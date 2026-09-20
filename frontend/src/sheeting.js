@@ -181,11 +181,11 @@ export class SheetingMachineTemplate{
     // BW's 2014 HSM 56 brochure explicitly states "Flat Bed Knife".
     // V67 therefore shows a visible reciprocating knife assembly during simulation,
     // while keeping its exact HSM-CTM7 stroke/actuation geometry unresolved.
-    this.box(knife,[.16,.13,2.40],[-.12,1.30,0],'bodyDark',.010,{detail:true,active:true,motion:'flat-bed-blade-reference',role:'knife-carrier',sourceAnchor:'BW-HSM56-FLAT-BED-KNIFE'});
-    this.box(knife,[.050,.34,2.30],[-.12,1.105,0],'steel',.004,{detail:true,active:true,motion:'flat-bed-blade-reference',role:'visible-flat-bed-blade',sourceAnchor:'BW-HSM56-FLAT-BED-KNIFE'});
+    this.box(knife,[.16,.13,2.40],[-.12,1.52,0],'bodyDark',.010,{detail:true,active:true,motion:'flat-bed-blade-reference',role:'knife-carrier',sourceAnchor:'BW-HSM56-FLAT-BED-KNIFE'});
+    this.box(knife,[.050,.55,2.30],[-.12,1.23,0],'steel',.004,{detail:true,active:true,motion:'flat-bed-blade-reference',role:'visible-flat-bed-blade',sourceAnchor:'BW-HSM56-FLAT-BED-KNIFE'});
     this.box(knife,[.062,.030,2.32],[-.12,.945,0],'chrome',.002,{detail:true,active:true,motion:'flat-bed-blade-reference',role:'knife-cutting-edge',sourceAnchor:'BW-HSM56-FLAT-BED-KNIFE'});
     this.box(knife,[.12,.085,2.34],[-.12,.835,0],'dark',.005,{detail:true,role:'knife-anvil-reference',sourceAnchor:'BW-HSM56-FLAT-BED-KNIFE'});
-    for(const side of [-1,1])this.box(knife,[.24,.58,.16],[-.12,1.08,side*1.23],'bodyDark',.012,{detail:true,role:'knife-guide-block',sourceAnchor:'BW-HSM56-FLAT-BED-KNIFE'});
+    for(const side of [-1,1])this.box(knife,[.24,.78,.16],[-.12,1.20,side*1.23],'bodyDark',.012,{detail:true,role:'knife-guide-block',sourceAnchor:'BW-HSM56-FLAT-BED-KNIFE'});
 
     const transport=this.group(head,'sheeting-cutter-transport','Integrated Head Bed / Service Plate',[0,0,0],[0,.12,0]);
     this.box(transport,[2.40,.11,2.62],[-.02,.55,0],'light',.016,{role:'head-bed'});
