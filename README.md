@@ -1,8 +1,8 @@
-# BMJ Packaging Offset — Factory Digital Twin V56
+# BMJ Packaging Offset — Factory Digital Twin V58
 
-Digital Twin interaktif untuk area **Packaging Offset PT Bukit Muria Jaya**. V56 merupakan hasil recovery dari riwayat build yang terverifikasi setelah repositori lama tidak lagi tersedia.
+Digital Twin interaktif untuk area **Packaging Offset PT Bukit Muria Jaya**. V58 melanjutkan hasil recovery dari riwayat build yang terverifikasi setelah repositori lama tidak lagi tersedia.
 
-## Cakupan V56
+## Pembaruan V58\n\n- Sheeting Lexus menjalankan **continuous web sebelum knife**, lalu membuat **individual cut sheet hanya setelah cutter**.\n- Reel, roller, chuck, dan drive berputar terhadap sumbu lokal cylinder sehingga tidak wobble.\n- Layboy menurunkan lift table secara progresif saat pile bertambah agar receiving height tetap konsisten.\n- Geometry feed/delivery dirapikan: roller dekoratif dikurangi, delivery menggunakan pola belt/overlap yang lebih terbaca, dan pile statis dihapus dari geometry dasar.\n\n## Cakupan V58
 
 - **41 equipment** dari database mesin Packaging Offset.
 - **3 digital twin khusus** dengan rekonstruksi lebih detail: Offset 5 / OFU-1, Offset 10, dan APM 2.
