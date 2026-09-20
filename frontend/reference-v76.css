@@ -186,7 +186,14 @@ body{font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI"
     box-shadow:0 5px 16px rgba(30,67,95,.06)!important;z-index:82!important;
   }
   .scene-options #labels,.scene-options #panel-launcher{display:none!important}
-  .viewport-zoom,.compass,.scene-heading,.scene-caption,.statusbar,.ui-mobile-actions,.telemetry-strip{display:none!important}
+  .viewport-zoom,.compass,.scene-caption,.statusbar,.ui-mobile-actions,.telemetry-strip{display:none!important}
+  .scene-heading{display:block!important;position:static!important;width:0!important;height:0!important;padding:0!important}
+  .scene-heading>div{display:none!important}
+  #panel-toggle{display:none!important}
+  body.panel-hidden #panel-toggle{
+    display:grid!important;position:absolute!important;right:10px!important;top:54px!important;width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;
+    border:1px solid var(--v76-line)!important;border-radius:10px!important;background:#fff!important;color:#31536d!important;box-shadow:0 5px 16px rgba(30,67,95,.08)!important;pointer-events:auto!important;z-index:88!important
+  }
   .scene-bottom{position:static!important;display:block!important;transform:none!important;max-width:none!important}
   .scene-bottom .view-switch{display:none!important}
 
@@ -209,6 +216,7 @@ body{font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI"
   .v76-selection-data{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 18px;padding-top:12px}
   .v76-selection-data div{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #eef2f5;padding-bottom:4px;font-size:8px;color:#82909e}
   .v76-selection-data b{font-size:9px;color:#40566b;font-weight:750}
+  .v76-mobile-detail{display:none!important}
 
   /* Right inspector matches the reference information card. */
   #detail-panel{
@@ -307,7 +315,11 @@ body{font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI"
   .workspace{height:100%!important;border:1px solid var(--v76-line)!important;border-radius:12px!important;background:#eef3f7!important}
   #detail-panel{position:absolute!important;right:12px!important;top:0!important;bottom:12px!important;width:var(--v76-inspector)!important;height:auto!important;border:1px solid var(--v76-line)!important;border-radius:12px!important;background:#fff!important}
   body.panel-hidden #detail-panel{display:none!important}body.panel-hidden .center-stack{right:12px!important}
-  .scene-heading,.viewport-zoom,.compass,.scene-caption,.statusbar,.ui-mobile-actions,.telemetry-strip{display:none!important}
+  .viewport-zoom,.compass,.scene-caption,.statusbar,.ui-mobile-actions,.telemetry-strip{display:none!important}
+  .scene-heading{display:block!important;position:static!important;width:0!important;height:0!important;padding:0!important}
+  .scene-heading>div{display:none!important}
+  #panel-toggle{display:none!important}
+  body.panel-hidden #panel-toggle{display:grid!important;position:absolute!important;right:8px!important;top:50px!important;width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;z-index:88!important}
   .asset-legend{position:absolute!important;display:flex!important;left:8px!important;top:8px!important;z-index:80!important;background:#fff!important;border-radius:18px!important}.asset-legend button{min-height:30px!important;height:30px!important;font-size:8px!important}#legend-info{display:none!important}
   .viewport-mode-switch{top:8px!important;right:48px!important}.scene-options #fullscreen{position:absolute!important;top:8px!important;right:8px!important;display:grid!important}
   .scene-bottom .view-switch{display:none!important}.scene-options #labels,.scene-options #panel-launcher{display:none!important}
