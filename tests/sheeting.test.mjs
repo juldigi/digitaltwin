@@ -190,7 +190,7 @@ test('diagnostic: Sheeting mesh collision and support report',()=>{
   const unsupported=[];
   const statics=entries.filter(e=>!e.motion&&e.owner!=='sheeting-web-path');
   for(const e of statics){
-    if(e.b.min.y<=.08||e.s.y<.06)continue;
+    if(e.b.min.y<=.08||e.s.y<.06||(e.detail&&e.s.y<.35))continue;
     const supported=statics.some(o=>{
       if(o===e||o.b.getCenter(new THREE.Vector3()).y>=e.b.getCenter(new THREE.Vector3()).y)return false;
       const ox=Math.min(e.b.max.x,o.b.max.x)-Math.max(e.b.min.x,o.b.min.x);
@@ -205,7 +205,9 @@ test('diagnostic: Sheeting mesh collision and support report',()=>{
   }
   console.log('SHEETING_AUDIT_ACTIVE_COLLISIONS='+JSON.stringify(activeVsStatic.slice(0,160)));
   console.log('SHEETING_AUDIT_UNSUPPORTED='+JSON.stringify(unsupported.slice(0,160)));
-  assert.ok(overlaps.length<200,'diagnostic overlap count unexpectedly exploded');
+  assert.equal(overlaps.length,0,'Sheeting must have zero significant cross-owner mesh penetrations');
+  assert.equal(activeVsStatic.length,0,'Sheeting moving mechanisms must not penetrate static geometry');
+  assert.equal(unsupported.length,0,'Sheeting structural/detail geometry must be grounded or physically supported');
   model.dispose();
 });
 
