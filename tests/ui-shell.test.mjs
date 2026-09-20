@@ -4,7 +4,9 @@ import {readFileSync} from 'node:fs';
 import {PHOTO_RECONSTRUCTION,OffsetMachineTemplate} from '../frontend/src/offset5.js';
 
 const html=readFileSync(new URL('../frontend/index.html',import.meta.url),'utf8');
-const ui=readFileSync(new URL('../frontend/src/ui-v5.js',import.meta.url),'utf8');\nconst mobileUi=readFileSync(new URL('../frontend/src/mobile-v75.js',import.meta.url),'utf8');\nconst mobileCss=readFileSync(new URL('../frontend/mobile-flagship-v75.css',import.meta.url),'utf8');
+const ui=readFileSync(new URL('../frontend/src/ui-v5.js',import.meta.url),'utf8');
+const mobileUi=readFileSync(new URL('../frontend/src/mobile-v75.js',import.meta.url),'utf8');
+const mobileCss=readFileSync(new URL('../frontend/mobile-flagship-v75.css',import.meta.url),'utf8');
 const css=readFileSync(new URL('../frontend/ui-v5.css',import.meta.url),'utf8');
 const responsiveCss=readFileSync(new URL('../frontend/responsive-v5.css',import.meta.url),'utf8');
 const experienceCss=readFileSync(new URL('../frontend/experience-v37.css',import.meta.url),'utf8');
@@ -76,6 +78,7 @@ test('all static buttons are actionable and none is permanently disabled',()=>{
     else if(b.tab)assert.match(app,/data-tab|dataset\.tab/);
     else if(b.workbench)assert.match(ui,/data-workbench|dataset\.workbench/);
     else if(b.partBack)assert.match(engine,/data-part-label-back/);
+    else if(b.mobile)assert.ok(mobileUi.includes('data-mobile-nav'),`mobile nav ${b.mobile} has no handler`);
     else assert.fail('button without id or delegated data attribute');
   }
 });
@@ -97,6 +100,10 @@ test('mobile portrait and landscape keep panels inside the viewport',()=>{
   assert.match(ui,/setFloatVisible\('\.floating-filter',false\)/);
   assert.match(css,/@media\(max-width:767px\)/);
   assert.match(css,/panel-launcher-menu/);
+  assert.match(mobileCss,/\.mobile-nav/);
+  assert.match(mobileCss,/body\.nav-open \.rail/);
+  assert.match(mobileCss,/orientation:landscape/);
+  assert.match(mobileUi,/setMobileNavActive/);
 });
 
 test('visible shell avoids deployment and prototype terminology',()=>{
