@@ -4,11 +4,11 @@ import * as THREE from 'three';
 import {MACHINE_REGISTRY} from '../frontend/src/data/machine-registry.js';
 import {UniversalMachineTemplate,UniversalProcessSimulation,universalMachineConfig,universalTaxonomy} from '../frontend/src/universal-machine.js';
 
-const flagship=new Set(['BMJ-MCH-0003','BMJ-MCH-0009','BMJ-MCH-0010']);
+const flagship=new Set(['BMJ-MCH-0002','BMJ-MCH-0003','BMJ-MCH-0009','BMJ-MCH-0010']);
 const remaining=MACHINE_REGISTRY.filter(m=>!flagship.has(m.machineId));
 
-test('all 38 remaining equipment resolve to one of the process-specific family builders',()=>{
- assert.equal(remaining.length,38);
+test('all 37 remaining equipment resolve to one of the process-specific family builders',()=>{
+ assert.equal(remaining.length,37);
  for(const machine of remaining){const cfg=universalMachineConfig(machine.machineId);assert.ok(cfg,machine.machineId);assert.ok(cfg.modules.length>=6);assert.ok(cfg.family);}
 });
 
