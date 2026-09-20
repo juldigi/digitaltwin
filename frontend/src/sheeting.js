@@ -101,11 +101,11 @@ export class SheetingMachineTemplate{
     // RIGHT: low single roll, visible hub, two-sided support and hydraulic/swing structure.
     const rollstand=this.group(this.root,'sheeting-rollstand','Low Fixed-Position Rollstand',[7.30,0,0],[.72,.34,0]);
     const reel=this.group(rollstand,'sheeting-reel','Paper Reel / Opposed Chuck',[0,0,0],[.24,.18,0]);
-    this.cyl(reel,.78,2.58,[-.12,.84,0],'paper','z',{active:true,motion:'reel',role:'reel',sourceAnchor:'BW-HSM56-ROLLSTAND-INSET'});
-    this.cyl(reel,.115,2.82,[-.12,.84,0],'dark','z',{active:true,motion:'reel-core',detail:true,role:'reel-core',sourceAnchor:'BW-HSM56-ROLLSTAND-INSET'});
+    this.cyl(reel,.78,2.58,[-.12,.82,0],'paper','z',{active:true,motion:'reel',role:'reel',sourceAnchor:'BW-HSM56-ROLLSTAND-INSET'});
+    this.cyl(reel,.115,2.82,[-.12,.82,0],'dark','z',{active:true,motion:'reel-core',detail:true,role:'reel-core',sourceAnchor:'BW-HSM56-ROLLSTAND-INSET'});
     for(const side of [-1,1]){
       const z=side*1.38;
-      this.cyl(reel,.215,.12,[-.12,.84,z],'body','z',{active:true,motion:'chuck',role:'chuck-hub',sourceAnchor:'BW-HSM56-ROLLSTAND-INSET'});
+      this.cyl(reel,.215,.12,[-.12,.82,z],'body','z',{active:true,motion:'chuck',role:'chuck-hub',sourceAnchor:'BW-HSM56-ROLLSTAND-INSET'});
       this.cyl(reel,.070,.15,[-.12,.84,z+side*.055],'dark','z',{detail:true,role:'chuck-center'});
       for(let i=0;i<6;i++){
         const a=i*Math.PI/3;
@@ -171,8 +171,8 @@ export class SheetingMachineTemplate{
     for(const z of [-1.05,-.82,-.59,-.36,-.13,.10,.33,.56,.79,1.02])this.box(process,[.28,.045,.055],[-.28,1.13,z],'dark',.004,{detail:true,role:'window-guide-finger',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
 
     const knife=this.group(head,'sheeting-knife','Cross-Cut Zone Reference',[-.30,0,0],[0,.24,0],'UNRESOLVED_EXACT');
-    this.box(knife,[.09,.08,2.30],[-.22,.78,0],'dark',.006,{active:true,motion:'knife-reference',detail:true,role:'cut-zone-reference'});
-    this.box(knife,[.07,.07,2.22],[-.05,.91,0],'chrome',.006,{active:true,motion:'knife-reference',detail:true,role:'cut-zone-reference'});
+    this.box(knife,[.09,.08,2.30],[-.22,.86,0],'dark',.006,{active:true,motion:'knife-reference',detail:true,role:'cut-zone-reference'});
+    this.box(knife,[.07,.07,2.22],[-.05,.98,0],'chrome',.006,{active:true,motion:'knife-reference',detail:true,role:'cut-zone-reference'});
 
     const transport=this.group(head,'sheeting-cutter-transport','Integrated Head Bed / Service Plate',[0,0,0],[0,.12,0]);
     this.box(transport,[2.40,.11,2.62],[-.02,.55,0],'light',.016,{role:'head-bed'});
@@ -212,7 +212,7 @@ export class SheetingMachineTemplate{
     this.box(delivery,[.12,.15,2.88],[-2.08,.93,0],'light',.010,{detail:true,role:'outfeed-front-crossbar',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
 
     // Compact sloped console integrated beside the outfeed/head transition.
-    const control=this.group(this.root,'sheeting-control','Integrated Low Operator Console',[.55,0,-1.62],[.18,.28,-.28]);
+    const control=this.group(this.root,'sheeting-control','Integrated Low Operator Console',[.55,0,-1.72],[.18,.28,-.28]);
     this.box(control,[.68,.46,.48],[0,.25,0],'light',.030,{cover:true,role:'control-console-base',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
     this.box(control,[.58,.07,.42],[0,.52,-.08],'dark',.010,{detail:true,role:'control-console-face',sourceAnchor:'BW-HSM56-MAIN-PHOTO'},[-.46,0,0]);
     this.cyl(control,.042,.032,[-.19,.55,-.24],'red','z',{detail:true,role:'estop'});
