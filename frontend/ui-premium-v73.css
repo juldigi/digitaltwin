@@ -87,3 +87,16 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid rgba(
 }
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
 @media (prefers-contrast:more){:root{--ui-line:rgba(10,35,48,.3)}.scene-heading p,.scene-caption{color:#263e4a}.rail button{color:#d7e5eb}}
+
+/* legacy-cascade isolation */
+.brandmark{color:transparent!important;line-height:0!important;overflow:hidden!important}
+.brandmark:before{color:#fff!important;line-height:1!important}
+.brandmark:after{display:none!important;content:none!important}
+.scene-heading{display:block!important;width:min(570px,calc(100vw - 160px))!important}
+.scene-heading>div{width:100%!important;min-width:0!important}
+.scene-heading #panel-toggle{position:fixed!important;top:86px!important;right:20px!important}
+@media (max-width:767px){
+ .scene-heading{width:calc(100vw - 126px)!important;max-width:none!important}
+ .scene-heading #panel-toggle{top:73px!important;right:62px!important}
+}
+@media (max-width:767px) and (orientation:landscape){.scene-heading #panel-toggle{top:58px!important}}
