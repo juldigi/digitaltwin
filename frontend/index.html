@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
-<meta name="theme-color" content="#07121b">
+<meta name="theme-color" content="#ffffff">
 <meta name="description" content="Digital Twin interaktif mesin Packaging Offset BMJ untuk eksplorasi, struktur dan simulasi.">
-<title>Factory Digital Twin</title>
+<title>BMJ Digital Twin</title>
 <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
 <link rel="stylesheet" href="./style.css">
 <link rel="stylesheet" href="./runtime-fallback.css">
@@ -16,8 +16,8 @@
 </head>
 <body class="panel-hidden ui-simple">
 <header class="topbar">
-  <a href="./" class="brand" aria-label="Beranda Digital Twin"><span class="brandmark">F<span>5</span></span><span>Factory Digital Twin<small>BMJ Packaging Offset © 2026 IDJ.</small></span></a>
-  <label class="global-search"><span>⌕</span><input id="global-search" type="search" aria-label="Cari mesin, komponen, atau dokumen" placeholder="Cari mesin, komponen, atau dokumen…"></label>
+  <a href="./" class="brand" aria-label="Beranda Digital Twin"><span class="brandmark">F<span>5</span></span><span>BMJ Digital Twin<small>Packaging Offset · Smart Factory</small></span></a>
+  <label class="global-search"><span>⌕</span><input id="global-search" type="search" aria-label="Cari mesin, komponen, atau dokumen" placeholder="Cari mesin atau komponen…"></label>
   <div class="top-kpis" aria-label="Ringkasan aplikasi">
     <div><small>MESIN</small><b id="machine-count">41</b><span>Database</span></div>
     <div><small>FOTO ACUAN</small><b>24</b><span>Referensi</span></div>
@@ -37,13 +37,13 @@
 <main class="twin-shell">
   <nav class="rail" aria-label="Navigasi utama">
     <div class="rail-title">MENU UTAMA</div>
-    <button id="nav-machine" class="active" title="Tampilan mesin 3D"><span>◈</span><small>Mesin 3D</small></button>
-    <button id="nav-layout" title="Denah pabrik"><span>▱</span><small>Denah Pabrik</small></button>
-    <button id="nav-assets" title="Daftar mesin"><span>▦</span><small>Daftar Mesin</small></button>
-    <button id="nav-components" title="Struktur mesin"><span>⌘</span><small>Struktur Mesin</small></button>
-    <button id="nav-exterior" title="Buka exterior untuk melihat interior"><span>▰</span><small>Buka Exterior</small></button>
+    <button id="nav-machine" class="active" title="Tampilan mesin 3D"><span>◈</span><small>3D</small></button>
+    <button id="nav-layout" title="Denah pabrik"><span>▱</span><small>Denah</small></button>
+    <button id="nav-assets" title="Daftar mesin"><span>▦</span><small>Mesin</small></button>
+    <button id="nav-components" title="Struktur mesin"><span>⌘</span><small>Struktur</small></button>
+    <button id="nav-exterior" title="Buka exterior untuk melihat interior"><span>▰</span><small>Exterior</small></button>
     <button id="nav-sources" title="Dokumen dan foto referensi"><span>▤</span><small>Referensi</small></button>
-    <button id="nav-view-panels" title="Atur panel tampilan"><span>▣</span><small>Panel Tampilan</small></button>
+    <button id="nav-view-panels" title="Atur panel tampilan"><span>▣</span><small>Panel</small></button>
     <div class="rail-bottom"><button id="nav-help" title="Panduan"><span>?</span><small>Panduan</small></button></div>
   </nav>
 
@@ -205,9 +205,10 @@
 <dialog id="modal"><div class="modal-head"><h2 id="modal-title"></h2><button id="modal-close" class="icon-btn" aria-label="Tutup dialog">×</button></div><div id="modal-body"></div></dialog>
 <div id="toast" role="status" aria-live="polite" hidden></div>
 <link rel="stylesheet" href="./experience-v37.css">
-<script type="module" src="./src/app.js?v=69"></script>
-<script type="module" src="./src/ui-v5.js"></script>
-<script type="module" src="./src/experience-v37.js?v=42"></script>
+<link rel="stylesheet" href="./ui-corporate-v74.css">
+<script type="module" src="./src/app.js?v=74"></script>
+<script type="module" src="./src/ui-v5.js?v=74"></script>
+<script type="module" src="./src/experience-v37.js?v=74"></script>
 <script>setTimeout(()=>{const b=document.getElementById('boot');if(b&&!b.hidden){b.innerHTML='<strong>Tampilan 3D belum berhasil dimuat</strong><p>Coba muat ulang halaman atau gunakan perangkat lain.</p>'; }},15000);</script>
 </body>
 </html>
