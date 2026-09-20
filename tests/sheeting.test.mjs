@@ -130,6 +130,52 @@ test('Sheeting simulation keeps web continuous before the knife and creates shee
   sim.dispose();model.dispose();
 });
 
+
+test('diagnostic: Sheeting mesh collision and support report',()=>{
+  const model=new SheetingMachineTemplate();
+  model.root.updateMatrixWorld(true);
+  const entries=model.meshes.map((m,index)=>{
+    const b=new THREE.Box3().setFromObject(m);
+    const s=b.getSize(new THREE.Vector3());
+    return {index,m,b,s,owner:m.userData.ownerId||'',motion:m.userData.motion||'',cover:!!m.userData.exteriorCover,detail:!!m.userData.detail};
+  });
+  const ignorePair=(a,b)=>{
+    if(a.owner===b.owner)return true;
+    const owners=[a.owner,b.owner].sort().join('|');
+    if(owners.includes('sheeting-web-path'))return true;
+    if(owners.includes('sheeting-structure'))return true;
+    if(owners==='sheeting-cutter|sheeting-cutter-transport')return true;
+    if(owners==='sheeting-cutter|sheeting-knife')return true;
+    if(owners==='sheeting-delivery|sheeting-layboy')return true;
+    if(owners==='sheeting-delivery|sheeting-overlap')return true;
+    return false;
+  };
+  const overlaps=[];
+  for(let i=0;i<entries.length;i++)for(let j=i+1;j<entries.length;j++){
+    const a=entries[i],b=entries[j];
+    if(ignorePair(a,b)||!a.b.intersectsBox(b.b))continue;
+    const min=new THREE.Vector3(Math.max(a.b.min.x,b.b.min.x),Math.max(a.b.min.y,b.b.min.y),Math.max(a.b.min.z,b.b.min.z));
+    const max=new THREE.Vector3(Math.min(a.b.max.x,b.b.max.x),Math.min(a.b.max.y,b.b.max.y),Math.min(a.b.max.z,b.b.max.z));
+    const d=max.sub(min);
+    if(d.x>.025&&d.y>.025&&d.z>.025)overlaps.push({
+      a:a.owner,b:b.owner,motionA:a.motion,motionB:b.motion,
+      penetration:d.toArray().map(v=>+v.toFixed(3)),
+      centerA:a.b.getCenter(new THREE.Vector3()).toArray().map(v=>+v.toFixed(3)),
+      centerB:b.b.getCenter(new THREE.Vector3()).toArray().map(v=>+v.toFixed(3))
+    });
+  }
+  const floating=entries.filter(e=>{
+    if(e.motion||e.owner==='sheeting-web-path')return false;
+    const thin=e.s.y<.08;
+    if(thin)return false;
+    return e.b.min.y>.12;
+  }).map(e=>({owner:e.owner,minY:+e.b.min.y.toFixed(3),size:e.s.toArray().map(v=>+v.toFixed(3)),center:e.b.getCenter(new THREE.Vector3()).toArray().map(v=>+v.toFixed(3))}));
+  console.log('SHEETING_AUDIT_OVERLAPS='+JSON.stringify(overlaps.slice(0,120)));
+  console.log('SHEETING_AUDIT_FLOATING='+JSON.stringify(floating.slice(0,120)));
+  assert.ok(overlaps.length<200,'diagnostic overlap count unexpectedly exploded');
+  model.dispose();
+});
+
 test('Sheeting low-detail and reset preserve dedicated geometry state',()=>{
   const model=new SheetingMachineTemplate(),cutter=model.findNode('sheeting-cutter'),knife=model.findNode('sheeting-knife');
   const rest=cutter.position.clone(),knifeRest=knife.position.clone();
