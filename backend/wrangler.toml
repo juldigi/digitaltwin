@@ -1,4 +1,4 @@
-name = "bmj-digitaltwin"
+name = "digitaltwin"
 main = "worker.js"
 compatibility_date = "2026-09-20"
 workers_dev = true
