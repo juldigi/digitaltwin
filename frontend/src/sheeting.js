@@ -123,7 +123,7 @@ export class SheetingMachineTemplate{
       this.box(epc,[.09,.15,.14],[-.25,1.25,side*1.14],'black',.010,{detail:true,role:'epc-sensor'});
     }
 
-    const head=this.group(this.root,'sheeting-cutter','Windowed Main Sheeting Head',[2.55,0,0],[0,.58,0]);
+    const head=this.group(this.root,'sheeting-cutter','Windowed Main Sheeting Head',[2.45,0,0],[0,.58,0]);
     // Base / side shells.
     for(const z of [-1.50,1.50]){
       this.box(head,[2.55,1.72,.28],[0,.92,z],'body',.050,{cover:true,role:'main-side-shell',sourceAnchor:'BW-HSM56-MAIN-HEAD-PHOTO'});
@@ -150,7 +150,7 @@ export class SheetingMachineTemplate{
     this.box(transport,[2.18,.12,2.62],[0,.54,0],'light',.018,{role:'head-bed'});
     for(const z of [-.96,-.64,-.32,0,.32,.64,.96])this.box(transport,[2.04,.026,.050],[0,.62,z],'black',.003,{detail:true,role:'head-belt'});
 
-    const delivery=this.group(this.root,'sheeting-delivery','Long Belt Outfeed / Overlap Bed',[-.95,0,0],[-.58,.42,0]);
+    const delivery=this.group(this.root,'sheeting-delivery','Long Belt Outfeed / Overlap Bed',[-1.15,0,0],[-.58,.42,0]);
     for(const z of [-1.34,1.34]){
       this.box(delivery,[4.45,.24,.16],[0,.56,z],'body',.025,{role:'outfeed-side-rail',sourceAnchor:'BW-HSM56-OUTFEED-PHOTO'});
       for(const x of [-2.02,-1.05,-.08,.89,1.86])this.box(delivery,[.11,.56,.11],[x,.28,z],'steel',.010,{role:'outfeed-leg'});
@@ -197,7 +197,7 @@ export class SheetingMachineTemplate{
     }
     this.box(access,[.72,.08,.54],[-.42,.39,-.02],'steel',.010,{detail:true,role:'access-landing'});
 
-    const control=this.group(this.root,'sheeting-control','Low Operator Control Console',[.92,0,-1.78],[.18,.30,-.28]);
+    const control=this.group(this.root,'sheeting-control','Low Operator Control Console',[.72,0,-1.78],[.18,.30,-.28]);
     this.box(control,[.68,.62,.48],[0,.31,0],'light',.035,{cover:true,role:'control-console-base',sourceAnchor:'BW-HSM56-OUTFEED-PHOTO'});
     this.box(control,[.58,.08,.40],[0,.66,-.02],'dark',.012,{detail:true,role:'control-console-face',sourceAnchor:'BW-HSM56-OUTFEED-PHOTO'},[-.38,0,0]);
     this.cyl(control,.045,.035,[-.18,.70,-.20],'red','z',{detail:true,role:'estop'});
