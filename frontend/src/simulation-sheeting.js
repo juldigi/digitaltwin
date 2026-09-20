@@ -48,7 +48,7 @@ export class SheetingProcessSimulation{
       new THREE.Vector3(-2.78,.80,0),
       new THREE.Vector3(-3.34,.78,0),
       new THREE.Vector3(-3.92,.76,0),
-      new THREE.Vector3(-4.72,.72,0)
+      new THREE.Vector3(-4.82,.72,0)
     ];
     this.preCutCurve=new THREE.CatmullRomCurve3(pre,false,'catmullrom',.05);
     this.postCutCurve=new THREE.CatmullRomCurve3(post,false,'catmullrom',.05);
@@ -66,7 +66,7 @@ export class SheetingProcessSimulation{
   }
   buildPile(){
     const geo=new THREE.BoxGeometry(1.50,.010,2.04);this.pileGeometry=geo;
-    for(let i=0;i<36;i++){const mesh=new THREE.Mesh(geo,this.sheetMaterial);mesh.visible=false;mesh.name='Finished sheet pile';mesh.userData.finishedSheet=true;mesh.position.set(-4.72,.72,0);this.group.add(mesh);this.pile.push(mesh);}
+    for(let i=0;i<36;i++){const mesh=new THREE.Mesh(geo,this.sheetMaterial);mesh.visible=false;mesh.name='Finished sheet pile';mesh.userData.finishedSheet=true;mesh.position.set(-4.82,.72,0);this.group.add(mesh);this.pile.push(mesh);}
   }
   state(){
     const progress=(this.elapsed/this.processCycle)%1,stageIndex=Math.min(SHEETING_SIMULATION_STAGES.length-1,Math.floor(progress*SHEETING_SIMULATION_STAGES.length));
@@ -116,7 +116,7 @@ export class SheetingProcessSimulation{
     const visible=Math.min(this.pile.length,this.completed),topY=.72,thickness=.010;
     for(let i=0;i<this.pile.length;i++){
       const sheet=this.pile[i];sheet.visible=i<visible;
-      if(sheet.visible)sheet.position.set(-4.72,topY-(visible-1-i)*thickness,0);
+      if(sheet.visible)sheet.position.set(-4.82,topY-(visible-1-i)*thickness,0);
     }
   }
   update(now){
