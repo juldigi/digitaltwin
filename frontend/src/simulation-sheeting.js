@@ -25,22 +25,23 @@ export class SheetingProcessSimulation{
   }
   buildPath(){
     const pre=[
-      new THREE.Vector3(6.77,1.10,0),
-      new THREE.Vector3(5.82,1.34,0),
-      new THREE.Vector3(4.65,1.58,0),
-      new THREE.Vector3(3.65,1.42,0),
-      new THREE.Vector3(2.15,1.39,0),
-      new THREE.Vector3(1.18,1.34,0),
-      new THREE.Vector3(.92,1.30,0)
+      new THREE.Vector3(7.68,1.10,0),
+      new THREE.Vector3(6.70,1.28,0),
+      new THREE.Vector3(5.55,1.46,0),
+      new THREE.Vector3(4.60,1.58,0),
+      new THREE.Vector3(3.58,1.43,0),
+      new THREE.Vector3(2.70,1.39,0),
+      new THREE.Vector3(1.55,1.34,0),
+      new THREE.Vector3(.82,1.28,0)
     ];
     const post=[
-      new THREE.Vector3(.68,1.18,0),
-      new THREE.Vector3(.10,1.02,0),
-      new THREE.Vector3(-1.10,.96,0),
-      new THREE.Vector3(-2.45,.94,0),
-      new THREE.Vector3(-3.90,.90,0),
-      new THREE.Vector3(-5.10,.78,0),
-      new THREE.Vector3(-5.95,.63,0)
+      new THREE.Vector3(.34,1.16,0),
+      new THREE.Vector3(-.55,1.00,0),
+      new THREE.Vector3(-1.65,.95,0),
+      new THREE.Vector3(-3.00,.93,0),
+      new THREE.Vector3(-4.45,.88,0),
+      new THREE.Vector3(-5.55,.75,0),
+      new THREE.Vector3(-6.30,.63,0)
     ];
     this.preCutCurve=new THREE.CatmullRomCurve3(pre,false,'catmullrom',.08);
     this.postCutCurve=new THREE.CatmullRomCurve3(post,false,'catmullrom',.08);
@@ -71,7 +72,7 @@ export class SheetingProcessSimulation{
     for(let i=0;i<28;i++){
       const mesh=new THREE.Mesh(geo,this.sheetMaterial);
       mesh.visible=false;mesh.name='Finished sheet pile';mesh.userData.finishedSheet=true;
-      mesh.position.set(-5.95,.63,0);this.group.add(mesh);this.pile.push(mesh);
+      mesh.position.set(-6.30,.63,0);this.group.add(mesh);this.pile.push(mesh);
     }
   }
   state(){
@@ -152,7 +153,7 @@ export class SheetingProcessSimulation{
     const topY=.63;
     for(let i=0;i<this.pile.length;i++){
       const sheet=this.pile[i];sheet.visible=i<visible;
-      if(sheet.visible)sheet.position.set(-5.95,topY-(visible-1-i)*.012,0);
+      if(sheet.visible)sheet.position.set(-6.30,topY-(visible-1-i)*.012,0);
     }
   }
   update(now){
