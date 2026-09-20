@@ -126,7 +126,7 @@ test('conditional controls explain requirements rather than failing silently',()
 });
 
 test('service worker refreshes the redesigned shell',()=>{
-  assert.match(sw,/factory-digital-twin-v76-20260921/);
+  assert.match(sw,/factory-digital-twin-v76-final-20260921/);
   assert.match(sw,/src\/universal-machine\.js/);
   assert.match(app,/template\.ghost\(true,part\)/,'object selection must automatically ghost all non-selected geometry');
   for(const asset of ['ui-v5.css','responsive-v5.css','ui-corporate-v74.css','mobile-flagship-v75.css','reference-v76.css','src/ui-v5.js','src/mobile-v75.js','src/reference-v76.js','src/app.js','src/simulation.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
