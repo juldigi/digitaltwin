@@ -16,6 +16,7 @@ test('Sheeting identity preserves BMJ HSM-CTM7 data without promoting HSM 56 to 
   assert.ok(SHEETING_TECHNICAL_SOURCES.some(s=>s.id==='SHEETING-HSM56-BW'&&/FAMILY/i.test(s.type)));
   assert.ok(SHEETING_TECHNICAL_SOURCES.some(s=>s.id==='SHEETING-LEXUS-INDONESIA'));
   assert.ok(SHEETING_TECHNICAL_SOURCES.some(s=>s.id==='SHEETING-GREATWALL-SYNCHRO-VISUAL'));
+  assert.ok(SHEETING_TECHNICAL_SOURCES.some(s=>s.id==='SHEETING-HSM56-NEAR-SERIAL'&&/00962/.test(s.note)));
   assert.match(SHEETING_ORIENTATION.cutterArchitecture,/UNRESOLVED|CONFLICT/i);
 });
 
