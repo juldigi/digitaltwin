@@ -1,0 +1,47 @@
+import {CONFIDENCE} from './confidence.js';
+
+export const ORIENTATION=Object.freeze({
+  coordinateSystem:{x:'+X · arah aliran material',y:'+Y · vertikal',z:'+Z · sisi drive'},
+  feedDirection:'FEEDER_TO_DELIVERY_POSITIVE_X',operatorSide:'NEGATIVE_Z',driveSide:'POSITIVE_Z',
+  feederEnd:'NEGATIVE_X',deliveryEnd:'POSITIVE_X',confidence:CONFIDENCE.HIGH
+});
+
+export const TECHNICAL_SOURCES=Object.freeze([
+  {id:'SRC-CD102-SERVICE-MANUAL',title:'Speedmaster CD 102 · electrical/service manual (446 pages)',publisher:'Heidelberger Druckmaschinen AG',url:null,type:'USER_SUPPLIED_OEM_MANUAL',confidence:CONFIDENCE.HIGH,localFile:'pdfcoffee.com_cd102pdf-4-pdf-free.pdf',supports:['feeder pile centering 11M9','pile support adjustment 11M8','suction-head height 11M5','suction-head/format adjustment 11M6','pile stops 11M11/11M12','format wheels 11M4','cover-guide height 1M4','front-lay adjustment 1M2/1M3','printing-pressure adjustment 1...nM5','sheet-arrival and monitoring architecture']},
+  {id:'SRC-CD102-ROLLER-PROCEDURE',title:'SM/CD102 · Removing and installing the inking rollers',publisher:'Heidelberger Druckmaschinen AG',url:null,type:'USER_SUPPLIED_OEM_PROCEDURE',confidence:CONFIDENCE.HIGH,localFile:'SMCD102_roller_remove_procedure.pdf',supports:['roller map 1-19','distributor rollers A-D','dampening distributor FR','roller diameters and materials','inking form roller color identification','roller removal sequence','ink-stripe adjustment references']},
+  {id:'SRC-HEIDELBERG-CD102',title:'Speedmaster CD 102 · official product information',publisher:'Heidelberger Druckmaschinen AG',url:'https://www.heidelberg.com/global/media/en/global_media/products___sheetfed_offset/2020_20/product_brochures_1/speedmaster-cd-102-product-information.pdf',type:'MANUFACTURER_PRODUCT_INFORMATION',confidence:CONFIDENCE.REFERENCE_ONLY,supports:['Preset Plus feeder','front-lay sheet alignment','sheet arrival monitoring','special gripper systems','AirTransfer sheet transport','inking and Alcolor dampening','ink fountain','chamber-blade coating unit','dryer system','sheet brake','Preset Plus delivery','central lubrication']},
+  {id:'SRC-HD-SUCTION-BELT-PATENT',title:'Device for adapting negative pressure in a suction-belt feed table',publisher:'Heidelberger Druckmaschinen AG',url:'https://patents.google.com/patent/US5697606A/en',type:'MANUFACTURER_PATENT',confidence:CONFIDENCE.REFERENCE_ONLY,supports:['suction-belt feed table','negative-pressure chambers','sheet transport','operating-condition adaptation']},
+  {id:'SRC-HD-SHEET-ALIGN-PATENT',title:'Device for aligning sheets in a feeder of a sheet-processing machine',publisher:'Heidelberger Druckmaschinen AG',url:'https://patents.google.com/patent/US6681697B2/en',type:'MANUFACTURER_PATENT',confidence:CONFIDENCE.REFERENCE_ONLY,supports:['feed table','sheet alignment','front lay reference','side-pull reference','sheet sensor reference']},
+  {id:'SRC-HD-PRESET-PLUS-MANUAL',title:'Preset Plus Feeder operating manual · archived mirror',publisher:'Heidelberger Druckmaschinen AG',url:'https://www.scribd.com/document/458032567/CD-102-New-Feeder-1-pdf',type:'MANUFACTURER_MANUAL_MIRROR',confidence:CONFIDENCE.REFERENCE_ONLY,supports:['blowing/suction nozzle','propelling roller','pull plate','suction tape module','guide plate','drive roller','idler pulley','multiple-sheet detector']},
+  {id:'SRC-FOCUSIGHT-SWAN',title:'FS-SWAN Offset Printing Online Inspection System',publisher:'Focusight Technology Co., Ltd.',url:'https://en.focusight.net/en/Product/Printing/536.html',type:'MANUFACTURER_PRODUCT_PAGE',confidence:CONFIDENCE.REFERENCE_ONLY,supports:['inline sheet inspection','camera/imaging assembly','lighting','image processing','alarm and marking system']},
+  {id:'SRC-USER-PHOTOS',title:'Foto aktual OFFSET 5',publisher:'PT Bukit Muria Jaya',url:null,type:'USER_EVIDENCE',confidence:CONFIDENCE.PHOTO_VERIFIED,supports:['outer housing','visible feeder structure','operator platform','visible delivery structure','visible inline-inspection gantry']}
+]);
+
+export const PHOTO_REGISTRY=Object.freeze([
+  ['p01','IMG_2312.jpeg','Delivery pile/end','end view toward printing units','active_geometry_reference',CONFIDENCE.HIGH],
+  ['p02','IMG_1970.jpeg','Printing units','upper ink/roller','active_geometry_reference',CONFIDENCE.HIGH],
+  ['p03','IMG_1971.jpeg','Printing units','upper ink/roller','active_geometry_reference',CONFIDENCE.HIGH],
+  ['p04','IMG_1656.jpeg','Delivery','panel view','active_geometry_reference',CONFIDENCE.HIGH],
+  ['p05','IMG_1624.jpeg','Feeder end','controls/end view','active_geometry_reference',CONFIDENCE.HIGH],
+  ['p06','IMG_1625.jpeg','Feeder pile','open frame and suction head','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['p07','IMG_1626.jpeg','Feed board / PU1 interface','board, grille and gauge detail','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['p08','IMG_1627.jpeg','Printing units','operator side','active_geometry_reference',CONFIDENCE.HIGH],
+  ['p09','IMG_1628.jpeg','Printing units','upper operator side','active_geometry_reference',CONFIDENCE.HIGH],
+  ['p10','IMG_1629.jpeg','Coating / delivery transition','platform, raised hood and end housing','supplementary_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['p11','IMG_1630.jpeg','Inline inspection','sloped hood, gantry and camera pods','supplementary_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['p12','IMG_1631.jpeg','Inline inspection','gantry/camera pods','supplementary_reference',CONFIDENCE.HIGH],
+  ['p13','IMG_1633.jpeg','Inline inspection','top beam','supplementary_reference',CONFIDENCE.HIGH],
+  ['p14','IMG_1634.jpeg','Machine end','orientation overview','orientation_reference',CONFIDENCE.HIGH],
+  ['p15','IMG_1165.jpeg','Service zone','gauge/hose detail','detail_reference',CONFIDENCE.MEDIUM],
+  ['p16','IMG_0947.jpeg','Service zone','roller detail','detail_reference',CONFIDENCE.MEDIUM],
+  ['p17','IMG_2388(2).jpeg','Delivery to feeder overview','operator-side longitudinal overview','orientation_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['p18','IMG_2391(1).jpeg','Delivery / coating / printing units','operator-side walkway and inspection bridge','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['p19','IMG_2392.jpeg','Coating to printing units','operator-side steps, covers and platform','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['p20','IMG_2389(1).jpeg','Delivery to printing units','drive-side longitudinal overview and service aisle','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['p21','IMG_2390(1).jpeg','Inspection / printing units','drive-side railing, flat covers and secondary steps','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['p22','IMG_2395.jpeg','Feeder to printing units','drive-side pile portal, utility cabinet and hose routing','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['p23','IMG_1628(2).jpeg','Printing Unit 1 to downstream units','top view from feeder toward delivery','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['p24','IMG_1662.jpeg','Inter-unit operator access bay','operator side looking through PU gap','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED]
+].map(([id,filename,machineZone,viewDirection,category,confidence])=>Object.freeze({id,filename,machineZone,viewDirection,category,confidence,duplicateOf:null})));
+
+export const photoStats=()=>PHOTO_REGISTRY.reduce((s,p)=>{s.uploaded++;if(!p.duplicateOf)s.unique++;s[p.category]=(s[p.category]||0)+1;return s;},{uploaded:0,unique:0,duplicate:0,active_geometry_reference:0,supplementary_reference:0,orientation_reference:0,detail_reference:0});
