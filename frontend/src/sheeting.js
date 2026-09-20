@@ -51,7 +51,7 @@ export class SheetingMachineTemplate{
   cyl(g,r,l,p,kind='steel',axis='z',opts={}){const rot=axis==='z'?[Math.PI/2,0,0]:axis==='x'?[0,0,Math.PI/2]:null;return this.mesh(g,()=>new THREE.CylinderGeometry(r,r,l,20),'cyl:'+r+':'+l,kind,p,rot,opts);}
   rail(g,x0,x1,z,y=.95){this.box(g,[x1-x0,.055,.055],[(x0+x1)/2,y,z],'yellow',.01,{detail:true});for(let x=x0;x<=x1+.01;x+=1.0)this.box(g,[.055,.82,.055],[Math.min(x,x1),y-.38,z],'yellow',.01,{detail:true});}
   build(){
-    // V59 source-grounded reconstruction.
+    // V61 source-grounded reconstruction with collision/support audit.
     // The exact HSM-CTM7 OEM drawing is not publicly available. Exterior architecture therefore follows:
     // 1) BMJ verified identity + user-confirmed RIGHT -> LEFT orientation,
     // 2) Indonesian Lexus sheeter references: servo high-speed sheeter, double hydraulic shaftless unwind, auto tension/EPC,
