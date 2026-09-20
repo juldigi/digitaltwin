@@ -9,9 +9,9 @@ import {SHEETING_TECHNICAL_SOURCES,SHEETING_ORIENTATION,SHEETING_VISUAL_ANCHORS}
 const boxOf=o=>new THREE.Box3().setFromObject(o);
 const worldX=o=>o.getWorldPosition(new THREE.Vector3()).x;
 
-test('V66 keeps exact BMJ identity separate from HSM56 family-level geometry evidence',()=>{
+test('V67 keeps exact BMJ identity separate from HSM56 family-level geometry evidence',()=>{
   assert.equal(SHEETING_VISUAL_REFERENCE.plantModel,'HSM-CTM7');
-  assert.equal(SHEETING_VISUAL_REFERENCE.visualRevision,'V66_HSM56_PROCESS_ZONE_REBUILD');
+  assert.equal(SHEETING_VISUAL_REFERENCE.visualRevision,'V67_HSM56_PROCESS_ZONE_REBUILD');
   assert.equal(SHEETING_VISUAL_REFERENCE.processDirection,'RIGHT_TO_LEFT');
   assert.equal(SHEETING_ORIENTATION.input,'RIGHT');assert.equal(SHEETING_ORIENTATION.output,'LEFT');
   const bmj=SHEETING_TECHNICAL_SOURCES.find(s=>s.id==='SHEETING-BMJ-DATABASE');
@@ -37,7 +37,7 @@ test('V66 keeps exact BMJ identity separate from HSM56 family-level geometry evi
   assert.ok(SHEETING_VISUAL_ANCHORS.mainHead.includes('true hollow operator-side inspection aperture'));
 });
 
-test('V66 major machine sequence remains physically right-to-left with explicit gaps',()=>{
+test('V67 major machine sequence remains physically right-to-left with explicit gaps',()=>{
   const model=new SheetingMachineTemplate();model.root.updateMatrixWorld(true);
   const ids=['sheeting-rollstand','sheeting-feed','sheeting-cutter','sheeting-delivery','sheeting-layboy'];
   const nodes=ids.map(id=>model.findNode(id));assert.ok(nodes.every(Boolean));
@@ -50,7 +50,7 @@ test('V66 major machine sequence remains physically right-to-left with explicit 
   model.dispose();
 });
 
-test('V66 rollstand reproduces low reel, exposed hub and supported two-sided mechanics',()=>{
+test('V67 rollstand reproduces low reel, exposed hub and supported two-sided mechanics',()=>{
   const model=new SheetingMachineTemplate();
   assert.equal(model.activeMeshes.filter(m=>m.userData.motion==='reel').length,1);
   assert.equal(model.activeMeshes.filter(m=>m.userData.motion==='reel-core').length,1);
@@ -66,7 +66,7 @@ test('V66 rollstand reproduces low reel, exposed hub and supported two-sided mec
   model.dispose();
 });
 
-test('V66 unwind guide stays inclined, sparse and fully supported',()=>{
+test('V67 unwind guide stays inclined, sparse and fully supported',()=>{
   const model=new SheetingMachineTemplate(),frame=model.findNode('sheeting-feed-frame'),rollers=model.findNode('sheeting-feed-rollers');
   assert.ok(frame&&rollers);
   assert.equal(model.meshes.filter(m=>m.userData.role==='feed-right-post').length,2);
@@ -81,7 +81,7 @@ test('V66 unwind guide stays inclined, sparse and fully supported',()=>{
   model.dispose();
 });
 
-test('V66 operator-side inspection window is a real aperture instead of glass laid over a solid shell',()=>{
+test('V67 operator-side inspection window is a real aperture instead of glass laid over a solid shell',()=>{
   const model=new SheetingMachineTemplate(),window=model.findNode('sheeting-window');
   assert.ok(window,'window must be a selectable geometry node');
   assert.equal(model.meshes.filter(m=>m.userData.role==='main-side-shell').length,0,'legacy full side shell must not return');
@@ -98,7 +98,7 @@ test('V66 operator-side inspection window is a real aperture instead of glass la
   model.dispose();
 });
 
-test('V66 main head keeps one dominant photo-anchored cylinder and no fake animated knife',()=>{
+test('V67 main head exposes a visible flat-bed knife family reference while exact HSM-CTM7 actuation remains unresolved',()=>{
   const model=new SheetingMachineTemplate();
   assert.equal(model.meshes.filter(m=>m.userData.role==='window-process-cylinder').length,1);
   assert.equal(model.meshes.filter(m=>m.userData.role==='process-cylinder-band').length,4);
@@ -106,13 +106,20 @@ test('V66 main head keeps one dominant photo-anchored cylinder and no fake anima
   assert.equal(model.meshes.filter(m=>m.userData.role==='window-guide-finger').length,10);
   assert.equal(model.meshes.filter(m=>m.userData.role==='diamond-service-plate').length,1);
   assert.equal(model.meshes.filter(m=>m.userData.role==='window-process-cylinder-dark').length,0);
-  assert.match(model.root.userData.processFlow.cutterArchitecture,/UNRESOLVED/);
-  assert.equal(model.activeMeshes.filter(m=>m.userData.motion==='knife-reference').length,0,'unresolved knife must not be animated');
+  assert.match(model.root.userData.processFlow.cutterArchitecture,/FLAT_BED_KNIFE_FAMILY_REFERENCE/);
+  assert.match(model.root.userData.processFlow.cutterArchitecture,/EXACT_HSM_CTM7.*UNRESOLVED/);
+  const blade=model.activeMeshes.filter(m=>m.userData.motion==='flat-bed-blade-reference');
+  assert.equal(blade.length,3,'carrier, blade and cutting edge must move together');
+  assert.equal(model.meshes.filter(m=>m.userData.role==='visible-flat-bed-blade').length,1);
+  assert.equal(model.meshes.filter(m=>m.userData.role==='knife-cutting-edge').length,1);
+  assert.equal(model.meshes.filter(m=>m.userData.role==='knife-carrier').length,1);
+  assert.equal(model.meshes.filter(m=>m.userData.role==='knife-anvil-reference').length,1);
+  assert.equal(model.meshes.filter(m=>m.userData.role==='knife-guide-block').length,2);
   assert.equal(model.meshes.filter(m=>/cut.?to.?mark/i.test(m.userData.role||'')).length,0,'CTM acronym must not invent a sensor');
   model.dispose();
 });
 
-test('V66 outfeed exposes fast/slow/overlap transport zones plus the operator handwheel',()=>{
+test('V67 outfeed exposes fast/slow/overlap transport zones plus the operator handwheel',()=>{
   const model=new SheetingMachineTemplate(),handwheel=model.findNode('sheeting-outfeed-handwheel');
   assert.ok(handwheel);
   assert.ok(model.findNode('sheeting-fast-belts'));
@@ -135,7 +142,7 @@ test('V66 outfeed exposes fast/slow/overlap transport zones plus the operator ha
   model.dispose();
 });
 
-test('V66 console remains compact, low and clear of both main head and outfeed rail',()=>{
+test('V67 console remains compact, low and clear of both main head and outfeed rail',()=>{
   const model=new SheetingMachineTemplate(),control=boxOf(model.findNode('sheeting-control'));
   assert.ok(control.max.y<.82);
   assert.equal(model.meshes.filter(m=>m.userData.role==='control-console-face').length,1);
@@ -147,7 +154,7 @@ test('V66 console remains compact, low and clear of both main head and outfeed r
   model.dispose();
 });
 
-test('V66 stacker reference load is a substantial supported skid stack, not a few sheet slabs',()=>{
+test('V67 stacker reference load is a substantial supported skid stack, not a few sheet slabs',()=>{
   const model=new SheetingMachineTemplate(),tower=model.findNode('sheeting-layboy'),lift=model.findNode('sheeting-stack-lift'),reference=model.findNode('sheeting-reference-stack');
   assert.ok(tower&&lift&&reference);
   assert.equal(model.meshes.filter(m=>m.userData.role==='stacker-column').length,4);
@@ -170,7 +177,7 @@ test('V66 stacker reference load is a substantial supported skid stack, not a fe
   model.dispose();
 });
 
-test('V66 taxonomy stays six levels and maps window, handwheel and reference load to selectable geometry',()=>{
+test('V67 taxonomy stays six levels and maps window, handwheel and reference load to selectable geometry',()=>{
   assert.deepEqual([...new Set(SHEETING_TAXONOMY.map(n=>n.level))].sort(),[1,2,3,4,5,6]);
   assert.equal(new Set(SHEETING_TAXONOMY.map(n=>n.id)).size,SHEETING_TAXONOMY.length);
   const model=new SheetingMachineTemplate();
@@ -191,7 +198,7 @@ test('V66 taxonomy stays six levels and maps window, handwheel and reference loa
   model.dispose();
 });
 
-test('V66 cutaway opens real housings/window while retaining mechanics and stacker structure',()=>{
+test('V67 cutaway opens real housings/window while retaining mechanics and stacker structure',()=>{
   const model=new SheetingMachineTemplate(),covers=model.meshes.filter(m=>m.userData.exteriorCover);
   assert.ok(covers.length>=10);
   model.setExteriorOpen(true);assert.ok(covers.every(m=>m.visible===false));
@@ -202,13 +209,17 @@ test('V66 cutaway opens real housings/window while retaining mechanics and stack
   model.dispose();
 });
 
-test('V66 simulation is a continuous web -> cut -> fast/slow/overlap -> stack sequence without teleporting sheets',()=>{
+test('V67 simulation is a continuous web -> cut -> fast/slow/overlap -> stack sequence without teleporting sheets',()=>{
   const model=new SheetingMachineTemplate(),sim=new SheetingProcessSimulation(model.root,model);
   assert.deepEqual(SHEETING_SIMULATION_STAGES,['Unwind / Continuous Web','Guide / Tension','Cross-Cut Event','Fast Tape Separation','Slow Tape / Overlap','Lift Table / Stacker']);
   const ref=model.meshes.filter(m=>m.userData.referenceStack);assert.equal(ref.length,14);assert.ok(ref.every(m=>m.visible));
   const lifts=model.activeMeshes.filter(m=>m.userData.motion==='lift-table');assert.equal(lifts.length,2);
   const process=model.activeMeshes.find(m=>m.userData.motion==='process-roller');assert.ok(process);
   const processRest=process.quaternion.clone(),liftRest=lifts.map(m=>m.position.y);
+  const blades=model.activeMeshes.filter(m=>m.userData.motion==='flat-bed-blade-reference');
+  assert.equal(blades.length,3);
+  const bladeRest=blades.map(m=>m.position.y);
+  let maxBladeStroke=0;
   const joggers=model.activeMeshes.filter(m=>/^stack-jogger-/.test(m.userData.motion||''));
   assert.equal(joggers.length,4);
   const joggerRest=joggers.map(m=>m.position.clone());
@@ -233,6 +244,7 @@ test('V66 simulation is a continuous web -> cut -> fast/slow/overlap -> stack se
   const history=new Map();
   for(let i=0;i<260;i++){
     now+=40;sim.update(now);
+    maxBladeStroke=Math.max(maxBladeStroke,...blades.map((m,i)=>bladeRest[i]-m.position.y));
     for(const s of sim.sheets.filter(x=>x.visible)){
       const prev=history.get(s.userData.cutId);
       if(prev!==undefined)assert.ok(s.position.x<=prev+.035,'sheet moved backward/teleported toward input');
@@ -250,6 +262,9 @@ test('V66 simulation is a continuous web -> cut -> fast/slow/overlap -> stack se
   assert.equal(state.webRibbonSegmentsVisible,sim.webRibbonSegments.length);
   assert.ok(Math.abs(sim.pile.find(s=>s.visible).position.x+4.82)<.001);
   assert.ok(process.quaternion.angleTo(processRest)>.001);
+  assert.ok(maxBladeStroke>.055,'blade must visibly descend toward the web during a cut');
+  assert.equal(state.bladeCount,3);
+  assert.equal(state.bladeVisible,true);
   assert.ok(joggers.some((m,i)=>m.position.distanceTo(joggerRest[i])>.001),'stack alignment joggers must visibly actuate');
 
   // The first sheets build upward from the pallet; table lowers only after top approaches delivery target.
@@ -262,12 +277,13 @@ test('V66 simulation is a continuous web -> cut -> fast/slow/overlap -> stack se
   assert.ok(sim.webRibbonSegments.every(m=>m.visible),'hiding debug path must not hide actual web');
 
   sim.stop();assert.ok(ref.every(m=>m.visible));
+  for(let i=0;i<blades.length;i++)assert.equal(blades[i].position.y,bladeRest[i],'blade must reset after stop');
   assert.ok(sim.webRibbonSegments.every(m=>!m.visible));
   for(let i=0;i<lifts.length;i++)assert.equal(lifts[i].position.y,liftRest[i]);
   sim.dispose();model.dispose();
 });
 
-test('V66 rejects significant accidental cross-module penetration including new window and handwheel nodes',()=>{
+test('V67 rejects significant accidental cross-module penetration including new window and handwheel nodes',()=>{
   const model=new SheetingMachineTemplate();model.root.updateMatrixWorld(true);
   const entries=model.meshes.map(m=>({m,b:boxOf(m),owner:m.userData.ownerId||'',role:m.userData.role||''}));
   const key=(a,b)=>[a,b].sort().join('|');
@@ -315,7 +331,7 @@ test('V66 rejects significant accidental cross-module penetration including new 
   model.dispose();
 });
 
-test('V66 low-detail, explode and reset restore selectable window/handwheel and supported reference load',()=>{
+test('V67 low-detail, explode and reset restore selectable window/handwheel and supported reference load',()=>{
   const model=new SheetingMachineTemplate(),head=model.findNode('sheeting-cutter'),window=model.findNode('sheeting-window'),handwheel=model.findNode('sheeting-outfeed-handwheel');
   const windowRest=window.position.clone(),wheelRest=handwheel.position.clone();
   model.setLow(true);assert.ok(model.detailMeshes.every(m=>!m.visible));
