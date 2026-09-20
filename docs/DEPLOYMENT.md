@@ -1,47 +1,47 @@
-# Deployment GitHub + Cloudflare — Digital Twin V63
+# Deployment GitHub + Cloudflare — Digital Twin V64
 
-## Build & deployment
+Repo aktif: `juldigi/digitaltwin` (private).
 
-Repo: `juldigi/digitaltwin` (private).
+## Pipeline
 
-Push ke `main` harus:
-1. menjalankan `npm ci`;
-2. menjalankan `npm run build`;
-3. menjalankan seluruh `npm test`;
-4. memvalidasi credential Cloudflare;
-5. deploy Worker dari `backend/`.
+Push ke `main` harus lulus:
+1. `npm ci`
+2. `npm run build`
+3. seluruh `npm test`
+4. Cloudflare credential validation
+5. Workers deployment
 
-Service worker cache V63: `factory-digital-twin-v63-20260920`.
+Service-worker cache: `factory-digital-twin-v64-20260920`.
 
-## V63 Sheeting verification gate
+## V64 Sheeting verification gate
 
-Sebelum deployment dianggap valid:
-- identitas tetap HSM-CTM7 / 00982 / SBM-2 / 2014;
-- arah proses tetap RIGHT → LEFT;
-- hanya **1 reel position** family-reference;
-- rollstand rendah dengan opposed support;
-- raised web frame mempunyai **4 guide/tension roller** dengan bearing/support;
-- main head mempunyai panoramic window dan large photographed process cylinders;
-- outfeed mempunyai **9 longitudinal belts**, **2 transport rollers**, **5 adjustment rods** dan collar/knob;
-- stacker berupa rigid tower dengan flat lift table + pallet;
-- operator control adalah low compact console;
-- tidak ada long generic catwalk;
-- module sequence unwind → feed → main head → outfeed → stacker mempunyai clearance;
-- tidak ada significant accidental cross-owner mesh penetration di luar mounted relationships;
-- continuous web berhenti di cross-cut zone;
-- individual sheet hanya ada downstream dan pile berada di stacker tower;
-- cutaway/explode/isolate/labels/reset tetap berfungsi.
+Deployment V64 tidak boleh lolos bila regression test gagal terhadap kontrak berikut:
+- identitas BMJ dan RIGHT → LEFT tetap;
+- tepat 1 paper reel, 1 reel core, 2 chuck hubs dan 12 visible hub bolts;
+- rollstand mempunyai swing/hydraulic support;
+- feed memakai inclined frame dan hanya 4 deliberate guide/tension rollers;
+- panoramic main window mempunyai 1 dominant process cylinder, 4 bright bands, 2 handles dan 10 lower guide fingers;
+- tidak ada competing second large process cylinder;
+- outfeed mempunyai 13 longitudinal belts, 2 main rotating transport rollers dan 3 adjustment rods;
+- adjustment hardware mempunyai 9 pedestals, 18 triangular braces, 9 collars dan 9 knobs;
+- console tetap rendah/kompak dan tidak menembus main head;
+- stacker mempunyai 4 columns, front/rear header, side cabinet, guarded sides, lift table dan pallet;
+- reference paper load harus supported dan hilang saat simulation mulai;
+- major modules mempunyai physical X clearance;
+- significant accidental cross-module penetration ditolak;
+- dynamic web hanya upstream cut event, dynamic sheet hanya downstream;
+- finished pile tetap di dalam stacker tower dan lift table turun sesuai pertumbuhan pile.
 
 ## Cloudflare
 
 Worker: `digitaltwin`
 
-- static assets: `../dist`
-- API: `/api/*`
+- assets: `../dist`
+- Worker routes: `/api/*`
 - D1 binding: `DB`
-- required GitHub secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`
+- GitHub secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`
 - Worker secrets: `ADMIN_TOKEN`, `VIEWER_TOKEN`
 
 ## Evidence boundary
 
-BW HSM 56 2014 adalah primary visual **family** reference, bukan bukti bahwa HSM-CTM7 BMJ identik. Public sources conflict mengenai knife architecture, sehingga exact cutting mechanism tetap unresolved sampai ada foto/drawing HSM-CTM7 BMJ.
+HSM 56 2014 digunakan sebagai **family visual anchor**, bukan klaim bahwa BMJ HSM-CTM7 identik. Exact HSM-CTM7 cutter internals tetap unresolved sampai tersedia foto/drawing spesifik.
