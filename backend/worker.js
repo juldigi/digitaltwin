@@ -13,13 +13,18 @@ async function body(req){
   const merged=new Uint8Array(n);let offset=0;for(const c of chunks){merged.set(c,offset);offset+=c.length;}return JSON.parse(new TextDecoder().decode(merged));
 }
 export default {async fetch(req,env){
+  const url=new URL(req.url),path=url.pathname;
+  if(!path.startsWith('/api/')){
+    if(!env.ASSETS)return new Response('Static assets belum terhubung.',{status:503});
+    return env.ASSETS.fetch(req);
+  }
   const origin=req.headers.get('Origin'),allowed=(env.ALLOWED_ORIGINS||'').split(',').map(s=>s.trim()).filter(Boolean);
-  const cors=origin&&allowed.includes(origin)?{'Access-Control-Allow-Origin':origin,'Vary':'Origin'}:{};
-  if(origin&&!allowed.includes(origin))return json({error:'Origin tidak diizinkan.'},403);
+  const sameOrigin=!origin||origin===url.origin;
+  const cors=origin&&(sameOrigin||allowed.includes(origin))?{'Access-Control-Allow-Origin':origin,'Vary':'Origin'}:{};
+  if(origin&&!sameOrigin&&!allowed.includes(origin))return json({error:'Origin tidak diizinkan.'},403);
   if(req.method==='OPTIONS')return new Response(null,{status:204,headers:{...cors,'Access-Control-Allow-Methods':'GET,PUT,DELETE,OPTIONS','Access-Control-Allow-Headers':'Authorization,Content-Type,If-Match','Access-Control-Max-Age':'600'}});
   try{
-    const path=new URL(req.url).pathname;
-    if(path==='/api/health'&&req.method==='GET')return json({service:'offset5-digital-twin',ready:!!env.DB&&!!env.ADMIN_TOKEN&&!!env.VIEWER_TOKEN},200,cors);
+    if(path==='/api/health'&&req.method==='GET')return json({service:'bmj-digitaltwin',ready:!!env.DB&&!!env.ADMIN_TOKEN&&!!env.VIEWER_TOKEN,assets:!!env.ASSETS},200,cors);
     const token=req.headers.get('Authorization')?.replace(/^Bearer /,'');
     const admin=await same(token,env.ADMIN_TOKEN),viewer=admin||await same(token,env.VIEWER_TOKEN);
     if(!viewer)return json({error:'Autentikasi diperlukan.'},401,cors);
