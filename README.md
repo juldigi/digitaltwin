@@ -1,44 +1,46 @@
-# BMJ Packaging Offset — Factory Digital Twin V63
+# BMJ Packaging Offset — Factory Digital Twin V64
 
-Digital Twin interaktif untuk area **Packaging Offset PT Bukit Muria Jaya**. V63 memfokuskan koreksi mendalam pada **Sheeting Lexus HSM-CTM7** berdasarkan visual anchor per zona dari brochure/foto HSM 56 2014 dan cross-check beberapa sumber keluarga HSM.
+Digital Twin interaktif untuk area **Packaging Offset PT Bukit Muria Jaya**. V64 melanjutkan rekonstruksi **Sheeting Lexus HSM-CTM7** dengan detail mekanis yang diturunkan langsung dari anchor visual resmi HSM 56 2014, tanpa mengubah dedicated geometry Offset 5, Offset 10, dan APM 2.
 
-## Pembaruan V63 — Sheeting Lexus
+## Fokus V64 — Sheeting Lexus
 
-Identitas BMJ tetap **LEXUS HSM-CTM7 · serial 00982 · SAP SBM-2 · tahun 2014** dan orientasi proses tetap **RIGHT → LEFT**.
+Identitas BMJ tetap **HSM-CTM7 · serial 00982 · SAP SBM-2 · 2014** dan arah proses tetap **RIGHT → LEFT**.
 
-V63 tidak lagi membangun silhouette dari satu asumsi arsitektur. Setiap zona memakai anchor visual yang dapat dilihat pada sumber:
-- **Rollstand:** satu reel rendah dengan opposed chuck/two-sided support. Tidak ada tandem reel spekulatif.
-- **Web handling:** frame guide/tension tinggi dengan empat roller utama yang seluruhnya mempunyai support/bearing.
-- **Main head:** body abu-abu/toska besar dengan **panoramic inspection window**; dua large transverse process cylinders dan ring/collar di dalam direkonstruksi karena terlihat jelas pada foto.
-- **Cross-cut:** fungsi cutting dipertahankan, tetapi exact knife HSM-CTM7 tidak dipaksakan karena sumber publik bertentangan antara istilah flat-bed dan rotary.
-- **Outfeed:** long narrow-belt bed dengan banyak belt longitudinal, hanya dua roller transversal utama, dan lima batang adjustment dengan collar/knob seperti yang terlihat pada foto.
-- **Stacker:** tower rigid dengan upper housing, safety guard, **flat lift table + pallet**; bukan portal terbuka generik.
-- **Operator controls:** console rendah/kompak seperti foto, bukan pedestal HMI tinggi.
-- **Access:** hanya localized stacker steps/landing; long catwalk generik dihapus.
-- Simulasi dipetakan ulang terhadap path V63 dan pile sekarang berada di dalam stacker tower.
-- Taxonomy 6 tingkat dipetakan ulang ke node fisik V63.
-- Regression tests mengunci jumlah reel, roller, belt, adjustment rods, stacker geometry, module clearance dan collision.
+V64 memperbaiki detail yang masih terlalu generik pada V63:
+- rollstand memakai **satu reel rendah**, exposed opposed chuck/hub, bolt circle, swing arm serta hydraulic support;
+- generic tall four-post feed tower diganti **inclined two-sided web guide frame**;
+- feed path dikunci menjadi **4 roller utama** dengan bearing pada side frame;
+- main head memakai panoramic window dengan **1 dominant turquoise process cylinder**, 4 bright bands dan end caps;
+- competing second large cylinder V63 dihapus;
+- ditambahkan black window handles, repeating guide fingers dan metal service plate;
+- outfeed memakai **13 longitudinal belts**, hanya 2 transport rollers dan **3 transverse adjustment assemblies**;
+- setiap adjustment assembly mempunyai triangular green supports, bronze collars dan black hand knobs;
+- low operator console dibuat integrated dengan pushbutton, E-stop dan lever;
+- stacker dibuat sebagai **open-front rigid tower** dengan mesh guards, side cabinet, internal lift guides, flat lift table, blue pallet dan grounded side steps;
+- paper stack referensi diletakkan secara fisik di atas pallet dan otomatis disembunyikan saat simulation berjalan;
+- simulation path mengikuti rollstand → inclined guide → main head → belt outfeed → stacker dan menggerakkan reel/core/chuck/guide rollers/main process cylinder/outfeed rollers/lift table.
 
 ## Evidence hierarchy
 
-1. **Verified BMJ:** model plant, serial, SAP code, tahun.
-2. **User-confirmed:** arah material RIGHT → LEFT.
-3. **Primary visual family evidence:** BW Papersystems 2014 Lexus HSM 56 brochure/photo.
-4. **Historical family evidence:** Mega Machinery/Megatech listing HSM 52/56/65 sebagai high-speed rotary sheeting machine.
-5. **Process-family evidence:** referensi Lexus Indonesia untuk automatic tension, EPC dan computerized control.
-6. **Secondary comparisons:** Great Wall/Accura hanya untuk pemahaman proses, bukan silhouette utama.
+1. Database BMJ — identitas mesin.
+2. Konfirmasi pengguna — arah material RIGHT → LEFT.
+3. BW Papersystems HSM 56 2014 brochure — primary family visual/spec reference.
+4. BW Papersystems full-resolution HSM 56 image — primary component-level visual anchor untuk main head/outfeed.
+5. Historical Mega Machinery HSM 52/56/65 listing — family corroboration.
+6. Indonesian Lexus reference — process-function corroboration untuk tension/EPC/control.
+7. Generic sheeter references — hanya secondary comparison.
 
-Karena BW HSM 56 menyebut “flat-bed knife” sementara sumber HSM family lain menyebut rotary, V63 tidak mengklaim exact cutting architecture HSM-CTM7. Bentuk yang terlihat di foto dimodelkan; fungsi yang tidak terbukti tetap berstatus unresolved.
+Exact HSM-CTM7 knife architecture tetap **unresolved** karena sumber publik keluarga HSM tidak sepenuhnya konsisten. V64 hanya memodelkan bentuk/fungsi internal yang cukup didukung bukti.
 
-## Cakupan aplikasi
+## Aplikasi
 
-- **41 equipment** dari database Packaging Offset.
-- **4 digital twin khusus:** Offset 5 / OFU-1, Offset 10, APM 2, dan Sheeting Lexus.
-- Taxonomy **6 tingkat:** Mesin → Unit Utama → Sub → Block → Part → Spesifik Part.
-- 3D machine, factory layout, cutaway/exterior, explode, isolate, component labels, focus camera dan process simulation.
-- Frontend + API dipublikasikan melalui **Cloudflare Workers Static Assets** dari repo private.
+- 41 equipment dalam machine registry.
+- 4 dedicated twins: Offset 5, Offset 10, APM 2, Sheeting Lexus.
+- Taxonomy 6 tingkat.
+- 3D, factory layout, cutaway, explode, isolate, labels, camera focus dan process simulation.
+- Runtime melalui Cloudflare Workers Static Assets dari private repository.
 
-## Menjalankan lokal
+## Local verification
 
 ```sh
 npm ci
@@ -47,12 +49,6 @@ npm test
 npm run dev
 ```
 
-## Deployment
+## Fidelity rule
 
-Repo aktif: `juldigi/digitaltwin`. Push ke `main` menjalankan build, regression test, credential validation dan deployment ke Worker `digitaltwin`.
-
-Detail: `docs/DEPLOYMENT.md`.
-
-## Prinsip fidelity
-
-Geometry family-reference tidak diperlakukan sebagai CAD OEM. Detail hanya dinaikkan menjadi verified jika didukung foto/drawing/data BMJ yang spesifik.
+Photo/family evidence tidak dianggap sebagai OEM CAD. Geometry exact hanya dinyatakan verified jika ada foto/drawing/data BMJ yang spesifik.
