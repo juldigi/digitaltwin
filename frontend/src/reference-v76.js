@@ -36,6 +36,15 @@ function v76BuildRail(){
     const foot=document.createElement('div');foot.className='v76-rail-foot';foot.innerHTML='Better Packaging<br>A Brighter Tomorrow';rail.append(foot);
   }
 }
+function v76BuildHeader(){
+  const top=v76('.topbar'),search=v76('.global-search'),input=v76('#global-search');
+  if(input)input.placeholder='Cari mesin, area, atau komponen…';
+  if(top&&!v76('.v76-plant-chip')){
+    const chip=document.createElement('button');chip.type='button';chip.className='v76-plant-chip';chip.innerHTML='<span>▥</span><b>Plant Karawang</b><i>⌄</i>';
+    if(search)top.insertBefore(chip,search);else top.append(chip);
+    chip.addEventListener('click',()=>v76Delegate('#nav-layout'));
+  }
+}
 function v76BuildKpis(){
   const kpis=v76('.top-kpis');if(!kpis)return;
   if(!v76('.v76-view-kpi')){
@@ -59,6 +68,8 @@ function v76BuildReferenceControls(){
     if(machine)machine.textContent='Fokus Utama';
     if(all)all.textContent='Semua Mesin';
     if(clean)clean.textContent='Tampilan Sederhana';
+    all?.addEventListener('click',()=>setTimeout(()=>v76Delegate('#nav-layout'),0));
+    machine?.addEventListener('click',()=>setTimeout(()=>v76Delegate('#nav-machine'),0));
   }
 }
 function v76SelectedLabel(){
@@ -136,7 +147,7 @@ function v76Responsive(){
 }
 function v76Boot(){
   document.documentElement.dataset.referenceUi='v76-bmj';
-  v76BuildLogo();v76BuildRail();v76BuildKpis();v76BuildReferenceControls();v76BuildSelectionCard();v76BuildInspector();v76BuildMobileNav();v76WatchSelection();v76Responsive();
+  v76BuildLogo();v76BuildRail();v76BuildHeader();v76BuildKpis();v76BuildReferenceControls();v76BuildSelectionCard();v76BuildInspector();v76BuildMobileNav();v76WatchSelection();v76Responsive();
   setTimeout(v76RefreshSelection,350);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',v76Boot,{once:true});else v76Boot();
