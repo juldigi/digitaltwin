@@ -1,54 +1,38 @@
-# BMJ Packaging Offset — Factory Digital Twin V64
+# BMJ Packaging Offset — Factory Digital Twin V65
 
-Digital Twin interaktif untuk area **Packaging Offset PT Bukit Muria Jaya**. V64 melanjutkan rekonstruksi **Sheeting Lexus HSM-CTM7** dengan detail mekanis yang diturunkan langsung dari anchor visual resmi HSM 56 2014, tanpa mengubah dedicated geometry Offset 5, Offset 10, dan APM 2.
+V65 melanjutkan koreksi **Sheeting Lexus HSM-CTM7** tanpa mengubah dedicated twin Offset 5, Offset 10, dan APM 2.
 
-## Fokus V64 — Sheeting Lexus
+## Sheeting V65
 
 Identitas BMJ tetap **HSM-CTM7 · serial 00982 · SAP SBM-2 · 2014** dan arah proses tetap **RIGHT → LEFT**.
 
-V64 memperbaiki detail yang masih terlalu generik pada V63:
-- rollstand memakai **satu reel rendah**, exposed opposed chuck/hub, bolt circle, swing arm serta hydraulic support;
-- generic tall four-post feed tower diganti **inclined two-sided web guide frame**;
-- feed path dikunci menjadi **4 roller utama** dengan bearing pada side frame;
-- main head memakai panoramic window dengan **1 dominant turquoise process cylinder**, 4 bright bands dan end caps;
-- competing second large cylinder V63 dihapus;
-- ditambahkan black window handles, repeating guide fingers dan metal service plate;
-- outfeed memakai **13 longitudinal belts**, hanya 2 transport rollers dan **3 transverse adjustment assemblies**;
-- setiap adjustment assembly mempunyai triangular green supports, bronze collars dan black hand knobs;
-- low operator console dibuat integrated dengan pushbutton, E-stop dan lever;
-- stacker dibuat sebagai **open-front rigid tower** dengan mesh guards, side cabinet, internal lift guides, flat lift table, blue pallet dan grounded side steps;
-- paper stack referensi diletakkan secara fisik di atas pallet dan otomatis disembunyikan saat simulation berjalan;
-- simulation path mengikuti rollstand → inclined guide → main head → belt outfeed → stacker dan menggerakkan reel/core/chuck/guide rollers/main process cylinder/outfeed rollers/lift table.
+Perubahan utama:
+- main-head operator side diubah dari panel solid + kaca menjadi **true hollow panoramic inspection aperture**;
+- window assembly sekarang node selectable sendiri untuk taxonomy/focus/isolate/explode;
+- satu turquoise process cylinder dengan 4 bright bands tetap menjadi dominant photographed mechanism;
+- outfeed mempertahankan 13 longitudinal belts, 3 adjustment rod assemblies, triangular supports, collars dan knobs;
+- ditambahkan **selectable operator-side outfeed handwheel** dari foto resmi BW;
+- reference paper stack di stacker diubah dari beberapa slab tipis menjadi **substantial supported skid load** di atas blue pallet;
+- reference skid otomatis hilang saat simulation dan diganti dynamic sheet pile;
+- exact HSM-CTM7 tetap unresolved: pencarian literal designation tersebut belum menghasilkan OEM drawing/manual/photo publik yang spesifik;
+- generic cut-to-mark literature hanya dipakai sebagai process comparison; **CTM7 tidak diasumsikan berarti cut-to-mark**.
 
 ## Evidence hierarchy
 
 1. Database BMJ — identitas mesin.
-2. Konfirmasi pengguna — arah material RIGHT → LEFT.
-3. BW Papersystems HSM 56 2014 brochure — primary family visual/spec reference.
-4. BW Papersystems full-resolution HSM 56 image — primary component-level visual anchor untuk main head/outfeed.
-5. Historical Mega Machinery HSM 52/56/65 listing — family corroboration.
-6. Indonesian Lexus reference — process-function corroboration untuk tension/EPC/control.
-7. Generic sheeter references — hanya secondary comparison.
+2. Konfirmasi pengguna — arah RIGHT → LEFT.
+3. BW Papersystems 2014 HSM 56 brochure — primary family visual/spec reference.
+4. BW full-resolution HSM 56 image — component-level visual anchor.
+5. Historical HSM family listing — corroboration only.
+6. Indonesian Lexus process reference — tension/EPC/control functions only.
+7. Generic sheeter control/stacker sources — simulation/process comparison only.
 
-Exact HSM-CTM7 knife architecture tetap **unresolved** karena sumber publik keluarga HSM tidak sepenuhnya konsisten. V64 hanya memodelkan bentuk/fungsi internal yang cukup didukung bukti.
-
-## Aplikasi
-
-- 41 equipment dalam machine registry.
-- 4 dedicated twins: Offset 5, Offset 10, APM 2, Sheeting Lexus.
-- Taxonomy 6 tingkat.
-- 3D, factory layout, cutaway, explode, isolate, labels, camera focus dan process simulation.
-- Runtime melalui Cloudflare Workers Static Assets dari private repository.
-
-## Local verification
+## Verification
 
 ```sh
 npm ci
 npm run build
 npm test
-npm run dev
 ```
 
-## Fidelity rule
-
-Photo/family evidence tidak dianggap sebagai OEM CAD. Geometry exact hanya dinyatakan verified jika ada foto/drawing/data BMJ yang spesifik.
+Regression tests mengunci physical module clearance, window architecture, component counts, taxonomy mapping, simulation behavior, and cross-module penetration.
