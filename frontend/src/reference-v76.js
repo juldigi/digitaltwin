@@ -29,8 +29,9 @@ function v76BuildRail(){
   if(!v76('#v76-nav-simulation')){
     const b=document.createElement('button');b.id='v76-nav-simulation';b.type='button';b.title='Simulasi proses';b.innerHTML='<span>▶</span><small>Simulasi</small>';
     v76('#nav-assets')?.after(b);
-    b.addEventListener('click',()=>{document.body.classList.remove('nav-open');v76Delegate('#tool-simulation');});
+    b.addEventListener('click',()=>{document.body.classList.remove('nav-open');v76all('.rail button').forEach(x=>x.classList.toggle('active',x===b));v76Delegate('#tool-simulation');});
   }
+  v76all('#nav-machine,#nav-layout,#nav-assets,#nav-components,#nav-exterior,#nav-sources,#nav-view-panels,#nav-help').forEach(button=>button.addEventListener('click',()=>{v76all('.rail button').forEach(x=>x.classList.toggle('active',x===button));}));
   if(!v76('.v76-rail-foot')){
     const foot=document.createElement('div');foot.className='v76-rail-foot';foot.innerHTML='Better Packaging<br>A Brighter Tomorrow';rail.append(foot);
   }
