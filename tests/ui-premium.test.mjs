@@ -48,7 +48,7 @@ test('legacy accessibility protections remain available under V76',()=>{
   assert.match(mobileJs,/aria-current/);
 });
 test('service worker cache is bumped and includes V76 reference assets',()=>{
-  assert.match(sw,/factory-digital-twin-v76-20260921/);
+  assert.match(sw,/factory-digital-twin-v76-final-20260921/);
   assert.match(sw,/reference-v76\.css/);
   assert.match(sw,/src\/reference-v76\.js/);
 });
