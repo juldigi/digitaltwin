@@ -41,7 +41,7 @@ export class SheetingProcessSimulation{
       new THREE.Vector3(-3.00,.93,0),
       new THREE.Vector3(-4.45,.88,0),
       new THREE.Vector3(-5.55,.75,0),
-      new THREE.Vector3(-6.30,.63,0)
+      new THREE.Vector3(-6.45,.63,0)
     ];
     this.preCutCurve=new THREE.CatmullRomCurve3(pre,false,'catmullrom',.08);
     this.postCutCurve=new THREE.CatmullRomCurve3(post,false,'catmullrom',.08);
@@ -72,7 +72,7 @@ export class SheetingProcessSimulation{
     for(let i=0;i<28;i++){
       const mesh=new THREE.Mesh(geo,this.sheetMaterial);
       mesh.visible=false;mesh.name='Finished sheet pile';mesh.userData.finishedSheet=true;
-      mesh.position.set(-6.30,.63,0);this.group.add(mesh);this.pile.push(mesh);
+      mesh.position.set(-6.45,.63,0);this.group.add(mesh);this.pile.push(mesh);
     }
   }
   state(){
@@ -153,7 +153,7 @@ export class SheetingProcessSimulation{
     const topY=.63;
     for(let i=0;i<this.pile.length;i++){
       const sheet=this.pile[i];sheet.visible=i<visible;
-      if(sheet.visible)sheet.position.set(-6.30,topY-(visible-1-i)*.012,0);
+      if(sheet.visible)sheet.position.set(-6.45,topY-(visible-1-i)*.012,0);
     }
   }
   update(now){
