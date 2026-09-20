@@ -42,9 +42,9 @@ if(IS_APM2)state.asset={...state.asset,asset_id:'MACHINE-APM2',asset_code:'APM-2
 if(IS_SHEETING)state.asset={...state.asset,asset_id:'BMJ-MCH-0002',asset_code:'SBM-2',codename:'SBM-2',model:'HSM-CTM7',description:'SHEETING LEXUS',source_description:'BMJ Machine Database',manufacturer:'LEXUS',specification:'HSM-CTM7 · HSM 56 family reference · 2014',configuration:'Rollstand → Feed/Tension/EPC → Flat-Bed Knife → Delivery/Layboy → Stacker','3d_status':'DEDICATED PROCEDURAL / USER-CONFIRMED ORIENTATION + FAMILY REFERENCE',data_confidence:'IDENTITY VERIFIED / HSM56 FAMILY REFERENCE',discovery_status:'HSM56_FAMILY_REFERENCE_AVAILABLE',serial_number:'00982',functional_location:'PC-PK2-OFS-SHT-SHEETING01',year:2014,sources:SHEETING_TECHNICAL_SOURCES};
 if(IS_GENERIC){const m=GENERIC_CONFIG.machine;state.asset={...state.asset,asset_id:m.machineId,asset_code:m.sapCode||m.machineId,codename:m.sapCode,model:m.model,description:m.name,source_description:'BMJ Machine Database',manufacturer:null,specification:GENERIC_CONFIG.label,configuration:GENERIC_CONFIG.modules.join(' · '),'3d_status':'PROCEDURAL / PARAMETRIC FAMILY REFERENCE',data_confidence:m.model?'IDENTITY VERIFIED / FAMILY REFERENCE':'IDENTITY VERIFIED / MODEL UNKNOWN',discovery_status:'FAMILY_REFERENCE_AVAILABLE',serial_number:m.serial,functional_location:m.functionalLocation,year:m.year,sources:GENERIC_SOURCES};}
 function applyMachineShell(){
- const name=IS_OFFSET10?'OFFSET 10':IS_APM2?'APM 2':IS_GENERIC?GENERIC_CONFIG.machine.name:'OFFSET 5';
- const maker=IS_OFFSET10||(!IS_APM2&&!IS_GENERIC)?'Heidelberg':IS_APM2?'BOBST':GENERIC_CONFIG.label;
- const model=IS_OFFSET10?'CX104-2+LY-8+LY-1+L UV + FoilStar':IS_APM2?'SP 102 · 1994':IS_GENERIC?(GENERIC_CONFIG.machine.model||'Model belum terverifikasi'):'CD 102-8+L';
+ const name=IS_OFFSET10?'OFFSET 10':IS_APM2?'APM 2':IS_SHEETING?'SHEETING LEXUS':IS_GENERIC?GENERIC_CONFIG.machine.name:'OFFSET 5';
+ const maker=IS_OFFSET10||(!IS_APM2&&!IS_SHEETING&&!IS_GENERIC)?'Heidelberg':IS_APM2?'BOBST':IS_SHEETING?'LEXUS':GENERIC_CONFIG.label;
+ const model=IS_OFFSET10?'CX104-2+LY-8+LY-1+L UV + FoilStar':IS_APM2?'SP 102 · 1994':IS_SHEETING?'HSM-CTM7 · 2014':IS_GENERIC?(GENERIC_CONFIG.machine.model||'Model belum terverifikasi'):'CD 102-8+L';
  document.title='Factory Digital Twin · '+name;
  const title=$('#view-title'),sub=$('#view-subtitle'),label=$('#machine-label strong'),detail=$('#label-detail'),caption=$('#geometry-caption');
  if(title)title.textContent=name;if(sub)sub.textContent=maker+' · '+model;if(label)label.textContent=name;if(detail)detail.textContent=model;if(caption)caption.textContent='Model '+name;
@@ -52,7 +52,8 @@ function applyMachineShell(){
  const quick=$('.telemetry-strip section:first-child');
  if(quick&&IS_OFFSET10)quick.innerHTML='<h4>INFORMASI CEPAT</h4><span>Mesin <b>OFFSET 10</b></span><span>Konfigurasi <b>Full UV + FoilStar</b></span><span>Model <b>CX 104</b></span>';
  if(quick&&IS_APM2)quick.innerHTML='<h4>INFORMASI CEPAT</h4><span>Mesin <b>APM 2</b></span><span>Model <b>SP 102</b></span><span>Tahun <b>1994</b></span>';
- const simCaption=$('#tool-simulation span');if(simCaption)simCaption.textContent=IS_APM2?'Proses Autoplaten':IS_GENERIC?'Simulasi Proses':'Printing Test';
+ if(quick&&IS_SHEETING)quick.innerHTML='<h4>INFORMASI CEPAT</h4><span>Mesin <b>SHEETING LEXUS</b></span><span>Kode <b>SBM-2</b></span><span>Alur <b>Kanan → Kiri</b></span>';
+ const simCaption=$('#tool-simulation span');if(simCaption)simCaption.textContent=IS_APM2?'Proses Autoplaten':IS_SHEETING?'Proses Sheeting':IS_GENERIC?'Simulasi Proses':'Printing Test';
  if(IS_OFFSET10){
   const mark=$('.brandmark');if(mark)mark.innerHTML='F<span>10</span>';
   const icon=$('.asset-icon');if(icon)icon.textContent='10';
@@ -71,6 +72,15 @@ function applyMachineShell(){
   const qsmall=$('[data-workbench-card="quick"] header small');if(qsmall)qsmall.textContent='APM-2';
   const qgrid=$('[data-workbench-card="quick"] .quick-grid');if(qgrid)qgrid.innerHTML='<dt>Model</dt><dd>SP 102</dd><dt>Serial</dt><dd>57115506</dd><dt>Tahun</dt><dd>1994</dd><dt>Sheet maks.</dt><dd>1.020 × 720 mm</dd><dt>Kecepatan family ref.</dt><dd>7.500 sheets/jam</dd><dt>Tekanan family ref.</dt><dd>250 ton</dd><dt>Suffix</dt><dd>Belum terkonfirmasi</dd><dt>SAP Code</dt><dd>APM-2</dd>';
   const warning=$('#dwg-warning');if(warning)warning.textContent='Posisi APM 2 pada plant belum diklaim sampai anchor layout aktualnya tervalidasi.';
+ }else if(IS_SHEETING){
+  const mark=$('.brandmark');if(mark)mark.innerHTML='S<span>2</span>';
+  const icon=$('.asset-icon');if(icon)icon.textContent='S2';
+  const kpi=$('.top-kpis>div:nth-child(2)');if(kpi)kpi.innerHTML='<small>REFERENSI TEKNIS</small><b>'+TECHNICAL_SOURCES.length+'</b><span>Database + family</span>';
+  const hierarchy=$('[data-workbench-card="hierarchy"] .asset-tree');if(hierarchy)hierarchy.innerHTML='<details open><summary>Pabrik <span class="tax-level">L0</span></summary><details open><summary>Offset Printing</summary><details open><summary><span class="active-node">SHEETING LEXUS</span> <span class="tax-level">L1 · Mesin</span></summary><div>Rollstand / Unwind · Feed / Tension / EPC · Flat-Bed Knife · Delivery / Layboy · Control · Access</div></details></details></details>';
+  const hsmall=$('[data-workbench-card="hierarchy"] header small');if(hsmall)hsmall.textContent='SBM-2';
+  const qsmall=$('[data-workbench-card="quick"] header small');if(qsmall)qsmall.textContent='SBM-2';
+  const qgrid=$('[data-workbench-card="quick"] .quick-grid');if(qgrid)qgrid.innerHTML='<dt>Model plant</dt><dd>HSM-CTM7</dd><dt>Serial</dt><dd>00982</dd><dt>Tahun</dt><dd>2014</dd><dt>SAP Code</dt><dd>SBM-2</dd><dt>Referensi family</dt><dd>LEXUS HSM 56</dd><dt>Cut length ref.</dt><dd>400–1700 mm</dd><dt>Knife load ref.</dt><dd>600 gsm</dd><dt>Speed ref.</dt><dd>300 m/min</dd><dt>Alur aktual</dt><dd>RIGHT → LEFT</dd>';
+  const warning=$('#dwg-warning');if(warning)warning.textContent='Orientasi Sheeting telah dikoreksi: input reel di kanan, proses menuju kiri, output stack di kiri. Posisi plant tetap menunggu anchor layout yang tervalidasi.';
  }else if(IS_GENERIC){
   const m=GENERIC_CONFIG.machine,mark=$('.brandmark');if(mark)mark.innerHTML=String(m.no).padStart(2,'0');
   const icon=$('.asset-icon');if(icon)icon.textContent=String(m.no).padStart(2,'0');
