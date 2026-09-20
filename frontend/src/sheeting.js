@@ -75,15 +75,15 @@ export class SheetingMachineTemplate{
     // narrow-belt transport and tall portal lift-table stacker). HSM-CTM7 exact architecture
     // remains unresolved; unsupported generic sheeter structures are intentionally omitted.
     const structure=this.group(this.root,'sheeting-structure','Main Structural Rails',[0,0,0],[0,-.22,0]);
-    for(const z of [-1.46,1.46])this.box(structure,[15.50,.18,.18],[0,.09,z],'dark',.025,{role:'main-rail'});
-    for(const x of [-7.15,-5.95,-4.55,-3.15,-1.75,-.35,1.15,2.55,4.00,5.40,6.70,7.25]){
+    for(const z of [-1.46,1.46])this.box(structure,[16.80,.18,.18],[0,.09,z],'dark',.025,{role:'main-rail'});
+    for(const x of [-7.75,-6.45,-5.15,-3.85,-2.55,-1.25,.05,1.35,2.65,3.95,5.25,6.55,7.75]){
       this.box(structure,[.15,.18,3.02],[x,.09,0],'steel',.018,{detail:true,role:'cross-member'});
       for(const z of [-1.48,1.48])this.box(structure,[.22,.10,.24],[x,.05,z],'dark',.014,{detail:true,role:'foot'});
     }
 
     // 2014 HSM56 brochure shows one fixed roll position supported from both sides.
     // This replaces the visually incorrect tandem-reel interpretation used in V59-V61.
-    const rollstand=this.group(this.root,'sheeting-rollstand','Fixed Two-Sided Rollstand Reference',[6.65,0,0],[.72,.40,0]);
+    const rollstand=this.group(this.root,'sheeting-rollstand','Fixed Two-Sided Rollstand Reference',[7.30,0,0],[.72,.40,0]);
     const reel=this.group(rollstand,'sheeting-reel','Paper Reel / Opposed Chuck Assembly',[0,0,0],[.26,.22,0]);
     this.cyl(reel,.72,2.56,[0,1.02,0],'paper','z',{active:true,motion:'reel',role:'reel'});
     for(const side of [-1,1]){
@@ -116,7 +116,7 @@ export class SheetingMachineTemplate{
     this.roller(feedRollers,.18,1.30,.13,{motion:'tension-roller',kind:'black'});
     this.roller(feedRollers,-.32,1.48,.11,{motion:'guide-roller',kind:'chrome'});
     this.roller(feedRollers,-.72,1.18,.12,{motion:'pull-roller',kind:'black'});
-    const epc=this.group(feed,'sheeting-epc','EPC Edge Sensors / Web Guide',[-.70,0,0],[.08,.10,0]);
+    const epc=this.group(feed,'sheeting-epc','EPC Edge Sensors / Web Guide',[-1.10,0,0],[.08,.10,0]);
     for(const side of [-1,1]){
       this.box(epc,[.10,.42,.12],[0,.88,side*1.34],'steel',.012,{detail:true,role:'sensor-post'});
       this.box(epc,[.30,.09,.14],[-.12,1.05,side*1.25],'bodyDark',.014,{detail:true,role:'sensor-arm'});
@@ -157,15 +157,15 @@ export class SheetingMachineTemplate{
     for(const z of [-.60,-.36,-.12,.12,.36,.60])this.box(delivery,[3.64,.025,.055],[-.06,.925,z],'black',.003,{detail:true,role:'transport-belt'});
     const overlap=this.group(delivery,'sheeting-overlap','Adjustment Rods / Overlap Hold-Down',[.15,0,0],[0,.16,0]);
     for(const x of [1.10,.32,-.46]){
-      this.cyl(overlap,.038,2.62,[x,1.055,0],'chrome','z',{detail:true,role:'adjustment-rod'});
+      this.cyl(overlap,.038,2.84,[x,1.055,0],'chrome','z',{detail:true,role:'adjustment-rod'});
       for(const side of [-1,1]){
-        this.box(overlap,[.16,.22,.12],[x,.99,side*1.28],'body',.012,{detail:true,role:'rod-support'});
+        this.box(overlap,[.16,.22,.12],[x,.99,side*1.42],'body',.012,{detail:true,role:'rod-support'});
         this.cyl(overlap,.065,.08,[x,1.12,side*.98],'black','y',{detail:true,role:'adjustment-knob'});
       }
     }
     for(const x of [-.86,-1.18,-1.50,-1.78])this.cyl(overlap,.060,2.24,[x,1.00,0],'black','z',{active:true,motion:'delivery-roller',detail:true,role:'hold-down-roller'});
 
-    const layboy=this.group(delivery,'sheeting-layboy','Portal Stacker / Flat Lift Table',[-3.55,0,0],[-.38,.34,0]);
+    const layboy=this.group(delivery,'sheeting-layboy','Portal Stacker / Flat Lift Table',[-3.85,0,0],[-.38,.34,0]);
     for(const x of [-1.08,1.08])for(const z of [-1.46,1.46])this.box(layboy,[.20,2.34,.20],[x,1.17,z],'body',.032,{role:'stacker-column'});
     for(const z of [-1.46,1.46])this.box(layboy,[2.24,.18,.20],[0,2.25,z],'bodyDark',.024,{role:'stacker-top-side'});
     for(const x of [-1.08,1.08])this.box(layboy,[.20,.18,3.10],[x,2.25,0],'bodyDark',.024,{role:'stacker-top-cross'});
@@ -179,7 +179,7 @@ export class SheetingMachineTemplate{
     const access=this.group(this.root,'sheeting-access','Operator-Side Service Deck / Steps',[-.55,0,0],[0,.30,-.42]);
     this.box(access,[4.70,.10,.58],[-.15,.34,-1.98],'steel',.014,{detail:true,role:'service-deck'});
     for(const x of [-2.28,-1.20,-.10,.98,2.05])for(const z of [-2.19,-1.78])this.box(access,[.10,.34,.10],[x,.17,z],'steel',.010,{detail:true,role:'deck-leg'});
-    for(const x of [-2.15,-.90,.35,1.60])this.box(access,[.34,.10,.18],[x,.34,-1.64],'bodyDark',.010,{detail:true,role:'deck-bridge'});
+    for(const x of [-2.15,-.90,.35,1.60])this.box(access,[.34,.10,.18],[x,.34,-1.80],'bodyDark',.010,{detail:true,role:'deck-bridge'});
     for(let i=0;i<3;i++){
       const h=.12+i*.13;
       this.box(access,[.58,h,.56],[-2.34-i*.22,h/2,-1.98],'steel',.010,{detail:true,role:'access-step'});
