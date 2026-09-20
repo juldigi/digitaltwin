@@ -172,6 +172,39 @@ test('diagnostic: Sheeting mesh collision and support report',()=>{
   }).map(e=>({owner:e.owner,minY:+e.b.min.y.toFixed(3),size:e.s.toArray().map(v=>+v.toFixed(3)),center:e.b.getCenter(new THREE.Vector3()).toArray().map(v=>+v.toFixed(3))}));
   console.log('SHEETING_AUDIT_OVERLAPS='+JSON.stringify(overlaps.slice(0,120)));
   console.log('SHEETING_AUDIT_FLOATING='+JSON.stringify(floating.slice(0,120)));
+  const activeVsStatic=[];
+  for(const a of entries.filter(e=>!!e.motion)){
+    for(const b of entries.filter(e=>!e.motion&&e.owner!=='sheeting-web-path')){
+      if(a.m===b.m||!a.b.intersectsBox(b.b))continue;
+      const min=new THREE.Vector3(Math.max(a.b.min.x,b.b.min.x),Math.max(a.b.min.y,b.b.min.y),Math.max(a.b.min.z,b.b.min.z));
+      const max=new THREE.Vector3(Math.min(a.b.max.x,b.b.max.x),Math.min(a.b.max.y,b.b.max.y),Math.min(a.b.max.z,b.b.max.z));
+      const d=max.sub(min);
+      if(d.x>.02&&d.y>.02&&d.z>.02)activeVsStatic.push({
+        movingOwner:a.owner,motion:a.motion,staticOwner:b.owner,
+        penetration:d.toArray().map(v=>+v.toFixed(3)),
+        movingCenter:a.b.getCenter(new THREE.Vector3()).toArray().map(v=>+v.toFixed(3)),
+        staticCenter:b.b.getCenter(new THREE.Vector3()).toArray().map(v=>+v.toFixed(3))
+      });
+    }
+  }
+  const unsupported=[];
+  const statics=entries.filter(e=>!e.motion&&e.owner!=='sheeting-web-path');
+  for(const e of statics){
+    if(e.b.min.y<=.08||e.s.y<.06)continue;
+    const supported=statics.some(o=>{
+      if(o===e||o.b.getCenter(new THREE.Vector3()).y>=e.b.getCenter(new THREE.Vector3()).y)return false;
+      const ox=Math.min(e.b.max.x,o.b.max.x)-Math.max(e.b.min.x,o.b.min.x);
+      const oz=Math.min(e.b.max.z,o.b.max.z)-Math.max(e.b.min.z,o.b.min.z);
+      const vertical=o.b.max.y>=e.b.min.y-.035&&o.b.min.y<e.b.min.y;
+      return ox>.018&&oz>.018&&vertical;
+    });
+    if(!supported)unsupported.push({
+      owner:e.owner,minY:+e.b.min.y.toFixed(3),size:e.s.toArray().map(v=>+v.toFixed(3)),
+      center:e.b.getCenter(new THREE.Vector3()).toArray().map(v=>+v.toFixed(3))
+    });
+  }
+  console.log('SHEETING_AUDIT_ACTIVE_COLLISIONS='+JSON.stringify(activeVsStatic.slice(0,160)));
+  console.log('SHEETING_AUDIT_UNSUPPORTED='+JSON.stringify(unsupported.slice(0,160)));
   assert.ok(overlaps.length<200,'diagnostic overlap count unexpectedly exploded');
   model.dispose();
 });
