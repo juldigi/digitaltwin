@@ -104,7 +104,7 @@ export class SheetingMachineTemplate{
     }
     this.box(rollstand,[1.95,.13,3.04],[.48,.07,0],'dark',.020,{role:'rollstand-floor-tie'});
 
-    const feed=this.group(this.root,'sheeting-feed','Raised Web Guide / Tension Frame',[5.18,0,0],[.44,.42,0]);
+    const feed=this.group(this.root,'sheeting-feed','Raised Web Guide / Tension Frame',[5.30,0,0],[.44,.42,0]);
     const feedFrame=this.group(feed,'sheeting-feed-frame','Tall Web Guide Frame',[0,0,0],[.10,.12,0]);
     for(const z of [-1.42,1.42]){
       for(const x of [-.84,.84])this.box(feedFrame,[.17,2.30,.18],[x,1.15,z],'body',.025,{role:'feed-post',sourceAnchor:'BW-HSM56-ROLLSTAND-PHOTO'});
