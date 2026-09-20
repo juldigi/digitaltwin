@@ -1,15 +1,15 @@
-const SOURCE_REFS=Object.freeze(['SHEETING-BMJ-DATABASE','SHEETING-HSM56-BW','SHEETING-MEGAMACH-HSM-FAMILY','SHEETING-LEXUS-INDONESIA','SHEETING-HSM56-NEAR-SERIAL','SHEETING-GREATWALL-SYNCHRO-VISUAL','SHEETING-RECOVERED-REFERENCE']);
+const SOURCE_REFS=Object.freeze(['SHEETING-BMJ-DATABASE','SHEETING-HSM56-BW-PDF','SHEETING-HSM56-BW-FULLIMAGE','SHEETING-MEGAMACH-HSM-FAMILY','SHEETING-LEXUS-INDONESIA','SHEETING-HSM56-NEAR-SERIAL','SHEETING-GREATWALL-SYNCHRO-VISUAL','SHEETING-RECOVERED-REFERENCE']);
 const add=(nodes,id,parentId,level,levelName,name,meshRefs=[],description='',confidence='FAMILY_REFERENCE')=>nodes.push(Object.freeze({id,parentId,level,levelName,name,machineZone:name,meshRefs,sourceRefs:SOURCE_REFS,confidence,verified:confidence==='VERIFIED',explodeVector:[level===2?.65:.15,level<4?.16:.08,0],explodeDistance:level===2?.85:level===3?.52:level===4?.32:level===5?.20:.12,focusCamera:null,description,maintenanceTag:null}));
 const nodes=[];
-add(nodes,'SH',null,1,'Mesin','SHEETING LEXUS · HSM-CTM7',['MACHINE-SHEETING'],'Identitas BMJ verified. V63 menggunakan anchor visual yang benar-benar terlihat pada brochure HSM 56 2014 dan mempertahankan RIGHT→LEFT dari konfirmasi pengguna; exact HSM-CTM7 tetap tidak diklaim tanpa foto/drawing spesifik.','VERIFIED');
+add(nodes,'SH',null,1,'Mesin','SHEETING LEXUS · HSM-CTM7',['MACHINE-SHEETING'],'Identitas BMJ verified. V64 memakai anchor visual komponen yang benar-benar terlihat pada brochure/foto resmi HSM 56 2014 dan mempertahankan RIGHT→LEFT dari konfirmasi pengguna. Exact internal HSM-CTM7 tidak dinaikkan menjadi verified tanpa foto/drawing spesifik.','VERIFIED');
 const chains=[
- ['ROLL','Unwind / Rollstand','sheeting-rollstand','Low fixed-position rollstand','Reel / opposed chuck / swing-arm support','sheeting-reel','Single low reel with opposed chuck and two-sided support visual anchor'],
- ['FEED','Web Guide / Tension / EPC','sheeting-feed','Raised web-handling frame','Guide/tension roller path + EPC reference','sheeting-feed-rollers','Four visible supported guide/tension rollers in a tall frame'],
- ['CUT','Main Head / Cross-Cut Zone','sheeting-cutter','Windowed teal/gray main head','Large photographed cylindrical process elements + cross-cut zone','sheeting-main-rollers','Panoramic-window process cylinders; exact knife function unresolved'],
- ['DEL','Outfeed / Overlap','sheeting-delivery','Long narrow-belt outfeed','Entry/exit rollers + transverse adjustment rods','sheeting-overlap','Multiple longitudinal belts with transverse adjustment rods/collars'],
- ['STACK','Lift-Table Stacker','sheeting-layboy','Tower-like stacker enclosure','Flat lift table / pallet / side guards','sheeting-stack-lift','Rigid stacker tower with lift table and pallet'],
- ['CTRL','Operator Controls','sheeting-control','Compact low console','Buttons / E-stop / sloped face','sheeting-control','Low console attached to outfeed-side operating position'],
- ['ACCESS','Access / Structure','sheeting-access','Localized stacker steps','Short grounded steps / landing','sheeting-structure','Grounded main chassis with localized access only']
+ ['ROLL','Unwind / Rollstand','sheeting-rollstand','Low fixed-position rollstand','Reel / chuck hub / swing-hydraulic support','sheeting-reel','Single low reel with exposed opposed hub and supported side arms'],
+ ['FEED','Web Guide / Tension / EPC','sheeting-feed','Inclined two-sided guide frame','Four guide/tension rollers + compact EPC reference','sheeting-feed-rollers','Inclined supported roller path from reel toward main head'],
+ ['HEAD','Main Head / Cross-Cut Zone','sheeting-cutter','Windowed gray/teal head','Dominant banded process cylinder + lower transport + unresolved cut zone','sheeting-main-rollers','One photographed turquoise process cylinder with bright bands behind panoramic window'],
+ ['DEL','Outfeed / Adjustment','sheeting-delivery','Long tape/belt outfeed','Belts / entry-exit rollers / transverse adjustment assemblies','sheeting-overlap','Longitudinal belt field with sparse transverse rods, supports, collars and knobs'],
+ ['STACK','Lift-Table Stacker','sheeting-layboy','Rigid open-front stacker tower','Lift rails / flat table / pallet / guarded tower','sheeting-stack-lift','Flat lift table and pallet within rigid guarded tower'],
+ ['CTRL','Operator Controls','sheeting-control','Integrated low console','Sloped control face / pushbuttons / lever','sheeting-control','Compact low operator console beside outfeed/main head'],
+ ['ACCESS','Access / Structure','sheeting-access','Grounded stacker side steps','Steps / landing / main chassis','sheeting-structure','Localized grounded access plus continuous structural chassis']
 ];
 for(const [key,l2,mesh,l3,l4,l5name,l6] of chains){
  const a='SH.'+key;add(nodes,a,'SH',2,'Unit Utama',l2,[mesh]);
@@ -18,13 +18,16 @@ for(const [key,l2,mesh,l3,l4,l5name,l6] of chains){
  const d=c+'.PART';const specific=l5name.startsWith('sheeting-')?l5name:mesh;add(nodes,d,c,5,'Part',l5name.replace(/^sheeting-/,'').replaceAll('-',' '),[specific]);
  add(nodes,d+'.SPEC',d,6,'Spesifik Part',l6,[specific]);
 }
-add(nodes,'SH.ROLL.SUB.BLOCK.PART.CHUCK','SH.ROLL.SUB.BLOCK.PART',6,'Spesifik Part','Opposed Chuck / Reel Support',['sheeting-reel'],'Photographed HSM56 family anchor: one low reel with side support. Exact BMJ HSM-CTM7 chuck type remains unverified.');
-add(nodes,'SH.FEED.SUB.BLOCK.PART.EPC','SH.FEED.SUB.BLOCK.PART',6,'Spesifik Part','EPC Edge Sensor / Web Guide',['sheeting-epc'],'EPC is supported by Indonesian Lexus process documentation; exact sensor geometry/position remains reconstructed.');
-add(nodes,'SH.CUT.SUB.BLOCK.PART.CYL','SH.CUT.SUB.BLOCK.PART',6,'Spesifik Part','Large Window Process Cylinders',['sheeting-main-rollers'],'Large transverse cylinders are directly visible behind the panoramic window in the BW HSM56 photo. Their exact cutter/feed function is unresolved because public sources conflict.');
-add(nodes,'SH.CUT.SUB.BLOCK.PART.KNIFE','SH.CUT.SUB.BLOCK.PART',6,'Spesifik Part','Cross-Cut Zone Reference',['sheeting-knife'],'Cross-cut function is certain for the sheeter, but V63 intentionally keeps the exact knife representation visually subordinate and unverified.');
-add(nodes,'SH.DEL.SUB.BLOCK.PART.ROLLERS','SH.DEL.SUB.BLOCK.PART',6,'Spesifik Part','Outfeed Entry / Exit Rollers',['sheeting-delivery-rollers'],'Only two prominent transverse outfeed rollers are retained to avoid the excessive roller clutter in earlier builds.');
-add(nodes,'SH.DEL.SUB.BLOCK.PART.ADJ','SH.DEL.SUB.BLOCK.PART',6,'Spesifik Part','Adjustment Rods / Collars',['sheeting-overlap'],'Multiple transverse rods, knobs and collars are directly visible over the belt bed in the HSM56 brochure photo.');
-add(nodes,'SH.STACK.SUB.BLOCK.PART.LIFT','SH.STACK.SUB.BLOCK.PART',6,'Spesifik Part','Flat Lift Table / Pallet',['sheeting-stack-lift'],'Flat plate lift table is specified by BW and visibly shown inside the tower-like stacker.');
+add(nodes,'SH.ROLL.SUB.BLOCK.PART.HUB','SH.ROLL.SUB.BLOCK.PART',6,'Spesifik Part','Chuck Hub / Bolt Circle',['sheeting-reel'],'V64 adds the exposed turquoise hub face, center and bolt circle visible in the BW rollstand inset.');
+add(nodes,'SH.FEED.SUB.BLOCK.PART.FRAME','SH.FEED.SUB.BLOCK.PART',6,'Spesifik Part','Inclined Guide Frame',['sheeting-feed-frame'],'V64 replaces the generic tall four-post frame with two sided inclined rails matching the brochure inset.');
+add(nodes,'SH.FEED.SUB.BLOCK.PART.EPC','SH.FEED.SUB.BLOCK.PART',6,'Spesifik Part','Compact EPC Edge Sensor',['sheeting-epc'],'Process-function reference only; exact HSM-CTM7 sensor shape/position remains reconstructed.');
+add(nodes,'SH.HEAD.SUB.BLOCK.PART.CYL','SH.HEAD.SUB.BLOCK.PART',6,'Spesifik Part','Banded Main Process Cylinder',['sheeting-main-rollers'],'One visually dominant turquoise cylinder with four bright circumferential bands is directly photo-anchored.');
+add(nodes,'SH.HEAD.SUB.BLOCK.PART.KNIFE','SH.HEAD.SUB.BLOCK.PART',6,'Spesifik Part','Cross-Cut Zone Reference',['sheeting-knife'],'Exact knife architecture deliberately remains unresolved because public family sources conflict.');
+add(nodes,'SH.HEAD.SUB.BLOCK.PART.BED','SH.HEAD.SUB.BLOCK.PART',6,'Spesifik Part','Integrated Bed / Service Plate',['sheeting-cutter-transport'],'Lower belt bed and metal service plate are derived from the full-resolution BW main photo.');
+add(nodes,'SH.DEL.SUB.BLOCK.PART.ROLLERS','SH.DEL.SUB.BLOCK.PART',6,'Spesifik Part','Outfeed Entry / Exit Rollers',['sheeting-delivery-rollers'],'Only the two main transverse transport rollers are modeled as rotating outfeed rollers.');
+add(nodes,'SH.DEL.SUB.BLOCK.PART.ADJ','SH.DEL.SUB.BLOCK.PART',6,'Spesifik Part','Adjustment Rod / Bracket / Collar / Knob',['sheeting-overlap'],'V64 reduces the generic rod field to three dominant transverse assemblies and adds photo-visible triangular supports, brass collars and black knobs.');
+add(nodes,'SH.STACK.SUB.BLOCK.PART.LIFT','SH.STACK.SUB.BLOCK.PART',6,'Spesifik Part','Flat Lift Table / Blue Pallet',['sheeting-stack-lift'],'Flat lift table is family-spec supported; blue pallet and tower arrangement are photo anchored.');
+add(nodes,'SH.STACK.SUB.BLOCK.PART.LOAD','SH.STACK.SUB.BLOCK.PART',6,'Spesifik Part','Reference Paper Stack',['sheeting-reference-stack'],'Photo-reference load is physically supported on the pallet and is hidden automatically during live process simulation.');
 export const SHEETING_TAXONOMY=Object.freeze(nodes);
 export const SHEETING_TAXONOMY_BY_ID=new Map(SHEETING_TAXONOMY.map(n=>[n.id,n]));
 export const sheetingTaxonomyChildren=id=>SHEETING_TAXONOMY.filter(n=>n.parentId===id);
