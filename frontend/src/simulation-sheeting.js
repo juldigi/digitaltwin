@@ -27,7 +27,7 @@ export class SheetingProcessSimulation{
     this.group=new THREE.Group();this.group.name='SHEETING-PROCESS-SIMULATION-V66';machine.add(this.group);
 
     this.active=false;this.running=false;this.speed=1;this.elapsed=0;this.lastNow=null;
-    this.completed=0;this.cutCount=0;this.pathVisible=true;this.inkFlowVisible=false;this.onUpdate=null;
+    this.completed=0;this.cutCount=0;this.pathVisible=false;this.inkFlowVisible=false;this.onUpdate=null;
 
     // Normalized visual process values. They represent process relationships, not engineering speed calibration.
     this.webLinearSpeed=1.58;
