@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {PHOTO_RECONSTRUCTION,OffsetMachineTemplate} from '../frontend/src/offset5.js';
 
 const html=readFileSync(new URL('../frontend/index.html',import.meta.url),'utf8');
-const ui=readFileSync(new URL('../frontend/src/ui-v5.js',import.meta.url),'utf8');
+const ui=readFileSync(new URL('../frontend/src/ui-v5.js',import.meta.url),'utf8');\nconst mobileUi=readFileSync(new URL('../frontend/src/mobile-v75.js',import.meta.url),'utf8');\nconst mobileCss=readFileSync(new URL('../frontend/mobile-flagship-v75.css',import.meta.url),'utf8');
 const css=readFileSync(new URL('../frontend/ui-v5.css',import.meta.url),'utf8');
 const responsiveCss=readFileSync(new URL('../frontend/responsive-v5.css',import.meta.url),'utf8');
 const experienceCss=readFileSync(new URL('../frontend/experience-v37.css',import.meta.url),'utf8');
@@ -112,10 +112,10 @@ test('conditional controls explain requirements rather than failing silently',()
 });
 
 test('service worker refreshes the redesigned shell',()=>{
-  assert.match(sw,/factory-digital-twin-v74-20260921/);
+  assert.match(sw,/factory-digital-twin-v75-20260921/);
   assert.match(sw,/src\/universal-machine\.js/);
   assert.match(app,/template\.ghost\(true,part\)/,'object selection must automatically ghost all non-selected geometry');
-  for(const asset of ['ui-v5.css','responsive-v5.css','ui-corporate-v74.css','src/ui-v5.js','src/app.js','src/simulation.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
+  for(const asset of ['ui-v5.css','responsive-v5.css','ui-corporate-v74.css','mobile-flagship-v75.css','src/ui-v5.js','src/mobile-v75.js','src/app.js','src/simulation.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
 });
 
 test('v41 keeps every right-sidebar taxonomy item clickable after repeated selections',()=>{
@@ -257,7 +257,7 @@ test('v53 routes a rebuilt document-grounded CX104 twin without Offset 5 UI leak
   assert.match(app,/MACHINE_KEY/);
   assert.match(app,/ACTIVE_ROOT/);
   assert.match(app,/selectedTaxonomyId=selectedTaxonomyId\|\|ACTIVE_ROOT/);
-  assert.match(app,/machine=\$\{encodeURIComponent\(route\)\}&v=74/);
+  assert.match(app,/machine=\$\{encodeURIComponent\(route\)\}&v=75/);
   assert.doesNotMatch(app,/machine=\$\{route\}&v=50/);
   assert.match(app,/Tidak ada foto aktual Offset 10 yang tersedia/);
   assert.match(app,/final drawing BMJ/);
@@ -287,7 +287,7 @@ test('v54 keeps APM2 as a dedicated 3D machine with process-specific UI and no i
   assert.match(app,/IS_APM2=MACHINE_KEY==='apm2'/);
   assert.match(app,/ACTIVE_ROOT=IS_OFFSET10\?'O10':IS_APM2\?'APM2':IS_SHEETING\?'SH':IS_GENERIC\?GENERIC_ROOT:'O5'/);
   assert.match(app,/machine\.machineId==='BMJ-MCH-0010'\?'apm2'/);
-  assert.match(app,/machine=\$\{encodeURIComponent\(route\)\}&v=74/);
+  assert.match(app,/machine=\$\{encodeURIComponent\(route\)\}&v=75/);
   assert.match(app,/Simulasi Proses APM 2/);
   assert.match(app,/register dan SideLay/);
   assert.match(app,/suffix E\/SE\/CER\/BMA tidak tersedia/);
