@@ -12,7 +12,7 @@ export const SHEETING_SIMULATION_STAGES=Object.freeze([
 export const SHEETING_PROCESS_STEPS=Object.freeze([
   'Continuous web peels from the RIGHT-side reel and remains unbroken through the guide/tension section',
   'The web follows a supported roller path; visual routing is offset around roller surfaces instead of passing through roller centers',
-  'A cut event creates one sheet at the cross-cut reference while the upstream web remains continuous',
+  'A visible flat-bed knife family-reference descends to the web; the sheet is released only at blade contact while the upstream web remains continuous',
   'The new sheet accelerates across the fast-tape zone so a visible gap opens behind it',
   'The sheet transfers to the slower tape/overlap zone; reduced downstream spacing visually produces overlap before stacking',
   'The sheet enters the stacker, settles on the pallet/pile, and the lift table lowers only as pile height approaches delivery level'
@@ -24,7 +24,7 @@ const clamp01=v=>Math.max(0,Math.min(1,v));
 export class SheetingProcessSimulation{
   constructor(machine,template){
     this.machine=machine;this.template=template;
-    this.group=new THREE.Group();this.group.name='SHEETING-PROCESS-SIMULATION-V66';machine.add(this.group);
+    this.group=new THREE.Group();this.group.name='SHEETING-PROCESS-SIMULATION-V67';machine.add(this.group);
 
     this.active=false;this.running=false;this.speed=1;this.elapsed=0;this.lastNow=null;
     this.completed=0;this.cutCount=0;this.pathVisible=false;this.inkFlowVisible=false;this.onUpdate=null;
@@ -32,6 +32,9 @@ export class SheetingProcessSimulation{
     // Normalized visual process values. They represent process relationships, not engineering speed calibration.
     this.webLinearSpeed=1.58;
     this.cutInterval=.96;
+    this.bladeStrokeWindow=.15;
+    this.bladeContactDelay=.075;
+    this.bladeStrokeDistance=.075;
     this.fastDuration=.92;
     this.slowDuration=1.02;
     this.overlapDuration=.86;
@@ -59,6 +62,7 @@ export class SheetingProcessSimulation{
     this.cutMaterial=new THREE.MeshStandardMaterial({color:0xd8f0eb,emissive:0x2fa78f,emissiveIntensity:.55,transparent:true,opacity:.76});
 
     this.referenceStackMeshes=this.template.meshes.filter(m=>m.userData.referenceStack);
+    this.bladeMeshes=this.template.activeMeshes.filter(m=>m.userData.motion==='flat-bed-blade-reference');
 
     this.buildPaths();
     this.buildContinuousWeb();
@@ -215,7 +219,10 @@ export class SheetingProcessSimulation{
       inkFlowCount:0,uvLampCount:0,uvActive:false,
       pathVisible:this.pathVisible,inkFlowVisible:false,
       transportMode:'FAST_TO_SLOW_TO_OVERLAP',
-      cutPulseVisible:this.cutIndicator.visible
+      cutPulseVisible:this.cutIndicator.visible,
+      bladeVisible:this.bladeMeshes.some(m=>m.visible),
+      bladeCount:this.bladeMeshes.length,
+      bladeStroke:this.bladeMeshes.length?Math.max(0,this.bladeMeshes[0].userData.restPosition.y-this.bladeMeshes[0].position.y):0
     };
   }
 
@@ -279,6 +286,12 @@ export class SheetingProcessSimulation{
         else if(motion==='tension-roller')rate=4.35;
         this.spinFromRest(m,-this.elapsed*rate);
       }
+      if(motion==='flat-bed-blade-reference'){
+        const phaseSinceCut=this.cutCount>0?this.elapsed-this.cutCount*this.cutInterval:Infinity;
+        const q=phaseSinceCut>=0&&phaseSinceCut<this.bladeStrokeWindow?phaseSinceCut/this.bladeStrokeWindow:0;
+        const stroke=q>0&&q<1?Math.sin(q*Math.PI)*this.bladeStrokeDistance:0;
+        m.position.y=m.userData.restPosition.y-stroke;
+      }
       if(motion==='lift-table')m.position.y=m.userData.restPosition.y-liftDrop;
       if(motion==='stack-jogger-x'){
         m.position.x=m.userData.restPosition.x+Math.sin(this.elapsed*18)*.012;
@@ -338,13 +351,13 @@ export class SheetingProcessSimulation{
 
   updateSheets(){
     this.cutCount=Math.floor(this.elapsed/this.cutInterval);
-    this.completed=Math.max(0,Math.floor((this.elapsed-this.sheetTravel)/this.cutInterval));
+    this.completed=Math.max(0,Math.floor((this.elapsed-this.sheetTravel-this.bladeContactDelay)/this.cutInterval));
     const pileMetrics=this.currentPileMetrics();
 
     for(const [slot,s] of this.sheets.entries()){
       const cutId=this.cutCount-slot;
       if(cutId<=0){s.visible=false;continue;}
-      const birth=cutId*this.cutInterval;
+      const birth=cutId*this.cutInterval+this.bladeContactDelay;
       const age=this.elapsed-birth;
       const pose=this.sheetPoseForAge(age,pileMetrics.top);
       if(!pose){s.visible=false;continue;}
@@ -365,9 +378,9 @@ export class SheetingProcessSimulation{
     }
 
     const phaseSinceCut=this.cutCount>0?this.elapsed-this.cutCount*this.cutInterval:Infinity;
-    this.cutIndicator.visible=this.active&&phaseSinceCut>=0&&phaseSinceCut<.115;
+    this.cutIndicator.visible=this.active&&phaseSinceCut>=0&&phaseSinceCut<this.bladeStrokeWindow;
     if(this.cutIndicator.visible){
-      const pulse=1+Math.sin((phaseSinceCut/.115)*Math.PI)*.45;
+      const pulse=1+Math.sin((phaseSinceCut/this.bladeStrokeWindow)*Math.PI)*.28;
       this.cutIndicator.scale.set(pulse,1,pulse);
     }else this.cutIndicator.scale.set(1,1,1);
   }
