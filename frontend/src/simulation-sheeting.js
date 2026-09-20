@@ -26,7 +26,7 @@ export class SheetingProcessSimulation{
   }
   buildPath(){
     const pre=[
-      new THREE.Vector3(7.18,1.62,0),
+      new THREE.Vector3(7.18,1.60,0),
       new THREE.Vector3(6.28,1.55,0),
       new THREE.Vector3(6.04,1.53,0),
       new THREE.Vector3(5.68,1.72,0),
