@@ -69,7 +69,8 @@ test('all static buttons are actionable and none is permanently disabled',()=>{
     camera:(m[1].match(/\bdata-camera="([^"]+)"/)||[])[1]||null,
     tab:(m[1].match(/\bdata-tab="([^"]+)"/)||[])[1]||null,
     workbench:(m[1].match(/\bdata-workbench="([^"]+)"/)||[])[1]||null,
-    partBack:/\bdata-part-label-back\b/.test(m[1])
+    partBack:/\bdata-part-label-back\b/.test(m[1]),
+    mobile:(m[1].match(/\bdata-mobile-nav="([^"]+)"/)||[])[1]||null
   }));
   assert.equal(buttons.filter(b=>/\bdisabled\b/.test(b.attrs)).length,0,'a visible static button is disabled');
   for(const b of buttons){
