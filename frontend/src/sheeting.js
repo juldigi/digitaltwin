@@ -5,15 +5,15 @@ import {SHEETING_TAXONOMY,SHEETING_TAXONOMY_BY_ID} from './data/taxonomy-sheetin
 export const SHEETING_VISUAL_REFERENCE=Object.freeze({
   machineId:'BMJ-MCH-0002',
   plantModel:'HSM-CTM7',
-  referenceFamily:'LEXUS HSM 56 · 2014 comparison',
+  referenceFamily:'LEXUS HSM 52/56/65 family · HSM 56 2014 visual anchor',
   year:2014,
   processDirection:'RIGHT_TO_LEFT',
   inputSide:'RIGHT',
   outputSide:'LEFT',
-  evidence:'BMJ database + user-confirmed RIGHT_TO_LEFT orientation + 2014 Lexus HSM 56 BW Papersystems brochure/photo + Indonesian Lexus sheeter process reference',
-  dimensions:'SOURCE_GROUNDED_VISUAL_RECONSTRUCTION_NOT_ENGINEERING',
-  visualFamily:'HSM56_TEAL_GRAY_FIXED_ROLLSTAND_TRANSPORT_BED_PORTAL_STACKER',
-  visualRevision:'V62_HSM56_LED_RECONSTRUCTION'
+  evidence:'BMJ database + user-confirmed RIGHT_TO_LEFT orientation + BW Papersystems HSM 56 2014 brochure photos/specification + Mega Machinery HSM family listing + Indonesian Lexus process reference',
+  dimensions:'PHOTO_ANCHORED_RECONSTRUCTION_NOT_ENGINEERING',
+  visualFamily:'HSM56_TEAL_GRAY_REEL_WEB_TOWER_WINDOWED_MAIN_HEAD_BELT_OUTFEED_LIFT_STACKER',
+  visualRevision:'V63_BWPHOTO_ANCHOR_RECONSTRUCTION'
 });
 
 export class SheetingMachineTemplate{
@@ -21,12 +21,14 @@ export class SheetingMachineTemplate{
     this.root=new THREE.Group();
     this.root.name='MACHINE-SHEETING';
     this.root.userData={
-      assetId:'BMJ-MCH-0002',machine:'SHEETING LEXUS',model:'HSM-CTM7',referenceFamily:'LEXUS HSM 56 · 2014 comparison',
-      processDirection:'RIGHT_TO_LEFT',confidence:'IDENTITY_VERIFIED_FAMILY_REFERENCE',visualRevision:'V62_HSM56_LED_RECONSTRUCTION'
+      assetId:'BMJ-MCH-0002',machine:'SHEETING LEXUS',model:'HSM-CTM7',
+      referenceFamily:'LEXUS HSM 52/56/65 family · HSM 56 2014 visual anchor',
+      processDirection:'RIGHT_TO_LEFT',confidence:'IDENTITY_VERIFIED__GEOMETRY_FAMILY_PHOTO_ANCHORED',
+      visualRevision:'V63_BWPHOTO_ANCHOR_RECONSTRUCTION'
     };
     this.nodes=[];this.parts=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.activeMeshes=[];this.detailMeshes=[];
     this.taxonomy=SHEETING_TAXONOMY;this.taxonomyById=SHEETING_TAXONOMY_BY_ID;this.exteriorOpen=false;this.ghosted=false;
-    this.palette={body:0x13a38f,bodyDark:0x08746a,light:0xd9ddda,white:0xeeeeea,dark:0x263238,steel:0x8f9898,chrome:0xc3cbcb,paper:0xeee7d4,glass:0x76b6bb,black:0x1f2528,blue:0x356ea8,red:0xc93434};
+    this.palette={body:0x17a48f,bodyDark:0x08786c,light:0xd7dad7,white:0xf0f1ec,dark:0x263238,steel:0x8e9798,chrome:0xc8cece,paper:0xe8ddc7,glass:0x80bbc0,black:0x1f2528,blue:0x2f67a1,red:0xc93434,green:0x4c9b4f};
     this.build();
     for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}
     this.root.updateMatrixWorld(true);
@@ -43,164 +45,174 @@ export class SheetingMachineTemplate{
       this.materials.set(key,new THREE.MeshStandardMaterial({
         color:this.palette[kind]??this.palette.dark,
         metalness:['steel','chrome','dark'].includes(kind)?.42:.08,
-        roughness:glass?.18:kind==='chrome'?.28:.55,
-        transparent:glass,opacity:glass?.32:1
+        roughness:glass?.16:kind==='chrome'?.24:.55,
+        transparent:glass,opacity:glass?.28:1
       }));
     }
     return this.materials.get(key);
   }
-  mesh(g,geo,key,kind,pos=[0,0,0],rot=null,{cover=false,detail=false,active=false,motion=null,role=null}={}){
+  mesh(g,geo,key,kind,pos=[0,0,0],rot=null,{cover=false,detail=false,active=false,motion=null,role=null,sourceAnchor=null}={}){
     if(!this.geometries.has(key))this.geometries.set(key,geo());
     const m=new THREE.Mesh(this.geometries.get(key),this.material(kind,g));m.position.set(...pos);if(rot)m.rotation.set(...rot);m.castShadow=kind!=='glass';m.receiveShadow=true;
-    m.userData={ownerId:g.userData.nodeId,exteriorCover:cover,detail,motion,role,restPosition:m.position.clone(),restRotation:m.rotation.clone()};
+    m.userData={ownerId:g.userData.nodeId,exteriorCover:cover,detail,motion,role,sourceAnchor,restPosition:m.position.clone(),restRotation:m.rotation.clone()};
     if(detail)this.detailMeshes.push(m);if(active){m.userData.activeElement=true;this.activeMeshes.push(m);}
     g.add(m);this.meshes.push(m);return m;
   }
-  box(g,s,p,kind='body',r=.035,opts={}){return this.mesh(g,()=>r?new RoundedBoxGeometry(...s,2,r):new THREE.BoxGeometry(...s),'box:'+s.join(':')+':'+r,kind,p,null,opts);}
-  cyl(g,r,l,p,kind='steel',axis='z',opts={}){const rot=axis==='z'?[Math.PI/2,0,0]:axis==='x'?[0,0,Math.PI/2]:null;return this.mesh(g,()=>new THREE.CylinderGeometry(r,r,l,24),'cyl:'+r+':'+l,kind,p,rot,opts);}
-  roller(g,x,y,r=0.1,{span=2.72,kind='chrome',motion='guide-roller',detail=false,active=true,frameZ=1.45}={}){
+  box(g,s,p,kind='body',r=.035,opts={},rot=null){return this.mesh(g,()=>r?new RoundedBoxGeometry(...s,2,r):new THREE.BoxGeometry(...s),'box:'+s.join(':')+':'+r,kind,p,rot,opts);}
+  cyl(g,r,l,p,kind='steel',axis='z',opts={}){const rot=axis==='z'?[Math.PI/2,0,0]:axis==='x'?[0,0,Math.PI/2]:null;return this.mesh(g,()=>new THREE.CylinderGeometry(r,r,l,28),'cyl:'+r+':'+l,kind,p,rot,opts);}
+  torus(g,r,t,p,kind='bodyDark',opts={}){return this.mesh(g,()=>new THREE.TorusGeometry(r,t,10,28),'torus:'+r+':'+t,kind,p,null,opts);}
+  roller(g,x,y,r=.1,{span=2.64,kind='chrome',motion='guide-roller',detail=false,active=true,bearings=true,supportBase=.48}={}){
     const m=this.cyl(g,r,span,[x,y,0],kind,'z',{active,motion,detail,role:'roller'});
-    const half=span/2;
-    for(const side of [-1,1]){
-      const z=side*(half+.055);
-      this.box(g,[.22,.24,.11],[x,y,z],'bodyDark',.018,{detail:true,role:'bearing'});
-      const supportH=Math.max(.18,y-r-.46);
-      if(supportH>.18)this.box(g,[.12,supportH,.12],[x,(y-r-.02)-supportH/2,side*frameZ],'steel',.012,{detail:true,role:'bearing-support'});
+    if(bearings){
+      const half=span/2;
+      for(const side of [-1,1]){
+        const z=side*(half+.055);
+        this.box(g,[.20,.22,.11],[x,y,z],'bodyDark',.016,{detail:true,role:'bearing'});
+        const h=Math.max(.16,y-r-supportBase);
+        if(h>.16)this.box(g,[.11,h,.11],[x,supportBase+h/2,side*(half+.05)],'steel',.010,{detail:true,role:'bearing-support'});
+      }
     }
     return m;
   }
   build(){
-    // V62: HSM56-led visual reconstruction. The official 2014 HSM 56 brochure photo is now
-    // the dominant visual family reference (teal/gray fixed rollstand, enclosed knife head,
-    // narrow-belt transport and tall portal lift-table stacker). HSM-CTM7 exact architecture
-    // remains unresolved; unsupported generic sheeter structures are intentionally omitted.
-    const structure=this.group(this.root,'sheeting-structure','Main Structural Rails',[0,0,0],[0,-.22,0]);
-    for(const z of [-1.46,1.46])this.box(structure,[16.80,.18,.18],[0,.09,z],'dark',.025,{role:'main-rail'});
-    for(const x of [-7.75,-6.45,-5.15,-3.85,-2.55,-1.25,.05,1.35,2.65,3.95,5.25,6.55,7.75]){
-      this.box(structure,[.15,.18,3.02],[x,.09,0],'steel',.018,{detail:true,role:'cross-member'});
-      for(const z of [-1.48,1.48])this.box(structure,[.22,.10,.24],[x,.05,z],'dark',.014,{detail:true,role:'foot'});
+    // V63 is driven by visible anchors in the BW Papersystems 2014 HSM 56 brochure:
+    // 1) one low fixed-position roll with opposed side support,
+    // 2) web rising into a tall guide/tension frame,
+    // 3) a large gray/teal main head with a panoramic window and large transverse cylinders,
+    // 4) a long narrow-belt outfeed with transverse adjustment rods/collars,
+    // 5) an enclosed/tower-like flat lift-table stacker,
+    // 6) a compact low operator console, not a detached tall HMI pedestal.
+    // Exact HSM-CTM7 mechanism identity remains unresolved where sources conflict.
+
+    const structure=this.group(this.root,'sheeting-structure','Grounded Main Chassis',[0,0,0],[0,-.22,0]);
+    for(const z of [-1.46,1.46])this.box(structure,[16.20,.18,.18],[.20,.09,z],'dark',.022,{role:'main-rail'});
+    for(const x of [-6.85,-5.60,-4.35,-3.10,-1.85,-.60,.65,1.90,3.15,4.40,5.65,6.90,8.05]){
+      this.box(structure,[.14,.16,2.98],[x,.08,0],'steel',.014,{detail:true,role:'cross-member'});
+      for(const z of [-1.48,1.48])this.box(structure,[.20,.08,.22],[x,.04,z],'dark',.012,{detail:true,role:'foot'});
     }
 
-    // 2014 HSM56 brochure shows one fixed roll position supported from both sides.
-    // This replaces the visually incorrect tandem-reel interpretation used in V59-V61.
-    const rollstand=this.group(this.root,'sheeting-rollstand','Fixed Two-Sided Rollstand Reference',[7.30,0,0],[.72,.40,0]);
-    const reel=this.group(rollstand,'sheeting-reel','Paper Reel / Opposed Chuck Assembly',[0,0,0],[.26,.22,0]);
-    this.cyl(reel,.72,2.56,[0,1.02,0],'paper','z',{active:true,motion:'reel',role:'reel'});
+    const rollstand=this.group(this.root,'sheeting-rollstand','HSM Fixed Rollstand Visual Anchor',[7.25,0,0],[.72,.36,0]);
+    const reel=this.group(rollstand,'sheeting-reel','Paper Reel / Opposed Chuck',[0,0,0],[.24,.20,0]);
+    this.cyl(reel,.76,2.58,[-.10,.86,0],'paper','z',{active:true,motion:'reel',role:'reel',sourceAnchor:'BW-HSM56-ROLLSTAND-PHOTO'});
     for(const side of [-1,1]){
       const z=side*1.36;
-      this.cyl(reel,.16,.16,[0,1.02,z],'dark','z',{active:true,motion:'chuck',detail:true,role:'chuck'});
-      this.box(rollstand,[1.46,1.28,.28],[0,.64,side*1.58],'light',.035,{cover:true,role:'rollstand-pedestal'});
-      this.box(rollstand,[1.34,.18,.36],[0,.18,side*1.58],'body',.025,{role:'rollstand-base'});
-      this.box(rollstand,[.22,.78,.24],[.50,.67,side*1.45],'bodyDark',.025,{detail:true,role:'hydraulic-lift'});
-      this.box(rollstand,[.22,.78,.24],[-.50,.67,side*1.45],'bodyDark',.025,{detail:true,role:'hydraulic-lift'});
+      this.cyl(reel,.15,.18,[-.10,.86,z],'bodyDark','z',{active:true,motion:'chuck',detail:true,role:'chuck'});
+      this.box(rollstand,[1.82,.24,.25],[.54,.64,side*1.43],'light',.025,{role:'swing-arm',sourceAnchor:'BW-HSM56-ROLLSTAND-PHOTO'},[0,0,.08]);
+      this.box(rollstand,[.34,1.02,.30],[1.18,.57,side*1.43],'body',.034,{role:'rollstand-upright',sourceAnchor:'BW-HSM56-ROLLSTAND-PHOTO'});
+      this.box(rollstand,[1.40,.20,.38],[.56,.12,side*1.43],'bodyDark',.024,{role:'rollstand-foot'});
+      this.cyl(rollstand,.09,.64,[.92,.47,side*1.43],'steel','y',{detail:true,role:'hydraulic-reference'});
     }
-    this.box(rollstand,[1.64,.14,3.34],[0,.08,0],'dark',.025,{role:'rollstand-cross-base'});
-    const unwindGuide=this.group(rollstand,'sheeting-unwind-guide','Unwind Take-Off / Guide Bridge',[-1.15,0,0],[.22,.22,0]);
-    for(const z of [-1.45,1.45]){
-      this.box(unwindGuide,[.18,2.02,.18],[0,1.01,z],'body',.024,{role:'guide-post'});
-      this.box(unwindGuide,[1.05,.16,.18],[-.42,1.94,z],'body',.02,{role:'guide-top-rail'});
-    }
-    this.box(unwindGuide,[.16,.16,3.08],[-.92,1.94,0],'bodyDark',.02,{role:'guide-crossbeam'});
-    this.roller(unwindGuide,-.02,1.72,.11,{span:2.72,kind:'chrome',motion:'guide-roller',frameZ:1.45});
-    this.roller(unwindGuide,-.62,1.46,.12,{span:2.72,kind:'black',motion:'tension-roller',frameZ:1.45});
+    this.box(rollstand,[1.95,.13,3.04],[.48,.07,0],'dark',.020,{role:'rollstand-floor-tie'});
 
-    const feed=this.group(this.root,'sheeting-feed','Feed / Tension / EPC Bridge',[4.05,0,0],[.48,.45,0]);
-    const feedFrame=this.group(feed,'sheeting-feed-frame','Feed Bridge Frame',[0,0,0],[.12,.12,0]);
-    for(const z of [-1.45,1.45]){
-      for(const x of [-.92,.92])this.box(feedFrame,[.18,1.92,.18],[x,.96,z],'light',.025,{role:'feed-post'});
-      this.box(feedFrame,[2.02,.16,.18],[0,1.84,z],'light',.02,{role:'feed-side-top'});
+    const feed=this.group(this.root,'sheeting-feed','Raised Web Guide / Tension Frame',[5.18,0,0],[.44,.42,0]);
+    const feedFrame=this.group(feed,'sheeting-feed-frame','Tall Web Guide Frame',[0,0,0],[.10,.12,0]);
+    for(const z of [-1.42,1.42]){
+      for(const x of [-.84,.84])this.box(feedFrame,[.17,2.30,.18],[x,1.15,z],'body',.025,{role:'feed-post',sourceAnchor:'BW-HSM56-ROLLSTAND-PHOTO'});
+      this.box(feedFrame,[1.86,.17,.18],[0,2.26,z],'bodyDark',.020,{role:'feed-top-side'});
     }
-    this.box(feedFrame,[.18,.16,3.08],[-.92,1.84,0],'body',.02,{role:'feed-crossbeam'});
-    const feedRollers=this.group(feed,'sheeting-feed-rollers','Supported Feed / Tension Rollers',[0,0,0],[.08,.10,0]);
-    this.roller(feedRollers,.68,1.55,.12,{motion:'guide-roller',kind:'chrome'});
-    this.roller(feedRollers,.18,1.30,.13,{motion:'tension-roller',kind:'black'});
-    this.roller(feedRollers,-.32,1.48,.11,{motion:'guide-roller',kind:'chrome'});
-    this.roller(feedRollers,-.72,1.18,.12,{motion:'pull-roller',kind:'black'});
-    const epc=this.group(feed,'sheeting-epc','EPC Edge Sensors / Web Guide',[-1.10,0,0],[.08,.10,0]);
+    this.box(feedFrame,[.18,.17,3.00],[-.84,2.26,0],'light',.020,{role:'feed-top-cross'});
+    const feedRollers=this.group(feed,'sheeting-feed-rollers','Visible Guide / Tension Roller Path',[0,0,0],[.06,.10,0]);
+    this.roller(feedRollers,.56,1.48,.11,{motion:'guide-roller',kind:'chrome',supportBase:.48});
+    this.roller(feedRollers,.18,1.82,.12,{motion:'tension-roller',kind:'black',supportBase:.48});
+    this.roller(feedRollers,-.24,1.54,.11,{motion:'guide-roller',kind:'chrome',supportBase:.48});
+    this.roller(feedRollers,-.58,1.95,.10,{motion:'guide-roller',kind:'chrome',supportBase:.48});
+    const epc=this.group(feed,'sheeting-epc','EPC / Web Guide Reference',[-1.10,0,0],[.06,.08,0]);
     for(const side of [-1,1]){
-      this.box(epc,[.10,.42,.12],[0,.88,side*1.34],'steel',.012,{detail:true,role:'sensor-post'});
-      this.box(epc,[.30,.09,.14],[-.12,1.05,side*1.25],'bodyDark',.014,{detail:true,role:'sensor-arm'});
-      this.box(epc,[.10,.18,.16],[-.27,1.05,side*1.17],'black',.012,{detail:true,role:'epc-sensor'});
+      this.box(epc,[.09,.34,.11],[0,1.12,side*1.27],'steel',.010,{detail:true,role:'sensor-post'});
+      this.box(epc,[.26,.08,.12],[-.11,1.25,side*1.21],'bodyDark',.010,{detail:true,role:'sensor-arm'});
+      this.box(epc,[.09,.15,.14],[-.25,1.25,side*1.14],'black',.010,{detail:true,role:'epc-sensor'});
     }
 
-    const cutter=this.group(this.root,'sheeting-cutter','Enclosed Cross-Cut Head',[1.45,0,0],[0,.62,0]);
-    for(const z of [-1.52,1.52]){
-      this.box(cutter,[2.08,1.90,.30],[0,.95,z],'body',.055,{cover:true,role:'cutter-side-housing'});
-      this.box(cutter,[1.72,.26,.10],[.02,1.22,z+(z<0?-.19:.19)],'bodyDark',.025,{cover:true,role:'cutter-side-cap'});
+    const head=this.group(this.root,'sheeting-cutter','Windowed Main Sheeting Head',[2.55,0,0],[0,.58,0]);
+    // Base / side shells.
+    for(const z of [-1.50,1.50]){
+      this.box(head,[2.55,1.72,.28],[0,.92,z],'body',.050,{cover:true,role:'main-side-shell',sourceAnchor:'BW-HSM56-MAIN-HEAD-PHOTO'});
+      this.box(head,[2.22,.24,.11],[-.04,.45,z+(z<0?-.18:.18)],'bodyDark',.020,{cover:true,role:'side-lower-trim'});
     }
-    this.box(cutter,[2.10,.44,3.20],[0,1.86,0],'light',.055,{cover:true,role:'cutter-top-hood'});
-    this.box(cutter,[1.38,.42,.035],[-.12,1.76,-1.665],'glass',.022,{cover:true,role:'inspection-window'});
-    for(const x of [-.82,.82])for(const z of [-1.34,1.34])this.box(cutter,[.16,.88,.18],[x,.44,z],'steel',.018,{role:'cutter-leg'});
+    this.box(head,[2.62,.40,3.16],[0,1.94,0],'light',.050,{cover:true,role:'main-top-hood',sourceAnchor:'BW-HSM56-MAIN-HEAD-PHOTO'});
+    this.box(head,[2.28,.72,.045],[-.02,1.60,-1.655],'glass',.020,{cover:true,role:'panoramic-window',sourceAnchor:'BW-HSM56-MAIN-HEAD-PHOTO'});
+    // Window frame visible in the brochure.
+    for(const x of [-1.12,1.08])this.box(head,[.09,.78,.08],[x,1.60,-1.69],'light',.010,{cover:true,role:'window-frame'});
+    for(const y of [1.23,1.97])this.box(head,[2.28,.08,.08],[-.02,y,-1.69],'light',.010,{cover:true,role:'window-frame'});
 
-    const knife=this.group(cutter,'sheeting-knife','Cross-Cut Knife / Counterbar',[0,0,0],[0,.34,0]);
-    this.box(knife,[.18,.14,2.72],[-.08,1.04,0],'dark',.012,{active:true,motion:'knife-counterbar',role:'counterbar'});
-    this.box(knife,[.15,.12,2.60],[.14,1.34,0],'chrome',.010,{active:true,motion:'knife-beam',role:'knife-carriage'});
-    this.box(knife,[.07,.18,2.48],[.14,1.22,0],'dark',.006,{active:true,motion:'knife-blade',role:'knife-blade'});
-    const transport=this.group(cutter,'sheeting-cutter-transport','Cutter Infeed / Outfeed Rollers',[0,0,0],[0,.15,.16]);
-    this.roller(transport,.72,1.04,.11,{motion:'pull-roller',kind:'black'});
-    this.roller(transport,.42,.82,.10,{motion:'pull-roller',kind:'chrome'});
-    this.roller(transport,-.64,.90,.10,{motion:'accelerator',kind:'black'});
+    const process=this.group(head,'sheeting-main-rollers','Large Cylindrical Process Elements Behind Window',[0,0,0],[0,.22,0]);
+    const large=this.cyl(process,.38,2.48,[.25,1.60,0],'body','z',{active:true,motion:'process-roller',role:'window-process-cylinder',sourceAnchor:'BW-HSM56-MAIN-HEAD-PHOTO'});
+    for(const z of [-.90,-.30,.30,.90])this.torus(process,.385,.030,[.25,1.60,z],'bodyDark',{detail:true,active:true,motion:'process-roller-ring',role:'process-cylinder-ring'});
+    this.cyl(process,.24,2.46,[-.54,1.48,0],'dark','z',{active:true,motion:'process-roller',role:'window-process-cylinder-dark',sourceAnchor:'BW-HSM56-MAIN-HEAD-PHOTO'});
+    this.cyl(process,.11,2.52,[.84,1.10,0],'chrome','z',{active:true,motion:'pull-roller',role:'head-outfeed-roller'});
+    this.cyl(process,.10,2.52,[-.88,1.02,0],'black','z',{active:true,motion:'pull-roller',role:'head-infeed-roller'});
+    for(const x of [.84,-.88])for(const side of [-1,1])this.box(process,[.19,.20,.12],[x,x>0?1.10:1.02,side*1.30],'bodyDark',.014,{detail:true,role:'head-roller-bearing'});
 
-    const delivery=this.group(this.root,'sheeting-delivery','Transport Bed / Overlap / Stacker',[-2.45,0,0],[-.62,.48,0]);
+    const knife=this.group(head,'sheeting-knife','Cross-Cut Zone Reference',[-.18,0,0],[0,.26,0],'UNRESOLVED_EXACT');
+    this.box(knife,[.10,.10,2.34],[-.35,.92,0],'dark',.008,{active:true,motion:'knife-reference',detail:true,role:'cut-zone-reference'});
+    this.box(knife,[.08,.08,2.28],[-.15,1.08,0],'chrome',.008,{active:true,motion:'knife-reference',detail:true,role:'cut-zone-reference'});
+    const transport=this.group(head,'sheeting-cutter-transport','Integrated Head Infeed / Outfeed',[0,0,0],[0,.12,0]);
+    this.box(transport,[2.18,.12,2.62],[0,.54,0],'light',.018,{role:'head-bed'});
+    for(const z of [-.96,-.64,-.32,0,.32,.64,.96])this.box(transport,[2.04,.026,.050],[0,.62,z],'black',.003,{detail:true,role:'head-belt'});
+
+    const delivery=this.group(this.root,'sheeting-delivery','Long Belt Outfeed / Overlap Bed',[-.95,0,0],[-.58,.42,0]);
     for(const z of [-1.34,1.34]){
-      this.box(delivery,[4.18,.24,.16],[0,.50,z],'bodyDark',.028,{role:'transport-side-rail'});
-      for(const x of [-1.82,-.92,0,.92,1.82])this.box(delivery,[.12,.50,.12],[x,.25,z],'steel',.014,{role:'transport-leg'});
+      this.box(delivery,[4.45,.24,.16],[0,.56,z],'body',.025,{role:'outfeed-side-rail',sourceAnchor:'BW-HSM56-OUTFEED-PHOTO'});
+      for(const x of [-2.02,-1.05,-.08,.89,1.86])this.box(delivery,[.11,.56,.11],[x,.28,z],'steel',.010,{role:'outfeed-leg'});
     }
-    const deliveryRollers=this.group(delivery,'sheeting-delivery-rollers','Transport Bed Rollers',[0,0,0],[0,.08,0]);
-    for(const [i,x] of [1.68,.98,.28,-.42,-1.12,-1.72].entries()){
-      this.cyl(deliveryRollers,.075,2.52,[x,.84,0],i%2?'chrome':'black','z',{active:true,motion:'delivery-roller',role:'transport-roller'});
-      for(const side of [-1,1]){
-        this.box(deliveryRollers,[.18,.20,.14],[x,.84,side*1.30],'body',.014,{detail:true,role:'transport-bearing'});
-        this.box(deliveryRollers,[.12,.25,.12],[x,.685,side*1.30],'steel',.010,{detail:true,role:'transport-bearing-support'});
-      }
-    }
-    for(const z of [-.60,-.36,-.12,.12,.36,.60])this.box(delivery,[3.64,.025,.055],[-.06,.925,z],'black',.003,{detail:true,role:'transport-belt'});
-    const overlap=this.group(delivery,'sheeting-overlap','Adjustment Rods / Overlap Hold-Down',[.15,0,0],[0,.16,0]);
-    for(const x of [1.10,.32,-.46]){
-      this.cyl(overlap,.038,2.84,[x,1.055,0],'chrome','z',{detail:true,role:'adjustment-rod'});
-      for(const side of [-1,1]){
-        this.box(overlap,[.16,.22,.12],[x,.99,side*1.42],'body',.012,{detail:true,role:'rod-support'});
-        this.cyl(overlap,.065,.08,[x,1.12,side*.98],'black','y',{detail:true,role:'adjustment-knob'});
-      }
-    }
-    for(const x of [-.86,-1.18,-1.50,-1.78])this.cyl(overlap,.060,2.24,[x,1.00,0],'black','z',{active:true,motion:'delivery-roller',detail:true,role:'hold-down-roller'});
+    this.box(delivery,[4.16,.10,2.64],[0,.76,0],'light',.018,{role:'outfeed-bed'});
+    for(const z of [-1.02,-.78,-.54,-.30,-.06,.18,.42,.66,.90])this.box(delivery,[4.02,.026,.052],[0,.835,z],'black',.003,{detail:true,role:'transport-belt',sourceAnchor:'BW-HSM56-OUTFEED-PHOTO'});
 
-    const layboy=this.group(delivery,'sheeting-layboy','Portal Stacker / Flat Lift Table',[-3.85,0,0],[-.38,.34,0]);
-    for(const x of [-1.08,1.08])for(const z of [-1.46,1.46])this.box(layboy,[.20,2.34,.20],[x,1.17,z],'body',.032,{role:'stacker-column'});
-    for(const z of [-1.46,1.46])this.box(layboy,[2.24,.18,.20],[0,2.25,z],'bodyDark',.024,{role:'stacker-top-side'});
-    for(const x of [-1.08,1.08])this.box(layboy,[.20,.18,3.10],[x,2.25,0],'bodyDark',.024,{role:'stacker-top-cross'});
-    for(const x of [-.78,.78])for(const z of [-1.32,1.32])this.box(layboy,[.10,.90,.10],[x,.45,z],'steel',.010,{detail:true,role:'lift-guide'});
-    this.box(layboy,[1.88,.14,2.52],[0,.48,0],'steel',.018,{active:true,motion:'lift-table',role:'lift-table'});
-    this.box(layboy,[1.66,.08,2.20],[0,.59,0],'blue',.010,{active:true,motion:'lift-table',detail:true,role:'pallet'});
-    for(const z of [-1.37,1.37])this.box(layboy,[.12,1.96,.12],[-1.12,.98,z],'bodyDark',.022,{cover:true,role:'rear-guard-post'});
-    this.box(layboy,[.12,.12,2.86],[-1.12,1.90,0],'bodyDark',.018,{cover:true,role:'rear-guard-top'});
-    for(const y of [.42,.70,.98,1.26,1.54,1.82])this.box(layboy,[.035,.035,2.64],[-1.12,y,0],'steel',.004,{detail:true,role:'rear-guard-horizontal'});
+    const deliveryRollers=this.group(delivery,'sheeting-delivery-rollers','Outfeed Entry / Exit Rollers',[0,0,0],[0,.08,0]);
+    for(const x of [1.92,-2.02]){
+      this.cyl(deliveryRollers,.085,2.54,[x,.87,0],'chrome','z',{active:true,motion:'delivery-roller',role:'transport-roller'});
+      for(const side of [-1,1])this.box(deliveryRollers,[.18,.20,.12],[x,.87,side*1.30],'bodyDark',.012,{detail:true,role:'transport-bearing'});
+    }
 
-    const access=this.group(this.root,'sheeting-access','Operator-Side Service Deck / Steps',[-.55,0,0],[0,.30,-.42]);
-    this.box(access,[4.70,.10,.58],[-.15,.34,-1.98],'steel',.014,{detail:true,role:'service-deck'});
-    for(const x of [-2.28,-1.20,-.10,.98,2.05])for(const z of [-2.19,-1.78])this.box(access,[.10,.34,.10],[x,.17,z],'steel',.010,{detail:true,role:'deck-leg'});
-    for(const x of [-2.15,-.90,.35,1.60])this.box(access,[.34,.10,.18],[x,.34,-1.80],'bodyDark',.010,{detail:true,role:'deck-bridge'});
+    const overlap=this.group(delivery,'sheeting-overlap','Transverse Adjustment / Hold-Down Rods',[0,0,0],[0,.14,0]);
+    for(const [i,x] of [1.35,.62,-.12,-.86,-1.60].entries()){
+      this.cyl(overlap,.035,2.72,[x,1.02,0],i===0?'chrome':'steel','z',{detail:true,role:'adjustment-rod',sourceAnchor:'BW-HSM56-OUTFEED-PHOTO'});
+      for(const side of [-1,1]){
+        this.box(overlap,[.13,.19,.11],[x,.96,side*1.39],'body',.010,{detail:true,role:'rod-support'});
+        this.cyl(overlap,.060,.07,[x,1.08,side*.86],'black','y',{detail:true,role:'adjustment-knob'});
+      }
+      for(const z of [-.72,0,.72])this.torus(overlap,.060,.018,[x,1.02,z],i%2?'bodyDark':'body',{detail:true,role:'adjustment-collar'});
+    }
+
+    const layboy=this.group(this.root,'sheeting-layboy','Enclosed Lift-Table Stacker Tower',[-4.72,0,0],[-.42,.34,0]);
+    // Four structural corner posts form the rigid tower seen in the lower brochure photo.
+    for(const x of [-.96,.96])for(const z of [-1.40,1.40])this.box(layboy,[.20,2.46,.20],[x,1.23,z],'body',.028,{role:'stacker-column',sourceAnchor:'BW-HSM56-STACKER-PHOTO'});
+    for(const z of [-1.40,1.40])this.box(layboy,[2.10,.34,.22],[0,2.38,z],'light',.030,{cover:true,role:'stacker-upper-housing',sourceAnchor:'BW-HSM56-STACKER-PHOTO'});
+    for(const x of [-.96,.96])this.box(layboy,[.20,.26,3.00],[x,2.38,0],'bodyDark',.024,{role:'stacker-top-cross'});
+    // Side safety mesh/rails: sparse and planar, not floating cylinders.
+    for(const z of [-1.50,1.50]){
+      for(const y of [.54,.82,1.10,1.38,1.66,1.94])this.box(layboy,[1.80,.032,.032],[-.06,y,z],'steel',.003,{detail:true,role:'stacker-guard-horizontal'});
+      for(const x of [-.82,-.42,-.02,.38,.78])this.box(layboy,[.032,1.56,.032],[x,1.24,z],'steel',.003,{detail:true,role:'stacker-guard-vertical'});
+    }
+    const lift=this.group(layboy,'sheeting-stack-lift','Flat Lift Table / Pallet',[0,0,0],[0,.12,0]);
+    this.box(lift,[1.86,.14,2.48],[0,.42,0],'steel',.016,{active:true,motion:'lift-table',role:'lift-table',sourceAnchor:'BW-HSM56-STACKER-PHOTO'});
+    this.box(lift,[1.62,.08,2.18],[0,.53,0],'blue',.010,{active:true,motion:'lift-table',detail:true,role:'pallet',sourceAnchor:'BW-HSM56-STACKER-PHOTO'});
+    for(const x of [-.72,.72])for(const z of [-1.22,1.22])this.box(lift,[.08,.72,.08],[x,.36,z],'steel',.008,{detail:true,role:'lift-guide'});
+    this.box(layboy,[.11,1.72,2.58],[-1.05,1.02,0],'bodyDark',.016,{cover:true,role:'stacker-backstop-frame'});
+
+    const access=this.group(this.root,'sheeting-access','Localized Operator Access / Stacker Steps',[-3.52,0,-1.76],[0,.26,-.30]);
     for(let i=0;i<3;i++){
       const h=.12+i*.13;
-      this.box(access,[.58,h,.56],[-2.34-i*.22,h/2,-1.98],'steel',.010,{detail:true,role:'access-step'});
+      this.box(access,[.56,h,.50],[-i*.19,h/2,-.02],'steel',.010,{detail:true,role:'access-step',sourceAnchor:'BW-HSM56-STACKER-PHOTO'});
     }
+    this.box(access,[.72,.08,.54],[-.42,.39,-.02],'steel',.010,{detail:true,role:'access-landing'});
 
-    const control=this.group(this.root,'sheeting-control','Operator HMI / Electrical Control',[2.35,0,-2.02],[.20,.38,-.30]);
-    this.box(control,[.58,1.22,.50],[0,.61,0],'body',.040,{cover:true,role:'hmi-pedestal'});
-    this.box(control,[.46,.40,.045],[0,.82,-.258],'glass',.016,{detail:true,role:'hmi-screen'});
-    this.cyl(control,.055,.05,[-.16,.43,-.27],'red','z',{detail:true,role:'estop'});
-    this.cyl(control,.046,.05,[.04,.43,-.27],'black','z',{detail:true,role:'control-button'});
-    this.box(control,[.76,.30,.58],[.72,.15,.02],'bodyDark',.028,{cover:true,role:'electrical-base'});
+    const control=this.group(this.root,'sheeting-control','Low Operator Control Console',[.92,0,-1.78],[.18,.30,-.28]);
+    this.box(control,[.68,.62,.48],[0,.31,0],'light',.035,{cover:true,role:'control-console-base',sourceAnchor:'BW-HSM56-OUTFEED-PHOTO'});
+    this.box(control,[.58,.08,.40],[0,.66,-.02],'dark',.012,{detail:true,role:'control-console-face',sourceAnchor:'BW-HSM56-OUTFEED-PHOTO'},[-.38,0,0]);
+    this.cyl(control,.045,.035,[-.18,.70,-.20],'red','z',{detail:true,role:'estop'});
+    this.cyl(control,.038,.035,[-.02,.70,-.20],'green','z',{detail:true,role:'control-button'});
+    this.cyl(control,.038,.035,[.13,.70,-.20],'black','z',{detail:true,role:'control-button'});
 
     this.root.userData.processFlow={
-      input:'RIGHT · fixed two-sided rollstand visual reference; exact HSM-CTM7 unwind configuration unresolved',
-      process:'RIGHT → LEFT · unwind take-off → tension/EPC → enclosed cross-cut zone → narrow-belt transport / overlap → portal stacker',
-      output:'LEFT · flat lift-table layboy / stacker',
+      input:'RIGHT · one low fixed-position rollstand visual anchor; exact HSM-CTM7 unwind mechanics unresolved',
+      process:'RIGHT → LEFT · reel → raised guide/tension frame → windowed main head / cross-cut zone → long narrow-belt outfeed with transverse adjustment rods → enclosed lift-table stacker',
+      output:'LEFT · flat lift-table / pallet stacker tower',
       idleWebGeometry:'HIDDEN_TO_AVOID_FALSE_FLOATING_SLABS',
       direction:'RIGHT_TO_LEFT',
-      unwindArchitecture:'HSM56_2014_SINGLE_FIXED_POSITION_TWO_SIDED_VISUAL_REFERENCE__HSM_CTM7_EXACT_UNRESOLVED',
-      cutterArchitecture:'HSM56_FLAT_BED_FAMILY_REFERENCE__HSM_CTM7_EXACT_UNRESOLVED',
-      visualBasis:'OFFICIAL_2014_HSM56_BROCHURE_PHOTOS_PRIORITY_OVER_GENERIC_SHEETER_SILHOUETTES'
+      unwindArchitecture:'BW_HSM56_ONE_FIXED_POSITION_TWO_SIDED_PHOTO_ANCHOR__HSM_CTM7_EXACT_UNRESOLVED',
+      cutterArchitecture:'VISIBLE_LARGE_CYLINDRICAL_ELEMENTS_PLUS_CROSS_CUT_ZONE__FUNCTION_EXACT_UNRESOLVED_DUE_SOURCE_CONFLICT',
+      visualBasis:'BW_2014_HSM56_BROCHURE_PHOTO_ANCHORS_FIRST__MEGAMACH_HSM_FAMILY_SECONDARY__INDONESIAN_LEXUS_PROCESS_SECONDARY'
     };
   }
   findNode(id){return id==='MACHINE-SHEETING'?this.root:this.nodes.find(n=>n.userData.nodeId===id)||null;}
@@ -210,7 +222,7 @@ export class SheetingMachineTemplate{
   explode(t,s=null){for(const n of this.nodes)n.position.copy(n.userData.rest);const targets=s?(s.children.filter(c=>c.userData.selectable).length?s.children.filter(c=>c.userData.selectable):[s]):this.parts;for(const n of targets)n.position.addScaledVector(n.userData.explode,THREE.MathUtils.clamp(+t||0,0,1));}
   highlight(p){for(const m of this.meshes){m.material.emissive?.setHex(p&&this.contains(p,m)?0x124f49:0);m.material.emissiveIntensity=.32;}}
   highlightMany(ps=[]){for(const m of this.meshes){m.material.emissive?.setHex(ps.some(p=>this.contains(p,m))?0x124f49:0);m.material.emissiveIntensity=.32;}}
-  ghost(on,except=null){this.ghosted=on;for(const m of this.meshes){const fade=on&&(!except||!this.contains(except,m));m.material.transparent=fade||m.userData.exteriorCover||m.material.transparent;m.material.opacity=fade?.14:(m.material.color?.getHex()===this.palette.glass?.32:1);m.material.depthWrite=!fade;}}
+  ghost(on,except=null){this.ghosted=on;for(const m of this.meshes){const fade=on&&(!except||!this.contains(except,m));m.material.transparent=fade||m.userData.exteriorCover||m.material.transparent;m.material.opacity=fade?.14:(m.material.color?.getHex()===this.palette.glass?.28:1);m.material.depthWrite=!fade;}}
   isolate(p,on=true){for(const n of this.nodes)n.visible=!on||!p||this.contains(p,n)||this.contains(n,p);}
   showOnly(ps=[],on=true){for(const n of this.nodes)n.visible=!on||!ps.length||ps.some(p=>n===p||this.contains(n,p));}
   setExteriorOpen(on=true){this.exteriorOpen=!!on;for(const m of this.meshes)if(m.userData.exteriorCover)m.visible=!on;this.root.userData.interiorCutawayVisible=on;}
