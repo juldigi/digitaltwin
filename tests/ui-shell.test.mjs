@@ -49,7 +49,7 @@ test('test-user shell uses clear user-facing navigation',()=>{
 
 test('v53 uses the requested BMJ Digital Twin identity everywhere visible',()=>{
   assert.match(html,/<title>BMJ Digital Twin<\/title>/);
-  assert.match(html,/>BMJ Digital Twin<small>BMJ Packaging Offset © 2026 IDJ\.<\/small>/);
+  assert.match(html,/>BMJ Digital Twin<small>Packaging Offset · Smart Factory<\/small>/);
   assert.match(app,/document\.title='BMJ Digital Twin · '\+name/);
   assert.doesNotMatch(html,/BMJ PACKAGING OFFSET · EKSPLORASI MESIN 3D/);
 });
