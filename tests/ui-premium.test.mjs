@@ -4,48 +4,51 @@ import fs from 'node:fs';
 
 const corporateCss=fs.readFileSync(new URL('../frontend/ui-corporate-v74.css',import.meta.url),'utf8');
 const mobileCss=fs.readFileSync(new URL('../frontend/mobile-flagship-v75.css',import.meta.url),'utf8');
-const html=fs.readFileSync(new URL('../frontend/index.html',import.meta.url),'utf8');
+const referenceCss=fs.readFileSync(new URL('../frontend/reference-v76.css',import.meta.url),'utf8');
+const referenceJs=fs.readFileSync(new URL('../frontend/src/reference-v76.js',import.meta.url),'utf8');
 const mobileJs=fs.readFileSync(new URL('../frontend/src/mobile-v75.js',import.meta.url),'utf8');
+const html=fs.readFileSync(new URL('../frontend/index.html',import.meta.url),'utf8');
 const sw=fs.readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 
-test('V75 mobile flagship stylesheet is the final cascade layer',()=>{
-  assert.match(html,/experience-v37\.css[\s\S]*ui-corporate-v74\.css[\s\S]*mobile-flagship-v75\.css/);
-  assert.match(html,/BMJ Digital Twin/);
+test('V76 BMJ reference stylesheet is the final cascade layer',()=>{
+  assert.match(html,/ui-corporate-v74\.css[\s\S]*mobile-flagship-v75\.css[\s\S]*reference-v76\.css/);
+  assert.match(html,/reference-v76\.js\?v=76/);
 });
-test('phone shell reserves safe header and dedicated bottom navigation',()=>{
-  assert.match(mobileCss,/@media \(max-width:767px\)/);
-  assert.match(mobileCss,/--m75-nav:66px/);
-  assert.match(mobileCss,/env\(safe-area-inset-bottom/);
-  assert.match(mobileCss,/bottom:calc\(var\(--m75-nav\)/);
+test('desktop shell matches the supplied left-nav center-stage right-inspector composition',()=>{
+  assert.match(referenceCss,/--v76-sidebar:174px/);
+  assert.match(referenceCss,/--v76-inspector:370px/);
+  assert.match(referenceCss,/\.top-kpis/);
+  assert.match(referenceCss,/\.v76-selection-card/);
+  assert.match(referenceCss,/#detail-panel/);
 });
-test('mobile navigation is independent from the desktop rail',()=>{
-  assert.match(mobileCss,/\.rail\{display:none!important\}/);
-  assert.match(mobileCss,/body\.nav-open \.rail/);
-  assert.match(mobileCss,/\.mobile-nav/);
-  assert.match(mobileCss,/grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
+test('reference navigation exposes only real application features',()=>{
+  assert.match(referenceJs,/Peta Pabrik/);
+  assert.match(referenceJs,/v76-nav-simulation/);
+  assert.match(referenceJs,/Referensi/);
+  assert.match(referenceJs,/Exterior/);
+  assert.doesNotMatch(referenceJs,/OEE|kWh|42\.6|12\.000/);
 });
-test('mobile action dock exposes only four core actions without horizontal scrolling',()=>{
-  assert.match(mobileCss,/\.view-switch \[data-camera="fit"\]/);
-  assert.match(mobileCss,/\.view-switch #tool-explode/);
-  assert.match(mobileCss,/\.view-switch #tool-simulation/);
-  assert.match(mobileCss,/\.view-switch \[data-camera="reset"\]/);
-  assert.match(mobileCss,/overflow:visible!important/);
+test('reference action grid delegates to existing 3D controls instead of duplicating engine logic',()=>{
+  assert.match(referenceJs,/focus:'#focus-machine'/);
+  assert.match(referenceJs,/explode:'#tool-explode'/);
+  assert.match(referenceJs,/simulation:'#tool-simulation'/);
+  assert.match(referenceJs,/reset:'\[data-camera="reset"\]'/);
 });
-test('portrait bottom sheets and landscape side sheets are explicit',()=>{
-  assert.match(mobileCss,/border-radius:24px 24px 0 0/);
-  assert.match(mobileCss,/@media \(max-width:767px\) and \(orientation:landscape\)/);
-  assert.match(mobileCss,/width:min\(440px,64vw\)/);
+test('mobile reference shell follows the supplied phone DNA without sacrificing safe areas',()=>{
+  assert.match(referenceCss,/@media \(max-width:767px\)/);
+  assert.match(referenceCss,/--v76-mobile-nav:62px/);
+  assert.match(referenceCss,/env\(safe-area-inset-bottom/);
+  assert.match(referenceCss,/grid-template-columns:repeat\(4,1fr\)/);
+  assert.match(referenceCss,/\.v76-mobile-detail/);
 });
-test('touch and accessibility safeguards remain explicit',()=>{
-  assert.match(corporateCss,/min-width:44px/);
+test('legacy accessibility protections remain available under V76',()=>{
   assert.match(corporateCss,/:focus-visible/);
   assert.match(corporateCss,/@media \(prefers-reduced-motion:reduce\)/);
   assert.match(corporateCss,/@media \(prefers-contrast:more\)/);
   assert.match(mobileJs,/aria-current/);
 });
-test('service worker cache is bumped and includes V75 mobile UI',()=>{
-  assert.match(sw,/factory-digital-twin-v75-20260921/);
-  assert.match(sw,/ui-corporate-v74\.css/);
-  assert.match(sw,/mobile-flagship-v75\.css/);
-  assert.match(sw,/src\/mobile-v75\.js/);
+test('service worker cache is bumped and includes V76 reference assets',()=>{
+  assert.match(sw,/factory-digital-twin-v76-20260921/);
+  assert.match(sw,/reference-v76\.css/);
+  assert.match(sw,/src\/reference-v76\.js/);
 });
