@@ -1,31 +1,52 @@
-# BMJ Packaging Offset — Factory Digital Twin V65
+# BMJ Packaging Offset — Factory Digital Twin V66
 
-V65 melanjutkan koreksi **Sheeting Lexus HSM-CTM7** tanpa mengubah dedicated twin Offset 5, Offset 10, dan APM 2.
+V66 berfokus pada dua hal: **deep-dive Sheeting Lexus HSM family** dan **rekonstruksi total mode simulation Sheeting**.
 
-## Sheeting V65
+## Evidence
 
-Identitas BMJ tetap **HSM-CTM7 · serial 00982 · SAP SBM-2 · 2014** dan arah proses tetap **RIGHT → LEFT**.
+Identitas BMJ tetap:
+- HSM-CTM7
+- serial 00982
+- SAP SBM-2
+- tahun 2014
+- arah proses RIGHT → LEFT
 
-Perubahan utama:
-- main-head operator side diubah dari panel solid + kaca menjadi **true hollow panoramic inspection aperture**;
-- window assembly sekarang node selectable sendiri untuk taxonomy/focus/isolate/explode;
-- satu turquoise process cylinder dengan 4 bright bands tetap menjadi dominant photographed mechanism;
-- outfeed mempertahankan 13 longitudinal belts, 3 adjustment rod assemblies, triangular supports, collars dan knobs;
-- ditambahkan **selectable operator-side outfeed handwheel** dari foto resmi BW;
-- reference paper stack di stacker diubah dari beberapa slab tipis menjadi **substantial supported skid load** di atas blue pallet;
-- reference skid otomatis hilang saat simulation dan diganti dynamic sheet pile;
-- exact HSM-CTM7 tetap unresolved: pencarian literal designation tersebut belum menghasilkan OEM drawing/manual/photo publik yang spesifik;
-- generic cut-to-mark literature hanya dipakai sebagai process comparison; **CTM7 tidak diasumsikan berarti cut-to-mark**.
+Sumber visual primer tetap BW Papersystems HSM 56 2014. Pencarian tambahan V66 mencakup BW used-machine product registry, historical LEXUS/HSM 52/56/65 listing, Pasaban folio-sheeter process map, Unico sheeter/cutoff control references, Maxson stacker sequence, dan Case Paper industrial sheeter installation.
 
-## Evidence hierarchy
+Sumber generic hanya dipakai untuk **process architecture**, bukan untuk mengklaim geometry exact HSM-CTM7.
 
-1. Database BMJ — identitas mesin.
-2. Konfirmasi pengguna — arah RIGHT → LEFT.
-3. BW Papersystems 2014 HSM 56 brochure — primary family visual/spec reference.
-4. BW full-resolution HSM 56 image — component-level visual anchor.
-5. Historical HSM family listing — corroboration only.
-6. Indonesian Lexus process reference — tension/EPC/control functions only.
-7. Generic sheeter control/stacker sources — simulation/process comparison only.
+## Geometry V66
+
+- low fixed-position rollstand;
+- inclined supported web-guide/tension frame;
+- true hollow inspection aperture;
+- one dominant banded process cylinder;
+- exact knife mechanism tetap unresolved;
+- delivery belt-bed sekarang mempunyai node process terpisah:
+  - Fast Tape Separation Zone
+  - Slow Tape Transfer Zone
+  - Overlap Tape Zone
+- operator handwheel, adjustment rods/collars/knobs, rigid stacker tower, lift table dan blue pallet dipertahankan.
+
+## Simulation V66
+
+Simulation lama dirombak total.
+
+- continuous web sekarang berupa **connected ribbon**, bukan potongan marker kertas yang tersebar;
+- route web menghindari center roller dan mengikuti sisi permukaan roller;
+- moving stripes hanya menunjukkan arah gerak di atas web kontinu;
+- setiap cut menghasilkan **1 sheet** dengan cut ID sendiri;
+- sheet tidak direcycle dengan modulo sehingga tidak teleport dari stacker kembali ke cutter;
+- downstream dibagi fast → slow → overlap → landing;
+- fast tape membuka gap setelah cut;
+- slow/overlap mengurangi spacing antarsheet sebelum stacker;
+- cut-event pulse muncul singkat pada cross-cut reference;
+- dynamic sheet size disesuaikan dengan pallet/stack width;
+- sheet masuk stacker melalui landing trajectory, bukan menghilang;
+- pile tumbuh dari pallet;
+- lift table hanya mulai turun saat pile mendekati target delivery height;
+- debug centerline dapat disembunyikan tanpa menghilangkan material web;
+- unresolved knife reference tidak lagi dianimasikan sebagai mekanisme palsu.
 
 ## Verification
 
@@ -35,4 +56,4 @@ npm run build
 npm test
 ```
 
-Regression tests mengunci physical module clearance, window architecture, component counts, taxonomy mapping, simulation behavior, and cross-module penetration.
+V66 regression gates memeriksa route clearance terhadap roller, monotonic sheet travel, absence of backward teleport, fast/slow/overlap zone mapping, stack support, lift compensation, cut pulse, collision, taxonomy dan reset behavior.
