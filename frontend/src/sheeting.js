@@ -130,7 +130,6 @@ export class SheetingMachineTemplate{
       this.box(feed,[.10,.30,.10],[-.92,1.11,z],'steel',.01,{detail:true});
       this.box(feed,[.36,.08,.10],[-1.10,.98,z],'steel',.01,{detail:true});
     }
-    this.box(feed,[2.96,.018,1.40],[.02,1.42,0],'paper',.004);
 
     // COMPACT CUTTER HEAD.
     // Exact HSM-CTM7 knife architecture is unresolved; keep a compact cross-cut module instead of the old oversized flat-bed box.
@@ -204,17 +203,11 @@ export class SheetingMachineTemplate{
     this.cyl(control,.050,.05,[.02,.41,-.305],'black','z',{detail:true});
     this.box(control,[.80,.32,.66],[.86,.16,.03],'bodyDark',.03,{cover:true});
 
-    // Continuous web is explicitly routed only up to the cutter.
-    const web=this.group(this.root,'sheeting-web-path','Continuous Web Path Before Cutter',[0,0,0],[0,.18,0]);
-    this.box(web,[1.80,.016,1.38],[6.18,1.42,0],'paper',.003);
-    this.box(web,[1.52,.016,1.38],[4.62,1.51,0],'paper',.003);
-    this.box(web,[1.72,.016,1.38],[3.02,1.43,0],'paper',.003);
-    this.box(web,[1.18,.016,1.38],[1.55,1.34,0],'paper',.003);
-
     this.root.userData.processFlow={
       input:'RIGHT · double hydraulic shaftless unwind reference',
       process:'RIGHT → LEFT · open feed bridge → tension/EPC → compact cross-cut cutter → overlap/tape delivery',
       output:'LEFT · lift-table layboy / jogger / pile',
+      idleWebGeometry:'HIDDEN_TO_AVOID_FALSE_FLOATING_SLABS',
       direction:'RIGHT_TO_LEFT',
       cutterArchitecture:'EXACT_HSM_CTM7_UNRESOLVED_PUBLIC_SOURCES_CONFLICT'
     };
