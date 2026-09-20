@@ -25,6 +25,10 @@ const simulationApm2=readFileSync(new URL('../frontend/src/simulation-apm2.js',i
 const taxonomyApm2=readFileSync(new URL('../frontend/src/data/taxonomy-apm2.js',import.meta.url),'utf8');
 const dimensionsApm2=readFileSync(new URL('../frontend/src/data/dimensions-apm2.js',import.meta.url),'utf8');
 const sourcesApm2=readFileSync(new URL('../frontend/src/data/sources-apm2.js',import.meta.url),'utf8');
+const sheeting=readFileSync(new URL('../frontend/src/sheeting.js',import.meta.url),'utf8');
+const simulationSheeting=readFileSync(new URL('../frontend/src/simulation-sheeting.js',import.meta.url),'utf8');
+const taxonomySheeting=readFileSync(new URL('../frontend/src/data/taxonomy-sheeting.js',import.meta.url),'utf8');
+const sourcesSheeting=readFileSync(new URL('../frontend/src/data/sources-sheeting.js',import.meta.url),'utf8');
 const registry=readFileSync(new URL('../frontend/src/data/machine-registry.js',import.meta.url),'utf8');
 
 test('runtime hooks required by the 3D application remain available',()=>{
@@ -108,7 +112,7 @@ test('conditional controls explain requirements rather than failing silently',()
 });
 
 test('service worker refreshes the redesigned shell',()=>{
-  assert.match(sw,/factory-digital-twin-v56-20260920/);
+  assert.match(sw,/factory-digital-twin-v57-20260920/);
   assert.match(sw,/src\/universal-machine\.js/);
   assert.match(app,/template\.ghost\(true,part\)/,'object selection must automatically ghost all non-selected geometry');
   for(const asset of ['ui-v5.css','responsive-v5.css','src/ui-v5.js','src/app.js','src/simulation.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
@@ -253,7 +257,7 @@ test('v53 routes a rebuilt document-grounded CX104 twin without Offset 5 UI leak
   assert.match(app,/MACHINE_KEY/);
   assert.match(app,/ACTIVE_ROOT/);
   assert.match(app,/selectedTaxonomyId=selectedTaxonomyId\|\|ACTIVE_ROOT/);
-  assert.match(app,/machine=\$\{encodeURIComponent\(route\)\}&v=55/);
+  assert.match(app,/machine=\$\{encodeURIComponent\(route\)\}&v=56/);
   assert.doesNotMatch(app,/machine=\$\{route\}&v=50/);
   assert.match(app,/Tidak ada foto aktual Offset 10 yang tersedia/);
   assert.match(app,/final drawing BMJ/);
@@ -278,12 +282,12 @@ test('v53 routes a rebuilt document-grounded CX104 twin without Offset 5 UI leak
   for(const asset of ['src/offset10.js','src/simulation-offset10.js','src/data/dimensions-offset10.js','src/data/sources-offset10.js','src/data/taxonomy-offset10.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
 });
 
-test('v54 routes APM2 as the third full 3D machine with process-specific UI and no invented suffix',()=>{
-  assert.match(app,/\['offset10','apm2'\]\.includes\(REQUESTED_MACHINE\)/);
+test('v54 keeps APM2 as a dedicated 3D machine with process-specific UI and no invented suffix',()=>{
+  assert.match(app,/\['offset10','apm2','sheeting'\]\.includes\(REQUESTED_MACHINE\)/);
   assert.match(app,/IS_APM2=MACHINE_KEY==='apm2'/);
-  assert.match(app,/ACTIVE_ROOT=IS_OFFSET10\?'O10':IS_APM2\?'APM2':IS_GENERIC\?GENERIC_ROOT:'O5'/);
+  assert.match(app,/ACTIVE_ROOT=IS_OFFSET10\?'O10':IS_APM2\?'APM2':IS_SHEETING\?'SH':IS_GENERIC\?GENERIC_ROOT:'O5'/);
   assert.match(app,/machine\.machineId==='BMJ-MCH-0010'\?'apm2'/);
-  assert.match(app,/machine=\$\{encodeURIComponent\(route\)\}&v=55/);
+  assert.match(app,/machine=\$\{encodeURIComponent\(route\)\}&v=56/);
   assert.match(app,/Simulasi Proses APM 2/);
   assert.match(app,/register dan SideLay/);
   assert.match(app,/suffix E\/SE\/CER\/BMA tidak tersedia/);
@@ -304,6 +308,26 @@ test('v54 routes APM2 as the third full 3D machine with process-specific UI and 
   assert.match(sourcesApm2,/APM2-BMJ-DATABASE/);
   assert.match(registry,/BMJ-MCH-0010[^\n]*1994,true/);
   for(const asset of ['src/apm2.js','src/simulation-apm2.js','src/data/dimensions-apm2.js','src/data/sources-apm2.js','src/data/taxonomy-apm2.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
+});
+
+test('v57 routes Sheeting Lexus as a dedicated right-to-left twin',()=>{
+  assert.match(app,/IS_SHEETING=MACHINE_KEY==='sheeting'/);
+  assert.match(app,/machine\.machineId==='BMJ-MCH-0002'\?'sheeting'/);
+  assert.match(app,/SHEETING LEXUS/);
+  assert.match(app,/RIGHT → LEFT/);
+  assert.match(app,/Simulasi Proses Sheeting/);
+  assert.match(engine,/SheetingMachineTemplate/);
+  assert.match(engine,/SheetingProcessSimulation/);
+  assert.match(engine,/this\.machineKey==='sheeting'/);
+  assert.match(sheeting,/processDirection:'RIGHT_TO_LEFT'/);
+  assert.match(sheeting,/sheeting-rollstand/);
+  assert.match(sheeting,/sheeting-cutter/);
+  assert.match(sheeting,/sheeting-layboy/);
+  assert.match(simulationSheeting,/Layboy \/ Stacker/);
+  assert.match(taxonomySheeting,/SHEETING LEXUS · HSM-CTM7/);
+  assert.match(sourcesSheeting,/HSM 56/);
+  assert.match(sourcesSheeting,/USER_CONFIRMED_REFERENCE/);
+  for(const asset of ['src/sheeting.js','src/simulation-sheeting.js','src/data/sources-sheeting.js','src/data/taxonomy-sheeting.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
 });
 
 test('selected assemblies expose camera-tracked component labels with leader lines',()=>{
