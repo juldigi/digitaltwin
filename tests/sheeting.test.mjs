@@ -11,7 +11,7 @@ const worldX=o=>o.getWorldPosition(new THREE.Vector3()).x;
 
 test('V67 keeps exact BMJ identity separate from HSM56 family-level geometry evidence',()=>{
   assert.equal(SHEETING_VISUAL_REFERENCE.plantModel,'HSM-CTM7');
-  assert.equal(SHEETING_VISUAL_REFERENCE.visualRevision,'V67_HSM56_PROCESS_ZONE_REBUILD');
+  assert.equal(SHEETING_VISUAL_REFERENCE.visualRevision,'V67_VISIBLE_FLAT_BED_KNIFE_REFERENCE');
   assert.equal(SHEETING_VISUAL_REFERENCE.processDirection,'RIGHT_TO_LEFT');
   assert.equal(SHEETING_ORIENTATION.input,'RIGHT');assert.equal(SHEETING_ORIENTATION.output,'LEFT');
   const bmj=SHEETING_TECHNICAL_SOURCES.find(s=>s.id==='SHEETING-BMJ-DATABASE');
