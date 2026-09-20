@@ -159,11 +159,12 @@ export class SheetingMachineTemplate{
     this.box(head,[2.48,.13,.28],[-.04,2.07,-1.50],'light',.018,{cover:true,role:'operator-window-upper-sill',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
     this.box(head,[2.44,.23,.11],[-.03,.31,-1.68],'bodyDark',.018,{cover:true,role:'operator-lower-trim'});
     this.box(head,[2.82,.40,3.16],[0,2.22,0],'light',.048,{cover:true,role:'main-top-hood',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
-    // Glass sits in the aperture with no opaque backing.
-    this.box(head,[2.42,.78,.035],[-.04,1.62,-1.655],'glass',.012,{cover:true,role:'panoramic-window',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
-    for(const x of [-1.23,1.15])this.box(head,[.08,.84,.07],[x,1.62,-1.69],'light',.008,{cover:true,role:'window-frame'});
-    for(const y of [1.21,2.03])this.box(head,[2.46,.07,.07],[-.04,y,-1.69],'light',.008,{cover:true,role:'window-frame'});
-    for(const x of [-.62,.58])this.box(head,[.36,.06,.07],[x,1.16,-1.73],'black',.018,{cover:true,detail:true,role:'window-handle',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
+    // Glass sits in the aperture with no opaque backing and has its own selectable taxonomy node.
+    const window=this.group(head,'sheeting-window','Panoramic Inspection Window Assembly',[0,0,0],[0,.18,-.22]);
+    this.box(window,[2.42,.78,.035],[-.04,1.62,-1.655],'glass',.012,{cover:true,role:'panoramic-window',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
+    for(const x of [-1.23,1.15])this.box(window,[.08,.84,.07],[x,1.62,-1.69],'light',.008,{cover:true,role:'window-frame'});
+    for(const y of [1.21,2.03])this.box(window,[2.46,.07,.07],[-.04,y,-1.69],'light',.008,{cover:true,role:'window-frame'});
+    for(const x of [-.62,.58])this.box(window,[.36,.06,.07],[x,1.16,-1.73],'black',.018,{cover:true,detail:true,role:'window-handle',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
 
     const process=this.group(head,'sheeting-main-rollers','Main Window Process Cylinder',[0,0,0],[0,.22,0]);
     this.cyl(process,.425,2.56,[.12,1.64,0],'aqua','z',{active:true,motion:'process-roller',role:'window-process-cylinder',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
