@@ -325,7 +325,7 @@ export class SheetingProcessSimulation{
       return {p,tan,angle,zone:'OVERLAP'};
     }
     age-=this.overlapDuration;
-    const k=age/this.landingDuration,{p,tan,angle}=this.curvePose(this.landingCurve,k);
+    const k=age/this.landingDuration;let {p,tan,angle}=this.curvePose(this.landingCurve,k);
     // During landing, use a smooth air-cushion-like descent and flatten before the sheet is committed to the pile.
     if(k>.35){
       const q=clamp01((k-.35)/.65);
@@ -377,7 +377,7 @@ export class SheetingProcessSimulation{
     if(this.lastNow==null){this.lastNow=now;return;}
     const dt=Math.min((now-this.lastNow)/1000,.05)*this.speed;
     this.lastNow=now;this.elapsed+=dt;
-    this.updateMechanisms();this.updateWeb();this.updateSheets();
+    this.updateWeb();this.updateSheets();this.updateMechanisms();
     this.onUpdate?.(this.state());
   }
 
