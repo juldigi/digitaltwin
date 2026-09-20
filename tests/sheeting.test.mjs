@@ -60,6 +60,26 @@ test('V59 Sheeting silhouette uses double shaftless unwind, open feed bridge and
   model.dispose();
 });
 
+test('Sheeting primary unit envelopes keep physical clearance and do not overlap',()=>{
+  const model=new SheetingMachineTemplate();
+  model.root.updateMatrixWorld(true);
+  const box=id=>new THREE.Box3().setFromObject(model.findNode(id));
+  const sequence=['sheeting-rollstand','sheeting-feed','sheeting-cutter','sheeting-delivery'];
+  for(let i=0;i<sequence.length-1;i++){
+    const right=box(sequence[i]),left=box(sequence[i+1]);
+    assert.equal(right.intersectsBox(left),false,sequence[i]+' collides with '+sequence[i+1]);
+    assert.ok(right.min.x-left.max.x>=.05,sequence[i]+' needs a visible X clearance from '+sequence[i+1]);
+  }
+  const access=box('sheeting-access'),control=box('sheeting-control');
+  assert.equal(access.intersectsBox(control),false,'HMI/control must not intersect the operator catwalk volume');
+  const reels=model.activeMeshes.filter(m=>m.userData.motion==='reel').sort((a,b)=>a.position.x-b.position.x);
+  assert.equal(reels.length,2);
+  const r0=reels[0].geometry.parameters.radiusTop,r1=reels[1].geometry.parameters.radiusTop;
+  const centerGap=Math.abs(reels[1].position.x-reels[0].position.x);
+  assert.ok(centerGap-(r0+r1)>=.30,'tandem unwind reels need visible longitudinal clearance');
+  model.dispose();
+});
+
 test('Sheeting taxonomy is contiguous through six levels and maps to physical nodes',()=>{
   assert.deepEqual([...new Set(SHEETING_TAXONOMY.map(n=>n.level))].sort(),[1,2,3,4,5,6]);
   assert.equal(new Set(SHEETING_TAXONOMY.map(n=>n.id)).size,SHEETING_TAXONOMY.length);
