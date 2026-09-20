@@ -5,6 +5,7 @@ import fs from 'node:fs';
 const corporateCss=fs.readFileSync(new URL('../frontend/ui-corporate-v74.css',import.meta.url),'utf8');
 const mobileCss=fs.readFileSync(new URL('../frontend/mobile-flagship-v75.css',import.meta.url),'utf8');
 const html=fs.readFileSync(new URL('../frontend/index.html',import.meta.url),'utf8');
+const mobileJs=fs.readFileSync(new URL('../frontend/src/mobile-v75.js',import.meta.url),'utf8');
 const sw=fs.readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 
 test('V75 mobile flagship stylesheet is the final cascade layer',()=>{
@@ -40,7 +41,7 @@ test('touch and accessibility safeguards remain explicit',()=>{
   assert.match(corporateCss,/:focus-visible/);
   assert.match(corporateCss,/@media \(prefers-reduced-motion:reduce\)/);
   assert.match(corporateCss,/@media \(prefers-contrast:more\)/);
-  assert.match(mobileCss,/aria-current/);
+  assert.match(mobileJs,/aria-current/);
 });
 test('service worker cache is bumped and includes V75 mobile UI',()=>{
   assert.match(sw,/factory-digital-twin-v75-20260921/);
