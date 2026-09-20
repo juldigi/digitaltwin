@@ -13,7 +13,7 @@ export const SHEETING_VISUAL_REFERENCE=Object.freeze({
   evidence:'BMJ database + user-confirmed RIGHT_TO_LEFT + BW Papersystems 2014 HSM 56 brochure/page/full-resolution machine photo + historical Lexus/HSM family listing + Indonesian Lexus process reference',
   dimensions:'PHOTO_ANCHORED_RECONSTRUCTION_NOT_ENGINEERING',
   visualFamily:'HSM56_LOW_REEL_INCLINED_WEB_GUIDE_HOLLOW_WINDOW_HEAD_BANDED_PROCESS_CYLINDER_BELT_OUTFEED_TOWER_STACKER',
-  visualRevision:'V65_HSM56_WINDOW_STACK_DETAIL'
+  visualRevision:'V66_HSM56_PROCESS_ZONE_REBUILD'
 });
 
 export class SheetingMachineTemplate{
@@ -24,7 +24,7 @@ export class SheetingMachineTemplate{
       assetId:'BMJ-MCH-0002',machine:'SHEETING LEXUS',model:'HSM-CTM7',
       referenceFamily:'LEXUS HSM family · HSM 56 2014 BW visual anchors',
       processDirection:'RIGHT_TO_LEFT',confidence:'IDENTITY_VERIFIED__GEOMETRY_FAMILY_PHOTO_ANCHORED',
-      visualRevision:'V65_HSM56_WINDOW_STACK_DETAIL'
+      visualRevision:'V66_HSM56_PROCESS_ZONE_REBUILD'
     };
     this.nodes=[];this.parts=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.activeMeshes=[];this.detailMeshes=[];
     this.taxonomy=SHEETING_TAXONOMY;this.taxonomyById=SHEETING_TAXONOMY_BY_ID;this.exteriorOpen=false;this.ghosted=false;
@@ -88,7 +88,7 @@ export class SheetingMachineTemplate{
     return m;
   }
   build(){
-    // V65 follows visible brochure/photo anchors at component level, not a generic sheeter silhouette.
+    // V66 follows visible brochure/photo anchors at component level, not a generic sheeter silhouette.
     // Exact HSM-CTM7 internal cutting mechanism is still unresolved where public sources conflict.
 
     const structure=this.group(this.root,'sheeting-structure','Grounded Main Chassis',[0,0,0],[0,-.22,0]);
@@ -178,8 +178,9 @@ export class SheetingMachineTemplate{
     for(const z of [-1.05,-.82,-.59,-.36,-.13,.10,.33,.56,.79,1.02])this.box(process,[.28,.045,.055],[-.28,1.13,z],'dark',.004,{detail:true,role:'window-guide-finger',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
 
     const knife=this.group(head,'sheeting-knife','Cross-Cut Zone Reference',[-.30,0,0],[0,.24,0],'UNRESOLVED_EXACT');
-    this.box(knife,[.09,.08,2.30],[-.22,.86,0],'dark',.006,{active:true,motion:'knife-reference',detail:true,role:'cut-zone-reference'});
-    this.box(knife,[.07,.07,2.22],[-.05,.98,0],'chrome',.006,{active:true,motion:'knife-reference',detail:true,role:'cut-zone-reference'});
+    // Exact knife actuation is unresolved; these are static cut-zone references, not fake animated blades.
+    this.box(knife,[.09,.08,2.30],[-.22,.86,0],'dark',.006,{detail:true,role:'cut-zone-reference'});
+    this.box(knife,[.07,.07,2.22],[-.05,.98,0],'chrome',.006,{detail:true,role:'cut-zone-reference'});
 
     const transport=this.group(head,'sheeting-cutter-transport','Integrated Head Bed / Service Plate',[0,0,0],[0,.12,0]);
     this.box(transport,[2.40,.11,2.62],[-.02,.55,0],'light',.016,{role:'head-bed'});
@@ -194,7 +195,16 @@ export class SheetingMachineTemplate{
     }
     this.box(delivery,[4.10,.085,2.62],[0,.75,0],'light',.015,{role:'outfeed-bed'});
     const beltZ=[-1.14,-.95,-.76,-.57,-.38,-.19,0,.19,.38,.57,.76,.95,1.14];
-    for(const z of beltZ)this.box(delivery,[4.02,.024,.045],[0,.817,z],'black',.002,{detail:true,role:'transport-belt',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
+    // Generic sheeter process references consistently separate fast tape, slow tape and overlap zones.
+    // V66 exposes those zones without changing the photo-anchored external silhouette.
+    const fastBelts=this.group(delivery,'sheeting-fast-belts','Fast Tape Separation Zone',[0,0,0],[0,.06,0],'PROCESS_FAMILY_REFERENCE');
+    const slowBelts=this.group(delivery,'sheeting-slow-belts','Slow Tape Transfer Zone',[0,0,0],[0,.06,0],'PROCESS_FAMILY_REFERENCE');
+    const overlapBelts=this.group(delivery,'sheeting-overlap-belts','Overlap Tape Zone',[0,0,0],[0,.06,0],'PROCESS_FAMILY_REFERENCE');
+    for(const z of beltZ){
+      this.box(fastBelts,[1.25,.024,.045],[1.34,.817,z],'black',.002,{detail:true,role:'fast-transport-belt',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
+      this.box(slowBelts,[.78,.024,.045],[.35,.817,z],'black',.002,{detail:true,role:'slow-transport-belt',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
+      this.box(overlapBelts,[1.95,.024,.045],[-1.04,.817,z],'black',.002,{detail:true,role:'overlap-transport-belt',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
+    }
     const deliveryRollers=this.group(delivery,'sheeting-delivery-rollers','Outfeed Entry / Exit Rollers',[0,0,0],[0,.08,0]);
     for(const x of [1.95,-1.95]){
       this.cyl(deliveryRollers,.082,2.54,[x,.86,0],'chrome','z',{active:true,motion:'delivery-roller',role:'transport-roller'});
@@ -284,9 +294,10 @@ export class SheetingMachineTemplate{
       direction:'RIGHT_TO_LEFT',
       unwindArchitecture:'BW_HSM56_LOW_REEL_PLUS_INCLINED_GUIDE_PHOTO_ANCHOR__HSM_CTM7_EXACT_UNRESOLVED',
       cutterArchitecture:'PHOTOGRAPHED_MAIN_PROCESS_CYLINDER_REPRODUCED__EXACT_HSM_CTM7_KNIFE_MECHANISM_UNRESOLVED',
-      visualBasis:'BW_2014_HSM56_PDF_SCREENSHOT_AND_FULL_RES_COMPONENT_ANCHORS_FIRST__MEGAMACH_HSM_FAMILY_SECONDARY__INDONESIAN_LEXUS_PROCESS_SECONDARY',
+      visualBasis:'BW_2014_HSM56_VISUAL_ANCHOR__PASABAN_FAST_SLOW_OVERLAP_PROCESS_MAP__UNICO_DRAW_ROLL_CUTTER_TAPES_CONTROL__MAXSON_STACKER_LIFT_SEQUENCE',
       windowArchitecture:'TRUE_OPERATOR_SIDE_APERTURE__NO_OPAQUE_PANEL_BEHIND_GLASS',
-      exactModelSearch:'NO_PUBLIC_HSM_CTM7_SPECIFIC_DRAWING_OR_PHOTO_CONFIRMED'
+      exactModelSearch:'NO_PUBLIC_HSM_CTM7_SPECIFIC_DRAWING_OR_PHOTO_CONFIRMED',
+      transportZones:'FAST_TAPE__SLOW_TAPE__OVERLAP__STACKER_PROCESS_REFERENCE'
     };
   }
   findNode(id){return id==='MACHINE-SHEETING'?this.root:this.nodes.find(n=>n.userData.nodeId===id)||null;}
