@@ -1,45 +1,47 @@
-# Deployment GitHub + Cloudflare — Digital Twin V62
+# Deployment GitHub + Cloudflare — Digital Twin V63
 
-## 1. Source dan frontend build
+## Build & deployment
 
-Repositori aktif: `juldigi/digitaltwin` (**private**).
+Repo: `juldigi/digitaltwin` (private).
 
-1. Push ke `main` menjalankan workflow **Verify frontend V62** untuk `npm ci`, build, dan seluruh regression test.
-2. `npm run build` menghasilkan folder `dist` dengan HTML, CSS, modul aplikasi, serta Three.js lokal.
-3. GitHub Pages tidak diperlukan untuk runtime aplikasi.
-4. Workflow Cloudflare melakukan build/test ulang sebelum deployment.
+Push ke `main` harus:
+1. menjalankan `npm ci`;
+2. menjalankan `npm run build`;
+3. menjalankan seluruh `npm test`;
+4. memvalidasi credential Cloudflare;
+5. deploy Worker dari `backend/`.
 
-## 2. Cloudflare Workers Static Assets + D1
+Service worker cache V63: `factory-digital-twin-v63-20260920`.
 
-Worker `digitaltwin` menggunakan `backend/wrangler.toml`.
+## V63 Sheeting verification gate
 
-- `[assets].directory = "../dist"` menyajikan frontend langsung dari Worker.
-- Binding `ASSETS` dipakai untuk request non-`/api/*`.
-- `run_worker_first = ["/api/*"]` membuat API tetap ditangani `backend/worker.js`.
-- D1 binding harus bernama `DB`.
+Sebelum deployment dianggap valid:
+- identitas tetap HSM-CTM7 / 00982 / SBM-2 / 2014;
+- arah proses tetap RIGHT → LEFT;
+- hanya **1 reel position** family-reference;
+- rollstand rendah dengan opposed support;
+- raised web frame mempunyai **4 guide/tension roller** dengan bearing/support;
+- main head mempunyai panoramic window dan large photographed process cylinders;
+- outfeed mempunyai **9 longitudinal belts**, **2 transport rollers**, **5 adjustment rods** dan collar/knob;
+- stacker berupa rigid tower dengan flat lift table + pallet;
+- operator control adalah low compact console;
+- tidak ada long generic catwalk;
+- module sequence unwind → feed → main head → outfeed → stacker mempunyai clearance;
+- tidak ada significant accidental cross-owner mesh penetration di luar mounted relationships;
+- continuous web berhenti di cross-cut zone;
+- individual sheet hanya ada downstream dan pile berada di stacker tower;
+- cutaway/explode/isolate/labels/reset tetap berfungsi.
 
-GitHub Actions membutuhkan `CLOUDFLARE_API_TOKEN` dan `CLOUDFLARE_ACCOUNT_ID`. Worker membutuhkan secret `ADMIN_TOKEN` dan `VIEWER_TOKEN`.
+## Cloudflare
 
-## 3. Verifikasi V62
+Worker: `digitaltwin`
 
-Setelah deployment, verifikasi:
+- static assets: `../dist`
+- API: `/api/*`
+- D1 binding: `DB`
+- required GitHub secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`
+- Worker secrets: `ADMIN_TOKEN`, `VIEWER_TOKEN`
 
-- URL Worker memuat build V62 dan service worker cache `factory-digital-twin-v62-20260920`.
-- Daftar Mesin menampilkan **41 equipment**.
-- Offset 5, Offset 10, APM 2, dan Sheeting Lexus membuka geometry khusus masing-masing.
-- Sheeting V62 mempertahankan **RIGHT → LEFT**.
-- Sheeting hanya menampilkan **satu reel position family reference**, bukan dua reel tandem spekulatif.
-- Feed/tension roller mempunyai bearing/support yang terlihat.
-- Cutter terlihat enclosed; delivery berupa narrow-belt bed; output mempunyai portal stacker dan flat lift table.
-- HMI tidak berpotongan dengan service deck.
-- Continuous web hanya muncul upstream cutter ketika simulasi aktif.
-- Individual cut sheet hanya muncul downstream cutter dan berakhir pada pile stacker.
-- Regression test menolak accidental cross-module penetration dan moving/static collision.
-- GET `/api/state` tanpa token → 401.
-- Viewer tidak dapat melakukan mutation.
-- Admin dapat menyimpan state dengan revision guard.
-- Uji desktop, mobile portrait/landscape, WebGL fallback, cutaway, explode, isolate, label komponen dan simulasi.
+## Evidence boundary
 
-## 4. Batas verifikasi
-
-Database BMJ dan orientasi yang dikonfirmasi pengguna adalah sumber utama identitas. Brochure HSM 56 2014 dipakai sebagai visual family evidence, bukan bukti bahwa HSM-CTM7 BMJ identik. Drawing/foto aktual HSM-CTM7 BMJ tetap diperlukan untuk menaikkan exact geometry menjadi verified.
+BW HSM 56 2014 adalah primary visual **family** reference, bukan bukti bahwa HSM-CTM7 BMJ identik. Public sources conflict mengenai knife architecture, sehingga exact cutting mechanism tetap unresolved sampai ada foto/drawing HSM-CTM7 BMJ.
