@@ -13,7 +13,7 @@ export const SHEETING_VISUAL_REFERENCE=Object.freeze({
   evidence:'BMJ database + user-confirmed RIGHT_TO_LEFT + BW Papersystems 2014 HSM 56 brochure/page/full-resolution machine photo + historical Lexus/HSM family listing + Indonesian Lexus process reference',
   dimensions:'PHOTO_ANCHORED_RECONSTRUCTION_NOT_ENGINEERING',
   visualFamily:'HSM56_LOW_REEL_INCLINED_WEB_GUIDE_HOLLOW_WINDOW_HEAD_BANDED_PROCESS_CYLINDER_BELT_OUTFEED_TOWER_STACKER',
-  visualRevision:'V67_VISIBLE_FLAT_BED_KNIFE_REFERENCE'
+  visualRevision:'V68_FUNCTIONAL_DRAW_DRUM_WEB_WRAP'
 });
 
 export class SheetingMachineTemplate{
@@ -24,7 +24,7 @@ export class SheetingMachineTemplate{
       assetId:'BMJ-MCH-0002',machine:'SHEETING LEXUS',model:'HSM-CTM7',
       referenceFamily:'LEXUS HSM family · HSM 56 2014 BW visual anchors',
       processDirection:'RIGHT_TO_LEFT',confidence:'IDENTITY_VERIFIED__GEOMETRY_FAMILY_PHOTO_ANCHORED',
-      visualRevision:'V67_VISIBLE_FLAT_BED_KNIFE_REFERENCE'
+      visualRevision:'V68_FUNCTIONAL_DRAW_DRUM_WEB_WRAP'
     };
     this.nodes=[];this.parts=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.activeMeshes=[];this.detailMeshes=[];
     this.taxonomy=SHEETING_TAXONOMY;this.taxonomyById=SHEETING_TAXONOMY_BY_ID;this.exteriorOpen=false;this.ghosted=false;
@@ -88,7 +88,7 @@ export class SheetingMachineTemplate{
     return m;
   }
   build(){
-    // V66 follows visible brochure/photo anchors at component level, not a generic sheeter silhouette.
+    // V68 keeps the photo-anchored HSM56 silhouette and makes the dominant turquoise drum functional in the simulated web path.
     // Exact HSM-CTM7 internal cutting mechanism is still unresolved where public sources conflict.
 
     const structure=this.group(this.root,'sheeting-structure','Grounded Main Chassis',[0,0,0],[0,-.22,0]);
@@ -166,8 +166,10 @@ export class SheetingMachineTemplate{
     for(const y of [1.21,2.03])this.box(window,[2.46,.07,.07],[-.04,y,-1.69],'light',.008,{cover:true,role:'window-frame'});
     for(const x of [-.62,.58])this.box(window,[.36,.06,.07],[x,1.16,-1.73],'black',.018,{cover:true,detail:true,role:'window-handle',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
 
-    const process=this.group(head,'sheeting-main-rollers','Main Window Process Cylinder',[0,0,0],[0,.22,0]);
-    this.cyl(process,.425,2.56,[.12,1.64,0],'aqua','z',{active:true,motion:'process-roller',role:'window-process-cylinder',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
+    const process=this.group(head,'sheeting-main-rollers','Main Draw / Traction Drum Family Reference',[0,0,0],[0,.22,0],'PROCESS_FAMILY_REFERENCE');
+    // The drum silhouette/bands are directly photo-anchored. Its draw/traction function is a process-family inference:
+    // BW sheeter controls document a draw-drum encoder tied to sheet length/squaring, while Unico/Maxson document draw-roll/drum coordination with cutter and tapes.
+    this.cyl(process,.425,2.56,[.12,1.64,0],'aqua','z',{active:true,motion:'draw-drum-reference',role:'main-draw-traction-drum',sourceAnchor:'BW-HSM56-MAIN-PHOTO__BW_UNICO_MAXSON_DRAW_DRUM_PROCESS_REFERENCE'});
     for(const z of [-.90,-.30,.30,.90])this.torus(process,.428,.026,[.12,1.64,z],'white',{detail:true,role:'process-cylinder-band',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
     for(const side of [-1,1])this.cyl(process,.255,.065,[.12,1.64,side*1.31],'dark','z',{detail:true,role:'process-cylinder-endcap',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
     // Lower transport rollers are visible/mechanically required but deliberately subordinate.
@@ -305,6 +307,7 @@ export class SheetingMachineTemplate{
       direction:'RIGHT_TO_LEFT',
       unwindArchitecture:'BW_HSM56_LOW_REEL_PLUS_INCLINED_GUIDE_PHOTO_ANCHOR__HSM_CTM7_EXACT_UNRESOLVED',
       cutterArchitecture:'BW_HSM56_FLAT_BED_KNIFE_FAMILY_REFERENCE_VISIBLE_IN_SIMULATION__EXACT_HSM_CTM7_STROKE_AND_ACTUATION_UNRESOLVED',
+      mainDrumFunction:'PROCESS_FAMILY_INFERENCE__DRAW_TRACTION_REFERENCE__WEB_WRAP_AND_LENGTH_CONTROL__EXACT_HSM_CTM7_ROLE_UNVERIFIED',
       visualBasis:'BW_2014_HSM56_VISUAL_ANCHOR__PASABAN_FAST_SLOW_OVERLAP_PROCESS_MAP__UNICO_DRAW_ROLL_CUTTER_TAPES_CONTROL__MAXSON_STACKER_LIFT_SEQUENCE',
       windowArchitecture:'TRUE_OPERATOR_SIDE_APERTURE__NO_OPAQUE_PANEL_BEHIND_GLASS',
       exactModelSearch:'NO_PUBLIC_HSM_CTM7_SPECIFIC_DRAWING_OR_PHOTO_CONFIRMED',
