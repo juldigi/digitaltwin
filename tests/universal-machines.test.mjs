@@ -22,6 +22,15 @@ test('every universal machine has finite grounded geometry and a contiguous six-
  }
 });
 
-test('universal cutaway retains active mechanisms and process simulation advances safely',()=>{
- for(const machine of remaining){const model=new UniversalMachineTemplate(machine.machineId);model.setExteriorOpen(true);assert.ok(model.activeMeshes.length>0,machine.machineId);assert.ok(model.activeMeshes.every(m=>m.visible));const sim=new UniversalProcessSimulation(model.root,model);const before=sim.state();sim.start();sim.update(1000);sim.update(1100);const after=sim.state();assert.equal(after.active,true);assert.ok(after.progress>=before.progress);sim.stop();assert.equal(sim.state().active,false);sim.dispose();model.dispose();}
+test('universal cutaway retains visible reference internals while unverified process motion stays blocked',()=>{
+ for(const machine of remaining){
+  const model=new UniversalMachineTemplate(machine.machineId);model.setExteriorOpen(true);
+  assert.ok(model.activeMeshes.length>0,machine.machineId);assert.ok(model.activeMeshes.every(m=>m.visible));
+  const initial=model.activeMeshes.map(m=>m.quaternion.clone()),sim=new UniversalProcessSimulation(model.root,model);
+  sim.start();sim.update(1000);sim.update(1100);const after=sim.state();
+  assert.equal(after.available,false);assert.equal(after.blocked,true);assert.equal(after.active,false);
+  assert.equal(after.completed,0);assert.equal(after.sheetsVisible,0);assert.equal(after.mechanismCount,0);
+  model.activeMeshes.forEach((m,i)=>assert.ok(m.quaternion.angleTo(initial[i])<1e-12,machine.machineId));
+  sim.dispose();model.dispose();
+ }
 });
