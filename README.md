@@ -1,17 +1,20 @@
-# BMJ Packaging Offset — Factory Digital Twin V59
+# BMJ Packaging Offset — Factory Digital Twin V60
 
-Digital Twin interaktif untuk area **Packaging Offset PT Bukit Muria Jaya**. V59 melanjutkan hasil recovery dari riwayat build yang terverifikasi setelah repositori lama tidak lagi tersedia.
+Digital Twin interaktif untuk area **Packaging Offset PT Bukit Muria Jaya**. V60 melanjutkan hasil recovery dari riwayat build yang terverifikasi setelah repositori lama tidak lagi tersedia.
 
-## Pembaruan V59
+## Pembaruan V60
+
+- Collision audit menambahkan clearance eksplisit antara unwind → feed bridge → cutter → delivery, memisahkan HMI dari volume catwalk, serta memberi jarak longitudinal yang lebih aman pada dua reel tandem.
+- Regression test sekarang menghitung bounding box unit utama dan gagal otomatis jika unit utama kembali saling berpotongan.
 
 - **Sheeting Lexus direkonstruksi ulang** berdasarkan deep-dive sumber Lexus Indonesia, visual Great Wall/Accura, data perdagangan regional, listing BW Papersystems HSM 56, dan pembanding HSM_56 serial 00962.
-- Silhouette lama yang terlalu tertutup dibuang: V59 memakai **open structural chassis**, operator-side catwalk, open feed/tension bridge, compact cutter head, long tape/overlap delivery, dan lift-table layboy.
+- Silhouette lama yang terlalu tertutup dibuang: V60 memakai **open structural chassis**, operator-side catwalk, open feed/tension bridge, compact cutter head, long tape/overlap delivery, dan lift-table layboy.
 - Area input sekarang memakai **double hydraulic shaftless unwind sebagai family reference**, dengan dua posisi reel, opposed chucks dan hydraulic pickup structure.
 - Continuous web hanya berada sebelum cutter; individual sheet baru muncul setelah cutting dan bergerak melalui overlap delivery ke pile.
 - Sumber publik saling bertentangan antara **servo rotary + double shaftless unwind** dan **HSM 56 flat-bed + fixed rollstand**. Karena itu exact cutter/rollstand HSM-CTM7 tetap diberi status **unresolved**, bukan diklaim sebagai OEM-verified.
 - Frontend dan API dipublikasikan melalui **Cloudflare Workers Static Assets** dari repo private; GitHub Actions dipakai untuk build/test verification.
 
-## Cakupan V59
+## Cakupan V60
 
 - **41 equipment** dari database mesin Packaging Offset.
 - **4 digital twin khusus** dengan rekonstruksi lebih detail: Offset 5 / OFU-1, Offset 10, APM 2, dan Sheeting Lexus.
@@ -33,7 +36,7 @@ Heidelberg Speedmaster **CX104-2-LY-8-LY-1-LX3**. Model menggunakan dokumen proy
 BOBST **SP 102**, serial **57115506**, tahun **1994**. Model proses mencakup feeder, register/SideLay, gripper chain, platen, stripping dan delivery. Varian/suffix yang belum terkonfirmasi tidak diklaim.
 
 ### Sheeting Lexus
-Identitas pabrik **HSM-CTM7**, serial **00982**, kode **SBM-2**, tahun **2014**. V59 mempertahankan orientasi proses kanan → kiri dan memodelkan open-frame roll-to-sheet architecture dari sumber Lexus Indonesia serta visual family Great Wall/Accura. HSM 56 2014 dan HSM_56 serial **00962 / 2013** dipertahankan sebagai pembanding keluarga. Exact cutter, rollstand dan dimensi HSM-CTM7 tidak dinaikkan menjadi verified tanpa drawing/foto BMJ yang spesifik.
+Identitas pabrik **HSM-CTM7**, serial **00982**, kode **SBM-2**, tahun **2014**. V60 mempertahankan orientasi proses kanan → kiri dan memodelkan open-frame roll-to-sheet architecture dari sumber Lexus Indonesia serta visual family Great Wall/Accura. HSM 56 2014 dan HSM_56 serial **00962 / 2013** dipertahankan sebagai pembanding keluarga. Exact cutter, rollstand dan dimensi HSM-CTM7 tidak dinaikkan menjadi verified tanpa drawing/foto BMJ yang spesifik.
 
 ## Data dan confidence
 
@@ -69,4 +72,4 @@ Repo tetap private di **`juldigi/digitaltwin`**. `npm run build` menghasilkan fo
 
 ## Prinsip recovery
 
-V59 mempertahankan hasil kerja yang dapat dipulihkan dan menghindari mengarang dimensi, serial, layout, taxonomy, atau part yang tidak didukung sumber. Detail baru harus masuk dengan source/confidence yang jelas agar peningkatan fidelity tidak merusak bagian yang sudah tervalidasi.
+V60 mempertahankan hasil kerja yang dapat dipulihkan dan menghindari mengarang dimensi, serial, layout, taxonomy, atau part yang tidak didukung sumber. Detail baru harus masuk dengan source/confidence yang jelas agar peningkatan fidelity tidak merusak bagian yang sudah tervalidasi.
