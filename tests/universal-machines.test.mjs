@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import {MACHINE_REGISTRY} from '../frontend/src/data/machine-registry.js';
 import {UniversalMachineTemplate,UniversalProcessSimulation,universalMachineConfig,universalTaxonomy} from '../frontend/src/universal-machine.js';
+import {mechanicalProfile} from '../frontend/src/data/mechanical-profiles.js';
 
 const flagship=new Set(['BMJ-MCH-0002','BMJ-MCH-0003','BMJ-MCH-0009','BMJ-MCH-0010']);
 const remaining=MACHINE_REGISTRY.filter(m=>!flagship.has(m.machineId));
@@ -32,5 +33,16 @@ test('universal cutaway retains visible reference internals while unverified pro
   assert.equal(after.completed,0);assert.equal(after.sheetsVisible,0);assert.equal(after.mechanismCount,0);
   model.activeMeshes.forEach((m,i)=>assert.ok(m.quaternion.angleTo(initial[i])<1e-12,machine.machineId));
   sim.dispose();model.dispose();
+ }
+});
+
+test('every non-flagship asset has an evidence-bounded mechanical architecture and process principle',()=>{
+ for(const machine of remaining){
+  const profile=mechanicalProfile(machine.no),cfg=universalMachineConfig(machine.machineId);
+  assert.ok(profile,machine.machineId);assert.equal(cfg.profile,profile);
+  assert.ok(profile.architecture.length>=5,machine.machineId);assert.ok(profile.process.length>=5,machine.machineId);
+  assert.equal(profile.footprint.length,3);assert.ok(profile.unknowns.length>=1,machine.machineId);
+  const taxonomy=universalTaxonomy(machine.machineId);
+  for(const component of profile.architecture)assert.ok(taxonomy.some(node=>node.name===component),machine.machineId+' '+component);
  }
 });
