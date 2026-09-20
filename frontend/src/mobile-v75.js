@@ -1,8 +1,14 @@
 const m75=q=>document.querySelector(q);
 const m75all=q=>[...document.querySelectorAll(q)];
+let lastPrimary='machine';
 
 function setMobileNavActive(name){
-  m75all('[data-mobile-nav]').forEach(button=>button.classList.toggle('active',button.dataset.mobileNav===name));
+  if(name!=='menu')lastPrimary=name;
+  m75all('[data-mobile-nav]').forEach(button=>{
+    const active=button.dataset.mobileNav===name;
+    button.classList.toggle('active',active);
+    if(active)button.setAttribute('aria-current','page'); else button.removeAttribute('aria-current');
+  });
 }
 function closeMobileMenu(){
   document.body.classList.remove('nav-open');
@@ -29,7 +35,7 @@ function bindMobileFlagship(){
     event.stopPropagation();
     const key=button.dataset.mobileNav;
     if(key==='menu'){
-      if(document.body.classList.contains('nav-open')){closeMobileMenu();setMobileNavActive('machine');}
+      if(document.body.classList.contains('nav-open')){closeMobileMenu();setMobileNavActive(lastPrimary);}
       else openMobileMenu();
       return;
     }
@@ -45,7 +51,7 @@ function bindMobileFlagship(){
   });
 
   m75('#panel-toggle')?.addEventListener('click',()=>{if(mobile.matches)closeMobileMenu();});
-  m75('#ui-backdrop')?.addEventListener('click',()=>{if(mobile.matches){closeMobileMenu();if(!document.body.classList.contains('mobile-panel-open')&&!document.body.classList.contains('ui-workbench-open'))setMobileNavActive('machine');}});
+  m75('#ui-backdrop')?.addEventListener('click',()=>{if(mobile.matches){closeMobileMenu();if(!document.body.classList.contains('mobile-panel-open')&&!document.body.classList.contains('ui-workbench-open'))setMobileNavActive(lastPrimary);}});
 
   const observer=new MutationObserver(()=>{
     if(!mobile.matches)return;
