@@ -67,13 +67,18 @@ body{font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI"
   .topbar .brand small{font-size:0!important}
   .topbar .brand small::before{font-size:10px!important}
 
+  .v76-plant-chip{
+    order:2;flex:0 0 auto;height:40px;min-height:40px;padding:0 12px;display:flex;align-items:center;gap:8px;
+    border:1px solid var(--v76-line);border-radius:10px;background:#fff;color:#38536b;font-size:9px;font-weight:700;box-shadow:none
+  }
+  .v76-plant-chip span{font-size:15px;color:var(--v76-navy)}.v76-plant-chip i{font-style:normal;color:#93a0ab}
   .global-search{
-    order:2!important;flex:1 1 320px!important;max-width:420px!important;min-width:240px!important;height:40px!important;
+    order:3!important;flex:1 1 320px!important;max-width:420px!important;min-width:240px!important;height:40px!important;
     border:1px solid var(--v76-line)!important;border-radius:10px!important;background:#f8fafc!important;
     box-shadow:inset 0 1px 2px rgba(20,40,60,.02)!important;
   }
   .global-search input{font-size:11px!important;color:#334b61!important}
-  .header-actions{order:3!important;margin-left:auto!important;display:flex!important;align-items:center!important;gap:8px!important}
+  .header-actions{order:4!important;margin-left:auto!important;display:flex!important;align-items:center!important;gap:8px!important}
   .header-actions .quiet,#connection{display:none!important}
   .header-actions .icon-btn{
     display:grid!important;width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;
@@ -301,7 +306,7 @@ body{font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI"
   .v76-logo-block strong{font-size:18px;font-weight:900;font-style:italic}.v76-logo-block small{display:none}
   .topbar{position:fixed!important;left:82px!important;right:0!important;top:0!important;height:60px!important;min-height:60px!important;padding:8px 12px!important}
   .topbar .brand{min-width:0!important;flex:1!important}.topbar .brandmark{display:none!important}.topbar .brand>span:last-child{font-size:13px!important}.topbar .brand small{font-size:8px!important}
-  .global-search{display:none!important}.header-actions .quiet,#connection,.user-profile{display:none!important}
+  .v76-plant-chip,.global-search{display:none!important}.header-actions .quiet,#connection,.user-profile{display:none!important}
   .top-kpis{position:fixed!important;left:94px!important;right:12px!important;top:69px!important;height:68px!important;display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:8px!important;z-index:280!important}
   .top-kpis>div{height:68px!important;padding:8px 10px!important;border:1px solid var(--v76-line)!important;border-radius:10px!important;background:#fff!important}
   .top-kpis>div:nth-child(n+5){display:none!important}
@@ -340,7 +345,7 @@ body{font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI"
   .topbar .brand{flex:1!important;min-width:0!important;max-width:none!important}.topbar .brandmark{display:grid!important;width:42px!important;height:42px!important;min-width:42px!important;border-radius:11px!important;background:#fff!important;box-shadow:none!important;color:#12487b!important;font-size:0!important}
   .topbar .brandmark::before{content:"BMJ"!important;color:#12487b!important;font-size:13px!important;font-weight:900!important;font-style:italic!important;letter-spacing:-.05em!important}
   .topbar .brand>span:last-child{display:none!important}
-  .global-search,.top-kpis{display:none!important}
+  .v76-plant-chip,.global-search,.top-kpis{display:none!important}
   .header-actions{display:flex!important;margin-left:auto!important;gap:7px!important}.header-actions>*{display:none!important}
   #ui-menu-toggle,.header-actions #settings{display:grid!important;width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;border:0!important;border-radius:50%!important;background:#f5f8fa!important;color:#33556f!important}
 
