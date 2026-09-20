@@ -103,6 +103,8 @@ function v76RefreshSelection(){
 }
 function v76BuildInspector(){
   const panel=v76('#detail-panel');if(!panel)return;
+  const tabLabels={overview:'Informasi',structure:'Struktur',simulation:'Simulasi',exterior:'Exterior',sources:'Dokumen'};
+  v76all('[data-tab]').forEach(tab=>{if(tabLabels[tab.dataset.tab])tab.textContent=tabLabels[tab.dataset.tab];});
   if(!v76('.v76-breadcrumb')){
     const bc=document.createElement('div');bc.className='v76-breadcrumb';bc.textContent='Mesin › Unit Utama › Sub › Block › Part › Spesifik Part';
     panel.querySelector('.panel-top')?.after(bc);
