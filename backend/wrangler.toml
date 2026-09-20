@@ -1,13 +1,13 @@
-name = "offset5-digital-twin-api"
+name = "bmj-digitaltwin"
 main = "worker.js"
-compatibility_date = "2026-09-01"
+compatibility_date = "2026-09-20"
 workers_dev = true
 
 [vars]
 ALLOWED_ORIGINS = "https://juldigi.github.io,https://juldigi0107.github.io"
 
-[[d1_databases]]
-binding = "DB"
-database_name = "offset5-digital-twin"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
-migrations_dir = "migrations"
+[assets]
+directory = "../dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*"]
