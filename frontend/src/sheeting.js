@@ -68,13 +68,13 @@ export class SheetingMachineTemplate{
 
     // Operator-side catwalk only. Reference imagery does not support a full-width mirrored deck on both sides.
     const access=this.group(this.root,'sheeting-access','Operator Catwalk / Service Access',[-.35,0,0],[0,.38,-.55]);
-    this.box(access,[9.10,.10,.82],[-.45,.55,-2.06],'steel',.015,{detail:true});
-    for(const x of [-4.55,-2.75,-.95,.85,2.65,4.05])for(const z of [-2.31,-1.81])this.box(access,[.10,.55,.10],[x,.275,z],'steel',.012,{detail:true});
-    this.rail(access,-4.95,4.05,-2.47,1.38);
+    this.box(access,[9.10,.10,.82],[-.45,.55,-2.30],'steel',.015,{detail:true});
+    for(const x of [-4.55,-2.75,-.95,.85,2.65,4.05])for(const z of [-2.55,-2.05])this.box(access,[.10,.55,.10],[x,.275,z],'steel',.012,{detail:true});
+    this.rail(access,-4.95,4.05,-2.71,1.38);
     // Grounded access stair blocks: no floating treads.
     for(let i=0;i<3;i++){
       const h=.12+i*.15;
-      this.box(access,[.76,h,.52],[-1.05-i*.20,h/2,-2.05],'steel',.01,{detail:true});
+      this.box(access,[.76,h,.52],[-1.05-i*.20,h/2,-2.29],'steel',.01,{detail:true});
     }
 
     // DOUBLE HYDRAULIC SHAFTLESS UNWIND FAMILY REFERENCE.
@@ -93,11 +93,11 @@ export class SheetingMachineTemplate{
     for(const station of reelStations){
       this.cyl(rollstand,station.r,2.64,[station.x,1.10,0],station.paper,'z',{active:true,motion:'reel'});
       for(const side of [-1,1]){
-        const chuckZ=side*1.44,armZ=side*1.70,bridgeZ=side*1.58;
+        const chuckZ=side*1.44,armZ=side*1.70,bridgeZ=side*1.68;
         this.cyl(rollstand,.15,.24,[station.x,1.10,chuckZ],'dark','z',{detail:true,active:true,motion:'chuck'});
-        // Hydraulic pickup arm sits outside the chuck axis; a short bridge connects them without mesh penetration.
+        // Hydraulic pickup arm sits outside the chuck axis; bridge begins at the chuck end instead of penetrating it.
         this.box(rollstand,[.16,1.00,.18],[station.x,.60,armZ],'steel',.018,{detail:true});
-        this.box(rollstand,[.18,.16,.34],[station.x,1.10,bridgeZ],'bodyDark',.018,{detail:true});
+        this.box(rollstand,[.18,.16,.24],[station.x,1.10,bridgeZ],'bodyDark',.018,{detail:true});
         this.box(rollstand,[.52,.16,.18],[station.x+(station.x>0?-.18:.18),.24,armZ],'bodyDark',.018,{detail:true});
       }
     }
@@ -128,6 +128,7 @@ export class SheetingMachineTemplate{
     for(const z of [-1.46,1.46]){
       this.box(feed,[.08,.18,.10],[-.92,1.28,z],'yellow',.01,{detail:true});
       this.box(feed,[.10,.30,.10],[-.92,1.11,z],'steel',.01,{detail:true});
+      this.box(feed,[.36,.08,.10],[-1.10,.98,z],'steel',.01,{detail:true});
     }
     this.box(feed,[2.96,.018,1.40],[.02,1.42,0],'paper',.004);
 
@@ -143,6 +144,7 @@ export class SheetingMachineTemplate{
       this.box(cutter,[1.26,.42,.08],[.18,1.48,z+(z<0?-.13:.13)],'bodyDark',.02,{cover:true});
     }
     this.box(cutter,[2.24,.38,3.54],[0,1.84,0],'body',.055,{cover:true});
+    for(const x of [-1.20,1.20])for(const z of [-1.55,1.55])this.box(cutter,[.18,.74,.24],[x,.37,z],'steel',.015,{detail:true});
     this.box(cutter,[.34,.88,3.36],[1.20,1.18,0],'bodyDark',.04,{cover:true});
     this.box(cutter,[.32,.82,3.36],[-1.20,1.15,0],'white',.04,{cover:true});
     // Small inspection windows on operator-side housing.
@@ -176,7 +178,7 @@ export class SheetingMachineTemplate{
     // Upper overlap/shingling belt frame.
     const overlap=this.group(delivery,'sheeting-overlap','Overlap / Shingling Belt Section',[.58,0,0],[0,.20,0]);
     for(const z of [-.92,.92])this.box(overlap,[2.22,.08,.08],[.15,1.26,z],'white',.012,{detail:true});
-    for(const x of [-.90,1.10])for(const z of [-.92,.92])this.box(overlap,[.08,.90,.08],[x,.77,z],'white',.01,{detail:true});
+    for(const x of [-.60,.90])for(const z of [-.92,.92])this.box(overlap,[.08,1.22,.08],[x,.61,z],'white',.01,{detail:true});
     for(const x of [-.72,-.12,.48,.92])this.cyl(overlap,.07,1.62,[x,1.18,0],'black','z',{detail:true,active:true,motion:'delivery-roller'});
     for(const z of [-.46,-.15,.15,.46])this.box(overlap,[1.78,.022,.055],[.10,1.11,z],'black',.003,{detail:true});
     // Low removable side guards, not tall solid walls.
@@ -194,11 +196,12 @@ export class SheetingMachineTemplate{
     this.box(layboy,[.18,1.42,2.54],[-1.04,.71,0],'bodyDark',.035,{cover:true});
 
     // Compact operator HMI near cutter, plus electrical cabinet kept separate from unwind.
-    const control=this.group(this.root,'sheeting-control','HMI / Electrical / Hydraulic Controls',[1.25,0,-2.88],[.25,.45,-.4]);
+    const control=this.group(this.root,'sheeting-control','HMI / Electrical / Hydraulic Controls',[1.25,0,-3.25],[.25,.45,-.4]);
     this.box(control,[.72,1.12,.60],[0,.56,0],'body',.045,{cover:true});
-    this.box(control,[.56,.44,.055],[0,.77,-.30],'glass',.02,{detail:true});
-    this.cyl(control,.065,.05,[-.23,.41,-.295],'yellow','z',{detail:true});
-    this.cyl(control,.050,.05,[.02,.41,-.295],'black','z',{detail:true});
+    this.box(control,[.56,.44,.055],[0,.77,-.285],'glass',.02,{detail:true});
+    this.box(control,[.38,.26,.035],[-.10,.38,-.292],'dark',.01,{detail:true});
+    this.cyl(control,.065,.05,[-.23,.41,-.305],'yellow','z',{detail:true});
+    this.cyl(control,.050,.05,[.02,.41,-.305],'black','z',{detail:true});
     this.box(control,[.80,.32,.66],[.86,.16,.03],'bodyDark',.03,{cover:true});
 
     // Continuous web is explicitly routed only up to the cutter.
