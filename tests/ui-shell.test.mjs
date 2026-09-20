@@ -47,10 +47,10 @@ test('test-user shell uses clear user-facing navigation',()=>{
   assert.match(html,/Siap diuji/);
 });
 
-test('v53 uses the requested Factory Digital Twin identity everywhere visible',()=>{
-  assert.match(html,/<title>Factory Digital Twin<\/title>/);
-  assert.match(html,/>Factory Digital Twin<small>BMJ Packaging Offset © 2026 IDJ\.<\/small>/);
-  assert.match(app,/document\.title='Factory Digital Twin · '\+name/);
+test('v53 uses the requested BMJ Digital Twin identity everywhere visible',()=>{
+  assert.match(html,/<title>BMJ Digital Twin<\/title>/);
+  assert.match(html,/>BMJ Digital Twin<small>BMJ Packaging Offset © 2026 IDJ\.<\/small>/);
+  assert.match(app,/document\.title='BMJ Digital Twin · '\+name/);
   assert.doesNotMatch(html,/BMJ PACKAGING OFFSET · EKSPLORASI MESIN 3D/);
 });
 
