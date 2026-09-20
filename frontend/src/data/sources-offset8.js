@@ -1,0 +1,7 @@
+export const OFFSET8_ORIENTATION={sheetFlow:'-X to +X',operatorSide:'-Z',driveSide:'+Z'};
+export const OFFSET8_TECHNICAL_SOURCES=[
+ {id:'CX104-OFFICIAL-TECH',authority:'primary',title:'HEIDELBERG Speedmaster CX 104 — Technical information',url:'https://www.heidelberg.com/global/en/print_and_packaging/products/offset_printing/format_70_x_100/speedmaster_cx_104/technical_data/technical_data_cx_104.jsp',supports:['sheet format','stock thickness','speed','plate and blanket geometry','coating blanket','pile heights']},
+ {id:'CX104-OFFICIAL-PRODUCT',authority:'primary',title:'HEIDELBERG Speedmaster CX 104 — Product information',url:'https://www.heidelberg.com/global/en/print_and_packaging/products/offset_printing/format_70_x_100/speedmaster_cx_104/product_information_5/product_information_cx_104.jsp',supports:['machine family','packaging application','Preset Plus architecture']},
+ {id:'BMJ-ASSET-REGISTRY',authority:'site-record',title:'BMJ machine registry — BMJ-MCH-0005',supports:['model','serial','year','SAP code','installed LYYL sequence']},
+ {id:'MODELING-BOUNDARY',authority:'engineering-control',title:'Evidence boundary',supports:['Dryer housings and airflow are represented functionally; UV/IR/LED energy type is intentionally not asserted without installed-machine evidence.']}
+];
