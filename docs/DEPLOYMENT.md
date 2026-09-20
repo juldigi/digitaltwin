@@ -1,58 +1,49 @@
-# Deployment GitHub + Cloudflare — Digital Twin V56
+# Deployment GitHub + Cloudflare — Digital Twin V58
 
-## 1. Frontend GitHub Pages
+## 1. Source dan frontend build
 
-Repositori aktif: `juldigi/digitaltwin` (private).
+Repositori aktif: `juldigi/digitaltwin` (**private**).
 
-1. Buka **Settings → Pages → Build and deployment** lalu pilih **GitHub Actions**.
-2. Workflow **Build and deploy GitHub Pages** berjalan ketika ada push ke `main` atau dijalankan manual.
-3. Workflow menjalankan build dan test sebelum mengunggah folder `dist`.
-4. Origin Pages untuk akun baru adalah `https://juldigi.github.io`; path project umumnya `/digitaltwin/`.
-5. Repo tetap private. Visibilitas source code tidak perlu diubah hanya untuk menyesuaikan konfigurasi aplikasi.
+1. Push ke `main` menjalankan workflow **Verify frontend V58** untuk `npm ci`, build, dan seluruh regression test.
+2. `npm run build` menghasilkan folder `dist` dengan HTML, CSS, modul aplikasi, serta Three.js lokal.
+3. GitHub Pages tidak diperlukan untuk runtime aplikasi. Repo dapat tetap private.
+4. Workflow Cloudflare melakukan build/test ulang sebelum deployment sehingga Worker hanya menerima build yang lolos regression suite.
 
-## 2. Backend Cloudflare Workers + D1
+## 2. Cloudflare Workers Static Assets + D1
 
-Nama Worker dan D1 lama **dipertahankan untuk kompatibilitas**:
-- Worker: `offset5-digital-twin-api`
-- D1: `offset5-digital-twin`
+Worker `digitaltwin` menggunakan konfigurasi `backend/wrangler.toml`.
 
-Nama resource lama tidak berarti backend hanya mendukung Offset 5; V56 frontend sudah menangani registry 41 equipment.
+- `[assets].directory = "../dist"` menyajikan frontend langsung dari Worker.
+- Binding `ASSETS` dipakai untuk semua request non-`/api/*`.
+- `run_worker_first = ["/api/*"]` membuat API tetap ditangani `backend/worker.js`.
+- `not_found_handling = "single-page-application"` menjaga route aplikasi tetap kembali ke frontend shell.
+- D1 binding harus bernama `DB`.
 
 ### Konfigurasi
 
-1. Binding database harus bernama `DB`.
-2. Isi `database_id` di `backend/wrangler.toml` dengan ID D1 aktual sebelum deployment.
-3. Jalankan migrasi `backend/migrations/0001_initial.sql`.
-4. Atur `ALLOWED_ORIGINS` untuk origin yang memang dipakai. Konfigurasi repo saat ini mempertahankan origin lama dan menambahkan `https://juldigi.github.io` agar migrasi akun tidak memutus akses.
-5. Atur secret Worker `ADMIN_TOKEN` dan `VIEWER_TOKEN` dengan nilai kuat dan berbeda. Jangan menyimpan token di source code, URL, atau screenshot.
-6. Deploy dengan konfigurasi `backend/wrangler.toml`.
-7. Periksa `/api/health`; `ready` harus bernilai `true` ketika D1 dan kedua secret tersedia.
-8. Isi `frontend/config.json` dengan origin Worker jika ingin koneksi default; nilai kosong mempertahankan mode lokal dan pengguna dapat mengisi koneksi dari UI.
+1. Pastikan D1 binding `DB` mengarah ke database Digital Twin aktual.
+2. Jalankan migrasi `backend/migrations/0001_initial.sql` bila database belum diinisialisasi.
+3. Atur Worker secret `ADMIN_TOKEN` dan `VIEWER_TOKEN` dengan nilai kuat dan berbeda.
+4. GitHub Actions membutuhkan secret `CLOUDFLARE_API_TOKEN` dan `CLOUDFLARE_ACCOUNT_ID`.
+5. Deploy dilakukan dari direktori `backend` dengan Wrangler.
+6. Periksa `/api/health`; `ready` harus `true` ketika D1 dan kedua secret tersedia, dan `assets` harus `true`.
+7. Karena frontend dan API berada pada origin Worker yang sama, CORS tidak diperlukan untuk penggunaan normal pada URL Workers.
 
-## 3. GitHub Actions untuk Cloudflare
-
-Repository secrets/variables yang diperlukan oleh workflow:
-- Secret `CLOUDFLARE_API_TOKEN`
-- Secret `CLOUDFLARE_ACCOUNT_ID`
-- Variable `CLOUDFLARE_D1_DATABASE_ID`
-
-API token cukup diberi izin yang diperlukan untuk Workers Scripts dan D1 pada account tujuan. Worker authentication token aplikasi (`ADMIN_TOKEN` / `VIEWER_TOKEN`) tetap disimpan sebagai Worker secret, bukan GitHub source.
-
-## 4. Verifikasi end-to-end
+## 3. Verifikasi V58
 
 Setelah deployment, verifikasi:
-- GitHub Pages memuat V56 dan cache service worker berubah ke namespace V56.
+- URL Worker memuat **Factory Digital Twin V58**.
 - Daftar Mesin menampilkan **41 equipment**.
-- Offset 5, Offset 10, dan APM 2 membuka geometry khusus masing-masing.
+- Offset 5, Offset 10, APM 2, dan Sheeting Lexus membuka geometry khusus masing-masing.
+- Sheeting: continuous web hanya berada sebelum knife; individual sheet hanya muncul setelah cutter; layboy menurunkan lift table saat pile bertambah.
 - Equipment lainnya membuka builder keluarga proses dan tidak diklaim sebagai CAD OEM.
 - Mode Denah memakai layout aktual yang tersedia; posisi approximate tetap ditandai sebagai approximate.
 - GET `/api/state` tanpa token → 401.
 - Viewer dapat membaca tetapi tidak dapat menulis → 403 pada mutation.
 - Admin dapat menyimpan state dengan revision guard.
 - Konflik revision menghasilkan 409 dan tidak menimpa perubahan lain.
-- Origin yang tidak diizinkan ditolak.
 - Uji desktop, mobile portrait/landscape, WebGL fallback, cutaway, explode, isolate, label komponen dan simulasi.
 
-## 5. Batas verifikasi
+## 4. Batas verifikasi
 
-DXF, foto aktual, database mesin dan dokumen teknis tetap menjadi sumber utama fidelity. Data yang belum memiliki bukti tidak boleh dinaikkan statusnya menjadi verified. Penamaan resource backend lama dipertahankan semata-mata untuk kompatibilitas deployment.
+DXF, foto aktual, database mesin dan dokumen teknis tetap menjadi sumber utama fidelity. Data yang belum memiliki bukti tidak boleh dinaikkan statusnya menjadi verified.
