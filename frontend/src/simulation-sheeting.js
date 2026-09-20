@@ -25,14 +25,14 @@ export class SheetingProcessSimulation{
   }
   buildPath(){
     const pre=[
-      new THREE.Vector3(6.65,1.72,0),new THREE.Vector3(5.63,1.72,0),new THREE.Vector3(5.05,1.46,0),
+      new THREE.Vector3(7.30,1.72,0),new THREE.Vector3(6.13,1.72,0),new THREE.Vector3(5.53,1.46,0),
       new THREE.Vector3(4.73,1.55,0),new THREE.Vector3(4.23,1.30,0),new THREE.Vector3(3.73,1.48,0),
       new THREE.Vector3(3.33,1.18,0),new THREE.Vector3(2.72,1.12,0),new THREE.Vector3(2.10,1.08,0),new THREE.Vector3(1.72,1.08,0)
     ];
     const post=[
       new THREE.Vector3(1.43,1.00,0),new THREE.Vector3(.70,.925,0),new THREE.Vector3(-.40,.925,0),
       new THREE.Vector3(-1.60,.925,0),new THREE.Vector3(-2.80,.92,0),new THREE.Vector3(-3.85,.90,0),
-      new THREE.Vector3(-4.55,.82,0),new THREE.Vector3(-5.20,.72,0),new THREE.Vector3(-6.00,.65,0)
+      new THREE.Vector3(-4.70,.82,0),new THREE.Vector3(-5.45,.72,0),new THREE.Vector3(-6.30,.65,0)
     ];
     this.preCutCurve=new THREE.CatmullRomCurve3(pre,false,'catmullrom',.06);
     this.postCutCurve=new THREE.CatmullRomCurve3(post,false,'catmullrom',.06);
@@ -50,7 +50,7 @@ export class SheetingProcessSimulation{
   }
   buildPile(){
     const geo=new THREE.BoxGeometry(1.48,.012,2.00);this.pileGeometry=geo;
-    for(let i=0;i<30;i++){const mesh=new THREE.Mesh(geo,this.sheetMaterial);mesh.visible=false;mesh.name='Finished sheet pile';mesh.userData.finishedSheet=true;mesh.position.set(-6.00,.65,0);this.group.add(mesh);this.pile.push(mesh);}
+    for(let i=0;i<30;i++){const mesh=new THREE.Mesh(geo,this.sheetMaterial);mesh.visible=false;mesh.name='Finished sheet pile';mesh.userData.finishedSheet=true;mesh.position.set(-6.30,.65,0);this.group.add(mesh);this.pile.push(mesh);}
   }
   state(){
     const progress=(this.elapsed/this.processCycle)%1,stageIndex=Math.min(SHEETING_SIMULATION_STAGES.length-1,Math.floor(progress*SHEETING_SIMULATION_STAGES.length));
@@ -82,7 +82,7 @@ export class SheetingProcessSimulation{
     const fleetPeriod=this.cutInterval*this.sheets.length;
     for(const [i,s] of this.sheets.entries()){const local=this.elapsed-i*this.cutInterval;if(local<0){s.visible=false;continue;}const cycleTime=((local%fleetPeriod)+fleetPeriod)%fleetPeriod,t=cycleTime/this.sheetTravel;if(t<0||t>=1){s.visible=false;continue;}s.visible=this.active;const p=this.postCutCurve.getPointAt(t),tangent=this.postCutCurve.getTangentAt(t);s.position.copy(p);s.rotation.set(0,-Math.atan2(tangent.z,tangent.x),0);}
     const visible=Math.min(this.pile.length,this.completed),topY=.65;
-    for(let i=0;i<this.pile.length;i++){const sheet=this.pile[i];sheet.visible=i<visible;if(sheet.visible)sheet.position.set(-6.00,topY-(visible-1-i)*.012,0);}
+    for(let i=0;i<this.pile.length;i++){const sheet=this.pile[i];sheet.visible=i<visible;if(sheet.visible)sheet.position.set(-6.30,topY-(visible-1-i)*.012,0);}
   }
   update(now){if(!this.active||!this.running){this.lastNow=now;return;}if(this.lastNow==null){this.lastNow=now;return;}const dt=Math.min((now-this.lastNow)/1000,.05)*this.speed;this.lastNow=now;this.elapsed+=dt;this.cutCount=Math.floor(this.elapsed/this.cutInterval);this.completed=Math.max(0,Math.floor((this.elapsed-this.sheetTravel)/this.cutInterval)+1);this.updateMechanisms();this.updateWebFlow();this.updateSheets();this.onUpdate?.(this.state());}
   dispose(){this.stop();this.sheetGeometry.dispose();this.pileGeometry.dispose();this.webFlowGeometry.dispose();this.sheetMaterial.dispose();this.flowMaterial.dispose();this.path.geometry.dispose();this.pathMaterial.dispose();this.group.removeFromParent();}
