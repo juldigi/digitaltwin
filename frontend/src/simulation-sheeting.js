@@ -280,6 +280,13 @@ export class SheetingProcessSimulation{
         this.spinFromRest(m,-this.elapsed*rate);
       }
       if(motion==='lift-table')m.position.y=m.userData.restPosition.y-liftDrop;
+      if(motion==='stack-jogger-x'){
+        m.position.x=m.userData.restPosition.x+Math.sin(this.elapsed*18)*.012;
+      }
+      if(motion==='stack-jogger-z'){
+        const sign=m.userData.restPosition.z>=0?1:-1;
+        m.position.z=m.userData.restPosition.z-sign*(.010+.006*Math.sin(this.elapsed*20));
+      }
     }
   }
 
@@ -313,14 +320,18 @@ export class SheetingProcessSimulation{
     age-=this.slowDuration;
     if(age<this.overlapDuration){
       const k=age/this.overlapDuration,{p,tan,angle}=this.curvePose(this.overlapCurve,k);
+      // A tiny vertical offset prevents coplanar z-fighting while preserving the visual shingle effect.
+      p.y+=.008*(1-k);
       return {p,tan,angle,zone:'OVERLAP'};
     }
     age-=this.overlapDuration;
     const k=age/this.landingDuration,{p,tan,angle}=this.curvePose(this.landingCurve,k);
-    // During landing, blend the final Y to the live pile top so sheets do not teleport.
-    if(k>.45){
-      const q=clamp01((k-.45)/.55);
-      p.y=THREE.MathUtils.lerp(p.y,pileTop+this.pileSheetThickness*.65,q);
+    // During landing, use a smooth air-cushion-like descent and flatten before the sheet is committed to the pile.
+    if(k>.35){
+      const q=clamp01((k-.35)/.65);
+      const smooth=q*q*(3-2*q);
+      p.y=THREE.MathUtils.lerp(p.y,pileTop+this.pileSheetThickness*.65,smooth);
+      angle=THREE.MathUtils.lerp(angle,0,smooth);
     }
     return {p,tan,angle,zone:'LANDING'};
   }
