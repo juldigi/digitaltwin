@@ -41,8 +41,37 @@ const FAMILY_SOURCES={
  compressor:[['Atlas Copco compressor principles','https://www.atlascopco.com/en-us/compressors/wiki/compressed-air-articles/how-does-a-screw-compressor-work'],['KAESER compressor family','https://www.kaeser.com/ie-en/products/rotary-screw-compressors/'],['SWAN official','https://www.swan-aircompressor.com/']],
  ahu:[['Trane air handlers','https://www.trane.com/commercial/north-america/us/en/products-systems/air-handlers.html'],['ASHRAE standards','https://www.ashrae.org/technical-resources/standards-and-guidelines']]
 };
+const EVIDENCE_BY_NO=new Map([
+ [1,{grade:'MODEL_IDENTIFIED',geometry:'FAMILY_REFERENCE',simulation:'BLOCKED',reason:'POLAR 115 EM MON identity is known, but installed guards, tables, hydraulics and knife-drive configuration still need BMJ photos/manual.'}],
+ [4,{grade:'IDENTITY_ONLY',geometry:'PLACEHOLDER',simulation:'BLOCKED',reason:'Model code YA1A1A has no verified OEM/configuration evidence in the registry.'}],
+ [5,{grade:'MODEL_IDENTIFIED',geometry:'OFFICIAL_FAMILY_REFERENCE',simulation:'BLOCKED',reason:'CX 104-8+LYYL identity is known; installed dryer/coating/delivery options still need serial-specific evidence.'}],
+ [6,{grade:'MODEL_IDENTIFIED',geometry:'OFFICIAL_FAMILY_REFERENCE',simulation:'BLOCKED',reason:'SX 52-4+L identity is known; installed coating/dryer/delivery configuration still needs serial-specific evidence.'}],
+ [7,{grade:'MODEL_IDENTIFIED',geometry:'FAMILY_REFERENCE',simulation:'BLOCKED',reason:'FZ 1200 identity is known but OEM and installed clamp/aeration arrangement are unresolved.'}],
+ [8,{grade:'MODEL_IDENTIFIED',geometry:'FAMILY_REFERENCE',simulation:'BLOCKED',reason:'FZ 1200 identity is known but OEM and installed clamp/aeration arrangement are unresolved.'}],
+ [11,{grade:'MODEL_IDENTIFIED',geometry:'FAMILY_REFERENCE',simulation:'BLOCKED',reason:'MK 920 YMI identity is known; foil paths, platen option and delivery configuration need machine-specific evidence.'}],
+ [12,{grade:'MODEL_IDENTIFIED',geometry:'FAMILY_REFERENCE',simulation:'BLOCKED',reason:'MK 920 YMI-II identity is known; foil paths, platen option and delivery configuration need machine-specific evidence.'}],
+ [13,{grade:'MODEL_IDENTIFIED',geometry:'FAMILY_REFERENCE',simulation:'BLOCKED',reason:'MK 1060 ER identity is known; stripping/blanking option configuration needs machine-specific evidence.'}],
+ [14,{grade:'MODEL_IDENTIFIED',geometry:'OFFICIAL_FAMILY_REFERENCE',simulation:'BLOCKED',reason:'Promatrix 106 CSB identity is known; installed feeder, stripping and blanking details need serial-specific evidence.'}],
+ [15,{grade:'MODEL_IDENTIFIED',geometry:'OFFICIAL_FAMILY_REFERENCE',simulation:'BLOCKED',reason:'Promatrix 106 CSB identity is known; installed feeder, stripping and blanking details need serial-specific evidence.'}],
+ [16,{grade:'MODEL_IDENTIFIED',geometry:'FAMILY_REFERENCE',simulation:'BLOCKED',reason:'MEDIA 100 II identity is known; module train, glue heads and compression section need serial-specific evidence.'}],
+ [17,{grade:'IDENTITY_ONLY',geometry:'PLACEHOLDER',simulation:'BLOCKED',reason:'Folder Gluer 2 has no model, serial or OEM in the BMJ registry.'}],
+ [18,{grade:'MODEL_IDENTIFIED',geometry:'FAMILY_REFERENCE',simulation:'BLOCKED',reason:'MEDIA 100 II identity is known; module train, glue heads and compression section need serial-specific evidence.'}],
+ [19,{grade:'MODEL_IDENTIFIED',geometry:'OFFICIAL_FAMILY_REFERENCE',simulation:'BLOCKED',reason:'DIANA EYE 55 identity is known; installed feeder/camera/reject configuration needs serial-specific evidence.'}],
+ [20,{grade:'MODEL_IDENTIFIED',geometry:'FAMILY_REFERENCE',simulation:'BLOCKED',reason:'FS-SHARK-N650-P3N1 identity is known; exact transport, camera and reject layout needs primary documentation.'}],
+ [21,{grade:'MODEL_IDENTIFIED',geometry:'FAMILY_REFERENCE',simulation:'BLOCKED',reason:'QF-100CS identity is known; stripping, blanking and waste-handling configuration needs primary documentation.'}],
+ [22,{grade:'MODEL_IDENTIFIED',geometry:'FAMILY_REFERENCE',simulation:'BLOCKED',reason:'FZ 1200 identity is known but OEM and installed clamp/aeration arrangement are unresolved.'}],
+ [23,{grade:'IDENTITY_ONLY',geometry:'PLACEHOLDER',simulation:'BLOCKED',reason:'Collator has no model, serial or OEM in the BMJ registry.'}],
+ [24,{grade:'MODEL_IDENTIFIED',geometry:'FAMILY_REFERENCE',simulation:'BLOCKED',reason:'UPG-LY300 identity is recorded, but authoritative machine documentation and installed configuration are absent.'}],
+ [25,{grade:'IDENTITY_ONLY',geometry:'PLACEHOLDER',simulation:'BLOCKED',reason:'CTP 1 has no Heidelberg model/serial in the BMJ registry.'}],
+ [26,{grade:'IDENTITY_ONLY',geometry:'PLACEHOLDER',simulation:'BLOCKED',reason:'CTP 2 has no Heidelberg model/serial in the BMJ registry.'}],
+ [27,{grade:'IDENTITY_ONLY',geometry:'PLACEHOLDER',simulation:'BLOCKED',reason:'SCREEN imagesetter model and serial are absent.'}],
+ [28,{grade:'IDENTITY_ONLY',geometry:'PLACEHOLDER',simulation:'BLOCKED',reason:'Zünd cutter model, table size and tool configuration are absent.'}],
+ ...[29,30,31,32,33,34,35].map(no=>[no,{grade:'IDENTITY_ONLY',geometry:'PLACEHOLDER',simulation:'BLOCKED',reason:'Compressor brand/number alone is insufficient to identify enclosure, air-end, motor, cooler and piping arrangement.'}]),
+ ...[36,37,38,39,40,41].map(no=>[no,{grade:'IDENTITY_ONLY',geometry:'PLACEHOLDER',simulation:'BLOCKED',reason:'AHU number/brand alone is insufficient to identify casing sections, fan type, coil/filter arrangement and airflow direction.'}])
+]);
+const DEFAULT_EVIDENCE=Object.freeze({grade:'IDENTITY_ONLY',geometry:'PLACEHOLDER',simulation:'BLOCKED',reason:'Machine-specific evidence is insufficient for mechanically faithful geometry or simulation.'});
 const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-export function universalMachineConfig(machineId){const machine=MACHINE_REGISTRY_BY_ID.get(machineId);if(!machine)return null;const family=FAMILY_BY_NO.get(machine.no);if(!family)return null;return {machine,family,label:LABELS[family],modules:MODULES[family]};}
+export function universalMachineConfig(machineId){const machine=MACHINE_REGISTRY_BY_ID.get(machineId);if(!machine)return null;const family=FAMILY_BY_NO.get(machine.no);if(!family)return null;return {machine,family,label:LABELS[family],modules:MODULES[family],evidence:Object.freeze(EVIDENCE_BY_NO.get(machine.no)||DEFAULT_EVIDENCE)};}
 export function universalTechnicalSources(machineId){const cfg=universalMachineConfig(machineId);if(!cfg)return [];return (FAMILY_SOURCES[cfg.family]||[]).map(([title,url],i)=>({id:`FAMILY-${cfg.family.toUpperCase()}-${i+1}`,title,publisher:new URL(url).hostname.replace(/^www\./,''),url,type:'TECHNICAL_REFERENCE',confidence:cfg.machine.model?'MEDIUM CONFIDENCE':'REFERENCE ONLY'}));}
 
 export function universalTaxonomy(machineId){
@@ -57,7 +86,7 @@ export function universalTaxonomy(machineId){
 export class UniversalMachineTemplate{
  constructor(machineId){
   this.cfg=universalMachineConfig(machineId);if(!this.cfg)throw new Error('Konfigurasi model 3D mesin tidak ditemukan.');
-  this.root=new THREE.Group();this.root.name='MACHINE-UNIVERSAL';this.root.userData={assetId:machineId,family:this.cfg.family,confidence:this.cfg.machine.model?'FAMILY_REFERENCE':'REFERENCE_ONLY'};
+  this.root=new THREE.Group();this.root.name='MACHINE-UNIVERSAL';this.root.userData={assetId:machineId,family:this.cfg.family,confidence:this.cfg.evidence.geometry,evidenceGrade:this.cfg.evidence.grade,simulationStatus:this.cfg.evidence.simulation,evidenceReason:this.cfg.evidence.reason,geometryStatus:'NON_DEDICATED_REFERENCE__NOT_ACTUAL_BMJ_CONFIGURATION'};
   this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.exteriorOpen=false;this.ghosted=false;this.activeMeshes=[];
   this.palette={body:0xe5e7e4,dark:0x283238,steel:0x8c999d,accent:0x2d6e72,orange:0xc86f42,paper:0xeee7d2,glass:0x68a3b5,blue:0x447899,filter:0xd5c7a5};
   this.build();this.taxonomy=universalTaxonomy(machineId);this.taxonomyById=new Map(this.taxonomy.map(n=>[n.id,n]));
@@ -101,9 +130,9 @@ export class UniversalMachineTemplate{
 }
 
 export class UniversalProcessSimulation{
- constructor(machine,template){this.machine=machine;this.template=template;this.group=new THREE.Group();this.group.name='UNIVERSAL-PROCESS-SIMULATION';machine.add(this.group);this.active=false;this.running=false;this.speed=1;this.elapsed=0;this.lastNow=null;this.completed=0;this.pathVisible=true;this.inkFlowVisible=false;this.onUpdate=null;}
- state(){return {active:this.active,running:this.running,paused:this.active&&!this.running,speed:this.speed,stage:this.template.cfg.modules[Math.floor(this.elapsed*.45)%this.template.cfg.modules.length],completed:this.completed,progress:(this.elapsed*.18)%1,sheetsVisible:this.active?1:0,pileSheetsVisible:this.completed%20,rotorCount:this.template.activeMeshes.length,oscillatorCount:0,mechanismCount:this.template.activeMeshes.length,inkFlowCount:0,uvLampCount:0,uvActive:false,pathVisible:this.pathVisible,inkFlowVisible:false};}
- start(){this.active=true;this.running=true;this.lastNow=null;this.onUpdate?.(this.state());return this.state();}pause(){this.running=false;return this.state();}resume(){this.running=true;this.lastNow=null;return this.state();}stop(){this.active=false;this.running=false;this.elapsed=0;this.completed=0;this.lastNow=null;return this.state();}setSpeed(v){this.speed=Math.max(.35,Math.min(2,+v||1));return this.state();}setPathVisible(v){this.pathVisible=!!v;return this.state();}setInkFlowVisible(){return this.state();}
- update(now){if(!this.active||!this.running){this.lastNow=now;return;}if(this.lastNow==null){this.lastNow=now;return;}const dt=Math.min((now-this.lastNow)/1000,.05)*this.speed;this.lastNow=now;this.elapsed+=dt;if(Math.floor((this.elapsed-dt)/4)<Math.floor(this.elapsed/4))this.completed++;for(const [i,m] of this.template.activeMeshes.entries())m.rotation.z+=dt*(1+i%3)*1.5;this.onUpdate?.(this.state());}
+ constructor(machine,template){this.machine=machine;this.template=template;this.group=new THREE.Group();this.group.name='UNIVERSAL-PROCESS-SIMULATION-BLOCKED';machine.add(this.group);this.active=false;this.running=false;this.speed=1;this.elapsed=0;this.lastNow=null;this.completed=0;this.pathVisible=false;this.inkFlowVisible=false;this.onUpdate=null;this.available=false;this.blockedReason=template.cfg.evidence.reason;}
+ state(){return {available:false,blocked:true,blockedReason:this.blockedReason,evidenceGrade:this.template.cfg.evidence.grade,geometryStatus:this.template.cfg.evidence.geometry,active:false,running:false,paused:false,speed:this.speed,stage:'Simulasi belum tervalidasi',completed:0,progress:0,sheetsVisible:0,pileSheetsVisible:0,rotorCount:0,oscillatorCount:0,mechanismCount:0,inkFlowCount:0,uvLampCount:0,uvActive:false,pathVisible:false,inkFlowVisible:false};}
+ start(){this.active=false;this.running=false;this.onUpdate?.(this.state());return this.state();}pause(){return this.state();}resume(){return this.start();}stop(){this.active=false;this.running=false;this.elapsed=0;this.completed=0;this.lastNow=null;return this.state();}setSpeed(v){this.speed=Math.max(.35,Math.min(2,+v||1));return this.state();}setPathVisible(){this.pathVisible=false;return this.state();}setInkFlowVisible(){return this.state();}
+ update(now){this.lastNow=now;}
  dispose(){this.stop();this.group.removeFromParent();}
 }
