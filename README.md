@@ -37,7 +37,7 @@ Geometry reference yang masih generik bukan hasil akhir. Penggantian dilakukan p
 6. collision/support/grounding tests;
 7. mechanically causal simulation tests.
 
-## Verification
+Evidence integrity gate berlaku untuk seluruh route universal pada V69.\n\n## Verification
 
 ```sh
 npm ci
