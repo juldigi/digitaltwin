@@ -19,7 +19,17 @@ test('machine master registry preserves the plant area totals',()=>{
   });
 });
 
-test('all database equipment have a confidence-aware 3D route while three flagship twins stay exact',()=>{
+test('all database equipment have a confidence-aware 3D route while four flagship twins stay dedicated',()=>{
+
+  const sheeting=MACHINE_REGISTRY.find(m=>m.sapCode==='SBM-2');
+  assert.ok(sheeting);
+  assert.equal(sheeting.machineId,'BMJ-MCH-0002');
+  assert.equal(sheeting.model,'HSM-CTM7');
+  assert.equal(sheeting.serial,'00982');
+  assert.equal(sheeting.year,2014);
+  assert.match(sheeting.source,/HSM56_FAMILY_REFERENCE/);
+  assert.match(sheeting.note,/RIGHT-to-LEFT/i);
+
   const offset5=MACHINE_REGISTRY.find(m=>m.sapCode==='OFU-1');
   assert.ok(offset5);
   assert.equal(offset5.model,'CD 102-8+L');
