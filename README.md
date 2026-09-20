@@ -1,34 +1,43 @@
-# BMJ Packaging Offset — Factory Digital Twin V67
+# BMJ Packaging Offset — Factory Digital Twin V68
 
-V67 memperbaiki **mode simulasi pemotongan Sheeting Lexus** agar proses potong tidak lagi terlihat seperti kertas terbelah sendiri.
+V68 memperbaiki fungsi **roll besar turquoise pada Sheeting Lexus** agar tidak lagi sekadar berputar tanpa berinteraksi dengan web.
 
-## Evidence yang dipakai
+## Evidence boundary
 
-Identitas BMJ tetap HSM-CTM7 · serial 00982 · SAP SBM-2 · 2014 · RIGHT → LEFT.
+Identitas BMJ tetap:
+- HSM-CTM7
+- serial 00982
+- SAP SBM-2
+- tahun 2014
+- arah proses RIGHT → LEFT
 
-BW Papersystems untuk Lexus HSM 56 tahun 2014 secara eksplisit menuliskan **600 gsm Knife load — Flat Bed Knife**. Itu cukup kuat untuk menampilkan sebuah **flat-bed knife family reference** di cut zone. Namun exact HSM-CTM7 blade profile, stroke, linkage, actuator dan timing OEM tetap belum terverifikasi.
+Silhouette roll besar dan band putih tetap berasal dari foto resmi keluarga Lexus HSM 56 BW Papersystems.
 
-## Geometry V67
+Fungsi **Main Draw / Traction Drum** adalah process-family reference, bukan klaim nama OEM exact HSM-CTM7. Dasarnya:
+- BW sheeter sheet-length/squaring control menyebut draw drum encoder dan knife marker;
+- BW servo upgrade menyebut koordinasi cross cutter, knife dan draw-drum functions;
+- Unico menghubungkan draw roll dengan cutter serta high/low-speed tapes;
+- Maxson menempatkan large-diameter draw drum pada pull-roll section sebelum cutter.
 
-Di dalam `sheeting-knife` sekarang ada:
-- knife carrier;
-- visible flat-bed blade;
-- bright cutting edge;
-- lower anvil reference;
-- two side guide blocks.
+## Geometry / web path V68
 
-Blade dibuat cukup tinggi agar bagian utamanya terlihat melalui inspection aperture/cutaway.
+- web dari guide/tension menuju head infeed roller;
+- web kemudian naik secara tangensial ke Main Draw / Traction Drum;
+- web mengikuti sampled contact arc pada permukaan drum;
+- web keluar tangensial menuju blade/anvil contact line;
+- cut point disejajarkan dengan visible flat-bed knife;
+- continuous web tetap tidak boleh menembus drum atau roller.
 
-## Simulation V67
+## Simulation V68
 
-- blade selalu ada secara fisik di main head;
-- carrier + blade + cutting edge bergerak sebagai satu assembly;
-- stroke turun/naik disinkronkan dengan cut event;
-- sheet baru **tidak dilepas sebelum blade mencapai contact timing**;
-- blade kembali ke posisi rest setelah setiap stroke dan setelah Stop/Reset;
-- upstream web tetap kontinu;
-- downstream tetap FAST → SLOW → OVERLAP → LANDING → STACK;
-- exact HSM-CTM7 knife actuation tidak diklaim.
+- web advance = elapsed process time × visual line speed;
+- draw drum angular travel = web advance / drum radius;
+- surface speed draw drum = visual web speed;
+- target cut length menentukan interval cut;
+- cut count dihitung dari web advance / target cut length;
+- blade stroke tetap mencapai contact timing sebelum sheet dilepas;
+- sheet lalu bergerak FAST → SLOW → OVERLAP → LANDING → STACK;
+- Stop & Reset mengembalikan drum/blade/lift/jogger ke posisi awal.
 
 ## Verification
 
@@ -38,4 +47,4 @@ npm run build
 npm test
 ```
 
-Regression test mengunci jumlah komponen knife, blade visibility, minimum visible stroke, synchronization dengan sheet release, reset behavior, transport sequence dan collision checks.
+Regression test V68 memeriksa web benar-benar mencapai dan membelit permukaan draw drum, tidak menembus drum, wrap angle cukup terlihat, drum surface speed sama dengan web speed, cut berasal dari web advance, blade tetap sinkron, sheet tidak teleport, dan collision checks tetap bersih.

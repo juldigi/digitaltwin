@@ -1,8 +1,8 @@
-# Deployment — Digital Twin V67
+# Deployment — Digital Twin V68
 
 Repository: `juldigi/digitaltwin`
 
-Service-worker cache: `factory-digital-twin-v67-20260921`.
+Service-worker cache: `factory-digital-twin-v68-20260921`.
 
 ## Required pipeline
 
@@ -12,15 +12,17 @@ Service-worker cache: `factory-digital-twin-v67-20260921`.
 4. Cloudflare credential validation
 5. Workers deployment
 
-## V67 Sheeting gates
+## V68 Sheeting gates
 
-- HSM-CTM7 identity dan RIGHT → LEFT tetap.
-- BW HSM 56 `Flat Bed Knife` hanya digunakan sebagai **family reference**.
-- `sheeting-knife` harus memiliki carrier, visible blade, cutting edge, anvil dan side guides.
-- Carrier/blade/edge harus mempunyai motion `flat-bed-blade-reference`.
-- Blade harus melakukan stroke visual yang nyata saat cut event.
-- Sheet release harus tertunda sampai blade-contact timing.
-- Blade harus kembali ke rest position saat Stop/Reset.
-- Continuous upstream web tidak boleh terputus.
-- FAST → SLOW → OVERLAP → LANDING tetap monotonic menuju LEFT.
-- Significant accidental penetration tetap nol.
+- BMJ identity dan RIGHT → LEFT preserved.
+- Dominant turquoise HSM56-photo-anchored cylinder remains visually unchanged except functional labeling.
+- Draw/traction role must remain marked process-family reference, not exact HSM-CTM7 OEM naming.
+- Web must approach the drum tangentially, maintain surface clearance, wrap visibly, and leave toward the blade.
+- Web must not penetrate the drum.
+- Draw-drum surface travel must equal visual web travel.
+- Cut count must derive from web advance / target cut length.
+- Blade contact timing must precede sheet release.
+- Continuous upstream web remains connected.
+- FAST → SLOW → OVERLAP → LANDING remains monotonic toward LEFT.
+- Stop/Reset must restore blade, drum, lift table and joggers.
+- Significant accidental cross-module penetration remains zero.
