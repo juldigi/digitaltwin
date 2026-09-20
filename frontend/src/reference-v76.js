@@ -77,7 +77,7 @@ function v76BuildSelectionCard(){
       '<div><span>Data operasi</span><b>Belum tersedia</b></div>'+
     '</div><button type="button" class="v76-mobile-detail">Lihat Detail</button>';
   workspace.append(card);
-  card.querySelector('.v76-mobile-detail')?.addEventListener('click',()=>{document.body.classList.remove('panel-hidden');document.body.classList.add('mobile-panel-open');v76Delegate('#panel-toggle');});
+  card.querySelector('.v76-mobile-detail')?.addEventListener('click',()=>{if(document.body.classList.contains('panel-hidden'))v76Delegate('#panel-toggle');else document.body.classList.add('mobile-panel-open');});
   v76RefreshSelection();
 }
 function v76RefreshSelection(){
