@@ -1,58 +1,44 @@
-# BMJ Packaging Offset — Factory Digital Twin V62
+# BMJ Packaging Offset — Factory Digital Twin V63
 
-Digital Twin interaktif area **Packaging Offset PT Bukit Muria Jaya**. V62 melanjutkan build V61 dengan rekonstruksi ulang **Sheeting Lexus HSM-CTM7** berdasarkan bukti visual keluarga yang lebih spesifik, tanpa mengubah geometry khusus Offset 5, Offset 10, dan APM 2.
+Digital Twin interaktif untuk area **Packaging Offset PT Bukit Muria Jaya**. V63 memfokuskan koreksi mendalam pada **Sheeting Lexus HSM-CTM7** berdasarkan visual anchor per zona dari brochure/foto HSM 56 2014 dan cross-check beberapa sumber keluarga HSM.
 
-## Pembaruan V62
+## Pembaruan V63 — Sheeting Lexus
 
-### Sheeting Lexus
-- Identitas BMJ tetap: **LEXUS HSM-CTM7**, serial **00982**, SAP **SBM-2**, tahun **2014**.
-- Orientasi proses yang dikonfirmasi pengguna tetap **RIGHT → LEFT**.
-- Referensi visual utama sekarang adalah brochure/foto **Lexus HSM 56 tahun 2014** dari BW Papersystems, bukan silhouette generik Great Wall/Accura.
-- Interpretasi **dua reel tandem** V59–V61 dihapus. V62 memakai **satu fixed-position/two-sided rollstand family reference** seperti yang terlihat/dideskripsikan pada HSM 56 2014.
-- Feed/tension/EPC memakai roller lebih sedikit dan setiap roller utama memiliki bearing/support yang terlihat agar tidak tampak mengambang.
-- Cutter diubah menjadi **enclosed cross-cut head** dengan inspection window. Exact knife HSM-CTM7 tetap unresolved; HSM 56 flat-bed knife hanya dipakai sebagai family evidence.
-- Delivery diubah menjadi **narrow-belt transport bed** dengan roller bearing/support, adjustment/hold-down rods, dan bukan slab besar.
-- Layboy diubah menjadi **tall portal stacker + flat lift table + pallet**, mengikuti anchor visual HSM 56.
-- Catwalk kuning panjang V61 dihapus dan diganti service deck pendek yang mempunyai support ke lantai.
-- HMI dipisahkan dari service deck untuk menghindari penetration.
-- Simulasi diperbarui: continuous web hanya sebelum cutter, cut sheet sesudah cutter, pile berada pada portal lift-table stacker.
-- Taxonomy 6 tingkat dipetakan ulang ke node fisik V62: reel/chuck, unwind guide, feed rollers, EPC, knife/counterbar, transport rollers, adjustment section, portal stacker.
-- Regression test baru menolak kembalinya tandem reel spekulatif, accidental cross-module penetration, dan moving/static collision.
+Identitas BMJ tetap **LEXUS HSM-CTM7 · serial 00982 · SAP SBM-2 · tahun 2014** dan orientasi proses tetap **RIGHT → LEFT**.
 
-### Evidence policy
-Sumber publik mengenai Lexus sheeter tidak sepenuhnya konsisten. Referensi Indonesia menyebut servo single-rotary + double hydraulic shaftless unwind + auto tension/EPC, sedangkan brochure HSM 56 2014 mencatat flat-bed knife + fixed-position two-sided rollstand. V62:
-1. mempertahankan fakta BMJ dan orientasi user-confirmed sebagai verified,
-2. memprioritaskan HSM 56 2014 sebagai **visual family reference**,
-3. memakai sumber Lexus Indonesia untuk fungsi proses seperti tension/EPC,
-4. tidak mengklaim exact HSM-CTM7 geometry sebagai OEM-verified tanpa drawing/foto BMJ yang spesifik.
+V63 tidak lagi membangun silhouette dari satu asumsi arsitektur. Setiap zona memakai anchor visual yang dapat dilihat pada sumber:
+- **Rollstand:** satu reel rendah dengan opposed chuck/two-sided support. Tidak ada tandem reel spekulatif.
+- **Web handling:** frame guide/tension tinggi dengan empat roller utama yang seluruhnya mempunyai support/bearing.
+- **Main head:** body abu-abu/toska besar dengan **panoramic inspection window**; dua large transverse process cylinders dan ring/collar di dalam direkonstruksi karena terlihat jelas pada foto.
+- **Cross-cut:** fungsi cutting dipertahankan, tetapi exact knife HSM-CTM7 tidak dipaksakan karena sumber publik bertentangan antara istilah flat-bed dan rotary.
+- **Outfeed:** long narrow-belt bed dengan banyak belt longitudinal, hanya dua roller transversal utama, dan lima batang adjustment dengan collar/knob seperti yang terlihat pada foto.
+- **Stacker:** tower rigid dengan upper housing, safety guard, **flat lift table + pallet**; bukan portal terbuka generik.
+- **Operator controls:** console rendah/kompak seperti foto, bukan pedestal HMI tinggi.
+- **Access:** hanya localized stacker steps/landing; long catwalk generik dihapus.
+- Simulasi dipetakan ulang terhadap path V63 dan pile sekarang berada di dalam stacker tower.
+- Taxonomy 6 tingkat dipetakan ulang ke node fisik V63.
+- Regression tests mengunci jumlah reel, roller, belt, adjustment rods, stacker geometry, module clearance dan collision.
 
-## Cakupan
+## Evidence hierarchy
 
-- **41 equipment** dari database mesin Packaging Offset.
-- **4 digital twin khusus**: Offset 5 / OFU-1, Offset 10, APM 2, dan Sheeting Lexus.
-- **37 equipment lainnya** memakai builder parametrik berbasis keluarga proses.
-- Taxonomy **6 tingkat**: Mesin → Unit Utama → Sub → Block → Part → Spesifik Part.
-- Mode 3D mesin, denah pabrik, cutaway/exterior, explode, isolate, component labels, kamera fokus, dan simulasi proses.
-- Frontend dan API dipublikasikan melalui **Cloudflare Workers Static Assets** dari repo private.
-- Rendering Three.js lokal dengan fallback tampilan ketika WebGL tidak tersedia.
+1. **Verified BMJ:** model plant, serial, SAP code, tahun.
+2. **User-confirmed:** arah material RIGHT → LEFT.
+3. **Primary visual family evidence:** BW Papersystems 2014 Lexus HSM 56 brochure/photo.
+4. **Historical family evidence:** Mega Machinery/Megatech listing HSM 52/56/65 sebagai high-speed rotary sheeting machine.
+5. **Process-family evidence:** referensi Lexus Indonesia untuk automatic tension, EPC dan computerized control.
+6. **Secondary comparisons:** Great Wall/Accura hanya untuk pemahaman proses, bukan silhouette utama.
 
-## Mesin khusus
+Karena BW HSM 56 menyebut “flat-bed knife” sementara sumber HSM family lain menyebut rotary, V63 tidak mengklaim exact cutting architecture HSM-CTM7. Bentuk yang terlihat di foto dimodelkan; fungsi yang tidak terbukti tetap berstatus unresolved.
 
-### Offset 5 — OFU-1
-Heidelberg Speedmaster **CD 102-8+L**, serial **550415**, tahun **2011**. Geometry mencakup feeder, PU1–PU8, transfer/gripper, coating/dryer, inspection dan delivery.
+## Cakupan aplikasi
 
-### Offset 10
-Heidelberg Speedmaster **CX104-2-LY-8-LY-1-LX3**. Model menggunakan dokumen proyek/final drawing Heidelberg yang tersedia, termasuk konfigurasi UV, FoilStar dan X3 delivery.
+- **41 equipment** dari database Packaging Offset.
+- **4 digital twin khusus:** Offset 5 / OFU-1, Offset 10, APM 2, dan Sheeting Lexus.
+- Taxonomy **6 tingkat:** Mesin → Unit Utama → Sub → Block → Part → Spesifik Part.
+- 3D machine, factory layout, cutaway/exterior, explode, isolate, component labels, focus camera dan process simulation.
+- Frontend + API dipublikasikan melalui **Cloudflare Workers Static Assets** dari repo private.
 
-### APM 2
-BOBST **SP 102**, serial **57115506**, tahun **1994**. Model proses mencakup feeder, register/SideLay, gripper chain, platen, stripping dan delivery.
-
-### Sheeting Lexus
-LEXUS **HSM-CTM7**, serial **00982**, kode **SBM-2**, tahun **2014**. V62 mempertahankan arah kanan → kiri dan membangun silhouette dari family evidence HSM 56 2014 dengan status confidence yang eksplisit.
-
-## Menjalankan secara lokal
-
-Memerlukan Node.js 24.
+## Menjalankan lokal
 
 ```sh
 npm ci
@@ -63,19 +49,10 @@ npm run dev
 
 ## Deployment
 
-Repo aktif tetap private di **`juldigi/digitaltwin`**. `npm run build` menghasilkan `dist`, kemudian workflow Cloudflare menjalankan Wrangler dari `backend/`. Binding `ASSETS` menyajikan frontend dari `../dist`, sedangkan route `/api/*` ditangani Worker dan D1.
+Repo aktif: `juldigi/digitaltwin`. Push ke `main` menjalankan build, regression test, credential validation dan deployment ke Worker `digitaltwin`.
 
-## Struktur penting
-
-- `frontend/src/app.js` — routing UI dan machine context.
-- `frontend/src/engine.js` — scene, camera, selection, transform dan renderer.
-- `frontend/src/offset5.js`, `offset10.js`, `apm2.js`, `sheeting.js` — geometry khusus.
-- `frontend/src/simulation-sheeting.js` — simulasi Sheeting V62.
-- `frontend/src/data/sources-sheeting.js` — evidence/confidence Sheeting.
-- `frontend/src/data/taxonomy-sheeting.js` — taxonomy 6 tingkat Sheeting.
-- `tests/sheeting.test.mjs` — regression geometry/simulation Sheeting.
-- `backend/` — Workers API + D1 + static asset binding.
+Detail: `docs/DEPLOYMENT.md`.
 
 ## Prinsip fidelity
 
-Detail yang belum mempunyai bukti tidak dinaikkan menjadi verified. Family reference membantu mendekati bentuk/fungsi, tetapi tidak dianggap pengganti drawing OEM atau foto aktual BMJ.
+Geometry family-reference tidak diperlakukan sebagai CAD OEM. Detail hanya dinaikkan menjadi verified jika didukung foto/drawing/data BMJ yang spesifik.
