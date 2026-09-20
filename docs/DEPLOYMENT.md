@@ -1,51 +1,45 @@
-# Deployment GitHub + Cloudflare — Digital Twin V61
+# Deployment GitHub + Cloudflare — Digital Twin V62
 
 ## 1. Source dan frontend build
 
 Repositori aktif: `juldigi/digitaltwin` (**private**).
 
-1. Push ke `main` menjalankan workflow **Verify frontend V61** untuk `npm ci`, build, dan seluruh regression test.
+1. Push ke `main` menjalankan workflow **Verify frontend V62** untuk `npm ci`, build, dan seluruh regression test.
 2. `npm run build` menghasilkan folder `dist` dengan HTML, CSS, modul aplikasi, serta Three.js lokal.
-3. GitHub Pages tidak diperlukan untuk runtime aplikasi. Repo dapat tetap private.
-4. Workflow Cloudflare melakukan build/test ulang sebelum deployment sehingga Worker hanya menerima build yang lolos regression suite.
+3. GitHub Pages tidak diperlukan untuk runtime aplikasi.
+4. Workflow Cloudflare melakukan build/test ulang sebelum deployment.
 
 ## 2. Cloudflare Workers Static Assets + D1
 
-Worker `digitaltwin` menggunakan konfigurasi `backend/wrangler.toml`.
+Worker `digitaltwin` menggunakan `backend/wrangler.toml`.
 
 - `[assets].directory = "../dist"` menyajikan frontend langsung dari Worker.
-- Binding `ASSETS` dipakai untuk semua request non-`/api/*`.
+- Binding `ASSETS` dipakai untuk request non-`/api/*`.
 - `run_worker_first = ["/api/*"]` membuat API tetap ditangani `backend/worker.js`.
-- `not_found_handling = "single-page-application"` menjaga route aplikasi tetap kembali ke frontend shell.
 - D1 binding harus bernama `DB`.
 
-### Konfigurasi
+GitHub Actions membutuhkan `CLOUDFLARE_API_TOKEN` dan `CLOUDFLARE_ACCOUNT_ID`. Worker membutuhkan secret `ADMIN_TOKEN` dan `VIEWER_TOKEN`.
 
-1. Pastikan D1 binding `DB` mengarah ke database Digital Twin aktual.
-2. Jalankan migrasi `backend/migrations/0001_initial.sql` bila database belum diinisialisasi.
-3. Atur Worker secret `ADMIN_TOKEN` dan `VIEWER_TOKEN` dengan nilai kuat dan berbeda.
-4. GitHub Actions membutuhkan secret `CLOUDFLARE_API_TOKEN` dan `CLOUDFLARE_ACCOUNT_ID`.
-5. Deploy dilakukan dari direktori `backend` dengan Wrangler.
-6. Periksa `/api/health`; `ready` harus `true` ketika D1 dan kedua secret tersedia, dan `assets` harus `true`.
-7. Karena frontend dan API berada pada origin Worker yang sama, CORS tidak diperlukan untuk penggunaan normal pada URL Workers.
-
-## 3. Verifikasi V61
-
-Collision gate wajib: cross-unit overlap = 0, moving-part collision = 0, dan unsupported structural geometry = 0.
+## 3. Verifikasi V62
 
 Setelah deployment, verifikasi:
-- URL Worker memuat **Factory Digital Twin V61**.
+
+- URL Worker memuat build V62 dan service worker cache `factory-digital-twin-v62-20260920`.
 - Daftar Mesin menampilkan **41 equipment**.
 - Offset 5, Offset 10, APM 2, dan Sheeting Lexus membuka geometry khusus masing-masing.
-- Sheeting V61: dua posisi reel pada shaftless-unwind reference, open feed/tension/EPC bridge, compact cutter head, long tape/overlap delivery, dan layboy lift table. Unit utama harus lolos collision regression test: unwind/feed/cutter/delivery tidak boleh saling berpotongan, HMI tidak boleh menembus catwalk, dan reel tandem harus memiliki clearance longitudinal. Continuous web hanya berada sebelum cutter; individual sheet hanya muncul setelah cutting.
-- Equipment lainnya membuka builder keluarga proses dan tidak diklaim sebagai CAD OEM.
-- Mode Denah memakai layout aktual yang tersedia; posisi approximate tetap ditandai sebagai approximate.
+- Sheeting V62 mempertahankan **RIGHT → LEFT**.
+- Sheeting hanya menampilkan **satu reel position family reference**, bukan dua reel tandem spekulatif.
+- Feed/tension roller mempunyai bearing/support yang terlihat.
+- Cutter terlihat enclosed; delivery berupa narrow-belt bed; output mempunyai portal stacker dan flat lift table.
+- HMI tidak berpotongan dengan service deck.
+- Continuous web hanya muncul upstream cutter ketika simulasi aktif.
+- Individual cut sheet hanya muncul downstream cutter dan berakhir pada pile stacker.
+- Regression test menolak accidental cross-module penetration dan moving/static collision.
 - GET `/api/state` tanpa token → 401.
-- Viewer dapat membaca tetapi tidak dapat menulis → 403 pada mutation.
+- Viewer tidak dapat melakukan mutation.
 - Admin dapat menyimpan state dengan revision guard.
-- Konflik revision menghasilkan 409 dan tidak menimpa perubahan lain.
 - Uji desktop, mobile portrait/landscape, WebGL fallback, cutaway, explode, isolate, label komponen dan simulasi.
 
 ## 4. Batas verifikasi
 
-DXF, foto aktual, database mesin dan dokumen teknis tetap menjadi sumber utama fidelity. Data yang belum memiliki bukti tidak boleh dinaikkan statusnya menjadi verified.
+Database BMJ dan orientasi yang dikonfirmasi pengguna adalah sumber utama identitas. Brochure HSM 56 2014 dipakai sebagai visual family evidence, bukan bukti bahwa HSM-CTM7 BMJ identik. Drawing/foto aktual HSM-CTM7 BMJ tetap diperlukan untuk menaikkan exact geometry menjadi verified.
