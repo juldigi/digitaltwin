@@ -1,30 +1,35 @@
-# OFFSET 5 — Factory Digital Twin
+# BMJ Packaging Offset — Factory Digital Twin V56
 
-Fondasi aplikasi web dari nol: **frontend GitHub Pages**, **backend Cloudflare Workers + D1**, Vanilla JavaScript dan Three.js. Hanya satu aset: `MACHINE-OFFSET5` / Heidelberg Speedmaster CD 102-8+L.
+Digital Twin interaktif untuk area **Packaging Offset PT Bukit Muria Jaya**. V56 merupakan hasil recovery dari riwayat build yang terverifikasi setelah repositori lama tidak lagi tersedia.
 
-## Status rekonstruksi foto
+## Cakupan V56
 
-Model Offset 5 sudah direkonstruksi dari sembilan foto aktual pengguna: feeder terbuka, deretan cover melengkung, kisi dan roller atas, platform/tangga, serta delivery dengan pagar. Bentuk dan dimensi tetap **RECONSTRUCTED / APPROXIMATE**, bukan CAD resmi atau ukuran mesin terukur.
+- **41 equipment** dari database mesin Packaging Offset.
+- **3 digital twin khusus** dengan rekonstruksi lebih detail: Offset 5 / OFU-1, Offset 10, dan APM 2.
+- **38 equipment lainnya** memakai builder parametrik berbasis keluarga proses agar seluruh database dapat dibuka dalam 3D tanpa mengklaim detail OEM yang belum terverifikasi.
+- Taxonomy **6 tingkat**: Mesin → Unit Utama → Sub → Block → Part → Spesifik Part.
+- Mode **3D mesin**, **denah pabrik**, cutaway/exterior, explode, isolate, component labels, kamera fokus, dan simulasi proses.
+- Rendering Three.js lokal dengan fallback tampilan ketika WebGL tidak tersedia.
+- Layout pabrik memakai data yang dipulihkan dari DXF/layout aktual; posisi yang belum tervalidasi tetap diberi status approximate/reconstruction.
 
-**Layout Phase 1 belum lengkap.** DWG asli sudah diterima dan berhasil diekstrak awal; posisi label OFFSET 5 ditemukan. Footprint, orientasi dan transformasi penempatan belum divalidasi sehingga scene tetap ruang inspeksi terpisah. Tidak ada denah pabrik rekaan.
+## Mesin khusus
 
-Lihat [rincian geometri dan bukti foto](docs/OFFSET5-PHOTO-RECONSTRUCTION.md). Delapan housing adalah susunan visual yang perlu verifikasi konfigurasi terpasang. Komponen tersembunyi tidak dibuat.
+### Offset 5 — OFU-1
+Heidelberg Speedmaster **CD 102-8+L**, serial **550415**, tahun **2011**. Geometry mencakup feeder, PU1–PU8, transfer/gripper, coating/dryer, inspection dan delivery. Foto aktual serta referensi teknis yang tersedia dipakai sebagai acuan visual; detail yang tidak dapat dibuktikan tidak diperlakukan sebagai CAD resmi.
 
-## Sudah tersedia
+### Offset 10
+Heidelberg Speedmaster **CX104-2-LY-8-LY-1-LX3**. Model menggunakan dokumen proyek/final drawing Heidelberg yang tersedia, termasuk konfigurasi UV, FoilStar dan X3 delivery. Field database yang belum tersedia tetap ditandai unknown, bukan diisi dengan asumsi.
 
-- Penampil WebGL 2 / Three.js lokal, orbit/pan/zoom, pemilihan, fokus bounding box dengan transisi, top/isometric/reset.
-- Satu aset dengan metadata, confidence, sumber dan penjelasan batas bukti.
-- Hierarki bentuk luar, explode pilihan, transparansi, isolasi dan reset exact. Bukan katalog part internal terverifikasi.
-- UI Bahasa Indonesia, panel desktop dan panel geser mobile, mode ringan.
-- Import JSON hasil ekstraksi DWG yang sudah ditinjau; entitas mentah tidak dibuang. Ini **bukan parser DWG biner**.
-- Layer mapping, transformasi DWG X/Y → Three X/Z, kalibrasi, anchor, serta editor drag/rotate/scale dan angka.
-- Workers API: viewer/admin, origin allowlist, validasi payload, revision guard, persistensi D1.
-- Cache shell offline dan salinan data IndexedDB secara opt-in. Tidak ada antrean tulis offline.
-- GitHub Actions untuk build/test/Pages, serta workflow manual deployment Workers.
+### APM 2
+BOBST **SP 102**, serial **57115506**, tahun **1994**. Model proses mencakup feeder, register/SideLay, gripper chain, platen, stripping dan delivery. Varian/suffix yang belum terkonfirmasi tidak diklaim.
 
-## Menjalankan
+## Data dan confidence
 
-Node 24:
+Registry membedakan informasi **verified**, **recovered**, **family reference**, dan **approximate**. Equipment generik tetap dapat dieksplorasi, tetapi bentuk proseduralnya bukan pengganti drawing OEM. Posisi layout yang belum memiliki anchor terverifikasi juga tidak dianggap sebagai posisi final.
+
+## Menjalankan secara lokal
+
+Memerlukan Node.js 24.
 
 ```sh
 npm ci
@@ -33,16 +38,23 @@ npm test
 npm run dev
 ```
 
-Buka `http://localhost:4173`. `dist/index.html` memuat UI/CSS/logika aplikasi inline dan menggunakan modul engine di `src/` serta Three.js lokal di `vendor/`. Jangan membuka HTML lewat `file://`.
+Buka alamat yang ditampilkan oleh server development. Jangan menjalankan aplikasi melalui `file://`.
 
 ## Deployment
 
-Lihat [panduan deployment](docs/DEPLOYMENT.md). Backend tidak otomatis aktif sebelum database, origin, dan secrets dikonfigurasi. Frontend tetap menampilkan metadata awal saat backend belum tersambung. Tidak ada token di source code atau penyimpanan browser.
+Frontend disiapkan untuk GitHub Pages dari repo private **`juldigi/digitaltwin`**. Backend tersedia sebagai Cloudflare Workers + D1 dan tetap mempertahankan nama resource lama untuk kompatibilitas deployment. Lihat `docs/DEPLOYMENT.md`.
 
-## Sumber layout
+## Struktur penting
 
-Lihat [kontrak layout](docs/LAYOUT-CONTRACT.md). DWG asli dibutuhkan untuk ekstraksi dan pemeriksaan fidelity. JSON hasil ekstraksi harus mempertahankan layer, ID entitas, hash berkas dan raw metadata. Data sintetis hanya terdapat dalam unit test, bukan data aplikasi.
+- `frontend/src/app.js` — routing UI dan machine context.
+- `frontend/src/engine.js` — scene, camera, selection, transform dan renderer.
+- `frontend/src/offset5.js`, `offset10.js`, `apm2.js` — geometry khusus.
+- `frontend/src/universal-machine.js` — builder keluarga proses untuk equipment lainnya.
+- `frontend/src/data/machine-registry.js` — registry 41 equipment.
+- `frontend/src/data/plant-layout-data.js` — data layout yang digunakan aplikasi.
+- `tests/` — regression, geometry, registry, backend dan UI tests.
+- `backend/` — Workers API + D1.
 
-## Batas verifikasi
+## Prinsip recovery
 
-Unit test menggunakan SQLite lokal untuk endpoint D1; ini tidak menggantikan pengujian pada Workers/D1 produksi. Detail LOD 2–5, GLB resmi, discovery/AI, Google Sheets/Drive dan inventori mesin lain belum diimplementasikan karena di luar fondasi dengan bukti yang tersedia.
+V56 mempertahankan hasil kerja yang dapat dipulihkan dan menghindari mengarang dimensi, serial, layout, taxonomy, atau part yang tidak didukung sumber. Detail baru harus masuk dengan source/confidence yang jelas agar peningkatan fidelity tidak merusak bagian yang sudah tervalidasi.
