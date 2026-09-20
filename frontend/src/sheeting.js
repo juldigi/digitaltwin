@@ -57,7 +57,7 @@ export class SheetingMachineTemplate{
     // 2) Indonesian Lexus sheeter references: servo high-speed sheeter, double hydraulic shaftless unwind, auto tension/EPC,
     // 3) Great Wall/Accura open-frame sheeter imagery for visual proportions only.
     // Conflicting HSM 56 flat-bed/fixed-rollstand data is retained as a comparison source, not forced onto HSM-CTM7.
-    const L=16.7,W=4.85;
+    const L=17.2,W=4.85;
     const structure=this.group(this.root,'sheeting-structure','Main Chassis / Structural Rails',[0,0,0],[0,-.25,0]);
     // Long open chassis rather than the previous monolithic dark floor slab.
     for(const z of [-1.63,1.63])this.box(structure,[L,.20,.18],[0,.16,z],'dark',.025);
@@ -75,16 +75,16 @@ export class SheetingMachineTemplate{
 
     // DOUBLE HYDRAULIC SHAFTLESS UNWIND FAMILY REFERENCE.
     // Two reel positions are arranged longitudinally; each reel is held by opposed short chucks, not a through-shaft.
-    const rollstand=this.group(this.root,'sheeting-rollstand','Double Hydraulic Shaftless Unwind',[6.05,0,0],[.8,.5,0]);
-    this.box(rollstand,[2.55,.16,3.52],[0,.18,0],'dark',.025,{detail:true});
+    const rollstand=this.group(this.root,'sheeting-rollstand','Double Hydraulic Shaftless Unwind',[6.80,0,0],[.8,.5,0]);
+    this.box(rollstand,[2.95,.16,3.52],[0,.18,0],'dark',.025,{detail:true});
     for(const z of [-1.62,1.62]){
-      this.box(rollstand,[2.60,.26,.26],[-.02,.28,z],'bodyDark',.025,{cover:true});
-      this.box(rollstand,[.36,1.12,.48],[.82,.72,z],'body',.045,{cover:true});
-      this.box(rollstand,[.36,1.12,.48],[-.72,.72,z],'body',.045,{cover:true});
+      this.box(rollstand,[3.00,.26,.26],[0,.28,z],'bodyDark',.025,{cover:true});
+      this.box(rollstand,[.34,1.10,.46],[.90,.72,z],'body',.045,{cover:true});
+      this.box(rollstand,[.34,1.10,.46],[-.90,.72,z],'body',.045,{cover:true});
     }
     const reelStations=[
-      {x:.72,r:.78,name:'active',paper:'paper'},
-      {x:-.72,r:.63,name:'standby',paper:'paper'}
+      {x:.88,r:.72,name:'active',paper:'paper'},
+      {x:-.88,r:.58,name:'standby',paper:'paper'}
     ];
     for(const station of reelStations){
       this.cyl(rollstand,station.r,2.64,[station.x,1.10,0],station.paper,'z',{active:true,motion:'reel'});
@@ -96,24 +96,24 @@ export class SheetingMachineTemplate{
       }
     }
     // Local unwind controls seen beside the reel stand on comparable machines.
-    this.box(rollstand,[.56,1.02,.58],[1.58,.61,-1.76],'body',.04,{cover:true});
-    this.box(rollstand,[.42,.34,.04],[1.58,.82,-2.07],'glass',.012,{detail:true});
+    this.box(rollstand,[.56,1.02,.54],[1.28,.61,-2.25],'body',.04,{cover:true});
+    this.box(rollstand,[.42,.34,.04],[1.28,.82,-2.54],'glass',.012,{detail:true});
 
     // OPEN FEED / TENSION / EPC BRIDGE.
-    const feed=this.group(this.root,'sheeting-feed','Open Feed Bridge / Tension / EPC',[3.55,0,0],[.55,.5,0]);
+    const feed=this.group(this.root,'sheeting-feed','Open Feed Bridge / Tension / EPC',[3.62,0,0],[.55,.5,0]);
     for(const z of [-1.54,1.54]){
-      this.box(feed,[.18,2.02,.18],[1.42,1.08,z],'white',.025,{detail:true});
-      this.box(feed,[.18,1.72,.18],[-1.46,.93,z],'white',.025,{detail:true});
-      this.box(feed,[3.04,.18,.18],[0,2.00,z],'white',.02,{detail:true});
+      this.box(feed,[.18,2.02,.18],[1.28,1.08,z],'white',.025,{detail:true});
+      this.box(feed,[.18,1.72,.18],[-1.28,.93,z],'white',.025,{detail:true});
+      this.box(feed,[2.74,.18,.18],[0,2.00,z],'white',.02,{detail:true});
     }
-    this.box(feed,[3.04,.16,3.22],[0,2.08,0],'white',.025,{detail:true});
+    this.box(feed,[2.74,.16,3.22],[0,2.08,0],'white',.025,{detail:true});
     // Sparse, large functional rollers matching the open-frame appearance.
     const bridgeRollers=[
-      [1.10,1.58,.13,'chrome','guide-roller'],
-      [.60,1.34,.12,'steel','tension-roller'],
-      [.10,1.63,.12,'chrome','guide-roller'],
-      [-.48,1.32,.14,'black','tension-roller'],
-      [-1.02,1.12,.13,'chrome','feed-roller']
+      [.98,1.58,.13,'chrome','guide-roller'],
+      [.52,1.34,.12,'steel','tension-roller'],
+      [.08,1.63,.12,'chrome','guide-roller'],
+      [-.42,1.32,.14,'black','tension-roller'],
+      [-.92,1.12,.13,'chrome','feed-roller']
     ];
     for(const [x,y,r,kind,motion] of bridgeRollers)this.cyl(feed,r,2.68,[x,y,0],kind,'z',{active:true,motion});
     // Dancer/tension pair and EPC edge sensors.
@@ -127,7 +127,7 @@ export class SheetingMachineTemplate{
 
     // COMPACT CUTTER HEAD.
     // Exact HSM-CTM7 knife architecture is unresolved; keep a compact cross-cut module instead of the old oversized flat-bed box.
-    const cutter=this.group(this.root,'sheeting-cutter','Compact Cross-Cut Cutter Head',[.72,0,0],[0,.72,0]);
+    const cutter=this.group(this.root,'sheeting-cutter','Compact Cross-Cut Cutter Head',[.42,0,0],[0,.72,0]);
     // Structural legs remain visible during cutaway.
     for(const z of [-1.55,1.55])for(const x of [-.82,.82])this.box(cutter,[.18,1.32,.20],[x,.72,z],'steel',.02,{detail:true});
     // Low teal side housings and top hood, visually closer to the Great Wall/Accura family.
@@ -158,7 +158,7 @@ export class SheetingMachineTemplate{
     ])this.cyl(internal,r,2.90,[x,y,0],kind,'z',{detail:true,active:true,motion});
 
     // LONG, OPEN DELIVERY / OVERLAP / LAYBOY.
-    const delivery=this.group(this.root,'sheeting-delivery','Knife Outfeed / Overlap / Layboy',[-3.55,0,0],[-.72,.55,0]);
+    const delivery=this.group(this.root,'sheeting-delivery','Knife Outfeed / Overlap / Layboy',[-3.90,0,0],[-.72,.55,0]);
     for(const z of [-1.34,1.34])this.box(delivery,[6.12,.22,.16],[0,.38,z],'dark',.025);
     // Lower tape-bed rollers.
     for(let i=0;i<7;i++)this.cyl(delivery,.075,2.52,[2.55-i*.72,.80+(i<3?.06:0),0],i%2?'chrome':'black','z',{active:true,motion:'delivery-roller'});
@@ -184,7 +184,7 @@ export class SheetingMachineTemplate{
     this.box(layboy,[.18,1.42,2.54],[-1.04,.88,0],'bodyDark',.035,{cover:true});
 
     // Compact operator HMI near cutter, plus electrical cabinet kept separate from unwind.
-    const control=this.group(this.root,'sheeting-control','HMI / Electrical / Hydraulic Controls',[1.45,0,-2.15],[.25,.45,-.4]);
+    const control=this.group(this.root,'sheeting-control','HMI / Electrical / Hydraulic Controls',[1.25,0,-2.82],[.25,.45,-.4]);
     this.box(control,[.72,1.12,.60],[0,.70,0],'body',.045,{cover:true});
     this.box(control,[.56,.44,.055],[0,.91,-.33],'glass',.02,{detail:true});
     this.cyl(control,.065,.05,[-.23,.55,-.35],'yellow','z',{detail:true});
@@ -193,10 +193,10 @@ export class SheetingMachineTemplate{
 
     // Continuous web is explicitly routed only up to the cutter.
     const web=this.group(this.root,'sheeting-web-path','Continuous Web Path Before Cutter',[0,0,0],[0,.18,0]);
-    this.box(web,[1.36,.016,1.38],[5.95,1.42,0],'paper',.003);
-    this.box(web,[2.62,.016,1.38],[4.43,1.42,0],'paper',.003);
-    this.box(web,[2.34,.016,1.38],[2.30,1.39,0],'paper',.003);
-    this.box(web,[.78,.016,1.38],[1.02,1.32,0],'paper',.003);
+    this.box(web,[1.80,.016,1.38],[6.18,1.42,0],'paper',.003);
+    this.box(web,[1.52,.016,1.38],[4.62,1.51,0],'paper',.003);
+    this.box(web,[1.72,.016,1.38],[3.02,1.43,0],'paper',.003);
+    this.box(web,[1.18,.016,1.38],[1.55,1.34,0],'paper',.003);
 
     this.root.userData.processFlow={
       input:'RIGHT · double hydraulic shaftless unwind reference',
