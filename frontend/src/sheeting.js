@@ -12,8 +12,8 @@ export const SHEETING_VISUAL_REFERENCE=Object.freeze({
   outputSide:'LEFT',
   evidence:'BMJ database + user-confirmed RIGHT_TO_LEFT + BW Papersystems 2014 HSM 56 brochure/page/full-resolution machine photo + historical Lexus/HSM family listing + Indonesian Lexus process reference',
   dimensions:'PHOTO_ANCHORED_RECONSTRUCTION_NOT_ENGINEERING',
-  visualFamily:'HSM56_LOW_REEL_INCLINED_WEB_GUIDE_WINDOWED_HEAD_BANDED_PROCESS_CYLINDER_BELT_OUTFEED_TOWER_STACKER',
-  visualRevision:'V64_HSM56_MECHANICAL_DETAIL'
+  visualFamily:'HSM56_LOW_REEL_INCLINED_WEB_GUIDE_HOLLOW_WINDOW_HEAD_BANDED_PROCESS_CYLINDER_BELT_OUTFEED_TOWER_STACKER',
+  visualRevision:'V65_HSM56_WINDOW_STACK_DETAIL'
 });
 
 export class SheetingMachineTemplate{
@@ -24,7 +24,7 @@ export class SheetingMachineTemplate{
       assetId:'BMJ-MCH-0002',machine:'SHEETING LEXUS',model:'HSM-CTM7',
       referenceFamily:'LEXUS HSM family · HSM 56 2014 BW visual anchors',
       processDirection:'RIGHT_TO_LEFT',confidence:'IDENTITY_VERIFIED__GEOMETRY_FAMILY_PHOTO_ANCHORED',
-      visualRevision:'V64_HSM56_MECHANICAL_DETAIL'
+      visualRevision:'V65_HSM56_WINDOW_STACK_DETAIL'
     };
     this.nodes=[];this.parts=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.activeMeshes=[];this.detailMeshes=[];
     this.taxonomy=SHEETING_TAXONOMY;this.taxonomyById=SHEETING_TAXONOMY_BY_ID;this.exteriorOpen=false;this.ghosted=false;
@@ -88,7 +88,7 @@ export class SheetingMachineTemplate{
     return m;
   }
   build(){
-    // V64 follows visible brochure/photo anchors at component level, not a generic sheeter silhouette.
+    // V65 follows visible brochure/photo anchors at component level, not a generic sheeter silhouette.
     // Exact HSM-CTM7 internal cutting mechanism is still unresolved where public sources conflict.
 
     const structure=this.group(this.root,'sheeting-structure','Grounded Main Chassis',[0,0,0],[0,-.22,0]);
@@ -147,17 +147,24 @@ export class SheetingMachineTemplate{
       this.box(epc,[.08,.13,.12],[-.20,1.02,side*1.10],'black',.009,{detail:true,role:'epc-sensor'});
     }
 
-    // Main head: gray front/window frame with ONE visually dominant turquoise cylinder and banding.
+    // Main head: the operator-side window is a true aperture. V64 incorrectly placed glass over a full opaque side slab.
     const head=this.group(this.root,'sheeting-cutter','Windowed Main Sheeting Head',[2.65,0,0],[0,.58,0]);
-    for(const z of [-1.50,1.50]){
-      this.box(head,[2.72,1.76,.28],[0,.94,z],'body',.048,{cover:true,role:'main-side-shell',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
-      this.box(head,[2.44,.23,.11],[-.03,.43,z+(z<0?-.18:.18)],'bodyDark',.018,{cover:true,role:'side-lower-trim'});
-    }
-    this.box(head,[2.82,.40,3.16],[0,2.01,0],'light',.048,{cover:true,role:'main-top-hood',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
-    this.box(head,[2.52,.83,.045],[-.04,1.62,-1.655],'glass',.018,{cover:true,role:'panoramic-window',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
-    for(const x of [-1.26,1.18])this.box(head,[.09,.88,.08],[x,1.62,-1.69],'light',.009,{cover:true,role:'window-frame'});
-    for(const y of [1.20,2.04])this.box(head,[2.54,.08,.08],[-.04,y,-1.69],'light',.009,{cover:true,role:'window-frame'});
-    for(const x of [-.62,.58])this.box(head,[.36,.06,.07],[x,1.16,-1.73],'black',.018,{cover:true,detail:true,role:'window-handle',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
+    // Drive side remains a full guarded shell.
+    this.box(head,[2.72,1.76,.28],[0,.94,1.50],'body',.048,{cover:true,role:'drive-side-shell',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
+    this.box(head,[2.44,.23,.11],[-.03,.43,1.68],'bodyDark',.018,{cover:true,role:'drive-lower-trim'});
+    // Operator side is built as lower cabinet + jambs/sills, leaving the actual inspection opening hollow.
+    this.box(head,[2.72,.74,.28],[0,.57,-1.50],'body',.045,{cover:true,role:'operator-lower-housing',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
+    for(const x of [-1.29,1.21])this.box(head,[.20,.92,.28],[x,1.61,-1.50],'body',.026,{cover:true,role:'operator-window-jamb',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
+    this.box(head,[2.48,.16,.28],[-.04,1.16,-1.50],'light',.018,{cover:true,role:'operator-window-lower-sill',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
+    this.box(head,[2.48,.13,.28],[-.04,2.07,-1.50],'light',.018,{cover:true,role:'operator-window-upper-sill',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
+    this.box(head,[2.44,.23,.11],[-.03,.31,-1.68],'bodyDark',.018,{cover:true,role:'operator-lower-trim'});
+    this.box(head,[2.82,.40,3.16],[0,2.22,0],'light',.048,{cover:true,role:'main-top-hood',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
+    // Glass sits in the aperture with no opaque backing and has its own selectable taxonomy node.
+    const window=this.group(head,'sheeting-window','Panoramic Inspection Window Assembly',[0,0,0],[0,.18,-.22]);
+    this.box(window,[2.42,.78,.035],[-.04,1.62,-1.655],'glass',.012,{cover:true,role:'panoramic-window',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
+    for(const x of [-1.23,1.15])this.box(window,[.08,.84,.07],[x,1.62,-1.69],'light',.008,{cover:true,role:'window-frame'});
+    for(const y of [1.21,2.03])this.box(window,[2.46,.07,.07],[-.04,y,-1.69],'light',.008,{cover:true,role:'window-frame'});
+    for(const x of [-.62,.58])this.box(window,[.36,.06,.07],[x,1.16,-1.73],'black',.018,{cover:true,detail:true,role:'window-handle',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
 
     const process=this.group(head,'sheeting-main-rollers','Main Window Process Cylinder',[0,0,0],[0,.22,0]);
     this.cyl(process,.425,2.56,[.12,1.64,0],'aqua','z',{active:true,motion:'process-roller',role:'window-process-cylinder',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
@@ -210,9 +217,17 @@ export class SheetingMachineTemplate{
       for(const side of [-1,1])this.cyl(overlap,.095,.075,[x,1.05,side*1.39],'body','z',{detail:true,role:'rod-end-cap'});
     }
     this.box(delivery,[.12,.15,2.88],[-2.08,.93,0],'light',.010,{detail:true,role:'outfeed-front-crossbar',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
+    // Large operator-side handwheel/adjuster visible in the BW main photograph.
+    const handwheel=this.group(delivery,'sheeting-outfeed-handwheel','Operator Outfeed Handwheel',[-.56,0,-1.56],[0,.08,-.12]);
+    this.torus(handwheel,.145,.024,[0,.59,0],'chrome',{detail:true,role:'outfeed-handwheel',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
+    this.cyl(handwheel,.036,.10,[0,.59,.025],'dark','z',{detail:true,role:'handwheel-hub'});
+    for(let i=0;i<4;i++){
+      const a=i*Math.PI/2;
+      this.box(handwheel,[.19,.025,.020],[Math.cos(a)*.072,.59+Math.sin(a)*.072,0],'chrome',.003,{detail:true,role:'handwheel-spoke'},[0,0,a]);
+    }
 
     // Compact sloped console integrated beside the outfeed/head transition.
-    const control=this.group(this.root,'sheeting-control','Integrated Low Operator Console',[.55,0,-1.72],[.18,.28,-.28]);
+    const control=this.group(this.root,'sheeting-control','Integrated Low Operator Console',[.55,0,-1.90],[.18,.28,-.28]);
     this.box(control,[.68,.46,.48],[0,.25,0],'light',.030,{cover:true,role:'control-console-base',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
     this.box(control,[.58,.07,.42],[0,.52,-.08],'dark',.010,{detail:true,role:'control-console-face',sourceAnchor:'BW-HSM56-MAIN-PHOTO'},[-.46,0,0]);
     this.cyl(control,.042,.032,[-.19,.55,-.24],'red','z',{detail:true,role:'estop'});
@@ -243,7 +258,13 @@ export class SheetingMachineTemplate{
     this.box(lift,[1.96,.14,2.58],[0,.42,0],'steel',.015,{active:true,motion:'lift-table',role:'lift-table',sourceAnchor:'BW-HSM56-STACKER-PHOTO'});
     this.box(lift,[1.72,.09,2.24],[0,.535,0],'blue',.009,{active:true,motion:'lift-table',detail:true,role:'pallet',sourceAnchor:'BW-HSM56-STACKER-PHOTO'});
     const refStack=this.group(lift,'sheeting-reference-stack','Reference Paper Stack',[0,0,0],[0,.08,0],'PHOTO_REFERENCE');
-    for(let i=0;i<6;i++)this.box(refStack,[1.56,.075,2.08],[0,.625+i*.078,0],'stackPaper',.006,{detail:true,role:'reference-paper-layer',sourceAnchor:'BW-HSM56-STACKER-PHOTO',referenceStack:true});
+    // The brochure stack is a substantial skid load, not a few floating sheets.
+    this.box(refStack,[1.58,.76,2.08],[0,.965,0],'stackPaper',.010,{role:'reference-paper-block',sourceAnchor:'BW-HSM56-STACKER-PHOTO',referenceStack:true});
+    for(let i=0;i<12;i++){
+      const y=.625+i*.062;
+      this.box(refStack,[1.60,.012,2.10],[0,y,0],'paper',.002,{detail:true,role:'reference-paper-seam',sourceAnchor:'BW-HSM56-STACKER-PHOTO',referenceStack:true});
+    }
+    this.box(refStack,[1.60,.055,2.10],[0,1.36,0],'paper',.004,{detail:true,role:'reference-paper-top',sourceAnchor:'BW-HSM56-STACKER-PHOTO',referenceStack:true});
     // Grounded lower base framing visible beneath the lift area.
     for(const z of [-1.31,1.31])this.box(layboy,[2.08,.12,.12],[0,.12,z],'dark',.010,{role:'stacker-base-rail'});
     for(const x of [-.92,0,.92])this.box(layboy,[.12,.12,2.66],[x,.12,0],'steel',.008,{detail:true,role:'stacker-base-cross'});
@@ -263,7 +284,9 @@ export class SheetingMachineTemplate{
       direction:'RIGHT_TO_LEFT',
       unwindArchitecture:'BW_HSM56_LOW_REEL_PLUS_INCLINED_GUIDE_PHOTO_ANCHOR__HSM_CTM7_EXACT_UNRESOLVED',
       cutterArchitecture:'PHOTOGRAPHED_MAIN_PROCESS_CYLINDER_REPRODUCED__EXACT_HSM_CTM7_KNIFE_MECHANISM_UNRESOLVED',
-      visualBasis:'BW_2014_HSM56_PDF_AND_FULL_RES_IMAGE_COMPONENT_ANCHORS_FIRST__MEGAMACH_HSM_FAMILY_SECONDARY__INDONESIAN_LEXUS_PROCESS_SECONDARY'
+      visualBasis:'BW_2014_HSM56_PDF_SCREENSHOT_AND_FULL_RES_COMPONENT_ANCHORS_FIRST__MEGAMACH_HSM_FAMILY_SECONDARY__INDONESIAN_LEXUS_PROCESS_SECONDARY',
+      windowArchitecture:'TRUE_OPERATOR_SIDE_APERTURE__NO_OPAQUE_PANEL_BEHIND_GLASS',
+      exactModelSearch:'NO_PUBLIC_HSM_CTM7_SPECIFIC_DRAWING_OR_PHOTO_CONFIRMED'
     };
   }
   findNode(id){return id==='MACHINE-SHEETING'?this.root:this.nodes.find(n=>n.userData.nodeId===id)||null;}

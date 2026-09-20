@@ -1,6 +1,6 @@
-# Deployment GitHub + Cloudflare — Digital Twin V64
+# Deployment — Digital Twin V65
 
-Repo aktif: `juldigi/digitaltwin` (private).
+Repo: `juldigi/digitaltwin` (private)
 
 ## Pipeline
 
@@ -9,39 +9,25 @@ Push ke `main` harus lulus:
 2. `npm run build`
 3. seluruh `npm test`
 4. Cloudflare credential validation
-5. Workers deployment
+5. Cloudflare Workers deployment
 
-Service-worker cache: `factory-digital-twin-v64-20260920`.
+Service worker cache: `factory-digital-twin-v65-20260920`.
 
-## V64 Sheeting verification gate
+## V65 Sheeting gates
 
-Deployment V64 tidak boleh lolos bila regression test gagal terhadap kontrak berikut:
-- identitas BMJ dan RIGHT → LEFT tetap;
-- tepat 1 paper reel, 1 reel core, 2 chuck hubs dan 12 visible hub bolts;
-- rollstand mempunyai swing/hydraulic support;
-- feed memakai inclined frame dan hanya 4 deliberate guide/tension rollers;
-- panoramic main window mempunyai 1 dominant process cylinder, 4 bright bands, 2 handles dan 10 lower guide fingers;
-- tidak ada competing second large process cylinder;
-- outfeed mempunyai 13 longitudinal belts, 2 main rotating transport rollers dan 3 adjustment rods;
-- adjustment hardware mempunyai 9 pedestals, 18 triangular braces, 9 collars dan 9 knobs;
-- console tetap rendah/kompak dan tidak menembus main head;
-- stacker mempunyai 4 columns, front/rear header, side cabinet, guarded sides, lift table dan pallet;
-- reference paper load harus supported dan hilang saat simulation mulai;
-- major modules mempunyai physical X clearance;
-- significant accidental cross-module penetration ditolak;
-- dynamic web hanya upstream cut event, dynamic sheet hanya downstream;
-- finished pile tetap di dalam stacker tower dan lift table turun sesuai pertumbuhan pile.
-
-## Cloudflare
-
-Worker: `digitaltwin`
-
-- assets: `../dist`
-- Worker routes: `/api/*`
-- D1 binding: `DB`
-- GitHub secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`
-- Worker secrets: `ADMIN_TOKEN`, `VIEWER_TOKEN`
+- BMJ identity dan RIGHT → LEFT tidak berubah.
+- Rollstand tetap single low reel + two-sided support.
+- Feed tetap 4 deliberate guide/tension rollers.
+- Operator-side main-head window harus berupa **true aperture**: tidak boleh ada legacy full opaque side shell di belakang glass.
+- Window harus selectable sebagai `sheeting-window`.
+- Main head hanya mempunyai 1 dominant photographed process cylinder + 4 bands.
+- Outfeed tetap 13 belts + 3 adjustment rod assemblies.
+- Operator outfeed handwheel harus selectable sebagai `sheeting-outfeed-handwheel`.
+- Reference skid load harus substantial, supported di pallet, dan hidden during live simulation.
+- CTM7 tidak boleh otomatis menambahkan cut-to-mark sensor/geometry tanpa model-specific evidence.
+- Significant accidental cross-module penetration harus tetap nol di luar mounted relationships.
+- Dynamic web hanya upstream cut event; dynamic sheets hanya downstream; pile berakhir di stacker.
 
 ## Evidence boundary
 
-HSM 56 2014 digunakan sebagai **family visual anchor**, bukan klaim bahwa BMJ HSM-CTM7 identik. Exact HSM-CTM7 cutter internals tetap unresolved sampai tersedia foto/drawing spesifik.
+HSM 56 2014 adalah family visual reference. Exact HSM-CTM7 cutter internals, OEM side naming, dan option package tetap unresolved sampai ada data BMJ atau OEM yang spesifik.
