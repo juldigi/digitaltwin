@@ -1,4 +1,4 @@
-name: Verify frontend V61
+name: Verify frontend V62
 on:
   push:
     branches: [main]
