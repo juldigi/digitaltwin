@@ -77,8 +77,11 @@ export class SheetingMachineTemplate{
     for(const z of [-1.62,1.62])this.box(feed,[.16,2.05,.16],[1.18,1.12,z],'body',.018,{detail:true});
     this.box(feed,[.24,.18,3.48],[1.18,2.08,0],'body',.02,{detail:true});
     this.box(feed,[3.95,.10,2.88],[0,.84,0],'steel',.015);
-    for(let i=0;i<9;i++)this.cyl(feed,.085,2.68,[-1.45+i*.43,.96,0],i%2?'chrome':'steel','z',{active:true,motion:'feed-roller'});
-    for(let i=0;i<5;i++)this.cyl(feed,.12,2.58,[-.70+i*.40,.75+(i%2)*.16,0],'chrome','z',{detail:true,active:true,motion:'tension-roller'});
+    // Keep the web train readable: fewer rollers, grouped by function instead of a dense decorative roller field.
+    for(let i=0;i<6;i++)this.cyl(feed,.090,2.68,[-1.32+i*.49,.98+(i%2)*.045,0],i%2?'chrome':'steel','z',{active:true,motion:'feed-roller'});
+    for(let i=0;i<3;i++)this.cyl(feed,.125,2.58,[-.48+i*.52,.76+(i%2)*.18,0],'chrome','z',{detail:true,active:true,motion:'tension-roller'});
+    this.cyl(feed,.155,2.62,[.82,.91,0],'black','z',{detail:true,active:true,motion:'pull-roller'});
+    this.cyl(feed,.155,2.62,[1.04,1.08,0],'chrome','z',{detail:true,active:true,motion:'pull-roller'});
     for(const z of [-1.30,1.30])this.box(feed,[.07,.14,.08],[.45,1.13,z],'yellow',.01,{detail:true});
     this.box(feed,[3.60,.018,1.38],[-.05,1.00,0],'paper',.004);
 
@@ -100,13 +103,15 @@ export class SheetingMachineTemplate{
 
     const delivery=this.group(this.root,'sheeting-delivery','Delivery / Layboy / Stacker',[-4.60,0,0],[-.72,.55,0]);
     this.box(delivery,[5.25,.18,2.72],[0,.30,0],'dark',.025);
-    for(let i=0;i<11;i++)this.cyl(delivery,.075,2.50,[2.18-i*.43,.78+(i%3===0?.05:0),0],i%2?'chrome':'black','z',{active:true,motion:'delivery-roller'});
-    this.box(delivery,[5.10,.035,1.48],[0,.88,0],'paper',.004);
+    // Delivery is a belt/overlap section, not a second forest of rollers.
+    for(let i=0;i<7;i++)this.cyl(delivery,.078,2.50,[2.12-i*.66,.78+(i%2)*.035,0],i%2?'chrome':'black','z',{active:true,motion:'delivery-roller'});
+    for(const z of [-.54,-.18,.18,.54])this.box(delivery,[4.66,.026,.075],[.06,.895,z],'black',.004,{detail:true});
     for(const z of [-1.23,1.23])this.box(delivery,[5.12,.34,.09],[0,.62,z],'white',.02,{cover:true});
     const layboy=this.group(delivery,'sheeting-layboy','Flat-Plate Lift Table / Sheet Pile',[-1.78,0,0],[-.4,.3,0]);
     this.box(layboy,[1.65,.12,2.20],[0,.52,0],'steel',.018,{active:true,motion:'lift-table'});
     for(const z of [-.95,.95])for(const x of [-.68,.68])this.box(layboy,[.07,.76,.07],[x,.78,z],'steel',.01,{detail:true});
-    for(let i=0;i<14;i++)this.box(layboy,[1.50,.012,2.02],[0,.59+i*.012,0],'paper',.002,{detail:true});
+    // Empty skid / receiving plate only. Finished sheets are created by simulation after the cutter.
+    this.box(layboy,[1.54,.050,2.06],[0,.595,0],'dark',.010,{detail:true});
     for(const z of [-1.08,1.08])this.box(layboy,[.06,.52,.06],[0,.84,z],'yellow',.01,{detail:true});
     this.box(delivery,[1.14,1.60,.70],[-2.82,.95,-1.56],'bodyDark',.04,{cover:true});
 
@@ -117,12 +122,11 @@ export class SheetingMachineTemplate{
     this.cyl(control,.07,.05,[-.28,.62,-.47],'yellow','z',{detail:true});
     this.box(control,[.48,.56,.62],[.72,.42,.06],'steel',.025,{detail:true});
 
-    // Continuous stock path: physical direction RIGHT -> LEFT.
-    const web=this.group(this.root,'sheeting-web-path','Continuous Web / Sheet Path',[0,0,0],[0,.18,0]);
+    // Continuous stock exists only upstream of the knife. Downstream material is individual sheet stock.
+    const web=this.group(this.root,'sheeting-web-path','Continuous Web Path Before Knife',[0,0,0],[0,.18,0]);
     this.box(web,[2.55,.016,1.36],[4.75,1.00,0],'paper',.003);
     this.box(web,[2.85,.016,1.36],[2.02,1.00,0],'paper',.003);
-    this.box(web,[2.20,.016,1.36],[-1.92,.91,0],'paper',.003);
-    this.box(web,[2.35,.016,1.36],[-4.05,.91,0],'paper',.003);
+    this.box(web,[1.16,.016,1.36],[.82,1.01,0],'paper',.003);
 
     this.root.userData.processFlow={input:'RIGHT · paper reel / rollstand',process:'RIGHT → LEFT · feed → tension/EPC → flat-bed knife → delivery',output:'LEFT · layboy / flat-plate lift table / pile',direction:'RIGHT_TO_LEFT'};
   }
