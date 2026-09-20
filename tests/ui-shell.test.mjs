@@ -112,7 +112,7 @@ test('conditional controls explain requirements rather than failing silently',()
 });
 
 test('service worker refreshes the redesigned shell',()=>{
-  assert.match(sw,/factory-digital-twin-v72-20260921/);
+  assert.match(sw,/factory-digital-twin-v73-20260921/);
   assert.match(sw,/src\/universal-machine\.js/);
   assert.match(app,/template\.ghost\(true,part\)/,'object selection must automatically ghost all non-selected geometry');
   for(const asset of ['ui-v5.css','responsive-v5.css','src/ui-v5.js','src/app.js','src/simulation.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
@@ -257,7 +257,7 @@ test('v53 routes a rebuilt document-grounded CX104 twin without Offset 5 UI leak
   assert.match(app,/MACHINE_KEY/);
   assert.match(app,/ACTIVE_ROOT/);
   assert.match(app,/selectedTaxonomyId=selectedTaxonomyId\|\|ACTIVE_ROOT/);
-  assert.match(app,/machine=\$\{encodeURIComponent\(route\)\}&v=72/);
+  assert.match(app,/machine=\$\{encodeURIComponent\(route\)\}&v=73/);
   assert.doesNotMatch(app,/machine=\$\{route\}&v=50/);
   assert.match(app,/Tidak ada foto aktual Offset 10 yang tersedia/);
   assert.match(app,/final drawing BMJ/);
@@ -287,7 +287,7 @@ test('v54 keeps APM2 as a dedicated 3D machine with process-specific UI and no i
   assert.match(app,/IS_APM2=MACHINE_KEY==='apm2'/);
   assert.match(app,/ACTIVE_ROOT=IS_OFFSET10\?'O10':IS_APM2\?'APM2':IS_SHEETING\?'SH':IS_GENERIC\?GENERIC_ROOT:'O5'/);
   assert.match(app,/machine\.machineId==='BMJ-MCH-0010'\?'apm2'/);
-  assert.match(app,/machine=\$\{encodeURIComponent\(route\)\}&v=72/);
+  assert.match(app,/machine=\$\{encodeURIComponent\(route\)\}&v=73/);
   assert.match(app,/Simulasi Proses APM 2/);
   assert.match(app,/register dan SideLay/);
   assert.match(app,/suffix E\/SE\/CER\/BMA tidak tersedia/);
