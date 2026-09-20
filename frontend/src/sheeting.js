@@ -123,7 +123,7 @@ export class SheetingMachineTemplate{
       this.box(epc,[.10,.18,.16],[-.27,1.05,side*1.17],'black',.012,{detail:true,role:'epc-sensor'});
     }
 
-    const cutter=this.group(this.root,'sheeting-cutter','Enclosed Cross-Cut Head',[1.65,0,0],[0,.62,0]);
+    const cutter=this.group(this.root,'sheeting-cutter','Enclosed Cross-Cut Head',[1.45,0,0],[0,.62,0]);
     for(const z of [-1.52,1.52]){
       this.box(cutter,[2.08,1.90,.30],[0,.95,z],'body',.055,{cover:true,role:'cutter-side-housing'});
       this.box(cutter,[1.72,.26,.10],[.02,1.22,z+(z<0?-.19:.19)],'bodyDark',.025,{cover:true,role:'cutter-side-cap'});
