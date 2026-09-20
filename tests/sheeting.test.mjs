@@ -19,12 +19,20 @@ test('V66 keeps exact BMJ identity separate from HSM56 family-level geometry evi
   const image=SHEETING_TECHNICAL_SOURCES.find(s=>s.id==='SHEETING-HSM56-BW-FULLIMAGE');
   const mega=SHEETING_TECHNICAL_SOURCES.find(s=>s.id==='SHEETING-MEGAMACH-HSM-FAMILY');
   const generic=SHEETING_TECHNICAL_SOURCES.find(s=>s.id==='SHEETING-CUTMARK-PROCESS-COMPARISON');
+  const vacuum=SHEETING_TECHNICAL_SOURCES.find(s=>s.id==='SHEETING-BW-VACUUM-OVERLAP');
+  const maxson=SHEETING_TECHNICAL_SOURCES.find(s=>s.id==='SHEETING-MAXSON-MSP-PDF');
+  const pasaban=SHEETING_TECHNICAL_SOURCES.find(s=>s.id==='SHEETING-PASABAN-CL165');
   assert.equal(bmj.confidence,'VERIFIED');
   assert.match(pdf.note,/fixed-position two-sided rollstand/i);
   assert.match(image.note,/hollow panoramic window/i);
   assert.match(image.note,/handwheel/i);
   assert.match(mega.note,/conflicts/i);
   assert.match(generic.note,/does NOT infer/i);
+  assert.match(vacuum.note,/high-speed tapes/i);
+  assert.match(vacuum.note,/low-speed tapes/i);
+  assert.match(maxson.note,/side jogger/i);
+  assert.match(maxson.note,/feed-down/i);
+  assert.match(pasaban.note,/overlapping group/i);
   assert.match(SHEETING_ORIENTATION.exactModelStatus,/did not surface/i);
   assert.ok(SHEETING_VISUAL_ANCHORS.mainHead.includes('true hollow operator-side inspection aperture'));
 });
@@ -155,6 +163,10 @@ test('V66 stacker reference load is a substantial supported skid stack, not a fe
   assert.ok(refBox.getSize(new THREE.Vector3()).y>.70);
   assert.ok(refBox.min.y>=palletBox.max.y-.02,'reference stack must sit on pallet rather than float below/above it');
   assert.ok(model.meshes.filter(m=>/stacker.*guard/.test(m.userData.role||'')).length>=20);
+  assert.ok(model.findNode('sheeting-stacker-joggers'));
+  assert.equal(model.meshes.filter(m=>m.userData.role==='front-stop-reference').length,1);
+  assert.equal(model.meshes.filter(m=>m.userData.role==='back-jog-reference').length,1);
+  assert.equal(model.meshes.filter(m=>m.userData.role==='side-jogger-reference').length,2);
   model.dispose();
 });
 
@@ -169,7 +181,7 @@ test('V66 taxonomy stays six levels and maps window, handwheel and reference loa
   for(const id of [
     'SH.HEAD.SUB.BLOCK.PART.WINDOW','SH.HEAD.SUB.BLOCK.PART.CYL',
     'SH.DEL.SUB.BLOCK.PART.FAST','SH.DEL.SUB.BLOCK.PART.SLOW','SH.DEL.SUB.BLOCK.PART.OVERLAP',
-    'SH.DEL.SUB.BLOCK.PART.HANDWHEEL','SH.STACK.SUB.BLOCK.PART.LOAD'
+    'SH.DEL.SUB.BLOCK.PART.HANDWHEEL','SH.STACK.SUB.BLOCK.PART.JOG','SH.STACK.SUB.BLOCK.PART.LOAD'
   ])assert.ok(model.resolveTaxonomyNode(id),id);
   assert.equal(model.resolveTaxonomyNode('SH.DEL.SUB.BLOCK.PART.FAST').userData.nodeId,'sheeting-fast-belts');
   assert.equal(model.resolveTaxonomyNode('SH.DEL.SUB.BLOCK.PART.SLOW').userData.nodeId,'sheeting-slow-belts');
@@ -197,6 +209,10 @@ test('V66 simulation is a continuous web -> cut -> fast/slow/overlap -> stack se
   const lifts=model.activeMeshes.filter(m=>m.userData.motion==='lift-table');assert.equal(lifts.length,2);
   const process=model.activeMeshes.find(m=>m.userData.motion==='process-roller');assert.ok(process);
   const processRest=process.quaternion.clone(),liftRest=lifts.map(m=>m.position.y);
+  const joggers=model.activeMeshes.filter(m=>/^stack-jogger-/.test(m.userData.motion||''));
+  assert.equal(joggers.length,4);
+  const joggerRest=joggers.map(m=>m.position.clone());
+  assert.equal(sim.state().pathVisible,false,'debug centerline should be off by default');
 
   sim.start();assert.ok(ref.every(m=>!m.visible));
   assert.ok(sim.webRibbonSegments.length>=50);
@@ -234,6 +250,7 @@ test('V66 simulation is a continuous web -> cut -> fast/slow/overlap -> stack se
   assert.equal(state.webRibbonSegmentsVisible,sim.webRibbonSegments.length);
   assert.ok(Math.abs(sim.pile.find(s=>s.visible).position.x+4.82)<.001);
   assert.ok(process.quaternion.angleTo(processRest)>.001);
+  assert.ok(joggers.some((m,i)=>m.position.distanceTo(joggerRest[i])>.001),'stack alignment joggers must visibly actuate');
 
   // The first sheets build upward from the pallet; table lowers only after top approaches delivery target.
   const pileY=sim.pile.filter(s=>s.visible).map(s=>s.position.y);
@@ -275,6 +292,7 @@ test('V66 rejects significant accidental cross-module penetration including new 
     key('sheeting-overlap-belts','sheeting-delivery-rollers'),
     key('sheeting-overlap-belts','sheeting-overlap'),
     key('sheeting-delivery','sheeting-outfeed-handwheel'),
+    key('sheeting-layboy','sheeting-stacker-joggers'),
     key('sheeting-layboy','sheeting-stack-lift'),
     key('sheeting-stack-lift','sheeting-reference-stack'),
     key('sheeting-layboy','sheeting-reference-stack'),

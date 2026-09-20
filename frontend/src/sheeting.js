@@ -262,6 +262,12 @@ export class SheetingMachineTemplate{
     // Side cabinet visible at the tower/outfeed side.
     this.box(layboy,[.42,1.88,.40],[1.12,1.22,-1.20],'light',.030,{cover:true,role:'stacker-side-cabinet',sourceAnchor:'BW-HSM56-STACKER-PHOTO'});
     this.box(layboy,[.34,.78,.045],[1.12,1.36,-1.425],'bodyDark',.012,{cover:true,role:'stacker-cabinet-door'});
+    // Process-family stack alignment references: front/back stop and side jogger blades.
+    // These are not claimed as exact HSM-CTM7 hardware; they exist to make the stacker process mechanically coherent.
+    const joggers=this.group(layboy,'sheeting-stacker-joggers','Stack Alignment / Jogger Reference',[0,0,0],[0,.08,0],'PROCESS_FAMILY_REFERENCE');
+    this.box(joggers,[.08,.54,2.18],[-.88,.92,0],'light',.010,{detail:true,active:true,motion:'stack-jogger-x',role:'front-stop-reference'});
+    this.box(joggers,[.08,.42,2.08],[.88,.84,0],'steel',.010,{detail:true,active:true,motion:'stack-jogger-x',role:'back-jog-reference'});
+    for(const side of [-1,1])this.box(joggers,[1.52,.42,.055],[0,.83,side*1.08],'steel',.008,{detail:true,active:true,motion:'stack-jogger-z',role:'side-jogger-reference'});
     // Internal lift rails, table and pallet.
     const lift=this.group(layboy,'sheeting-stack-lift','Flat Lift Table / Pallet',[0,0,0],[0,.12,0]);
     for(const x of [-.80,.80])for(const z of [-1.24,1.24])this.box(lift,[.075,1.12,.075],[x,.70,z],'steel',.007,{detail:true,role:'lift-guide-rail'});
