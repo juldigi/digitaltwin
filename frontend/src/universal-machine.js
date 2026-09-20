@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
 import {MACHINE_REGISTRY_BY_ID} from './data/machine-registry.js';
+import {mechanicalProfile} from './data/mechanical-profiles.js';
 
 const FAMILY_BY_NO=new Map([
  [1,'guillotine'],[2,'sheeter'],[4,'offset'],[5,'offset'],[6,'offset'],[7,'pileturner'],[8,'pileturner'],
@@ -71,7 +72,7 @@ const EVIDENCE_BY_NO=new Map([
 ]);
 const DEFAULT_EVIDENCE=Object.freeze({grade:'IDENTITY_ONLY',geometry:'PLACEHOLDER',simulation:'BLOCKED',reason:'Machine-specific evidence is insufficient for mechanically faithful geometry or simulation.'});
 const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-export function universalMachineConfig(machineId){const machine=MACHINE_REGISTRY_BY_ID.get(machineId);if(!machine)return null;const family=FAMILY_BY_NO.get(machine.no);if(!family)return null;return {machine,family,label:LABELS[family],modules:MODULES[family],evidence:Object.freeze(EVIDENCE_BY_NO.get(machine.no)||DEFAULT_EVIDENCE)};}
+export function universalMachineConfig(machineId){const machine=MACHINE_REGISTRY_BY_ID.get(machineId);if(!machine)return null;const family=FAMILY_BY_NO.get(machine.no);if(!family)return null;return {machine,family,label:LABELS[family],modules:MODULES[family],profile:mechanicalProfile(machine.no),evidence:Object.freeze(EVIDENCE_BY_NO.get(machine.no)||DEFAULT_EVIDENCE)};}
 export function universalTechnicalSources(machineId){const cfg=universalMachineConfig(machineId);if(!cfg)return [];return (FAMILY_SOURCES[cfg.family]||[]).map(([title,url],i)=>({id:`FAMILY-${cfg.family.toUpperCase()}-${i+1}`,title,publisher:new URL(url).hostname.replace(/^www\./,''),url,type:'TECHNICAL_REFERENCE',confidence:cfg.machine.model?'MEDIUM CONFIDENCE':'REFERENCE ONLY'}));}
 
 export function universalTaxonomy(machineId){
@@ -79,14 +80,14 @@ export function universalTaxonomy(machineId){
  const root='U'+String(cfg.machine.no).padStart(2,'0'),nodes=[];
  const add=(id,parentId,level,levelName,name,meshRefs=[],description='')=>nodes.push(Object.freeze({id,parentId,level,levelName,name,machineZone:name,meshRefs,sourceRefs:['BMJ-MACHINE-DATABASE',`FAMILY-${cfg.family.toUpperCase()}`],confidence:cfg.machine.model?'FAMILY_REFERENCE':'REFERENCE_ONLY',verified:false,explodeVector:[level===2?.7:.12,level<4?.18:.08,0],explodeDistance:level===2?.9:level===3?.55:level===4?.34:level===5?.22:.12,focusCamera:null,description,maintenanceTag:null}));
  add(root,null,1,'Mesin',`${cfg.machine.name} · ${cfg.machine.model||'model belum terverifikasi'}`,['MACHINE-UNIVERSAL'],`Identitas berasal dari database BMJ. Geometry ${cfg.label} berbasis arsitektur keluarga dan tidak mengklaim varian yang belum tercatat.`);
- cfg.modules.forEach((name,i)=>{const a=`${root}.M${i+1}`,mesh=`universal-module-${i+1}`;add(a,root,2,'Unit Utama',name,[mesh]);const b=a+'.SUB';add(b,a,3,'Sub',`${name} Assembly`,[mesh]);const c=b+'.BLOCK';add(c,b,4,'Block',`${name} Functional Block`,[mesh]);const d=c+'.PART';add(d,c,5,'Part',`${name} Service Group`,[mesh]);add(d+'.SPEC',d,6,'Spesifik Part',`${name} Active Element`,[`${mesh}-active`]);});
+ (cfg.profile?.architecture||cfg.modules).forEach((name,i)=>{const a=`${root}.M${i+1}`,mesh=`universal-module-${i+1}`;add(a,root,2,'Unit Utama',name,[mesh]);const b=a+'.SUB';add(b,a,3,'Sub',`${name} Assembly`,[mesh]);const c=b+'.BLOCK';add(c,b,4,'Block',`${name} Functional Block`,[mesh]);const d=c+'.PART';add(d,c,5,'Part',`${name} Service Group`,[mesh]);add(d+'.SPEC',d,6,'Spesifik Part',`${name} Active Element`,[`${mesh}-active`]);});
  return nodes;
 }
 
 export class UniversalMachineTemplate{
  constructor(machineId){
   this.cfg=universalMachineConfig(machineId);if(!this.cfg)throw new Error('Konfigurasi model 3D mesin tidak ditemukan.');
-  this.root=new THREE.Group();this.root.name='MACHINE-UNIVERSAL';this.root.userData={assetId:machineId,family:this.cfg.family,confidence:this.cfg.evidence.geometry,evidenceGrade:this.cfg.evidence.grade,simulationStatus:this.cfg.evidence.simulation,evidenceReason:this.cfg.evidence.reason,geometryStatus:'NON_DEDICATED_REFERENCE__NOT_ACTUAL_BMJ_CONFIGURATION'};
+  this.root=new THREE.Group();this.root.name='MACHINE-UNIVERSAL';this.root.userData={assetId:machineId,family:this.cfg.family,confidence:this.cfg.evidence.geometry,evidenceGrade:this.cfg.evidence.grade,simulationStatus:this.cfg.evidence.simulation,evidenceReason:this.cfg.evidence.reason,geometryStatus:'MODEL_FAMILY_MECHANICAL_PROFILE__INSTALLED_OPTIONS_REQUIRE_BMJ_VERIFICATION',processPrinciple:this.cfg.profile?.process||[],installedUnknowns:this.cfg.profile?.unknowns||[]};
   this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.exteriorOpen=false;this.ghosted=false;this.activeMeshes=[];
   this.palette={body:0xe5e7e4,dark:0x283238,steel:0x8c999d,accent:0x2d6e72,orange:0xc86f42,paper:0xeee7d2,glass:0x68a3b5,blue:0x447899,filter:0xd5c7a5};
   this.build();this.taxonomy=universalTaxonomy(machineId);this.taxonomyById=new Map(this.taxonomy.map(n=>[n.id,n]));
@@ -100,12 +101,12 @@ export class UniversalMachineTemplate{
  active(o){o.userData.activeElement=true;this.activeMeshes.push(o);return o;}
  cover(o){o.userData.exteriorCover=true;return o;}
  build(){
-  const f=this.cfg.family,mods=this.cfg.modules,n=mods.length,pitch=f==='offset'?1.05:f==='folder'?1.0:.92,total=Math.max(4.2,n*pitch+1.2),base=this.group(this.root,'universal-base','Base Frame',[0,0,0],[0,-.2,0]);this.box(base,[total,.22,1.9],[0,.11,0],'dark',.035);
+  const f=this.cfg.family,mods=this.cfg.profile?.architecture||this.cfg.modules,n=mods.length,envelope=this.cfg.profile?.footprint||[Math.max(4.2,n*.92+1.2),2,1.8],pitch=Math.max(.72,(envelope[0]-1.1)/Math.max(1,n)),total=envelope[0],base=this.group(this.root,'universal-base','Base Frame',[0,0,0],[0,-.2,0]);this.box(base,[total,.22,1.9],[0,.11,0],'dark',.035);
   if(f==='ahu')return this.buildAHU(total);
   if(f==='compressor')return this.buildCompressor(total);
   if(f==='zund')return this.buildZund(total);
   mods.forEach((name,i)=>{const x=(i-(n-1)/2)*pitch,g=this.group(this.root,`universal-module-${i+1}`,name,[x,0,0],[Math.sign(x||1)*.45,.2,0]);
-   const h=['offset','diecutter','hotfoil','blanker'].includes(f)?1.75:1.35,w=pitch*.86;
+   const h=Math.max(1.15,(envelope[2]||1.8)-.45),w=pitch*.86;
    this.cover(this.box(g,[w,h,.09],[0,.3+h/2,-.93],'body',.035));this.cover(this.box(g,[w,.20,1.75],[0,.3+h,0],'body',.03));
    for(const z of [-.72,.72]){this.box(g,[.07,h,.07],[-w*.35,.3+h/2,z],'steel',.01);this.box(g,[.07,h,.07],[w*.35,.3+h/2,z],'steel',.01);}
    const active=this.group(g,`universal-module-${i+1}-active`,name+' Active Element',[0,0,0],[0,.15,.15]);
@@ -115,7 +116,7 @@ export class UniversalMachineTemplate{
    else {for(const y of [.72,1.02,1.32])this.active(this.cyl(active,.18,1.22,[0,y,0],i%3===0?'orange':'steel','z'));}
   });
  }
- buildCompressor(total){const g=this.group(this.root,'universal-module-1','Compressor Package',[0,0,0],[.5,.2,0]);this.cover(this.box(g,[3.4,1.75,1.65],[0,1.02,0],'body',.08));const a=this.group(g,'universal-module-1-active','Motor / Compression Element',[0,0,0]);this.active(this.cyl(a,.38,1.1,[-.55,.86,0],'accent','x'));this.active(this.cyl(a,.28,.9,[.55,.86,0],'steel','x'));this.box(a,[.48,1.0,.72],[1.16,1.1,0],'dark',.04);for(let i=1;i<this.cfg.modules.length;i++){const x=-1.4+i*.42,m=this.group(this.root,`universal-module-${i+1}`,this.cfg.modules[i],[x,0,0],[.3,.2,0]);this.box(m,[.28,.36,.42],[0,.48,.56],'steel',.02);}}
+ buildCompressor(total){const g=this.group(this.root,'universal-module-1','Compressor Package',[0,0,0],[.5,.2,0]);this.cover(this.box(g,[3.4,1.75,1.65],[0,1.02,0],'body',.08));const a=this.group(g,'universal-module-1-active','Motor / Compression Element',[0,0,0]);this.active(this.cyl(a,.38,1.1,[-.55,.86,0],'accent','x'));this.active(this.cyl(a,.28,.9,[.55,.86,0],'steel','x'));this.box(a,[.48,1.0,.72],[1.16,1.1,0],'dark',.04);for(let i=1;i<(this.cfg.profile?.architecture||this.cfg.modules).length;i++){const x=-1.4+i*.42,m=this.group(this.root,`universal-module-${i+1}`,(this.cfg.profile?.architecture||this.cfg.modules)[i],[x,0,0],[.3,.2,0]);this.box(m,[.28,.36,.42],[0,.48,.56],'steel',.02);}}
  buildAHU(total){this.cfg.modules.forEach((name,i)=>{const x=(i-(this.cfg.modules.length-1)/2)*1.08,g=this.group(this.root,`universal-module-${i+1}`,name,[x,0,0],[Math.sign(x||1)*.45,.2,0]);this.cover(this.box(g,[1.02,1.72,1.72],[0,1.02,0],'body',.035));const a=this.group(g,`universal-module-${i+1}-active`,name+' Active Element');if(i===4)this.active(this.cyl(a,.52,.18,[0,1.03,0],'accent','z'));else if(i===1)this.box(a,[.12,1.3,1.3],[0,1.03,0],'filter',.01);else this.active(this.cyl(a,.08,1.25,[0,1.02,0],'steel','z'));});}
  buildZund(total){const g=this.group(this.root,'universal-module-1','Vacuum Cutting Table',[0,0,0],[0,.2,0]);this.box(g,[5.8,.35,2.7],[0,.45,0],'dark',.05);this.box(g,[5.55,.06,2.45],[0,.65,0],'body',.01);for(let i=1;i<this.cfg.modules.length;i++){const x=-2.4+(i-1)*.8,m=this.group(this.root,`universal-module-${i+1}`,this.cfg.modules[i],[x,0,0],[.3,.25,0]),a=this.group(m,`universal-module-${i+1}-active`,this.cfg.modules[i]+' Active Element');this.active(this.box(a,[.28,.55,.32],[0,1.0,0],i===2?'orange':'steel',.025));}const rail=this.group(this.root,'zund-gantry','Tool Gantry');this.box(rail,[.18,1.05,2.9],[0,1.05,0],'accent',.025);}
  resolvePart(o){for(let p=o;p&&p!==this.root;p=p.parent)if(p.userData.selectable)return p;return null;}findNode(id){return id==='MACHINE-UNIVERSAL'?this.root:this.nodes.find(n=>n.userData.nodeId===id)||null;}
