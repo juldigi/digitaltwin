@@ -158,7 +158,7 @@ export class SheetingMachineTemplate{
     ])this.cyl(internal,r,2.90,[x,y,0],kind,'z',{detail:true,active:true,motion});
 
     // LONG, OPEN DELIVERY / OVERLAP / LAYBOY.
-    const delivery=this.group(this.root,'sheeting-delivery','Knife Outfeed / Overlap / Layboy',[-3.90,0,0],[-.72,.55,0]);
+    const delivery=this.group(this.root,'sheeting-delivery','Knife Outfeed / Overlap / Layboy',[-4.05,0,0],[-.72,.55,0]);
     for(const z of [-1.34,1.34])this.box(delivery,[6.12,.22,.16],[0,.38,z],'dark',.025);
     // Lower tape-bed rollers.
     for(let i=0;i<7;i++)this.cyl(delivery,.075,2.52,[2.55-i*.72,.80+(i<3?.06:0),0],i%2?'chrome':'black','z',{active:true,motion:'delivery-roller'});
@@ -184,7 +184,7 @@ export class SheetingMachineTemplate{
     this.box(layboy,[.18,1.42,2.54],[-1.04,.88,0],'bodyDark',.035,{cover:true});
 
     // Compact operator HMI near cutter, plus electrical cabinet kept separate from unwind.
-    const control=this.group(this.root,'sheeting-control','HMI / Electrical / Hydraulic Controls',[1.25,0,-2.82],[.25,.45,-.4]);
+    const control=this.group(this.root,'sheeting-control','HMI / Electrical / Hydraulic Controls',[1.25,0,-2.88],[.25,.45,-.4]);
     this.box(control,[.72,1.12,.60],[0,.70,0],'body',.045,{cover:true});
     this.box(control,[.56,.44,.055],[0,.91,-.33],'glass',.02,{detail:true});
     this.cyl(control,.065,.05,[-.23,.55,-.35],'yellow','z',{detail:true});
