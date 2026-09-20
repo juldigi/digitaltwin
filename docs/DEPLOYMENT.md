@@ -1,33 +1,42 @@
-# Deployment — Digital Twin V65
+# Deployment — Digital Twin V66
 
-Repo: `juldigi/digitaltwin` (private)
+Repository: `juldigi/digitaltwin`
 
-## Pipeline
+Service-worker cache: `factory-digital-twin-v66-20260920`.
 
-Push ke `main` harus lulus:
-1. `npm ci`
-2. `npm run build`
-3. seluruh `npm test`
+## Required pipeline
+
+1. npm ci
+2. npm run build
+3. npm test
 4. Cloudflare credential validation
-5. Cloudflare Workers deployment
+5. Workers deployment
 
-Service worker cache: `factory-digital-twin-v65-20260920`.
+## V66 Sheeting gates
 
-## V65 Sheeting gates
+Deployment tidak boleh dilanjutkan jika salah satu kontrak berikut gagal:
 
-- BMJ identity dan RIGHT → LEFT tidak berubah.
-- Rollstand tetap single low reel + two-sided support.
-- Feed tetap 4 deliberate guide/tension rollers.
-- Operator-side main-head window harus berupa **true aperture**: tidak boleh ada legacy full opaque side shell di belakang glass.
-- Window harus selectable sebagai `sheeting-window`.
-- Main head hanya mempunyai 1 dominant photographed process cylinder + 4 bands.
-- Outfeed tetap 13 belts + 3 adjustment rod assemblies.
-- Operator outfeed handwheel harus selectable sebagai `sheeting-outfeed-handwheel`.
-- Reference skid load harus substantial, supported di pallet, dan hidden during live simulation.
-- CTM7 tidak boleh otomatis menambahkan cut-to-mark sensor/geometry tanpa model-specific evidence.
-- Significant accidental cross-module penetration harus tetap nol di luar mounted relationships.
-- Dynamic web hanya upstream cut event; dynamic sheets hanya downstream; pile berakhir di stacker.
+- BMJ identity dan RIGHT → LEFT preserved.
+- Exact HSM-CTM7 internals tetap unresolved bila tidak ada source spesifik.
+- Unresolved knife reference tidak boleh masuk active-mechanism animation.
+- Delivery mempunyai 13 fast-belt segments, 13 slow-belt segments dan 13 overlap-belt segments.
+- Continuous upstream web harus terdiri dari connected ribbon segments.
+- Debug path toggle tidak boleh menghilangkan actual web.
+- Web centerline harus clear dari pusat/radius utama guide rollers.
+- Cut sheet memiliki stable cut ID dan transport zone.
+- Sheet X harus monoton menuju LEFT; backward teleport/recycling ditolak.
+- Sheet lifecycle: FAST → SLOW → OVERLAP → LANDING.
+- Static reference skid tersembunyi selama simulation.
+- Dynamic pile dimulai dari pallet dan sheet Y tersusun naik.
+- Lift table turun hanya setelah pile mencapai delivery-height compensation threshold.
+- Significant accidental cross-module penetration tetap nol.
 
-## Evidence boundary
+## Evidence separation
 
-HSM 56 2014 adalah family visual reference. Exact HSM-CTM7 cutter internals, OEM side naming, dan option package tetap unresolved sampai ada data BMJ atau OEM yang spesifik.
+BW HSM 56: visual/family anchor.
+Pasaban: generic fast/slow/overlay/stacking process architecture.
+Unico: generic coordinated web/draw-roll/cutter/tapes control.
+Maxson: generic overlap and lift-table sequence.
+Case Paper: generic lift-table/airflow stacker corroboration.
+
+Tidak satu pun source generic tersebut menjadikan geometry HSM-CTM7 exact verified.
