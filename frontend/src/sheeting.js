@@ -227,7 +227,7 @@ export class SheetingMachineTemplate{
     }
 
     // Compact sloped console integrated beside the outfeed/head transition.
-    const control=this.group(this.root,'sheeting-control','Integrated Low Operator Console',[.55,0,-1.72],[.18,.28,-.28]);
+    const control=this.group(this.root,'sheeting-control','Integrated Low Operator Console',[.55,0,-1.90],[.18,.28,-.28]);
     this.box(control,[.68,.46,.48],[0,.25,0],'light',.030,{cover:true,role:'control-console-base',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
     this.box(control,[.58,.07,.42],[0,.52,-.08],'dark',.010,{detail:true,role:'control-console-face',sourceAnchor:'BW-HSM56-MAIN-PHOTO'},[-.46,0,0]);
     this.cyl(control,.042,.032,[-.19,.55,-.24],'red','z',{detail:true,role:'estop'});
