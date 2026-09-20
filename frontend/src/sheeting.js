@@ -222,7 +222,7 @@ export class SheetingMachineTemplate{
     this.sphere(control,.050,[.24,.75,-.16],'black',{detail:true,role:'control-lever-knob'});
 
     // LEFT: rigid open-front tower, flat lift table, pallet, safety mesh and side cabinet/steps.
-    const layboy=this.group(this.root,'sheeting-layboy','Rigid Lift-Table Stacker Tower',[-4.72,0,0],[-.42,.34,0]);
+    const layboy=this.group(this.root,'sheeting-layboy','Rigid Lift-Table Stacker Tower',[-4.82,0,0],[-.42,.34,0]);
     for(const x of [-1.05,1.05])for(const z of [-1.44,1.44])this.box(layboy,[.21,2.55,.21],[x,1.275,z],'body',.028,{role:'stacker-column',sourceAnchor:'BW-HSM56-STACKER-PHOTO'});
     this.box(layboy,[2.30,.34,.25],[0,2.45,-1.44],'light',.030,{cover:true,role:'stacker-front-header',sourceAnchor:'BW-HSM56-STACKER-PHOTO'});
     this.box(layboy,[2.30,.30,.25],[0,2.43,1.44],'bodyDark',.028,{cover:true,role:'stacker-rear-header'});
