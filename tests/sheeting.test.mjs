@@ -82,11 +82,11 @@ test('Sheeting simulation moves right-to-left and accumulates finished sheets',(
 });
 
 test('Sheeting low-detail and reset preserve dedicated geometry state',()=>{
-  const model=new SheetingMachineTemplate(),cutter=model.findNode('sheeting-cutter');
-  const rest=cutter.position.clone();
+  const model=new SheetingMachineTemplate(),cutter=model.findNode('sheeting-cutter'),knife=model.findNode('sheeting-knife');
+  const rest=cutter.position.clone(),knifeRest=knife.position.clone();
   model.setLow(true);assert.ok(model.detailMeshes.every(m=>!m.visible));
   model.setLow(false);assert.ok(model.detailMeshes.every(m=>m.visible));
-  model.explode(.8,cutter);assert.notDeepEqual(cutter.position.toArray(),rest.toArray());
-  model.reset();assert.deepEqual(cutter.position.toArray(),rest.toArray());
+  model.explode(.8,cutter);assert.deepEqual(cutter.position.toArray(),rest.toArray());assert.notDeepEqual(knife.position.toArray(),knifeRest.toArray());
+  model.reset();assert.deepEqual(cutter.position.toArray(),rest.toArray());assert.deepEqual(knife.position.toArray(),knifeRest.toArray());
   model.dispose();
 });
