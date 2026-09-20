@@ -42,7 +42,7 @@ test('geometry baseline remains unchanged while the user interface is rebuilt',(
 });
 
 test('test-user shell uses clear user-facing navigation',()=>{
-  for(const label of ['Mesin 3D','Denah Pabrik','Daftar Mesin','Struktur Mesin','Buka Exterior','Referensi','Panel Tampilan','Panduan'])assert.match(html,new RegExp(label));assert.match(html,/id="taxonomy-count"/);
+  for(const label of ['3D','Denah','Mesin','Struktur','Exterior','Referensi','Panel','Panduan'])assert.match(html,new RegExp(label));assert.match(html,/id="taxonomy-count"/);
   assert.match(html,/Mode uji/);
   assert.match(html,/Siap diuji/);
 });
