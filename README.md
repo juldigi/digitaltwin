@@ -1,50 +1,46 @@
-# BMJ Packaging Offset — Factory Digital Twin V68
+# BMJ Packaging Offset — Factory Digital Twin V69
 
-V68 memperbaiki fungsi **roll besar turquoise pada Sheeting Lexus** agar tidak lagi sekadar berputar tanpa berinteraksi dengan web.
+V69 memulai rekonstruksi seluruh mesin dengan **evidence-integrity gate**. Perubahan ini sengaja menghentikan perilaku lama yang memutar object generik dan menghasilkan produk fiktif tanpa hubungan mekanis.
 
-## Evidence boundary
+## Status model
 
-Identitas BMJ tetap:
-- HSM-CTM7
-- serial 00982
-- SAP SBM-2
-- tahun 2014
-- arah proses RIGHT → LEFT
+Empat twin dedicated tetap dipisahkan:
+- Offset 5 · Heidelberg CD 102-8+L
+- Offset 10 · Heidelberg CX 104 project configuration
+- APM 2 · BOBST SP 102 family reconstruction
+- Sheeting Lexus · HSM-CTM7 identity / HSM 56 visual-family reference
 
-Silhouette roll besar dan band putih tetap berasal dari foto resmi keluarga Lexus HSM 56 BW Papersystems.
+Tiga puluh tujuh mesin lain sekarang mempunyai profil bukti eksplisit:
+- `MODEL_IDENTIFIED`: model diketahui, tetapi konfigurasi terpasang belum cukup untuk diklaim exact.
+- `IDENTITY_ONLY`: nama aset tersedia, namun model/serial/OEM atau susunan modul belum tersedia.
+- `OFFICIAL_FAMILY_REFERENCE`, `FAMILY_REFERENCE`, atau `PLACEHOLDER`: status geometry yang ditampilkan.
 
-Fungsi **Main Draw / Traction Drum** adalah process-family reference, bukan klaim nama OEM exact HSM-CTM7. Dasarnya:
-- BW sheeter sheet-length/squaring control menyebut draw drum encoder dan knife marker;
-- BW servo upgrade menyebut koordinasi cross cutter, knife dan draw-drum functions;
-- Unico menghubungkan draw roll dengan cutter serta high/low-speed tapes;
-- Maxson menempatkan large-diameter draw drum pada pull-roll section sebelum cutter.
+## Simulation integrity
 
-## Geometry / web path V68
+`UniversalProcessSimulation` lama telah dinonaktifkan. Mesin non-dedicated sekarang:
+- tidak memutar mesh berdasarkan indeks;
+- tidak menambah completed count setiap empat detik;
+- tidak membuat sheet/product fiktif;
+- tidak mengklaim actuator, interlock, timing, atau material flow yang belum tervalidasi;
+- menampilkan alasan spesifik mengapa simulasi diblokir.
 
-- web dari guide/tension menuju head infeed roller;
-- web kemudian naik secara tangensial ke Main Draw / Traction Drum;
-- web mengikuti sampled contact arc pada permukaan drum;
-- web keluar tangensial menuju blade/anvil contact line;
-- cut point disejajarkan dengan visible flat-bed knife;
-- continuous web tetap tidak boleh menembus drum atau roller.
+Simulasi baru hanya boleh diaktifkan setelah tersedia bukti untuk material path, actuator, support/bearing, interlock, timing relationship, dan output/stack behavior.
 
-## Simulation V68
+## Next fidelity batches
 
-- web advance = elapsed process time × visual line speed;
-- draw drum angular travel = web advance / drum radius;
-- surface speed draw drum = visual web speed;
-- target cut length menentukan interval cut;
-- cut count dihitung dari web advance / target cut length;
-- blade stroke tetap mencapai contact timing sebelum sheet dilepas;
-- sheet lalu bergerak FAST → SLOW → OVERLAP → LANDING → STACK;
-- Stop & Reset mengembalikan drum/blade/lift/jogger ke posisi awal.
+Geometry reference yang masih generik bukan hasil akhir. Penggantian dilakukan per keluarga dan per zona, dengan urutan:
+1. exact identity/nameplate;
+2. primary OEM drawing/manual/brochure;
+3. foto aktual BMJ empat sisi dan interior aman;
+4. module configuration dan orientation;
+5. six-level taxonomy mapped ke geometry nyata;
+6. collision/support/grounding tests;
+7. mechanically causal simulation tests.
 
-## Verification
+Evidence integrity gate berlaku untuk seluruh route universal pada V69.\n\n## Verification
 
 ```sh
 npm ci
 npm run build
 npm test
 ```
-
-Regression test V68 memeriksa web benar-benar mencapai dan membelit permukaan draw drum, tidak menembus drum, wrap angle cukup terlihat, drum surface speed sama dengan web speed, cut berasal dari web advance, blade tetap sinkron, sheet tidak teleport, dan collision checks tetap bersih.
