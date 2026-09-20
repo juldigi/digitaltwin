@@ -14,6 +14,9 @@ test('Sheeting identity preserves BMJ HSM-CTM7 data without promoting HSM 56 to 
   assert.equal(SHEETING_ORIENTATION.output,'LEFT');
   assert.ok(SHEETING_TECHNICAL_SOURCES.some(s=>s.id==='SHEETING-BMJ-DATABASE'&&s.confidence==='VERIFIED'));
   assert.ok(SHEETING_TECHNICAL_SOURCES.some(s=>s.id==='SHEETING-HSM56-BW'&&/FAMILY/i.test(s.type)));
+  assert.ok(SHEETING_TECHNICAL_SOURCES.some(s=>s.id==='SHEETING-LEXUS-INDONESIA'));
+  assert.ok(SHEETING_TECHNICAL_SOURCES.some(s=>s.id==='SHEETING-GREATWALL-SYNCHRO-VISUAL'));
+  assert.match(SHEETING_ORIENTATION.cutterArchitecture,/UNRESOLVED|CONFLICT/i);
 });
 
 test('Sheeting geometry follows confirmed right-to-left process order',()=>{
@@ -37,6 +40,22 @@ test('Sheeting dedicated geometry is finite, grounded and includes HSM visual an
   assert.ok(box.min.y>=-0.01,'machine geometry must remain on the floor');
   for(const id of ['sheeting-rollstand','sheeting-feed','sheeting-cutter','sheeting-knife','sheeting-cutter-transport','sheeting-delivery','sheeting-layboy','sheeting-control','sheeting-access'])assert.ok(model.findNode(id),id);
   assert.ok(model.activeMeshes.length>=20,'reel, feed, knife and delivery mechanisms should be animated');
+  model.dispose();
+});
+
+test('V59 Sheeting silhouette uses double shaftless unwind, open feed bridge and compact cutter head',()=>{
+  const model=new SheetingMachineTemplate();
+  const roll=model.findNode('sheeting-rollstand'),feed=model.findNode('sheeting-feed'),cutter=model.findNode('sheeting-cutter'),delivery=model.findNode('sheeting-delivery'),overlap=model.findNode('sheeting-overlap');
+  assert.ok(roll&&feed&&cutter&&delivery&&overlap);
+  const reels=model.activeMeshes.filter(m=>m.userData.motion==='reel');
+  const chucks=model.activeMeshes.filter(m=>m.userData.motion==='chuck');
+  assert.equal(reels.length,2,'double unwind reference should show two reel positions');
+  assert.ok(chucks.length>=4,'shaftless unwind should use opposed short chucks');
+  const cutterBox=new THREE.Box3().setFromObject(cutter),feedBox=new THREE.Box3().setFromObject(feed),deliveryBox=new THREE.Box3().setFromObject(delivery);
+  assert.ok((cutterBox.max.x-cutterBox.min.x)<3.0,'cutter head must remain compact, not the former oversized box');
+  assert.ok((feedBox.max.y-feedBox.min.y)>1.8,'feed bridge must be visibly elevated/open');
+  assert.ok((deliveryBox.max.x-deliveryBox.min.x)>5.5,'delivery/overlap section should be long and open');
+  assert.equal(model.root.userData.processFlow.cutterArchitecture,'EXACT_HSM_CTM7_UNRESOLVED_PUBLIC_SOURCES_CONFLICT');
   model.dispose();
 });
 
@@ -66,7 +85,7 @@ test('Sheeting cutaway hides exterior covers but retains process mechanisms',()=
 
 test('Sheeting simulation keeps web continuous before the knife and creates sheets only after cutting',()=>{
   const model=new SheetingMachineTemplate(),sim=new SheetingProcessSimulation(model.root,model);
-  assert.deepEqual(SHEETING_SIMULATION_STAGES,['Rollstand / Unwind','Feed & Tension / EPC','Flat-Bed Knife','Sheet Transport','Layboy / Stacker']);
+  assert.deepEqual(SHEETING_SIMULATION_STAGES,['Double Shaftless Unwind','Open Feed / Tension / EPC','Cross-Cut Cutter','Overlap / Sheet Transport','Layboy / Stacker']);
   const lift=model.activeMeshes.find(m=>m.userData.motion==='lift-table');
   assert.ok(lift,'layboy lift table must be animated');
   const liftRest=lift.position.y;
@@ -81,9 +100,9 @@ test('Sheeting simulation keeps web continuous before the knife and creates shee
   assert.ok(state.sheetsVisible>0);
   assert.ok(state.webFlowMarksVisible>0);
   const sheetPositions=sim.sheets.filter(s=>s.visible).map(s=>s.position.x);
-  assert.ok(sheetPositions.every(x=>x<=.08),'individual sheets must exist only downstream of the knife');
+  assert.ok(sheetPositions.every(x=>x<=.72),'individual sheets must exist only downstream of the compact cutter');
   const webPositions=sim.webFlowMarks.filter(s=>s.visible).map(s=>s.position.x);
-  assert.ok(webPositions.every(x=>x>=.16),'continuous-web motion markers must stay upstream of the knife');
+  assert.ok(webPositions.every(x=>x>=.90),'continuous-web motion markers must stay upstream of the cutter');
   assert.ok(lift.position.y<liftRest,'lift table must lower as the pile grows to preserve receiving height');
   sim.stop();assert.equal(sim.state().active,false);
   assert.equal(lift.position.y,liftRest,'stopping simulation must restore the lift table');
