@@ -64,20 +64,29 @@ test('Sheeting cutaway hides exterior covers but retains process mechanisms',()=
   model.dispose();
 });
 
-test('Sheeting simulation moves right-to-left and accumulates finished sheets',()=>{
+test('Sheeting simulation keeps web continuous before the knife and creates sheets only after cutting',()=>{
   const model=new SheetingMachineTemplate(),sim=new SheetingProcessSimulation(model.root,model);
   assert.deepEqual(SHEETING_SIMULATION_STAGES,['Rollstand / Unwind','Feed & Tension / EPC','Flat-Bed Knife','Sheet Transport','Layboy / Stacker']);
+  const lift=model.activeMeshes.find(m=>m.userData.motion==='lift-table');
+  assert.ok(lift,'layboy lift table must be animated');
+  const liftRest=lift.position.y;
   sim.start();
   let now=1000;sim.update(now);
-  for(let i=0;i<110;i++){now+=50;sim.update(now);}
+  for(let i=0;i<150;i++){now+=50;sim.update(now);}
   const state=sim.state();
   assert.equal(state.active,true);
+  assert.ok(state.cutCount>state.completed,'cut count should lead stack completion because sheets need travel time');
   assert.ok(state.completed>=1);
   assert.ok(state.pileSheetsVisible>=1);
   assert.ok(state.sheetsVisible>0);
-  const positions=sim.sheets.filter(s=>s.visible).map(s=>s.position.x);
-  assert.ok(positions.some(x=>x<0)&&positions.some(x=>x>0),'animated sheets should span both sides of the machine path');
+  assert.ok(state.webFlowMarksVisible>0);
+  const sheetPositions=sim.sheets.filter(s=>s.visible).map(s=>s.position.x);
+  assert.ok(sheetPositions.every(x=>x<=.08),'individual sheets must exist only downstream of the knife');
+  const webPositions=sim.webFlowMarks.filter(s=>s.visible).map(s=>s.position.x);
+  assert.ok(webPositions.every(x=>x>=.16),'continuous-web motion markers must stay upstream of the knife');
+  assert.ok(lift.position.y<liftRest,'lift table must lower as the pile grows to preserve receiving height');
   sim.stop();assert.equal(sim.state().active,false);
+  assert.equal(lift.position.y,liftRest,'stopping simulation must restore the lift table');
   sim.dispose();model.dispose();
 });
 
