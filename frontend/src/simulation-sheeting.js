@@ -1,13 +1,13 @@
 import * as THREE from 'three';
 
 export const SHEETING_SIMULATION_STAGES=Object.freeze([
-  'Rollstand / Unwind','Feed & Tension / EPC','Flat-Bed Knife','Sheet Transport','Layboy / Stacker'
+  'Double Shaftless Unwind','Open Feed / Tension / EPC','Cross-Cut Cutter','Overlap / Sheet Transport','Layboy / Stacker'
 ]);
 export const SHEETING_PROCESS_STEPS=Object.freeze([
-  'Paper reel unwinds from the RIGHT-side rollstand',
-  'A continuous web passes feed rollers, tension control and EPC',
-  'The flat-bed knife separates the continuous web into individual sheets',
-  'Only cut sheets travel through the delivery / overlap section',
+  'Paper reel unwinds from the RIGHT-side double shaftless unwind reference',
+  'A continuous web rises through the open feed bridge, tension/dancer rollers and EPC',
+  'The compact cross-cut cutter separates the continuous web into individual sheets',
+  'Only cut sheets travel through the long tape and overlap/shingling delivery',
   'The layboy lowers its lift table while finished sheets accumulate at the LEFT-side stack'
 ]);
 
@@ -25,21 +25,22 @@ export class SheetingProcessSimulation{
   }
   buildPath(){
     const pre=[
-      new THREE.Vector3(6.05,1.28,0),
-      new THREE.Vector3(5.25,1.06,0),
-      new THREE.Vector3(4.20,1.00,0),
-      new THREE.Vector3(2.35,1.00,0),
-      new THREE.Vector3(.55,1.02,0),
-      new THREE.Vector3(.18,1.02,0)
+      new THREE.Vector3(6.77,1.10,0),
+      new THREE.Vector3(5.82,1.34,0),
+      new THREE.Vector3(4.65,1.58,0),
+      new THREE.Vector3(3.65,1.42,0),
+      new THREE.Vector3(2.15,1.39,0),
+      new THREE.Vector3(1.18,1.34,0),
+      new THREE.Vector3(.92,1.30,0)
     ];
     const post=[
-      new THREE.Vector3(.05,1.00,0),
-      new THREE.Vector3(-.70,.93,0),
-      new THREE.Vector3(-1.65,.90,0),
-      new THREE.Vector3(-3.15,.90,0),
-      new THREE.Vector3(-4.75,.79,0),
-      new THREE.Vector3(-5.85,.70,0),
-      new THREE.Vector3(-6.38,.665,0)
+      new THREE.Vector3(.68,1.18,0),
+      new THREE.Vector3(.10,1.02,0),
+      new THREE.Vector3(-1.10,.96,0),
+      new THREE.Vector3(-2.45,.94,0),
+      new THREE.Vector3(-3.90,.90,0),
+      new THREE.Vector3(-5.10,.78,0),
+      new THREE.Vector3(-5.95,.63,0)
     ];
     this.preCutCurve=new THREE.CatmullRomCurve3(pre,false,'catmullrom',.08);
     this.postCutCurve=new THREE.CatmullRomCurve3(post,false,'catmullrom',.08);
@@ -70,7 +71,7 @@ export class SheetingProcessSimulation{
     for(let i=0;i<28;i++){
       const mesh=new THREE.Mesh(geo,this.sheetMaterial);
       mesh.visible=false;mesh.name='Finished sheet pile';mesh.userData.finishedSheet=true;
-      mesh.position.set(-6.38,.665,0);this.group.add(mesh);this.pile.push(mesh);
+      mesh.position.set(-5.95,.63,0);this.group.add(mesh);this.pile.push(mesh);
     }
   }
   state(){
@@ -148,10 +149,10 @@ export class SheetingProcessSimulation{
       s.position.copy(p);s.rotation.set(0,-Math.atan2(tangent.z,tangent.x),0);
     }
     const visible=Math.min(this.pile.length,this.completed);
-    const topY=.665;
+    const topY=.63;
     for(let i=0;i<this.pile.length;i++){
       const sheet=this.pile[i];sheet.visible=i<visible;
-      if(sheet.visible)sheet.position.set(-6.38,topY-(visible-1-i)*.012,0);
+      if(sheet.visible)sheet.position.set(-5.95,topY-(visible-1-i)*.012,0);
     }
   }
   update(now){
