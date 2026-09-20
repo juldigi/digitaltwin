@@ -13,7 +13,7 @@ export const SHEETING_VISUAL_REFERENCE=Object.freeze({
   evidence:'BMJ database + user-confirmed RIGHT_TO_LEFT + BW Papersystems 2014 HSM 56 brochure/page/full-resolution machine photo + historical Lexus/HSM family listing + Indonesian Lexus process reference',
   dimensions:'PHOTO_ANCHORED_RECONSTRUCTION_NOT_ENGINEERING',
   visualFamily:'HSM56_LOW_REEL_INCLINED_WEB_GUIDE_HOLLOW_WINDOW_HEAD_BANDED_PROCESS_CYLINDER_BELT_OUTFEED_TOWER_STACKER',
-  visualRevision:'V66_HSM56_PROCESS_ZONE_REBUILD'
+  visualRevision:'V67_VISIBLE_FLAT_BED_KNIFE_REFERENCE'
 });
 
 export class SheetingMachineTemplate{
@@ -24,7 +24,7 @@ export class SheetingMachineTemplate{
       assetId:'BMJ-MCH-0002',machine:'SHEETING LEXUS',model:'HSM-CTM7',
       referenceFamily:'LEXUS HSM family · HSM 56 2014 BW visual anchors',
       processDirection:'RIGHT_TO_LEFT',confidence:'IDENTITY_VERIFIED__GEOMETRY_FAMILY_PHOTO_ANCHORED',
-      visualRevision:'V66_HSM56_PROCESS_ZONE_REBUILD'
+      visualRevision:'V67_VISIBLE_FLAT_BED_KNIFE_REFERENCE'
     };
     this.nodes=[];this.parts=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.activeMeshes=[];this.detailMeshes=[];
     this.taxonomy=SHEETING_TAXONOMY;this.taxonomyById=SHEETING_TAXONOMY_BY_ID;this.exteriorOpen=false;this.ghosted=false;
@@ -177,10 +177,15 @@ export class SheetingMachineTemplate{
     // Repeating guides/fingers are visible just under the window.
     for(const z of [-1.05,-.82,-.59,-.36,-.13,.10,.33,.56,.79,1.02])this.box(process,[.28,.045,.055],[-.28,1.13,z],'dark',.004,{detail:true,role:'window-guide-finger',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
 
-    const knife=this.group(head,'sheeting-knife','Cross-Cut Zone Reference',[-.30,0,0],[0,.24,0],'UNRESOLVED_EXACT');
-    // Exact knife actuation is unresolved; these are static cut-zone references, not fake animated blades.
-    this.box(knife,[.09,.08,2.30],[-.22,.86,0],'dark',.006,{detail:true,role:'cut-zone-reference'});
-    this.box(knife,[.07,.07,2.22],[-.05,.98,0],'chrome',.006,{detail:true,role:'cut-zone-reference'});
+    const knife=this.group(head,'sheeting-knife','Flat-Bed Knife Family Reference',[-.30,0,0],[0,.24,0],'FAMILY_REFERENCE__EXACT_HSM_CTM7_UNRESOLVED');
+    // BW's 2014 HSM 56 brochure explicitly states "Flat Bed Knife".
+    // V67 therefore shows a visible reciprocating knife assembly during simulation,
+    // while keeping its exact HSM-CTM7 stroke/actuation geometry unresolved.
+    this.box(knife,[.16,.13,2.40],[-.12,1.30,0],'bodyDark',.010,{detail:true,active:true,motion:'flat-bed-blade-reference',role:'knife-carrier',sourceAnchor:'BW-HSM56-FLAT-BED-KNIFE'});
+    this.box(knife,[.050,.34,2.30],[-.12,1.105,0],'steel',.004,{detail:true,active:true,motion:'flat-bed-blade-reference',role:'visible-flat-bed-blade',sourceAnchor:'BW-HSM56-FLAT-BED-KNIFE'});
+    this.box(knife,[.062,.030,2.32],[-.12,.945,0],'chrome',.002,{detail:true,active:true,motion:'flat-bed-blade-reference',role:'knife-cutting-edge',sourceAnchor:'BW-HSM56-FLAT-BED-KNIFE'});
+    this.box(knife,[.12,.085,2.34],[-.12,.835,0],'dark',.005,{detail:true,role:'knife-anvil-reference',sourceAnchor:'BW-HSM56-FLAT-BED-KNIFE'});
+    for(const side of [-1,1])this.box(knife,[.24,.58,.16],[-.12,1.08,side*1.23],'bodyDark',.012,{detail:true,role:'knife-guide-block',sourceAnchor:'BW-HSM56-FLAT-BED-KNIFE'});
 
     const transport=this.group(head,'sheeting-cutter-transport','Integrated Head Bed / Service Plate',[0,0,0],[0,.12,0]);
     this.box(transport,[2.40,.11,2.62],[-.02,.55,0],'light',.016,{role:'head-bed'});
@@ -299,7 +304,7 @@ export class SheetingMachineTemplate{
       idleWebGeometry:'REFERENCE_STACK_VISIBLE__MOVING_WEB_ONLY_DURING_SIMULATION',
       direction:'RIGHT_TO_LEFT',
       unwindArchitecture:'BW_HSM56_LOW_REEL_PLUS_INCLINED_GUIDE_PHOTO_ANCHOR__HSM_CTM7_EXACT_UNRESOLVED',
-      cutterArchitecture:'PHOTOGRAPHED_MAIN_PROCESS_CYLINDER_REPRODUCED__EXACT_HSM_CTM7_KNIFE_MECHANISM_UNRESOLVED',
+      cutterArchitecture:'BW_HSM56_FLAT_BED_KNIFE_FAMILY_REFERENCE_VISIBLE_IN_SIMULATION__EXACT_HSM_CTM7_STROKE_AND_ACTUATION_UNRESOLVED',
       visualBasis:'BW_2014_HSM56_VISUAL_ANCHOR__PASABAN_FAST_SLOW_OVERLAP_PROCESS_MAP__UNICO_DRAW_ROLL_CUTTER_TAPES_CONTROL__MAXSON_STACKER_LIFT_SEQUENCE',
       windowArchitecture:'TRUE_OPERATOR_SIDE_APERTURE__NO_OPAQUE_PANEL_BEHIND_GLASS',
       exactModelSearch:'NO_PUBLIC_HSM_CTM7_SPECIFIC_DRAWING_OR_PHOTO_CONFIRMED',
