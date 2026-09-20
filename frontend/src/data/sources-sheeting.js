@@ -36,6 +36,15 @@ export const SHEETING_TECHNICAL_SOURCES=Object.freeze([
     note:'Trade records include MACH SRV 56 servo rotary high-speed sheeter machines exported from the Philippines to Indonesia with double shaftless reel stands, plus Accura Synchro-Fly sheeters with shaftless unwind stands. This supports the regional architecture but does not establish exact BMJ model identity.'
   }),
   Object.freeze({
+    id:'SHEETING-HSM56-NEAR-SERIAL',
+    title:'LEXUS HSM_56 · 2013 · serial 00962',
+    publisher:'Public machinery register / Kou Fu Packaging reference',
+    type:'CORROBORATING_NEAR_SERIAL_REFERENCE',
+    confidence:'MEDIUM-FAMILY / LOW-EXACT',
+    url:'https://www.scribd.com/document/923019062/Printing-Machines',
+    note:'A separate production register lists a LEXUS HSM_56 manufactured 06-2013 with serial 00962 and 300 m/min status. The nearby serial sequence and date are useful family corroboration for BMJ serial 00982 / 2014, but they do not prove identical configuration.'
+  }),
+  Object.freeze({
     id:'SHEETING-HSM56-BW',
     title:'2014 Lexus Sheeter · Model HSM 56',
     publisher:'BW Papersystems',
