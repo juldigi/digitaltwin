@@ -10,6 +10,7 @@ export const OFFSET9_SPEC=Object.freeze({
  maxSheet:[.370,.520],minSheet:[.105,.145],maxPrint:[.360,.520],stockStandard:[.00003,.00040],stockOptionMax:.00060,
  maxSpeed:15000,gripperMargin:[.008,.010],plate:[.459,.525],plateThickness:[.00010,.00015],blanket:[.460,.536],blanketThickness:.00195,
  feederPile:.915,standardDeliveryPile:.535,highPileDelivery:.695,printingUnits:4,coatingUnits:1,configuration:'4 PU + L',
+ inkingRollerCountVerified:false,dampeningRollerCountVerified:false,deliveryPileOptionVerified:false,dryerInstalledVerified:false,perfectorInstalledVerified:false,
  referenceEnvelope5L:[7.67,2.04,1.62],
- dimensionalBoundary:'Official overall envelope is published for a sample SX 52-5+L high-pile configuration. The BMJ 4+L overall length is therefore modeled proportionally and is not asserted as an as-built measurement.'
+ dimensionalBoundary:'Official overall envelope is published for a sample SX 52-5-P+L short-high-pile configuration, not the BMJ 4+L serial. The BMJ overall length and standard/high-pile delivery option are therefore not asserted as as-built measurements. Roller counts shown inside the inking/dampening visualization are functional references, not serial-verified counts.'
 });
