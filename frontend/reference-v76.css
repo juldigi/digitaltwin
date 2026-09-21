@@ -548,3 +548,66 @@ dialog#modal::backdrop{background:rgba(15,35,52,.34)!important;backdrop-filter:b
   body.nav-open .rail{left:auto!important;right:8px!important;width:min(360px,52vw)!important;grid-template-columns:1fr!important;max-height:72dvh!important}
   .engineering-workbench{left:auto!important;right:0!important;top:calc(var(--v76-mobile-head) + var(--v76-safe-t))!important;bottom:calc(var(--v76-mobile-nav) + var(--v76-safe-b))!important;width:min(520px,68vw)!important;height:auto!important;border-radius:16px 0 0 0!important}
 }
+
+
+/* ---------- V77 stability layer: single mobile shell, no blur traps ---------- */
+[hidden]{display:none!important}
+.floating-window[hidden],.notice[hidden],.panel-launcher-menu[hidden],.keyplan-mini[hidden],#scene-notice[hidden],#toast[hidden],.mobile-nav[hidden]{display:none!important}
+
+@media (max-width:767px){
+  /* Never dim/blur the screen just because machine detail is open. */
+  .ui-backdrop{
+    display:none!important;
+    pointer-events:none!important;
+    background:rgba(11,31,46,.18)!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    z-index:405!important;
+  }
+  body.nav-open .ui-backdrop,
+  body.ui-workbench-open .ui-backdrop{
+    display:block!important;
+    pointer-events:auto!important;
+  }
+  body.mobile-panel-open .ui-backdrop,
+  body:not(.panel-hidden) .ui-backdrop{
+    display:none!important;
+    pointer-events:none!important;
+  }
+
+  #detail-panel{
+    z-index:520!important;
+    opacity:1!important;
+    visibility:visible!important;
+    filter:none!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+  }
+  body.panel-hidden #detail-panel{display:none!important}
+  body:not(.panel-hidden) #detail-panel{display:flex!important}
+
+  /* All legacy toolbars are explicitly suppressed in the V77 phone shell. */
+  .scene-bottom,.view-switch,.ui-mobile-actions,.telemetry-strip,.viewport-zoom,.compass,.asset-legend,.scene-caption{
+    display:none!important;
+  }
+  .scene-options{display:block!important}
+  .scene-options #labels,.scene-options #panel-launcher{display:none!important}
+  .scene-options #fullscreen{display:grid!important}
+
+  /* Menu is only visible while nav-open. */
+  .rail{display:none!important}
+  body:not(.nav-open) .rail{display:none!important}
+  body.nav-open .rail{display:grid!important;z-index:530!important}
+
+  /* Floating utilities cannot sit permanently above the 3D stage. */
+  .floating-window,.notice,.panel-launcher-menu{
+    z-index:535!important;
+  }
+  .floating-window[hidden],.notice[hidden],.panel-launcher-menu[hidden]{display:none!important}
+
+  .engineering-workbench{z-index:525!important}
+}
+
+@media (min-width:768px){
+  .ui-backdrop{display:none!important;pointer-events:none!important}
+}
