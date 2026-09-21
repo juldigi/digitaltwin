@@ -115,6 +115,7 @@ test('V123 R3 QF-100CS ABM-2 uses one bounded family working bay with XY-safe hy
   'collector-stacker-option-envelope','operator-touchscreen',
   'hydraulic-reservoir','hydraulic-pump','plc-servo-cabinet'
  ]);
+ assert.equal(m.findNode('qf100-head-ram').userData.modeledReferenceHeadCount,1);
  assert.equal(m.findNode('qf100-head-ram').userData.installedHeadCountVerified,false);
  assert.equal(m.findNode('qf100-collector-option').userData.installedOptionVerified,false);
  assert.equal(m.findNode('qf100-separation-interface').userData.noInventedForkOrConveyor,true);
