@@ -20,6 +20,8 @@ import {SHARK_N650_TAXONOMY} from './data/taxonomy-shark-n650.js';
 import {SHARK_N650_TECHNICAL_SOURCES} from './data/sources-shark-n650.js';
 import {fz1200TaxonomyFor} from './data/taxonomy-fz1200.js';
 import {FZ1200_TECHNICAL_SOURCES} from './data/sources-fz1200.js';
+import {UPG_LY300_TAXONOMY} from './data/taxonomy-upg-ly300.js';
+import {UPG_LY300_TECHNICAL_SOURCES} from './data/sources-upg-ly300.js';
 
 const FAMILY_BY_NO=new Map([
  [1,'guillotine'],[2,'sheeter'],[4,'offset'],[5,'offset'],[6,'offset'],[7,'pileturner'],[8,'pileturner'],
@@ -80,7 +82,7 @@ const EVIDENCE_BY_NO=new Map([
  [21,{grade:'MODEL_IDENTIFIED',geometry:'FAMILY_REFERENCE',simulation:'BLOCKED',reason:'QF-100CS identity is known; stripping, blanking and waste-handling configuration needs primary documentation.'}],
  [22,{grade:'MODEL_FAMILY_PROCESS_GROUNDED',geometry:'DEDICATED_FAMILY_PROCESS_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated FZ1200 twin models the consistently documented clamp, turning, air separation/dust removal and jogging/alignment process. OEM origin and installed load/hydraulic/blower configuration remain unresolved.'}],
  [23,{grade:'IDENTITY_ONLY',geometry:'PLACEHOLDER',simulation:'BLOCKED',reason:'Collator has no model, serial or OEM in the BMJ registry.'}],
- [24,{grade:'MODEL_IDENTIFIED',geometry:'FAMILY_REFERENCE',simulation:'BLOCKED',reason:'UPG-LY300 identity is recorded, but authoritative machine documentation and installed configuration are absent.'}],
+ [24,{grade:'OEM_MODEL_GROUNDED',geometry:'DEDICATED_OEM_MODEL_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated UPG-LY300 twin uses the matching manufacturer model documentation for automatic paging, servo transport, Ricoh G5 UV inkjet, LED UV curing, 2K inspection, plate-turn rejection and collection. Optional/custom accessories remain bounded.'}],
  [25,{grade:'IDENTITY_ONLY',geometry:'PLACEHOLDER',simulation:'BLOCKED',reason:'CTP 1 has no Heidelberg model/serial in the BMJ registry.'}],
  [26,{grade:'IDENTITY_ONLY',geometry:'PLACEHOLDER',simulation:'BLOCKED',reason:'CTP 2 has no Heidelberg model/serial in the BMJ registry.'}],
  [27,{grade:'IDENTITY_ONLY',geometry:'PLACEHOLDER',simulation:'BLOCKED',reason:'SCREEN imagesetter model and serial are absent.'}],
@@ -91,7 +93,7 @@ const EVIDENCE_BY_NO=new Map([
 const DEFAULT_EVIDENCE=Object.freeze({grade:'IDENTITY_ONLY',geometry:'PLACEHOLDER',simulation:'BLOCKED',reason:'Machine-specific evidence is insufficient for mechanically faithful geometry or simulation.'});
 const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 export function universalMachineConfig(machineId){const machine=MACHINE_REGISTRY_BY_ID.get(machineId);if(!machine)return null;const family=FAMILY_BY_NO.get(machine.no);if(!family)return null;return {machine,family,label:LABELS[family],modules:MODULES[family],profile:mechanicalProfile(machine.no),evidence:Object.freeze(EVIDENCE_BY_NO.get(machine.no)||DEFAULT_EVIDENCE)};}
-export function universalTechnicalSources(machineId){if(machineId==='BMJ-MCH-0001')return [...POLAR115_TECHNICAL_SOURCES];if(machineId==='BMJ-MCH-0006')return [...OFFSET9_TECHNICAL_SOURCES];if(['BMJ-MCH-0011','BMJ-MCH-0012'].includes(machineId))return [...MK920_TECHNICAL_SOURCES];if(machineId==='BMJ-MCH-0013')return [...MK1060_TECHNICAL_SOURCES];if(['BMJ-MCH-0014','BMJ-MCH-0015'].includes(machineId))return [...PROMATRIX106_TECHNICAL_SOURCES];if(['BMJ-MCH-0016','BMJ-MCH-0018'].includes(machineId))return [...MEDIA100_TECHNICAL_SOURCES];if(machineId==='BMJ-MCH-0019')return [...DIANA_EYE55_TECHNICAL_SOURCES];if(machineId==='BMJ-MCH-0020')return [...SHARK_N650_TECHNICAL_SOURCES];if(['BMJ-MCH-0007','BMJ-MCH-0008','BMJ-MCH-0022'].includes(machineId))return [...FZ1200_TECHNICAL_SOURCES];const cfg=universalMachineConfig(machineId);if(!cfg)return [];return (FAMILY_SOURCES[cfg.family]||[]).map(([title,url],i)=>({id:`FAMILY-${cfg.family.toUpperCase()}-${i+1}`,title,publisher:new URL(url).hostname.replace(/^www\./,''),url,type:'TECHNICAL_REFERENCE',confidence:cfg.machine.model?'MEDIUM CONFIDENCE':'REFERENCE ONLY'}));}
+export function universalTechnicalSources(machineId){if(machineId==='BMJ-MCH-0001')return [...POLAR115_TECHNICAL_SOURCES];if(machineId==='BMJ-MCH-0006')return [...OFFSET9_TECHNICAL_SOURCES];if(['BMJ-MCH-0011','BMJ-MCH-0012'].includes(machineId))return [...MK920_TECHNICAL_SOURCES];if(machineId==='BMJ-MCH-0013')return [...MK1060_TECHNICAL_SOURCES];if(['BMJ-MCH-0014','BMJ-MCH-0015'].includes(machineId))return [...PROMATRIX106_TECHNICAL_SOURCES];if(['BMJ-MCH-0016','BMJ-MCH-0018'].includes(machineId))return [...MEDIA100_TECHNICAL_SOURCES];if(machineId==='BMJ-MCH-0019')return [...DIANA_EYE55_TECHNICAL_SOURCES];if(machineId==='BMJ-MCH-0020')return [...SHARK_N650_TECHNICAL_SOURCES];if(['BMJ-MCH-0007','BMJ-MCH-0008','BMJ-MCH-0022'].includes(machineId))return [...FZ1200_TECHNICAL_SOURCES];if(machineId==='BMJ-MCH-0024')return [...UPG_LY300_TECHNICAL_SOURCES];const cfg=universalMachineConfig(machineId);if(!cfg)return [];return (FAMILY_SOURCES[cfg.family]||[]).map(([title,url],i)=>({id:`FAMILY-${cfg.family.toUpperCase()}-${i+1}`,title,publisher:new URL(url).hostname.replace(/^www\./,''),url,type:'TECHNICAL_REFERENCE',confidence:cfg.machine.model?'MEDIUM CONFIDENCE':'REFERENCE ONLY'}));}
 
 export function universalTaxonomy(machineId){
  if(machineId==='BMJ-MCH-0001')return [...POLAR115_TAXONOMY];
@@ -103,6 +105,7 @@ export function universalTaxonomy(machineId){
  if(machineId==='BMJ-MCH-0019')return [...DIANA_EYE55_TAXONOMY];
  if(machineId==='BMJ-MCH-0020')return [...SHARK_N650_TAXONOMY];
  if(['BMJ-MCH-0007','BMJ-MCH-0008','BMJ-MCH-0022'].includes(machineId))return [...fz1200TaxonomyFor(machineId)];
+ if(machineId==='BMJ-MCH-0024')return [...UPG_LY300_TAXONOMY];
  const cfg=universalMachineConfig(machineId);if(!cfg)return [];
  const root='U'+String(cfg.machine.no).padStart(2,'0'),nodes=[];
  const add=(id,parentId,level,levelName,name,meshRefs=[],description='')=>nodes.push(Object.freeze({id,parentId,level,levelName,name,machineZone:name,meshRefs,sourceRefs:['BMJ-MACHINE-DATABASE',`FAMILY-${cfg.family.toUpperCase()}`],confidence:cfg.machine.model?'FAMILY_REFERENCE':'REFERENCE_ONLY',verified:false,explodeVector:[level===2?.7:.12,level<4?.18:.08,0],explodeDistance:level===2?.9:level===3?.55:level===4?.34:level===5?.22:.12,focusCamera:null,description,maintenanceTag:null}));
