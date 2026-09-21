@@ -138,7 +138,7 @@ export class OffsetMachineTemplate {
       const batches=new Map();
       for(const mesh of group.children.filter(c=>c.isMesh&&!c.isInstancedMesh&&!c.userData.dynamicRotor)){
         const cover=!!mesh.userData.exteriorCover;
-        const semantic=mesh.userData.uvLamp?'uvLamp':mesh.userData.uvBeam?'uvBeam':mesh.userData.uvWindow?'uvWindow':mesh.userData.uvReflector?'uvReflector':'normal';
+        const semantic=mesh.userData.uvLamp?'uvLamp':mesh.userData.uvBeam?'uvBeam':mesh.userData.uvWindow?'uvWindow':mesh.userData.uvReflector?'uvReflector':mesh.userData.rotorRoleReference?'rotorRef:'+mesh.userData.rotorRoleReference:'normal';
         const key=mesh.material.uuid+':'+(cover?'cover':'structure')+':'+semantic+':'+(mesh.visible?'visible':'hidden');
         if(!batches.has(key))batches.set(key,{material:mesh.material,cover,semantic,visible:mesh.visible,meshes:[]});
         batches.get(key).meshes.push(mesh);
@@ -150,7 +150,9 @@ export class OffsetMachineTemplate {
         this.geometries.set('merged:'+group.userData.nodeId+':'+material.uuid+':'+(cover?'cover':'structure')+':'+semantic,merged);
         const mesh=new THREE.Mesh(merged,material);mesh.castShadow=true;mesh.receiveShadow=true;mesh.visible=visible;
         mesh.userData={assetId:'MACHINE-OFFSET5',ownerId:group.userData.nodeId,exteriorCover:cover};
-        if(semantic!=='normal'){mesh.userData[semantic]=true;mesh.userData.uvElementCount=meshes.reduce((sum,m)=>sum+(m.userData.uvElementCount||1),0);}
+        if(semantic.startsWith('rotorRef:')){
+          mesh.userData.rotorRoleReference=semantic.slice('rotorRef:'.length);mesh.userData.motionBudget='STATIC_REFERENCE_MOBILE';mesh.userData.rotorElementCount=meshes.reduce((sum,m)=>sum+(m.userData.rotorElementCount||1),0);
+        }else if(semantic!=='normal'){mesh.userData[semantic]=true;mesh.userData.uvElementCount=meshes.reduce((sum,m)=>sum+(m.userData.uvElementCount||1),0);}
         for(const old of meshes){group.remove(old);this.meshes.splice(this.meshes.indexOf(old),1);}group.add(mesh);this.meshes.push(mesh);
       }
     }
