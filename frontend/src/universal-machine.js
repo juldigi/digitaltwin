@@ -28,6 +28,7 @@ import {OFFSET7_GRAVURE_TAXONOMY} from './data/taxonomy-offset7.js';
 import {QF100CS_TAXONOMY} from './data/taxonomy-qf100cs.js';
 import {compressorTaxonomyFor} from './data/taxonomy-compressors.js';
 import {COLLATOR_TAXONOMY} from './data/taxonomy-collator.js';
+import {suprasetterTaxonomyFor} from './data/taxonomy-suprasetter.js';
 
 const FAMILY_BY_NO=new Map([
  [1,'guillotine'],[2,'sheeter'],[4,'gravure'],[5,'offset'],[6,'offset'],[7,'pileturner'],[8,'pileturner'],
@@ -93,7 +94,12 @@ const FAMILY_SOURCES={
   ['Duplo DSC-10/60i official ten-bin suction collator family','https://www.duplousa.com/product/isaddle-5-0/'],
   ['Vertical collator suction-rotor mechanism patent','https://patents.google.com/patent/US20050242484A1/en']
  ],
- ctp:[['Heidelberg Suprasetter CtP family official','https://www.heidelberg.com/global/en/print_and_packaging/products/computer_to_plate_1/prepress_overview.jsp']],
+ ctp:[
+  ['HEIDELBERG Suprasetter A75 official product page','https://www.heidelberg.com/global/en/print_and_packaging/products/computer_to_plate_1/suprasetter_a52_a75/product_information_94/suprasetter_a52_a75.jsp'],
+  ['HEIDELBERG Suprasetter A106/106 official product page','https://www.heidelberg.com/global/en/print_and_packaging/products/computer_to_plate_1/suprasetter_a106_106__106_uv/product_information_95/suprasetter_a106_106.jsp'],
+  ['HEIDELBERG Suprasetter family technical data','https://www.heidelberg.com/global/media/l1/global_media/products___ctp/pdf_5/suprasetter_fam_tec_specs.pdf'],
+  ['HEIDELBERG Suprasetter A52/A75 product guide','https://www.heidelberg.com/global/media/en/global_media/products___ctp/pdf_5/a52_a75_product_guide.pdf']
+ ],
  imagesetter:[['SCREEN Katana 5040/5055 official technical article','https://www.screen.co.jp/ga_dtp/en/news/pdf/newsbox/vol9_pdf/newsbox_9_4.pdf']],
  zund:[['Zünd G3 official modular flatbed cutter','https://www.zund.com/en/cutting-systems/digital-cutting-systems/g3-cutter']],
  compressor:[
@@ -139,8 +145,8 @@ const EVIDENCE_BY_NO=new Map([
  [22,{grade:'MODEL_FAMILY_PROCESS_GROUNDED',geometry:'DEDICATED_FAMILY_PROCESS_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated FZ1200 twin models the consistently documented clamp, turning, air separation/dust removal and jogging/alignment process. OEM origin and installed load/hydraulic/blower configuration remain unresolved.'}],
  [23,{grade:'FUNCTIONAL_MULTI_VENDOR_REFERENCE',geometry:'MULTI_VENDOR_10_BIN_SUCTION_COLLATOR_PROCESS_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'The BMJ registry records only COLLATOR MACHINE with no OEM/model/serial. The twin therefore uses the process intersection documented by Horizon VAC-1000/VAC-600H, Duplo DSC-10/60i and a vertical-collator patent: modular vertical feed bins, suction-rotor / air-assisted separation, feed-integrity sensing, common gathering transport, set delivery and touchscreen control. Ten bins are a modeled cross-family tower reference shared by Horizon and Duplo, not a claim about the installed BMJ bin count or OEM.'}],
  [24,{grade:'OEM_MODEL_GROUNDED',geometry:'DEDICATED_OEM_MODEL_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated UPG-LY300 twin uses the matching manufacturer model documentation for automatic paging, servo transport, Ricoh G5 UV inkjet, LED UV curing, 2K inspection, plate-turn rejection and collection. Optional/custom accessories remain bounded.'}],
- [25,{grade:'OEM_FAMILY_REFERENCE',geometry:'HEIDELBERG_SUPRASETTER_FAMILY_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'CTP-1 is confirmed Heidelberg but model/serial is absent. The twin therefore follows Suprasetter family principles—plate loading/transport, external drum imaging, modular Heidelberg laser, optional internal punch and unloading—without assigning A52/A75/A106 or loader options.'}],
- [26,{grade:'OEM_FAMILY_REFERENCE',geometry:'HEIDELBERG_SUPRASETTER_FAMILY_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'CTP-2 is confirmed Heidelberg but model/serial is absent. The twin follows the same bounded Suprasetter family architecture while keeping CTP-2 as a distinct asset; no exact format, loader or laser-module count is inferred.'}],
+ [25,{grade:'OEM_MULTI_MODEL_FAMILY_REFERENCE',geometry:'HEIDELBERG_SUPRASETTER_MULTI_MODEL_FAMILY_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'CTP-1 is confirmed Heidelberg but exact Suprasetter model/serial/format is absent. The twin uses only mechanisms supported across the official Suprasetter family: plate entry/transport, external imaging drum, HEIDELBERG thermal laser architecture and IDS, plus unload. ATL/DTL/ACL/DCL/APL loaders, internal punch, debris removal, temperature stabilization, downstream processor/stacker and laser-module count remain explicit capability boundaries and are not animated as installed.'}],
+ [26,{grade:'OEM_MULTI_MODEL_FAMILY_REFERENCE',geometry:'HEIDELBERG_SUPRASETTER_MULTI_MODEL_FAMILY_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'CTP-2 is confirmed Heidelberg but exact Suprasetter model/serial/format is absent. It remains a distinct BMJ asset while sharing the bounded Suprasetter family process architecture. Automatic loader type, punch, debris removal, temperature stabilization, processor/stacker and laser-module/productivity configuration are not inferred.'}],
  [27,{grade:'OEM_FAMILY_REFERENCE',geometry:'SCREEN_FTR_KATANA_CAPSTAN_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'The BMJ asset is confirmed SCREEN CTF imagesetter but model/serial is absent. Geometry follows SCREEN FT-R/Katana capstan transport and polygon-mirror laser scanning references, replacing the former incorrect vacuum-drum placeholder. Exact wavelength, media width, punch and processor remain unverified.'}],
  [28,{grade:'OEM_FAMILY_REFERENCE',geometry:'ZUND_G3_S3_MODULAR_FLATBED_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'The BMJ asset is confirmed Zünd but exact model is absent. Geometry uses the recognizable modular Zünd flatbed architecture: zoned vacuum table, travelling beam, tool carriage, modular tool heads, registration camera and operator console. Table size/tool package are intentionally unclaimed.'}],
  ...[29,30,35].map(no=>[no,{grade:'BRAND_FAMILY_REFERENCE',geometry:'ATLAS_COPCO_GA_G_OIL_INJECTED_FAMILY_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'The registry identifies Atlas Copco but not the exact model. Geometry follows official GA/G oil-injected screw principles only: intake/load-unload, motor/airend, oil-air separation, minimum-pressure path, oil circuit, cooler/aftercooler, condensate handling and Elektronikon-family control. Exact GA/G variant, VSD, Full Feature dryer, power and piping are not asserted.'}]),
@@ -159,6 +165,7 @@ export function universalTaxonomy(machineId){
  if(machineId==='BMJ-MCH-0004')return [...OFFSET7_GRAVURE_TAXONOMY];
  if(machineId==='BMJ-MCH-0021')return [...QF100CS_TAXONOMY];
  if(machineId==='BMJ-MCH-0023')return [...COLLATOR_TAXONOMY];
+ if(['BMJ-MCH-0025','BMJ-MCH-0026'].includes(machineId))return [...suprasetterTaxonomyFor(machineId)];
  if(['BMJ-MCH-0029','BMJ-MCH-0030','BMJ-MCH-0031','BMJ-MCH-0032','BMJ-MCH-0033','BMJ-MCH-0034','BMJ-MCH-0035'].includes(machineId))return [...compressorTaxonomyFor(machineId)];
  if(machineId==='BMJ-MCH-0005')return [...OFFSET8_TAXONOMY];
  if(machineId==='BMJ-MCH-0006')return [...OFFSET9_TAXONOMY];
