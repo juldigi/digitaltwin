@@ -30,7 +30,7 @@ add('APM2',null,1,'Mesin','APM 2 · BOBST SP 102 family · Automatic Flatbed Die
 const l2=[
  ['FEEDER','Pile Feeder & Sheet Separation',['apm2-feeder'],[-1.0,.15,0]],
  ['REGISTER','Feed Table / Register & Side Lay',['apm2-register'],[-.65,.18,-.25]],
- ['TRANSPORT','Gripper Chain Sheet Transport',['apm2-transport'],[-.1,.28,.35]],
+ ['TRANSPORT','14-bar intermittent gripper-chain transport',['apm2-transport'],[-.1,.28,.35]],
  ['PLATEN','Flatbed Die-Cutting Platen',['apm2-platen'],[0,.45,0]],
  ['STRIP','Stripping Station',['apm2-stripping'],[.55,.32,0]],
  ['DELIVERY','Delivery & Pile Formation',['apm2-delivery'],[1.0,.15,0]],
@@ -87,9 +87,9 @@ for(const [k,n,r,v] of l2)add('APM2.'+k,'APM2',2,'Unit Utama',n,{meshRefs:r,sour
  const cb=block(chain,'LOOP','Chain loop / guides',['apm2-gripper-chain']);
  part(cb,'OS','Operator-side chain',['apm2-gripper-chain-os'],['Chain links','Chain guide','Tension reference']);
  part(cb,'DS','Drive-side chain',['apm2-gripper-chain-ds'],['Chain links','Chain guide','Tension reference']);
- const bars=sub('APM2.TRANSPORT','BARS','Gripper Bars',['apm2-gripper-bars'],['APM2-SP102-PARTS']);
- const bb=block(bars,'SET','14-bar transport set',['apm2-gripper-bars'],['APM2-SP102-PARTS']);
- for(let i=1;i<=14;i++)part(bb,'BAR'+i,'Gripper Bar '+i,['apm2-gripper-bar-'+i],['Bar shell','Gripper holders','Movable grippers','Stationary grippers','Return springs']);
+ const bars=sub('APM2.TRANSPORT','BARS','14 Gripper Bars · family chain-set reference',['apm2-gripper-bars'],['APM2-SP102-CHAIN14','APM2-SP102-PARTS']);
+ const bb=block(bars,'SET','14-bar intermittent transport set',['apm2-gripper-bars'],['APM2-SP102-CHAIN14','APM2-BOBST-GRIPPER-PATENT']);
+ for(let i=1;i<=14;i++)part(bb,'BAR'+i,'Gripper Bar '+i,['apm2-gripper-bar-'+i],['Bar shell','Gripper holders','Movable grippers','Stationary grippers','Return springs'],['APM2-SP102-CHAIN14','APM2-BOBST-GRIPPER-PATENT']);
  const sprocket=sub('APM2.TRANSPORT','SPROCKET','Drive / Return Sprockets',['apm2-chain-sprockets'],['APM2-SP102-PARTS']);
  const spb=block(sprocket,'PAIR','Chain sprocket system',['apm2-chain-sprockets']);
  part(spb,'DRIVE','Drive sprocket',['apm2-chain-drive-sprocket'],['Sprocket wheel','Hub','Shaft support bearing']);
