@@ -95,3 +95,44 @@ test('V123 R2 YA1A1A Offset 7 exposes bounded sheet-fed gravure mechanisms and b
  assert.equal(state.available,false);
  sim.dispose();m.dispose();
 });
+
+
+test('V123 R3 QF-100CS ABM-2 uses one bounded family working bay with XY-safe hydraulic blanking logic',()=>{
+ const m=createMachineTemplate('BMJ-MCH-0021');
+ assert.equal(m.root.userData.researchVersion,'V123');
+ assert.equal(m.root.userData.detailPass,'V123_R3_QF100CS_BOUNDED_FAMILY_RECONSTRUCTION');
+ assert.equal(m.root.userData.exactModelPublicDocumentationFound,false);
+ assert.equal(m.root.userData.installedBlankingHeadCountVerified,false);
+ assert.equal(m.root.userData.installedCollectorStackerVerified,false);
+ assert.equal(m.root.userData.simulationBinding.type,'XY_PLATFORM_FIXED_HYDRAULIC_HEAD');
+ requireRoles(m,[
+  'x-axis-ball-screw','x-axis-linear-guide','x-axis-servo-motor',
+  'y-axis-ball-screw','y-axis-linear-guide','y-axis-servo-motor',
+  'photoelectric-position-sensor','main-hydraulic-cylinder-reference',
+  'hydraulic-ram-reference','blanking-pressure-plate','ram-guide-post',
+  'honeycomb-pin-board','honeycomb-hole-reference','blanking-tool-pin',
+  'waste-frame-support-rail','product-receiving-tray',
+  'collector-stacker-option-envelope','operator-touchscreen',
+  'hydraulic-reservoir','hydraulic-pump','plc-servo-cabinet'
+ ]);
+ assert.equal(m.findNode('qf100-head-ram').userData.installedHeadCountVerified,false);
+ assert.equal(m.findNode('qf100-collector-option').userData.installedOptionVerified,false);
+ assert.equal(m.findNode('qf100-separation-interface').userData.noInventedForkOrConveyor,true);
+ const levels=[...new Set(m.taxonomy.map(n=>n.level))].sort();
+ assert.deepEqual(levels,[1,2,3,4,5,6]);
+ assert.ok(m.taxonomy.filter(n=>n.level===6).length>=19);
+
+ const sim=createMachineSimulation('BMJ-MCH-0021',m.root,m);
+ const first=sim.start();
+ assert.equal(first.available,true);assert.equal(first.blocked,false);
+ assert.equal(first.simulationBoundary,'QF_LQF_1080_FAMILY_PROCESS_ONLY');
+ let now=0,sawIndex=false,sawPress=false;
+ for(let i=0;i<220;i++){
+  now+=100;sim.update(now);const s=sim.state();
+  sawIndex ||= s.platformIndexing;sawPress ||= s.blankingHeadPressing;
+  assert.equal(s.mechanicalInterlockSafe,true,'platform indexing and hydraulic pressing must never overlap');
+  assert.equal(s.platformIndexing&&s.blankingHeadPressing,false);
+ }
+ assert.equal(sawIndex,true);assert.equal(sawPress,true);
+ sim.dispose();m.dispose();
+});
