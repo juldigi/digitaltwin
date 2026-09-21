@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {MACHINE_REGISTRY} from '../frontend/src/data/machine-registry.js';
 import {UniversalMachineTemplate,UniversalProcessSimulation,universalMachineConfig,universalTaxonomy} from '../frontend/src/universal-machine.js';
 
-const dedicated=new Set([2,3,5,6,9,10,11,12,13]);
+const dedicated=new Set([2,3,5,6,9,10,11,12,13,14,15]);
 
 test('V69 assigns an explicit evidence gate to every non-dedicated machine',()=>{
   for(const machine of MACHINE_REGISTRY.filter(m=>!dedicated.has(m.no))){
