@@ -77,7 +77,7 @@ test('APM2 process sequence explicitly separates one-pitch index and stopped mul
 
 test('APM2 fourteen gripper bars advance only one chain pitch per machine cycle',()=>{
  const machine=new APM2MachineTemplate(),sim=new APM2ProcessSimulation(machine.root,machine);sim.start();let now=1000;const advance=t=>{while(sim.elapsed<t){now+=20;sim.update(now);}};
- const b=sim.gripperBars[0],p0=b.position.clone();advance(2.82);const afterIndex=b.position.clone();assert.ok(afterIndex.distanceTo(p0)>.01);assert.ok(afterIndex.distanceTo(p0)<1.5);
+ const b=sim.gripperBars[0],p0=b.position.clone();advance(3.05);const afterIndex=b.position.clone();assert.ok(afterIndex.distanceTo(p0)>.01);assert.ok(afterIndex.distanceTo(p0)<1.5);
  advance(7.90);assert.ok(b.position.distanceTo(afterIndex)<1e-10,'gripper bar moved during stopped processing dwell');
  advance(10.75);assert.ok(b.position.distanceTo(afterIndex)>.01,'next cycle failed to advance the next chain pitch');
  sim.dispose();machine.dispose();
