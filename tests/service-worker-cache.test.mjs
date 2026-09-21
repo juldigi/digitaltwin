@@ -24,5 +24,5 @@ test('service-worker shell cache references only deployable frontend files',()=>
 });
 
 test('service-worker cache version advances with the centralized runtime release',()=>{
- assert.match(sw,/factory-digital-twin-v110-shark-tracking-20260921/);
+ assert.match(sw,/factory-digital-twin-v111-ly300-causality-20260921/);
 });
