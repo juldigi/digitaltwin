@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import {OFFSET9_MODULE_SEQUENCE,OFFSET9_CENTERS} from './data/dimensions-offset9.js';
 
-export const OFFSET9_SIMULATION_STAGES=Object.freeze(['Pile separation','Central suction-tape feeder','Front and side register',...OFFSET9_MODULE_SEQUENCE.map(m=>m.label),'Gripper-chain delivery','Venturi sheet guide','Sheet brake','Delivery pile']);
+export const OFFSET9_SIMULATION_STAGES=Object.freeze(['Pile separation','Central suction-tape feeder','Front and side register',...OFFSET9_MODULE_SEQUENCE.map(m=>m.label),'Gripper-chain delivery','Delivery sheet guidance · option-bounded','Sheet brake','Delivery pile']);
 const Y_AXIS=new THREE.Vector3(0,1,0);
 const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
 const smooth=(v,a,b)=>THREE.MathUtils.smoothstep(v,a,b);
@@ -32,7 +32,7 @@ export class Offset9PrintingSimulation{
   this.feederSuctionActive=false;this.feederVenturiActive=false;this.coatingActive=false;this.chamberBladeActive=false;this.airGuidanceActive=false;this.deliveryBrakeActive=false;
   root.traverse(o=>{if(o.isMesh&&o.userData.rotor)this.rotors.push(o);if(o.userData.airNozzle){this.nozzles.push(o);(o.userData.feederAirNozzle?this.feederNozzles:this.deliveryNozzles).push(o);}if(/^(doctor-blade-metering-edge|doctor-blade-sealing-edge|coating-chamber-body|chamber-end-seal-reference)$/.test(String(o.userData.mechanismRole||'')))this.coatingElements.push(o);if(o.userData.reciprocator)this.suckers.push(o);if(o.userData.deliveryGripperBar)this.deliveryBars.push(o);});
   this.rotorRest=this.rotors.map(o=>o.quaternion.clone());this.suckerRest=this.suckers.map(o=>o.position.clone());this.deliveryBarRest=this.deliveryBars.map(o=>o.position.clone());
-  this.feederHead=template.findNode('offset9-feeder-head');this.feederHeadRest=this.feederHead?.position.clone()||null;
+  this.feederHead=template.findNode('offset9-feeder-head');this.feederHeadRest=this.feederHead?.position.clone()||null;this.deliveryGuide=template.findNode('offset9-delivery-guide');this.deliveryVenturiInstalledVerified=this.deliveryGuide?.userData.installedOptionVerified===true;
   this.points=sheetPathPoints();this.curve=polylineCurve(this.points);
   const pathGeo=new THREE.BufferGeometry().setFromPoints(this.curve.getPoints(220)),pathMat=new THREE.LineDashedMaterial({color:0x40899f,dashSize:.055,gapSize:.035,transparent:true,opacity:.58});
   this.pathLine=new THREE.Line(pathGeo,pathMat);this.pathLine.name='OFFSET9-EVIDENCE-BOUNDED-SHEET-PATH';this.pathLine.computeLineDistances();this.pathLine.visible=false;root.add(this.pathLine);
@@ -45,7 +45,7 @@ export class Offset9PrintingSimulation{
   return {available:true,blocked:false,active:this.active,running:this.running,paused:this.paused,speed:this.speed,stage:OFFSET9_SIMULATION_STAGES[index],completed:this.completed,progress,
    sheetsVisible:this.sheets.filter(s=>s.mesh.visible).length,pileSheetsVisible:this.stack.filter(s=>s.visible).length,rotorCount:this.rotors.length,oscillatorCount:this.suckers.length,
    mechanismCount:this.rotors.length+this.suckers.length+this.nozzles.length+this.deliveryBars.length+this.coatingElements.length,inkFlowCount:0,uvLampCount:0,uvActive:false,pathVisible:this.pathVisible,inkFlowVisible:false,
-   feederSuctionActive:this.feederSuctionActive,feederVenturiActive:this.feederVenturiActive,coatingActive:this.coatingActive,chamberBladeActive:this.chamberBladeActive,airGuidanceActive:this.airGuidanceActive,deliveryBrakeActive:this.deliveryBrakeActive,deliveryGripperActive:this.active&&this.running,
+   feederSuctionActive:this.feederSuctionActive,feederVenturiActive:this.feederVenturiActive,coatingActive:this.coatingActive,chamberBladeActive:this.chamberBladeActive,airGuidanceActive:this.airGuidanceActive,deliveryVenturiInstalledVerified:this.deliveryVenturiInstalledVerified,deliveryBrakeActive:this.deliveryBrakeActive,deliveryGripperActive:this.active&&this.running,
    simulationBoundary:'SX52_4L_PROCESS__OPTIONS_NOT_INFERRED'};
  }
  start(){this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;for(const s of this.sheets)s.lap=-1;this.resetMechanisms();this.onUpdate?.(this.state());return this.state();}
@@ -77,7 +77,7 @@ export class Offset9PrintingSimulation{
   let coat=false,air=false,brake=false;const coatX=OFFSET9_CENTERS.L;
   for(const sheet of this.sheets){const raw=this.elapsed/12+sheet.phase,t=raw%1,pos=this.curve.getPointAt(t),next=this.curve.getPointAt(Math.min(.9999,t+.0025));sheet.mesh.visible=this.active;sheet.mesh.position.copy(pos);sheet.mesh.rotation.set(-Math.PI/2,0,-Math.atan2(next.y-pos.y,Math.max(.001,next.x-pos.x)));
    if(Math.abs(pos.x-coatX)<.48){coat=true;sheet.mesh.material.roughness=.70;}else sheet.mesh.material.roughness=.88;
-   if(pos.x>4.05&&pos.x<5.25)air=true;if(pos.x>5.18&&pos.x<5.62)brake=true;
+   if(this.deliveryVenturiInstalledVerified&&pos.x>4.05&&pos.x<5.25)air=true;if(pos.x>5.18&&pos.x<5.62)brake=true;
    const lap=Math.floor(raw);if(lap>sheet.lap){if(sheet.lap>=0){this.completed++;const pile=this.stack[(this.completed-1)%this.stack.length];pile.visible=true;pile.position.set(5.39,.985+((this.completed-1)%this.stack.length)*.0065,0);}sheet.lap=lap;}
   }
   this.coatingActive=coat;this.chamberBladeActive=coat;this.airGuidanceActive=air;this.deliveryBrakeActive=brake;
