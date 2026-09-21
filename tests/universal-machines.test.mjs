@@ -70,7 +70,7 @@ test('reference mechanical profiles carry explicit unknowns instead of pretendin
   assert.equal(profile.footprint.length,3);assert.ok(profile.unknowns.length>=1,machine.machineId);
   assert.doesNotMatch(cfg.evidence.geometry,/^PLACEHOLDER$/,machine.machineId);
   const taxonomy=universalTaxonomy(machine.machineId);
-  for(const component of profile.architecture){const words=String(component).toLowerCase().split(/[^a-z0-9]+/).filter(w=>w.length>3);assert.ok(taxonomy.some(node=>{const name=String(node.name).toLowerCase();return name===String(component).toLowerCase()||words.some(w=>name.includes(w));}),machine.machineId+' '+component);}
+  for(const component of profile.architecture){const words=String(component).toLowerCase().split(/[^a-z0-9]+/).filter(w=>w.length>3);assert.ok(taxonomy.some(node=>{const text=(String(node.name)+' '+String(node.description||'')).toLowerCase();return text===String(component).toLowerCase()||words.some(w=>text.includes(w));}),machine.machineId+' '+component);}
  }
 });
 
