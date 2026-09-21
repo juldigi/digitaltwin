@@ -7,9 +7,9 @@ const js=fs.readFileSync(new URL('../frontend/src/app-shell-v79.js',import.meta.
 const html=fs.readFileSync(new URL('../frontend/index.html',import.meta.url),'utf8');
 const sw=fs.readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 
-test('V79 loads one unified shell after the stable base styles',()=>{
-  assert.match(html,/style\.css[\s\S]*runtime-fallback\.css[\s\S]*app-shell-v79\.css\?v=79/);
-  assert.match(html,/app\.js\?v=79[\s\S]*ui-v5\.js\?v=79[\s\S]*experience-v37\.js\?v=79[\s\S]*app-shell-v79\.js\?v=79/);
+test('V80 loads one unified shell after the stable base styles',()=>{
+  assert.match(html,/style\.css[\s\S]*runtime-fallback\.css[\s\S]*app-shell-v79\.css\?v=80/);
+  assert.match(html,/app\.js\?v=80[\s\S]*ui-v5\.js\?v=80[\s\S]*experience-v37\.js\?v=80[\s\S]*app-shell-v79\.js\?v=80/);
   for(const stale of ['ui-premium-v73.css','ui-corporate-v74.css','reference-v76.css','mobile-stable-v78.css','reference-v76.js','mobile-stable-v78.js'])assert.doesNotMatch(html,new RegExp(stale.replaceAll('.','\\.')));
 });
 
@@ -54,9 +54,25 @@ test('icons use one accessible vector family without emoji runtime controls',()=
   assert.match(js,/viewBox="0 0 24 24"/);
 });
 
-test('service worker owns only the V79 shell assets',()=>{
-  assert.match(sw,/factory-digital-twin-v79-unified-shell-20260921/);
+test('service worker owns the V80 shell assets',()=>{
+  assert.match(sw,/factory-digital-twin-v80-first-paint-spa-20260921/);
   assert.match(sw,/app-shell-v79\.css/);
   assert.match(sw,/src\/app-shell-v79\.js/);
   assert.match(sw,/assets\/splash-industrial-v79\.webp/);
+});
+
+
+test('splash exists in first HTML paint before the application shell',()=>{
+  const splash=html.indexOf('class="app-splash"'),header=html.indexOf('class="topbar"');
+  assert.ok(splash>0&&splash<header,'splash must precede the visible application shell');
+  assert.match(html,/<style id="splash-critical">[\s\S]*\.app-splash/);
+  assert.doesNotMatch(js,/document\.createElement\('div'\);splash\.className='app-splash'/);
+});
+test('machine changes use in-place scene switching instead of page navigation',()=>{
+  const app=fs.readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
+  const engine=fs.readFileSync(new URL('../frontend/src/engine.js',import.meta.url),'utf8');
+  assert.match(app,/async function switchActiveMachine/);
+  assert.match(app,/history\.pushState/);
+  assert.doesNotMatch(app,/location\.href=.*machine=/);
+  assert.match(engine,/switchMachine\(key\)/);
 });
