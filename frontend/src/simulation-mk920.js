@@ -33,7 +33,7 @@ export class MK920StampingSimulation{
   this.lowerRest=this.lower?.position.clone()||null;this.headRest=this.feederHead?.position.clone()||null;
   root.traverse(o=>{if(o.isMesh&&o.userData.rotor)this.rotors.push(o);if(o.isMesh&&o.userData.reciprocator)this.suckers.push(o);if(o.userData.gripperBar)this.gripperBars.push(o);if(o.isMesh&&o.userData.heater)this.heaters.push(o);if(o.userData.foilPullAxis)this.foilAxes.push(o);if(o.userData.foilWeb)this.foilWebs.push(o);});
   this.rotorRest=this.rotors.map(r=>r.quaternion.clone());this.suckerRest=this.suckers.map(s=>s.position.clone());this.barRest=this.gripperBars.map(b=>b.position.clone());
-  this.points=[[-3.44,1.35,0],[-2.33,1.15,0],[-1.42,1.14,0],[-.15,1.46,0],[1.20,1.25,0],[2.98,.90,0]].map(p=>new THREE.Vector3(...p));
+  this.points=[[-3.44,1.35,0],[-2.33,1.15,0],[-1.42,1.14,0],[-.15,1.46,0],[1.20,1.25,0],[2.98,1.15,0]].map(p=>new THREE.Vector3(...p));
   this.curve=new THREE.CatmullRomCurve3(this.points,false,'centripetal');
   const pathGeo=new THREE.BufferGeometry().setFromPoints(this.curve.getPoints(160)),pathMat=new THREE.LineDashedMaterial({color:0x8b7650,dashSize:.06,gapSize:.04,transparent:true,opacity:.52});
   this.pathLine=new THREE.Line(pathGeo,pathMat);this.pathLine.computeLineDistances();this.pathLine.visible=false;this.pathLine.name='MK920-INTERMITTENT-STAMPING-PATH';root.add(this.pathLine);
@@ -76,7 +76,7 @@ export class MK920StampingSimulation{
  }
  updateFeeder(p){const active=p<.18,local=Math.min(1,p/.18);this.feederSuctionActive=active;if(this.feederHead&&this.headRest){this.feederHead.position.copy(this.headRest);if(active){this.feederHead.position.y-=.04*Math.sin(Math.PI*local);this.feederHead.position.x+=.03*Math.sin(Math.PI*local);}}this.suckers.forEach((s,i)=>{s.position.copy(this.suckerRest[i]);if(active)s.position.y-=.016*Math.sin(Math.PI*local);});}
  updateGrippers(globalTransport){for(const bar of this.gripperBars){const q=gripperLoopPosition(globalTransport+(bar.userData.barPhase||0));bar.position.set(q.x,q.y,0);}}
- outputSheet(){this.completed++;const p=this.stack[(this.completed-1)%this.stack.length];p.visible=true;p.position.set(2.98,.91+((this.completed-1)%this.stack.length)*.007,0);}
+ outputSheet(){this.completed++;const p=this.stack[(this.completed-1)%this.stack.length];p.visible=true;p.position.set(2.98,1.125+((this.completed-1)%this.stack.length)*.007,0);}
  updateSheets(cycleIndex,transport){
   const global=cycleIndex+transport;
   for(const s of this.sheets){const raw=global+s.phase,t=((raw%1)+1)%1;s.mesh.visible=true;s.mesh.position.copy(this.curve.getPointAt(Math.min(.999,t)));s.mesh.rotation.set(-Math.PI/2,0,0);s.mesh.material.color.setHex(this.stampingContact&&t>.40&&t<.60?0xe1c06a:t>.55?0xead9a8:0xf1ead7);
