@@ -23,6 +23,7 @@ test('service-worker shell cache references only deployable frontend files',()=>
  assert.ok(paths.includes('src/data/research-v123.js'));
  assert.ok(paths.includes('src/data/taxonomy-offset7.js'));
  assert.ok(paths.includes('src/data/taxonomy-qf100cs.js'));
+ assert.ok(paths.includes('src/data/taxonomy-compressors.js'));
  assert.ok(paths.includes('src/upg-ly300.js'));
  assert.ok(paths.includes('src/diana-eye55.js'));
  assert.equal(new Set(paths).size,paths.length,'service-worker shell cache should not contain duplicate asset paths');
@@ -30,5 +31,5 @@ test('service-worker shell cache references only deployable frontend files',()=>
 });
 
 test('service-worker cache version advances with the centralized runtime release',()=>{
- assert.match(sw,/factory-digital-twin-v123-r3-brand-compressors-20260921/);
+ assert.match(sw,/factory-digital-twin-v123-r3-brand-compressors-v2-20260921/);
 });
