@@ -128,7 +128,25 @@ function v76BuildInspector(){
 function v76BuildMobileNav(){
   const nav=v76('.mobile-nav');if(!nav)return;
   const labels={machine:'Beranda',layout:'Peta',assets:'Mesin',components:'Detail'};
-  Object.entries(labels).forEach(([key,label])=>{const el=nav.querySelector('[data-mobile-nav="'+key+'"] small');if(el)el.textContent=label;});
+  const targets={machine:'#nav-machine',layout:'#nav-layout',assets:'#nav-assets',components:'#nav-components'};
+  Object.entries(labels).forEach(([key,label])=>{
+    const button=nav.querySelector('[data-mobile-nav="'+key+'"]'),caption=button?.querySelector('small');
+    if(caption)caption.textContent=label;
+    button?.addEventListener('click',event=>{
+      if(!matchMedia('(max-width:767px)').matches)return;
+      event.preventDefault();
+      document.body.classList.remove('nav-open','ui-workbench-open');
+      if(key!=='components'){
+        document.body.classList.add('panel-hidden');
+        document.body.classList.remove('mobile-panel-open');
+      }
+      v76Delegate(targets[key]);
+      nav.querySelectorAll('[data-mobile-nav]').forEach(item=>{
+        const active=item===button;item.classList.toggle('active',active);
+        if(active)item.setAttribute('aria-current','page');else item.removeAttribute('aria-current');
+      });
+    });
+  });
 }
 function v76WatchSelection(){
   const layer=v76('#part-label-layer'),content=v76('#panel-content');
@@ -146,6 +164,8 @@ function v76Responsive(){
   mobile.addEventListener?.('change',sync);sync();
   v76('#close-panel')?.addEventListener('click',()=>{if(!mobile.matches)document.body.classList.add('v76-user-closed-panel');});
   v76('#panel-toggle')?.addEventListener('click',()=>document.body.classList.remove('v76-user-closed-panel'));
+  v76('#close-panel')?.addEventListener('click',()=>document.body.classList.remove('mobile-panel-open'));
+  v76('#ui-backdrop')?.addEventListener('click',()=>document.body.classList.remove('nav-open','ui-workbench-open'));
 }
 function v76Boot(){
   document.documentElement.dataset.referenceUi='v76-bmj';
