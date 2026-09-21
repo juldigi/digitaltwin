@@ -91,6 +91,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   const m8=this.mod(8,[3.55,0,0],[.62,.15,0]);
   this.box(m8.g,[.54,1.45,.78],[0,.80,.78],'dark',.04);this.box(m8.a,[.32,.22,.025],[-.05,1.12,.38],'glass',.01);
   this.motion(this.cyl(m8.a,.10,.34,[0,.48,.70],'steel','x'),'spin','x',4,.02,0,null);
+  this.root.userData.referenceNote='YA1A1A identity is exact to the BMJ registry and external installed-machine evidence. Envelope/throughput class uses YA1A1 evidence; doctor-blade, ink-system, dryer and delivery morphology use the later YA1B1 family only where the older YA1A1A documentation is unavailable.';
  }
  buildFolderGluer(){
   this.palette.body=0xe8e8e3;this.palette.accent=0x3d735d;this.palette.dark=0x273034;
