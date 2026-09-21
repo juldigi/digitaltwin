@@ -23,6 +23,8 @@ export const APM2_DIMENSIONS=Object.freeze({
     bodyHeightRange:[2.15,2.20],
     bodyWidthWithoutPlatformRange:[2.00,2.72],
     referenceWeightKg:18700,
+    gripperBarChainSetReference:14,
+    intermittentStationTransportFamilyReference:true,
     suffix:'UNCONFIRMED'
   }),
   layout:Object.freeze({
