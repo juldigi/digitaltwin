@@ -311,8 +311,8 @@ test('v54 keeps APM2 as a dedicated 3D machine with process-specific UI and no i
   assert.match(apm2,/apm2-gripper-bar-/);
   assert.match(apm2,/apm2-moving-platen/);
   assert.match(apm2,/apm2-stripping-upper/);
-  assert.match(simulationApm2,/Flatbed Die-Cutting Platen/);
-  assert.match(simulationApm2,/SideLay/);
+  assert.match(simulationApm2,/Flatbed die-cut pressure dwell/);
+  assert.match(simulationApm2,/SideLay/);assert.match(simulationApm2,/transportIsIndexing/);assert.match(simulationApm2,/platenRequiresStoppedTransport/);assert.match(simulationApm2,/strippingRequiresStoppedTransport/);
   assert.match(taxonomyApm2,/BMJ_Q2_2026_SIDELAY_MOTOR/);
   assert.match(dimensionsApm2,/suffix:'UNCONFIRMED'/);
   assert.doesNotMatch(dimensionsApm2,/model:'SP 102 (?:E|SE|CER|BMA)'/);
