@@ -63,16 +63,16 @@ add(base+'.CHAIN','Gripper-Chain Transport',3,base,['offset9-delivery-chain'],'s
 chain(base+'.CHAIN','DRIVE','Chain Drive','Chain / Sprocket Assembly','Chain Rail / Sprocket','offset9-delivery-chain','Delivery chain transport reference.');
 add(base+'.GRIPPER','Delivery Gripper Bars',3,base,['offset9-delivery-grippers'],'subassembly','Gripper bars carry sheets through delivery loop.');
 chain(base+'.GRIPPER','BAR','Gripper Bars','Gripper-Bar Assembly','Gripper Fingers / Chain Attachment','offset9-delivery-grippers','Delivery gripper-bar family reference.');
-add(base+'.GUIDE','Venturi Non-Contact Sheet Guidance',3,base,['offset9-delivery-guide'],'subassembly','Air-assisted sheet guidance in delivery.');
-chain(base+'.GUIDE','VENTURI','Venturi Guide Plate','Air-Guidance Assembly','Venturi Nozzles / Air Manifold','offset9-delivery-guide','Official SX 52 Venturi delivery guidance principle.');
+add(base+'.GUIDE','High-Pile Venturi Sheet Guidance · Option Boundary',3,base,['offset9-delivery-guide'],'subassembly','High-pile delivery family feature; BMJ standard versus high-pile option is not verified.','OPTION_BOUNDARY');
+chain(base+'.GUIDE','VENTURI','High-Pile Venturi Guide Plate','Air-Guidance Assembly','Venturi Nozzles / Air Manifold','offset9-delivery-guide','Official SX 52 high-pile Venturi delivery principle; intentionally not treated as installed on GS001804.','OPTION_BOUNDARY');
 add(base+'.BRAKE','Sheet Brake & Release',3,base,['offset9-delivery-brake'],'subassembly','Controlled deceleration before pile release.');
 chain(base+'.BRAKE','BRAKE','Sheet Brake','Brake Assembly','Brake Wheel / Release Interface','offset9-delivery-brake','Sheet braking family reference; exact brake-belt/sensor package not asserted.');
 add(base+'.PILE','Delivery Pile Lift',3,base,['offset9-delivery-stack'],'subassembly','Receives completed sheets.');
 chain(base+'.PILE','LIFT','Pile Lift','Pile-Lift Assembly','Pile Board / Lift Interface','offset9-delivery-stack','Standard versus high-pile BMJ option is unverified.');
 
 base='O9.CONTROL';
-add(base+'.CONSOLE','Prinect Press Console',3,base,['offset9-console'],'subassembly','Operator console family representation.');
-chain(base+'.CONSOLE','HMI','Operator Interface','Console HMI Assembly','Display / Control Surface','offset9-console','Prinect-family console representation; exact installed generation unverified.');
+add(base+'.CONSOLE','Prinect Press Center 3 · Family Reference',3,base,['offset9-console'],'subassembly','Press Center 3 appears in SX 52 family documentation; GS001804 controller generation remains unverified.','OPTION_BOUNDARY');
+chain(base+'.CONSOLE','HMI','Operator Interface','Console HMI Assembly','24-inch Multi-Touch Display · Family Reference','offset9-console','Prinect Press Center 3 family control-station reference; exact installed generation on BMJ asset is unverified.','OPTION_BOUNDARY');
 
 base='O9.ACCESS';
 add(base+'.FRAME','Base / Frame / Guarding',3,base,['offset9-access'],'subassembly','Machine supporting frame and guarding.');
