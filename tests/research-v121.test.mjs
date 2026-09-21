@@ -36,7 +36,7 @@ test('V121 source coverage spans every major production and utility machine fami
 });
 
 test('V121 gravure twin exposes sheet-fed registration, doctor-blade, ink and delivery mechanics',()=>{
- expectRoles('BMJ-MCH-0004',['feeder-sucker','side-lay-reference','ink-circulation-pump','doctor-blade-holder','doctor-axial-oscillator','impression-cylinder-journal','delivery-chain-gripper','delivery-side-jogger']);
+ expectRoles('BMJ-MCH-0004',['feeder-sucker','side-lay-reference','ink-circulation-pump','doctor-blade-holder','doctor-axial-oscillator','impression-cylinder-journal','delivery-gripper-reference','delivery-side-jogger']);
 });
 
 test('V121 QF reference exposes servo XY, linear guides, hydraulic blanking and tooling details',()=>{
@@ -49,7 +49,7 @@ test('V121 collator exposes suction, sensing, gathering and delivery mechanics',
 
 test('V121 Heidelberg CTP exposes plate transport, external drum, laser and bounded punch detail',()=>{
  const model=createMachineTemplate('BMJ-MCH-0025'),set=roles(model);
- for(const role of ['manual-plate-side-guide','plate-transport-roller','plate-clamp-bar','drum-bearing','laser-linear-rail','laser-diode-module','internal-punch-pin-option'])assert.ok(set.has(role),role);
+ for(const role of ['manual-plate-side-guide','plate-transport-roller','plate-clamp-reference','imaging-drum-bearing-reference','laser-linear-rail','heidelberg-laser-module-reference','internal-punch-pin-option'])assert.ok(set.has(role),role);
  const punches=[];model.root.traverse(o=>{if(o.userData?.mechanismRole==='internal-punch-pin-option')punches.push(o);});
  assert.ok(punches.length>=2);assert.ok(punches.every(p=>p.userData.installedOptionVerified===false));
  assert.equal(model.root.userData.engineeringDimensions,false);model.dispose();
@@ -64,7 +64,7 @@ test('V121 Zund reference exposes vacuum zones, gantry, modular tools and regist
 });
 
 test('V121 compressor reference exposes a coherent screw-compressor oil/air flow package',()=>{
- expectRoles('BMJ-MCH-0031',['kaeser-dry-intake-filter','kaeser-inlet-vent-valve-reference','kaeser-drive-interface-reference','kaeser-sigma-profile-airend','kaeser-cooling-fluid-separator-tank','kaeser-minimum-pressure-check-valve','kaeser-fluid-filter-reference','kaeser-thermostatic-valve-reference','kaeser-cooling-fan-reference']);
+ expectRoles('BMJ-MCH-0031',['kaeser-dry-intake-filter','kaeser-inlet-vent-valve-reference','kaeser-drive-interface-reference','kaeser-sigma-profile-airend','kaeser-cooling-fluid-separator-tank','kaeser-minimum-pressure-check-valve','kaeser-eco-fluid-filter-reference','kaeser-thermostatic-valve-reference','kaeser-cooling-fan-reference']);
 });
 
 test('V121 standard AHU exposes damper-filter-coil-drain-fan-service-discharge sections',()=>{
