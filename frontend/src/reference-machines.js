@@ -816,10 +816,10 @@ export class ReferenceProcessSimulation{
   this.blocked=template.cfg.evidence.simulation==='BLOCKED';this.blockedReason=this.blocked?template.cfg.evidence.reason:null;
   this.stages=template.cfg.profile?.process||template.cfg.modules;this.cycle=Math.max(8,this.stages.length*1.35);
   this.motions=this.blocked?[]:template.activeMeshes.filter(m=>m.userData.motion&&!m.userData.referencePlaceholder).map(mesh=>({mesh,motion:mesh.userData.motion,position:mesh.position.clone(),quaternion:mesh.quaternion.clone()}));
-  this.family=template.cfg.family;this.pathVisible=false;this.inkFlowVisible=false;this.processPiece=null;this.processMaterial=null;this.processGeometry=null;this.blanker=null;if(!this.blocked)this.buildProcessPiece();if(!this.blocked&&this.family==='blanker')this.bindBlanker();
+  this.family=template.cfg.family;this.pathVisible=false;this.inkFlowVisible=false;this.processPiece=null;this.processMaterial=null;this.processGeometry=null;this.blanker=null;this.collator=null;this.collatorSheets=[];this.collatorSheetGeometry=null;this.collatorSheetMaterial=null;if(!this.blocked)this.buildProcessPiece();if(!this.blocked&&this.family==='blanker')this.bindBlanker();if(!this.blocked&&this.family==='collator')this.bindCollator();
  }
  buildProcessPiece(){
-  const family=this.family;if(['compressor','ahu'].includes(family))return;
+  const family=this.family;if(['compressor','ahu','collator'].includes(family))return;
   const bounds=new THREE.Box3().setFromObject(this.root),size=bounds.getSize(new THREE.Vector3()),center=bounds.getCenter(new THREE.Vector3());
   const metal=['ctp','imagesetter','zund'].includes(family);
   const blanker=family==='blanker';
@@ -872,23 +872,63 @@ export class ReferenceProcessSimulation{
    if(indexing){const axis=m.userData.mechanismRole==='y-axis-servo-motor'?AXIS.z:AXIS.x;m.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(axis,spin));}
   }
  }
+ bindCollator(){
+  const binCount=this.template.root.userData.modeledReferenceBinCount||10;
+  const rotors=[],sensors=[];
+  this.template.root.traverse(o=>{if(o.userData?.mechanismRole==='suction-rotor')rotors.push(o);if(o.userData?.mechanismRole==='double-miss-feed-sensor-reference')sensors.push(o);});
+  this.collator={binCount,rotors,sensors,installedBinCountVerified:this.template.root.userData.installedBinCountVerified===true};
+  this.collatorSheetGeometry=new THREE.BoxGeometry(.42,.012,.58);
+  this.collatorSheetMaterial=new THREE.MeshStandardMaterial({color:0xe8dfc8,roughness:.90,metalness:0});
+  for(let b=0;b<binCount;b++){
+   const mesh=new THREE.Mesh(this.collatorSheetGeometry,this.collatorSheetMaterial);
+   mesh.name='COLLATOR-BIN-'+(b+1)+'-PROCESS-SHEET';mesh.visible=false;mesh.userData.binIndex=b;this.root.add(mesh);
+   this.collatorSheets.push({mesh,bin:b,start:new THREE.Vector3(-.70,.34+b*.145,0)});
+  }
+ }
+ collatorStatus(){
+  const p=this.active?(this.elapsed%this.cycle)/this.cycle:0;
+  const idx=Math.min(this.stages.length-1,Math.floor(p*this.stages.length));
+  return {p,idx,modeledBinCount:this.collator?.binCount||0,installedBinCountVerified:this.collator?.installedBinCountVerified??false};
+ }
+ updateCollator(){
+  if(!this.collator)return;
+  const p=(this.elapsed%this.cycle)/this.cycle,binCount=this.collator.binCount;
+  let activeFeedCount=0,completedInSet=0;
+  const smooth01=v=>{v=THREE.MathUtils.clamp(v,0,1);return v*v*(3-2*v);};
+  for(const item of this.collatorSheets){
+   const b=item.bin,start=.04+b*.025,end=start+.46,q=(p-start)/(end-start),mesh=item.mesh;
+   mesh.visible=this.active;
+   if(q<=0){mesh.position.copy(item.start);continue;}
+   if(q>=1){mesh.position.set(1.06,.62+b*.012,0);completedInSet++;continue;}
+   activeFeedCount++;
+   if(q<.36){
+    const t=smooth01(q/.36);mesh.position.set(THREE.MathUtils.lerp(item.start.x,.18,t),item.start.y,0);
+   }else if(q<.76){
+    const t=smooth01((q-.36)/.40);mesh.position.set(.18,THREE.MathUtils.lerp(item.start.y,.62,t),0);
+   }else{
+    const t=smooth01((q-.76)/.24);mesh.position.set(THREE.MathUtils.lerp(.18,1.06,t),.62+b*.012,0);
+   }
+  }
+  this.collator.activeFeedCount=activeFeedCount;this.collator.completedSheetsInSet=completedInSet;
+ }
  stageIndex(){const p=this.active?(this.elapsed%this.cycle)/this.cycle:0;return Math.min(this.stages.length-1,Math.floor(p*this.stages.length));}
  state(){
-  const progress=this.active?(this.elapsed%this.cycle)/this.cycle:0,blankerState=this.family==='blanker'?this.blankerStatus():null,idx=blankerState?.idx??this.stageIndex();
+  const progress=this.active?(this.elapsed%this.cycle)/this.cycle:0,blankerState=this.family==='blanker'?this.blankerStatus():null,collatorState=this.family==='collator'?this.collatorStatus():null,idx=blankerState?.idx??collatorState?.idx??this.stageIndex();
   return {available:!this.blocked,blocked:this.blocked,blockedReason:this.blockedReason,referenceModel:true,evidenceGrade:this.template.cfg.evidence.grade,geometryStatus:this.template.cfg.evidence.geometry,
    active:this.active,running:this.running,paused:this.paused,speed:this.speed,stage:this.blocked?'Simulasi belum tervalidasi':(this.stages[idx]||'Reference process'),completed:this.completed,progress,
-   sheetsVisible:this.processPiece?.visible?1:0,pileSheetsVisible:0,rotorCount:this.motions.filter(x=>x.motion.type==='spin').length,
+   sheetsVisible:this.family==='collator'?this.collatorSheets.filter(s=>s.mesh.visible).length:(this.processPiece?.visible?1:0),pileSheetsVisible:0,rotorCount:this.motions.filter(x=>x.motion.type==='spin').length,
    oscillatorCount:this.motions.filter(x=>x.motion.type!=='spin').length,mechanismCount:this.family==='blanker'?this.template.activeMeshes.length:this.motions.length,inkFlowCount:0,uvLampCount:0,uvActive:false,pathVisible:false,inkFlowVisible:false,
    platformIndexing:blankerState?.indexing??false,blankingHeadPressing:blankerState?.pressing??false,mechanicalInterlockSafe:blankerState?.interlockSafe??true,
-   simulationBoundary:this.family==='blanker'?'QF_LQF_1080_FAMILY_PROCESS_ONLY':null,referenceBoundary:this.template.cfg.profile?.unknowns||[]};
+   modeledBinCount:collatorState?.modeledBinCount??null,installedBinCountVerified:collatorState?.installedBinCountVerified??null,activeBinFeeds:this.collator?.activeFeedCount??0,completedSheetsInSet:this.collator?.completedSheetsInSet??0,
+   simulationBoundary:this.family==='blanker'?'QF_LQF_1080_FAMILY_PROCESS_ONLY':this.family==='collator'?'MULTI_VENDOR_SUCTION_COLLATOR_PROCESS_ONLY__TEN_BIN_REFERENCE_NOT_INSTALLATION_CLAIM':null,referenceBoundary:this.template.cfg.profile?.unknowns||[]};
  }
- start(){if(this.blocked){this.active=false;this.running=false;this.paused=false;this.onUpdate?.(this.state());return this.state();}this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;if(this.processPiece)this.processPiece.visible=true;this.resetMotion();this.onUpdate?.(this.state());return this.state();}
+ start(){if(this.blocked){this.active=false;this.running=false;this.paused=false;this.onUpdate?.(this.state());return this.state();}this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;if(this.processPiece)this.processPiece.visible=true;for(const s of this.collatorSheets)s.mesh.visible=true;this.resetMotion();this.onUpdate?.(this.state());return this.state();}
  pause(){this.running=false;this.paused=this.active;this.onUpdate?.(this.state());return this.state();}
  resume(){if(this.active){this.running=true;this.paused=false;this.lastNow=null;}this.onUpdate?.(this.state());return this.state();}
  setSpeed(v){this.speed=Math.max(.25,Math.min(3,Number(v)||1));return this.state();}
  setPathVisible(){this.pathVisible=false;return this.state();}
  setInkFlowVisible(){this.inkFlowVisible=false;return this.state();}
- resetMotion(){for(const item of this.motions){item.mesh.position.copy(item.position);item.mesh.quaternion.copy(item.quaternion);}if(this.blanker){if(this.blanker.platform)this.blanker.platform.position.copy(this.blanker.platformRest);if(this.blanker.ram)this.blanker.ram.position.copy(this.blanker.ramRest);}if(this.processPiece){if(this.family==='blanker'&&this.processPiece.userData.blankerRest)this.processPiece.position.copy(this.processPiece.userData.blankerRest);else this.processPiece.position.x=this.processPiece.userData.startX;this.processPiece.visible=this.active;}}
+ resetMotion(){for(const item of this.motions){item.mesh.position.copy(item.position);item.mesh.quaternion.copy(item.quaternion);}if(this.blanker){if(this.blanker.platform)this.blanker.platform.position.copy(this.blanker.platformRest);if(this.blanker.ram)this.blanker.ram.position.copy(this.blanker.ramRest);}if(this.processPiece){if(this.family==='blanker'&&this.processPiece.userData.blankerRest)this.processPiece.position.copy(this.processPiece.userData.blankerRest);else this.processPiece.position.x=this.processPiece.userData.startX;this.processPiece.visible=this.active;}for(const s of this.collatorSheets){s.mesh.position.copy(s.start);s.mesh.visible=this.active;}if(this.collator){this.collator.activeFeedCount=0;this.collator.completedSheetsInSet=0;}}
  update(now){
   if(!this.active||!this.running){this.lastNow=now;return;}
   if(this.lastNow===null){this.lastNow=now;return;}
@@ -903,9 +943,10 @@ export class ReferenceProcessSimulation{
    else if(motion.type==='oscillate'||motion.type==='slide')mesh.position.addScaledVector(axis,Math.sin(t)*motion.amp);
    else if(motion.type==='press')mesh.position.addScaledVector(axis,-Math.abs(Math.sin(t))*motion.amp);
   }
+  if(this.family==='collator')this.updateCollator();
   if(this.processPiece){this.processPiece.position.x=THREE.MathUtils.lerp(this.processPiece.userData.startX,this.processPiece.userData.endX,phase);this.processPiece.visible=true;}
   this.completed=Math.floor(this.elapsed/this.cycle);this.onUpdate?.(this.state());
  }
- stop(){this.active=false;this.running=false;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;this.resetMotion();if(this.processPiece)this.processPiece.visible=false;this.onUpdate?.(this.state());return this.state();}
- dispose(){this.stop();this.processPiece?.removeFromParent();this.processGeometry?.dispose();this.processMaterial?.dispose();}
+ stop(){this.active=false;this.running=false;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;this.resetMotion();if(this.processPiece)this.processPiece.visible=false;for(const s of this.collatorSheets)s.mesh.visible=false;this.onUpdate?.(this.state());return this.state();}
+ dispose(){this.stop();this.processPiece?.removeFromParent();this.processGeometry?.dispose();this.processMaterial?.dispose();for(const s of this.collatorSheets)s.mesh.removeFromParent();this.collatorSheetGeometry?.dispose();this.collatorSheetMaterial?.dispose();}
 }
