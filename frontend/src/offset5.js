@@ -658,7 +658,7 @@ export class OffsetMachineTemplate {
     const monitoring=this.group(g,'dryer-monitoring','Dryer temperature / airflow monitoring points',[0,0,0],[.12,.30,-.46],photos,'Sensor heads are service-location references only; sensor type, alarm threshold and control-loop behavior are not inferred.');
     for(const x0 of [-.36,.36]){this.box(monitoring,[.10,.08,.06],[x0,1.52,-.99],'graphite',.010);this.cylinder(monitoring,.012,.11,[x0,1.47,-.91],'steel','z');}
     const path=this.group(g,'dryer-sheet-path','Sheet transport through extension',[0,0,0],[.35,.20,0],photos);
-    for(const x0 of [-.60,-.36,-.12,.12,.36,.60]){const r=this.cylinder(path,.035,1.42,[x0,1.29,0],'steel');Object.assign(r.userData,{dynamicRotor:true,rotorRole:'dryer-transport-roller',rotorSign:1,rotorRate:.88});}
+    for(const x0 of [-.60,-.36,-.12,.12,.36,.60]){const r=this.cylinder(path,.035,1.42,[x0,1.29,0],'steel');Object.assign(r.userData,{rotorRoleReference:'dryer-transport-roller',motionBudget:'STATIC_REFERENCE_MOBILE'});}
   }
   inspectionBridge(x){
     const photos=['IMG_1630.jpeg','IMG_1631.jpeg','IMG_1633.jpeg','IMG_2391(1).jpeg'];
@@ -716,9 +716,9 @@ export class OffsetMachineTemplate {
     const chainPath=this.group(g,'delivery-chain-path','Delivery gripper-chain rails & sheet receiving path',[0,0,0],[.35,.24,-.30],photos,'Chain rails and receiving path explain the sheet route into the pile. Chain pitch, gripper count and timing remain reference-only.');
     for(const z of [-.78,.78]){this.box(chainPath,[1.46,.06,.06],[-.06,1.61,z],'steel',.010);for(let n=0;n<12;n++)this.cylinder(chainPath,.022,.035,[-.70+n*.125,1.61,z],'graphite','z');}
     const sprockets=this.group(g,'delivery-drive-sprockets','Delivery gripper-chain drive / return sprocket references',[0,0,0],[.30,.22,-.44],photos,'Sprocket locations complete the visible chain route; tooth count, pitch, tension and drive ratio are not asserted.');
-    for(const x0 of [-.68,.68])for(const z of [-.78,.78]){const sign=x0<0?-1:1,key=x0+':'+z,hub=this.cylinder(sprockets,.12,.045,[x0,1.61,z],'graphite','z'),ring=this.ring(sprockets,.092,.012,[x0,1.61,z],'steel','z');for(const r of [hub,ring])Object.assign(r.userData,{dynamicRotor:true,rotorRole:'delivery-chain-sprocket',rotorSign:sign,rotorRate:.94,rotorPairKey:key});}
+    for(const x0 of [-.68,.68])for(const z of [-.78,.78]){const sign=x0<0?-1:1,key=x0+':'+z,hub=this.cylinder(sprockets,.12,.045,[x0,1.61,z],'graphite','z'),ring=this.ring(sprockets,.092,.012,[x0,1.61,z],'steel','z');Object.assign(hub.userData,{dynamicRotor:true,rotorRole:'delivery-chain-sprocket',rotorSign:sign,rotorRate:.94,rotorPairKey:key});Object.assign(ring.userData,{rotorRoleReference:'delivery-chain-sprocket-ring',motionBudget:'STATIC_REFERENCE_MOBILE',rotorPairKey:key});}
     const tensioners=this.group(g,'delivery-chain-tensioners','Delivery chain tensioners, guides & gripper bars',[0,0,0],[.28,.20,-.40],photos,'Tensioner and gripper-bar locations complete the receiving path. Chain tension, pitch, gripper count and phasing remain unverified.');
-    for(const z of [-.78,.78]){this.box(tensioners,[.22,.10,.055],[-.54,1.48,z],'graphite',.010);const r=this.cylinder(tensioners,.045,.035,[-.43,1.53,z],'steel','z');Object.assign(r.userData,{dynamicRotor:true,rotorRole:'delivery-tensioner-idler',rotorSign:1,rotorRate:.90});}
+    for(const z of [-.78,.78]){this.box(tensioners,[.22,.10,.055],[-.54,1.48,z],'graphite',.010);const r=this.cylinder(tensioners,.045,.035,[-.43,1.53,z],'steel','z');Object.assign(r.userData,{rotorRoleReference:'delivery-tensioner-idler',motionBudget:'STATIC_REFERENCE_MOBILE'});}
     for(const x0 of [-.42,.04,.50])this.box(tensioners,[.045,.045,1.48],[x0,1.58,0],'steel',.008);
     const powder=this.group(g,'delivery-powder-jogger-air','Powder / air bar and pile-edge conditioning reference',[0,0,0],[.28,.22,.36],photos,'Upper air/powder bar is a functional reference only; installed powder device, dosage and nozzle settings are not asserted.');
     this.cylinder(powder,.028,1.52,[-.38,1.72,0],'steel','z');
