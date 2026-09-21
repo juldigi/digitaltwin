@@ -26,6 +26,7 @@ import {UPG_LY300_TAXONOMY} from './data/taxonomy-upg-ly300.js';
 import {UPG_LY300_TECHNICAL_SOURCES} from './data/sources-upg-ly300.js';
 import {OFFSET7_GRAVURE_TAXONOMY} from './data/taxonomy-offset7.js';
 import {QF100CS_TAXONOMY} from './data/taxonomy-qf100cs.js';
+import {compressorTaxonomyFor} from './data/taxonomy-compressors.js';
 
 const FAMILY_BY_NO=new Map([
  [1,'guillotine'],[2,'sheeter'],[4,'gravure'],[5,'offset'],[6,'offset'],[7,'pileturner'],[8,'pileturner'],
@@ -150,6 +151,7 @@ export function universalTaxonomy(machineId){
  if(machineId==='BMJ-MCH-0001')return [...POLAR115_TAXONOMY];
  if(machineId==='BMJ-MCH-0004')return [...OFFSET7_GRAVURE_TAXONOMY];
  if(machineId==='BMJ-MCH-0021')return [...QF100CS_TAXONOMY];
+ if(['BMJ-MCH-0029','BMJ-MCH-0030','BMJ-MCH-0031','BMJ-MCH-0032','BMJ-MCH-0033','BMJ-MCH-0034','BMJ-MCH-0035'].includes(machineId))return [...compressorTaxonomyFor(machineId)];
  if(machineId==='BMJ-MCH-0005')return [...OFFSET8_TAXONOMY];
  if(machineId==='BMJ-MCH-0006')return [...OFFSET9_TAXONOMY];
  if(['BMJ-MCH-0011','BMJ-MCH-0012'].includes(machineId))return [...mk920TaxonomyFor(machineId)];
