@@ -63,10 +63,11 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  enrichGravure(){
   const f=this.activeGroup(1),reg=this.activeGroup(2),ink=this.activeGroup(3),print=this.activeGroup(4),imp=this.activeGroup(5),dryer=this.activeGroup(6),delivery=this.activeGroup(7),drive=this.activeGroup(8);
   const sections=[f,reg,ink,print,imp,dryer,delivery,drive].filter(Boolean);
-  for(const section of sections)for(const child of [...section.children])if(child.isMesh&&child.userData.activeElement)child.visible=false;
+  for(const section of sections)for(const child of [...section.children])if(child.isMesh){child.visible=false;child.userData.referencePlaceholder=true;}
   const part=(parent,id,name,explode=[0,.08,.08])=>parent?this.group(parent,id,name,[0,0,0],explode):null;
   this.root.userData.detailPass='V123_R2_YA1A1A_SHEETFED_GRAVURE_COMPONENT_RECONSTRUCTION';
   this.root.userData.simulationStatus='BLOCKED_PENDING_YA1A1A_TRANSPORT_DRIVE_VERIFICATION';
+  this.root.userData.printingNip={x:-.65,y:1.128,z:0,relation:'GRAVURE_CYLINDER_TO_IMPRESSION_CYLINDER',verifiedGeometry:false};
   this.root.userData.gravureMechanismBoundary={
    exactIdentity:'YA1A1A',
    processFamily:'SHEET_FED_SINGLE_COLOR_GRAVURE',
@@ -106,31 +107,31 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    for(const z of [-.42,.42])this.tag(this.cyl(circ,.014,.60,[.06,.74,z],'steel','y'),'ink-return-line','FAMILY_REFERENCE');
    const drop=part(ink,'o7-ink-drop-option','Drop-feed ink reference');
    drop.userData.installedOptionVerified=false;drop.userData.boundary='Patent-supported alternative architecture; BMJ YA1A1A installed ink-feed mode is not confirmed.';
-   this.tag(this.cyl(drop,.018,1.02,[.08,1.28,0],'steel','z'),'ink-drop-manifold','SHEETFED_GRAVURE_PATENT');
-   for(const z of [-.40,-.20,0,.20,.40]){const n=this.cyl(drop,.010,.12,[.08,1.19,z],'accent','y');this.tag(n,'ink-drop-nozzle-reference','SHEETFED_GRAVURE_PATENT');}
+   this.tag(this.cyl(drop,.018,1.02,[-.24,1.26,0],'steel','z'),'ink-drop-manifold','SHEETFED_GRAVURE_PATENT');
+   for(const z of [-.40,-.20,0,.20,.40]){const n=this.cyl(drop,.010,.12,[-.24,1.17,z],'accent','y');this.tag(n,'ink-drop-nozzle-reference','SHEETFED_GRAVURE_PATENT');}
   }
 
   if(print){
    const cyl=part(print,'o7-gravure-cylinder','Gravure printing cylinder');
-   this.tag(this.cyl(cyl,.285,1.24,[0,.86,0],'accent','z'),'engraved-gravure-cylinder','SHEETFED_GRAVURE_PRIMARY');
-   for(const z of [-.68,.68]){this.tag(this.cyl(cyl,.055,.16,[0,.86,z],'steel','z'),'gravure-cylinder-journal','SHEETFED_GRAVURE_PRIMARY');this.tag(this.box(cyl,[.16,.18,.10],[0,.86,z],'dark',.008),'gravure-side-bearing','SHEETFED_GRAVURE_PRIMARY');}
+   this.tag(this.cyl(cyl,.285,1.24,[0,.84,0],'accent','z'),'engraved-gravure-cylinder','SHEETFED_GRAVURE_PRIMARY');cyl.userData.printingNipPartner='o7-impression-cylinder';
+   for(const z of [-.68,.68]){this.tag(this.cyl(cyl,.055,.16,[0,.84,z],'steel','z'),'gravure-cylinder-journal','SHEETFED_GRAVURE_PRIMARY');this.tag(this.box(cyl,[.16,.18,.10],[0,.84,z],'dark',.008),'gravure-side-bearing','SHEETFED_GRAVURE_PRIMARY');}
    const doc=part(print,'o7-doctor','Doctor blade assembly');
-   this.tag(this.cyl(doc,.035,1.34,[.23,1.16,0],'steel','z'),'doctor-pivot-shaft','GRAVURE_DOCTOR_PATENT');
-   const holder=this.box(doc,[.16,.09,1.20],[.16,1.08,0],'dark',.008);holder.rotation.z=-.18;this.tag(holder,'doctor-blade-holder','GRAVURE_DOCTOR_PATENT');
-   const blade=this.box(doc,[.035,.012,1.16],[.08,1.00,0],'steel',.002);blade.rotation.z=-.18;this.tag(blade,'doctor-blade-edge','GRAVURE_DOCTOR_PATENT');
-   this.tag(this.cyl(doc,.050,.17,[.24,1.22,.58],'accent','x'),'doctor-axial-oscillator','GRAVURE_DOCTOR_PATENT');
-   this.tag(this.cyl(doc,.044,.14,[.24,1.22,-.58],'dark','x'),'doctor-oscillation-damper','GRAVURE_DOCTOR_PATENT');
+   this.tag(this.cyl(doc,.035,1.34,[-.30,1.12,0],'steel','z'),'doctor-pivot-shaft','GRAVURE_DOCTOR_PATENT');
+   const holder=this.box(doc,[.16,.09,1.20],[-.24,1.04,0],'dark',.008);holder.rotation.z=-.18;this.tag(holder,'doctor-blade-holder','GRAVURE_DOCTOR_PATENT');
+   const blade=this.box(doc,[.035,.012,1.16],[-.15,1.00,0],'steel',.002);blade.rotation.z=-.18;this.tag(blade,'doctor-blade-edge','GRAVURE_DOCTOR_PATENT');
+   this.tag(this.cyl(doc,.050,.17,[-.30,1.18,.58],'accent','x'),'doctor-axial-oscillator','GRAVURE_DOCTOR_PATENT');
+   this.tag(this.cyl(doc,.044,.14,[-.30,1.18,-.58],'dark','x'),'doctor-oscillation-damper','GRAVURE_DOCTOR_PATENT');
   }
 
   if(imp){
    const ic=part(imp,'o7-impression-cylinder','Impression cylinder');
-   this.tag(this.cyl(ic,.30,1.24,[0,1.05,0],'steel','z'),'impression-cylinder','SHEETFED_GRAVURE_PATENT');
-   for(const z of [-.68,.68]){this.tag(this.cyl(ic,.058,.15,[0,1.05,z],'steel','z'),'impression-cylinder-journal','SHEETFED_GRAVURE_PATENT');this.tag(this.box(ic,[.16,.18,.10],[0,1.05,z],'dark',.008),'impression-bearing','SHEETFED_GRAVURE_PATENT');}
-   this.tag(this.box(ic,[.055,.045,1.10],[-.16,1.30,0],'dark',.004),'impression-cylinder-gripper-bar','SHEETFED_GRAVURE_PATENT');
-   for(const z of [-.42,-.14,.14,.42])this.tag(this.box(ic,[.10,.025,.045],[-.20,1.33,z],'steel',.003),'impression-gripper-finger','SHEETFED_GRAVURE_PATENT');
+   this.tag(this.cyl(ic,.30,1.24,[0,1.43,0],'steel','z'),'impression-cylinder','SHEETFED_GRAVURE_PATENT');ic.userData.printingNipPartner='o7-gravure-cylinder';
+   for(const z of [-.68,.68]){this.tag(this.cyl(ic,.058,.15,[0,1.43,z],'steel','z'),'impression-cylinder-journal','SHEETFED_GRAVURE_PATENT');this.tag(this.box(ic,[.16,.18,.10],[0,1.43,z],'dark',.008),'impression-bearing','SHEETFED_GRAVURE_PATENT');}
+   this.tag(this.box(ic,[.055,.045,1.10],[-.16,1.68,0],'dark',.004),'impression-cylinder-gripper-bar','SHEETFED_GRAVURE_PATENT');
+   for(const z of [-.42,-.14,.14,.42])this.tag(this.box(ic,[.10,.025,.045],[-.20,1.70,z],'steel',.003),'impression-gripper-finger','SHEETFED_GRAVURE_PATENT');
    const sc=part(imp,'o7-impression-sheet-control','Pre-nip sheet control');
-   this.tag(this.cyl(sc,.060,1.10,[-.22,.76,0],'dark','z'),'slack-suppression-press-roller','SHEETFED_GRAVURE_PATENT');
-   for(const z of [-.54,.54])this.tag(this.box(sc,[.11,.20,.06],[-.22,.78,z],'steel',.006),'press-roller-support','SHEETFED_GRAVURE_PATENT');
+   this.tag(this.cyl(sc,.060,1.10,[-.40,1.16,0],'dark','z'),'slack-suppression-press-roller','SHEETFED_GRAVURE_PATENT');
+   for(const z of [-.54,.54])this.tag(this.box(sc,[.11,.20,.06],[-.40,1.16,z],'steel',.006),'press-roller-support','SHEETFED_GRAVURE_PATENT');
   }
 
   if(dryer){
@@ -243,7 +244,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   if(filter){for(const x of [-.20,0,.20]){const f=this.box(filter,[.055,1.38,1.38],[x,1.02,0],'filter',.004);f.rotation.y=x<0?.12:x>0?-.12:0;this.tag(f,'filter-bank');}}
   if(coil){for(let y=.48;y<=1.50;y+=.10)this.tag(this.box(coil,[.045,.025,1.30],[0,y,0],'steel',.002),'coil-fin');for(const z of [-.55,.55])this.tag(this.cyl(coil,.035,.16,[.26,.98,z],'accent','z'),'coil-header');}
   if(drain){this.tag(this.box(drain,[.72,.06,1.42],[0,.38,0],'steel',.008),'drain-pan');this.tag(this.cyl(drain,.025,.42,[.28,.25,.55],'dark','y'),'condensate-trap-reference');}
-  if(fan){const wheel=this.motion(this.cyl(fan,.40,.22,[0,1.05,0],'dark','z'),'spin','z',7,.01,0,null);this.tag(wheel,'supply-fan-wheel');for(let k=0;k<10;k++){const blade=this.box(fan,[.30,.025,.07],[0,1.05,0],'steel',.003);blade.rotation.z=k*Math.PI/5;this.tag(blade,'fan-blade');}this.tag(this.cyl(fan,.10,.32,[.34,.75,.55],'dark','x'),'fan-motor');}
+  if(fan){const wheel=this.motion(this.cyl(fan,.40,.22,[0,1.05,0],'dark','z'),'spin','z',7,.01,0,null);this.tag(wheel,'supply-fan-wheel');for(let k=0;k<10;k++){const blade=this.box(fan,[.30,.025,.07],[0,1.43,0],'steel',.003);blade.rotation.z=k*Math.PI/5;this.tag(blade,'fan-blade');}this.tag(this.cyl(fan,.10,.32,[.34,.75,.55],'dark','x'),'fan-motor');}
   if(service){this.tag(this.box(service,[.70,.92,.035],[0,1.02,-.92],'body',.018),'service-door');this.tag(this.cyl(service,.018,.30,[.27,1.02,-.95],'dark','y'),'door-handle');}
   if(out){this.tag(this.box(out,[.60,1.25,1.36],[.08,1.02,0],'accent',.015),'discharge-plenum');this.tag(this.box(out,[.24,.18,.025],[-.12,1.30,-.72],'glass',.008),'ahu-controller');}
  }
@@ -274,29 +275,29 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.box(m2.g,[1.38,.10,1.55],[0,.68,0],'body',.02);
   for(const z of [-.56,.56])this.box(m2.a,[1.15,.05,.06],[0,.82,z],'steel',.008);
   this.motion(this.box(m2.a,[.18,.09,1.22],[.15,.87,0],'accent',.01),'oscillate','z',8,.10,0,1);
-  const m3=this.mod(3,[-.92,0,0],[-.20,.24,.26]);
-  this.shell(m3.g,[1.25,1.88,2.18],[0,1.02,0]);
+  const m3=this.mod(3,[-.65,0,0],[-.20,.24,.26]);
+  m3.g.userData.coLocatedPrintingStation=true;
   const pan=this.box(m3.a,[.88,.18,1.30],[0,.50,0],'dark',.02);pan.userData.inkPan=true;
   this.motion(this.cyl(m3.a,.25,1.38,[0,.89,0],'orange','z'),'spin','z',3.8,.05,0,2);
   this.cyl(m3.a,.045,.95,[.40,.58,.70],'steel','y');
-  const m4=this.mod(4,[.08,0,0],[0,.28,.28]);
-  this.shell(m4.g,[1.08,1.98,2.18],[0,1.05,0]);
+  const m4=this.mod(4,[-.65,0,0],[0,.28,.28]);
+  this.shell(m4.g,[1.60,2.30,2.18],[0,1.18,0]);m4.g.userData.printingStationFrame=true;
   const grav=this.motion(this.cyl(m4.a,.30,1.42,[0,.88,0],'orange','z'),'spin','z',4.4,.06,0,3);
   grav.userData.gravureCylinder=true;
   const blade=this.motion(this.box(m4.a,[.62,.045,1.46],[.18,1.16,0],'steel',.008),'oscillate','z',10,.035,0,3);blade.rotation.z=-.20;blade.userData.doctorBlade=true;
-  const m5=this.mod(5,[1.06,0,0],[.20,.28,.25]);
-  this.shell(m5.g,[1.08,1.98,2.18],[0,1.05,0]);
+  const m5=this.mod(5,[-.65,0,0],[.20,.28,.25]);
+  m5.g.userData.coLocatedPrintingStation=true;
   const imp=this.motion(this.cyl(m5.a,.31,1.42,[0,1.18,0],'steel','z'),'spin','z',-4.4,.06,0,4);imp.userData.impressionCylinder=true;
   this.motion(this.cyl(m5.a,.11,1.48,[.10,.68,0],'dark','z'),'spin','z',5.6,.03,0,4);
-  const m6=this.mod(6,[2.05,0,0],[.32,.25,0]);
+  const m6=this.mod(6,[.85,0,0],[.32,.25,0]);
   this.shell(m6.g,[1.15,2.30,2.16],[0,1.18,0]);
   for(const y of [.72,1.05,1.38,1.72]){const heater=this.box(m6.a,[.74,.035,1.25],[0,y,0],'orange',.005);heater.userData.dryerElement=true;}
   for(const z of [-.56,.56])this.motion(this.cyl(m6.a,.16,.10,[.25,1.95,z],'dark','z'),'spin','z',9,.02,0,5);
-  const m7=this.mod(7,[2.95,0,0],[.50,.16,0]);
+  const m7=this.mod(7,[2.20,0,0],[.50,.16,0]);
   this.shell(m7.g,[1.12,1.70,2.05],[0,.92,0]);
   for(const y of [.62,.88,1.15])this.motion(this.cyl(m7.a,.075,1.35,[-.10,y,0],'steel','z'),'spin','z',5,.02,0,6);
   this.box(m7.a,[.76,.035,1.18],[.18,.52,0],'paper',.004);
-  const m8=this.mod(8,[3.55,0,0],[.62,.15,0]);
+  const m8=this.mod(8,[-.35,0,0],[.62,.15,0]);
   this.box(m8.g,[.54,1.45,.78],[0,.80,.78],'dark',.04);this.box(m8.a,[.32,.22,.025],[-.05,1.12,.38],'glass',.01);
   this.motion(this.cyl(m8.a,.10,.34,[0,.48,.70],'steel','x'),'spin','x',4,.02,0,null);
   this.root.userData.referenceNote='YA1A1A identity is exact to the BMJ registry and external installed-machine evidence. Envelope/throughput class uses YA1A1 evidence; doctor-blade, ink-system, dryer and delivery morphology use the later YA1B1 family only where the older YA1A1A documentation is unavailable.';
@@ -378,7 +379,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.palette.body=0xdfe3e2;this.palette.dark=0x20272b;this.palette.accent=0x365b68;this.palette.orange=0xe26a2c;
   this.base(5.6,2.65);
   const m1=this.mod(1,[0,0,0],[0,.15,0]);this.box(m1.g,[5.45,.38,2.55],[0,.38,0],'dark',.04);this.box(m1.a,[5.22,.055,2.35],[0,.60,0],'body',.006);
-  const m2=this.mod(2,[0,0,0],[0,.28,.30]);for(const z of [-1.17,1.17])this.box(m2.g,[5.30,.18,.12],[0,.86,z],'steel',.018);const gantry=this.motion(this.box(m2.a,[.16,.90,2.62],[0,1.16,0],'accent',.025),'oscillate','x',.55,2.25,0,2);gantry.userData.gantry=true;
+  const m2=this.mod(2,[0,0,0],[0,.28,.30]);for(const z of [-1.17,1.17])this.box(m2.g,[5.30,.18,.12],[0,.84,z],'steel',.018);const gantry=this.motion(this.box(m2.a,[.16,.90,2.62],[0,1.16,0],'accent',.025),'oscillate','x',.55,2.25,0,2);gantry.userData.gantry=true;
   const m3=this.mod(3,[0,0,0],[0,.35,.36]);const carriage=this.motion(this.box(m3.a,[.38,.42,.52],[0,1.22,0],'dark',.035),'oscillate','z',1.15,1.00,.8,3);carriage.userData.toolCarriage=true;
   const m4=this.mod(4,[0,0,0],[0,.42,.42]);for(const z of [-.16,0,.16]){const tool=this.motion(this.cyl(m4.a,.045,.26,[0,.90,z],z===0?'orange':'steel','y'),'press','y',5,.06,z,3);tool.userData.toolModule=true;}
   const m5=this.mod(5,[0,0,0],[0,.38,-.40]);this.box(m5.g,[.34,.56,.36],[-.12,1.56,-.82],'dark',.025);this.motion(this.cyl(m5.a,.055,.12,[-.12,1.36,-.82],'glass','y'),'oscillate','z',1,.08,0,1);
