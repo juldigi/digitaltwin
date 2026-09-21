@@ -5,6 +5,7 @@ import { cadToWorld } from './model.js';
 import { plantDisplayPoint } from './data/plant-layout-data.js';
 
 import {createMachineTemplate,createMachineSimulation,normalizeMachineKey} from './machine-runtime.js';
+import {universalMachineConfig} from './universal-machine.js';
 export {OffsetMachineTemplate} from './offset5.js';
 export {Offset10MachineTemplate} from './offset10.js';
 export {APM2MachineTemplate} from './apm2.js';
