@@ -1,0 +1,1 @@
+CI verification snapshot for V115b Offset10 rotor roles plus Offset5 mobile-budget correction. Temporary branch; do not merge marker.
