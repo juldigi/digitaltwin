@@ -63,9 +63,10 @@ test('V123 Zund reference exposes zoned vacuum ITI ICC laser and router extracti
  m.dispose();
 });
 
-test('V123 compressor reference follows explicit GA26 air-oil flow architecture',()=>{
- const m=createMachineTemplate('BMJ-MCH-0031');
- requireRoles(m,['oil-separator-element','oil-scavenge-line','air-cooler-core','oil-cooler-core','condensate-trap']);
+test('V123 Atlas compressor reference follows GA/G oil-injected family flow without claiming exact model',()=>{
+ const m=createMachineTemplate('BMJ-MCH-0029');
+ requireRoles(m,['atlas-intake-filter','atlas-oil-injected-screw-airend','atlas-oil-air-separator-vessel','atlas-oil-separator-element','atlas-minimum-pressure-valve','atlas-oil-filter','atlas-compressed-air-aftercooler','atlas-oil-cooler','atlas-moisture-separator-reference','atlas-electronic-condensate-drain-reference','atlas-elektronikon-controller-reference']);
+ assert.equal(m.root.userData.exactCompressorModelVerified,false);
  assert.equal(m.root.userData.engineeringDimensions,false);m.dispose();
 });
 
