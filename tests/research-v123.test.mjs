@@ -256,3 +256,52 @@ test('V123 R4 SX52 Offset 9 binds official feeder AutoPlate inking Alcolor trans
  assert.equal(sawBrake,true);
  sim.dispose();m.dispose();
 });
+
+
+test('V123 R4 collator uses bounded multi-vendor suction-tower mechanics and per-bin gathering simulation',()=>{
+ const m=createMachineTemplate('BMJ-MCH-0023');
+ assert.equal(m.root.userData.detailPass,'V123_R4_MULTI_VENDOR_SUCTION_COLLATOR_RECONSTRUCTION');
+ assert.equal(m.root.userData.exactCollatorOemVerified,false);
+ assert.equal(m.root.userData.exactCollatorModelVerified,false);
+ assert.equal(m.root.userData.modeledReferenceBinCount,10);
+ assert.equal(m.root.userData.installedBinCountVerified,false);
+ assert.deepEqual(m.root.userData.crossFamilyReferences,['HORIZON_VAC1000','HORIZON_VAC600H','DUPLO_DSC10_60I','VERTICAL_COLLATOR_PATENT']);
+ assert.match(m.root.userData.collatorProcessBoundary,/TEN_BIN_DISPLAY_IS_CROSS_FAMILY_REFERENCE_NOT_BMJ_INSTALLED_COUNT/);
+
+ requireRoles(m,[
+  'feed-bin-shelf','bin-sheet-stack-reference','bin-side-guide-reference',
+  'suction-rotor','feed-nip-roller-reference','bin-air-separation-nozzle',
+  'vacuum-blower','vacuum-main-manifold','vacuum-bin-branch',
+  'double-miss-feed-sensor-reference','bin-empty-sheet-presence-sensor',
+  'vertical-gather-guide','gather-guide-plate','gather-transport-roller',
+  'delivery-belt','set-jogger','downstream-finisher-interface-boundary',
+  'collator-touchscreen-reference','collator-control-io-cabinet','bin-control-io-reference'
+ ]);
+ assert.equal(m.findNode('collator-downstream-boundary').userData.installedDownstreamFinisherVerified,false);
+
+ const levels=[...new Set(m.taxonomy.map(n=>n.level))].sort();
+ assert.deepEqual(levels,[1,2,3,4,5,6]);
+ assert.equal(new Set(m.taxonomy.map(n=>n.id)).size,m.taxonomy.length);
+ for(const n of m.taxonomy.filter(n=>n.level>1))assert.ok(m.taxonomy.some(p=>p.id===n.parentId),'Collator missing parent '+n.parentId);
+ for(const n of m.taxonomy.filter(n=>n.level===6)){
+  assert.ok(n.meshRefs.length>0,n.id);
+  assert.ok(m.findNode(n.meshRefs[0]),'Collator missing taxonomy target '+n.meshRefs[0]);
+ }
+
+ const sim=createMachineSimulation('BMJ-MCH-0023',m.root,m);
+ let s=sim.start(),now=0,sawFeed=false,sawGather=false;
+ assert.equal(s.available,true);assert.equal(s.blocked,false);
+ assert.equal(s.modeledBinCount,10);
+ assert.equal(s.installedBinCountVerified,false);
+ assert.equal(s.simulationBoundary,'MULTI_VENDOR_SUCTION_COLLATOR_PROCESS_ONLY__TEN_BIN_REFERENCE_NOT_INSTALLATION_CLAIM');
+ for(let i=0;i<320;i++){
+  now+=50;sim.update(now);s=sim.state();
+  sawFeed ||= s.activeBinFeeds>0;
+  sawGather ||= s.completedSheetsInSet>0;
+  assert.equal(s.installedBinCountVerified,false);
+ }
+ assert.equal(sawFeed,true);
+ assert.equal(sawGather,true);
+ assert.ok(s.completedSheetsInSet>=0&&s.completedSheetsInSet<=10);
+ sim.dispose();m.dispose();
+});
