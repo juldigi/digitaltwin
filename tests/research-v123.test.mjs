@@ -305,3 +305,54 @@ test('V123 R4 collator uses bounded multi-vendor suction-tower mechanics and per
  assert.ok(s.completedSheetsInSet>=0&&s.completedSheetsInSet<=10);
  sim.dispose();m.dispose();
 });
+
+
+test('V123 R5 Suprasetter CTP-1/2 expose common Heidelberg mechanics while loader punch debris and temperature systems remain option-bounded',()=>{
+ for(const id of ['BMJ-MCH-0025','BMJ-MCH-0026']){
+  const m=createMachineTemplate(id);
+  assert.equal(m.root.userData.detailPass,'V123_R5_SUPRASETTER_MULTI_MODEL_FAMILY_RECONSTRUCTION',id);
+  assert.equal(m.root.userData.exactSuprasetterModelVerified,false,id);
+  assert.equal(m.root.userData.exactPlateFormatVerified,false,id);
+  assert.deepEqual(m.root.userData.familyCandidates,['A52','A75','A106','106'],id);
+  assert.equal(m.root.userData.installedLoaderTypeVerified,false,id);
+  assert.equal(m.root.userData.suprasetterOptions.loader,'MODEL_DEPENDENT_NOT_INSTALLATION_CONFIRMED',id);
+  assert.equal(m.root.userData.suprasetterOptions.internalPunch,'AVAILABLE_NOT_INSTALLATION_CONFIRMED',id);
+  assert.equal(m.root.userData.suprasetterOptions.debrisRemoval,'AVAILABLE_NOT_INSTALLATION_CONFIRMED',id);
+  assert.equal(m.root.userData.suprasetterOptions.temperatureStabilization,'MODEL_DEPENDENT_NOT_INSTALLATION_CONFIRMED',id);
+
+  requireRoles(m,[
+   'manual-plate-entry-bed','manual-plate-side-guide','automatic-loader-family-envelope',
+   'plate-transport-roller','plate-position-sensor-reference','plate-register-stop-reference',
+   'external-imaging-drum','imaging-drum-bearing-reference','plate-clamp-reference',
+   'laser-linear-rail','heidelberg-laser-carriage','heidelberg-laser-module-reference','ids-diode-channel-reference',
+   'internal-punch-option-reference','plate-unload-guide','plate-output-bed-reference',
+   'processor-stacker-interface-boundary','debris-removal-vacuum-option','debris-filter-option',
+   'temperature-stabilizer-option','temperature-control-line-option'
+  ]);
+  assert.equal(m.findNode('ctp-loader-boundary').userData.installedOptionVerified,false,id);
+  assert.equal(m.findNode('ctp-punch-option').userData.installedOptionVerified,false,id);
+  assert.equal(m.findNode('ctp-debris-option').userData.installedOptionVerified,false,id);
+  assert.equal(m.findNode('ctp-temp-stabilizer-option').userData.installedOptionVerified,false,id);
+  assert.equal(m.findNode('ctp-processor-boundary').userData.installedOptionVerified,false,id);
+  assert.equal(m.findNode('ctp-ids').userData.oemTechnology,'INTELLIGENT_DIODE_SYSTEM',id);
+
+  const levels=[...new Set(m.taxonomy.map(n=>n.level))].sort();
+  assert.deepEqual(levels,[1,2,3,4,5,6],id);
+  assert.equal(new Set(m.taxonomy.map(n=>n.id)).size,m.taxonomy.length,id);
+  for(const n of m.taxonomy.filter(n=>n.level>1))assert.ok(m.taxonomy.some(p=>p.id===n.parentId),id+' missing parent '+n.parentId);
+  for(const n of m.taxonomy.filter(n=>n.level===6)){
+   assert.ok(n.meshRefs.length>0,id+' '+n.id);
+   assert.ok(m.findNode(n.meshRefs[0]),id+' missing taxonomy target '+n.meshRefs[0]);
+  }
+
+  const sim=createMachineSimulation(id,m.root,m),start=sim.start();
+  assert.equal(start.available,true,id);assert.equal(start.blocked,false,id);
+  assert.equal(start.simulationBoundary,'SUPRASETTER_COMMON_PROCESS_ONLY__PUNCH_LOADER_DEBRIS_TEMP_OPTIONS_NOT_SIMULATED',id);
+  assert.equal(sim.stages.some(s=>/punch/i.test(s)),false,id+' punch stage must be bypassed when installation is unverified');
+  const optionRoles=/internal-punch|debris-removal|temperature-stabilizer|automatic-loader/i;
+  assert.ok(sim.motions.every(item=>!optionRoles.test(String(item.mesh.userData.mechanismRole||''))),id+' unverified option leaked into active simulation');
+  assert.ok(sim.motions.some(item=>item.mesh.userData.mechanismRole==='external-imaging-drum'),id+' imaging drum motion missing');
+  assert.ok(sim.motions.some(item=>item.mesh.userData.mechanismRole==='heidelberg-laser-carriage'),id+' laser carriage motion missing');
+  sim.dispose();m.dispose();
+ }
+});
