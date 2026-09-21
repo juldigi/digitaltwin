@@ -56,13 +56,19 @@ const MODULES={
 const FAMILY_SOURCES={
  guillotine:[['POLAR 115 EM archive reference','https://www.exapro.com/polar-115-em-monitor-p241022253/']],
  gravure:[
+  ['YA1A1A exact-model gravure classification · public equipment register','https://zjjcmspublic.oss-cn-hangzhou-zwynet-d01-a.internet.cloud.zj.gov.cn/jcms_files/jcms1/web3765/site/attach/0/7812f59accf74d029e3be38b6d7c4db6.pdf'],
   ['YA1A1A installed single-gravure evidence','https://www.wlzp.vip/touch/wzp/index.aspx?comid=49287'],
-  ['YA1A1 used-machine size/speed evidence','https://www.sohu.com/a/130659125_167159'],
+  ['YA1A1 used-machine 920×650 / 5000 sheet-h class','https://www.sohu.com/a/130659125_167159'],
+  ['YA1A1A 650×920 installed-machine visual reference','https://hnyrbz.com/PicList.aspx?ClassID=26'],
+  ['YA1A1C 65×92 OEM successor-family visual reference','https://www.ezgravtek.com/NewsDetail.aspx?ID=180'],
+  ['YA1B1 OEM successor-family visual reference','https://www.ezgravtek.com/ProDetail.aspx?Proid=30'],
   ['Ezgravtek sheet-fed gravure technology / current family','https://en.ezgravtek.com/NewsDetail.aspx?ID=233'],
   ['Sheet-fed gravure transfer / ink pan / gripper patent','https://patents.google.com/patent/JP3292876B2/en'],
+  ['Sheet-fed gravure feeder / transfer / impression / delivery train patent','https://patents.google.com/patent/US8720334B2/en'],
   ['Gravure doctor holder / oscillator patent','https://patents.google.com/patent/US20030213386A1/en'],
   ['H. C. MOOG sheet-fed rotogravure press program','https://www.hcmoog.de/products/program/'],
-  ['H. C. MOOG sheet-fed gravure technology / drying options','https://www.hcmoog.de/products/rotogravure-technology/']
+  ['H. C. MOOG sheet-fed gravure technology / drying options','https://www.hcmoog.de/products/rotogravure-technology/'],
+  ['Gravure printing nip principle · paperboard manual','https://www.iggesund.com/insights/paperboard-know-how/paperboard-manual/paperboard-manual-publication/printing-and-converting-performance/gravure-printing/']
  ],
  offset:[['Heidelberg CX 104 official','https://www.heidelberg.com/global/en/print_and_packaging/products/offset_printing/format_70_x_100/speedmaster_cx_104/product_information_5/product_information_cx_104.jsp'],['Heidelberg SX 52 brochure','https://www.heidelberg.com/tw/media/local_media/product/brochures/Speedmaster_SX_52.pdf']],
  hotfoil:[['MK 920 YMI archive','https://www.pressdepo.com/machine/en-133612/mk-920-ymi-foil-stamping-machine']],
