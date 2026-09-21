@@ -90,17 +90,22 @@ const FAMILY_SOURCES={
  zund:[['Zünd G3 official modular flatbed cutter','https://www.zund.com/en/cutting-systems/digital-cutting-systems/g3-cutter']],
  compressor:[
   ['Atlas Copco GA oil-injected screw compressor family','https://www.atlascopco.com/id-id/compressors/products/air-compressor/rotary-screw-compressor/ga-series'],
-  ['KAESER rotary screw compressor family','https://id.kaeser.com/products/rotary-screw-compressors/rotary-screw-compressors-with-fluid-cooling/with-1-to-1-direct-drive/'],
-  ['SWAN TS-AD direct screw compressor family','https://swan-aircompressor.com/en/products/screw/direct-driven-screw']
+  ['Atlas Copco GA 37-90 component / controller family','https://www.atlascopco.com/en-id/compressors/products/air-compressor/rotary-screw-compressor/ga-screw-compressor'],
+  ['KAESER 1:1 direct-drive rotary screw family','https://id.kaeser.com/products/rotary-screw-compressors/rotary-screw-compressors-with-fluid-cooling/with-1-to-1-direct-drive/'],
+  ['KAESER belt-drive rotary screw family','https://id.kaeser.com/products/rotary-screw-compressors/rotary-screw-compressors-with-fluid-cooling/with-belt-drive/'],
+  ['KAESER rotary screw component / flow brochure','https://id.kaeser.com/download.ashx?id=tcm%3A148-5928'],
+  ['SWAN TS-AD direct screw compressor family','https://swan-aircompressor.com/en/products/screw/direct-driven-screw'],
+  ['SWAN TMV variable-speed screw compressor family','https://swan-aircompressor.com/en/products/screw/variable-speed-screw'],
+  ['SWAN Screw Compressor Series catalogue','https://www.swan-aircompressor.com/en/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBa1VNIiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--00fd60abbc79a7b9a28569af7dedf6aca949ded0/Screw%20Compressor%20Series.pdf?disposition=preview']
  ],
  ahu:[['Trane air handlers family reference','https://www.trane.com/commercial/north-america/us/en/products-systems/air-handlers.html'],['ASHRAE standards','https://www.ashrae.org/technical-resources/standards-and-guidelines']]
 };
 const REFERENCE_SOURCES_BY_NO=new Map([
  [4,FAMILY_SOURCES.gravure],[17,FAMILY_SOURCES.folder],[21,FAMILY_SOURCES.blanker],[23,FAMILY_SOURCES.collator],
  [25,FAMILY_SOURCES.ctp],[26,FAMILY_SOURCES.ctp],[27,FAMILY_SOURCES.imagesetter],[28,FAMILY_SOURCES.zund],
- [29,[FAMILY_SOURCES.compressor[0]]],[30,[FAMILY_SOURCES.compressor[0]]],[35,[FAMILY_SOURCES.compressor[0]]],
- [31,[FAMILY_SOURCES.compressor[1]]],[32,[FAMILY_SOURCES.compressor[1]]],[34,[FAMILY_SOURCES.compressor[1]]],
- [33,[FAMILY_SOURCES.compressor[2]]],
+ [29,[FAMILY_SOURCES.compressor[0],FAMILY_SOURCES.compressor[1]]],[30,[FAMILY_SOURCES.compressor[0],FAMILY_SOURCES.compressor[1]]],[35,[FAMILY_SOURCES.compressor[0],FAMILY_SOURCES.compressor[1]]],
+ [31,[FAMILY_SOURCES.compressor[2],FAMILY_SOURCES.compressor[3],FAMILY_SOURCES.compressor[4]]],[32,[FAMILY_SOURCES.compressor[2],FAMILY_SOURCES.compressor[3],FAMILY_SOURCES.compressor[4]]],[34,[FAMILY_SOURCES.compressor[2],FAMILY_SOURCES.compressor[3],FAMILY_SOURCES.compressor[4]]],
+ [33,[FAMILY_SOURCES.compressor[5],FAMILY_SOURCES.compressor[6],FAMILY_SOURCES.compressor[7]]],
  [40,[['PT Sansin Indonesia / NES central cooling family','https://www.nesacsentral.web.id/']]],
  [36,FAMILY_SOURCES.ahu],[37,FAMILY_SOURCES.ahu],[38,FAMILY_SOURCES.ahu],[39,FAMILY_SOURCES.ahu],[41,FAMILY_SOURCES.ahu]
 ]);
@@ -130,7 +135,9 @@ const EVIDENCE_BY_NO=new Map([
  [26,{grade:'OEM_FAMILY_REFERENCE',geometry:'HEIDELBERG_SUPRASETTER_FAMILY_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'CTP-2 is confirmed Heidelberg but model/serial is absent. The twin follows the same bounded Suprasetter family architecture while keeping CTP-2 as a distinct asset; no exact format, loader or laser-module count is inferred.'}],
  [27,{grade:'OEM_FAMILY_REFERENCE',geometry:'SCREEN_FTR_KATANA_CAPSTAN_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'The BMJ asset is confirmed SCREEN CTF imagesetter but model/serial is absent. Geometry follows SCREEN FT-R/Katana capstan transport and polygon-mirror laser scanning references, replacing the former incorrect vacuum-drum placeholder. Exact wavelength, media width, punch and processor remain unverified.'}],
  [28,{grade:'OEM_FAMILY_REFERENCE',geometry:'ZUND_G3_S3_MODULAR_FLATBED_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'The BMJ asset is confirmed Zünd but exact model is absent. Geometry uses the recognizable modular Zünd flatbed architecture: zoned vacuum table, travelling beam, tool carriage, modular tool heads, registration camera and operator console. Table size/tool package are intentionally unclaimed.'}],
- ...[29,30,31,32,33,34,35].map(no=>[no,{grade:'BRAND_FAMILY_REFERENCE',geometry:'BRAND_SPECIFIC_SCREW_COMPRESSOR_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'Exact compressor model is absent, but manufacturer identity is retained and each twin uses a brand-family screw-compressor package rather than a generic box: intake/filter, drive motor, screw airend, fluid separator, oil/air circuit, cooler/fan and controller. Power, drive type, integrated dryer/receiver and piping remain unverified.'}]),
+ ...[29,30,35].map(no=>[no,{grade:'BRAND_FAMILY_REFERENCE',geometry:'ATLAS_COPCO_GA_G_OIL_INJECTED_FAMILY_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'The registry identifies Atlas Copco but not the exact model. Geometry follows official GA/G oil-injected screw principles only: intake/load-unload, motor/airend, oil-air separation, minimum-pressure path, oil circuit, cooler/aftercooler, condensate handling and Elektronikon-family control. Exact GA/G variant, VSD, Full Feature dryer, power and piping are not asserted.'}]),
+ ...[31,32,34].map(no=>[no,{grade:'BRAND_FAMILY_REFERENCE',geometry:'KAESER_SIGMA_FLUID_COOLED_FAMILY_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'The registry identifies KAESER but not the model. Geometry follows official KAESER fluid-cooled screw architecture: intake/inlet valve, SIGMA PROFILE airend, motor interface, cooling-fluid separator tank/cartridge, minimum-pressure check valve, thermostatic/fluid-filter circuit, air/fluid coolers, centrifugal separator/ECO-DRAIN and SIGMA CONTROL family. Belt versus 1:1 direct drive and exact controller generation remain unverified.'}]),
+ [33,{grade:'BRAND_FAMILY_REFERENCE',geometry:'SWAN_TS_AD_TMV_SCREW_FAMILY_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'The registry identifies SWAN but not the model. Geometry follows SWAN TS-AD/TMV screw-family references: air-filter assembly, screw airend/drive interface, built-in oil-air cooling, cooling fan family and smart/variable-frequency control. Exact TS-AD versus TMV series, horsepower, coupling/VFD configuration and separator internals remain unverified.'}],
  ...[36,37,38,39,41].map(no=>[no,{grade:'FUNCTIONAL_FAMILY_REFERENCE',geometry:'DOUBLE_SKIN_AHU_SECTIONAL_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'Exact AHU model is absent. The twin uses a serviceable double-skin sectional AHU reference—damper, filters, heat-exchange/cooling coil, drain section, supply fan and discharge/control—while section order, fan type and airflow direction remain unverified.'}]),
  [40,{grade:'BRAND_FAMILY_REFERENCE',geometry:'SANSIN_NES_INDUSTRIAL_COOLING_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'AHU 7 is identified as SANSIN. Exact model is absent, so geometry follows the PT Sansin Indonesia/NES industrial central-cooling family, including indoor air-handling and outdoor cooling/compressor modules. It is explicitly not claimed to be YZKJ-45N or YZKJ-90N.'}]
 ]);
