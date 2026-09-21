@@ -9,7 +9,7 @@ export class Offset9MachineTemplate{
  constructor(){
   this.root=new THREE.Group();this.root.name='Speedmaster SX 52-4+L';
   this.root.userData={assetId:'BMJ-MCH-0006',nodeId:'offset9-root',spec:OFFSET9_SPEC,sources:OFFSET9_TECHNICAL_SOURCES,orientation:OFFSET9_ORIENTATION,taxonomyVersion:'offset9-v2-oem-mechanics',evidenceGrade:'OFFICIAL_FAMILY_REFERENCE',engineeringDimensions:false,detailPass:'V123_R4_SX52_OEM_MECHANISM_DETAIL'};
-  this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.exteriorOpen=false;this.build();
+  this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.dynamicMaterials=[];this.exteriorOpen=false;this.build();
   this.taxonomy=OFFSET9_TAXONOMY;this.taxonomyById=OFFSET9_TAXONOMY_BY_ID;
   for(const node of this.nodes){node.userData.rest=node.position.clone();node.userData.restQuaternion=node.quaternion.clone();}this.root.updateMatrixWorld(true);
  }
@@ -26,6 +26,7 @@ export class Offset9MachineTemplate{
   return mesh;
  }
  cover(mesh){mesh.userData.exteriorCover=true;return mesh;}
+ uniqueMaterial(mesh){const m=mesh.material.clone();mesh.material=m;this.dynamicMaterials.push(m);return mesh;}
  build(){
   const access=this.group(this.root,'offset9-access','Frames, safety guards and access');
   this.box(access,[8.65,.14,2.02],[.38,.34,0],'black');
@@ -44,7 +45,7 @@ export class Offset9MachineTemplate{
   const head=this.group(g,'offset9-feeder-head','Suction head and sheet separation');this.box(head,[.72,.25,1.18],[.18,1.86,0],'graphite');for(const z of [-.42,-.14,.14,.42]){this.cyl(head,.026,.13,[.37,1.66,z],'rubber','suction-foot','y');this.box(head,[.035,.22,.035],[.37,1.76,z],'steel');}
   const reg=this.group(g,'offset9-register','Central suction-belt feedboard and register',[1.43,0,0]);this.box(reg,[1.23,.48,1.55],[0,.90,0],'graphite',.05);this.box(reg,[1.19,.025,1.43],[0,1.17,0],'steel');
   const tape=this.group(reg,'offset9-register-suction-tape','Central suction tape');tape.userData.oemFunction='CENTRAL_SUCTION_TAPE';this.box(tape,[1.04,.018,.18],[0,1.225,0],'rubber',.004);for(const x of [-.48,.48])this.cyl(tape,.035,.18,[x,1.22,0],'rubber','suction-belt-wheel','z');
-  const venturi=this.group(reg,'offset9-register-venturi','Venturi infeed nozzles');venturi.userData.oemFunction='VENTURI_SHEET_INFEED';for(const z of [-.42,-.14,.14,.42]){const n=this.cyl(venturi,.012,.07,[.46,1.245,z],'cyan','venturi-nozzle','y');n.userData.airNozzle=true;n.userData.feederAirNozzle=true;n.userData.mechanismRole='feeder-venturi-nozzle';}
+  const venturi=this.group(reg,'offset9-register-venturi','Venturi infeed nozzles');venturi.userData.oemFunction='VENTURI_SHEET_INFEED';for(const z of [-.42,-.14,.14,.42]){const n=this.uniqueMaterial(this.cyl(venturi,.012,.07,[.46,1.245,z],'cyan','venturi-nozzle','y'));n.userData.airNozzle=true;n.userData.feederAirNozzle=true;n.userData.mechanismRole='feeder-venturi-nozzle';}
   const lays=this.group(reg,'offset9-register-lays','Front and side register lays');for(const z of [-.48,.48])this.box(lays,[.10,.08,.10],[.47,1.25,z],'silver');for(const z of [-.26,.26])this.box(lays,[.07,.07,.06],[.34,1.245,z],'steel',.006);
  }
  sideFrames(g){for(const z of [-.91,.91]){this.cover(this.box(g,[.92,1.49,.12],[0,1.43,z],'ivory',.07));this.cover(this.box(g,[.70,.23,.025],[0,2.10,z+(z<0?-.065:.065)],'graphite'));}this.cover(this.box(g,[.96,.23,1.70],[0,2.21,0],'graphite',.05));}
@@ -67,7 +68,7 @@ export class Offset9MachineTemplate{
   const id='offset9-l',g=this.group(parent,id,module.label,[OFFSET9_CENTERS.L,0,0],[.20,.22,0]);g.userData.moduleType='coat';g.userData.moduleKey='L';this.sideFrames(g);
   const supply=this.group(g,id+'-supply','Coating circulation interface');this.box(supply,[.48,.19,1.43],[-.27,1.98,0],'green');this.box(supply,[.11,.10,1.50],[-.02,1.88,0],'steel');
   const meter=this.group(g,id+'-meter','Anilox metering');const anilox=this.cyl(meter,.105,1.43,[.10,1.78,0],'silver','anilox');anilox.userData.mechanismRole='coating-anilox-roll';for(const z of [-.78,.78]){const bearing=this.box(meter,[.14,.15,.10],[.10,1.78,z],'graphite',.008);bearing.userData.mechanismRole='anilox-bearing-reference';}
-  const chamber=this.group(g,id+'-chamber','Chamber blade coating system');chamber.userData.oemFunction='CHAMBER_BLADE_COATING';const cb=this.box(chamber,[.28,.12,1.48],[-.13,1.90,0],'graphite',.012);cb.userData.mechanismRole='coating-chamber-body';const meterBlade=this.box(chamber,[.27,.012,1.42],[-.04,1.84,0],'steel',.002);meterBlade.rotation.z=.18;meterBlade.userData.mechanismRole='doctor-blade-metering-edge';const sealBlade=this.box(chamber,[.27,.012,1.42],[-.19,1.97,0],'steel',.002);sealBlade.rotation.z=-.18;sealBlade.userData.mechanismRole='doctor-blade-sealing-edge';for(const z of [-.72,.72]){const seal=this.box(chamber,[.10,.14,.08],[-.13,1.90,z],'rubber',.006);seal.userData.mechanismRole='chamber-end-seal-reference';}
+  const chamber=this.group(g,id+'-chamber','Chamber blade coating system');chamber.userData.oemFunction='CHAMBER_BLADE_COATING';const cb=this.uniqueMaterial(this.box(chamber,[.28,.12,1.48],[-.13,1.90,0],'graphite',.012));cb.userData.mechanismRole='coating-chamber-body';const meterBlade=this.uniqueMaterial(this.box(chamber,[.27,.012,1.42],[-.04,1.84,0],'steel',.002));meterBlade.rotation.z=.18;meterBlade.userData.mechanismRole='doctor-blade-metering-edge';const sealBlade=this.uniqueMaterial(this.box(chamber,[.27,.012,1.42],[-.19,1.97,0],'steel',.002));sealBlade.rotation.z=-.18;sealBlade.userData.mechanismRole='doctor-blade-sealing-edge';for(const z of [-.72,.72]){const seal=this.uniqueMaterial(this.box(chamber,[.10,.14,.08],[-.13,1.90,z],'rubber',.006));seal.userData.mechanismRole='chamber-end-seal-reference';}
   const form=this.group(g,id+'-form','Coating plate or blanket cylinder');form.userData.officialPlate=OFFSET9_SPEC.coatingPlate;form.userData.officialBlanket=OFFSET9_SPEC.coatingBlanket;form.userData.maxCoatingArea=OFFSET9_SPEC.maxCoatingArea;form.userData.leadEdgeOffset=OFFSET9_SPEC.coatingLeadEdgeOffset;this.cyl(form,.195,1.72,[.04,1.35,0],'rubber','coating-form');
   const impression=this.group(g,id+'-impression','Coating impression cylinder');this.cyl(impression,.215,1.72,[-.08,.91,0],'silver','coating-impression');
  }
@@ -75,8 +76,8 @@ export class Offset9MachineTemplate{
   const g=this.group(this.root,'offset9-delivery','Preset delivery · pile-height option unverified',[4.72,0,0],[.9,.18,0]);g.userData.pileHeightOptionVerified=false;this.cover(this.box(g,[2.78,1.70,2.02],[0,1.27,0],'ivory',.10));this.cover(this.box(g,[2.28,.46,1.96],[-.15,2.10,0],'graphite',.07));
   const chain=this.group(g,'offset9-delivery-chain','Gripper-chain transport');for(const z of [-.72,.72]){this.cyl(chain,.20,.09,[-.96,1.52,z],'steel','chain-sprocket');this.cyl(chain,.20,.09,[.92,1.52,z],'steel','chain-sprocket');this.box(chain,[1.88,.035,.035],[-.02,1.72,z],'black');}
   const grippers=this.group(g,'offset9-delivery-grippers','Delivery gripper bars · loop reference');for(let i=0;i<6;i++){const bar=this.group(grippers,'offset9-delivery-gripper-'+(i+1),'Delivery gripper bar '+(i+1),[-.96+i*(1.88/5),1.72,0]);bar.userData.deliveryGripperBar=true;bar.userData.barPhase=i/6;this.box(bar,[.045,.04,1.42],[0,0,0],'steel',.006);for(const z of [-.54,-.27,0,.27,.54])this.box(bar,[.05,.04,.03],[.02,-.035,z],'graphite',.003);}
-  const guide=this.group(g,'offset9-delivery-guide','Venturi non-contact sheet guidance');this.box(guide,[1.72,.035,1.44],[-.06,1.12,0],'silver');for(let x=-.68;x<=.68;x+=.34)for(const z of [-.48,0,.48]){const q=this.cyl(guide,.018,.025,[x,1.15,z],'cyan','venturi-nozzle','y');q.userData.airNozzle=true;}
-  const brake=this.group(g,'offset9-delivery-brake','Sheet brake and release');brake.userData.familyFunction='CONTROLLED_SHEET_DECELERATION';for(const z of [-.47,-.16,.16,.47])this.cyl(brake,.055,.14,[.78,.88,z],'rubber','sheet-brake');
+  const guide=this.group(g,'offset9-delivery-guide','Venturi non-contact sheet guidance');this.box(guide,[1.72,.035,1.44],[-.06,1.12,0],'silver');for(let x=-.68;x<=.68;x+=.34)for(const z of [-.48,0,.48]){const q=this.uniqueMaterial(this.cyl(guide,.018,.025,[x,1.15,z],'cyan','venturi-nozzle','y'));q.userData.airNozzle=true;q.userData.mechanismRole='delivery-venturi-nozzle';}
+  const brake=this.group(g,'offset9-delivery-brake','Sheet brake and release');brake.userData.familyFunction='CONTROLLED_SHEET_DECELERATION';for(const z of [-.47,-.16,.16,.47]){const b=this.cyl(brake,.055,.14,[.78,.88,z],'rubber','sheet-brake');b.userData.mechanismRole='delivery-sheet-brake-wheel';}
   const stack=this.group(g,'offset9-delivery-stack','Delivery pile lift');this.box(stack,[1.18,.07,1.24],[.67,.46,0],'steel');this.box(stack,[1.14,.48,1.18],[.67,.74,0],'paper');
  }
  buildConsole(){const g=this.group(this.root,'offset9-console','Prinect press console',[1.18,0,-1.83],[0,.15,-.35]);this.box(g,[1.25,.72,.54],[0,.72,0],'graphite',.06);this.box(g,[.76,.42,.025],[-.12,1.18,-.14],'glass',.03);this.box(g,[.55,.05,.36],[.20,1.00,.12],'silver');}
@@ -92,5 +93,5 @@ export class Offset9MachineTemplate{
  setExteriorOpen(on){this.exteriorOpen=!!on;let hidden=0;this.root.traverse(object=>{if(object.isMesh&&object.userData.exteriorCover){object.visible=!on;hidden++;}});this.root.userData.interiorCutawayVisible=!!on;this.root.userData.exteriorHiddenCount=on?hidden:0;}
  explode(amount,selection=null){for(const node of this.nodes)node.position.copy(node.userData.rest);const targets=selection?(selection.children.filter(c=>c.userData.selectable).length?selection.children.filter(c=>c.userData.selectable):[selection]):this.parts;for(const node of targets)node.position.addScaledVector(node.userData.explode,THREE.MathUtils.clamp(+amount||0,0,1));}
  reset(){const open=this.exteriorOpen;this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const node of this.nodes)node.quaternion.copy(node.userData.restQuaternion);this.setExteriorOpen(open);}setLow(){}
- dispose(){for(const geometry of this.geometries.values())geometry.dispose();for(const material of this.materials.values())material.dispose();}
+ dispose(){for(const geometry of this.geometries.values())geometry.dispose();for(const material of this.materials.values())material.dispose();for(const material of this.dynamicMaterials)material.dispose();}
 }
