@@ -185,3 +185,67 @@ test('V123 R3 brand-specific compressor taxonomy resolves every service componen
   m.dispose();
  }
 });
+
+
+test('V123 R4 SX52 Offset 9 binds official feeder AutoPlate inking Alcolor transfer coating and delivery evidence without inventing options',()=>{
+ const m=createMachineTemplate('BMJ-MCH-0006');
+ assert.equal(m.root.userData.assetId,'BMJ-MCH-0006');
+ assert.equal(m.root.userData.detailPass,'V123_R4_SX52_OEM_MECHANISM_DETAIL');
+ assert.equal(m.root.userData.spec.model,'Speedmaster SX 52-4+L');
+ assert.equal(m.root.userData.spec.serial,'GS001804');
+ assert.deepEqual(m.root.userData.spec.maxCoatingArea,[.360,.520]);
+ assert.deepEqual(m.root.userData.spec.coatingBlanket,[.425,.534]);
+ assert.deepEqual(m.root.userData.spec.coatingPlate,[.426,.525]);
+ assert.equal(m.root.userData.spec.coatingLeadEdgeOffset,.034);
+ assert.equal(m.root.userData.spec.perfectorInstalledVerified,false);
+ assert.equal(m.root.userData.spec.dryerInstalledVerified,false);
+
+ requireRoles(m,[
+  'feeder-venturi-nozzle','autoplate-guide-reference','autoplate-clamp-reference',
+  'heidelberg-ink-fountain-body','ink-fountain-liner-reference','remote-ink-zone-interface-reference',
+  'transferjacket-blue-family-reference','coating-anilox-roll','anilox-bearing-reference',
+  'coating-chamber-body','doctor-blade-metering-edge','doctor-blade-sealing-edge','chamber-end-seal-reference',
+  'delivery-venturi-nozzle','delivery-sheet-brake-wheel'
+ ]);
+ for(let i=1;i<=4;i++){
+  assert.equal(m.findNode('offset9-pu'+i+'-autoplate').userData.installedSystemVerified,false);
+  assert.equal(m.findNode('offset9-pu'+i+'-transfer-jacket').userData.installedVariantVerified,false);
+  assert.equal(m.findNode('offset9-pu'+i).userData.automaticWashupInstalledVerified,false);
+  assert.equal(m.findNode('offset9-pu'+i+'-inking').userData.exactRollerCountVerified,false);
+  assert.equal(m.findNode('offset9-pu'+i+'-dampening').userData.exactRollerCountVerified,false);
+ }
+ assert.equal(m.findNode('offset9-delivery').userData.pileHeightOptionVerified,false);
+ assert.equal(m.findNode('offset9-perfector'),null);
+
+ const levels=[...new Set(m.taxonomy.map(n=>n.level))].sort();
+ assert.deepEqual(levels,[1,2,3,4,5,6]);
+ assert.equal(new Set(m.taxonomy.map(n=>n.id)).size,m.taxonomy.length);
+ for(const n of m.taxonomy.filter(n=>n.level===6)){
+  assert.ok(n.meshRefs.length>0,n.id);
+  assert.ok(m.findNode(n.meshRefs[0]),'Offset 9 missing taxonomy target '+n.meshRefs[0]);
+ }
+ for(const n of m.taxonomy.filter(n=>n.level>1))assert.ok(m.taxonomy.some(p=>p.id===n.parentId),'Offset 9 missing parent '+n.parentId);
+
+ const dynamic=[];
+ m.root.traverse(o=>{if(o.userData?.airNozzle||/doctor-blade|coating-chamber|chamber-end-seal/.test(String(o.userData?.mechanismRole||'')))dynamic.push(o);});
+ assert.ok(dynamic.length>0);
+ assert.equal(new Set(dynamic.map(o=>o.material).filter(Boolean)).size,dynamic.filter(o=>o.material).length,'dynamic SX52 meshes must not share emissive material instances');
+
+ const sim=createMachineSimulation('BMJ-MCH-0006',m.root,m);
+ let state=sim.start(),now=0,sawFeederVenturi=false,sawCoat=false,sawDeliveryAir=false,sawBrake=false;
+ assert.equal(state.simulationBoundary,'SX52_4L_PROCESS__OPTIONS_NOT_INFERRED');
+ for(let i=0;i<500;i++){
+  now+=50;sim.update(now);state=sim.state();
+  sawFeederVenturi ||= state.feederVenturiActive;
+  sawCoat ||= state.coatingActive&&state.chamberBladeActive;
+  sawDeliveryAir ||= state.airGuidanceActive;
+  sawBrake ||= state.deliveryBrakeActive;
+  assert.equal(state.uvActive,false);
+  assert.equal(state.uvLampCount,0);
+ }
+ assert.equal(sawFeederVenturi,true);
+ assert.equal(sawCoat,true);
+ assert.equal(sawDeliveryAir,true);
+ assert.equal(sawBrake,true);
+ sim.dispose();m.dispose();
+});
