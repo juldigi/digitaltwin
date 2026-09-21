@@ -14,6 +14,8 @@ import {promatrix106TaxonomyFor} from './data/taxonomy-promatrix106.js';
 import {PROMATRIX106_TECHNICAL_SOURCES} from './data/sources-promatrix106.js';
 import {media100TaxonomyFor} from './data/taxonomy-media100.js';
 import {MEDIA100_TECHNICAL_SOURCES} from './data/sources-media100.js';
+import {DIANA_EYE55_TAXONOMY} from './data/taxonomy-diana-eye55.js';
+import {DIANA_EYE55_TECHNICAL_SOURCES} from './data/sources-diana-eye55.js';
 
 const FAMILY_BY_NO=new Map([
  [1,'guillotine'],[2,'sheeter'],[4,'offset'],[5,'offset'],[6,'offset'],[7,'pileturner'],[8,'pileturner'],
@@ -69,7 +71,7 @@ const EVIDENCE_BY_NO=new Map([
  [16,{grade:'MODEL_FAMILY_PROCESS_GROUNDED',geometry:'DEDICATED_FAMILY_PROCESS_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated FGM-1 MEDIA 100 II twin follows the documented MEDIA II folder-gluer process and machine examples: feeder, pre-fold, carton-forming/lock-bottom architecture, glue application, final fold/trombone and compression delivery. A1/A2 suffix and accessories remain unverified.'}],
  [17,{grade:'IDENTITY_ONLY',geometry:'PLACEHOLDER',simulation:'BLOCKED',reason:'Folder Gluer 2 has no model, serial or OEM in the BMJ registry.'}],
  [18,{grade:'MODEL_FAMILY_PROCESS_GROUNDED',geometry:'DEDICATED_FAMILY_PROCESS_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated FGM-3 MEDIA 100 II twin uses the same evidence-bounded MEDIA II process architecture while retaining its own BMJ serial/SAP identity. No A1/A2 or accessory difference is inferred.'}],
- [19,{grade:'MODEL_IDENTIFIED',geometry:'OFFICIAL_FAMILY_REFERENCE',simulation:'BLOCKED',reason:'DIANA EYE 55 identity is known; installed feeder/camera/reject configuration needs serial-specific evidence.'}],
+ [19,{grade:'OEM_PROCESS_GROUNDED',geometry:'DEDICATED_OEM_PROCESS_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated DIANA EYE 55 twin follows official HEIDELBERG/Masterwork architecture for blank feeding, suction-belt inspection, camera/LED imaging, image processing and inline reject separation. Installed camera mix, reject actuation and optional stacker remain serial-specific.'}],
  [20,{grade:'MODEL_IDENTIFIED',geometry:'FAMILY_REFERENCE',simulation:'BLOCKED',reason:'FS-SHARK-N650-P3N1 identity is known; exact transport, camera and reject layout needs primary documentation.'}],
  [21,{grade:'MODEL_IDENTIFIED',geometry:'FAMILY_REFERENCE',simulation:'BLOCKED',reason:'QF-100CS identity is known; stripping, blanking and waste-handling configuration needs primary documentation.'}],
  [22,{grade:'MODEL_IDENTIFIED',geometry:'FAMILY_REFERENCE',simulation:'BLOCKED',reason:'FZ 1200 identity is known but OEM and installed clamp/aeration arrangement are unresolved.'}],
@@ -85,7 +87,7 @@ const EVIDENCE_BY_NO=new Map([
 const DEFAULT_EVIDENCE=Object.freeze({grade:'IDENTITY_ONLY',geometry:'PLACEHOLDER',simulation:'BLOCKED',reason:'Machine-specific evidence is insufficient for mechanically faithful geometry or simulation.'});
 const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 export function universalMachineConfig(machineId){const machine=MACHINE_REGISTRY_BY_ID.get(machineId);if(!machine)return null;const family=FAMILY_BY_NO.get(machine.no);if(!family)return null;return {machine,family,label:LABELS[family],modules:MODULES[family],profile:mechanicalProfile(machine.no),evidence:Object.freeze(EVIDENCE_BY_NO.get(machine.no)||DEFAULT_EVIDENCE)};}
-export function universalTechnicalSources(machineId){if(machineId==='BMJ-MCH-0001')return [...POLAR115_TECHNICAL_SOURCES];if(machineId==='BMJ-MCH-0006')return [...OFFSET9_TECHNICAL_SOURCES];if(['BMJ-MCH-0011','BMJ-MCH-0012'].includes(machineId))return [...MK920_TECHNICAL_SOURCES];if(machineId==='BMJ-MCH-0013')return [...MK1060_TECHNICAL_SOURCES];if(['BMJ-MCH-0014','BMJ-MCH-0015'].includes(machineId))return [...PROMATRIX106_TECHNICAL_SOURCES];if(['BMJ-MCH-0016','BMJ-MCH-0018'].includes(machineId))return [...MEDIA100_TECHNICAL_SOURCES];const cfg=universalMachineConfig(machineId);if(!cfg)return [];return (FAMILY_SOURCES[cfg.family]||[]).map(([title,url],i)=>({id:`FAMILY-${cfg.family.toUpperCase()}-${i+1}`,title,publisher:new URL(url).hostname.replace(/^www\./,''),url,type:'TECHNICAL_REFERENCE',confidence:cfg.machine.model?'MEDIUM CONFIDENCE':'REFERENCE ONLY'}));}
+export function universalTechnicalSources(machineId){if(machineId==='BMJ-MCH-0001')return [...POLAR115_TECHNICAL_SOURCES];if(machineId==='BMJ-MCH-0006')return [...OFFSET9_TECHNICAL_SOURCES];if(['BMJ-MCH-0011','BMJ-MCH-0012'].includes(machineId))return [...MK920_TECHNICAL_SOURCES];if(machineId==='BMJ-MCH-0013')return [...MK1060_TECHNICAL_SOURCES];if(['BMJ-MCH-0014','BMJ-MCH-0015'].includes(machineId))return [...PROMATRIX106_TECHNICAL_SOURCES];if(['BMJ-MCH-0016','BMJ-MCH-0018'].includes(machineId))return [...MEDIA100_TECHNICAL_SOURCES];if(machineId==='BMJ-MCH-0019')return [...DIANA_EYE55_TECHNICAL_SOURCES];const cfg=universalMachineConfig(machineId);if(!cfg)return [];return (FAMILY_SOURCES[cfg.family]||[]).map(([title,url],i)=>({id:`FAMILY-${cfg.family.toUpperCase()}-${i+1}`,title,publisher:new URL(url).hostname.replace(/^www\./,''),url,type:'TECHNICAL_REFERENCE',confidence:cfg.machine.model?'MEDIUM CONFIDENCE':'REFERENCE ONLY'}));}
 
 export function universalTaxonomy(machineId){
  if(machineId==='BMJ-MCH-0001')return [...POLAR115_TAXONOMY];
@@ -94,6 +96,7 @@ export function universalTaxonomy(machineId){
  if(machineId==='BMJ-MCH-0013')return [...MK1060_TAXONOMY];
  if(['BMJ-MCH-0014','BMJ-MCH-0015'].includes(machineId))return [...promatrix106TaxonomyFor(machineId)];
  if(['BMJ-MCH-0016','BMJ-MCH-0018'].includes(machineId))return [...media100TaxonomyFor(machineId)];
+ if(machineId==='BMJ-MCH-0019')return [...DIANA_EYE55_TAXONOMY];
  const cfg=universalMachineConfig(machineId);if(!cfg)return [];
  const root='U'+String(cfg.machine.no).padStart(2,'0'),nodes=[];
  const add=(id,parentId,level,levelName,name,meshRefs=[],description='')=>nodes.push(Object.freeze({id,parentId,level,levelName,name,machineZone:name,meshRefs,sourceRefs:['BMJ-MACHINE-DATABASE',`FAMILY-${cfg.family.toUpperCase()}`],confidence:cfg.machine.model?'FAMILY_REFERENCE':'REFERENCE_ONLY',verified:false,explodeVector:[level===2?.7:.12,level<4?.18:.08,0],explodeDistance:level===2?.9:level===3?.55:level===4?.34:level===5?.22:.12,focusCamera:null,description,maintenanceTag:null}));
