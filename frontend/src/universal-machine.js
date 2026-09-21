@@ -24,16 +24,17 @@ import {UPG_LY300_TAXONOMY} from './data/taxonomy-upg-ly300.js';
 import {UPG_LY300_TECHNICAL_SOURCES} from './data/sources-upg-ly300.js';
 
 const FAMILY_BY_NO=new Map([
- [1,'guillotine'],[2,'sheeter'],[4,'offset'],[5,'offset'],[6,'offset'],[7,'pileturner'],[8,'pileturner'],
+ [1,'guillotine'],[2,'sheeter'],[4,'gravure'],[5,'offset'],[6,'offset'],[7,'pileturner'],[8,'pileturner'],
  [11,'hotfoil'],[12,'hotfoil'],[13,'diecutter'],[14,'diecutter'],[15,'diecutter'],[16,'folder'],[17,'folder'],[18,'folder'],
  [19,'inspection'],[20,'inspection'],[21,'blanker'],[22,'pileturner'],[23,'collator'],[24,'inkjet'],[25,'ctp'],[26,'ctp'],
  [27,'imagesetter'],[28,'zund'],[29,'compressor'],[30,'compressor'],[31,'compressor'],[32,'compressor'],
  [33,'compressor'],[34,'compressor'],[35,'compressor'],[36,'ahu'],[37,'ahu'],[38,'ahu'],[39,'ahu'],[40,'ahu'],[41,'ahu']
 ]);
-const LABELS={guillotine:'Guillotine Cutter',sheeter:'Roll / Sheet Converting',offset:'Sheetfed Offset Press',pileturner:'Pile Turner',hotfoil:'Hot Foil Stamping',diecutter:'Die Cutting & Stripping',folder:'Folder Gluer',inspection:'Offline Inspection',blanker:'Automatic Blanking',collator:'Sheet Collator',inkjet:'Digital Inkjet',ctp:'Computer to Plate',imagesetter:'CTF Imagesetter',zund:'Digital Cutting Table',compressor:'Rotary Air Compressor',ahu:'Air Handling Unit'};
+const LABELS={guillotine:'Guillotine Cutter',sheeter:'Roll / Sheet Converting',gravure:'Single-Unit Gravure Press',offset:'Sheetfed Offset Press',pileturner:'Pile Turner',hotfoil:'Hot Foil Stamping',diecutter:'Die Cutting & Stripping',folder:'Folder Gluer',inspection:'Offline Inspection',blanker:'Automatic Blanking',collator:'Sheet Collator',inkjet:'Digital Inkjet',ctp:'Computer to Plate',imagesetter:'CTF Imagesetter',zund:'Digital Cutting Table',compressor:'Rotary Air Compressor',ahu:'Air Handling Unit'};
 const MODULES={
  guillotine:['Infeed Table','Backgauge','Cutting Station','Clamp','Knife Drive','Delivery / Side Tables','Hydraulic & Control'],
  sheeter:['Roll Stand','Web Tension','Infeed','Slitting','Cross Cutter','Overlap Conveyor','Sheet Stacker','Drive & Control'],
+ gravure:['Substrate Infeed','Register / Transport','Ink Pan / Circulation','Gravure Cylinder','Doctor Blade','Impression Cylinder','Drying / Exhaust','Delivery / Rewind'],
  offset:['Preset Feeder','Feedboard / Register','Printing Units','Coating / Dryer','Delivery','Drive & Control'],
  pileturner:['Base Frame','Turntable / Forks','Clamp','Aeration / Jogging','Hydraulic Drive','Safety & Control'],
  hotfoil:['Feeder','Register','Foil Unwind','Heating / Stamping Platen','Foil Advance','Stripping','Delivery','Drive & Control'],
@@ -51,6 +52,7 @@ const MODULES={
 };
 const FAMILY_SOURCES={
  guillotine:[['POLAR 115 EM archive reference','https://www.exapro.com/polar-115-em-monitor-p241022253/']],
+ gravure:[['Installed YA1A1A single-gravure machine reference','https://www.wlzp.vip/touch/wzp/index.aspx?comid=49287'],['Beijing Ezgravtek / 北京贞亨利民 company identity','https://www.cnverify.com/company/Beijing-Ezgravtek-Printing-Machinery-Co-Ltd']],
  offset:[['Heidelberg CX 104 official','https://www.heidelberg.com/global/en/print_and_packaging/products/offset_printing/format_70_x_100/speedmaster_cx_104/product_information_5/product_information_cx_104.jsp'],['Heidelberg SX 52 brochure','https://www.heidelberg.com/tw/media/local_media/product/brochures/Speedmaster_SX_52.pdf']],
  hotfoil:[['MK 920 YMI archive','https://www.pressdepo.com/machine/en-133612/mk-920-ymi-foil-stamping-machine']],
  diecutter:[['Heidelberg Promatrix 106 CSB official','https://www.heidelberg.com/global/fr/print_and_packaging/finishing/die_cutting/die_cutting__machines/promatrix_106_csb/promatrix_106_csb_1.jsp']],
@@ -64,7 +66,7 @@ const FAMILY_SOURCES={
 };
 const EVIDENCE_BY_NO=new Map([
  [1,{grade:'MODEL_IDENTIFIED',geometry:'FAMILY_REFERENCE',simulation:'BLOCKED',reason:'POLAR 115 EM MON identity is known, but installed guards, tables, hydraulics and knife-drive configuration still need BMJ photos/manual.'}],
- [4,{grade:'IDENTITY_ONLY',geometry:'PLACEHOLDER',simulation:'BLOCKED',reason:'Model code YA1A1A has no verified OEM/configuration evidence in the registry.'}],
+ [4,{grade:'MODEL_IDENTIFIED',geometry:'FAMILY_REFERENCE',simulation:'BLOCKED',reason:'The exact YA1A1A model string is externally documented as a Beijing Zhenhengli / Ezgravtek single gravure press, so Offset-family mechanics are not used. BMJ transport mode, cylinder dimensions, doctor blade, ink circulation, dryer/exhaust and delivery/rewind configuration remain unverified.'}],
  [5,{grade:'MODEL_IDENTIFIED',geometry:'OFFICIAL_FAMILY_REFERENCE',simulation:'BLOCKED',reason:'CX 104-8+LYYL identity is known; installed dryer/coating/delivery options still need serial-specific evidence.'}],
  [6,{grade:'DOCUMENT_GROUNDED',geometry:'DEDICATED_OFFICIAL_FAMILY_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated SX 52-4+L twin uses official Heidelberg architecture and limits plus the BMJ identity/configuration record. Unverified UV/dryer/perfector options remain excluded.'}],
  [7,{grade:'MODEL_FAMILY_PROCESS_GROUNDED',geometry:'DEDICATED_FAMILY_PROCESS_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated FZ1200 twin models the consistently documented clamp, turning, air separation/dust removal and jogging/alignment process. OEM origin and installed load/hydraulic/blower configuration remain unresolved.'}],
