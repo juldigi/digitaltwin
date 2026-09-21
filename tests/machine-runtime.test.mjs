@@ -2,6 +2,7 @@ import test from 'node:test';import assert from 'node:assert/strict';
 import {normalizeMachineKey,isDedicatedMachineKey,createMachineTemplate,createMachineSimulation} from '../frontend/src/machine-runtime.js';
 import {UniversalMachineTemplate,UniversalProcessSimulation,universalMachineConfig,universalTaxonomy,universalTechnicalSources} from '../frontend/src/universal-machine.js';
 import {ReferenceMachineTemplate,ReferenceProcessSimulation,isReferenceMachineKey,REFERENCE_MACHINE_IDS} from '../frontend/src/reference-machines.js';
+import {MACHINE_REGISTRY} from '../frontend/src/data/machine-registry.js';
 
 test('legacy BMJ IDs normalize to the same dedicated routes used by machine cards',()=>{
  assert.equal(normalizeMachineKey('BMJ-MCH-0002'),'sheeting');
@@ -45,6 +46,16 @@ test('every non-legacy dedicated BMJ runtime is synchronized with UI evidence ta
   assert.ok(uiSources.length>0,id+' UI sources empty');
   if(runtimeSources.length)assert.deepEqual(uiSources.map(s=>s.id),runtimeSources.map(s=>s.id),id+' source routing diverged');
   template.dispose();
+ }
+});
+
+test('V120 registry invariant: all 41 BMJ assets avoid plain universal geometry and blocked universal simulation',()=>{
+ assert.equal(MACHINE_REGISTRY.length,41);
+ for(const machine of MACHINE_REGISTRY){
+  const template=createMachineTemplate(machine.machineId),sim=createMachineSimulation(machine.machineId,template.root,template);
+  assert.notEqual(template.constructor,UniversalMachineTemplate,machine.machineId+' still renders plain universal geometry');
+  assert.notEqual(sim.constructor,UniversalProcessSimulation,machine.machineId+' still uses blocked universal simulation');
+  sim.dispose();template.dispose();
  }
 });
 
