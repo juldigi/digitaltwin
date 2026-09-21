@@ -29,6 +29,7 @@ test('service-worker shell cache references only deployable frontend files',()=>
  assert.ok(paths.includes('src/data/taxonomy-imagesetter.js'));
  assert.ok(paths.includes('src/data/taxonomy-zund.js'));
  assert.ok(paths.includes('src/data/taxonomy-ahu.js'));
+ assert.ok(paths.includes('src/data/taxonomy-fgm2.js'));
  assert.ok(paths.includes('src/upg-ly300.js'));
  assert.ok(paths.includes('src/diana-eye55.js'));
  assert.equal(new Set(paths).size,paths.length,'service-worker shell cache should not contain duplicate asset paths');
@@ -36,7 +37,7 @@ test('service-worker shell cache references only deployable frontend files',()=>
 });
 
 test('service-worker cache version advances with the centralized runtime release',()=>{
- assert.match(sw,/factory-digital-twin-v123-r8-ahu-20260922/);
+ assert.match(sw,/factory-digital-twin-v123-r9-fgm2-20260922/);
 });
 
 
