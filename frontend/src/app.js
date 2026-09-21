@@ -336,7 +336,7 @@ function renderPanel(tab=activeTab){
    }else if(IS_GENERIC&&IS_VERIFIED_REGISTRY_SIM){
     const m=GENERIC_CONFIG.machine,e=GENERIC_CONFIG.evidence;
     const flagRows=[
-     ['Gripper indexing',s.transportIndexing],['Transport stopped',s.transportStopped],['Feeder suction',s.feederSuctionActive],['Cutting / platen',s.cuttingActive??s.platenClosed],['Pressure dwell',s.pressureDwell],['Stripping',s.strippingActive],['Blanking',s.blankingActive],
+     ['Gripper indexing',s.transportIndexing],['Transport stopped',s.transportStopped],['Feeder suction',s.feederSuctionActive],['Cutting / platen',s.cuttingActive??s.platenClosed],['Pressure dwell',s.pressureDwell],['Stripping',s.strippingActive],['Blanking',s.blankingActive],['Tie-sheet demo',s.tieSheetActive],
      ['Foil advance',s.foilAdvancing],['Folding',s.foldingActive],['Glue application',s.glueApplying],['Compression',s.compressionActive],
      ['Vision scan',s.scanActive],['Image processing',s.imageProcessingActive??s.processingActive],['UV curing',s.uvActive],['Camera inspection',s.cameraActive],
      ['Air table',s.airTableActive],['Feeder suction',s.feederSuctionActive],['Backgauge motion',s.backgaugeMoving],['Pile clamped',s.clamped],['Lift clearance',s.liftActive],['Turning assembly',s.turningActive],['Hydraulic drive',s.hydraulicActive],['Clamp',s.clampActive],['Knife downstroke',s.knifeDownstroke],['Knife upstroke',s.knifeUpstroke],['Coating transfer',s.coatingActive],['Dryer passage',s.dryerActive],['Venturi guidance',s.airGuidanceActive],['Delivery gripper bars',s.deliveryGripperActive],['Dynamic sheet brake',s.deliveryBrakeActive],['Air separation',s.airingActive],['Jogging / alignment',s.joggingActive],['Reject demo',s.demoRejectActive],['Delivery rake',s.deliveryRakeActive]
