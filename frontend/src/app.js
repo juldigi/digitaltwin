@@ -22,7 +22,7 @@ function configureActiveMachine(requested){
  REQUESTED_MACHINE=requested;requested=normalizeMachineKey(requested);
  GENERIC_CONFIG=universalMachineConfig(requested);
  MACHINE_KEY=['offset10','apm2','sheeting'].includes(requested)||GENERIC_CONFIG?requested:'offset5';
- IS_OFFSET10=MACHINE_KEY==='offset10';IS_APM2=MACHINE_KEY==='apm2';IS_SHEETING=MACHINE_KEY==='sheeting';IS_GENERIC=!!GENERIC_CONFIG;IS_VERIFIED_REGISTRY_SIM=IS_GENERIC&&GENERIC_CONFIG.evidence.simulation==='VERIFIED_PROCESS_MODEL';
+ IS_OFFSET10=MACHINE_KEY==='offset10';IS_APM2=MACHINE_KEY==='apm2';IS_SHEETING=MACHINE_KEY==='sheeting';IS_GENERIC=!!GENERIC_CONFIG;IS_VERIFIED_REGISTRY_SIM=IS_GENERIC&&['VERIFIED_PROCESS_MODEL','FAMILY_PROCESS_MODEL'].includes(GENERIC_CONFIG.evidence.simulation);
  GENERIC_TAXONOMY=IS_GENERIC?universalTaxonomy(MACHINE_KEY):[];GENERIC_ROOT=GENERIC_TAXONOMY[0]?.id;
  ACTIVE_ROOT=IS_OFFSET10?'O10':IS_APM2?'APM2':IS_SHEETING?'SH':IS_GENERIC?GENERIC_ROOT:'O5';
  ACTIVE_TAXONOMY=IS_OFFSET10?OFFSET10_TAXONOMY:IS_APM2?APM2_TAXONOMY:IS_SHEETING?SHEETING_TAXONOMY:IS_GENERIC?GENERIC_TAXONOMY:OFFSET5_TAXONOMY;
@@ -97,7 +97,7 @@ function applyMachineShell(){
   const hierarchy=$('[data-workbench-card="hierarchy"] .asset-tree');if(hierarchy)hierarchy.innerHTML=`<details open><summary>Pabrik <span class="tax-level">L0</span></summary><details open><summary>${esc(m.area)}</summary><details open><summary><span class="active-node">${esc(m.name)}</span> <span class="tax-level">L1 · Mesin</span></summary><div>${GENERIC_CONFIG.modules.map(esc).join(' · ')}</div></details></details></details>`;
   const hsmall=$('[data-workbench-card="hierarchy"] header small');if(hsmall)hsmall.textContent=m.sapCode||m.machineId;
   const qsmall=$('[data-workbench-card="quick"] header small');if(qsmall)qsmall.textContent=m.sapCode||m.machineId;
-  const qgrid=$('[data-workbench-card="quick"] .quick-grid');if(qgrid)qgrid.innerHTML=`<dt>Model</dt><dd>${esc(m.model||'Belum tersedia')}</dd><dt>Serial</dt><dd>${esc(m.serial||'Belum tersedia')}</dd><dt>Tahun</dt><dd>${esc(m.year||'Belum tersedia')}</dd><dt>Area</dt><dd>${esc(m.area)}</dd><dt>Status geometry</dt><dd>${esc(GENERIC_CONFIG.evidence.geometry)}</dd><dt>Status simulasi</dt><dd>${IS_VERIFIED_REGISTRY_SIM?'TERSEDIA · process-grounded':'DIBLOKIR · belum tervalidasi'}</dd><dt>Catatan bukti</dt><dd>${esc(GENERIC_CONFIG.evidence.reason)}</dd>`;
+  const qgrid=$('[data-workbench-card="quick"] .quick-grid');if(qgrid)qgrid.innerHTML=`<dt>Model</dt><dd>${esc(m.model||'Belum tersedia')}</dd><dt>Serial</dt><dd>${esc(m.serial||'Belum tersedia')}</dd><dt>Tahun</dt><dd>${esc(m.year||'Belum tersedia')}</dd><dt>Area</dt><dd>${esc(m.area)}</dd><dt>Status geometry</dt><dd>${esc(GENERIC_CONFIG.evidence.geometry)}</dd><dt>Status simulasi</dt><dd>${IS_VERIFIED_REGISTRY_SIM?'TERSEDIA · reference process':'DIBLOKIR · belum tervalidasi'}</dd><dt>Catatan bukti</dt><dd>${esc(GENERIC_CONFIG.evidence.reason)}</dd>`;
   const warning=$('#dwg-warning');if(warning)warning.textContent='Posisi dan orientasi mesin ini pada plant belum diklaim sampai anchor layout aktual tervalidasi.';
  }
 }

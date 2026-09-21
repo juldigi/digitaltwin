@@ -29,6 +29,7 @@ import {FZ1200MachineTemplate} from './fz1200.js';
 import {FZ1200ProcessSimulation} from './simulation-fz1200.js';
 import {UpgLy300MachineTemplate} from './upg-ly300.js';
 import {UpgLy300ProcessSimulation} from './simulation-upg-ly300.js';
+import {ReferenceMachineTemplate,ReferenceProcessSimulation,isReferenceMachineKey} from './reference-machines.js';
 
 export const LEGACY_MACHINE_ROUTE=Object.freeze({
  'BMJ-MCH-0002':'sheeting',
@@ -64,6 +65,7 @@ export function createMachineTemplate(key){
  if(k==='BMJ-MCH-0019')return new DianaEye55MachineTemplate();
  if(k==='BMJ-MCH-0020')return new SharkN650MachineTemplate();
  if(k==='BMJ-MCH-0024')return new UpgLy300MachineTemplate();
+ if(isReferenceMachineKey(k))return new ReferenceMachineTemplate(k);
  if(universalMachineConfig(k))return new UniversalMachineTemplate(k);
  return new OffsetMachineTemplate();
 }
@@ -85,6 +87,7 @@ export function createMachineSimulation(key,machine,template){
  if(k==='BMJ-MCH-0019')return new DianaEye55ProcessSimulation(machine,template);
  if(k==='BMJ-MCH-0020')return new SharkN650ProcessSimulation(machine,template);
  if(k==='BMJ-MCH-0024')return new UpgLy300ProcessSimulation(machine,template);
+ if(isReferenceMachineKey(k))return new ReferenceProcessSimulation(machine,template);
  if(universalMachineConfig(k))return new UniversalProcessSimulation(machine,template);
  return new PrintingSimulation(machine,template);
 }
