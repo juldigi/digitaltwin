@@ -4,9 +4,9 @@ for(const [id,name,ref] of [['BASE','Base and lift','fz1200-base'],['CLAMP','Pil
 const branches={
  BASE:[['FRAME','Floor base frame','fz1200-base-frame'],['LIFT','Vertical lift carriage','fz1200-base-lift'],['PALLET','Lower pallet platform','fz1200-base-pallet']],
  CLAMP:[['UPPER','Upper clamp plate','fz1200-clamp-upper'],['LOWER','Lower clamp / pallet plate','fz1200-clamp-lower'],['COLUMN','Clamp guide columns','fz1200-clamp-column']],
- TURN:[['YOKE','Rotating yoke','fz1200-turn-yoke'],['TRUNNION','Trunnion bearings','fz1200-turn-trunnion'],['DRIVE','Rotation drive interface','fz1200-turn-drive']],
- AIR:[['BLOWER','High-pressure air blower reference','fz1200-air-blower'],['NOZZLE','Air-jet manifold','fz1200-air-nozzle'],['DUST','Dust / powder collection path','fz1200-air-dust']],
- JOG:[['SIDE','Side jogger plates','fz1200-jog-side'],['FRONT','Front/back alignment plates','fz1200-jog-front'],['VIB','Vibration drive reference','fz1200-jog-vibration']],
+ TURN:[['YOKE','Rotating yoke about clamped-pile pivot','fz1200-turn-yoke'],['TRUNNION','Trunnion bearings','fz1200-turn-trunnion'],['DRIVE','Rotation drive interface','fz1200-turn-drive']],
+ AIR:[['BLOWER','High-pressure air blower reference','fz1200-air-blower'],['NOZZLE','Air-jet manifold · represented nozzle count unverified','fz1200-air-nozzle'],['DUST','Dust / powder collection path','fz1200-air-dust']],
+ JOG:[['SIDE','Side jogger plates','fz1200-jog-side'],['FRONT','Front/back alignment plates','fz1200-jog-front'],['VIB','Vibration / jogging drive reference','fz1200-jog-vibration']],
  HYD:[['CYL','Lift / clamp hydraulic cylinders','fz1200-hyd-cylinder'],['POWER','Hydraulic power pack','fz1200-hyd-power'],['HOSE','Hydraulic routing interface','fz1200-hyd-hose']],
  CONTROL:[['HMI','Operator control panel','fz1200-control-hmi'],['SAFETY','Interlock / E-stop architecture','fz1200-control-safety'],['GUARD','Perimeter guard reference','fz1200-control-guard']]
 };
