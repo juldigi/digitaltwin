@@ -648,3 +648,51 @@ test('V123 R9 FGM-2 is a neutral folder-gluer process twin and does not inherit 
  assert.equal(sawFold,true);assert.equal(sawGlue,true);assert.equal(sawCompression,true);
  sim.dispose();m.dispose();
 });
+
+
+test('V123 R10 FZ1200 uses exact-model public mechanics while BMJ OEM and installed ratings remain unverified',()=>{
+ for(const id of ['BMJ-MCH-0007','BMJ-MCH-0008','BMJ-MCH-0022']){
+  const m=createMachineTemplate(id);
+  assert.equal(m.root.userData.evidenceGrade,'MODEL_IDENTIFIED_EXACT_PUBLIC_REFERENCE__OEM_UNVERIFIED',id);
+  assert.equal(m.root.userData.exactModelVerifiedFromBMJ,true,id);
+  assert.equal(m.root.userData.installedOemVerified,false,id);
+  assert.equal(m.root.userData.geometryStatus,'FZ1200_EXACT_MODEL_PROCESS_REFERENCE__BMJ_INSTALLED_OEM_AND_DIMENSIONS_BOUNDED',id);
+  assert.equal(m.root.userData.spec.model,'FZ 1200',id);
+  assert.equal(m.root.userData.spec.exactModelPublicReference.maxPileKg,1200,id);
+  assert.deepEqual(m.root.userData.spec.exactModelPublicReference.maxPaperM,[1.2,.8],id);
+  assert.deepEqual(m.root.userData.spec.exactModelPublicReference.openingM,[.76,1.64],id);
+  assert.equal(m.root.userData.spec.exactModelPublicReference.powerKw,9,id);
+  assert.equal(m.root.userData.spec.exactModelPublicReference.hydraulicPressureMPa,16,id);
+  assert.equal(m.root.userData.spec.installedCapacityVerified,false,id);
+  assert.equal(m.root.userData.spec.installedOpeningVerified,false,id);
+  assert.equal(m.root.userData.spec.installedPowerVerified,false,id);
+  assert.equal(m.root.userData.spec.installedHydraulicPressureVerified,false,id);
+  assert.equal(m.root.userData.installedNozzleCountVerified,false,id);
+  assert.equal(m.root.userData.installedBlowerLayoutVerified,false,id);
+  assert.equal(m.root.userData.installedCylinderCountVerified,false,id);
+  assert.equal(m.findNode('fz1200-jog-gauge').userData.installedGeometryVerified,false,id);
+  assert.equal(m.findNode('fz1200-control-guard').userData.installedGuardGeometryVerified,false,id);
+
+  const levels=[...new Set(m.taxonomy.map(n=>n.level))].sort();
+  assert.deepEqual(levels,[1,2,3,4,5,6],id);
+  assert.equal(new Set(m.taxonomy.map(n=>n.id)).size,m.taxonomy.length,id);
+  for(const n of m.taxonomy.filter(n=>n.level>1))assert.ok(m.taxonomy.some(p=>p.id===n.parentId),id+' missing parent '+n.parentId);
+  for(const n of m.taxonomy.filter(n=>n.level===6)){
+   assert.ok(n.meshRefs.length>0,id+' '+n.id);
+   assert.ok(m.findNode(n.meshRefs[0]),id+' missing taxonomy target '+n.meshRefs[0]);
+  }
+
+  const sim=createMachineSimulation(id,m.root,m);
+  let s=sim.start(),now=0,sawTurn=false,sawAir=false,sawJog=false;
+  for(let i=0;i<360;i++){
+   now+=50;sim.update(now);s=sim.state();
+   sawTurn ||= s.turningActive;
+   sawAir ||= s.airingActive;
+   sawJog ||= s.joggingActive;
+   if(s.turningActive)assert.equal(s.interlocks.turnPermitted,true,id+' turned without clamp/lift interlock');
+   if(s.airingActive)assert.equal(s.interlocks.airPermitted,true,id+' aired before turn/clamp interlock');
+  }
+  assert.equal(sawTurn,true,id);assert.equal(sawAir,true,id);assert.equal(sawJog,true,id);
+  sim.dispose();m.dispose();
+ }
+});
