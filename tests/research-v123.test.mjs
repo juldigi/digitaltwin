@@ -205,7 +205,7 @@ test('V123 R4 SX52 Offset 9 binds official feeder AutoPlate inking Alcolor trans
   'heidelberg-ink-fountain-body','ink-fountain-liner-reference','remote-ink-zone-interface-reference',
   'transferjacket-blue-family-reference','coating-anilox-roll','anilox-bearing-reference',
   'coating-chamber-body','doctor-blade-metering-edge','doctor-blade-sealing-edge','chamber-end-seal-reference',
-  'delivery-venturi-nozzle','delivery-sheet-brake-wheel'
+  'delivery-venturi-nozzle','delivery-sheet-brake-wheel','prinect-press-center-display-reference'
  ]);
  for(let i=1;i<=4;i++){
   assert.equal(m.findNode('offset9-pu'+i+'-autoplate').userData.installedSystemVerified,false);
@@ -215,6 +215,8 @@ test('V123 R4 SX52 Offset 9 binds official feeder AutoPlate inking Alcolor trans
   assert.equal(m.findNode('offset9-pu'+i+'-dampening').userData.exactRollerCountVerified,false);
  }
  assert.equal(m.findNode('offset9-delivery').userData.pileHeightOptionVerified,false);
+ assert.equal(m.findNode('offset9-delivery-guide').userData.installedOptionVerified,false);
+ assert.equal(m.findNode('offset9-console').userData.installedGenerationVerified,false);
  assert.equal(m.findNode('offset9-perfector'),null);
 
  const levels=[...new Set(m.taxonomy.map(n=>n.level))].sort();
@@ -234,6 +236,7 @@ test('V123 R4 SX52 Offset 9 binds official feeder AutoPlate inking Alcolor trans
  const sim=createMachineSimulation('BMJ-MCH-0006',m.root,m);
  let state=sim.start(),now=0,sawFeederVenturi=false,sawCoat=false,sawDeliveryAir=false,sawBrake=false;
  assert.equal(state.simulationBoundary,'SX52_4L_PROCESS__OPTIONS_NOT_INFERRED');
+ assert.equal(state.deliveryVenturiInstalledVerified,false);
  for(let i=0;i<500;i++){
   now+=50;sim.update(now);state=sim.state();
   sawFeederVenturi ||= state.feederVenturiActive;
@@ -245,7 +248,7 @@ test('V123 R4 SX52 Offset 9 binds official feeder AutoPlate inking Alcolor trans
  }
  assert.equal(sawFeederVenturi,true);
  assert.equal(sawCoat,true);
- assert.equal(sawDeliveryAir,true);
+ assert.equal(sawDeliveryAir,false,'high-pile delivery Venturi must remain inactive until BMJ option is verified');
  assert.equal(sawBrake,true);
  sim.dispose();m.dispose();
 });
