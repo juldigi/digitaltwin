@@ -393,13 +393,121 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   }
  }
  enrichImagesetter(){
-  const supply=this.activeGroup(1),capstan=this.activeGroup(2),scan=this.activeGroup(3),laser=this.activeGroup(4),cut=this.activeGroup(5),out=this.activeGroup(6);
-  if(supply){for(const z of [-.34,.34])this.tag(this.box(supply,[.08,.74,.06],[0,.72,z],'steel',.006),'film-cassette-guide');}
-  if(capstan){for(const y of [.46,.64,.82,1.00]){const r=this.motion(this.cyl(capstan,.055,.76,[0,y,0],'dark','z'),'spin','z',7,.01,y,1);this.tag(r,'capstan-transport-roller');}this.tag(this.cyl(capstan,.032,.70,[.18,1.08,0],'steel','z'),'tension-dancer');}
-  if(scan){this.tag(this.box(scan,[.30,.28,.32],[0,.78,0],'dark',.02),'polygon-scanner-housing');for(let k=0;k<8;k++){const facet=this.box(scan,[.10,.015,.12],[0,.78,0],'steel',.002);facet.rotation.y=k*Math.PI/4;this.tag(facet,'polygon-facet');}}
-  if(laser){this.tag(this.box(laser,[.20,.18,.20],[-.18,.78,0],'accent',.012),'laser-modulator');this.tag(this.cyl(laser,.025,.50,[.12,.78,0],'glass','z'),'optical-path-reference');}
-  if(cut){const blade=this.motion(this.box(cut,[.08,.22,.76],[0,.78,0],'steel',.005),'press','y',4,.055,0,4);this.tag(blade,'film-cutter');}
-  if(out){for(const y of [.48,.66]){const r=this.motion(this.cyl(out,.045,.70,[0,y,0],'dark','z'),'spin','z',5,.01,y,5);this.tag(r,'processor-interface-roller');}}
+  const supply=this.activeGroup(1),transport=this.activeGroup(2),scan=this.activeGroup(3),laser=this.activeGroup(4),cut=this.activeGroup(5),out=this.activeGroup(6);
+  this.root.userData.detailPass='V123_R6_SCREEN_FTR_KATANA_MULTI_MODEL_RECONSTRUCTION';
+  this.root.userData.exactScreenModelVerified=false;
+  this.root.userData.familyCandidates=['FT-R3035','FT-R3050','Katana 5040','Katana 5055'];
+  this.root.userData.exactLaserWavelengthVerified=false;
+  this.root.userData.familyLaserWavelengthNm=[633,635];
+  this.root.userData.katanaPolygonReference={facets:5,maxRpm:14400,installedApplicabilityVerified:false};
+  this.root.userData.imagesetterOptions={punch:'NOT_INSTALLATION_CONFIRMED',inlineProcessor:'NOT_INSTALLATION_CONFIRMED',outputCassette:'NOT_INSTALLATION_CONFIRMED',ripInterface:'NOT_INSTALLATION_CONFIRMED'};
+  this.root.userData.commonFamilyMechanisms=['ROLL_MEDIA_SUPPLY','AUTOMATIC_MEDIA_LOADING','CAPSTAN_TRANSPORT','SLACK_TENSION_CONTROL','POLYGON_MIRROR_FAST_SCAN','RED_LASER_OPTICS','MEDIA_CUT_OUTPUT'];
+  this.root.userData.processArchitecture='CAPSTAN_FLATBED_SCAN__NOT_IMAGING_DRUM';
+
+  if(supply){
+   const cassette=this.findNode('ctf-media-cassette');
+   if(cassette){
+    const roll=this.motion(this.cyl(cassette,.21,.74,[-.18,.68,0],'dark','z'),'spin','z',2.2,.01,0,null);this.tag(roll,'media-supply-roll','SCREEN_FTR_KATANA_FAMILY');roll.userData.exactMediaWidthVerified=false;
+    this.tag(this.cyl(cassette,.045,.86,[-.18,.68,0],'steel','z'),'media-cassette-spindle','SCREEN_FTR_KATANA_FAMILY');
+    for(const z of [-.45,.45])this.tag(this.box(cassette,[.48,.56,.035],[-.18,.68,z],'dark',.012),'media-cassette-sideplate','SCREEN_FTR_KATANA_FAMILY');
+   }
+   const load=this.findNode('ctf-auto-load');
+   if(load){
+    load.userData.familyFunction='AUTOMATIC_MEDIA_LOADING';
+    for(const y of [.60,.78]){const r=this.motion(this.cyl(load,.034,.82,[.19,y,0],'steel','z'),'spin','z',4.2,.01,y,null);this.tag(r,'automatic-load-roller','SCREEN_FTR_KATANA_FAMILY');}
+    for(const z of [-.38,.38])this.tag(this.box(load,[.42,.025,.035],[.10,.70,z],'steel',.003),'media-entry-guide','SCREEN_FTR_KATANA_FAMILY');
+   }
+  }
+
+  if(transport){
+   const capstan=this.findNode('ctf-capstan');
+   if(capstan){
+    const drive=this.motion(this.cyl(capstan,.075,.86,[0,.79,0],'dark','z'),'spin','z',6.2,.01,0,null);this.tag(drive,'capstan-drive-roller','SCREEN_FTR_KATANA_FAMILY');
+    const nip=this.motion(this.cyl(capstan,.046,.86,[.15,.79,0],'steel','z'),'spin','z',6.2,.01,.2,null);this.tag(nip,'capstan-nip-roller','SCREEN_FTR_KATANA_FAMILY');
+    this.tag(this.box(capstan,[.42,.014,.78],[-.08,.87,0],'paper',.002),'media-web-reference','PROCESS_WORKPIECE_REFERENCE');
+   }
+   const front=this.findNode('ctf-front-slack');
+   if(front){
+    front.userData.slackZone='FRONT';
+    for(const [x,y,a] of [[-.26,.73,-.35],[-.13,.53,-.16],[0,.45,0],[.13,.53,.16],[.26,.73,.35]]){const seg=this.box(front,[.16,.012,.74],[x,y,0],'paper',.001);seg.rotation.z=a;this.tag(seg,'front-slack-media-loop-reference','KATANA_OFFICIAL');}
+    for(const x of [-.28,.28])this.tag(this.cyl(front,.028,.80,[x,.76,0],'steel','z'),'front-slack-guide-roller','KATANA_OFFICIAL');
+   }
+   const gravity=this.findNode('ctf-gravity-roller');
+   if(gravity){
+    const gr=this.motion(this.cyl(gravity,.052,.84,[0,.49,0],'steel','z'),'spin','z',4.4,.01,0,null);this.tag(gr,'gravity-tension-roller','KATANA_OFFICIAL');
+    gr.userData.tensionRegulationReference=true;
+   }
+   const rear=this.findNode('ctf-rear-slack');
+   if(rear){
+    rear.userData.slackZone='REAR';
+    for(const [x,y,a] of [[-.25,.72,-.32],[-.12,.55,-.15],[0,.48,0],[.12,.55,.15],[.25,.72,.32]]){const seg=this.box(rear,[.15,.012,.74],[x,y,0],'paper',.001);seg.rotation.z=a;this.tag(seg,'rear-slack-media-loop-reference','KATANA_OFFICIAL');}
+    for(const x of [-.27,.27])this.tag(this.cyl(rear,.028,.80,[x,.75,0],'steel','z'),'rear-slack-guide-roller','KATANA_OFFICIAL');
+   }
+  }
+
+  if(scan){
+   const mirror=this.findNode('ctf-polygon-mirror');
+   if(mirror){
+    const poly=this.mesh(mirror,()=>new THREE.CylinderGeometry(.105,.105,.065,5),'ctf-polygon-five-facet','steel',[0,.82,0]);
+    this.active(poly);this.motion(poly,'spin','y',14,.01,0,null);this.tag(poly,'five-facet-polygon-mirror-reference','KATANA_OFFICIAL');
+    poly.userData.documentedKatanaFacetCount=5;poly.userData.installedFacetCountVerified=false;poly.userData.documentedKatanaMaxRpm=14400;poly.userData.installedRpmVerified=false;
+    this.tag(this.box(mirror,[.34,.28,.34],[0,.82,0],'dark',.018),'polygon-scanner-housing','SCREEN_FTR_KATANA_FAMILY');
+   }
+   const drive=this.findNode('ctf-polygon-drive');
+   if(drive){
+    const motor=this.motion(this.cyl(drive,.075,.18,[0,.62,0],'dark','y'),'spin','y',14,.01,0,null);this.tag(motor,'polygon-drive-motor-reference','SCREEN_FTR_KATANA_FAMILY');
+    motor.userData.actualMotorSpeedVerified=false;
+   }
+  }
+
+  if(laser){
+   const source=this.findNode('ctf-laser-source');
+   if(source){
+    const src=this.box(source,[.20,.16,.22],[-.20,.84,0],'accent',.012);this.tag(src,'red-laser-source-reference','SCREEN_FTR_KATANA_FAMILY');
+    src.userData.familyWavelengthNm=[633,635];src.userData.installedWavelengthVerified=false;
+   }
+   const optics=this.findNode('ctf-optics');
+   if(optics){
+    const lens=this.cyl(optics,.048,.035,[.02,.84,0],'glass','x');this.tag(lens,'beam-focus-lens-reference','KATANA_OFFICIAL');
+    const path1=this.box(optics,[.28,.012,.012],[-.05,.84,0],'glass',.001);this.tag(path1,'laser-beam-path-reference','PROCESS_VISUALIZATION');
+    const path2=this.box(optics,[.012,.012,.52],[.09,.84,.25],'glass',.001);this.tag(path2,'laser-scan-path-reference','PROCESS_VISUALIZATION');
+   }
+   const mod=this.findNode('ctf-laser-modulator');
+   if(mod)this.tag(this.box(mod,[.13,.11,.16],[-.08,1.02,.20],'dark',.008),'laser-modulator-reference','SCREEN_FTR_KATANA_FAMILY');
+  }
+
+  if(cut){
+   const cutter=this.findNode('ctf-cutter');
+   if(cutter){
+    const blade=this.motion(this.box(cutter,[.10,.22,.78],[0,.78,0],'steel',.005),'press','y',2.4,.045,0,null);this.tag(blade,'media-cross-cutter','SCREEN_FTR_FAMILY');
+    this.tag(this.box(cutter,[.08,.06,.82],[.03,.66,0],'dark',.004),'cutter-anvil-reference','SCREEN_FTR_FAMILY');
+   }
+   const punch=this.findNode('ctf-punch-option');
+   if(punch){
+    punch.userData.installedOptionVerified=false;punch.userData.simulationEnabled=false;punch.userData.boundary='Katana supports multiple punch formats and optional tail punch; BMJ installed punch package is not verified.';
+    for(const z of [-.30,.30]){const pin=this.cyl(punch,.020,.16,[.18,.78,z],'steel','y');pin.userData.optionReference=true;pin.userData.simulationEnabled=false;this.tag(pin,'register-punch-option-reference','KATANA_OPTION_BOUNDARY');}
+   }
+  }
+
+  if(out){
+   const cassette=this.findNode('ctf-output-cassette');
+   if(cassette){
+    cassette.userData.installedOptionVerified=false;
+    const tray=this.box(cassette,[.62,.08,.86],[.02,.48,0],'steel',.008);tray.userData.optionReference=true;this.tag(tray,'output-cassette-family-reference','KATANA_FAMILY_OPTION_BOUNDARY');
+    for(const z of [-.40,.40])this.tag(this.box(cassette,[.54,.26,.035],[.06,.59,z],'dark',.008),'output-cassette-side-guide','KATANA_FAMILY_OPTION_BOUNDARY');
+   }
+   const processor=this.findNode('ctf-processor-boundary');
+   if(processor){
+    processor.userData.installedOptionVerified=false;processor.userData.simulationEnabled=false;
+    const env=this.box(processor,[.42,.38,.90],[.34,.58,0],'glass',.016);env.userData.optionReference=true;this.tag(env,'inline-processor-interface-boundary','OPTION_BOUNDARY');
+   }
+   const control=this.findNode('ctf-control-boundary');
+   if(control){
+    control.userData.installedOptionVerified=false;
+    const box=this.box(control,[.30,.38,.32],[-.34,.55,.36],'dark',.014);box.userData.optionReference=true;this.tag(box,'rip-control-interface-reference','SCREEN_FTR_KATANA_FAMILY');
+    const port=this.box(control,[.08,.08,.08],[-.20,.58,.19],'accent',.004);port.userData.optionReference=true;this.tag(port,'data-interface-generation-boundary','OPTION_BOUNDARY');
+   }
+  }
  }
  enrichZund(){
   const table=this.activeGroup(1),beam=this.activeGroup(2),car=this.activeGroup(3),tools=this.activeGroup(4),cam=this.activeGroup(5),ctl=this.activeGroup(6);
@@ -804,19 +912,47 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.root.userData.referenceNote='BMJ records Heidelberg CTP but not exact Suprasetter model. Exterior is deliberately a multi-model family silhouette, while internal selectable mechanics distinguish verified-common Suprasetter process elements from model-dependent or optional loader, punch, debris-removal and temperature-stabilization capabilities.';
  }
  buildImagesetter(){
-  this.palette.body=0xe7e7e3;this.palette.dark=0x33383c;this.palette.accent=0x497f9b;
+  this.palette.body=0xe7e7e3;this.palette.dark=0x33383c;this.palette.accent=0x497f9b;this.palette.blue=0x577f9a;
   this.base(2.20,1.18);
-  const xs=[-.85,-.50,-.12,.28,.62,.92];
-  for(let i=1;i<=6;i++){
-   const {g,a}=this.mod(i,[xs[i-1],0,0],[Math.sign(xs[i-1]||1)*.30,.18,0]);
-   if(i===1){this.shell(g,[.62,1.05,1.08],[0,.62,0]);this.cyl(a,.22,.72,[0,.72,0],'dark','z');}
-   else if(i===2){this.shell(g,[.56,1.12,1.08],[0,.66,0]);for(const y of [.52,.78])this.motion(this.cyl(a,.055,.76,[0,y,0],'steel','z'),'spin','z',6,.01,0,1);}
-   else if(i===3){this.shell(g,[.64,1.18,1.08],[0,.69,0]);const mirror=this.motion(this.cyl(a,.07,.20,[0,.78,0],'accent','y'),'spin','y',14,.01,0,2);mirror.userData.polygonMirror=true;}
-   else if(i===4){this.shell(g,[.52,1.12,1.08],[0,.66,0]);const optics=this.motion(this.box(a,[.12,.12,.22],[0,.78,0],'accent',.012),'oscillate','z',3.5,.26,0,3);optics.userData.laserOptics=true;this.box(a,[.035,.035,.74],[0,.78,0],'glass',.002);}
-   else if(i===5){this.shell(g,[.44,.94,1.05],[0,.58,0]);this.motion(this.box(a,[.18,.09,.70],[0,.72,0],'steel',.008),'press','y',2,.035,0,4);}
-   else {this.box(g,[.62,.45,1.04],[0,.36,0],'body',.025);this.box(a,[.52,.025,.78],[.05,.60,0],'paper',.003);}
-  }
-  this.root.userData.referenceNote='SCREEN model is unknown. The internal reference follows FT-R/Katana capstan transport and high-speed polygon-mirror laser scanning; it does not use the incorrect generic vacuum-drum representation.';
+
+  const shell=this.group(this.root,'ctf-family-envelope','SCREEN FT-R / Katana family envelope',[0,0,0],[0,.18,0]);
+  this.cover(this.box(shell,[2.05,1.05,1.10],[0,.69,0],'body',.07));
+  this.cover(this.box(shell,[1.72,.24,1.05],[.04,1.28,0],'body',.05));
+  shell.userData.visualBoundary='MULTI_MODEL_SCREEN_FTR_KATANA_SILHOUETTE_NOT_MODEL_IDENTIFICATION';
+
+  const m1=this.mod(1,[-.72,0,0],[-.32,.18,0]);
+  this.group(m1.a,'ctf-media-cassette','Media supply cassette',[0,0,0],[-.12,.10,0]);
+  this.group(m1.a,'ctf-auto-load','Automatic media loading',[0,0,0],[0,.10,.12]);
+
+  const m2=this.mod(2,[-.30,0,0],[-.20,.18,0]);
+  this.group(m2.a,'ctf-capstan','Capstan transport',[0,0,0],[0,.12,.12]);
+  this.group(m2.a,'ctf-front-slack','Front slack zone',[0,0,0],[0,.14,.16]);
+  this.group(m2.a,'ctf-gravity-roller','Gravity tension roller',[0,0,0],[0,.14,.16]);
+  this.group(m2.a,'ctf-rear-slack','Rear slack zone',[0,0,0],[0,.14,.16]);
+
+  const m3=this.mod(3,[.10,0,0],[0,.24,.20]);
+  this.group(m3.a,'ctf-polygon-mirror','Polygon mirror scanner',[0,0,0],[0,.16,.18]);
+  this.group(m3.a,'ctf-polygon-drive','Polygon scanner drive',[0,0,0],[0,.16,.18]);
+
+  const m4=this.mod(4,[.10,0,0],[0,.30,-.20]);
+  this.group(m4.a,'ctf-laser-source','Laser source',[0,0,0],[0,.18,-.18]);
+  this.group(m4.a,'ctf-optics','Beam shaping / focus optics',[0,0,0],[0,.18,.20]);
+  this.group(m4.a,'ctf-laser-modulator','Laser modulation',[0,0,0],[0,.18,.20]);
+
+  const m5=this.mod(5,[.50,0,0],[.22,.18,0]);
+  this.group(m5.a,'ctf-cutter','Media cutter',[0,0,0],[.12,.12,0]);
+  const punch=this.group(m5.a,'ctf-punch-option','Punch option boundary',[0,0,0],[.14,.14,.12]);punch.userData.installedOptionVerified=false;
+
+  const m6=this.mod(6,[.82,0,0],[.34,.18,0]);
+  const cassette=this.group(m6.a,'ctf-output-cassette','Output cassette family reference',[0,0,0],[.12,.10,0]);cassette.userData.installedOptionVerified=false;
+  const processor=this.group(m6.a,'ctf-processor-boundary','Inline processor boundary',[0,0,0],[.18,.12,0]);processor.userData.installedOptionVerified=false;
+  const control=this.group(m6.a,'ctf-control-boundary','RIP / control boundary',[0,0,0],[.16,.12,.12]);control.userData.installedOptionVerified=false;
+
+  this.root.userData.exactScreenModelVerified=false;
+  this.root.userData.familyCandidates=['FT-R3035','FT-R3050','Katana 5040','Katana 5055'];
+  this.root.userData.installedPunchVerified=false;
+  this.root.userData.installedProcessorVerified=false;
+  this.root.userData.referenceNote='BMJ identifies a SCREEN CTF imagesetter but not its exact model. Geometry is a bounded FT-R/Katana multi-model process twin using capstan transport, slack/tension control, polygon-mirror scanning and red-laser optics. Katana 5-facet/14,400-rpm values are retained as reference metadata only; model-specific width, wavelength, punch, output cassette, processor and RIP/interface are not asserted.';
  }
  buildZundReference(){
   this.palette.body=0xdfe3e2;this.palette.dark=0x20272b;this.palette.accent=0x365b68;this.palette.orange=0xe26a2c;
