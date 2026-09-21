@@ -730,28 +730,115 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   }
  }
  enrichSansin(){
-  const inlet=this.activeGroup(1),filter=this.activeGroup(2),coil=this.activeGroup(3),supply=this.activeGroup(4),outdoor=this.activeGroup(5),circuit=this.activeGroup(6),ctl=this.activeGroup(7);
-  this.root.userData.sansinBoundary='Brand-specific PT Sansin/NES family morphology only; exact YZKJ model/capacity is not asserted.';
-  if(inlet)for(const y of [.58,.86,1.14,1.42]){const d=this.box(inlet,[.055,.055,1.30],[0,y,0],'steel',.004);d.rotation.z=-.18;this.tag(d,'return-inlet-damper');}
-  if(filter)for(const x of [-.16,.16])this.tag(this.box(filter,[.055,1.38,1.30],[x,1.10,0],'filter',.004),'filter-bank');
-  if(coil){for(let y=.54;y<=1.62;y+=.11)this.tag(this.box(coil,[.05,.025,1.24],[0,y,0],'blue',.002),'heat-exchange-fin');for(const z of [-.52,.52])this.tag(this.cyl(coil,.035,.18,[.25,1.06,z],'accent','z'),'coil-header');}
-  if(supply){const w=this.motion(this.cyl(supply,.40,.22,[0,1.12,0],'dark','z'),'spin','z',7,.01,0,null);this.tag(w,'indoor-supply-fan');this.tag(this.cyl(supply,.10,.30,[.34,.76,.52],'dark','x'),'fan-motor');}
-  if(outdoor){for(const z of [-.50,.50]){const cf=this.motion(this.cyl(outdoor,.25,.09,[0,1.46,z],'dark','z'),'spin','z',8,.01,z,null);this.tag(cf,'outdoor-condenser-fan');}this.tag(this.cyl(outdoor,.13,.48,[.20,.60,0],'dark','y'),'compressor-reference');for(let y=.46;y<=1.30;y+=.10)this.tag(this.box(outdoor,[.04,.025,1.22],[-.24,y,0],'steel',.002),'condenser-fin');}
-  if(circuit){for(const z of [-.36,.36])this.tag(this.cyl(circuit,.020,.82,[0,.76,z],'blue','y'),'refrigerant-water-line-reference');this.tag(this.box(circuit,[.28,.20,.20],[.18,.56,.30],'accent',.015),'valve-manifold');}
-  if(ctl){this.tag(this.box(ctl,[.32,.24,.025],[-.02,1.02,.31],'glass',.008),'cooling-controller');this.tag(this.box(ctl,[.38,.42,.30],[0,.56,.48],'dark',.02),'electrical-panel');}
+  const inlet=this.activeGroup(1),filter=this.activeGroup(2),evap=this.activeGroup(3),supply=this.activeGroup(4),outdoor=this.activeGroup(5),circuit=this.activeGroup(6),ctl=this.activeGroup(7);
+  this.root.userData.detailPass='V123_R8_SANSIN_NES_YZKJ_TWO_STAGE_COOLING_RECONSTRUCTION';
+  this.root.userData.exactSansinModelVerified=false;
+  this.root.userData.familyCandidates=['YZKJ-45N','YZKJ-90N'];
+  this.root.userData.exactCoolingCapacityVerified=false;
+  this.root.userData.familyPublishedCapacityKw=[50,100];
+  this.root.userData.familyCapacityApplicabilityVerified=false;
+  this.root.userData.sansinBoundary='Brand SANSIN is verified by BMJ; YZKJ family architecture is a reference, not an exact 45N/90N installation claim.';
+  this.root.userData.airTreatmentSequence=['FILTER','HONEYCOMB_WET_CURTAIN_PRECOOL','LOW_TEMPERATURE_FIN_EVAPORATOR','SUPPLY_FAN'];
+  this.root.userData.outdoorCircuitBoundary='REFRIGERATION_AND_EVAPORATIVE_CONDENSER_FAMILY_REFERENCE';
+
+  if(inlet){
+   const damper=this.findNode('sansin-inlet-damper');
+   if(damper){for(const y of [.58,.86,1.14,1.42]){const d=this.box(damper,[.055,.055,1.28],[0,y,0],'steel',.004);d.rotation.z=-.18;this.tag(d,'sansin-return-inlet-damper','SANSIN_NES_FAMILY');}this.tag(this.box(damper,[.08,.18,.12],[.28,1.00,.58],'dark',.006),'sansin-damper-actuator-reference','SANSIN_NES_FAMILY');}
+  }
+  if(filter){
+   const bank=this.findNode('sansin-filter-net');
+   if(bank){for(const x of [-.11,.11]){const panel=this.box(bank,[.045,1.38,1.28],[x,1.10,0],'filter',.004);this.tag(panel,'sansin-filter-net-layer','NES_YZKJ_FAMILY');panel.userData.filterLayerReference=x<0?1:2;}}
+   const mix=this.findNode('sansin-mixing');
+   if(mix){for(const z of [-.42,0,.42])this.tag(this.box(mix,[.30,.035,.24],[.22,.78,z],'steel',.004),'sansin-air-distribution-baffle','FUNCTIONAL_REFERENCE');mix.userData.exactMixingTopologyVerified=false;}
+  }
+  if(evap){
+   const pad=this.findNode('sansin-wet-curtain');
+   if(pad){const wet=this.box(pad,[.12,1.42,1.28],[-.16,1.08,0],'accent',.006);this.tag(wet,'honeycomb-wet-curtain','NES_YZKJ_FAMILY');wet.userData.evapPrecoolStage=true;for(let y=.50;y<=1.60;y+=.11)this.tag(this.box(pad,[.014,.025,1.20],[-.10,y,0],'blue',.001),'wet-curtain-water-distribution-reference','NES_YZKJ_FAMILY');}
+   const coil=this.findNode('sansin-evaporator');
+   if(coil){for(let y=.52;y<=1.60;y+=.10)this.tag(this.box(coil,[.050,.025,1.24],[.16,y,0],'blue',.002),'sansin-evaporator-fin','NES_YZKJ_FAMILY');for(const z of [-.52,.52])this.tag(this.cyl(coil,.035,.18,[.28,1.06,z],'accent','z'),'sansin-evaporator-header-reference','NES_YZKJ_FAMILY');coil.userData.exactCoilRowsVerified=false;}
+  }
+  if(supply){
+   const fan=this.findNode('sansin-supply-fan');
+   if(fan){const wheel=this.motion(this.cyl(fan,.40,.22,[0,1.12,0],'dark','z'),'spin','z',7,.01,0,null);this.tag(wheel,'sansin-indoor-supply-fan','NES_YZKJ_FAMILY');wheel.userData.installedFanGeometryVerified=false;for(let k=0;k<8;k++){const b=this.box(fan,[.30,.025,.07],[0,1.12,0],'steel',.003);b.rotation.z=k*Math.PI/4;this.tag(b,'sansin-supply-fan-blade-reference','FUNCTIONAL_REFERENCE');}}
+   const plenum=this.findNode('sansin-supply-plenum');
+   if(plenum)this.tag(this.box(plenum,[.48,1.35,1.30],[.18,1.08,0],'accent',.015),'sansin-conditioned-air-plenum','NES_YZKJ_FAMILY');
+  }
+  if(outdoor){
+   const comp=this.findNode('sansin-compressor');
+   if(comp){const pkg=this.cyl(comp,.14,.52,[.18,.62,0],'dark','y');this.tag(pkg,'sansin-refrigeration-compressor-reference','NES_YZKJ_FAMILY');pkg.userData.installedCompressorModelVerified=false;}
+   const cond=this.findNode('sansin-condenser');
+   if(cond){for(let y=.48;y<=1.34;y+=.10)this.tag(this.box(cond,[.045,.025,1.20],[-.20,y,0],'steel',.002),'sansin-evaporative-condenser-fin-reference','NES_YZKJ_FAMILY');const wet=this.box(cond,[.10,.96,1.24],[-.31,.90,0],'blue',.004);this.tag(wet,'sansin-condenser-wet-section-reference','NES_YZKJ_FAMILY');}
+   const fan=this.findNode('sansin-outdoor-fan');
+   if(fan){fan.userData.installedFanCountVerified=false;const cf=this.motion(this.cyl(fan,.27,.10,[.14,1.45,0],'dark','z'),'spin','z',8,.01,0,null);this.tag(cf,'sansin-outdoor-condenser-fan-reference','NES_YZKJ_FAMILY');cf.userData.modeledReferenceFanCount=1;}
+  }
+  if(circuit){
+   const ref=this.findNode('sansin-refrigerant');
+   if(ref){for(const z of [-.30,.30]){const line=this.cyl(ref,.018,.84,[0,.76,z],'blue','y');this.tag(line,'sansin-refrigerant-line-reference','NES_YZKJ_FAMILY');line.userData.familyRefrigerant='R410A';line.userData.installedChargeVerified=false;}this.tag(this.box(ref,[.24,.16,.20],[.18,.55,.28],'accent',.012),'sansin-refrigerant-valve-manifold-reference','FUNCTIONAL_REFERENCE');}
+   const water=this.findNode('sansin-water-circuit');
+   if(water){this.tag(this.box(water,[.42,.28,.46],[-.15,.40,-.28],'accent',.018),'sansin-water-tank-reference','NES_YZKJ_FAMILY');this.tag(this.cyl(water,.075,.18,[.18,.46,-.28],'dark','x'),'sansin-water-pump-reference','NES_YZKJ_FAMILY');this.tag(this.cyl(water,.055,.22,[.30,.65,-.28],'filter','y'),'sansin-water-filter-reference','NES_YZKJ_FAMILY');for(const z of [-.34,.34])this.tag(this.cyl(water,.014,.72,[-.02,.82,z],'blue','y'),'sansin-water-recirculation-line','NES_YZKJ_FAMILY');}
+  }
+  if(ctl){
+   const hmi=this.findNode('sansin-controller');
+   if(hmi)this.tag(this.box(hmi,[.32,.24,.025],[-.02,1.02,.31],'glass',.008),'sansin-cooling-controller-reference','SANSIN_NES_FAMILY');
+   const elec=this.findNode('sansin-electrical');
+   if(elec){this.tag(this.box(elec,[.38,.42,.30],[0,.56,.48],'dark',.02),'sansin-electrical-panel','SANSIN_NES_FAMILY');for(const y of [.47,.58,.69])this.tag(this.box(elec,[.18,.025,.18],[.02,y,.31],'steel',.002),'sansin-electrical-module-reference','CONTROL_REFERENCE');}
+  }
  }
  enrichAHU(sansin=false){
   if(sansin)return this.enrichSansin();
-  const intake=this.activeGroup(1),filter=this.activeGroup(2),coil=this.activeGroup(3),drain=this.activeGroup(4),fan=this.activeGroup(5),service=this.activeGroup(6),out=this.activeGroup(7);
-  if(intake)for(const y of [.55,.80,1.05,1.30,1.55]){const d=this.box(intake,[.055,.055,1.34],[0,y,0],'steel',.004);d.rotation.z=-.18;this.tag(d,'opposed-blade-damper');}
-  if(filter){for(const x of [-.20,0,.20]){const f=this.box(filter,[.055,1.38,1.38],[x,1.02,0],'filter',.004);f.rotation.y=x<0?.12:x>0?-.12:0;this.tag(f,'filter-bank');}}
-  if(coil){for(let y=.48;y<=1.50;y+=.10)this.tag(this.box(coil,[.045,.025,1.30],[0,y,0],'steel',.002),'coil-fin');for(const z of [-.55,.55])this.tag(this.cyl(coil,.035,.16,[.26,.98,z],'accent','z'),'coil-header');}
-  if(drain){this.tag(this.box(drain,[.72,.06,1.42],[0,.38,0],'steel',.008),'drain-pan');this.tag(this.cyl(drain,.025,.42,[.28,.25,.55],'dark','y'),'condensate-trap-reference');}
-  if(fan){const wheel=this.motion(this.cyl(fan,.40,.22,[0,1.05,0],'dark','z'),'spin','z',7,.01,0,null);this.tag(wheel,'supply-fan-wheel');for(let k=0;k<10;k++){const blade=this.box(fan,[.30,.025,.07],[0,1.05,0],'steel',.003);blade.rotation.z=k*Math.PI/5;this.tag(blade,'fan-blade');}this.tag(this.cyl(fan,.10,.32,[.34,.75,.55],'dark','x'),'fan-motor');}
-  if(service){this.tag(this.box(service,[.70,.92,.035],[0,1.02,-.92],'body',.018),'service-door');this.tag(this.cyl(service,.018,.30,[.27,1.02,-.95],'dark','y'),'door-handle');}
-  if(out){this.tag(this.box(out,[.60,1.25,1.36],[.08,1.02,0],'accent',.015),'discharge-plenum');this.tag(this.box(out,[.24,.18,.025],[-.12,1.30,-.72],'glass',.008),'ahu-controller');}
- }
+  const intake=this.activeGroup(1),filter=this.activeGroup(2),coil=this.activeGroup(3),drain=this.activeGroup(4),fanUnit=this.activeGroup(5),service=this.activeGroup(6),out=this.activeGroup(7);
+  this.root.userData.detailPass='V123_R8_EUROVENT_SECTIONAL_AHU_FUNCTIONAL_RECONSTRUCTION';
+  this.root.userData.exactAhuModelVerified=false;
+  this.root.userData.sectionOrderVerified=false;
+  this.root.userData.airflowDirectionVerified=false;
+  this.root.userData.filterClassVerified=false;
+  this.root.userData.coilTypeVerified=false;
+  this.root.userData.fanTypeVerified=false;
+  this.root.userData.visualizedSectionOrder='CANONICAL_FUNCTIONAL_REFERENCE_ONLY';
 
+  if(intake){
+   const damper=this.findNode('ahu-inlet-damper');
+   if(damper){for(const y of [.55,.80,1.05,1.30,1.55]){const d=this.box(damper,[.055,.055,1.34],[0,y,0],'steel',.004);d.rotation.z=-.18;this.tag(d,'opposed-blade-damper-reference','EUROVENT_FUNCTIONAL_REFERENCE');}this.tag(this.box(damper,[.08,.18,.12],[.28,1.04,.62],'dark',.006),'damper-actuator-reference','FUNCTIONAL_REFERENCE');}
+   const mix=this.findNode('ahu-mixing-boundary');
+   if(mix){mix.userData.installedConfigurationVerified=false;const env=this.box(mix,[.40,.92,1.30],[-.20,1.02,0],'glass',.010);env.userData.optionReference=true;this.tag(env,'outdoor-return-mixing-boundary','CONFIGURATION_BOUNDARY');}
+  }
+  if(filter){
+   const bank=this.findNode('ahu-filter-bank');
+   if(bank){for(const x of [-.20,0,.20]){const fp=this.box(bank,[.055,1.38,1.38],[x,1.02,0],'filter',.004);fp.rotation.y=x<0?.12:x>0?-.12:0;this.tag(fp,'ahu-filter-panel-reference','EUROVENT_FUNCTIONAL_REFERENCE');}bank.userData.installedFilterClassVerified=false;}
+   const dp=this.findNode('ahu-filter-dp');
+   if(dp){for(const x of [-.28,.28])this.tag(this.cyl(dp,.012,.12,[x,1.26,-.70],'accent','z'),'filter-pressure-tap-reference','MAINTENANCE_FUNCTION_REFERENCE');this.tag(this.box(dp,[.12,.16,.05],[0,1.30,-.72],'glass',.004),'filter-differential-pressure-indicator-reference','MAINTENANCE_FUNCTION_REFERENCE');}
+  }
+  if(coil){
+   const face=this.findNode('ahu-cooling-coil');
+   if(face){for(let y=.48;y<=1.50;y+=.09)this.tag(this.box(face,[.045,.025,1.30],[0,y,0],'steel',.002),'cooling-coil-fin-reference','EUROVENT_FUNCTIONAL_REFERENCE');face.userData.installedCoilFluidVerified=false;face.userData.installedCoilRowsVerified=false;}
+   const hdr=this.findNode('ahu-coil-headers');
+   if(hdr){for(const z of [-.55,.55])this.tag(this.cyl(hdr,.035,.18,[.26,.98,z],'accent','z'),'cooling-coil-header-reference','EUROVENT_FUNCTIONAL_REFERENCE');for(const y of [.72,1.24])this.tag(this.cyl(hdr,.025,.24,[.31,y,.56],'accent','x'),'coil-connection-reference','FUNCTIONAL_REFERENCE');}
+  }
+  if(drain){
+   const pan=this.findNode('ahu-drain-pan');
+   if(pan){const p=this.box(pan,[.78,.055,1.42],[0,.38,0],'steel',.008);p.rotation.z=-.015;this.tag(p,'sloped-condensate-drain-pan','EUROVENT_6_18');}
+   const trap=this.findNode('ahu-drain-trap');
+   if(trap){this.tag(this.cyl(trap,.020,.24,[.28,.27,.56],'dark','y'),'condensate-drain-drop-reference','EUROVENT_6_18');this.tag(this.cyl(trap,.020,.22,[.38,.15,.56],'dark','x'),'condensate-trap-horizontal-reference','EUROVENT_6_18');this.tag(this.cyl(trap,.020,.18,[.49,.24,.56],'dark','y'),'condensate-trap-rise-reference','EUROVENT_6_18');}
+   const drop=this.findNode('ahu-droplet-option');
+   if(drop){drop.userData.installedOptionVerified=false;const env=this.box(drop,[.08,1.32,1.28],[.28,1.00,0],'glass',.006);env.userData.optionReference=true;this.tag(env,'droplet-eliminator-option-boundary','EUROVENT_OPTION_CRITERIA');}
+  }
+  if(fanUnit){
+   const fan=this.findNode('ahu-supply-fan');
+   if(fan){fan.userData.installedFanTypeVerified=false;const wheel=this.motion(this.cyl(fan,.40,.22,[0,1.05,0],'dark','z'),'spin','z',7,.01,0,null);this.tag(wheel,'supply-fan-wheel-reference','AHU_FUNCTIONAL_REFERENCE');for(let k=0;k<10;k++){const blade=this.box(fan,[.30,.025,.07],[0,1.05,0],'steel',.003);blade.rotation.z=k*Math.PI/5;this.tag(blade,'supply-fan-blade-reference','FUNCTIONAL_REFERENCE');}}
+   const drive=this.findNode('ahu-fan-drive');
+   if(drive){drive.userData.installedDriveTypeVerified=false;this.tag(this.cyl(drive,.10,.32,[.34,.75,.55],'dark','x'),'supply-fan-motor-reference','AHU_FUNCTIONAL_REFERENCE');const env=this.box(drive,[.28,.18,.22],[.16,.72,.38],'glass',.008);env.userData.optionReference=true;this.tag(env,'fan-drive-type-boundary','CONFIGURATION_BOUNDARY');}
+  }
+  if(service){
+   const door=this.findNode('ahu-service-door');
+   if(door){this.tag(this.box(door,[.70,.92,.035],[0,1.02,-.92],'body',.018),'ahu-service-door','AHU_FUNCTIONAL_REFERENCE');this.tag(this.cyl(door,.018,.30,[.27,1.02,-.95],'dark','y'),'service-door-handle','AHU_FUNCTIONAL_REFERENCE');}
+  }
+  if(out){
+   const plenum=this.findNode('ahu-discharge-plenum');
+   if(plenum){this.tag(this.box(plenum,[.60,1.25,1.36],[.08,1.02,0],'accent',.015),'ahu-discharge-plenum','AHU_FUNCTIONAL_REFERENCE');plenum.userData.installedDuctDirectionVerified=false;}
+   const ctrl=this.findNode('ahu-controller');
+   if(ctrl){this.tag(this.box(ctrl,[.24,.18,.025],[-.12,1.30,-.72],'glass',.008),'ahu-controller-reference','CONTROL_FUNCTION_REFERENCE');for(const y of [.84,1.10])this.tag(this.box(ctrl,[.06,.08,.05],[.24,y,-.70],'accent',.004),'ahu-temperature-pressure-sensor-reference','CONTROL_FUNCTION_REFERENCE');}
+  }
+ }
  build(){
   const no=this.cfg.machine.no;
   this.root.userData.geometryStatus='REFERENCE_GROUNDED_FAMILY__NOT_SERIAL_SPECIFIC';
@@ -1083,34 +1170,52 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  }
  buildAirHandlerReference(sansin=false){
   if(sansin)return this.buildSansinCooling();
-  this.palette.body=0xdde3e2;this.palette.dark=0x30383b;this.palette.accent=0x4b7480;this.palette.filter=0xc7b783;
+  this.palette.body=0xdde3e2;this.palette.dark=0x30383b;this.palette.accent=0x4b7480;this.palette.filter=0xc7b783;this.palette.blue=0x52839c;
   this.base(7.10,2.02);
   const xs=[-3.02,-2.02,-1.02,0,1.03,2.08,3.05];
   for(let i=1;i<=7;i++){
    const {g,a}=this.mod(i,[xs[i-1],0,0],[Math.sign(xs[i-1]||1)*.42,.18,0]);this.shell(g,[.94,1.88,1.88],[0,1.02,0]);
-   if(i===1){for(const y of [.55,.80,1.05,1.30]){const d=this.box(a,[.08,.07,1.45],[0,y,0],'steel',.005);d.rotation.z=-.18;}}
-   else if(i===2){for(const x of [-.18,0,.18])this.box(a,[.055,1.38,1.42],[x,1.02,0],'filter',.005);}
-   else if(i===3||i===4){for(let y=.48;y<=1.48;y+=.14)this.box(a,[.055,.035,1.32],[0,y,0],'steel',.003);this.cyl(a,.025,1.30,[.25,1.02,0],'accent','z');}
-   else if(i===5){this.box(a,[.72,.08,1.40],[0,.42,0],'steel',.01);this.cyl(a,.035,1.10,[.25,.34,0],'dark','z');}
-   else if(i===6){const fan=this.motion(this.cyl(a,.48,.24,[0,1.04,0],'dark','z'),'spin','z',6,.02,0,null);fan.userData.supplyFan=true;for(let k=0;k<8;k++){const blade=this.box(a,[.38,.04,.07],[0,1.04,0],'steel',.004);blade.rotation.z=k*Math.PI/4;}}
-   else {this.box(a,[.20,1.35,1.50],[.22,1.02,0],'accent',.015);}
+   if(i===1){this.group(a,'ahu-inlet-damper','Inlet damper bank');const mix=this.group(a,'ahu-mixing-boundary','Outdoor / return mixing boundary');mix.userData.installedConfigurationVerified=false;}
+   else if(i===2){this.group(a,'ahu-filter-bank','Filter bank');this.group(a,'ahu-filter-dp','Filter differential pressure reference');}
+   else if(i===3){this.group(a,'ahu-cooling-coil','Cooling / heat-exchange coil');this.group(a,'ahu-coil-headers','Coil headers / connections');}
+   else if(i===4){this.group(a,'ahu-drain-pan','Condensate drain pan');this.group(a,'ahu-drain-trap','Condensate drain trap');const d=this.group(a,'ahu-droplet-option','Droplet eliminator capability');d.userData.installedOptionVerified=false;}
+   else if(i===5){this.group(a,'ahu-supply-fan','Supply fan');const drive=this.group(a,'ahu-fan-drive','Fan motor / drive boundary');drive.userData.installedDriveTypeVerified=false;}
+   else if(i===6)this.group(a,'ahu-service-door','Service access');
+   else {this.group(a,'ahu-discharge-plenum','Discharge plenum');this.group(a,'ahu-controller','AHU control / sensors');}
   }
-  this.root.userData.referenceNote='AHU model/section order is unknown. Geometry is a serviceable double-skin AHU family reference with damper, filter bank, cooling/heat-exchange coil, drain pan, supply fan and discharge/control sections.';
+  this.root.userData.exactAhuModelVerified=false;
+  this.root.userData.sectionOrderVerified=false;
+  this.root.userData.airflowDirectionVerified=false;
+  this.root.userData.familyVisualEnvelope=[7.10,2.02,2.10];
+  this.root.userData.engineeringDimensions=false;
+  this.root.userData.referenceNote='OEM/model and actual section order are unavailable. The displayed order is a Eurovent-neutral functional visualization of damper, filtration, thermal coil, condensate management, fan, service and discharge/control sections. It is not an as-built BMJ section sequence.';
  }
  buildSansinCooling(){
-  this.palette.body=0xe3e6e3;this.palette.dark=0x273034;this.palette.accent=0x437563;this.palette.blue=0x497e9d;
-  this.base(5.0,2.30);
-  const xs=[-2.05,-1.40,-.72,.05,.85,1.62,2.20];
+  this.palette.body=0xe3e6e3;this.palette.dark=0x273034;this.palette.accent=0x437563;this.palette.blue=0x497e9d;this.palette.filter=0xc7b783;
+  this.base(5.0,2.50);
+  const pos=[[-1.72,0,-.25],[-1.05,0,-.25],[-.38,0,-.25],[.34,0,-.25],[1.45,0,.55],[.72,0,.86],[1.72,0,-.62]];
   for(let i=1;i<=7;i++){
-   const {g,a}=this.mod(i,[xs[i-1],0,0],[Math.sign(xs[i-1]||1)*.38,.20,0]);
-   if(i<=4){this.shell(g,[.70,2.05,1.70],[0,1.10,0]);if(i===1)for(const y of [.58,.88,1.18,1.48]){const d=this.box(a,[.06,.06,1.30],[0,y,0],'steel',.005);d.rotation.z=-.16;}if(i===2)for(const x of [-.14,.14])this.box(a,[.045,1.45,1.30],[x,1.10,0],'filter',.004);if(i===3)for(let y=.55;y<1.65;y+=.15)this.box(a,[.05,.04,1.25],[0,y,0],'blue',.003);if(i===4)this.motion(this.cyl(a,.46,.22,[0,1.12,0],'dark','z'),'spin','z',6,.02,0,null);}
-   else if(i===5){this.shell(g,[1.00,1.75,1.65],[0,.98,0]);for(const z of [-.52,.52])this.motion(this.cyl(a,.28,.10,[0,1.45,z],'dark','z'),'spin','z',7,.02,z,null);for(let y=.45;y<1.35;y+=.13)this.box(a,[.05,.03,1.25],[0,y,0],'steel',.003);}
-   else if(i===6){this.box(g,[.75,.75,1.10],[0,.50,0],'dark',.04);this.cyl(a,.11,.60,[0,.62,0],'steel','x');this.cyl(a,.035,1.18,[0,.78,0],'blue','z');}
-   else {this.box(g,[.60,1.28,.58],[0,.78,.62],'dark',.04);this.box(a,[.36,.23,.025],[-.02,1.02,.31],'glass',.008);}
+   const {g,a}=this.mod(i,pos[i-1],[Math.sign(pos[i-1][0]||1)*.38,.20,0]);
+   if(i<=4)this.shell(g,[.66,2.02,1.50],[0,1.10,0]);
+   else if(i===5)this.shell(g,[1.08,1.88,1.35],[0,1.02,0]);
+   else if(i===6)this.box(g,[.72,.82,.90],[0,.54,0],'dark',.035);
+   else this.box(g,[.62,1.28,.58],[0,.78,0],'dark',.04);
+   if(i===1)this.group(a,'sansin-inlet-damper','Return / outdoor air inlet');
+   else if(i===2){this.group(a,'sansin-filter-net','Double filter net');this.group(a,'sansin-mixing','Air mixing / distribution');}
+   else if(i===3){this.group(a,'sansin-wet-curtain','Honeycomb wet curtain');this.group(a,'sansin-evaporator','Low-temperature fin evaporator');}
+   else if(i===4){this.group(a,'sansin-supply-fan','Indoor supply fan');this.group(a,'sansin-supply-plenum','Conditioned-air plenum');}
+   else if(i===5){this.group(a,'sansin-compressor','Refrigeration compressor');this.group(a,'sansin-condenser','Evaporative condenser');const fan=this.group(a,'sansin-outdoor-fan','Outdoor condenser fan reference');fan.userData.installedFanCountVerified=false;}
+   else if(i===6){this.group(a,'sansin-refrigerant','Refrigerant circuit');this.group(a,'sansin-water-circuit','Water recirculation circuit');}
+   else {this.group(a,'sansin-controller','Cooling controller');this.group(a,'sansin-electrical','Electrical cabinet');}
   }
-  this.root.userData.referenceBrandFamily='PT Sansin Indonesia / NES industrial central cooling family';
-  this.root.userData.referenceNote='Registry identifies AHU 7 as SANSIN but not the model. Geometry therefore follows the PT Sansin/NES YZKJ industrial central-cooling family as a nearest brand-specific reference, not a YZKJ-45N installation claim.';
+  this.root.userData.referenceBrandFamily='PT Sansin Indonesia / NES YZKJ industrial central cooling family';
+  this.root.userData.exactSansinModelVerified=false;
+  this.root.userData.familyCandidates=['YZKJ-45N','YZKJ-90N'];
+  this.root.userData.familyVisualEnvelope=[5.0,2.50,2.30];
+  this.root.userData.engineeringDimensions=false;
+  this.root.userData.referenceNote='Registry verifies SANSIN brand but not model. The twin follows the documented NES/YZKJ two-stage industrial cooling family: filtration, wet-curtain pre-cooling, fin evaporator, indoor supply fan, outdoor refrigeration/evaporative condenser, water/refrigerant services and controls. YZKJ-45N/90N capacities and component counts are not assigned to the BMJ unit.';
  }
+
 }
 
 export class ReferenceProcessSimulation{
