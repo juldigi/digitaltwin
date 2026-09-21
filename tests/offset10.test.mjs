@@ -292,3 +292,45 @@ test('V116 Offset10 FoilStar UV and sheet brake are driven by independent sheet-
   assert.equal(brakeOnly,true,'delivery sheet brake was incorrectly coupled to FoilStar');
   sim.dispose();machine.dispose();
 });
+
+test('V117 Offset10 sheet centerline clears blanket impression and coating nip cylinders',()=>{
+  const machine=new Offset10MachineTemplate(),sim=new Offset10PrintingSimulation(machine.root,machine);
+  machine.root.updateMatrixWorld(true);
+  const samples=Array.from({length:1801},(_,i)=>sim.curve.getPointAt(i/1800));
+  const clearance=(mesh)=>{
+    const p=new THREE.Vector3();mesh.getWorldPosition(p);const r=mesh.userData.rollerRadius;
+    let min=Infinity;for(const s of samples){const d=Math.hypot(s.x-p.x,s.y-p.y);if(d<min)min=d;}
+    return {min,r,role:mesh.userData.rollerRole,owner:mesh.userData.ownerId};
+  };
+  const checks=[];
+  for(const key of OFFSET10_PRINTING_UNIT_KEYS){
+    const id='o10-'+key.toLowerCase();
+    for(const suffix of ['blanket','impression']){
+      const node=machine.findNode(id+'-'+suffix),mesh=node?.children.find(o=>o.isMesh&&Number.isFinite(o.userData.rollerRadius));
+      assert.ok(mesh,id+'-'+suffix);checks.push(clearance(mesh));
+    }
+  }
+  for(const key of OFFSET10_COATING_UNIT_KEYS){
+    const id='o10-'+key.toLowerCase();
+    for(const suffix of ['form','impression']){
+      const node=machine.findNode(id+'-'+suffix),mesh=node?.children.find(o=>o.isMesh&&Number.isFinite(o.userData.rollerRadius));
+      assert.ok(mesh,id+'-'+suffix);checks.push(clearance(mesh));
+    }
+  }
+  for(const q of checks)assert.ok(q.min>=q.r-.004,(q.owner||'')+'/'+(q.role||'')+' centerline penetration '+(q.r-q.min).toFixed(4)+' m');
+  sim.dispose();machine.dispose();
+});
+
+test('V117 Offset10 print and coating centerline passes through intended nip corridors',()=>{
+  const machine=new Offset10MachineTemplate(),sim=new Offset10PrintingSimulation(machine.root,machine);
+  const curveSamples=Array.from({length:1201},(_,i)=>sim.curve.getPointAt(i/1200));
+  for(const key of OFFSET10_PRINTING_UNIT_KEYS){
+    const x=OFFSET10_MODULE_CENTERS[key],pts=curveSamples.filter(p=>Math.abs(p.x-x)<.08);assert.ok(pts.length>0);
+    const avg=pts.reduce((s,p)=>s+p.y,0)/pts.length;assert.ok(avg>1.245&&avg<1.295,key+' print nip y '+avg);
+  }
+  for(const key of OFFSET10_COATING_UNIT_KEYS){
+    const x=OFFSET10_MODULE_CENTERS[key],pts=curveSamples.filter(p=>Math.abs(p.x-x)<.08);assert.ok(pts.length>0);
+    const avg=pts.reduce((s,p)=>s+p.y,0)/pts.length;assert.ok(avg>1.285&&avg<1.330,key+' coating nip y '+avg);
+  }
+  sim.dispose();machine.dispose();
+});
