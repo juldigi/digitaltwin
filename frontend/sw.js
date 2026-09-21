@@ -1,4 +1,4 @@
-const VERSION='factory-digital-twin-v100-offset8-sheetpath-20260921';
+const VERSION='factory-digital-twin-v101-offset8-process-20260921';
 const SHELL=['./','./index.html','./config.json','./assets/favicon.svg',
   './assets/splash-industrial-v79.webp',
   './app-shell-v79.css',
