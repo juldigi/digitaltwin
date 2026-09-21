@@ -1,0 +1,1 @@
+Final second CI verification for V112 APM2 synchronous mechanics. Temporary branch; do not merge marker.
