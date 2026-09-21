@@ -1,35 +1,94 @@
 import * as THREE from 'three';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
 import {POLAR115_TAXONOMY} from './data/taxonomy-polar115.js';
+import {POLAR115_SPEC,POLAR115_REFERENCE_DIMENSIONS} from './data/dimensions-polar115.js';
+import {POLAR115_TECHNICAL_SOURCES} from './data/sources-polar115.js';
 
 export class Polar115MachineTemplate{
  constructor(){
   this.root=new THREE.Group();this.root.name='POLAR-115-EM';this.parts=[];this.nodes=[];this.meshes=[];this.materials=[];this.geometries=[];this.activeMeshes=[];this.exteriorOpen=false;
-  this.palette={body:0xd9ddd9,dark:0x263238,table:0x6b777c,steel:0x9ca7aa,accent:0x315e73,warning:0xd8a228,screen:0x163c35,light:0xc93636,paper:0xeee8d7};
+  this.palette={body:0xb8bbb5,bodyDark:0x8f938f,dark:0x252b2e,table:0x6f787b,steel:0xa9b0b1,accent:0x405961,warning:0xd0a338,screen:0x173e34,red:0xb6302d,paper:0xece5d2,black:0x111517,air:0x8bbad0};
   this.build();this.taxonomy=POLAR115_TAXONOMY;this.taxonomyById=new Map(this.taxonomy.map(n=>[n.id,n]));
   for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}this.root.updateMatrixWorld(true);
-  this.root.userData={assetId:'BMJ-MCH-0001',model:'115 EM MON',serial:'5831536',geometryStatus:'DEDICATED_MODEL_REFERENCE',engineeringDimensions:false};
+  this.root.userData={assetId:POLAR115_SPEC.assetId,nodeId:'POLAR-115-EM',model:POLAR115_SPEC.model,serial:POLAR115_SPEC.serial,spec:POLAR115_SPEC,sources:POLAR115_TECHNICAL_SOURCES,machineEnvelope:{reference:POLAR115_REFERENCE_DIMENSIONS},geometryStatus:'DEDICATED_MODEL_REFERENCE__ARCHIVE_DIMENSIONS_NOT_INSTALLATION_CAD',engineeringDimensions:false,evidenceBoundary:POLAR115_SPEC.evidenceBoundary};
  }
- mat(kind,transparent=false){const m=new THREE.MeshStandardMaterial({color:this.palette[kind]??this.palette.body,metalness:['steel','table'].includes(kind)?.45:.08,roughness:kind==='screen'?.2:.55,transparent,opacity:transparent?.38:1});this.materials.push(m);return m;}
+ mat(kind,transparent=false){const m=new THREE.MeshStandardMaterial({color:this.palette[kind]??this.palette.body,metalness:['steel','table'].includes(kind)?.5:.08,roughness:kind==='screen'?.18:.52,transparent,opacity:transparent?.36:1});m.userData.baseOpacity=m.opacity;this.materials.push(m);return m;}
  group(parent,id,name,pos=[0,0,0],explode=[0,.18,0]){const g=new THREE.Group();g.name=name;g.position.set(...pos);g.userData={nodeId:id,selectable:true,explode:new THREE.Vector3(...explode)};parent.add(g);this.nodes.push(g);if(parent===this.root)this.parts.push(g);return g;}
- mesh(g,geo,kind,pos=[0,0,0],rot=null,id=null){const x=new THREE.Mesh(geo,this.mat(kind));x.position.set(...pos);if(rot)x.rotation.set(...rot);x.castShadow=kind!=='screen';x.receiveShadow=true;x.userData={ownerId:g.userData.nodeId};if(id)x.name=id;g.add(x);this.meshes.push(x);this.geometries.push(geo);return x;}
+ mesh(g,geo,kind,pos=[0,0,0],rot=null,id=null){const x=new THREE.Mesh(geo,this.mat(kind));x.position.set(...pos);if(rot)x.rotation.set(...rot);x.castShadow=!['screen','air'].includes(kind);x.receiveShadow=true;x.userData={ownerId:g.userData.nodeId};if(id)x.name=id;g.add(x);this.meshes.push(x);this.geometries.push(geo);return x;}
  box(g,s,p,k='body',r=.025,id=null){return this.mesh(g,r?new RoundedBoxGeometry(...s,2,r):new THREE.BoxGeometry(...s),k,p,null,id);}
  cyl(g,r,l,p,k='steel',axis='z',id=null){return this.mesh(g,new THREE.CylinderGeometry(r,r,l,24),k,p,axis==='z'?[Math.PI/2,0,0]:axis==='x'?[0,0,Math.PI/2]:null,id);}
- cover(m){m.userData.exteriorCover=true;return m;} active(m){m.userData.activeElement=true;this.activeMeshes.push(m);return m;}
+ cover(m){m.userData.exteriorCover=true;return m;}active(m,role=''){m.userData.activeElement=true;m.userData.mechanismRole=role;this.activeMeshes.push(m);return m;}
+ holes(group,width,depth,y,zCenter,countX,countZ){const grid=this.group(group,'polar-feed-grid-'+group.userData.nodeId,'Air-nozzle grid');for(let ix=0;ix<countX;ix++)for(let iz=0;iz<countZ;iz++){const x=-width*.42+(width*.84)*(ix/Math.max(1,countX-1)),z=zCenter-depth*.38+(depth*.76)*(iz/Math.max(1,countZ-1));const h=this.cyl(grid,.009,.006,[x,y+.064,z],'black','y');h.userData.detail=true;h.userData.airNozzle=true;}return grid;}
  build(){
-  const frame=this.group(this.root,'polar-frame','Machine Frame');this.box(frame,[2.15,.25,1.7],[0,.125,.25],'dark',.04);
-  const feed=this.group(this.root,'polar-feed','Air Tables',[0,0,-.55],[0,.18,-.45]);
-  for(const [id,x,w] of [['polar-feed-1',-1.72,1.22],['polar-feed-2',0,2.12],['polar-feed-3',1.72,1.22]]){const t=this.group(feed,id,'Air Table',[x,0,0]);this.box(t,[w,.12,1.15],[0,.86,0],'table',.02);for(let ix=-2;ix<=2;ix++)for(let iz=-2;iz<=2;iz++){const hole=this.cyl(t,.012,.008,[ix*w/6,.925,iz*.18],'dark','y');hole.userData.detail=true;}this.box(t,[.08,.75,.08],[-w*.38,.43,.35],'dark',.01);this.box(t,[.08,.75,.08],[w*.38,.43,.35],'dark',.01);}
-  const gauge=this.group(this.root,'polar-gauge','Backgauge',[0,0,.2],[0,.25,.45]);this.box(gauge,[1.72,.18,.16],[0,1.03,.46],'accent',.02);for(const x of [-.62,0,.62])this.active(this.box(gauge,[.10,.34,.08],[x,.87,.38],'steel',.01));for(const x of [-.78,.78])this.cyl(gauge,.035,1.0,[x,.82,.02],'steel','z');this.active(this.cyl(gauge,.045,1.25,[0,.70,.02],'steel','x'));
-  const clamp=this.group(this.root,'polar-clamp','Hydraulic Clamp',[0,0,-.02],[0,.35,0]);this.active(this.box(clamp,[1.78,.22,.18],[0,1.28,-.08],'warning',.02,'Clamp Beam'));for(const x of [-.68,.68])this.cyl(clamp,.07,.42,[x,1.53,-.02],'steel','y');
-  const knife=this.group(this.root,'polar-knife','Knife Cutting System',[0,0,-.04],[0,.5,0]);const carrier=this.active(this.box(knife,[1.86,.22,.15],[0,1.62,-.01],'dark',.015,'Knife Carrier'));const blade=this.active(this.box(knife,[1.78,.035,.16],[0,1.49,-.045],'steel',.004,'1150 mm Knife'));blade.rotation.z=-.018;this.box(knife,[1.82,.035,.06],[0,.955,-.03],'warning',.004,'Cutting Stick');for(const x of [-.72,.72]){this.active(this.cyl(knife,.11,.16,[x,1.82,.02],'accent','z'));this.box(knife,[.10,.46,.08],[x,1.59,.02],'steel',.01);}
-  const safety=this.group(this.root,'polar-safety','Safety System',[0,0,-.48],[0,.3,-.5]);for(const [id,x] of [['polar-safety-1',-.98],['polar-safety-2',.98]]){const s=this.group(safety,id,'Light Barrier Column',[x,0,0]);this.box(s,[.07,.78,.07],[0,1.18,0],'dark',.01);for(let y=.86;y<1.55;y+=.09){const led=this.cyl(s,.012,.025,[0,y,-.045],'light','z');led.userData.detail=true;}}this.box(safety,[2.02,.035,.035],[0,1.57,0],'light',.005);
-  const control=this.group(this.root,'polar-control','EM Monitor Control',[1.34,0,-.14],[.45,.25,-.2]);this.cover(this.box(control,[.48,.82,.45],[0,1.26,0],'body',.045));this.box(control,[.33,.28,.025],[-.01,1.43,-.235],'screen',.015,'CRT Monitor');for(let i=0;i<12;i++)this.box(control,[.045,.025,.012],[-.13+(i%4)*.085,1.17-Math.floor(i/4)*.055,-.238],i===11?'warning':'dark',.004);
-  const hyd=this.group(this.root,'polar-hyd','Hydraulic and Air Supply',[-.75,0,.48],[-.4,.2,.35]);this.active(this.box(hyd,[.62,.55,.48],[0,.55,0],'accent',.04));this.cyl(hyd,.16,.42,[-.12,.91,0],'dark','x');this.cyl(hyd,.13,.5,[.22,.48,0],'steel','y');for(let i=0;i<4;i++)this.cyl(hyd,.018,.55,[-.22+i*.14,.82,.18],'warning','y');
-  const housing=this.group(this.root,'polar-housing','Main Housing');this.cover(this.box(housing,[2.12,1.58,.18],[0,1.18,.62],'body',.05));this.cover(this.box(housing,[.18,1.62,1.12],[-1.02,1.18,.18],'body',.04));this.cover(this.box(housing,[.18,1.62,1.12],[1.02,1.18,.18],'body',.04));this.cover(this.box(housing,[2.12,.18,1.12],[0,1.94,.18],'body',.04));
+  const frame=this.group(this.root,'polar-frame','Machine Frame');
+  this.box(frame,[2.16,.62,1.56],[0,.31,.47],'bodyDark',.05);
+  for(const x of [-.92,.92])this.box(frame,[.15,.56,1.66],[x,.83,.47],'bodyDark',.04);
+
+  const feed=this.group(this.root,'polar-feed','Air Table & Material Handling',[0,0,0],[0,.16,-.35]);
+  const center=this.group(feed,'polar-feed-center','Center chromed air table');this.box(center,[1.42,.12,.715],[0,.90,-.37],'table',.018);this.holes(center,1.42,.715,.90,-.37,7,5);
+  const left=this.group(feed,'polar-feed-left','Left air side table',[-1.015,0,0]);this.box(left,[.60,.12,.715],[0,.90,-.37],'table',.018);this.holes(left,.60,.715,.90,-.37,4,5);
+  const right=this.group(feed,'polar-feed-right','Right air side table',[1.015,0,0]);this.box(right,[.60,.12,.715],[0,.90,-.37],'table',.018);this.holes(right,.60,.715,.90,-.37,4,5);
+  for(const g of [left,right])for(const x of [-.22,.22])this.box(g,[.055,.76,.055],[x,.46,-.22],'dark',.01);
+  const rearTable=this.group(feed,'polar-feed-rear','Back table');this.box(rearTable,[1.44,.09,1.15],[0,.90,.565],'table',.015);this.holes(rearTable,1.44,1.15,.90,.565,7,7);
+
+  const gauge=this.group(this.root,'polar-gauge','Backgauge Positioning',[0,0,0],[0,.20,.36]);
+  const beam=this.group(gauge,'polar-gauge-beam','Backgauge beam');this.box(beam,[1.20,.14,.13],[0,1.02,.70],'accent',.018);
+  const rake=this.group(gauge,'polar-gauge-rake','Backgauge rake / fingers');for(const x of [-.48,-.24,0,.24,.48])this.active(this.box(rake,[.055,.20,.055],[x,.90,.625],'steel',.008),'backgauge');
+  const guides=this.group(gauge,'polar-gauge-guides','Twin guideways');for(const x of [-.56,.56])this.cyl(guides,.022,1.02,[x,.80,.72],'steel','z');
+  const drive=this.group(gauge,'polar-gauge-drive','Positioning screw / drive reference');this.active(this.cyl(drive,.035,1.02,[0,.77,.72],'steel','z'),'backgauge-drive');
+  const enc=this.group(gauge,'polar-gauge-encoder','Length-measurement encoder reference');this.cyl(enc,.055,.10,[.70,.80,.72],'dark','z');
+
+  const clamp=this.group(this.root,'polar-clamp','Hydraulic Clamp',[0,0,0],[0,.28,0]);
+  const clampBeam=this.group(clamp,'polar-clamp-beam','Clamp beam');this.active(this.box(clampBeam,[1.28,.18,.16],[0,1.25,-.01],'warning',.018,'Clamp Beam'),'clamp');
+  const clampCyl=this.group(clamp,'polar-clamp-cylinders','Clamp hydraulic actuation reference');for(const x of [-.48,.48])this.cyl(clampCyl,.055,.34,[x,1.45,.02],'steel','y');
+  const contact=this.group(clamp,'polar-clamp-contact','Stock-contact face');this.box(contact,[1.23,.025,.10],[0,1.155,-.035],'dark',.004);
+
+  const knife=this.group(this.root,'polar-knife','Knife Cutting System',[0,0,0],[0,.42,0]);
+  const carrier=this.group(knife,'polar-knife-carrier','Knife carrier');this.active(this.box(carrier,[1.34,.18,.13],[0,1.47,.035],'dark',.014,'Knife Carrier'),'knife-carrier');
+  const bladeGroup=this.group(knife,'polar-knife-blade','1150 mm knife');const blade=this.active(this.box(bladeGroup,[1.18,.025,.13],[0,1.37,-.005],'steel',.003,'1150 mm Knife'),'knife');blade.rotation.z=-.012;
+  const stick=this.group(knife,'polar-knife-stick','Cutting stick');this.box(stick,[1.20,.025,.055],[0,.965,-.018],'warning',.003,'Cutting Stick');
+  const knifeDrive=this.group(knife,'polar-knife-drive','Hydraulic knife-drive interface');for(const x of [-.56,.56]){this.active(this.cyl(knifeDrive,.085,.13,[x,1.57,.08],'accent','z'),'knife-drive');this.box(knifeDrive,[.07,.30,.065],[x,1.42,.08],'steel',.008);}
+  const topSense=this.group(knife,'polar-knife-top-sense','Top-position / cut-cycle sensing reference');this.box(topSense,[.08,.12,.06],[.68,1.50,.07],'red',.010);
+
+  const safety=this.group(this.root,'polar-safety','Safety System',[0,0,0],[0,.24,-.45]);
+  const photo=this.group(safety,'polar-safety-photo','Photoelectric light-barrier arms');
+  for(const x of [-.82,.82]){const arm=this.box(photo,[.15,.17,.58],[x,1.03,-.36],'body',.04);arm.rotation.x=.08;for(let i=0;i<6;i++){const led=this.cyl(photo,.009,.012,[x+(x<0?.077:-.077),1.03,-.56+i*.08],'red','x');led.userData.detail=true;led.userData.photoCell=true;}}
+  const twohand=this.group(safety,'polar-safety-twohand','Two-hand cut buttons');for(const x of [-.72,.72]){this.box(twohand,[.18,.08,.14],[x,.91,-.71],'dark',.025);const b=this.cyl(twohand,.035,.022,[x,.96,-.78],'red','z');b.userData.twoHandButton=true;}
+  const estop=this.group(safety,'polar-safety-estop','Emergency stop');this.cyl(estop,.043,.035,[.92,1.32,-.18],'red','z');
+  const rear=this.group(safety,'polar-safety-rear','Rear guard reference');this.cover(this.box(rear,[1.50,.50,.045],[0,1.12,1.18],'body',.025));
+
+  const control=this.group(this.root,'polar-control','EM-MONITOR Control',[0,0,0],[0,.24,-.20]);
+  const panel=this.group(control,'polar-control-panel','Central program / dimension keypad');this.cover(this.box(panel,[1.42,.31,.15],[0,1.36,-.11],'dark',.035));
+  const crt=this.group(control,'polar-control-crt','CRT monitor');this.cover(this.box(crt,[.40,.35,.27],[-.12,1.58,-.02],'dark',.035));this.box(crt,[.30,.22,.012],[-.12,1.60,-.165],'screen',.018,'CRT Monitor');
+  const memory=this.group(control,'polar-control-memory','Eltromat Memory / program interface');for(let i=0;i<30;i++){const col=i%10,row=Math.floor(i/10);this.box(memory,[.034,.025,.012],[-.50+col*.067,1.39-row*.055,-.195],i%7===0?'warning':'body',.003);}
+  const corr=this.group(control,'polar-control-correction','Correction / pressure controls');for(const [x,k] of [[.48,'body'],[.61,'body'],[.76,'warning']])this.cyl(corr,.035,.022,[x,1.38,-.195],k,'z');
+  const pressure=this.group(control,'polar-control-pressure','Clamp-pressure control interface');this.cyl(pressure,.060,.035,[.92,1.17,-.14],'dark','z');
+
+  const utility=this.group(this.root,'polar-utility','Hydraulic & Air Utility',[-.55,0,.48],[-.32,.18,.30]);
+  const hyd=this.group(utility,'polar-hyd-power','Hydraulic power-unit reference');this.active(this.box(hyd,[.48,.38,.38],[-.20,.37,.55],'accent',.035),'hydraulic-power');
+  const valve=this.group(utility,'polar-hyd-valve','Valve / manifold reference');this.box(valve,[.30,.18,.24],[.25,.45,.55],'steel',.018);
+  const blower=this.group(utility,'polar-air-blower','Air blower');this.active(this.cyl(blower,.14,.30,[.50,.32,.56],'dark','x'),'air-blower');
+  const duct=this.group(utility,'polar-air-duct','Air-distribution duct reference');this.cyl(duct,.045,.72,[.10,.62,.42],'steel','x');
+
+  const housing=this.group(this.root,'polar-housing','Main Housing');
+  this.cover(this.box(housing,[2.14,.72,1.46],[0,.37,.52],'bodyDark',.05));
+  this.cover(this.box(housing,[2.16,.80,.20],[0,1.22,.86],'body',.05));
+  this.cover(this.box(housing,[.20,.78,1.25],[-1.00,1.17,.48],'body',.045));
+  this.cover(this.box(housing,[.20,.78,1.25],[1.00,1.17,.48],'body',.045));
+  const brow=this.cover(this.box(housing,[2.00,.25,.22],[0,1.49,.68],'body',.04));brow.userData.consoleBrow=true;
  }
- findNode(id){return id==='POLAR-115-EM'?this.root:this.nodes.find(n=>n.userData.nodeId===id)||null;}resolvePart(o){for(let p=o;p&&p!==this.root;p=p.parent)if(p.userData.selectable)return p;return null;}resolveTaxonomyNode(id){let m=this.taxonomyById.get(id);while(m){for(const r of m.meshRefs||[]){const n=this.findNode(r);if(n)return n;}m=m.parentId?this.taxonomyById.get(m.parentId):null;}return this.root;}contains(a,b){for(let p=b;p;p=p.parent)if(p===a)return true;return false;}
- explode(t,s=null){for(const n of this.nodes)n.position.copy(n.userData.rest);const targets=s?[s]:this.parts;for(const n of targets)n.position.addScaledVector(n.userData.explode,THREE.MathUtils.clamp(+t||0,0,1));}
- highlight(p){for(const m of this.meshes){m.material.emissive?.setHex(p&&this.contains(p,m)?0x17494a:0);m.material.emissiveIntensity=.3;}}highlightMany(ps=[]){for(const m of this.meshes){m.material.emissive?.setHex(ps.some(p=>this.contains(p,m))?0x17494a:0);m.material.emissiveIntensity=.3;}}ghost(on,except=null){for(const m of this.meshes){const fade=on&&(!except||!this.contains(except,m));m.material.transparent=fade||m.material.transparent;m.material.opacity=fade?.14:1;m.material.depthWrite=!fade;}}isolate(p,on=true){for(const n of this.nodes)n.visible=!on||!p||this.contains(p,n)||this.contains(n,p);}showOnly(ps=[],on=true){for(const n of this.nodes)n.visible=!on||!ps.length||ps.some(p=>n===p||this.contains(n,p));}
- setExteriorOpen(on=true){this.exteriorOpen=!!on;for(const m of this.meshes)if(m.userData.exteriorCover)m.visible=!on;}setLow(on){for(const m of this.meshes)if(m.userData.detail)m.visible=!on;}reset(){this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);if(this.exteriorOpen)this.setExteriorOpen(true);}dispose(){this.geometries.forEach(g=>g.dispose());this.materials.forEach(m=>m.dispose());}
+ findNode(id){return id==='POLAR-115-EM'?this.root:this.nodes.find(n=>n.userData.nodeId===id)||null;}
+ resolvePart(o){for(let p=o;p&&p!==this.root;p=p.parent)if(p.userData.selectable)return p;return null;}
+ resolveTaxonomyNode(id){let m=this.taxonomyById.get(id);while(m){for(const r of m.meshRefs||[]){const n=this.findNode(r);if(n)return n;}m=m.parentId?this.taxonomyById.get(m.parentId):null;}return this.root;}
+ contains(a,b){for(let p=b;p;p=p.parent)if(p===a)return true;return false;}
+ explode(t,s=null){for(const n of this.nodes)n.position.copy(n.userData.rest);const targets=s?(s.children.filter(c=>c.userData?.selectable).length?s.children.filter(c=>c.userData.selectable):[s]):this.parts;for(const n of targets)n.position.addScaledVector(n.userData.explode,THREE.MathUtils.clamp(+t||0,0,1));}
+ highlight(p){for(const m of this.meshes){m.material.emissive?.setHex(p&&this.contains(p,m)?0x17494a:0);m.material.emissiveIntensity=.3;}}
+ highlightMany(ps=[]){for(const m of this.meshes){m.material.emissive?.setHex(ps.some(p=>this.contains(p,m))?0x17494a:0);m.material.emissiveIntensity=.3;}}
+ ghost(on,except=null){this.ghosted=!!on;for(const m of this.meshes){const fade=on&&(!except||!this.contains(except,m)),base=m.material.userData.baseOpacity??1;m.material.transparent=fade||base<1;m.material.opacity=fade?.14:base;m.material.depthWrite=!fade;}}
+ isolate(p,on=true){for(const n of this.nodes)n.visible=!on||!p||this.contains(p,n)||this.contains(n,p);}
+ showOnly(ps=[],on=true){for(const n of this.nodes)n.visible=!on||!ps.length||ps.some(p=>n===p||this.contains(n,p));}
+ setExteriorOpen(on=true){this.exteriorOpen=!!on;let hidden=0;for(const m of this.meshes)if(m.userData.exteriorCover){m.visible=!on;if(on)hidden++;}this.root.userData.interiorCutawayVisible=!!on;this.root.userData.exteriorHiddenCount=on?hidden:0;}
+ setLow(on){for(const m of this.meshes)if(m.userData.detail)m.visible=!on;}
+ reset(){this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const n of this.nodes)n.quaternion.copy(n.userData.restQuaternion);if(this.exteriorOpen)this.setExteriorOpen(true);}
+ dispose(){this.geometries.forEach(g=>g.dispose());this.materials.forEach(m=>m.dispose());}
 }
