@@ -57,11 +57,14 @@ test('V123 Suprasetter reference exposes debris and temperature capabilities onl
  assert.equal(m.root.userData.engineeringDimensions,false);m.dispose();
 });
 
-test('V123 Zund reference exposes zoned vacuum ITI ICC laser and router extraction while ARC remains capability-only',()=>{
+test('V123 Zund reference exposes modular vacuum platform while ICC ITI router and ARC remain capability-only',()=>{
  const m=createMachineTemplate('BMJ-MCH-0028');
- requireRoles(m,['vacuum-zone-valve','iti-initialization-pad','icc-laser-pointer-reference','router-dust-extraction-hose']);
- assert.equal(m.findNode('universal-module-1-active').userData.individuallySwitchableVacuumZones,true);
- assert.match(m.findNode('universal-module-4-active').userData.arcMagazineCapability,/OPTIONAL/);
+ requireRoles(m,['vacuum-zone-valve-reference','tool-initialization-pad-option-reference','icc-camera-option-reference','router-dust-extraction-option-reference','arc-toolchanger-capability-envelope']);
+ assert.equal(m.findNode('zund-vacuum-zones').userData.individualZoneTopologyVerified,false);
+ assert.equal(m.findNode('zund-iti-option').userData.installedOptionVerified,false);
+ assert.equal(m.findNode('zund-icc-option').userData.installedOptionVerified,false);
+ assert.equal(m.findNode('zund-router-option').userData.installedOptionVerified,false);
+ assert.equal(m.findNode('zund-arc-option').userData.installedOptionVerified,false);
  m.dispose();
 });
 
@@ -419,5 +422,60 @@ test('V123 R6 SCREEN CTF uses capstan slack gravity polygon laser and bounded ou
  }
  assert.equal(sawExposure,true);
  assert.equal(sawCut,true);
+ sim.dispose();m.dispose();
+});
+
+
+test('V123 R7 Zünd keeps tool camera initialization and handling packages bounded while simulating vacuum plus XY platform only',()=>{
+ const m=createMachineTemplate('BMJ-MCH-0028');
+ assert.equal(m.root.userData.detailPass,'V123_R7_ZUND_MODULAR_PLATFORM_RECONSTRUCTION');
+ assert.equal(m.root.userData.exactZundModelVerified,false);
+ assert.deepEqual(m.root.userData.familyCandidates,['G3','S3']);
+ assert.equal(m.root.userData.installedToolPackageVerified,false);
+ assert.equal(m.root.userData.installedIccVerified,false);
+ assert.equal(m.root.userData.installedItiVerified,false);
+ assert.equal(m.root.userData.installedArcVerified,false);
+ assert.equal(m.root.userData.installedMaterialHandlingVerified,false);
+
+ requireRoles(m,[
+  'vacuum-cutting-surface','vacuum-port-reference','vacuum-zone-divider-reference','vacuum-zone-valve-reference',
+  'gantry-linear-guide-reference','gantry-drive-rack-reference','travelling-beam-structure','beam-guide-carriage-reference',
+  'tool-carriage-structure','carriage-z-guide-reference','universal-module-carrier-reference','module-bayonet-interface-reference',
+  'cutting-tool-capability-envelope','creasing-tool-capability-envelope','routing-tool-capability-envelope','arc-toolchanger-capability-envelope',
+  'router-dust-extraction-option-reference','icc-camera-option-reference','icc-lighting-option-reference',
+  'tool-initialization-pad-option-reference','zund-control-display-reference','vacuum-generator-interface',
+  'vacuum-supply-duct-reference','material-handling-option-boundary'
+ ]);
+ for(const id of ['zund-cut-tool-option','zund-crease-option','zund-router-option','zund-arc-option','zund-icc-option','zund-iti-option','zund-handling-option']){
+  assert.equal(m.findNode(id).userData.installedOptionVerified,false,id);
+  assert.equal(m.findNode(id).userData.simulationEnabled,false,id);
+ }
+ assert.equal(m.findNode('zund-router-option').userData.urtReference.powerW,300);
+ assert.equal(m.findNode('zund-router-option').userData.urtReference.maxRpm,80000);
+ assert.equal(m.findNode('zund-router-option').userData.urtReference.installedApplicabilityVerified,false);
+
+ const levels=[...new Set(m.taxonomy.map(n=>n.level))].sort();
+ assert.deepEqual(levels,[1,2,3,4,5,6]);
+ assert.equal(new Set(m.taxonomy.map(n=>n.id)).size,m.taxonomy.length);
+ for(const n of m.taxonomy.filter(n=>n.level>1))assert.ok(m.taxonomy.some(p=>p.id===n.parentId),'Zünd missing parent '+n.parentId);
+ for(const n of m.taxonomy.filter(n=>n.level===6)){
+  assert.ok(n.meshRefs.length>0,n.id);
+  assert.ok(m.findNode(n.meshRefs[0]),'Zünd missing taxonomy target '+n.meshRefs[0]);
+ }
+
+ const sim=createMachineSimulation('BMJ-MCH-0028',m.root,m);
+ let s=sim.start(),now=0,sawVacuum=false,sawAxis=false;
+ assert.equal(s.simulationBoundary,'ZUND_XY_PLATFORM_MOTION_ONLY__INSTALLED_TOOL_CAMERA_INIT_PACKAGE_NOT_INFERRED');
+ assert.equal(s.installedToolPackageVerified,false);
+ assert.equal(s.toolActionEnabled,false);
+ assert.equal(s.registrationCameraInstalledVerified,false);
+ assert.equal(s.toolInitializationInstalledVerified,false);
+ for(let i=0;i<220;i++){
+  now+=50;sim.update(now);s=sim.state();
+  sawVacuum ||= s.vacuumHoldActive;
+  sawAxis ||= s.zundAxisMotionActive;
+  assert.equal(s.toolActionEnabled,false);
+ }
+ assert.equal(sawVacuum,true);assert.equal(sawAxis,true);
  sim.dispose();m.dispose();
 });
