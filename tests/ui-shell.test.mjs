@@ -35,6 +35,7 @@ const simulationSheeting=readFileSync(new URL('../frontend/src/simulation-sheeti
 const taxonomySheeting=readFileSync(new URL('../frontend/src/data/taxonomy-sheeting.js',import.meta.url),'utf8');
 const sourcesSheeting=readFileSync(new URL('../frontend/src/data/sources-sheeting.js',import.meta.url),'utf8');
 const registry=readFileSync(new URL('../frontend/src/data/machine-registry.js',import.meta.url),'utf8');
+const runtime=readFileSync(new URL('../frontend/src/machine-runtime.js',import.meta.url),'utf8');
 
 test('runtime hooks required by the 3D application remain available',()=>{
   for(const id of ['viewport','detail-panel','panel-content','nav-machine','nav-layout','nav-assets','nav-exterior','nav-sources','nav-help','focus-machine','edit-position','settings','connect','modal','toast','dwg-canvas'])assert.match(html,new RegExp(`id="${id}"`));
@@ -192,7 +193,7 @@ test('v45 exposes a safe Printing Test simulation with continuous sheet flow',()
   assert.match(app,/engine\.startPrintingSimulation\(\)/);
   assert.match(app,/engine\.pausePrintingSimulation\(\)/);
   assert.match(app,/engine\.stopPrintingSimulation\(\)/);
-  assert.match(engine,/new PrintingSimulation\(this\.machine,this\.template\)/);
+  assert.match(runtime,/if\(k==='offset5'\)return new PrintingSimulation\(machine,template\)/);
   assert.match(engine,/this\.simulation\?\.update\(now\)/);
   assert.match(simulation,/CatmullRomCurve3/);
   assert.match(simulation,/getPointAt\(t\)/);
@@ -270,8 +271,8 @@ test('v53 routes a rebuilt document-grounded CX104 twin without Offset 5 UI leak
   assert.doesNotMatch(app,/machine=\$\{route\}&v=50/);
   assert.match(app,/Tidak ada foto aktual Offset 10 yang tersedia/);
   assert.match(app,/final drawing BMJ/);
-  assert.match(engine,/Offset10MachineTemplate/);
-  assert.match(engine,/Offset10PrintingSimulation/);
+  assert.match(runtime,/Offset10MachineTemplate/);
+  assert.match(runtime,/Offset10PrintingSimulation/);
   assert.match(offset10,/o10-foilstar-superstructure/);
   assert.match(offset10,/o10-foilstar-unwinder/);
   assert.match(offset10,/o10-foilstar-rewinder/);
@@ -302,9 +303,9 @@ test('v54 keeps APM2 as a dedicated 3D machine with process-specific UI and no i
   assert.match(app,/register dan SideLay/);
   assert.match(app,/suffix E\/SE\/CER\/BMA tidak tersedia/);
   assert.match(app,/machine\.machineId==='BMJ-MCH-0010'\?'apm2'/);
-  assert.match(engine,/APM2MachineTemplate/);
-  assert.match(engine,/APM2ProcessSimulation/);
-  assert.match(engine,/this\.machineKey==='apm2'/);
+  assert.match(runtime,/APM2MachineTemplate/);
+  assert.match(runtime,/APM2ProcessSimulation/);
+  assert.match(runtime,/if\(k==='apm2'\)return new APM2MachineTemplate\(\)/);
   assert.match(apm2,/MACHINE-APM2/);
   assert.match(apm2,/apm2-register-sidelay/);
   assert.match(apm2,/apm2-gripper-bar-/);
@@ -326,9 +327,9 @@ test('v57 routes Sheeting Lexus as a dedicated right-to-left twin',()=>{
   assert.match(app,/SHEETING LEXUS/);
   assert.match(app,/RIGHT → LEFT/);
   assert.match(app,/Simulasi Proses Sheeting/);
-  assert.match(engine,/SheetingMachineTemplate/);
-  assert.match(engine,/SheetingProcessSimulation/);
-  assert.match(engine,/this\.machineKey==='sheeting'/);
+  assert.match(runtime,/SheetingMachineTemplate/);
+  assert.match(runtime,/SheetingProcessSimulation/);
+  assert.match(runtime,/if\(k==='sheeting'\)return new SheetingMachineTemplate\(\)/);
   assert.match(sheeting,/processDirection:'RIGHT_TO_LEFT'/);
   assert.match(sheeting,/sheeting-rollstand/);
   assert.match(sheeting,/sheeting-cutter/);
