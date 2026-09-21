@@ -84,7 +84,11 @@ test('V123 R2 YA1A1A Offset 7 exposes bounded sheet-fed gravure mechanisms and b
  ]);
  assert.equal(m.findNode('o7-ink-drop-option').userData.installedOptionVerified,false);
  assert.equal(m.findNode('o7-transmission').userData.installedTopologyVerified,false);
+ assert.equal(m.findNode('universal-module-3').position.x,m.findNode('universal-module-4').position.x);
+ assert.equal(m.findNode('universal-module-4').position.x,m.findNode('universal-module-5').position.x);
+ assert.equal(m.root.userData.printingNip.relation,'GRAVURE_CYLINDER_TO_IMPRESSION_CYLINDER');
  assert.ok(m.taxonomy.filter(n=>n.level===6).length>=18);
+ for(let i=1;i<=8;i++)for(const child of m.findNode('universal-module-'+i+'-active').children.filter(o=>o.isMesh&&o.userData.referencePlaceholder))assert.equal(child.visible,false);
  const sim=createMachineSimulation('BMJ-MCH-0004',m.root,m);
  const state=sim.start();
  assert.equal(state.blocked,true);
