@@ -24,6 +24,7 @@ import {fz1200TaxonomyFor} from './data/taxonomy-fz1200.js';
 import {FZ1200_TECHNICAL_SOURCES} from './data/sources-fz1200.js';
 import {UPG_LY300_TAXONOMY} from './data/taxonomy-upg-ly300.js';
 import {UPG_LY300_TECHNICAL_SOURCES} from './data/sources-upg-ly300.js';
+import {OFFSET7_GRAVURE_TAXONOMY} from './data/taxonomy-offset7.js';
 
 const FAMILY_BY_NO=new Map([
  [1,'guillotine'],[2,'sheeter'],[4,'gravure'],[5,'offset'],[6,'offset'],[7,'pileturner'],[8,'pileturner'],
@@ -57,7 +58,11 @@ const FAMILY_SOURCES={
  gravure:[
   ['YA1A1A installed single-gravure evidence','https://www.wlzp.vip/touch/wzp/index.aspx?comid=49287'],
   ['YA1A1 used-machine size/speed evidence','https://www.sohu.com/a/130659125_167159'],
-  ['Ezgravtek sheet-fed gravure technology / current family','https://en.ezgravtek.com/NewsDetail.aspx?ID=233']
+  ['Ezgravtek sheet-fed gravure technology / current family','https://en.ezgravtek.com/NewsDetail.aspx?ID=233'],
+  ['Sheet-fed gravure transfer / ink pan / gripper patent','https://patents.google.com/patent/JP3292876B2/en'],
+  ['Gravure doctor holder / oscillator patent','https://patents.google.com/patent/US20030213386A1/en'],
+  ['H. C. MOOG sheet-fed rotogravure press program','https://www.hcmoog.de/products/program/'],
+  ['H. C. MOOG sheet-fed gravure technology / drying options','https://www.hcmoog.de/products/rotogravure-technology/']
  ],
  offset:[['Heidelberg CX 104 official','https://www.heidelberg.com/global/en/print_and_packaging/products/offset_printing/format_70_x_100/speedmaster_cx_104/product_information_5/product_information_cx_104.jsp'],['Heidelberg SX 52 brochure','https://www.heidelberg.com/tw/media/local_media/product/brochures/Speedmaster_SX_52.pdf']],
  hotfoil:[['MK 920 YMI archive','https://www.pressdepo.com/machine/en-133612/mk-920-ymi-foil-stamping-machine']],
@@ -91,7 +96,7 @@ const REFERENCE_SOURCES_BY_NO=new Map([
 
 const EVIDENCE_BY_NO=new Map([
  [1,{grade:'MODEL_PROCESS_GROUNDED',geometry:'DEDICATED_MODEL_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated POLAR 115 EM-MON twin uses the BMJ model/serial identity plus repeatedly documented 115 EM/EM-MON architecture: 115 cm guillotine, air table and side tables, programmed backgauge, hydraulic clamp/knife, photoelectric safety and two-hand cut command. Exact BMJ accessory package and internal hydraulic routing remain serial-specific.'}],
- [4,{grade:'MODEL_IDENTIFIED_PROCESS_GROUNDED',geometry:'YA1A1_EXACT_IDENTITY__YA1B1_FAMILY_MECHANICS',simulation:'FAMILY_PROCESS_MODEL',reason:'YA1A1A is externally documented as a Beijing Zhenhengli single sheet-fed gravure press. YA1A1 references support the 920×650 mm size class and roughly 5,000 sheets/hour; later YA1B1 references support the recognizable sheet-fed feeder, ink-pan/gravure-cylinder/doctor-blade, impression, dryer and high-pile-delivery architecture. Exact BMJ YA1A1A cylinder, ink-circulation and dryer details remain unverified.'}],
+ [4,{grade:'MODEL_IDENTIFIED_PROCESS_GROUNDED',geometry:'YA1A1A_EXACT_IDENTITY__SHEETFED_GRAVURE_MECHANISM_REFERENCE',simulation:'BLOCKED',reason:'YA1A1A is externally documented as a Beijing Zhenhengli single sheet-fed gravure press. V123 R2 deepens the model with documented sheet-fed gravure mechanisms: swing-pawl sheet transfer, impression-cylinder gripper, adjustable ink pan / drop-feed option boundary, gravure cylinder journals, pivoting doctor holder with axial oscillation, anti-slack pre-nip roller, drying/exhaust and high-pile delivery. Exact BMJ YA1A1A drive topology, ink-feed mode, cylinder dimensions and dryer technology remain unverified, therefore simulation stays blocked rather than inventing motion.'}],
  [5,{grade:'DOCUMENT_GROUNDED',geometry:'DEDICATED_OFFICIAL_FAMILY_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated OFFSET 8 twin combines the BMJ CX 104-8+LYYL identity/serial/year and installed 8 PU + L + Y + Y + L sequence with official HEIDELBERG CX 104 sheet, stock, speed, pile and Preset Plus architecture. Dryer energy technology and serial-specific option packages remain intentionally unasserted.'}],
  [6,{grade:'DOCUMENT_GROUNDED',geometry:'DEDICATED_OFFICIAL_FAMILY_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated SX 52-4+L twin uses official HEIDELBERG sheet limits, central suction-tape/Venturi feed, offset-cylinder/TransferJacket architecture, speed-compensated inking, Alcolor film dampening, chamber-blade coating and Venturi delivery principles plus the BMJ identity/configuration record. Standard versus high-pile delivery, dryer/UV/perfector/Anicolor options and exact internal roller counts remain unverified.'}],
  [7,{grade:'MODEL_FAMILY_PROCESS_GROUNDED',geometry:'DEDICATED_FAMILY_PROCESS_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated FZ1200 twin models the consistently documented clamp, turning, air separation/dust removal and jogging/alignment process. OEM origin and installed load/hydraulic/blower configuration remain unresolved.'}],
@@ -125,6 +130,7 @@ export function universalTechnicalSources(machineId){const cfg0=universalMachine
 
 export function universalTaxonomy(machineId){
  if(machineId==='BMJ-MCH-0001')return [...POLAR115_TAXONOMY];
+ if(machineId==='BMJ-MCH-0004')return [...OFFSET7_GRAVURE_TAXONOMY];
  if(machineId==='BMJ-MCH-0005')return [...OFFSET8_TAXONOMY];
  if(machineId==='BMJ-MCH-0006')return [...OFFSET9_TAXONOMY];
  if(['BMJ-MCH-0011','BMJ-MCH-0012'].includes(machineId))return [...mk920TaxonomyFor(machineId)];
