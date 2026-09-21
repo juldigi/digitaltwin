@@ -1,9 +1,20 @@
 export const POLAR115_TECHNICAL_SOURCES=Object.freeze([
- {id:'BMJ-POLAR-ID',title:'BMJ Machine Database · GLM-1',publisher:'PT Bukit Muria Jaya',type:'USER_PROVIDED',confidence:'VERIFIED',supports:['model','serial','functionalLocation','sapCode']},
- {id:'POLAR-EM-SPEC-1',title:'POLAR 115 EM-MON listing · 115 cm opening, air tables, photocells, 3500 kg',publisher:'Kitmondo',url:'https://www.kitmondo.com/polar-115-em-mon-p260219425/',type:'ARCHIVE_SPECIFICATION',confidence:'CORROBORATED'},
- {id:'POLAR-EM-SPEC-2',title:'POLAR 115 EM Monitor · 115 cm width/depth and 16.5 cm cutting height',publisher:'Exapro',url:'https://www.exapro.com/polar-115-em-monitor-p241022253/',type:'ARCHIVE_SPECIFICATION',confidence:'CORROBORATED'},
- {id:'POLAR-EM-OP-1',title:'POLAR 115 EM program entry and deletion operation',publisher:'Gab Supplies',url:'https://www.youtube.com/watch?v=VTjD3mLdJgg',type:'OPERATION_VIDEO',confidence:'MODEL_REFERENCE'},
- {id:'POLAR-EM-OP-2',title:'POLAR 115 EM pre-shipment operational inspection',publisher:'Gab Supplies',url:'https://www.youtube.com/watch?v=yBB8pHxqswY',type:'OPERATION_VIDEO',confidence:'MODEL_REFERENCE'},
- {id:'POLAR-EM-SVC-1',title:'POLAR 115 EM length measurement / backgauge reference drive evidence',publisher:'Color Printing Forum',url:'https://www.colorprintingforum.com/threads/polar-115-em-mon-no-pulses-from-the-lms.15745/',type:'SERVICE_REFERENCE',confidence:'MODEL_REFERENCE'}
+ {id:'BMJ-POLAR-ID',title:'BMJ Machine Database · GLM-1',publisher:'PT Bukit Muria Jaya',type:'USER_PROVIDED',confidence:'VERIFIED',supports:['model 115 EM MON','serial 5831536','functional location','SAP GLM-1']},
+ {id:'POLAR-EM-SPEC-KITMONDO',title:'POLAR 115 EM MONITOR · 115 cm opening, air table, side tables, photocells',publisher:'Kitmondo',url:'https://www.kitmondo.com/polar-115-em-monitor-p241022253/',type:'ARCHIVE_SPECIFICATION',confidence:'CORROBORATED',supports:['115 cm cutting opening','115 cm back-table depth','air table','left/right side tables','photo cells','165 mm published cutting-height reference']},
+ {id:'POLAR-EM-SPEC-EXAPRO',title:'POLAR 115 EM Monitor family specification',publisher:'Exapro',url:'https://www.exapro.com/sp/polar-115emmonitor-50051/',type:'ARCHIVE_SPECIFICATION',confidence:'CORROBORATED',supports:['115 cm width/depth','air table','left/right side tables','photo cells','2650×2540×1650 mm reference envelope','3200 kg reference weight']},
+ {id:'POLAR-EM-1994-EXAPRO',title:'POLAR 115 EM-MON operating configuration reference',publisher:'Exapro',url:'https://www.exapro.com/polar-115-em-mon-p210527056/',type:'ARCHIVE_CONFIGURATION',confidence:'MODEL_REFERENCE',supports:['program monitor','electric dimension positioning','hydraulic pressing/cutting','chromed airbed','IR safety','two-hand operation','165 mm pile-height reference']},
+ {id:'POLAR-EM-1984-ARCHIVE',title:'POLAR 115 EM technical archive reference',publisher:'Exapro',url:'https://www.exapro.fr/polar-115-em-p80220111/',type:'ARCHIVE_SPECIFICATION',confidence:'FAMILY_REFERENCE',supports:['Eltromat Memory control','automatic backgauge positioning','optical cut line','150–4500 daN clamp-pressure reference','front table 715 mm','table height 900 mm','2650×2540×1650 mm envelope','3200 kg reference weight']},
+ {id:'POLAR-EM-SAFETY',title:'POLAR 115 EM-MON · hydraulic knife, photocell and two-hand operation reference',publisher:'Werktuigen / Graphische Okkasionen Karakus',url:'https://www.werktuigen.com/polar-115%2Bem-monitor/wt-188-20511',type:'ARCHIVE_CONFIGURATION',confidence:'MODEL_REFERENCE',supports:['hydraulic knife drive','photocell safety device','two-hand operation','EM-MON program control','air table with blower']},
+ {id:'POLAR-EM-OP-MANUAL',title:'POLAR 92/115/137/155 EMC/EM-MONITOR operating-instruction archive',publisher:'Document archive',url:'https://www.scribd.com/document/1064998278/Polar-92-115-137-155-Emc-Em-Monitor-Instrucciones-de-Funcionamiento',type:'OPERATION_MANUAL_ARCHIVE',confidence:'MODEL_FAMILY_REFERENCE',supports:['EM-MONITOR control-desk architecture','program keys','dimension input','air-table control','pressing-without-cut control']},
+ {id:'POLAR-EM-EVIDENCE-BOUNDARY',title:'Installed-option and dimensional boundary',publisher:'Digital Twin engineering control',type:'ENGINEERING_CONTROL',confidence:'VERIFIED_BOUNDARY',supports:['Do not infer Autotrim, jogger, pallet lift, exact internal hydraulic routing, exact machine weight or serial-specific accessory package for BMJ serial 5831536.']}
 ]);
-export const POLAR115_PROCESS=Object.freeze(['Load and float pile on air table','Move backgauge to programmed dimension','Align stock against gauge and side reference','Confirm light barrier clear and two-hand command','Lower hydraulic clamp','Knife descends through stock into cutting stick','Knife returns to top position','Release clamp and reposition stock']);
+export const POLAR115_PROCESS=Object.freeze([
+ 'Load / float stock on air table',
+ 'Move backgauge to programmed dimension',
+ 'Align stock against backgauge and side reference',
+ 'Verify light barrier clear / initiate two-hand cut command',
+ 'Lower hydraulic clamp',
+ 'Knife downstroke through stock into cutting stick',
+ 'Knife upstroke to top position',
+ 'Release clamp / remove or reposition stock'
+]);
