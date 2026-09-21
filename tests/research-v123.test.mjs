@@ -47,10 +47,12 @@ test('V123 Diana Eye 55 exposes feeder knife air blowing ultrasonic double-sheet
  m.dispose();
 });
 
-test('V123 Suprasetter reference adds thermal stabilization and debris-removal detail without asserting installed options',()=>{
+test('V123 Suprasetter reference exposes debris and temperature capabilities only as unverified option boundaries',()=>{
  const m=createMachineTemplate('BMJ-MCH-0025');
  assert.equal(m.root.userData.researchVersion,'V123');
- requireRoles(m,['temperature-stabilizer-interface','temperature-control-line-reference','debris-removal-vacuum-fan','debris-filter-cartridge']);
+ requireRoles(m,['temperature-stabilizer-option','temperature-control-line-option','debris-removal-vacuum-option','debris-filter-option']);
+ assert.equal(m.findNode('ctp-debris-option').userData.installedOptionVerified,false);
+ assert.equal(m.findNode('ctp-temp-stabilizer-option').userData.installedOptionVerified,false);
  assert.equal(m.root.userData.suprasetterOptions.internalPunch,'AVAILABLE_NOT_INSTALLATION_CONFIRMED');
  assert.equal(m.root.userData.engineeringDimensions,false);m.dispose();
 });
@@ -355,4 +357,67 @@ test('V123 R5 Suprasetter CTP-1/2 expose common Heidelberg mechanics while loade
   assert.ok(sim.motions.some(item=>item.mesh.userData.mechanismRole==='heidelberg-laser-carriage'),id+' laser carriage motion missing');
   sim.dispose();m.dispose();
  }
+});
+
+
+test('V123 R6 SCREEN CTF uses capstan slack gravity polygon laser and bounded output architecture without inventing exact model',()=>{
+ const m=createMachineTemplate('BMJ-MCH-0027');
+ assert.equal(m.root.userData.detailPass,'V123_R6_SCREEN_FTR_KATANA_MULTI_MODEL_RECONSTRUCTION');
+ assert.equal(m.root.userData.exactScreenModelVerified,false);
+ assert.deepEqual(m.root.userData.familyCandidates,['FT-R3035','FT-R3050','Katana 5040','Katana 5055']);
+ assert.equal(m.root.userData.processArchitecture,'CAPSTAN_FLATBED_SCAN__NOT_IMAGING_DRUM');
+ assert.equal(m.root.userData.exactLaserWavelengthVerified,false);
+ assert.deepEqual(m.root.userData.familyLaserWavelengthNm,[633,635]);
+ assert.deepEqual(m.root.userData.katanaPolygonReference,{facets:5,maxRpm:14400,installedApplicabilityVerified:false});
+ assert.equal(m.root.userData.installedPunchVerified,false);
+ assert.equal(m.root.userData.installedProcessorVerified,false);
+
+ requireRoles(m,[
+  'media-supply-roll','media-cassette-spindle','media-cassette-sideplate',
+  'automatic-load-roller','media-entry-guide',
+  'capstan-drive-roller','capstan-nip-roller','media-web-reference',
+  'front-slack-media-loop-reference','front-slack-guide-roller','gravity-tension-roller',
+  'rear-slack-media-loop-reference','rear-slack-guide-roller',
+  'five-facet-polygon-mirror-reference','polygon-scanner-housing','polygon-drive-motor-reference',
+  'red-laser-source-reference','beam-focus-lens-reference','laser-beam-path-reference','laser-scan-path-reference','laser-modulator-reference',
+  'media-cross-cutter','cutter-anvil-reference','register-punch-option-reference',
+  'output-cassette-family-reference','inline-processor-interface-boundary','rip-control-interface-reference','data-interface-generation-boundary'
+ ]);
+ const poly=[];m.root.traverse(o=>{if(o.userData?.mechanismRole==='five-facet-polygon-mirror-reference')poly.push(o);});
+ assert.equal(poly.length,1);
+ assert.equal(poly[0].userData.documentedKatanaFacetCount,5);
+ assert.equal(poly[0].userData.installedFacetCountVerified,false);
+ assert.equal(poly[0].userData.documentedKatanaMaxRpm,14400);
+ assert.equal(poly[0].userData.installedRpmVerified,false);
+ assert.equal(m.findNode('ctf-punch-option').userData.installedOptionVerified,false);
+ assert.equal(m.findNode('ctf-processor-boundary').userData.installedOptionVerified,false);
+ assert.equal(m.findNode('ctf-output-cassette').userData.installedOptionVerified,false);
+ assert.equal(m.findNode('ctf-control-boundary').userData.installedOptionVerified,false);
+
+ const levels=[...new Set(m.taxonomy.map(n=>n.level))].sort();
+ assert.deepEqual(levels,[1,2,3,4,5,6]);
+ assert.equal(new Set(m.taxonomy.map(n=>n.id)).size,m.taxonomy.length);
+ for(const n of m.taxonomy.filter(n=>n.level>1))assert.ok(m.taxonomy.some(p=>p.id===n.parentId),'CTF missing parent '+n.parentId);
+ for(const n of m.taxonomy.filter(n=>n.level===6)){
+  assert.ok(n.meshRefs.length>0,n.id);
+  assert.ok(m.findNode(n.meshRefs[0]),'CTF missing taxonomy target '+n.meshRefs[0]);
+ }
+
+ const sim=createMachineSimulation('BMJ-MCH-0027',m.root,m);
+ let s=sim.start(),now=0,sawExposure=false,sawCut=false;
+ assert.equal(s.available,true);assert.equal(s.blocked,false);
+ assert.equal(s.exactScreenModelVerified,false);
+ assert.equal(s.punchInstalledVerified,false);
+ assert.equal(s.processorInstalledVerified,false);
+ assert.equal(s.simulationBoundary,'SCREEN_FTR_KATANA_COMMON_PROCESS_ONLY__PUNCH_PROCESSOR_MODEL_OPTIONS_NOT_INFERRED');
+ const optionRoles=/register-punch-option|inline-processor-interface/i;
+ assert.ok(sim.motions.every(item=>!optionRoles.test(String(item.mesh.userData.mechanismRole||''))));
+ for(let i=0;i<280;i++){
+  now+=50;sim.update(now);s=sim.state();
+  sawExposure ||= s.exposureActive;
+  sawCut ||= s.cuttingActive;
+ }
+ assert.equal(sawExposure,true);
+ assert.equal(sawCut,true);
+ sim.dispose();m.dispose();
 });
