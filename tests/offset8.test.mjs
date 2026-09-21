@@ -5,7 +5,18 @@ test('Offset 8 is dedicated CX104-8+LYYL geometry',()=>{const m=new Offset8Machi
 test('each PU has physical offset train, 4+4 ink and 5 dampening rollers',()=>{const m=new Offset8MachineTemplate();for(let i=1;i<=8;i++){const id='offset8-pu'+i;for(const x of ['cylinders','inking','dampening','sheet'])assert.ok(m.findNode(id+'-'+x));const roles=[];m.findNode(id+'-inking').traverse(o=>o.userData?.rollerRole&&roles.push(o.userData.rollerRole));assert.equal(roles.filter(x=>x.startsWith('distributor')).length,4);assert.equal(roles.filter(x=>x.startsWith('form')).length,4);const d=[];m.findNode(id+'-dampening').traverse(o=>o.userData?.rollerRole&&d.push(o));assert.equal(d.length,5);}m.dispose();});
 test('LYYL order has two coaters and neutral dryer sections',()=>{const m=new Offset8MachineTemplate();assert.deepEqual(OFFSET8_MODULE_SEQUENCE.slice(-4).map(x=>x.key),['L1','Y1','Y2','L2']);for(const x of ['l1-chamber','l1-anilox','l1-apply','y1-air','y1-guide','y1-exhaust','y2-air','l2-apply'])assert.ok(m.findNode('offset8-'+x));m.dispose();});
 test('six-level taxonomy is populated and mapped',()=>{const s=offset8TaxonomyStats();for(let l=1;l<=6;l++)assert.ok(s.byLevel[l]>0);assert.ok(s.total>250);});
-test('simulation advances through all modules and restores mechanisms',()=>{const m=new Offset8MachineTemplate(),s=new Offset8PrintingSimulation(m.root,m);assert.ok(s.rotors.length>100);assert.ok(OFFSET8_SIMULATION_STAGES.includes('Coating Unit 1'));assert.ok(OFFSET8_SIMULATION_STAGES.includes('Dryer 2'));s.start();s.update(s.startAt+16000);assert.ok(s.completed>0);s.stop();assert.equal(s.state().pileSheetsVisible,0);assert.equal(s.rotors.every((r,i)=>Math.abs(r.rotation.z-s.rest[i])<1e-9),true);s.dispose();m.dispose();});
+test('simulation rotates only real process rollers and restores every local-axis quaternion',()=>{
+ const m=new Offset8MachineTemplate(),s=new Offset8PrintingSimulation(m.root,m);
+ assert.ok(s.rotors.length>90);assert.ok(s.rotors.length<180);
+ const bad=new Set(['rail','sucker','air-bar','exhaust']);
+ assert.equal(s.rotors.some(r=>bad.has(r.userData.rollerRole)),false);
+ assert.ok(s.suckers.length===4);assert.ok(OFFSET8_SIMULATION_STAGES.includes('Dynamic Sheet Brake'));
+ s.start();let now=1000;for(let i=0;i<1800;i++){now+=10;s.update(now);}
+ assert.ok(s.completed>0);assert.ok(s.state().mechanismCount>s.rotors.length);
+ s.stop();assert.equal(s.state().pileSheetsVisible,0);
+ assert.equal(s.rotors.every((r,i)=>r.quaternion.angleTo(s.rotorRest[i])<1e-9),true);
+ s.dispose();m.dispose();
+});
 test('official CX104 limits are recorded',()=>{assert.deepEqual(OFFSET8_SPEC.maxSheet,[.720,1.040]);assert.deepEqual(OFFSET8_SPEC.maxPrint,[.710,1.020]);assert.equal(OFFSET8_SPEC.speedStandard,15000);assert.equal(OFFSET8_SPEC.speedOption,16500);assert.equal(OFFSET8_SPEC.feederPile,1.320);});
 test('OFFSET 8 app evidence routing matches its dedicated engine runtime',()=>{
  const cfg=universalMachineConfig('BMJ-MCH-0005');
@@ -14,4 +25,21 @@ test('OFFSET 8 app evidence routing matches its dedicated engine runtime',()=>{
  assert.deepEqual(universalTaxonomy('BMJ-MCH-0005'),OFFSET8_TAXONOMY);
  assert.deepEqual(universalTechnicalSources('BMJ-MCH-0005'),OFFSET8_TECHNICAL_SOURCES);
  assert.ok(OFFSET8_TECHNICAL_SOURCES.filter(s=>s.authority==='primary').length>=2);
+});
+
+test('V99 sheet centerline visits offset/coating nips without crossing cylinder cores',()=>{
+ const m=new Offset8MachineTemplate(),s=new Offset8PrintingSimulation(m.root,m);
+ const critical=[];m.root.updateMatrixWorld(true);
+ m.root.traverse(o=>{if(o.isMesh&&['plate','blanket','impression','transfer','coating-blanket','coating-impression','anilox'].includes(o.userData.rollerRole)){const p=new THREE.Vector3();o.getWorldPosition(p);critical.push({p,r:o.userData.radius,role:o.userData.rollerRole});}});
+ let minimum=Infinity;
+ for(const p of s.curve.getPoints(900))for(const c of critical){const d=Math.hypot(p.x-c.p.x,p.y-c.p.y);minimum=Math.min(minimum,d);assert.ok(d>c.r*.72,`${c.role} core penetration d=${d.toFixed(3)} r=${c.r}`);}
+ assert.ok(minimum<.34,'path should still approach a real process nip rather than float far above all cylinders');
+ s.dispose();m.dispose();
+});
+
+test('V99 delivery stack accumulates on the represented pile surface and dryer/coater states are occupancy-driven',()=>{
+ const m=new Offset8MachineTemplate(),s=new Offset8PrintingSimulation(m.root,m);s.start();let now=1000,coat=false,dry=false,brake=false;
+ for(let i=0;i<2400;i++){now+=10;s.update(now);const st=s.state();coat||=st.coatingActive;dry||=st.dryerActive;brake||=st.deliveryBrakeActive;}
+ assert.ok(coat&&dry&&brake);assert.ok(s.completed>0);const visible=s.stack.filter(x=>x.visible);assert.ok(visible.length>0);assert.ok(visible.every(x=>x.position.y>=1.292));
+ s.dispose();m.dispose();
 });
