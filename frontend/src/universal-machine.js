@@ -30,6 +30,7 @@ import {compressorTaxonomyFor} from './data/taxonomy-compressors.js';
 import {COLLATOR_TAXONOMY} from './data/taxonomy-collator.js';
 import {suprasetterTaxonomyFor} from './data/taxonomy-suprasetter.js';
 import {SCREEN_IMAGESETTER_TAXONOMY} from './data/taxonomy-imagesetter.js';
+import {FGM2_TAXONOMY} from './data/taxonomy-fgm2.js';
 import {ZUND_TAXONOMY} from './data/taxonomy-zund.js';
 import {ahuTaxonomyFor} from './data/taxonomy-ahu.js';
 
@@ -49,7 +50,7 @@ const MODULES={
  pileturner:['Base Frame','Turntable / Forks','Clamp','Aeration / Jogging','Hydraulic Drive','Safety & Control'],
  hotfoil:['Feeder','Register','Foil Unwind','Heating / Stamping Platen','Foil Advance','Stripping','Delivery','Drive & Control'],
  diecutter:['Feeder','Register','Gripper Transport','Die-Cutting Platen','Stripping','Blanking','Delivery','Drive & Control'],
- folder:['Feeder','Alignment','Pre-fold','Crash-lock / Folding','Glue System','Compression','Delivery','Drive & Control'],
+ folder:['Blank Feeder & Separation','Alignment & Prebreaking','Primary Folding / Box-Style Capabilities','Glue Application Boundary','Final Folding & Squaring','Compression Section','Delivery & Control'],
  inspection:['Feeder','Alignment','Camera / Lighting','Image Processing','Reject Gate','Delivery','Control'],
  blanker:['Feeder','Transport','Stripping / Blanking','Blank Separation','Waste Removal','Delivery','Drive & Control'],
  collator:['Feed Stations','Sheet Detection','Gathering Conveyor','Alignment','Stacker','Delivery','Control'],
@@ -80,7 +81,12 @@ const FAMILY_SOURCES={
  offset:[['Heidelberg CX 104 official','https://www.heidelberg.com/global/en/print_and_packaging/products/offset_printing/format_70_x_100/speedmaster_cx_104/product_information_5/product_information_cx_104.jsp'],['Heidelberg SX 52 brochure','https://www.heidelberg.com/tw/media/local_media/product/brochures/Speedmaster_SX_52.pdf']],
  hotfoil:[['MK 920 YMI archive','https://www.pressdepo.com/machine/en-133612/mk-920-ymi-foil-stamping-machine']],
  diecutter:[['Heidelberg Promatrix 106 CSB official','https://www.heidelberg.com/global/fr/print_and_packaging/finishing/die_cutting/die_cutting__machines/promatrix_106_csb/promatrix_106_csb_1.jsp']],
- folder:[['BOBST MEDIA 100 II archive','https://www.pressxchange.com/en/category/carton%20gluers/bobst/1998/germany/allaoui%20graphic%20machinery%20gmbh/media%20100%20ii%20-%20a2/machineid/71192/']],
+ folder:[
+  ['BOBST Media 100 II neighbor-process reference · FGM-1/FGM-3 class only','https://www.pressxchange.com/en/bobst-media-100-ii-a2-year-2002/machine-id/385095/'],
+  ['BOBST NOVAFOLD folder-gluer process reference','https://www.bobst.com/na/en/news/1642421329-completing-the-folding-gluing-dream-team-bobst-introduces-the-brand-new-novafold'],
+  ['Jaya Makmur Mesindo folder-gluer catalogue + BMJ customer association · not installation proof','https://jayamakmurmesindo.com/'],
+  ['BOBST modular folding mechanism patent','https://patents.google.com/patent/US5762597A/en']
+ ],
  inspection:[['Masterwork inspection systems','https://www.masterworkgroup.com/inspection-machine/mk-550qmini-inspection-machine.html']],
  blanker:[
   ['QF-1080B · moving platform / stable head / servo-ball-screw family reference','https://www.shanghai-yuyin.com/QF-1080B-Automatic-Blanking-Machine-pd45580714.html'],
@@ -157,7 +163,7 @@ const EVIDENCE_BY_NO=new Map([
  [14,{grade:'OEM_PROCESS_GROUNDED',geometry:'DEDICATED_OEM_PROCESS_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated APM-8 Promatrix 106 CSB twin follows HEIDELBERG documentation for non-stop feeder, suction-belt register table, cutting, stripping, blanking and CSB non-stop delivery. Optional MasterSet/logistics/tooling are not inferred.'}],
  [15,{grade:'OEM_PROCESS_GROUNDED',geometry:'DEDICATED_OEM_PROCESS_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated APM-9 Promatrix 106 CSB twin follows HEIDELBERG documentation for non-stop feeder, suction-belt register table, cutting, stripping, blanking and CSB non-stop delivery. Optional MasterSet/logistics/tooling are not inferred.'}],
  [16,{grade:'MODEL_FAMILY_PROCESS_GROUNDED',geometry:'DEDICATED_FAMILY_PROCESS_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated FGM-1 MEDIA 100 II twin follows the documented MEDIA II folder-gluer process and machine examples: feeder, pre-fold, carton-forming/lock-bottom architecture, glue application, final fold/trombone and compression delivery. A1/A2 suffix and accessories remain unverified.'}],
- [17,{grade:'NEAREST_INSTALLED_FAMILY_REFERENCE',geometry:'MEDIA100II_NEAREST_NEIGHBOR_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'FGM-2 has no model/serial/OEM in the BMJ registry. Because FGM-1 and FGM-3 are both recorded as BOBST MEDIA 100 II, FGM-2 now uses the MEDIA II process architecture only as the nearest installed family reference. It is not labelled as an exact BOBST model.'}],
+ [17,{grade:'FUNCTIONAL_MULTI_VENDOR_REFERENCE',geometry:'MULTI_VENDOR_FOLDER_GLUER_PROCESS_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'FGM-2 has no model/serial/OEM in the BMJ registry, so it is no longer shaped as a presumed MEDIA 100 II. The twin uses only the process intersection supported by folder-gluer references: blank feeding/separation, alignment/prebreaking, folding belts/guides, adhesive application boundary, final folding, compression and delivery/control. MEDIA 100 II evidence from neighboring FGM-1/FGM-3 and Jaya Makmur Mesindo folder-gluer/BMJ association improve local relevance but do not prove FGM-2 brand/model. Crash-lock, 4/6-corner, glue-gun/disc type, glue detection, counter/kicker and downstream packer remain unverified capabilities.'}],
  [18,{grade:'MODEL_FAMILY_PROCESS_GROUNDED',geometry:'DEDICATED_FAMILY_PROCESS_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated FGM-3 MEDIA 100 II twin uses the same evidence-bounded MEDIA II process architecture while retaining its own BMJ serial/SAP identity. No A1/A2 or accessory difference is inferred.'}],
  [19,{grade:'OEM_PROCESS_GROUNDED',geometry:'DEDICATED_OEM_PROCESS_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated DIANA EYE 55 twin follows official HEIDELBERG/Masterwork architecture for blank feeding, suction-belt inspection, camera/LED imaging, image processing and inline reject separation. Installed camera mix, reject actuation and optional stacker remain serial-specific.'}],
  [20,{grade:'MODEL_FAMILY_PROCESS_GROUNDED',geometry:'DEDICATED_FAMILY_PROCESS_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated IPM-4 twin follows Focusight FS-SHARK N650 primary documentation for automated feeding, full-suction transfer, high-speed vision inspection, reject separation and good/bad return collection. The P3N1 suffix and installed camera/feeder/reject configuration remain undecoded.'}],
@@ -187,6 +193,7 @@ export function universalTaxonomy(machineId){
  if(machineId==='BMJ-MCH-0023')return [...COLLATOR_TAXONOMY];
  if(['BMJ-MCH-0025','BMJ-MCH-0026'].includes(machineId))return [...suprasetterTaxonomyFor(machineId)];
  if(machineId==='BMJ-MCH-0027')return [...SCREEN_IMAGESETTER_TAXONOMY];
+ if(machineId==='BMJ-MCH-0017')return [...FGM2_TAXONOMY];
  if(machineId==='BMJ-MCH-0028')return [...ZUND_TAXONOMY];
  if(['BMJ-MCH-0036','BMJ-MCH-0037','BMJ-MCH-0038','BMJ-MCH-0039','BMJ-MCH-0040','BMJ-MCH-0041'].includes(machineId))return [...ahuTaxonomyFor(machineId)];
  if(['BMJ-MCH-0029','BMJ-MCH-0030','BMJ-MCH-0031','BMJ-MCH-0032','BMJ-MCH-0033','BMJ-MCH-0034','BMJ-MCH-0035'].includes(machineId))return [...compressorTaxonomyFor(machineId)];
