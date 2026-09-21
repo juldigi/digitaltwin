@@ -1,4 +1,4 @@
-const VERSION='factory-digital-twin-v123-r3-qf100cs-20260921';
+const VERSION='factory-digital-twin-v123-r3-brand-compressors-20260921';
 const SHELL=['./','./index.html','./config.json','./assets/favicon.svg',
   './assets/splash-industrial-v79.webp',
   './app-shell-v79.css',
