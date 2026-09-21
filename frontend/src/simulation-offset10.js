@@ -43,7 +43,6 @@ function createSheetGeometry(l=10,w=8){
   for(let i=0;i<l;i++)for(let j=0;j<w;j++){const a=i*(w+1)+j,b=a+1,d=(i+1)*(w+1)+j,e=d+1;idx.push(a,d,b,b,d,e);}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(p,3));g.setAttribute('color',new THREE.BufferAttribute(c,3));g.setIndex(idx);return g;
 }
-function cylinders(node){const out=[];node?.traverse(o=>{if(o.isMesh&&o.geometry?.type==='CylinderGeometry')out.push(o);});return out;}
 function flowCurve(cx,type='ink'){
   if(type==='damp')return new THREE.CatmullRomCurve3([
     new THREE.Vector3(cx+.35,1.54,.04),new THREE.Vector3(cx+.44,1.67,.035),new THREE.Vector3(cx+.47,1.84,.03),
@@ -124,8 +123,11 @@ export class Offset10PrintingSimulation{
     for(const key of OFFSET10_COATING_UNIT_KEYS){const cx=OFFSET10_MODULE_CENTERS[key],curve=new THREE.CatmullRomCurve3([new THREE.Vector3(cx-.35,2.30,.08),new THREE.Vector3(cx-.12,2.05,.04),new THREE.Vector3(cx+.08,1.55,0)],false,'centripetal',.5);this.addFlow(curve,0xd2b25a,'coat',cx*.01);}
   }
   collectMotion(){
-    for(const key of OFFSET10_PRINTING_UNIT_KEYS){const id='o10-'+key.toLowerCase();for(const suffix of ['plate','blanket','impression','transfer','ink-fountain-roll','ink-form','ink-distributors','ink-transfer','damp-rolls','damp-vario'])for(const mesh of cylinders(this.template.findNode(id+'-'+suffix)))this.rotors.push({mesh,initial:mesh.quaternion.clone(),rate:.8+(this.rotors.length%5)*.08,sign:this.rotors.length%2?-1:1});}
-    for(const key of OFFSET10_COATING_UNIT_KEYS){const id='o10-'+key.toLowerCase();for(const suffix of ['anilox','form','impression'])for(const mesh of cylinders(this.template.findNode(id+'-'+suffix)))this.rotors.push({mesh,initial:mesh.quaternion.clone(),rate:.9,sign:this.rotors.length%2?-1:1});}
+    const seen=new Set();
+    this.machine.traverse(mesh=>{
+      if(!mesh.isMesh||!mesh.userData?.rotor||!mesh.userData?.rollerRole||seen.has(mesh.uuid))return;
+      seen.add(mesh.uuid);this.rotors.push({mesh,initial:mesh.quaternion.clone(),role:mesh.userData.rollerRole,rate:mesh.userData.spinRate||.8,sign:mesh.userData.spinDirection||1});
+    });
     for(const key of OFFSET10_PRINTING_UNIT_KEYS){const n=this.template.findNode('o10-'+key.toLowerCase()+'-ink-distributors');if(n)this.oscillators.push({object:n,initial:n.position.clone(),axis:'z',amp:.035,rate:.72,phase:this.oscillators.length*.31});}
   }
   collectUV(){for(const id of ['o10-y1-uv','o10-y2-uv','o10-eop-uv'])this.template.findNode(id)?.traverse(mesh=>{if(mesh.userData.uvLamp)this.uv.push({mesh,type:'lamp',initial:mesh.material.emissiveIntensity});if(mesh.userData.uvBeam)this.uv.push({mesh,type:'beam',initialVisible:mesh.visible,initialOpacity:mesh.material.opacity});});}
@@ -135,7 +137,7 @@ export class Offset10PrintingSimulation{
   }
   state(){
     const moving=this.sheets.filter(s=>s.mesh.visible),lead=[...moving].sort((a,b)=>b.userData.progress-a.userData.progress)[0],p=lead?.userData.lead||this.points[0];
-    return {active:this.active,running:this.running,paused:this.active&&!this.running,speed:this.speed,stage:stageForX(p.x),completed:this.completed,progress:lead?.userData.progress||0,sheetsVisible:moving.length,pileSheetsVisible:this.pileSheets.filter(s=>s.mesh.visible).length,rotorCount:this.rotors.length,oscillatorCount:this.oscillators.length,mechanismCount:this.rotors.length+this.oscillators.length,inkFlowCount:this.flows.length,uvLampCount:9,uvActive:this.uvActive,foilStarActive:this.foilStarActive,pathVisible:this.pathVisible,inkFlowVisible:this.inkFlowVisible};
+    return {active:this.active,running:this.running,paused:this.active&&!this.running,speed:this.speed,stage:stageForX(p.x),completed:this.completed,progress:lead?.userData.progress||0,sheetsVisible:moving.length,pileSheetsVisible:this.pileSheets.filter(s=>s.mesh.visible).length,rotorCount:this.rotors.length,rotorRoles:[...new Set(this.rotors.map(r=>r.role))],oscillatorCount:this.oscillators.length,mechanismCount:this.rotors.length+this.oscillators.length,inkFlowCount:this.flows.length,uvLampCount:9,uvActive:this.uvActive,foilStarActive:this.foilStarActive,pathVisible:this.pathVisible,inkFlowVisible:this.inkFlowVisible};
   }
   emit(force=false){const now=performance?.now?.()||Date.now();if(!force&&now<this.emitAt)return;this.emitAt=now+120;this.onUpdate?.(this.state());}
   start(){if(!this.active){this.elapsed=0;this.completed=0;for(const p of this.pileSheets){p.mesh.visible=false;p.userData.serial=-1;}for(const s of this.sheets)s.userData.lastCycle=-1;}this.refreshPile();this.active=true;this.running=true;this.lastNow=null;this.group.visible=true;this.emit(true);return this.state();}
@@ -157,7 +159,7 @@ export class Offset10PrintingSimulation{
       if(x>D.deliveryCenterX-1.75&&x<D.deliveryCenterX-.25)zones.add('o10-eop-uv');
       if(Math.abs(x-OFFSET10_MODULE_CENTERS.PU2)<.75)this.foilStarActive=true;
     }
-    const angular=4.6*scaled;for(const r of this.rotors)r.mesh.rotateY(r.sign*r.rate*angular);const phase=this.elapsed*TAU;for(const o of this.oscillators)o.object.position[o.axis]=o.initial[o.axis]+Math.sin(phase*o.rate+o.phase)*o.amp;
+    const angular=4.6*scaled;for(const r of this.rotors)r.mesh.rotateY((r.sign||1)*(r.rate||.8)*angular);const phase=this.elapsed*TAU;for(const o of this.oscillators)o.object.position[o.axis]=o.initial[o.axis]+Math.sin(phase*o.rate+o.phase)*o.amp;
     for(const f of this.foil)if(this.foilStarActive)f.mesh.rotateY((f.direction||1)*angular*.82);
     if(this.inkFlowVisible)for(const f of this.flows)for(let i=0;i<f.particles.length;i++){const t=mod(this.elapsed*f.speed+f.phase+i/f.particles.length,1);f.particles[i].position.copy(f.curve.getPointAt(t));f.particles[i].scale.setScalar(.75+.25*Math.sin(phase+i));}
     this.setUV([...zones]);this.emit(false);
