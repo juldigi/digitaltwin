@@ -1,0 +1,1 @@
+CI verification snapshot for V103 FZ1200 mechanics. Temporary branch; do not merge marker.
