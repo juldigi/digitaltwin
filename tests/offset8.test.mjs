@@ -3,7 +3,7 @@ import {Offset8MachineTemplate} from '../frontend/src/offset8.js';import {Offset
 import {OFFSET8_MODULE_SEQUENCE,OFFSET8_SPEC} from '../frontend/src/data/dimensions-offset8.js';import {OFFSET8_TAXONOMY,offset8TaxonomyStats} from '../frontend/src/data/taxonomy-offset8.js';import {OFFSET8_TECHNICAL_SOURCES} from '../frontend/src/data/sources-offset8.js';import {universalMachineConfig,universalTaxonomy,universalTechnicalSources} from '../frontend/src/universal-machine.js';
 test('Offset 8 is dedicated CX104-8+LYYL geometry',()=>{const m=new Offset8MachineTemplate();assert.equal(OFFSET8_SPEC.configuration,'8 PU + L + Y + Y + L');assert.equal(OFFSET8_MODULE_SEQUENCE.length,12);for(const x of OFFSET8_MODULE_SEQUENCE)assert.ok(m.findNode('offset8-'+x.key.toLowerCase()));assert.ok(m.meshes.length>250);assert.equal(m.findNode('offset8-pu1-ink-roller-13'),null);m.dispose();});
 test('each PU has physical offset train, 4+4 ink and 5 dampening rollers',()=>{const m=new Offset8MachineTemplate();for(let i=1;i<=8;i++){const id='offset8-pu'+i;for(const x of ['cylinders','inking','dampening','sheet'])assert.ok(m.findNode(id+'-'+x));const roles=[];m.findNode(id+'-inking').traverse(o=>o.userData?.rollerRole&&roles.push(o.userData.rollerRole));assert.equal(roles.filter(x=>x.startsWith('distributor')).length,4);assert.equal(roles.filter(x=>x.startsWith('form')).length,4);const d=[];m.findNode(id+'-dampening').traverse(o=>o.userData?.rollerRole&&d.push(o));assert.equal(d.length,5);}m.dispose();});
-test('LYYL order has two coaters and neutral dryer sections',()=>{const m=new Offset8MachineTemplate();assert.deepEqual(OFFSET8_MODULE_SEQUENCE.slice(-4).map(x=>x.key),['L1','Y1','Y2','L2']);for(const x of ['l1-chamber','l1-anilox','l1-apply','y1-air','y1-guide','y1-exhaust','y2-air','l2-apply'])assert.ok(m.findNode('offset8-'+x));m.dispose();});
+test('LYYL order has two evidence-bounded coaters and neutral dryer sections',()=>{const m=new Offset8MachineTemplate();assert.deepEqual(OFFSET8_MODULE_SEQUENCE.slice(-4).map(x=>x.key),['L1','Y1','Y2','L2']);for(const x of ['l1-chamber','l1-anilox','l1-drip','l1-supply','l1-apply','y1-air','y1-guide','y1-recirc','y1-exhaust','y2-air','y2-recirc','l2-drip','l2-apply'])assert.ok(m.findNode('offset8-'+x));assert.equal(m.findNode('offset8-y1').userData.energyTechnologyVerified,false);m.dispose();});
 test('six-level taxonomy is populated and mapped',()=>{const s=offset8TaxonomyStats();for(let l=1;l<=6;l++)assert.ok(s.byLevel[l]>0);assert.ok(s.total>250);});
 test('simulation rotates only real process rollers and restores every local-axis quaternion',()=>{
  const m=new Offset8MachineTemplate(),s=new Offset8PrintingSimulation(m.root,m);
@@ -18,7 +18,7 @@ test('simulation rotates only real process rollers and restores every local-axis
  assert.equal(s.rotors.every((r,i)=>r.quaternion.angleTo(s.rotorRest[i])<1e-9),true);
  s.dispose();m.dispose();
 });
-test('official CX104 limits are recorded',()=>{assert.deepEqual(OFFSET8_SPEC.maxSheet,[.720,1.040]);assert.deepEqual(OFFSET8_SPEC.maxPrint,[.710,1.020]);assert.equal(OFFSET8_SPEC.speedStandard,15000);assert.equal(OFFSET8_SPEC.speedOption,16500);assert.equal(OFFSET8_SPEC.feederPile,1.320);});
+test('official CX104 limits are recorded without inventing installed roller counts or dryer energy technology',()=>{assert.deepEqual(OFFSET8_SPEC.maxSheet,[.720,1.040]);assert.deepEqual(OFFSET8_SPEC.maxPrint,[.710,1.020]);assert.equal(OFFSET8_SPEC.speedStandard,15000);assert.equal(OFFSET8_SPEC.speedOption,16500);assert.equal(OFFSET8_SPEC.feederPile,1.320);assert.equal(OFFSET8_SPEC.inkingRollerCountVerified,false);assert.equal(OFFSET8_SPEC.dampeningRollerCountVerified,false);assert.equal(OFFSET8_SPEC.dryerEnergyTechnologyVerified,false);});
 test('OFFSET 8 app evidence routing matches its dedicated engine runtime',()=>{
  const cfg=universalMachineConfig('BMJ-MCH-0005');
  assert.equal(cfg.evidence.simulation,'VERIFIED_PROCESS_MODEL');
@@ -43,4 +43,17 @@ test('V99 delivery stack accumulates on the represented pile surface and dryer/c
  for(let i=0;i<2400;i++){now+=10;s.update(now);const st=s.state();coat||=st.coatingActive;dry||=st.dryerActive;brake||=st.deliveryBrakeActive;}
  assert.ok(coat&&dry&&brake);assert.ok(s.completed>0);const visible=s.stack.filter(x=>x.visible);assert.ok(visible.length>0);assert.ok(visible.every(x=>x.position.y>=1.292));
  s.dispose();m.dispose();
+});
+
+test('V101 delivery gripper bars move around the represented chain loop and reset exactly',()=>{
+ const m=new Offset8MachineTemplate(),s=new Offset8PrintingSimulation(m.root,m);assert.equal(s.deliveryBars.length,8);const before=s.deliveryBars.map(b=>b.position.clone());
+ s.start();let now=1000;for(let i=0;i<80;i++){now+=20;s.update(now);}assert.ok(s.deliveryBars.some((b,i)=>b.position.distanceTo(before[i])>.05));assert.equal(s.state().deliveryGripperActive,true);
+ s.stop();assert.equal(s.deliveryBars.every((b,i)=>b.position.distanceTo(before[i])<1e-10),true);s.dispose();m.dispose();
+});
+
+test('V101 AirTransfer and coating details are functional references rather than unsupported exact claims',()=>{
+ const m=new Offset8MachineTemplate();let venturi=0,levels=0;m.root.traverse(o=>{if(o.userData.airTransferNozzle)venturi++;if(o.userData.levelSensor)levels++;});
+ assert.equal(venturi,56);assert.equal(levels,4);
+ for(let i=1;i<=8;i++){assert.equal(m.findNode('offset8-pu'+i+'-inking').userData.exactRollerCountVerified,false);assert.equal(m.findNode('offset8-pu'+i+'-dampening').userData.exactRollerCountVerified,false);}
+ m.dispose();
 });
