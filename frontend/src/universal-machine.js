@@ -25,6 +25,7 @@ import {FZ1200_TECHNICAL_SOURCES} from './data/sources-fz1200.js';
 import {UPG_LY300_TAXONOMY} from './data/taxonomy-upg-ly300.js';
 import {UPG_LY300_TECHNICAL_SOURCES} from './data/sources-upg-ly300.js';
 import {OFFSET7_GRAVURE_TAXONOMY} from './data/taxonomy-offset7.js';
+import {QF100CS_TAXONOMY} from './data/taxonomy-qf100cs.js';
 
 const FAMILY_BY_NO=new Map([
  [1,'guillotine'],[2,'sheeter'],[4,'gravure'],[5,'offset'],[6,'offset'],[7,'pileturner'],[8,'pileturner'],
@@ -76,8 +77,12 @@ const FAMILY_SOURCES={
  folder:[['BOBST MEDIA 100 II archive','https://www.pressxchange.com/en/category/carton%20gluers/bobst/1998/germany/allaoui%20graphic%20machinery%20gmbh/media%20100%20ii%20-%20a2/machineid/71192/']],
  inspection:[['Masterwork inspection systems','https://www.masterworkgroup.com/inspection-machine/mk-550qmini-inspection-machine.html']],
  blanker:[
-  ['UPG LQF-1080CS automatic blanking family','https://www.shanghai-upg.com/LQF-1080CS-Automatic-Blanking-Machine-pd44776496.html'],
-  ['UPG QF-1080C automatic blanking family','https://www.shanghai-yuyin.com/QF-1080C-Automatic-Blanking-Machine-pd45746924.html']
+  ['QF-1080B · moving platform / stable head / servo-ball-screw family reference','https://www.shanghai-yuyin.com/QF-1080B-Automatic-Blanking-Machine-pd45580714.html'],
+  ['QF-1080C · family architecture and C-variant boundary','https://www.shanghai-yuyin.com/QF-1080C-Automatic-Blanking-Machine-pd45746924.html'],
+  ['LQF-1080CS · two-axis moving platform / fixed hydraulic head reference','https://www.shanghai-upg.com/LQF-1080CS-Automatic-Blanking-Machine-pd44776496.html'],
+  ['UPG blanking family technical detail · hydraulic station / double lead screw / honeycomb board / HMI','https://www.shanghai-upg.com/Advantages-of-automatic-blanking-machine-id3320993.html'],
+  ['Collecting / stacker variant · option boundary only','https://www.shanghai-upg.com/LQ-QF-1080B-Blanking-Machine-with-Collecting-And-Stacker-pd45266496.html'],
+  ['Installed QF-1080C visual reference','https://printpack.ru/news/instalacion/mashina-dlya-razdeleniya-kartonnyh-zagotovok-uanchor-qf-1080c-origamo.html']
  ],
  collator:[['Horizon VAC air-suction collator family brochure','https://www.horizon.co.jp/products/catalog/e_pdf/e001co/04vac_pdf/vacseries_e.pdf']],
  ctp:[['Heidelberg Suprasetter CtP family official','https://www.heidelberg.com/global/en/print_and_packaging/products/computer_to_plate_1/prepress_overview.jsp']],
@@ -117,7 +122,7 @@ const EVIDENCE_BY_NO=new Map([
  [18,{grade:'MODEL_FAMILY_PROCESS_GROUNDED',geometry:'DEDICATED_FAMILY_PROCESS_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated FGM-3 MEDIA 100 II twin uses the same evidence-bounded MEDIA II process architecture while retaining its own BMJ serial/SAP identity. No A1/A2 or accessory difference is inferred.'}],
  [19,{grade:'OEM_PROCESS_GROUNDED',geometry:'DEDICATED_OEM_PROCESS_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated DIANA EYE 55 twin follows official HEIDELBERG/Masterwork architecture for blank feeding, suction-belt inspection, camera/LED imaging, image processing and inline reject separation. Installed camera mix, reject actuation and optional stacker remain serial-specific.'}],
  [20,{grade:'MODEL_FAMILY_PROCESS_GROUNDED',geometry:'DEDICATED_FAMILY_PROCESS_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated IPM-4 twin follows Focusight FS-SHARK N650 primary documentation for automated feeding, full-suction transfer, high-speed vision inspection, reject separation and good/bad return collection. The P3N1 suffix and installed camera/feeder/reject configuration remain undecoded.'}],
- [21,{grade:'MODEL_IDENTIFIED_CLOSE_FAMILY_PROCESS',geometry:'QF_LQF_1080CS_CLOSE_FAMILY_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'The BMJ identity QF-100CS is preserved. Exact QF-100CS primary documentation was not found, so geometry uses the closest QF/LQF 1080 C/CS blanking family: stable hydraulic blanking head, servo moving platform on ball screw/linear guides, PLC positioning, product/waste separation and collection. No exact 1080CS equivalence is claimed.'}],
+ [21,{grade:'MODEL_IDENTIFIED_CLOSE_FAMILY_PROCESS',geometry:'QF_LQF_1080_FAMILY_PROCESS_REFERENCE__QF100CS_EXACT_EQUIVALENCE_UNVERIFIED',simulation:'FAMILY_PROCESS_MODEL',reason:'The BMJ identity QF-100CS is preserved from the plant registry. Public exact-model QF-100CS documentation remains unresolved. QF/LQF-1080 B/C/BS/CS manufacturer-family references consistently establish a moving X/Y platform under a stable hydraulic blanking head, servo motors, ball screws, straight-line guides, photoelectric positioning, PLC/HMI control and configurable pin-board tooling. Dual-head architecture and collecting/stacker hardware are variant capabilities only and are not asserted as installed on ABM-2.'}],
  [22,{grade:'MODEL_FAMILY_PROCESS_GROUNDED',geometry:'DEDICATED_FAMILY_PROCESS_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated FZ1200 twin models the consistently documented clamp, turning, air separation/dust removal and jogging/alignment process. OEM origin and installed load/hydraulic/blower configuration remain unresolved.'}],
  [23,{grade:'FUNCTIONAL_FAMILY_REFERENCE',geometry:'VERTICAL_SUCTION_COLLATOR_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'Collator OEM/model is absent. A vertical modular suction-collator architecture is used instead of a generic box, based on documented VAC-family principles: multiple feed bins, suction rotors, double/miss sensors, gathering transport and delivery. Horizon branding/model is not claimed.'}],
  [24,{grade:'OEM_MODEL_GROUNDED',geometry:'DEDICATED_OEM_MODEL_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated UPG-LY300 twin uses the matching manufacturer model documentation for automatic paging, servo transport, Ricoh G5 UV inkjet, LED UV curing, 2K inspection, plate-turn rejection and collection. Optional/custom accessories remain bounded.'}],
@@ -137,6 +142,7 @@ export function universalTechnicalSources(machineId){const cfg0=universalMachine
 export function universalTaxonomy(machineId){
  if(machineId==='BMJ-MCH-0001')return [...POLAR115_TAXONOMY];
  if(machineId==='BMJ-MCH-0004')return [...OFFSET7_GRAVURE_TAXONOMY];
+ if(machineId==='BMJ-MCH-0021')return [...QF100CS_TAXONOMY];
  if(machineId==='BMJ-MCH-0005')return [...OFFSET8_TAXONOMY];
  if(machineId==='BMJ-MCH-0006')return [...OFFSET9_TAXONOMY];
  if(['BMJ-MCH-0011','BMJ-MCH-0012'].includes(machineId))return [...mk920TaxonomyFor(machineId)];
