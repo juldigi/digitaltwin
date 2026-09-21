@@ -10,7 +10,7 @@ function uiNotice(message,error=false){
 function setText(selector,value){const el=$(selector);if(el)el.textContent=value;}
 function showDetail(tab){
   document.body.classList.remove('panel-hidden','nav-open','ui-workbench-open');
-  document.body.classList.add('mobile-panel-open');
+  if(matchMedia('(max-width:767px)').matches)document.body.classList.add('mobile-panel-open');else document.body.classList.remove('mobile-panel-open');
   if(tab)document.querySelector(`[data-tab="${tab}"]`)?.click();
   $('#detail-panel')?.scrollTo({top:0,behavior:'smooth'});
 }
@@ -26,7 +26,7 @@ function toggleLauncher(force){
   $('#panel-launcher')?.classList.toggle('active',open);
 }
 function closeTransientPanels(){
-  document.body.classList.remove('nav-open','ui-workbench-open','mobile-panel-open');
+  document.body.classList.remove('nav-open','ui-workbench-open');
   toggleLauncher(false);
 }
 function setLegendActive(id){$$('.asset-legend button').forEach(b=>b.classList.toggle('active',b.id===id));}
