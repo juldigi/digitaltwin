@@ -30,5 +30,5 @@ test('service-worker shell cache references only deployable frontend files',()=>
 });
 
 test('service-worker cache version advances with the centralized runtime release',()=>{
- assert.match(sw,/factory-digital-twin-v123-r3-qf100cs-20260921/);
+ assert.match(sw,/factory-digital-twin-v123-r3-brand-compressors-20260921/);
 });
