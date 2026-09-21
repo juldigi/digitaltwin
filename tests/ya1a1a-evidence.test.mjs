@@ -14,8 +14,8 @@ test('YA1A1A keeps the BMJ master name but uses sheet-fed gravure rather than of
  assert.equal(cfg.family,'gravure');
  assert.equal(cfg.label,'Single-Unit Gravure Press');
  assert.equal(cfg.evidence.grade,'MODEL_IDENTIFIED_PROCESS_GROUNDED');
- assert.match(cfg.evidence.geometry,/YA1A1_EXACT_IDENTITY/);
- assert.equal(cfg.evidence.simulation,'FAMILY_PROCESS_MODEL');
+ assert.match(cfg.evidence.geometry,/YA1A1A_EXACT_IDENTITY/);
+ assert.equal(cfg.evidence.simulation,'BLOCKED');
  assert.equal(profile.family,'gravure');
  for(const part of ['Sheet Feeder','Feedboard / Register','Ink Pan & Circulation','Gravure Cylinder / Doctor Blade','Impression Cylinder / Gripper','Dryer / Exhaust','High-Pile Delivery'])assert.ok(profile.architecture.includes(part),part);
  assert.ok(!profile.architecture.some(x=>/plate|blanket|dampening/i.test(x)));
@@ -39,8 +39,7 @@ test('YA1A1A reference simulation uses only tagged gravure-family mechanisms and
  assert.ok(sim instanceof ReferenceProcessSimulation);
  assert.equal(model.root.userData.engineeringDimensions,false);
  assert.match(model.root.userData.referenceNote||'',/YA1A1A|QF|reference/i);
- const before=sim.state();assert.equal(before.available,true);assert.equal(before.blocked,false);
- sim.start();let now=0;for(let i=0;i<60;i++){now+=100;sim.update(now);}
- assert.ok(sim.state().progress>0);assert.ok(sim.state().mechanismCount>=5);
+ const before=sim.state();assert.equal(before.available,false);assert.equal(before.blocked,true);
+ const started=sim.start();assert.equal(started.active,false);assert.equal(started.progress,0);assert.match(started.blockedReason||'',/YA1A1A|transport|drive|dryer/i);
  sim.dispose();model.dispose();
 });
