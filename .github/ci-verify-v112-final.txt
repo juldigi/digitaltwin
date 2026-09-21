@@ -1,0 +1,1 @@
+CI verification snapshot for V112 APM2 intermittent SP102 mechanics. Temporary branch; do not merge marker.
