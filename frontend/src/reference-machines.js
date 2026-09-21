@@ -1225,7 +1225,7 @@ export class ReferenceProcessSimulation{
   this.family=template.cfg.family;
   this.stages=template.cfg.profile?.process||template.cfg.modules;if(this.family==='ctp')this.stages=this.stages.filter((_,i)=>i!==4);this.cycle=Math.max(8,this.stages.length*1.35);
   this.motions=this.blocked?[]:template.activeMeshes.filter(m=>m.userData.motion&&!m.userData.referencePlaceholder&&m.userData.simulationEnabled!==false).map(mesh=>({mesh,motion:mesh.userData.motion,position:mesh.position.clone(),quaternion:mesh.quaternion.clone()}));
- this.pathVisible=false;this.inkFlowVisible=false;this.processPiece=null;this.processMaterial=null;this.processGeometry=null;this.blanker=null;this.collator=null;this.collatorSheets=[];this.collatorSheetGeometry=null;this.collatorSheetMaterial=null;this.imagesetter=null;this.imagesetterMedia=null;this.imagesetterMediaGeometry=null;this.imagesetterMediaMaterial=null;this.zund=null;this.zundMaterial=null;this.zundMaterialGeometry=null;this.zundMaterialMaterial=null;if(!this.blocked)this.buildProcessPiece();if(!this.blocked&&this.family==='blanker')this.bindBlanker();if(!this.blocked&&this.family==='collator')this.bindCollator();if(!this.blocked&&this.family==='imagesetter')this.bindImagesetter();if(!this.blocked&&this.family==='zund')this.bindZund();
+ this.pathVisible=false;this.inkFlowVisible=false;this.processPiece=null;this.processMaterial=null;this.processGeometry=null;this.blanker=null;this.collator=null;this.collatorSheets=[];this.collatorSheetGeometry=null;this.collatorSheetMaterial=null;this.imagesetter=null;this.imagesetterMedia=null;this.imagesetterMediaGeometry=null;this.imagesetterMediaMaterial=null;this.zund=null;this.zundMaterial=null;this.zundMaterialGeometry=null;this.zundMaterialMaterial=null;this.ahu=null;this.ahuParticles=[];this.ahuParticleGeometry=null;this.ahuParticleMaterial=null;if(!this.blocked)this.buildProcessPiece();if(!this.blocked&&this.family==='blanker')this.bindBlanker();if(!this.blocked&&this.family==='collator')this.bindCollator();if(!this.blocked&&this.family==='imagesetter')this.bindImagesetter();if(!this.blocked&&this.family==='zund')this.bindZund();if(!this.blocked&&this.family==='ahu')this.bindAHU();
  }
  buildProcessPiece(){
   const family=this.family;if(['compressor','ahu','collator','imagesetter','zund'].includes(family))return;
@@ -1392,26 +1392,67 @@ export class ReferenceProcessSimulation{
   if(this.zundMaterial)this.zundMaterial.visible=this.active;
   z.vacuumHoldActive=s.vacuumHold;
  }
+ bindAHU(){
+  const sansin=this.template.cfg.machine.no===40;
+  this.ahu={
+   sansin,
+   sectionOrderVerified:sansin?false:(this.template.root.userData.sectionOrderVerified===true),
+   exactModelVerified:sansin?this.template.root.userData.exactSansinModelVerified===true:this.template.root.userData.exactAhuModelVerified===true,
+   flowStart:sansin?-2.05:-3.42,
+   flowEnd:sansin?.62:3.42,
+   evaporativePrecoolActive:false,
+   dxEvaporatorActive:false,
+   genericCoilActive:false
+  };
+  this.ahuParticleGeometry=new THREE.SphereGeometry(.028,10,8);
+  this.ahuParticleMaterial=new THREE.MeshStandardMaterial({color:0x73a9b5,roughness:.42,metalness:0,transparent:true,opacity:.78});
+  for(let i=0;i<12;i++){
+   const mesh=new THREE.Mesh(this.ahuParticleGeometry,this.ahuParticleMaterial);
+   mesh.name='AHU-AIRFLOW-PARTICLE-'+(i+1);mesh.visible=false;mesh.userData.airflowReference=true;this.root.add(mesh);
+   this.ahuParticles.push({mesh,phase:i/12,z:-.62+(i%4)*.41,y:.72+(i%3)*.22});
+  }
+ }
+ ahuStatus(){
+  const p=this.active?(this.elapsed%this.cycle)/this.cycle:0,idx=Math.min(this.stages.length-1,Math.floor(p*this.stages.length));
+  return {p,idx};
+ }
+ updateAHU(){
+  if(!this.ahu)return;
+  const a=this.ahu,s=this.ahuStatus();
+  for(const item of this.ahuParticles){
+   const q=(s.p+item.phase)%1,x=THREE.MathUtils.lerp(a.flowStart,a.flowEnd,q);
+   item.mesh.position.set(x,item.y,item.z);item.mesh.visible=this.active;
+  }
+  if(a.sansin){
+   a.evaporativePrecoolActive=s.p>=.22&&s.p<.52;
+   a.dxEvaporatorActive=s.p>=.34&&s.p<.64;
+   a.genericCoilActive=false;
+  }else{
+   a.genericCoilActive=s.p>=.26&&s.p<.58;
+   a.evaporativePrecoolActive=false;a.dxEvaporatorActive=false;
+  }
+ }
  stageIndex(){const p=this.active?(this.elapsed%this.cycle)/this.cycle:0;return Math.min(this.stages.length-1,Math.floor(p*this.stages.length));}
  state(){
-  const progress=this.active?(this.elapsed%this.cycle)/this.cycle:0,blankerState=this.family==='blanker'?this.blankerStatus():null,collatorState=this.family==='collator'?this.collatorStatus():null,imagesetterState=this.family==='imagesetter'?this.imagesetterStatus():null,zundState=this.family==='zund'?this.zundStatus():null,idx=blankerState?.idx??collatorState?.idx??imagesetterState?.idx??zundState?.idx??this.stageIndex();
+  const progress=this.active?(this.elapsed%this.cycle)/this.cycle:0,blankerState=this.family==='blanker'?this.blankerStatus():null,collatorState=this.family==='collator'?this.collatorStatus():null,imagesetterState=this.family==='imagesetter'?this.imagesetterStatus():null,zundState=this.family==='zund'?this.zundStatus():null,ahuState=this.family==='ahu'?this.ahuStatus():null,idx=blankerState?.idx??collatorState?.idx??imagesetterState?.idx??zundState?.idx??ahuState?.idx??this.stageIndex();
   return {available:!this.blocked,blocked:this.blocked,blockedReason:this.blockedReason,referenceModel:true,evidenceGrade:this.template.cfg.evidence.grade,geometryStatus:this.template.cfg.evidence.geometry,
    active:this.active,running:this.running,paused:this.paused,speed:this.speed,stage:this.blocked?'Simulasi belum tervalidasi':(this.stages[idx]||'Reference process'),completed:this.completed,progress,
-   sheetsVisible:this.family==='collator'?this.collatorSheets.filter(s=>s.mesh.visible).length:this.family==='imagesetter'?(this.imagesetterMedia?.visible?1:0):(this.processPiece?.visible?1:0),pileSheetsVisible:0,rotorCount:this.motions.filter(x=>x.motion.type==='spin').length,
+   sheetsVisible:this.family==='collator'?this.collatorSheets.filter(s=>s.mesh.visible).length:this.family==='imagesetter'?(this.imagesetterMedia?.visible?1:0):(this.processPiece?.visible?1:0),pileSheetsVisible:0,airflowParticleCount:this.family==='ahu'?this.ahuParticles.filter(p=>p.mesh.visible).length:0,rotorCount:this.motions.filter(x=>x.motion.type==='spin').length,
    oscillatorCount:this.motions.filter(x=>x.motion.type!=='spin').length,mechanismCount:this.family==='blanker'?this.template.activeMeshes.length:this.family==='zund'?2:this.motions.length,inkFlowCount:0,uvLampCount:0,uvActive:false,pathVisible:false,inkFlowVisible:false,
    platformIndexing:blankerState?.indexing??false,blankingHeadPressing:blankerState?.pressing??false,mechanicalInterlockSafe:blankerState?.interlockSafe??true,
    modeledBinCount:collatorState?.modeledBinCount??null,installedBinCountVerified:collatorState?.installedBinCountVerified??null,activeBinFeeds:this.collator?.activeFeedCount??0,completedSheetsInSet:this.collator?.completedSheetsInSet??0,
    exposureActive:imagesetterState?.exposure??false,cuttingActive:imagesetterState?.cutting??false,punchInstalledVerified:this.imagesetter?.punch?.userData.installedOptionVerified===true,processorInstalledVerified:this.imagesetter?.processor?.userData.installedOptionVerified===true,exactScreenModelVerified:this.family==='imagesetter'?this.template.root.userData.exactScreenModelVerified:null,
    vacuumHoldActive:zundState?.vacuumHold??false,zundAxisMotionActive:zundState?.axisMotion??false,installedToolPackageVerified:this.family==='zund'?(this.zund?.installedToolPackageVerified??false):null,toolActionEnabled:this.family==='zund'?(this.zund?.installedToolPackageVerified===true):null,registrationCameraInstalledVerified:this.family==='zund'?(this.zund?.installedIccVerified??false):null,toolInitializationInstalledVerified:this.family==='zund'?(this.zund?.installedItiVerified??false):null,
-   simulationBoundary:this.family==='blanker'?'QF_LQF_1080_FAMILY_PROCESS_ONLY':this.family==='collator'?'MULTI_VENDOR_SUCTION_COLLATOR_PROCESS_ONLY__TEN_BIN_REFERENCE_NOT_INSTALLATION_CLAIM':this.family==='ctp'?'SUPRASETTER_COMMON_PROCESS_ONLY__PUNCH_LOADER_DEBRIS_TEMP_OPTIONS_NOT_SIMULATED':this.family==='imagesetter'?'SCREEN_FTR_KATANA_COMMON_PROCESS_ONLY__PUNCH_PROCESSOR_MODEL_OPTIONS_NOT_INFERRED':this.family==='zund'?'ZUND_XY_PLATFORM_MOTION_ONLY__INSTALLED_TOOL_CAMERA_INIT_PACKAGE_NOT_INFERRED':null,referenceBoundary:this.template.cfg.profile?.unknowns||[]};
+   ahuSectionOrderVerified:this.family==='ahu'?(this.ahu?.sectionOrderVerified??false):null,ahuExactModelVerified:this.family==='ahu'?(this.ahu?.exactModelVerified??false):null,evaporativePrecoolActive:this.family==='ahu'?(this.ahu?.evaporativePrecoolActive??false):false,dxEvaporatorActive:this.family==='ahu'?(this.ahu?.dxEvaporatorActive??false):false,genericCoilConditioningActive:this.family==='ahu'?(this.ahu?.genericCoilActive??false):false,
+   simulationBoundary:this.family==='blanker'?'QF_LQF_1080_FAMILY_PROCESS_ONLY':this.family==='collator'?'MULTI_VENDOR_SUCTION_COLLATOR_PROCESS_ONLY__TEN_BIN_REFERENCE_NOT_INSTALLATION_CLAIM':this.family==='ctp'?'SUPRASETTER_COMMON_PROCESS_ONLY__PUNCH_LOADER_DEBRIS_TEMP_OPTIONS_NOT_SIMULATED':this.family==='imagesetter'?'SCREEN_FTR_KATANA_COMMON_PROCESS_ONLY__PUNCH_PROCESSOR_MODEL_OPTIONS_NOT_INFERRED':this.family==='zund'?'ZUND_XY_PLATFORM_MOTION_ONLY__INSTALLED_TOOL_CAMERA_INIT_PACKAGE_NOT_INFERRED':this.family==='ahu'?(this.ahu?.sansin?'SANSIN_NES_YZKJ_INDOOR_AIR_PATH_FAMILY_REFERENCE__MODEL_CAPACITY_UNVERIFIED':'EUROVENT_CANONICAL_AHU_AIR_PATH_REFERENCE__SECTION_ORDER_DIRECTION_UNVERIFIED'):null,referenceBoundary:this.template.cfg.profile?.unknowns||[]};
  }
- start(){if(this.blocked){this.active=false;this.running=false;this.paused=false;this.onUpdate?.(this.state());return this.state();}this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;if(this.processPiece)this.processPiece.visible=true;for(const s of this.collatorSheets)s.mesh.visible=true;if(this.imagesetterMedia)this.imagesetterMedia.visible=true;if(this.zundMaterial)this.zundMaterial.visible=true;this.resetMotion();this.onUpdate?.(this.state());return this.state();}
+ start(){if(this.blocked){this.active=false;this.running=false;this.paused=false;this.onUpdate?.(this.state());return this.state();}this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;if(this.processPiece)this.processPiece.visible=true;for(const s of this.collatorSheets)s.mesh.visible=true;if(this.imagesetterMedia)this.imagesetterMedia.visible=true;if(this.zundMaterial)this.zundMaterial.visible=true;for(const p of this.ahuParticles)p.mesh.visible=true;this.resetMotion();this.onUpdate?.(this.state());return this.state();}
  pause(){this.running=false;this.paused=this.active;this.onUpdate?.(this.state());return this.state();}
  resume(){if(this.active){this.running=true;this.paused=false;this.lastNow=null;}this.onUpdate?.(this.state());return this.state();}
  setSpeed(v){this.speed=Math.max(.25,Math.min(3,Number(v)||1));return this.state();}
  setPathVisible(){this.pathVisible=false;return this.state();}
  setInkFlowVisible(){this.inkFlowVisible=false;return this.state();}
- resetMotion(){for(const item of this.motions){item.mesh.position.copy(item.position);item.mesh.quaternion.copy(item.quaternion);}if(this.blanker){if(this.blanker.platform)this.blanker.platform.position.copy(this.blanker.platformRest);if(this.blanker.ram)this.blanker.ram.position.copy(this.blanker.ramRest);}if(this.processPiece){if(this.family==='blanker'&&this.processPiece.userData.blankerRest)this.processPiece.position.copy(this.processPiece.userData.blankerRest);else this.processPiece.position.x=this.processPiece.userData.startX;this.processPiece.visible=this.active;}for(const s of this.collatorSheets){s.mesh.position.copy(s.start);s.mesh.visible=this.active;}if(this.collator){this.collator.activeFeedCount=0;this.collator.completedSheetsInSet=0;}if(this.imagesetterMedia){this.imagesetterMedia.position.set(-.82,.68,0);this.imagesetterMedia.visible=this.active;}if(this.imagesetter){this.imagesetter.exposureActive=false;this.imagesetter.cuttingActive=false;if(this.imagesetter.laser?.material?.emissive){this.imagesetter.laser.material.emissive.setHex(0);this.imagesetter.laser.material.emissiveIntensity=0;}}if(this.zund){if(this.zund.beam)this.zund.beam.position.copy(this.zund.beamRest);if(this.zund.carriage)this.zund.carriage.position.copy(this.zund.carriageRest);this.zund.vacuumHoldActive=false;}if(this.zundMaterial){this.zundMaterial.position.set(0,.69,0);this.zundMaterial.visible=this.active;}}
+ resetMotion(){for(const item of this.motions){item.mesh.position.copy(item.position);item.mesh.quaternion.copy(item.quaternion);}if(this.blanker){if(this.blanker.platform)this.blanker.platform.position.copy(this.blanker.platformRest);if(this.blanker.ram)this.blanker.ram.position.copy(this.blanker.ramRest);}if(this.processPiece){if(this.family==='blanker'&&this.processPiece.userData.blankerRest)this.processPiece.position.copy(this.processPiece.userData.blankerRest);else this.processPiece.position.x=this.processPiece.userData.startX;this.processPiece.visible=this.active;}for(const s of this.collatorSheets){s.mesh.position.copy(s.start);s.mesh.visible=this.active;}if(this.collator){this.collator.activeFeedCount=0;this.collator.completedSheetsInSet=0;}if(this.imagesetterMedia){this.imagesetterMedia.position.set(-.82,.68,0);this.imagesetterMedia.visible=this.active;}if(this.imagesetter){this.imagesetter.exposureActive=false;this.imagesetter.cuttingActive=false;if(this.imagesetter.laser?.material?.emissive){this.imagesetter.laser.material.emissive.setHex(0);this.imagesetter.laser.material.emissiveIntensity=0;}}if(this.zund){if(this.zund.beam)this.zund.beam.position.copy(this.zund.beamRest);if(this.zund.carriage)this.zund.carriage.position.copy(this.zund.carriageRest);this.zund.vacuumHoldActive=false;}if(this.zundMaterial){this.zundMaterial.position.set(0,.69,0);this.zundMaterial.visible=this.active;}for(const p of this.ahuParticles)p.mesh.visible=this.active;if(this.ahu){this.ahu.evaporativePrecoolActive=false;this.ahu.dxEvaporatorActive=false;this.ahu.genericCoilActive=false;}}
  update(now){
   if(!this.active||!this.running){this.lastNow=now;return;}
   if(this.lastNow===null){this.lastNow=now;return;}
@@ -1429,9 +1470,10 @@ export class ReferenceProcessSimulation{
   if(this.family==='collator')this.updateCollator();
   if(this.family==='imagesetter')this.updateImagesetter();
   if(this.family==='zund')this.updateZund();
+  if(this.family==='ahu')this.updateAHU();
   if(this.processPiece){this.processPiece.position.x=THREE.MathUtils.lerp(this.processPiece.userData.startX,this.processPiece.userData.endX,phase);this.processPiece.visible=true;}
   this.completed=Math.floor(this.elapsed/this.cycle);this.onUpdate?.(this.state());
  }
- stop(){this.active=false;this.running=false;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;this.resetMotion();if(this.processPiece)this.processPiece.visible=false;for(const s of this.collatorSheets)s.mesh.visible=false;if(this.imagesetterMedia)this.imagesetterMedia.visible=false;if(this.zundMaterial)this.zundMaterial.visible=false;this.onUpdate?.(this.state());return this.state();}
- dispose(){this.stop();this.processPiece?.removeFromParent();this.processGeometry?.dispose();this.processMaterial?.dispose();for(const s of this.collatorSheets)s.mesh.removeFromParent();this.collatorSheetGeometry?.dispose();this.collatorSheetMaterial?.dispose();this.imagesetterMedia?.removeFromParent();this.imagesetterMediaGeometry?.dispose();this.imagesetterMediaMaterial?.dispose();this.zundMaterial?.removeFromParent();this.zundMaterialGeometry?.dispose();this.zundMaterialMaterial?.dispose();}
+ stop(){this.active=false;this.running=false;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;this.resetMotion();if(this.processPiece)this.processPiece.visible=false;for(const s of this.collatorSheets)s.mesh.visible=false;if(this.imagesetterMedia)this.imagesetterMedia.visible=false;if(this.zundMaterial)this.zundMaterial.visible=false;for(const p of this.ahuParticles)p.mesh.visible=false;this.onUpdate?.(this.state());return this.state();}
+ dispose(){this.stop();this.processPiece?.removeFromParent();this.processGeometry?.dispose();this.processMaterial?.dispose();for(const s of this.collatorSheets)s.mesh.removeFromParent();this.collatorSheetGeometry?.dispose();this.collatorSheetMaterial?.dispose();this.imagesetterMedia?.removeFromParent();this.imagesetterMediaGeometry?.dispose();this.imagesetterMediaMaterial?.dispose();this.zundMaterial?.removeFromParent();this.zundMaterialGeometry?.dispose();this.zundMaterialMaterial?.dispose();for(const p of this.ahuParticles)p.mesh.removeFromParent();this.ahuParticleGeometry?.dispose();this.ahuParticleMaterial?.dispose();}
 }
