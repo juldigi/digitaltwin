@@ -479,3 +479,105 @@ test('V123 R7 Zünd keeps tool camera initialization and handling packages bound
  assert.equal(sawVacuum,true);assert.equal(sawAxis,true);
  sim.dispose();m.dispose();
 });
+
+
+test('V123 R8 generic AHU remains Eurovent-functional with unknown section order airflow direction and installed configuration',()=>{
+ const m=createMachineTemplate('BMJ-MCH-0036');
+ assert.equal(m.root.userData.detailPass,'V123_R8_EUROVENT_SECTIONAL_AHU_FUNCTIONAL_RECONSTRUCTION');
+ assert.equal(m.root.userData.exactAhuModelVerified,false);
+ assert.equal(m.root.userData.sectionOrderVerified,false);
+ assert.equal(m.root.userData.airflowDirectionVerified,false);
+ assert.equal(m.root.userData.filterClassVerified,false);
+ assert.equal(m.root.userData.coilTypeVerified,false);
+ assert.equal(m.root.userData.fanTypeVerified,false);
+ assert.equal(m.root.userData.visualizedSectionOrder,'CANONICAL_FUNCTIONAL_REFERENCE_ONLY');
+
+ requireRoles(m,[
+  'opposed-blade-damper-reference','damper-actuator-reference','outdoor-return-mixing-boundary',
+  'ahu-filter-panel-reference','filter-pressure-tap-reference','filter-differential-pressure-indicator-reference',
+  'cooling-coil-fin-reference','cooling-coil-header-reference','coil-connection-reference',
+  'sloped-condensate-drain-pan','condensate-drain-drop-reference','condensate-trap-horizontal-reference','condensate-trap-rise-reference',
+  'droplet-eliminator-option-boundary','supply-fan-wheel-reference','supply-fan-blade-reference',
+  'supply-fan-motor-reference','fan-drive-type-boundary','ahu-service-door','service-door-handle',
+  'ahu-discharge-plenum','ahu-controller-reference','ahu-temperature-pressure-sensor-reference'
+ ]);
+ assert.equal(m.findNode('ahu-mixing-boundary').userData.installedConfigurationVerified,false);
+ assert.equal(m.findNode('ahu-droplet-option').userData.installedOptionVerified,false);
+ assert.equal(m.findNode('ahu-fan-drive').userData.installedDriveTypeVerified,false);
+ assert.equal(m.findNode('ahu-filter-bank').userData.installedFilterClassVerified,false);
+ assert.equal(m.findNode('ahu-cooling-coil').userData.installedCoilFluidVerified,false);
+ assert.equal(m.findNode('ahu-supply-fan').userData.installedFanTypeVerified,false);
+
+ const levels=[...new Set(m.taxonomy.map(n=>n.level))].sort();
+ assert.deepEqual(levels,[1,2,3,4,5,6]);
+ assert.equal(new Set(m.taxonomy.map(n=>n.id)).size,m.taxonomy.length);
+ for(const n of m.taxonomy.filter(n=>n.level>1))assert.ok(m.taxonomy.some(p=>p.id===n.parentId),'AHU generic missing parent '+n.parentId);
+ for(const n of m.taxonomy.filter(n=>n.level===6)){
+  assert.ok(n.meshRefs.length>0,n.id);
+  assert.ok(m.findNode(n.meshRefs[0]),'AHU generic missing taxonomy target '+n.meshRefs[0]);
+ }
+
+ const sim=createMachineSimulation('BMJ-MCH-0036',m.root,m);
+ let s=sim.start(),now=0,sawAir=false,sawCoil=false;
+ assert.equal(s.ahuSectionOrderVerified,false);
+ assert.equal(s.ahuExactModelVerified,false);
+ assert.equal(s.simulationBoundary,'EUROVENT_CANONICAL_AHU_AIR_PATH_REFERENCE__SECTION_ORDER_DIRECTION_UNVERIFIED');
+ for(let i=0;i<240;i++){
+  now+=50;sim.update(now);s=sim.state();
+  sawAir ||= s.airflowParticleCount>0;
+  sawCoil ||= s.genericCoilConditioningActive;
+  assert.equal(s.ahuSectionOrderVerified,false);
+ }
+ assert.equal(sawAir,true);
+ assert.equal(sawCoil,true);
+ sim.dispose();m.dispose();
+});
+
+test('V123 R8 SANSIN AHU 7 separates wet-curtain evaporator indoor airflow from outdoor refrigeration family module',()=>{
+ const m=createMachineTemplate('BMJ-MCH-0040');
+ assert.equal(m.root.userData.detailPass,'V123_R8_SANSIN_NES_YZKJ_TWO_STAGE_COOLING_RECONSTRUCTION');
+ assert.equal(m.root.userData.exactSansinModelVerified,false);
+ assert.deepEqual(m.root.userData.familyCandidates,['YZKJ-45N','YZKJ-90N']);
+ assert.equal(m.root.userData.exactCoolingCapacityVerified,false);
+ assert.deepEqual(m.root.userData.familyPublishedCapacityKw,[50,100]);
+ assert.equal(m.root.userData.familyCapacityApplicabilityVerified,false);
+ assert.deepEqual(m.root.userData.airTreatmentSequence,['FILTER','HONEYCOMB_WET_CURTAIN_PRECOOL','LOW_TEMPERATURE_FIN_EVAPORATOR','SUPPLY_FAN']);
+
+ requireRoles(m,[
+  'sansin-return-inlet-damper','sansin-damper-actuator-reference','sansin-filter-net-layer','sansin-air-distribution-baffle',
+  'honeycomb-wet-curtain','wet-curtain-water-distribution-reference','sansin-evaporator-fin','sansin-evaporator-header-reference',
+  'sansin-indoor-supply-fan','sansin-supply-fan-blade-reference','sansin-conditioned-air-plenum',
+  'sansin-refrigeration-compressor-reference','sansin-evaporative-condenser-fin-reference','sansin-condenser-wet-section-reference',
+  'sansin-outdoor-condenser-fan-reference','sansin-refrigerant-line-reference','sansin-refrigerant-valve-manifold-reference',
+  'sansin-water-tank-reference','sansin-water-pump-reference','sansin-water-filter-reference','sansin-water-recirculation-line',
+  'sansin-cooling-controller-reference','sansin-electrical-panel','sansin-electrical-module-reference'
+ ]);
+ assert.equal(m.findNode('sansin-outdoor-fan').userData.installedFanCountVerified,false);
+ const fan=[];m.root.traverse(o=>{if(o.userData?.mechanismRole==='sansin-outdoor-condenser-fan-reference')fan.push(o);});
+ assert.equal(fan.length,1);
+ assert.equal(fan[0].userData.modeledReferenceFanCount,1);
+ assert.equal(m.findNode('sansin-refrigerant').children.some(o=>o.userData?.installedChargeVerified===false),true);
+
+ const levels=[...new Set(m.taxonomy.map(n=>n.level))].sort();
+ assert.deepEqual(levels,[1,2,3,4,5,6]);
+ assert.equal(new Set(m.taxonomy.map(n=>n.id)).size,m.taxonomy.length);
+ for(const n of m.taxonomy.filter(n=>n.level>1))assert.ok(m.taxonomy.some(p=>p.id===n.parentId),'SANSIN AHU missing parent '+n.parentId);
+ for(const n of m.taxonomy.filter(n=>n.level===6)){
+  assert.ok(n.meshRefs.length>0,n.id);
+  assert.ok(m.findNode(n.meshRefs[0]),'SANSIN AHU missing taxonomy target '+n.meshRefs[0]);
+ }
+
+ const sim=createMachineSimulation('BMJ-MCH-0040',m.root,m);
+ let s=sim.start(),now=0,sawAir=false,sawPrecool=false,sawEvap=false;
+ assert.equal(s.ahuExactModelVerified,false);
+ assert.equal(s.simulationBoundary,'SANSIN_NES_YZKJ_INDOOR_AIR_PATH_FAMILY_REFERENCE__MODEL_CAPACITY_UNVERIFIED');
+ for(let i=0;i<240;i++){
+  now+=50;sim.update(now);s=sim.state();
+  sawAir ||= s.airflowParticleCount>0;
+  sawPrecool ||= s.evaporativePrecoolActive;
+  sawEvap ||= s.dxEvaporatorActive;
+  assert.equal(m.root.userData.familyCapacityApplicabilityVerified,false);
+ }
+ assert.equal(sawAir,true);assert.equal(sawPrecool,true);assert.equal(sawEvap,true);
+ sim.dispose();m.dispose();
+});
