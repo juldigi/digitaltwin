@@ -1,0 +1,1 @@
+CI verification snapshot for V102 SX52 mechanics. Temporary branch; do not merge marker.
