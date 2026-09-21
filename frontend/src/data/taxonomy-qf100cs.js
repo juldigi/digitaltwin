@@ -4,7 +4,8 @@ const SRC=Object.freeze([
  'V123-QF1080C-YUYIN',
  'V123-LQF1080CS-UPG',
  'V123-QF-FAMILY-ADVANTAGES',
- 'V123-QF1080C-INSTALL-VISUAL'
+ 'V123-QF1080C-INSTALL-VISUAL',
+ 'V123-JMM-QF-BMJ'
 ]);
 const nodes=[];
 const add=(id,parentId,level,levelName,name,meshRefs,description,confidence='CLOSE_FAMILY_PROCESS_REFERENCE')=>nodes.push(Object.freeze({
