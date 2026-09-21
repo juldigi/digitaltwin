@@ -208,3 +208,44 @@ test('Offset 10 stage list includes all physical modules and X3 delivery',()=>{
   for(const module of OFFSET10_MODULE_SEQUENCE)assert.ok(OFFSET10_SIMULATION_STAGES.includes(module.label));
   for(let i=1;i<OFFSET10_MODULE_SEQUENCE.length;i++)assert.ok(OFFSET10_MODULE_CENTERS[OFFSET10_MODULE_SEQUENCE[i].key]>OFFSET10_MODULE_CENTERS[OFFSET10_MODULE_SEQUENCE[i-1].key]);
 });
+
+
+test('V115 Offset10 process rotor set is role-tagged and excludes static cylindrical hardware',()=>{
+  const machine=new Offset10MachineTemplate(),sim=new Offset10PrintingSimulation(machine.root,machine);
+  const required=['plate','blanket','impression','transfer','fountain','form-1','distributor-1','damp-form','damp-pan','coating-anilox','coating-form','coating-impression','coating-transfer'];
+  const roles=new Set(sim.rotors.map(r=>r.role));
+  for(const role of required)assert.ok(roles.has(role),'missing rotor role '+role);
+  assert.equal(sim.rotors.every(r=>r.mesh.userData.rotor===true&&r.mesh.userData.rollerRole===r.role),true);
+  const forbiddenOwners=['airtransfer','blower','drip-tray','chamber','sheet-monitor','foilstar-superstructure','foilstar-loading'];
+  for(const r of sim.rotors){
+    const owner=String(r.mesh.userData.ownerId||'');
+    assert.equal(forbiddenOwners.some(x=>owner.includes(x)),false,'static hardware leaked into rotor set: '+owner);
+  }
+  assert.equal(sim.rotors.some(r=>!Number.isFinite(r.sign)||!Number.isFinite(r.rate)),false);
+  sim.dispose();machine.dispose();
+});
+
+test('V115 Offset10 rotor direction is stable by mechanical role rather than traversal order',()=>{
+  const a=new Offset10MachineTemplate(),sa=new Offset10PrintingSimulation(a.root,a);
+  const b=new Offset10MachineTemplate(),sb=new Offset10PrintingSimulation(b.root,b);
+  const map=s=>new Map(s.rotors.map(r=>[(r.mesh.userData.ownerId||'')+'|'+r.role,{sign:r.sign,rate:r.rate}]));
+  const ma=map(sa),mb=map(sb);assert.equal(ma.size,mb.size);
+  for(const [k,v] of ma){assert.deepEqual(mb.get(k),v,'role motion changed across identical builds: '+k);}
+  for(const [role,expected] of [['plate',1],['blanket',-1],['impression',1],['transfer',-1],['coating-anilox',1],['coating-form',-1],['coating-impression',1],['coating-transfer',-1]]){
+    const matches=sa.rotors.filter(r=>r.role===role);assert.ok(matches.length>0,role);assert.equal(matches.every(r=>r.sign===expected),true,role+' direction mismatch');
+  }
+  sa.dispose();a.dispose();sb.dispose();b.dispose();
+});
+
+test('V115 Offset10 static cylindrical references remain unchanged during simulation',()=>{
+  const machine=new Offset10MachineTemplate(),sim=new Offset10PrintingSimulation(machine.root,machine);
+  const staticMeshes=[];
+  for(const id of ['o10-pu1-airtransfer','o10-pu1-damp-blower','o10-cu1-drip-tray','o10-cu1-chamber','o10-foilstar-loading']){
+    machine.findNode(id)?.traverse(o=>{if(o.isMesh&&o.geometry?.type==='CylinderGeometry'&&!o.userData.rotor)staticMeshes.push(o);});
+  }
+  assert.ok(staticMeshes.length>0);
+  const q=staticMeshes.map(m=>m.quaternion.clone());
+  sim.start();sim.update(0);for(let ms=16;ms<=1500;ms+=16)sim.update(ms);
+  assert.equal(staticMeshes.every((m,i)=>m.quaternion.angleTo(q[i])<1e-10),true);
+  sim.dispose();machine.dispose();
+});
