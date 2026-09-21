@@ -1,4 +1,4 @@
-const VERSION='factory-digital-twin-v97-polar115-20260921';
+const VERSION='factory-digital-twin-v98-offset8-evidence-20260921';
 const SHELL=['./','./index.html','./config.json','./assets/favicon.svg',
   './assets/splash-industrial-v79.webp',
   './app-shell-v79.css',
