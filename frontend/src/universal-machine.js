@@ -4,6 +4,8 @@ import {MACHINE_REGISTRY_BY_ID} from './data/machine-registry.js';
 import {mechanicalProfile} from './data/mechanical-profiles.js';
 import {POLAR115_TAXONOMY} from './data/taxonomy-polar115.js';
 import {POLAR115_TECHNICAL_SOURCES} from './data/sources-polar115.js';
+import {OFFSET9_TAXONOMY} from './data/taxonomy-offset9.js';
+import {OFFSET9_TECHNICAL_SOURCES} from './data/sources-offset9.js';
 
 const FAMILY_BY_NO=new Map([
  [1,'guillotine'],[2,'sheeter'],[4,'offset'],[5,'offset'],[6,'offset'],[7,'pileturner'],[8,'pileturner'],
@@ -48,7 +50,7 @@ const EVIDENCE_BY_NO=new Map([
  [1,{grade:'MODEL_IDENTIFIED',geometry:'FAMILY_REFERENCE',simulation:'BLOCKED',reason:'POLAR 115 EM MON identity is known, but installed guards, tables, hydraulics and knife-drive configuration still need BMJ photos/manual.'}],
  [4,{grade:'IDENTITY_ONLY',geometry:'PLACEHOLDER',simulation:'BLOCKED',reason:'Model code YA1A1A has no verified OEM/configuration evidence in the registry.'}],
  [5,{grade:'MODEL_IDENTIFIED',geometry:'OFFICIAL_FAMILY_REFERENCE',simulation:'BLOCKED',reason:'CX 104-8+LYYL identity is known; installed dryer/coating/delivery options still need serial-specific evidence.'}],
- [6,{grade:'MODEL_IDENTIFIED',geometry:'OFFICIAL_FAMILY_REFERENCE',simulation:'BLOCKED',reason:'SX 52-4+L identity is known; installed coating/dryer/delivery configuration still needs serial-specific evidence.'}],
+ [6,{grade:'DOCUMENT_GROUNDED',geometry:'DEDICATED_OFFICIAL_FAMILY_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated SX 52-4+L twin uses official Heidelberg architecture and limits plus the BMJ identity/configuration record. Unverified UV/dryer/perfector options remain excluded.'}],
  [7,{grade:'MODEL_IDENTIFIED',geometry:'FAMILY_REFERENCE',simulation:'BLOCKED',reason:'FZ 1200 identity is known but OEM and installed clamp/aeration arrangement are unresolved.'}],
  [8,{grade:'MODEL_IDENTIFIED',geometry:'FAMILY_REFERENCE',simulation:'BLOCKED',reason:'FZ 1200 identity is known but OEM and installed clamp/aeration arrangement are unresolved.'}],
  [11,{grade:'MODEL_IDENTIFIED',geometry:'FAMILY_REFERENCE',simulation:'BLOCKED',reason:'MK 920 YMI identity is known; foil paths, platen option and delivery configuration need machine-specific evidence.'}],
@@ -75,10 +77,11 @@ const EVIDENCE_BY_NO=new Map([
 const DEFAULT_EVIDENCE=Object.freeze({grade:'IDENTITY_ONLY',geometry:'PLACEHOLDER',simulation:'BLOCKED',reason:'Machine-specific evidence is insufficient for mechanically faithful geometry or simulation.'});
 const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 export function universalMachineConfig(machineId){const machine=MACHINE_REGISTRY_BY_ID.get(machineId);if(!machine)return null;const family=FAMILY_BY_NO.get(machine.no);if(!family)return null;return {machine,family,label:LABELS[family],modules:MODULES[family],profile:mechanicalProfile(machine.no),evidence:Object.freeze(EVIDENCE_BY_NO.get(machine.no)||DEFAULT_EVIDENCE)};}
-export function universalTechnicalSources(machineId){if(machineId==='BMJ-MCH-0001')return [...POLAR115_TECHNICAL_SOURCES];const cfg=universalMachineConfig(machineId);if(!cfg)return [];return (FAMILY_SOURCES[cfg.family]||[]).map(([title,url],i)=>({id:`FAMILY-${cfg.family.toUpperCase()}-${i+1}`,title,publisher:new URL(url).hostname.replace(/^www\./,''),url,type:'TECHNICAL_REFERENCE',confidence:cfg.machine.model?'MEDIUM CONFIDENCE':'REFERENCE ONLY'}));}
+export function universalTechnicalSources(machineId){if(machineId==='BMJ-MCH-0001')return [...POLAR115_TECHNICAL_SOURCES];if(machineId==='BMJ-MCH-0006')return [...OFFSET9_TECHNICAL_SOURCES];const cfg=universalMachineConfig(machineId);if(!cfg)return [];return (FAMILY_SOURCES[cfg.family]||[]).map(([title,url],i)=>({id:`FAMILY-${cfg.family.toUpperCase()}-${i+1}`,title,publisher:new URL(url).hostname.replace(/^www\./,''),url,type:'TECHNICAL_REFERENCE',confidence:cfg.machine.model?'MEDIUM CONFIDENCE':'REFERENCE ONLY'}));}
 
 export function universalTaxonomy(machineId){
  if(machineId==='BMJ-MCH-0001')return [...POLAR115_TAXONOMY];
+ if(machineId==='BMJ-MCH-0006')return [...OFFSET9_TAXONOMY];
  const cfg=universalMachineConfig(machineId);if(!cfg)return [];
  const root='U'+String(cfg.machine.no).padStart(2,'0'),nodes=[];
  const add=(id,parentId,level,levelName,name,meshRefs=[],description='')=>nodes.push(Object.freeze({id,parentId,level,levelName,name,machineZone:name,meshRefs,sourceRefs:['BMJ-MACHINE-DATABASE',`FAMILY-${cfg.family.toUpperCase()}`],confidence:cfg.machine.model?'FAMILY_REFERENCE':'REFERENCE_ONLY',verified:false,explodeVector:[level===2?.7:.12,level<4?.18:.08,0],explodeDistance:level===2?.9:level===3?.55:level===4?.34:level===5?.22:.12,focusCamera:null,description,maintenanceTag:null}));
