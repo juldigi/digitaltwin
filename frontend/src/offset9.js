@@ -17,12 +17,19 @@ export class Offset9MachineTemplate{
  mat(key){if(!this.materials.has(key)){const colors={ivory:0xe7e8e1,light:0xd7dbd8,graphite:0x252e32,black:0x101719,steel:0x89969b,silver:0xc3ccce,rubber:0x22282a,paper:0xf2ebd8,blue:0x257aa8,cyan:0x42b3be,amber:0xd7a338,green:0x668d78,glass:0x79bdd0};this.materials.set(key,new THREE.MeshStandardMaterial({color:colors[key]||0x888888,metalness:['steel','silver'].includes(key)?.62:.12,roughness:key==='paper'?.92:.46,transparent:key==='glass',opacity:key==='glass'?.32:1}));}return this.materials.get(key);}
  mesh(group,geometry,key,material='graphite',pos=[0,0,0],rotation=null){if(!this.geometries.has(key))this.geometries.set(key,geometry());const mesh=new THREE.Mesh(this.geometries.get(key),this.mat(material));mesh.position.set(...pos);if(rotation)mesh.rotation.set(...rotation);mesh.castShadow=material!=='glass';mesh.receiveShadow=true;mesh.userData.ownerId=group.userData.nodeId;group.add(mesh);this.meshes.push(mesh);return mesh;}
  box(g,size,pos,material='graphite',radius=.02){return this.mesh(g,()=>radius?new RoundedBoxGeometry(...size,2,radius):new THREE.BoxGeometry(...size),'b'+size.join('_')+'_'+radius,material,pos);}
- cyl(g,radius,length,pos,material='steel',role=''){const mesh=this.mesh(g,()=>new THREE.CylinderGeometry(radius,radius,length,24),'c'+radius+'_'+length,material,pos,[Math.PI/2,0,0]);mesh.userData.rotor=true;mesh.userData.rollerRole=role;return mesh;}
+ cyl(g,radius,length,pos,material='steel',role='',axis='z'){
+  const rotation=axis==='z'?[Math.PI/2,0,0]:axis==='x'?[0,0,Math.PI/2]:null;
+  const mesh=this.mesh(g,()=>new THREE.CylinderGeometry(radius,radius,length,24),'c'+radius+'_'+length+'_'+axis,material,pos,rotation);
+  const rotating=/^(suction-belt-wheel|plate|blanket|impression|transfer|ink-transfer|ink-form-\d+|damp-\d+|anilox|coating-form|coating-impression|chain-sprocket|sheet-brake)$/.test(role);
+  mesh.userData.rollerRole=role;mesh.userData.rotor=rotating;mesh.userData.rotorAxis=axis;mesh.userData.radius=radius;mesh.userData.reciprocator=role==='suction-foot';
+  if(rotating){mesh.userData.spinDirection=/^(blanket|transfer|ink-transfer|anilox|coating-form|chain-sprocket)$/.test(role)?-1:1;}
+  return mesh;
+ }
  cover(mesh){mesh.userData.exteriorCover=true;return mesh;}
  build(){
   const access=this.group(this.root,'offset9-access','Frames, safety guards and access');
   this.box(access,[8.65,.14,2.02],[.38,.34,0],'black');
-  for(const z of [-1.11,1.11]){this.box(access,[7.75,.08,.36],[.42,.51,z],'steel');for(let x=-2.8;x<4.4;x+=1.25)this.cyl(access,.018,.44,[x,.82,z],'steel','guard-rail');}
+  for(const z of [-1.11,1.11]){this.box(access,[7.75,.08,.36],[.42,.51,z],'steel');for(let x=-2.8;x<4.4;x+=1.25)this.cyl(access,.018,.44,[x,.82,z],'steel','guard-rail','y');}
   this.buildFeeder();
   const print=this.group(this.root,'offset9-print','Four offset printing units');
   const coat=this.group(this.root,'offset9-coat','Inline coating unit');
@@ -34,7 +41,7 @@ export class Offset9MachineTemplate{
   this.cover(this.box(g,[2.05,1.42,1.92],[0,1.16,0],'ivory',.10));this.cover(this.box(g,[.50,.50,1.98],[.78,1.90,0],'graphite',.07));
   const pile=this.group(g,'offset9-feeder-pile','Pile lift and pallet table');this.box(pile,[1.25,.07,1.22],[-.40,.49,0],'steel');this.box(pile,[1.20,.72,1.16],[-.40,.89,0],'paper');
   for(const z of [-.53,.53]){this.cyl(pile,.045,.10,[-.87,.45,z],'black','pile-chain');this.cyl(pile,.045,.10,[.05,.45,z],'black','pile-chain');}
-  const head=this.group(g,'offset9-feeder-head','Suction head and sheet separation');this.box(head,[.72,.25,1.18],[.18,1.86,0],'graphite');for(const z of [-.42,-.14,.14,.42]){this.cyl(head,.026,.13,[.37,1.66,z],'rubber','suction-foot');this.box(head,[.035,.22,.035],[.37,1.76,z],'steel');}
+  const head=this.group(g,'offset9-feeder-head','Suction head and sheet separation');this.box(head,[.72,.25,1.18],[.18,1.86,0],'graphite');for(const z of [-.42,-.14,.14,.42]){this.cyl(head,.026,.13,[.37,1.66,z],'rubber','suction-foot','y');this.box(head,[.035,.22,.035],[.37,1.76,z],'steel');}
   const reg=this.group(g,'offset9-register','Central suction-belt feedboard and register',[1.43,0,0]);this.box(reg,[1.23,.48,1.55],[0,.90,0],'graphite',.05);this.box(reg,[1.19,.025,1.43],[0,1.17,0],'steel');for(const z of [-.38,0,.38])this.cyl(reg,.025,1.02,[0,1.21,z],'rubber','suction-belt-wheel');for(const z of [-.48,.48])this.box(reg,[.10,.08,.10],[.47,1.25,z],'silver');
  }
  sideFrames(g){for(const z of [-.91,.91]){this.cover(this.box(g,[.92,1.49,.12],[0,1.43,z],'ivory',.07));this.cover(this.box(g,[.70,.23,.025],[0,2.10,z+(z<0?-.065:.065)],'graphite'));}this.cover(this.box(g,[.96,.23,1.70],[0,2.21,0],'graphite',.05));}
@@ -46,8 +53,8 @@ export class Offset9MachineTemplate{
   const blanket=this.group(train,id+'-blanket','Blanket cylinder and wash device');this.cyl(blanket,.194,1.72,[.04,1.31,0],'rubber','blanket');this.box(blanket,[.17,.08,1.78],[.30,1.43,0],'silver');
   const impression=this.group(train,id+'-impression','Impression cylinder and jacket');this.cyl(impression,.215,1.72,[-.08,.88,0],'silver','impression');
   const transfer=this.group(train,id+'-transfer','Transfer cylinder and gripper bridge');this.cyl(transfer,.215,1.72,[.33,.52,0],'graphite','transfer');for(const z of [-.57,-.28,0,.28,.57])this.box(transfer,[.12,.028,.04],[.24,.70,z],'steel');
-  const ink=this.group(g,id+'-inking','Speed-compensated inking unit');this.box(ink,[.60,.18,1.47],[-.25,2.34,0],'graphite');for(const [j,x,y] of [[0,-.37,2.08],[1,-.20,2.13],[2,-.02,2.15],[3,.16,2.12],[4,.33,2.05]])this.cyl(ink,.047,1.41,[x,y,0],j%2?'rubber':'steel','ink-transfer');for(const [j,x,y] of [[0,-.22,1.94],[1,-.07,1.99],[2,.09,1.98],[3,.23,1.91]])this.cyl(ink,.052+j*.002,1.42,[x,y,0],'rubber','ink-form-'+(j+1));
-  const damp=this.group(g,id+'-dampening','Alcolor continuous dampening');for(const [j,x,y] of [[0,.26,1.74],[1,.39,1.83],[2,.45,1.69],[3,.39,1.54],[4,.27,1.43]])this.cyl(damp,.044+(j>2?.007:0),1.40,[x,y,0],j%2?'rubber':'steel','damp-'+(j+1));this.box(damp,[.34,.07,1.46],[.34,1.34,0],'steel');
+  const ink=this.group(g,id+'-inking','Speed-compensated inking unit · visualization reference');ink.userData.exactRollerCountVerified=false;this.box(ink,[.60,.18,1.47],[-.25,2.34,0],'graphite');for(const [j,x,y] of [[0,-.37,2.08],[1,-.20,2.13],[2,-.02,2.15],[3,.16,2.12],[4,.33,2.05]])this.cyl(ink,.047,1.41,[x,y,0],j%2?'rubber':'steel','ink-transfer');for(const [j,x,y] of [[0,-.22,1.94],[1,-.07,1.99],[2,.09,1.98],[3,.23,1.91]])this.cyl(ink,.052+j*.002,1.42,[x,y,0],'rubber','ink-form-'+(j+1));
+  const damp=this.group(g,id+'-dampening','Alcolor film dampening · visualization reference');damp.userData.exactRollerCountVerified=false;for(const [j,x,y] of [[0,.26,1.74],[1,.39,1.83],[2,.45,1.69],[3,.39,1.54],[4,.27,1.43]])this.cyl(damp,.044+(j>2?.007:0),1.40,[x,y,0],j%2?'rubber':'steel','damp-'+(j+1));this.box(damp,[.34,.07,1.46],[.34,1.34,0],'steel');
  }
  coatingUnit(parent,module){
   const id='offset9-l',g=this.group(parent,id,module.label,[OFFSET9_CENTERS.L,0,0],[.20,.22,0]);g.userData.moduleType='coat';g.userData.moduleKey='L';this.sideFrames(g);
@@ -57,9 +64,10 @@ export class Offset9MachineTemplate{
   const impression=this.group(g,id+'-impression','Coating impression cylinder');this.cyl(impression,.215,1.72,[-.08,.91,0],'silver','coating-impression');
  }
  buildDelivery(){
-  const g=this.group(this.root,'offset9-delivery','High-pile delivery',[4.72,0,0],[.9,.18,0]);this.cover(this.box(g,[2.78,1.70,2.02],[0,1.27,0],'ivory',.10));this.cover(this.box(g,[2.28,.46,1.96],[-.15,2.10,0],'graphite',.07));
-  const chain=this.group(g,'offset9-delivery-chain','Gripper-chain transport');for(const z of [-.72,.72]){this.cyl(chain,.20,.09,[-.96,1.52,z],'steel','chain-sprocket');this.cyl(chain,.20,.09,[.92,1.52,z],'steel','chain-sprocket');this.box(chain,[1.88,.035,.035],[-.02,1.72,z],'black');}for(let x=-.75;x<=.70;x+=.37)this.box(chain,[.06,.035,1.42],[x,1.69,0],'steel');
-  const guide=this.group(g,'offset9-delivery-guide','Venturi non-contact sheet guidance');this.box(guide,[1.72,.035,1.44],[-.06,1.12,0],'silver');for(let x=-.68;x<=.68;x+=.34)for(const z of [-.48,0,.48]){const q=this.cyl(guide,.018,.025,[x,1.15,z],'cyan','venturi-nozzle');q.userData.airNozzle=true;}
+  const g=this.group(this.root,'offset9-delivery','Preset delivery · pile-height option unverified',[4.72,0,0],[.9,.18,0]);g.userData.pileHeightOptionVerified=false;this.cover(this.box(g,[2.78,1.70,2.02],[0,1.27,0],'ivory',.10));this.cover(this.box(g,[2.28,.46,1.96],[-.15,2.10,0],'graphite',.07));
+  const chain=this.group(g,'offset9-delivery-chain','Gripper-chain transport');for(const z of [-.72,.72]){this.cyl(chain,.20,.09,[-.96,1.52,z],'steel','chain-sprocket');this.cyl(chain,.20,.09,[.92,1.52,z],'steel','chain-sprocket');this.box(chain,[1.88,.035,.035],[-.02,1.72,z],'black');}
+  const grippers=this.group(g,'offset9-delivery-grippers','Delivery gripper bars · loop reference');for(let i=0;i<6;i++){const bar=this.group(grippers,'offset9-delivery-gripper-'+(i+1),'Delivery gripper bar '+(i+1),[-.96+i*(1.88/5),1.52,0]);bar.userData.deliveryGripperBar=true;bar.userData.barPhase=i/6;this.box(bar,[.045,.04,1.42],[0,0,0],'steel',.006);for(const z of [-.54,-.27,0,.27,.54])this.box(bar,[.05,.04,.03],[.02,-.035,z],'graphite',.003);}
+  const guide=this.group(g,'offset9-delivery-guide','Venturi non-contact sheet guidance');this.box(guide,[1.72,.035,1.44],[-.06,1.12,0],'silver');for(let x=-.68;x<=.68;x+=.34)for(const z of [-.48,0,.48]){const q=this.cyl(guide,.018,.025,[x,1.15,z],'cyan','venturi-nozzle','y');q.userData.airNozzle=true;}
   const brake=this.group(g,'offset9-delivery-brake','Sheet brake and release');for(const z of [-.47,-.16,.16,.47])this.cyl(brake,.055,.14,[.78,.88,z],'rubber','sheet-brake');
   const stack=this.group(g,'offset9-delivery-stack','Delivery pile lift');this.box(stack,[1.18,.07,1.24],[.67,.46,0],'steel');this.box(stack,[1.14,.48,1.18],[.67,.74,0],'paper');
  }
