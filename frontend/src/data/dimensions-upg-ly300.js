@@ -4,7 +4,8 @@ export const UPG_LY300_SPEC=Object.freeze({
  feederMode:'Baffle type',feederMotor:'Frequency conversion',printhead:'Ricoh G5',printWidthMm:54.1,printSpeedReferenceMMin:114,
  cameraInspection:'2K line scan',resolutionsDpi:[600,800,1000,1100,1200,1600],paperPileHeightMm:200,
  positioningAccuracyMm:0.20,inkType:'LED curing UV ink',uvDryingKw:1,colour:'Black',belt:'PU black high-temperature-resistant',
- rejectMode:'Plate turning out',control:'PLC digital communication',drive:'Servo motor',
+ rejectMode:'Plate turning out',control:'PLC digital communication',drive:'Servo motor',feedReceiveMethod:'Air cylinder',
+ installedPrintheadCountVerified:false,installedCoronaTreatmentVerified:false,installedCollectionStrapperVerified:false,installedAccessoryPlacementVerified:false,
  processes:['automatic paging / sheet separation','uniform conveyor positioning','piezo UV variable-data printing','LED UV curing','camera inspection','reject separation','collection / strapping interface'],
  dimensionalBoundary:'The BMJ registry model UPG-LY300 matches the manufacturer model family LQ-UPG LY300. Core published dimensions and process devices are used. Customizable conveyor form, optional corona surface treatment, G5/G6 alternatives beyond the published UPG-LY300 table, exact collection/strapping hardware and BMJ installed printhead count remain configuration-specific.'
 });
