@@ -43,6 +43,20 @@ export const APM2_TECHNICAL_SOURCES=Object.freeze([
     supports:['legacy SP 102 exterior proportions','feeder opening','die-cutting housing','operator controls','stripping section']
   },
   {
+    id:'APM2-SP102-CHAIN14',
+    title:'Bobst SP 102 gripper-bar chain set · 14 pcs',
+    publisher:'Conway Machine',
+    url:'https://catalog.conwaymachine.com/catalog/chain-sets',
+    supports:['SP 102 gripper-bar chain set of 14','two-chain gripper transport family reference']
+  },
+  {
+    id:'APM2-BOBST-GRIPPER-PATENT',
+    title:'Gripper bar for die cutting machine · assigned to Bobst Group',
+    publisher:'Google Patents / USPTO record',
+    url:'https://patents.google.com/patent/US20030107167A1/en',
+    supports:['gripper bars on two lateral chains','cross-machine gripper-bar architecture','successive horizontal intermittent movement through processing stations','return path to sheet pickup']
+  },
+  {
     id:'APM2-SP102-PARTS',
     title:'SP 102 E compatible parts catalogue',
     publisher:'MV Parts',
