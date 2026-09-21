@@ -165,3 +165,19 @@ test('V123 R3 compressor brand-lineage isolation prevents Atlas evidence leaking
   m.dispose();
  }
 });
+
+
+test('V123 R3 brand-specific compressor taxonomy resolves every service component to a selectable 3D node',()=>{
+ for(const id of ['BMJ-MCH-0029','BMJ-MCH-0031','BMJ-MCH-0033']){
+  const m=createMachineTemplate(id);
+  const levels=[...new Set(m.taxonomy.map(n=>n.level))].sort();
+  assert.deepEqual(levels,[1,2,3,4,5,6],id);
+  assert.equal(new Set(m.taxonomy.map(n=>n.id)).size,m.taxonomy.length,id);
+  for(const n of m.taxonomy.filter(n=>n.level===6)){
+   assert.ok(n.meshRefs.length>0,id+' '+n.id);
+   assert.ok(m.findNode(n.meshRefs[0]),id+' missing selectable node '+n.meshRefs[0]);
+  }
+  for(const n of m.taxonomy.filter(n=>n.level>1))assert.ok(m.taxonomy.some(p=>p.id===n.parentId),id+' missing parent '+n.parentId);
+  m.dispose();
+ }
+});
