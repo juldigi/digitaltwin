@@ -16,9 +16,10 @@ import {SHEETING_PHOTO_REGISTRY,SHEETING_TECHNICAL_SOURCES,sheetingPhotoStats,SH
 import {SHEETING_SIMULATION_STAGES,SHEETING_PROCESS_STEPS} from './simulation-sheeting.js';
 import {MACHINE_REGISTRY,MACHINE_REGISTRY_BY_ID,MACHINE_REGISTRY_STATS,searchMachines} from './data/machine-registry.js';
 import {universalMachineConfig,universalTaxonomy,universalTechnicalSources} from './universal-machine.js';
+import {normalizeMachineKey} from './machine-runtime.js';
 let REQUESTED_MACHINE,GENERIC_CONFIG,MACHINE_KEY,IS_OFFSET10,IS_APM2,IS_SHEETING,IS_GENERIC,IS_VERIFIED_REGISTRY_SIM,GENERIC_TAXONOMY,GENERIC_ROOT,ACTIVE_ROOT,ACTIVE_TAXONOMY,TAXONOMY_BY_ID,taxonomyChildren,taxonomyStats,PHOTO_REGISTRY,GENERIC_SOURCES,TECHNICAL_SOURCES,photoStats,ORIENTATION,PRINTING_SIMULATION_STAGES,INK_SIMULATION_SEQUENCE;
 function configureActiveMachine(requested){
- REQUESTED_MACHINE=requested;
+ REQUESTED_MACHINE=requested;requested=normalizeMachineKey(requested);
  GENERIC_CONFIG=universalMachineConfig(requested);
  MACHINE_KEY=['offset10','apm2','sheeting'].includes(requested)||GENERIC_CONFIG?requested:'offset5';
  IS_OFFSET10=MACHINE_KEY==='offset10';IS_APM2=MACHINE_KEY==='apm2';IS_SHEETING=MACHINE_KEY==='sheeting';IS_GENERIC=!!GENERIC_CONFIG;IS_VERIFIED_REGISTRY_SIM=IS_GENERIC&&GENERIC_CONFIG.evidence.simulation==='VERIFIED_PROCESS_MODEL';
