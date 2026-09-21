@@ -1,0 +1,1 @@
+CI verification snapshot for V115c role-based Offset10 motion plus batched Offset5 static rotor references. Temporary branch; do not merge marker.
