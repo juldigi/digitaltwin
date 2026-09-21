@@ -39,7 +39,7 @@ test('Diana reject demo is causally downstream of a stored inspection result',()
 
 test('Diana scan lights follow inspection occupancy and result tracking remains demo-only',()=>{
  const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);sim.start();let now=1000,seenScan=false,seenProcessing=false,seenReject=false,seenAccepted=false;
- for(let i=0;i<450;i++){now+=20;sim.update(now);const s=sim.state();seenScan||=s.scanActive;seenProcessing||=s.imageProcessingActive;seenReject||=s.rejectTrackingActive;seenAccepted||=s.acceptedDeliveryActive;if(s.scanActive)assert.ok(sim.lights.some(l=>l.material.emissiveIntensity>1);}
+ for(let i=0;i<450;i++){now+=20;sim.update(now);const s=sim.state();seenScan||=s.scanActive;seenProcessing||=s.imageProcessingActive;seenReject||=s.rejectTrackingActive;seenAccepted||=s.acceptedDeliveryActive;if(s.scanActive)assert.ok(sim.lights.some(l=>l.material.emissiveIntensity>1));}
  assert.ok(seenScan&&seenProcessing&&seenReject&&seenAccepted);const s=sim.state();assert.equal(s.installedCameraCountVerified,false);assert.equal(s.installedRejectActuationVerified,false);assert.ok(s.inspectedDemoCount>0);sim.dispose();model.dispose();
 });
 
