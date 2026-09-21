@@ -5,8 +5,6 @@ import {PHOTO_RECONSTRUCTION,OffsetMachineTemplate} from '../frontend/src/offset
 
 const html=readFileSync(new URL('../frontend/index.html',import.meta.url),'utf8');
 const ui=readFileSync(new URL('../frontend/src/ui-v5.js',import.meta.url),'utf8');
-const mobileUi=readFileSync(new URL('../frontend/src/mobile-v75.js',import.meta.url),'utf8');
-const mobileCss=readFileSync(new URL('../frontend/mobile-flagship-v75.css',import.meta.url),'utf8');
 const referenceCss=readFileSync(new URL('../frontend/reference-v76.css',import.meta.url),'utf8');
 const referenceUi=readFileSync(new URL('../frontend/src/reference-v76.js',import.meta.url),'utf8');
 const css=readFileSync(new URL('../frontend/ui-v5.css',import.meta.url),'utf8');
@@ -81,7 +79,7 @@ test('all static buttons are actionable and none is permanently disabled',()=>{
     else if(b.tab)assert.match(app,/data-tab|dataset\.tab/);
     else if(b.workbench)assert.match(ui,/data-workbench|dataset\.workbench/);
     else if(b.partBack)assert.match(engine,/data-part-label-back/);
-    else if(b.mobile)assert.ok(mobileUi.includes('data-mobile-nav'),`mobile nav ${b.mobile} has no handler`);
+    else if(b.mobile)assert.ok(referenceUi.includes('data-mobile-nav'),`mobile nav ${b.mobile} has no handler`);
     else assert.fail('button without id or delegated data attribute');
   }
 });
@@ -103,10 +101,10 @@ test('mobile portrait and landscape keep panels inside the viewport',()=>{
   assert.match(ui,/setFloatVisible\('\.floating-filter',false\)/);
   assert.match(css,/@media\(max-width:767px\)/);
   assert.match(css,/panel-launcher-menu/);
-  assert.match(mobileCss,/\.mobile-nav/);
-  assert.match(mobileCss,/body\.nav-open \.rail/);
-  assert.match(mobileCss,/orientation:landscape/);
-  assert.match(mobileUi,/setMobileNavActive/);
+  assert.match(referenceCss,/\.mobile-nav/);
+  assert.match(referenceCss,/body\.nav-open \.rail/);
+  assert.match(referenceCss,/orientation:landscape/);
+  assert.match(referenceUi,/v76BuildMobileNav/);
   assert.match(referenceCss,/--v76-sidebar:174px/);
   assert.match(referenceCss,/--v76-inspector:370px/);
   assert.match(referenceUi,/v76BuildInspector/);
@@ -126,10 +124,10 @@ test('conditional controls explain requirements rather than failing silently',()
 });
 
 test('service worker refreshes the redesigned shell',()=>{
-  assert.match(sw,/factory-digital-twin-v76-final-20260921/);
+  assert.match(sw,/factory-digital-twin-v77-stable-20260921/);
   assert.match(sw,/src\/universal-machine\.js/);
   assert.match(app,/template\.ghost\(true,part\)/,'object selection must automatically ghost all non-selected geometry');
-  for(const asset of ['ui-v5.css','responsive-v5.css','ui-corporate-v74.css','mobile-flagship-v75.css','reference-v76.css','src/ui-v5.js','src/mobile-v75.js','src/reference-v76.js','src/app.js','src/simulation.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
+  for(const asset of ['ui-v5.css','responsive-v5.css','ui-corporate-v74.css','reference-v76.css','src/ui-v5.js','src/reference-v76.js','src/app.js','src/simulation.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
 });
 
 test('v41 keeps every right-sidebar taxonomy item clickable after repeated selections',()=>{
@@ -271,7 +269,7 @@ test('v53 routes a rebuilt document-grounded CX104 twin without Offset 5 UI leak
   assert.match(app,/MACHINE_KEY/);
   assert.match(app,/ACTIVE_ROOT/);
   assert.match(app,/selectedTaxonomyId=selectedTaxonomyId\|\|ACTIVE_ROOT/);
-  assert.match(app,/machine=\$\{encodeURIComponent\(route\)\}&v=76/);
+  assert.match(app,/machine=\$\{encodeURIComponent\(route\)\}&v=77/);
   assert.doesNotMatch(app,/machine=\$\{route\}&v=50/);
   assert.match(app,/Tidak ada foto aktual Offset 10 yang tersedia/);
   assert.match(app,/final drawing BMJ/);
@@ -301,7 +299,7 @@ test('v54 keeps APM2 as a dedicated 3D machine with process-specific UI and no i
   assert.match(app,/IS_APM2=MACHINE_KEY==='apm2'/);
   assert.match(app,/ACTIVE_ROOT=IS_OFFSET10\?'O10':IS_APM2\?'APM2':IS_SHEETING\?'SH':IS_GENERIC\?GENERIC_ROOT:'O5'/);
   assert.match(app,/machine\.machineId==='BMJ-MCH-0010'\?'apm2'/);
-  assert.match(app,/machine=\$\{encodeURIComponent\(route\)\}&v=76/);
+  assert.match(app,/machine=\$\{encodeURIComponent\(route\)\}&v=77/);
   assert.match(app,/Simulasi Proses APM 2/);
   assert.match(app,/register dan SideLay/);
   assert.match(app,/suffix E\/SE\/CER\/BMA tidak tersedia/);
