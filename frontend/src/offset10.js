@@ -58,9 +58,9 @@ export class Offset10MachineTemplate{
   roller(g,r,len,pos,kind,role){
     const m=this.cylinder(g,r,len,pos,kind);m.userData.rollerRadius=r;m.userData.rollerRole=role;m.userData.rotor=true;m.userData.rotorAxis='local-y';
     const numbered=Number((String(role).match(/(\d+)$/)||[])[1]||0);
-    const map={plate:1,blanket:-1,impression:1,transfer:-1,fountain:1,'damp-form':-1,'damp-intermediate':1,'damp-distributor':-1,'damp-metering':1,'damp-pan':-1,'coating-anilox':1,'coating-form':-1,'coating-impression':1,'coating-transfer':-1};
+    const map={plate:1,blanket:-1,impression:1,transfer:-1,fountain:1,'damp-form':-1,'damp-intermediate':1,'damp-distributor':-1,'damp-metering':1,'damp-pan':-1,'coating-anilox':1,'coating-form':-1,'coating-impression':1,'coating-transfer':-1,'sheet-brake':1};
     m.userData.spinDirection=map[role]??(numbered?(numbered%2?-1:1):1);
-    m.userData.spinRate=/^(plate|blanket|impression|transfer)$/.test(role)?1:/^coating-/.test(role)?.88:/^damp-/.test(role)?.72:.78;
+    m.userData.spinRate=role==='sheet-brake'?1.08:/^(plate|blanket|impression|transfer)$/.test(role)?1:/^coating-/.test(role)?.88:/^damp-/.test(role)?.72:.78;
     return m;
   }
   build(){
@@ -316,7 +316,7 @@ export class Offset10MachineTemplate{
     const chain=this.group(g,'o10-delivery-chain','Delivery gripper chain / guide rails',[0,0,0],[.3,.15,0],['O10-PROPOSAL']);
     for(const z of [-1.00,1.00])this.box(chain,[4.05,.055,.055],[.12,1.46,z],'steel',.010);
     const brake=this.group(g,'o10-delivery-sheet-brake','Presettable dynamic sheet brake',[0,0,0],[.3,.12,0],['O10-PROPOSAL','O10-CX104-OFFICIAL']);
-    for(const z of [-.62,0,.62])this.cylinder(brake,.055,.22,[1.42,1.28,z],'rubber','z');
+    for(const z of [-.62,0,.62])this.roller(brake,.055,.22,[1.42,1.28,z],'rubber','sheet-brake');
 
     const pile=this.group(g,'o10-delivery-pile','Automatic non-stop delivery pile',[0,0,0],[.4,.1,0],['O10-PROPOSAL']);
     this.box(pile,[1.42,.10,1.80],[1.16,.70,0],'steel',.016);
