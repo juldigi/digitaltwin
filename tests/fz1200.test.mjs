@@ -10,7 +10,7 @@ import {FZ1200_TECHNICAL_SOURCES} from '../frontend/src/data/sources-fz1200.js';
 test('FZ1200 keeps all three BMJ identities and supplier numbers remain reference-only',()=>{
  assert.equal(Object.keys(FZ1200_ASSET_PROFILES).length,3);assert.equal(FZ1200_ASSET_PROFILES['BMJ-MCH-0007'].serial,'24RVOFS0920');assert.equal(FZ1200_ASSET_PROFILES['BMJ-MCH-0008'].serial,'2105080SF34');assert.equal(FZ1200_ASSET_PROFILES['BMJ-MCH-0022'].serial,'22000320');
  const ref=FZ1200_ASSET_PROFILES['BMJ-MCH-0007'];assert.equal(ref.exactModelPublicReference.maxPileKg,1200);assert.deepEqual(ref.exactModelPublicReference.openingM,[.76,1.64]);assert.equal(ref.exactModelPublicReference.powerKw,9);
- assert.equal(ref.installedCapacityVerified,false);assert.equal(ref.installedOpeningVerified,false);assert.equal(ref.installedPowerVerified,false);assert.equal(ref.installedEnvelopeVerified,false);assert.equal(ref.exactNozzleCountVerified,false);
+ assert.equal(ref.installedCapacityVerified,false);assert.equal(ref.installedOpeningVerified,false);assert.equal(ref.installedPowerVerified,false);assert.equal(ref.installedEnvelopeVerified,false);assert.equal(ref.installedNozzleCountVerified,false);
  assert.ok(FZ1200_TECHNICAL_SOURCES.some(s=>s.id==='FZ1200-EVIDENCE-BOUNDARY'));
 });
 
