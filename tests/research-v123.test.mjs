@@ -137,3 +137,30 @@ test('V123 R3 QF-100CS ABM-2 uses one bounded family working bay with XY-safe hy
  assert.equal(sawIndex,true);assert.equal(sawPress,true);
  sim.dispose();m.dispose();
 });
+
+
+test('V123 R3 compressor brand-lineage isolation prevents Atlas evidence leaking into KAESER or SWAN twins',()=>{
+ const cases=[
+  ['BMJ-MCH-0029','ATLAS',['atlas-intake-filter','atlas-oil-injected-screw-airend','atlas-oil-separator-element','atlas-compressed-air-aftercooler','atlas-elektronikon-controller-reference'],['KAESER','SWAN']],
+  ['BMJ-MCH-0031','KAESER',['kaeser-dry-intake-filter','kaeser-sigma-profile-airend','kaeser-cooling-fluid-separator-tank','kaeser-minimum-pressure-check-valve','kaeser-eco-drain-reference','kaeser-sigma-control-family-reference'],['ATLAS','SWAN']],
+  ['BMJ-MCH-0033','SWAN',['swan-air-filter-assembly','swan-screw-airend','swan-oil-air-separation-package-reference','swan-built-in-oil-air-cooler','swan-smart-control-panel-reference'],['ATLAS','KAESER']]
+ ];
+ for(const [id,brand,required,forbidden] of cases){
+  const m=createMachineTemplate(id),set=roles(m);
+  for(const role of required)assert.ok(set.has(role),id+' missing '+role);
+  const evidence=[];m.root.traverse(o=>{if(o.userData?.evidence)evidence.push(String(o.userData.evidence));});
+  for(const bad of forbidden)for(const e of evidence)assert.doesNotMatch(e,new RegExp(bad,'i'),id+' contaminated evidence '+e);
+  assert.match(m.root.userData.referenceBrandFamily,new RegExp(brand==='ATLAS'?'Atlas':brand,'i'));
+  assert.equal(m.root.userData.exactCompressorModelVerified,false);
+  if(brand==='KAESER'){
+   assert.equal(m.root.userData.kaeserDriveType,'UNVERIFIED_BELT_OR_1_TO_1_DIRECT');
+   assert.equal(m.root.userData.brandEvidenceBoundary.controllerGeneration,'UNVERIFIED');
+  }
+  if(brand==='SWAN'){
+   assert.equal(m.root.userData.installedSwanSeriesVerified,false);
+   const vfd=[];m.root.traverse(o=>{if(o.userData?.mechanismRole==='swan-vfd-controller-option-reference')vfd.push(o);});
+   assert.equal(vfd.length,1);assert.equal(vfd[0].userData.installedOptionVerified,false);
+  }
+  m.dispose();
+ }
+});
