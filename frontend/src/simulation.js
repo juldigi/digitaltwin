@@ -297,10 +297,16 @@ export class PrintingSimulation{
       this.addFlow(dampeningCurve(cx),{color:0x45bfe5,type:'dampening',count:4,speed:.060,phase:unit*.061+.37,radius:.006,opacity:.28,particleRadius:.015});
     });
   }
-  addRotor(mesh,sign=1,rate=1){
+  addRotor(mesh,sign=1,rate=1,meta={}){
     if(!mesh||this.rotors.some(entry=>entry.mesh===mesh))return;
     const axis=mesh.geometry?.type==='TorusGeometry'?'z':'y';
-    this.rotors.push({mesh,sign,rate,axis,initial:mesh.quaternion.clone()});
+    this.rotors.push({mesh,sign,rate,axis,role:meta.role||mesh.userData.rotorRole||'legacy-rotor',source:meta.source||'simulation-selection',initial:mesh.quaternion.clone()});
+  }
+  addTaggedRotors(){
+    this.machine.traverse(mesh=>{
+      if(!mesh.isMesh||!mesh.userData.dynamicRotor)return;
+      this.addRotor(mesh,Number(mesh.userData.rotorSign)||1,Number(mesh.userData.rotorRate)||1,{role:mesh.userData.rotorRole,source:'geometry-role-tag'});
+    });
   }
   addNodeRotors(id,sign=1,rate=1,{torus=true}={}){
     const node=this.template.findNode(id);if(!node)return;
@@ -353,7 +359,7 @@ export class PrintingSimulation{
       }
     }
 
-    for(const id of ['coater-chamber','coater-chamber-locks','dryer-sheet-path','dryer-ventilation','delivery-sheet-brake','delivery-drive-sprockets','delivery-chain-tensioners','delivery-pile-lift'])this.addNodeRotors(id,1,.78);
+    this.addTaggedRotors();
     const joggers=this.template.findNode('delivery-joggers');
     joggers?.traverse(object=>{
       if(!object.isMesh||object.geometry?.type!=='BoxGeometry')return;
