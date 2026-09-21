@@ -44,12 +44,12 @@ export const MACHINE_REGISTRY=Object.freeze([
   row('BMJ-MCH-0033',33,'UTILITY','COMPRESSOR SWAN NO.7',null,null,null,null,null,true,'EXCEL + SWAN_TS_AD_TMV_FAMILY_PRIMARY','Brand SWAN berasal dari registry BMJ; exact series belum tersedia. Twin menggunakan TS-AD/TMV family reference secara konservatif; coupling versus PM direct drive, VFD, separator internal, horsepower dan options tidak diklaim.'),
   row('BMJ-MCH-0034',34,'UTILITY','COMPRESSOR KAESER NO.8',null,null,null,null,null,true,'EXCEL + KAESER_SIGMA_FAMILY_PRIMARY','Brand KAESER berasal dari registry BMJ; exact model belum tersedia. Twin mengikuti SIGMA fluid-cooled screw family; belt/direct drive dan installed configuration belum diverifikasi.'),
   row('BMJ-MCH-0035',35,'UTILITY','COMPRESSOR ATLAS COPCO NO.9',null,null,null,null,null,true,'EXCEL + ATLAS_COPCO_GA_G_FAMILY_PRIMARY','Brand Atlas Copco berasal dari registry BMJ; exact model belum tersedia. Twin mengikuti GA/G oil-injected family architecture dengan VSD/dryer/receiver/power sebagai unknown installed options.'),
-  row('BMJ-MCH-0036',36,'UTILITY','AHU 3'),
-  row('BMJ-MCH-0037',37,'UTILITY','AHU 4'),
-  row('BMJ-MCH-0038',38,'UTILITY','AHU 5'),
-  row('BMJ-MCH-0039',39,'UTILITY','AHU 6'),
-  row('BMJ-MCH-0040',40,'UTILITY','AHU 7 (SANSIN)'),
-  row('BMJ-MCH-0041',41,'UTILITY','AHU 8')
+  row('BMJ-MCH-0036',36,'UTILITY','AHU 3',null,null,null,null,null,true,'EXCEL + EUROVENT_SECTIONAL_AHU_FUNCTIONAL_REFERENCE','OEM/model/section order/airflow direction tidak tersedia. Twin memakai fungsi AHU netral Eurovent dan tidak mengklaim filter class, coil fluid/DX type, fan type/drive, droplet eliminator atau mixing arrangement sebagai installed.'),
+  row('BMJ-MCH-0037',37,'UTILITY','AHU 4',null,null,null,null,null,true,'EXCEL + EUROVENT_SECTIONAL_AHU_FUNCTIONAL_REFERENCE','OEM/model/section order/airflow direction tidak tersedia. Geometry dan simulation hanya functional reference; installed component order harus diverifikasi dari unit aktual.'),
+  row('BMJ-MCH-0038',38,'UTILITY','AHU 5',null,null,null,null,null,true,'EXCEL + EUROVENT_SECTIONAL_AHU_FUNCTIONAL_REFERENCE','OEM/model/section order/airflow direction tidak tersedia. Filter, coil, drain dan fan ditampilkan sebagai serviceable AHU functional reference, bukan serial-specific engineering layout.'),
+  row('BMJ-MCH-0039',39,'UTILITY','AHU 6',null,null,null,null,null,true,'EXCEL + EUROVENT_SECTIONAL_AHU_FUNCTIONAL_REFERENCE','OEM/model/section order/airflow direction tidak tersedia. Section sequence pada twin adalah canonical functional visualization dan bukan bukti susunan aktual.'),
+  row('BMJ-MCH-0040',40,'UTILITY','AHU 7 (SANSIN)',null,null,null,null,null,true,'EXCEL + SANSIN_NES_YZKJ_FAMILY_REFERENCE','Brand SANSIN berasal dari registry BMJ. Family twin mengikuti NES/YZKJ evaporative pre-cooling + fin evaporator + indoor fan + outdoor refrigeration/evaporative condenser + water circuit. Exact YZKJ-45N/90N model, 50/100 kW capacity, fan count, refrigerant charge dan installed controls tidak diklaim.'),
+  row('BMJ-MCH-0041',41,'UTILITY','AHU 8',null,null,null,null,null,true,'EXCEL + EUROVENT_SECTIONAL_AHU_FUNCTIONAL_REFERENCE','OEM/model/section order/airflow direction tidak tersedia. Twin mempertahankan configuration boundaries untuk mixing, filter class, coil type, fan drive, droplet control dan control package.')
 ]);
 
 export const MACHINE_REGISTRY_BY_ID=new Map(MACHINE_REGISTRY.map(machine=>[machine.machineId,machine]));
