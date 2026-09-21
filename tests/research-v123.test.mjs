@@ -4,7 +4,7 @@ import {V123_SOURCE_LEDGER,V123_SOURCE_STATS,V123_NEW_RESEARCH_SOURCES} from '..
 import {Offset10MachineTemplate} from '../frontend/src/offset10.js';
 import {Offset8MachineTemplate} from '../frontend/src/offset8.js';
 import {DianaEye55MachineTemplate} from '../frontend/src/diana-eye55.js';
-import {createMachineTemplate} from '../frontend/src/machine-runtime.js';
+import {createMachineTemplate,createMachineSimulation} from '../frontend/src/machine-runtime.js';
 
 const roles=model=>{const s=new Set();model.root.traverse(o=>{if(o.userData?.mechanismRole)s.add(o.userData.mechanismRole);});return s;};
 const requireRoles=(model,arr)=>{const s=roles(model);for(const r of arr)assert.ok(s.has(r),model.root.name+' missing '+r);};
@@ -67,4 +67,27 @@ test('V123 compressor reference follows explicit GA26 air-oil flow architecture'
  const m=createMachineTemplate('BMJ-MCH-0031');
  requireRoles(m,['oil-separator-element','oil-scavenge-line','air-cooler-core','oil-cooler-core','condensate-trap']);
  assert.equal(m.root.userData.engineeringDimensions,false);m.dispose();
+});
+
+
+test('V123 R2 YA1A1A Offset 7 exposes bounded sheet-fed gravure mechanisms and blocks invented simulation',()=>{
+ const m=createMachineTemplate('BMJ-MCH-0004');
+ assert.equal(m.root.userData.researchVersion,'V123');
+ assert.equal(m.root.userData.simulationStatus,'BLOCKED_PENDING_YA1A1A_TRANSPORT_DRIVE_VERIFICATION');
+ requireRoles(m,[
+  'swing-gripper-shaft','swing-pawl-gripper','ink-pan-bottom','ink-pan-lift-screw',
+  'ink-drop-nozzle-reference','engraved-gravure-cylinder','doctor-pivot-shaft','doctor-blade-edge',
+  'doctor-axial-oscillator','doctor-oscillation-damper','impression-cylinder',
+  'impression-cylinder-gripper-bar','slack-suppression-press-roller','air-knife-reference',
+  'dryer-exhaust-fan','delivery-chain-guide','delivery-pile-platform','main-drive-motor-reference',
+  'transmission-line-shaft-reference'
+ ]);
+ assert.equal(m.findNode('o7-ink-drop-option').userData.installedOptionVerified,false);
+ assert.equal(m.findNode('o7-transmission').userData.installedTopologyVerified,false);
+ assert.ok(m.taxonomy.filter(n=>n.level===6).length>=18);
+ const sim=createMachineSimulation('BMJ-MCH-0004',m.root,m);
+ const state=sim.start();
+ assert.equal(state.blocked,true);
+ assert.equal(state.available,false);
+ sim.dispose();m.dispose();
 });
