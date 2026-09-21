@@ -272,13 +272,69 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   }
  }
  enrichCollator(){
-  const bins=this.activeGroup(1),vac=this.activeGroup(2),sense=this.activeGroup(3),gather=this.activeGroup(4),delivery=this.activeGroup(5),control=this.activeGroup(6);
-  if(bins){for(let b=0;b<10;b++){const y=.30+b*.155;this.tag(this.box(bins,[.90,.025,1.14],[-.06,y,0],'steel',.004),'feed-bin-shelf');this.tag(this.box(bins,[.06,.10,.06],[.35,y+.045,-.52],'accent',.004),'bin-sheet-sensor');}}
-  if(vac){const blower=this.motion(this.cyl(vac,.16,.28,[0,.42,.36],'dark','x'),'spin','x',12,.01,0,1);this.tag(blower,'vacuum-blower');for(let b=0;b<10;b++)this.tag(this.cyl(vac,.012,.46,[.08,.30+b*.135,0],'steel','z'),'vacuum-manifold-branch');}
-  if(sense)for(let b=0;b<10;b++)this.tag(this.box(sense,[.07,.06,.05],[-.04,.34+b*.14,-.50],'accent',.004),'double-miss-detector');
-  if(gather){for(const z of [-.36,.36])this.tag(this.box(gather,[.06,1.18,.06],[0,.94,z],'steel',.005),'gather-guide');for(const y of [.42,.70,.98,1.26]){const r=this.motion(this.cyl(gather,.05,.80,[0,y,0],'dark','z'),'spin','z',7,.01,y,3);this.tag(r,'gather-transport-roller');}}
-  if(delivery){for(const z of [-.42,-.14,.14,.42])this.tag(this.box(delivery,[.62,.025,.08],[0,.62,z],'dark',.004),'delivery-belt');const jog=this.motion(this.box(delivery,[.42,.18,.04],[.20,.72,.50],'accent',.006),'oscillate','z',10,.025,0,4);this.tag(jog,'set-jogger');}
-  if(control)this.tag(this.box(control,[.26,.20,.025],[-.02,.86,-.33],'glass',.008),'operator-display');
+  const tower=this.activeGroup(1),vac=this.activeGroup(2),sense=this.activeGroup(3),gather=this.activeGroup(4),delivery=this.activeGroup(5),control=this.activeGroup(6);
+  const part=(parent,id,name)=>parent?this.group(parent,id,name,[0,0,0],[0,.08,.08]):null;
+  this.root.userData.detailPass='V123_R4_MULTI_VENDOR_SUCTION_COLLATOR_RECONSTRUCTION';
+  this.root.userData.exactCollatorOemVerified=false;
+  this.root.userData.exactCollatorModelVerified=false;
+  this.root.userData.modeledReferenceBinCount=10;
+  this.root.userData.installedBinCountVerified=false;
+  this.root.userData.crossFamilyReferences=['HORIZON_VAC1000','HORIZON_VAC600H','DUPLO_DSC10_60I','VERTICAL_COLLATOR_PATENT'];
+  this.root.userData.collatorProcessBoundary='TEN_BIN_DISPLAY_IS_CROSS_FAMILY_REFERENCE_NOT_BMJ_INSTALLED_COUNT';
+
+  if(tower){
+   const trays=this.findNode('collator-bin-trays');
+   const feeds=this.findNode('collator-suction-feeds');
+   const air=this.findNode('collator-bin-air');
+   for(let b=0;b<10;b++){
+    const y=.34+b*.145;
+    if(trays){
+     this.tag(this.box(trays,[.82,.025,1.02],[-.08,y,0],'steel',.004),'feed-bin-shelf','MULTI_VENDOR_COLLATOR_FAMILY');
+     this.tag(this.box(trays,[.72,.018,.94],[-.12,y+.035,0],'paper',.003),'bin-sheet-stack-reference','PROCESS_WORKPIECE_REFERENCE');
+     for(const z of [-.47,.47])this.tag(this.box(trays,[.06,.10,.035],[-.33,y+.06,z],'steel',.004),'bin-side-guide-reference','MULTI_VENDOR_COLLATOR_FAMILY');
+    }
+    if(feeds){
+     const rotor=this.motion(this.cyl(feeds,.035,.82,[.30,y+.045,0],'dark','z'),'spin','z',8,.01,b*.17,0);this.tag(rotor,'suction-rotor','MULTI_VENDOR_COLLATOR_FAMILY');rotor.userData.binIndex=b;
+     const nip=this.cyl(feeds,.024,.82,[.39,y+.045,0],'steel','z');this.tag(nip,'feed-nip-roller-reference','VERTICAL_COLLATOR_PATENT');nip.userData.binIndex=b;
+    }
+    if(air){
+     for(const z of [-.32,.32]){const n=this.cyl(air,.010,.065,[.02,y+.075,z],'accent','x');this.tag(n,'bin-air-separation-nozzle','MULTI_VENDOR_COLLATOR_FAMILY');n.userData.binIndex=b;}
+    }
+   }
+  }
+  if(vac){
+   const blower=this.findNode('collator-vacuum-blower');
+   if(blower){const fan=this.motion(this.cyl(blower,.15,.28,[0,.42,.36],'dark','x'),'spin','x',11,.01,0,null);this.tag(fan,'vacuum-blower','MULTI_VENDOR_COLLATOR_FAMILY');}
+   const manifold=this.findNode('collator-vacuum-manifold');
+   if(manifold){this.tag(this.cyl(manifold,.030,1.30,[.04,.98,.44],'steel','y'),'vacuum-main-manifold','MULTI_VENDOR_COLLATOR_FAMILY');for(let b=0;b<10;b++){const y=.34+b*.145;const branch=this.cyl(manifold,.010,.42,[.04,y,.22],'steel','z');this.tag(branch,'vacuum-bin-branch','MULTI_VENDOR_COLLATOR_FAMILY');branch.userData.binIndex=b;}}
+  }
+  if(sense){
+   const feed=this.findNode('collator-double-feed'),empty=this.findNode('collator-bin-empty');
+   for(let b=0;b<10;b++){const y=.34+b*.145;
+    if(feed){const s=this.box(feed,[.055,.065,.045],[.48,y+.045,-.47],'accent',.004);this.tag(s,'double-miss-feed-sensor-reference','MULTI_VENDOR_COLLATOR_FAMILY');s.userData.binIndex=b;}
+    if(empty){const s=this.box(empty,[.050,.055,.040],[-.28,y+.055,-.48],'blue',.004);this.tag(s,'bin-empty-sheet-presence-sensor','MULTI_VENDOR_COLLATOR_FAMILY');s.userData.binIndex=b;}
+   }
+  }
+  if(gather){
+   const guide=this.findNode('collator-gather-guide');
+   if(guide){for(const z of [-.40,.40])this.tag(this.box(guide,[.065,1.42,.055],[0,.92,z],'steel',.005),'vertical-gather-guide','VERTICAL_COLLATOR_PATENT');for(const y of [.40,.72,1.04,1.36])this.tag(this.box(guide,[.34,.022,.86],[-.02,y,0],'steel',.003),'gather-guide-plate','VERTICAL_COLLATOR_PATENT');}
+   const drive=this.findNode('collator-gather-drive');
+   if(drive)for(const y of [.42,.70,.98,1.26]){const r=this.motion(this.cyl(drive,.047,.82,[.03,y,0],'dark','z'),'spin','z',7,.01,y,3);this.tag(r,'gather-transport-roller','MULTI_VENDOR_COLLATOR_FAMILY');}
+  }
+  if(delivery){
+   const belt=this.findNode('collator-delivery-belt');
+   if(belt)for(const z of [-.36,-.12,.12,.36])this.tag(this.box(belt,[.68,.025,.07],[0,.59,z],'dark',.004),'delivery-belt','MULTI_VENDOR_COLLATOR_FAMILY');
+   const jog=this.findNode('collator-set-jogger');
+   if(jog){const j=this.motion(this.box(jog,[.42,.18,.045],[.16,.69,.46],'accent',.006),'oscillate','z',9,.025,0,4);this.tag(j,'set-jogger','MULTI_VENDOR_COLLATOR_FAMILY');}
+   const boundary=this.findNode('collator-downstream-boundary');
+   if(boundary){boundary.userData.installedDownstreamFinisherVerified=false;const marker=this.box(boundary,[.36,.22,.88],[.36,.60,0],'glass',.012);marker.userData.optionReference=true;this.tag(marker,'downstream-finisher-interface-boundary','OPTION_BOUNDARY');}
+  }
+  if(control){
+   const hmi=this.findNode('collator-hmi');
+   if(hmi)this.tag(this.box(hmi,[.27,.20,.025],[-.02,.89,-.34],'glass',.008),'collator-touchscreen-reference','MULTI_VENDOR_COLLATOR_FAMILY');
+   const io=this.findNode('collator-control-io');
+   if(io){this.tag(this.box(io,[.26,.48,.34],[.06,.53,.22],'dark',.016),'collator-control-io-cabinet','CONTROL_FAMILY_REFERENCE');for(let b=0;b<10;b++)this.tag(this.box(io,[.10,.025,.08],[-.03,.32+b*.035,.02],'accent',.002),'bin-control-io-reference','CONTROL_FAMILY_REFERENCE');}
+  }
  }
  enrichCTP(){
   const load=this.activeGroup(1),transport=this.activeGroup(2),drum=this.activeGroup(3),laser=this.activeGroup(4),punch=this.activeGroup(5),unload=this.activeGroup(6);
@@ -620,16 +676,47 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.root.userData.referenceNote='ABM-2 remains identified as QF-100CS from the BMJ registry. Public exact-model documentation is not available. The reconstructed silhouette and mechanisms follow QF/LQF-1080 family sources: long open gantry working bay, X/Y servo platform, stable hydraulic head, configurable pin-board tooling and PLC/HMI. Dual-head and automatic collector/stacker remain explicit option boundaries.';
  }
  buildCollator(){
-  this.palette.body=0xe9e8e2;this.palette.dark=0x282f34;this.palette.accent=0x3e7c8b;
+  this.palette.body=0xe9e8e2;this.palette.dark=0x282f34;this.palette.accent=0x3e7c8b;this.palette.blue=0x4d7f9a;
   this.base(2.15,1.45);
-  const m1=this.mod(1,[-.62,0,0],[-.35,.20,0]);this.shell(m1.g,[1.05,1.95,1.30],[0,1.05,0]);
-  for(let b=0;b<10;b++){const y=.28+b*.155;this.box(m1.a,[.76,.025,1.08],[0,y,0],'paper',.003);const rotor=this.motion(this.cyl(m1.a,.035,.85,[.28,y+.05,0],'dark','z'),'spin','z',8,.01,b*.2,0);rotor.userData.suctionRotor=true;}
-  const m2=this.mod(2,[.15,0,0],[0,.22,.20]);this.box(m2.g,[.40,1.72,1.20],[0,.94,0],'body',.03);this.motion(this.cyl(m2.a,.15,.34,[0,.40,.48],'dark','x'),'spin','x',10,.02,0,1);
-  const m3=this.mod(3,[.54,0,0],[.20,.20,0]);this.box(m3.g,[.30,1.70,1.18],[0,.94,0],'body',.025);for(let b=0;b<10;b++)this.box(m3.a,[.16,.035,.05],[-.08,.32+b*.145,-.52],'accent',.005);
-  const m4=this.mod(4,[.90,0,0],[.30,.18,0]);for(const y of [.44,.72,1.00,1.28])this.motion(this.cyl(m4.a,.045,.82,[0,y,0],'steel','z'),'spin','z',6,.01,0,3);this.shell(m4.g,[.48,1.50,1.14],[0,.84,0]);
-  const m5=this.mod(5,[1.35,0,0],[.40,.15,0]);this.box(m5.g,[.72,.42,1.15],[0,.38,0],'body',.025);for(const z of [-.38,-.12,.12,.38])this.box(m5.a,[.65,.03,.08],[0,.62,z],'dark',.004);
-  const m6=this.mod(6,[1.72,0,0],[.48,.16,0]);this.box(m6.g,[.48,1.05,.62],[0,.62,.54],'dark',.04);this.box(m6.a,[.30,.22,.025],[-.02,.82,.20],'glass',.01);
-  this.root.userData.referenceNote='Collator OEM/model is absent. Geometry intentionally uses a generic vertical 10-bin suction-collator architecture comparable to Horizon VAC family, without claiming Horizon installation.';
+
+  const m1=this.mod(1,[-.62,0,0],[-.35,.20,0]);
+  for(const z of [-.61,.61]){this.cover(this.box(m1.g,[.12,1.92,.10],[-.48,1.02,z],'body',.016));this.cover(this.box(m1.g,[.12,1.92,.10],[.48,1.02,z],'body',.016));}
+  this.cover(this.box(m1.g,[1.08,.12,1.30],[0,1.95,0],'body',.02));
+  this.cover(this.box(m1.g,[1.08,.12,1.30],[0,.16,0],'dark',.02));
+  this.group(m1.a,'collator-bin-trays','Feed bin trays',[0,0,0],[0,.10,.10]);
+  this.group(m1.a,'collator-suction-feeds','Suction rotor feed modules',[0,0,0],[0,.12,.12]);
+  this.group(m1.a,'collator-bin-air','Per-bin air separation',[0,0,0],[0,.12,.12]);
+
+  const m2=this.mod(2,[.10,0,.44],[0,.22,.20]);
+  this.cover(this.box(m2.g,[.46,1.52,.48],[0,.82,0],'body',.026));
+  this.group(m2.a,'collator-vacuum-blower','Vacuum blower',[0,0,0],[0,.10,.12]);
+  this.group(m2.a,'collator-vacuum-manifold','Vacuum distribution manifold',[0,0,0],[0,.10,.12]);
+
+  const m3=this.mod(3,[.28,0,0],[.18,.20,0]);
+  this.group(m3.a,'collator-double-feed','Double / miss feed detection',[0,0,0],[0,.10,.12]);
+  this.group(m3.a,'collator-bin-empty','Bin-empty / sheet-presence detection',[0,0,0],[0,.10,.12]);
+
+  const m4=this.mod(4,[.58,0,0],[.28,.18,0]);
+  this.cover(this.box(m4.g,[.48,1.56,1.10],[0,.86,0],'body',.025));
+  this.group(m4.a,'collator-gather-guide','Vertical gathering guide',[0,0,0],[0,.12,.12]);
+  this.group(m4.a,'collator-gather-drive','Gathering transport drive',[0,0,0],[0,.12,.12]);
+
+  const m5=this.mod(5,[1.10,0,0],[.38,.15,0]);
+  this.cover(this.box(m5.g,[.82,.42,1.14],[0,.36,0],'body',.025));
+  this.group(m5.a,'collator-delivery-belt','Set delivery conveyor',[0,0,0],[.10,.10,0]);
+  this.group(m5.a,'collator-set-jogger','Set jogger',[0,0,0],[.12,.10,.10]);
+  this.group(m5.a,'collator-downstream-boundary','Downstream finisher boundary',[0,0,0],[.16,.10,0]);
+
+  const m6=this.mod(6,[1.60,0,.44],[.46,.16,.12]);
+  this.cover(this.box(m6.g,[.52,1.06,.62],[0,.61,0],'dark',.035));
+  this.group(m6.a,'collator-hmi','Operator touchscreen',[0,0,0],[0,.12,.10]);
+  this.group(m6.a,'collator-control-io','Bin control / I-O',[0,0,0],[0,.12,.10]);
+
+  this.root.userData.modeledReferenceBinCount=10;
+  this.root.userData.installedBinCountVerified=false;
+  this.root.userData.exactCollatorOemVerified=false;
+  this.root.userData.exactCollatorModelVerified=false;
+  this.root.userData.referenceNote='BMJ registry provides no collator OEM/model/serial/bin count. Geometry is a multi-vendor process intersection: Horizon VAC and Duplo suction-collator families plus vertical-collator mechanism patents. Ten displayed bins are a modeled cross-family reference, not an installed BMJ claim.';
  }
  buildCTP(){
   this.palette.body=0xe4e6e4;this.palette.dark=0x292f33;this.palette.accent=0x607784;
