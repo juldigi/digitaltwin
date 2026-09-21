@@ -208,10 +208,7 @@ export class OffsetMachineTemplate {
     if(vacuum){
       const valve=this.group(vacuum,'feedboard-vacuum-rotary-valve-v122','Suction-tape vacuum rotary valve',[0,0,0],[.08,.10,.10],['Heidelberg Speedmaster CD 102 manual'],'Manual-confirmed rotary valve and bearing; internal port timing is not installation CAD.');
       detail(this.cylinder(valve,.055,.16,[-.30,1.22,.25],'steel','x'),'suction-tape-rotary-valve');
-      detail(this.cylinder(valve,.020,.26,[-.30,1.22,.25],'dark','x'),'rotary-valve-shaft');
-      detail(this.box(valve,[.18,.20,.15],[-.38,1.22,.25],'graphite',.010),'rotary-valve-cover');
-      detail(this.cylinder(valve,.030,.08,[-.18,1.22,.25],'steel','x'),'rotary-valve-bearing');
-      detail(this.box(valve,[.18,.26,.14],[-.30,.98,.38],'dark',.010),'suction-air-filter-housing');
+      valve.userData.serviceDetails=['rotary-valve shaft','bearing','cover','suction-air filter housing'];
     }
 
     const separating=this.findNode('feeder-separation');

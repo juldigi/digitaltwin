@@ -376,7 +376,7 @@ export class SheetingMachineTemplate{
         tag(this.cyl(drive,.065,.12,[-.45,1.49,side*1.10],'dark','z',{detail:true,role:'knife-linear-guide-bearing'}),'knife-linear-guide-bearing','HSM56_FLAT_BED_KNIFE_FAMILY');
         tag(this.box(drive,[.16,.34,.12],[-.45,1.35,side*1.10],'steel',.008,{detail:true,role:'knife-slide-block-reference'}),'knife-slide-block-reference','HSM56_FLAT_BED_KNIFE_FAMILY');
       }
-      const motor=tag(this.cyl(drive,.16,.36,[-.65,1.00,1.10],'dark','x',{detail:true,active:true,motion:'knife-drive-motor-reference',role:'knife-drive-motor-reference'}),'knife-drive-motor-reference','GENERIC_SHEETER_KNIFE_DRIVE');
+      const motor=tag(this.cyl(drive,.16,.36,[-.15,1.00,1.10],'dark','x',{detail:true,active:true,motion:'knife-drive-motor-reference',role:'knife-drive-motor-reference'}),'knife-drive-motor-reference','GENERIC_SHEETER_KNIFE_DRIVE');
       motor.userData.installedActuationUnknown=true;
       tag(this.cyl(drive,.12,.10,[-.40,1.00,1.10],'steel','x',{detail:true,role:'knife-drive-coupling-reference'}),'knife-drive-coupling-reference','GENERIC_SHEETER_KNIFE_DRIVE');
       tag(this.box(drive,[.42,.05,.08],[-.45,1.20,1.10],'steel',.004,{detail:true,role:'knife-linkage-reference'}),'knife-linkage-reference','GENERIC_SHEETER_KNIFE_DRIVE');
