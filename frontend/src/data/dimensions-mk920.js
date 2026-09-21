@@ -1,5 +1,5 @@
 const COMMON=Object.freeze({
- modelFamily:'MK 920 YMI',maxSheet:[.920,.650],minSheet:[.360,.520],maxStampingSpeed:6500,foilPullAxes:3,foilAdvanceIncrementMm:1,
+ modelFamily:'MK 920 YMI',maxSheet:[.920,.650],minSheet:[.360,.520],maxStampingSpeed:6500,maxSpeed:6500,foilPullAxes:3,foilAdvanceIncrementMm:1,
  processes:['hot-foil stamping','flatbed die-cutting'],
  installedReelCountVerified:false,installedHeatingZoneCountVerified:false,installedPlatenForceVerified:false,installedEnvelopeVerified:false,installedTransverseFoilAxesVerified:false,
  relatedYMMarketReference:Object.freeze({maxSheet:[.920,.650],minSheet:[.360,.320],maxDieCut:[.910,.630],maxStamp:[.900,.600],dieCutSpeed:7500,stampingSpeed:6500,foilPullLongitudinal:3,foilPullTransverse:2,heatingZones:20,temperatureC:[40,180],approxEnvelopeM:[5.6,4.5,2.2],approxWeightT:15}),
