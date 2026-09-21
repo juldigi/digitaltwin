@@ -8,8 +8,8 @@ const html=fs.readFileSync(new URL('../frontend/index.html',import.meta.url),'ut
 const sw=fs.readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 
 test('V80 loads one unified shell after the stable base styles',()=>{
-  assert.match(html,/style\.css[\s\S]*runtime-fallback\.css[\s\S]*app-shell-v79\.css\?v=80/);
-  assert.match(html,/app\.js\?v=80[\s\S]*ui-v5\.js\?v=80[\s\S]*experience-v37\.js\?v=80[\s\S]*app-shell-v79\.js\?v=80/);
+  assert.match(html,/style\.css[\s\S]*runtime-fallback\.css[\s\S]*app-shell-v79\.css\?v=81/);
+  assert.match(html,/app\.js\?v=81[\s\S]*ui-v5\.js\?v=81[\s\S]*experience-v37\.js\?v=81[\s\S]*app-shell-v79\.js\?v=81/);
   for(const stale of ['ui-premium-v73.css','ui-corporate-v74.css','reference-v76.css','mobile-stable-v78.css','reference-v76.js','mobile-stable-v78.js'])assert.doesNotMatch(html,new RegExp(stale.replaceAll('.','\\.')));
 });
 
@@ -55,7 +55,7 @@ test('icons use one accessible vector family without emoji runtime controls',()=
 });
 
 test('service worker owns the V80 shell assets',()=>{
-  assert.match(sw,/factory-digital-twin-v80-first-paint-spa-20260921/);
+  assert.match(sw,/factory-digital-twin-v81-spatial-layout-20260921/);
   assert.match(sw,/app-shell-v79\.css/);
   assert.match(sw,/src\/app-shell-v79\.js/);
   assert.match(sw,/assets\/splash-industrial-v79\.webp/);
@@ -75,4 +75,14 @@ test('machine changes use in-place scene switching instead of page navigation',(
   assert.match(app,/history\.pushState/);
   assert.doesNotMatch(app,/location\.href=.*machine=/);
   assert.match(engine,/switchMachine\(key\)/);
+});
+
+test('V81 prevents sidebar and toolbar overlap across constrained screens',()=>{
+  assert.match(css,/scene-bottom\{width:min\(920px,calc\(100% - 40px\)\)/);
+  assert.match(css,/@media \(min-width:768px\) and \(max-width:1180px\)/);
+  assert.match(css,/aside#detail-panel\{position:absolute;z-index:75/);
+  assert.match(css,/@media \(min-width:768px\) and \(max-height:720px\)/);
+  assert.match(css,/html:fullscreen body/);
+  assert.match(css,/html:fullscreen \.statusbar\{display:none\}/);
+  assert.match(css,/\.rail\{width:100%;height:100%;min-height:0;overflow-y:auto/);
 });

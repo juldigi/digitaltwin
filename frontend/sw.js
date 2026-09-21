@@ -1,4 +1,4 @@
-const VERSION='factory-digital-twin-v80-first-paint-spa-20260921';
+const VERSION='factory-digital-twin-v81-spatial-layout-20260921';
 const SHELL=['./','./index.html','./config.json','./assets/favicon.svg',
   './assets/splash-industrial-v79.webp',
   './app-shell-v79.css',
