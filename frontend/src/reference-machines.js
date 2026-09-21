@@ -509,13 +509,80 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   }
  }
  enrichZund(){
-  const table=this.activeGroup(1),beam=this.activeGroup(2),car=this.activeGroup(3),tools=this.activeGroup(4),cam=this.activeGroup(5),ctl=this.activeGroup(6);
-  if(table){for(let x=-2.25;x<=2.25;x+=.45)for(let z=-.90;z<=.90;z+=.45){const port=this.cyl(table,.012,.015,[x,.635,z],'dark','y');this.tag(port,'vacuum-port');}for(const x of [-2.0,-1.0,0,1.0,2.0])this.tag(this.box(table,[.015,.02,2.15],[x,.63,0],'accent',.001),'vacuum-zone-divider');for(const x of [-1.5,-.5,.5,1.5])this.tag(this.box(table,[.08,.08,.12],[x,.46,1.02],'accent',.006),'vacuum-zone-valve','ZUND_G3_OEM');table.userData.individuallySwitchableVacuumZones=true;}
-  if(beam){for(const z of [-1.15,1.15])this.tag(this.box(beam,[4.90,.04,.05],[0,.82,z],'steel',.005),'gantry-linear-guide');this.tag(this.box(beam,[4.60,.025,.035],[0,.77,-1.12],'dark',.003),'rack-reference');}
-  if(car){this.tag(this.box(car,[.28,.12,.46],[0,1.05,0],'accent',.012),'module-carrier');for(const z of [-.14,.14])this.tag(this.cyl(car,.025,.36,[0,.96,z],'steel','y'),'z-axis-guide');}
-  if(tools){for(const [z,role] of [[-.18,'crease-wheel'],[0,'oscillating-knife'],[.18,'router-tool']]){const t=this.motion(this.cyl(tools,.035,.24,[0,.91,z],role==='oscillating-knife'?'orange':'steel','y'),'press','y',6,.045,z,3);this.tag(t,role);}this.tag(this.box(tools,[.22,.06,.24],[.20,.72,.44],'accent',.008),'iti-initialization-pad','ZUND_G3_OEM');this.tag(this.cyl(tools,.020,.46,[.24,1.06,.34],'dark','y'),'router-dust-extraction-hose','ZUND_ROUTING_FAMILY');tools.userData.arcMagazineCapability='OPTIONAL_ON_G3_NOT_INSTALLED_ASSUMPTION';}
-  if(cam){this.tag(this.cyl(cam,.060,.07,[-.12,1.34,-.82],'glass','y'),'icc-camera-lens','ZUND_ICC');this.tag(this.cyl(cam,.090,.025,[-.12,1.27,-.82],'accent','y'),'icc-led-ring','ZUND_ICC');this.tag(this.cyl(cam,.012,.20,[-.12,1.18,-.82],'orange','y'),'icc-laser-pointer-reference','ZUND_ICC');}
-  if(ctl){this.tag(this.box(ctl,[.36,.24,.025],[-2.30,.92,-1.69],'glass',.008),'workstation-display');this.tag(this.box(ctl,[.42,.42,.35],[-2.10,.38,-1.30],'dark',.02),'vacuum-generator-interface');}
+  const table=this.activeGroup(1),beamUnit=this.activeGroup(2),carUnit=this.activeGroup(3),tools=this.activeGroup(4),sense=this.activeGroup(5),ctl=this.activeGroup(6);
+  this.root.userData.detailPass='V123_R7_ZUND_MODULAR_PLATFORM_RECONSTRUCTION';
+  this.root.userData.exactZundModelVerified=false;
+  this.root.userData.familyCandidates=['G3','S3'];
+  this.root.userData.installedToolPackageVerified=false;
+  this.root.userData.installedIccVerified=false;
+  this.root.userData.installedItiVerified=false;
+  this.root.userData.installedArcVerified=false;
+  this.root.userData.installedMaterialHandlingVerified=false;
+  this.root.userData.platformSimulationBoundary='XY_CARRIAGE_MOTION_ONLY__NO_TOOL_ACTION_WITHOUT_INSTALLED_TOOL_EVIDENCE';
+
+  if(table){
+   const bed=this.findNode('zund-vacuum-bed');
+   if(bed){
+    this.tag(this.box(bed,[5.18,.055,2.30],[0,.62,0],'body',.006),'vacuum-cutting-surface','ZUND_G3_S3_FAMILY');
+    for(let x=-2.25;x<=2.25;x+=.45)for(let z=-.90;z<=.90;z+=.45){const port=this.cyl(bed,.010,.015,[x,.655,z],'dark','y');this.tag(port,'vacuum-port-reference','ZUND_G3_S3_FAMILY');}
+   }
+   const zones=this.findNode('zund-vacuum-zones');
+   if(zones){
+    zones.userData.individualZoneTopologyVerified=false;
+    for(const x of [-1.75,-.85,0,.85,1.75])this.tag(this.box(zones,[.015,.018,2.15],[x,.65,0],'accent',.001),'vacuum-zone-divider-reference','ZUND_FAMILY_REFERENCE');
+    for(const x of [-1.45,-.48,.48,1.45]){const valve=this.box(zones,[.08,.08,.12],[x,.46,1.04],'accent',.006);this.tag(valve,'vacuum-zone-valve-reference','ZUND_FAMILY_REFERENCE');valve.userData.installedZoneTopologyVerified=false;}
+   }
+  }
+
+  if(beamUnit){
+   const guide=this.findNode('zund-gantry-guide');
+   if(guide){for(const z of [-1.16,1.16])this.tag(this.box(guide,[5.20,.045,.055],[0,.84,z],'steel',.005),'gantry-linear-guide-reference','ZUND_G3_S3_FAMILY');this.tag(this.box(guide,[4.95,.025,.035],[0,.79,-1.12],'dark',.003),'gantry-drive-rack-reference','ZUND_FAMILY_REFERENCE');}
+   const beam=this.findNode('zund-gantry-beam');
+   if(beam){this.tag(this.box(beam,[.17,.90,2.55],[0,1.18,0],'accent',.025),'travelling-beam-structure','ZUND_G3_S3_FAMILY');for(const z of [-1.08,1.08])this.tag(this.box(beam,[.26,.20,.16],[0,.86,z],'dark',.010),'beam-guide-carriage-reference','ZUND_FAMILY_REFERENCE');}
+  }
+
+  if(carUnit){
+   const traverse=this.findNode('zund-carriage-y');
+   if(traverse){this.tag(this.box(traverse,[.38,.42,.52],[0,1.22,0],'dark',.035),'tool-carriage-structure','ZUND_G3_S3_FAMILY');for(const z of [-.15,.15])this.tag(this.cyl(traverse,.025,.36,[0,.97,z],'steel','y'),'carriage-z-guide-reference','ZUND_G3_S3_FAMILY');}
+   const slots=this.findNode('zund-module-slots');
+   if(slots){
+    slots.userData.installedModuleCountVerified=false;
+    for(const z of [-.14,.14]){const holder=this.box(slots,[.18,.30,.17],[0,.92,z],'steel',.010);this.tag(holder,'universal-module-carrier-reference','ZUND_UM_PRIMARY');holder.userData.toolDetectionFamilyCapability=true;}
+    this.tag(this.box(slots,[.12,.06,.36],[.17,1.04,0],'accent',.006),'module-bayonet-interface-reference','ZUND_UM_PRIMARY');
+   }
+  }
+
+  if(tools){
+   const options=[
+    ['zund-cut-tool-option','cutting-tool-capability-envelope','UCT_EOT_POT_FAMILY'],
+    ['zund-crease-option','creasing-tool-capability-envelope','CTT_FAMILY'],
+    ['zund-router-option','routing-tool-capability-envelope','URT_RM_FAMILY'],
+    ['zund-arc-option','arc-toolchanger-capability-envelope','ARC_FAMILY']
+   ];
+   for(const [id,role,evidence] of options){
+    const g=this.findNode(id);if(!g)continue;g.userData.installedOptionVerified=false;g.userData.simulationEnabled=false;
+    const env=this.box(g,[.16,.26,.18],[0,.88,(id.includes('cut')?-.30:id.includes('crease')?-.10:id.includes('router')?.10:.30)],'glass',.010);
+    env.userData.optionReference=true;env.userData.simulationEnabled=false;this.tag(env,role,evidence);
+   }
+   const router=this.findNode('zund-router-option');
+   if(router){router.userData.urtReference={powerW:300,maxRpm:80000,installedApplicabilityVerified:false};const hose=this.cyl(router,.018,.46,[.20,1.08,.12],'dark','y');hose.userData.optionReference=true;hose.userData.simulationEnabled=false;this.tag(hose,'router-dust-extraction-option-reference','ZUND_URT_PRIMARY');}
+  }
+
+  if(sense){
+   const icc=this.findNode('zund-icc-option');
+   if(icc){icc.userData.installedOptionVerified=false;icc.userData.simulationEnabled=false;const cam=this.cyl(icc,.055,.08,[-.10,1.32,-.35],'glass','y');cam.userData.optionReference=true;this.tag(cam,'icc-camera-option-reference','ZUND_FAMILY_OPTION');const ring=this.cyl(icc,.085,.025,[-.10,1.25,-.35],'accent','y');ring.userData.optionReference=true;this.tag(ring,'icc-lighting-option-reference','ZUND_FAMILY_OPTION');}
+   const iti=this.findNode('zund-iti-option');
+   if(iti){iti.userData.installedOptionVerified=false;iti.userData.simulationEnabled=false;const pad=this.box(iti,[.22,.06,.24],[.20,.72,.42],'accent',.008);pad.userData.optionReference=true;this.tag(pad,'tool-initialization-pad-option-reference','ZUND_S3_FAMILY_OPTION');}
+  }
+
+  if(ctl){
+   const hmi=this.findNode('zund-control');
+   if(hmi)this.tag(this.box(hmi,[.38,.24,.025],[-2.30,.92,-1.69],'glass',.008),'zund-control-display-reference','ZUND_FAMILY_REFERENCE');
+   const vac=this.findNode('zund-vacuum-generator');
+   if(vac){this.tag(this.box(vac,[.42,.42,.35],[-2.10,.38,-1.30],'dark',.02),'vacuum-generator-interface','ZUND_FAMILY_REFERENCE');this.tag(this.cyl(vac,.035,.48,[-1.95,.52,-1.08],'steel','y'),'vacuum-supply-duct-reference','ZUND_FAMILY_REFERENCE');}
+   const handling=this.findNode('zund-handling-option');
+   if(handling){handling.userData.installedOptionVerified=false;handling.userData.simulationEnabled=false;const env=this.box(handling,[1.20,.18,1.70],[2.52,.54,0],'glass',.012);env.userData.optionReference=true;this.tag(env,'material-handling-option-boundary','OPTION_BOUNDARY');}
+  }
  }
  enrichCompressor(){
   for(let i=1;i<=7;i++){const a=this.activeGroup(i);if(a)for(const child of [...a.children])if(child.isMesh){child.visible=false;child.userData.referencePlaceholder=true;}}
@@ -954,15 +1021,46 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.root.userData.referenceNote='BMJ identifies a SCREEN CTF imagesetter but not its exact model. Geometry is a bounded FT-R/Katana multi-model process twin using capstan transport, slack/tension control, polygon-mirror scanning and red-laser optics. Katana 5-facet/14,400-rpm values are retained as reference metadata only; model-specific width, wavelength, punch, output cassette, processor and RIP/interface are not asserted.';
  }
  buildZundReference(){
-  this.palette.body=0xdfe3e2;this.palette.dark=0x20272b;this.palette.accent=0x365b68;this.palette.orange=0xe26a2c;
+  this.palette.body=0xdfe3e2;this.palette.dark=0x20272b;this.palette.accent=0x365b68;this.palette.orange=0xe26a2c;this.palette.blue=0x507d92;
   this.base(5.6,2.65);
-  const m1=this.mod(1,[0,0,0],[0,.15,0]);this.box(m1.g,[5.45,.38,2.55],[0,.38,0],'dark',.04);this.box(m1.a,[5.22,.055,2.35],[0,.60,0],'body',.006);
-  const m2=this.mod(2,[0,0,0],[0,.28,.30]);for(const z of [-1.17,1.17])this.box(m2.g,[5.30,.18,.12],[0,.86,z],'steel',.018);const gantry=this.motion(this.box(m2.a,[.16,.90,2.62],[0,1.16,0],'accent',.025),'oscillate','x',.55,2.25,0,2);gantry.userData.gantry=true;
-  const m3=this.mod(3,[0,0,0],[0,.35,.36]);const carriage=this.motion(this.box(m3.a,[.38,.42,.52],[0,1.22,0],'dark',.035),'oscillate','z',1.15,1.00,.8,3);carriage.userData.toolCarriage=true;
-  const m4=this.mod(4,[0,0,0],[0,.42,.42]);for(const z of [-.16,0,.16]){const tool=this.motion(this.cyl(m4.a,.045,.26,[0,.90,z],z===0?'orange':'steel','y'),'press','y',5,.06,z,3);tool.userData.toolModule=true;}
-  const m5=this.mod(5,[0,0,0],[0,.38,-.40]);this.box(m5.g,[.34,.56,.36],[-.12,1.56,-.82],'dark',.025);this.motion(this.cyl(m5.a,.055,.12,[-.12,1.36,-.82],'glass','y'),'oscillate','z',1,.08,0,1);
-  const m6=this.mod(6,[0,0,0],[.45,.18,0]);this.box(m6.g,[.72,1.12,.52],[-2.25,.72,-1.42],'dark',.04);this.box(m6.a,[.46,.28,.025],[-2.30,.92,-1.69],'glass',.012);
-  this.root.userData.referenceNote='Exact Zünd model/table size is unknown. Geometry follows G3/S3 modular flatbed architecture: zoned vacuum bed, travelling beam, tool carriage, modular cutting/creasing/routing heads and registration camera.';
+
+  const m1=this.mod(1,[0,0,0],[0,.15,0]);
+  this.cover(this.box(m1.g,[5.45,.38,2.55],[0,.38,0],'dark',.04));
+  this.group(m1.a,'zund-vacuum-bed','Vacuum cutting bed',[0,0,0],[0,.12,.10]);
+  this.group(m1.a,'zund-vacuum-zones','Vacuum zone / distribution reference',[0,0,0],[0,.12,.10]);
+
+  const m2=this.mod(2,[0,0,0],[0,.28,.30]);
+  this.group(m2.a,'zund-gantry-guide','X-axis gantry guide',[0,0,0],[0,.18,.20]);
+  this.group(m2.a,'zund-gantry-beam','Travelling beam',[0,0,0],[0,.20,.22]);
+
+  const m3=this.mod(3,[0,0,0],[0,.35,.36]);
+  this.group(m3.a,'zund-carriage-y','Y/Z tool carriage',[0,0,0],[0,.20,.24]);
+  this.group(m3.a,'zund-module-slots','Module carrier slots',[0,0,0],[0,.22,.26]);
+
+  const m4=this.mod(4,[0,0,0],[0,.42,.42]);
+  for(const [id,name,z] of [
+   ['zund-cut-tool-option','Knife / oscillating tool capability',-.30],
+   ['zund-crease-option','Creasing capability',-.10],
+   ['zund-router-option','Routing capability',.10],
+   ['zund-arc-option','ARC toolchanger capability',.30]
+  ]){const g=this.group(m4.a,id,name,[0,0,0],[0,.22,z]);g.userData.installedOptionVerified=false;g.userData.simulationEnabled=false;}
+
+  const m5=this.mod(5,[0,0,0],[0,.38,-.40]);
+  for(const [id,name,z] of [['zund-icc-option','ICC registration capability',-.20],['zund-iti-option','Tool initialization capability',.20]]){const g=this.group(m5.a,id,name,[0,0,0],[0,.18,z]);g.userData.installedOptionVerified=false;g.userData.simulationEnabled=false;}
+
+  const m6=this.mod(6,[0,0,0],[.45,.18,0]);
+  this.group(m6.a,'zund-control','Operator control',[0,0,0],[.14,.10,-.10]);
+  this.group(m6.a,'zund-vacuum-generator','Vacuum generator interface',[0,0,0],[.14,.10,.10]);
+  const handling=this.group(m6.a,'zund-handling-option','Material handling option boundary',[0,0,0],[.22,.12,0]);handling.userData.installedOptionVerified=false;handling.userData.simulationEnabled=false;
+
+  this.root.userData.exactZundModelVerified=false;
+  this.root.userData.familyCandidates=['G3','S3'];
+  this.root.userData.installedToolPackageVerified=false;
+  this.root.userData.installedCameraRegistrationVerified=false;
+  this.root.userData.installedToolInitializationVerified=false;
+  this.root.userData.familyVisualEnvelope=[5.6,2.65,1.65];
+  this.root.userData.engineeringDimensions=false;
+  this.root.userData.referenceNote='BMJ registry confirms Zünd but not exact model/table size/module/tool package. Geometry models the common modular flatbed platform only. Specific cutting, creasing, routing, ARC, ICC, ITI and material-handling equipment are represented solely as option boundaries until the installed configuration is verified.';
  }
  buildCompressorReference(){
   const name=this.cfg.machine.name.toUpperCase(),atlas=name.includes('ATLAS'),kaeser=name.includes('KAESER'),swan=name.includes('SWAN');
