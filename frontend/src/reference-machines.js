@@ -333,12 +333,12 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   if(motor){
    const drive=P(motor,'atlas-drive-group','Atlas motor / drive interface');
    for(let x=-.18;x<=.18;x+=.06)this.tag(this.box(drive,[.018,.40,.50],[x,.68,0],'steel',.002),'atlas-motor-cooling-fin',E);
-   this.tag(this.cyl(drive,.045,.18,[.26,.68,0],'steel','x'),'atlas-drive-interface-reference',E);
+   const coupling=this.motion(this.cyl(drive,.045,.18,[.26,.68,0],'steel','x'),'spin','x',5,.01,0,null);this.tag(coupling,'atlas-drive-interface-reference',E);
   }
   if(airend){
    const ae=P(airend,'atlas-airend-group','Atlas oil-injected screw airend');
    this.tag(this.cyl(ae,.12,.40,[0,.70,-.10],'steel','x'),'atlas-oil-injected-screw-airend',E);
-   this.tag(this.cyl(ae,.045,.45,[0,.76,.05],'dark','x'),'atlas-airend-shaft-reference',E);
+   const shaft=this.motion(this.cyl(ae,.045,.45,[0,.76,.05],'dark','x'),'spin','x',8,.01,0,null);this.tag(shaft,'atlas-airend-shaft-reference',E);
   }
   if(sep){
    const vessel=P(sep,'atlas-separator-group','Atlas oil / air separator');
@@ -381,12 +381,12 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   if(motor){
    const drive=P(motor,'kaeser-drive-group','KAESER motor / drive interface');
    for(let x=-.18;x<=.18;x+=.06)this.tag(this.box(drive,[.018,.40,.50],[x,.68,0],'steel',.002),'kaeser-motor-cooling-fin',E);
-   const coupling=this.tag(this.cyl(drive,.055,.22,[.26,.68,0],'steel','x'),'kaeser-drive-interface-reference',E);coupling.userData.installedDriveTypeVerified=false;
+   const coupling=this.motion(this.cyl(drive,.055,.22,[.26,.68,0],'steel','x'),'spin','x',5,.01,0,null);this.tag(coupling,'kaeser-drive-interface-reference',E);coupling.userData.installedDriveTypeVerified=false;
   }
   if(airend){
    const ae=P(airend,'kaeser-airend-group','KAESER SIGMA PROFILE airend');
    this.tag(this.cyl(ae,.13,.42,[0,.70,-.08],'steel','x'),'kaeser-sigma-profile-airend',E);
-   this.tag(this.cyl(ae,.048,.46,[0,.76,.06],'dark','x'),'kaeser-airend-shaft-reference',E);
+   const shaft=this.motion(this.cyl(ae,.048,.46,[0,.76,.06],'dark','x'),'spin','x',8,.01,0,null);this.tag(shaft,'kaeser-airend-shaft-reference',E);
   }
   if(sep){
    const vessel=P(sep,'kaeser-separator-group','KAESER cooling-fluid separator');
@@ -426,12 +426,12 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   if(motor){
    const drive=P(motor,'swan-drive-group','SWAN drive interface');
    for(let x=-.18;x<=.18;x+=.06)this.tag(this.box(drive,[.018,.40,.50],[x,.68,0],'steel',.002),'swan-motor-cooling-reference',E);
-   const coupling=this.tag(this.cyl(drive,.055,.22,[.26,.68,0],'steel','x'),'swan-drive-interface-reference',E);coupling.userData.installedDriveTypeVerified=false;
+   const coupling=this.motion(this.cyl(drive,.055,.22,[.26,.68,0],'steel','x'),'spin','x',5,.01,0,null);this.tag(coupling,'swan-drive-interface-reference',E);coupling.userData.installedDriveTypeVerified=false;
   }
   if(airend){
    const ae=P(airend,'swan-airend-group','SWAN screw airend');
    this.tag(this.cyl(ae,.13,.42,[0,.70,-.08],'steel','x'),'swan-screw-airend',E);
-   this.tag(this.cyl(ae,.048,.46,[0,.76,.06],'dark','x'),'swan-airend-shaft-reference',E);
+   const shaft=this.motion(this.cyl(ae,.048,.46,[0,.76,.06],'dark','x'),'spin','x',8,.01,0,null);this.tag(shaft,'swan-airend-shaft-reference',E);
   }
   if(sep){
    const sg=P(sep,'swan-separation-group','SWAN oil / air separation package boundary');
@@ -727,7 +727,7 @@ export class ReferenceProcessSimulation{
   this.root=root;this.template=template;this.active=false;this.running=false;this.paused=false;this.speed=1;this.elapsed=0;this.lastNow=null;this.completed=0;this.onUpdate=null;
   this.blocked=template.cfg.evidence.simulation==='BLOCKED';this.blockedReason=this.blocked?template.cfg.evidence.reason:null;
   this.stages=template.cfg.profile?.process||template.cfg.modules;this.cycle=Math.max(8,this.stages.length*1.35);
-  this.motions=this.blocked?[]:template.activeMeshes.filter(m=>m.userData.motion).map(mesh=>({mesh,motion:mesh.userData.motion,position:mesh.position.clone(),quaternion:mesh.quaternion.clone()}));
+  this.motions=this.blocked?[]:template.activeMeshes.filter(m=>m.userData.motion&&!m.userData.referencePlaceholder).map(mesh=>({mesh,motion:mesh.userData.motion,position:mesh.position.clone(),quaternion:mesh.quaternion.clone()}));
   this.family=template.cfg.family;this.pathVisible=false;this.inkFlowVisible=false;this.processPiece=null;this.processMaterial=null;this.processGeometry=null;this.blanker=null;if(!this.blocked)this.buildProcessPiece();if(!this.blocked&&this.family==='blanker')this.bindBlanker();
  }
  buildProcessPiece(){
