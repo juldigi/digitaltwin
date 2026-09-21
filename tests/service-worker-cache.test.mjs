@@ -24,5 +24,5 @@ test('service-worker shell cache references only deployable frontend files',()=>
 });
 
 test('service-worker cache version advances with the centralized runtime release',()=>{
- assert.match(sw,/factory-digital-twin-v94-runtime-registry-20260921/);
+ assert.match(sw,/factory-digital-twin-v97-polar115-20260921/);
 });
