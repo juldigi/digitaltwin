@@ -35,7 +35,12 @@ test('every reference machine has finite non-placeholder geometry and contiguous
   assert.deepEqual([...new Set(tax.map(n=>n.level))].sort(),[1,2,3,4,5,6]);
   assert.equal(new Set(tax.map(n=>n.id)).size,tax.length);
   for(const node of tax.filter(n=>n.level>1))assert.ok(tax.some(p=>p.id===node.parentId),node.id);
-  for(const node of tax.filter(n=>n.level===2))assert.ok(model.findNode(node.meshRefs[0]),machine.machineId+' missing '+node.meshRefs[0]);
+  for(const node of tax.filter(n=>n.meshRefs?.length)){
+   for(const ref of node.meshRefs){
+    if(ref==='MACHINE-UNIVERSAL')continue;
+    assert.ok(model.findNode(ref),machine.machineId+' taxonomy '+node.id+' missing geometry target '+ref);
+   }
+  }
   model.dispose();
  }
 });
@@ -79,4 +84,18 @@ test('V123 research-grounded nearest-neighbour corrections preserve machine-fami
   ['BMJ-MCH-0040','ahu','SANSIN_NES']
  ];
  for(const [id,family,token] of checks){const cfg=universalMachineConfig(id),model=createMachineTemplate(id);assert.equal(cfg.family,family,id);assert.ok(cfg.evidence.geometry.includes(token),id);assert.equal(model.root.userData.referenceBuilder,'V123_RESEARCH_GROUNDED_BUILDER',id);model.dispose();}
+});
+
+
+test('reference simulations never animate explicitly unverified option meshes',()=>{
+ for(const machine of referenceAssets){
+  const model=createMachineTemplate(machine.machineId);
+  const sim=createMachineSimulation(machine.machineId,model.root,model);
+  for(const item of sim.motions||[]){
+   assert.notEqual(item.mesh.userData.simulationEnabled,false,machine.machineId+' animated simulation-disabled mesh '+(item.mesh.userData.mechanismRole||item.mesh.name));
+   assert.notEqual(item.mesh.userData.referencePlaceholder,true,machine.machineId+' animated hidden placeholder '+(item.mesh.userData.mechanismRole||item.mesh.name));
+   if(item.mesh.userData.optionReference===true)assert.equal(item.mesh.userData.installedOptionVerified,true,machine.machineId+' animated unverified option '+(item.mesh.userData.mechanismRole||item.mesh.name));
+  }
+  sim.dispose();model.dispose();
+ }
 });
