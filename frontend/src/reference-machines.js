@@ -244,7 +244,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   if(filter){for(const x of [-.20,0,.20]){const f=this.box(filter,[.055,1.38,1.38],[x,1.02,0],'filter',.004);f.rotation.y=x<0?.12:x>0?-.12:0;this.tag(f,'filter-bank');}}
   if(coil){for(let y=.48;y<=1.50;y+=.10)this.tag(this.box(coil,[.045,.025,1.30],[0,y,0],'steel',.002),'coil-fin');for(const z of [-.55,.55])this.tag(this.cyl(coil,.035,.16,[.26,.98,z],'accent','z'),'coil-header');}
   if(drain){this.tag(this.box(drain,[.72,.06,1.42],[0,.38,0],'steel',.008),'drain-pan');this.tag(this.cyl(drain,.025,.42,[.28,.25,.55],'dark','y'),'condensate-trap-reference');}
-  if(fan){const wheel=this.motion(this.cyl(fan,.40,.22,[0,1.05,0],'dark','z'),'spin','z',7,.01,0,null);this.tag(wheel,'supply-fan-wheel');for(let k=0;k<10;k++){const blade=this.box(fan,[.30,.025,.07],[0,1.43,0],'steel',.003);blade.rotation.z=k*Math.PI/5;this.tag(blade,'fan-blade');}this.tag(this.cyl(fan,.10,.32,[.34,.75,.55],'dark','x'),'fan-motor');}
+  if(fan){const wheel=this.motion(this.cyl(fan,.40,.22,[0,1.05,0],'dark','z'),'spin','z',7,.01,0,null);this.tag(wheel,'supply-fan-wheel');for(let k=0;k<10;k++){const blade=this.box(fan,[.30,.025,.07],[0,1.05,0],'steel',.003);blade.rotation.z=k*Math.PI/5;this.tag(blade,'fan-blade');}this.tag(this.cyl(fan,.10,.32,[.34,.75,.55],'dark','x'),'fan-motor');}
   if(service){this.tag(this.box(service,[.70,.92,.035],[0,1.02,-.92],'body',.018),'service-door');this.tag(this.cyl(service,.018,.30,[.27,1.02,-.95],'dark','y'),'door-handle');}
   if(out){this.tag(this.box(out,[.60,1.25,1.36],[.08,1.02,0],'accent',.015),'discharge-plenum');this.tag(this.box(out,[.24,.18,.025],[-.12,1.30,-.72],'glass',.008),'ahu-controller');}
  }
@@ -379,7 +379,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.palette.body=0xdfe3e2;this.palette.dark=0x20272b;this.palette.accent=0x365b68;this.palette.orange=0xe26a2c;
   this.base(5.6,2.65);
   const m1=this.mod(1,[0,0,0],[0,.15,0]);this.box(m1.g,[5.45,.38,2.55],[0,.38,0],'dark',.04);this.box(m1.a,[5.22,.055,2.35],[0,.60,0],'body',.006);
-  const m2=this.mod(2,[0,0,0],[0,.28,.30]);for(const z of [-1.17,1.17])this.box(m2.g,[5.30,.18,.12],[0,.84,z],'steel',.018);const gantry=this.motion(this.box(m2.a,[.16,.90,2.62],[0,1.16,0],'accent',.025),'oscillate','x',.55,2.25,0,2);gantry.userData.gantry=true;
+  const m2=this.mod(2,[0,0,0],[0,.28,.30]);for(const z of [-1.17,1.17])this.box(m2.g,[5.30,.18,.12],[0,.86,z],'steel',.018);const gantry=this.motion(this.box(m2.a,[.16,.90,2.62],[0,1.16,0],'accent',.025),'oscillate','x',.55,2.25,0,2);gantry.userData.gantry=true;
   const m3=this.mod(3,[0,0,0],[0,.35,.36]);const carriage=this.motion(this.box(m3.a,[.38,.42,.52],[0,1.22,0],'dark',.035),'oscillate','z',1.15,1.00,.8,3);carriage.userData.toolCarriage=true;
   const m4=this.mod(4,[0,0,0],[0,.42,.42]);for(const z of [-.16,0,.16]){const tool=this.motion(this.cyl(m4.a,.045,.26,[0,.90,z],z===0?'orange':'steel','y'),'press','y',5,.06,z,3);tool.userData.toolModule=true;}
   const m5=this.mod(5,[0,0,0],[0,.38,-.40]);this.box(m5.g,[.34,.56,.36],[-.12,1.56,-.82],'dark',.025);this.motion(this.cyl(m5.a,.055,.12,[-.12,1.36,-.82],'glass','y'),'oscillate','z',1,.08,0,1);
