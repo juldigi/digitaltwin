@@ -59,17 +59,109 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   if(no>=36&&no<=41)return this.enrichAHU(no===40);
  }
  activeGroup(i){return this.findNode('universal-module-'+i+'-active');}
- tag(mesh,role,evidence='FAMILY_REFERENCE'){mesh.userData.mechanismRole=role;mesh.userData.evidence=evidence;return mesh;}
+ tag(mesh,role,evidence='FAMILY_REFERENCE'){mesh.userData.mechanismRole=role;mesh.userData.evidence=evidence;mesh.userData.detail=true;return mesh;}
  enrichGravure(){
   const f=this.activeGroup(1),reg=this.activeGroup(2),ink=this.activeGroup(3),print=this.activeGroup(4),imp=this.activeGroup(5),dryer=this.activeGroup(6),delivery=this.activeGroup(7),drive=this.activeGroup(8);
-  if(f){for(const z of [-.46,-.15,.15,.46]){const s=this.motion(this.cyl(f,.027,.22,[-.38,1.18,z],'dark','y'),'oscillate','y',8,.05,z,0);this.tag(s,'feeder-sucker','SHEETFED_FAMILY');}this.tag(this.box(f,[.70,.05,.08],[-.38,1.27,0],'steel',.008),'suction-head-rail');this.tag(this.cyl(f,.10,.30,[-.48,.45,.78],'dark','x'),'feeder-vacuum-pump');}
-  if(reg){for(const z of [-.48,.48])this.tag(this.box(reg,[.12,.12,.12],[.32,.88,z],'accent',.012),'side-lay');const bar=this.motion(this.box(reg,[.06,.08,1.22],[.52,.92,0],'steel',.008),'oscillate','x',6,.08,0,1);this.tag(bar,'register-gripper-bar');}
-  if(ink){this.tag(this.cyl(ink,.13,.28,[.42,.47,-.66],'dark','x'),'ink-circulation-pump');this.tag(this.box(ink,[.34,.36,.40],[.42,.40,.70],'accent',.025),'ink-reservoir');for(const z of [-.42,.42])this.tag(this.cyl(ink,.018,.70,[.34,.70,z],'steel','y'),'ink-return-line');}
-  if(print){for(const z of [-.60,.60]){this.tag(this.cyl(print,.055,.16,[0,.88,z],'steel','z'),'gravure-cylinder-journal');this.tag(this.cyl(print,.075,.08,[0,.88,z],'dark','z'),'side-bearing');}const holder=this.motion(this.box(print,[.66,.09,1.56],[.20,1.21,0],'dark',.012),'oscillate','z',7,.035,0,3);this.tag(holder,'doctor-blade-holder','DOCTOR_BLADE_MECHANISM');this.tag(this.cyl(print,.055,.20,[.46,1.17,.70],'accent','x'),'doctor-oscillator');}
-  if(imp){for(const z of [-.58,.58])this.tag(this.cyl(imp,.060,.15,[0,1.18,z],'steel','z'),'impression-bearing');const grip=this.motion(this.box(imp,[.07,.055,1.18],[-.19,1.38,0],'dark',.006),'spin','z',-4.4,.01,0,4);this.tag(grip,'impression-gripper-reference','SHEETFED_FAMILY');}
-  if(dryer){for(const y of [.75,1.05,1.35,1.65])for(const z of [-.44,0,.44])this.tag(this.box(dryer,[.42,.025,.06],[.22,y,z],'steel',.004),'hot-air-nozzle');for(const z of [-.56,.56]){const fan=this.motion(this.cyl(dryer,.14,.09,[-.25,1.95,z],'dark','z'),'spin','z',10,.02,z,5);this.tag(fan,'dryer-exhaust-fan');}}
-  if(delivery){for(const z of [-.72,.72]){this.tag(this.box(delivery,[.92,.035,.035],[0,1.38,z],'dark',.004),'delivery-chain-guide');for(let x=-.34;x<=.34;x+=.17)this.tag(this.box(delivery,[.035,.08,.13],[x,1.35,z],'steel',.004),'delivery-gripper');}for(const z of [-.58,.58]){const jog=this.motion(this.box(delivery,[.58,.22,.045],[.20,.60,z],'accent',.008),'oscillate','z',12,.025,z,6);this.tag(jog,'pile-side-jogger');}}
-  if(drive){this.tag(this.cyl(drive,.12,.36,[.10,.48,.60],'dark','x'),'main-drive-motor');this.tag(this.cyl(drive,.08,.84,[.10,.48,0],'steel','z'),'line-shaft-reference');}
+  const sections=[f,reg,ink,print,imp,dryer,delivery,drive].filter(Boolean);
+  for(const section of sections)for(const child of [...section.children])if(child.isMesh&&child.userData.activeElement)child.visible=false;
+  const part=(parent,id,name,explode=[0,.08,.08])=>parent?this.group(parent,id,name,[0,0,0],explode):null;
+  this.root.userData.detailPass='V123_R2_YA1A1A_SHEETFED_GRAVURE_COMPONENT_RECONSTRUCTION';
+  this.root.userData.simulationStatus='BLOCKED_PENDING_YA1A1A_TRANSPORT_DRIVE_VERIFICATION';
+  this.root.userData.gravureMechanismBoundary={
+   exactIdentity:'YA1A1A',
+   processFamily:'SHEET_FED_SINGLE_COLOR_GRAVURE',
+   verifiedMechanisms:['sheet feeding','impression-cylinder gripper principle','gravure cylinder','doctor blade','ink pan / drop-feed architectures','drying/exhaust functional section','sheet delivery'],
+   unresolvedInstalledDetails:['exact feeder transfer geometry','ink-feed mode on BMJ asset','cylinder diameters','doctor actuation hardware','dryer technology','main-drive topology','high-pile non-stop option']
+  };
+
+  if(f){
+   const suction=part(f,'o7-feeder-suction','Suction feeder head');
+   this.tag(this.box(suction,[.52,.05,1.16],[-.08,1.24,0],'steel',.008),'suction-head-rail','SHEETFED_FAMILY');
+   for(const z of [-.42,-.14,.14,.42])this.tag(this.cyl(suction,.026,.18,[-.08,1.14,z],'dark','y'),'feeder-sucker','SHEETFED_FAMILY');
+   const swing=part(f,'o7-feeder-swing-gripper','Swing-pawl sheet transfer');
+   this.tag(this.cyl(swing,.034,1.18,[.17,.91,0],'steel','z'),'swing-gripper-shaft','SHEETFED_GRAVURE_PATENT');
+   for(const z of [-.43,-.14,.14,.43]){const pawl=this.box(swing,[.12,.035,.055],[.11,.96,z],'dark',.004);pawl.rotation.z=-.22;this.tag(pawl,'swing-pawl-gripper','SHEETFED_GRAVURE_PATENT');}
+   const vac=part(f,'o7-feeder-vacuum','Feeder vacuum supply');
+   this.tag(this.cyl(vac,.105,.26,[-.18,.45,.57],'dark','x'),'feeder-vacuum-pump','SHEETFED_FAMILY');
+   this.tag(this.cyl(vac,.018,.72,[-.05,.72,.56],'steel','y'),'feeder-vacuum-manifold','SHEETFED_FAMILY');
+  }
+
+  if(reg){
+   const lays=part(reg,'o7-register-lays','Register lays');
+   for(const z of [-.42,.42])this.tag(this.box(lays,[.11,.10,.09],[.05,.82,z],'accent',.008),'side-lay-reference','SHEETFED_FAMILY');
+   for(const z of [-.28,.28])this.tag(this.box(lays,[.075,.12,.08],[.22,.86,z],'steel',.006),'front-lay-reference','SHEETFED_FAMILY');
+   const transfer=part(reg,'o7-register-transfer','Register transfer gripper');
+   this.tag(this.cyl(transfer,.032,1.18,[.15,.95,0],'steel','z'),'register-transfer-shaft','SHEETFED_FAMILY');
+   const bar=this.box(transfer,[.065,.055,1.12],[.20,1.00,0],'dark',.005);this.tag(bar,'register-gripper-bar','SHEETFED_FAMILY');
+  }
+
+  if(ink){
+   const pan=part(ink,'o7-ink-pan','Adjustable ink pan');
+   this.tag(this.box(pan,[.54,.045,1.16],[0,.48,0],'accent',.006),'ink-pan-bottom','SHEETFED_GRAVURE_PATENT');
+   for(const z of [-.56,.56])this.tag(this.box(pan,[.54,.16,.035],[0,.55,z],'accent',.004),'ink-pan-sidewall','SHEETFED_GRAVURE_PATENT');
+   for(const z of [-.46,.46])this.tag(this.cyl(pan,.022,.38,[-.20,.31,z],'steel','y'),'ink-pan-lift-screw','SHEETFED_GRAVURE_PATENT');
+   const circ=part(ink,'o7-ink-circulation','Ink circulation');
+   this.tag(this.box(circ,[.28,.30,.34],[.18,.38,.48],'accent',.018),'ink-reservoir','FAMILY_REFERENCE');
+   this.tag(this.cyl(circ,.085,.18,[-.18,.39,.48],'dark','x'),'ink-circulation-pump','FAMILY_REFERENCE');
+   for(const z of [-.42,.42])this.tag(this.cyl(circ,.014,.60,[.06,.74,z],'steel','y'),'ink-return-line','FAMILY_REFERENCE');
+   const drop=part(ink,'o7-ink-drop-option','Drop-feed ink reference');
+   drop.userData.installedOptionVerified=false;drop.userData.boundary='Patent-supported alternative architecture; BMJ YA1A1A installed ink-feed mode is not confirmed.';
+   this.tag(this.cyl(drop,.018,1.02,[.08,1.28,0],'steel','z'),'ink-drop-manifold','SHEETFED_GRAVURE_PATENT');
+   for(const z of [-.40,-.20,0,.20,.40]){const n=this.cyl(drop,.010,.12,[.08,1.19,z],'accent','y');this.tag(n,'ink-drop-nozzle-reference','SHEETFED_GRAVURE_PATENT');}
+  }
+
+  if(print){
+   const cyl=part(print,'o7-gravure-cylinder','Gravure printing cylinder');
+   this.tag(this.cyl(cyl,.285,1.24,[0,.86,0],'accent','z'),'engraved-gravure-cylinder','SHEETFED_GRAVURE_PRIMARY');
+   for(const z of [-.68,.68]){this.tag(this.cyl(cyl,.055,.16,[0,.86,z],'steel','z'),'gravure-cylinder-journal','SHEETFED_GRAVURE_PRIMARY');this.tag(this.box(cyl,[.16,.18,.10],[0,.86,z],'dark',.008),'gravure-side-bearing','SHEETFED_GRAVURE_PRIMARY');}
+   const doc=part(print,'o7-doctor','Doctor blade assembly');
+   this.tag(this.cyl(doc,.035,1.34,[.23,1.16,0],'steel','z'),'doctor-pivot-shaft','GRAVURE_DOCTOR_PATENT');
+   const holder=this.box(doc,[.16,.09,1.20],[.16,1.08,0],'dark',.008);holder.rotation.z=-.18;this.tag(holder,'doctor-blade-holder','GRAVURE_DOCTOR_PATENT');
+   const blade=this.box(doc,[.035,.012,1.16],[.08,1.00,0],'steel',.002);blade.rotation.z=-.18;this.tag(blade,'doctor-blade-edge','GRAVURE_DOCTOR_PATENT');
+   this.tag(this.cyl(doc,.050,.17,[.24,1.22,.58],'accent','x'),'doctor-axial-oscillator','GRAVURE_DOCTOR_PATENT');
+   this.tag(this.cyl(doc,.044,.14,[.24,1.22,-.58],'dark','x'),'doctor-oscillation-damper','GRAVURE_DOCTOR_PATENT');
+  }
+
+  if(imp){
+   const ic=part(imp,'o7-impression-cylinder','Impression cylinder');
+   this.tag(this.cyl(ic,.30,1.24,[0,1.05,0],'steel','z'),'impression-cylinder','SHEETFED_GRAVURE_PATENT');
+   for(const z of [-.68,.68]){this.tag(this.cyl(ic,.058,.15,[0,1.05,z],'steel','z'),'impression-cylinder-journal','SHEETFED_GRAVURE_PATENT');this.tag(this.box(ic,[.16,.18,.10],[0,1.05,z],'dark',.008),'impression-bearing','SHEETFED_GRAVURE_PATENT');}
+   this.tag(this.box(ic,[.055,.045,1.10],[-.16,1.30,0],'dark',.004),'impression-cylinder-gripper-bar','SHEETFED_GRAVURE_PATENT');
+   for(const z of [-.42,-.14,.14,.42])this.tag(this.box(ic,[.10,.025,.045],[-.20,1.33,z],'steel',.003),'impression-gripper-finger','SHEETFED_GRAVURE_PATENT');
+   const sc=part(imp,'o7-impression-sheet-control','Pre-nip sheet control');
+   this.tag(this.cyl(sc,.060,1.10,[-.22,.76,0],'dark','z'),'slack-suppression-press-roller','SHEETFED_GRAVURE_PATENT');
+   for(const z of [-.54,.54])this.tag(this.box(sc,[.11,.20,.06],[-.22,.78,z],'steel',.006),'press-roller-support','SHEETFED_GRAVURE_PATENT');
+  }
+
+  if(dryer){
+   dryer.userData.installedDryerTechnologyVerified=false;
+   const air=part(dryer,'o7-dryer-air','Drying air section');
+   this.tag(this.box(air,[.50,.42,1.18],[0,1.05,0],'body',.018),'dryer-plenum','SHEETFED_GRAVURE_FAMILY');
+   for(const y of [.88,1.04,1.20])this.tag(this.box(air,[.42,.022,1.05],[.03,y,0],'steel',.003),'air-knife-reference','MOOG_FAMILY_OPTION');
+   const exh=part(dryer,'o7-dryer-exhaust','Dryer exhaust');
+   this.tag(this.box(exh,[.18,.52,.34],[-.15,1.42,.43],'dark',.012),'exhaust-duct-reference','SHEETFED_GRAVURE_FAMILY');
+   const fan=this.cyl(exh,.13,.08,[-.15,1.62,.43],'dark','z');this.tag(fan,'dryer-exhaust-fan','SHEETFED_GRAVURE_FAMILY');
+   this.tag(this.box(exh,[.22,.12,.30],[-.15,1.78,.43],'steel',.008),'exhaust-outlet-reference','SHEETFED_GRAVURE_FAMILY');
+  }
+
+  if(delivery){
+   const chain=part(delivery,'o7-delivery-chain','Delivery gripper transport');
+   for(const z of [-.62,.62]){this.tag(this.box(chain,[.58,.035,.035],[0,1.34,z],'dark',.003),'delivery-chain-guide','SHEETFED_GRAVURE_FAMILY');for(const x of [-.22,0,.22])this.tag(this.box(chain,[.05,.07,.11],[x,1.31,z],'steel',.004),'delivery-gripper-reference','SHEETFED_GRAVURE_FAMILY');}
+   const pile=part(delivery,'o7-delivery-pile','High-pile delivery');
+   this.tag(this.box(pile,[.52,.055,1.10],[0,.39,0],'steel',.006),'delivery-pile-platform','MOOG_SHEETFED_GRAVURE');
+   for(const z of [-.54,.54])this.tag(this.box(pile,[.40,.22,.045],[.08,.63,z],'accent',.006),'pile-side-jogger','MOOG_SHEETFED_GRAVURE');
+   for(const z of [-.42,.42])this.tag(this.box(pile,[.06,.16,.06],[.22,.92,z],'blue',.006),'pile-height-sensor-reference','FAMILY_REFERENCE');
+  }
+
+  if(drive){
+   const motor=part(drive,'o7-main-drive','Main drive motor');
+   this.tag(this.cyl(motor,.13,.34,[-.08,.48,.52],'dark','x'),'main-drive-motor-reference','FAMILY_REFERENCE');
+   for(let x=-.16;x<=.16;x+=.08)this.tag(this.box(motor,[.018,.28,.34],[x-.08,.48,.52],'steel',.002),'motor-cooling-fin','FAMILY_REFERENCE');
+   const tr=part(drive,'o7-transmission','Mechanical transmission');
+   this.tag(this.cyl(tr,.045,1.16,[.08,.55,0],'steel','z'),'transmission-line-shaft-reference','OPTION_BOUNDARY');
+   for(const [x,y,r] of [[-.18,.78,.12],[.04,.72,.16],[.24,.84,.09]])this.tag(this.cyl(tr,r,.055,[x,y,.58],'steel','z'),'side-gear-reference','OPTION_BOUNDARY');
+   tr.userData.installedTopologyVerified=false;
+  }
  }
  enrichFolder(){
   for(let i=1;i<=7;i++){const a=this.activeGroup(i);if(!a)continue;for(const z of [-.62,.62])this.tag(this.box(a,[1.10,.035,.04],[0,.62,z],'steel',.004),'side-frame-rail');if(i>1&&i<7)for(const z of [-.45,-.15,.15,.45]){const p=this.motion(this.cyl(a,.048,.12,[.45,.78,z],'dark','z'),'spin','z',7,.01,z,i-1);this.tag(p,'transport-pulley');}}
