@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {UniversalMachineTemplate} from './universal-machine.js';
-import {V121_SOURCE_STATS} from './data/research-v121.js';
+import {V122_SOURCE_STATS} from './data/research-v122.js';
 
 const AXIS={x:new THREE.Vector3(1,0,0),y:new THREE.Vector3(0,1,0),z:new THREE.Vector3(0,0,1)};
 export const REFERENCE_MACHINE_IDS=Object.freeze([
@@ -15,12 +15,12 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  constructor(machineId){
   super(machineId);
   this.root.name=this.cfg.machine.name+' · REFERENCE-GROUNDED';
-  this.root.userData.referenceBuilder='V121_RESEARCH_GROUNDED_BUILDER';
+  this.root.userData.referenceBuilder='V122_RESEARCH_GROUNDED_BUILDER';
   this.root.userData.engineeringDimensions=false;
   this.root.userData.referenceBoundary=this.cfg.profile?.unknowns||[];
-  this.root.userData.researchVersion='V121';
-  this.root.userData.researchSourceCount=V121_SOURCE_STATS.total;
-  this.root.userData.newReviewedSources=V121_SOURCE_STATS.newReviewed;
+  this.root.userData.researchVersion='V122';
+  this.root.userData.researchSourceCount=V122_SOURCE_STATS.total;
+  this.root.userData.newReviewedSources=V122_SOURCE_STATS.newReviewed;
   this.enrichV121();
   for(const m of this.activeMeshes){
    m.userData.motionRestPosition=m.position.clone();
@@ -47,7 +47,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  }
  enrichV121(){
   const no=this.cfg.machine.no;
-  this.root.userData.detailPass='V121_MECHANICAL_ENRICHMENT';
+  this.root.userData.detailPass='V122_COMPONENT_LEVEL_ENRICHMENT';
   if(no===4)return this.enrichGravure();
   if(no===17)return this.enrichFolder();
   if(no===21)return this.enrichBlanker();

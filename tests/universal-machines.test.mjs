@@ -66,7 +66,7 @@ test('reference mechanical profiles carry explicit unknowns instead of pretendin
  }
 });
 
-test('V121 research-grounded nearest-neighbour corrections preserve machine-family identity',()=>{
+test('V122 research-grounded nearest-neighbour corrections preserve machine-family identity',()=>{
  const checks=[
   ['BMJ-MCH-0004','gravure','YA1A1'],
   ['BMJ-MCH-0021','blanker','QF_LQF'],
@@ -75,5 +75,5 @@ test('V121 research-grounded nearest-neighbour corrections preserve machine-fami
   ['BMJ-MCH-0028','zund','ZUND_G3_S3'],
   ['BMJ-MCH-0040','ahu','SANSIN_NES']
  ];
- for(const [id,family,token] of checks){const cfg=universalMachineConfig(id),model=createMachineTemplate(id);assert.equal(cfg.family,family,id);assert.ok(cfg.evidence.geometry.includes(token),id);assert.equal(model.root.userData.referenceBuilder,'V121_RESEARCH_GROUNDED_BUILDER',id);model.dispose();}
+ for(const [id,family,token] of checks){const cfg=universalMachineConfig(id),model=createMachineTemplate(id);assert.equal(cfg.family,family,id);assert.ok(cfg.evidence.geometry.includes(token),id);assert.equal(model.root.userData.referenceBuilder,'V122_RESEARCH_GROUNDED_BUILDER',id);model.dispose();}
 });

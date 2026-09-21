@@ -4,6 +4,7 @@ import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js'
 import {OFFSET5_TAXONOMY,TAXONOMY_BY_ID} from './data/taxonomy-offset5.js';
 import {ORIENTATION} from './data/sources-offset5.js';
 import {OFFSET5_DIMENSIONS,OFFSET5_UNIT_CENTERS,offset5DimensionAudit} from './data/dimensions-offset5.js';
+import {V122_SOURCE_STATS} from './data/research-v122.js';
 
 // Offset 5 reconstruction.
 // The outer longitudinal/lateral envelope and repeated-unit pitch are calibrated from
@@ -29,7 +30,7 @@ export class OffsetMachineTemplate {
     this.root.userData={assetId:'MACHINE-OFFSET5',...PHOTO_RECONSTRUCTION,orientation:ORIENTATION,taxonomyVersion:'offset5-taxonomy-v17',machineEnvelope:OFFSET5_DIMENSIONS,dimensionAudit:offset5DimensionAudit()};
     this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.ghosted=false;this.exteriorOpen=false;
     this.palette={graphite:0x30383d,black:0x151b20,silver:0xaeb8b8,steel:0x889598,light:0xd1d4c9,paper:0xeee9d5,rubber:0x20252a,glass:0x23333a,red:0xb33c32,yellow:0xe2b541,blue:0x243e70};
-    this.build();this.alignOperatorSide();this.batchMeshes();this.tagAdaptiveDetails();
+    this.build();this.alignOperatorSide();this.batchMeshes();this.enrichV122Feeder();this.tagAdaptiveDetails();
     this.taxonomy=OFFSET5_TAXONOMY;this.taxonomyById=TAXONOMY_BY_ID;
     this.original=this.parts.map(p=>p.position.clone());
     for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}
@@ -155,6 +156,76 @@ export class OffsetMachineTemplate {
         }else if(semantic!=='normal'){mesh.userData[semantic]=true;mesh.userData.uvElementCount=meshes.reduce((sum,m)=>sum+(m.userData.uvElementCount||1),0);}
         for(const old of meshes){group.remove(old);this.meshes.splice(this.meshes.indexOf(old),1);}group.add(mesh);this.meshes.push(mesh);
       }
+    }
+  }
+  enrichV122Feeder(){
+    this.root.userData.researchVersion='V122';
+    this.root.userData.researchSourceCount=V122_SOURCE_STATS.total;
+    this.root.userData.detailPass='V122_PRESET_PLUS_REGISTER_SERVICE_DETAIL';
+    const detail=(m,role,source='CD102_PRESET_PLUS_MANUAL')=>{if(!m)return m;m.userData.detail=true;m.userData.mechanismRole=role;m.userData.sourceAnchor=source;return m;};
+
+    const front=this.findNode('feedboard-front-lays');
+    if(front){
+      front.userData.exactFamilyCount=15;
+      front.userData.evidence='SM_CD102_PRESET_PLUS_MANUAL';
+      front.userData.installedGeometryBoundary='15 front lays are manual-confirmed for SM/CD102 family; exact installed wear/setting remains unverified.';
+      for(let i=0;i<15;i++){
+        const z=-.70+i*(1.40/14);
+        const finger=detail(this.box(front,[.045,.105,.035],[.44,1.425,z],'steel',.005),'front-lay');
+        finger.rotation.z=-.10;
+        detail(this.cylinder(front,.018,.055,[.395,1.365,z],'graphite','z'),'front-lay-pivot');
+        detail(this.box(front,[.060,.025,.050],[.465,1.485,z],'graphite',.004),'front-lay-stop');
+      }
+    }
+
+    const pulls=this.findNode('feedboard-pull-lays');
+    if(pulls){
+      pulls.userData.manualConfirmedCount=2;
+      pulls.userData.evidence='PRESET_PLUS_D_S_AND_O_S_PULL_LAYS';
+      for(const side of [-1,1]){
+        const z=side*.70;
+        detail(this.box(pulls,[.18,.025,.17],[.30,1.405,z],'graphite',.006),'pull-plate');
+        detail(this.cylinder(pulls,.026,.09,[.38,1.435,z],'steel','z'),'propelling-roller');
+        detail(this.cylinder(pulls,.018,.07,[.265,1.455,z-side*.025],'steel','z'),'double-sheet-feeler-roller');
+        detail(this.box(pulls,[.060,.11,.045],[.22,1.455,z+side*.045],'graphite',.005),'pull-lay-retainer');
+        detail(this.box(pulls,[.060,.060,.040],[.34,1.505,z-side*.055],'black',.004),'pull-sensor');
+        detail(this.cylinder(pulls,.014,.10,[.20,1.515,z],'steel','y'),'pull-sensor-adjusting-screw');
+      }
+    }
+
+    const detection=this.findNode('feedboard-detection');
+    if(detection){
+      detection.userData.manualOptionRange='1..24 feeler rollers';
+      detection.userData.installedFeelerCountUnknown=true;
+      detail(this.box(detection,[.08,.055,1.52],[.32,1.62,0],'steel',.007),'multiple-sheet-detector-crossbar');
+      for(let i=0;i<12;i++){
+        const z=-.66+i*(1.32/11);
+        detail(this.cylinder(detection,.017,.035,[.30,1.565,z],'steel','z'),'multiple-sheet-feeler-reference','CD102_MANUAL_OPTION_1_TO_24');
+      }
+      detail(this.cylinder(detection,.032,.07,[.39,1.62,.78],'graphite','z'),'detector-adjustment-knob');
+    }
+
+    const vacuum=this.findNode('vacuum-table');
+    if(vacuum){
+      const valve=this.group(vacuum,'feedboard-vacuum-rotary-valve-v122','Suction-tape vacuum rotary valve',[0,0,0],[.08,.10,.10],['Heidelberg Speedmaster CD 102 manual'],'Manual-confirmed rotary valve and bearing; internal port timing is not installation CAD.');
+      detail(this.cylinder(valve,.055,.16,[-.30,1.22,.25],'steel','x'),'suction-tape-rotary-valve');
+      detail(this.cylinder(valve,.020,.26,[-.30,1.22,.25],'dark','x'),'rotary-valve-shaft');
+      detail(this.box(valve,[.18,.20,.15],[-.38,1.22,.25],'graphite',.010),'rotary-valve-cover');
+      detail(this.cylinder(valve,.030,.08,[-.18,1.22,.25],'steel','x'),'rotary-valve-bearing');
+      detail(this.box(valve,[.18,.26,.14],[-.30,.98,.38],'dark',.010),'suction-air-filter-housing');
+    }
+
+    const separating=this.findNode('feeder-separation');
+    if(separating){
+      separating.userData.serviceEvidence='Preset Plus suction head components and separator functions';
+      for(const z of [-.62,-.31,0,.31,.62]){
+        detail(this.box(separating,[.045,.16,.035],[-.20,1.58,z],'steel',.004),'sheet-separator-finger');
+      }
+      for(const z of [-.56,-.28,.28,.56]){
+        const nozzle=detail(this.cylinder(separating,.014,.10,[-.30,1.56,z],'steel','x'),'sheet-separation-blower-nozzle');
+        nozzle.rotation.z=.18;
+      }
+      for(const z of [-.50,.50])detail(this.cylinder(separating,.020,.16,[-.42,1.46,z],'steel','x'),'rear-edge-blower-nozzle');
     }
   }
   tagAdaptiveDetails(){

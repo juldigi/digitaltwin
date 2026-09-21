@@ -3,12 +3,13 @@ import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js'
 import {POLAR115_TAXONOMY} from './data/taxonomy-polar115.js';
 import {POLAR115_SPEC,POLAR115_REFERENCE_DIMENSIONS} from './data/dimensions-polar115.js';
 import {POLAR115_TECHNICAL_SOURCES} from './data/sources-polar115.js';
+import {V122_SOURCE_STATS} from './data/research-v122.js';
 
 export class Polar115MachineTemplate{
  constructor(){
   this.root=new THREE.Group();this.root.name='POLAR-115-EM';this.parts=[];this.nodes=[];this.meshes=[];this.materials=[];this.geometries=[];this.activeMeshes=[];this.exteriorOpen=false;
   this.palette={body:0xb8bbb5,bodyDark:0x8f938f,dark:0x252b2e,table:0x6f787b,steel:0xa9b0b1,accent:0x405961,warning:0xd0a338,screen:0x173e34,red:0xb6302d,paper:0xece5d2,black:0x111517,air:0x8bbad0};
-  this.build();this.taxonomy=POLAR115_TAXONOMY;this.taxonomyById=new Map(this.taxonomy.map(n=>[n.id,n]));
+  this.build();this.enrichV122();this.taxonomy=POLAR115_TAXONOMY;this.taxonomyById=new Map(this.taxonomy.map(n=>[n.id,n]));
   for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}this.root.updateMatrixWorld(true);
   this.root.userData={assetId:POLAR115_SPEC.assetId,nodeId:'POLAR-115-EM',model:POLAR115_SPEC.model,serial:POLAR115_SPEC.serial,spec:POLAR115_SPEC,sources:POLAR115_TECHNICAL_SOURCES,machineEnvelope:{reference:POLAR115_REFERENCE_DIMENSIONS},geometryStatus:'DEDICATED_MODEL_REFERENCE__ARCHIVE_DIMENSIONS_NOT_INSTALLATION_CAD',engineeringDimensions:false,evidenceBoundary:POLAR115_SPEC.evidenceBoundary};
  }
@@ -76,6 +77,64 @@ export class Polar115MachineTemplate{
   this.cover(this.box(housing,[.20,.78,1.25],[-1.00,1.17,.48],'body',.045));
   this.cover(this.box(housing,[.20,.78,1.25],[1.00,1.17,.48],'body',.045));
   const brow=this.cover(this.box(housing,[2.00,.25,.22],[0,1.49,.68],'body',.04));brow.userData.consoleBrow=true;
+ }
+ enrichV122(){
+  this.root.userData.researchVersion='V122';
+  this.root.userData.researchSourceCount=V122_SOURCE_STATS.total;
+  this.root.userData.detailPass='V122_POLAR115_SERVICE_COMPONENT_LEVEL';
+  const tag=(m,role,evidence='POLAR_115_155_EMC_SERVICE_MANUAL')=>{if(!m)return m;m.userData.detail=true;m.userData.mechanismRole=role;m.userData.evidence=evidence;return m;};
+
+  const gauge=this.findNode('polar-gauge');if(gauge){
+   const sledge=this.group(gauge,'polar-gauge-sledge-v122','Backgauge sledge and nut',[0,0,0],[0,.12,.22]);
+   tag(this.box(sledge,[.42,.12,.18],[0,.80,.73],'dark',.012),'backgauge-sledge');
+   tag(this.cyl(sledge,.055,.20,[0,.78,.73],'steel','z'),'backgauge-lead-nut');
+   for(const x of [-.56,.56])tag(this.box(sledge,[.16,.08,.18],[x,.80,.72],'steel',.006),'backgauge-guide-block');
+   const encoder=this.findNode('polar-gauge-encoder');if(encoder){
+    tag(this.cyl(encoder,.025,.18,[.68,.80,.65],'steel','x'),'backgauge-encoder-coupling');
+    tag(this.box(encoder,[.12,.12,.08],[.74,.80,.61],'dark',.008),'position-encoder-body');
+   }
+  }
+
+  const clamp=this.findNode('polar-clamp');if(clamp){
+   const pressure=this.group(clamp,'polar-clamp-pressure-v122','Clamp pressure regulation',[0,0,0],[0,.12,.20]);
+   tag(this.cyl(pressure,.055,.12,[.62,1.32,.14],'dark','z'),'clamp-pressure-adjuster');
+   tag(this.box(pressure,[.16,.10,.08],[.62,1.20,.14],'steel',.008),'clamp-pressure-valve');
+   tag(this.cyl(pressure,.035,.12,[.44,1.20,.14],'steel','x'),'clamp-pressure-line-reference');
+   const cylinders=this.findNode('polar-clamp-cylinders');if(cylinders)for(const x of [-.48,.48])tag(this.cyl(cylinders,.025,.28,[x,1.28,.02],'steel','y'),'clamp-piston-rod');
+  }
+
+  const knife=this.findNode('polar-knife');if(knife){
+   const linkage=this.group(knife,'polar-knife-linkage-v122','Knife carrier drive, clutch and top-stop reference',[0,0,0],[0,.16,.18]);
+   for(const x of [-.56,.56]){
+    tag(this.box(linkage,[.10,.34,.10],[x,1.34,.15],'steel',.007),'knife-carrier-guide');
+    tag(this.cyl(linkage,.070,.12,[x,1.60,.15],'dark','z'),'knife-drive-pivot');
+   }
+   tag(this.cyl(linkage,.18,.14,[.78,.74,.50],'dark','z'),'knife-drive-clutch');
+   tag(this.cyl(linkage,.24,.12,[.78,.74,.50],'steel','z'),'knife-drive-gear');
+   tag(this.box(linkage,[.20,.20,.10],[.78,.98,.50],'accent',.010),'knife-top-position-stop');
+   const change=this.group(knife,'polar-knife-change-v122','Knife-change handle / carrier support reference',[0,0,0],[0,.12,-.20]);
+   tag(this.cyl(change,.025,.52,[-.82,1.34,-.12],'steel','y'),'knife-change-handle');
+   tag(this.box(change,[.20,.12,.12],[-.82,1.08,-.12],'dark',.010),'knife-change-support');
+  }
+
+  const safety=this.findNode('polar-safety');if(safety){
+   const line=this.group(safety,'polar-cut-line-v122','Optical/mechanical cutting-line indication',[0,0,0],[0,.08,-.30]);
+   const emitter=tag(this.box(line,[.10,.10,.08],[-.70,1.02,-.44],'dark',.008),'cut-line-emitter');
+   const receiver=tag(this.box(line,[.10,.10,.08],[.70,1.02,-.44],'dark',.008),'cut-line-receiver');
+   emitter.userData.opticalReference=true;receiver.userData.opticalReference=true;
+   const beam=this.box(line,[1.30,.008,.008],[0,.995,-.44],'air',0);beam.material.transparent=true;beam.material.opacity=.30;tag(beam,'cut-line-indicator-beam');
+  }
+
+  const utility=this.findNode('polar-utility');if(utility){
+   const pump=this.findNode('polar-hyd-power');if(pump){
+    tag(this.cyl(pump,.085,.24,[-.32,.42,.55],'dark','x'),'hydraulic-pump-motor');
+    tag(this.box(pump,[.28,.20,.18],[-.08,.50,.55],'steel',.010),'hydraulic-reservoir-filter');
+   }
+   const manifold=this.findNode('polar-hyd-valve');if(manifold){
+    for(const x of [.16,.25,.34])tag(this.cyl(manifold,.020,.10,[x,.52,.55],'steel','y'),'hydraulic-solenoid-valve');
+    for(const z of [.46,.58,.70])tag(this.cyl(manifold,.012,.54,[.05,.60,z],'steel','x'),'hydraulic-line-reference','SERVICE_TOPOLOGY__ROUTING_VISUAL');
+   }
+  }
  }
  findNode(id){return id==='POLAR-115-EM'?this.root:this.nodes.find(n=>n.userData.nodeId===id)||null;}
  resolvePart(o){for(let p=o;p&&p!==this.root;p=p.parent)if(p.userData.selectable)return p;return null;}
