@@ -121,7 +121,7 @@ test('conditional controls explain requirements rather than failing silently',()
 });
 
 test('service worker refreshes the redesigned shell',()=>{
-  assert.match(sw,/factory-digital-twin-v118-offset10-sheet-occupancy-20260921/);
+  assert.match(sw,/factory-digital-twin-v119-ui-adaptive-20260921/);
   assert.match(sw,/src\/universal-machine\.js/);
   assert.match(app,/template\.ghost\(true,part\)/,'object selection must automatically ghost all non-selected geometry');
   for(const asset of ['app-shell-v79.css','src/app-shell-v79.js','assets/splash-industrial-v79.webp','src/ui-v5.js','src/app.js','src/simulation.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
@@ -370,6 +370,15 @@ test('v40 labels drill through the six-level taxonomy with individually mapped g
   assert.match(taxonomy,/gripper-cam/);
   assert.match(experienceCss,/\.part-label-nav/);
   assert.match(experienceCss,/\.part-label\.is-reference/);
+});
+
+test('V119 adaptive shell prevents duplicate mobile drawer toggles and restores workbench visibility',()=>{
+  assert.match(appShellCss,/V119 adaptive layout hardening/);
+  assert.match(appShellCss,/\.ui-workbench-open \.engineering-workbench/);
+  assert.match(appShellCss,/var\(--app-vh,100dvh\)/);
+  assert.match(appShellCss,/body:not\(\.panel-hidden\) \.scene-bottom/);
+  assert.doesNotMatch(ui,/document\.body\.classList\.toggle\('nav-open'\)/);
+  assert.match(ui,/app-shell-v79\.js owns the nav-open toggle/);
 });
 
 test('V79 interface keeps the scene primary, readable and secondary panels dismissible',()=>{
