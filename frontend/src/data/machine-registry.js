@@ -30,7 +30,7 @@ export const MACHINE_REGISTRY=Object.freeze([
   row('BMJ-MCH-0021',21,'OFFSET CONVERTING','AUTOBLANKING MACHINE 2','QF-100CS','2103072CGB05','PC-PK2-CON-STR-STRIPING02','ABM-2',2022),
   row('BMJ-MCH-0022',22,'OFFSET CONVERTING','PILE TURNER 2','FZ 1200','22000320','PC-PK2-CON-PLT','PLT-1',2020,true,'EXCEL + FZ1200_MULTI_VENDOR_PROCESS_REFERENCE','Dedicated process twin models clamp/turn/air/jog functions shared across FZ1200 references. OEM and exact installed capacity/hydraulic/blower configuration remain unverified. SAP Code PLT-1 is also used by Pile Turner 01.'),
   row('BMJ-MCH-0023',23,'OFFSET CONVERTING','COLLATOR MACHINE'),
-  row('BMJ-MCH-0024',24,'OFFSET CONVERTING','DIGITAL INKJET','UPG-LY300',null,null,null,2025),
+  row('BMJ-MCH-0024',24,'OFFSET CONVERTING','DIGITAL INKJET','UPG-LY300',null,null,null,2025,true,'EXCEL + UPG_LY300_PRIMARY','Dedicated twin uses exact matching UPG LY300 OEM documentation: automatic paging, servo conveyor, Ricoh G5 UV inkjet, LED UV curing, 2K inspection, plate-turn reject and collection/strapping interface. Serial/SAP/FLOC and installed optional accessories are not present in the BMJ registry.'),
 
   row('BMJ-MCH-0025',25,'PDS','CTP HEIDELBERG MACHINE',null,null,'GC-PK2-GEN-LT1-00PREPRESS-CTP1','CTP-1'),
   row('BMJ-MCH-0026',26,'PDS','CTP HEIDELBERG MACHINE',null,null,'GC-PK2-GEN-LT1-00PREPRESS-CTP2','CTP-2'),
