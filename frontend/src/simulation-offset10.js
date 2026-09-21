@@ -13,8 +13,10 @@ function pathPoints(){
     new THREE.Vector3(OFFSET10_MODULE_CENTERS.PU1-.52,1.40,0)
   ];
   OFFSET10_MODULE_SEQUENCE.forEach((module,i)=>{
-    const x=OFFSET10_MODULE_CENTERS[module.key],y=module.type==='dryer'?1.42:module.type==='coat'?1.36:1.30;
-    pts.push(new THREE.Vector3(x-.38,y+.05,0),new THREE.Vector3(x,y,0),new THREE.Vector3(x+.38,y+.04,0));
+    const x=OFFSET10_MODULE_CENTERS[module.key];
+    const nipY=module.type==='dryer'?1.42:module.type==='coat'?1.305:1.270;
+    const shoulderY=module.type==='dryer'?1.42:module.type==='coat'?1.345:1.315;
+    pts.push(new THREE.Vector3(x-.38,shoulderY,0),new THREE.Vector3(x,nipY,0),new THREE.Vector3(x+.38,shoulderY,0));
     if(i<OFFSET10_MODULE_SEQUENCE.length-1){
       const nx=OFFSET10_MODULE_CENTERS[OFFSET10_MODULE_SEQUENCE[i+1].key];
       pts.push(new THREE.Vector3((x+nx)/2,1.18,0));
