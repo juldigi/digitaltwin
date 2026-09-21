@@ -292,7 +292,7 @@ test('v53 routes a rebuilt document-grounded CX104 twin without Offset 5 UI leak
 });
 
 test('v54 keeps APM2 as a dedicated 3D machine with process-specific UI and no invented suffix',()=>{
-  assert.match(app,/\['offset10','apm2','sheeting'\]\.includes\(REQUESTED_MACHINE\)/);
+  assert.match(app,/\['offset10','apm2','sheeting'\]\.includes\(requested\)/);
   assert.match(app,/IS_APM2=MACHINE_KEY==='apm2'/);
   assert.match(app,/ACTIVE_ROOT=IS_OFFSET10\?'O10':IS_APM2\?'APM2':IS_SHEETING\?'SH':IS_GENERIC\?GENERIC_ROOT:'O5'/);
   assert.match(app,/machine\.machineId==='BMJ-MCH-0010'\?'apm2'/);
