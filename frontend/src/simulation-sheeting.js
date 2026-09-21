@@ -41,11 +41,13 @@ export class SheetingProcessSimulation{
     this.drawDrumWrapEnd=THREE.MathUtils.degToRad(-63.4);
     this.drawDrumWrapAngle=Math.abs(this.drawDrumWrapStart-this.drawDrumWrapEnd);
     this.bladeStrokeWindow=.15;
-    this.bladeContactDelay=.075;
+    this.bladeContactDelay=this.bladeStrokeWindow/2;
     this.bladeStrokeDistance=.075;
     this.fastDuration=.92;
     this.slowDuration=1.02;
     this.overlapDuration=.86;
+    this.reelReferenceRadius=.78;
+    this.reelAngularSpeed=this.webLinearSpeed/this.reelReferenceRadius;
     this.landingDuration=.62;
     this.sheetTravel=this.fastDuration+this.slowDuration+this.overlapDuration+this.landingDuration;
     this.processCycle=this.cutInterval*6;
@@ -246,7 +248,17 @@ export class SheetingProcessSimulation{
       drawDrumSurfaceSpeed:this.webLinearSpeed,
       drawDrumAngularSpeed:this.webLinearSpeed/this.drawDrumRadius,
       drawDrumWrapDegrees:THREE.MathUtils.radToDeg(this.drawDrumWrapAngle),
-      drawDrumContactPointCount:this.drawDrumContactPoints.length
+      drawDrumContactPointCount:this.drawDrumContactPoints.length,
+      reelFunctional:true,
+      reelReferenceRadius:this.reelReferenceRadius,
+      reelAngularSpeed:this.reelAngularSpeed,
+      reelSurfaceSpeed:this.reelAngularSpeed*this.reelReferenceRadius,
+      bladeContactDelay:this.bladeContactDelay,
+      bladeStrokeWindow:this.bladeStrokeWindow,
+      bladePeakContactAligned:Math.abs(this.bladeContactDelay-this.bladeStrokeWindow/2)<1e-12,
+      fastTapeLinearSpeed:this.fastCurve.getLength()/this.fastDuration,
+      slowTapeLinearSpeed:this.slowCurve.getLength()/this.slowDuration,
+      overlapTapeLinearSpeed:this.overlapCurve.getLength()/this.overlapDuration
     };
   }
 
@@ -304,13 +316,20 @@ export class SheetingProcessSimulation{
       if(motion==='draw-drum-reference'){
         // Surface travel equals web travel: theta = s / r.
         this.spinFromRest(m,-this.webAdvance/this.drawDrumRadius);
+      }else if(m.userData.kinematicGroup==='UNWIND_REEL'){
+        // Reel body, core and chucks share one angular velocity. The .78 m visible radius is a visual reference, not a live roll-diameter measurement.
+        this.spinFromRest(m,-this.elapsed*this.reelAngularSpeed);
+      }else if(m.userData.kinematicGroup==='WEB_CONTACT'){
+        const radius=Math.max(.001,m.userData.surfaceRadius||.1);
+        this.spinFromRest(m,-this.elapsed*(this.webLinearSpeed/radius));
+      }else if(m.userData.kinematicGroup==='CUT_SHEET_TRANSPORT'){
+        const radius=Math.max(.001,m.userData.surfaceRadius||.082);
+        const linear=m.userData.transportZone==='FAST'?this.fastCurve.getLength()/this.fastDuration:this.overlapCurve.getLength()/this.overlapDuration;
+        this.spinFromRest(m,-this.elapsed*(linear/radius));
       }else if(/reel|chuck|roller/.test(motion)){
-        let rate=4.6;
-        if(/reel|chuck/.test(motion))rate=1.12;
-        else if(motion==='delivery-roller')rate=5.35;
-        else if(motion==='pull-roller')rate=4.85;
-        else if(motion==='tension-roller')rate=4.35;
-        this.spinFromRest(m,-this.elapsed*rate);
+        // Fallback only for future unclassified visualization surfaces.
+        const radius=Math.max(.001,m.userData.surfaceRadius||.1);
+        this.spinFromRest(m,-this.elapsed*(this.webLinearSpeed/radius));
       }
       if(motion==='flat-bed-blade-reference'){
         const phaseSinceCut=this.cutCount>0?this.elapsed-this.cutCount*this.cutInterval:Infinity;
