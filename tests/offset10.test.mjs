@@ -249,3 +249,46 @@ test('V115 Offset10 static cylindrical references remain unchanged during simula
   assert.equal(staticMeshes.every((m,i)=>m.quaternion.angleTo(q[i])<1e-10),true);
   sim.dispose();machine.dispose();
 });
+
+
+test('V116 Offset10 dynamic sheet brake is idle until a sheet enters the controlled slowdown zone',()=>{
+  const machine=new Offset10MachineTemplate(),sim=new Offset10PrintingSimulation(machine.root,machine);
+  const brakes=sim.rotors.filter(r=>r.role==='sheet-brake');assert.equal(brakes.length,3);
+  const q0=brakes.map(r=>r.mesh.quaternion.clone());
+  sim.start();sim.update(0);
+  for(let ms=16;ms<=1200;ms+=16)sim.update(ms);
+  assert.equal(sim.state().deliveryBrakeActive,false);
+  assert.equal(brakes.every((r,i)=>r.mesh.quaternion.angleTo(q0[i])<1e-10),true,'sheet brake rotated before sheet arrival');
+
+  let seen=false,rotated=false;
+  for(let ms=1216;ms<=26000;ms+=16){
+    sim.update(ms);
+    if(sim.state().deliveryBrakeActive){
+      seen=true;
+      rotated ||= brakes.some((r,i)=>r.mesh.quaternion.angleTo(q0[i])>.001);
+    }
+    if(seen&&rotated)break;
+  }
+  assert.equal(seen,true,'delivery slowdown zone never activated');
+  assert.equal(rotated,true,'dynamic sheet brake did not rotate while sheet occupied slowdown zone');
+  sim.stop();
+  assert.equal(sim.state().deliveryBrakeActive,false);
+  assert.equal(brakes.every((r,i)=>r.mesh.quaternion.angleTo(q0[i])<1e-8),true,'sheet brake phase did not reset');
+  sim.dispose();machine.dispose();
+});
+
+test('V116 Offset10 FoilStar UV and sheet brake are driven by independent sheet-position zones',()=>{
+  const machine=new Offset10MachineTemplate(),sim=new Offset10PrintingSimulation(machine.root,machine);
+  sim.start();sim.update(0);
+  let foilOnly=false,uvSeen=false,brakeOnly=false;
+  for(let ms=16;ms<=26000;ms+=16){
+    sim.update(ms);const s=sim.state();
+    foilOnly ||= s.foilStarActive&&!s.deliveryBrakeActive;
+    uvSeen ||= s.uvActive;
+    brakeOnly ||= s.deliveryBrakeActive&&!s.foilStarActive;
+  }
+  assert.equal(foilOnly,true,'FoilStar never operated independently around PU2');
+  assert.equal(uvSeen,true,'UV never followed sheet occupancy');
+  assert.equal(brakeOnly,true,'delivery sheet brake was incorrectly coupled to FoilStar');
+  sim.dispose();machine.dispose();
+});
