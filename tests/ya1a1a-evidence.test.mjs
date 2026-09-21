@@ -28,8 +28,8 @@ test('YA1A1A source map separates exact identity/size-class evidence from later 
  assert.ok(sources.some(s=>/ezgravtek\.com/.test(s.url)&&/family/i.test(s.title)));
  const taxonomy=universalTaxonomy('BMJ-MCH-0004');
  assert.deepEqual([...new Set(taxonomy.map(n=>n.level))].sort(),[1,2,3,4,5,6]);
- assert.ok(taxonomy.some(n=>n.name==='Gravure Cylinder / Doctor Blade'));
- assert.ok(taxonomy.some(n=>n.name==='Impression Cylinder / Gripper'));
+ assert.ok(taxonomy.some(n=>n.name==='Gravure Cylinder / Doctor'));
+ assert.ok(taxonomy.some(n=>n.name==='Impression Cylinder / Sheet Control'));
 });
 
 test('YA1A1A reference simulation uses only tagged gravure-family mechanisms and remains explicitly non-CAD',()=>{
