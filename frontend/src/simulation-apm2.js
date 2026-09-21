@@ -10,22 +10,22 @@ const lerp=(a,b,t)=>THREE.MathUtils.lerp(a,b,clamp(t));
 export const APM2_SIMULATION_STAGES=Object.freeze([
  'Pile separation / suction pickup',
  'Front lays + SideLay registration',
- 'Gripper index to platen',
- 'Flatbed die-cut pressure dwell',
- 'Gripper index to stripping',
- 'Stripping dwell · family reference',
- 'Gripper index to delivery',
- 'Gripper release / pile formation'
+ 'Gripper close / one-pitch chain index',
+ 'Platen + stripping approach',
+ 'Pressure / stripping dwell',
+ 'Platen + stripping return',
+ 'Gripper release / pile settle',
+ 'Prepare next registered index'
 ]);
 export const APM2_PROCESS_STEPS=Object.freeze([
- 'Prepare next sheet while gripper-chain transport is stopped',
- 'Register against front lays and operator-side SideLay',
- 'Close grippers and index the intermittent chain to the platen station',
- 'Stop chain and execute flatbed die-cutting impression',
- 'Index sheet to stripping station',
- 'Stop chain and execute upper/lower stripping reference cycle',
- 'Index sheet to delivery',
- 'Open grippers and settle converted sheet on the delivery pile'
+ 'Prepare and register the next sheet while the gripper-chain transport is stopped',
+ 'Close the gripper bar on the registered leading edge',
+ 'Advance all engaged sheets together by one intermittent chain pitch',
+ 'Hold the chain stationary while the platen executes the die-cutting impression',
+ 'Hold the same transport dwell while the stripping station executes its family-reference stroke',
+ 'Return platen and stripping tools before the next index',
+ 'Release the downstream gripper and settle the converted sheet on the delivery pile',
+ 'Repeat the registered one-pitch index; visual timing is deliberately slowed for training'
 ]);
 
 function pathPoints(){
@@ -37,15 +37,11 @@ function pathPoints(){
  ];
 }
 function transportProgress(p){
- if(p<.24)return 0;
- if(p<.34)return lerp(0,.36,(p-.24)/.10);
- if(p<.52)return .36;
- if(p<.62)return lerp(.36,.62,(p-.52)/.10);
- if(p<.78)return .62;
- if(p<.94)return lerp(.62,.90,(p-.78)/.16);
- return lerp(.90,1,(p-.94)/.06);
+ if(p<.22)return 0;
+ if(p<.34)return smooth(p,.22,.34);
+ return 1;
 }
-function transportIsIndexing(p){return (p>=.24&&p<.34)||(p>=.52&&p<.62)||p>=.78;}
+function transportIsIndexing(p){return p>=.22&&p<.34;}
 function gripperLoopPosition(t){
  t=((t%1)+1)%1;
  if(t<.46)return {x:lerp(-1.95,2.31,t/.46),y:1.57};
@@ -53,7 +49,7 @@ function gripperLoopPosition(t){
  if(t<.94)return {x:lerp(2.31,-1.95,(t-.52)/.42),y:1.00};
  return {x:-1.95,y:lerp(1.00,1.57,(t-.94)/.06)};
 }
-function stageIndex(p){return p<.12?0:p<.24?1:p<.34?2:p<.52?3:p<.62?4:p<.78?5:p<.94?6:7;}
+function stageIndex(p){return p<.11?0:p<.22?1:p<.34?2:p<.41?3:p<.56?4:p<.66?5:p<.79?6:7;}
 
 export class APM2ProcessSimulation{
  constructor(machine,template){
@@ -73,9 +69,9 @@ export class APM2ProcessSimulation{
  buildPath(){const pts=[];for(let i=0;i<=180;i++)pts.push(this.curve.getPointAt(i/180));const geo=this.geometry(new THREE.BufferGeometry().setFromPoints(pts)),mat=new THREE.LineDashedMaterial({color:0x35a5b8,dashSize:.06,gapSize:.04,transparent:true,opacity:.38,depthWrite:false});this.materials.push(mat);this.pathLine=new THREE.Line(geo,mat);this.pathLine.computeLineDistances();this.pathLine.visible=this.pathVisible;this.group.add(this.pathLine);}
  buildSheets(){
   const geo=this.geometry(new THREE.PlaneGeometry(.72,1.02,4,6));geo.rotateX(-Math.PI/2);
-  for(let i=0;i<8;i++){const mat=this.material({color:0xf2ecda,roughness:.9,metalness:0,side:THREE.DoubleSide}),mesh=new THREE.Mesh(geo,mat);mesh.visible=false;mesh.frustumCulled=false;this.group.add(mesh);
+  for(let i=0;i<4;i++){const mat=this.material({color:0xf2ecda,roughness:.9,metalness:0,side:THREE.DoubleSide}),mesh=new THREE.Mesh(geo,mat);mesh.visible=false;mesh.frustumCulled=false;this.group.add(mesh);
    const cut=new THREE.LineSegments(this.geometry(new THREE.EdgesGeometry(new THREE.BoxGeometry(.56,.006,.78))),new THREE.LineBasicMaterial({color:0x6f6658,transparent:true,opacity:.65}));this.materials.push(cut.material);cut.visible=false;this.group.add(cut);
-   this.sheets.push({mesh,cut,phase:i/8,lap:-1,diecut:false,stripped:false});
+   this.sheets.push({mesh,cut,phase:i/4,lap:-1,diecut:false,stripped:false});
   }
  }
  buildPileSheets(){const geo=this.geometry(new THREE.PlaneGeometry(.72,1.02,4,6));geo.rotateX(-Math.PI/2);for(let i=0;i<this.maxPileSheets;i++){const mesh=new THREE.Mesh(geo,this.material({color:0xe9e2cc,roughness:.92,metalness:0,side:THREE.DoubleSide}));mesh.visible=false;mesh.frustumCulled=false;this.group.add(mesh);this.pileSheets.push({mesh,serial:-1});}}
@@ -104,23 +100,23 @@ export class APM2ProcessSimulation{
   }
  }
  updateMechanisms(p){
-  this.feederSuctionActive=p<.12;this.registrationActive=p>=.12&&p<.24;this.sideLayActive=this.registrationActive;
+  this.feederSuctionActive=p<.11;this.registrationActive=p>=.11&&p<.22;this.sideLayActive=this.registrationActive;
   this.transportIndexing=transportIsIndexing(p);this.transportStopped=!this.transportIndexing;
-  const platenStroke=smooth(p,.34,.40)*(1-smooth(p,.47,.52)),stripStroke=smooth(p,.62,.67)*(1-smooth(p,.73,.78));
-  this.platenClosing=p>=.34&&p<.40;this.platenClosed=platenStroke>.90;this.pressureDwell=p>=.40&&p<.47;this.strippingActive=stripStroke>.20;this.deliveryReleaseActive=p>=.94;
-  if(this.feederHead&&this.rest.head){this.feederHead.position.copy(this.rest.head);if(this.feederSuctionActive){const q=p/.12;this.feederHead.position.y-=.05*Math.sin(Math.PI*q);this.feederHead.position.x+=.035*Math.sin(Math.PI*q);}}
-  if(this.sideLay&&this.rest.side){this.sideLay.position.copy(this.rest.side);if(this.sideLayActive){const q=(p-.12)/.12;this.sideLay.position.z-=.025*Math.sin(Math.PI*clamp(q));}}
+  const platenStroke=smooth(p,.34,.41)*(1-smooth(p,.56,.66)),stripStroke=smooth(p,.36,.43)*(1-smooth(p,.56,.66));
+  this.platenClosing=p>=.34&&p<.41;this.platenClosed=platenStroke>.90;this.pressureDwell=p>=.41&&p<.56;this.strippingActive=stripStroke>.25;this.deliveryReleaseActive=p>=.66&&p<.79;
+  if(this.feederHead&&this.rest.head){this.feederHead.position.copy(this.rest.head);if(this.feederSuctionActive){const q=p/.11;this.feederHead.position.y-=.05*Math.sin(Math.PI*q);this.feederHead.position.x+=.035*Math.sin(Math.PI*q);}}
+  if(this.sideLay&&this.rest.side){this.sideLay.position.copy(this.rest.side);if(this.sideLayActive){const q=(p-.11)/.11;this.sideLay.position.z-=.025*Math.sin(Math.PI*clamp(q));}}
   if(this.platen&&this.rest.platen){this.platen.position.copy(this.rest.platen);this.platen.position.y+=.085*platenStroke;}
   if(this.stripUpper&&this.rest.upper){this.stripUpper.position.copy(this.rest.upper);this.stripUpper.position.y-=.055*stripStroke;}
   if(this.stripLower&&this.rest.lower){this.stripLower.position.copy(this.rest.lower);this.stripLower.position.y+=.035*stripStroke;}
  }
- updateGripperBars(globalTransport){for(const bar of this.gripperBars){const q=gripperLoopPosition(globalTransport+(bar.userData.barPhase||0));bar.position.set(q.x-(bar.children[0]?.position.x||0),q.y-(bar.children[0]?.position.y||0),0);}}
- updateSheets(cycleIndex,transport,p){
-  const global=cycleIndex+transport;
+ updateGripperBars(cycleIndex,indexFraction){const globalPitch=(cycleIndex+indexFraction)/14;for(const bar of this.gripperBars){const q=gripperLoopPosition(globalPitch+(bar.userData.barPhase||0)),child=bar.children[0];bar.position.set(q.x-(child?.position.x||0),q.y-(child?.position.y||0),0);}}
+ updateSheets(cycleIndex,indexFraction,p){
+  const global=(cycleIndex+indexFraction)/4;
   for(const s of this.sheets){const raw=global+s.phase,t=((raw%1)+1)%1,lap=Math.floor(raw),pos=this.curve.getPointAt(Math.min(.999,t));s.mesh.visible=this.active;s.mesh.position.copy(pos);s.mesh.position.y+=.015;s.mesh.rotation.set(0,0,0);
-   if(this.platenClosed&&Math.abs(pos.x-D.platenCenterX)<.48)s.diecut=true;if(this.strippingActive&&s.diecut&&Math.abs(pos.x-D.strippingCenterX)<.46)s.stripped=true;
+   if(this.platenClosed&&Math.abs(pos.x-D.platenCenterX)<.52)s.diecut=true;if(this.strippingActive&&s.diecut&&Math.abs(pos.x-D.strippingCenterX)<.52)s.stripped=true;
    s.mesh.material.color.setHex(s.stripped?0xddd2b4:s.diecut?0xe7dfc5:0xf2ecda);s.cut.position.copy(s.mesh.position);s.cut.position.y+=.008;s.cut.rotation.copy(s.mesh.rotation);s.cut.visible=s.diecut;
-   if(lap>s.lap){if(s.lap>=0)this.deposit();s.lap=lap;s.diecut=false;s.stripped=false;}
+   if(lap>s.lap){if(s.lap>=0&&s.diecut)this.deposit();s.lap=lap;s.diecut=false;s.stripped=false;}
   }
  }
  start(){if(!this.active){this.elapsed=0;this.completed=0;for(const p of this.pileSheets){p.mesh.visible=false;p.serial=-1;}for(const s of this.sheets){s.lap=-1;s.diecut=false;s.stripped=false;}}this.refreshPile();this.active=true;this.running=true;this.paused=false;this.lastNow=null;this.group.visible=true;this.resetMechanisms();this.onUpdate?.(this.state());return this.state();}
@@ -131,6 +127,6 @@ export class APM2ProcessSimulation{
  setSpeed(v){this.speed=clamp(Number(v)||1,.35,2);return this.state();}
  setPathVisible(on){this.pathVisible=!!on;this.pathLine.visible=this.pathVisible;return this.state();}
  setInkFlowVisible(){return this.state();}
- update(now){if(!this.active||!this.running){this.lastNow=now;return;}if(this.lastNow==null){this.lastNow=now;return;}const dt=Math.min(Math.max((now-this.lastNow)/1000,0),.05)*this.speed;this.lastNow=now;this.elapsed+=dt;const cycleIndex=Math.floor(this.elapsed/this.cycleSeconds),p=(this.elapsed%this.cycleSeconds)/this.cycleSeconds,transport=transportProgress(p),indexing=transportIsIndexing(p);this.updateMechanisms(p);this.updateRotors(dt,p,indexing,this.platenClosing||this.pressureDwell);this.updateGripperBars(transport);this.updateSheets(cycleIndex,transport,p);this.onUpdate?.(this.state());}
+ update(now){if(!this.active||!this.running){this.lastNow=now;return;}if(this.lastNow==null){this.lastNow=now;return;}const dt=Math.min(Math.max((now-this.lastNow)/1000,0),.05)*this.speed;this.lastNow=now;this.elapsed+=dt;const cycleIndex=Math.floor(this.elapsed/this.cycleSeconds),p=(this.elapsed%this.cycleSeconds)/this.cycleSeconds,transport=transportProgress(p),indexing=transportIsIndexing(p);this.updateMechanisms(p);this.updateRotors(dt,p,indexing,this.platenClosing||this.pressureDwell);this.updateGripperBars(cycleIndex,transport);this.updateSheets(cycleIndex,transport,p);this.onUpdate?.(this.state());}
  dispose(){this.stop();this.group.removeFromParent();for(const g of this.geometries)g.dispose();for(const m of this.materials)m.dispose();}
 }
