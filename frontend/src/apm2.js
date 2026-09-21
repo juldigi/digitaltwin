@@ -13,10 +13,11 @@ export class APM2MachineTemplate{
     this.root.userData={
       assetId:'MACHINE-APM2',
       orientation:APM2_ORIENTATION,
-      taxonomyVersion:'apm2-taxonomy-v1',
+      taxonomyVersion:'apm2-taxonomy-v2',
       machineEnvelope:APM2_DIMENSIONS,
       dimensionAudit:apm2DimensionAudit(),
-      sources:APM2_TECHNICAL_SOURCES
+      sources:APM2_TECHNICAL_SOURCES,
+      bmjAssetId:'BMJ-MCH-0010',geometryStatus:'LEGACY_SP102_FAMILY_PROCESS_REFERENCE__SUFFIX_UNCONFIRMED',engineeringDimensions:false
     };
     this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.exteriorOpen=false;this.ghosted=false;
     this.palette={
@@ -118,7 +119,7 @@ export class APM2MachineTemplate{
     const belts=this.group(g,'apm2-feeder-belts','Feed Belts / Slow-down',[0,0,0],[.15,.1,0]);
     for(const z of [-.42,-.14,.14,.42])this.box(belts,[.82,.018,.055],[.68,1.13,z],'rubber',.006);
     const rollers=this.group(g,'apm2-feeder-infeed-rollers','Infeed Rollers',[0,0,0],[.1,.1,0]);
-    this.cylinder(rollers,.045,1.12,[.35,1.14,0],'rubber','z');this.cylinder(rollers,.035,1.12,[.78,1.14,0],'steel','z');
+    {const a=this.cylinder(rollers,.045,1.12,[.35,1.14,0],'rubber','z');a.userData.driveRotor=true;a.userData.mechanismRole='feed-roller';const b=this.cylinder(rollers,.035,1.12,[.78,1.14,0],'steel','z');b.userData.driveRotor=true;b.userData.mechanismRole='feed-roller';}
   }
   buildRegister(){
     const g=this.group(this.root,'apm2-register','Feed Table / Register & Side Lay',[D.registerCenterX,0,0],[-.55,.15,-.25],['APM2-SP102-1994','APM2-BMJ-Q2']);
@@ -157,12 +158,12 @@ export class APM2MachineTemplate{
     const sprockets=this.group(g,'apm2-chain-sprockets','Chain Sprockets',[0,0,0],[0,.12,.25]);
     const drive=this.group(sprockets,'apm2-chain-drive-sprocket','Drive Sprocket',[0,0,0],[.1,.1,.2]);
     const ret=this.group(sprockets,'apm2-chain-return-sprocket','Return Sprocket',[0,0,0],[-.1,.1,.2]);
-    for(const z of [-.72,.72]){this.torus(drive,.18,.026,[2.31,1.285,z],'steel',[Math.PI/2,0,0]);this.torus(ret,.18,.026,[-1.95,1.285,z],'steel',[Math.PI/2,0,0]);}
+    for(const z of [-.72,.72]){const a=this.torus(drive,.18,.026,[2.31,1.285,z],'steel',[Math.PI/2,0,0]);a.userData.driveRotor=true;a.userData.mechanismRole='chain-sprocket';const b=this.torus(ret,.18,.026,[-1.95,1.285,z],'steel',[Math.PI/2,0,0]);b.userData.driveRotor=true;b.userData.mechanismRole='chain-sprocket';}
     const bars=this.group(g,'apm2-gripper-bars','14 Gripper Bars',[0,0,0],[0,.15,0],['APM2-SP102-PARTS']);
     for(let i=0;i<14;i++){
       const t=i/14,x=-1.75+t*4.02,y=i<7?1.57:1.00;
-      const id='apm2-gripper-bar-'+(i+1),bar=this.group(bars,id,'Gripper Bar '+(i+1),[0,0,0],[0,.08,0]);
-      const shaft=this.cylinder(bar,.022,1.46,[x,y,0],'steel','z');shaft.userData.gripperBar=true;shaft.userData.gripperIndex=i+1;
+      const id='apm2-gripper-bar-'+(i+1),bar=this.group(bars,id,'Gripper Bar '+(i+1),[0,0,0],[0,.08,0]);bar.userData.gripperBar=true;bar.userData.barPhase=i/14;bar.userData.familyCountReference=14;
+      const shaft=this.cylinder(bar,.022,1.46,[x,y,0],'steel','z');shaft.userData.gripperShaft=true;shaft.userData.gripperIndex=i+1;
       for(const z of [-.48,-.16,.16,.48]){this.box(bar,[.09,.025,.05],[x,y-.035,z],'graphite',.004).userData.gripperFinger=true;}
     }
   }
@@ -252,17 +253,17 @@ export class APM2MachineTemplate{
     const g=this.group(this.root,'apm2-drive','Main Drive / Transmission',[0,0,0],[0,.25,.65],['APM2-SP102-PARTS']);
     const main=this.group(g,'apm2-main-drive','Main Motor / Flywheel',[0,0,0],[0,.16,.35]);
     const motor=this.group(main,'apm2-main-motor','Main Drive Motor',[0,0,0],[0,.12,.3]);
-    this.cylinder(motor,.22,.56,[-.28,.58,.92],'graphite','x').userData.mainMotor=true;
+    {const r=this.cylinder(motor,.22,.56,[-.28,.58,.92],'graphite','x');r.userData.mainMotor=true;r.userData.driveRotor=true;r.userData.mechanismRole='main-motor';}
     const fly=this.group(main,'apm2-flywheel','Flywheel',[0,0,0],[0,.1,.25]);
-    this.cylinder(fly,.34,.10,[.10,.64,.95],'steel','x').userData.flywheel=true;
+    {const r=this.cylinder(fly,.34,.10,[.10,.64,.95],'steel','x');r.userData.flywheel=true;r.userData.driveRotor=true;r.userData.mechanismRole='flywheel';}
     const clutch=this.group(main,'apm2-clutch-brake','Clutch / Brake',[0,0,0],[0,.1,.25]);
-    this.cylinder(clutch,.24,.12,[.22,.64,.95],'dark','x').userData.clutch=true;
+    {const r=this.cylinder(clutch,.24,.12,[.22,.64,.95],'dark','x');r.userData.clutch=true;r.userData.driveRotor=true;r.userData.mechanismRole='clutch-brake';}
 
     const trans=this.group(g,'apm2-drive-transmission','Mechanical Transmission',[0,0,0],[.1,.16,.3]);
     const shaft=this.group(trans,'apm2-main-shaft','Main Shaft',[0,0,0],[0,.1,.2]);
-    this.cylinder(shaft,.045,2.00,[0,.64,0],'steel','z').userData.driveRotor=true;
+    {const r=this.cylinder(shaft,.045,2.00,[0,.64,0],'steel','z');r.userData.driveRotor=true;r.userData.mechanismRole='main-shaft';}
     const gears=this.group(trans,'apm2-drive-gears','Drive Gears / Sprockets',[0,0,0],[0,.1,.25]);
-    for(const [x,r] of [[-.42,.19],[-.10,.15],[.18,.20]])this.cylinder(gears,r,.08,[x,.65,.92],'steel','x').userData.driveRotor=true;
+    for(const [x,radius] of [[-.42,.19],[-.10,.15],[.18,.20]]){const q=this.cylinder(gears,radius,.08,[x,.65,.92],'steel','x');q.userData.driveRotor=true;q.userData.mechanismRole='drive-gear';}
 
     const lube=this.group(g,'apm2-lubrication','Lubrication System',[0,0,0],[0,.16,.25]);
     const pump=this.group(lube,'apm2-lube-pump','Lubrication Pump',[0,0,0],[0,.08,.15]);
