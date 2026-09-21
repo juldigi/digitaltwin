@@ -10,6 +10,8 @@ import {MK920_TAXONOMY,mk920TaxonomyFor} from './data/taxonomy-mk920.js';
 import {MK920_TECHNICAL_SOURCES} from './data/sources-mk920.js';
 import {MK1060_TAXONOMY} from './data/taxonomy-mk1060.js';
 import {MK1060_TECHNICAL_SOURCES} from './data/sources-mk1060.js';
+import {promatrix106TaxonomyFor} from './data/taxonomy-promatrix106.js';
+import {PROMATRIX106_TECHNICAL_SOURCES} from './data/sources-promatrix106.js';
 
 const FAMILY_BY_NO=new Map([
  [1,'guillotine'],[2,'sheeter'],[4,'offset'],[5,'offset'],[6,'offset'],[7,'pileturner'],[8,'pileturner'],
@@ -60,8 +62,8 @@ const EVIDENCE_BY_NO=new Map([
  [11,{grade:'MODEL_IDENTIFIED_PROCESS_GROUNDED',geometry:'DEDICATED_PROCESS_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated MK 920 YMI twin uses BMJ identity plus reference-supported sheet limits, rated speed, flatbed stamping architecture and three foil-pull axes. Serial-specific options remain bounded.'}],
  [12,{grade:'MODEL_IDENTIFIED_PROCESS_GROUNDED',geometry:'DEDICATED_PROCESS_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'APM-6 is the second BMJ MK 920 YMI asset. It uses the same reference-supported flatbed stamping architecture and three foil-pull axes as APM-5 while keeping its own serial/year/SAP identity; no extra option is inferred from the site suffix II.'}],
  [13,{grade:'MODEL_MANUAL_PROCESS_GROUNDED',geometry:'DEDICATED_MANUAL_PROCESS_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated MK 1060 ER twin uses BMJ identity plus the 2013 operating-manual architecture: suction feeder, feed table, platen press, double-action stripping, blanking and sheet-edge waste delivery. Exact BMJ tooling and guard details remain serial-specific.'}],
- [14,{grade:'MODEL_IDENTIFIED',geometry:'OFFICIAL_FAMILY_REFERENCE',simulation:'BLOCKED',reason:'Promatrix 106 CSB identity is known; installed feeder, stripping and blanking details need serial-specific evidence.'}],
- [15,{grade:'MODEL_IDENTIFIED',geometry:'OFFICIAL_FAMILY_REFERENCE',simulation:'BLOCKED',reason:'Promatrix 106 CSB identity is known; installed feeder, stripping and blanking details need serial-specific evidence.'}],
+ [14,{grade:'OEM_PROCESS_GROUNDED',geometry:'DEDICATED_OEM_PROCESS_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated APM-8 Promatrix 106 CSB twin follows HEIDELBERG documentation for non-stop feeder, suction-belt register table, cutting, stripping, blanking and CSB non-stop delivery. Optional MasterSet/logistics/tooling are not inferred.'}],
+ [15,{grade:'OEM_PROCESS_GROUNDED',geometry:'DEDICATED_OEM_PROCESS_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated APM-9 Promatrix 106 CSB twin follows HEIDELBERG documentation for non-stop feeder, suction-belt register table, cutting, stripping, blanking and CSB non-stop delivery. Optional MasterSet/logistics/tooling are not inferred.'}],
  [16,{grade:'MODEL_IDENTIFIED',geometry:'FAMILY_REFERENCE',simulation:'BLOCKED',reason:'MEDIA 100 II identity is known; module train, glue heads and compression section need serial-specific evidence.'}],
  [17,{grade:'IDENTITY_ONLY',geometry:'PLACEHOLDER',simulation:'BLOCKED',reason:'Folder Gluer 2 has no model, serial or OEM in the BMJ registry.'}],
  [18,{grade:'MODEL_IDENTIFIED',geometry:'FAMILY_REFERENCE',simulation:'BLOCKED',reason:'MEDIA 100 II identity is known; module train, glue heads and compression section need serial-specific evidence.'}],
@@ -81,13 +83,14 @@ const EVIDENCE_BY_NO=new Map([
 const DEFAULT_EVIDENCE=Object.freeze({grade:'IDENTITY_ONLY',geometry:'PLACEHOLDER',simulation:'BLOCKED',reason:'Machine-specific evidence is insufficient for mechanically faithful geometry or simulation.'});
 const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 export function universalMachineConfig(machineId){const machine=MACHINE_REGISTRY_BY_ID.get(machineId);if(!machine)return null;const family=FAMILY_BY_NO.get(machine.no);if(!family)return null;return {machine,family,label:LABELS[family],modules:MODULES[family],profile:mechanicalProfile(machine.no),evidence:Object.freeze(EVIDENCE_BY_NO.get(machine.no)||DEFAULT_EVIDENCE)};}
-export function universalTechnicalSources(machineId){if(machineId==='BMJ-MCH-0001')return [...POLAR115_TECHNICAL_SOURCES];if(machineId==='BMJ-MCH-0006')return [...OFFSET9_TECHNICAL_SOURCES];if(['BMJ-MCH-0011','BMJ-MCH-0012'].includes(machineId))return [...MK920_TECHNICAL_SOURCES];if(machineId==='BMJ-MCH-0013')return [...MK1060_TECHNICAL_SOURCES];const cfg=universalMachineConfig(machineId);if(!cfg)return [];return (FAMILY_SOURCES[cfg.family]||[]).map(([title,url],i)=>({id:`FAMILY-${cfg.family.toUpperCase()}-${i+1}`,title,publisher:new URL(url).hostname.replace(/^www\./,''),url,type:'TECHNICAL_REFERENCE',confidence:cfg.machine.model?'MEDIUM CONFIDENCE':'REFERENCE ONLY'}));}
+export function universalTechnicalSources(machineId){if(machineId==='BMJ-MCH-0001')return [...POLAR115_TECHNICAL_SOURCES];if(machineId==='BMJ-MCH-0006')return [...OFFSET9_TECHNICAL_SOURCES];if(['BMJ-MCH-0011','BMJ-MCH-0012'].includes(machineId))return [...MK920_TECHNICAL_SOURCES];if(machineId==='BMJ-MCH-0013')return [...MK1060_TECHNICAL_SOURCES];if(['BMJ-MCH-0014','BMJ-MCH-0015'].includes(machineId))return [...PROMATRIX106_TECHNICAL_SOURCES];const cfg=universalMachineConfig(machineId);if(!cfg)return [];return (FAMILY_SOURCES[cfg.family]||[]).map(([title,url],i)=>({id:`FAMILY-${cfg.family.toUpperCase()}-${i+1}`,title,publisher:new URL(url).hostname.replace(/^www\./,''),url,type:'TECHNICAL_REFERENCE',confidence:cfg.machine.model?'MEDIUM CONFIDENCE':'REFERENCE ONLY'}));}
 
 export function universalTaxonomy(machineId){
  if(machineId==='BMJ-MCH-0001')return [...POLAR115_TAXONOMY];
  if(machineId==='BMJ-MCH-0006')return [...OFFSET9_TAXONOMY];
  if(['BMJ-MCH-0011','BMJ-MCH-0012'].includes(machineId))return [...mk920TaxonomyFor(machineId)];
  if(machineId==='BMJ-MCH-0013')return [...MK1060_TAXONOMY];
+ if(['BMJ-MCH-0014','BMJ-MCH-0015'].includes(machineId))return [...promatrix106TaxonomyFor(machineId)];
  const cfg=universalMachineConfig(machineId);if(!cfg)return [];
  const root='U'+String(cfg.machine.no).padStart(2,'0'),nodes=[];
  const add=(id,parentId,level,levelName,name,meshRefs=[],description='')=>nodes.push(Object.freeze({id,parentId,level,levelName,name,machineZone:name,meshRefs,sourceRefs:['BMJ-MACHINE-DATABASE',`FAMILY-${cfg.family.toUpperCase()}`],confidence:cfg.machine.model?'FAMILY_REFERENCE':'REFERENCE_ONLY',verified:false,explodeVector:[level===2?.7:.12,level<4?.18:.08,0],explodeDistance:level===2?.9:level===3?.55:level===4?.34:level===5?.22:.12,focusCamera:null,description,maintenanceTag:null}));
