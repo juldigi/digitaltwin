@@ -214,6 +214,7 @@ export class OffsetMachineTemplate {
     const separating=this.findNode('feeder-separation');
     if(separating){
       separating.userData.serviceEvidence='Preset Plus suction head components and separator functions';
+      separating.userData.additionalServiceDetails=['rear-edge blower nozzles retained as metadata to protect mobile mesh budget'];
       for(const z of [-.62,-.31,0,.31,.62]){
         detail(this.box(separating,[.045,.16,.035],[-.20,1.58,z],'steel',.004),'sheet-separator-finger');
       }
@@ -221,7 +222,6 @@ export class OffsetMachineTemplate {
         const nozzle=detail(this.cylinder(separating,.014,.10,[-.30,1.56,z],'steel','x'),'sheet-separation-blower-nozzle');
         nozzle.rotation.z=.18;
       }
-      for(const z of [-.50,.50])detail(this.cylinder(separating,.020,.16,[-.42,1.46,z],'steel','x'),'rear-edge-blower-nozzle');
     }
   }
   tagAdaptiveDetails(){
