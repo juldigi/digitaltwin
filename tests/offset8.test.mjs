@@ -7,9 +7,10 @@ test('LYYL order has two coaters and neutral dryer sections',()=>{const m=new Of
 test('six-level taxonomy is populated and mapped',()=>{const s=offset8TaxonomyStats();for(let l=1;l<=6;l++)assert.ok(s.byLevel[l]>0);assert.ok(s.total>250);});
 test('simulation rotates only real process rollers and restores every local-axis quaternion',()=>{
  const m=new Offset8MachineTemplate(),s=new Offset8PrintingSimulation(m.root,m);
- assert.ok(s.rotors.length>90);assert.ok(s.rotors.length<180);
- const bad=new Set(['rail','sucker','air-bar','exhaust']);
- assert.equal(s.rotors.some(r=>bad.has(r.userData.rollerRole)),false);
+ assert.equal(s.rotors.length,193);
+ const allowed=/^(plate|blanket|impression|transfer|distributor-\d+|form-\d+|transfer-ink|damp-\d+|feed-wheel|anilox|coating-blanket|coating-impression|chain-sprocket|sheet-brake)$/;
+ assert.equal(s.rotors.some(r=>!allowed.test(r.userData.rollerRole||'')),false);
+ assert.equal(s.rotors.some(r=>['rail','sucker','air-bar','exhaust'].includes(r.userData.rollerRole)),false);
  assert.ok(s.suckers.length===4);assert.ok(OFFSET8_SIMULATION_STAGES.includes('Dynamic Sheet Brake'));
  s.start();let now=1000;for(let i=0;i<1800;i++){now+=10;s.update(now);}
  assert.ok(s.completed>0);assert.ok(s.state().mechanismCount>s.rotors.length);
@@ -32,7 +33,7 @@ test('V99 sheet centerline visits offset/coating nips without crossing cylinder 
  const critical=[];m.root.updateMatrixWorld(true);
  m.root.traverse(o=>{if(o.isMesh&&['plate','blanket','impression','transfer','coating-blanket','coating-impression','anilox'].includes(o.userData.rollerRole)){const p=new THREE.Vector3();o.getWorldPosition(p);critical.push({p,r:o.userData.radius,role:o.userData.rollerRole});}});
  let minimum=Infinity;
- for(const p of s.curve.getPoints(900))for(const c of critical){const d=Math.hypot(p.x-c.p.x,p.y-c.p.y);minimum=Math.min(minimum,d);assert.ok(d>c.r*.72,`${c.role} core penetration d=${d.toFixed(3)} r=${c.r}`);}
+ for(const p of s.curve.getPoints(900))for(const c of critical){const d=Math.hypot(p.x-c.p.x,p.y-c.p.y);minimum=Math.min(minimum,d);assert.ok(d>c.r*.98,`${c.role} core penetration d=${d.toFixed(3)} r=${c.r}`);}
  assert.ok(minimum<.34,'path should still approach a real process nip rather than float far above all cylinders');
  s.dispose();m.dispose();
 });
