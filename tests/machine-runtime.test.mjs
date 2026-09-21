@@ -4,6 +4,8 @@ import {UniversalMachineTemplate,UniversalProcessSimulation,universalMachineConf
 import {ReferenceMachineTemplate,ReferenceProcessSimulation,isReferenceMachineKey,REFERENCE_MACHINE_IDS} from '../frontend/src/reference-machines.js';
 import {MACHINE_REGISTRY} from '../frontend/src/data/machine-registry.js';
 
+const blockedReferenceIds=new Set(['BMJ-MCH-0004']);
+
 test('legacy BMJ IDs normalize to the same dedicated routes used by machine cards',()=>{
  assert.equal(normalizeMachineKey('BMJ-MCH-0002'),'sheeting');
  assert.equal(normalizeMachineKey('BMJ-MCH-0003'),'offset5');
@@ -22,14 +24,17 @@ test('exact and strong dedicated assets never fall through to UniversalMachineTe
  }
 });
 
-test('all formerly blocked assets now use reference-grounded geometry and family-process simulation',()=>{
+test('all reference assets use evidence-grounded geometry and simulation availability follows the evidence boundary',()=>{
  assert.equal(REFERENCE_MACHINE_IDS.length,21);
  for(const key of REFERENCE_MACHINE_IDS){
   assert.equal(isReferenceMachineKey(key),true,key);
   const template=createMachineTemplate(key),sim=createMachineSimulation(key,template.root,template);
   assert.ok(template instanceof ReferenceMachineTemplate,key);
   assert.ok(sim instanceof ReferenceProcessSimulation,key);
-  assert.equal(sim.state().blocked,false,key);assert.equal(sim.state().available,true,key);
+  const blocked=blockedReferenceIds.has(key);
+  assert.equal(sim.state().blocked,blocked,key);
+  assert.equal(sim.state().available,!blocked,key);
+  assert.equal(universalMachineConfig(key).evidence.simulation,blocked?'BLOCKED':'FAMILY_PROCESS_MODEL',key);
   assert.notEqual(universalMachineConfig(key).evidence.geometry,'PLACEHOLDER',key);
   sim.dispose();template.dispose();
  }
