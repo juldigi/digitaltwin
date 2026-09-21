@@ -1,0 +1,1 @@
+CI verification snapshot for V104 FZ1200 interlocks. Temporary branch; do not merge marker.
