@@ -1,4 +1,4 @@
-const VERSION='factory-digital-twin-v123-r9-fgm2-20260922';
+const VERSION='factory-digital-twin-v123-r10-fz1200-20260922';
 const SHELL=['./','./index.html','./config.json','./assets/favicon.svg',
   './assets/splash-industrial-v79.webp',
   './app-shell-v79.css',
