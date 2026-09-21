@@ -55,7 +55,7 @@ test('icons use one accessible vector family without emoji runtime controls',()=
 });
 
 test('service worker owns the V80 shell assets',()=>{
-  assert.match(sw,/factory-digital-twin-v116-offset10-delivery-20260921/);
+  assert.match(sw,/factory-digital-twin-v117-offset10-nip-path-20260921/);
   assert.match(sw,/app-shell-v79\.css/);
   assert.match(sw,/src\/app-shell-v79\.js/);
   assert.match(sw,/assets\/splash-industrial-v79\.webp/);
