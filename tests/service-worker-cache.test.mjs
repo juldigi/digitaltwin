@@ -18,6 +18,7 @@ test('service-worker shell cache references only deployable frontend files',()=>
  const paths=[...sw.matchAll(/['"]\.\/([^'"]+)['"]/g)].map(m=>m[1]);
  assert.ok(paths.includes('src/machine-runtime.js'));
  assert.ok(paths.includes('src/reference-machines.js'));
+ assert.ok(paths.includes('src/data/research-v121.js'));
  assert.ok(paths.includes('src/upg-ly300.js'));
  assert.ok(paths.includes('src/diana-eye55.js'));
  assert.equal(new Set(paths).size,paths.length,'service-worker shell cache should not contain duplicate asset paths');
@@ -25,5 +26,5 @@ test('service-worker shell cache references only deployable frontend files',()=>
 });
 
 test('service-worker cache version advances with the centralized runtime release',()=>{
- assert.match(sw,/factory-digital-twin-v119-ui-adaptive-20260921/);
+ assert.match(sw,/factory-digital-twin-v121-deep-research-20260921/);
 });
