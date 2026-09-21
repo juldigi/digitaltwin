@@ -6,24 +6,30 @@ const Y_AXIS=new THREE.Vector3(0,1,0);
 const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
 const smooth=(v,a,b)=>THREE.MathUtils.smoothstep(v,a,b);
 
+function arcPoints(cx,cy,r,fromDeg,toDeg,steps=12){
+ const pts=[];for(let i=0;i<=steps;i++){const a=THREE.MathUtils.degToRad(fromDeg+(toDeg-fromDeg)*(i/steps));pts.push(new THREE.Vector3(cx+Math.cos(a)*r,cy+Math.sin(a)*r,0));}return pts;
+}
+function appendUnique(dst,points){for(const p of points){const q=dst[dst.length-1];if(!q||q.distanceToSquared(p)>1e-10)dst.push(p);}return dst;}
+function polylineCurve(points){const path=new THREE.CurvePath();for(let i=1;i<points.length;i++)path.add(new THREE.LineCurve3(points[i-1],points[i]));return path;}
 function sheetPathPoints(){
  const pts=[new THREE.Vector3(-7.65,1.30,0),new THREE.Vector3(-6.55,1.37,0),new THREE.Vector3(-5.45,1.38,0)];
  for(const m of OFFSET8_MODULE_SEQUENCE){
   const x=OFFSET8_CENTERS[m.key];
   if(m.type==='print'){
-   // Impression center (-.10,1.02), r=.27; blanket center (.05,1.51), r=.22.
-   // The middle point lies at their tangency region instead of through either cylinder center.
-   pts.push(new THREE.Vector3(x-.44,.86,0),new THREE.Vector3(x-.021,1.278,0),new THREE.Vector3(x+.34,.86,0));
+   // Follow the outside of the impression cylinder into the blanket nip, then hand off to the transfer cylinder.
+   // Reference local centers: impression (-.10,1.02,r=.27), blanket (.05,1.51,r=.22), transfer (.34,.58,r=.27).
+   const impressionArc=arcPoints(x-.10,1.02,.282,205,20,25);
+   const transferArc=arcPoints(x+.34,.58,.282,110,35,11);
+   appendUnique(pts,impressionArc);appendUnique(pts,transferArc);
   }else if(m.type==='coat'){
-   // Coating blanket (.05,1.57,r=.23) against impression (-.08,1.08,r=.27).
-   pts.push(new THREE.Vector3(x-.40,.91,0),new THREE.Vector3(x-.011,1.341,0),new THREE.Vector3(x+.38,.93,0));
+   // Coating blanket / impression nip. The .282 m centerline radius stays outside the represented .27 m impression core.
+   appendUnique(pts,arcPoints(x-.08,1.08,.282,205,20,25));
   }else{
-   // Dryer guide plane is represented at y≈1.03; keep stock clear of the cassette bodies.
-   pts.push(new THREE.Vector3(x-.42,1.06,0),new THREE.Vector3(x,1.07,0),new THREE.Vector3(x+.42,1.06,0));
+   // Dryer guide plane is represented at y≈1.03; transport remains below the dryer cassettes.
+   appendUnique(pts,[new THREE.Vector3(x-.42,1.06,0),new THREE.Vector3(x,1.07,0),new THREE.Vector3(x+.42,1.06,0)]);
   }
  }
- // Preset Plus delivery: gripper-chain elevation -> dynamic sheet brake -> pile surface.
- pts.push(new THREE.Vector3(9.85,1.70,0),new THREE.Vector3(11.55,1.70,0),new THREE.Vector3(12.23,1.24,0),new THREE.Vector3(12.02,1.30,0));
+ appendUnique(pts,[new THREE.Vector3(9.85,1.70,0),new THREE.Vector3(11.55,1.70,0),new THREE.Vector3(12.23,1.24,0),new THREE.Vector3(12.02,1.30,0)]);
  return pts;
 }
 
@@ -35,7 +41,7 @@ export class Offset8PrintingSimulation{
   root.traverse(o=>{if(o.isMesh&&o.userData.rotor)this.rotors.push(o);if(o.userData.dryerEmitter)this.emitters.push(o);if(o.userData.reciprocator)this.suckers.push(o);});
   this.rotorRest=this.rotors.map(o=>o.quaternion.clone());this.suckerRest=this.suckers.map(o=>o.position.clone());
   this.feederHead=template.findNode('offset8-feeder-head');this.feederHeadRest=this.feederHead?.position.clone()||null;
-  this.points=sheetPathPoints();this.curve=new THREE.CatmullRomCurve3(this.points,false,'centripetal',.45);this.pathLength=this.curve.getLength();
+  this.points=sheetPathPoints();this.curve=polylineCurve(this.points);this.pathLength=this.curve.getLength();
   const pathGeo=new THREE.BufferGeometry().setFromPoints(this.curve.getPoints(220)),pathMat=new THREE.LineDashedMaterial({color:0x3f7f9a,dashSize:.08,gapSize:.05,transparent:true,opacity:.55});
   this.pathLine=new THREE.Line(pathGeo,pathMat);this.pathLine.name='OFFSET8-EVIDENCE-BOUNDED-SHEET-PATH';this.pathLine.computeLineDistances();this.pathLine.visible=false;root.add(this.pathLine);
   const mat=new THREE.MeshStandardMaterial({color:0xf5f0dd,roughness:.86,side:THREE.DoubleSide});
