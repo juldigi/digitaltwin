@@ -188,7 +188,7 @@ export class OffsetMachineTemplate {
         const z=side*.70;
         detail(this.box(pulls,[.18,.025,.17],[.30,1.405,z],'graphite',.006),'pull-plate');
         detail(this.cylinder(pulls,.026,.09,[.38,1.435,z],'steel','z'),'propelling-roller');
-        detail(this.box(pulls,[.060,.060,.040],[.34,1.505,z-side*.055],'black',.004),'pull-sensor');
+        detail(this.box(pulls,[.060,.060,.040],[.34,1.505,z-side*.055],'graphite',.004),'pull-sensor');
       }
     }
 
@@ -206,9 +206,8 @@ export class OffsetMachineTemplate {
 
     const vacuum=this.findNode('vacuum-table');
     if(vacuum){
-      const valve=this.group(vacuum,'feedboard-vacuum-rotary-valve-v122','Suction-tape vacuum rotary valve',[0,0,0],[.08,.10,.10],['Heidelberg Speedmaster CD 102 manual'],'Manual-confirmed rotary valve and bearing; internal port timing is not installation CAD.');
-      detail(this.cylinder(valve,.055,.16,[-.30,1.22,.25],'steel','x'),'suction-tape-rotary-valve');
-      valve.userData.serviceDetails=['rotary-valve shaft','bearing','cover','suction-air filter housing'];
+      vacuum.userData.v122RotaryValve={confirmed:true,serviceDetails:['rotary-valve shaft','bearing','cover','suction-air filter housing'],boundary:'internal port timing is not installation CAD'};
+      detail(this.cylinder(vacuum,.055,.16,[-.30,1.22,.25],'steel','x'),'suction-tape-rotary-valve');
     }
 
     const separating=this.findNode('feeder-separation');

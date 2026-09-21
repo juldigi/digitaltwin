@@ -63,11 +63,14 @@ test('V122 POLAR 115 exposes backgauge sledge clamp pressure knife drive safety 
 test('V122 Sheeting keeps HSM-CTM7 exact boundary while adding tension slitter knife overlap and stacker references',()=>{
  const m=new SheetingMachineTemplate();
  assert.equal(m.root.userData.researchVersion,'V122');assert.ok(m.root.userData.researchSourceCount>=160);
- requireRoles(m,['unwind-brake-disc','rollstand-load-cell-reference','web-tension-load-cell-reference','epc-actuator-reference','upper-slitter-knife-reference','knife-linear-guide-bearing','knife-drive-motor-reference','overlap-vacuum-box-reference','sheet-count-sensor-reference','stack-height-sensor-reference','lift-drive-sprocket-reference']);
- const slitter=m.findNode('sheeting-slitter-v122'),knife=m.findNode('sheeting-knife');
+ requireRoles(m,['unwind-brake-disc','rollstand-load-cell-reference','web-tension-load-cell-reference','epc-actuator-reference','upper-slitter-knife-reference','knife-linear-guide-bearing','overlap-vacuum-box-reference','sheet-count-sensor-reference','stack-height-sensor-reference','lift-drive-sprocket-reference']);
+ const slitter=m.findNode('sheeting-slitter-v122'),knife=m.findNode('sheeting-knife'),knifeDrive=m.findNode('sheeting-knife-drive-v122');
  assert.equal(slitter.userData.installedOptionUnknown,true);
  assert.match(slitter.userData.evidenceBoundary,/no public evidence confirms/i);
  assert.match(knife.userData.v122Boundary,/exact HSM-CTM7/i);
+ assert.equal(knifeDrive.userData.installedActuationUnknown,true);
+ assert.ok(knifeDrive.userData.serviceDetails.includes('knife drive motor'));
+ assert.match(knifeDrive.userData.evidenceBoundary,/metadata rather than speculative/i);
  m.dispose();
 });
 
