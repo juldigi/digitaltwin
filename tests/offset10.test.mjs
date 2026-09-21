@@ -277,19 +277,23 @@ test('V116 Offset10 dynamic sheet brake is idle until a sheet enters the control
   sim.dispose();machine.dispose();
 });
 
-test('V116 Offset10 FoilStar UV and sheet brake are driven by independent sheet-position zones',()=>{
+test('V117 Offset10 FoilStar UV and sheet brake states exactly follow their own sheet-occupancy zones',()=>{
   const machine=new Offset10MachineTemplate(),sim=new Offset10PrintingSimulation(machine.root,machine);
-  sim.start();sim.update(0);
-  let foilOnly=false,uvSeen=false,brakeOnly=false;
+  sim.start();sim.update(0);let foilSeen=false,uvSeen=false,brakeSeen=false;
   for(let ms=16;ms<=26000;ms+=16){
-    sim.update(ms);const s=sim.state();
-    foilOnly ||= s.foilStarActive&&!s.deliveryBrakeActive;
-    uvSeen ||= s.uvActive;
-    brakeOnly ||= s.deliveryBrakeActive&&!s.foilStarActive;
+    sim.update(ms);const s=sim.state(),visible=sim.sheets.filter(x=>x.mesh.visible);
+    const expectedFoil=visible.some(x=>Math.abs(x.userData.lead.x-OFFSET10_MODULE_CENTERS.PU2)<.75);
+    const expectedBrake=visible.some(x=>Math.abs(x.userData.lead.x-(OFFSET10_DIMENSIONS.layout.deliveryCenterX+1.42))<.58);
+    const expectedUV=visible.some(x=>{
+      const px=x.userData.lead.x;
+      return Math.abs(px-OFFSET10_MODULE_CENTERS.Y1)<.65||Math.abs(px-OFFSET10_MODULE_CENTERS.Y2)<.65||(px>OFFSET10_DIMENSIONS.layout.deliveryCenterX-1.75&&px<OFFSET10_DIMENSIONS.layout.deliveryCenterX-.25);
+    });
+    assert.equal(s.foilStarActive,expectedFoil,'FoilStar state diverged from PU2 occupancy');
+    assert.equal(s.deliveryBrakeActive,expectedBrake,'sheet-brake state diverged from delivery occupancy');
+    assert.equal(s.uvActive,expectedUV,'UV state diverged from Y/EOP occupancy');
+    foilSeen||=s.foilStarActive;uvSeen||=s.uvActive;brakeSeen||=s.deliveryBrakeActive;
   }
-  assert.equal(foilOnly,true,'FoilStar never operated independently around PU2');
-  assert.equal(uvSeen,true,'UV never followed sheet occupancy');
-  assert.equal(brakeOnly,true,'delivery sheet brake was incorrectly coupled to FoilStar');
+  assert.ok(foilSeen&&uvSeen&&brakeSeen);
   sim.dispose();machine.dispose();
 });
 
