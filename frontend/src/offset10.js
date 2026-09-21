@@ -56,7 +56,12 @@ export class Offset10MachineTemplate{
     mesh.userData.exteriorCover=true;return mesh;
   }
   roller(g,r,len,pos,kind,role){
-    const m=this.cylinder(g,r,len,pos,kind);m.userData.rollerRadius=r;m.userData.rollerRole=role;return m;
+    const m=this.cylinder(g,r,len,pos,kind);m.userData.rollerRadius=r;m.userData.rollerRole=role;m.userData.rotor=true;m.userData.rotorAxis='local-y';
+    const numbered=Number((String(role).match(/(\d+)$/)||[])[1]||0);
+    const map={plate:1,blanket:-1,impression:1,transfer:-1,fountain:1,'damp-form':-1,'damp-intermediate':1,'damp-distributor':-1,'damp-metering':1,'damp-pan':-1,'coating-anilox':1,'coating-form':-1,'coating-impression':1,'coating-transfer':-1};
+    m.userData.spinDirection=map[role]??(numbered?(numbered%2?-1:1):1);
+    m.userData.spinRate=/^(plate|blanket|impression|transfer)$/.test(role)?1:/^coating-/.test(role)?.88:/^damp-/.test(role)?.72:.78;
+    return m;
   }
   build(){
     this.buildPlatform();
@@ -127,13 +132,13 @@ export class Offset10MachineTemplate{
 
     const cyl=this.group(g,id+'-cylinders',label+' cylinder train / AirTransfer',[0,0,0],[0,.18,-.25],['O10-PROPOSAL']);
     const plate=this.group(cyl,id+'-plate','Plate cylinder',[0,0,0],[0,.10,0],['O10-PROPOSAL']);
-    const plateMesh=this.cylinder(plate,.20,2.58,[.10,1.92,0],'steel');plateMesh.userData.cylinderRole='plate';
+    const plateMesh=this.roller(plate,.20,2.58,[.10,1.92,0],'steel','plate');plateMesh.userData.cylinderRole='plate';
     const blanket=this.group(cyl,id+'-blanket','Blanket cylinder',[0,0,0],[0,.10,0],['O10-PROPOSAL']);
-    const blanketMesh=this.cylinder(blanket,.22,2.58,[-.08,1.49,0],'rubber');blanketMesh.userData.cylinderRole='blanket';
+    const blanketMesh=this.roller(blanket,.22,2.58,[-.08,1.49,0],'rubber','blanket');blanketMesh.userData.cylinderRole='blanket';
     const impression=this.group(cyl,id+'-impression','Double-diameter impression cylinder reference',[0,0,0],[0,.10,0],['O10-PROPOSAL']);
-    const impressionMesh=this.cylinder(impression,.27,2.58,[.10,1.00,0],'steel');impressionMesh.userData.cylinderRole='impression';
+    const impressionMesh=this.roller(impression,.27,2.58,[.10,1.00,0],'steel','impression');impressionMesh.userData.cylinderRole='impression';
     const transfer=this.group(cyl,id+'-transfer','Triple-diameter AirTransfer reference',[0,0,0],[0,.10,0],['O10-PROPOSAL']);
-    const transferMesh=this.cylinder(transfer,.27,2.54,[.43,.53,0],'graphite');transferMesh.userData.cylinderRole='transfer';
+    const transferMesh=this.roller(transfer,.27,2.54,[.43,.53,0],'graphite','transfer');transferMesh.userData.cylinderRole='transfer';
     const gripper=this.group(cyl,id+'-gripper','Low-maintenance universal gripper system',[0,0,0],[.1,.12,0],['O10-PROPOSAL']);
     for(const z of [-.84,-.42,0,.42,.84])this.box(gripper,[.13,.032,.055],[.30,.78,z],'steel',.005);
 
@@ -254,11 +259,11 @@ export class Offset10MachineTemplate{
     const drip=this.group(g,id+'-drip-tray','Coating drip tray / level sensor',[0,0,0],[0,.1,0],['O10-CX104-OFFICIAL']);
     this.box(drip,[.38,.08,2.22],[-.16,1.84,0],'steel',.018);
     const form=this.group(g,id+'-form','Coating form / blanket cylinder',[0,0,0],[0,.15,0],['O10-PROPOSAL']);
-    this.cylinder(form,.22,2.54,[.06,1.54,0],'rubber');
+    this.roller(form,.22,2.54,[.06,1.54,0],'rubber','coating-form');
     const imp=this.group(g,id+'-impression','Coating impression / sheet transfer',[0,0,0],[0,.15,0],['O10-PROPOSAL']);
-    this.cylinder(imp,.27,2.54,[.10,1.02,0],'steel');
+    this.roller(imp,.27,2.54,[.10,1.02,0],'steel','coating-impression');
     const transfer=this.group(g,id+'-transfer','Coating transfer / AirTransfer',[0,0,0],[0,.12,0],['O10-PROPOSAL']);
-    this.cylinder(transfer,.27,2.50,[.42,.55,0],'graphite');
+    this.roller(transfer,.27,2.50,[.42,.55,0],'graphite','coating-transfer');
     const supply=this.group(g,id+'-supply','CoatingStar supply interface',[0,0,0],[.1,.1,.2],['O10-PROPOSAL','O10-TECH-DATA']);
     this.tube(supply,[[-.34,2.15,.91],[-.45,1.72,.91],[-.43,1.04,.91]],.018,'blue');
   }
