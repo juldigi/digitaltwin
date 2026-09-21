@@ -6,12 +6,12 @@ for(const [id,name,ref] of [
  ['REJECT','Reject separation','shark650-reject'],['RETURN','Good/bad product return and collection','shark650-return'],['ACCESS','Frame, platform and guarding','shark650-access']
 ])add(`SHARKN650.${id}`,name,2,'SHARKN650',[ref],'unit',true);
 const branches={
- FEED:[['STACK','Input blank support','shark650-feed-stack'],['SUCTION','Suction-feeder architecture','shark650-feed-suction'],['FRICTION','Friction-feeder option zone','shark650-feed-friction'],['SEPARATE','Blank separation / air assist','shark650-feed-separate']],
+ FEED:[['STACK','Input blank support','shark650-feed-stack'],['SUCTION','Suction-feeder architecture reference','shark650-feed-suction'],['FRICTION','Friction-feeder option reference','shark650-feed-friction'],['SEPARATE','Blank separation / air assist','shark650-feed-separate']],
  TRANSFER:[['BELT','Full-suction transport belts','shark650-transfer-belt'],['VAC','Vacuum plenum / blowers','shark650-transfer-vacuum'],['GUIDE','Adjustable transport guides','shark650-transfer-guide']],
  INSPECT:[['TOWER','Vision tower / enclosure','shark650-inspection-tower'],['WINDOW','Dark inspection aperture','shark650-inspection-window'],['BED','Inspection transport bed','shark650-inspection-bed']],
- VISION:[['CAMERA','Configurable camera mounting array','shark650-vision-camera'],['LIGHT','Software-controlled lighting array','shark650-vision-light'],['TRIGGER','Inspection trigger / encoder sensing','shark650-vision-trigger']],
+ VISION:[['CAMERA','Configurable camera mounting array · installed count unverified','shark650-vision-camera'],['LIGHT','Software-controlled lighting array','shark650-vision-light'],['TRIGGER','Inspection trigger / encoder sensing','shark650-vision-trigger']],
  PROCESS:[['COMPUTE','Industrial vision computer','shark650-process-compute'],['HMI','Operator HMI','shark650-process-hmi'],['RECIPE','Inspection template / tolerance logic','shark650-process-recipe']],
- REJECT:[['PLATE','Plate-reject architecture','shark650-reject-plate'],['AIR','Air-reject option manifold','shark650-reject-air'],['TRACK','Reject tracking / confirmation','shark650-reject-track']],
+ REJECT:[['PLATE','Plate-reject family reference','shark650-reject-plate'],['AIR','Air-reject family reference','shark650-reject-air'],['TRACK','Reject tracking / confirmation','shark650-reject-track']],
  RETURN:[['GOOD','Accepted-product return belt','shark650-return-good'],['BAD','Rejected-product return belt','shark650-return-bad'],['STACK','Collection / palletizing interface','shark650-return-stack']],
  ACCESS:[['FRAME','Machine base frame','shark650-access-frame'],['PLATFORM','Operator platform','shark650-access-platform'],['GUARD','Interlocked covers / guarding','shark650-access-guard']]
 };
