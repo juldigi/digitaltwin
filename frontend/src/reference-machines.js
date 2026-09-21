@@ -143,6 +143,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    this.tag(this.box(exh,[.18,.52,.34],[-.15,1.42,.43],'dark',.012),'exhaust-duct-reference','SHEETFED_GRAVURE_FAMILY');
    const fan=this.cyl(exh,.13,.08,[-.15,1.62,.43],'dark','z');this.tag(fan,'dryer-exhaust-fan','SHEETFED_GRAVURE_FAMILY');
    this.tag(this.box(exh,[.22,.12,.30],[-.15,1.78,.43],'steel',.008),'exhaust-outlet-reference','SHEETFED_GRAVURE_FAMILY');
+   for(const z of [-.42,.42]){this.tag(this.cyl(exh,.070,.92,[.18,2.08,z],'steel','y'),'dryer-exhaust-stack-reference','YA1A1A_VISUAL_REFERENCE');this.tag(this.cyl(exh,.095,.12,[.18,2.55,z],'dark','y'),'dryer-exhaust-stack-cap','YA1A1A_VISUAL_REFERENCE');}
   }
 
   if(delivery){
@@ -268,7 +269,9 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.base(7.25,2.45);
   // YA1A1A is exact identity; geometry follows documented YA1A1 sheetfed size class and later YA1B1 mechanical family.
   const m1=this.mod(1,[-3.0,0,0],[-.55,.15,0]);
-  this.shell(m1.g,[1.20,1.55,2.10],[0,.86,0]);
+  for(const x of [-.49,.49]){const post=this.cover(this.box(m1.g,[.18,1.42,2.00],[x,.88,0],'body',.035));post.userData.visualRole='YA1A1A_FEEDER_PORTAL_UPRIGHT';}
+  const feederTop=this.cover(this.box(m1.g,[1.16,.28,2.00],[0,1.58,0],'body',.035));feederTop.userData.visualRole='YA1A1A_FEEDER_TOP_FASCIA';
+  this.box(m1.g,[1.10,.12,1.96],[0,.22,0],'dark',.02);
   this.box(m1.a,[.82,.06,1.35],[-.08,.50,0],'paper',.006);
   for(const z of [-.50,-.18,.18,.50])this.motion(this.cyl(m1.a,.055,.72,[.35,.78,z],'steel','x'),'spin','x',7,.04,0,0);
   const m2=this.mod(2,[-2.05,0,0],[-.38,.18,0]);
@@ -281,7 +284,13 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.motion(this.cyl(m3.a,.25,1.38,[0,.89,0],'orange','z'),'spin','z',3.8,.05,0,2);
   this.cyl(m3.a,.045,.95,[.40,.58,.70],'steel','y');
   const m4=this.mod(4,[-.65,0,0],[0,.28,.28]);
-  this.shell(m4.g,[1.60,2.30,2.18],[0,1.18,0]);m4.g.userData.printingStationFrame=true;
+  m4.g.userData.printingStationFrame=true;
+  for(const z of [-1.03,1.03]){
+   for(const x of [-.63,.63]){const column=this.cover(this.box(m4.g,[.25,1.68,.12],[x,1.15,z],'body',.025));column.userData.visualRole='YA1A1A_PRINT_PORTAL_COLUMN';}
+   const sideTop=this.cover(this.box(m4.g,[1.50,.30,.12],[0,2.00,z],'body',.025));sideTop.userData.visualRole='YA1A1A_PRINT_TOP_SIDE_FASCIA';
+   const lower=this.cover(this.box(m4.g,[1.50,.38,.12],[0,.46,z],'dark',.02));lower.userData.visualRole='YA1A1A_PRINT_LOWER_SIDE_GUARD';
+  }
+  const printTop=this.cover(this.box(m4.g,[1.52,.28,2.02],[0,2.04,0],'body',.03));printTop.userData.visualRole='YA1A1A_PRINT_TOP_BRIDGE';
   const grav=this.motion(this.cyl(m4.a,.30,1.42,[0,.88,0],'orange','z'),'spin','z',4.4,.06,0,3);
   grav.userData.gravureCylinder=true;
   const blade=this.motion(this.box(m4.a,[.62,.045,1.46],[.18,1.16,0],'steel',.008),'oscillate','z',10,.035,0,3);blade.rotation.z=-.20;blade.userData.doctorBlade=true;
@@ -290,17 +299,21 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   const imp=this.motion(this.cyl(m5.a,.31,1.42,[0,1.18,0],'steel','z'),'spin','z',-4.4,.06,0,4);imp.userData.impressionCylinder=true;
   this.motion(this.cyl(m5.a,.11,1.48,[.10,.68,0],'dark','z'),'spin','z',5.6,.03,0,4);
   const m6=this.mod(6,[.85,0,0],[.32,.25,0]);
-  this.shell(m6.g,[1.15,2.30,2.16],[0,1.18,0]);
+  const dryerTop=this.cover(this.box(m6.g,[1.18,.52,2.12],[0,1.88,0],'body',.035));dryerTop.userData.visualRole='YA1A1A_DRYER_CANOPY';
+  for(const z of [-1.00,1.00]){const side=this.cover(this.box(m6.g,[1.10,1.30,.12],[0,1.05,z],'body',.025));side.userData.visualRole='YA1A1A_DRYER_SIDE_PANEL';}
   for(const y of [.72,1.05,1.38,1.72]){const heater=this.box(m6.a,[.74,.035,1.25],[0,y,0],'orange',.005);heater.userData.dryerElement=true;}
   for(const z of [-.56,.56])this.motion(this.cyl(m6.a,.16,.10,[.25,1.95,z],'dark','z'),'spin','z',9,.02,0,5);
   const m7=this.mod(7,[2.20,0,0],[.50,.16,0]);
-  this.shell(m7.g,[1.12,1.70,2.05],[0,.92,0]);
+  for(const x of [-.45,.45]){const post=this.cover(this.box(m7.g,[.18,1.46,1.92],[x,.88,0],'body',.03));post.userData.visualRole='YA1A1A_DELIVERY_PORTAL_UPRIGHT';}
+  const deliveryTop=this.cover(this.box(m7.g,[1.05,.28,1.92],[0,1.58,0],'body',.03));deliveryTop.userData.visualRole='YA1A1A_DELIVERY_TOP_FASCIA';
   for(const y of [.62,.88,1.15])this.motion(this.cyl(m7.a,.075,1.35,[-.10,y,0],'steel','z'),'spin','z',5,.02,0,6);
   this.box(m7.a,[.76,.035,1.18],[.18,.52,0],'paper',.004);
   const m8=this.mod(8,[-.35,0,0],[.62,.15,0]);
   this.box(m8.g,[.54,1.45,.78],[0,.80,.78],'dark',.04);this.box(m8.a,[.32,.22,.025],[-.05,1.12,.38],'glass',.01);
   this.motion(this.cyl(m8.a,.10,.34,[0,.48,.70],'steel','x'),'spin','x',4,.02,0,null);
-  this.root.userData.referenceNote='YA1A1A identity is exact to the BMJ registry and external installed-machine evidence. Envelope/throughput class uses YA1A1 evidence; doctor-blade, ink-system, dryer and delivery morphology use the later YA1B1 family only where the older YA1A1A documentation is unavailable.';
+  this.root.userData.exteriorMorphology='YA1A1A_650x920_VISUAL_REFERENCE__YA1A1C_YA1B1_SUCCESSOR_FAMILY';
+  this.root.userData.visualBoundary='Third-party exact-model photo and OEM successor-family images guide silhouette only. Color, service hoist, duct routing and installed covers on the BMJ asset remain unverified.';
+  this.root.userData.referenceNote='YA1A1A identity is exact to the BMJ registry and independent equipment references. The exterior is rebuilt from a YA1A1A 650×920 installed-machine photo plus YA1A1C/YA1B1 successor-family OEM morphology; internal mechanics use sheet-fed gravure primary references. No serial-specific BMJ option is invented.';
  }
  buildFolderGluer(){
   this.palette.body=0xe8e8e3;this.palette.accent=0x3d735d;this.palette.dark=0x273034;
