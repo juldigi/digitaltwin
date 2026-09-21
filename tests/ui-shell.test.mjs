@@ -97,10 +97,10 @@ test('every floating information window can be closed and restored',()=>{
 test('mobile portrait and landscape keep panels inside the viewport',()=>{
   assert.match(html,/interactive-widget=resizes-content/);
   assert.match(html,/id="ui-backdrop"/);
-  assert.match(appShellCss,/env\\(safe-area-inset-top/);
+  assert.match(appShellCss,/env\(safe-area-inset-top/);
   assert.match(appShellCss,/orientation:landscape/);
-  assert.match(appShellCss,/@media\\(max-width:767px\\)/);
-  assert.match(appShellCss,/@media\\(min-width:768px\\) and \\(max-width:1024px\\)/);
+  assert.match(appShellCss,/@media\(max-width:767px\)/);
+  assert.match(appShellCss,/@media\(min-width:768px\) and \(max-width:1024px\)/);
   assert.match(appShellCss,/100dvh/);
   assert.match(mobileStableUi,/visualViewport/);
   assert.match(mobileStableUi,/data-mobile-nav/);
@@ -121,9 +121,9 @@ test('conditional controls explain requirements rather than failing silently',()
 
 test('service worker refreshes the redesigned shell',()=>{
   assert.match(sw,/factory-digital-twin-v79-unified-shell-20260921/);
-  assert.match(sw,/src\\/universal-machine\\.js/);
-  assert.match(app,/template\\.ghost\\(true,part\\)/,'object selection must automatically ghost all non-selected geometry');
-  for(const asset of ['app-shell-v79.css','src/app-shell-v79.js','assets/splash-industrial-v79.webp','src/ui-v5.js','src/app.js','src/simulation.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\\\/')));
+  assert.match(sw,/src\/universal-machine\.js/);
+  assert.match(app,/template\.ghost\(true,part\)/,'object selection must automatically ghost all non-selected geometry');
+  for(const asset of ['app-shell-v79.css','src/app-shell-v79.js','assets/splash-industrial-v79.webp','src/ui-v5.js','src/app.js','src/simulation.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
 });
 
 test('v41 keeps every right-sidebar taxonomy item clickable after repeated selections',()=>{
@@ -371,17 +371,17 @@ test('v40 labels drill through the six-level taxonomy with individually mapped g
 
 test('V79 interface keeps the scene primary, readable and secondary panels dismissible',()=>{
   assert.match(html,/<body class="panel-hidden ui-simple">/);
-  assert.match(html,/app-shell-v79\\.css/);
-  assert.match(html,/app-shell-v79\\.js/);
+  assert.match(html,/app-shell-v79\.css/);
+  assert.match(html,/app-shell-v79\.js/);
   assert.match(appShellCss,/aside#detail-panel/);
   assert.match(appShellCss,/panel-hidden aside#detail-panel/);
   assert.match(appShellCss,/orientation:landscape/);
   assert.match(mobileStableUi,/aria-expanded/);
   assert.match(experienceJs,/fullscreenchange/);
   assert.match(appShellCss,/--rail-w:92px/);
-  assert.match(appShellCss,/\\.rail button small/);
-  assert.match(appShellCss,/\\.view-switch button span/);
-  assert.match(appShellCss,/\\.statusbar/);
+  assert.match(appShellCss,/\.rail button small/);
+  assert.match(appShellCss,/\.view-switch button span/);
+  assert.match(appShellCss,/\.statusbar/);
 });
 
 test('runtime binds every workbench button and provides a visual fallback without WebGL',()=>{
