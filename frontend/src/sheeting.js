@@ -63,7 +63,10 @@ export class SheetingMachineTemplate{
     g.add(m);this.meshes.push(m);return m;
   }
   box(g,s,p,kind='body',r=.035,opts={},rot=null){return this.mesh(g,()=>r?new RoundedBoxGeometry(...s,2,r):new THREE.BoxGeometry(...s),'box:'+s.join(':')+':'+r,kind,p,rot,opts);}
-  cyl(g,r,l,p,kind='steel',axis='z',opts={}){const rot=axis==='z'?[Math.PI/2,0,0]:axis==='x'?[0,0,Math.PI/2]:null;return this.mesh(g,()=>new THREE.CylinderGeometry(r,r,l,32),'cyl:'+r+':'+l,kind,p,rot,opts);}
+  cyl(g,r,l,p,kind='steel',axis='z',opts={}){
+    const rot=axis==='z'?[Math.PI/2,0,0]:axis==='x'?[0,0,Math.PI/2]:null,m=this.mesh(g,()=>new THREE.CylinderGeometry(r,r,l,32),'cyl:'+r+':'+l,kind,p,rot,opts);
+    m.userData.surfaceRadius=r;m.userData.rotorAxis=axis;return m;
+  }
   torus(g,r,t,p,kind='bodyDark',opts={}){return this.mesh(g,()=>new THREE.TorusGeometry(r,t,12,32),'torus:'+r+':'+t,kind,p,null,opts);}
   sphere(g,r,p,kind='black',opts={}){return this.mesh(g,()=>new THREE.SphereGeometry(r,18,12),'sphere:'+r,kind,p,null,opts);}
   beamXY(g,a,b,z,thick=.12,depth=.16,kind='body',opts={}){
@@ -75,7 +78,7 @@ export class SheetingMachineTemplate{
     return this.box(g,[depth,len,thick],[x,(a[1]+b[1])/2,(a[0]+b[0])/2],kind,.008,opts,[angle,0,0]);
   }
   roller(g,x,y,r=.1,{span=2.64,kind='chrome',motion='guide-roller',detail=false,active=true,bearings=true,supportBase=.48,sourceAnchor=null}={}){
-    const m=this.cyl(g,r,span,[x,y,0],kind,'z',{active,motion,detail,role:'roller',sourceAnchor});
+    const m=this.cyl(g,r,span,[x,y,0],kind,'z',{active,motion,detail,role:'roller',sourceAnchor});m.userData.kinematicGroup='WEB_CONTACT';
     if(bearings){
       const half=span/2;
       for(const side of [-1,1]){
@@ -101,11 +104,11 @@ export class SheetingMachineTemplate{
     // RIGHT: low single roll, visible hub, two-sided support and hydraulic/swing structure.
     const rollstand=this.group(this.root,'sheeting-rollstand','Low Fixed-Position Rollstand',[7.30,0,0],[.72,.34,0]);
     const reel=this.group(rollstand,'sheeting-reel','Paper Reel / Opposed Chuck',[0,0,0],[.24,.18,0]);
-    this.cyl(reel,.78,2.58,[-.12,.82,0],'paper','z',{active:true,motion:'reel',role:'reel',sourceAnchor:'BW-HSM56-ROLLSTAND-INSET'});
-    this.cyl(reel,.115,2.82,[-.12,.82,0],'dark','z',{active:true,motion:'reel-core',detail:true,role:'reel-core',sourceAnchor:'BW-HSM56-ROLLSTAND-INSET'});
+    const reelBody=this.cyl(reel,.78,2.58,[-.12,.82,0],'paper','z',{active:true,motion:'reel',role:'reel',sourceAnchor:'BW-HSM56-ROLLSTAND-INSET'});reelBody.userData.kinematicGroup='UNWIND_REEL';reelBody.userData.referenceWebContactRadius=.78;
+    const reelCore=this.cyl(reel,.115,2.82,[-.12,.82,0],'dark','z',{active:true,motion:'reel-core',detail:true,role:'reel-core',sourceAnchor:'BW-HSM56-ROLLSTAND-INSET'});reelCore.userData.kinematicGroup='UNWIND_REEL';reelCore.userData.referenceWebContactRadius=.78;
     for(const side of [-1,1]){
       const z=side*1.38;
-      this.cyl(reel,.215,.12,[-.12,.82,z],'body','z',{active:true,motion:'chuck',role:'chuck-hub',sourceAnchor:'BW-HSM56-ROLLSTAND-INSET'});
+      {const chuck=this.cyl(reel,.215,.12,[-.12,.82,z],'body','z',{active:true,motion:'chuck',role:'chuck-hub',sourceAnchor:'BW-HSM56-ROLLSTAND-INSET'});chuck.userData.kinematicGroup='UNWIND_REEL';chuck.userData.referenceWebContactRadius=.78;}
       this.cyl(reel,.070,.15,[-.12,.84,z+side*.055],'dark','z',{detail:true,role:'chuck-center'});
       for(let i=0;i<6;i++){
         const a=i*Math.PI/3;
@@ -169,12 +172,12 @@ export class SheetingMachineTemplate{
     const process=this.group(head,'sheeting-main-rollers','Main Draw / Traction Drum Family Reference',[0,0,0],[0,.22,0],'PROCESS_FAMILY_REFERENCE');
     // The drum silhouette/bands are directly photo-anchored. Its draw/traction function is a process-family inference:
     // BW sheeter controls document a draw-drum encoder tied to sheet length/squaring, while Unico/Maxson document draw-roll/drum coordination with cutter and tapes.
-    this.cyl(process,.425,2.56,[.12,1.64,0],'aqua','z',{active:true,motion:'draw-drum-reference',role:'main-draw-traction-drum',sourceAnchor:'BW-HSM56-MAIN-PHOTO__BW_UNICO_MAXSON_DRAW_DRUM_PROCESS_REFERENCE'});
+    {const drum=this.cyl(process,.425,2.56,[.12,1.64,0],'aqua','z',{active:true,motion:'draw-drum-reference',role:'main-draw-traction-drum',sourceAnchor:'BW-HSM56-MAIN-PHOTO__BW_UNICO_MAXSON_DRAW_DRUM_PROCESS_REFERENCE'});drum.userData.kinematicGroup='WEB_CONTACT';}
     for(const z of [-.90,-.30,.30,.90])this.torus(process,.428,.026,[.12,1.64,z],'white',{detail:true,role:'process-cylinder-band',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
     for(const side of [-1,1])this.cyl(process,.255,.065,[.12,1.64,side*1.31],'dark','z',{detail:true,role:'process-cylinder-endcap',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
     // Lower transport rollers are visible/mechanically required but deliberately subordinate.
-    this.cyl(process,.105,2.52,[.86,1.02,0],'chrome','z',{active:true,motion:'pull-roller',role:'head-infeed-roller'});
-    this.cyl(process,.105,2.52,[-.92,.92,0],'chrome','z',{active:true,motion:'pull-roller',role:'head-outfeed-roller'});
+    {const r=this.cyl(process,.105,2.52,[.86,1.02,0],'chrome','z',{active:true,motion:'pull-roller',role:'head-infeed-roller'});r.userData.kinematicGroup='WEB_CONTACT';}
+    {const r=this.cyl(process,.105,2.52,[-.92,.92,0],'chrome','z',{active:true,motion:'pull-roller',role:'head-outfeed-roller'});r.userData.kinematicGroup='WEB_CONTACT';}
     for(const x of [.86,-.92])for(const side of [-1,1])this.box(process,[.19,.20,.12],[x,x>0?1.02:.92,side*1.30],'bodyDark',.013,{detail:true,role:'head-roller-bearing'});
     // Repeating guides/fingers are visible just under the window.
     for(const z of [-1.05,-.82,-.59,-.36,-.13,.10,.33,.56,.79,1.02])this.box(process,[.28,.045,.055],[-.28,1.13,z],'dark',.004,{detail:true,role:'window-guide-finger',sourceAnchor:'BW-HSM56-MAIN-PHOTO'});
@@ -214,7 +217,7 @@ export class SheetingMachineTemplate{
     }
     const deliveryRollers=this.group(delivery,'sheeting-delivery-rollers','Outfeed Entry / Exit Rollers',[0,0,0],[0,.08,0]);
     for(const x of [1.95,-1.95]){
-      this.cyl(deliveryRollers,.082,2.54,[x,.86,0],'chrome','z',{active:true,motion:'delivery-roller',role:'transport-roller'});
+      {const r=this.cyl(deliveryRollers,.082,2.54,[x,.86,0],'chrome','z',{active:true,motion:'delivery-roller',role:'transport-roller'});r.userData.kinematicGroup='CUT_SHEET_TRANSPORT';r.userData.transportZone=x>0?'FAST':'OVERLAP';}
       for(const side of [-1,1])this.box(deliveryRollers,[.17,.19,.12],[x,.86,side*1.30],'bodyDark',.011,{detail:true,role:'transport-bearing'});
     }
 
