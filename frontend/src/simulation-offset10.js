@@ -69,7 +69,7 @@ export class Offset10PrintingSimulation{
     this.sheetLength=.72;this.sheetWidth=1.04;this.sheetGap=1.30;this.cycleDistance=this.pathLength+2.6;this.sheetCount=Math.max(9,Math.floor(this.cycleDistance/this.sheetGap));
     this.sheets=[];this.pileSheets=[];this.rotors=[];this.oscillators=[];this.flows=[];this.uv=[];this.foil=[];this.materials=[];this.geometries=[];
     this.maxPileSheets=32;this.pileThickness=.0034;this.pileAnchor=new THREE.Vector3(D.deliveryPileX,1.66,0);
-    this.active=false;this.running=false;this.speed=1;this.elapsed=0;this.lastNow=null;this.completed=0;this.emitAt=0;this.pathVisible=true;this.inkFlowVisible=true;this.uvActive=false;this.foilStarActive=false;this.onUpdate=null;this.baseMetersPerSecond=2.35;
+    this.active=false;this.running=false;this.speed=1;this.elapsed=0;this.lastNow=null;this.completed=0;this.emitAt=0;this.pathVisible=true;this.inkFlowVisible=true;this.uvActive=false;this.foilStarActive=false;this.deliveryBrakeActive=false;this.onUpdate=null;this.baseMetersPerSecond=2.35;
     this.buildPath();this.buildSheets();this.buildPileSheets();this.refreshPile();this.buildFlows();this.collectMotion();this.collectUV();this.collectFoil();
   }
   material(params){const basic=params.basic;delete params.basic;const m=basic?new THREE.MeshBasicMaterial(params):new THREE.MeshStandardMaterial(params);this.materials.push(m);return m;}
@@ -137,20 +137,20 @@ export class Offset10PrintingSimulation{
   }
   state(){
     const moving=this.sheets.filter(s=>s.mesh.visible),lead=[...moving].sort((a,b)=>b.userData.progress-a.userData.progress)[0],p=lead?.userData.lead||this.points[0];
-    return {active:this.active,running:this.running,paused:this.active&&!this.running,speed:this.speed,stage:stageForX(p.x),completed:this.completed,progress:lead?.userData.progress||0,sheetsVisible:moving.length,pileSheetsVisible:this.pileSheets.filter(s=>s.mesh.visible).length,rotorCount:this.rotors.length,rotorRoles:[...new Set(this.rotors.map(r=>r.role))],oscillatorCount:this.oscillators.length,mechanismCount:this.rotors.length+this.oscillators.length,inkFlowCount:this.flows.length,uvLampCount:9,uvActive:this.uvActive,foilStarActive:this.foilStarActive,pathVisible:this.pathVisible,inkFlowVisible:this.inkFlowVisible};
+    return {active:this.active,running:this.running,paused:this.active&&!this.running,speed:this.speed,stage:stageForX(p.x),completed:this.completed,progress:lead?.userData.progress||0,sheetsVisible:moving.length,pileSheetsVisible:this.pileSheets.filter(s=>s.mesh.visible).length,rotorCount:this.rotors.length,rotorRoles:[...new Set(this.rotors.map(r=>r.role))],oscillatorCount:this.oscillators.length,mechanismCount:this.rotors.length+this.oscillators.length,inkFlowCount:this.flows.length,uvLampCount:9,uvActive:this.uvActive,foilStarActive:this.foilStarActive,deliveryBrakeActive:this.deliveryBrakeActive,pathVisible:this.pathVisible,inkFlowVisible:this.inkFlowVisible};
   }
   emit(force=false){const now=performance?.now?.()||Date.now();if(!force&&now<this.emitAt)return;this.emitAt=now+120;this.onUpdate?.(this.state());}
   start(){if(!this.active){this.elapsed=0;this.completed=0;for(const p of this.pileSheets){p.mesh.visible=false;p.userData.serial=-1;}for(const s of this.sheets)s.userData.lastCycle=-1;}this.refreshPile();this.active=true;this.running=true;this.lastNow=null;this.group.visible=true;this.emit(true);return this.state();}
   pause(){if(this.active){this.running=false;this.lastNow=null;this.emit(true);}return this.state();}
   resume(){if(this.active){this.running=true;this.lastNow=null;this.emit(true);}return this.state();}
-  stop(){this.active=false;this.running=false;this.elapsed=0;this.lastNow=null;this.completed=0;this.group.visible=false;for(const s of this.sheets){s.mesh.visible=false;s.gripper.visible=false;s.userData.lastCycle=-1;this.colorSheet(s,0);}for(const p of this.pileSheets){p.mesh.visible=false;p.userData.serial=-1;}for(const r of this.rotors)r.mesh.quaternion.copy(r.initial);for(const o of this.oscillators)o.object.position.copy(o.initial);for(const f of this.foil)f.mesh.quaternion.copy(f.initial);this.setUV([]);this.foilStarActive=false;this.emit(true);return this.state();}
+  stop(){this.active=false;this.running=false;this.elapsed=0;this.lastNow=null;this.completed=0;this.group.visible=false;for(const s of this.sheets){s.mesh.visible=false;s.gripper.visible=false;s.userData.lastCycle=-1;this.colorSheet(s,0);}for(const p of this.pileSheets){p.mesh.visible=false;p.userData.serial=-1;}for(const r of this.rotors)r.mesh.quaternion.copy(r.initial);for(const o of this.oscillators)o.object.position.copy(o.initial);for(const f of this.foil)f.mesh.quaternion.copy(f.initial);this.setUV([]);this.foilStarActive=false;this.deliveryBrakeActive=false;this.emit(true);return this.state();}
   setSpeed(v){this.speed=clamp(Number(v)||1,.35,2);this.emit(true);return this.state();}
   setPathVisible(on){this.pathVisible=!!on;this.pathLine.visible=this.pathVisible;this.emit(true);return this.state();}
   setInkFlowVisible(on){this.inkFlowVisible=!!on;for(const f of this.flows){f.tube.visible=this.inkFlowVisible;for(const p of f.particles)p.visible=this.inkFlowVisible;}this.emit(true);return this.state();}
   update(now){
     if(!this.active)return;if(!this.running){this.lastNow=now;return;}if(this.lastNow==null){this.lastNow=now;return;}
     const dt=Math.min(Math.max((now-this.lastNow)/1000,0),.05),scaled=dt*this.speed;this.lastNow=now;this.elapsed+=scaled;const travelled=this.elapsed*this.baseMetersPerSecond;
-    const zones=new Set();this.foilStarActive=false;
+    const zones=new Set();this.foilStarActive=false;this.deliveryBrakeActive=false;
     for(let i=0;i<this.sheets.length;i++){
       const s=this.sheets[i],absolute=travelled-i*this.sheetGap;if(absolute<this.sheetLength){s.mesh.visible=false;s.gripper.visible=false;continue;}
       const cycle=Math.floor(absolute/this.cycleDistance),local=mod(absolute,this.cycleDistance);if(local>this.pathLength){this.deposit(s,cycle);continue;}if(!this.updateSheet(s,local))continue;
@@ -158,8 +158,9 @@ export class Offset10PrintingSimulation{
       for(const key of ['Y1','Y2'])if(Math.abs(x-OFFSET10_MODULE_CENTERS[key])<.65)zones.add('o10-'+key.toLowerCase()+'-uv');
       if(x>D.deliveryCenterX-1.75&&x<D.deliveryCenterX-.25)zones.add('o10-eop-uv');
       if(Math.abs(x-OFFSET10_MODULE_CENTERS.PU2)<.75)this.foilStarActive=true;
+      if(Math.abs(x-(D.deliveryCenterX+1.42))<.58)this.deliveryBrakeActive=true;
     }
-    const angular=4.6*scaled;for(const r of this.rotors)r.mesh.rotateY((r.sign||1)*(r.rate||.8)*angular);const phase=this.elapsed*TAU;for(const o of this.oscillators)o.object.position[o.axis]=o.initial[o.axis]+Math.sin(phase*o.rate+o.phase)*o.amp;
+    const angular=4.6*scaled;for(const r of this.rotors){if(r.role==='sheet-brake'&&!this.deliveryBrakeActive)continue;r.mesh.rotateY((r.sign||1)*(r.rate||.8)*angular);}const phase=this.elapsed*TAU;for(const o of this.oscillators)o.object.position[o.axis]=o.initial[o.axis]+Math.sin(phase*o.rate+o.phase)*o.amp;
     for(const f of this.foil)if(this.foilStarActive)f.mesh.rotateY((f.direction||1)*angular*.82);
     if(this.inkFlowVisible)for(const f of this.flows)for(let i=0;i<f.particles.length;i++){const t=mod(this.elapsed*f.speed+f.phase+i/f.particles.length,1);f.particles[i].position.copy(f.curve.getPointAt(t));f.particles[i].scale.setScalar(.75+.25*Math.sin(phase+i));}
     this.setUV([...zones]);this.emit(false);
