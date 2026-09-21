@@ -14,9 +14,9 @@ test('legacy BMJ IDs normalize to the same dedicated routes used by machine card
 test('exact and strong dedicated assets never fall through to UniversalMachineTemplate',()=>{
  for(const key of ['BMJ-MCH-0006','BMJ-MCH-0007','BMJ-MCH-0008','BMJ-MCH-0011','BMJ-MCH-0012','BMJ-MCH-0013','BMJ-MCH-0014','BMJ-MCH-0015','BMJ-MCH-0016','BMJ-MCH-0018','BMJ-MCH-0019','BMJ-MCH-0020','BMJ-MCH-0022','BMJ-MCH-0024']){
   const template=createMachineTemplate(key);
-  assert.equal(template.constructor,UniversalMachineTemplate,key+' fell through to plain universal geometry');
+  assert.notEqual(template.constructor,UniversalMachineTemplate,key+' fell through to plain universal geometry');
   const sim=createMachineSimulation(key,template.root,template);
-  assert.equal(sim.constructor,UniversalProcessSimulation,key+' fell through to blocked universal simulation');
+  assert.notEqual(sim.constructor,UniversalProcessSimulation,key+' fell through to blocked universal simulation');
   sim.dispose();template.dispose();
  }
 });
