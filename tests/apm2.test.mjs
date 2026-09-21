@@ -45,13 +45,13 @@ test('APM2 flatbed pressure dwell freezes sheets and all fourteen gripper bars',
  const machine=new APM2MachineTemplate(),sim=new APM2ProcessSimulation(machine.root,machine);sim.start();let now=1000;const advance=t=>{while(sim.elapsed<t){now+=20;sim.update(now);}};
  advance(3.55);let s=sim.state();assert.equal(s.platenClosed,true);assert.equal(s.pressureDwell,true);assert.equal(s.transportStopped,true);assert.equal(s.interlocks.platenRequiresStoppedTransport,true);
  const sheets=sim.sheets.map(x=>x.mesh.position.clone()),bars=sim.gripperBars.map(x=>x.position.clone());
- advance(3.90);assert.equal(sim.sheets.every((x,i)=>x.mesh.position.distanceTo(sheets[i])<1e-10),true);assert.equal(sim.gripperBars.every((x,i)=>x.position.distanceTo(bars[i])<1e-10),true);
- advance(4.65);assert.equal(sim.state().transportIndexing,true);assert.ok(sim.gripperBars.some((x,i)=>x.position.distanceTo(bars[i])>.03));sim.dispose();machine.dispose();
+ advance(4.55);assert.equal(sim.sheets.every((x,i)=>x.mesh.position.distanceTo(sheets[i])<1e-10),true);assert.equal(sim.gripperBars.every((x,i)=>x.position.distanceTo(bars[i])<1e-10),true);
+ advance(10.65);assert.equal(sim.state().transportIndexing,true);assert.ok(sim.gripperBars.some((x,i)=>x.position.distanceTo(bars[i])>.03));sim.dispose();machine.dispose();
 });
 
 test('APM2 stripping family-reference stroke occurs only while transport is stopped',()=>{
  const machine=new APM2MachineTemplate(),sim=new APM2ProcessSimulation(machine.root,machine),upper=machine.findNode('apm2-stripping-upper'),lower=machine.findNode('apm2-stripping-lower'),u0=upper.position.clone(),l0=lower.position.clone();sim.start();let now=1000;const advance=t=>{while(sim.elapsed<t){now+=20;sim.update(now);}};
- advance(5.6);const s=sim.state();assert.equal(s.strippingActive,true);assert.equal(s.transportStopped,true);assert.equal(s.interlocks.strippingRequiresStoppedTransport,true);assert.equal(s.strippingConfigurationVerified,false);assert.ok(upper.position.distanceTo(u0)>.01);assert.ok(lower.position.distanceTo(l0)>.005);sim.dispose();machine.dispose();
+ advance(4.0);const s=sim.state();assert.equal(s.strippingActive,true);assert.equal(s.transportStopped,true);assert.equal(s.interlocks.strippingRequiresStoppedTransport,true);assert.equal(s.strippingConfigurationVerified,false);assert.ok(upper.position.distanceTo(u0)>.01);assert.ok(lower.position.distanceTo(l0)>.005);sim.dispose();machine.dispose();
 });
 
 test('APM2 converted sheets accumulate on top of represented delivery pile and reset cleanly',()=>{
@@ -70,8 +70,8 @@ test('APM2 taxonomy remains six-level and variant-specific systems stay referenc
  for(const id of ['APM2.TRANSPORT.BARS.SET','APM2.PLATEN.TOOLING.CHASE','APM2.STRIP.STATION.FRAMES','APM2.DELIVERY.PILE.STACK'])assert.ok(machine.resolveTaxonomyNode(id),id);machine.dispose();
 });
 
-test('APM2 process sequence explicitly separates index and dwell operations',()=>{
- assert.deepEqual(APM2_SIMULATION_STAGES,['Pile separation / suction pickup','Front lays + SideLay registration','Gripper index to platen','Flatbed die-cut pressure dwell','Gripper index to stripping','Stripping dwell · family reference','Gripper index to delivery','Gripper release / pile formation']);
+test('APM2 process sequence explicitly separates one-pitch index and stopped multi-station dwell',()=>{
+ assert.deepEqual(APM2_SIMULATION_STAGES,['Pile separation / suction pickup','Front lays + SideLay registration','Gripper close / one-pitch chain index','Platen + stripping approach','Pressure / stripping dwell','Platen + stripping return','Gripper release / pile settle','Prepare next registered index']);
  assert.equal(APM2_PROCESS_STEPS.length,8);assert.deepEqual(APM2_PROCESS_SEQUENCE.map(x=>x.key),['FEEDER','REGISTER','TRANSPORT','PLATEN','STRIP','DELIVERY']);
 });
 
