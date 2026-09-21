@@ -179,41 +179,28 @@ test('simulation dryer zone corresponds to installed extension dimensions',()=>{
   assert.ok(OFFSET5_DIMENSIONS.layout.dryerLength>1);
 });
 
-test('V114 Offset5 downstream motion uses role-tagged rotors and leaves static service hardware untouched',()=>{
+test('V115 Offset5 prioritizes high-value downstream rotor animation within the mobile mesh budget',()=>{
   const machine=new OffsetMachineTemplate();
-  const dynamic=machine.meshes.filter(m=>m.userData.dynamicRotor);
-  const byRole=role=>dynamic.filter(m=>m.userData.rotorRole===role);
-  assert.equal(dynamic.length,22,'unexpected downstream dynamic rotor count');
+  const dynamic=machine.meshes.filter(m=>m.userData.dynamicRotor),byRole=role=>dynamic.filter(m=>m.userData.rotorRole===role);
+  assert.equal(dynamic.length,10,'unexpected prioritized downstream dynamic rotor count');
   assert.equal(byRole('coater-process-roller').length,3);
-  assert.equal(byRole('dryer-transport-roller').length,6);
   assert.equal(byRole('sheet-brake-roller').length,3);
-  assert.equal(byRole('delivery-chain-sprocket').length,8);
-  assert.equal(byRole('delivery-tensioner-idler').length,2);
+  assert.equal(byRole('delivery-chain-sprocket').length,4);
+  const references=machine.meshes.filter(m=>m.userData.motionBudget==='STATIC_REFERENCE_MOBILE');
+  assert.equal(references.filter(m=>m.userData.rotorRoleReference==='dryer-transport-roller').length,6);
+  assert.equal(references.filter(m=>m.userData.rotorRoleReference==='delivery-chain-sprocket-ring').length,4);
+  assert.equal(references.filter(m=>m.userData.rotorRoleReference==='delivery-tensioner-idler').length,2);
 
   for(const id of ['coater-chamber-locks','dryer-ventilation','delivery-pile-lift']){
-    const node=machine.findNode(id);assert.ok(node,id);
-    const tagged=[];node.traverse(o=>{if(o.isMesh&&o.userData.dynamicRotor)tagged.push(o);});
-    assert.equal(tagged.length,0,id+' must not be a dynamic rotor group');
+    const node=machine.findNode(id);assert.ok(node,id);const tagged=[];node.traverse(o=>{if(o.isMesh&&o.userData.dynamicRotor)tagged.push(o);});assert.equal(tagged.length,0,id+' must not be a dynamic rotor group');
   }
-
-  const sprockets=byRole('delivery-chain-sprocket'),pairs=new Map();
-  for(const m of sprockets){assert.ok(m.userData.rotorPairKey);if(!pairs.has(m.userData.rotorPairKey))pairs.set(m.userData.rotorPairKey,[]);pairs.get(m.userData.rotorPairKey).push(m);}
-  assert.equal(pairs.size,4);
-  for(const pair of pairs.values()){assert.equal(pair.length,2);assert.equal(new Set(pair.map(m=>m.userData.rotorSign)).size,1,'hub and ring of one sprocket rotate in opposite directions');}
-
-  const staticMeshes=[];
-  for(const id of ['coater-chamber-locks','dryer-ventilation','delivery-pile-lift']){
-    machine.findNode(id).traverse(o=>{if(o.isMesh)staticMeshes.push({mesh:o,q:o.quaternion.clone()});});
-  }
-  const sim=new PrintingSimulation(machine.root,machine);
-  const taggedRotors=sim.rotors.filter(r=>r.source==='geometry-role-tag');
-  assert.equal(taggedRotors.length,22);
-  assert.equal(new Set(taggedRotors.map(r=>r.role)).size,5);
-  const before=taggedRotors.map(r=>r.mesh.quaternion.clone());
-  run(sim,5000);
+  const sprockets=byRole('delivery-chain-sprocket');assert.equal(new Set(sprockets.map(m=>m.userData.rotorPairKey)).size,4);
+  const staticMeshes=references.map(mesh=>({mesh,q:mesh.quaternion.clone()}));
+  const sim=new PrintingSimulation(machine.root,machine),taggedRotors=sim.rotors.filter(r=>r.source==='geometry-role-tag');
+  assert.equal(taggedRotors.length,10);assert.equal(new Set(taggedRotors.map(r=>r.role)).size,3);
+  const before=taggedRotors.map(r=>r.mesh.quaternion.clone());run(sim,5000);
   assert.ok(taggedRotors.some((r,i)=>r.mesh.quaternion.angleTo(before[i])>.001),'tagged downstream rotors never moved');
-  assert.equal(staticMeshes.every(x=>x.mesh.quaternion.angleTo(x.q)<1e-10),true,'static downstream hardware was rotated by simulation');
-  sim.stop();
-  assert.equal(taggedRotors.every((r,i)=>r.mesh.quaternion.angleTo(before[i])<1e-8),true,'tagged rotor phase did not reset');
+  assert.equal(staticMeshes.every(x=>x.mesh.quaternion.angleTo(x.q)<1e-10),true,'mobile-budget reference rotor unexpectedly moved');
+  sim.stop();assert.equal(taggedRotors.every((r,i)=>r.mesh.quaternion.angleTo(before[i])<1e-8),true,'tagged rotor phase did not reset');
   sim.dispose();machine.dispose();
 });
