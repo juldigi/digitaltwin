@@ -7,9 +7,9 @@ const js=fs.readFileSync(new URL('../frontend/src/app-shell-v79.js',import.meta.
 const html=fs.readFileSync(new URL('../frontend/index.html',import.meta.url),'utf8');
 const sw=fs.readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 
-test('V80 loads one unified shell after the stable base styles',()=>{
-  assert.match(html,/style\.css[\s\S]*runtime-fallback\.css[\s\S]*app-shell-v79\.css\?v=81/);
-  assert.match(html,/app\.js\?v=81[\s\S]*ui-v5\.js\?v=81[\s\S]*experience-v37\.js\?v=81[\s\S]*app-shell-v79\.js\?v=81/);
+test('V119 loads one unified adaptive shell after the stable base styles',()=>{
+  assert.match(html,/style\.css[\s\S]*runtime-fallback\.css[\s\S]*app-shell-v79\.css\?v=119/);
+  assert.match(html,/app\.js\?v=81[\s\S]*ui-v5\.js\?v=119[\s\S]*experience-v37\.js\?v=81[\s\S]*app-shell-v79\.js\?v=119/);
   for(const stale of ['ui-premium-v73.css','ui-corporate-v74.css','reference-v76.css','mobile-stable-v78.css','reference-v76.js','mobile-stable-v78.js'])assert.doesNotMatch(html,new RegExp(stale.replaceAll('.','\\.')));
 });
 
@@ -54,8 +54,8 @@ test('icons use one accessible vector family without emoji runtime controls',()=
   assert.match(js,/viewBox="0 0 24 24"/);
 });
 
-test('service worker owns the V80 shell assets',()=>{
-  assert.match(sw,/factory-digital-twin-v118-offset10-sheet-occupancy-20260921/);
+test('service worker owns the V119 shell assets',()=>{
+  assert.match(sw,/factory-digital-twin-v119-ui-adaptive-20260921/);
   assert.match(sw,/app-shell-v79\.css/);
   assert.match(sw,/src\/app-shell-v79\.js/);
   assert.match(sw,/assets\/splash-industrial-v79\.webp/);
