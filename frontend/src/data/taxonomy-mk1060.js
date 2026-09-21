@@ -1,15 +1,15 @@
 const rows=[];const add=(id,name,level,parentId,meshRefs=[],kind='assembly',verified=false)=>rows.push(Object.freeze({id,name,level,parentId,meshRefs,kind,verified,confidence:verified?'MODEL_PROCESS_VERIFIED':'FAMILY_SERVICE_REFERENCE'}));
 add('MK1060','APM 7 · MK 1060 ER',1,null,['mk1060-root'],'machine',true);
 for(const [id,name,ref] of [
- ['FEED','Non-stop pile feeding','mk1060-feeder'],['REGISTER','Sheet registration','mk1060-register'],['TRANSPORT','Gripper-bar transport','mk1060-transport'],
+ ['FEED','Non-stop pile feeding','mk1060-feeder'],['REGISTER','Sheet registration','mk1060-register'],['TRANSPORT','Intermittent gripper-bar transport','mk1060-transport'],
  ['PLATEN','Flatbed die-cutting platen','mk1060-platen'],['STRIP','Double-action stripping','mk1060-stripping'],['BLANK','Blanking and product separation','mk1060-blanking'],
  ['WASTE','Sheet-edge waste delivery','mk1060-waste'],['DRIVE','Drive, electrical and control','mk1060-drive'],['ACCESS','Frame, guards and operator access','mk1060-access']
 ])add(`MK1060.${id}`,name,2,'MK1060',[ref],'unit',true);
 const branches={
  FEED:[['PILE','Pile lift','mk1060-feeder-pile'],['HEAD','Suction head','mk1060-feeder-head'],['NONSTOP','Non-stop rack','mk1060-feeder-nonstop']],
  REGISTER:[['TABLE','Feed table','mk1060-register-table'],['FRONT','Front lays','mk1060-register-front'],['SIDE','Operator-side pull guide','mk1060-register-side']],
- TRANSPORT:[['CHAIN','Gripper chains','mk1060-transport-chain'],['BAR','Gripper bars','mk1060-transport-bar'],['TORQUE','Chain torque limiter','mk1060-transport-torque']],
- PLATEN:[['CHASE','Upper cutting chase','mk1060-platen-chase'],['LOWER','Moving lower platen','mk1060-platen-lower'],['PRESS','Pressure drive','mk1060-platen-drive']],
+ TRANSPORT:[['CHAIN','Intermittent gripper chains','mk1060-transport-chain'],['BAR','Intermittent gripper bars','mk1060-transport-bar'],['TORQUE','Torque limiter / clutch interface','mk1060-transport-torque']],
+ PLATEN:[['CHASE','Upper cutting chase','mk1060-platen-chase'],['LOWER','Moving lower platen','mk1060-platen-lower'],['PRESS','Toggle / eccentric pressure-drive reference','mk1060-platen-drive']],
  STRIP:[['UPPER','Upper stripping frame','mk1060-strip-upper'],['LOWER','Lower stripping frame','mk1060-strip-lower'],['ACTION','Double-action stripping mechanism','mk1060-strip-action']],
  BLANK:[['UPPER','Upper blanking frame','mk1060-blank-upper'],['LOWER','Lower blanking support frame','mk1060-blank-lower'],['STACK','Blank stacking plate','mk1060-blank-stack']],
  WASTE:[['EDGE','Sheet-edge waste release','mk1060-waste-edge'],['CONVEYOR','Waste conveyor','mk1060-waste-conveyor'],['PRODUCT','Product conveyor / delivery','mk1060-product-delivery']],
