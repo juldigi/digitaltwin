@@ -188,6 +188,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    positionFeedback:'PHOTOELECTRIC_AND_POSITION_LIMIT_REFERENCE',
    tooling:'HONEYCOMB_PIN_BOARD_FAMILY_REFERENCE',
    control:'PLC_HMI',
+   safetyInterlock:'PLATFORM_STOP_BEFORE_HYDRAULIC_STROKE',
    simulationBoundary:'FAMILY_PROCESS_ONLY__NOT_SERIAL_SPECIFIC'
   };
   const detail=(parent,id,name)=>parent?this.group(parent,id,name,[0,0,0],[0,.08,.08]):null;
@@ -449,7 +450,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   for(const z of [-.77,.77]){const rail=this.cover(this.box(frame,[3.55,.16,.08],[0,1.42,z],'body',.018));rail.userData.visualRole='QF_FAMILY_OPEN_WORKING_BAY_RAIL';}
   const ram=this.group(m3.a,'qf100-head-ram','Fixed hydraulic blanking ram',[0,0,0],[0,.18,.12]);
   const headGuides=this.group(m3.a,'qf100-head-guides','Hydraulic ram guidance',[0,0,0],[0,.18,.12]);
-  ram.userData.headCountReference=1;ram.userData.installedHeadCountVerified=false;
+  ram.userData.modeledReferenceHeadCount=1;ram.userData.installedHeadCountVerified=false;
 
   const m4=this.mod(4,[0,0,0],[0,.28,.26]);
   const board=this.group(m4.a,'qf100-pin-board','Honeycomb pin-board',[0,0,0],[0,.15,.16]);
@@ -644,7 +645,7 @@ export class ReferenceProcessSimulation{
    if(!['x-axis-servo-motor','y-axis-servo-motor'].includes(m.userData.mechanismRole))continue;
    if(!m.userData.motionRestQuaternion)m.userData.motionRestQuaternion=m.quaternion.clone();
    m.quaternion.copy(m.userData.motionRestQuaternion);
-   if(indexing)m.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(AXIS.x,spin));
+   if(indexing){const axis=m.userData.mechanismRole==='y-axis-servo-motor'?AXIS.z:AXIS.x;m.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(axis,spin));}
   }
  }
  stageIndex(){const p=this.active?(this.elapsed%this.cycle)/this.cycle:0;return Math.min(this.stages.length-1,Math.floor(p*this.stages.length));}
