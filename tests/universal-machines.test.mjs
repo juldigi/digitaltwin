@@ -8,6 +8,7 @@ import {isDedicatedMachineKey,createMachineTemplate,createMachineSimulation} fro
 import {ReferenceMachineTemplate,ReferenceProcessSimulation,isReferenceMachineKey} from '../frontend/src/reference-machines.js';
 
 const referenceAssets=MACHINE_REGISTRY.filter(m=>!isDedicatedMachineKey(m.machineId));
+const blockedReferenceIds=new Set(['BMJ-MCH-0004']);
 
 test('all 21 formerly generic assets now route to evidence-grounded reference builders',()=>{
  assert.equal(referenceAssets.length,21);
@@ -15,7 +16,7 @@ test('all 21 formerly generic assets now route to evidence-grounded reference bu
   const cfg=universalMachineConfig(machine.machineId);
   assert.ok(cfg,machine.machineId);
   assert.ok(cfg.profile?.architecture.length>=5,machine.machineId);
-  assert.equal(cfg.evidence.simulation,'FAMILY_PROCESS_MODEL',machine.machineId);
+  assert.equal(cfg.evidence.simulation,blockedReferenceIds.has(machine.machineId)?'BLOCKED':'FAMILY_PROCESS_MODEL',machine.machineId);
   assert.equal(isReferenceMachineKey(machine.machineId),true,machine.machineId);
   const model=createMachineTemplate(machine.machineId);
   assert.ok(model instanceof ReferenceMachineTemplate,machine.machineId+' did not use the V120 reference builder');
@@ -39,17 +40,19 @@ test('every reference machine has finite non-placeholder geometry and contiguous
  }
 });
 
-test('reference cutaway retains internals and family-process simulation is available',()=>{
+test('reference cutaway retains intentional internals and simulation follows each evidence boundary',()=>{
  for(const machine of referenceAssets){
   const model=createMachineTemplate(machine.machineId);model.setExteriorOpen(true);
-  assert.ok(model.activeMeshes.every(m=>m.visible),machine.machineId);
+  const intentional=model.activeMeshes.filter(m=>!m.userData.referencePlaceholder);
+  assert.ok(intentional.every(m=>m.visible),machine.machineId);
   const sim=createMachineSimulation(machine.machineId,model.root,model);
   assert.ok(sim instanceof ReferenceProcessSimulation,machine.machineId);
-  const before=sim.state();assert.equal(before.available,true,machine.machineId);assert.equal(before.blocked,false,machine.machineId);
+  const before=sim.state(),blocked=blockedReferenceIds.has(machine.machineId);
+  assert.equal(before.available,!blocked,machine.machineId);assert.equal(before.blocked,blocked,machine.machineId);
   sim.start();let now=0;for(let i=0;i<40;i++){now+=100;sim.update(now);}
   const after=sim.state();
-  assert.equal(after.active,true,machine.machineId);assert.ok(after.mechanismCount>0,machine.machineId);
-  assert.ok(after.progress>0,machine.machineId);
+  if(blocked){assert.equal(after.active,false,machine.machineId);assert.equal(after.progress,0,machine.machineId);}
+  else {assert.equal(after.active,true,machine.machineId);assert.ok(after.mechanismCount>0,machine.machineId);assert.ok(after.progress>0,machine.machineId);}
   sim.dispose();model.dispose();
  }
 });
