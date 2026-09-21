@@ -581,3 +581,70 @@ test('V123 R8 SANSIN AHU 7 separates wet-curtain evaporator indoor airflow from 
  assert.equal(sawAir,true);assert.equal(sawPrecool,true);assert.equal(sawEvap,true);
  sim.dispose();m.dispose();
 });
+
+
+test('V123 R9 FGM-2 is a neutral folder-gluer process twin and does not inherit MEDIA 100 II identity or optional box-style hardware',()=>{
+ const m=createMachineTemplate('BMJ-MCH-0017');
+ assert.equal(m.root.userData.detailPass,'V123_R9_FGM2_MULTI_VENDOR_PROCESS_RECONSTRUCTION');
+ assert.equal(m.root.userData.exactFolderGluerOemVerified,false);
+ assert.equal(m.root.userData.exactFolderGluerModelVerified,false);
+ assert.equal(m.root.userData.neighborMedia100IdentityProof,false);
+ assert.equal(m.root.userData.localSupplierFamilyEvidence.bmjCustomerAssociation,true);
+ assert.equal(m.root.userData.localSupplierFamilyEvidence.folderGluerCatalogue,true);
+ assert.equal(m.root.userData.localSupplierFamilyEvidence.installationProof,false);
+ assert.equal(m.root.userData.localSupplierFamilyEvidence.modelProof,false);
+ assert.equal(m.root.userData.geometryStatus,'MULTI_VENDOR_FOLDER_GLUER_PROCESS_REFERENCE__NOT_MEDIA100_IDENTITY');
+ assert.equal(m.root.userData.fgm2Capabilities.crashLock,'UNVERIFIED');
+ assert.equal(m.root.userData.fgm2Capabilities.fourSixCorner,'UNVERIFIED');
+ assert.equal(m.root.userData.fgm2Capabilities.glueApplicatorType,'UNVERIFIED');
+
+ requireRoles(m,[
+  'blank-feed-table','blank-side-guide','carton-blank-stack-reference',
+  'feeder-transport-belt','feeder-drive-roller','blank-separator-gate-reference',
+  'blank-aligner-rail','aligner-transport-roller','prebreaker-guide-rail','prebreaker-wheel-reference',
+  'primary-fold-transport-belt','primary-fold-guide','crash-lock-module-capability-envelope','four-six-corner-device-capability',
+  'glue-reservoir-reference','glue-pump-reference','glue-supply-line-reference','glue-applicator-capability-envelope',
+  'glue-nozzle-capability-reference','glue-line-sensor-capability','upper-final-fold-belt','lower-final-fold-belt',
+  'final-fold-guide-rail','squaring-guide-plate','upper-compression-belt','lower-compression-belt',
+  'compression-belt-drive-roller','compression-pressure-actuator-reference','delivery-transport-belt','delivery-drive-roller',
+  'counter-kicker-capability-envelope','main-control-cabinet-reference','operator-hmi-reference','downstream-packing-interface-boundary'
+ ]);
+
+ for(const id of ['fgm2-lockbottom-boundary','fgm2-corner-boundary','fgm2-glue-applicator-boundary','fgm2-glue-detection-boundary','fgm2-counter-boundary','fgm2-downstream-boundary']){
+  const node=m.findNode(id);assert.ok(node,id);assert.equal(node.userData.installedOptionVerified,false,id);assert.equal(node.userData.simulationEnabled,false,id);
+ }
+ assert.equal(m.findNode('fgm2-feed-separator').userData.feederTechnologyVerified,false);
+ assert.equal(m.findNode('fgm2-pressure-reference').userData.actuationTypeVerified,false);
+ assert.equal(m.findNode('fgm2-control').userData.controllerBrandVerified,false);
+
+ const levels=[...new Set(m.taxonomy.map(n=>n.level))].sort();
+ assert.deepEqual(levels,[1,2,3,4,5,6]);
+ assert.equal(new Set(m.taxonomy.map(n=>n.id)).size,m.taxonomy.length);
+ for(const n of m.taxonomy.filter(n=>n.level>1))assert.ok(m.taxonomy.some(p=>p.id===n.parentId),'FGM-2 missing parent '+n.parentId);
+ for(const n of m.taxonomy.filter(n=>n.level===6)){
+  assert.ok(n.meshRefs.length>0,n.id);
+  assert.ok(m.findNode(n.meshRefs[0]),'FGM-2 missing taxonomy target '+n.meshRefs[0]);
+ }
+
+ const sim=createMachineSimulation('BMJ-MCH-0017',m.root,m);
+ let s=sim.start(),now=0,sawFold=false,sawGlue=false,sawCompression=false;
+ assert.equal(s.available,true);assert.equal(s.blocked,false);
+ assert.equal(s.simulationBoundary,'FGM2_MULTI_VENDOR_COMMON_FOLD_GLUE_PROCESS_ONLY__BOX_STYLE_GLUE_HARDWARE_OPTIONS_NOT_INFERRED');
+ assert.equal(s.cartonBlankGeometryIsSchematic,true);
+ assert.equal(s.crashLockInstalledVerified,false);
+ assert.equal(s.fourSixCornerInstalledVerified,false);
+ assert.equal(s.glueApplicatorTypeVerified,false);
+ const optionPattern=/crash-lock|four-six-corner|glue-applicator-capability|glue-line-sensor|counter-kicker|downstream-packing/i;
+ assert.ok(sim.motions.every(item=>!optionPattern.test(String(item.mesh.userData.mechanismRole||''))));
+ for(let i=0;i<360;i++){
+  now+=50;sim.update(now);s=sim.state();
+  sawFold ||= s.foldingActive;
+  sawGlue ||= s.glueZoneActive;
+  sawCompression ||= s.compressionActive;
+  assert.equal(s.crashLockInstalledVerified,false);
+  assert.equal(s.fourSixCornerInstalledVerified,false);
+  assert.equal(s.glueApplicatorTypeVerified,false);
+ }
+ assert.equal(sawFold,true);assert.equal(sawGlue,true);assert.equal(sawCompression,true);
+ sim.dispose();m.dispose();
+});
