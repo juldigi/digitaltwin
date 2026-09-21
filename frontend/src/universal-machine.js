@@ -31,6 +31,7 @@ import {COLLATOR_TAXONOMY} from './data/taxonomy-collator.js';
 import {suprasetterTaxonomyFor} from './data/taxonomy-suprasetter.js';
 import {SCREEN_IMAGESETTER_TAXONOMY} from './data/taxonomy-imagesetter.js';
 import {ZUND_TAXONOMY} from './data/taxonomy-zund.js';
+import {ahuTaxonomyFor} from './data/taxonomy-ahu.js';
 
 const FAMILY_BY_NO=new Map([
  [1,'guillotine'],[2,'sheeter'],[4,'gravure'],[5,'offset'],[6,'offset'],[7,'pileturner'],[8,'pileturner'],
@@ -57,7 +58,7 @@ const MODULES={
  imagesetter:['Media Cassette / Supply','Capstan Transport / Tension','High-Speed Polygon Scanner','Laser / Beam Optics','Cut / Punch Boundary','Output / Processor Interface'],
  zund:['Vacuum Cutting Table','X-Axis Travelling Beam','Y/Z Tool Carriage & Module Slots','Installed Tool Package Boundary','Registration / Initialization Boundary','Operator / Vacuum / Material Handling'],
  compressor:['Air Intake','Compression Element','Electric Motor','Oil Separator','Cooling','Air / Oil Circuit','Controller'],
- ahu:['Intake / Damper','Pre-filter','Cooling Coil','Heating Coil','Supply Fan','Drain / Humidification','Outlet / Control']
+ ahu:['Intake / Damper','Filter Bank','Cooling / Heat-Exchange Coil','Moisture / Drain Section','Supply Fan','Access / Service Section','Discharge / Control']
 };
 const FAMILY_SOURCES={
  guillotine:[['POLAR 115 EM archive reference','https://www.exapro.com/polar-115-em-monitor-p241022253/']],
@@ -126,7 +127,12 @@ const FAMILY_SOURCES={
   ['SWAN TMV variable-speed screw compressor family','https://swan-aircompressor.com/en/products/screw/variable-speed-screw'],
   ['SWAN Screw Compressor Series catalogue','https://www.swan-aircompressor.com/en/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBa1VNIiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--00fd60abbc79a7b9a28569af7dedf6aca949ded0/Screw%20Compressor%20Series.pdf?disposition=preview']
  ],
- ahu:[['Trane air handlers family reference','https://www.trane.com/commercial/north-america/us/en/products-systems/air-handlers.html'],['ASHRAE standards','https://www.ashrae.org/technical-resources/standards-and-guidelines']]
+ ahu:[
+  ['Eurovent AHU Guidebook','https://www.eurovent.me/wp-content/uploads/2021-eurovent-ahu-guidebook-second-edition-en-web.pdf'],
+  ['Eurovent 6/18 AHU quality criteria','https://www.eurovent.me/wp-content/uploads/eurovent-rec-6-18-quality-criteria-for-air-handling-units-2022-en-2.pdf'],
+  ['PT Sansin Indonesia / NES AC Central','https://www.nesacsentral.web.id/'],
+  ['NES YZKJ-45N/90N industrial central air-conditioner family','https://sansinmachinery.en.made-in-china.com/product/FYGRPNzdCLVg/China-Nes-Evaporative-Cooling-Energy-Saving-Industrial-Central-Air-Conditioner.html']
+ ]
 };
 const REFERENCE_SOURCES_BY_NO=new Map([
  [4,FAMILY_SOURCES.gravure],[17,FAMILY_SOURCES.folder],[21,FAMILY_SOURCES.blanker],[23,FAMILY_SOURCES.collator],
@@ -166,8 +172,8 @@ const EVIDENCE_BY_NO=new Map([
  ...[29,30,35].map(no=>[no,{grade:'BRAND_FAMILY_REFERENCE',geometry:'ATLAS_COPCO_GA_G_OIL_INJECTED_FAMILY_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'The registry identifies Atlas Copco but not the exact model. Geometry follows official GA/G oil-injected screw principles only: intake/load-unload, motor/airend, oil-air separation, minimum-pressure path, oil circuit, cooler/aftercooler, condensate handling and Elektronikon-family control. Exact GA/G variant, VSD, Full Feature dryer, power and piping are not asserted.'}]),
  ...[31,32,34].map(no=>[no,{grade:'BRAND_FAMILY_REFERENCE',geometry:'KAESER_SIGMA_FLUID_COOLED_FAMILY_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'The registry identifies KAESER but not the model. Geometry follows official KAESER fluid-cooled screw architecture: intake/inlet valve, SIGMA PROFILE airend, motor interface, cooling-fluid separator tank/cartridge, minimum-pressure check valve, thermostatic/fluid-filter circuit, air/fluid coolers, centrifugal separator/ECO-DRAIN and SIGMA CONTROL family. Belt versus 1:1 direct drive and exact controller generation remain unverified.'}]),
  [33,{grade:'BRAND_FAMILY_REFERENCE',geometry:'SWAN_TS_AD_TMV_SCREW_FAMILY_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'The registry identifies SWAN but not the model. Geometry follows SWAN TS-AD/TMV screw-family references: air-filter assembly, screw airend/drive interface, built-in oil-air cooling, cooling fan family and smart/variable-frequency control. Exact TS-AD versus TMV series, horsepower, coupling/VFD configuration and separator internals remain unverified.'}],
- ...[36,37,38,39,41].map(no=>[no,{grade:'FUNCTIONAL_FAMILY_REFERENCE',geometry:'DOUBLE_SKIN_AHU_SECTIONAL_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'Exact AHU model is absent. The twin uses a serviceable double-skin sectional AHU reference—damper, filters, heat-exchange/cooling coil, drain section, supply fan and discharge/control—while section order, fan type and airflow direction remain unverified.'}]),
- [40,{grade:'BRAND_FAMILY_REFERENCE',geometry:'SANSIN_NES_INDUSTRIAL_COOLING_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'AHU 7 is identified as SANSIN. Exact model is absent, so geometry follows the PT Sansin Indonesia/NES industrial central-cooling family, including indoor air-handling and outdoor cooling/compressor modules. It is explicitly not claimed to be YZKJ-45N or YZKJ-90N.'}]
+ ...[36,37,38,39,41].map(no=>[no,{grade:'FUNCTIONAL_MULTI_VENDOR_REFERENCE',geometry:'EUROVENT_SECTIONAL_AHU_FUNCTIONAL_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'The BMJ registry identifies the AHU asset but provides no OEM/model/section order/airflow direction. The twin uses Eurovent-neutral AHU functions only: inlet/damper, filter bank, finned heat-exchange coil, condensate pan/trap for dehumidifying cooling, supply fan, service access and discharge/control. Mixing arrangement, filter class, coil fluid/DX type, droplet eliminator, fan type/drive and section order are explicit configuration boundaries.'}]),
+ [40,{grade:'BRAND_FAMILY_REFERENCE',geometry:'SANSIN_NES_YZKJ_INDOOR_OUTDOOR_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'AHU 7 is identified by BMJ as SANSIN. The family reference follows NES/YZKJ two-stage industrial cooling: dust filtration, honeycomb wet-curtain pre-cooling, low-temperature fin evaporator, supply fan, outdoor refrigeration/evaporative-condenser module and water/refrigerant circuits. YZKJ-45N versus YZKJ-90N, 50/100 kW capacity, fan count, refrigerant charge, duct routing and exact installed controller remain unverified.'}]
 ]);
 const DEFAULT_EVIDENCE=Object.freeze({grade:'IDENTITY_ONLY',geometry:'PLACEHOLDER',simulation:'BLOCKED',reason:'Machine-specific evidence is insufficient for mechanically faithful geometry or simulation.'});
 const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
@@ -182,6 +188,7 @@ export function universalTaxonomy(machineId){
  if(['BMJ-MCH-0025','BMJ-MCH-0026'].includes(machineId))return [...suprasetterTaxonomyFor(machineId)];
  if(machineId==='BMJ-MCH-0027')return [...SCREEN_IMAGESETTER_TAXONOMY];
  if(machineId==='BMJ-MCH-0028')return [...ZUND_TAXONOMY];
+ if(['BMJ-MCH-0036','BMJ-MCH-0037','BMJ-MCH-0038','BMJ-MCH-0039','BMJ-MCH-0040','BMJ-MCH-0041'].includes(machineId))return [...ahuTaxonomyFor(machineId)];
  if(['BMJ-MCH-0029','BMJ-MCH-0030','BMJ-MCH-0031','BMJ-MCH-0032','BMJ-MCH-0033','BMJ-MCH-0034','BMJ-MCH-0035'].includes(machineId))return [...compressorTaxonomyFor(machineId)];
  if(machineId==='BMJ-MCH-0005')return [...OFFSET8_TAXONOMY];
  if(machineId==='BMJ-MCH-0006')return [...OFFSET9_TAXONOMY];
