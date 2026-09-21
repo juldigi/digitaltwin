@@ -9,8 +9,9 @@ export const OFFSET9_SPEC=Object.freeze({
  assetId:'BMJ-MCH-0006',model:'Speedmaster SX 52-4+L',serial:'GS001804',year:2024,sap:'OFS-9',
  maxSheet:[.370,.520],minSheet:[.105,.145],maxPrint:[.360,.520],stockStandard:[.00003,.00040],stockOptionMax:.00060,
  maxSpeed:15000,gripperMargin:[.008,.010],plate:[.459,.525],plateThickness:[.00010,.00015],blanket:[.460,.536],blanketThickness:.00195,
+ maxCoatingArea:[.360,.520],coatingBlanket:[.425,.534],coatingPlate:[.426,.525],coatingCylinderUndercut:.00320,coatingLeadEdgeOffset:.034,
  feederPile:.915,standardDeliveryPile:.535,highPileDelivery:.695,printingUnits:4,coatingUnits:1,configuration:'4 PU + L',
- inkingRollerCountVerified:false,dampeningRollerCountVerified:false,deliveryPileOptionVerified:false,dryerInstalledVerified:false,perfectorInstalledVerified:false,
+ inkingRollerCountVerified:false,dampeningRollerCountVerified:false,deliveryPileOptionVerified:false,dryerInstalledVerified:false,perfectorInstalledVerified:false,automaticWashupInstalledVerified:false,transferJacketInstalledVariantVerified:false,
  referenceEnvelope5L:[7.67,2.04,1.62],
  dimensionalBoundary:'Official overall envelope is published for a sample SX 52-5-P+L short-high-pile configuration, not the BMJ 4+L serial. The BMJ overall length and standard/high-pile delivery option are therefore not asserted as as-built measurements. Roller counts shown inside the inking/dampening visualization are functional references, not serial-verified counts.'
 });
