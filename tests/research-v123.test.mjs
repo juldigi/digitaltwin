@@ -153,6 +153,10 @@ test('V123 R3 compressor brand-lineage isolation prevents Atlas evidence leaking
   for(const bad of forbidden)for(const e of evidence)assert.doesNotMatch(e,new RegExp(bad,'i'),id+' contaminated evidence '+e);
   assert.match(m.root.userData.referenceBrandFamily,new RegExp(brand==='ATLAS'?'Atlas':brand,'i'));
   assert.equal(m.root.userData.exactCompressorModelVerified,false);
+  const sim=createMachineSimulation(id,m.root,m);
+  assert.ok(sim.motions.every(item=>!item.mesh.userData.referencePlaceholder),id+' simulator must exclude hidden generic placeholder motion');
+  assert.ok(sim.motions.some(item=>/drive-interface|airend-shaft|cooling-fan/i.test(String(item.mesh.userData.mechanismRole))),id+' has no visible brand-specific rotating mechanism');
+  sim.dispose();
   if(brand==='KAESER'){
    assert.equal(m.root.userData.kaeserDriveType,'UNVERIFIED_BELT_OR_1_TO_1_DIRECT');
    assert.equal(m.root.userData.brandEvidenceBoundary.controllerGeneration,'UNVERIFIED');
