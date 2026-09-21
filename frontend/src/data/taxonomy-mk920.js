@@ -4,9 +4,9 @@ for(const [id,name,ref] of [['FEED','Pile feeding','mk920-feeder'],['REGISTER','
 const branches={
  FEED:[['PILE','Pile lift','mk920-feeder-pile'],['HEAD','Suction feeding head','mk920-feeder-head'],['AIR','Blower and air manifold','mk920-feeder-air']],
  REGISTER:[['TABLE','Feed table','mk920-register-table'],['FRONT','Front lays','mk920-register-front'],['SIDE','Side lay','mk920-register-side']],
- FOIL:[['UNWIND','Foil reel supports','mk920-foil-unwind'],['PULL','Three precision foil-pull axes','mk920-foil-pull'],['GUIDE','Foil guides and tension','mk920-foil-guide'],['WASTE','Spent foil rewind','mk920-foil-waste']],
+ FOIL:[['UNWIND','Foil reel supports · installed count unverified','mk920-foil-unwind'],['PULL','Three precision foil-pull axes','mk920-foil-pull'],['GUIDE','Foil guides and tension','mk920-foil-guide'],['WEB','Three longitudinal foil-web functional references','mk920-foil-web'],['WASTE','Spent foil rewind','mk920-foil-waste']],
  PLATEN:[['UPPER','Heated upper chase','mk920-platen-upper'],['LOWER','Moving lower platen','mk920-platen-lower'],['TOGGLE','Toggle and pressure drive','mk920-platen-toggle'],['CHASE','Die and foil chase interface','mk920-platen-chase']],
- TRANSPORT:[['CHAIN','Intermittent gripper chain','mk920-transport-chain'],['BAR','Gripper bars','mk920-transport-bar'],['CAM','Indexing cam and rails','mk920-transport-cam']],
+ TRANSPORT:[['CHAIN','Intermittent gripper chain','mk920-transport-chain'],['BAR','Gripper bars · represented count unverified','mk920-transport-bar'],['CAM','Indexing cam and rails','mk920-transport-cam']],
  DELIVERY:[['RELEASE','Gripper release','mk920-delivery-release'],['PILE','Delivery pile lift','mk920-delivery-pile'],['JOG','Sheet joggers','mk920-delivery-jog']],
  DRIVE:[['MOTOR','Main motor','mk920-drive-motor'],['FLYWHEEL','Flywheel and clutch','mk920-drive-flywheel'],['CONTROL','Operator console and safety circuit','mk920-drive-control']],
  ACCESS:[['FRAME','Monobloc side frames','mk920-access-frame'],['GUARD','Interlocked guarding','mk920-access-guard'],['PLATFORM','Operator platform','mk920-access-platform']]
