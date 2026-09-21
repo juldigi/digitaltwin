@@ -2,6 +2,8 @@ const COMMON=Object.freeze({
  model:'FZ 1200',processes:['pile clamping','pile turning','air separation / airing','jogging / alignment','dust / powder removal'],
  familyPaperSizeMaxM:[1.200,.800],familyPaperSizeMinM:[.560,.360],
  referenceCapacityKg:[1000,1200],referencePowerKw:[8,12],
+ uanchorFZ1200Reference:Object.freeze({maxPileKg:1200,maxPaperM:[1.2,.8],openingM:[.76,1.64],powerKw:9,netWeightKg:2800,envelopeM:[2.37,2.09,2.10],hydraulicPressureMPa:16}),
+ installedCapacityVerified:false,installedOpeningVerified:false,installedPowerVerified:false,installedEnvelopeVerified:false,exactNozzleCountVerified:false,
  dimensionalBoundary:'FZ-1200 is sold by multiple printing-finishing suppliers/OEM channels with conflicting published capacity, power, opening and envelope values. The process architecture—clamp, turn, air, jog/align, dust removal—is consistent. BMJ serials are preserved, but OEM origin, exact clamp opening, hydraulic layout, blower count, capacity and dimensions are not inferred.'
 });
 export const FZ1200_ASSET_PROFILES=Object.freeze({
