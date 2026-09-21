@@ -309,6 +309,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   if(ctl){this.tag(this.box(ctl,[.36,.24,.025],[-2.30,.92,-1.69],'glass',.008),'workstation-display');this.tag(this.box(ctl,[.42,.42,.35],[-2.10,.38,-1.30],'dark',.02),'vacuum-generator-interface');}
  }
  enrichCompressor(){
+  for(let i=1;i<=7;i++){const a=this.activeGroup(i);if(a)for(const child of [...a.children])if(child.isMesh){child.visible=false;child.userData.referencePlaceholder=true;}}
   const no=this.cfg.machine.no;
   if([29,30,35].includes(no))return this.enrichAtlasCompressor();
   if([31,32,34].includes(no))return this.enrichKaeserCompressor();
@@ -318,126 +319,137 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   intake:this.activeGroup(1),motor:this.activeGroup(2),airend:this.activeGroup(3),sep:this.activeGroup(4),
   circuit:this.activeGroup(5),cool:this.activeGroup(6),ctl:this.activeGroup(7)
  };}
+ compressorPart(parent,id,name){return parent?this.group(parent,id,name,[0,0,0],[0,.08,.08]):null;}
  enrichAtlasCompressor(){
-  const {intake,motor,airend,sep,circuit,cool,ctl}=this.compressorGroups(),E='ATLAS_GA_G_FAMILY_PRIMARY';
+  const {intake,motor,airend,sep,circuit,cool,ctl}=this.compressorGroups(),E='ATLAS_GA_G_FAMILY_PRIMARY',P=(p,id,n)=>this.compressorPart(p,id,n);
   this.root.userData.detailPass='V123_R3_ATLAS_GA_G_BRAND_FAMILY';
   this.root.userData.referenceBrandFamily='Atlas Copco GA/G oil-injected screw family';
   this.root.userData.exactCompressorModelVerified=false;
   this.root.userData.brandEvidenceBoundary={brand:'ATLAS_COPCO',model:'UNVERIFIED',vsd:'UNVERIFIED',fullFeatureDryer:'UNVERIFIED',receiver:'UNVERIFIED'};
   if(intake){
-   this.tag(this.box(intake,[.28,.32,.28],[0,.78,0],'dark',.02),'atlas-intake-filter',E);
-   this.tag(this.cyl(intake,.07,.16,[.12,.58,0],'steel','x'),'atlas-load-unload-inlet-valve',E);
+   const filter=P(intake,'atlas-intake-filter-group','Atlas intake filter');this.tag(this.box(filter,[.28,.32,.28],[0,.78,0],'dark',.02),'atlas-intake-filter',E);
+   const inlet=P(intake,'atlas-inlet-valve-group','Atlas load / unload inlet valve');this.tag(this.cyl(inlet,.07,.16,[.12,.58,0],'steel','x'),'atlas-load-unload-inlet-valve',E);
   }
   if(motor){
-   for(let x=-.18;x<=.18;x+=.06)this.tag(this.box(motor,[.018,.40,.50],[x,.68,0],'steel',.002),'atlas-motor-cooling-fin',E);
-   this.tag(this.cyl(motor,.045,.18,[.26,.68,0],'steel','x'),'atlas-drive-interface-reference',E);
+   const drive=P(motor,'atlas-drive-group','Atlas motor / drive interface');
+   for(let x=-.18;x<=.18;x+=.06)this.tag(this.box(drive,[.018,.40,.50],[x,.68,0],'steel',.002),'atlas-motor-cooling-fin',E);
+   this.tag(this.cyl(drive,.045,.18,[.26,.68,0],'steel','x'),'atlas-drive-interface-reference',E);
   }
   if(airend){
-   this.tag(this.cyl(airend,.12,.40,[0,.70,-.10],'steel','x'),'atlas-oil-injected-screw-airend',E);
-   this.tag(this.cyl(airend,.045,.45,[0,.76,.05],'dark','x'),'atlas-airend-shaft-reference',E);
+   const ae=P(airend,'atlas-airend-group','Atlas oil-injected screw airend');
+   this.tag(this.cyl(ae,.12,.40,[0,.70,-.10],'steel','x'),'atlas-oil-injected-screw-airend',E);
+   this.tag(this.cyl(ae,.045,.45,[0,.76,.05],'dark','x'),'atlas-airend-shaft-reference',E);
   }
   if(sep){
-   this.tag(this.cyl(sep,.18,.62,[0,.72,0],'steel','y'),'atlas-oil-air-separator-vessel',E);
-   this.tag(this.cyl(sep,.11,.38,[0,.78,0],'filter','y'),'atlas-oil-separator-element',E);
-   this.tag(this.cyl(sep,.055,.16,[.16,1.05,0],'dark','y'),'atlas-minimum-pressure-valve',E);
-   this.tag(this.cyl(sep,.010,.42,[-.10,.88,.18],'steel','y'),'atlas-oil-return-line-reference',E);
+   const vessel=P(sep,'atlas-separator-group','Atlas oil / air separator');
+   this.tag(this.cyl(vessel,.18,.62,[0,.72,0],'steel','y'),'atlas-oil-air-separator-vessel',E);
+   this.tag(this.cyl(vessel,.11,.38,[0,.78,0],'filter','y'),'atlas-oil-separator-element',E);
+   const mpv=P(sep,'atlas-mpv-group','Atlas minimum pressure valve');this.tag(this.cyl(mpv,.055,.16,[.16,1.05,0],'dark','y'),'atlas-minimum-pressure-valve',E);
   }
   if(circuit){
-   this.tag(this.cyl(circuit,.055,.28,[0,.64,.22],'dark','y'),'atlas-oil-filter',E);
-   this.tag(this.box(circuit,[.24,.16,.18],[.12,.86,-.24],'accent',.015),'atlas-thermostatic-bypass-reference',E);
-   for(const z of [-.28,.28])this.tag(this.cyl(circuit,.018,.50,[0,.88,z],'steel','y'),'atlas-oil-air-pipe-reference',E);
+   const filter=P(circuit,'atlas-oil-filter-group','Atlas oil filter');this.tag(this.cyl(filter,.055,.28,[0,.64,.22],'dark','y'),'atlas-oil-filter',E);
+   const thermo=P(circuit,'atlas-thermostat-group','Atlas thermostatic bypass');this.tag(this.box(thermo,[.24,.16,.18],[.12,.86,-.24],'accent',.015),'atlas-thermostatic-bypass-reference',E);
+   const ret=P(circuit,'atlas-oil-return-group','Atlas oil return / piping');
+   this.tag(this.cyl(ret,.010,.42,[-.10,.88,.18],'steel','y'),'atlas-oil-return-line-reference',E);
+   for(const z of [-.28,.28])this.tag(this.cyl(ret,.018,.50,[0,.88,z],'steel','y'),'atlas-oil-air-pipe-reference',E);
   }
   if(cool){
-   this.tag(this.box(cool,[.18,.52,.32],[-.22,.80,-.20],'steel',.008),'atlas-compressed-air-aftercooler',E);
-   this.tag(this.box(cool,[.18,.52,.32],[.22,.80,-.20],'steel',.008),'atlas-oil-cooler',E);
-   for(let y=.52;y<=1.06;y+=.09)this.tag(this.box(cool,[.025,.035,.72],[0,y,0],'steel',.002),'atlas-cooler-fin',E);
-   const fan=this.motion(this.cyl(cool,.17,.08,[.12,1.18,0],'dark','z'),'spin','z',11,.01,0,null);this.tag(fan,'atlas-cooling-fan',E);
-   this.tag(this.cyl(cool,.10,.20,[-.18,.48,.34],'steel','y'),'atlas-moisture-separator-reference',E);
-   this.tag(this.box(cool,[.12,.18,.12],[.12,.46,.38],'accent',.008),'atlas-electronic-condensate-drain-reference',E);
+   const ac=P(cool,'atlas-aftercooler-group','Atlas compressed-air aftercooler');this.tag(this.box(ac,[.18,.52,.32],[-.22,.80,-.20],'steel',.008),'atlas-compressed-air-aftercooler',E);
+   const oc=P(cool,'atlas-oil-cooler-group','Atlas oil cooler');this.tag(this.box(oc,[.18,.52,.32],[.22,.80,-.20],'steel',.008),'atlas-oil-cooler',E);
+   for(let y=.52;y<=1.06;y+=.09){this.tag(this.box(ac,[.025,.035,.34],[-.22,y,-.20],'steel',.002),'atlas-aftercooler-fin',E);this.tag(this.box(oc,[.025,.035,.34],[.22,y,-.20],'steel',.002),'atlas-oil-cooler-fin',E);}
+   const cond=P(cool,'atlas-condensate-group','Atlas moisture separation / drain');
+   this.tag(this.cyl(cond,.10,.20,[-.18,.48,.34],'steel','y'),'atlas-moisture-separator-reference',E);
+   this.tag(this.box(cond,[.12,.18,.12],[.12,.46,.38],'accent',.008),'atlas-electronic-condensate-drain-reference',E);
+   const fg=P(cool,'atlas-fan-group','Atlas cooling fan');const fan=this.motion(this.cyl(fg,.17,.08,[.12,1.18,0],'dark','z'),'spin','z',11,.01,0,null);this.tag(fan,'atlas-cooling-fan',E);
   }
   if(ctl){
-   const screen=this.tag(this.box(ctl,[.24,.18,.025],[-.02,1.02,-.62],'glass',.008),'atlas-elektronikon-controller-reference',E);
-   screen.userData.controllerGenerationVerified=false;
+   const cg=P(ctl,'atlas-controller-group','Atlas Elektronikon controller family');
+   const screen=this.tag(this.box(cg,[.24,.18,.025],[-.02,1.02,-.62],'glass',.008),'atlas-elektronikon-controller-reference',E);screen.userData.controllerGenerationVerified=false;
   }
  }
  enrichKaeserCompressor(){
-  const {intake,motor,airend,sep,circuit,cool,ctl}=this.compressorGroups(),E='KAESER_SIGMA_FAMILY_PRIMARY';
+  const {intake,motor,airend,sep,circuit,cool,ctl}=this.compressorGroups(),E='KAESER_SIGMA_FAMILY_PRIMARY',P=(p,id,n)=>this.compressorPart(p,id,n);
   this.root.userData.detailPass='V123_R3_KAESER_SIGMA_BRAND_FAMILY';
   this.root.userData.referenceBrandFamily='KAESER SIGMA fluid-cooled screw family';
   this.root.userData.exactCompressorModelVerified=false;
   this.root.userData.kaeserDriveType='UNVERIFIED_BELT_OR_1_TO_1_DIRECT';
   this.root.userData.brandEvidenceBoundary={brand:'KAESER',model:'UNVERIFIED',drive:'BELT_OR_1_TO_1_DIRECT_UNVERIFIED',controllerGeneration:'UNVERIFIED',integratedDryer:'UNVERIFIED'};
   if(intake){
-   this.tag(this.box(intake,[.28,.32,.28],[0,.78,0],'dark',.02),'kaeser-dry-intake-filter',E);
-   this.tag(this.cyl(intake,.07,.16,[.12,.58,0],'steel','x'),'kaeser-inlet-vent-valve-reference',E);
+   const filter=P(intake,'kaeser-intake-filter-group','KAESER dry intake filter');this.tag(this.box(filter,[.28,.32,.28],[0,.78,0],'dark',.02),'kaeser-dry-intake-filter',E);
+   const inlet=P(intake,'kaeser-inlet-valve-group','KAESER inlet / vent valve');this.tag(this.cyl(inlet,.07,.16,[.12,.58,0],'steel','x'),'kaeser-inlet-vent-valve-reference',E);
   }
   if(motor){
-   for(let x=-.18;x<=.18;x+=.06)this.tag(this.box(motor,[.018,.40,.50],[x,.68,0],'steel',.002),'kaeser-motor-cooling-fin',E);
-   const drive=this.tag(this.cyl(motor,.055,.22,[.26,.68,0],'steel','x'),'kaeser-drive-interface-reference',E);
-   drive.userData.installedDriveTypeVerified=false;
+   const drive=P(motor,'kaeser-drive-group','KAESER motor / drive interface');
+   for(let x=-.18;x<=.18;x+=.06)this.tag(this.box(drive,[.018,.40,.50],[x,.68,0],'steel',.002),'kaeser-motor-cooling-fin',E);
+   const coupling=this.tag(this.cyl(drive,.055,.22,[.26,.68,0],'steel','x'),'kaeser-drive-interface-reference',E);coupling.userData.installedDriveTypeVerified=false;
   }
   if(airend){
-   this.tag(this.cyl(airend,.13,.42,[0,.70,-.08],'steel','x'),'kaeser-sigma-profile-airend',E);
-   this.tag(this.cyl(airend,.048,.46,[0,.76,.06],'dark','x'),'kaeser-airend-shaft-reference',E);
+   const ae=P(airend,'kaeser-airend-group','KAESER SIGMA PROFILE airend');
+   this.tag(this.cyl(ae,.13,.42,[0,.70,-.08],'steel','x'),'kaeser-sigma-profile-airend',E);
+   this.tag(this.cyl(ae,.048,.46,[0,.76,.06],'dark','x'),'kaeser-airend-shaft-reference',E);
   }
   if(sep){
-   this.tag(this.cyl(sep,.19,.64,[0,.72,0],'steel','y'),'kaeser-cooling-fluid-separator-tank',E);
-   const cartridge=this.tag(this.cyl(sep,.105,.34,[0,.80,0],'filter','y'),'kaeser-separator-cartridge-reference',E);
-   cartridge.userData.separatorStageCountVerified=false;
-   this.tag(this.cyl(sep,.058,.16,[.17,1.05,0],'dark','y'),'kaeser-minimum-pressure-check-valve',E);
+   const vessel=P(sep,'kaeser-separator-group','KAESER cooling-fluid separator');
+   this.tag(this.cyl(vessel,.19,.64,[0,.72,0],'steel','y'),'kaeser-cooling-fluid-separator-tank',E);
+   const cartridge=this.tag(this.cyl(vessel,.105,.34,[0,.80,0],'filter','y'),'kaeser-separator-cartridge-reference',E);cartridge.userData.separatorStageCountVerified=false;
+   const mpv=P(sep,'kaeser-mpv-group','KAESER minimum-pressure check valve');this.tag(this.cyl(mpv,.058,.16,[.17,1.05,0],'dark','y'),'kaeser-minimum-pressure-check-valve',E);
   }
   if(circuit){
-   this.tag(this.cyl(circuit,.060,.28,[0,.64,.22],'dark','y'),'kaeser-eco-fluid-filter-reference',E);
-   this.tag(this.box(circuit,[.24,.16,.18],[.12,.86,-.24],'accent',.015),'kaeser-thermostatic-fluid-valve-reference',E);
-   for(const z of [-.28,.28])this.tag(this.cyl(circuit,.018,.50,[0,.88,z],'steel','y'),'kaeser-fluid-air-pipe-reference',E);
+   const filter=P(circuit,'kaeser-fluid-filter-group','KAESER ECO fluid filter');this.tag(this.cyl(filter,.060,.28,[0,.64,.22],'dark','y'),'kaeser-eco-fluid-filter-reference',E);
+   const thermo=P(circuit,'kaeser-thermostat-group','KAESER thermostatic fluid valve');this.tag(this.box(thermo,[.24,.16,.18],[.12,.86,-.24],'accent',.015),'kaeser-thermostatic-fluid-valve-reference',E);
+   const lines=P(circuit,'kaeser-fluid-lines-group','KAESER fluid / air circuit');for(const z of [-.28,.28])this.tag(this.cyl(lines,.018,.50,[0,.88,z],'steel','y'),'kaeser-fluid-air-pipe-reference',E);
   }
   if(cool){
-   this.tag(this.box(cool,[.18,.52,.32],[-.22,.80,-.20],'steel',.008),'kaeser-compressed-air-aftercooler',E);
-   this.tag(this.box(cool,[.18,.52,.32],[.22,.80,-.20],'steel',.008),'kaeser-fluid-cooler',E);
-   const fan=this.motion(this.cyl(cool,.18,.08,[.12,1.18,0],'dark','z'),'spin','z',10,.01,0,null);this.tag(fan,'kaeser-cooling-fan-reference',E);
-   this.tag(this.cyl(cool,.11,.20,[-.17,.48,.34],'steel','y'),'kaeser-centrifugal-separator-reference',E);
-   this.tag(this.box(cool,[.12,.18,.12],[.12,.46,.38],'accent',.008),'kaeser-eco-drain-reference',E);
+   const ac=P(cool,'kaeser-aftercooler-group','KAESER compressed-air aftercooler');this.tag(this.box(ac,[.18,.52,.32],[-.22,.80,-.20],'steel',.008),'kaeser-compressed-air-aftercooler',E);
+   const fc=P(cool,'kaeser-fluid-cooler-group','KAESER cooling-fluid cooler');this.tag(this.box(fc,[.18,.52,.32],[.22,.80,-.20],'steel',.008),'kaeser-fluid-cooler',E);
+   const cond=P(cool,'kaeser-condensate-group','KAESER centrifugal separator / ECO-DRAIN');
+   this.tag(this.cyl(cond,.11,.20,[-.17,.48,.34],'steel','y'),'kaeser-centrifugal-separator-reference',E);
+   this.tag(this.box(cond,[.12,.18,.12],[.12,.46,.38],'accent',.008),'kaeser-eco-drain-reference',E);
+   const fg=P(cool,'kaeser-fan-group','KAESER cooling fan');const fan=this.motion(this.cyl(fg,.18,.08,[.12,1.18,0],'dark','z'),'spin','z',10,.01,0,null);this.tag(fan,'kaeser-cooling-fan-reference',E);
   }
   if(ctl){
-   const screen=this.tag(this.box(ctl,[.25,.19,.025],[-.02,1.02,-.62],'glass',.008),'kaeser-sigma-control-family-reference',E);
-   screen.userData.controllerGenerationVerified=false;
+   const cg=P(ctl,'kaeser-controller-group','KAESER SIGMA CONTROL family');
+   const screen=this.tag(this.box(cg,[.25,.19,.025],[-.02,1.02,-.62],'glass',.008),'kaeser-sigma-control-family-reference',E);screen.userData.controllerGenerationVerified=false;
   }
  }
  enrichSwanCompressor(){
-  const {intake,motor,airend,sep,circuit,cool,ctl}=this.compressorGroups(),E='SWAN_TS_AD_TMV_FAMILY_PRIMARY';
+  const {intake,motor,airend,sep,circuit,cool,ctl}=this.compressorGroups(),E='SWAN_TS_AD_TMV_FAMILY_PRIMARY',P=(p,id,n)=>this.compressorPart(p,id,n);
   this.root.userData.detailPass='V123_R3_SWAN_TSAD_TMV_BRAND_FAMILY';
   this.root.userData.referenceBrandFamily='SWAN TS-AD / TMV screw family';
   this.root.userData.exactCompressorModelVerified=false;
   this.root.userData.installedSwanSeriesVerified=false;
   this.root.userData.brandEvidenceBoundary={brand:'SWAN',model:'UNVERIFIED',series:'TS_AD_OR_TMV_UNVERIFIED',drive:'COUPLING_OR_PM_DIRECT_UNVERIFIED',vfd:'UNVERIFIED'};
   if(intake){
-   this.tag(this.box(intake,[.28,.32,.28],[0,.78,0],'dark',.02),'swan-air-filter-assembly',E);
-   this.tag(this.cyl(intake,.07,.16,[.12,.58,0],'steel','x'),'swan-inlet-interface-reference',E);
+   const filter=P(intake,'swan-intake-filter-group','SWAN air filter assembly');this.tag(this.box(filter,[.28,.32,.28],[0,.78,0],'dark',.02),'swan-air-filter-assembly',E);
+   const inlet=P(intake,'swan-inlet-group','SWAN inlet interface');this.tag(this.cyl(inlet,.07,.16,[.12,.58,0],'steel','x'),'swan-inlet-interface-reference',E);
   }
   if(motor){
-   for(let x=-.18;x<=.18;x+=.06)this.tag(this.box(motor,[.018,.40,.50],[x,.68,0],'steel',.002),'swan-motor-cooling-reference',E);
-   const drive=this.tag(this.cyl(motor,.055,.22,[.26,.68,0],'steel','x'),'swan-drive-interface-reference',E);
-   drive.userData.installedDriveTypeVerified=false;
+   const drive=P(motor,'swan-drive-group','SWAN drive interface');
+   for(let x=-.18;x<=.18;x+=.06)this.tag(this.box(drive,[.018,.40,.50],[x,.68,0],'steel',.002),'swan-motor-cooling-reference',E);
+   const coupling=this.tag(this.cyl(drive,.055,.22,[.26,.68,0],'steel','x'),'swan-drive-interface-reference',E);coupling.userData.installedDriveTypeVerified=false;
   }
   if(airend){
-   this.tag(this.cyl(airend,.13,.42,[0,.70,-.08],'steel','x'),'swan-screw-airend',E);
-   this.tag(this.cyl(airend,.048,.46,[0,.76,.06],'dark','x'),'swan-airend-shaft-reference',E);
+   const ae=P(airend,'swan-airend-group','SWAN screw airend');
+   this.tag(this.cyl(ae,.13,.42,[0,.70,-.08],'steel','x'),'swan-screw-airend',E);
+   this.tag(this.cyl(ae,.048,.46,[0,.76,.06],'dark','x'),'swan-airend-shaft-reference',E);
   }
   if(sep){
-   const pkg=this.tag(this.cyl(sep,.18,.58,[0,.72,0],'steel','y'),'swan-oil-air-separation-package-reference','SWAN_BRAND_FAMILY_INTERNAL_BOUNDARY');
-   pkg.userData.internalSeparatorTopologyVerified=false;
+   const sg=P(sep,'swan-separation-group','SWAN oil / air separation package boundary');
+   const pkg=this.tag(this.cyl(sg,.18,.58,[0,.72,0],'steel','y'),'swan-oil-air-separation-package-reference','SWAN_BRAND_FAMILY_INTERNAL_BOUNDARY');pkg.userData.internalSeparatorTopologyVerified=false;
   }
   if(circuit){
-   this.tag(this.cyl(circuit,.050,.27,[0,.64,.22],'dark','y'),'swan-oil-circuit-service-reference','SWAN_BRAND_FAMILY_INTERNAL_BOUNDARY');
-   for(const z of [-.28,.28])this.tag(this.cyl(circuit,.016,.48,[0,.88,z],'steel','y'),'swan-oil-air-line-reference','SWAN_BRAND_FAMILY_INTERNAL_BOUNDARY');
+   const cg=P(circuit,'swan-circuit-group','SWAN oil / air service circuit');
+   this.tag(this.cyl(cg,.050,.27,[0,.64,.22],'dark','y'),'swan-oil-circuit-service-reference','SWAN_BRAND_FAMILY_INTERNAL_BOUNDARY');
+   for(const z of [-.28,.28])this.tag(this.cyl(cg,.016,.48,[0,.88,z],'steel','y'),'swan-oil-air-line-reference','SWAN_BRAND_FAMILY_INTERNAL_BOUNDARY');
   }
   if(cool){
-   this.tag(this.box(cool,[.34,.52,.34],[0,.80,-.20],'steel',.008),'swan-built-in-oil-air-cooler',E);
-   const fan=this.motion(this.cyl(cool,.18,.08,[.12,1.18,0],'dark','z'),'spin','z',10,.01,0,null);this.tag(fan,'swan-cooling-fan-reference',E);
+   const cooler=P(cool,'swan-cooler-group','SWAN built-in oil / air cooler');this.tag(this.box(cooler,[.34,.52,.34],[0,.80,-.20],'steel',.008),'swan-built-in-oil-air-cooler',E);
+   const fg=P(cool,'swan-fan-group','SWAN cooling fan');const fan=this.motion(this.cyl(fg,.18,.08,[.12,1.18,0],'dark','z'),'spin','z',10,.01,0,null);this.tag(fan,'swan-cooling-fan-reference',E);
   }
   if(ctl){
-   this.tag(this.box(ctl,[.25,.19,.025],[-.02,1.02,-.62],'glass',.008),'swan-smart-control-panel-reference',E);
-   const vfd=this.tag(this.box(ctl,[.18,.30,.16],[.13,.62,.35],'accent',.012),'swan-vfd-controller-option-reference','SWAN_TMV_OPTION_BOUNDARY');
+   const cg=P(ctl,'swan-controller-group','SWAN smart control panel');this.tag(this.box(cg,[.25,.19,.025],[-.02,1.02,-.62],'glass',.008),'swan-smart-control-panel-reference',E);
+   const vg=P(ctl,'swan-vfd-option-group','SWAN TMV VFD option boundary');
+   const vfd=this.tag(this.box(vg,[.18,.30,.16],[.13,.62,.35],'accent',.012),'swan-vfd-controller-option-reference','SWAN_TMV_OPTION_BOUNDARY');
    vfd.userData.installedOptionVerified=false;vfd.userData.boundary='TMV variable-frequency family capability; BMJ Compressor No.7 series is not verified.';
   }
  }
