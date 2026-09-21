@@ -30,6 +30,7 @@ import {compressorTaxonomyFor} from './data/taxonomy-compressors.js';
 import {COLLATOR_TAXONOMY} from './data/taxonomy-collator.js';
 import {suprasetterTaxonomyFor} from './data/taxonomy-suprasetter.js';
 import {SCREEN_IMAGESETTER_TAXONOMY} from './data/taxonomy-imagesetter.js';
+import {ZUND_TAXONOMY} from './data/taxonomy-zund.js';
 
 const FAMILY_BY_NO=new Map([
  [1,'guillotine'],[2,'sheeter'],[4,'gravure'],[5,'offset'],[6,'offset'],[7,'pileturner'],[8,'pileturner'],
@@ -54,7 +55,7 @@ const MODULES={
  inkjet:['Feeder','Cleaning / Corona','Transport','Printheads','UV / Drying','Inspection','Stacker','Ink & Control'],
  ctp:['Plate Loader','Transport','Imaging Drum','Laser Head','Punch','Processor / Unload','Vacuum & Control'],
  imagesetter:['Media Cassette / Supply','Capstan Transport / Tension','High-Speed Polygon Scanner','Laser / Beam Optics','Cut / Punch Boundary','Output / Processor Interface'],
- zund:['Vacuum Table','Material Feed','Tool Carriage','Cutting / Creasing Tools','Camera Registration','Conveyor / Delivery','Vacuum & Control'],
+ zund:['Vacuum Cutting Table','X-Axis Travelling Beam','Y/Z Tool Carriage & Module Slots','Installed Tool Package Boundary','Registration / Initialization Boundary','Operator / Vacuum / Material Handling'],
  compressor:['Air Intake','Compression Element','Electric Motor','Oil Separator','Cooling','Air / Oil Circuit','Controller'],
  ahu:['Intake / Damper','Pre-filter','Cooling Coil','Heating Coil','Supply Fan','Drain / Humidification','Outlet / Control']
 };
@@ -107,7 +108,14 @@ const FAMILY_SOURCES={
   ['SCREEN FT-R3050 installed-system reference','https://www.ronseintech.com/en/product/screen-ftr-3050-imagesetter/index.html'],
   ['SCREEN Katana FT-R5055 installed-system reference','https://www.graph4print.com/machine/en-118752/screen-katana-ft-r-5055-imagesetter']
  ],
- zund:[['Zünd G3 official modular flatbed cutter','https://www.zund.com/en/cutting-systems/digital-cutting-systems/g3-cutter']],
+ zund:[
+  ['Zünd G3 official modular flatbed cutter','https://www.zund.com/en/cutting-systems/digital-cutting-systems/g3-cutter'],
+  ['Zünd S3 official compact modular cutter','https://www.zund.com/en/cutting-systems/digital-cutting-systems/s3-cutter'],
+  ['Zünd official modules and tools catalogue','https://www.zund.com/en/cutting-systems/modules-and-tools'],
+  ['Zünd Gen3 modules/tools technical brochure','https://www.zund.com/media/375/download/Modules-and-Tools_Gen3_2_ANSICHT_EN-us.pdf?v=7'],
+  ['Zünd Universal Routing Tool official','https://www.zund.com/en/cutting-systems/modules-and-tools/universal-routing-tool-urt'],
+  ['Zünd Universal Module official','https://www.zund.com/en/cutting-systems/modules-and-tools/universal-module']
+ ],
  compressor:[
   ['Atlas Copco GA oil-injected screw compressor family','https://www.atlascopco.com/id-id/compressors/products/air-compressor/rotary-screw-compressor/ga-series'],
   ['Atlas Copco GA 37-90 component / controller family','https://www.atlascopco.com/en-id/compressors/products/air-compressor/rotary-screw-compressor/ga-screw-compressor'],
@@ -154,7 +162,7 @@ const EVIDENCE_BY_NO=new Map([
  [25,{grade:'OEM_MULTI_MODEL_FAMILY_REFERENCE',geometry:'HEIDELBERG_SUPRASETTER_MULTI_MODEL_FAMILY_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'CTP-1 is confirmed Heidelberg but exact Suprasetter model/serial/format is absent. The twin uses only mechanisms supported across the official Suprasetter family: plate entry/transport, external imaging drum, HEIDELBERG thermal laser architecture and IDS, plus unload. ATL/DTL/ACL/DCL/APL loaders, internal punch, debris removal, temperature stabilization, downstream processor/stacker and laser-module count remain explicit capability boundaries and are not animated as installed.'}],
  [26,{grade:'OEM_MULTI_MODEL_FAMILY_REFERENCE',geometry:'HEIDELBERG_SUPRASETTER_MULTI_MODEL_FAMILY_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'CTP-2 is confirmed Heidelberg but exact Suprasetter model/serial/format is absent. It remains a distinct BMJ asset while sharing the bounded Suprasetter family process architecture. Automatic loader type, punch, debris removal, temperature stabilization, processor/stacker and laser-module/productivity configuration are not inferred.'}],
  [27,{grade:'OEM_MULTI_MODEL_FAMILY_REFERENCE',geometry:'SCREEN_FTR_KATANA_MULTI_MODEL_FAMILY_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'The BMJ asset is confirmed SCREEN CTF imagesetter but model/serial is absent. The twin uses the documented intersection of FT-R3035/3050 and Katana 5040/5055 families: roll-media supply, automatic loading, capstan transport, slack/tension control, polygon-mirror fast scan, red-laser optics, media cut and cassette/processor output boundary. Exact model, 633 versus 635 nm wavelength, media width, punch installation, polygon speed/facet applicability, output cassette, inline processor and RIP/interface generation remain unverified.'}],
- [28,{grade:'OEM_FAMILY_REFERENCE',geometry:'ZUND_G3_S3_MODULAR_FLATBED_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'The BMJ asset is confirmed Zünd but exact model is absent. Geometry uses the recognizable modular Zünd flatbed architecture: zoned vacuum table, travelling beam, tool carriage, modular tool heads, registration camera and operator console. Table size/tool package are intentionally unclaimed.'}],
+ [28,{grade:'OEM_MULTI_MODEL_FAMILY_REFERENCE',geometry:'ZUND_G3_S3_MODULAR_PLATFORM_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'The BMJ asset is confirmed Zünd but exact model/table/tool package is absent. The twin models only common platform mechanics: vacuum flatbed hold-down, X-axis travelling beam, Y/Z carriage, modular carrier slots and control/vacuum interfaces. UCT/EOT/POT cutting tools, CTT creasing, URT/RM routing, ARC, ICC camera, ITI initialization and conveyor/roll-off/tandem handling are explicit family capabilities, not installed claims. Simulation therefore moves platform axes only until the actual BMJ module/tool package is identified.'}],
  ...[29,30,35].map(no=>[no,{grade:'BRAND_FAMILY_REFERENCE',geometry:'ATLAS_COPCO_GA_G_OIL_INJECTED_FAMILY_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'The registry identifies Atlas Copco but not the exact model. Geometry follows official GA/G oil-injected screw principles only: intake/load-unload, motor/airend, oil-air separation, minimum-pressure path, oil circuit, cooler/aftercooler, condensate handling and Elektronikon-family control. Exact GA/G variant, VSD, Full Feature dryer, power and piping are not asserted.'}]),
  ...[31,32,34].map(no=>[no,{grade:'BRAND_FAMILY_REFERENCE',geometry:'KAESER_SIGMA_FLUID_COOLED_FAMILY_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'The registry identifies KAESER but not the model. Geometry follows official KAESER fluid-cooled screw architecture: intake/inlet valve, SIGMA PROFILE airend, motor interface, cooling-fluid separator tank/cartridge, minimum-pressure check valve, thermostatic/fluid-filter circuit, air/fluid coolers, centrifugal separator/ECO-DRAIN and SIGMA CONTROL family. Belt versus 1:1 direct drive and exact controller generation remain unverified.'}]),
  [33,{grade:'BRAND_FAMILY_REFERENCE',geometry:'SWAN_TS_AD_TMV_SCREW_FAMILY_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'The registry identifies SWAN but not the model. Geometry follows SWAN TS-AD/TMV screw-family references: air-filter assembly, screw airend/drive interface, built-in oil-air cooling, cooling fan family and smart/variable-frequency control. Exact TS-AD versus TMV series, horsepower, coupling/VFD configuration and separator internals remain unverified.'}],
@@ -173,6 +181,7 @@ export function universalTaxonomy(machineId){
  if(machineId==='BMJ-MCH-0023')return [...COLLATOR_TAXONOMY];
  if(['BMJ-MCH-0025','BMJ-MCH-0026'].includes(machineId))return [...suprasetterTaxonomyFor(machineId)];
  if(machineId==='BMJ-MCH-0027')return [...SCREEN_IMAGESETTER_TAXONOMY];
+ if(machineId==='BMJ-MCH-0028')return [...ZUND_TAXONOMY];
  if(['BMJ-MCH-0029','BMJ-MCH-0030','BMJ-MCH-0031','BMJ-MCH-0032','BMJ-MCH-0033','BMJ-MCH-0034','BMJ-MCH-0035'].includes(machineId))return [...compressorTaxonomyFor(machineId)];
  if(machineId==='BMJ-MCH-0005')return [...OFFSET8_TAXONOMY];
  if(machineId==='BMJ-MCH-0006')return [...OFFSET9_TAXONOMY];
