@@ -329,13 +329,13 @@ export class SheetingMachineTemplate{
     if(rollstand){
       const brake=this.group(rollstand,'sheeting-unwind-brake-v122','Unwind Brake / Tension Reference',[0,0,0],[.12,.10,.28],'PROCESS_FAMILY_REFERENCE');
       brake.userData.installedOptionUnknown=true;
-      const disc=tag(this.cyl(brake,.225,.035,[-.12,.82,1.53],'steel','z',{detail:true,role:'unwind-brake-disc',sourceAnchor:'PASABAN_MAXSON_UNWIND_REFERENCE'}),'unwind-brake-disc','PASABAN_MAXSON_UNWIND_REFERENCE');
+      const disc=tag(this.cyl(brake,.225,.035,[-.12,.82,1.68],'steel','z',{detail:true,role:'unwind-brake-disc',sourceAnchor:'PASABAN_MAXSON_UNWIND_REFERENCE'}),'unwind-brake-disc','PASABAN_MAXSON_UNWIND_REFERENCE');
       disc.userData.installedOptionUnknown=true;
-      const cal=tag(this.box(brake,[.18,.22,.12],[-.12,.62,1.55],'dark',.014,{detail:true,role:'unwind-brake-caliper',sourceAnchor:'PASABAN_MAXSON_UNWIND_REFERENCE'}),'unwind-brake-caliper','PASABAN_MAXSON_UNWIND_REFERENCE');
+      const cal=tag(this.box(brake,[.18,.22,.12],[-.12,.76,1.72],'dark',.014,{detail:true,role:'unwind-brake-caliper',sourceAnchor:'PASABAN_MAXSON_UNWIND_REFERENCE'}),'unwind-brake-caliper','PASABAN_MAXSON_UNWIND_REFERENCE');
       cal.userData.installedOptionUnknown=true;
-      tag(this.cyl(brake,.025,.18,[.02,.62,1.55],'chrome','x',{detail:true,role:'brake-actuator-reference'}),'brake-actuator-reference');
+      tag(this.cyl(brake,.025,.18,[.02,.76,1.76],'chrome','x',{detail:true,role:'brake-actuator-reference'}),'brake-actuator-reference');
       for(const side of [-1,1]){
-        const load=tag(this.box(brake,[.16,.08,.10],[.76,.57,side*1.43],'steel',.006,{detail:true,role:'rollstand-load-cell-reference'}),'rollstand-load-cell-reference','CLOSED_LOOP_TENSION_FAMILY');
+        const load=tag(this.box(brake,[.16,.08,.10],[.76,.42,side*1.43],'steel',.006,{detail:true,role:'rollstand-load-cell-reference'}),'rollstand-load-cell-reference','CLOSED_LOOP_TENSION_FAMILY');
         load.userData.installedOptionUnknown=true;
       }
     }
@@ -345,11 +345,11 @@ export class SheetingMachineTemplate{
       const tension=this.group(feed,'sheeting-tension-control-v122','Web Tension / Dancer Measurement Reference',[0,0,0],[.12,.14,.22],'PROCESS_FAMILY_REFERENCE');
       tension.userData.installedOptionUnknown=true;
       for(const side of [-1,1]){
-        tag(this.cyl(tension,.055,.10,[-.18,1.55,side*1.31],'dark','z',{detail:true,role:'dancer-pivot-bearing'}),'dancer-pivot-bearing');
-        tag(this.box(tension,[.18,.08,.12],[-.56,1.22,side*1.32],'steel',.006,{detail:true,role:'web-tension-load-cell-reference'}),'web-tension-load-cell-reference','CLOSED_LOOP_TENSION_FAMILY');
+        tag(this.cyl(tension,.055,.10,[-.18,1.55,side*1.52],'dark','z',{detail:true,role:'dancer-pivot-bearing'}),'dancer-pivot-bearing');
+        tag(this.box(tension,[.18,.08,.12],[-.86,1.22,side*1.32],'steel',.006,{detail:true,role:'web-tension-load-cell-reference'}),'web-tension-load-cell-reference','CLOSED_LOOP_TENSION_FAMILY');
       }
-      tag(this.box(tension,[.22,.18,.16],[-.64,.78,1.12],'bodyDark',.012,{detail:true,role:'epc-actuator-reference'}),'epc-actuator-reference','EPC_FAMILY_REFERENCE');
-      tag(this.cyl(tension,.022,.40,[-.56,.94,1.12],'chrome','x',{detail:true,role:'epc-actuator-rod-reference'}),'epc-actuator-rod-reference','EPC_FAMILY_REFERENCE');
+      tag(this.box(tension,[.22,.18,.16],[-.64,.78,1.50],'bodyDark',.012,{detail:true,role:'epc-actuator-reference'}),'epc-actuator-reference','EPC_FAMILY_REFERENCE');
+      tag(this.cyl(tension,.022,.40,[-.56,.94,1.50],'chrome','x',{detail:true,role:'epc-actuator-rod-reference'}),'epc-actuator-rod-reference','EPC_FAMILY_REFERENCE');
     }
 
     const cutter=this.findNode('sheeting-cutter');
@@ -373,20 +373,20 @@ export class SheetingMachineTemplate{
       const drive=this.group(knife,'sheeting-knife-drive-v122','Knife Drive / Guide Reference',[0,0,0],[.12,.18,.25],'PROCESS_FAMILY_REFERENCE');
       drive.userData.installedActuationUnknown=true;
       for(const side of [-1,1]){
-        tag(this.cyl(drive,.065,.12,[-.12,1.49,side*1.24],'dark','z',{detail:true,role:'knife-linear-guide-bearing'}),'knife-linear-guide-bearing','HSM56_FLAT_BED_KNIFE_FAMILY');
-        tag(this.box(drive,[.16,.34,.12],[-.12,1.34,side*1.24],'steel',.008,{detail:true,role:'knife-slide-block-reference'}),'knife-slide-block-reference','HSM56_FLAT_BED_KNIFE_FAMILY');
+        tag(this.cyl(drive,.065,.12,[-.12,1.49,side*1.38],'dark','z',{detail:true,role:'knife-linear-guide-bearing'}),'knife-linear-guide-bearing','HSM56_FLAT_BED_KNIFE_FAMILY');
+        tag(this.box(drive,[.16,.34,.12],[.16,1.35,side*1.38],'steel',.008,{detail:true,role:'knife-slide-block-reference'}),'knife-slide-block-reference','HSM56_FLAT_BED_KNIFE_FAMILY');
       }
-      const motor=tag(this.cyl(drive,.16,.36,[.56,.66,1.20],'dark','x',{detail:true,active:true,motion:'knife-drive-motor-reference',role:'knife-drive-motor-reference'}),'knife-drive-motor-reference','GENERIC_SHEETER_KNIFE_DRIVE');
+      const motor=tag(this.cyl(drive,.16,.36,[.56,.88,1.52],'dark','x',{detail:true,active:true,motion:'knife-drive-motor-reference',role:'knife-drive-motor-reference'}),'knife-drive-motor-reference','GENERIC_SHEETER_KNIFE_DRIVE');
       motor.userData.installedActuationUnknown=true;
-      tag(this.cyl(drive,.12,.10,[.28,.66,1.20],'steel','x',{detail:true,role:'knife-drive-coupling-reference'}),'knife-drive-coupling-reference','GENERIC_SHEETER_KNIFE_DRIVE');
-      tag(this.box(drive,[.42,.05,.08],[.05,.94,1.20],'steel',.004,{detail:true,role:'knife-linkage-reference'}),'knife-linkage-reference','GENERIC_SHEETER_KNIFE_DRIVE');
+      tag(this.cyl(drive,.12,.10,[.28,.88,1.52],'steel','x',{detail:true,role:'knife-drive-coupling-reference'}),'knife-drive-coupling-reference','GENERIC_SHEETER_KNIFE_DRIVE');
+      tag(this.box(drive,[.42,.05,.08],[.05,1.10,1.50],'steel',.004,{detail:true,role:'knife-linkage-reference'}),'knife-linkage-reference','GENERIC_SHEETER_KNIFE_DRIVE');
     }
 
     const delivery=this.findNode('sheeting-delivery');
     if(delivery){
       const vacuum=this.group(delivery,'sheeting-overlap-vacuum-v122','Vacuum Overlap / Sheet Control Reference',[-.55,0,0],[.10,.12,.20],'PROCESS_FAMILY_REFERENCE');
       vacuum.userData.installedOptionUnknown=true;
-      tag(this.box(vacuum,[.82,.10,2.12],[.18,.75,0],'dark',.010,{detail:true,role:'overlap-vacuum-box-reference',sourceAnchor:'BW_VACUUM_OVERLAP_FAMILY'}),'overlap-vacuum-box-reference','BW_VACUUM_OVERLAP_FAMILY');
+      tag(this.box(vacuum,[.82,.10,2.12],[.18,.90,0],'dark',.010,{detail:true,role:'overlap-vacuum-box-reference',sourceAnchor:'BW_VACUUM_OVERLAP_FAMILY'}),'overlap-vacuum-box-reference','BW_VACUUM_OVERLAP_FAMILY');
       for(let ix=0;ix<8;ix++)for(let iz=0;iz<8;iz++)tag(this.cyl(vacuum,.006,.008,[-.12+ix*.085,.807,-.72+iz*.205],'black','y',{detail:true,role:'overlap-vacuum-port-reference'}),'overlap-vacuum-port-reference','BW_VACUUM_OVERLAP_FAMILY');
       const count=this.group(delivery,'sheeting-count-sensor-v122','Sheet Count / Jam Detection Reference',[0,0,0],[.12,.14,.18],'PROCESS_FAMILY_REFERENCE');
       for(const z of [-.92,.92])tag(this.box(count,[.08,.14,.08],[-1.82,1.02,z],'bodyDark',.008,{detail:true,role:'sheet-count-sensor-reference'}),'sheet-count-sensor-reference','PASABAN_SHEET_COUNT_JAM_DETECTION');
@@ -397,10 +397,10 @@ export class SheetingMachineTemplate{
       const level=this.group(layboy,'sheeting-stack-level-v122','Stack Height / Lift Drive Reference',[0,0,0],[0,.10,.22],'PROCESS_FAMILY_REFERENCE');
       for(const z of [-1.10,1.10])tag(this.box(level,[.08,.12,.08],[-.92,1.32,z],'bodyDark',.008,{detail:true,role:'stack-height-sensor-reference'}),'stack-height-sensor-reference','STACKER_FAMILY_REFERENCE');
       for(const z of [-1.22,1.22]){
-        tag(this.cyl(level,.055,.16,[.78,.36,z],'dark','z',{detail:true,active:true,motion:'lift-drive-reference',role:'lift-drive-sprocket-reference'}),'lift-drive-sprocket-reference','STACKER_FAMILY_REFERENCE');
-        tag(this.box(level,[.035,1.05,.05],[.78,.88,z],'steel',.004,{detail:true,role:'lift-chain-reference'}),'lift-chain-reference','STACKER_FAMILY_REFERENCE');
+        tag(this.cyl(level,.055,.16,[1.02,.28,z],'dark','z',{detail:true,active:true,motion:'lift-drive-reference',role:'lift-drive-sprocket-reference'}),'lift-drive-sprocket-reference','STACKER_FAMILY_REFERENCE');
+        tag(this.box(level,[.035,1.05,.05],[1.02,.88,z],'steel',.004,{detail:true,role:'lift-chain-reference'}),'lift-chain-reference','STACKER_FAMILY_REFERENCE');
       }
-      tag(this.cyl(level,.12,.30,[.96,.30,1.22],'dark','x',{detail:true,active:true,motion:'lift-motor-reference',role:'lift-motor-reference'}),'lift-motor-reference','STACKER_FAMILY_REFERENCE');
+      tag(this.cyl(level,.12,.30,[1.20,.24,1.15],'dark','x',{detail:true,active:true,motion:'lift-motor-reference',role:'lift-motor-reference'}),'lift-motor-reference','STACKER_FAMILY_REFERENCE');
     }
   }
   findNode(id){return id==='MACHINE-SHEETING'?this.root:this.nodes.find(n=>n.userData.nodeId===id)||null;}

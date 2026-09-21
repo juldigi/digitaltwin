@@ -10,8 +10,8 @@ const roles=model=>{
 };
 const expectRoles=(id,required)=>{
  const model=createMachineTemplate(id),set=roles(model);
- assert.equal(model.root.userData.researchVersion,'V121',id);
- assert.ok(model.root.userData.researchSourceCount>=100,id+' research ledger < 100 sources');
+ assert.equal(model.root.userData.researchVersion,'V122',id);
+ assert.ok(model.root.userData.researchSourceCount>=160,id+' current research ledger < 160 sources');
  assert.equal(model.root.userData.engineeringDimensions,false,id);
  for(const role of required)assert.ok(set.has(role),id+' missing V121 mechanism '+role);
  const sim=createMachineSimulation(id,model.root,model);

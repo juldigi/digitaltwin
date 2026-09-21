@@ -30,7 +30,7 @@ export class OffsetMachineTemplate {
     this.root.userData={assetId:'MACHINE-OFFSET5',...PHOTO_RECONSTRUCTION,orientation:ORIENTATION,taxonomyVersion:'offset5-taxonomy-v17',machineEnvelope:OFFSET5_DIMENSIONS,dimensionAudit:offset5DimensionAudit()};
     this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.ghosted=false;this.exteriorOpen=false;
     this.palette={graphite:0x30383d,black:0x151b20,silver:0xaeb8b8,steel:0x889598,light:0xd1d4c9,paper:0xeee9d5,rubber:0x20252a,glass:0x23333a,red:0xb33c32,yellow:0xe2b541,blue:0x243e70};
-    this.build();this.alignOperatorSide();this.batchMeshes();this.enrichV122Feeder();this.tagAdaptiveDetails();
+    this.build();this.alignOperatorSide();this.enrichV122Feeder();this.batchMeshes();this.tagAdaptiveDetails();
     this.taxonomy=OFFSET5_TAXONOMY;this.taxonomyById=TAXONOMY_BY_ID;
     this.original=this.parts.map(p=>p.position.clone());
     for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}
@@ -139,7 +139,7 @@ export class OffsetMachineTemplate {
       const batches=new Map();
       for(const mesh of group.children.filter(c=>c.isMesh&&!c.isInstancedMesh&&!c.userData.dynamicRotor)){
         const cover=!!mesh.userData.exteriorCover;
-        const semantic=mesh.userData.uvLamp?'uvLamp':mesh.userData.uvBeam?'uvBeam':mesh.userData.uvWindow?'uvWindow':mesh.userData.uvReflector?'uvReflector':mesh.userData.rotorRoleReference?'rotorRef:'+mesh.userData.rotorRoleReference:'normal';
+        const semantic=mesh.userData.mechanismRole?'mechanism:'+mesh.userData.mechanismRole:mesh.userData.uvLamp?'uvLamp':mesh.userData.uvBeam?'uvBeam':mesh.userData.uvWindow?'uvWindow':mesh.userData.uvReflector?'uvReflector':mesh.userData.rotorRoleReference?'rotorRef:'+mesh.userData.rotorRoleReference:'normal';
         const key=mesh.material.uuid+':'+(cover?'cover':'structure')+':'+semantic+':'+(mesh.visible?'visible':'hidden');
         if(!batches.has(key))batches.set(key,{material:mesh.material,cover,semantic,visible:mesh.visible,meshes:[]});
         batches.get(key).meshes.push(mesh);
@@ -153,7 +153,7 @@ export class OffsetMachineTemplate {
         mesh.userData={assetId:'MACHINE-OFFSET5',ownerId:group.userData.nodeId,exteriorCover:cover};
         if(semantic.startsWith('rotorRef:')){
           mesh.userData.rotorRoleReference=semantic.slice('rotorRef:'.length);mesh.userData.motionBudget='STATIC_REFERENCE_MOBILE';mesh.userData.rotorElementCount=meshes.reduce((sum,m)=>sum+(m.userData.rotorElementCount||1),0);
-        }else if(semantic!=='normal'){mesh.userData[semantic]=true;mesh.userData.uvElementCount=meshes.reduce((sum,m)=>sum+(m.userData.uvElementCount||1),0);}
+        }else if(semantic.startsWith('mechanism:')){mesh.userData.mechanismRole=semantic.slice('mechanism:'.length);mesh.userData.detail=true;mesh.userData.sourceAnchor='V122_PRESET_PLUS_COMPONENT_BATCH';mesh.userData.elementCount=meshes.length;}else if(semantic!=='normal'){mesh.userData[semantic]=true;mesh.userData.uvElementCount=meshes.reduce((sum,m)=>sum+(m.userData.uvElementCount||1),0);}
         for(const old of meshes){group.remove(old);this.meshes.splice(this.meshes.indexOf(old),1);}group.add(mesh);this.meshes.push(mesh);
       }
     }

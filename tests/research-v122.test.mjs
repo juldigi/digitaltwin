@@ -19,7 +19,7 @@ const requireRoles=(model,required)=>{
  for(const role of required)assert.ok(set.has(role),model.root.name+' missing '+role);
 };
 
-test('V122 research ledger exceeds 160 unique technical sources without URL duplication',()=>{
+test(`V122 research ledger contains ${V122_SOURCE_STATS.total} unique technical sources without URL duplication`,()=>{
  const urls=V122_SOURCE_LEDGER.map(s=>s.url);
  assert.ok(V122_SOURCE_STATS.total>=160,'V122 ledger only has '+V122_SOURCE_STATS.total);
  assert.ok(V122_SOURCE_STATS.newReviewed>=60,'V122 new source batch only has '+V122_SOURCE_STATS.newReviewed);

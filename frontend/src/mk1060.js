@@ -35,17 +35,17 @@ export class MK1060MachineTemplate{
   const chain=this.findNode('mk1060-transport-chain');if(chain){
    for(const z of [-.98,.98]){
     tag(this.box(chain,[4.55,.06,.08],[.15,1.22,z],'dark',.006),'gripper-chain-guide');
-    for(const x of [-1.72,1.98]){const t=tag(this.cyl(chain,.105,.10,[x,1.08,z],'steel','chain-sprocket'),'chain-tensioner-sprocket');t.userData.tensioner=true;}
+    for(const x of [-1.72,1.98]){const t=tag(this.cyl(chain,.105,.10,[x,1.08,z],'steel',''),'chain-tensioner-sprocket');t.userData.tensioner=true;}
    }
   }
 
   const platen=this.findNode('mk1060-platen-drive');if(platen){
    for(const z of [-.64,.64]){
-    tag(this.cyl(platen,.085,.16,[0,.78,z],'steel','pressure-eccentric','z'),'platen-eccentric-bearing');
+    tag(this.cyl(platen,.085,.16,[0,.78,z],'steel','','z'),'platen-eccentric-bearing');
     tag(this.box(platen,[.18,.24,.12],[.58,.80,z],'dark',.012),'cutting-force-adjuster');
     tag(this.cyl(platen,.035,.22,[.58,.94,z],'steel','pressure-eccentric','y'),'cutting-force-adjusting-screw');
    }
-   tag(this.cyl(platen,.12,1.42,[0,.44,0],'dark','flywheel','z'),'platen-main-drive-shaft');
+   tag(this.cyl(platen,.12,1.42,[0,.44,0],'dark','','z'),'platen-main-drive-shaft');
   }
 
   const strip=this.findNode('mk1060-stripping');if(strip){
@@ -71,14 +71,14 @@ export class MK1060MachineTemplate{
   const drive=this.findNode('mk1060-drive');if(drive){
    const lube=this.group(drive,'mk1060-lubrication-v122','Automatic circulating / intermittent lubrication',[0,0,0],[0,.15,.35]);
    tag(this.box(lube,[.34,.40,.30],[1.65,.38,1.42],'dark',.025),'lubrication-reservoir');
-   tag(this.cyl(lube,.075,.18,[1.65,.64,1.42],'steel','main-motor','y'),'lubrication-pump');
+   tag(this.cyl(lube,.075,.18,[1.65,.64,1.42],'steel','','y'),'lubrication-pump');
    tag(this.box(lube,[.26,.16,.12],[1.30,.58,1.42],'steel',.010),'lubrication-distribution-manifold');
    for(const z of [1.28,1.42,1.56])tag(this.cyl(lube,.010,1.35,[.58,.58,z],'steel','button','x'),'lubrication-line-reference','MODEL_MANUAL_TOPOLOGY__ROUTING_VISUAL');
    lube.userData.installedRoutingBoundary='Lubrication classes are model-manual confirmed; exact tube routing and metering-point count are visual references.';
    const driveChain=this.group(drive,'mk1060-drive-chain-v122','Main drive chain / tension reference',[0,0,0],[0,.18,.30]);
-   for(const x of [-.15,.45])tag(this.cyl(driveChain,.15,.10,[x,.56,1.48],'steel','chain-sprocket','z'),'main-drive-chain-sprocket');
+   for(const x of [-.15,.45])tag(this.cyl(driveChain,.15,.10,[x,.56,1.48],'steel','','z'),'main-drive-chain-sprocket');
    tag(this.box(driveChain,[.72,.035,.06],[.15,.72,1.48],'black',.004),'main-drive-chain-reference');
-   tag(this.cyl(driveChain,.07,.10,[.15,.86,1.48],'steel','chain-sprocket','z'),'drive-chain-tensioner');
+   tag(this.cyl(driveChain,.07,.10,[.15,.86,1.48],'steel','','z'),'drive-chain-tensioner');
   }
  }
  findNode(id){return id==='mk1060-root'?this.root:this.nodes.find(n=>n.userData.nodeId===id)||null;}resolvePart(o){for(let p=o;p&&p!==this.root;p=p.parent)if(p.userData?.selectable)return p;return null;}resolveTaxonomyNode(id){return this.taxonomyById.get(id)?.meshRefs.map(ref=>this.findNode(ref)).find(Boolean)||null;}contains(a,b){for(let p=b;p;p=p.parent)if(p===a)return true;return false;}
