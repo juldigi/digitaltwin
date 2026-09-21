@@ -10,13 +10,23 @@ export class Offset8MachineTemplate{
  mat(k){if(!this.materials.has(k)){const c={light:0xe8e8e2,graphite:0x273238,black:0x11181c,steel:0x8d999e,silver:0xc0c8ca,rubber:0x20262a,paper:0xf2ecda,blue:0x2874a6,cyan:0x3fb7c5,amber:0xe2a83c,coat:0xb7d7d0,glass:0x73b7c9}[k]||0x888888;this.materials.set(k,new THREE.MeshStandardMaterial({color:c,metalness:['steel','silver'].includes(k)?.6:.15,roughness:k==='paper'?.9:.48,transparent:k==='glass',opacity:k==='glass'?.35:1}));}return this.materials.get(k);}
  mesh(g,geo,key,k='graphite',pos=[0,0,0],rot=null){if(!this.geometries.has(key))this.geometries.set(key,geo());const m=new THREE.Mesh(this.geometries.get(key),this.mat(k));m.position.set(...pos);if(rot)m.rotation.set(...rot);m.castShadow=k!=='glass';m.receiveShadow=true;m.userData.ownerId=g.userData.nodeId;g.add(m);this.meshes.push(m);return m;}
  box(g,s,p,k='graphite',r=.02){return this.mesh(g,()=>r?new RoundedBoxGeometry(...s,2,r):new THREE.BoxGeometry(...s),'b'+s+r,k,p);}
- cyl(g,r,l,p,k='steel',role=''){const m=this.mesh(g,()=>new THREE.CylinderGeometry(r,r,l,20),'c'+r+l,k,p,[Math.PI/2,0,0]);m.userData.rotor=true;m.userData.rollerRole=role;return m;}
+ cyl(g,r,l,p,k='steel',role='',axis='z'){
+  const rot=axis==='z'?[Math.PI/2,0,0]:axis==='x'?[0,0,Math.PI/2]:null;
+  const m=this.mesh(g,()=>new THREE.CylinderGeometry(r,r,l,20),'c'+r+l+axis,k,p,rot);
+  const rotating=/^(plate|blanket|impression|transfer|distributor-\d+|form-\d+|transfer-ink|damp-\d+|feed-wheel|anilox|coating-blanket|coating-impression|chain-sprocket|sheet-brake)$/.test(role);
+  m.userData.rollerRole=role;m.userData.rotor=rotating;m.userData.rotorAxis=axis;m.userData.radius=r;m.userData.reciprocator=role==='sucker';
+  if(rotating){
+   if(/^blanket$/.test(role)||/^transfer$/.test(role)||/^form-/.test(role)||/^transfer-ink$/.test(role)||/^anilox$/.test(role)||/^chain-sprocket$/.test(role))m.userData.spinDirection=-1;
+   else m.userData.spinDirection=1;
+  }
+  return m;
+ }
  cover(m){m.userData.exteriorCover=true;return m;}
- build(){const access=this.group(this.root,'offset8-access','Elevated access and paired side frames');this.box(access,[19,.16,3.35],[1.2,.42,0],'black');for(const z of [-1.82,1.82]){this.box(access,[18,.08,.48],[1.2,.62,z],'steel');for(let x=-7;x<10;x+=2)this.cyl(access,.022,.62,[x,1.03,z],'steel','rail');}
+ build(){const access=this.group(this.root,'offset8-access','Elevated access and paired side frames');this.box(access,[19,.16,3.35],[1.2,.42,0],'black');for(const z of [-1.82,1.82]){this.box(access,[18,.08,.48],[1.2,.62,z],'steel');for(let x=-7;x<10;x+=2)this.cyl(access,.022,.62,[x,1.03,z],'steel','rail','y');}
  this.buildFeeder();const pg=this.group(this.root,'offset8-print','Eight printing units');const fg=this.group(this.root,'offset8-finish','LYYL inline finishing');
  for(const [i,m] of OFFSET8_MODULE_SEQUENCE.entries()){if(m.type==='print')this.printUnit(pg,m,i);else if(m.type==='coat')this.coater(fg,m);else this.dryer(fg,m);}this.buildDelivery();}
  buildFeeder(){const g=this.group(this.root,'offset8-feeder','Preset Plus feeder',[-6.95,0,0],[-1,.2,0]);this.cover(this.box(g,[2.3,1.8,2.9],[0,1.48,0],'light',.1));const pile=this.group(g,'offset8-feeder-pile','Pile lift');this.box(pile,[1.35,.08,1.78],[-.62,.61,0],'steel');this.box(pile,[1.30,1.02,1.72],[-.62,1.16,0],'paper');
- const head=this.group(g,'offset8-feeder-head','Suction head');this.box(head,[.74,.30,1.65],[.28,2.34,0],'graphite');for(const z of [-.58,-.2,.2,.58]){this.cyl(head,.032,.18,[.45,2.13,z],'rubber','sucker');this.box(head,[.04,.26,.04],[.45,2.23,z],'steel');}
+ const head=this.group(g,'offset8-feeder-head','Suction head');this.box(head,[.74,.30,1.65],[.28,2.34,0],'graphite');for(const z of [-.58,-.2,.2,.58]){this.cyl(head,.032,.18,[.45,2.13,z],'rubber','sucker','y');this.box(head,[.04,.26,.04],[.45,2.23,z],'steel');}
  const reg=this.group(g,'offset8-register','Stream feeder and register',[1.55,0,0]);this.box(reg,[1.45,.56,2.42],[0,1.03,0],'graphite',.05);this.box(reg,[1.4,.035,2.2],[0,1.34,0],'steel');for(const z of [-.62,0,.62])this.cyl(reg,.028,1.24,[0,1.40,z],'rubber','feed-wheel');for(const z of [-.73,.73])this.box(reg,[.12,.10,.12],[.58,1.43,z],'silver');}
  side(g){for(const z of [-1.38,1.26]){this.cover(this.box(g,[.94,1.78,.13],[0,1.70,z],'light',.07));this.cover(this.box(g,[.72,.25,.02],[0,2.42,z+(z<0?-.07:.07)],'graphite'));}this.cover(this.box(g,[.98,.25,2.58],[0,2.56,0],'graphite',.05));}
  printUnit(parent,m,index){const id='offset8-'+m.key.toLowerCase(),g=this.group(parent,id,m.label,[OFFSET8_CENTERS[m.key],0,0],[0,.2,(index%2?1:-1)*.3]);g.userData.moduleType='print';g.userData.moduleKey=m.key;this.side(g);const frame=this.group(g,id+'-frame','Paired side frames');for(const z of [-1.18,1.18])for(const x of [-.38,.38])this.box(frame,[.10,1.75,.10],[x,1.53,z],'steel');
