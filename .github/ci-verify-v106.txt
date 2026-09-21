@@ -1,0 +1,1 @@
+CI verification snapshot for V106 Promatrix registered intermittent transport. Temporary branch; do not merge marker.
