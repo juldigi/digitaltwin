@@ -105,6 +105,10 @@ test('V123 R3 QF-100CS ABM-2 uses one bounded family working bay with XY-safe hy
  assert.equal(m.root.userData.exactModelPublicDocumentationFound,false);
  assert.equal(m.root.userData.installedBlankingHeadCountVerified,false);
  assert.equal(m.root.userData.installedCollectorStackerVerified,false);
+ assert.deepEqual(m.root.userData.localSupplierFamilyEvidence.catalogue,['QF1080B','QF1080C']);
+ assert.equal(m.root.userData.localSupplierFamilyEvidence.bmjCustomerAssociation,true);
+ assert.equal(m.root.userData.localSupplierFamilyEvidence.installationProof,false);
+ assert.equal(m.root.userData.localSupplierFamilyEvidence.exactModelEquivalenceProof,false);
  assert.equal(m.root.userData.simulationBinding.type,'XY_PLATFORM_FIXED_HYDRAULIC_HEAD');
  requireRoles(m,[
   'x-axis-ball-screw','x-axis-linear-guide','x-axis-servo-motor',
