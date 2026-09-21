@@ -23,3 +23,5 @@ dialog#modal{width:min(680px,calc(100vw - 32px));max-height:min(82dvh,780px);pad
 @media(min-width:768px) and (max-width:1024px){.topbar{grid-template-columns:220px 1fr auto}.header-actions .user-profile,.header-actions .chip{display:none}.scene-bottom{bottom:38px}.view-switch button:nth-child(4),.view-switch button:nth-child(6){display:none}aside#detail-panel{position:absolute;right:0;width:min(380px,46vw);max-width:none}.panel-hidden aside#detail-panel{transform:translateX(100%);width:min(380px,46vw)}.panel-hidden .center-stack{grid-column:2/-1}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 @media(prefers-contrast:more){:root{--line:#9caec0;--muted:#45576a}.topbar,.rail,.scene-bottom,aside#detail-panel{border-width:2px}}
+
+.scene-switching #viewport canvas,.scene-switching .static-machine-fallback{opacity:.16;transition:opacity .18s}.scene-switching #boot{display:grid!important;background:rgba(241,247,251,.9);backdrop-filter:blur(8px)}

@@ -250,5 +250,14 @@ export class FactoryEngine {
   clearFactory(){this.factory.traverse(o=>{o.geometry?.dispose();if(Array.isArray(o.material))o.material.forEach(m=>{m.map?.dispose();m.dispose();});else{o.material?.map?.dispose();o.material?.dispose();}});this.factory.clear();}
   edit(on){if(on&&this.view==='factory'&&this.layout){this.machine.visible=true;this.gizmo.attach(this.machine);}else this.gizmo.detach();}
   setLow(on){this.low=on;this.renderer.setPixelRatio(on?1:Math.min(devicePixelRatio,1.7));this.renderer.shadowMap.enabled=!on;this.template.setLow(on);this.resize();}
+  switchMachine(key){
+    if(!key||key===this.machineKey)return;
+    this.gizmo.detach();this.clearPartLabels();this.simulation?.dispose();this.template?.dispose();if(this.machine)this.scene.remove(this.machine);
+    this.machineKey=key;const generic=universalMachineConfig(key);
+    this.template=key==='BMJ-MCH-0005'?new Offset8MachineTemplate():key==='BMJ-MCH-0001'?new Polar115MachineTemplate():key==='offset10'?new Offset10MachineTemplate():key==='apm2'?new APM2MachineTemplate():key==='sheeting'?new SheetingMachineTemplate():generic?new UniversalMachineTemplate(key):new OffsetMachineTemplate();
+    this.machine=this.template.root;this.scene.add(this.machine);
+    this.simulation=key==='BMJ-MCH-0005'?new Offset8PrintingSimulation(this.machine,this.template):key==='BMJ-MCH-0001'?new Polar115ProcessSimulation(this.machine,this.template):key==='offset10'?new Offset10PrintingSimulation(this.machine,this.template):key==='apm2'?new APM2ProcessSimulation(this.machine,this.template):key==='sheeting'?new SheetingProcessSimulation(this.machine,this.template):generic?new UniversalProcessSimulation(this.machine,this.template):new PrintingSimulation(this.machine,this.template);
+    this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);this.isolated=false;this.view='machine';this.machine.visible=true;this.factory.visible=false;this.template.setLow(this.low);this.fit(this.machine);this.resize();
+  }
   dispose(){cancelAnimationFrame(this.frame);this.clearPartLabels();this.resizeObserver.disconnect();this.controls.dispose();this.gizmo.dispose();this.simulation?.dispose();this.template.dispose();this.clearFactory();this.studio.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});this.renderer.dispose();}
 }

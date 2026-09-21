@@ -6,13 +6,15 @@
 <meta name="theme-color" content="#ffffff">
 <meta name="description" content="Digital Twin interaktif mesin Packaging Offset BMJ untuk eksplorasi, struktur dan simulasi.">
 <title>BMJ Digital Twin</title>
+<style id="splash-critical">html,body{margin:0;background:#061524}.app-splash{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;overflow:hidden;color:#fff;background:#061524}.app-splash:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(4,15,28,.9),rgba(4,20,37,.54),rgba(4,15,28,.88)),url("./assets/splash-industrial-v79.webp") center/cover no-repeat}.splash-content{position:relative;text-align:center;padding:24px;font-family:Inter,"Segoe UI",sans-serif}.splash-mark{display:grid;place-items:center;width:82px;height:82px;margin:0 auto 18px;border:1px solid rgba(255,255,255,.3);border-radius:24px;background:rgba(20,100,170,.35);font-size:28px;font-weight:900}.splash-content h1{margin:0;font-size:clamp(25px,4vw,42px)}.splash-content p{margin:8px 0 22px;color:#c6d9ea;font-size:12px;letter-spacing:.08em}.splash-loader{width:min(260px,70vw);height:3px;margin:auto;overflow:hidden;border-radius:4px;background:rgba(255,255,255,.18)}.splash-loader i{display:block;width:45%;height:100%;background:#39bfff;animation:splashCritical 1.2s ease-in-out infinite}@keyframes splashCritical{from{transform:translateX(-110%)}to{transform:translateX(250%)}}</style>
 <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
 <link rel="stylesheet" href="./style.css">
 <link rel="stylesheet" href="./runtime-fallback.css">
-<link rel="stylesheet" href="./app-shell-v79.css?v=79">
+<link rel="stylesheet" href="./app-shell-v79.css?v=80">
 <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/addons/"}}</script>
 </head>
 <body class="panel-hidden ui-simple">
+<div class="app-splash" role="status" aria-label="Menyiapkan BMJ Digital Twin"><div class="splash-content"><div class="splash-mark">BMJ</div><h1>Smart 3D Digital Twin</h1><p>Packaging Offset · Plant Karawang</p><div class="splash-loader"><i></i></div></div></div>
 <header class="topbar">
   <a href="./" class="brand" aria-label="Beranda Digital Twin"><span class="brandmark">F<span>5</span></span><span>BMJ Digital Twin<small>Packaging Offset · Smart Factory</small></span></a>
   <label class="global-search"><span>⌕</span><input id="global-search" type="search" aria-label="Cari mesin, komponen, atau dokumen" placeholder="Cari mesin atau komponen…"></label>
@@ -210,10 +212,10 @@
 
 <dialog id="modal"><div class="modal-head"><h2 id="modal-title"></h2><button id="modal-close" class="icon-btn" aria-label="Tutup dialog">×</button></div><div id="modal-body"></div></dialog>
 <div id="toast" role="status" aria-live="polite" hidden></div>
-<script type="module" src="./src/app.js?v=79"></script>
-<script type="module" src="./src/ui-v5.js?v=79"></script>
-<script type="module" src="./src/experience-v37.js?v=79"></script>
-<script type="module" src="./src/app-shell-v79.js?v=79"></script>
+<script type="module" src="./src/app.js?v=80"></script>
+<script type="module" src="./src/ui-v5.js?v=80"></script>
+<script type="module" src="./src/experience-v37.js?v=80"></script>
+<script type="module" src="./src/app-shell-v79.js?v=80"></script>
 <script>setTimeout(()=>{const b=document.getElementById('boot');if(b&&!b.hidden){b.innerHTML='<strong>Tampilan 3D belum berhasil dimuat</strong><p>Coba muat ulang halaman atau gunakan perangkat lain.</p>'; }},15000);</script>
 </body>
 </html>
