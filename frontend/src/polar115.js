@@ -45,7 +45,7 @@ export class Polar115MachineTemplate{
 
   const knife=this.group(this.root,'polar-knife','Knife Cutting System',[0,0,0],[0,.42,0]);
   const carrier=this.group(knife,'polar-knife-carrier','Knife carrier');this.active(this.box(carrier,[1.34,.18,.13],[0,1.47,.035],'dark',.014,'Knife Carrier'),'knife-carrier');
-  const bladeGroup=this.group(knife,'polar-knife-blade','1150 mm knife');const blade=this.active(this.box(bladeGroup,[1.18,.025,.13],[0,1.37,-.005],'steel',.003,'1150 mm Knife'),'knife');blade.rotation.z=-.012;
+  const bladeGroup=this.group(knife,'polar-knife-blade','1150 mm knife');const blade=this.active(this.box(bladeGroup,[1.18,.13,.025],[0,1.37,-.005],'steel',.003,'1150 mm Knife'),'knife');blade.rotation.z=-.012;blade.userData.knifeBlade=true;blade.userData.geometryReference='VERTICAL_BLADE__EXACT_BEVEL_UNVERIFIED';
   const stick=this.group(knife,'polar-knife-stick','Cutting stick');this.box(stick,[1.20,.025,.055],[0,.965,-.018],'warning',.003,'Cutting Stick');
   const knifeDrive=this.group(knife,'polar-knife-drive','Hydraulic knife-drive interface');for(const x of [-.56,.56]){this.active(this.cyl(knifeDrive,.085,.13,[x,1.57,.08],'accent','z'),'knife-drive');this.box(knifeDrive,[.07,.30,.065],[x,1.42,.08],'steel',.008);}
   const topSense=this.group(knife,'polar-knife-top-sense','Top-position / cut-cycle sensing reference');this.box(topSense,[.08,.12,.06],[.68,1.50,.07],'red',.010);
@@ -53,7 +53,7 @@ export class Polar115MachineTemplate{
   const safety=this.group(this.root,'polar-safety','Safety System',[0,0,0],[0,.24,-.45]);
   const photo=this.group(safety,'polar-safety-photo','Photoelectric light-barrier arms');
   for(const x of [-.82,.82]){const arm=this.box(photo,[.15,.17,.58],[x,1.03,-.36],'body',.04);arm.rotation.x=.08;for(let i=0;i<6;i++){const led=this.cyl(photo,.009,.012,[x+(x<0?.077:-.077),1.03,-.56+i*.08],'red','x');led.userData.detail=true;led.userData.photoCell=true;}}
-  const twohand=this.group(safety,'polar-safety-twohand','Two-hand cut buttons');for(const x of [-.72,.72]){this.box(twohand,[.18,.08,.14],[x,.91,-.71],'dark',.025);const b=this.cyl(twohand,.035,.022,[x,.96,-.78],'red','z');b.userData.twoHandButton=true;}
+  const twohand=this.group(safety,'polar-safety-twohand','Two-hand cut buttons · simultaneous cut release');twohand.userData.simultaneityControlReference=true;twohand.userData.antiRepeatReference=true;for(const x of [-.72,.72]){this.box(twohand,[.18,.08,.14],[x,.91,-.71],'dark',.025);const b=this.cyl(twohand,.035,.022,[x,.96,-.78],'red','z');b.userData.twoHandButton=true;}
   const estop=this.group(safety,'polar-safety-estop','Emergency stop');this.cyl(estop,.043,.035,[.92,1.32,-.18],'red','z');
   const rear=this.group(safety,'polar-safety-rear','Rear guard reference');this.cover(this.box(rear,[1.50,.50,.045],[0,1.12,1.18],'body',.025));
 
