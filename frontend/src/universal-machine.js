@@ -27,6 +27,7 @@ import {UPG_LY300_TECHNICAL_SOURCES} from './data/sources-upg-ly300.js';
 import {OFFSET7_GRAVURE_TAXONOMY} from './data/taxonomy-offset7.js';
 import {QF100CS_TAXONOMY} from './data/taxonomy-qf100cs.js';
 import {compressorTaxonomyFor} from './data/taxonomy-compressors.js';
+import {COLLATOR_TAXONOMY} from './data/taxonomy-collator.js';
 
 const FAMILY_BY_NO=new Map([
  [1,'guillotine'],[2,'sheeter'],[4,'gravure'],[5,'offset'],[6,'offset'],[7,'pileturner'],[8,'pileturner'],
@@ -86,7 +87,12 @@ const FAMILY_SOURCES={
   ['Installed QF-1080C visual reference','https://printpack.ru/news/instalacion/mashina-dlya-razdeleniya-kartonnyh-zagotovok-uanchor-qf-1080c-origamo.html'],
   ['Jaya Makmur Mesindo · QF1080B/QF1080C catalogue + BMJ customer association · family relevance only','https://jayamakmurmesindo.com/']
  ],
- collator:[['Horizon VAC air-suction collator family brochure','https://www.horizon.co.jp/products/catalog/e_pdf/e001co/04vac_pdf/vacseries_e.pdf']],
+ collator:[
+  ['Horizon VAC-1000 official 10-bin air-suction collator','https://www.horizon.co.jp/products/en/products/collators/vac1000/vac1000_e.html'],
+  ['Horizon VAC-600H official modular suction collator','https://www.horizon.co.jp/products/en/products/collators/vac600h/vac600h_e.html'],
+  ['Duplo DSC-10/60i official ten-bin suction collator family','https://www.duplousa.com/product/isaddle-5-0/'],
+  ['Vertical collator suction-rotor mechanism patent','https://patents.google.com/patent/US20050242484A1/en']
+ ],
  ctp:[['Heidelberg Suprasetter CtP family official','https://www.heidelberg.com/global/en/print_and_packaging/products/computer_to_plate_1/prepress_overview.jsp']],
  imagesetter:[['SCREEN Katana 5040/5055 official technical article','https://www.screen.co.jp/ga_dtp/en/news/pdf/newsbox/vol9_pdf/newsbox_9_4.pdf']],
  zund:[['Zünd G3 official modular flatbed cutter','https://www.zund.com/en/cutting-systems/digital-cutting-systems/g3-cutter']],
@@ -131,7 +137,7 @@ const EVIDENCE_BY_NO=new Map([
  [20,{grade:'MODEL_FAMILY_PROCESS_GROUNDED',geometry:'DEDICATED_FAMILY_PROCESS_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated IPM-4 twin follows Focusight FS-SHARK N650 primary documentation for automated feeding, full-suction transfer, high-speed vision inspection, reject separation and good/bad return collection. The P3N1 suffix and installed camera/feeder/reject configuration remain undecoded.'}],
  [21,{grade:'MODEL_IDENTIFIED_CLOSE_FAMILY_PROCESS',geometry:'QF_LQF_1080_FAMILY_PROCESS_REFERENCE__QF100CS_EXACT_EQUIVALENCE_UNVERIFIED',simulation:'FAMILY_PROCESS_MODEL',reason:'The BMJ identity QF-100CS is preserved from the plant registry. Public exact-model QF-100CS documentation remains unresolved. QF/LQF-1080 B/C/BS/CS manufacturer-family references consistently establish a moving X/Y platform under a stable hydraulic blanking head, servo motors, ball screws, straight-line guides, photoelectric positioning, PLC/HMI control and configurable pin-board tooling. Jaya Makmur Mesindo publicly lists QF1080B/QF1080C and separately lists PT Bukit Muria Jaya Karawang/Kudus among customers, strengthening local supplier-family relevance without proving ABM-2 purchase or exact QF-100CS equivalence. Dual-head architecture and collecting/stacker hardware are variant capabilities only and are not asserted as installed on ABM-2.'}],
  [22,{grade:'MODEL_FAMILY_PROCESS_GROUNDED',geometry:'DEDICATED_FAMILY_PROCESS_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated FZ1200 twin models the consistently documented clamp, turning, air separation/dust removal and jogging/alignment process. OEM origin and installed load/hydraulic/blower configuration remain unresolved.'}],
- [23,{grade:'FUNCTIONAL_FAMILY_REFERENCE',geometry:'VERTICAL_SUCTION_COLLATOR_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'Collator OEM/model is absent. A vertical modular suction-collator architecture is used instead of a generic box, based on documented VAC-family principles: multiple feed bins, suction rotors, double/miss sensors, gathering transport and delivery. Horizon branding/model is not claimed.'}],
+ [23,{grade:'FUNCTIONAL_MULTI_VENDOR_REFERENCE',geometry:'MULTI_VENDOR_10_BIN_SUCTION_COLLATOR_PROCESS_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'The BMJ registry records only COLLATOR MACHINE with no OEM/model/serial. The twin therefore uses the process intersection documented by Horizon VAC-1000/VAC-600H, Duplo DSC-10/60i and a vertical-collator patent: modular vertical feed bins, suction-rotor / air-assisted separation, feed-integrity sensing, common gathering transport, set delivery and touchscreen control. Ten bins are a modeled cross-family tower reference shared by Horizon and Duplo, not a claim about the installed BMJ bin count or OEM.'}],
  [24,{grade:'OEM_MODEL_GROUNDED',geometry:'DEDICATED_OEM_MODEL_REFERENCE',simulation:'VERIFIED_PROCESS_MODEL',reason:'Dedicated UPG-LY300 twin uses the matching manufacturer model documentation for automatic paging, servo transport, Ricoh G5 UV inkjet, LED UV curing, 2K inspection, plate-turn rejection and collection. Optional/custom accessories remain bounded.'}],
  [25,{grade:'OEM_FAMILY_REFERENCE',geometry:'HEIDELBERG_SUPRASETTER_FAMILY_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'CTP-1 is confirmed Heidelberg but model/serial is absent. The twin therefore follows Suprasetter family principles—plate loading/transport, external drum imaging, modular Heidelberg laser, optional internal punch and unloading—without assigning A52/A75/A106 or loader options.'}],
  [26,{grade:'OEM_FAMILY_REFERENCE',geometry:'HEIDELBERG_SUPRASETTER_FAMILY_REFERENCE',simulation:'FAMILY_PROCESS_MODEL',reason:'CTP-2 is confirmed Heidelberg but model/serial is absent. The twin follows the same bounded Suprasetter family architecture while keeping CTP-2 as a distinct asset; no exact format, loader or laser-module count is inferred.'}],
@@ -152,6 +158,7 @@ export function universalTaxonomy(machineId){
  if(machineId==='BMJ-MCH-0001')return [...POLAR115_TAXONOMY];
  if(machineId==='BMJ-MCH-0004')return [...OFFSET7_GRAVURE_TAXONOMY];
  if(machineId==='BMJ-MCH-0021')return [...QF100CS_TAXONOMY];
+ if(machineId==='BMJ-MCH-0023')return [...COLLATOR_TAXONOMY];
  if(['BMJ-MCH-0029','BMJ-MCH-0030','BMJ-MCH-0031','BMJ-MCH-0032','BMJ-MCH-0033','BMJ-MCH-0034','BMJ-MCH-0035'].includes(machineId))return [...compressorTaxonomyFor(machineId)];
  if(machineId==='BMJ-MCH-0005')return [...OFFSET8_TAXONOMY];
  if(machineId==='BMJ-MCH-0006')return [...OFFSET9_TAXONOMY];
