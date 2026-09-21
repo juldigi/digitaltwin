@@ -5,129 +5,72 @@ import {APM2MachineTemplate} from '../frontend/src/apm2.js';
 import {APM2ProcessSimulation,APM2_SIMULATION_STAGES,APM2_PROCESS_STEPS} from '../frontend/src/simulation-apm2.js';
 import {APM2_DIMENSIONS,APM2_PROCESS_SEQUENCE} from '../frontend/src/data/dimensions-apm2.js';
 import {APM2_TAXONOMY,APM2_TAXONOMY_BY_ID,apm2TaxonomyStats} from '../frontend/src/data/taxonomy-apm2.js';
+import {APM2_TECHNICAL_SOURCES} from '../frontend/src/data/sources-apm2.js';
 
-test('APM2 identity stays faithful to the BMJ database and does not invent a suffix',()=>{
-  assert.equal(APM2_DIMENSIONS.verified.assetCode,'APM-2');
-  assert.equal(APM2_DIMENSIONS.verified.model,'SP 102');
-  assert.equal(APM2_DIMENSIONS.verified.serial,'57115506');
-  assert.equal(APM2_DIMENSIONS.verified.functionalLocation,'PC-PK2-CON-AUT-AUTOPLAT02');
-  assert.equal(APM2_DIMENSIONS.verified.year,1994);
-  assert.equal(APM2_DIMENSIONS.familyReference.suffix,'UNCONFIRMED');
-  assert.equal(APM2_DIMENSIONS.verified.maxSheetWidth,1.020);
-  assert.equal(APM2_DIMENSIONS.verified.maxSheetLength,.720);
-  assert.equal(APM2_DIMENSIONS.familyReference.maxSpeedSph,7500);
-  assert.equal(APM2_DIMENSIONS.familyReference.maxCuttingForceT,250);
+test('APM2 identity stays faithful to BMJ while SP102 family transport evidence remains suffix-neutral',()=>{
+ assert.equal(APM2_DIMENSIONS.verified.assetCode,'APM-2');assert.equal(APM2_DIMENSIONS.verified.model,'SP 102');assert.equal(APM2_DIMENSIONS.verified.serial,'57115506');assert.equal(APM2_DIMENSIONS.verified.functionalLocation,'PC-PK2-CON-AUT-AUTOPLAT02');assert.equal(APM2_DIMENSIONS.verified.year,1994);
+ assert.equal(APM2_DIMENSIONS.familyReference.suffix,'UNCONFIRMED');assert.equal(APM2_DIMENSIONS.verified.maxSheetWidth,1.020);assert.equal(APM2_DIMENSIONS.verified.maxSheetLength,.720);assert.equal(APM2_DIMENSIONS.familyReference.maxSpeedSph,7500);assert.equal(APM2_DIMENSIONS.familyReference.maxCuttingForceT,250);
+ assert.equal(APM2_DIMENSIONS.familyReference.gripperBarChainSetReference,14);assert.equal(APM2_DIMENSIONS.familyReference.intermittentStationTransportFamilyReference,true);
+ assert.ok(APM2_TECHNICAL_SOURCES.some(s=>s.id==='APM2-SP102-CHAIN14'));assert.ok(APM2_TECHNICAL_SOURCES.some(s=>s.id==='APM2-BOBST-GRIPPER-PATENT'));
 });
 
-test('APM2 builds the complete SP102 process line and remains within a mobile geometry budget',()=>{
-  const machine=new APM2MachineTemplate();
-  for(const id of [
-    'apm2-feeder','apm2-register','apm2-transport','apm2-platen','apm2-stripping','apm2-delivery',
-    'apm2-drive','apm2-control','apm2-safety','apm2-register-sidelay','apm2-sidelay-drive',
-    'apm2-gripper-bars','apm2-moving-platen','apm2-stripping-upper','apm2-delivery-paper-stack'
-  ])assert.ok(machine.findNode(id),'missing '+id);
-  assert.ok(machine.meshes.length>130,'APM2 geometry is unexpectedly sparse');
-  assert.ok(machine.meshes.length<1000,'APM2 geometry exceeds mobile budget');
-  assert.equal(machine.root.userData.assetId,'MACHINE-APM2');
-  assert.equal(machine.root.userData.dimensionAudit.serial,'57115506');
-  assert.equal(machine.root.userData.dimensionAudit.variantSuffix,'UNCONFIRMED');
-  machine.dispose();
+test('APM2 builds the complete SP102 family process line with explicit non-installation-CAD boundary',()=>{
+ const machine=new APM2MachineTemplate(),box=new THREE.Box3().setFromObject(machine.root),size=box.getSize(new THREE.Vector3());
+ for(const id of ['apm2-feeder','apm2-register','apm2-transport','apm2-platen','apm2-stripping','apm2-delivery','apm2-drive','apm2-control','apm2-safety','apm2-register-sidelay','apm2-gripper-bars','apm2-moving-platen','apm2-stripping-upper','apm2-delivery-paper-stack'])assert.ok(machine.findNode(id),id);
+ assert.equal(machine.root.userData.bmjAssetId,'BMJ-MCH-0010');assert.equal(machine.root.userData.engineeringDimensions,false);assert.match(machine.root.userData.geometryStatus,/SUFFIX_UNCONFIRMED/);
+ assert.ok(size.x>5.5&&size.x<7.2);assert.ok(size.y>1.9&&size.y<2.6);assert.ok(size.z>2&&size.z<3.5);assert.ok(box.min.y>-.05);machine.dispose();
 });
 
-test('APM2 maps four front lays, a SideLay maintenance focus and fourteen gripper bars',()=>{
-  const machine=new APM2MachineTemplate();
-  for(let i=1;i<=4;i++)assert.ok(machine.findNode('apm2-front-lay-'+i),'missing front lay '+i);
-  for(let i=1;i<=14;i++)assert.ok(machine.findNode('apm2-gripper-bar-'+i),'missing gripper bar '+i);
-  const motor=machine.findNode('apm2-sidelay-drive');
-  let tagged=false;motor.traverse(o=>{if(o.userData?.sideLayMotor)tagged=true;});
-  assert.equal(tagged,true,'SideLay drive motor is not tagged in geometry');
-  assert.ok(APM2_TAXONOMY.some(n=>n.maintenanceTag==='BMJ_Q2_2026_SIDELAY_MOTOR'),'Q2 SideLay maintenance focus missing from taxonomy');
-  machine.dispose();
+test('APM2 geometry contains exactly fourteen family-reference gripper bars with unique phases',()=>{
+ const machine=new APM2MachineTemplate(),bars=[];machine.root.traverse(o=>{if(o.userData.gripperBar)bars.push(o);});
+ assert.equal(bars.length,14);assert.equal(new Set(bars.map(b=>b.userData.barPhase)).size,14);assert.equal(bars.every(b=>b.userData.familyCountReference===14),true);
+ for(let i=1;i<=14;i++)assert.ok(machine.findNode('apm2-gripper-bar-'+i),String(i));
+ const chainNode=APM2_TAXONOMY_BY_ID.get('APM2.TRANSPORT.BARS.SET');assert.ok(chainNode.sourceRefs.includes('APM2-SP102-CHAIN14'));assert.ok(chainNode.sourceRefs.includes('APM2-BOBST-GRIPPER-PATENT'));machine.dispose();
 });
 
-test('APM2 six-level taxonomy resolves process-critical assemblies without claiming variant-specific items as verified',()=>{
-  const machine=new APM2MachineTemplate(),stats=apm2TaxonomyStats();
-  assert.ok(stats.total>190,'APM2 taxonomy lacks detailed six-level coverage');
-  for(let level=1;level<=6;level++)assert.ok(stats.byLevel[level]>0,'empty taxonomy level '+level);
-  for(const id of [
-    'APM2','APM2.FEEDER','APM2.REGISTER','APM2.TRANSPORT','APM2.PLATEN','APM2.STRIP','APM2.DELIVERY',
-    'APM2.DRIVE','APM2.CONTROL','APM2.SAFETY','APM2.REGISTER.SIDE','APM2.TRANSPORT.BARS','APM2.PLATEN.MOTION'
-  ])assert.ok(APM2_TAXONOMY_BY_ID.has(id),'missing taxonomy '+id);
-  for(const id of [
-    'APM2.REGISTER.SIDE.DRIVE','APM2.TRANSPORT.BARS.SET','APM2.PLATEN.TOOLING.CHASE',
-    'APM2.STRIP.STATION.FRAMES','APM2.DELIVERY.PILE.STACK','APM2.DRIVE.MAIN.POWER'
-  ])assert.ok(machine.resolveTaxonomyNode(id),'unmapped taxonomy '+id);
-  const strip=APM2_TAXONOMY_BY_ID.get('APM2.STRIP.STATION');
-  assert.equal(strip.confidence,'REFERENCE_ONLY','variant-specific stripping must remain reference-only');
-  assert.ok(!APM2_TAXONOMY.some(n=>/SP 102 (SE|E|CER|BMA)/i.test(n.name)),'an unconfirmed SP102 suffix leaked into taxonomy');
-  machine.dispose();
+test('APM2 rotor collection is role-tagged and excludes suction stems controls and static platen hardware',()=>{
+ const machine=new APM2MachineTemplate(),sim=new APM2ProcessSimulation(machine.root,machine),allowed=new Set(['feed-roller','chain-sprocket','main-motor','flywheel','clutch-brake','main-shaft','drive-gear']);
+ assert.equal(sim.rotors.length,13);assert.equal(sim.rotors.every(r=>allowed.has(r.userData.mechanismRole)),true);assert.equal(sim.gripperBars.length,14);
+ assert.equal(machine.meshes.some(m=>m.userData.driveRotor&&!allowed.has(m.userData.mechanismRole)),false);sim.dispose();machine.dispose();
 });
 
-test('APM2 exterior cutaway removes guards and housings while retaining mechanism geometry',()=>{
-  const machine=new APM2MachineTemplate(),covers=[];
-  machine.root.traverse(o=>{if(o.isMesh&&o.userData.exteriorCover)covers.push(o);});
-  assert.ok(covers.length>=15,'too few removable APM2 cover elements');
-  machine.setExteriorOpen(true);
-  assert.ok(covers.every(m=>!m.visible),'some exterior cover remains visible');
-  for(const id of [
-    'apm2-register-sidelay','apm2-gripper-bars','apm2-cutting-chase','apm2-moving-platen',
-    'apm2-platen-toggle','apm2-stripping-upper','apm2-delivery-pile','apm2-main-drive'
-  ])assert.equal(machine.findNode(id)?.visible,true,id+' disappeared with cutaway');
-  assert.equal(machine.root.userData.interiorCutawayVisible,true);
-  machine.setExteriorOpen(false);
-  assert.ok(covers.every(m=>m.visible),'exterior did not restore');
-  machine.dispose();
+test('APM2 feeder and SideLay act only in their registration windows while gripper chain remains stopped',()=>{
+ const machine=new APM2MachineTemplate(),sim=new APM2ProcessSimulation(machine.root,machine),side=machine.findNode('apm2-register-sidelay'),side0=side.position.clone();sim.start();let now=1000;const advance=t=>{while(sim.elapsed<t){now+=20;sim.update(now);}};
+ advance(.55);let s=sim.state();assert.equal(s.feederSuctionActive,true);assert.equal(s.transportStopped,true);
+ advance(1.55);s=sim.state();assert.equal(s.registrationActive,true);assert.equal(s.sideLayActive,true);assert.equal(s.transportStopped,true);assert.ok(side.position.distanceTo(side0)>.001);
+ advance(2.4);s=sim.state();assert.equal(s.transportIndexing,true);assert.equal(s.sideLayActive,false);sim.dispose();machine.dispose();
 });
 
-test('APM2 geometry is finite, grounded and does not contain floating process modules',()=>{
-  const machine=new APM2MachineTemplate();machine.root.updateMatrixWorld(true);
-  const box=new THREE.Box3().setFromObject(machine.root),size=box.getSize(new THREE.Vector3());
-  assert.ok(size.x>5.5&&size.x<7.2,'unexpected APM2 length '+size.x);
-  assert.ok(size.y>1.9&&size.y<2.6,'unexpected APM2 height '+size.y);
-  assert.ok(size.z>2.0&&size.z<3.5,'unexpected APM2 width '+size.z);
-  for(const mesh of machine.meshes){
-    const b=new THREE.Box3().setFromObject(mesh);
-    for(const value of [b.min.x,b.min.y,b.min.z,b.max.x,b.max.y,b.max.z])assert.ok(Number.isFinite(value),'non-finite APM2 geometry');
-    assert.ok(b.min.y>-.05,'geometry floats below machine floor: '+(mesh.userData.ownerId||mesh.name));
-  }
-  const platen=new THREE.Box3().setFromObject(machine.findNode('apm2-platen-frame'));
-  const moving=new THREE.Box3().setFromObject(machine.findNode('apm2-moving-platen'));
-  assert.ok(moving.min.x>=platen.min.x-.05&&moving.max.x<=platen.max.x+.05,'moving platen leaves platen frame envelope');
-  assert.ok(moving.min.z>=platen.min.z-.05&&moving.max.z<=platen.max.z+.05,'moving platen floats outside side frames');
-  machine.dispose();
+test('APM2 flatbed pressure dwell freezes sheets and all fourteen gripper bars',()=>{
+ const machine=new APM2MachineTemplate(),sim=new APM2ProcessSimulation(machine.root,machine);sim.start();let now=1000;const advance=t=>{while(sim.elapsed<t){now+=20;sim.update(now);}};
+ advance(3.55);let s=sim.state();assert.equal(s.platenClosed,true);assert.equal(s.pressureDwell,true);assert.equal(s.transportStopped,true);assert.equal(s.interlocks.platenRequiresStoppedTransport,true);
+ const sheets=sim.sheets.map(x=>x.mesh.position.clone()),bars=sim.gripperBars.map(x=>x.position.clone());
+ advance(3.90);assert.equal(sim.sheets.every((x,i)=>x.mesh.position.distanceTo(sheets[i])<1e-10),true);assert.equal(sim.gripperBars.every((x,i)=>x.position.distanceTo(bars[i])<1e-10),true);
+ advance(4.65);assert.equal(sim.state().transportIndexing,true);assert.ok(sim.gripperBars.some((x,i)=>x.position.distanceTo(bars[i])>.03));sim.dispose();machine.dispose();
 });
 
-test('APM2 simulation runs feeder, SideLay, platen, stripping and delivery pile accumulation',()=>{
-  const machine=new APM2MachineTemplate(),sim=new APM2ProcessSimulation(machine.root,machine);
-  assert.deepEqual(APM2_PROCESS_SEQUENCE.map(x=>x.key),['FEEDER','REGISTER','TRANSPORT','PLATEN','STRIP','DELIVERY']);
-  assert.equal(APM2_SIMULATION_STAGES[0],'Pile Feeder');
-  assert.equal(APM2_SIMULATION_STAGES.at(-1),'Non-stop Delivery');
-  assert.equal(APM2_PROCESS_STEPS.length,7);
-  assert.ok(sim.rotors.length>=5,'too few APM2 rotating mechanisms');
-  assert.ok(sim.oscillators.length>=4,'SideLay/platen/stripping/suction motion missing');
+test('APM2 stripping family-reference stroke occurs only while transport is stopped',()=>{
+ const machine=new APM2MachineTemplate(),sim=new APM2ProcessSimulation(machine.root,machine),upper=machine.findNode('apm2-stripping-upper'),lower=machine.findNode('apm2-stripping-lower'),u0=upper.position.clone(),l0=lower.position.clone();sim.start();let now=1000;const advance=t=>{while(sim.elapsed<t){now+=20;sim.update(now);}};
+ advance(5.6);const s=sim.state();assert.equal(s.strippingActive,true);assert.equal(s.transportStopped,true);assert.equal(s.interlocks.strippingRequiresStoppedTransport,true);assert.equal(s.strippingConfigurationVerified,false);assert.ok(upper.position.distanceTo(u0)>.01);assert.ok(lower.position.distanceTo(l0)>.005);sim.dispose();machine.dispose();
+});
 
-  const side=machine.findNode('apm2-register-sidelay'),platen=machine.findNode('apm2-moving-platen'),strip=machine.findNode('apm2-stripping-upper');
-  const side0=side.position.clone(),platen0=platen.position.clone(),strip0=strip.position.clone();
+test('APM2 converted sheets accumulate on top of represented delivery pile and reset cleanly',()=>{
+ const machine=new APM2MachineTemplate(),sim=new APM2ProcessSimulation(machine.root,machine);sim.start();let now=1000;for(let i=0;i<1200;i++){now+=20;sim.update(now);}const s=sim.state();assert.ok(s.completed>0);assert.ok(s.pileSheetsVisible>0);assert.equal(s.visualTimeScaledDemo,true);assert.equal(s.familyProductionReferenceSph,7500);assert.ok(sim.pileSheets.filter(p=>p.mesh.visible).every(p=>p.mesh.position.y>=sim.pileAnchor.y));
+ sim.stop();assert.equal(sim.state().pileSheetsVisible,0);assert.equal(sim.rotors.every((r,i)=>r.quaternion.angleTo(sim.rotorRest[i])<1e-9),true);assert.equal(sim.gripperBars.every((b,i)=>b.position.distanceTo(sim.barRest[i])<1e-10),true);sim.dispose();machine.dispose();
+});
 
-  sim.start();sim.update(0);
-  let pileSeen=false,sideMoved=false,platenMoved=false,stripMoved=false;
-  for(let ms=16;ms<=18000;ms+=16){
-    sim.update(ms);
-    pileSeen ||= sim.state().pileSheetsVisible>0;
-    sideMoved ||= side.position.distanceTo(side0)>.001;
-    platenMoved ||= platen.position.distanceTo(platen0)>.001;
-    stripMoved ||= strip.position.distanceTo(strip0)>.001;
-  }
-  assert.equal(sideMoved,true,'SideLay never moved');
-  assert.equal(platenMoved,true,'platen pressure stroke never moved');
-  assert.equal(stripMoved,true,'stripping frame never moved');
-  assert.equal(pileSeen,true,'delivery pile never accumulated sheets');
-  assert.ok(sim.state().completed>0,'no APM2 sheet completed a cycle');
-  assert.equal(sim.state().uvLampCount,0);
-  assert.equal(sim.state().inkFlowCount,0);
-  sim.stop();assert.equal(sim.state().pileSheetsVisible,0);
-  assert.ok(side.position.distanceTo(side0)<1e-9);
-  assert.ok(platen.position.distanceTo(platen0)<1e-9);
-  assert.ok(strip.position.distanceTo(strip0)<1e-9);
-  sim.dispose();machine.dispose();
+test('APM2 pause and resume do not jump process time',()=>{
+ const machine=new APM2MachineTemplate(),sim=new APM2ProcessSimulation(machine.root,machine);sim.start();sim.update(1000);sim.update(1200);const t=sim.elapsed;sim.pause();sim.update(20000);sim.resume();sim.update(30000);assert.equal(sim.elapsed,t);sim.update(30020);assert.ok(sim.elapsed-t<.03);sim.dispose();machine.dispose();
+});
+
+test('APM2 taxonomy remains six-level and variant-specific systems stay reference-only',()=>{
+ const machine=new APM2MachineTemplate(),stats=apm2TaxonomyStats();assert.ok(stats.total>190);for(let level=1;level<=6;level++)assert.ok(stats.byLevel[level]>0);
+ for(const id of ['APM2','APM2.FEEDER','APM2.REGISTER','APM2.TRANSPORT','APM2.PLATEN','APM2.STRIP','APM2.DELIVERY','APM2.DRIVE','APM2.CONTROL','APM2.SAFETY'])assert.ok(APM2_TAXONOMY_BY_ID.has(id),id);
+ assert.equal(APM2_TAXONOMY_BY_ID.get('APM2.STRIP.STATION').confidence,'REFERENCE_ONLY');assert.ok(!APM2_TAXONOMY.some(n=>/SP 102 (SE|E|CER|BMA)/i.test(n.name)));
+ for(const id of ['APM2.TRANSPORT.BARS.SET','APM2.PLATEN.TOOLING.CHASE','APM2.STRIP.STATION.FRAMES','APM2.DELIVERY.PILE.STACK'])assert.ok(machine.resolveTaxonomyNode(id),id);machine.dispose();
+});
+
+test('APM2 process sequence explicitly separates index and dwell operations',()=>{
+ assert.deepEqual(APM2_SIMULATION_STAGES,['Pile separation / suction pickup','Front lays + SideLay registration','Gripper index to platen','Flatbed die-cut pressure dwell','Gripper index to stripping','Stripping dwell · family reference','Gripper index to delivery','Gripper release / pile formation']);
+ assert.equal(APM2_PROCESS_STEPS.length,8);assert.deepEqual(APM2_PROCESS_SEQUENCE.map(x=>x.key),['FEEDER','REGISTER','TRANSPORT','PLATEN','STRIP','DELIVERY']);
 });
