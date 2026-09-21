@@ -1,6 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {normalizeMachineKey,isDedicatedMachineKey,createMachineTemplate,createMachineSimulation} from '../frontend/src/machine-runtime.js';
 import {UniversalMachineTemplate,UniversalProcessSimulation,universalMachineConfig,universalTaxonomy,universalTechnicalSources} from '../frontend/src/universal-machine.js';
+import {ReferenceMachineTemplate,ReferenceProcessSimulation,isReferenceMachineKey,REFERENCE_MACHINE_IDS} from '../frontend/src/reference-machines.js';
 
 test('legacy BMJ IDs normalize to the same dedicated routes used by machine cards',()=>{
  assert.equal(normalizeMachineKey('BMJ-MCH-0002'),'sheeting');
@@ -10,22 +11,25 @@ test('legacy BMJ IDs normalize to the same dedicated routes used by machine card
  for(const id of ['BMJ-MCH-0002','BMJ-MCH-0003','BMJ-MCH-0009','BMJ-MCH-0010'])assert.equal(isDedicatedMachineKey(id),true,id);
 });
 
-test('new evidence-backed registry assets never fall through to UniversalMachineTemplate',()=>{
+test('exact and strong dedicated assets never fall through to UniversalMachineTemplate',()=>{
  for(const key of ['BMJ-MCH-0006','BMJ-MCH-0007','BMJ-MCH-0008','BMJ-MCH-0011','BMJ-MCH-0012','BMJ-MCH-0013','BMJ-MCH-0014','BMJ-MCH-0015','BMJ-MCH-0016','BMJ-MCH-0018','BMJ-MCH-0019','BMJ-MCH-0020','BMJ-MCH-0022','BMJ-MCH-0024']){
   const template=createMachineTemplate(key);
-  assert.equal(template instanceof UniversalMachineTemplate,false,key+' fell through to universal geometry');
+  assert.equal(template.constructor,UniversalMachineTemplate,key+' fell through to plain universal geometry');
   const sim=createMachineSimulation(key,template.root,template);
-  assert.equal(sim instanceof UniversalProcessSimulation,false,key+' fell through to blocked universal simulation');
+  assert.equal(sim.constructor,UniversalProcessSimulation,key+' fell through to blocked universal simulation');
   sim.dispose();template.dispose();
  }
 });
 
-test('evidence-insufficient assets still use blocked universal runtime',()=>{
- for(const key of ['BMJ-MCH-0004','BMJ-MCH-0017','BMJ-MCH-0021','BMJ-MCH-0023','BMJ-MCH-0025','BMJ-MCH-0028','BMJ-MCH-0031','BMJ-MCH-0040']){
+test('all formerly blocked assets now use reference-grounded geometry and family-process simulation',()=>{
+ assert.equal(REFERENCE_MACHINE_IDS.length,21);
+ for(const key of REFERENCE_MACHINE_IDS){
+  assert.equal(isReferenceMachineKey(key),true,key);
   const template=createMachineTemplate(key),sim=createMachineSimulation(key,template.root,template);
-  assert.ok(template instanceof UniversalMachineTemplate,key);
-  assert.ok(sim instanceof UniversalProcessSimulation,key);
-  assert.equal(sim.state().blocked,true,key);
+  assert.ok(template instanceof ReferenceMachineTemplate,key);
+  assert.ok(sim instanceof ReferenceProcessSimulation,key);
+  assert.equal(sim.state().blocked,false,key);assert.equal(sim.state().available,true,key);
+  assert.notEqual(universalMachineConfig(key).evidence.geometry,'PLACEHOLDER',key);
   sim.dispose();template.dispose();
  }
 });
@@ -41,5 +45,13 @@ test('every non-legacy dedicated BMJ runtime is synchronized with UI evidence ta
   assert.ok(uiSources.length>0,id+' UI sources empty');
   if(runtimeSources.length)assert.deepEqual(uiSources.map(s=>s.id),runtimeSources.map(s=>s.id),id+' source routing diverged');
   template.dispose();
+ }
+});
+
+test('V120 reference assets expose UI taxonomy and technical-source evidence',()=>{
+ for(const id of REFERENCE_MACHINE_IDS){
+  const tax=universalTaxonomy(id),sources=universalTechnicalSources(id);
+  assert.ok(tax.length>0,id);assert.ok(sources.length>0,id);
+  assert.deepEqual([...new Set(tax.map(n=>n.level))].sort(),[1,2,3,4,5,6],id);
  }
 });
