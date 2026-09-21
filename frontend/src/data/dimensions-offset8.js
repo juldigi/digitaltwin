@@ -10,5 +10,6 @@ export const OFFSET8_SPEC=Object.freeze({
  stock:[.00003,.001],speedStandard:15000,speedOption:16500,gripperMargin:[.010,.012],
  feederPile:1.320,deliveryPile:1.295,printingUnits:8,coatingUnits:2,dryerSections:2,
  configuration:'8 PU + L + Y + Y + L',modulePitch:1.18,
+ inkingRollerCountVerified:false,dampeningRollerCountVerified:false,dryerEnergyTechnologyVerified:false,deliveryGripperLoopDimensional:false,
  basis:'Official CX 104 technical limits; BMJ installed module sequence from machine registry/configuration record.'
 });
