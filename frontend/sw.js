@@ -1,4 +1,4 @@
-const VERSION='factory-digital-twin-v113-polar-safety-20260921';
+const VERSION='factory-digital-twin-v114-offset5-rotors-20260921';
 const SHELL=['./','./index.html','./config.json','./assets/favicon.svg',
   './assets/splash-industrial-v79.webp',
   './app-shell-v79.css',
