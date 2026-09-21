@@ -170,9 +170,129 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   }
  }
  enrichFolder(){
-  for(let i=1;i<=7;i++){const a=this.activeGroup(i);if(!a)continue;for(const z of [-.62,.62])this.tag(this.box(a,[1.10,.035,.04],[0,.62,z],'steel',.004),'side-frame-rail');if(i>1&&i<7)for(const z of [-.45,-.15,.15,.45]){const p=this.motion(this.cyl(a,.048,.12,[.45,.78,z],'dark','z'),'spin','z',7,.01,z,i-1);this.tag(p,'transport-pulley');}}
-  const glue=this.activeGroup(5);if(glue){this.tag(this.box(glue,[.48,.55,.42],[.42,.50,.78],'accent',.025),'glue-reservoir');this.tag(this.cyl(glue,.045,.62,[.18,.90,.66],'steel','y'),'glue-line');}
-  const press=this.activeGroup(6);if(press)for(const z of [-.48,.48])this.tag(this.cyl(press,.045,.36,[.30,1.20,z],'steel','x'),'compression-pressure-cylinder');
+  const feed=this.activeGroup(1),align=this.activeGroup(2),fold1=this.activeGroup(3),glue=this.activeGroup(4),fold2=this.activeGroup(5),press=this.activeGroup(6),out=this.activeGroup(7);
+  this.root.userData.detailPass='V123_R9_FGM2_MULTI_VENDOR_PROCESS_RECONSTRUCTION';
+  this.root.userData.exactFolderGluerOemVerified=false;
+  this.root.userData.exactFolderGluerModelVerified=false;
+  this.root.userData.neighborMedia100IdentityProof=false;
+  this.root.userData.localSupplierFamilyEvidence={source:'Jaya Makmur Mesindo',bmjCustomerAssociation:true,folderGluerCatalogue:true,installationProof:false,modelProof:false};
+  this.root.userData.fgm2Capabilities={
+   crashLock:'UNVERIFIED',
+   fourSixCorner:'UNVERIFIED',
+   glueApplicatorType:'UNVERIFIED',
+   glueDetection:'UNVERIFIED',
+   counterKicker:'UNVERIFIED',
+   downstreamPacking:'UNVERIFIED'
+  };
+  this.root.userData.commonProcessMechanisms=['BLANK_FEED','ALIGNMENT','PREBREAK','FOLDING_BELTS','ADHESIVE_APPLICATION_ZONE','FINAL_FOLD','COMPRESSION','DELIVERY'];
+  const tagOption=(node,boundary)=>{if(!node)return;node.userData.installedOptionVerified=false;node.userData.simulationEnabled=false;node.userData.boundary=boundary;};
+
+  if(feed){
+   const table=this.findNode('fgm2-feed-table');
+   if(table){
+    this.tag(this.box(table,[1.22,.04,1.42],[0,.61,0],'steel',.006),'blank-feed-table','MULTI_VENDOR_FOLDER_GLUER_PROCESS');
+    for(const z of [-.64,.64])this.tag(this.box(table,[1.08,.18,.035],[-.05,.72,z],'steel',.004),'blank-side-guide','MULTI_VENDOR_FOLDER_GLUER_PROCESS');
+    const stack=this.box(table,[.78,.035,1.14],[-.18,.68,0],'paper',.003);this.tag(stack,'carton-blank-stack-reference','PROCESS_WORKPIECE_REFERENCE');
+   }
+   const drive=this.findNode('fgm2-feed-drive');
+   if(drive){
+    for(const z of [-.45,-.15,.15,.45]){const belt=this.box(drive,[1.12,.025,.07],[.03,.75,z],'dark',.004);this.tag(belt,'feeder-transport-belt','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+    for(const x of [-.49,.49])for(const z of [-.45,-.15,.15,.45]){const r=this.motion(this.cyl(drive,.045,.07,[x,.75,z],'dark','z'),'spin','z',7,.01,z,0);this.tag(r,'feeder-drive-roller','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+   }
+   const sep=this.findNode('fgm2-feed-separator');
+   if(sep){
+    for(const z of [-.42,0,.42])this.tag(this.box(sep,[.055,.20,.06],[-.48,.84,z],'accent',.004),'blank-separator-gate-reference','MULTI_VENDOR_FOLDER_GLUER_PROCESS');
+    sep.userData.feederTechnologyVerified=false;
+   }
+  }
+
+  if(align){
+   const a=this.findNode('fgm2-aligner');
+   if(a){
+    for(const z of [-.56,.56]){const rail=this.box(a,[1.32,.045,.045],[0,.91,z],'steel',.005);rail.rotation.z=z<0?.035:-.035;this.tag(rail,'blank-aligner-rail','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+    for(const x of [-.48,0,.48]){const r=this.motion(this.cyl(a,.040,.10,[x,.76,-.43],'dark','z'),'spin','z',6,.01,x,1);this.tag(r,'aligner-transport-roller','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+   }
+   const pre=this.findNode('fgm2-prebreaker');
+   if(pre){
+    for(const z of [-.52,.52]){const rail=this.box(pre,[1.25,.035,.055],[0,1.03,z],'steel',.005);rail.rotation.z=z<0?.14:-.14;rail.rotation.x=z<0?.10:-.10;this.tag(rail,'prebreaker-guide-rail','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+    for(const z of [-.46,.46]){const wheel=this.motion(this.cyl(pre,.055,.08,[.36,.88,z],'dark','z'),'spin','z',6.5,.01,z,1);this.tag(wheel,'prebreaker-wheel-reference','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+   }
+  }
+
+  if(fold1){
+   const belts=this.findNode('fgm2-primary-fold');
+   if(belts){
+    for(const z of [-.52,-.20,.20,.52]){const b=this.box(belts,[1.40,.025,.075],[0,.77,z],'dark',.004);this.tag(b,'primary-fold-transport-belt','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+    for(const z of [-.58,.58]){const guide=this.box(belts,[1.32,.035,.045],[0,1.04,z],'steel',.004);guide.rotation.z=z<0?.18:-.18;guide.rotation.x=z<0?.18:-.18;this.tag(guide,'primary-fold-guide','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+   }
+   const lock=this.findNode('fgm2-lockbottom-boundary');
+   tagOption(lock,'Crash-lock bottom module is common in folder-gluer families but no evidence confirms installation on FGM-2.');
+   if(lock){const env=this.box(lock,[.58,.40,1.08],[.16,.91,0],'glass',.014);env.userData.optionReference=true;this.tag(env,'crash-lock-module-capability-envelope','OPTION_BOUNDARY');}
+   const corner=this.findNode('fgm2-corner-boundary');
+   tagOption(corner,'4/6-corner devices are available on multiple folder-gluer families but FGM-2 installed configuration is unknown.');
+   if(corner){for(const z of [-.34,.34]){const env=this.box(corner,[.22,.22,.24],[-.20,.98,z],'glass',.010);env.userData.optionReference=true;this.tag(env,'four-six-corner-device-capability','OPTION_BOUNDARY');}}
+  }
+
+  if(glue){
+   const supply=this.findNode('fgm2-glue-supply');
+   if(supply){
+    this.tag(this.box(supply,[.38,.48,.36],[.43,.50,.64],'accent',.022),'glue-reservoir-reference','MULTI_VENDOR_FOLDER_GLUER_PROCESS');
+    this.tag(this.cyl(supply,.075,.16,[.20,.48,.64],'dark','x'),'glue-pump-reference','MULTI_VENDOR_FOLDER_GLUER_PROCESS');
+    this.tag(this.cyl(supply,.016,.82,[.10,.87,.58],'steel','y'),'glue-supply-line-reference','MULTI_VENDOR_FOLDER_GLUER_PROCESS');
+   }
+   const app=this.findNode('fgm2-glue-applicator-boundary');
+   tagOption(app,'Actual FGM-2 adhesive application hardware may be gun/nozzle/disc/wheel and cold/hot-melt; no type is verified.');
+   if(app){
+    const manifold=this.box(app,[.20,.10,1.00],[-.04,1.08,0],'glass',.008);manifold.userData.optionReference=true;this.tag(manifold,'glue-applicator-capability-envelope','OPTION_BOUNDARY');
+    for(const z of [-.34,.34]){const n=this.cyl(app,.025,.12,[-.04,.94,z],'glass','y');n.userData.optionReference=true;this.tag(n,'glue-nozzle-capability-reference','OPTION_BOUNDARY');}
+   }
+   const detect=this.findNode('fgm2-glue-detection-boundary');
+   tagOption(detect,'Glue-line detection exists on some folder-gluer configurations; installation on FGM-2 is not confirmed.');
+   if(detect){const s=this.box(detect,[.08,.12,.08],[.34,.89,-.54],'glass',.005);s.userData.optionReference=true;this.tag(s,'glue-line-sensor-capability','OPTION_BOUNDARY');}
+  }
+
+  if(fold2){
+   const belts=this.findNode('fgm2-final-fold');
+   if(belts){
+    for(const y of [.75,.98])for(const z of [-.46,-.15,.15,.46]){const b=this.box(belts,[1.48,.025,.07],[0,y,z],'dark',.004);this.tag(b,y>.8?'upper-final-fold-belt':'lower-final-fold-belt','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+    for(const z of [-.56,.56]){const rail=this.box(belts,[1.34,.035,.045],[0,1.10,z],'steel',.004);rail.rotation.z=z<0?.12:-.12;this.tag(rail,'final-fold-guide-rail','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+   }
+   const square=this.findNode('fgm2-squaring');
+   if(square){for(const z of [-.58,.58])this.tag(this.box(square,[.72,.32,.035],[.30,.86,z],'steel',.006),'squaring-guide-plate','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+  }
+
+  if(press){
+   const belts=this.findNode('fgm2-compression-belts');
+   if(belts){
+    for(const y of [.74,1.02])for(const z of [-.48,-.16,.16,.48]){const b=this.box(belts,[1.42,.035,.08],[0,y,z],'dark',.004);this.tag(b,y>.8?'upper-compression-belt':'lower-compression-belt','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+    for(const x of [-.56,.56])for(const z of [-.48,.48]){const r=this.motion(this.cyl(belts,.052,.08,[x,.88,z],'dark','z'),'spin','z',6,.01,z,5);this.tag(r,'compression-belt-drive-roller','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+   }
+   const pressure=this.findNode('fgm2-pressure-reference');
+   if(pressure){
+    pressure.userData.actuationTypeVerified=false;
+    for(const z of [-.48,.48])this.tag(this.cyl(pressure,.040,.34,[.28,1.20,z],'steel','x'),'compression-pressure-actuator-reference','MULTI_VENDOR_FOLDER_GLUER_PROCESS');
+   }
+  }
+
+  if(out){
+   const delivery=this.findNode('fgm2-delivery');
+   if(delivery){
+    for(const z of [-.46,-.15,.15,.46]){const belt=this.box(delivery,[1.16,.028,.075],[-.04,.74,z],'dark',.004);this.tag(belt,'delivery-transport-belt','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+    for(const x of [-.46,.46])for(const z of [-.46,-.15,.15,.46]){const r=this.motion(this.cyl(delivery,.048,.075,[x,.74,z],'dark','z'),'spin','z',6,.01,z,6);this.tag(r,'delivery-drive-roller','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+   }
+   const count=this.findNode('fgm2-counter-boundary');
+   tagOption(count,'Counter/kicker hardware is common on many folder-gluers but is not verified on FGM-2.');
+   if(count){const marker=this.box(count,[.28,.24,.72],[.22,.92,0],'glass',.012);marker.userData.optionReference=true;this.tag(marker,'counter-kicker-capability-envelope','OPTION_BOUNDARY');}
+   const ctrl=this.findNode('fgm2-control');
+   if(ctrl){
+    this.tag(this.box(ctrl,[.46,.72,.42],[-.34,.62,.64],'dark',.024),'main-control-cabinet-reference','CONTROL_FAMILY_REFERENCE');
+    this.tag(this.box(ctrl,[.28,.20,.025],[-.34,.86,.42],'glass',.008),'operator-hmi-reference','CONTROL_FAMILY_REFERENCE');
+    ctrl.userData.controllerBrandVerified=false;
+   }
+   const downstream=this.findNode('fgm2-downstream-boundary');
+   tagOption(downstream,'No packer/bundler is recorded as part of FGM-2 in the BMJ registry.');
+   if(downstream){const env=this.box(downstream,[.54,.32,1.02],[.42,.58,0],'glass',.014);env.userData.optionReference=true;this.tag(env,'downstream-packing-interface-boundary','OPTION_BOUNDARY');}
+  }
  }
  enrichBlanker(){
   const xy=this.activeGroup(2),head=this.activeGroup(3),tool=this.activeGroup(4),sep=this.activeGroup(5),out=this.activeGroup(6),ctl=this.activeGroup(7);
@@ -905,19 +1025,50 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.root.userData.referenceNote='YA1A1A identity is exact to the BMJ registry and independent equipment references. The exterior is rebuilt from a YA1A1A 650×920 installed-machine photo plus YA1A1C/YA1B1 successor-family OEM morphology; internal mechanics use sheet-fed gravure primary references. No serial-specific BMJ option is invented.';
  }
  buildFolderGluer(){
-  this.palette.body=0xe8e8e3;this.palette.accent=0x3d735d;this.palette.dark=0x273034;
+  this.palette.body=0xe8e8e3;this.palette.accent=0x3d735d;this.palette.dark=0x273034;this.palette.orange=0xc77732;
   this.base(11.7,1.95);
   const xs=[-5.0,-3.45,-1.75,0,1.75,3.55,5.0];
+  const widths=[1.32,1.46,1.52,1.40,1.52,1.48,1.26];
   for(let i=1;i<=7;i++){
-   const {g,a}=this.mod(i,[xs[i-1],0,0],[Math.sign(xs[i-1]||1)*.45,.20,0]);
-   for(const z of [-.72,.72]){this.box(g,[1.35,.08,.08],[0,.65,z],'steel',.012);this.box(g,[.08,.72,.08],[-.54,.62,z],'steel',.012);}
-   if(i===1){this.shell(g,[1.35,.65,1.72],[0,.54,0]);for(const z of [-.52,-.26,0,.26,.52])this.motion(this.cyl(a,.055,.18,[.26,.72,z],'dark','z'),'spin','z',8,.02,0,0);}
-   else if(i<=4){for(const z of [-.52,-.18,.18,.52]){const belt=this.box(a,[1.35,.035,.09],[0,.78,z],'dark',.005);belt.userData.transportBelt=true;}for(const z of [-.58,.58]){const rail=this.box(a,[1.28,.045,.045],[0,1.03,z],'steel',.006);rail.rotation.z=z<0?.12:-.12;}if(i===3)this.motion(this.box(a,[.28,.20,.08],[.32,1.02,.48],'accent',.015),'oscillate','z',5,.12,0,2);}
-   else if(i===5){this.box(a,[1.34,.05,.05],[0,1.20,0],'steel',.006);for(const z of [-.45,.45]){const d=this.motion(this.cyl(a,.12,.055,[-.18,.86,z],'orange','z'),'spin','z',5,.02,0,4);d.userData.glueDisc=true;}}
-   else if(i===6){for(const y of [.76,1.01])for(const z of [-.50,-.16,.16,.50])this.box(a,[1.38,.04,.09],[0,y,z],'dark',.005);}
-   else {for(const z of [-.50,-.16,.16,.50])this.motion(this.cyl(a,.06,.14,[0,.80,z],'dark','z'),'spin','z',6,.02,0,6);this.shell(g,[1.30,.58,1.70],[0,.62,0]);}
+   const {g,a}=this.mod(i,[xs[i-1],0,0],[Math.sign(xs[i-1]||1)*.45,.20,0]),w=widths[i-1];
+   for(const z of [-.74,.74]){
+    this.cover(this.box(g,[w,.07,.07],[0,.36,z],'dark',.010));
+    for(const x of [-w*.43,w*.43])this.cover(this.box(g,[.07,.70,.07],[x,.67,z],'steel',.010));
+   }
+   this.cover(this.box(g,[w,.07,1.56],[0,.34,0],'dark',.012));
+
+   if(i===1){
+    this.group(a,'fgm2-feed-table','Blank stack / feeder table',[0,0,0],[0,.10,.10]);
+    this.group(a,'fgm2-feed-drive','Feeder transport',[0,0,0],[0,.12,.12]);
+    this.group(a,'fgm2-feed-separator','Blank separation',[0,0,0],[0,.12,.12]);
+   }else if(i===2){
+    this.group(a,'fgm2-aligner','Blank alignment',[0,0,0],[0,.12,.12]);
+    this.group(a,'fgm2-prebreaker','Prebreaker',[0,0,0],[0,.14,.14]);
+   }else if(i===3){
+    this.group(a,'fgm2-primary-fold','Primary folding belts',[0,0,0],[0,.14,.14]);
+    const lock=this.group(a,'fgm2-lockbottom-boundary','Crash-lock capability boundary',[0,0,0],[0,.18,.16]);lock.userData.installedOptionVerified=false;
+    const corner=this.group(a,'fgm2-corner-boundary','4 / 6-corner capability boundary',[0,0,0],[0,.18,-.16]);corner.userData.installedOptionVerified=false;
+   }else if(i===4){
+    this.group(a,'fgm2-glue-supply','Glue supply',[0,0,0],[0,.12,.12]);
+    const app=this.group(a,'fgm2-glue-applicator-boundary','Glue applicator capability boundary',[0,0,0],[0,.18,.16]);app.userData.installedOptionVerified=false;
+    const detect=this.group(a,'fgm2-glue-detection-boundary','Glue detection capability boundary',[0,0,0],[0,.18,-.16]);detect.userData.installedOptionVerified=false;
+   }else if(i===5){
+    this.group(a,'fgm2-final-fold','Final folding belts',[0,0,0],[0,.14,.14]);
+    this.group(a,'fgm2-squaring','Squaring / guides',[0,0,0],[0,.14,.14]);
+   }else if(i===6){
+    this.group(a,'fgm2-compression-belts','Compression conveyor',[0,0,0],[0,.14,.14]);
+    this.group(a,'fgm2-pressure-reference','Pressure adjustment',[0,0,0],[0,.14,.14]);
+   }else{
+    this.group(a,'fgm2-delivery','Delivery conveyor',[0,0,0],[0,.12,.12]);
+    const count=this.group(a,'fgm2-counter-boundary','Counter / kicker capability',[0,0,0],[0,.16,.14]);count.userData.installedOptionVerified=false;
+    this.group(a,'fgm2-control','Operator control',[0,0,0],[0,.14,.14]);
+    const downstream=this.group(a,'fgm2-downstream-boundary','Packing / bundling boundary',[0,0,0],[.18,.12,0]);downstream.userData.installedOptionVerified=false;
+   }
   }
-  this.root.userData.referenceNote='FGM-2 model is absent from the BMJ registry; morphology follows the nearest installed MEDIA 100 II family used by FGM-1 and FGM-3, not an exact-model claim.';
+  this.root.userData.geometryStatus='MULTI_VENDOR_FOLDER_GLUER_PROCESS_REFERENCE__NOT_MEDIA100_IDENTITY';
+  this.root.userData.exactFolderGluerOemVerified=false;
+  this.root.userData.exactFolderGluerModelVerified=false;
+  this.root.userData.referenceNote='FGM-2 has no OEM/model/serial in the BMJ registry. The former nearest-MEDIA-100-II morphology is removed. This geometry visualizes only common folder-gluer process functions; crash-lock, 4/6-corner, glue-applicator type, glue detection, counter/kicker and downstream packing are explicit unverified boundaries.';
  }
  buildBlanker(){
   this.palette.body=0xf2f1ed;this.palette.dark=0x34393b;this.palette.accent=0x4b7782;this.palette.orange=0xc56d38;this.palette.blue=0x477b9a;
