@@ -181,6 +181,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.root.userData.exactModelPublicDocumentationFound=false;
   this.root.userData.installedBlankingHeadCountVerified=false;
   this.root.userData.installedCollectorStackerVerified=false;
+  this.root.userData.localSupplierFamilyEvidence={source:'Jaya Makmur Mesindo',catalogue:['QF1080B','QF1080C'],bmjCustomerAssociation:true,installationProof:false,exactModelEquivalenceProof:false};
   this.root.userData.familyProcess={
    movingPlatformAxes:['X','Y'],
    stableHead:true,
