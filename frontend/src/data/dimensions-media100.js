@@ -1,6 +1,7 @@
 const COMMON=Object.freeze({
  model:'MEDIA 100 II',workingWidthM:1.000,maxBlankLengthM:.600,referenceMinWorkingWidthM:.126,referenceMinBlankLengthM:.060,
  solidBoardGsm:[100,600],corrugatedReference:'N/F/E flute; some market listings also cite B flute depending configuration',
+ marketMinWorkingWidthReferencesM:[.056,.126],installedMinWorkingWidthVerified:false,installedA1A2SuffixVerified:false,installedGlueHeadCountVerified:false,installedCornerServoPackageVerified:false,installedKickerVerified:false,installedEjectorVerified:false,installedControlGenerationVerified:false,
  nominalRunSpeedMMin:300,inchingSpeedMMin:20,motorKw:11,
  familyLengthsM:{A1:10.50,A2:11.80},familyWeightKg:{A1:4800,A2:5200},
  processes:['blank feeding','alignment / pre-break','pre-fold','lock-bottom / carton-forming conversion','glue application','final folding / trombone','compression delivery'],
