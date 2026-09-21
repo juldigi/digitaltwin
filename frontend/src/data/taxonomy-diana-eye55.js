@@ -9,10 +9,10 @@ const branches={
  FEED:[['STACK','Blank stack support','diana55-feed-stack'],['FRICTION','Friction feeder belts','diana55-feed-friction'],['ALIGN','Blank aligning guides','diana55-feed-align'],['DOUBLE','Double-sheet sensing zone','diana55-feed-double']],
  TRANSPORT:[['BELT','Suction belt','diana55-transport-belt'],['VAC','Vacuum plenum','diana55-transport-vacuum'],['GUIDE','Transport guide rails','diana55-transport-guide']],
  INSPECT:[['WINDOW','Darkened inspection window','diana55-inspection-window'],['TUNNEL','Inspection tunnel / enclosure','diana55-inspection-tunnel'],['BED','Inspection belt bed','diana55-inspection-bed']],
- CAMERA:[['TOP','Upper camera mounting bays','diana55-camera-top'],['LOWANGLE','Low-angle mirror/camera path','diana55-camera-low'],['REAR','Rear-side camera bay','diana55-camera-rear'],['AREA','Area-camera mounting bays','diana55-camera-area']],
+ CAMERA:[['TOP','Upper camera mounting bays · capacity reference','diana55-camera-top'],['LOWANGLE','Low-angle mirror/camera path','diana55-camera-low'],['REAR','Rear-side camera bay · capability reference','diana55-camera-rear'],['AREA','Area-camera mounting bays · capacity reference','diana55-camera-area']],
  LIGHT:[['DOME','Light-dome architecture','diana55-light-dome'],['LED','Adjustable LED arrays','diana55-light-led'],['LOW','Low-angle illumination','diana55-light-low']],
  PROCESS:[['GPU','GPU+CPU processing cabinet','diana55-process-compute'],['HMI','Operator terminal','diana55-process-hmi'],['RECIPE','Master / tolerance recipe storage interface','diana55-process-recipe']],
- REJECT:[['GATE','Mechanical reject gate reference','diana55-reject-gate'],['CHUTE','Reject collection path','diana55-reject-chute'],['SENSOR','Reject confirmation sensing','diana55-reject-sensor']],
+ REJECT:[['GATE','Mechanical reject reference · installed type unverified','diana55-reject-gate'],['AIR','Air-nozzle reject reference · installed type unverified','diana55-reject-air'],['CHUTE','Reject collection path','diana55-reject-chute'],['SENSOR','Reject confirmation sensing','diana55-reject-sensor']],
  DELIVERY:[['BELT','Accepted-product belt','diana55-delivery-belt'],['STACK','Delivery stack / buffer interface','diana55-delivery-stack'],['COUNTER','Output sensing / counter','diana55-delivery-counter']],
  ACCESS:[['FRAME','Machine base and side frames','diana55-access-frame'],['GUARD','Inspection guards and panels','diana55-access-guard'],['DOOR','Service-access panels','diana55-access-door']]
 };
