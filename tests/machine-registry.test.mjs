@@ -64,7 +64,7 @@ test('all database equipment have a confidence-aware 3D route while four flagshi
 test('source data quality issues are preserved rather than silently rewritten',()=>{
   const plt1=MACHINE_REGISTRY.filter(m=>m.sapCode==='PLT-1');
   assert.equal(plt1.length,2,'duplicate SAP Code PLT-1 must remain flagged until SAP is confirmed');
-  assert.ok(plt1.every(m=>/tidak boleh menjadi identifier unik|duplicate|validasi SAP/i.test(m.note)));
+  assert.ok(plt1.every(m=>/tidak boleh (?:menjadi|dianggap) identifier unik|duplicate|validasi SAP/i.test(m.note)));
   const shared=MACHINE_REGISTRY.filter(m=>m.functionalLocation==='PC-PK2-CON-PLT');
   assert.equal(shared.length,3);
   assert.equal(MACHINE_REGISTRY.find(m=>m.name==='FOLDER GLUER - 2 MACHINE').sapCode,'FGM-2');
