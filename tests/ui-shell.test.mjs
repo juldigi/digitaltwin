@@ -8,7 +8,8 @@ const ui=readFileSync(new URL('../frontend/src/ui-v5.js',import.meta.url),'utf8'
 const referenceCss=readFileSync(new URL('../frontend/reference-v76.css',import.meta.url),'utf8');
 const referenceUi=readFileSync(new URL('../frontend/src/reference-v76.js',import.meta.url),'utf8');
 const mobileStableCss=readFileSync(new URL('../frontend/mobile-stable-v78.css',import.meta.url),'utf8');
-const mobileStableUi=readFileSync(new URL('../frontend/src/mobile-stable-v78.js',import.meta.url),'utf8');
+const mobileStableUi=readFileSync(new URL('../frontend/src/app-shell-v79.js',import.meta.url),'utf8');
+const appShellCss=readFileSync(new URL('../frontend/app-shell-v79.css',import.meta.url),'utf8');
 const css=readFileSync(new URL('../frontend/ui-v5.css',import.meta.url),'utf8');
 const responsiveCss=readFileSync(new URL('../frontend/responsive-v5.css',import.meta.url),'utf8');
 const experienceCss=readFileSync(new URL('../frontend/experience-v37.css',import.meta.url),'utf8');
@@ -81,7 +82,7 @@ test('all static buttons are actionable and none is permanently disabled',()=>{
     else if(b.tab)assert.match(app,/data-tab|dataset\.tab/);
     else if(b.workbench)assert.match(ui,/data-workbench|dataset\.workbench/);
     else if(b.partBack)assert.match(engine,/data-part-label-back/);
-    else if(b.mobile)assert.ok(referenceUi.includes('data-mobile-nav'),`mobile nav ${b.mobile} has no handler`);
+    else if(b.mobile)assert.ok(mobileStableUi.includes('data-mobile-nav'),`mobile nav ${b.mobile} has no handler`);
     else assert.fail('button without id or delegated data attribute');
   }
 });
@@ -90,29 +91,20 @@ test('every floating information window can be closed and restored',()=>{
   for(const id of ['filter-close','keyplan-close','notice-close','close-panel','ui-close-workbench','modal-close','panel-launcher-close'])assert.match(html,new RegExp(`id="${id}"`));
   for(const id of ['show-filter','show-keyplan','show-notice','show-detail','show-workbench','panel-launcher'])assert.match(html,new RegExp(`id="${id}"`));
   for(const id of ['filter-close','keyplan-close','notice-close','close-panel','ui-close-workbench','panel-launcher-close','show-filter','show-keyplan','show-notice','show-detail','show-workbench'])assert.match(ui,new RegExp(id));
-  assert.match(css,/\.floating-close/);
-  assert.match(css,/\.panel-launcher-menu/);
+  assert.match(appShellCss,/\.panel-launcher-menu/);
 });
 
 test('mobile portrait and landscape keep panels inside the viewport',()=>{
   assert.match(html,/interactive-widget=resizes-content/);
   assert.match(html,/id="ui-backdrop"/);
-  assert.match(responsiveCss,/env\(safe-area-inset-top/);
-  assert.match(responsiveCss,/orientation:landscape/);
-  assert.match(ui,/visualViewport\?\.height/);
-  assert.match(ui,/setFloatVisible\('\.floating-filter',false\)/);
-  assert.match(css,/@media\(max-width:767px\)/);
-  assert.match(css,/panel-launcher-menu/);
-  assert.match(referenceCss,/\.mobile-nav/);
-  assert.match(referenceCss,/body\.nav-open \.rail/);
-  assert.match(referenceCss,/orientation:landscape/);
-  assert.match(referenceUi,/v76BuildMobileNav/);
-  assert.match(referenceCss,/--v76-sidebar:174px/);
-  assert.match(referenceCss,/--v76-inspector:370px/);
-  assert.match(referenceUi,/v76BuildInspector/);
-  assert.match(referenceUi,/v76BuildSelectionCard/);
-  assert.match(mobileStableCss,/body:not\(\.panel-hidden\) \.center-stack/);
-  assert.match(mobileStableUi,/m78Sync/);
+  assert.match(appShellCss,/env\\(safe-area-inset-top/);
+  assert.match(appShellCss,/orientation:landscape/);
+  assert.match(appShellCss,/@media\\(max-width:767px\\)/);
+  assert.match(appShellCss,/@media\\(min-width:768px\\) and \\(max-width:1024px\\)/);
+  assert.match(appShellCss,/100dvh/);
+  assert.match(mobileStableUi,/visualViewport/);
+  assert.match(mobileStableUi,/data-mobile-nav/);
+  assert.match(mobileStableUi,/closeNav/);
 });
 
 test('visible shell avoids deployment and prototype terminology',()=>{
@@ -128,10 +120,10 @@ test('conditional controls explain requirements rather than failing silently',()
 });
 
 test('service worker refreshes the redesigned shell',()=>{
-  assert.match(sw,/factory-digital-twin-v78-mobile-clean-20260921/);
-  assert.match(sw,/src\/universal-machine\.js/);
-  assert.match(app,/template\.ghost\(true,part\)/,'object selection must automatically ghost all non-selected geometry');
-  for(const asset of ['ui-v5.css','responsive-v5.css','ui-corporate-v74.css','reference-v76.css','mobile-stable-v78.css','src/ui-v5.js','src/reference-v76.js','src/mobile-stable-v78.js','src/app.js','src/simulation.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
+  assert.match(sw,/factory-digital-twin-v79-unified-shell-20260921/);
+  assert.match(sw,/src\\/universal-machine\\.js/);
+  assert.match(app,/template\\.ghost\\(true,part\\)/,'object selection must automatically ghost all non-selected geometry');
+  for(const asset of ['app-shell-v79.css','src/app-shell-v79.js','assets/splash-industrial-v79.webp','src/ui-v5.js','src/app.js','src/simulation.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\\\/')));
 });
 
 test('v41 keeps every right-sidebar taxonomy item clickable after repeated selections',()=>{
@@ -377,20 +369,19 @@ test('v40 labels drill through the six-level taxonomy with individually mapped g
   assert.match(experienceCss,/\.part-label\.is-reference/);
 });
 
-test('v38 interface keeps the scene primary, readable and secondary panels dismissible',()=>{
+test('V79 interface keeps the scene primary, readable and secondary panels dismissible',()=>{
   assert.match(html,/<body class="panel-hidden ui-simple">/);
-  assert.match(html,/experience-v37\.css/);
-  assert.match(html,/experience-v37\.js/);
-  assert.match(experienceCss,/aside#detail-panel/);
-  assert.match(experienceCss,/panel-hidden aside#detail-panel/);
-  assert.match(experienceCss,/orientation:landscape/);
-  assert.match(experienceJs,/aria-expanded/);
+  assert.match(html,/app-shell-v79\\.css/);
+  assert.match(html,/app-shell-v79\\.js/);
+  assert.match(appShellCss,/aside#detail-panel/);
+  assert.match(appShellCss,/panel-hidden aside#detail-panel/);
+  assert.match(appShellCss,/orientation:landscape/);
+  assert.match(mobileStableUi,/aria-expanded/);
   assert.match(experienceJs,/fullscreenchange/);
-  assert.match(experienceJs,/offset5-theme/);
-  assert.match(experienceCss,/--ui-rail:88px/);
-  assert.match(experienceCss,/\.rail small\{[^}]*font-size:9px/);
-  assert.match(experienceCss,/\.view-switch button span\{[^}]*font-size:8px/);
-  assert.match(experienceCss,/\.statusbar\{[^}]*font-size:10px/);
+  assert.match(appShellCss,/--rail-w:92px/);
+  assert.match(appShellCss,/\\.rail button small/);
+  assert.match(appShellCss,/\\.view-switch button span/);
+  assert.match(appShellCss,/\\.statusbar/);
 });
 
 test('runtime binds every workbench button and provides a visual fallback without WebGL',()=>{

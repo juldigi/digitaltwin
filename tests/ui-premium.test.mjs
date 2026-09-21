@@ -2,49 +2,61 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const mobileCss=fs.readFileSync(new URL('../frontend/mobile-stable-v78.css',import.meta.url),'utf8');
-const mobileJs=fs.readFileSync(new URL('../frontend/src/mobile-stable-v78.js',import.meta.url),'utf8');
-const referenceCss=fs.readFileSync(new URL('../frontend/reference-v76.css',import.meta.url),'utf8');
+const css=fs.readFileSync(new URL('../frontend/app-shell-v79.css',import.meta.url),'utf8');
+const js=fs.readFileSync(new URL('../frontend/src/app-shell-v79.js',import.meta.url),'utf8');
 const html=fs.readFileSync(new URL('../frontend/index.html',import.meta.url),'utf8');
 const sw=fs.readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 
-test('V78 fresh mobile shell is loaded last with cache-busting URLs',()=>{
-  assert.match(html,/reference-v76\.css\?v=78[\s\S]*mobile-stable-v78\.css\?v=78/);
-  assert.match(html,/reference-v76\.js\?v=78[\s\S]*mobile-stable-v78\.js\?v=78/);
+test('V79 loads one unified shell after the stable base styles',()=>{
+  assert.match(html,/style\.css[\s\S]*runtime-fallback\.css[\s\S]*app-shell-v79\.css\?v=79/);
+  assert.match(html,/app\.js\?v=79[\s\S]*ui-v5\.js\?v=79[\s\S]*experience-v37\.js\?v=79[\s\S]*app-shell-v79\.js\?v=79/);
+  for(const stale of ['ui-premium-v73.css','ui-corporate-v74.css','reference-v76.css','mobile-stable-v78.css','reference-v76.js','mobile-stable-v78.js'])assert.doesNotMatch(html,new RegExp(stale.replaceAll('.','\\.')));
 });
-test('detail is a full mobile page rather than an overlay sheet',()=>{
-  assert.match(mobileCss,/body:not\(\.panel-hidden\) \.center-stack\{display:none!important\}/);
-  assert.match(mobileCss,/#detail-panel[\s\S]*top:calc\(var\(--m78-head\)/);
-  assert.match(mobileCss,/#detail-panel[\s\S]*border-radius:0!important/);
-  assert.match(mobileCss,/#detail-panel[\s\S]*background:#fff!important/);
+
+test('responsive contract covers phone tablet desktop and landscape',()=>{
+  assert.match(css,/@media\(max-width:767px\)/);
+  assert.match(css,/@media\(max-width:390px\)/);
+  assert.match(css,/@media\(max-height:560px\) and \(orientation:landscape\)/);
+  assert.match(css,/@media\(min-width:768px\) and \(max-width:1024px\)/);
+  assert.match(css,/env\(safe-area-inset-bottom\)/);
+  assert.match(css,/100dvh/);
+  assert.match(css,/prefers-reduced-motion/);
+  assert.match(css,/prefers-contrast:more/);
 });
-test('selected summary cannot overlap machine detail',()=>{
-  assert.match(mobileCss,/body:not\(\.panel-hidden\) \.center-stack\{display:none!important\}/);
-  assert.match(mobileCss,/\.v76-selection-card[\s\S]*z-index:40!important/);
-  assert.match(mobileCss,/#detail-panel[\s\S]*z-index:650!important/);
+
+test('detail is an in-flow desktop inspector and a full mobile page',()=>{
+  assert.match(css,/aside#detail-panel/);
+  assert.match(css,/\.panel-hidden aside#detail-panel/);
+  assert.match(css,/@media\(max-width:767px\)[\s\S]*aside#detail-panel\{position:absolute/);
+  assert.match(css,/\.panel-hidden aside#detail-panel\{transform:translateX\(105%\)/);
 });
-test('2D and 3D are one horizontal segmented control',()=>{
-  assert.match(mobileCss,/\.viewport-mode-switch[\s\S]*display:grid!important/);
-  assert.match(mobileCss,/grid-template-columns:1fr 1fr!important/);
-  assert.match(mobileCss,/grid-auto-flow:column!important/);
+
+test('mobile navigation and drawer have one state owner',()=>{
+  assert.match(css,/body\.nav-open \.rail\{transform:none\}/);
+  assert.match(css,/\.mobile-nav\{position:fixed/);
+  assert.match(js,/const closeNav=/);
+  assert.match(js,/data-mobile-nav/);
+  assert.match(js,/aria-expanded/);
 });
-test('legacy toolbars and floating widgets cannot permanently cover phone screen',()=>{
-  assert.match(mobileCss,/\.scene-heading,.scene-bottom,.view-switch,.ui-mobile-actions,.telemetry-strip,.asset-legend/);
-  assert.match(mobileCss,/\.rail\{display:none!important\}/);
-  assert.match(mobileCss,/body:not\(\.nav-open\) \.rail\{display:none!important\}/);
-  assert.match(mobileCss,/\[hidden\]\{display:none!important\}/);
+
+test('premium generated splash is bounded and cannot get stuck',()=>{
+  assert.match(css,/splash-industrial-v79\.webp/);
+  assert.match(css,/\.app-splash\.is-done/);
+  assert.match(js,/sessionStorage\.getItem\('bmj-splash-seen'\)/);
+  assert.match(js,/setTimeout\(finishSplash,5000\)/);
+  assert.match(sw,/assets\/splash-industrial-v79\.webp/);
 });
-test('detail never activates blur backdrop',()=>{
-  assert.match(mobileCss,/body:not\(\.panel-hidden\) \.ui-backdrop,body\.mobile-panel-open \.ui-backdrop\{display:none!important/);
-  assert.match(mobileCss,/backdrop-filter:none!important/);
-  assert.match(mobileJs,/m78CleanTransient/);
+
+test('icons use one accessible vector family without emoji runtime controls',()=>{
+  assert.match(js,/<symbol id="i-home"/);
+  assert.match(js,/<symbol id="i-settings"/);
+  assert.match(js,/aria-hidden="true"/);
+  assert.match(js,/viewBox="0 0 24 24"/);
 });
-test('V78 forces the phone shell to the supplied light corporate DNA',()=>{
-  assert.match(mobileCss,/\.topbar[\s\S]*background:#fff!important/);
-  assert.match(mobileJs,/classList\.add\('light-mode'\)/);
-});
-test('service worker cache uses new V78 shell files',()=>{
-  assert.match(sw,/factory-digital-twin-v78-mobile-clean-20260921/);
-  assert.match(sw,/mobile-stable-v78\.css/);
-  assert.match(sw,/src\/mobile-stable-v78\.js/);
+
+test('service worker owns only the V79 shell assets',()=>{
+  assert.match(sw,/factory-digital-twin-v79-unified-shell-20260921/);
+  assert.match(sw,/app-shell-v79\.css/);
+  assert.match(sw,/src\/app-shell-v79\.js/);
+  assert.match(sw,/assets\/splash-industrial-v79\.webp/);
 });
