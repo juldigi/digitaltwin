@@ -12,7 +12,7 @@ const roles=(root,key='mechanismRole')=>{
  const s=new Set();root.traverse(o=>{const v=o.userData?.[key];if(v)s.add(v);});return s;
 };
 const roleUnion=root=>{
- const s=new Set();root.traverse(o=>{for(const k of ['mechanismRole','role'])if(o.userData?.[k])s.add(o.userData[k]);});return s;
+ const s=new Set();root.traverse(o=>{for(const k of ['mechanismRole','role'])if(o.userData?.[k])s.add(o.userData[k]);for(const r of o.userData?.mechanismRoles||[])s.add(r);});return s;
 };
 const requireRoles=(model,required)=>{
  const set=roleUnion(model.root);

@@ -373,13 +373,13 @@ export class SheetingMachineTemplate{
       const drive=this.group(knife,'sheeting-knife-drive-v122','Knife Drive / Guide Reference',[0,0,0],[.12,.18,.25],'PROCESS_FAMILY_REFERENCE');
       drive.userData.installedActuationUnknown=true;
       for(const side of [-1,1]){
-        tag(this.cyl(drive,.065,.12,[-.12,1.49,side*1.38],'dark','z',{detail:true,role:'knife-linear-guide-bearing'}),'knife-linear-guide-bearing','HSM56_FLAT_BED_KNIFE_FAMILY');
-        tag(this.box(drive,[.16,.34,.12],[.16,1.35,side*1.38],'steel',.008,{detail:true,role:'knife-slide-block-reference'}),'knife-slide-block-reference','HSM56_FLAT_BED_KNIFE_FAMILY');
+        tag(this.cyl(drive,.065,.12,[.20,1.49,side*1.10],'dark','z',{detail:true,role:'knife-linear-guide-bearing'}),'knife-linear-guide-bearing','HSM56_FLAT_BED_KNIFE_FAMILY');
+        tag(this.box(drive,[.16,.34,.12],[.22,1.35,side*1.10],'steel',.008,{detail:true,role:'knife-slide-block-reference'}),'knife-slide-block-reference','HSM56_FLAT_BED_KNIFE_FAMILY');
       }
-      const motor=tag(this.cyl(drive,.16,.36,[.56,.88,1.52],'dark','x',{detail:true,active:true,motion:'knife-drive-motor-reference',role:'knife-drive-motor-reference'}),'knife-drive-motor-reference','GENERIC_SHEETER_KNIFE_DRIVE');
+      const motor=tag(this.cyl(drive,.16,.36,[.56,.88,1.10],'dark','x',{detail:true,active:true,motion:'knife-drive-motor-reference',role:'knife-drive-motor-reference'}),'knife-drive-motor-reference','GENERIC_SHEETER_KNIFE_DRIVE');
       motor.userData.installedActuationUnknown=true;
-      tag(this.cyl(drive,.12,.10,[.28,.88,1.52],'steel','x',{detail:true,role:'knife-drive-coupling-reference'}),'knife-drive-coupling-reference','GENERIC_SHEETER_KNIFE_DRIVE');
-      tag(this.box(drive,[.42,.05,.08],[.05,1.10,1.50],'steel',.004,{detail:true,role:'knife-linkage-reference'}),'knife-linkage-reference','GENERIC_SHEETER_KNIFE_DRIVE');
+      tag(this.cyl(drive,.12,.10,[.28,.88,1.10],'steel','x',{detail:true,role:'knife-drive-coupling-reference'}),'knife-drive-coupling-reference','GENERIC_SHEETER_KNIFE_DRIVE');
+      tag(this.box(drive,[.42,.05,.08],[.05,1.10,1.10],'steel',.004,{detail:true,role:'knife-linkage-reference'}),'knife-linkage-reference','GENERIC_SHEETER_KNIFE_DRIVE');
     }
 
     const delivery=this.findNode('sheeting-delivery');
@@ -396,7 +396,7 @@ export class SheetingMachineTemplate{
     if(layboy){
       const level=this.group(layboy,'sheeting-stack-level-v122','Stack Height / Lift Drive Reference',[0,0,0],[0,.10,.22],'PROCESS_FAMILY_REFERENCE');
       for(const z of [-1.10,1.10])tag(this.box(level,[.08,.12,.08],[-.92,1.32,z],'bodyDark',.008,{detail:true,role:'stack-height-sensor-reference'}),'stack-height-sensor-reference','STACKER_FAMILY_REFERENCE');
-      for(const z of [-1.22,1.22]){
+      for(const z of [1.18]){
         tag(this.cyl(level,.055,.16,[1.02,.28,z],'dark','z',{detail:true,active:true,motion:'lift-drive-reference',role:'lift-drive-sprocket-reference'}),'lift-drive-sprocket-reference','STACKER_FAMILY_REFERENCE');
         tag(this.box(level,[.035,1.05,.05],[1.02,.88,z],'steel',.004,{detail:true,role:'lift-chain-reference'}),'lift-chain-reference','STACKER_FAMILY_REFERENCE');
       }

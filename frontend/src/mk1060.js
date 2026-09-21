@@ -30,7 +30,7 @@ export class MK1060MachineTemplate{
   const torque=this.findNode('mk1060-transport-torque');if(torque){
    tag(this.box(torque,[.10,.12,.08],[-1.57,.69,1.16],'red',.008),'torque-limiter-proximity-switch');
    tag(this.box(torque,[.22,.035,.035],[-1.69,.69,1.16],'steel',.004),'proximity-switch-bracket');
-   tag(this.cyl(torque,.055,.18,[-1.98,.64,1.16],'steel','torque-limiter','z'),'torque-limiter-adjuster');
+   tag(this.cyl(torque,.055,.18,[-1.98,.64,1.16],'steel','','z'),'torque-limiter-adjuster');
   }
   const chain=this.findNode('mk1060-transport-chain');if(chain){
    for(const z of [-.98,.98]){
@@ -43,7 +43,7 @@ export class MK1060MachineTemplate{
    for(const z of [-.64,.64]){
     tag(this.cyl(platen,.085,.16,[0,.78,z],'steel','','z'),'platen-eccentric-bearing');
     tag(this.box(platen,[.18,.24,.12],[.58,.80,z],'dark',.012),'cutting-force-adjuster');
-    tag(this.cyl(platen,.035,.22,[.58,.94,z],'steel','pressure-eccentric','y'),'cutting-force-adjusting-screw');
+    tag(this.cyl(platen,.035,.22,[.58,.94,z],'steel','','y'),'cutting-force-adjusting-screw');
    }
    tag(this.cyl(platen,.12,1.42,[0,.44,0],'dark','','z'),'platen-main-drive-shaft');
   }
