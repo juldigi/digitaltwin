@@ -1,0 +1,1 @@
+CI verification snapshot for V117b Offset10 nip path and occupancy-driven causality. Temporary branch; do not merge marker.
