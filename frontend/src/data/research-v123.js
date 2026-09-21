@@ -31,6 +31,13 @@ export const V123_NEW_RESEARCH_SOURCES=Object.freeze([
  s('V123-ZUND-RML','ZUND','Router Module RM-L · spindle and clamping-system reference','Zünd','https://www.zund.com/en/cutting-systems/modules-and-tools/router-module-rm-l','OEM_TOOL_REFERENCE'),
  s('V123-ZUND-DIGITAL-SYSTEMS','ZUND','Zünd digital cutting systems family overview','Zünd','https://www.zund.com/en/cutting-systems/digital-cutting-systems','OEM_PRODUCT_INDEX'),
  s('V123-ZUND-DIGITAL-CUTTING','ZUND','Digital cutting workflow and repeatability architecture','Zünd','https://www.zund.com/en/cutting-systems/digital-cutting','OEM_PROCESS_REFERENCE'),
+ s('V123-GRAVURE-SHEETFED-PATENT','OFFSET7','Sheet-fed gravure press · feeder swing pawl, impression gripper, adjustable ink pan, drop-feed nozzle, doctor holder and anti-slack roller','Google Patents','https://patents.google.com/patent/JP3292876B2/en','PRIMARY_MECHANISM','PRIMARY_MECHANISM'),
+ s('V123-GRAVURE-DOCTOR-US','OFFSET7','Gravure doctor-blade holder, pivot shaft and axial oscillator mechanism','Google Patents','https://patents.google.com/patent/US20030213386A1/en','PRIMARY_MECHANISM','PRIMARY_MECHANISM'),
+ s('V123-GRAVURE-DOCTOR-MOVE','OFFSET7','Doctor blade longitudinal shift / vibration architecture for gravure cylinder','Google Patents','https://patents.google.com/patent/EP1531043B1/en','PRIMARY_MECHANISM','PRIMARY_MECHANISM'),
+ s('V123-MOOG-PROGRAM','OFFSET7','Sheet-fed rotogravure press program · single/multicolor formats and cylinder architectures','H. C. MOOG GmbH','https://www.hcmoog.de/products/program/','OEM_FAMILY_REFERENCE','OEM_FAMILY_REFERENCE'),
+ s('V123-MOOG-TECH','OFFSET7','Sheet-fed rotogravure technology · high-pile feeder/delivery, UV/IR and hot-air knife option boundaries','H. C. MOOG GmbH','https://www.hcmoog.de/products/rotogravure-technology/','OEM_FAMILY_REFERENCE','OEM_FAMILY_REFERENCE'),
+ s('V123-MOOG-ABOUT','OFFSET7','Long-running specialist reference for single- and multi-color sheet-fed gravure presses','H. C. MOOG GmbH','https://www.hcmoog.de/about/','OEM_FAMILY_REFERENCE','OEM_FAMILY_REFERENCE'),
+ s('V123-YA1B1-CLOSE','OFFSET7','YA1B1 single-colour sheet-fed gravure close-family market reference · high-pile architecture and 6000 sheet/h class','Made-in-China supplier listing','https://cneletech.en.made-in-china.com/product/sZjaJrMOrtWc/China-Sheet-Fed-Gravure-Press-Printing-Machine.html','CLOSE_FAMILY_MARKET_REFERENCE','CLOSE_FAMILY_REFERENCE'),
 ]);
 const seen=new Set();
 export const V123_SOURCE_LEDGER=Object.freeze([...V123_NEW_RESEARCH_SOURCES,...V122_SOURCE_LEDGER].filter(e=>e.url&&!seen.has(e.url)&&(seen.add(e.url),true)));
