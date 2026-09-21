@@ -1,0 +1,4 @@
+export const MK920_SPEC=Object.freeze({assetId:'BMJ-MCH-0011',model:'MK 920 YMI',serial:'20110509330',year:2011,sap:'APM-5',maxSheet:[.920,.650],minSheet:[.360,.520],maxSpeed:6500,foilPullAxes:3,processes:['hot-foil stamping','flatbed die-cutting'],dimensionalBoundary:'Sheet limits, rated speed and three precision foil-pull systems are reference-supported. Installed reel count, heating-zone count, platen force, exact exterior envelope and delivery options require BMJ serial-specific evidence.'});
+export const MK920_STATIONS=Object.freeze([
+ {key:'FEED',label:'Pile Feeder',x:-3.15},{key:'REGISTER',label:'Registration Table',x:-2.05},{key:'FOIL',label:'Foil Unwind and Advance',x:-.65},{key:'PLATEN',label:'Heated Stamping Platen',x:.20},{key:'TRANSPORT',label:'Gripper-chain Transport',x:1.10},{key:'DELIVERY',label:'Delivery Pile',x:2.65}
+]);
