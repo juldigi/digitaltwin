@@ -187,9 +187,10 @@ test('V115 Offset5 prioritizes high-value downstream rotor animation within the 
   assert.equal(byRole('sheet-brake-roller').length,3);
   assert.equal(byRole('delivery-chain-sprocket').length,4);
   const references=machine.meshes.filter(m=>m.userData.motionBudget==='STATIC_REFERENCE_MOBILE');
-  assert.equal(references.filter(m=>m.userData.rotorRoleReference==='dryer-transport-roller').length,6);
-  assert.equal(references.filter(m=>m.userData.rotorRoleReference==='delivery-chain-sprocket-ring').length,4);
-  assert.equal(references.filter(m=>m.userData.rotorRoleReference==='delivery-tensioner-idler').length,2);
+  const referenceCount=role=>references.filter(m=>m.userData.rotorRoleReference===role).reduce((sum,m)=>sum+(m.userData.rotorElementCount||1),0);
+  assert.equal(referenceCount('dryer-transport-roller'),6);
+  assert.equal(referenceCount('delivery-chain-sprocket-ring'),4);
+  assert.equal(referenceCount('delivery-tensioner-idler'),2);
 
   for(const id of ['coater-chamber-locks','dryer-ventilation','delivery-pile-lift']){
     const node=machine.findNode(id);assert.ok(node,id);const tagged=[];node.traverse(o=>{if(o.isMesh&&o.userData.dynamicRotor)tagged.push(o);});assert.equal(tagged.length,0,id+' must not be a dynamic rotor group');
