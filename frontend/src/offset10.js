@@ -3,6 +3,7 @@ import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js'
 import {OFFSET10_DIMENSIONS,OFFSET10_MODULE_SEQUENCE,OFFSET10_MODULE_CENTERS,offset10DimensionAudit} from './data/dimensions-offset10.js';
 import {OFFSET10_ORIENTATION,OFFSET10_TECHNICAL_SOURCES} from './data/sources-offset10.js';
 import {OFFSET10_TAXONOMY,OFFSET10_TAXONOMY_BY_ID} from './data/taxonomy-offset10.js';
+import {V123_SOURCE_STATS} from './data/research-v123.js';
 
 const V=a=>new THREE.Vector3(...a);
 const D=OFFSET10_DIMENSIONS.layout;
@@ -14,7 +15,7 @@ export class Offset10MachineTemplate{
     this.root.userData={assetId:'MACHINE-OFFSET10',orientation:OFFSET10_ORIENTATION,taxonomyVersion:'offset10-taxonomy-v1',machineEnvelope:OFFSET10_DIMENSIONS,dimensionAudit:offset10DimensionAudit(),sources:OFFSET10_TECHNICAL_SOURCES};
     this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.exteriorOpen=false;this.ghosted=false;
     this.palette={graphite:0x293238,black:0x12191d,silver:0xb7c0c1,steel:0x879397,light:0xe6e8e2,paper:0xf2edda,rubber:0x22272b,glass:0x69a9bd,red:0xb43835,yellow:0xe0b73e,blue:0x325c86,violet:0x7652ff,foil:0xd6c17b,green:0x3c8d68};
-    this.build();
+    this.build();this.enrichV123();
     this.taxonomy=OFFSET10_TAXONOMY;this.taxonomyById=OFFSET10_TAXONOMY_BY_ID;
     for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}
     this.original=this.parts.map(p=>p.position.clone());this.root.updateMatrixWorld(true);
@@ -351,6 +352,56 @@ export class Offset10MachineTemplate{
     this.box(g,[1.46,.62,.06],[-7.0,1.74,-2.62],'black',.025);
     this.box(g,[1.30,.50,.025],[-7.0,1.75,-2.585],'glass',.018);
     this.box(g,[1.94,.06,.70],[-7.0,1.48,-2.84],'steel',.018);
+  }
+  enrichV123(){
+    this.root.userData.researchVersion='V123';
+    this.root.userData.researchSourceCount=V123_SOURCE_STATS.total;
+    this.root.userData.detailPass='V123_CX104_COATING_AIRTRANSFER_DELIVERY_FOILSTAR';
+    const tag=(m,role,evidence='HEIDELBERG_CX104_OEM')=>{if(m){m.userData.mechanismRole=role;m.userData.evidence=evidence;m.userData.detail=true;}return m;};
+    for(const key of ['CU1','CU2','CUF']){
+      const id='o10-'+key.toLowerCase(),ch=this.findNode(id+'-chamber'),an=this.findNode(id+'-anilox'),drip=this.findNode(id+'-drip-tray');
+      if(ch){
+        tag(this.box(ch,[.36,.018,2.08],[-.27,2.285,0],'steel',.003),'doctor-blade-metering-edge');
+        tag(this.box(ch,[.36,.018,2.08],[-.27,2.155,0],'steel',.003),'doctor-blade-sealing-edge');
+        ch.userData.oemArchitecture='PRESSURIZED_CHAMBER_DOCTOR_BLADE';
+      }
+      if(an){
+        for(const z of [-1.15,1.15])tag(this.box(an,[.16,.16,.10],[-.10,2.01,z],'graphite',.010),'compact-anilox-bearing-unit');
+      }
+      if(drip){
+        for(const z of [-.86,.86])tag(this.box(drip,[.055,.10,.055],[.02,1.91,z],'blue',.006),'coating-level-sensor');
+        drip.userData.oemFunction='DRIP_TRAY_WITH_LEVEL_SENSING';
+      }
+    }
+    for(const m of OFFSET10_MODULE_SEQUENCE.filter(x=>x.type==='print')){
+      const air=this.findNode('o10-'+m.key.toLowerCase()+'-airtransfer');
+      if(air){
+        air.userData.oemFunction='CONTACT_FREE_SHEET_GUIDE_VENTURI';
+        air.userData.venturiNozzleTechnology=true;
+        for(const z of [-.72,0,.72])tag(this.box(air,[.10,.018,.065],[.34,.84,z],'silver',.004),'airtransfer-venturi-nozzle');
+      }
+    }
+    const brake=this.findNode('o10-delivery-sheet-brake');
+    if(brake){
+      brake.userData.oemFunction='PRESETTABLE_DYNAMIC_SHEET_BRAKE';
+      for(const z of [-.90,-.30,.30,.90])tag(this.box(brake,[.34,.025,.08],[1.30,1.18,z],'black',.004),'sheet-brake-belt-reference');
+      for(const z of [-.90,.90])tag(this.box(brake,[.08,.16,.08],[1.58,1.15,z],'steel',.006),'sheet-brake-position-sensor');
+    }
+    const pile=this.findNode('o10-delivery-pile');
+    if(pile){
+      for(const z of [-.78,.78])tag(this.box(pile,[.06,.18,.06],[1.72,1.08,z],'blue',.006),'delivery-pile-height-sensor');
+    }
+    const foil=this.findNode('o10-foilstar');
+    if(foil){
+      foil.userData.oemIndexingConfirmed=true;
+      foil.userData.minimumFoilThicknessMicron=6;
+      const sensors=this.findNode('o10-foilstar-sensors');
+      if(sensors){
+        tag(this.cylinder(sensors,.035,.08,[-.08,3.82,1.10],'steel','z'),'foil-unwind-index-encoder','HEIDELBERG_FOILSTAR');
+        tag(this.cylinder(sensors,.035,.08,[.17,3.27,1.10],'steel','z'),'foil-rewind-index-encoder','HEIDELBERG_FOILSTAR');
+        tag(this.box(sensors,[.08,.08,.06],[-.18,3.36,1.04],'blue',.006),'foil-dancer-position-sensor','HEIDELBERG_FOILSTAR');
+      }
+    }
   }
   resolvePart(object){let p=object;while(p&&p!==this.root){if(p.userData.selectable)return p;p=p.parent;}return null;}
   findNode(nodeId){return nodeId==='MACHINE-OFFSET10'?this.root:this.nodes.find(n=>n.userData.nodeId===nodeId)||null;}

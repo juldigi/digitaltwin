@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {UniversalMachineTemplate} from './universal-machine.js';
-import {V122_SOURCE_STATS} from './data/research-v122.js';
+import {V123_SOURCE_STATS} from './data/research-v123.js';
 
 const AXIS={x:new THREE.Vector3(1,0,0),y:new THREE.Vector3(0,1,0),z:new THREE.Vector3(0,0,1)};
 export const REFERENCE_MACHINE_IDS=Object.freeze([
@@ -15,12 +15,12 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  constructor(machineId){
   super(machineId);
   this.root.name=this.cfg.machine.name+' · REFERENCE-GROUNDED';
-  this.root.userData.referenceBuilder='V122_RESEARCH_GROUNDED_BUILDER';
+  this.root.userData.referenceBuilder='V123_RESEARCH_GROUNDED_BUILDER';
   this.root.userData.engineeringDimensions=false;
   this.root.userData.referenceBoundary=this.cfg.profile?.unknowns||[];
-  this.root.userData.researchVersion='V122';
-  this.root.userData.researchSourceCount=V122_SOURCE_STATS.total;
-  this.root.userData.newReviewedSources=V122_SOURCE_STATS.newReviewed;
+  this.root.userData.researchVersion='V123';
+  this.root.userData.researchSourceCount=V123_SOURCE_STATS.total;
+  this.root.userData.newReviewedSources=V123_SOURCE_STATS.newReviewed;
   this.enrichV121();
   for(const m of this.activeMeshes){
    m.userData.motionRestPosition=m.position.clone();
@@ -47,7 +47,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  }
  enrichV121(){
   const no=this.cfg.machine.no;
-  this.root.userData.detailPass='V122_COMPONENT_LEVEL_ENRICHMENT';
+  this.root.userData.detailPass='V123_COMPONENT_LEVEL_ENRICHMENT';
   if(no===4)return this.enrichGravure();
   if(no===17)return this.enrichFolder();
   if(no===21)return this.enrichBlanker();
@@ -101,7 +101,9 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   if(drum){for(const z of [-.48,.48])this.tag(this.box(drum,[.10,.06,.08],[0,.80,z],'accent',.006),'plate-clamp-bar');for(const z of [-.52,.52])this.tag(this.cyl(drum,.06,.12,[0,.80,z],'steel','z'),'drum-bearing');this.tag(this.box(drum,[.38,.06,.16],[.16,.50,.54],'dark',.008),'vacuum-manifold');}
   if(laser){this.tag(this.box(laser,[.05,.05,.96],[0,1.12,0],'steel',.004),'laser-linear-rail');for(const z of [-.22,0,.22])this.tag(this.box(laser,[.09,.09,.11],[0,1.12,z],'accent',.008),'laser-diode-module');}
   if(punch){for(const z of [-.34,.34]){const p=this.motion(this.cyl(punch,.025,.18,[0,.84,z],'steel','y'),'press','y',3,.045,z,4);this.tag(p,'internal-punch-pin','SUPRASETTER_OPTION_BOUNDARY');}}
-  if(unload){for(const z of [-.42,.42])this.tag(this.box(unload,[.62,.025,.05],[.08,.64,z],'steel',.004),'plate-unload-guide');this.tag(this.box(unload,[.34,.30,.34],[-.28,.42,.48],'dark',.02),'debris-filter-interface');}
+  if(unload){for(const z of [-.42,.42])this.tag(this.box(unload,[.62,.025,.05],[.08,.64,z],'steel',.004),'plate-unload-guide');this.tag(this.box(unload,[.34,.30,.34],[-.28,.42,.48],'dark',.02),'debris-filter-interface');const fan=this.motion(this.cyl(unload,.10,.12,[-.42,.54,.48],'dark','x'),'spin','x',8,.01,0,5);this.tag(fan,'debris-removal-vacuum-fan','SUPRASETTER_OEM');this.tag(this.box(unload,[.20,.28,.20],[-.52,.38,.48],'filter',.012),'debris-filter-cartridge','SUPRASETTER_OEM');}
+  if(drum){this.tag(this.box(drum,[.26,.18,.22],[-.32,.48,.52],'blue',.012),'temperature-stabilizer-interface','SUPRASETTER_OEM');for(const z of [-.42,.42])this.tag(this.cyl(drum,.012,.54,[-.28,.44,z],'blue','y'),'temperature-control-line-reference','SUPRASETTER_OEM');}
+  this.root.userData.suprasetterOptions={internalPunch:'AVAILABLE_NOT_INSTALLATION_CONFIRMED',debrisRemoval:'AVAILABLE_NOT_INSTALLATION_CONFIRMED',aplAcl:'MODEL_CAPABILITY_ONLY'};
  }
  enrichImagesetter(){
   const supply=this.activeGroup(1),capstan=this.activeGroup(2),scan=this.activeGroup(3),laser=this.activeGroup(4),cut=this.activeGroup(5),out=this.activeGroup(6);
@@ -114,11 +116,11 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  }
  enrichZund(){
   const table=this.activeGroup(1),beam=this.activeGroup(2),car=this.activeGroup(3),tools=this.activeGroup(4),cam=this.activeGroup(5),ctl=this.activeGroup(6);
-  if(table){for(let x=-2.25;x<=2.25;x+=.45)for(let z=-.90;z<=.90;z+=.45){const port=this.cyl(table,.012,.015,[x,.635,z],'dark','y');this.tag(port,'vacuum-port');}for(const x of [-2.0,-1.0,0,1.0,2.0])this.tag(this.box(table,[.015,.02,2.15],[x,.63,0],'accent',.001),'vacuum-zone-divider');}
+  if(table){for(let x=-2.25;x<=2.25;x+=.45)for(let z=-.90;z<=.90;z+=.45){const port=this.cyl(table,.012,.015,[x,.635,z],'dark','y');this.tag(port,'vacuum-port');}for(const x of [-2.0,-1.0,0,1.0,2.0])this.tag(this.box(table,[.015,.02,2.15],[x,.63,0],'accent',.001),'vacuum-zone-divider');for(const x of [-1.5,-.5,.5,1.5])this.tag(this.box(table,[.08,.08,.12],[x,.46,1.02],'accent',.006),'vacuum-zone-valve','ZUND_G3_OEM');table.userData.individuallySwitchableVacuumZones=true;}
   if(beam){for(const z of [-1.15,1.15])this.tag(this.box(beam,[4.90,.04,.05],[0,.82,z],'steel',.005),'gantry-linear-guide');this.tag(this.box(beam,[4.60,.025,.035],[0,.77,-1.12],'dark',.003),'rack-reference');}
   if(car){this.tag(this.box(car,[.28,.12,.46],[0,1.05,0],'accent',.012),'module-carrier');for(const z of [-.14,.14])this.tag(this.cyl(car,.025,.36,[0,.96,z],'steel','y'),'z-axis-guide');}
-  if(tools){for(const [z,role] of [[-.18,'crease-wheel'],[0,'oscillating-knife'],[.18,'router-tool']]){const t=this.motion(this.cyl(tools,.035,.24,[0,.91,z],role==='oscillating-knife'?'orange':'steel','y'),'press','y',6,.045,z,3);this.tag(t,role);}}
-  if(cam){this.tag(this.cyl(cam,.060,.07,[-.12,1.34,-.82],'glass','y'),'icc-camera-lens','ZUND_ICC');this.tag(this.cyl(cam,.090,.025,[-.12,1.27,-.82],'accent','y'),'icc-led-ring','ZUND_ICC');}
+  if(tools){for(const [z,role] of [[-.18,'crease-wheel'],[0,'oscillating-knife'],[.18,'router-tool']]){const t=this.motion(this.cyl(tools,.035,.24,[0,.91,z],role==='oscillating-knife'?'orange':'steel','y'),'press','y',6,.045,z,3);this.tag(t,role);}this.tag(this.box(tools,[.22,.06,.24],[.20,.72,.44],'accent',.008),'iti-initialization-pad','ZUND_G3_OEM');this.tag(this.cyl(tools,.020,.46,[.24,1.06,.34],'dark','y'),'router-dust-extraction-hose','ZUND_ROUTING_FAMILY');tools.userData.arcMagazineCapability='OPTIONAL_ON_G3_NOT_INSTALLED_ASSUMPTION';}
+  if(cam){this.tag(this.cyl(cam,.060,.07,[-.12,1.34,-.82],'glass','y'),'icc-camera-lens','ZUND_ICC');this.tag(this.cyl(cam,.090,.025,[-.12,1.27,-.82],'accent','y'),'icc-led-ring','ZUND_ICC');this.tag(this.cyl(cam,.012,.20,[-.12,1.18,-.82],'orange','y'),'icc-laser-pointer-reference','ZUND_ICC');}
   if(ctl){this.tag(this.box(ctl,[.36,.24,.025],[-2.30,.92,-1.69],'glass',.008),'workstation-display');this.tag(this.box(ctl,[.42,.42,.35],[-2.10,.38,-1.30],'dark',.02),'vacuum-generator-interface');}
  }
  enrichCompressor(){
@@ -126,9 +128,9 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   if(intake){this.tag(this.box(intake,[.28,.32,.28],[0,.78,0],'dark',.02),'intake-filter');this.tag(this.cyl(intake,.07,.16,[.12,.58,0],'steel','x'),'inlet-valve');}
   if(motor){for(let x=-.18;x<=.18;x+=.06)this.tag(this.box(motor,[.018,.40,.50],[x,.68,0],'steel',.002),'motor-cooling-fin');this.tag(this.cyl(motor,.045,.18,[.26,.68,0],'steel','x'),'motor-coupling');}
   if(airend){this.tag(this.cyl(airend,.12,.40,[0,.70,-.10],'steel','x'),'screw-airend-housing');this.tag(this.cyl(airend,.045,.45,[0,.76,.05],'dark','x'),'airend-shaft');}
-  if(sep){this.tag(this.cyl(sep,.18,.62,[0,.72,0],'steel','y'),'separator-vessel');this.tag(this.cyl(sep,.055,.16,[.16,1.05,0],'dark','y'),'minimum-pressure-valve');}
+  if(sep){this.tag(this.cyl(sep,.18,.62,[0,.72,0],'steel','y'),'separator-vessel');this.tag(this.cyl(sep,.11,.38,[0,.78,0],'filter','y'),'oil-separator-element','ATLAS_GA26_FLOW_REFERENCE');this.tag(this.cyl(sep,.055,.16,[.16,1.05,0],'dark','y'),'minimum-pressure-valve');this.tag(this.cyl(sep,.010,.42,[-.10,.88,.18],'steel','y'),'oil-scavenge-line','ATLAS_GA26_FLOW_REFERENCE');}
   if(circuit){this.tag(this.cyl(circuit,.055,.28,[0,.64,.22],'dark','y'),'oil-filter');this.tag(this.box(circuit,[.24,.16,.18],[.12,.86,-.24],'accent',.015),'thermostatic-valve');for(const z of [-.28,.28])this.tag(this.cyl(circuit,.018,.50,[0,.88,z],'steel','y'),'oil-air-pipe-reference');}
-  if(cool){for(let y=.52;y<=1.06;y+=.09)this.tag(this.box(cool,[.025,.035,.72],[0,y,0],'steel',.002),'cooler-fin');const fan=this.motion(this.cyl(cool,.17,.08,[.12,1.18,0],'dark','z'),'spin','z',11,.01,0,null);this.tag(fan,'cooling-fan');this.tag(this.box(cool,[.22,.12,.16],[-.16,.48,.35],'dark',.012),'condensate-drain');}
+  if(cool){for(let y=.52;y<=1.06;y+=.09)this.tag(this.box(cool,[.025,.035,.72],[0,y,0],'steel',.002),'cooler-fin');this.tag(this.box(cool,[.18,.52,.32],[-.22,.80,-.20],'steel',.008),'air-cooler-core','ATLAS_GA26_FLOW_REFERENCE');this.tag(this.box(cool,[.18,.52,.32],[.22,.80,-.20],'steel',.008),'oil-cooler-core','ATLAS_GA26_FLOW_REFERENCE');const fan=this.motion(this.cyl(cool,.17,.08,[.12,1.18,0],'dark','z'),'spin','z',11,.01,0,null);this.tag(fan,'cooling-fan');this.tag(this.box(cool,[.22,.12,.16],[-.16,.48,.35],'dark',.012),'condensate-drain');this.tag(this.box(cool,[.12,.18,.12],[.12,.46,.38],'accent',.008),'condensate-trap','ATLAS_GA26_FLOW_REFERENCE');}
   if(ctl)this.tag(this.box(ctl,[.24,.18,.025],[-.02,1.02,-.62],'glass',.008),'compressor-controller');
  }
  enrichSansin(){
