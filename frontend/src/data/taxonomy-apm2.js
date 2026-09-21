@@ -83,7 +83,7 @@ for(const [k,n,r,v] of l2)add('APM2.'+k,'APM2',2,'Unit Utama',n,{meshRefs:r,sour
 
 /* GRIPPER TRANSPORT */
 {
- const chain=sub('APM2.TRANSPORT','CHAIN','Twin Gripper Chains',['apm2-gripper-chain'],['APM2-SP102-PARTS']);
+ const chain=sub('APM2.TRANSPORT','CHAIN','Twin Gripper Chains',['apm2-gripper-chain'],['APM2-SP102-PARTS','APM2-SP102-CHAIN14','APM2-BOBST-GRIPPER-PATENT']);
  const cb=block(chain,'LOOP','Chain loop / guides',['apm2-gripper-chain']);
  part(cb,'OS','Operator-side chain',['apm2-gripper-chain-os'],['Chain links','Chain guide','Tension reference']);
  part(cb,'DS','Drive-side chain',['apm2-gripper-chain-ds'],['Chain links','Chain guide','Tension reference']);
