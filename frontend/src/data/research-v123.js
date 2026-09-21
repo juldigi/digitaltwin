@@ -21,6 +21,16 @@ export const V123_NEW_RESEARCH_SOURCES=Object.freeze([
  s('V123-BOBST-GRIPPER','APM2','BOBST gripper-bar transport through cutting, stripping and blank separation','Google Patents','https://patents.google.com/patent/US20030107167A1/en','PRIMARY_MECHANISM','PRIMARY_MECHANISM'),
  s('V123-BOBST-BLANK','APM2','BOBST blank separation and frontal/side register process','Google Patents','https://patents.google.com/patent/US5810233A/es','PRIMARY_MECHANISM','PRIMARY_MECHANISM'),
  s('V123-BOBST-FOLD','MEDIA100','BOBST modular folding device for folder-gluer','Google Patents','https://patents.google.com/patent/US5762597A/en','PRIMARY_MECHANISM','PRIMARY_MECHANISM')
+ s('V123-CX104-AU','OFFSET8/OFFSET10','Speedmaster CX 104 global-bestseller configuration and delivery reference','HEIDELBERG Australia & New Zealand','https://www.heidelberg.com/au/en/products/offset_printing_1/speedmaster_cx_104_campaign.jsp','OEM_PRODUCT'),
+ s('V123-CX104-PL','OFFSET8/OFFSET10','Speedmaster CX 104 coating-unit configuration reference','HEIDELBERG Polska','https://www.heidelberg.com/pl/pl/drukowanie/druk_offsetowy/speedmaster_cx_104_pl/speedmaster_CX_104.jsp','OEM_PRODUCT'),
+ s('V123-CX104-PL-BEST','OFFSET8/OFFSET10','Speedmaster CX 104 chamber-doctor-blade / anilox / level-sensor reference','HEIDELBERG Polska','https://www.heidelberg.com/pl/pl/drukowanie/druk_offsetowy/speedmaster_cx_104_pl/speedmaster_cx104_bestseller.jsp','OEM_PRODUCT'),
+ s('V123-CX104-TR','OFFSET8/OFFSET10','Speedmaster CX 104 Turkish product architecture','HEIDELBERG Türkiye','https://www.heidelberg.com/tr/tr/baski/ofset_bask_/speedmaster_cx_104/speedmaster_cx_104.jsp','OEM_PRODUCT'),
+ s('V123-ZUND-S3','ZUND','S3 digital cutter · vacuum plate, automatic tool initialization, modular tooling','Zünd','https://www.zund.com/en/cutting-systems/digital-cutting-systems/s3-cutter','OEM_PRODUCT'),
+ s('V123-ZUND-OCC','ZUND','Over Cutter Camera · one-shot register-mark capture and ICC interoperability','Zünd','https://www.zund.com/en/cutting-systems/registration-methods/over-cutter-camera','OEM_PRODUCT'),
+ s('V123-ZUND-RML-DETAIL','ZUND','RM-L 3.6 kW routing system · water cooling, dust extraction, MQL','Zünd','https://www.zund.com/en/cutting-systems/modules-and-tools/router-module-rm-l/rm-l','OEM_TOOL_REFERENCE'),
+ s('V123-ZUND-RML','ZUND','Router Module RM-L · spindle and clamping-system reference','Zünd','https://www.zund.com/en/cutting-systems/modules-and-tools/router-module-rm-l','OEM_TOOL_REFERENCE'),
+ s('V123-ZUND-DIGITAL-SYSTEMS','ZUND','Zünd digital cutting systems family overview','Zünd','https://www.zund.com/en/cutting-systems/digital-cutting-systems','OEM_PRODUCT_INDEX'),
+ s('V123-ZUND-DIGITAL-CUTTING','ZUND','Digital cutting workflow and repeatability architecture','Zünd','https://www.zund.com/en/cutting-systems/digital-cutting','OEM_PROCESS_REFERENCE'),
 ]);
 const seen=new Set();
 export const V123_SOURCE_LEDGER=Object.freeze([...V123_NEW_RESEARCH_SOURCES,...V122_SOURCE_LEDGER].filter(e=>e.url&&!seen.has(e.url)&&(seen.add(e.url),true)));
