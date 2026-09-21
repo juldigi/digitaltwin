@@ -81,7 +81,7 @@ const EXISTING=Object.freeze([
 
 const normalize=e=>({id:e.id||e.sourceId||e.title||e.url,machineScope:e.machineScope||e.machine||'EXISTING',title:e.title||e.name||e.id||'Technical reference',publisher:e.publisher||e.source||'Existing registry',url:e.url,kind:e.kind||e.type||'EXISTING_REFERENCE',confidence:e.confidence||'EXISTING_EVIDENCE',reviewBatch:e.reviewBatch||'PRE-V121'});
 const seen=new Set();
-export const V121_SOURCE_LEDGER=Object.freeze([...EXISTING.map(normalize),...V121_NEW_RESEARCH_SOURCES].filter(e=>{if(!e.url||seen.has(e.url))return false;seen.add(e.url);return true;}));
+export const V121_SOURCE_LEDGER=Object.freeze([...V121_NEW_RESEARCH_SOURCES,...EXISTING.map(normalize)].filter(e=>{if(!e.url||seen.has(e.url))return false;seen.add(e.url);return true;}));
 export const V121_SOURCE_STATS=Object.freeze({
  total:V121_SOURCE_LEDGER.length,
  newReviewed:V121_NEW_RESEARCH_SOURCES.length,

@@ -19,7 +19,7 @@ const expectRoles=(id,required)=>{
  sim.dispose();model.dispose();
 };
 
-test('V121 deep-research ledger contains at least 100 unique technical sources',()=>{
+test(`V121 deep-research ledger contains ${V121_SOURCE_STATS.total} unique technical sources`,()=>{
  const urls=V121_SOURCE_LEDGER.map(s=>s.url);
  assert.ok(V121_SOURCE_STATS.total>=100,'source ledger has only '+V121_SOURCE_STATS.total);
  assert.ok(V121_SOURCE_STATS.newReviewed>=50,'new review batch too small');
