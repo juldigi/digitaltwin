@@ -136,7 +136,7 @@ export class OffsetMachineTemplate {
     // depends on this flag surviving batching so covers can disappear independently.
     for(const group of this.nodes){
       const batches=new Map();
-      for(const mesh of group.children.filter(c=>c.isMesh&&!c.isInstancedMesh)){
+      for(const mesh of group.children.filter(c=>c.isMesh&&!c.isInstancedMesh&&!c.userData.dynamicRotor)){
         const cover=!!mesh.userData.exteriorCover;
         const semantic=mesh.userData.uvLamp?'uvLamp':mesh.userData.uvBeam?'uvBeam':mesh.userData.uvWindow?'uvWindow':mesh.userData.uvReflector?'uvReflector':'normal';
         const key=mesh.material.uuid+':'+(cover?'cover':'structure')+':'+semantic+':'+(mesh.visible?'visible':'hidden');
@@ -578,9 +578,9 @@ export class OffsetMachineTemplate {
     this.tread(op,[.30,.09,.37],[.35,1.03,1.34]);
     const chamber=this.group(g,'coater-chamber','Chamber blade & coating roller functional reference',[0,0,0],[0,.62,-.20],['IMG_1629.jpeg','pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'The chamber-blade system is supported by Heidelberg product information. Geometry is functional/sectional only.');
     this.box(chamber,[.38,.12,1.55],[-.14,2.02,0],'graphite',.018);
-    this.cylinder(chamber,.115,1.46,[-.02,1.80,0],'steel');
-    this.cylinder(chamber,.235,1.48,[.10,1.48,0],'rubber');
-    this.cylinder(chamber,.255,1.50,[-.08,1.06,0],'steel');
+    {const r=this.cylinder(chamber,.115,1.46,[-.02,1.80,0],'steel');Object.assign(r.userData,{dynamicRotor:true,rotorRole:'coater-process-roller',rotorSign:1,rotorRate:.82});}
+    {const r=this.cylinder(chamber,.235,1.48,[.10,1.48,0],'rubber');Object.assign(r.userData,{dynamicRotor:true,rotorRole:'coater-process-roller',rotorSign:-1,rotorRate:.78});}
+    {const r=this.cylinder(chamber,.255,1.50,[-.08,1.06,0],'steel');Object.assign(r.userData,{dynamicRotor:true,rotorRole:'coater-process-roller',rotorSign:1,rotorRate:.74});}
     const blade=this.box(chamber,[.11,.06,1.48],[-.20,1.90,0],'light',.012);blade.rotation.z=-.18;
     const locks=this.group(g,'coater-chamber-locks','Chamber end locks, bearing collars & blade clamps',[0,0,0],[.14,.40,-.58],photos,'End hardware is an inspection-oriented functional reference; clamp force, blade angle and bearing specification are not asserted.');
     for(const z of [-.77,.77]){this.cylinder(locks,.075,.055,[-.02,1.80,z],'graphite','z');this.ring(locks,.060,.010,[-.02,1.80,z],'steel','z');this.handle(locks,[-.19,1.94,z],'z',.11);}
@@ -658,7 +658,7 @@ export class OffsetMachineTemplate {
     const monitoring=this.group(g,'dryer-monitoring','Dryer temperature / airflow monitoring points',[0,0,0],[.12,.30,-.46],photos,'Sensor heads are service-location references only; sensor type, alarm threshold and control-loop behavior are not inferred.');
     for(const x0 of [-.36,.36]){this.box(monitoring,[.10,.08,.06],[x0,1.52,-.99],'graphite',.010);this.cylinder(monitoring,.012,.11,[x0,1.47,-.91],'steel','z');}
     const path=this.group(g,'dryer-sheet-path','Sheet transport through extension',[0,0,0],[.35,.20,0],photos);
-    for(const x0 of [-.60,-.36,-.12,.12,.36,.60])this.cylinder(path,.035,1.42,[x0,1.29,0],'steel');
+    for(const x0 of [-.60,-.36,-.12,.12,.36,.60]){const r=this.cylinder(path,.035,1.42,[x0,1.29,0],'steel');Object.assign(r.userData,{dynamicRotor:true,rotorRole:'dryer-transport-roller',rotorSign:1,rotorRate:.88});}
   }
   inspectionBridge(x){
     const photos=['IMG_1630.jpeg','IMG_1631.jpeg','IMG_1633.jpeg','IMG_2391(1).jpeg'];
@@ -712,13 +712,13 @@ export class OffsetMachineTemplate {
     for(const [name,y,z] of [['12B65',1.18,-.91],['12B69',.98,-.91],['12B129',1.34,.91],['12S34',.26,.91]]){const sn=this.group(pileSensors,`delivery-sensor-${name.toLowerCase()}`,`Delivery sensor ${name}`,[0,0,0],[.08,.08,z<0?-.16:.16],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf']);this.box(sn,[.09,.07,.06],[.66,y,z],'graphite',.010);}
 
     const sheetBrake=this.group(g,'delivery-sheet-brake','Sheet brake / slowdown zone',[0,0,0],[.45,.25,0],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf','IMG_2312.jpeg'],'Delivery sheet slowdown is documented in the supplied manual; sheet-brake placement is a functional visual reference.');
-    for(const z of [-.54,0,.54]){this.cylinder(sheetBrake,.055,.28,[-.54,1.46,z],'rubber','z');this.box(sheetBrake,[.20,.06,.32],[-.50,1.39,z],'graphite',.010);}
+    for(const z of [-.54,0,.54]){const r=this.cylinder(sheetBrake,.055,.28,[-.54,1.46,z],'rubber','z');Object.assign(r.userData,{dynamicRotor:true,rotorRole:'sheet-brake-roller',rotorSign:1,rotorRate:1.08});this.box(sheetBrake,[.20,.06,.32],[-.50,1.39,z],'graphite',.010);}
     const chainPath=this.group(g,'delivery-chain-path','Delivery gripper-chain rails & sheet receiving path',[0,0,0],[.35,.24,-.30],photos,'Chain rails and receiving path explain the sheet route into the pile. Chain pitch, gripper count and timing remain reference-only.');
     for(const z of [-.78,.78]){this.box(chainPath,[1.46,.06,.06],[-.06,1.61,z],'steel',.010);for(let n=0;n<12;n++)this.cylinder(chainPath,.022,.035,[-.70+n*.125,1.61,z],'graphite','z');}
     const sprockets=this.group(g,'delivery-drive-sprockets','Delivery gripper-chain drive / return sprocket references',[0,0,0],[.30,.22,-.44],photos,'Sprocket locations complete the visible chain route; tooth count, pitch, tension and drive ratio are not asserted.');
-    for(const x0 of [-.68,.68])for(const z of [-.78,.78]){this.cylinder(sprockets,.12,.045,[x0,1.61,z],'graphite','z');this.ring(sprockets,.092,.012,[x0,1.61,z],'steel','z');}
+    for(const x0 of [-.68,.68])for(const z of [-.78,.78]){const sign=x0<0?-1:1,key=x0+':'+z,hub=this.cylinder(sprockets,.12,.045,[x0,1.61,z],'graphite','z'),ring=this.ring(sprockets,.092,.012,[x0,1.61,z],'steel','z');for(const r of [hub,ring])Object.assign(r.userData,{dynamicRotor:true,rotorRole:'delivery-chain-sprocket',rotorSign:sign,rotorRate:.94,rotorPairKey:key});}
     const tensioners=this.group(g,'delivery-chain-tensioners','Delivery chain tensioners, guides & gripper bars',[0,0,0],[.28,.20,-.40],photos,'Tensioner and gripper-bar locations complete the receiving path. Chain tension, pitch, gripper count and phasing remain unverified.');
-    for(const z of [-.78,.78]){this.box(tensioners,[.22,.10,.055],[-.54,1.48,z],'graphite',.010);this.cylinder(tensioners,.045,.035,[-.43,1.53,z],'steel','z');}
+    for(const z of [-.78,.78]){this.box(tensioners,[.22,.10,.055],[-.54,1.48,z],'graphite',.010);const r=this.cylinder(tensioners,.045,.035,[-.43,1.53,z],'steel','z');Object.assign(r.userData,{dynamicRotor:true,rotorRole:'delivery-tensioner-idler',rotorSign:1,rotorRate:.90});}
     for(const x0 of [-.42,.04,.50])this.box(tensioners,[.045,.045,1.48],[x0,1.58,0],'steel',.008);
     const powder=this.group(g,'delivery-powder-jogger-air','Powder / air bar and pile-edge conditioning reference',[0,0,0],[.28,.22,.36],photos,'Upper air/powder bar is a functional reference only; installed powder device, dosage and nozzle settings are not asserted.');
     this.cylinder(powder,.028,1.52,[-.38,1.72,0],'steel','z');
