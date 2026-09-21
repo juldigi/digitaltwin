@@ -1,4 +1,4 @@
-const VERSION='factory-digital-twin-v104-fz1200-interlocks-20260921';
+const VERSION='factory-digital-twin-v105-mk1060-intermittent-20260921';
 const SHELL=['./','./index.html','./config.json','./assets/favicon.svg',
   './assets/splash-industrial-v79.webp',
   './app-shell-v79.css',
