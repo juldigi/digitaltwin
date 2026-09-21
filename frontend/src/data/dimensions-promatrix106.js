@@ -1,11 +1,12 @@
 const COMMON=Object.freeze({
  model:'Promatrix 106 CSB',sheetMax:[.760,1.060],sheetMin:[.300,.350],sheetMinMasterSet:[.350,.400],
  paperMinGsm:90,solidBoardMaxGsm:2000,corrugatedMaxM:.004,corrugatedMaxMasterSetM:.002,
- cuttingPressureMN:2.6,cuttingPressureTonnes:260,publishedMaxSpeed:8000,
+ cuttingPressureMN:2.6,cuttingPressureTonnes:260,publishedMaxSpeed:8000,brochure2020CSBMaxSpeed:7500,
+ oemGripperBarCount:7,registeredGripperStopVerified:true,
  feederPileHeightM:1.5,feederPileNonStopHeightM:1.2,feederPileMaxKg:1500,
  deliveryPileHeightCSBM:1.2,deliveryPileMaxCSBKg:900,
- processes:['die-cutting','creasing / embossing','stripping','blanking','non-stop pile handling'],
- dimensionalBoundary:'Current HEIDELBERG technical data publishes 8000 sheets/hour for Promatrix 106 CS/CSB. Earlier official literature has generation-dependent speed figures, so installed BMJ serial speed/software level remains serial-specific. MasterSet, feeder logistics Auto-Non-Stop, chase changer and other options are not assumed installed unless site evidence confirms them.'
+ processes:['die-cutting','creasing / embossing','stripping','blanking','tie-sheet separation','non-stop pile handling'],
+ dimensionalBoundary:'Current HEIDELBERG CSB product pages publish 8000 sheets/hour while the Dec-2020 official brochure lists 7500 sheets/hour for CSB. Installed BMJ serial speed/software level therefore remains serial-specific. The OEM brochure documents seven gripper bars and a register system that stops the gripper bar repeatably at process stations. MasterSet, feeder logistics Auto-Non-Stop, chase changer and other options are not assumed installed unless site evidence confirms them.'
 });
 export const PROMATRIX106_ASSET_PROFILES=Object.freeze({
  'BMJ-MCH-0014':Object.freeze({...COMMON,assetId:'BMJ-MCH-0014',serial:'MP.DBE0-00100',year:2022,sap:'APM-8',siteLabel:'AUTOPLATEN - 8 STRIPPING & BLANKING'}),
