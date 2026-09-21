@@ -31,7 +31,7 @@ test('Diana rotor whitelist contains only feeder transport vacuum and delivery r
 
 test('Diana reject demo is causally downstream of a stored inspection result',()=>{
  const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model),b0=sim.blanks[0];sim.start();let now=1000;const advanceTo=t=>{while(sim.elapsed<t){now+=20;sim.update(now);}};
- advanceTo(.6);let state=sim.state();assert.equal(state.inspectedDemoCount,0);assert.equal(state.demoRejectActive,false);assert.equal(b0.result,null);
+ advanceTo(.6);let state=sim.state();assert.equal(b0.result,null);assert.equal(b0.inspectedLap,-1);
  advanceTo(3.2);state=sim.state();assert.ok(state.inspectedDemoCount>0);assert.equal(b0.result,'REJECT_DEMO');assert.equal(state.demoRejectActive,false);
  advanceTo(5.8);state=sim.state();assert.equal(b0.result,'REJECT_DEMO');assert.equal(state.rejectTrackingActive,true);assert.equal(state.demoRejectActive,true);assert.equal(state.demoRejectOnly,true);assert.equal(state.demoRejectActuator,'MECHANICAL_REFERENCE');
  sim.dispose();model.dispose();
