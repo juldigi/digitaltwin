@@ -277,17 +277,21 @@ test('V116 Offset10 dynamic sheet brake is idle until a sheet enters the control
   sim.dispose();machine.dispose();
 });
 
-test('V117 Offset10 FoilStar UV and sheet brake states exactly follow their own sheet-occupancy zones',()=>{
+test('V118 Offset10 FoilStar UV and sheet brake states follow full-sheet occupancy',()=>{
   const machine=new Offset10MachineTemplate(),sim=new Offset10PrintingSimulation(machine.root,machine);
   sim.start();sim.update(0);let foilSeen=false,uvSeen=false,brakeSeen=false;
   for(let ms=16;ms<=26000;ms+=16){
     sim.update(ms);const s=sim.state(),visible=sim.sheets.filter(x=>x.mesh.visible);
-    const expectedFoil=visible.some(x=>Math.abs(x.userData.lead.x-OFFSET10_MODULE_CENTERS.PU2)<.75);
-    const expectedBrake=visible.some(x=>Math.abs(x.userData.lead.x-(OFFSET10_DIMENSIONS.layout.deliveryCenterX+1.42))<.58);
-    const expectedUV=visible.some(x=>{
-      const px=x.userData.lead.x;
-      return Math.abs(px-OFFSET10_MODULE_CENTERS.Y1)<.65||Math.abs(px-OFFSET10_MODULE_CENTERS.Y2)<.65||(px>OFFSET10_DIMENSIONS.layout.deliveryCenterX-1.75&&px<OFFSET10_DIMENSIONS.layout.deliveryCenterX-.25);
+    const occupied=(start,end)=>visible.some(sheet=>{
+      const positions=sheet.mesh.geometry.attributes.position;
+      let min=Infinity,max=-Infinity;
+      for(let i=0;i<positions.count;i++){min=Math.min(min,positions.getX(i));max=Math.max(max,positions.getX(i));}
+      return max>start&&min<end;
     });
+    const centers=OFFSET10_MODULE_CENTERS,delivery=OFFSET10_DIMENSIONS.layout.deliveryCenterX;
+    const expectedFoil=occupied(centers.PU2-.75,centers.PU2+.75);
+    const expectedBrake=occupied(delivery+.84,delivery+2);
+    const expectedUV=occupied(centers.Y1-.65,centers.Y1+.65)||occupied(centers.Y2-.65,centers.Y2+.65)||occupied(delivery-1.75,delivery-.25);
     assert.equal(s.foilStarActive,expectedFoil,'FoilStar state diverged from PU2 occupancy');
     assert.equal(s.deliveryBrakeActive,expectedBrake,'sheet-brake state diverged from delivery occupancy');
     assert.equal(s.uvActive,expectedUV,'UV state diverged from Y/EOP occupancy');
@@ -336,5 +340,32 @@ test('V117 Offset10 print and coating centerline passes through intended nip cor
     const x=OFFSET10_MODULE_CENTERS[key],pts=curveSamples.filter(p=>Math.abs(p.x-x)<.08);assert.ok(pts.length>0);
     const avg=pts.reduce((s,p)=>s+p.y,0)/pts.length;assert.ok(avg>1.285&&avg<1.330,key+' coating nip y '+avg);
   }
+  sim.dispose();machine.dispose();
+});
+
+
+test('V118 Offset10 retains UV effect for a trailing sheet and freezes on pause',()=>{
+  const machine=new Offset10MachineTemplate(),sim=new Offset10PrintingSimulation(machine.root,machine);
+  sim.start();sim.update(0);
+  const end=OFFSET10_MODULE_CENTERS.Y1+.65;
+  let found=false;
+  for(let ms=16;ms<26000;ms+=16){
+    sim.update(ms);
+    const trailing=sim.sheets.find(s=>s.mesh.visible&&s.userData.lead.x>end&&s.userData.trail.x<end);
+    if(!trailing)continue;
+    const beams=sim.uv.filter(u=>u.type==='beam'&&u.mesh.parent.userData.nodeId.startsWith('o10-y1-uv'));
+    assert.ok(beams.length===3&&beams.every(u=>u.mesh.visible),'UV effect stopped before the trailing edge left');
+    const positions=Array.from(trailing.mesh.geometry.attributes.position.array);
+    const rotations=sim.foil.map(f=>f.mesh.quaternion.clone());
+    sim.pause();sim.update(ms+1000);
+    assert.deepEqual(Array.from(trailing.mesh.geometry.attributes.position.array),positions);
+    assert.ok(sim.foil.every((f,i)=>f.mesh.quaternion.equals(rotations[i])));
+    sim.resume();sim.update(ms+1016);sim.update(ms+1032);
+    assert.notDeepEqual(Array.from(trailing.mesh.geometry.attributes.position.array),positions);
+    found=true;break;
+  }
+  assert.ok(found,'never sampled a trailing-edge-only UV overlap');
+  sim.stop();assert.equal(sim.state().uvActive,false);
+  assert.ok(sim.uv.filter(u=>u.type==='beam').every(u=>!u.mesh.visible));
   sim.dispose();machine.dispose();
 });

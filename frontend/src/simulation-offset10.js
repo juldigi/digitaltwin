@@ -156,11 +156,13 @@ export class Offset10PrintingSimulation{
     for(let i=0;i<this.sheets.length;i++){
       const s=this.sheets[i],absolute=travelled-i*this.sheetGap;if(absolute<this.sheetLength){s.mesh.visible=false;s.gripper.visible=false;continue;}
       const cycle=Math.floor(absolute/this.cycleDistance),local=mod(absolute,this.cycleDistance);if(local>this.pathLength){this.deposit(s,cycle);continue;}if(!this.updateSheet(s,local))continue;
-      const x=s.userData.lead.x;
-      for(const key of ['Y1','Y2'])if(Math.abs(x-OFFSET10_MODULE_CENTERS[key])<.65)zones.add('o10-'+key.toLowerCase()+'-uv');
-      if(x>D.deliveryCenterX-1.75&&x<D.deliveryCenterX-.25)zones.add('o10-eop-uv');
-      if(Math.abs(x-OFFSET10_MODULE_CENTERS.PU2)<.75)this.foilStarActive=true;
-      if(Math.abs(x-(D.deliveryCenterX+1.42))<.58)this.deliveryBrakeActive=true;
+      // Process occupancy spans the complete sheet, including its trailing edge.
+      const minX=Math.min(s.userData.lead.x,s.userData.trail.x),maxX=Math.max(s.userData.lead.x,s.userData.trail.x);
+      const overlaps=(start,end)=>maxX>start&&minX<end;
+      for(const key of ['Y1','Y2'])if(overlaps(OFFSET10_MODULE_CENTERS[key]-.65,OFFSET10_MODULE_CENTERS[key]+.65))zones.add('o10-'+key.toLowerCase()+'-uv');
+      if(overlaps(D.deliveryCenterX-1.75,D.deliveryCenterX-.25))zones.add('o10-eop-uv');
+      if(overlaps(OFFSET10_MODULE_CENTERS.PU2-.75,OFFSET10_MODULE_CENTERS.PU2+.75))this.foilStarActive=true;
+      if(overlaps(D.deliveryCenterX+.84,D.deliveryCenterX+2.00))this.deliveryBrakeActive=true;
     }
     const angular=4.6*scaled;for(const r of this.rotors){if(r.role==='sheet-brake'&&!this.deliveryBrakeActive)continue;r.mesh.rotateY((r.sign||1)*(r.rate||.8)*angular);}const phase=this.elapsed*TAU;for(const o of this.oscillators)o.object.position[o.axis]=o.initial[o.axis]+Math.sin(phase*o.rate+o.phase)*o.amp;
     for(const f of this.foil)if(this.foilStarActive)f.mesh.rotateY((f.direction||1)*angular*.82);
