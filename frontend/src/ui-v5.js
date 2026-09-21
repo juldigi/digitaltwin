@@ -32,11 +32,11 @@ function closeTransientPanels(){
 function setLegendActive(id){$$('.asset-legend button').forEach(b=>b.classList.toggle('active',b.id===id));}
 
 function bindShell(){
-  $('#ui-menu-toggle')?.addEventListener('click',e=>{
-    e.stopPropagation();
+  // V119: app-shell-v79.js owns the nav-open toggle. Keep this listener side-effect-only
+  // so one tap cannot toggle the mobile drawer twice and cancel itself.
+  $('#ui-menu-toggle')?.addEventListener('click',()=>{
     document.body.classList.remove('ui-workbench-open','mobile-panel-open');
     toggleLauncher(false);
-    document.body.classList.toggle('nav-open');
   });
   document.addEventListener('click',e=>{
     if(document.body.classList.contains('nav-open')&&!e.target.closest('.rail')&&!e.target.closest('#ui-menu-toggle'))document.body.classList.remove('nav-open');

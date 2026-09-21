@@ -1,4 +1,4 @@
-const VERSION='factory-digital-twin-v118-offset10-sheet-occupancy-20260921';
+const VERSION='factory-digital-twin-v119-ui-adaptive-20260921';
 const SHELL=['./','./index.html','./config.json','./assets/favicon.svg',
   './assets/splash-industrial-v79.webp',
   './app-shell-v79.css',
