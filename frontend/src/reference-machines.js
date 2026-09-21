@@ -438,9 +438,10 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
 export class ReferenceProcessSimulation{
  constructor(root,template){
   this.root=root;this.template=template;this.active=false;this.running=false;this.paused=false;this.speed=1;this.elapsed=0;this.lastNow=null;this.completed=0;this.onUpdate=null;
+  this.blocked=template.cfg.evidence.simulation==='BLOCKED';this.blockedReason=this.blocked?template.cfg.evidence.reason:null;
   this.stages=template.cfg.profile?.process||template.cfg.modules;this.cycle=Math.max(8,this.stages.length*1.35);
-  this.motions=template.activeMeshes.filter(m=>m.userData.motion).map(mesh=>({mesh,motion:mesh.userData.motion,position:mesh.position.clone(),quaternion:mesh.quaternion.clone()}));
-  this.family=template.cfg.family;this.pathVisible=false;this.inkFlowVisible=false;this.processPiece=null;this.processMaterial=null;this.processGeometry=null;this.buildProcessPiece();
+  this.motions=this.blocked?[]:template.activeMeshes.filter(m=>m.userData.motion).map(mesh=>({mesh,motion:mesh.userData.motion,position:mesh.position.clone(),quaternion:mesh.quaternion.clone()}));
+  this.family=template.cfg.family;this.pathVisible=false;this.inkFlowVisible=false;this.processPiece=null;this.processMaterial=null;this.processGeometry=null;if(!this.blocked)this.buildProcessPiece();
  }
  buildProcessPiece(){
   const family=this.family;if(['compressor','ahu'].includes(family))return;
@@ -453,13 +454,13 @@ export class ReferenceProcessSimulation{
  stageIndex(){const p=this.active?(this.elapsed%this.cycle)/this.cycle:0;return Math.min(this.stages.length-1,Math.floor(p*this.stages.length));}
  state(){
   const progress=this.active?(this.elapsed%this.cycle)/this.cycle:0,idx=this.stageIndex();
-  return {available:true,blocked:false,referenceModel:true,evidenceGrade:this.template.cfg.evidence.grade,geometryStatus:this.template.cfg.evidence.geometry,
-   active:this.active,running:this.running,paused:this.paused,speed:this.speed,stage:this.stages[idx]||'Reference process',completed:this.completed,progress,
+  return {available:!this.blocked,blocked:this.blocked,blockedReason:this.blockedReason,referenceModel:true,evidenceGrade:this.template.cfg.evidence.grade,geometryStatus:this.template.cfg.evidence.geometry,
+   active:this.active,running:this.running,paused:this.paused,speed:this.speed,stage:this.blocked?'Simulasi belum tervalidasi':(this.stages[idx]||'Reference process'),completed:this.completed,progress,
    sheetsVisible:this.processPiece?.visible?1:0,pileSheetsVisible:0,rotorCount:this.motions.filter(x=>x.motion.type==='spin').length,
    oscillatorCount:this.motions.filter(x=>x.motion.type!=='spin').length,mechanismCount:this.motions.length,inkFlowCount:0,uvLampCount:0,uvActive:false,pathVisible:false,inkFlowVisible:false,
    referenceBoundary:this.template.cfg.profile?.unknowns||[]};
  }
- start(){this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;if(this.processPiece)this.processPiece.visible=true;this.resetMotion();this.onUpdate?.(this.state());return this.state();}
+ start(){if(this.blocked){this.active=false;this.running=false;this.paused=false;this.onUpdate?.(this.state());return this.state();}this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;if(this.processPiece)this.processPiece.visible=true;this.resetMotion();this.onUpdate?.(this.state());return this.state();}
  pause(){this.running=false;this.paused=this.active;this.onUpdate?.(this.state());return this.state();}
  resume(){if(this.active){this.running=true;this.paused=false;this.lastNow=null;}this.onUpdate?.(this.state());return this.state();}
  setSpeed(v){this.speed=Math.max(.25,Math.min(3,Number(v)||1));return this.state();}
