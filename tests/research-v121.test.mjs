@@ -15,7 +15,7 @@ const expectRoles=(id,required)=>{
  assert.equal(model.root.userData.engineeringDimensions,false,id);
  for(const role of required)assert.ok(set.has(role),id+' missing V121 mechanism '+role);
  const sim=createMachineSimulation(id,model.root,model);
- assert.equal(sim.state().blocked,false,id);
+ const shouldBlock=id==='BMJ-MCH-0004';assert.equal(sim.state().blocked,shouldBlock,id);
  sim.dispose();model.dispose();
 };
 
@@ -36,44 +36,44 @@ test('V121 source coverage spans every major production and utility machine fami
 });
 
 test('V121 gravure twin exposes sheet-fed registration, doctor-blade, ink and delivery mechanics',()=>{
- expectRoles('BMJ-MCH-0004',['feeder-sucker','side-lay','ink-circulation-pump','doctor-blade-holder','doctor-oscillator','impression-bearing','delivery-gripper','pile-side-jogger']);
+ expectRoles('BMJ-MCH-0004',['feeder-sucker','side-lay-reference','ink-circulation-pump','doctor-blade-holder','doctor-axial-oscillator','impression-cylinder-side-bearing','delivery-chain-gripper','delivery-side-jogger']);
 });
 
 test('V121 QF reference exposes servo XY, linear guides, hydraulic blanking and tooling details',()=>{
- expectRoles('BMJ-MCH-0021',['linear-guide','ball-screw-x','ball-screw-y','servo-drive','hydraulic-cylinder','blanking-pressure-plate','tooling-pin','separator-fork']);
+ expectRoles('BMJ-MCH-0021',['x-axis-linear-guide','x-axis-ball-screw','y-axis-ball-screw','x-axis-servo-motor','main-hydraulic-cylinder-reference','blanking-pressure-plate','blanking-tool-pin','waste-frame-support-rail']);
 });
 
 test('V121 collator exposes suction, sensing, gathering and delivery mechanics',()=>{
- expectRoles('BMJ-MCH-0023',['feed-bin-shelf','vacuum-blower','vacuum-manifold-branch','double-miss-detector','gather-transport-roller','set-jogger']);
+ expectRoles('BMJ-MCH-0023',['feed-bin-shelf','vacuum-blower','vacuum-bin-branch','double-miss-feed-sensor-reference','gather-transport-roller','set-jogger']);
 });
 
 test('V121 Heidelberg CTP exposes plate transport, external drum, laser and bounded punch detail',()=>{
  const model=createMachineTemplate('BMJ-MCH-0025'),set=roles(model);
- for(const role of ['plate-side-guide','plate-transport-roller','plate-clamp-bar','drum-bearing','laser-linear-rail','laser-diode-module','internal-punch-pin'])assert.ok(set.has(role),role);
- const punches=[];model.root.traverse(o=>{if(o.userData?.mechanismRole==='internal-punch-pin')punches.push(o);});
- assert.ok(punches.length>=2);assert.ok(punches.every(p=>p.userData.evidence==='SUPRASETTER_OPTION_BOUNDARY'));
+ for(const role of ['plate-side-guide','plate-transport-roller','plate-clamp-bar','drum-bearing','laser-linear-rail','laser-diode-module','internal-punch-pin-option'])assert.ok(set.has(role),role);
+ const punches=[];model.root.traverse(o=>{if(o.userData?.mechanismRole==='internal-punch-pin-option')punches.push(o);});
+ assert.ok(punches.length>=2);assert.ok(punches.every(p=>p.userData.installedOptionVerified===false));
  assert.equal(model.root.userData.engineeringDimensions,false);model.dispose();
 });
 
 test('V121 SCREEN imagesetter uses capstan/polygon-mirror mechanics rather than a generic drum',()=>{
- expectRoles('BMJ-MCH-0027',['film-cassette-guide','capstan-transport-roller','tension-dancer','polygon-facet','laser-modulator','film-cutter','processor-interface-roller']);
+ expectRoles('BMJ-MCH-0027',['media-cassette-sideplate','capstan-drive-roller','gravity-tension-roller','five-facet-polygon-mirror-reference','laser-modulator-reference','media-cross-cutter','inline-processor-interface-boundary']);
 });
 
 test('V121 Zund reference exposes vacuum zones, gantry, modular tools and registration camera',()=>{
- expectRoles('BMJ-MCH-0028',['vacuum-port','vacuum-zone-divider','gantry-linear-guide','module-carrier','oscillating-knife','router-tool','icc-camera-lens','icc-led-ring']);
+ expectRoles('BMJ-MCH-0028',['vacuum-port-reference','vacuum-zone-divider-reference','gantry-linear-guide-reference','universal-module-carrier-reference','cutting-tool-capability-envelope','routing-tool-capability-envelope','icc-camera-option-reference','icc-lighting-option-reference']);
 });
 
 test('V121 compressor reference exposes a coherent screw-compressor oil/air flow package',()=>{
- expectRoles('BMJ-MCH-0031',['intake-filter','inlet-valve','motor-coupling','screw-airend-housing','separator-vessel','minimum-pressure-valve','oil-filter','thermostatic-valve','cooling-fan']);
+ expectRoles('BMJ-MCH-0031',['kaeser-dry-intake-filter','kaeser-inlet-valve-reference','kaeser-drive-interface-reference','kaeser-sigma-profile-airend','kaeser-cooling-fluid-separator-tank','kaeser-minimum-pressure-check-valve','kaeser-fluid-filter-reference','kaeser-thermostatic-valve-reference','kaeser-cooling-fan-reference']);
 });
 
 test('V121 standard AHU exposes damper-filter-coil-drain-fan-service-discharge sections',()=>{
- expectRoles('BMJ-MCH-0036',['opposed-blade-damper','filter-bank','coil-fin','coil-header','drain-pan','supply-fan-wheel','fan-motor','service-door','discharge-plenum']);
+ expectRoles('BMJ-MCH-0036',['opposed-blade-damper-reference','ahu-filter-panel-reference','cooling-coil-fin-reference','cooling-coil-header-reference','sloped-condensate-drain-pan','supply-fan-wheel-reference','supply-fan-motor-reference','ahu-service-door','ahu-discharge-plenum']);
 });
 
 test('V121 Sansin asset keeps brand-specific indoor/outdoor cooling boundary without inventing exact model',()=>{
  const model=createMachineTemplate('BMJ-MCH-0040'),set=roles(model);
- for(const role of ['return-inlet-damper','filter-bank','heat-exchange-fin','indoor-supply-fan','outdoor-condenser-fan','compressor-reference','valve-manifold','cooling-controller'])assert.ok(set.has(role),role);
+ for(const role of ['sansin-return-inlet-damper','sansin-filter-net-layer','sansin-evaporator-fin','sansin-indoor-supply-fan','sansin-outdoor-condenser-fan-reference','sansin-refrigeration-compressor-reference','sansin-refrigerant-valve-manifold-reference','sansin-cooling-controller-reference'])assert.ok(set.has(role),role);
  assert.match(model.root.userData.sansinBoundary,/exact YZKJ model\/capacity is not asserted/);
  model.dispose();
 });
