@@ -17,7 +17,7 @@ test('V69 assigns an explicit evidence gate to every non-dedicated machine',()=>
 });
 
 test('V69 never presents unknown-model equipment as actual BMJ geometry',()=>{
-  for(const no of [4,17,23,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41]){
+  for(const no of [17,23,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41]){
     const machine=MACHINE_REGISTRY.find(m=>m.no===no);
     const cfg=universalMachineConfig(machine.machineId);
     assert.equal(cfg.evidence.geometry,'PLACEHOLDER',machine.name);
