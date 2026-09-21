@@ -5,11 +5,11 @@ import {MACHINE_REGISTRY} from '../frontend/src/data/machine-registry.js';
 import {UniversalMachineTemplate,UniversalProcessSimulation,universalMachineConfig,universalTaxonomy} from '../frontend/src/universal-machine.js';
 import {mechanicalProfile} from '../frontend/src/data/mechanical-profiles.js';
 
-const flagship=new Set(['BMJ-MCH-0002','BMJ-MCH-0003','BMJ-MCH-0005','BMJ-MCH-0006','BMJ-MCH-0009','BMJ-MCH-0010']);
+const flagship=new Set(['BMJ-MCH-0002','BMJ-MCH-0003','BMJ-MCH-0005','BMJ-MCH-0006','BMJ-MCH-0009','BMJ-MCH-0010','BMJ-MCH-0011']);
 const remaining=MACHINE_REGISTRY.filter(m=>!flagship.has(m.machineId));
 
-test('all 35 remaining equipment resolve to one of the process-specific family builders',()=>{
- assert.equal(remaining.length,35);
+test('all 34 remaining equipment resolve to one of the process-specific family builders',()=>{
+ assert.equal(remaining.length,34);
  for(const machine of remaining){const cfg=universalMachineConfig(machine.machineId);assert.ok(cfg,machine.machineId);assert.ok(cfg.modules.length>=6);assert.ok(cfg.family);}
 });
 
