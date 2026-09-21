@@ -38,3 +38,10 @@ test('service-worker shell cache references only deployable frontend files',()=>
 test('service-worker cache version advances with the centralized runtime release',()=>{
  assert.match(sw,/factory-digital-twin-v123-r8-ahu-20260922/);
 });
+
+
+test('service worker precache paths are unique',()=>{
+ const source=fs.readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
+ const literals=[...source.matchAll(/['"]\.\/([^'"]+)['"]/g)].map(m=>m[1]);
+ assert.equal(new Set(literals).size,literals.length,'duplicate precache path detected: '+literals.filter((v,i)=>literals.indexOf(v)!==i).join(', '));
+});
