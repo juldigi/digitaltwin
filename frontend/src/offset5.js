@@ -176,7 +176,6 @@ export class OffsetMachineTemplate {
         const finger=detail(this.box(front,[.045,.105,.035],[.44,1.425,z],'steel',.005),'front-lay');
         finger.rotation.z=-.10;
         detail(this.cylinder(front,.018,.055,[.395,1.365,z],'graphite','z'),'front-lay-pivot');
-        detail(this.box(front,[.060,.025,.050],[.465,1.485,z],'graphite',.004),'front-lay-stop');
       }
     }
 
@@ -184,14 +183,12 @@ export class OffsetMachineTemplate {
     if(pulls){
       pulls.userData.manualConfirmedCount=2;
       pulls.userData.evidence='PRESET_PLUS_D_S_AND_O_S_PULL_LAYS';
+      pulls.userData.serviceDetails=['double-sheet feeler roller','retainer height adjustment','pull-sensor adjusting screw'];
       for(const side of [-1,1]){
         const z=side*.70;
         detail(this.box(pulls,[.18,.025,.17],[.30,1.405,z],'graphite',.006),'pull-plate');
         detail(this.cylinder(pulls,.026,.09,[.38,1.435,z],'steel','z'),'propelling-roller');
-        detail(this.cylinder(pulls,.018,.07,[.265,1.455,z-side*.025],'steel','z'),'double-sheet-feeler-roller');
-        detail(this.box(pulls,[.060,.11,.045],[.22,1.455,z+side*.045],'graphite',.005),'pull-lay-retainer');
         detail(this.box(pulls,[.060,.060,.040],[.34,1.505,z-side*.055],'black',.004),'pull-sensor');
-        detail(this.cylinder(pulls,.014,.10,[.20,1.515,z],'steel','y'),'pull-sensor-adjusting-screw');
       }
     }
 
