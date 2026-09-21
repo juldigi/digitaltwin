@@ -337,15 +337,60 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   }
  }
  enrichCTP(){
-  const load=this.activeGroup(1),transport=this.activeGroup(2),drum=this.activeGroup(3),laser=this.activeGroup(4),punch=this.activeGroup(5),unload=this.activeGroup(6);
-  if(load){for(const z of [-.45,.45])this.tag(this.box(load,[.58,.025,.04],[0,.55,z],'steel',.004),'plate-side-guide');this.tag(this.box(load,[.52,.04,.95],[0,.72,0],'steel',.005),'manual-loader-bed');}
-  if(transport){for(const y of [.48,.64,.80,.96]){const r=this.motion(this.cyl(transport,.045,.92,[0,y,0],'dark','z'),'spin','z',4,.01,y,1);this.tag(r,'plate-transport-roller');}}
-  if(drum){for(const z of [-.48,.48])this.tag(this.box(drum,[.10,.06,.08],[0,.80,z],'accent',.006),'plate-clamp-bar');for(const z of [-.52,.52])this.tag(this.cyl(drum,.06,.12,[0,.80,z],'steel','z'),'drum-bearing');this.tag(this.box(drum,[.38,.06,.16],[.16,.50,.54],'dark',.008),'vacuum-manifold');}
-  if(laser){this.tag(this.box(laser,[.05,.05,.96],[0,1.12,0],'steel',.004),'laser-linear-rail');for(const z of [-.22,0,.22])this.tag(this.box(laser,[.09,.09,.11],[0,1.12,z],'accent',.008),'laser-diode-module');}
-  if(punch){for(const z of [-.34,.34]){const p=this.motion(this.cyl(punch,.025,.18,[0,.84,z],'steel','y'),'press','y',3,.045,z,4);this.tag(p,'internal-punch-pin','SUPRASETTER_OPTION_BOUNDARY');}}
-  if(unload){for(const z of [-.42,.42])this.tag(this.box(unload,[.62,.025,.05],[.08,.64,z],'steel',.004),'plate-unload-guide');this.tag(this.box(unload,[.34,.30,.34],[-.28,.42,.48],'dark',.02),'debris-filter-interface');const fan=this.motion(this.cyl(unload,.10,.12,[-.42,.54,.48],'dark','x'),'spin','x',8,.01,0,5);this.tag(fan,'debris-removal-vacuum-fan','SUPRASETTER_OEM');this.tag(this.box(unload,[.20,.28,.20],[-.52,.38,.48],'filter',.012),'debris-filter-cartridge','SUPRASETTER_OEM');}
-  if(drum){this.tag(this.box(drum,[.26,.18,.22],[-.32,.48,.52],'blue',.012),'temperature-stabilizer-interface','SUPRASETTER_OEM');for(const z of [-.42,.42])this.tag(this.cyl(drum,.012,.54,[-.28,.44,z],'blue','y'),'temperature-control-line-reference','SUPRASETTER_OEM');}
-  this.root.userData.suprasetterOptions={internalPunch:'AVAILABLE_NOT_INSTALLATION_CONFIRMED',debrisRemoval:'AVAILABLE_NOT_INSTALLATION_CONFIRMED',aplAcl:'MODEL_CAPABILITY_ONLY'};
+  const load=this.activeGroup(1),transport=this.activeGroup(2),drumUnit=this.activeGroup(3),laserUnit=this.activeGroup(4),punchUnit=this.activeGroup(5),out=this.activeGroup(6);
+  this.root.userData.detailPass='V123_R5_SUPRASETTER_MULTI_MODEL_FAMILY_RECONSTRUCTION';
+  this.root.userData.exactSuprasetterModelVerified=false;
+  this.root.userData.exactPlateFormatVerified=false;
+  this.root.userData.suprasetterOptions={
+   loader:'MODEL_DEPENDENT_NOT_INSTALLATION_CONFIRMED',
+   internalPunch:'AVAILABLE_NOT_INSTALLATION_CONFIRMED',
+   debrisRemoval:'AVAILABLE_NOT_INSTALLATION_CONFIRMED',
+   temperatureStabilization:'MODEL_DEPENDENT_NOT_INSTALLATION_CONFIRMED',
+   processorStacker:'NOT_INSTALLATION_CONFIRMED'
+  };
+  this.root.userData.commonVerifiedFamilyMechanisms=['EXTERNAL_IMAGING_DRUM','HEIDELBERG_THERMAL_LASER_FAMILY','INTELLIGENT_DIODE_SYSTEM','PLATE_TRANSPORT','PLATE_UNLOAD'];
+  const part=(parent,id,name)=>parent?this.group(parent,id,name,[0,0,0],[0,.08,.08]):null;
+
+  if(load){
+   const manual=this.findNode('ctp-manual-entry');
+   if(manual){this.tag(this.box(manual,[.72,.035,1.04],[-.12,.70,0],'steel',.005),'manual-plate-entry-bed','SUPRASETTER_FAMILY_PRIMARY');for(const z of [-.48,.48])this.tag(this.box(manual,[.50,.035,.035],[-.12,.77,z],'steel',.003),'manual-plate-side-guide','SUPRASETTER_FAMILY_PRIMARY');}
+   const loader=this.findNode('ctp-loader-boundary');
+   if(loader){loader.userData.installedOptionVerified=false;loader.userData.boundary='ATL/DTL are A52/A75 family options; ACL/DCL/APL belong to A106/106 families. Exact BMJ model and loader package are unknown.';const env=this.box(loader,[.66,.54,1.12],[-.34,1.20,0],'glass',.018);env.userData.optionReference=true;this.tag(env,'automatic-loader-family-envelope','SUPRASETTER_LOADER_OPTION_BOUNDARY');}
+  }
+  if(transport){
+   const path=this.findNode('ctp-transport');
+   if(path)for(const y of [.62,.82,.98]){const r=this.motion(this.cyl(path,.045,1.02,[0,y,0],'dark','z'),'spin','z',3.4,.01,y,1);this.tag(r,'plate-transport-roller','SUPRASETTER_FAMILY_PRIMARY');}
+   const reg=this.findNode('ctp-register');
+   if(reg){for(const z of [-.42,.42])this.tag(this.box(reg,[.075,.055,.055],[.24,.87,z],'accent',.005),'plate-position-sensor-reference','SUPRASETTER_FAMILY_PROCESS');this.tag(this.box(reg,[.06,.32,1.00],[-.24,.82,0],'steel',.004),'plate-register-stop-reference','SUPRASETTER_FAMILY_PROCESS');}
+  }
+  if(drumUnit){
+   const drum=this.findNode('ctp-drum');
+   if(drum){const d=this.motion(this.cyl(drum,.34,1.10,[0,.82,0],'dark','z'),'spin','z',2.8,.01,0,2);this.tag(d,'external-imaging-drum','SUPRASETTER_FAMILY_PRIMARY');d.userData.imagingDrum=true;for(const z of [-.57,.57])this.tag(this.cyl(drum,.060,.12,[0,.82,z],'steel','z'),'imaging-drum-bearing-reference','SUPRASETTER_FAMILY_PROCESS');}
+   const clamp=this.findNode('ctp-drum-clamp');
+   if(clamp){for(const z of [-.43,.43]){const bar=this.box(clamp,[.12,.055,.13],[-.23,.98,z],'accent',.005);this.tag(bar,'plate-clamp-reference','SUPRASETTER_FAMILY_PROCESS');}}
+  }
+  if(laserUnit){
+   const rail=this.findNode('ctp-laser-rail');
+   if(rail)this.tag(this.box(rail,[.055,.055,1.02],[0,1.23,0],'steel',.004),'laser-linear-rail','SUPRASETTER_FAMILY_PRIMARY');
+   const module=this.findNode('ctp-laser-module');
+   if(module){const carriage=this.motion(this.box(module,[.19,.17,.24],[0,1.23,0],'accent',.014),'oscillate','z',3.8,.38,0,3);this.tag(carriage,'heidelberg-laser-carriage','SUPRASETTER_FAMILY_PRIMARY');carriage.userData.installedLaserModuleCountVerified=false;for(const z of [-.07,.07])this.tag(this.box(module,[.055,.055,.065],[.08,1.22,z],'blue',.004),'heidelberg-laser-module-reference','SUPRASETTER_FAMILY_PRIMARY');}
+   const ids=this.findNode('ctp-ids');
+   if(ids){ids.userData.oemTechnology='INTELLIGENT_DIODE_SYSTEM';ids.userData.installedDiodeCountVerified=false;for(const z of [-.12,0,.12])this.tag(this.box(ids,[.04,.04,.055],[-.09,1.22,z],'accent',.003),'ids-diode-channel-reference','SUPRASETTER_FAMILY_PRIMARY');}
+  }
+  if(punchUnit){
+   const punch=this.findNode('ctp-punch-option');
+   if(punch){punch.userData.installedOptionVerified=false;punch.userData.simulationEnabled=false;punch.userData.boundary='Internal punch is an official Suprasetter option. Available punch-pair count depends on exact model; neither BMJ CTP installation is confirmed.';for(const z of [-.33,.33]){const pin=this.cyl(punch,.025,.18,[0,.84,z],'steel','y');pin.userData.optionReference=true;pin.userData.simulationEnabled=false;this.tag(pin,'internal-punch-option-reference','SUPRASETTER_OPTION_BOUNDARY');}}
+  }
+  if(out){
+   const unload=this.findNode('ctp-unload');
+   if(unload){for(const z of [-.42,.42])this.tag(this.box(unload,[.66,.025,.05],[.08,.66,z],'steel',.004),'plate-unload-guide','SUPRASETTER_FAMILY_PRIMARY');this.tag(this.box(unload,[.64,.025,.92],[.12,.69,0],'steel',.003),'plate-output-bed-reference','SUPRASETTER_FAMILY_PROCESS');}
+   const processor=this.findNode('ctp-processor-boundary');
+   if(processor){processor.userData.installedOptionVerified=false;const env=this.box(processor,[.44,.30,1.02],[.44,.54,0],'glass',.015);env.userData.optionReference=true;this.tag(env,'processor-stacker-interface-boundary','OPTION_BOUNDARY');}
+   const debris=this.findNode('ctp-debris-option');
+   if(debris){debris.userData.installedOptionVerified=false;debris.userData.simulationEnabled=false;const fan=this.cyl(debris,.10,.12,[-.34,.52,.42],'dark','x');fan.userData.optionReference=true;fan.userData.simulationEnabled=false;this.tag(fan,'debris-removal-vacuum-option','SUPRASETTER_OPTION_BOUNDARY');const filter=this.box(debris,[.20,.28,.20],[-.48,.40,.42],'filter',.012);filter.userData.optionReference=true;this.tag(filter,'debris-filter-option','SUPRASETTER_OPTION_BOUNDARY');}
+   const temp=this.findNode('ctp-temp-stabilizer-option');
+   if(temp){temp.userData.installedOptionVerified=false;const box=this.box(temp,[.26,.18,.22],[-.28,.50,-.42],'blue',.012);box.userData.optionReference=true;this.tag(box,'temperature-stabilizer-option','SUPRASETTER_MODEL_DEPENDENT_BOUNDARY');for(const z of [-.34,.34])this.tag(this.cyl(temp,.012,.42,[-.24,.47,z],'blue','y'),'temperature-control-line-option','SUPRASETTER_MODEL_DEPENDENT_BOUNDARY');}
+  }
  }
  enrichImagesetter(){
   const supply=this.activeGroup(1),capstan=this.activeGroup(2),scan=this.activeGroup(3),laser=this.activeGroup(4),cut=this.activeGroup(5),out=this.activeGroup(6);
@@ -719,19 +764,44 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.root.userData.referenceNote='BMJ registry provides no collator OEM/model/serial/bin count. Geometry is a multi-vendor process intersection: Horizon VAC and Duplo suction-collator families plus vertical-collator mechanism patents. Ten displayed bins are a modeled cross-family reference, not an installed BMJ claim.';
  }
  buildCTP(){
-  this.palette.body=0xe4e6e4;this.palette.dark=0x292f33;this.palette.accent=0x607784;
-  this.base(3.25,1.72);
-  const xs=[-1.32,-.78,-.15,.52,1.08,1.48];
-  for(let i=1;i<=6;i++){
-   const {g,a}=this.mod(i,[xs[i-1],0,0],[Math.sign(xs[i-1]||1)*.38,.20,0]);
-   if(i===1){this.shell(g,[.78,1.28,1.55],[0,.76,0]);for(let p=0;p<5;p++)this.box(a,[.60,.012,1.05],[0,.46+p*.05,0],'steel',.002);}
-   else if(i===2){this.shell(g,[.72,1.32,1.55],[0,.78,0]);for(const y of [.55,.82])this.motion(this.cyl(a,.06,1.05,[0,y,0],'steel','z'),'spin','z',3,.01,0,1);}
-   else if(i===3){this.shell(g,[1.00,1.52,1.58],[0,.88,0]);const drum=this.motion(this.cyl(a,.34,1.10,[0,.80,0],'dark','z'),'spin','z',2.8,.02,0,2);drum.userData.imagingDrum=true;}
-   else if(i===4){this.shell(g,[.72,1.44,1.55],[0,.84,0]);const laser=this.motion(this.box(a,[.16,.16,.20],[0,1.12,0],'accent',.015),'oscillate','z',4,.40,0,3);laser.userData.laserCarriage=true;this.box(a,[.05,.05,1.00],[0,1.12,0],'steel',.006);}
-   else if(i===5){this.shell(g,[.48,1.22,1.50],[0,.72,0]);for(const z of [-.34,.34])this.motion(this.box(a,[.14,.18,.12],[0,.82,z],'steel',.012),'press','y',2,.04,z,4);}
-   else {this.box(g,[.76,.50,1.38],[0,.40,0],'body',.025);this.box(a,[.68,.025,1.15],[.08,.66,0],'steel',.004);}
-  }
-  this.root.userData.referenceNote='Heidelberg model is unknown; geometry follows the Suprasetter family language: enclosed thermal imaging engine, plate transport, imaging drum, modular laser carriage, optional internal punch and unload.';
+  this.palette.body=0xe4e6e4;this.palette.dark=0x292f33;this.palette.accent=0x607784;this.palette.blue=0x4f809a;
+  this.base(2.65,1.72);
+  const shell=this.group(this.root,'ctp-family-envelope','Suprasetter family basic-unit envelope',[0,0,0],[0,.18,0]);
+  this.cover(this.box(shell,[2.52,1.30,1.58],[0,.80,0],'body',.08));
+  this.cover(this.box(shell,[2.20,.38,1.50],[-.05,1.47,0],'body',.07));
+  this.cover(this.box(shell,[1.36,.48,1.62],[-.35,.42,0],'dark',.05));
+  shell.userData.visualBoundary='MULTI_MODEL_SUPRASETTER_FAMILY_SILHOUETTE_NOT_MODEL_IDENTIFICATION';
+
+  const m1=this.mod(1,[-.84,0,0],[-.34,.18,0]);
+  this.group(m1.a,'ctp-manual-entry','Manual plate entry',[0,0,0],[0,.10,.10]);
+  const loader=this.group(m1.a,'ctp-loader-boundary','Automatic loader family boundary',[0,0,0],[-.16,.12,0]);loader.userData.installedOptionVerified=false;
+
+  const m2=this.mod(2,[-.42,0,0],[-.20,.18,0]);
+  this.group(m2.a,'ctp-transport','Plate transport',[0,0,0],[0,.10,.12]);
+  this.group(m2.a,'ctp-register','Plate registration / sensing',[0,0,0],[0,.10,.12]);
+
+  const m3=this.mod(3,[.08,0,0],[0,.24,.20]);
+  this.group(m3.a,'ctp-drum','External imaging drum',[0,0,0],[0,.14,.16]);
+  this.group(m3.a,'ctp-drum-clamp','Plate clamp system',[0,0,0],[0,.14,.16]);
+
+  const m4=this.mod(4,[.08,0,0],[0,.30,.25]);
+  this.group(m4.a,'ctp-laser-rail','Laser carriage rail',[0,0,0],[0,.16,.20]);
+  this.group(m4.a,'ctp-laser-module','HEIDELBERG laser module family',[0,0,0],[0,.18,.22]);
+  this.group(m4.a,'ctp-ids','Intelligent Diode System',[0,0,0],[0,.18,.22]);
+
+  const m5=this.mod(5,[.08,0,0],[0,.32,-.22]);
+  const punch=this.group(m5.a,'ctp-punch-option','Internal punch option boundary',[0,0,0],[0,.20,-.22]);punch.userData.installedOptionVerified=false;
+
+  const m6=this.mod(6,[.86,0,0],[.34,.18,0]);
+  this.group(m6.a,'ctp-unload','Plate unload path',[0,0,0],[.12,.10,0]);
+  const processor=this.group(m6.a,'ctp-processor-boundary','Processor / stacker boundary',[0,0,0],[.18,.12,0]);processor.userData.installedOptionVerified=false;
+  const debris=this.group(m6.a,'ctp-debris-option','Debris removal option',[0,0,0],[.14,.16,.16]);debris.userData.installedOptionVerified=false;
+  const temp=this.group(m6.a,'ctp-temp-stabilizer-option','Temperature stabilization capability',[0,0,0],[.14,.16,-.16]);temp.userData.installedOptionVerified=false;
+
+  this.root.userData.exactSuprasetterModelVerified=false;
+  this.root.userData.familyCandidates=['A52','A75','A106','106'];
+  this.root.userData.installedLoaderTypeVerified=false;
+  this.root.userData.referenceNote='BMJ records Heidelberg CTP but not exact Suprasetter model. Exterior is deliberately a multi-model family silhouette, while internal selectable mechanics distinguish verified-common Suprasetter process elements from model-dependent or optional loader, punch, debris-removal and temperature-stabilization capabilities.';
  }
  buildImagesetter(){
   this.palette.body=0xe7e7e3;this.palette.dark=0x33383c;this.palette.accent=0x497f9b;
@@ -815,7 +885,7 @@ export class ReferenceProcessSimulation{
   this.root=root;this.template=template;this.active=false;this.running=false;this.paused=false;this.speed=1;this.elapsed=0;this.lastNow=null;this.completed=0;this.onUpdate=null;
   this.blocked=template.cfg.evidence.simulation==='BLOCKED';this.blockedReason=this.blocked?template.cfg.evidence.reason:null;
   this.stages=template.cfg.profile?.process||template.cfg.modules;this.cycle=Math.max(8,this.stages.length*1.35);
-  this.motions=this.blocked?[]:template.activeMeshes.filter(m=>m.userData.motion&&!m.userData.referencePlaceholder).map(mesh=>({mesh,motion:mesh.userData.motion,position:mesh.position.clone(),quaternion:mesh.quaternion.clone()}));
+  this.motions=this.blocked?[]:template.activeMeshes.filter(m=>m.userData.motion&&!m.userData.referencePlaceholder&&m.userData.simulationEnabled!==false).map(mesh=>({mesh,motion:mesh.userData.motion,position:mesh.position.clone(),quaternion:mesh.quaternion.clone()}));
   this.family=template.cfg.family;this.pathVisible=false;this.inkFlowVisible=false;this.processPiece=null;this.processMaterial=null;this.processGeometry=null;this.blanker=null;this.collator=null;this.collatorSheets=[];this.collatorSheetGeometry=null;this.collatorSheetMaterial=null;if(!this.blocked)this.buildProcessPiece();if(!this.blocked&&this.family==='blanker')this.bindBlanker();if(!this.blocked&&this.family==='collator')this.bindCollator();
  }
  buildProcessPiece(){
