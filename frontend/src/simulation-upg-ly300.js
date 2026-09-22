@@ -60,13 +60,13 @@ export class UpgLy300ProcessSimulation{
    if(t>=.25&&t<.46)negativeDemand=true;
    if(t>=.28&&t<.34&&item.positioned)printTrig=true;
    const itemPrintPermit=t>=.30&&t<.45&&item.positioned&&negativeDemand;
-   if(itemPrintPermit){printing=true;if(!item.printed){item.printed=true;this.printedDemoCount++;}item.code.visible=this.printVisible;}
+   if(itemPrintPermit){printing=true;item.code.visible=this.printVisible;if(t>=.40&&!item.printed){item.printed=true;this.printedDemoCount++;}}
    if(item.printed)printed=true;
    const itemUvPermit=t>=.45&&t<.57&&item.printed;
-   if(itemUvPermit){uv=true;if(!item.cured){item.cured=true;this.curedDemoCount++;}}
+   if(itemUvPermit){uv=true;if(t>=.54&&!item.cured){item.cured=true;this.curedDemoCount++;}}
    if(item.cured)cured=true;
    const itemCameraPermit=t>=.57&&t<.70&&item.cured;
-   if(itemCameraPermit){camera=true;processing=true;if(!item.inspected||item.inspectionLap!==lap)this.assignResult(item,lap);}
+   if(itemCameraPermit){camera=true;processing=true;if(t>=.66&&(!item.inspected||item.inspectionLap!==lap))this.assignResult(item,lap);}
    if(item.inspected){inspected=true;decision=true;}
    if(t>=.76&&item.result){const q=clamp((t-.76)/.15);if(item.result==='REJECT_DEMO'){item.group.position.z=THREE.MathUtils.lerp(0,.34,q);rejectTracked=true;if(t>=.80&&t<.91)rejectAtGate=true;if(t>=.88)rejectConfirmed=true;}else{acceptRoute=true;if(t>=.92)collection=true;}}
   }
