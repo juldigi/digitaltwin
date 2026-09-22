@@ -54,8 +54,8 @@ test('icons use one accessible vector family without emoji runtime controls',()=
   assert.match(js,/viewBox="0 0 24 24"/);
 });
 
-test('service worker owns the V123 OEM-deep-detail shell assets',()=>{
-  assert.match(sw,/factory-digital-twin-v145-micro-realism-r1-20260922/);
+test('service worker owns the current OEM-deep-detail shell assets',()=>{
+ assert.match(sw,/factory-digital-twin-v147-ipal-process-complete-r1-20260922/);
   assert.match(sw,/app-shell-v79\.css/);
   assert.match(sw,/src\/app-shell-v79\.js/);
   assert.match(sw,/assets\/splash-industrial-v79\.webp/);

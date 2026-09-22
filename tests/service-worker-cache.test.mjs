@@ -35,6 +35,8 @@ test('service-worker shell cache references only deployable frontend files',()=>
  assert.ok(paths.includes('src/data/research-v143.js'));
  assert.ok(paths.includes('src/data/research-v144.js'));
  assert.ok(paths.includes('src/data/research-v145.js'));
+ assert.ok(paths.includes('src/data/research-v146.js'));
+ assert.ok(paths.includes('src/data/research-v147.js'));
  assert.ok(paths.includes('src/data/taxonomy-offset7.js'));
  assert.ok(paths.includes('src/data/taxonomy-qf100cs.js'));
  assert.ok(paths.includes('src/data/taxonomy-compressors.js'));
@@ -51,7 +53,7 @@ test('service-worker shell cache references only deployable frontend files',()=>
 });
 
 test('service-worker cache version advances with the centralized runtime release',()=>{
- assert.match(sw,/factory-digital-twin-v145-micro-realism-r1-20260922/);
+ assert.match(sw,/factory-digital-twin-v147-ipal-process-complete-r1-20260922/);
 });
 
 
