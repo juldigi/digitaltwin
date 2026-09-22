@@ -1,5 +1,5 @@
 import {ACTUAL_PLANT_GZIP} from './plant-actual-data.js';
-import {MACHINE_REGISTRY} from './machine-registry.js';
+import {FOUNDATION_ASSETS} from './foundation-assets.js';
 import {buildDwgFidelityLedger} from './dwg-fidelity.js';
 export const BASELINE_ID='BMJ-250804-RED-20260921';
 const known={
@@ -26,7 +26,7 @@ const known={
  'BMJ-MCH-0022':[77.99,82.24,0,'PILE TURNER 2','DXF_LABEL'],
  'BMJ-MCH-0027':[3.7,39.5,0,'CTF SCREEN','DXF_ROOM']
 };
-export const MACHINE_PLACEMENTS=Object.freeze(MACHINE_REGISTRY.map(m=>{
+export const MACHINE_PLACEMENTS=Object.freeze(FOUNDATION_ASSETS.map(m=>{
  const p=known[m.machineId];return Object.freeze({machineId:m.machineId,label:p?.[3]||m.name,x:p?.[0]??null,y:p?.[1]??null,rotation:p?.[2]??0,status:p?.[4]||'UNIDENTIFIED',flowStatus:'AXIS_CONFIRMED_DIRECTION_UNVERIFIED',scale:1});
 }));
 export async function decodePlantData(value){const raw=Uint8Array.from(atob(value),c=>c.charCodeAt(0));return JSON.parse(await new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream('gzip'))).text());}
