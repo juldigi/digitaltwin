@@ -7,7 +7,8 @@ const css=fs.readFileSync(new URL('../frontend/app-shell-v79.css',import.meta.ur
 
 test('V150 removes internal routing jargon from user-facing factory copy',()=>{
   for(const oldCopy of ['Routing scaffold siap dipasang','Future anchors','Preview pipa compressor','Preview pipa AHU','Preview ducting AHU','AHU & ducting plant','Compressed air & piping plant'])assert.equal(app.includes(oldCopy),false,oldCopy);
-  for(const copy of ['Jalur utilitas siap dilengkapi','Titik sambungan utilitas','Lihat pipa compressor','Lihat pipa AHU','Lihat ducting AHU','Udara bertekanan & pipa'])assert.equal(app.includes(copy),true,copy);
+  for(const copy of ['Fondasi pabrik','Scope fase fondasi','Detail teknis penuh hanya dibuka untuk OFFSET 5','Posisi belum teridentifikasi'])assert.equal(app.includes(copy),true,copy);
+  for(const hiddenExpansionCopy of ['Jalur utilitas siap dilengkapi','Lihat pipa compressor','Lihat pipa AHU','Lihat ducting AHU'])assert.equal(app.includes(hiddenExpansionCopy),false,hiddenExpansionCopy);
 });
 
 test('V150 asset and reference copy is human-first without changing technical source data',()=>{
@@ -26,7 +27,8 @@ test('V150 asset and reference copy is human-first without changing technical so
 test('V150 contextual help follows active workspace and avoids implementation jargon',()=>{
   assert.match(app,/function helpDialog\(\)/);
   assert.match(app,/activeSection\|\|'factory'/);
-  for(const section of ['simulation','system','reference','asset'])assert.equal(app.includes("section==='"+section+"'"),true,section);
+  for(const section of ['simulation','reference','asset'])assert.equal(app.includes("section==='"+section+"'"),true,section);
+  assert.equal(app.includes("section==='system'"),false,'system help context must stay out of Phase-1');
   assert.match(app,/PANDUAN KONTEKSTUAL/);
   assert.match(app,/Kejujuran data/);
   assert.equal(app.includes('memakai simulation engine mesin yang sedang aktif'),false);
