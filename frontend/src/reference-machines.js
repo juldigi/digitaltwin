@@ -845,7 +845,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   for(const y of [.25,1.39])this.tag(this.cyl(receiver,.20,.10,[2.48,y,0],'dark','y'),'receiver-end-reference','SYSTEM_OPTION_BOUNDARY');
   const relief=this.cyl(receiver,.035,.18,[2.48,1.61,0],'accent','y');this.tag(relief,'receiver-safety-relief-reference','SYSTEM_SAFETY_REFERENCE');
   const recvGauge=this.cyl(receiver,.070,.035,[2.80,1.18,0],'glass','z');this.tag(recvGauge,'receiver-pressure-gauge-reference','SYSTEM_OPTION_BOUNDARY');
-  const drain=this.cyl(receiver,.022,.28,[2.48,.06,0],'dark','y');this.tag(drain,'receiver-condensate-drain-reference','CONDENSATE_MANAGEMENT_REFERENCE');
+  const drain=this.cyl(receiver,.022,.28,[2.48,.14,0],'dark','y');this.tag(drain,'receiver-condensate-drain-reference','CONDENSATE_MANAGEMENT_REFERENCE');
 
   const treatment=this.group(site,'compressor-air-treatment-boundary','Dryer / Filtration Boundary',[0,0,0],[.12,.08,.08]);treatment.userData.installedConfigurationVerified=false;
   const dryer=this.box(treatment,[.72,1.02,.82],[3.35,.64,0],'glass',.035);this.tag(dryer,'compressed-air-dryer-option-boundary','SYSTEM_OPTION_BOUNDARY');dryer.userData.installedOptionVerified=false;
@@ -855,7 +855,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   const postLink=this.cyl(treatment,.032,.40,[3.55,.72,-.54],'blue','x');this.tag(postLink,'compressed-air-dryer-to-postfilter-reference','SYSTEM_OPTION_BOUNDARY');
   const bypass=this.cyl(treatment,.026,.86,[3.35,1.30,-.54],'blue','x');this.tag(bypass,'compressed-air-dryer-bypass-reference','SYSTEM_OPTION_BOUNDARY');bypass.userData.installedOptionVerified=false;
   for(const x of [2.92,3.35,3.78]){const valve=this.cyl(treatment,.050,.11,[x,1.30,-.54],'accent','x');this.tag(valve,'compressed-air-dryer-bypass-valve-reference','SYSTEM_OPTION_BOUNDARY');valve.userData.installedOptionVerified=false;}
-  const tDrain=this.cyl(treatment,.020,.24,[3.35,.08,.36],'dark','y');this.tag(tDrain,'air-treatment-condensate-drain-reference','CONDENSATE_MANAGEMENT_REFERENCE');
+  const tDrain=this.cyl(treatment,.020,.24,[3.35,.12,.36],'dark','y');this.tag(tDrain,'air-treatment-condensate-drain-reference','CONDENSATE_MANAGEMENT_REFERENCE');
 
   const ring=this.group(site,'compressor-ring-main-reference','Closed-Loop Ring Main Reference',[0,0,0],[.14,.08,0]);ring.userData.installedRouteVerified=false;
   const y=1.48,x0=4.15,x1=7.05,z0=-1.10,z1=1.10;
