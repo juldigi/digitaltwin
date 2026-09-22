@@ -851,7 +851,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  }
  enrichSansin(){
   const inlet=this.activeGroup(1),filter=this.activeGroup(2),evap=this.activeGroup(3),supply=this.activeGroup(4),outdoor=this.activeGroup(5),circuit=this.activeGroup(6),ctl=this.activeGroup(7);
-  this.root.userData.detailPass='V123_R8_SANSIN_NES_YZKJ_TWO_STAGE_COOLING_RECONSTRUCTION';
+  this.root.userData.detailPass='V132_SANSIN_INDOOR_OUTDOOR_DUCT_AIRFLOW_RECONSTRUCTION';
   this.root.userData.exactSansinModelVerified=false;
   this.root.userData.familyCandidates=['YZKJ-45N','YZKJ-90N'];
   this.root.userData.exactCoolingCapacityVerified=false;
@@ -933,7 +933,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  enrichAHU(sansin=false){
   if(sansin)return this.enrichSansin();
   const intake=this.activeGroup(1),filter=this.activeGroup(2),coil=this.activeGroup(3),drain=this.activeGroup(4),fanUnit=this.activeGroup(5),service=this.activeGroup(6),out=this.activeGroup(7);
-  this.root.userData.detailPass='V123_R8_EUROVENT_SECTIONAL_AHU_FUNCTIONAL_RECONSTRUCTION';
+  this.root.userData.detailPass='V132_EUROVENT_SECTIONAL_AHU_DUCT_AIRFLOW_RECONSTRUCTION';
   this.root.userData.exactAhuModelVerified=false;
   this.root.userData.sectionOrderVerified=false;
   this.root.userData.airflowDirectionVerified=false;
@@ -1404,6 +1404,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    else if(i===5)this.shell(g,[1.08,1.88,1.35],[0,1.02,0]);
    else if(i===6)this.box(g,[.72,.82,.90],[0,.54,0],'dark',.035);
    else this.box(g,[.62,1.28,.58],[0,.78,0],'dark',.04);
+   g.userData.packageZone=i<=4?'INDOOR_AIR_TREATMENT':i===5?'OUTDOOR_HEAT_REJECTION':i===6?'OUTDOOR_SERVICE_INTERFACE':'INDOOR_CONTROL';
    if(i===1)this.group(a,'sansin-inlet-damper','Return / outdoor air inlet');
    else if(i===2){this.group(a,'sansin-filter-net','Double filter net');this.group(a,'sansin-mixing','Air mixing / distribution');}
    else if(i===3){this.group(a,'sansin-wet-curtain','Honeycomb wet curtain');this.group(a,'sansin-evaporator','Low-temperature fin evaporator');}
