@@ -707,15 +707,60 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  enrichCompressor(){
   for(let i=1;i<=7;i++){const a=this.activeGroup(i);if(a)for(const child of [...a.children])if(child.isMesh){child.visible=false;child.userData.referencePlaceholder=true;}}
   const no=this.cfg.machine.no;
-  if([29,30,35].includes(no))return this.enrichAtlasCompressor();
-  if([31,32,34].includes(no))return this.enrichKaeserCompressor();
-  if(no===33)return this.enrichSwanCompressor();
+  if([29,30,35].includes(no))this.enrichAtlasCompressor();
+  else if([31,32,34].includes(no))this.enrichKaeserCompressor();
+  else if(no===33)this.enrichSwanCompressor();
+  this.enrichCompressedAirDistribution();
  }
  compressorGroups(){return {
   intake:this.activeGroup(1),motor:this.activeGroup(2),airend:this.activeGroup(3),sep:this.activeGroup(4),
   circuit:this.activeGroup(5),cool:this.activeGroup(6),ctl:this.activeGroup(7)
  };}
  compressorPart(parent,id,name){return parent?this.group(parent,id,name,[0,0,0],[0,.08,.08]):null;}
+ enrichCompressedAirDistribution(){
+  this.root.userData.compressedAirDistributionVisualization='LOCAL_DISCHARGE_TREATMENT_RING_MAIN_FUNCTIONAL_REFERENCE';
+  this.root.userData.plantCompressedAirRouteVerified=false;
+  this.root.userData.airReceiverInstalledVerified=false;
+  this.root.userData.airDryerInstalledVerified=false;
+  this.root.userData.lineFilterPackageInstalledVerified=false;
+  this.root.userData.ringMainInstalledVerified=false;
+  this.root.userData.pressureValuesAreNormalized=true;
+  const site=this.group(this.root,'compressor-air-distribution','Compressed-Air Discharge & Distribution Reference',[0,0,0],[.18,.10,0]);
+  site.userData.installedRouteVerified=false;site.userData.visualizationOnly=true;
+  const discharge=this.group(site,'compressor-discharge-piping','Compressor Discharge Piping',[0,0,0],[.12,.08,0]);
+  const flex=this.cyl(discharge,.045,.62,[1.52,.80,0],'dark','x');this.tag(flex,'compressor-flexible-discharge-connector-reference','COMPRESSED_AIR_INSTALLATION_REFERENCE');flex.userData.installedGeometryVerified=false;
+  const check=this.box(discharge,[.20,.16,.16],[1.86,.80,0],'steel',.015);this.tag(check,'compressor-discharge-check-valve-reference','COMPRESSED_AIR_INSTALLATION_REFERENCE');
+  const iso=this.cyl(discharge,.075,.16,[2.08,.80,0],'accent','x');this.tag(iso,'compressor-discharge-isolation-valve-reference','COMPRESSED_AIR_INSTALLATION_REFERENCE');
+  const handle=this.box(discharge,[.20,.025,.035],[2.08,.94,0],'dark',.003);this.tag(handle,'compressor-isolation-valve-handle-reference','FUNCTIONAL_REFERENCE');
+  const gauge=this.cyl(discharge,.075,.035,[2.27,1.03,0],'glass','z');this.tag(gauge,'compressor-discharge-pressure-gauge-reference','FUNCTIONAL_REFERENCE');gauge.userData.pressureScaleVerified=false;
+
+  const receiver=this.group(site,'compressor-air-receiver-boundary','Air Receiver Boundary',[0,0,0],[.10,.08,.10]);receiver.userData.installedOptionVerified=false;
+  const vessel=this.cyl(receiver,.36,1.35,[2.48,.82,0],'steel','y');this.tag(vessel,'compressed-air-receiver-reference','SYSTEM_OPTION_BOUNDARY');vessel.userData.installedVolumeVerified=false;
+  for(const y of [.25,1.39])this.tag(this.cyl(receiver,.20,.10,[2.48,y,0],'dark','y'),'receiver-end-reference','SYSTEM_OPTION_BOUNDARY');
+  const relief=this.cyl(receiver,.035,.18,[2.48,1.61,0],'accent','y');this.tag(relief,'receiver-safety-relief-reference','SYSTEM_SAFETY_REFERENCE');
+  const recvGauge=this.cyl(receiver,.070,.035,[2.80,1.18,0],'glass','z');this.tag(recvGauge,'receiver-pressure-gauge-reference','SYSTEM_OPTION_BOUNDARY');
+  const drain=this.cyl(receiver,.022,.28,[2.48,.06,0],'dark','y');this.tag(drain,'receiver-condensate-drain-reference','CONDENSATE_MANAGEMENT_REFERENCE');
+
+  const treatment=this.group(site,'compressor-air-treatment-boundary','Dryer / Filtration Boundary',[0,0,0],[.12,.08,.08]);treatment.userData.installedConfigurationVerified=false;
+  const dryer=this.box(treatment,[.72,1.02,.82],[3.35,.64,0],'glass',.035);this.tag(dryer,'compressed-air-dryer-option-boundary','SYSTEM_OPTION_BOUNDARY');dryer.userData.installedOptionVerified=false;
+  const pre=this.cyl(treatment,.095,.34,[2.95,.72,-.54],'filter','y');this.tag(pre,'compressed-air-prefilter-option-reference','SYSTEM_OPTION_BOUNDARY');pre.userData.installedOptionVerified=false;
+  const post=this.cyl(treatment,.085,.34,[3.75,.72,-.54],'filter','y');this.tag(post,'compressed-air-postfilter-option-reference','SYSTEM_OPTION_BOUNDARY');post.userData.installedOptionVerified=false;
+  const tDrain=this.cyl(treatment,.020,.24,[3.35,.08,.36],'dark','y');this.tag(tDrain,'air-treatment-condensate-drain-reference','CONDENSATE_MANAGEMENT_REFERENCE');
+
+  const ring=this.group(site,'compressor-ring-main-reference','Closed-Loop Ring Main Reference',[0,0,0],[.14,.08,0]);ring.userData.installedRouteVerified=false;
+  const y=1.48,x0=4.15,x1=7.05,z0=-1.10,z1=1.10;
+  for(const z of [z0,z1]){const p=this.cyl(ring,.038,x1-x0,[(x0+x1)/2,y,z],'blue','x');this.tag(p,'compressed-air-ring-main-reference','DISTRIBUTION_FUNCTIONAL_REFERENCE');p.userData.installedDiameterVerified=false;}
+  for(const x of [x0,x1]){const p=this.cyl(ring,.038,z1-z0,[x,y,0],'blue','z');this.tag(p,'compressed-air-ring-main-reference','DISTRIBUTION_FUNCTIONAL_REFERENCE');p.userData.installedDiameterVerified=false;}
+  const feed=this.cyl(ring,.038,1.10,[4.05,1.15,0],'blue','y');this.tag(feed,'compressed-air-main-riser-reference','DISTRIBUTION_FUNCTIONAL_REFERENCE');
+  const link=this.cyl(ring,.038,.84,[3.63,.80,0],'blue','x');this.tag(link,'compressed-air-treatment-to-riser-reference','DISTRIBUTION_FUNCTIONAL_REFERENCE');
+
+  for(const [i,x,z] of [[1,4.65,z0],[2,5.60,z1],[3,6.55,z0]]){
+   const drop=this.cyl(ring,.026,1.00,[x,.98,z],'blue','y');this.tag(drop,'compressed-air-service-drop-reference','DISTRIBUTION_FUNCTIONAL_REFERENCE');drop.userData.servicePointIndex=i;
+   const valve=this.cyl(ring,.055,.12,[x,.48,z],'accent','y');this.tag(valve,'compressed-air-service-isolation-valve-reference','DISTRIBUTION_FUNCTIONAL_REFERENCE');
+   const offtake=this.cyl(ring,.026,.42,[x+.21,.44,z],'blue','x');this.tag(offtake,'compressed-air-service-offtake-reference','DISTRIBUTION_FUNCTIONAL_REFERENCE');
+   const drip=this.cyl(ring,.018,.28,[x,.34,z],'dark','y');this.tag(drip,'compressed-air-drip-leg-reference','CONDENSATE_MANAGEMENT_REFERENCE');
+  }
+ }
  enrichAtlasCompressor(){
   const {intake,motor,airend,sep,circuit,cool,ctl}=this.compressorGroups(),E='ATLAS_GA_G_FAMILY_PRIMARY',P=(p,id,n)=>this.compressorPart(p,id,n);
   this.root.userData.detailPass='V123_R3_ATLAS_GA_G_BRAND_FAMILY';
@@ -740,6 +785,8 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    const vessel=P(sep,'atlas-separator-group','Atlas oil / air separator');
    this.tag(this.cyl(vessel,.18,.62,[0,.72,0],'steel','y'),'atlas-oil-air-separator-vessel',E);
    this.tag(this.cyl(vessel,.11,.38,[0,.78,0],'filter','y'),'atlas-oil-separator-element',E);
+   const nr=this.cyl(vessel,.050,.14,[-.18,.93,.24],'dark','x');this.tag(nr,'atlas-airend-non-return-valve-reference',E);
+   const scavenge=this.cyl(vessel,.010,.46,[.15,.74,.24],'accent','y');this.tag(scavenge,'atlas-separator-scavenge-line-reference',E);
    const mpv=P(sep,'atlas-mpv-group','Atlas minimum pressure valve');this.tag(this.cyl(mpv,.055,.16,[.16,1.05,0],'dark','y'),'atlas-minimum-pressure-valve',E);
   }
   if(circuit){
@@ -748,6 +795,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    const ret=P(circuit,'atlas-oil-return-group','Atlas oil return / piping');
    this.tag(this.cyl(ret,.010,.42,[-.10,.88,.18],'steel','y'),'atlas-oil-return-line-reference',E);
    for(const z of [-.28,.28])this.tag(this.cyl(ret,.018,.50,[0,.88,z],'steel','y'),'atlas-oil-air-pipe-reference',E);
+   this.tag(this.cyl(ret,.045,.15,[.24,.58,-.18],'dark','x'),'atlas-oil-stop-valve-reference',E);
   }
   if(cool){
    const ac=P(cool,'atlas-aftercooler-group','Atlas compressed-air aftercooler');this.tag(this.box(ac,[.18,.52,.32],[-.22,.80,-.20],'steel',.008),'atlas-compressed-air-aftercooler',E);
@@ -756,6 +804,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    const cond=P(cool,'atlas-condensate-group','Atlas moisture separation / drain');
    this.tag(this.cyl(cond,.10,.20,[-.18,.48,.34],'steel','y'),'atlas-moisture-separator-reference',E);
    this.tag(this.box(cond,[.12,.18,.12],[.12,.46,.38],'accent',.008),'atlas-electronic-condensate-drain-reference',E);
+   const outlet=this.cyl(cond,.040,.34,[.34,.72,.34],'blue','x');this.tag(outlet,'atlas-package-air-outlet-reference',E);outlet.userData.installedConnectionSizeVerified=false;
    const fg=P(cool,'atlas-fan-group','Atlas cooling fan');const fan=this.motion(this.cyl(fg,.17,.08,[.12,1.18,0],'dark','z'),'spin','z',11,.01,0,null);this.tag(fan,'atlas-cooling-fan',E);
   }
   if(ctl){
@@ -788,11 +837,13 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    const vessel=P(sep,'kaeser-separator-group','KAESER cooling-fluid separator');
    this.tag(this.cyl(vessel,.19,.64,[0,.72,0],'steel','y'),'kaeser-cooling-fluid-separator-tank',E);
    const cartridge=this.tag(this.cyl(vessel,.105,.34,[0,.80,0],'filter','y'),'kaeser-separator-cartridge-reference',E);cartridge.userData.separatorStageCountVerified=false;
+   const cyclone=this.cyl(vessel,.145,.20,[0,.56,0],'dark','y');this.tag(cyclone,'kaeser-separator-preseparation-zone-reference',E);
    const mpv=P(sep,'kaeser-mpv-group','KAESER minimum-pressure check valve');this.tag(this.cyl(mpv,.058,.16,[.17,1.05,0],'dark','y'),'kaeser-minimum-pressure-check-valve',E);
   }
   if(circuit){
    const filter=P(circuit,'kaeser-fluid-filter-group','KAESER ECO fluid filter');this.tag(this.cyl(filter,.060,.28,[0,.64,.22],'dark','y'),'kaeser-eco-fluid-filter-reference',E);
    const thermo=P(circuit,'kaeser-thermostat-group','KAESER thermostatic fluid valve');this.tag(this.box(thermo,[.24,.16,.18],[.12,.86,-.24],'accent',.015),'kaeser-thermostatic-fluid-valve-reference',E);
+   this.tag(this.box(thermo,[.11,.10,.10],[-.12,1.02,-.24],'glass',.006),'kaeser-etm-temperature-management-reference',E);
    const lines=P(circuit,'kaeser-fluid-lines-group','KAESER fluid / air circuit');for(const z of [-.28,.28])this.tag(this.cyl(lines,.018,.50,[0,.88,z],'steel','y'),'kaeser-fluid-air-pipe-reference',E);
   }
   if(cool){
@@ -801,6 +852,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    const cond=P(cool,'kaeser-condensate-group','KAESER centrifugal separator / ECO-DRAIN');
    this.tag(this.cyl(cond,.11,.20,[-.17,.48,.34],'steel','y'),'kaeser-centrifugal-separator-reference',E);
    this.tag(this.box(cond,[.12,.18,.12],[.12,.46,.38],'accent',.008),'kaeser-eco-drain-reference',E);
+   const outlet=this.cyl(cond,.040,.34,[.34,.72,.34],'blue','x');this.tag(outlet,'kaeser-package-air-outlet-reference',E);outlet.userData.installedConnectionSizeVerified=false;
    const fg=P(cool,'kaeser-fan-group','KAESER cooling fan');const fan=this.motion(this.cyl(fg,.18,.08,[.12,1.18,0],'dark','z'),'spin','z',10,.01,0,null);this.tag(fan,'kaeser-cooling-fan-reference',E);
   }
   if(ctl){
@@ -832,6 +884,8 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   if(sep){
    const sg=P(sep,'swan-separation-group','SWAN oil / air separation package boundary');
    const pkg=this.tag(this.cyl(sg,.18,.58,[0,.72,0],'steel','y'),'swan-oil-air-separation-package-reference','SWAN_BRAND_FAMILY_INTERNAL_BOUNDARY');pkg.userData.internalSeparatorTopologyVerified=false;
+   const cyclone=this.tag(this.cyl(sg,.14,.18,[0,.56,0],'dark','y'),'swan-cyclonic-preseparator-family-reference','SWAN_TMV_FAMILY_OPTION');cyclone.userData.installedSeriesVerified=false;
+   const element=this.tag(this.cyl(sg,.095,.30,[0,.84,0],'filter','y'),'swan-separator-element-family-reference','SWAN_SCREW_FAMILY');element.userData.installedSeriesVerified=false;
   }
   if(circuit){
    const cg=P(circuit,'swan-circuit-group','SWAN oil / air service circuit');
@@ -840,6 +894,8 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   }
   if(cool){
    const cooler=P(cool,'swan-cooler-group','SWAN built-in oil / air cooler');this.tag(this.box(cooler,[.34,.52,.34],[0,.80,-.20],'steel',.008),'swan-built-in-oil-air-cooler',E);
+   for(let y=.56;y<=1.04;y+=.08)this.tag(this.box(cooler,[.025,.030,.36],[0,y,-.20],'steel',.002),'swan-air-oil-cooler-fin-reference',E);
+   const outlet=this.cyl(cooler,.040,.32,[.32,.70,.08],'blue','x');this.tag(outlet,'swan-package-air-outlet-reference',E);outlet.userData.installedConnectionSizeVerified=false;
    const fg=P(cool,'swan-fan-group','SWAN cooling fan');const fan=this.motion(this.cyl(fg,.18,.08,[.12,1.18,0],'dark','z'),'spin','z',10,.01,0,null);this.tag(fan,'swan-cooling-fan-reference',E);
   }
   if(ctl){
