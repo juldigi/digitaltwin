@@ -18,6 +18,10 @@ test('service-worker shell cache references only deployable frontend files',()=>
  const paths=[...sw.matchAll(/['"]\.\/([^'"]+)['"]/g)].map(m=>m[1]);
  assert.ok(paths.includes('src/machine-runtime.js'));
  assert.ok(paths.includes('src/reference-machines.js'));
+ assert.ok(paths.includes('src/utility-routing.js'));
+ assert.ok(paths.includes('src/data/compressed-air-routes.js'));
+ assert.ok(paths.includes('src/data/ahu-pipe-routes.js'));
+ assert.ok(paths.includes('src/data/ahu-duct-routes.js'));
  assert.ok(paths.includes('src/data/research-v121.js'));
  assert.ok(paths.includes('src/data/research-v122.js'));
  assert.ok(paths.includes('src/data/research-v123.js'));
@@ -37,7 +41,7 @@ test('service-worker shell cache references only deployable frontend files',()=>
 });
 
 test('service-worker cache version advances with the centralized runtime release',()=>{
- assert.match(sw,/factory-digital-twin-v134-compressor-pressure-condensate-20260922/);
+ assert.match(sw,/factory-digital-twin-v135-utility-routing-scaffold-20260922/);
 });
 
 
