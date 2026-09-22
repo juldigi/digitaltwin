@@ -75,13 +75,6 @@ function bindShell(){
   $('#legend-info')?.addEventListener('click',()=>{setLegendActive('legend-info');document.body.classList.remove('clean-view');showDetail('overview');});
   $('#legend-clean')?.addEventListener('click',()=>{setLegendActive('legend-clean');document.body.classList.add('clean-view');setFloatVisible('.floating-filter',false);setFloatVisible('.keyplan-mini',false);setFloatVisible('#scene-notice',false);hideDetail();document.body.classList.remove('ui-workbench-open');uiNotice('Tampilan bersih aktif. Gunakan tombol Panel untuk menampilkan informasi kembali.');});
 
-  $('#global-search')?.addEventListener('keydown',e=>{
-    if(e.key!=='Enter')return;
-    const q=e.currentTarget.value.trim();
-    $('#nav-assets')?.click();
-    setTimeout(()=>{const input=$('#asset-search');if(input){input.value=q;input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();}},0);
-  });
-
 }
 
 function bindWorkbench(){
