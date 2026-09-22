@@ -5,7 +5,8 @@ const SRC=Object.freeze([
  'V123-LQF1080CS-UPG',
  'V123-QF-FAMILY-ADVANTAGES',
  'V123-QF1080C-INSTALL-VISUAL',
- 'V123-JMM-QF-BMJ'
+ 'V123-JMM-QF-BMJ',
+ 'V138-QF1080-DRIVE-HYDRAULIC-SERVICE'
 ]);
 const nodes=[];
 const add=(id,parentId,level,levelName,name,meshRefs,description,confidence='CLOSE_FAMILY_PROCESS_REFERENCE')=>nodes.push(Object.freeze({
@@ -36,6 +37,8 @@ chain(u,'PLATFORM','Moving platform','Platform carriage block','Moving-platform 
 chain(u,'X','X-axis drive','X linear-motion block','X-axis service group','X ball screw / linear guides / servo','qf100-x-axis','Servo, ball screw dan straight-line guide didokumentasikan pada keluarga QF/LQF.');
 chain(u,'Y','Y-axis drive','Y linear-motion block','Y-axis service group','Y ball screw / linear guides / servo','qf100-y-axis','Gerak sumbu kedua untuk indexing area blanking.');
 chain(u,'POS','Position feedback','Position-control block','Position sensing service group','Photoelectric / limit sensors','qf100-position-sensors','Photoelectric device dan position limiter menjaga akurasi keluarga mesin.');
+chain(u,'XTRANS','X Servo Transmission Support','Servo Coupling / Bearing Block','X Transmission Service Group','Coupling / Fixed-Floating Support / Ball-Screw Nut','qf100-x-transmission-service','Close-family QF-1080B/C publishes servo, leadscrew and linear-bearing architecture; installed component brands on BMJ QF-100CS remain unverified.');
+chain(u,'YTRANS','Y Servo Transmission Support','Servo Coupling / Bearing Block','Y Transmission Service Group','Coupling / Fixed-Floating Support / Ball-Screw Nut','qf100-y-transmission-service','Service-level transmission reference for the second platform axis; exact BMJ support-bearing arrangement is unverified.');
 
 u=unit('HEAD','Fixed Hydraulic Blanking Head','universal-module-3','Hydraulic blanking head tetap; jumlah head unit BMJ belum terverifikasi.');
 chain(u,'FRAME','Gantry head frame','Fixed-head frame block','Head-frame service group','Upper gantry / head supports','qf100-head-frame','Gantry structure menjaga blanking head tetap terhadap moving platform.');
@@ -58,6 +61,7 @@ chain(u,'OPTION','Automatic collector option','Collector option block','Collecto
 u=unit('CTRL','PLC / Hydraulic Cabinet','universal-module-7','Kontrol motion, pressure, interlock dan operator interface.');
 chain(u,'HMI','Operator control','HMI block','Operator-interface service group','Touchscreen / controls','qf100-hmi','Keluarga QF/LQF menggunakan PLC dan touchscreen/HMI.');
 chain(u,'HYD','Hydraulic power unit','Hydraulic-power block','Hydraulic service group','Pump / reservoir / manifold','qf100-hydraulic-unit','Menyuplai blanking head; brand/component exact unit BMJ tidak diklaim.');
+chain(u,'HYDCTRL','Hydraulic Pressure / Valve Control','Valve-Manifold Block','Hydraulic Control Service Group','Pump Motor / Solenoid Bank / Gauge / Relief / Return Filter','qf100-hydraulic-unit','QF-1080B/C publishes hydraulic station, cylinder and solenoid-valve architecture; exact BMJ brands and pressure setting remain unverified.');
 chain(u,'PLC','Electrical / PLC','PLC cabinet block','Electrical-control service group','PLC / servo-drive cabinet','qf100-plc-cabinet','Koordinasi X/Y servo, position limit, pressure cycle dan safety.');
 
 export const QF100CS_TAXONOMY=Object.freeze(nodes);
