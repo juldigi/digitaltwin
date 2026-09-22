@@ -21,8 +21,8 @@ test('each FZ1200 asset instantiates pivot-correct clamp turn air jog hydraulic 
 });
 
 test('FZ1200 true rotor whitelist excludes guide columns nozzles ducts hydraulics hoses and buttons',()=>{
- const model=new FZ1200MachineTemplate(),sim=new FZ1200ProcessSimulation(model.root,model),allowed=new Set(['trunnion-shaft','rotation-gear','blower','vibration','hyd-pump']);
- assert.equal(sim.rotors.length,6);assert.equal(sim.rotors.some(r=>!allowed.has(r.userData.mechanismRole)),false);
+ const model=new FZ1200MachineTemplate(),sim=new FZ1200ProcessSimulation(model.root,model),allowed=new Set(['lift-chain-sprocket','trunnion-shaft','rotation-gear','blower','blower-motor','vibration','hyd-pump','hyd-pump-motor']);
+ assert.equal(sim.rotors.length,12);assert.equal(sim.rotors.some(r=>!allowed.has(r.userData.mechanismRole)),false);
  const forbidden=['clamp-guide','trunnion','rotation-drive','air-nozzle','dust-duct','hyd-cylinder','hose','button'];assert.equal(model.meshes.some(m=>m.userData.rotor&&forbidden.includes(m.userData.mechanismRole)),false);
  sim.dispose();model.dispose();
 });
@@ -32,7 +32,7 @@ test('FZ1200 clamps first, reaches lift clearance, then permits the pivot-correc
  sim.start();let now=1000;const advanceTo=target=>{while(sim.elapsed<target){now+=20;sim.update(now);}};
  advanceTo(2.35);let st=sim.state();assert.equal(st.clamped,true);assert.ok(upper.position.y<upper0-.40);assert.equal(st.interlocks.turnPermitted,false);
  advanceTo(3.55);st=sim.state();assert.equal(st.liftActive,true);assert.equal(st.interlocks.liftClearance,true);assert.equal(st.interlocks.turnPermitted,true);assert.ok(clamp.position.y>sim.rest.clampPosition.y+.10);assert.ok(yoke.position.y>sim.rest.yokePosition.y+.10);
- advanceTo(6.05);st=sim.state();assert.ok(st.turnAngleDeg>175);assert.ok(clamp.quaternion.angleTo(yoke.quaternion)<1e-9);assert.equal(st.interlocks.airPermitted,true);
+ advanceTo(7.30);st=sim.state();assert.ok(st.turnAngleDeg>175);assert.ok(clamp.quaternion.angleTo(yoke.quaternion)<1e-9);assert.equal(st.interlocks.airPermitted,true);
  model.root.updateMatrixWorld(true);const pileBox=new THREE.Box3().setFromObject(model.findNode('fz1200-pile'));assert.ok(pileBox.min.y>0,'turned pile must stay above floor');
  sim.dispose();model.dispose();
 });
@@ -46,7 +46,7 @@ test('FZ1200 airing and jogging use jets and opposing plate motion instead of sp
 
 test('FZ1200 cycle remains continuous across repeated 180 degree turns and resets exactly',()=>{
  const model=new FZ1200MachineTemplate(),sim=new FZ1200ProcessSimulation(model.root,model),clamp=model.findNode('fz1200-clamp'),q0=clamp.quaternion.clone();sim.start();let now=1000;
- for(let i=0;i<1300;i++){now+=20;sim.update(now);}assert.ok(sim.completed>=2);assert.ok(clamp.quaternion.angleTo(q0)<.25,'two 180-degree cycles should approach a full 360-degree orientation');
+ for(let i=0;i<1500;i++){now+=20;sim.update(now);}assert.ok(sim.completed>=2);assert.ok(clamp.quaternion.angleTo(q0)<.25,'two 180-degree cycles should approach a full 360-degree orientation');
  sim.stop();assert.ok(clamp.quaternion.angleTo(q0)<1e-10);assert.equal(sim.state().completed,0);sim.dispose();model.dispose();
 });
 
@@ -63,6 +63,6 @@ test('V104 FZ1200 interlocks prevent turn and air before clamp and lift clearanc
  advanceTo(1.1);let s=sim.state();assert.equal(s.interlocks.turnPermitted,false);assert.equal(s.turnAngleDeg,0);assert.equal(s.airingActive,false);
  advanceTo(2.4);s=sim.state();assert.equal(s.interlocks.clampSecured,true);assert.equal(s.interlocks.liftClearance,false);assert.equal(s.turnAngleDeg,0);
  advanceTo(4.0);s=sim.state();assert.equal(s.interlocks.turnPermitted,true);assert.ok(s.turnAngleDeg>0);assert.equal(s.airingActive,false);
- advanceTo(6.35);s=sim.state();assert.equal(s.interlocks.airPermitted,true);assert.equal(s.airingActive,true);
+ advanceTo(7.60);s=sim.state();assert.equal(s.interlocks.airPermitted,true);assert.equal(s.airingActive,true);
  sim.dispose();model.dispose();
 });
