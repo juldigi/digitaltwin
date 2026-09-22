@@ -221,7 +221,7 @@ test('V136 remaining reference twins use process-faithful motion boundaries inst
  // Suprasetter external drum: no generic workpiece, clamp/expose only in the imaging window.
  for(const id of ['BMJ-MCH-0025','BMJ-MCH-0026']){
   const t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t);
-  assert.equal(t.root.userData.researchVersion,'V138',id);
+  assert.equal(t.root.userData.researchVersion,'V139',id);
   assert.ok(t.root.userData.uniqueResearchUrls>200,id+' research ledger did not exceed 200 unique URLs');
   assert.equal(sim.processPiece,null,id+' must not use generic linear workpiece');
   sim.start();sim.elapsed=sim.cycle*.50;sim.updateCTP();const st=sim.state();
@@ -295,7 +295,7 @@ test('V137 service-component contact mechanics are present on the least-specific
  {
   const {t,roles}=rolesFor('BMJ-MCH-0017');
   for(const role of ['primary-fold-belt-tensioner-reference','folder-gluer-bearing-block-reference','compression-pressure-roller-reference','box-stream-photoeye-reference'])assert.ok(roles.has(role),role);
-  assert.equal(t.root.userData.researchVersion,'V138');assert.ok(t.root.userData.uniqueResearchUrls>205);t.dispose();
+  assert.equal(t.root.userData.researchVersion,'V139');assert.ok(t.root.userData.uniqueResearchUrls>205);t.dispose();
  }
  {
   const {t,roles}=rolesFor('BMJ-MCH-0023');
@@ -411,4 +411,55 @@ test('V138 QF close-family component brands remain reference metadata and not BM
  assert.equal(meta.installedOnBmjVerified,false);
  assert.match(meta.plcHmi,/Delta/);assert.match(meta.leadscrew,/TBI/);assert.match(meta.hydraulicStation,/Oiltec/);assert.match(meta.hydraulicCylinder,/SMC/);
  t.dispose();
+});
+
+
+test('V139 CTP CTF drive-sensor interlocks gate exposure and cutting correctly',()=>{
+ for(const id of ['BMJ-MCH-0025','BMJ-MCH-0026']){
+  const t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t);sim.start();
+  sim.elapsed=sim.cycle*.20;sim.updateCTP();let st=sim.state();
+  assert.equal(st.ctpPlatePresent,true,id);assert.equal(st.ctpRegisterConfirmed,false,id);assert.equal(st.ctpExposureActive,false,id);
+  sim.elapsed=sim.cycle*.24;sim.updateCTP();st=sim.state();
+  assert.equal(st.ctpRegisterConfirmed,true,id);assert.equal(st.ctpDrumAtLoadPosition,true,id);assert.equal(st.ctpClampConfirmed,false,id);assert.equal(st.ctpExposurePermit,false,id);
+  sim.elapsed=sim.cycle*.31;sim.updateCTP();st=sim.state();
+  assert.equal(st.ctpClampConfirmed,true,id);assert.equal(st.ctpExposureActive,false,id);
+  sim.elapsed=sim.cycle*.50;sim.updateCTP();st=sim.state();
+  assert.equal(st.ctpDrumEncoderSync,true,id);assert.equal(st.ctpExposurePermit,true,id);assert.equal(st.ctpExposureActive,true,id);assert.equal(st.ctpInterlockSafe,true,id);assert.equal(st.ctpLaserBeamVisible,true,id);
+  sim.elapsed=sim.cycle*.90;sim.updateCTP();st=sim.state();
+  assert.equal(st.ctpClampConfirmed,false,id);assert.equal(st.ctpUnloadPermit,true,id);assert.equal(st.ctpExposureActive,false,id);
+  sim.elapsed=sim.cycle*.95;sim.updateCTP();st=sim.state();
+  assert.equal(st.ctpOutputDetected,true,id);assert.equal(st.ctpInterlockSafe,true,id);
+  sim.dispose();t.dispose();
+ }
+ {
+  const id='BMJ-MCH-0027',t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t);sim.start();
+  sim.elapsed=sim.cycle*.20;sim.updateImagesetter();let st=sim.state();
+  assert.equal(st.imagesetterMediaPresent,true);assert.equal(st.imagesetterTensionValid,false);assert.equal(st.exposureActive,false);assert.equal(st.imagesetterExposurePermit,false);
+  sim.elapsed=sim.cycle*.36;sim.updateImagesetter();st=sim.state();
+  assert.equal(st.imagesetterTensionValid,true);assert.equal(st.imagesetterCapstanEncoderActive,true);assert.equal(st.imagesetterPolygonAtSpeed,false);assert.equal(st.exposureActive,false);
+  sim.elapsed=sim.cycle*.50;sim.updateImagesetter();st=sim.state();
+  assert.equal(st.imagesetterPolygonAtSpeed,true);assert.equal(st.imagesetterExposurePermit,true);assert.equal(st.exposureActive,true);assert.equal(st.imagesetterInterlockSafe,true);
+  sim.elapsed=sim.cycle*.78;sim.updateImagesetter();st=sim.state();
+  assert.equal(st.imagesetterExposureComplete,true);assert.equal(st.imagesetterCutterPermit,true);assert.equal(st.cuttingActive,true);assert.equal(st.imagesetterCutterHomeConfirmed,false);assert.equal(st.imagesetterInterlockSafe,true);
+  sim.elapsed=sim.cycle*.94;sim.updateImagesetter();st=sim.state();
+  assert.equal(st.imagesetterOutputDetected,true);assert.equal(st.cuttingActive,false);assert.equal(st.outputBoundaryActive,true);
+  sim.dispose();t.dispose();
+ }
+});
+
+test('V139 CTP CTF service roles and taxonomy expose drive feedback and interlock chains',()=>{
+ {
+  const id='BMJ-MCH-0025',t=createMachineTemplate(id),roles=new Set();t.root.traverse(o=>{if(o.userData?.mechanismRole)roles.add(o.userData.mechanismRole);});
+  for(const role of ['ctp-plate-transport-motor-reference','ctp-transport-encoder-reference','ctp-register-confirm-sensor-reference','ctp-register-stop-actuator-reference','ctp-drum-drive-motor-reference','ctp-drum-drive-coupling-reference','ctp-drum-position-brake-reference','ctp-clamp-confirm-sensor-reference','ctp-output-plate-sensor-reference'])assert.ok(roles.has(role),role);
+  const names=universalTaxonomy(id).map(x=>x.name).join(' | ');
+  for(const term of ['Plate Transport Drive / Position Feedback','Register Confirmation / Stop Actuation','Drum Drive / Encoder / Position Brake','Clamp Confirmation Interlock','Output Plate Confirmation'])assert.ok(names.includes(term),term);
+  assert.equal(t.root.userData.researchVersion,'V139');t.dispose();
+ }
+ {
+  const id='BMJ-MCH-0027',t=createMachineTemplate(id),roles=new Set();t.root.traverse(o=>{if(o.userData?.mechanismRole)roles.add(o.userData.mechanismRole);});
+  for(const role of ['ctf-supply-roll-brake-reference','ctf-supply-brake-actuator-reference','ctf-capstan-drive-motor-reference','ctf-capstan-drive-coupling-reference','ctf-capstan-encoder-reference','ctf-polygon-speed-sensor-reference','ctf-polygon-motor-driver-reference','ctf-cutter-actuator-reference','ctf-cutter-home-sensor-reference','ctf-output-media-sensor-reference'])assert.ok(roles.has(role),role);
+  const names=universalTaxonomy(id).map(x=>x.name).join(' | ');
+  for(const term of ['Supply Roll Brake / Tension Boundary','Capstan Drive / Encoder','Polygon Speed Feedback / Driver','Cutter Actuation / Home Interlock','Output Media Detection'])assert.ok(names.includes(term),term);
+  assert.equal(t.root.userData.researchVersion,'V139');t.dispose();
+ }
 });
