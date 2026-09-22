@@ -139,7 +139,8 @@ function renderStaticMachineFallback(error){
 }
 function modal(title,html){$('#modal-title').textContent=title;$('#modal-body').innerHTML=html;if(!$('#modal').open)$('#modal').showModal();}
 function closeModal(){$('#modal').close();}
-function showPanel(){document.body.classList.remove('panel-hidden');if(matchMedia('(max-width:767px)').matches)document.body.classList.add('mobile-panel-open');}
+function emitDomainState(detail){window.dispatchEvent(new CustomEvent('bmj:domainstate',{detail}));}
+function showPanel(){document.body.classList.remove('panel-hidden');if(matchMedia('(max-width:767px)').matches)document.body.classList.add('mobile-panel-open');emitDomainState({inspectorState:{open:true,tab:activeTab}});}
 const activeLayout=()=>selectPlantLayout(state.layout,bundledLayout);
 function redrawPlantPlan(){if(bundledLayout)drawPlantPlan($('#dwg-canvas'),bundledLayout);}
 function pair(label,value){return `<dt>${esc(label)}</dt><dd${value==null?' class="unknown"':''}>${esc(value)}</dd>`;}
@@ -224,6 +225,7 @@ function updateSimulationPanel(next=simulationState){
  document.querySelectorAll('[data-sim-speed]').forEach(b=>b.classList.toggle('active',Math.abs(+b.dataset.simSpeed-(simulationState.speed||1))<.01));
  document.querySelectorAll('[data-sim-stage]').forEach(b=>b.classList.toggle('active',b.dataset.simStage===(simulationState.stage||'')));
  $('#tool-simulation')?.classList.toggle('active',active);
+ emitDomainState({simulationState:{active,playing:running,stage:simulationState.stage||null,speed:simulationState.speed||1,progress}});
 }
 function startPrintingSimulation(){
  if(!engine)return;
@@ -253,7 +255,7 @@ function simulationLocksStructure(){
   if(engine?.isPrintingSimulationActive()){toast(IS_APM2?'Hentikan simulasi proses APM 2 sebelum memilih, mengurai, atau mengisolasi komponen.':IS_VERIFIED_REGISTRY_SIM?'Hentikan simulasi proses sebelum memilih, mengurai, atau mengisolasi komponen.':'Hentikan simulasi Printing Test sebelum memilih, mengurai, atau mengisolasi komponen.');return true;}
  return false;
 }
-function choosePart(part){if(!part||!engine||simulationLocksStructure())return;engine.template.reset();engine.isolated=false;explode=0;selectedPart=part;engine.template.highlight(part);engine.template.ghost(true,part);engine.setPartLabels(part,selectedTaxonomyId);engine.fit(part);}
+function choosePart(part){if(!part||!engine||simulationLocksStructure())return;engine.template.reset();engine.isolated=false;explode=0;selectedPart=part;engine.template.highlight(part);engine.template.ghost(true,part);engine.setPartLabels(part,selectedTaxonomyId);engine.fit(part);const meta=taxonomyForPart(part);emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:meta?.id||part.userData?.nodeId||selectedTaxonomyId,inspectorState:{open:true,tab:'structure'}});}
 function taxonomyForPart(part){const id=part?.userData?.nodeId;if(!id)return null;return ACTIVE_TAXONOMY.filter(n=>(n.meshRefs||[]).includes(id)).sort((a,b)=>Math.abs(a.level-5)-Math.abs(b.level-5))[0]||null;}
 function taxonomyAtLevel(level){
  const target=Math.max(1,Math.min(6,Number(level)||1));let meta=TAXONOMY_BY_ID.get(selectedTaxonomyId)||TAXONOMY_BY_ID.get(ACTIVE_ROOT);
@@ -264,7 +266,7 @@ function taxonomyAtLevel(level){
 function selectTaxonomy(id,{revealPanel=false}={}){
  if(simulationLocksStructure())return;const meta=TAXONOMY_BY_ID.get(id);if(!meta)return;
  selectedTaxonomyId=meta.id;const part=engine?.template.resolveTaxonomyNode(meta.id);
- if(part)choosePart(part);else{selectedPart=null;engine?.template.reset();engine?.clearPartLabels();}
+ if(part)choosePart(part);else{selectedPart=null;engine?.template.reset();engine?.clearPartLabels();emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:meta.id,inspectorState:{open:true,tab:'structure'}});}
  if(revealPanel&&!matchMedia('(max-width:767px)').matches)showPanel();renderPanel('structure');
 }
 function taxonomyTree(parentId=ACTIVE_ROOT){
@@ -532,7 +534,9 @@ on('#tool-pan',()=>{if(!engine)return;engine.controls.enablePan=!engine.controls
 on('#tool-explode',()=>{if(simulationLocksStructure())return;showPanel();selectedTaxonomyId=selectedTaxonomyId||ACTIVE_ROOT;renderPanel('structure');explode=explode>.01?0:.65;engine?.template.explode(explode,selectedPart);renderPanel('structure');});
 on('#tool-isolate',()=>{if(simulationLocksStructure())return;if(!engine||!selectedPart){showPanel();renderPanel('structure');toast('Pilih bagian mesin terlebih dahulu.',true);return;}engine.isolated=!engine.isolated;engine.template.isolate(selectedPart,engine.isolated);$('#tool-isolate').classList.toggle('active',engine.isolated);});
 on('#tool-simulation',()=>{showPanel();renderPanel('simulation');});
-on('#labels',()=>{if(engine){engine.labels=!engine.labels;$('#labels').classList.toggle('active',engine.labels);}});on('#fullscreen',async()=>{if(!document.fullscreenEnabled){toast('Layar penuh tidak didukung browser ini.');return;}if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();});
+on('#labels',()=>{if(engine){engine.labels=!engine.labels;$('#labels').classList.toggle('active',engine.labels);emitDomainState({visibleLayers:{labels:engine.labels}});}});
+window.addEventListener('bmj:layerchange',event=>{if(!engine)return;const {key,visible}=event.detail||{};const map={building:'building',roof:'roof',machines:'machines',labels:'labels',landscape:'landscape',reference:'reference',unidentified:'unidentified',compressedAir:'utility_compressed_air',ahuPiping:'utility_ahu_piping',ducting:'utility_ahu_ducting',utilityAnchors:'utility_anchors'};const layer=map[key];if(!layer)return;if(key==='labels'){engine.labels=Boolean(visible);$('#labels')?.classList.toggle('active',engine.labels);}engine.setFactoryLayer(layer,Boolean(visible));});
+on('#fullscreen',async()=>{if(!document.fullscreenEnabled){toast('Layar penuh tidak didukung browser ini.');return;}if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();});
 window.addEventListener('offline',()=>{$('#connection').textContent='Mode lokal';toast('Koneksi data terputus. Aplikasi tetap dapat digunakan secara lokal.');});window.addEventListener('online',()=>{$('#connection').textContent=role?'Data tersambung':'Mode lokal';if(role)request('/api/state').then(acceptState).then(()=>{$('#connection').textContent='Data tersambung';toast('Data berhasil diperbarui.');}).catch(e=>toast(e.message,true));});
 try{const config=await fetch('./config.json').then(r=>r.json());apiBase=localStorage.getItem('offset5-api-base')||config.apiBase||'';if(cacheEnabled&&apiBase){const cached=await cache.get(apiBase);if(cached?.state){state=cached.state;engine?.loadLayout(activeLayout());renderStatus();renderPanel();$('#connection').textContent='Data perangkat · '+new Date(cached.savedAt).toLocaleDateString('id-ID');}}}catch(e){toast('Data tersimpan tidak dapat dibaca. Mode lokal tetap tersedia.',true);}
 window.addEventListener('resize',redrawPlantPlan,{passive:true});$('#ui-workbench-toggle')?.addEventListener('click',()=>setTimeout(redrawPlantPlan,80));$$('[data-workbench="dwg"]').forEach(b=>b.addEventListener('click',()=>setTimeout(redrawPlantPlan,40)));if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
