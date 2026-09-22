@@ -43,6 +43,8 @@ test('V144 creates richer room interiors only where source room labels exist',as
   assert.ok(stats.sparepartBins>0,'sparepart bins should be created');
   assert.ok(stats.sparepartRackGuards>0,'rack guards should be created');
  }
+ const fgLabels=layout.actual.labels.filter(l=>/\\bFG\\s*[-.]?\\s*[123]\\b|FINISH(?:ED)?\\s*GOODS/i.test(l.text));
+ if(fgLabels.length&&stats.finishedGoodsStagingZones>0)assert.ok(stats.finishedGoodsPalletLoads>0,'source-labelled FG staging should contain carton pallets');
  assert.equal(built.root.userData.nonMachineCollisionAudit.accidentalFixtureOverlaps,0);
  assert.equal(built.layers.utility_compressed_air.visible,false);
  assert.equal(built.layers.utility_ahu_piping.visible,false);
