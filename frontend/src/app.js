@@ -633,13 +633,11 @@ function openPrimaryFactoryContext(machine,{historyMode='push'}={}){
  return true;
 }
 function machineDetailDialog(machine){
- const policy=foundationAssetPolicy(machine,placementForMachine(machine.machineId)),primary=policy.canOpenTechnical3D;
- if(primary){openPrimaryFactoryContext(machine);return;}
- const status=primary?'Aset 3D teknis utama':'Placeholder tata letak';
- const copy=primary?'OFFSET 5 adalah aset teknis utama pada fase fondasi. Struktur, detail 3D, sumber, dan simulasi dibuka dari satu konteks yang tervalidasi.':'Aset ini tetap dipertahankan pada posisi pabrik sebagai konteks tata letak. Detail 3D teknis belum dibuka sampai fase ekspansi agar aplikasi tidak menyajikan rekonstruksi sebagai data terverifikasi.';
- modal(machine.name,`<div class="card accent"><h4>${esc(status)}</h4><p>${esc(copy)}</p></div><dl class="data-list">${pair('Machine ID',machine.machineId)+pair('Area',machine.area)+pair('Model',machine.model)+pair('Serial Number',machine.serial)+pair('SAP Functional Location',machine.functionalLocation)+pair('SAP Code',machine.sapCode)+pair('Tahun',machine.year)+pair('Dasar posisi',positionStatusLabel(policy.positionStatus))+pair('Sumber identitas',machine.source==='USER_CONFIRMED'?'Konfirmasi pengguna':'Registry mesin')}</dl>${machine.note?`<div class="card"><h4>Catatan sumber</h4><p>${esc(machine.note)}</p></div>`:''}<div class="actions"><button id="${primary?'open-machine-3d':'focus-layout-asset'}" class="primary">${primary?'Buka Model 3D':'Pusatkan di Pabrik'}</button></div>`);
- if(primary)on('#open-machine-3d',()=>{closeModal();switchActiveMachine(FOUNDATION_SCOPE.primaryRoute);});
- else on('#focus-layout-asset',()=>{closeModal();setView('factory');engine?.focusFactoryAsset(machine.machineId);});
+ const policy=foundationAssetPolicy(machine,placementForMachine(machine.machineId));
+ if(policy.canOpenTechnical3D){openPrimaryFactoryContext(machine);return;}
+ const copy='Aset ini tetap dipertahankan pada posisi pabrik sebagai konteks tata letak. Detail 3D teknis belum dibuka sampai fase ekspansi agar aplikasi tidak menyajikan rekonstruksi sebagai data terverifikasi.';
+ modal(machine.name,`<div class="card accent"><h4>Placeholder tata letak</h4><p>${esc(copy)}</p></div><dl class="data-list">${pair('Machine ID',machine.machineId)+pair('Area',machine.area)+pair('Model',machine.model)+pair('Serial Number',machine.serial)+pair('SAP Functional Location',machine.functionalLocation)+pair('SAP Code',machine.sapCode)+pair('Tahun',machine.year)+pair('Dasar posisi',positionStatusLabel(policy.positionStatus))+pair('Sumber identitas',machine.source==='USER_CONFIRMED'?'Konfirmasi pengguna':'Registry mesin')}</dl>${machine.note?`<div class="card"><h4>Catatan sumber</h4><p>${esc(machine.note)}</p></div>`:''}<div class="actions"><button id="focus-layout-asset" class="primary">Pusatkan di Pabrik</button></div>`);
+ on('#focus-layout-asset',()=>{closeModal();setView('factory');engine?.focusFactoryAsset(machine.machineId);});
 }
 async function switchActiveMachine(route,{historyMode='push'}={}){
  if(!canOpenTechnical3D(route)){
