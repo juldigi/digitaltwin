@@ -221,7 +221,7 @@ test('V136 remaining reference twins use process-faithful motion boundaries inst
  // Suprasetter external drum: no generic workpiece, clamp/expose only in the imaging window.
  for(const id of ['BMJ-MCH-0025','BMJ-MCH-0026']){
   const t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t);
-  assert.equal(t.root.userData.researchVersion,'V136',id);
+  assert.equal(t.root.userData.researchVersion,'V137',id);
   assert.ok(t.root.userData.uniqueResearchUrls>200,id+' research ledger did not exceed 200 unique URLs');
   assert.equal(sim.processPiece,null,id+' must not use generic linear workpiece');
   sim.start();sim.elapsed=sim.cycle*.50;sim.updateCTP();const st=sim.state();
@@ -286,5 +286,73 @@ test('V136 generic-looking facade details are replaced with family-grounded serv
 test('V136 YA1A1A remains blocked rather than inventing an unverified gravure transport simulation',()=>{
  const id='BMJ-MCH-0004',t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t),st=sim.start();
  assert.equal(st.blocked,true);assert.equal(st.active,false);assert.match(st.blockedReason,/YA1A1A|gravure|transport|drive/i);
+ sim.dispose();t.dispose();
+});
+
+
+test('V137 service-component contact mechanics are present on the least-specific reference twins',()=>{
+ const rolesFor=id=>{const t=createMachineTemplate(id),roles=new Set();t.root.traverse(o=>{if(o.userData?.mechanismRole)roles.add(o.userData.mechanismRole);});return {t,roles};};
+ {
+  const {t,roles}=rolesFor('BMJ-MCH-0017');
+  for(const role of ['primary-fold-belt-tensioner-reference','folder-gluer-bearing-block-reference','compression-pressure-roller-reference','box-stream-photoeye-reference'])assert.ok(roles.has(role),role);
+  assert.equal(t.root.userData.researchVersion,'V137');assert.ok(t.root.userData.uniqueResearchUrls>205);t.dispose();
+ }
+ {
+  const {t,roles}=rolesFor('BMJ-MCH-0023');
+  for(const role of ['suction-rotor-vacuum-port-reference','double-feed-stop-pad-reference','double-feed-ir-emitter-reference','double-feed-ir-receiver-reference'])assert.ok(roles.has(role),role);
+  t.dispose();
+ }
+ {
+  const {t,roles}=rolesFor('BMJ-MCH-0025');
+  for(const role of ['imaging-drum-encoder-reference','plate-clamp-actuator-reference','laser-linear-bearing-block-reference'])assert.ok(roles.has(role),role);
+  t.dispose();
+ }
+ {
+  const {t,roles}=rolesFor('BMJ-MCH-0027');
+  for(const role of ['capstan-bearing-housing-reference','capstan-nip-pressure-arm-reference','gravity-tension-position-sensor-reference','polygon-scanner-bearing-reference'])assert.ok(roles.has(role),role);
+  t.dispose();
+ }
+ {
+  const {t,roles}=rolesFor('BMJ-MCH-0028');
+  for(const role of ['gantry-servo-motor-reference','gantry-rack-pinion-reference','module-tool-detection-sensor-reference','module-z-pressure-position-actuator-reference'])assert.ok(roles.has(role),role);
+  t.dispose();
+ }
+});
+
+test('V137 collator sheet contact follows air-float suction pickup sensing and gather phases',()=>{
+ const id='BMJ-MCH-0023',t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t);sim.start();sim.elapsed=sim.cycle*.18;sim.updateCollator();let st=sim.state();
+ assert.equal(st.airSeparationActive,true);assert.equal(st.rotorPickupActive,true);assert.equal(st.doubleFeedCheckActive,true);
+ assert.ok(sim.collatorSheets.some(x=>Math.abs(x.mesh.rotation.z)>0),'sheet should tilt during suction pickup');
+ sim.elapsed=sim.cycle*.52;sim.updateCollator();st=sim.state();assert.equal(st.gatherTransportActive,true);
+ sim.dispose();t.dispose();
+});
+
+test('V137 Suprasetter laser beam appears only during drum-clamped exposure',()=>{
+ const id='BMJ-MCH-0025',t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t);sim.start();
+ sim.elapsed=sim.cycle*.18;sim.updateCTP();let st=sim.state();assert.equal(st.ctpLaserBeamVisible,false);assert.notEqual(st.ctpMaterialContact,'DRUM_SURFACE');
+ sim.elapsed=sim.cycle*.50;sim.updateCTP();st=sim.state();assert.equal(st.ctpPlateClamped,true);assert.equal(st.ctpLaserBeamVisible,true);assert.equal(st.ctpMaterialContact,'DRUM_SURFACE');
+ sim.elapsed=sim.cycle*.90;sim.updateCTP();st=sim.state();assert.equal(st.ctpLaserBeamVisible,false);assert.equal(st.ctpMaterialContact,'OUTPUT_GUIDE');
+ sim.dispose();t.dispose();
+});
+
+test('V137 SCREEN and Zund simulations expose physical contact state without inventing optional tool actions',()=>{
+ {
+  const id='BMJ-MCH-0027',t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t);sim.start();sim.elapsed=sim.cycle*.50;sim.updateImagesetter();const st=sim.state();
+  assert.equal(st.imagesetterMediaContactStage,'CAPSTAN_NIP_AND_EXPOSURE');assert.equal(st.capstanAdvanceActive,true);assert.equal(st.tensionRegulationActive,true);
+  sim.dispose();t.dispose();
+ }
+ {
+  const id='BMJ-MCH-0028',t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t);sim.start();sim.elapsed=sim.cycle*.50;sim.updateZund();const st=sim.state();
+  assert.equal(st.zundVacuumContactActive,true);assert.equal(st.zundToolClearanceMaintained,true);assert.equal(st.zundToolActionActive,false);
+  assert.ok(sim.zundMaterial.position.y<.69,'vacuum should pull material to bed reference');
+  sim.dispose();t.dispose();
+ }
+});
+
+test('V137 FGM2 blank enters skewed then aligns while remaining in belt contact through process zones',()=>{
+ const id='BMJ-MCH-0017',t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t);sim.start();
+ sim.elapsed=sim.cycle*.05;sim.updateFolder();let st=sim.state();assert.equal(st.folderBeltContactActive,true);assert.ok(Math.abs(sim.folderBlank.position.z)>0);
+ sim.elapsed=sim.cycle*.25;sim.updateFolder();st=sim.state();assert.equal(st.alignmentActive,true);assert.ok(Math.abs(sim.folderBlank.position.z)<.075);
+ sim.elapsed=sim.cycle*.52;sim.updateFolder();st=sim.state();assert.equal(st.glueZoneActive,true);assert.equal(st.folderMaterialContactZone,3);
  sim.dispose();t.dispose();
 });
