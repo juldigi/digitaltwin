@@ -1,4 +1,4 @@
-const VERSION='factory-digital-twin-v144-packaging-interior-realism-r1-20260922';
+const VERSION='factory-digital-twin-v144-packaging-interior-realism-r2-20260922';
 const SHELL=['./','./index.html','./config.json','./assets/favicon.svg',
   './assets/splash-industrial-v79.webp',
   './app-shell-v79.css',
