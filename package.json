@@ -1,13 +1,13 @@
 {
   "name": "bmj-factory-digital-twin",
-  "version": "0.78.0",
+  "version": "0.79.0",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
     "dev": "node scripts/serve.mjs",
     "test": "node --test tests/*.test.mjs",
-    "test:release": "node --test tests/build.test.mjs tests/frontend-syntax.test.mjs tests/factory-building-v147.test.mjs tests/machine-registry.test.mjs tests/model.test.mjs tests/plant-layout.test.mjs tests/utility-routing.test.mjs tests/ui-premium.test.mjs tests/mobile-routing-hotfix.test.mjs tests/service-worker-cache.test.mjs tests/master-prompt-v152.test.mjs tests/master-prompt-v153.test.mjs tests/master-prompt-v154.test.mjs tests/master-prompt-v155.test.mjs tests/master-prompt-v156.test.mjs tests/worker.test.mjs"
+    "test:release": "node --test tests/build.test.mjs tests/frontend-syntax.test.mjs tests/factory-building-v147.test.mjs tests/machine-registry.test.mjs tests/model.test.mjs tests/plant-layout.test.mjs tests/utility-routing.test.mjs tests/ui-premium.test.mjs tests/mobile-routing-hotfix.test.mjs tests/service-worker-cache.test.mjs tests/master-prompt-v152.test.mjs tests/master-prompt-v153.test.mjs tests/master-prompt-v154.test.mjs tests/master-prompt-v155.test.mjs tests/master-prompt-v156.test.mjs tests/master-prompt-v157.test.mjs tests/worker.test.mjs"
   },
   "dependencies": {
     "three": "0.180.0"
