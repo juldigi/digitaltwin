@@ -13,7 +13,7 @@ const SRC=Object.freeze({
  SWAN:Object.freeze(['BMJ-MACHINE-DATABASE','V123-SWAN-TSAD','V123-SWAN-TMV','V123-SWAN-CATALOG'])
 });
 const UNITS=Object.freeze([
- 'Air Intake / Filter','Electric Drive Motor','Rotary Screw Airend','Oil / Fluid Separator Vessel','Oil / Air Circuit','Aftercooler / Fan','Controller / Electrical Cabinet'
+ 'Air Intake / Filter','Electric Drive Motor','Rotary Screw Airend','Oil / Fluid Separator Vessel','Oil / Air Circuit','Aftercooler / Fan','Controller / Electrical Cabinet','Compressed-Air Discharge / Distribution'
 ]);
 const COMPONENTS=Object.freeze({
  ATLAS:Object.freeze([
@@ -30,7 +30,11 @@ const COMPONENTS=Object.freeze({
   [6,'OIL_COOLER','Oil Cooler','atlas-oil-cooler-group','Injected-oil cooler family reference.'],
   [6,'CONDENSATE','Moisture Separator / Drain','atlas-condensate-group','Moisture separation and electronic drain family reference.'],
   [6,'FAN','Cooling Fan','atlas-fan-group','Package cooling fan reference.'],
-  [7,'CONTROL','Elektronikon Controller Family','atlas-controller-group','Elektronikon-family HMI/control reference; generation unverified.']
+  [7,'CONTROL','Elektronikon Controller Family','atlas-controller-group','Elektronikon-family HMI/control reference; generation unverified.'],
+  [8,'DISCHARGE','Discharge Piping / Isolation','compressor-discharge-piping','Flexible connector, check/isolation valve and gauge reference between package and station header.'],
+  [8,'RECEIVER','Air Receiver Boundary','compressor-air-receiver-boundary','Receiver is a system-level reference only; installed volume and actual BMJ receiver arrangement are unverified.'],
+  [8,'TREATMENT','Dryer / Filtration Boundary','compressor-air-treatment-boundary','Dryer and line-filter package shown as explicit option boundary, not an installed claim.'],
+  [8,'RING','Closed-Loop Ring Main Reference','compressor-ring-main-reference','Closed-loop main with service drops and drip legs illustrates efficient plant distribution; actual BMJ route/diameter remain unverified.']
  ]),
  KAESER:Object.freeze([
   [1,'INTAKE_FILTER','Dry Intake Filter','kaeser-intake-filter-group','Dry intake filtration ahead of inlet/vent valve.'],
@@ -46,7 +50,11 @@ const COMPONENTS=Object.freeze({
   [6,'FLUID_COOLER','Cooling-Fluid Cooler','kaeser-fluid-cooler-group','Cooling-fluid cooler family reference.'],
   [6,'SEPARATOR_DRAIN','Centrifugal Separator / ECO-DRAIN','kaeser-condensate-group','Condensate separation and electronic drain family reference.'],
   [6,'FAN','Cooling Fan','kaeser-fan-group','Package cooling fan family reference.'],
-  [7,'CONTROL','SIGMA CONTROL Family','kaeser-controller-group','SIGMA CONTROL family HMI; installed generation unverified.']
+  [7,'CONTROL','SIGMA CONTROL Family','kaeser-controller-group','SIGMA CONTROL family HMI; installed generation unverified.'],
+  [8,'DISCHARGE','Discharge Piping / Isolation','compressor-discharge-piping','Flexible connector, check/isolation valve and gauge reference between package and station header.'],
+  [8,'RECEIVER','Air Receiver Boundary','compressor-air-receiver-boundary','Receiver is a system-level reference only; installed volume and actual BMJ receiver arrangement are unverified.'],
+  [8,'TREATMENT','Dryer / Filtration Boundary','compressor-air-treatment-boundary','Dryer and line-filter package shown as explicit option boundary, not an installed claim.'],
+  [8,'RING','Closed-Loop Ring Main Reference','compressor-ring-main-reference','Ring-main reference follows compressed-air engineering guidance; actual BMJ route, pipe material and diameter are unverified.']
  ]),
  SWAN:Object.freeze([
   [1,'INTAKE_FILTER','Air Filter Assembly','swan-intake-filter-group','SWAN family air-filter assembly.'],
@@ -58,7 +66,11 @@ const COMPONENTS=Object.freeze({
   [6,'COOLER','Built-In Oil / Air Cooler','swan-cooler-group','SWAN built-in oil/air cooler family reference.'],
   [6,'FAN','Cooling Fan','swan-fan-group','SWAN cooling-fan family reference.'],
   [7,'CONTROL','Smart Control Panel','swan-controller-group','SWAN smart control-panel family reference.'],
-  [7,'VFD_OPTION','TMV VFD Controller Option','swan-vfd-option-group','TMV variable-frequency capability only; installed series/options are unverified.']
+  [7,'VFD_OPTION','TMV VFD Controller Option','swan-vfd-option-group','TMV variable-frequency capability only; installed series/options are unverified.'],
+  [8,'DISCHARGE','Discharge Piping / Isolation','compressor-discharge-piping','Flexible connector, check/isolation valve and gauge reference between package and station header.'],
+  [8,'RECEIVER','Air Receiver Boundary','compressor-air-receiver-boundary','Receiver is a system-level reference only; installed volume and actual BMJ receiver arrangement are unverified.'],
+  [8,'TREATMENT','Dryer / Filtration Boundary','compressor-air-treatment-boundary','Dryer and line-filter package shown as explicit option boundary, not an installed claim.'],
+  [8,'RING','Closed-Loop Ring Main Reference','compressor-ring-main-reference','Functional ring-main distribution reference; actual BMJ route/diameter remain unverified.']
  ])
 });
 export function compressorTaxonomyFor(machineId){
@@ -72,6 +84,7 @@ export function compressorTaxonomyFor(machineId){
  }));
  add(root,null,1,'Mesin',asset.label,['MACHINE-UNIVERSAL'],'Brand identity comes from the BMJ registry. Exact compressor model remains unverified; geometry and taxonomy are brand-family references.');
  for(let i=0;i<7;i++)add(root+'.M'+(i+1),root,2,'Unit Utama',UNITS[i],['universal-module-'+(i+1)],'Brand-family functional section; exact installed layout remains model-specific.');
+ add(root+'.M8',root,2,'Unit Utama',UNITS[7],['compressor-air-distribution'],'Station/distribution functional reference; receiver, dryer, filters, ring-main route, pipe material and dimensions are not asserted as installed.');
  for(const [unit,code,name,mesh,desc] of COMPONENTS[asset.brand]){
   const parent=root+'.M'+unit,a=parent+'.'+code,b=a+'.BLOCK',d=b+'.PART',e=d+'.SPEC';
   add(a,parent,3,'Sub',name,[mesh],desc);
