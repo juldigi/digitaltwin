@@ -364,4 +364,4 @@ const relabel=()=>{
  const connection=q('#connection');if(connection)connection.textContent=navigator.onLine?'Data tersedia':'Offline';
 };
 relabel();const hydratedState=hydrateUrl();if(hydratedState.viewMode==='2d')q('#mode-2d')?.click();subscribe(state=>{markSection(state.activeSection);syncLayerControls()});
-document.documentElement.dataset.uiArchitecture='v154-master-prompt';
+document.documentElement.dataset.uiArchitecture='v155-master-prompt';
