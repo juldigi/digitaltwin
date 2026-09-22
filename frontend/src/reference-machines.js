@@ -584,6 +584,8 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
     const roll=this.motion(this.cyl(cassette,.21,.74,[-.18,.68,0],'dark','z'),'spin','z',2.2,.01,0,0);this.tag(roll,'media-supply-roll','SCREEN_FTR_KATANA_FAMILY');roll.userData.exactMediaWidthVerified=false;
     this.tag(this.cyl(cassette,.045,.86,[-.18,.68,0],'steel','z'),'media-cassette-spindle','SCREEN_FTR_KATANA_FAMILY');
     for(const z of [-.45,.45])this.tag(this.box(cassette,[.48,.56,.035],[-.18,.68,z],'dark',.012),'media-cassette-sideplate','SCREEN_FTR_KATANA_FAMILY');
+    const brake=this.cyl(cassette,.075,.055,[-.18,.68,.49],'accent','z');this.tag(brake,'ctf-supply-roll-brake-reference','SCREEN_MEDIA_TENSION_REFERENCE');
+    const brakeAct=this.box(cassette,[.10,.12,.08],[-.06,.52,.47],'steel',.006);this.tag(brakeAct,'ctf-supply-brake-actuator-reference','SCREEN_MEDIA_TENSION_REFERENCE');
    }
    const load=this.findNode('ctf-auto-load');
    if(load){
@@ -598,6 +600,9 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    if(capstan){
     const drive=this.motion(this.cyl(capstan,.075,.86,[0,.79,0],'dark','z'),'spin','z',6.2,.01,0,1);this.tag(drive,'capstan-drive-roller','SCREEN_FTR_KATANA_FAMILY');
     const nip=this.motion(this.cyl(capstan,.046,.86,[.15,.79,0],'steel','z'),'spin','z',6.2,.01,.2,1);this.tag(nip,'capstan-nip-roller','SCREEN_FTR_KATANA_FAMILY');
+    const motor=this.cyl(capstan,.095,.22,[-.16,.62,.48],'dark','x');this.tag(motor,'ctf-capstan-drive-motor-reference','SCREEN_FUNCTIONAL_DRIVE_REFERENCE');
+    const coupling=this.cyl(capstan,.042,.10,[-.05,.62,.48],'accent','x');this.tag(coupling,'ctf-capstan-drive-coupling-reference','SCREEN_FUNCTIONAL_DRIVE_REFERENCE');
+    const encoder=this.cyl(capstan,.060,.026,[.12,.79,.48],'glass','z');this.tag(encoder,'ctf-capstan-encoder-reference','SCREEN_MEDIA_POSITION_REFERENCE');
     for(const z of [-.46,.46]){const bh=this.box(capstan,[.12,.12,.09],[0,.79,z],'dark',.008);this.tag(bh,'capstan-bearing-housing-reference','SCREEN_SERVICE_REFERENCE');}
     const arm=this.box(capstan,[.26,.035,.045],[.12,.92,-.45],'steel',.004);arm.rotation.z=-.34;this.tag(arm,'capstan-nip-pressure-arm-reference','SCREEN_SERVICE_REFERENCE');
     this.tag(this.box(capstan,[.42,.014,.78],[-.08,.87,0],'paper',.002),'media-web-reference','PROCESS_WORKPIECE_REFERENCE');
@@ -632,6 +637,8 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    if(drive){
     const motor=this.motion(this.cyl(drive,.075,.18,[0,.62,0],'dark','y'),'spin','y',14,.01,0,2);this.tag(motor,'polygon-drive-motor-reference','SCREEN_FTR_KATANA_FAMILY');
     motor.userData.actualMotorSpeedVerified=false;
+    const tach=this.cyl(drive,.055,.025,[.12,.62,0],'glass','y');this.tag(tach,'ctf-polygon-speed-sensor-reference','SCREEN_SCAN_INTERLOCK_REFERENCE');
+    const driver=this.box(drive,[.16,.18,.14],[-.18,.62,.24],'dark',.008);this.tag(driver,'ctf-polygon-motor-driver-reference','SCREEN_SCAN_INTERLOCK_REFERENCE');
    }
   }
 
@@ -656,6 +663,8 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    if(cutter){
     const blade=this.motion(this.box(cutter,[.10,.22,.78],[0,.78,0],'steel',.005),'press','y',2.4,.045,0,4);this.tag(blade,'media-cross-cutter','SCREEN_FTR_FAMILY');
     this.tag(this.box(cutter,[.08,.06,.82],[.03,.66,0],'dark',.004),'cutter-anvil-reference','SCREEN_FTR_FAMILY');
+    const actuator=this.cyl(cutter,.030,.18,[-.12,.94,0],'steel','y');this.tag(actuator,'ctf-cutter-actuator-reference','SCREEN_CUTTER_FUNCTIONAL_REFERENCE');
+    const home=this.box(cutter,[.045,.055,.040],[.08,.90,-.38],'accent',.004);this.tag(home,'ctf-cutter-home-sensor-reference','SCREEN_CUTTER_INTERLOCK_REFERENCE');
    }
    const punch=this.findNode('ctf-punch-option');
    if(punch){
@@ -670,6 +679,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
     cassette.userData.installedOptionVerified=false;
     const tray=this.box(cassette,[.62,.08,.86],[.02,.48,0],'steel',.008);tray.userData.optionReference=true;this.tag(tray,'output-cassette-family-reference','KATANA_FAMILY_OPTION_BOUNDARY');
     for(const z of [-.40,.40])this.tag(this.box(cassette,[.54,.26,.035],[.06,.59,z],'dark',.008),'output-cassette-side-guide','KATANA_FAMILY_OPTION_BOUNDARY');
+    const sensor=this.box(cassette,[.045,.055,.040],[.28,.62,-.38],'accent',.004);this.tag(sensor,'ctf-output-media-sensor-reference','SCREEN_OUTPUT_INTERLOCK_REFERENCE');
    }
    const processor=this.findNode('ctf-processor-boundary');
    if(processor){
