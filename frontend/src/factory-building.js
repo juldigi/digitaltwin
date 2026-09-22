@@ -1,6 +1,7 @@
 import * as T from 'three';
 import {FACTORY_FLEET_GZIP} from './data/factory-fleet-data.js';
 import {decodePlantData} from './data/plant-actual.js';
+import {buildUtilityRoutingScaffold} from './utility-routing.js';
 let fleetCache;
 export async function loadFactoryFleet(){return fleetCache||(fleetCache=await decodePlantData(FACTORY_FLEET_GZIP));}
 export const MACHINE_SERVICE_CLEARANCE=1.2;
@@ -36,8 +37,9 @@ export function resolvePortalClearance(portal,clearances,margin=.35){
 }
 export function buildActualFactory(layout,fleet){
  const root=new T.Group();root.name='BMJ · baseline 250804 + revisi';const layers={};
- for(const name of ['building','roof','machines','labels','landscape','reference','unidentified']){layers[name]=new T.Group();layers[name].name=name;root.add(layers[name]);}
+ for(const name of ['building','roof','machines','labels','landscape','reference','unidentified','utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors']){layers[name]=new T.Group();layers[name].name=name;root.add(layers[name]);}
  layers.roof.visible=false;layers.reference.visible=false;
+ for(const name of ['utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors'])layers[name].visible=false;
  const mats=new Map();const material=(color,opacity=1)=>{const k=color+':'+opacity;if(!mats.has(k))mats.set(k,new T.MeshStandardMaterial({color,roughness:.82,metalness:.04,transparent:opacity<1,opacity,depthWrite:opacity===1,side:T.DoubleSide}));return mats.get(k);};
  const boxGeo=new T.BoxGeometry(1,1,1);
  const box=(parent,x,y,z,w,h,d,color,rot=0,opacity=1)=>{const o=new T.Mesh(boxGeo,material(color,opacity));o.position.set(x,y,z);o.scale.set(w,h,d);o.rotation.y=rot;o.receiveShadow=true;parent.add(o);return o;};
@@ -184,6 +186,7 @@ export function buildActualFactory(layout,fleet){
  }
  box(layers.unidentified,124,-.07,-44,38,.1,86,0xd9d4c5);label('POSISI AKTUAL BELUM TERIDENTIFIKASI',124,4,-90,30,'#835a2c',layers.unidentified);
  const pts=data.segments.flatMap(s=>[s[0],.012,-s[1],s[2],.012,-s[3]]),geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(pts,3));layers.reference.add(new T.LineSegments(geo,new T.LineBasicMaterial({color:0x355e72,transparent:true,opacity:.4})));
- root.userData={baselineId:layout.baselineId,assumptions:{...data.assumptions,roofEaves:4.5,roofRidge:7,roofHeightEvidence:'USER_APPROXIMATE_MEASUREMENT',machineServiceClearance:MACHINE_SERVICE_CLEARANCE,offsetRoomClearance:1.85,wallTreatment:'SOURCE_SEGMENTS_CLIPPED_TO_SERVICE_ENVELOPE',portalTreatment:'SOURCE_PORTALS_SHIFTED_ONLY_WHEN_CLEARANCE_CONFLICTS',roomContents:'FUNCTION_SPECIFIC_VISUALIZATION_NOT_AS_BUILT_INVENTORY',ipalTreatment:'OUTDOOR_OPEN_FRAME_FUNCTIONAL_RECONSTRUCTION'},offsetRooms:pressRooms.map(r=>({...r,centerError:Math.hypot((r.minX+r.maxX)/2-r.centerX,(r.minY+r.maxY)/2-r.centerY)})),ipal:{zone:ipalZone,enclosingWalls:0,removedSourceWallSegments:ipalRemovedWalls.length,openSides:true,processFlow:['EQUALIZATION','AERATION','CLARIFICATION','FILTRATION','TRANSFER'],equipment:ipalEquipment},nonMachineCollisionAudit:{placedFixtures:fixtureBoxes.length,skippedFixtures:skippedFixtures.length,accidentalFixtureOverlaps:0},omittedCollisionWalls:0,trimmedCollisionWalls:omitted.length,adjustedPortals:adjustedPortals.map(p=>({semantic:p.evidence,x:p.x,y:p.y,sourceX:p.sourceX,sourceY:p.sourceY})),legacyWalls:data.legacyWalls.length};
- return {root,layers,assets,machineBoxes};
+ const utilityRouting=buildUtilityRoutingScaffold(layers);
+ root.userData={baselineId:layout.baselineId,utilityRouting,assumptions:{...data.assumptions,roofEaves:4.5,roofRidge:7,roofHeightEvidence:'USER_APPROXIMATE_MEASUREMENT',machineServiceClearance:MACHINE_SERVICE_CLEARANCE,offsetRoomClearance:1.85,wallTreatment:'SOURCE_SEGMENTS_CLIPPED_TO_SERVICE_ENVELOPE',portalTreatment:'SOURCE_PORTALS_SHIFTED_ONLY_WHEN_CLEARANCE_CONFLICTS',roomContents:'FUNCTION_SPECIFIC_VISUALIZATION_NOT_AS_BUILT_INVENTORY',ipalTreatment:'OUTDOOR_OPEN_FRAME_FUNCTIONAL_RECONSTRUCTION'},offsetRooms:pressRooms.map(r=>({...r,centerError:Math.hypot((r.minX+r.maxX)/2-r.centerX,(r.minY+r.maxY)/2-r.centerY)})),ipal:{zone:ipalZone,enclosingWalls:0,removedSourceWallSegments:ipalRemovedWalls.length,openSides:true,processFlow:['EQUALIZATION','AERATION','CLARIFICATION','FILTRATION','TRANSFER'],equipment:ipalEquipment},nonMachineCollisionAudit:{placedFixtures:fixtureBoxes.length,skippedFixtures:skippedFixtures.length,accidentalFixtureOverlaps:0},omittedCollisionWalls:0,trimmedCollisionWalls:omitted.length,adjustedPortals:adjustedPortals.map(p=>({semantic:p.evidence,x:p.x,y:p.y,sourceX:p.sourceX,sourceY:p.sourceY})),legacyWalls:data.legacyWalls.length};
+ return {root,layers,assets,machineBoxes,utilityRouting};
 }
