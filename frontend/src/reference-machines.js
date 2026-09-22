@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {UniversalMachineTemplate} from './universal-machine.js';
-import {V137_SOURCE_STATS} from './data/research-v137.js';
+import {V138_SOURCE_STATS} from './data/research-v138.js';
 
 const AXIS={x:new THREE.Vector3(1,0,0),y:new THREE.Vector3(0,1,0),z:new THREE.Vector3(0,0,1)};
 export const REFERENCE_MACHINE_IDS=Object.freeze([
@@ -15,12 +15,12 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  constructor(machineId){
   super(machineId);
   this.root.name=this.cfg.machine.name+' · REFERENCE-GROUNDED';
-  this.root.userData.referenceBuilder='V137_RESEARCH_GROUNDED_BUILDER';
+  this.root.userData.referenceBuilder='V138_RESEARCH_GROUNDED_BUILDER';
   this.root.userData.engineeringDimensions=false;
   this.root.userData.referenceBoundary=this.cfg.profile?.unknowns||[];
-  this.root.userData.researchVersion='V137';
-  this.root.userData.researchSourceCount=V137_SOURCE_STATS.total;
-  this.root.userData.newReviewedSources=V137_SOURCE_STATS.newReviewed;this.root.userData.uniqueResearchUrls=V137_SOURCE_STATS.uniqueUrls;
+  this.root.userData.researchVersion='V138';
+  this.root.userData.researchSourceCount=V138_SOURCE_STATS.total;
+  this.root.userData.newReviewedSources=V138_SOURCE_STATS.newReviewed;this.root.userData.uniqueResearchUrls=V138_SOURCE_STATS.uniqueUrls;
   this.enrichV121();
   for(const n of this.nodes){
    if(!n.userData.rest)n.userData.rest=n.position.clone();
@@ -303,12 +303,13 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  }
  enrichBlanker(){
   const xy=this.activeGroup(2),head=this.activeGroup(3),tool=this.activeGroup(4),sep=this.activeGroup(5),out=this.activeGroup(6),ctl=this.activeGroup(7);
-  this.root.userData.detailPass='V123_R3_QF100CS_BOUNDED_FAMILY_RECONSTRUCTION';
+  this.root.userData.detailPass='V138_QF100CS_SERVO_HYDRAULIC_CONTROL_CHAIN';
   this.root.userData.blankerFamily='QF_LQF_1080_B_C_BS_CS_CLOSE_FAMILY';
   this.root.userData.exactModelPublicDocumentationFound=false;
   this.root.userData.installedBlankingHeadCountVerified=false;
   this.root.userData.installedCollectorStackerVerified=false;
   this.root.userData.localSupplierFamilyEvidence={source:'Jaya Makmur Mesindo',catalogue:['QF1080B','QF1080C'],bmjCustomerAssociation:true,installationProof:false,exactModelEquivalenceProof:false};
+  this.root.userData.qf1080PublishedComponentReference={installedOnBmjVerified:false,plcHmi:'Delta on QF-1080B/C reference',servo:'ZCTQ on QF-1080B/C reference',leadscrew:'TBI on QF-1080B/C reference',crossRail:'STAF on QF-1080B/C reference',hydraulicStation:'Oiltec on QF-1080B/C reference',hydraulicCylinder:'SMC on QF-1080B/C reference',solenoidValve:'EASUN on QF-1080B/C reference'};
   this.root.userData.familyProcess={
    movingPlatformAxes:['X','Y'],
    stableHead:true,
@@ -326,11 +327,19 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    this.tag(this.cyl(x,.022,.96,[0,.49,-.48],'steel','x'),'x-axis-ball-screw','QF_LQF_FAMILY_PRIMARY');
    for(const z of [-.58,-.38])this.tag(this.box(x,[1.02,.035,.045],[0,.54,z],'steel',.004),'x-axis-linear-guide','QF_LQF_FAMILY_PRIMARY');
    const sx=this.active(this.cyl(x,.085,.18,[-.58,.49,-.48],'dark','x'));this.tag(sx,'x-axis-servo-motor','QF_LQF_FAMILY_PRIMARY');
+   const xsvc=detail(x,'qf100-x-transmission-service','X-axis transmission / support');
+   const xcouple=this.cyl(xsvc,.040,.10,[-.47,.49,-.48],'accent','x');this.tag(xcouple,'x-axis-servo-coupling-reference','QF1080_CLOSE_FAMILY_COMPONENT_REFERENCE');
+   for(const x0 of [-.39,.39]){const brg=this.box(xsvc,[.12,.12,.14],[x0,.49,-.48],'dark',.008);this.tag(brg,x0<0?'x-axis-fixed-support-bearing-reference':'x-axis-floating-support-bearing-reference','QF1080_CLOSE_FAMILY_COMPONENT_REFERENCE');}
+   const xnut=this.box(xsvc,[.16,.14,.16],[0,.49,-.48],'steel',.008);this.tag(xnut,'x-axis-ball-screw-nut-housing-reference','QF1080_CLOSE_FAMILY_COMPONENT_REFERENCE');
 
    const y=detail(xy,'qf100-y-axis-detail','Y-axis drive detail');
    this.tag(this.cyl(y,.022,1.05,[.32,.46,0],'steel','z'),'y-axis-ball-screw','QF_LQF_FAMILY_PRIMARY');
    for(const x0 of [.22,.42])this.tag(this.box(y,[.045,.035,1.12],[x0,.51,0],'steel',.004),'y-axis-linear-guide','QF_LQF_FAMILY_PRIMARY');
    const sy=this.active(this.cyl(y,.085,.18,[.32,.46,.60],'dark','z'));this.tag(sy,'y-axis-servo-motor','QF_LQF_FAMILY_PRIMARY');
+   const ysvc=detail(y,'qf100-y-transmission-service','Y-axis transmission / support');
+   const ycouple=this.cyl(ysvc,.040,.10,[.32,.46,.49],'accent','z');this.tag(ycouple,'y-axis-servo-coupling-reference','QF1080_CLOSE_FAMILY_COMPONENT_REFERENCE');
+   for(const z0 of [-.46,.46]){const brg=this.box(ysvc,[.14,.12,.12],[.32,.46,z0],'dark',.008);this.tag(brg,z0>0?'y-axis-fixed-support-bearing-reference':'y-axis-floating-support-bearing-reference','QF1080_CLOSE_FAMILY_COMPONENT_REFERENCE');}
+   const ynut=this.box(ysvc,[.16,.14,.16],[.32,.46,0],'steel',.008);this.tag(ynut,'y-axis-ball-screw-nut-housing-reference','QF1080_CLOSE_FAMILY_COMPONENT_REFERENCE');
 
    const sensors=this.findNode('qf100-position-sensors');
    if(sensors){
@@ -388,8 +397,15 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    const hyd=this.findNode('qf100-hydraulic-unit');
    if(hyd){
     this.tag(this.box(hyd,[.42,.34,.42],[0,.43,.47],'accent',.02),'hydraulic-reservoir','QF_FAMILY_TECHNICAL_ARTICLE');
-    this.tag(this.cyl(hyd,.085,.22,[-.13,.70,.47],'dark','x'),'hydraulic-pump','QF_FAMILY_TECHNICAL_ARTICLE');
-    this.tag(this.box(hyd,[.18,.15,.18],[.16,.69,.47],'steel',.008),'hydraulic-manifold-reference','CLOSE_FAMILY_MECHANISM');
+    const pump=this.cyl(hyd,.085,.22,[-.13,.70,.47],'dark','x');this.tag(pump,'hydraulic-pump','QF_FAMILY_TECHNICAL_ARTICLE');
+    const motor=this.cyl(hyd,.10,.22,[-.34,.70,.47],'dark','x');this.tag(motor,'hydraulic-pump-motor-reference','QF1080_CLOSE_FAMILY_COMPONENT_REFERENCE');
+    const manifold=this.box(hyd,[.18,.15,.18],[.16,.69,.47],'steel',.008);this.tag(manifold,'hydraulic-manifold-reference','CLOSE_FAMILY_MECHANISM');
+    for(const z of [.37,.47,.57]){const valve=this.box(hyd,[.055,.10,.055],[.16,.83,z],'accent',.004);this.tag(valve,'hydraulic-solenoid-valve-reference','QF1080_CLOSE_FAMILY_COMPONENT_REFERENCE');}
+    const gauge=this.cyl(hyd,.060,.025,[.28,.79,.47],'glass','z');this.tag(gauge,'hydraulic-pressure-gauge-reference','QF1080_CLOSE_FAMILY_COMPONENT_REFERENCE');
+    const relief=this.cyl(hyd,.030,.10,[.03,.82,.57],'steel','y');this.tag(relief,'hydraulic-pressure-relief-reference','HYDRAULIC_FUNCTIONAL_REFERENCE');
+    const filter=this.cyl(hyd,.050,.18,[-.02,.46,.69],'filter','y');this.tag(filter,'hydraulic-return-filter-reference','HYDRAULIC_FUNCTIONAL_REFERENCE');
+    const supplyLine=this.cyl(hyd,.016,.82,[.34,1.10,.47],'steel','y');this.tag(supplyLine,'hydraulic-cylinder-supply-line-reference','HYDRAULIC_FUNCTIONAL_REFERENCE');
+    const returnLine=this.cyl(hyd,.014,.74,[.42,1.04,.57],'steel','y');this.tag(returnLine,'hydraulic-cylinder-return-line-reference','HYDRAULIC_FUNCTIONAL_REFERENCE');
    }
    const plc=this.findNode('qf100-plc-cabinet');
    if(plc){
