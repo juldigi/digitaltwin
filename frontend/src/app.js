@@ -598,7 +598,18 @@ async function switchActiveMachine(route,{historyMode='push'}={}){
  finally{if(boot)boot.hidden=true;document.body.classList.remove('scene-switching');}
 }
 function qStaticFallbackClear(){const viewport=$('#viewport');viewport?.querySelectorAll('.static-machine-fallback').forEach(node=>node.remove());}
-addEventListener('popstate',()=>{const params=new URLSearchParams(location.search);switchActiveMachine(params.get('machine')||params.get('asset')||'offset5',{historyMode:'none'});});
+async function restoreHistoryContext(){
+ const params=new URLSearchParams(location.search),route=params.get('machine')||params.get('asset')||'offset5',node=params.get('node'),viewMode=params.get('view')==='2d'?'2d':'3d';
+ await switchActiveMachine(route,{historyMode:'none'});
+ if(node&&TAXONOMY_BY_ID.has(node)){
+  setView('machine');selectTaxonomy(node,{revealPanel:true});showPanel();renderPanel('structure');
+ }else{
+  selectedTaxonomyId=ACTIVE_ROOT;selectedPart=null;engine?.clearPartLabels();
+  emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:null});
+ }
+ dispatchEvent(new CustomEvent('bmj:historyrestore',{detail:{selectedAsset:MACHINE_KEY,selectedNode:node&&TAXONOMY_BY_ID.has(node)?node:null,viewMode}}));
+}
+addEventListener('popstate',()=>{restoreHistoryContext().catch(error=>toast('Riwayat tampilan gagal dipulihkan: '+error.message,true));});
 function machineRoute(machine){
  return machine?.machineId==='BMJ-MCH-0009'?'offset10':machine?.machineId==='BMJ-MCH-0010'?'apm2':machine?.machineId==='BMJ-MCH-0002'?'sheeting':machine?.machineId==='BMJ-MCH-0003'?'offset5':machine?.machineId||'offset5';
 }
