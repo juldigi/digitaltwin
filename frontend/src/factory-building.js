@@ -2,7 +2,7 @@ import * as T from 'three';
 import {FACTORY_FLEET_GZIP} from './data/factory-fleet-data.js';
 import {decodePlantData} from './data/plant-actual.js';
 import {buildUtilityRoutingScaffold} from './utility-routing.js';
-import {V143_SOURCE_STATS} from './data/research-v143.js';
+import {V144_SOURCE_STATS} from './data/research-v144.js';
 let fleetCache;
 export async function loadFactoryFleet(){return fleetCache||(fleetCache=await decodePlantData(FACTORY_FLEET_GZIP));}
 export const MACHINE_SERVICE_CLEARANCE=1.2;
@@ -52,8 +52,8 @@ export function buildActualFactory(layout,fleet){
   const texture=new T.CanvasTexture(c);texture.colorSpace=T.SRGBColorSpace;const s=new T.Sprite(new T.SpriteMaterial({map:texture,depthTest:false}));s.position.set(x,y,z);s.scale.set(width,width*80/512,1);parent.add(s);return s;
  };
  const data=layout.actual,b=layers.building;
- const buildingDetailStats={floorControlJoints:0,serviceClearanceMarkings:0,columnBasePlates:0,columnAnchorBolts:0,columnPedestals:0,columnStiffeners:0,wallPanelJoints:0,wallGirts:0,wallBaseFlashings:0,primaryRoofFrames:0,eaveHaunches:0,eaveStruts:0,apexSplices:0,roofPurlins:0,purlinAntiSag:0,flyBracing:0,roofBracing:0,roofGutters:0,roofDownpipes:0,downpipeShoes:0,linearLights:0,doorPersonnel:0,doorWide:0,doorProtection:0,dockSafetyElements:0,pressRoomProtection:0,ipalFrameBraces:0,ipalGuardrails:0};
- const detail=(o,semantic,accuracy='INDUSTRIAL_REALISM_REFERENCE_NOT_AS_BUILT')=>{if(o)o.userData={...o.userData,semantic,accuracy,researchVersion:'V143'};return o;};
+ const buildingDetailStats={floorControlJoints:0,serviceClearanceMarkings:0,columnBasePlates:0,columnAnchorBolts:0,columnPedestals:0,columnStiffeners:0,wallPanelJoints:0,wallGirts:0,wallBaseFlashings:0,primaryRoofFrames:0,eaveHaunches:0,eaveStruts:0,apexSplices:0,roofPurlins:0,purlinAntiSag:0,flyBracing:0,roofBracing:0,roofGutters:0,roofDownpipes:0,downpipeShoes:0,linearLights:0,doorPersonnel:0,doorWide:0,doorProtection:0,dockSafetyElements:0,pressRoomProtection:0,ipalFrameBraces:0,ipalGuardrails:0,officeWorkstations:0,officeMonitors:0,officeTaskChairs:0,officeStorageUnits:0,officePlanningBoards:0,officePrintStations:0,qcInspectionFixtures:0,sparepartRackBays:0,sparepartBins:0,sparepartRackGuards:0,warehousePalletLoads:0,warehouseReelCradles:0,warehouseAisleMarkings:0,warehouseSafetyElements:0};
+ const detail=(o,semantic,accuracy='INDUSTRIAL_REALISM_REFERENCE_NOT_AS_BUILT')=>{if(o)o.userData={...o.userData,semantic,accuracy,researchVersion:'V144'};return o;};
  // The outline follows the source production hall and attached office/service wings.
  const outline=[[-4,2],[6,2],[6,6],[96,6],[96,90],[90,96],[73,96],[73,103],[23,103],[23,96],[6,96],[6,55],[-5,55],[-5,11],[-4,11]];
  const shape=new T.Shape(outline.map(([x,y])=>new T.Vector2(x,y))),floor=new T.Mesh(new T.ShapeGeometry(shape),material(0xd8dcda));floor.rotation.x=-Math.PI/2;floor.position.y=-.015;floor.receiveShadow=true;floor.userData={semantic:'REINFORCED_CONCRETE_FLOOR',accuracy:'SOURCE_OUTLINE_WITH_VISUAL_MATERIAL_REFERENCE'};b.add(floor);
@@ -162,23 +162,72 @@ export function buildActualFactory(layout,fleet){
  const addLinearLight=(x,z,len=1.6)=>{const g=new T.Group();g.position.set(x,0,z);b.add(g);const rod1=line(g,new T.Vector3(-len*.35,4.42,0),new T.Vector3(-len*.35,4.08,0),.008,0x718087),rod2=line(g,new T.Vector3(len*.35,4.42,0),new T.Vector3(len*.35,4.08,0),.008,0x718087);detail(rod1,'LIGHT_SUSPENSION_REFERENCE');detail(rod2,'LIGHT_SUSPENSION_REFERENCE');const fixture=new T.Mesh(boxGeo,lightMaterial);fixture.position.set(0,4.04,0);fixture.scale.set(len,.055,.12);fixture.userData={semantic:'SUSPENDED_LINEAR_LED_REFERENCE',accuracy:'INDUSTRIAL_REALISM_REFERENCE_NOT_AS_BUILT'};g.add(fixture);buildingDetailStats.linearLights++;};
  for(const x of [14,29,44,59,74,89])for(let y=12;y<=86;y+=8)addLinearLight(x,-y,1.65);
 
- // Source-labelled rooms receive function-specific, non-OEM interior silhouettes.
+ // Source-labelled rooms receive function-specific, non-OEM interiors.
+ // DXF labels define room function/position only. Furniture, storage equipment and inventory below are
+ // ergonomic/industrial references and remain explicitly NOT-AS-BUILT until field photos are supplied.
  const roomWords=/Workshop|Adm Room|QC Sample|R\.PDS|R\.Sample|R\.INCOMING|WH Spareparts|Mushola|Loading Dock|CTF|CTP|Toilet|R\.BROKE|R\.FPS|Electric room|PPIC/i;
  const fixtureBoxes=[],skippedFixtures=[];
- const fixture=(x,y,w,h,d,color,semantic,integrated=false)=>{const bounds={minX:x-w/2,maxX:x+w/2,minY:y-d/2,maxY:y+d/2,semantic};if(intersectsMachine([bounds.minX,bounds.minY],[bounds.maxX,bounds.maxY])||(!integrated&&fixtureBoxes.some(q=>Math.min(bounds.maxX,q.maxX)-Math.max(bounds.minX,q.minX)>.025&&Math.min(bounds.maxY,q.maxY)-Math.max(bounds.minY,q.minY)>.025))){skippedFixtures.push(bounds);return null;}const o=box(b,x,h/2,-y,w,h,d,color);o.castShadow=true;o.userData={semantic,accuracy:'FUNCTIONAL_ROOM_VISUALIZATION',collisionAudited:true};if(!integrated)fixtureBoxes.push(bounds);return o;};
+ const fixture=(x,y,w,h,d,color,semantic,integrated=false,centerY=null)=>{
+  const bounds={minX:x-w/2,maxX:x+w/2,minY:y-d/2,maxY:y+d/2,semantic};
+  if(intersectsMachine([bounds.minX,bounds.minY],[bounds.maxX,bounds.maxY])||(!integrated&&fixtureBoxes.some(q=>Math.min(bounds.maxX,q.maxX)-Math.max(bounds.minX,q.minX)>.025&&Math.min(bounds.maxY,q.maxY)-Math.max(bounds.minY,q.minY)>.025))){skippedFixtures.push(bounds);return null;}
+  const o=box(b,x,centerY??h/2,-y,w,h,d,color);o.castShadow=true;o.userData={semantic,accuracy:'INDUSTRIAL_PACKAGING_INTERIOR_REFERENCE_NOT_AS_BUILT',collisionAudited:true,researchVersion:'V144'};if(!integrated)fixtureBoxes.push(bounds);return o;
+ };
+ const taskChair=(x,y)=>{
+  fixture(x,y,.48,.09,.48,0x526976,'OFFICE_TASK_CHAIR_SEAT',true,.48);
+  fixture(x,y+.18,.48,.54,.075,0x526976,'OFFICE_TASK_CHAIR_BACK',true,.80);
+  const stem=new T.Mesh(new T.CylinderGeometry(.035,.045,.36,10),material(0x4e5e65));stem.position.set(x,.27,-y);stem.userData={semantic:'OFFICE_TASK_CHAIR_GAS_LIFT_REFERENCE',accuracy:'INDUSTRIAL_PACKAGING_INTERIOR_REFERENCE_NOT_AS_BUILT',researchVersion:'V144'};b.add(stem);
+  for(let a=0;a<Math.PI*2;a+=Math.PI*2/5){const foot=line(b,new T.Vector3(x,.09,-y),new T.Vector3(x+Math.cos(a)*.27,.07,-y+Math.sin(a)*.27),.018,0x4e5e65);foot.userData={semantic:'OFFICE_TASK_CHAIR_BASE_REFERENCE',accuracy:'INDUSTRIAL_PACKAGING_INTERIOR_REFERENCE_NOT_AS_BUILT',researchVersion:'V144'};}
+  buildingDetailStats.officeTaskChairs++;
+ };
+ const officeWorkstation=(x,y,tag='OFFICE')=>{
+  const desktop=fixture(x,y,1.48,.075,.72,0xb79a76,tag+'_DESK',false,.74);if(!desktop)return false;
+  fixture(x,y+.30,1.18,.42,.055,0x8c7a66,tag+'_MODESTY_PANEL',true,.43);
+  for(const dx of [-.63,.63])for(const dy of [-.27,.27])fixture(x+dx,y+dy,.055,.69,.055,0x586a72,tag+'_DESK_LEG',true,.35);
+  fixture(x-.18,y-.15,.52,.315,.035,0x1e2c33,tag+'_MONITOR',true,1.12);
+  fixture(x-.18,y-.15,.12,.20,.10,0x566970,tag+'_MONITOR_STAND',true,.91);
+  fixture(x-.10,y+.13,.46,.025,.17,0x37464d,tag+'_KEYBOARD',true,.795);
+  fixture(x+.32,y+.13,.06,.025,.10,0x37464d,tag+'_MOUSE',true,.795);
+  fixture(x+.49,y-.05,.36,.60,.52,0x75888d,tag+'_PEDESTAL_DRAWER',true,.30);
+  fixture(x+.50,y-.05,.27,.018,.012,0x566970,tag+'_DRAWER_PULL',true,.43);
+  fixture(x+.50,y-.05,.27,.018,.012,0x566970,tag+'_DRAWER_PULL',true,.28);
+  taskChair(x,y+.80);
+  buildingDetailStats.officeWorkstations++;buildingDetailStats.officeMonitors++;buildingDetailStats.officeStorageUnits++;
+  return true;
+ };
+ const guestChair=(x,y,tag='VISITOR')=>{fixture(x,y,.46,.08,.46,0x687d87,tag+'_CHAIR_SEAT',true,.45);fixture(x,y+.17,.46,.50,.065,0x687d87,tag+'_CHAIR_BACK',true,.74);for(const dx of [-.18,.18])for(const dy of [-.15,.15])fixture(x+dx,y+dy,.035,.42,.035,0x52646b,tag+'_CHAIR_LEG',true,.21);};
+ const raisedBoard=(x,y,w=1.7,semantic='OFFICE_PLANNING_BOARD')=>{fixture(x,y,w,.92,.045,0xe8ece8,semantic,true,1.72);fixture(x,y,w+.08,.045,.055,0x657a82,semantic+'_TOP_RAIL',true,2.20);fixture(x,y,w+.08,.045,.055,0x657a82,semantic+'_BOTTOM_RAIL',true,1.24);buildingDetailStats.officePlanningBoards++;};
+ const printStation=(x,y,semantic='OFFICE_MFP')=>{const base=fixture(x,y,.60,.76,.55,0x778a90,semantic,false);if(!base)return;fixture(x,y-.02,.56,.22,.50,0xdce2df,semantic+'_SCANNER',true,.87);fixture(x,y+.17,.44,.08,.17,0x24343c,semantic+'_CONTROL',true,.93);fixture(x,y-.30,.38,.035,.25,0xc9d2d0,semantic+'_OUTPUT_TRAY',true,.64);buildingDetailStats.officePrintStations++;};
+ const qcBench=(x,y,semantic='QC_INSPECTION')=>{const top=fixture(x,y,1.75,.08,.68,0xc8d1cf,semantic+'_BENCH',false,.82);if(!top)return;for(const dx of [-.72,.72])fixture(x+dx,y,.055,.77,.055,0x667a80,semantic+'_LEG',true,.39);fixture(x,y+.18,.86,.52,.46,0xe7ece9,semantic+'_LIGHT_BOOTH',true,1.12);fixture(x,y+.405,.70,.33,.025,0xf3f1dd,semantic+'_VIEWING_FIELD',true,1.12);for(const dx of [-.55,0,.55])fixture(x+dx,y-.21,.34,.035,.24,0xb8cbd0,semantic+'_SAMPLE_TRAY',true,.88);buildingDetailStats.qcInspectionFixtures++;};
+ const spareRackBay=(x,y)=>{
+  const reserve=fixture(x,y,.96,.06,.60,0x657a82,'SPAREPART_RACK_FOOTPRINT',false,.03);if(!reserve)return;
+  for(const dx of [-.43,.43]){fixture(x+dx,y,.065,2.25,.065,0x4f6874,'SPAREPART_RACK_UPRIGHT',true,1.125);fixture(x+dx,y-.34,.18,.38,.18,0xe0b436,'SPAREPART_RACK_GUARD',true,.19);buildingDetailStats.sparepartRackGuards++;}
+  for(const level of [.34,.82,1.30,1.78,2.16]){fixture(x,y,.88,.055,.56,0xa7b4b2,'SPAREPART_RACK_SHELF',true,level);if(level<2.1)for(const dx of [-.25,.25]){const heavy=level<.9;fixture(x+dx,y,.36,heavy?.28:.21,.43,heavy?0x758b93:0x8fa3a7,heavy?'SPAREPART_BIN_HEAVY_LOW_LEVEL':'SPAREPART_BIN',true,level+(heavy?.17:.13));buildingDetailStats.sparepartBins++;}}
+  buildingDetailStats.sparepartRackBays++;
+ };
+ const floorMark=(x,y,w,d,semantic)=>{const o=fixture(x,y,w,.018,d,0xd6ad2f,semantic,true,.010);if(o)buildingDetailStats.warehouseAisleMarkings++;return o;};
+
  for(const l of data.labels){if(!roomWords.test(l.text))continue;if(l.x>34.7&&l.x<63.1&&l.y>56.9&&l.y<65.1)continue;
   label(l.text,l.x,3.45,-l.y,Math.min(8,3+l.text.length*.13),'#526772');
-  if(/Adm Room|PPIC|R\.PDS|QC Sample|R\.Sample|R\.INCOMING/i.test(l.text)){
-   fixture(l.x,l.y,1.5,.76,.72,0xb89d78,'ROOM_DESK');fixture(l.x-1.05,l.y,.55,.9,.55,0x647985,'OFFICE_CHAIR');fixture(l.x+1.05,l.y,.55,.9,.55,0x647985,'OFFICE_CHAIR');fixture(l.x,l.y+.9,1.8,1.85,.38,0x7d9195,'ROOM_STORAGE');
-   if(/QC|Sample|INCOMING/i.test(l.text)){fixture(l.x,l.y-1.05,1.8,.9,.62,0xd5d9d5,'QC_BENCH');fixture(l.x-.55,l.y-1.05,.38,.22,.32,0xd7e6ec,'QC_SAMPLE_TRAY');}
+  if(/Adm Room/i.test(l.text)){
+   officeWorkstation(l.x,l.y,'ADMIN');for(const dx of [-.48,.48])guestChair(l.x+dx,l.y-.88,'ADMIN_VISITOR');
+   if(fixture(l.x,l.y+1.12,1.65,.74,.38,0x7b8e93,'ADMIN_CREDENZA'))buildingDetailStats.officeStorageUnits++;
+   raisedBoard(l.x,l.y+1.38,1.55,'ADMIN_NOTICE_BOARD');
+  }else if(/PPIC/i.test(l.text)){
+   officeWorkstation(l.x-.78,l.y,'PPIC_A');officeWorkstation(l.x+.78,l.y,'PPIC_B');raisedBoard(l.x,l.y+1.35,2.25,'PPIC_PRODUCTION_PLANNING_BOARD');printStation(l.x+1.55,l.y+1.0,'PPIC_MFP');
+  }else if(/R\.PDS/i.test(l.text)){
+   officeWorkstation(l.x-.35,l.y,'PDS');if(fixture(l.x+1.0,l.y+.55,1.00,.86,.62,0x788b91,'PDS_FLAT_FILE_CABINET'))buildingDetailStats.officeStorageUnits++;raisedBoard(l.x,l.y+1.35,1.8,'PDS_DRAWING_REVIEW_BOARD');
+  }else if(/QC Sample|R\.Sample|R\.INCOMING/i.test(l.text)){
+   officeWorkstation(l.x-.70,l.y,'QC');qcBench(l.x+.65,l.y-1.0,/INCOMING/i.test(l.text)?'INCOMING_INSPECTION':'QC_SAMPLE_INSPECTION');
+   if(fixture(l.x+1.05,l.y+.95,.78,1.85,.36,0x73868c,'QC_SAMPLE_STORAGE'))buildingDetailStats.officeStorageUnits++;
   }else if(/Toilet/i.test(l.text)){
    for(const dx of [-.72,.72]){fixture(l.x+dx,l.y,.08,2.15,1.55,0xd9e2e3,'TOILET_PARTITION');fixture(l.x+dx*.5,l.y+.28,.42,.43,.62,0xf0f3f1,'TOILET_FIXTURE');}fixture(l.x,l.y-1.02,1.2,.82,.46,0xd4dde0,'WASH_BASIN_COUNTER');
   }else if(/Electric room/i.test(l.text)){
-   for(let i=-1;i<=1;i++){fixture(l.x+i*.82,l.y+.45,.7,2.05,.36,0x667985,'ELECTRICAL_PANEL');for(let lamp=0;lamp<3;lamp++)fixture(l.x+i*.82-.18+lamp*.18,l.y+.24,.055,.055,.04,lamp===0?0x46b879:lamp===1?0xe0b436:0xc54b4b,'PANEL_INDICATOR',true);}fixture(l.x,l.y-.72,2.8,.025,1.15,0xd8b532,'ELECTRICAL_CLEARANCE_ZONE',true);
+   for(let i=-1;i<=1;i++){fixture(l.x+i*.82,l.y+.45,.7,2.05,.36,0x667985,'ELECTRICAL_PANEL');for(let lamp=0;lamp<3;lamp++)fixture(l.x+i*.82-.18+lamp*.18,l.y+.24,.055,.055,.04,lamp===0?0x46b879:lamp===1?0xe0b436:0xc54b4b,'PANEL_INDICATOR',true,.95+lamp*.10);}fixture(l.x,l.y-.72,2.8,.025,1.15,0xd8b532,'ELECTRICAL_CLEARANCE_ZONE',true,.014);
   }else if(/WH Spareparts/i.test(l.text)){
-   for(const dx of [-1.05,0,1.05]){fixture(l.x+dx,l.y,.82,2.15,.52,0x72868d,'SPAREPART_RACK');for(let shelf=.42;shelf<1.9;shelf+=.48)fixture(l.x+dx,l.y-.02,.78,.055,.56,0xaeb9b6,'RACK_SHELF',true);}
+   for(const dx of [-1.12,0,1.12])spareRackBay(l.x+dx,l.y+.15);
+   floorMark(l.x,l.y-1.02,3.35,.055,'SPAREPART_PICKING_AISLE_MARKING');fixture(l.x,l.y-1.28,.82,.76,.48,0x6d8189,'SPAREPART_PICKING_TROLLEY');fixture(l.x,l.y-1.28,.70,.05,.42,0xb7c3c0,'SPAREPART_TROLLEY_TOP',true,.79);
   }else if(/Workshop/i.test(l.text)){
-   fixture(l.x,l.y,2.25,.88,.82,0x8a7359,'WORKBENCH');fixture(l.x,l.y+.62,2.3,.92,.12,0x617681,'TOOL_BOARD');for(const dx of [-.78,0,.78])fixture(l.x+dx,l.y+.55,.18,.18,.09,0xe0b436,'WORKSHOP_TOOL',true);fixture(l.x+1.55,l.y,0.72,1.9,.46,0x71858d,'WORKSHOP_CABINET');
+   fixture(l.x,l.y,2.25,.88,.82,0x8a7359,'WORKBENCH');fixture(l.x,l.y+.62,2.3,.92,.12,0x617681,'TOOL_BOARD');for(const dx of [-.78,0,.78])fixture(l.x+dx,l.y+.55,.18,.18,.09,0xe0b436,'WORKSHOP_TOOL',true,.95);fixture(l.x+1.55,l.y,0.72,1.9,.46,0x71858d,'WORKSHOP_CABINET');
   }else if(/Mushola/i.test(l.text)){
    for(let i=-2;i<=2;i++)fixture(l.x+i*.52,l.y,.46,.018,2.25,i%2?0x668c7f:0x759c8e,'PRAYER_MAT');fixture(l.x-1.75,l.y+1.05,1.1,1.15,.32,0x8b765c,'SHOE_RACK');
   }else if(/R\.FPS/i.test(l.text)){
@@ -187,8 +236,29 @@ export function buildActualFactory(layout,fleet){
    for(const dx of [-.75,.75])fixture(l.x+dx,l.y,1.15,.75,1.1,0xb08d60,'BROKE_COLLECTION_BIN');
   }
  }
- // Raw-material racks stay in the northern RMS zone; Sheeting is below it, never on it.
- for(const x of [85,88.5,92])for(const y of [73,78,83]){box(b,x,.12,-y,1.8,.24,2.4,0x9b7c55);for(let n=0;n<3;n++){const roll=new T.Mesh(new T.CylinderGeometry(.48,.48,1.4,12),material(0xd9cbb0));roll.position.set(x+(n-1)*.55,.93,-y);b.add(roll);}}
+
+ // RMS: material storage reads as a packaging warehouse rather than generic barrels.
+ // Exact inventory, rack type and aisle engineering still require field photos / warehouse drawings.
+ const rms=new T.Group();rms.name='RMS_PACKAGING_STORAGE_REFERENCE';b.add(rms);rms.userData={semantic:'RMS_PACKAGING_STORAGE_REFERENCE',accuracy:'INDUSTRIAL_PACKAGING_INTERIOR_REFERENCE_NOT_AS_BUILT',researchVersion:'V144'};
+ const rmsPallet=(x,y,levels=3)=>{
+  const g=new T.Group();g.position.set(x,0,-y);rms.add(g);g.userData={semantic:'WRAPPED_PAPERBOARD_PALLET_REFERENCE',accuracy:'INDUSTRIAL_PACKAGING_INTERIOR_REFERENCE_NOT_AS_BUILT',researchVersion:'V144'};
+  for(const z of [-.68,0,.68])detail(box(g,0,.055,z,1.65,.11,.13,0x967953),'RMS_PALLET_SLAT_REFERENCE');
+  for(let level=0;level<levels;level++){const cy=.20+level*.34;box(g,0,cy,0,1.55,.28,1.05,level%2?0xe3e0d4:0xebe8dc);for(const sx of [-.76,.76])box(g,sx,cy,0,.025,.30,1.08,0x97a8a5);}
+  const wrap=box(g,0,.22+(levels-1)*.17,0,1.62,.34*levels+.10,1.11,0xeaf0ed,0,.20);wrap.userData={semantic:'RMS_PROTECTIVE_WRAP_REFERENCE',accuracy:'PACKAGING_MATERIAL_STORAGE_REFERENCE'};
+  for(const sx of [-.42,.42])detail(box(g,sx,.22+(levels-1)*.17,0,.035,.34*levels+.12,1.13,0x536f83),'RMS_PALLET_STRAP_REFERENCE');
+  buildingDetailStats.warehousePalletLoads++;
+ };
+ const rmsReel=(x,y)=>{
+  const g=new T.Group();g.position.set(x,0,-y);rms.add(g);g.userData={semantic:'RMS_REEL_CRADLE_REFERENCE',accuracy:'INDUSTRIAL_PACKAGING_INTERIOR_REFERENCE_NOT_AS_BUILT',researchVersion:'V144'};
+  box(g,0,.07,0,1.85,.14,1.28,0x8d7656);for(const sx of [-.72,.72])for(const z of [-.48,.48]){const chock=box(g,sx,.22,z,.18,.30,.24,0x6d7777);chock.rotation.z=sx<0?-.28:.28;}
+  const roll=new T.Mesh(new T.CylinderGeometry(.48,.48,1.48,24),material(0xd9cfba));roll.rotation.z=Math.PI/2;roll.position.set(0,.66,0);roll.userData={semantic:'RMS_WRAPPED_REEL_REFERENCE',accuracy:'INDUSTRIAL_PACKAGING_INTERIOR_REFERENCE_NOT_AS_BUILT',researchVersion:'V144'};g.add(roll);
+  const core=new T.Mesh(new T.CylinderGeometry(.11,.11,1.51,18),material(0x806c55));core.rotation.z=Math.PI/2;core.position.set(0,.66,0);core.userData.semantic='RMS_REEL_CORE_REFERENCE';g.add(core);buildingDetailStats.warehouseReelCradles++;
+ };
+ for(const x of [84.5,88.5,92.5]){for(const y of [74.0,78.0])rmsPallet(x,y,(Math.round(x+y)%2)+2);for(const y of [82.2,86.0])rmsReel(x,y);}
+ for(const x of [82.7,94.3]){const aisle=box(b,x,.012,-80.0,.055,.024,15.4,0xd6ad2f);detail(aisle,'RMS_AISLE_BOUNDARY_REFERENCE');buildingDetailStats.warehouseAisleMarkings++;}
+ for(const y of [72.6,87.4]){const cross=box(b,88.5,.012,-y,11.7,.024,.055,0xd6ad2f);detail(cross,'RMS_STAGING_BOUNDARY_REFERENCE');buildingDetailStats.warehouseAisleMarkings++;}
+ for(const [x,y] of [[82.7,72.6],[94.3,72.6],[82.7,87.4],[94.3,87.4]]){const guard=box(b,x,.46,-y,.20,.92,.20,0xe0b436);detail(guard,'RMS_RACK_OR_ZONE_GUARD_REFERENCE');buildingDetailStats.warehouseSafetyElements++;}
+ const envPanel=box(b,93.5,1.72,-71.8,.62,.42,.08,0x506771);detail(envPanel,'RMS_TEMPERATURE_HUMIDITY_MONITOR_REFERENCE');envPanel.userData.industryReference={paperboardRH:[50,55],paperboardTemperatureC:[20,23],source:'STORA_ENSO_PAPERBOARD_GUIDE',plantSetpoint:false};buildingDetailStats.warehouseSafetyElements++;
  label('RMS',88.5,3.8,-81,5);
  // IPAL is an outdoor process yard: concrete slab + open steel frame + roof, with no enclosing walls.
  const ipal=new T.Group();ipal.name='IPAL_OPEN_AIR_WATER_TREATMENT';b.add(ipal);
@@ -248,13 +318,13 @@ export function buildActualFactory(layout,fleet){
  box(layers.unidentified,124,-.07,-44,38,.1,86,0xd9d4c5);label('POSISI AKTUAL BELUM TERIDENTIFIKASI',124,4,-90,30,'#835a2c',layers.unidentified);
  const pts=data.segments.flatMap(s=>[s[0],.012,-s[1],s[2],.012,-s[3]]),geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(pts,3));layers.reference.add(new T.LineSegments(geo,new T.LineBasicMaterial({color:0x355e72,transparent:true,opacity:.4})));
  const utilityRouting=buildUtilityRoutingScaffold(layers,layout.utilityRoutingOverrides||{});
- root.userData={baselineId:layout.baselineId,buildingDetailPass:'V143_FACTORY_STRUCTURAL_AND_ARCHITECTURAL_REALISM',researchVersion:'V143',researchSourceCount:V143_SOURCE_STATS.total,uniqueResearchUrls:V143_SOURCE_STATS.uniqueUrls,buildingDetailStats,utilityRouting,
+ root.userData={baselineId:layout.baselineId,buildingDetailPass:'V144_PACKAGING_INTERIORS_AND_WAREHOUSE_REALISM',researchVersion:'V144',researchSourceCount:V144_SOURCE_STATS.total,uniqueResearchUrls:V144_SOURCE_STATS.uniqueUrls,buildingDetailStats,utilityRouting,
   architecturalEvidenceBoundary:{
    sourceGrounded:['PLANT_OUTLINE','DXF_WALL_SEGMENTS','DXF_COLUMN_POSITIONS','SOURCE_DOORS_AND_CURTAINS','MACHINE_PLACEMENTS','USER_APPROX_ROOF_4_5_TO_7M'],
-   realismReferences:['CONCRETE_CONTROL_JOINT_GRID','SERVICE_CLEARANCE_FLOOR_MARKING','COLUMN_PEDESTALS_BASE_PLATES_ANCHORS_STIFFENERS','WALL_GIRTS_BASE_FLASHING','PANEL_OR_CONTROL_JOINT_RHYTHM','PORTAL_HAUNCH_EAVE_STRUT_APEX_SPLICE','ROOF_PURLIN_ANTI_SAG_FLY_BRACING','LINEAR_LIGHTING','GUTTER_DOWNPIPE_SHOE_SPACING','PERSONNEL_DOOR_HARDWARE','WIDE_DOOR_HARDWARE','PRESS_ROOM_KICK_RAIL_AND_CORNER_PROTECTION','DOCK_LEVELLER_STAIR_CANOPY_PROTECTION','IPAL_SERVICE_HARDWARE'],
+   realismReferences:['CONCRETE_CONTROL_JOINT_GRID','SERVICE_CLEARANCE_FLOOR_MARKING','COLUMN_PEDESTALS_BASE_PLATES_ANCHORS_STIFFENERS','WALL_GIRTS_BASE_FLASHING','PANEL_OR_CONTROL_JOINT_RHYTHM','PORTAL_HAUNCH_EAVE_STRUT_APEX_SPLICE','ROOF_PURLIN_ANTI_SAG_FLY_BRACING','LINEAR_LIGHTING','GUTTER_DOWNPIPE_SHOE_SPACING','PERSONNEL_DOOR_HARDWARE','WIDE_DOOR_HARDWARE','PRESS_ROOM_KICK_RAIL_AND_CORNER_PROTECTION','DOCK_LEVELLER_STAIR_CANOPY_PROTECTION','IPAL_SERVICE_HARDWARE','OFFICE_ERGONOMIC_WORKSTATIONS_AND_ADMIN_STORAGE','PPIC_PLANNING_BOARD_AND_PRINT_STATION','QC_INSPECTION_BENCH_AND_SAMPLE_STORAGE','SPAREPART_RACK_BINS_GUARDS_AND_PICKING_AISLE','RMS_WRAPPED_PAPERBOARD_PALLETS_REEL_CRADLES_AISLE_MARKINGS_AND_ENVIRONMENT_MONITOR'],
    notAsBuilt:true,utilityMEPActualRoutingAdded:false,reason:'Architectural realism references improve physical readability but do not replace field photos, structural drawings or MEP routing drawings.'
   },
-  assumptions:{...data.assumptions,roofEaves:4.5,roofRidge:7,roofHeightEvidence:'USER_APPROXIMATE_MEASUREMENT',machineServiceClearance:MACHINE_SERVICE_CLEARANCE,offsetRoomClearance:1.85,wallTreatment:'SOURCE_SEGMENTS_CLIPPED_TO_SERVICE_ENVELOPE',portalTreatment:'SOURCE_PORTALS_SHIFTED_ONLY_WHEN_CLEARANCE_CONFLICTS',roomContents:'FUNCTION_SPECIFIC_VISUALIZATION_NOT_AS_BUILT_INVENTORY',architecturalRealism:'V143_REFERENCE_NOT_AS_BUILT',utilityRoutingBoundary:'COMPRESSED_AIR_AHU_PIPE_AHU_DUCT_REMAIN_TEMPLATE_ONLY_UNTIL_ROUTING_DRAWING',ipalTreatment:'OUTDOOR_OPEN_FRAME_FUNCTIONAL_RECONSTRUCTION'},
+  assumptions:{...data.assumptions,roofEaves:4.5,roofRidge:7,roofHeightEvidence:'USER_APPROXIMATE_MEASUREMENT',machineServiceClearance:MACHINE_SERVICE_CLEARANCE,offsetRoomClearance:1.85,wallTreatment:'SOURCE_SEGMENTS_CLIPPED_TO_SERVICE_ENVELOPE',portalTreatment:'SOURCE_PORTALS_SHIFTED_ONLY_WHEN_CLEARANCE_CONFLICTS',roomContents:'FUNCTION_SPECIFIC_PACKAGING_INTERIOR_REFERENCE_NOT_AS_BUILT_INVENTORY',warehouseReference:'PAPERBOARD_WRAPPED_PALLETS_PLUS_REEL_CRADLES_WITH_CLEAR_AISLES_AND_GUARDS_NOT_AS_BUILT',architecturalRealism:'V144_PACKAGING_INTERIOR_REFERENCE_NOT_AS_BUILT',utilityRoutingBoundary:'COMPRESSED_AIR_AHU_PIPE_AHU_DUCT_REMAIN_TEMPLATE_ONLY_UNTIL_ROUTING_DRAWING',rmsEnvironmentIndustryReference:'STORA_ENSO_50_55_RH_20_23C_NOT_PLANT_SETPOINT',ipalTreatment:'OUTDOOR_OPEN_FRAME_FUNCTIONAL_RECONSTRUCTION'},
   offsetRooms:pressRooms.map(r=>({...r,centerError:Math.hypot((r.minX+r.maxX)/2-r.centerX,(r.minY+r.maxY)/2-r.centerY)})),ipal:{zone:ipalZone,enclosingWalls:0,removedSourceWallSegments:ipalRemovedWalls.length,openSides:true,processFlow:['EQUALIZATION','AERATION','CLARIFICATION','FILTRATION','TRANSFER'],equipment:ipalEquipment,structuralReference:{xBracing:buildingDetailStats.ipalFrameBraces,guardrailElements:buildingDetailStats.ipalGuardrails}},
   nonMachineCollisionAudit:{placedFixtures:fixtureBoxes.length,skippedFixtures:skippedFixtures.length,accidentalFixtureOverlaps:0},omittedCollisionWalls:0,trimmedCollisionWalls:omitted.length,adjustedPortals:adjustedPortals.map(p=>({semantic:p.evidence,x:p.x,y:p.y,sourceX:p.sourceX,sourceY:p.sourceY})),legacyWalls:data.legacyWalls.length};
  return {root,layers,assets,machineBoxes,utilityRouting};
