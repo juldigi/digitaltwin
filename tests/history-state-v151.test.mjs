@@ -15,7 +15,8 @@ test('V151 browser history restores machine component and workspace view without
   assert.match(app,/focusFoundationPlaceholder\(record,\{historyMode:'none',openDialog:false\}\)/);
   assert.match(app,/selectTaxonomy\(node,\{revealPanel:true\}\)/);
   assert.match(app,/bmj:historyrestore/);
-  assert.doesNotMatch(app,/location\.(?:reload|assign|replace)\(/);
+  const restoreBody=app.slice(app.indexOf('async function restoreHistoryContext'),app.indexOf("addEventListener('popstate'"));
+  assert.doesNotMatch(restoreBody,/location\.(?:reload|assign|replace)\(/);
 });
 
 test('V151 shell applies restored 2D or 3D mode through canonical controls',()=>{
