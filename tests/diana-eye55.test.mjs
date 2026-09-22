@@ -27,8 +27,8 @@ test('DIANA geometry represents camera capacity and both reject actuator referen
 });
 
 test('DIANA rotor whitelist rotates only feeder transport vacuum and delivery mechanisms',()=>{
- const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model),allowed=/^(feed-pulley|transport-pulley|vacuum-blower|delivery-pulley)$/;
- assert.equal(sim.rotors.length,25);assert.equal(sim.rotors.some(r=>!allowed.test(r.userData.mechanismRole||'')),false);
+ const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model),allowed=/^(feed-pulley|transport-pulley|transport-drive-motor|transport-encoder|vacuum-blower|delivery-pulley)$/;
+ assert.equal(sim.rotors.length,27);assert.equal(sim.rotors.some(r=>!allowed.test(r.userData.mechanismRole||'')),false);
  assert.equal(model.meshes.some(m=>m.userData.rotor&&['camera-lens','rear-camera','area-camera','reject-air-nozzle'].includes(m.userData.mechanismRole)),false);
  sim.dispose();model.dispose();
 });

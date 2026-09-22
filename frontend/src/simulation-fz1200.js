@@ -70,7 +70,7 @@ export class FZ1200ProcessSimulation{
   const clampCommand=phase>=.08&&phase<.985,clampConfirmed=clampProfile>.94;
   const liftUp=smooth(phase,.18,.28),liftDown=smooth(phase,.85,.94),lift=liftUp*(1-liftDown);
   const liftClearance=lift>.82,guardSafe=true,turnPermitted=clampConfirmed&&liftClearance&&guardSafe;
-  const requestedTurn=smooth(phase,.29,.48),turn=turnPermitted?requestedTurn:0,turnComplete=turn>.985;
+  const requestedTurn=smooth(phase,.29,.48),turn=phase>=.48?1:(turnPermitted?requestedTurn:0),turnComplete=turn>.985;
   const turnLockCommand=turnComplete&&phase>=.49&&phase<.84,turnLockConfirmed=turnLockCommand&&phase>=.515;
   const airPermitted=clampConfirmed&&liftClearance&&turnComplete&&turnLockConfirmed;
   const air=airPermitted&&phase>=.54&&phase<.72,airPressureReady=airPermitted&&phase>=.565;

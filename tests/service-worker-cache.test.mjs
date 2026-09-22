@@ -48,12 +48,13 @@ test('service-worker shell cache references only deployable frontend files',()=>
  assert.ok(paths.includes('src/data/taxonomy-fgm2.js'));
  assert.ok(paths.includes('src/upg-ly300.js'));
  assert.ok(paths.includes('src/diana-eye55.js'));
+ assert.ok(paths.includes('src/state/app-state.js'));
  assert.equal(new Set(paths).size,paths.length,'service-worker shell cache should not contain duplicate asset paths');
  for(const path of paths)assert.ok(cacheSourceExists(path),path+' is listed in sw.js but is neither a frontend source nor a build-generated Three.js asset');
 });
 
 test('service-worker cache version advances with the centralized runtime release',()=>{
- assert.match(sw,/factory-digital-twin-v147-mobile-routing-hotfix1-20260922/);
+ assert.match(sw,/factory-digital-twin-v149-safe-shell-20260922/);
 });
 
 

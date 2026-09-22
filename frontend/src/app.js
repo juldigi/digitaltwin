@@ -39,7 +39,8 @@ function configureActiveMachine(requested){
  PRINTING_SIMULATION_STAGES=IS_OFFSET10?OFFSET10_SIMULATION_STAGES:IS_APM2?APM2_SIMULATION_STAGES:IS_SHEETING?SHEETING_SIMULATION_STAGES:IS_GENERIC?(IS_VERIFIED_REGISTRY_SIM?(GENERIC_CONFIG.profile?.process?.length?GENERIC_CONFIG.profile.process:GENERIC_TAXONOMY.filter(n=>n.level===2).map(n=>n.name)):GENERIC_CONFIG.modules):OFFSET5_SIM_STAGES;
  INK_SIMULATION_SEQUENCE=IS_OFFSET10?OFFSET10_INK_SEQUENCE:IS_APM2?APM2_PROCESS_STEPS:IS_SHEETING?SHEETING_PROCESS_STEPS:IS_GENERIC?(IS_VERIFIED_REGISTRY_SIM?PRINTING_SIMULATION_STAGES:GENERIC_CONFIG.modules.map(x=>`${x} process`)):OFFSET5_INK_SEQUENCE;
 }
-configureActiveMachine(new URLSearchParams(location.search).get('machine'));
+const INITIAL_URL_STATE=new URLSearchParams(location.search);
+configureActiveMachine(INITIAL_URL_STATE.get('machine')||INITIAL_URL_STATE.get('asset'));
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'Belum tersedia').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const number=n=>Number.isFinite(n)?n.toLocaleString('id-ID',{maximumFractionDigits:4}):'Belum tersedia';
@@ -53,6 +54,15 @@ function applyActiveMachineState(){
  if(IS_GENERIC){const m=GENERIC_CONFIG.machine,e=GENERIC_CONFIG.evidence,units=GENERIC_TAXONOMY.filter(n=>n.level===2).map(n=>n.name);state.asset={...state.asset,asset_id:m.machineId,asset_code:m.sapCode||m.machineId,codename:m.sapCode,model:m.model,description:m.name,source_description:'BMJ Machine Database',manufacturer:null,specification:GENERIC_CONFIG.label,configuration:(units.length?units:GENERIC_CONFIG.modules).join(' · '),'3d_status':IS_VERIFIED_REGISTRY_SIM?'DEDICATED PROCEDURAL / '+e.geometry:'PROCEDURAL / '+e.geometry,data_confidence:e.grade,discovery_status:IS_VERIFIED_REGISTRY_SIM?'DEDICATED_EVIDENCE_AVAILABLE':'FAMILY_REFERENCE_AVAILABLE',serial_number:m.serial,functional_location:m.functionalLocation,year:m.year,sources:GENERIC_SOURCES};}
 }
 applyActiveMachineState();
+function updateEvidenceStatus(){
+ const summary=$('#evidence-summary'),detail=$('#evidence-detail');if(!summary||!detail)return;
+ const identity=state?.asset?.asset_id||state?.asset?.asset_code||MACHINE_KEY;
+ const photos=Array.isArray(PHOTO_REGISTRY)?PHOTO_REGISTRY.length:0;
+ const docs=Array.isArray(TECHNICAL_SOURCES)?TECHNICAL_SOURCES.length:0;
+ const geometry=IS_GENERIC?(GENERIC_CONFIG?.evidence?.geometry||'Belum terverifikasi'):state?.asset?.data_confidence||state?.asset?.['3d_status']||'Referensi tersedia';
+ summary.textContent=photos&&docs?'Data sebagian terverifikasi':docs?'Referensi dokumen tersedia':'Data referensi terbatas';
+ detail.innerHTML=`${pair('Identitas',identity?'Tersedia':'Belum tersedia')}${pair('Foto aktual / registry',photos?photos+' file':'Belum tersedia')}${pair('Dokumen / sumber teknis',docs?docs+' sumber':'Belum tersedia')}${pair('Status geometri',geometry)}`;
+}
 function applyMachineShell(){
  const name=IS_OFFSET10?'OFFSET 10':IS_APM2?'APM 2':IS_SHEETING?'SHEETING LEXUS':IS_GENERIC?GENERIC_CONFIG.machine.name:'OFFSET 5';
  const maker=IS_OFFSET10||(!IS_APM2&&!IS_SHEETING&&!IS_GENERIC)?'Heidelberg':IS_APM2?'BOBST':IS_SHEETING?'LEXUS':GENERIC_CONFIG.label;
@@ -60,12 +70,12 @@ function applyMachineShell(){
  document.title='Packaging Offset Factory Digital Twin · '+name;
  const title=$('#view-title'),sub=$('#view-subtitle'),label=$('#machine-label strong'),detail=$('#label-detail'),caption=$('#geometry-caption');
  if(title)title.textContent=name;if(sub)sub.textContent=maker+' · '+model;if(label)label.textContent=name;if(detail)detail.textContent=model;if(caption)caption.textContent='Model '+name;
- const heading=$('.asset-heading h2'),headingSub=$('.asset-heading p');if(heading)heading.textContent=name;if(headingSub)headingSub.textContent=maker+' · '+model;
+ const heading=$('.asset-heading h2'),headingSub=$('.asset-heading p');if(heading)heading.textContent=name;if(headingSub)headingSub.textContent=maker+' · '+model;updateEvidenceStatus();
  const quick=$('.telemetry-strip section:first-child');
  if(quick&&IS_OFFSET10)quick.innerHTML='<h4>INFORMASI CEPAT</h4><span>Mesin <b>OFFSET 10</b></span><span>Konfigurasi <b>Full UV + FoilStar</b></span><span>Model <b>CX 104</b></span>';
  if(quick&&IS_APM2)quick.innerHTML='<h4>INFORMASI CEPAT</h4><span>Mesin <b>APM 2</b></span><span>Model <b>SP 102</b></span><span>Tahun <b>1994</b></span>';
  if(quick&&IS_SHEETING)quick.innerHTML='<h4>INFORMASI CEPAT</h4><span>Mesin <b>SHEETING LEXUS</b></span><span>Kode <b>SBM-2</b></span><span>Alur <b>Kanan → Kiri</b></span>';
- const simCaption=$('#tool-simulation span');if(simCaption)simCaption.textContent=IS_APM2?'Proses Autoplaten':IS_SHEETING?'Proses Sheeting':IS_GENERIC?(IS_VERIFIED_REGISTRY_SIM?'Simulasi Proses':'Belum Tervalidasi'):'Printing Test';
+ const simCaption=$('#tool-simulation span');if(simCaption)simCaption.textContent=IS_APM2?'Proses Autoplaten':IS_SHEETING?'Proses Sheeting':IS_GENERIC?(IS_VERIFIED_REGISTRY_SIM?'Simulasi Proses':'Belum Tervalidasi'):'Simulasi Proses';
  if(IS_OFFSET10){
   const mark=$('.brandmark');if(mark)mark.innerHTML='F<span>10</span>';
   const icon=$('.asset-icon');if(icon)icon.textContent='10';
@@ -139,7 +149,8 @@ function renderStaticMachineFallback(error){
 }
 function modal(title,html){$('#modal-title').textContent=title;$('#modal-body').innerHTML=html;if(!$('#modal').open)$('#modal').showModal();}
 function closeModal(){$('#modal').close();}
-function showPanel(){document.body.classList.remove('panel-hidden');if(matchMedia('(max-width:767px)').matches)document.body.classList.add('mobile-panel-open');}
+function emitDomainState(detail){window.dispatchEvent(new CustomEvent('bmj:domainstate',{detail}));}
+function showPanel(){document.body.classList.remove('panel-hidden');if(matchMedia('(max-width:767px)').matches)document.body.classList.add('mobile-panel-open');emitDomainState({inspectorState:{open:true,tab:activeTab}});}
 const activeLayout=()=>selectPlantLayout(state.layout,bundledLayout);
 function redrawPlantPlan(){if(bundledLayout)drawPlantPlan($('#dwg-canvas'),bundledLayout);}
 function pair(label,value){return `<dt>${esc(label)}</dt><dd${value==null?' class="unknown"':''}>${esc(value)}</dd>`;}
@@ -219,11 +230,12 @@ function updateSimulationPanel(next=simulationState){
  if(uvCount)uvCount.textContent=String(simulationState.uvLampCount||0);
  if(uvIndicator)uvIndicator.classList.toggle('active',!!simulationState.uvActive);
  if(bar)bar.style.width=progress+'%';
- if(start)start.textContent=active?(running?'Running':'Lanjutkan'):(IS_APM2?'Mulai Simulasi Proses':IS_SHEETING?'Mulai Simulasi Sheeting':IS_VERIFIED_REGISTRY_SIM?'Mulai Simulasi Proses':'Mulai Printing Test');
+ if(start)start.textContent=active?(running?'Running':'Lanjutkan'):(IS_APM2?'Mulai Simulasi Proses':IS_SHEETING?'Mulai Simulasi Sheeting':IS_VERIFIED_REGISTRY_SIM?'Mulai Simulasi Proses':'Mulai Simulasi Proses');
  if(pause)pause.textContent=running?'Pause':'Lanjut';
  document.querySelectorAll('[data-sim-speed]').forEach(b=>b.classList.toggle('active',Math.abs(+b.dataset.simSpeed-(simulationState.speed||1))<.01));
  document.querySelectorAll('[data-sim-stage]').forEach(b=>b.classList.toggle('active',b.dataset.simStage===(simulationState.stage||'')));
  $('#tool-simulation')?.classList.toggle('active',active);
+ emitDomainState({simulationState:{active,playing:running,stage:simulationState.stage||null,speed:simulationState.speed||1,progress}});
 }
 function startPrintingSimulation(){
  if(!engine)return;
@@ -250,11 +262,34 @@ function stopPrintingSimulation({restoreExterior=true}={}){
  if(activeTab==='simulation')renderPanel('simulation');
 }
 function simulationLocksStructure(){
-  if(engine?.isPrintingSimulationActive()){toast(IS_APM2?'Hentikan simulasi proses APM 2 sebelum memilih, mengurai, atau mengisolasi komponen.':IS_VERIFIED_REGISTRY_SIM?'Hentikan simulasi proses sebelum memilih, mengurai, atau mengisolasi komponen.':'Hentikan simulasi Printing Test sebelum memilih, mengurai, atau mengisolasi komponen.');return true;}
+  if(engine?.isPrintingSimulationActive()){toast(IS_APM2?'Hentikan simulasi proses APM 2 sebelum memilih, mengurai, atau mengisolasi komponen.':IS_VERIFIED_REGISTRY_SIM?'Hentikan simulasi proses sebelum memilih, mengurai, atau mengisolasi komponen.':'Hentikan Simulasi Proses sebelum memilih, mengurai, atau mengisolasi komponen.');return true;}
  return false;
 }
-function choosePart(part){if(!part||!engine||simulationLocksStructure())return;engine.template.reset();engine.isolated=false;explode=0;selectedPart=part;engine.template.highlight(part);engine.template.ghost(true,part);engine.setPartLabels(part,selectedTaxonomyId);engine.fit(part);}
+function choosePart(part){if(!part||!engine||simulationLocksStructure())return;engine.template.reset();engine.isolated=false;explode=0;selectedPart=part;engine.template.highlight(part);engine.template.ghost(true,part);engine.setPartLabels(part,selectedTaxonomyId);engine.fit(part);const meta=taxonomyForPart(part);emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:meta?.id||part.userData?.nodeId||selectedTaxonomyId,inspectorState:{open:true,tab:'structure'}});}
 function taxonomyForPart(part){const id=part?.userData?.nodeId;if(!id)return null;return ACTIVE_TAXONOMY.filter(n=>(n.meshRefs||[]).includes(id)).sort((a,b)=>Math.abs(a.level-5)-Math.abs(b.level-5))[0]||null;}
+function taxonomyPath(id=selectedTaxonomyId){
+ const path=[];let meta=TAXONOMY_BY_ID.get(id)||TAXONOMY_BY_ID.get(ACTIVE_ROOT),guard=0;
+ while(meta&&guard++<8){path.unshift(meta);meta=meta.parentId?TAXONOMY_BY_ID.get(meta.parentId):null;}
+ return path;
+}
+function resetTaxonomyRoot(){
+ selectedTaxonomyId=ACTIVE_ROOT;selectedPart=null;explode=0;
+ if(engine){engine.template.reset();engine.clearPartLabels();engine.isolated=false;engine.fit(engine.machine);}
+ $('#tool-explode')?.classList.remove('active');$('#tool-isolate')?.classList.remove('active');
+ emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:ACTIVE_ROOT,inspectionMode:{explode:false,isolate:false}});
+ renderPanel(activeTab);
+}
+function renderContextBreadcrumb(){
+ const host=$('#context-breadcrumb');if(!host)return;
+ if(engine?.view==='factory'){
+  host.innerHTML='<button type="button" data-breadcrumb-factory aria-current="page">Pabrik</button>';
+ }else{
+  const path=taxonomyPath();
+  host.innerHTML='<button type="button" data-breadcrumb-factory>Pabrik</button>'+path.map((node,index)=>`<span aria-hidden="true">/</span><button type="button" data-breadcrumb-node="${esc(node.id)}" ${index===path.length-1?'aria-current="page"':''}>${esc(node.name)}</button>`).join('');
+ }
+ host.querySelector('[data-breadcrumb-factory]')?.addEventListener('click',()=>{showHome();renderContextBreadcrumb();});
+ host.querySelectorAll('[data-breadcrumb-node]').forEach(button=>button.addEventListener('click',()=>{const id=button.dataset.breadcrumbNode;if(id===ACTIVE_ROOT)resetTaxonomyRoot();else selectTaxonomy(id,{revealPanel:true});}));
+}
 function taxonomyAtLevel(level){
  const target=Math.max(1,Math.min(6,Number(level)||1));let meta=TAXONOMY_BY_ID.get(selectedTaxonomyId)||TAXONOMY_BY_ID.get(ACTIVE_ROOT);
  while(meta&&meta.level>target)meta=meta.parentId?TAXONOMY_BY_ID.get(meta.parentId):meta;
@@ -264,15 +299,15 @@ function taxonomyAtLevel(level){
 function selectTaxonomy(id,{revealPanel=false}={}){
  if(simulationLocksStructure())return;const meta=TAXONOMY_BY_ID.get(id);if(!meta)return;
  selectedTaxonomyId=meta.id;const part=engine?.template.resolveTaxonomyNode(meta.id);
- if(part)choosePart(part);else{selectedPart=null;engine?.template.reset();engine?.clearPartLabels();}
+ if(part)choosePart(part);else{selectedPart=null;engine?.template.reset();engine?.clearPartLabels();emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:meta.id,inspectorState:{open:true,tab:'structure'}});}
  if(revealPanel&&!matchMedia('(max-width:767px)').matches)showPanel();renderPanel('structure');
 }
 function taxonomyTree(parentId=ACTIVE_ROOT){
- const children=taxonomyChildren(parentId);
+ const children=taxonomyChildren(parentId),selectedPath=new Set(taxonomyPath().map(node=>node.id));
  return children.map(n=>{
   const descendants=taxonomyChildren(n.id);
   const mapped=!!engine?.template.resolveTaxonomyNode(n.id);
-  return `<div class="geometry-node"><button data-taxonomy="${esc(n.id)}" aria-pressed="${n.id===selectedTaxonomyId}">${esc(n.name)} <span class="tax-level">L${n.level}${mapped?' · Model':' · Referensi'}</span></button>${descendants.length?`<details ${selectedTaxonomyId.startsWith(n.id)?'open':''}><summary>${esc(n.levelName)}</summary>${taxonomyTree(n.id)}</details>`:''}</div>`;
+  return `<div class="geometry-node"><button data-taxonomy="${esc(n.id)}" aria-pressed="${n.id===selectedTaxonomyId}">${esc(n.name)} <span class="tax-level">L${n.level}${mapped?' · Model':' · Referensi'}</span></button>${descendants.length?`<details ${selectedPath.has(n.id)?'open':''}><summary>${esc(n.levelName||'Struktur')}</summary>${taxonomyTree(n.id)}</details>`:''}</div>`;
  }).join('');
 }
 function renderFactoryPanel(){
@@ -283,14 +318,15 @@ function renderFactoryPanel(){
  const routing=engine?.actualFactory?.utilityRouting||engine?.actualFactory?.root?.userData?.utilityRouting;
  const routingSystems=routing?.systems||[];
  $('#panel-content').innerHTML=`<h3>Bangunan & mesin</h3><p class="subtle">${known.length} mesin terpetakan · ${unknown.length} menunggu identifikasi posisi.</p><div class="card">${[['roof','Atap'],['building','Dinding & ruangan'],['machines','Mesin terpetakan'],['labels','Nama area & mesin'],['landscape','Taman & akses luar'],['unidentified','Area belum teridentifikasi'],['reference','Garis denah sumber'],['utility_compressed_air',(routing?.actualRoutingApplied?'Routing':'Template')+' · Pipa compressor'],['utility_ahu_piping',(routing?.actualRoutingApplied?'Routing':'Template')+' · Pipa AHU'],['utility_ahu_ducting',(routing?.actualRoutingApplied?'Routing':'Template')+' · Ducting AHU'],['utility_anchors','Future anchors']].map(([key,text])=>`<label class="check"><input type="checkbox" data-factory-layer="${key}" ${layers[key].visible?'checked':''}> ${text}</label>`).join('')}</div><label for="factory-asset-focus">Cari posisi mesin</label><select id="factory-asset-focus"><option value="">Pilih mesin</option>${layout.placements.map(p=>`<option value="${p.machineId}">${esc(p.label)}${p.status==='UNIDENTIFIED'?' · belum teridentifikasi':''}</option>`).join('')}</select><div class="actions"><button id="factory-overview" class="secondary">Lihat seluruh pabrik</button><button id="factory-unknown" class="secondary">Area belum teridentifikasi</button></div><div class="card accent"><h4>Routing scaffold siap dipasang</h4><p>${routing?(routing.mode==='TEMPLATE_ONLY'?'Compressed-air piping, AHU piping, dan AHU ducting sudah tersedia sebagai node–segment template. Layer sengaja tersembunyi default dan diberi status TEMPLATE ONLY agar tidak tertukar dengan jalur as-built. Saat drawing aktual tersedia, koordinat node/segment dapat dioverride tanpa membangun ulang renderer atau UI.':`Routing data sudah masuk dalam mode ${routing.mode}. Sistem yang belum tervalidasi tetap mempertahankan template boundary sampai override lengkap dan field-verified tersedia.`):'Routing scaffold belum dimuat.'}</p><p class="subtle">${routingSystems.map(x=>`${x.system}: ${x.nodeCount} node · ${x.segmentCount} segment · ${x.equipmentAnchorCount} future anchor`).join(' · ')}</p><div class="actions"><button class="secondary" data-routing-focus="utility_compressed_air">Preview pipa compressor</button><button class="secondary" data-routing-focus="utility_ahu_piping">Preview pipa AHU</button><button class="secondary" data-routing-focus="utility_ahu_ducting">Preview ducting AHU</button></div></div><div class="card"><h4>AHU & ducting plant</h4><p>${knownAhu.length===ahuPlacements.length?'Seluruh anchor AHU sudah tersedia. Template supply/return/outdoor-air duct serta utility piping sudah siap; drawing aktual hanya perlu mengganti node, elevasi, ukuran, dan fitting.':`${knownAhu.length} dari ${ahuPlacements.length} AHU memiliki anchor plant tervalidasi. Template pipa AHU dan ducting sudah siap di layer terpisah, tetapi belum ditempel ke hall produksi sampai posisi dan drawing aktual tersedia.`}</p></div><div class="card"><h4>Compressed air & piping plant</h4><p>${knownCompressors.length===compressorPlacements.length?'Seluruh anchor compressor sudah tersedia. Template discharge/header/ring-main/drop sudah siap untuk dimapping ke routing aktual.':`${knownCompressors.length} dari ${compressorPlacements.length} compressor memiliki anchor plant tervalidasi. Template discharge → treatment → ring-main → swan-neck service drops sudah siap, tetapi masih berada pada routing scaffold dan belum diklaim sebagai as-built.`}</p></div><div class="card"><h4>Ketelitian tampilan</h4><p>Denah 250804 mengikuti revisi posisi Anda. Tinggi bangunan, bentuk atap, detail pintu, taman, tanaman, dan perlengkapan ruang merupakan perkiraan visual. Posisi berbasis label masih berupa zona, bukan titik ukur. Arah feeder–delivery perlu verifikasi.</p></div>`;
- $$('[data-factory-layer]').forEach(input=>input.onchange=()=>engine.setFactoryLayer(input.dataset.factoryLayer,input.checked));
+ const canonicalFactoryLayer={roof:'roof',building:'building',machines:'machines',labels:'labels',landscape:'landscape',unidentified:'unidentified',reference:'reference',utility_compressed_air:'compressedAir',utility_ahu_piping:'ahuPiping',utility_ahu_ducting:'ducting',utility_anchors:'utilityAnchors'};
+ $$('[data-factory-layer]').forEach(input=>input.onchange=()=>{const key=input.dataset.factoryLayer,visible=input.checked;engine.setFactoryLayer(key,visible);const canonical=canonicalFactoryLayer[key];if(canonical)emitDomainState({visibleLayers:{[canonical]:visible}});});
  $('#factory-asset-focus').onchange=e=>{if(e.target.value){const p=layout.placements.find(p=>p.machineId===e.target.value);engine.setFactoryLayer(p.status==='UNIDENTIFIED'?'unidentified':'machines',true);engine.focusFactoryAsset(e.target.value);}};
- $$('[data-routing-focus]').forEach(button=>button.onclick=()=>{const key=button.dataset.routingFocus;engine.setFactoryLayer(key,true);const input=document.querySelector(`[data-factory-layer="${key}"]`);if(input)input.checked=true;engine.fit(layers[key]);});
+ $$('[data-routing-focus]').forEach(button=>button.onclick=()=>{const key=button.dataset.routingFocus;engine.setFactoryLayer(key,true);const input=document.querySelector(`[data-factory-layer="${key}"]`);if(input)input.checked=true;const canonical=canonicalFactoryLayer[key];if(canonical)emitDomainState({visibleLayers:{[canonical]:true}});engine.fit(layers[key]);});
  $('#factory-overview').onclick=()=>engine.fit(engine.factory);$('#factory-unknown').onclick=()=>{engine.setFactoryLayer('unidentified',true);engine.fit(layers.unidentified);};return true;
 }
 function renderPanel(tab=activeTab){
  if(editing&&engine){engine.edit(false);engine.onTransform=null;engine.applyPlacement(state);editing=false;}
- activeTab=tab;
+ activeTab=tab;renderContextBreadcrumb();
  if(engine?.view==='factory'&&renderFactoryPanel())return;
  $$('[data-tab]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===tab)));
  const a=state.asset;
@@ -327,8 +363,8 @@ function renderPanel(tab=activeTab){
   }
  }else if(tab==='structure'){
   const meta=TAXONOMY_BY_ID.get(selectedTaxonomyId)||TAXONOMY_BY_ID.get(ACTIVE_ROOT),stats=taxonomyStats();
-  $('#panel-content').innerHTML=`<h3>Struktur mesin · 6 tingkat</h3><p class="subtle">Pilih bagian mesin untuk memusatkan tampilan. Object terpilih tetap terlihat penuh, sedangkan seluruh bagian lainnya otomatis transparan. Label <b>Model</b> berarti bagian tersebut dapat dipilih pada tampilan 3D; label <b>Referensi</b> berarti informasi bagian tersedia tetapi bentuk detailnya belum ditampilkan.</p><button id="tree-root" class="secondary">${IS_OFFSET10?'OFFSET 10':IS_APM2?'APM 2':IS_SHEETING?'SHEETING LEXUS':IS_GENERIC?GENERIC_CONFIG.machine.name:'OFFSET 5'} · Mesin</button><div class="card accent" style="margin-top:12px"><h4>${esc(meta.name)}</h4><p>Bagian terpilih pada struktur ${IS_OFFSET10?'Offset 10':IS_APM2?'APM 2':IS_SHEETING?'Sheeting Lexus':IS_GENERIC?GENERIC_CONFIG.machine.name:'Offset 5'}.</p><span class="tag">TINGKAT ${meta.level}</span></div><label for="explode">Jarak uraian <span id="explode-value">${Math.round(explode*100)}%</span></label><input id="explode" type="range" min="0" max="1" step="0.01" value="${explode}" ${engine?.view==='factory'?'disabled':''}><div class="actions"><button id="assemble" class="secondary">Rakit Kembali</button><button id="ghost" class="secondary ${engine?.template.ghosted?'active':''}">Transparan</button><button id="isolate" class="secondary ${engine?.isolated?'active':''}" aria-disabled="${selectedPart?'false':'true'}">Tampilkan Sendiri</button></div><div class="stage-strip">${[1,2,3,4,5,6].map(level=>`<button data-stage="${level}" class="${meta.level===level?'active':''}">L${level}</button>`).join('')}</div><div class="geometry-tree">${taxonomyTree()}</div><p class="subtle">${stats.total} bagian tercatat dalam struktur mesin.</p>`;
-  $('#explode').addEventListener('input',e=>{explode=+e.target.value;engine?.template.explode(explode,selectedPart);if(selectedPart)engine.template.ghost(explode>0,selectedPart);$('#explode-value').textContent=Math.round(explode*100)+'%';$('#ghost').classList.toggle('active',!!engine?.template.ghosted);});
+  $('#panel-content').innerHTML=`<h3>Struktur mesin · 6 tingkat</h3><p class="subtle">Pilih bagian mesin untuk memusatkan tampilan. Object terpilih tetap terlihat penuh, sedangkan seluruh bagian lainnya otomatis transparan. Label <b>Model</b> berarti bagian tersebut dapat dipilih pada tampilan 3D; label <b>Referensi</b> berarti informasi bagian tersedia tetapi bentuk detailnya belum ditampilkan.</p><button id="tree-root" class="secondary">${IS_OFFSET10?'OFFSET 10':IS_APM2?'APM 2':IS_SHEETING?'SHEETING LEXUS':IS_GENERIC?GENERIC_CONFIG.machine.name:'OFFSET 5'} · Mesin</button><div class="card accent" style="margin-top:12px"><h4>${esc(meta.name)}</h4><p>Bagian terpilih pada struktur ${IS_OFFSET10?'Offset 10':IS_APM2?'APM 2':IS_SHEETING?'Sheeting Lexus':IS_GENERIC?GENERIC_CONFIG.machine.name:'Offset 5'}.</p><span class="tag">TINGKAT ${meta.level}</span></div><label for="explode">Jarak uraian <span id="explode-value">${Math.round(explode*100)}%</span></label><input id="explode" type="range" min="0" max="1" step="0.01" value="${explode}" ${engine?.view==='factory'?'disabled':''}><div class="actions"><button id="assemble" class="secondary">Rakit Kembali</button><button id="ghost" class="secondary ${engine?.template.ghosted?'active':''}">Transparan</button><button id="isolate" class="secondary ${engine?.isolated?'active':''}" aria-disabled="${selectedPart?'false':'true'}">Tampilkan Sendiri</button></div><div class="stage-strip">${[['Mesin',1],['Unit Utama',2],['Sub',3],['Block',4],['Part',5],['Spesifik Part',6]].map(([label,level])=>`<button data-stage="${level}" class="${meta.level===level?'active':''}"><span>${label}</span><small>L${level}</small></button>`).join('')}</div><div class="geometry-tree">${taxonomyTree()}</div><p class="subtle">${stats.total} bagian tercatat dalam struktur mesin.</p>`;
+  $('#explode').addEventListener('input',e=>{explode=+e.target.value;engine?.template.explode(explode,selectedPart);if(selectedPart)engine.template.ghost(explode>0,selectedPart);$('#explode-value').textContent=Math.round(explode*100)+'%';$('#ghost').classList.toggle('active',!!engine?.template.ghosted);$('#tool-explode')?.classList.toggle('active',explode>0);emitDomainState({inspectionMode:{explode:explode>0}});});
   on('#assemble',()=>{explode=0;selectedPart=null;if(engine){engine.template.reset();engine.clearPartLabels();engine.isolated=false;engine.fit(engine.machine);}renderPanel();});
   on('#ghost',()=>{if(engine){engine.template.ghost(!engine.template.ghosted,selectedPart);$('#ghost').classList.toggle('active',engine.template.ghosted);}});
   on('#isolate',()=>{if(!engine){toast('Tampilan 3D belum tersedia.',true);return;}if(!selectedPart){toast('Pilih bagian mesin terlebih dahulu.');return;}engine.isolated=!engine.isolated;engine.template.isolate(selectedPart,engine.isolated);$('#isolate').classList.toggle('active',engine.isolated);});
@@ -372,7 +408,7 @@ function renderPanel(tab=activeTab){
    $('#panel-content').innerHTML=`<h3>Simulasi belum tervalidasi</h3><div class="card accent"><h4>Tidak dijalankan untuk mencegah gerakan palsu</h4><p>${esc(reason)}</p><span class="tag">${esc(GENERIC_CONFIG.evidence.grade)}</span><span class="tag">${esc(GENERIC_CONFIG.evidence.geometry)}</span></div><dl class="data-list">${pair('Status simulasi','DIBLOKIR')+pair('Komponen bergerak','0')+pair('Produk fiktif','0')+pair('Syarat aktivasi','Alur material + actuator + interlock + timing + output harus tervalidasi')}</dl><div class="card"><h4>Yang masih dapat diperiksa</h4><p>Model referensi tetap dapat diputar, difokuskan dan dibuka strukturnya, tetapi bukan representasi konfigurasi aktual BMJ sampai foto empat sisi, nameplate, manual, susunan modul dan arah proses tersedia.</p></div>`;
   }else{
   const s=engine?.getPrintingSimulationState?.()||simulationState;simulationState=s;
-  $('#panel-content').innerHTML=`<h3>Simulasi Printing Test</h3><p class="subtle">${IS_OFFSET10?'Simulasi membuka exterior otomatis dan memperlihatkan feeder, sheet alignment, seluruh cylinder train, AirTransfer, inking, Alcolor dampening, FoilStar pada PU2, tiga coating unit, UV/drying dan X3 delivery. Jalur mekanis adalah visualisasi proses berbasis dokumen, bukan nilai timing atau setelan servis OEM.':'Simulasi menjalankan sheet travel sekaligus mekanisme utama mesin. Kertas mengikuti permukaan impression/transfer cylinder sebagai lembar fleksibel agar tidak menembus roll. Feeder dan register bergerak, gripper melakukan transfer antar-unit, cylinder/gear/roller berputar, distributor tinta berosilasi, tetesan tinta terlihat dari fountain menuju ductor, dampening bekerja, lalu UV curing, inspection dan delivery menyelesaikan alur. Nilai stroke, phase, intensitas UV dan timing adalah visualisasi proses, bukan setelan servis.'}</p><div class="card accent simulation-overview"><div class="simulation-status-row"><span id="sim-status" class="simulation-state">${s.running?'RUNNING':s.active?'PAUSED':'READY'}</span><b id="sim-stage">${esc(s.stage||'Feeder')}</b></div><div class="simulation-progress"><span id="sim-progress-bar" style="width:${Math.round((s.progress||0)*100)}%"></span></div><dl class="data-list compact">${pair('Lembar selesai',s.completed||0)+pair('Lembar bergerak',s.sheetsVisible||0)}<dt>Lembar di pile</dt><dd id="sim-pile">${s.pileSheetsVisible||0}</dd>${pair('Part mekanis aktif',s.mechanismCount||0)+pair('Gerak osilasi',s.oscillatorCount||0)+pair('Jalur tinta / dampening',s.inkFlowCount||0)+pair('Dynamic sheet brake',s.deliveryBrakeActive?'AKTIF':'STANDBY')}<dt>UV curing</dt><dd id="sim-uv-state" class="${s.uvActive?'active':''}">${s.uvActive?'AKTIF':'STANDBY'}</dd><dt>UV lamp visual</dt><dd><span id="sim-uv-count">${s.uvLampCount||0}</span> cassette</dd>${pair('Kecepatan visual',(s.speed||1)+'×')}</dl><div class="actions simulation-actions"><button id="sim-start" class="primary">${s.active?(s.running?'Running':'Lanjutkan'):'Mulai Printing Test'}</button><button id="sim-pause" class="secondary">${s.running?'Pause':'Lanjut'}</button><button id="sim-stop" class="secondary">Stop & Reset</button></div></div><h4>Kecepatan visual</h4><div class="simulation-speed">${[.5,1,1.5,2].map(v=>`<button data-sim-speed="${v}" class="${Math.abs((s.speed||1)-v)<.01?'active':''}">${v}×</button>`).join('')}</div><label class="check"><input id="sim-path" type="checkbox" ${s.pathVisible!==false?'checked':''}> Tampilkan garis jalur kertas</label><label class="check"><input id="sim-ink-flow" type="checkbox" ${s.inkFlowVisible!==false?'checked':''}> Tampilkan aliran tinta & dampening</label><h4>Sistem tinta</h4><div class="simulation-ink-flow">${INK_SIMULATION_SEQUENCE.map((step,index)=>`<div><span>${index+1}</span><b>${esc(step)}</b></div>`).join('')}</div><p class="subtle">Tetesan memanjang menunjukkan cucuran tinta dari fountain menuju ductor/vibrator; jalur tipis berikutnya menunjukkan transfer film tinta antar-roller. Warna unit pada simulasi hanya pembeda visual, bukan urutan warna job aktual.</p><div class="simulation-uv-card"><span id="sim-uv-indicator" aria-hidden="true"></span><div><b>UV Curing System</b><small>Beam menyala otomatis saat sheet berada di bawah cassette dryer.</small></div></div><h4>Alur proses mesin</h4><div class="simulation-flow">${PRINTING_SIMULATION_STAGES.map(stage=>`<div data-sim-stage="${esc(stage)}" class="${stage===s.stage?'active':''}"><span></span><b>${esc(stage)}</b></div>`).join('')}</div><div class="card"><h4>Gerak yang disimulasikan</h4><p>Feeder, register, cylinder train, gripper/transfer, inking, dampening, coating, UV/dryer dan delivery bergerak bersama. Pada Offset 10, FoilStar PU2 dan tiga coating unit ikut divisualisasikan sesuai konfigurasi dokumen. Aliran tinta divisualkan sebagai cucuran fountain → ductor, lalu film menuju roller/distributor → form rollers → plate → blanket → sheet; dampening divisualkan terpisah dari pan/roller ke plate. UV beam aktif hanya ketika sheet melewati dryer. Saat mencapai delivery, gripper melepaskan sheet tepat di atas main pile dan lembar tetap terlihat menumpuk di atas stack yang sudah ada.</p></div>`;
+  $('#panel-content').innerHTML=`<h3>Simulasi Proses</h3><p class="subtle">${IS_OFFSET10?'Simulasi membuka exterior otomatis dan memperlihatkan feeder, sheet alignment, seluruh cylinder train, AirTransfer, inking, Alcolor dampening, FoilStar pada PU2, tiga coating unit, UV/drying dan X3 delivery. Jalur mekanis adalah visualisasi proses berbasis dokumen, bukan nilai timing atau setelan servis OEM.':'Simulasi menjalankan sheet travel sekaligus mekanisme utama mesin. Kertas mengikuti permukaan impression/transfer cylinder sebagai lembar fleksibel agar tidak menembus roll. Feeder dan register bergerak, gripper melakukan transfer antar-unit, cylinder/gear/roller berputar, distributor tinta berosilasi, tetesan tinta terlihat dari fountain menuju ductor, dampening bekerja, lalu UV curing, inspection dan delivery menyelesaikan alur. Nilai stroke, phase, intensitas UV dan timing adalah visualisasi proses, bukan setelan servis.'}</p><div class="card accent simulation-overview"><div class="simulation-status-row"><span id="sim-status" class="simulation-state">${s.running?'RUNNING':s.active?'PAUSED':'READY'}</span><b id="sim-stage">${esc(s.stage||'Feeder')}</b></div><div class="simulation-progress"><span id="sim-progress-bar" style="width:${Math.round((s.progress||0)*100)}%"></span></div><dl class="data-list compact">${pair('Lembar selesai',s.completed||0)+pair('Lembar bergerak',s.sheetsVisible||0)}<dt>Lembar di pile</dt><dd id="sim-pile">${s.pileSheetsVisible||0}</dd>${pair('Part mekanis aktif',s.mechanismCount||0)+pair('Gerak osilasi',s.oscillatorCount||0)+pair('Jalur tinta / dampening',s.inkFlowCount||0)+pair('Dynamic sheet brake',s.deliveryBrakeActive?'AKTIF':'STANDBY')}<dt>UV curing</dt><dd id="sim-uv-state" class="${s.uvActive?'active':''}">${s.uvActive?'AKTIF':'STANDBY'}</dd><dt>UV lamp visual</dt><dd><span id="sim-uv-count">${s.uvLampCount||0}</span> cassette</dd>${pair('Kecepatan visual',(s.speed||1)+'×')}</dl><div class="actions simulation-actions"><button id="sim-start" class="primary">${s.active?(s.running?'Running':'Lanjutkan'):'Mulai Simulasi Proses'}</button><button id="sim-pause" class="secondary">${s.running?'Pause':'Lanjut'}</button><button id="sim-stop" class="secondary">Stop & Reset</button></div></div><h4>Kecepatan visual</h4><div class="simulation-speed">${[.5,1,1.5,2].map(v=>`<button data-sim-speed="${v}" class="${Math.abs((s.speed||1)-v)<.01?'active':''}">${v}×</button>`).join('')}</div><label class="check"><input id="sim-path" type="checkbox" ${s.pathVisible!==false?'checked':''}> Tampilkan garis jalur kertas</label><label class="check"><input id="sim-ink-flow" type="checkbox" ${s.inkFlowVisible!==false?'checked':''}> Tampilkan aliran tinta & dampening</label><h4>Sistem tinta</h4><div class="simulation-ink-flow">${INK_SIMULATION_SEQUENCE.map((step,index)=>`<div><span>${index+1}</span><b>${esc(step)}</b></div>`).join('')}</div><p class="subtle">Tetesan memanjang menunjukkan cucuran tinta dari fountain menuju ductor/vibrator; jalur tipis berikutnya menunjukkan transfer film tinta antar-roller. Warna unit pada simulasi hanya pembeda visual, bukan urutan warna job aktual.</p><div class="simulation-uv-card"><span id="sim-uv-indicator" aria-hidden="true"></span><div><b>UV Curing System</b><small>Beam menyala otomatis saat sheet berada di bawah cassette dryer.</small></div></div><h4>Alur proses mesin</h4><div class="simulation-flow">${PRINTING_SIMULATION_STAGES.map(stage=>`<div data-sim-stage="${esc(stage)}" class="${stage===s.stage?'active':''}"><span></span><b>${esc(stage)}</b></div>`).join('')}</div><div class="card"><h4>Gerak yang disimulasikan</h4><p>Feeder, register, cylinder train, gripper/transfer, inking, dampening, coating, UV/dryer dan delivery bergerak bersama. Pada Offset 10, FoilStar PU2 dan tiga coating unit ikut divisualisasikan sesuai konfigurasi dokumen. Aliran tinta divisualkan sebagai cucuran fountain → ductor, lalu film menuju roller/distributor → form rollers → plate → blanket → sheet; dampening divisualkan terpisah dari pan/roller ke plate. UV beam aktif hanya ketika sheet melewati dryer. Saat mencapai delivery, gripper melepaskan sheet tepat di atas main pile dan lembar tetap terlihat menumpuk di atas stack yang sudah ada.</p></div>`;
   on('#sim-start',startPrintingSimulation);on('#sim-pause',pausePrintingSimulation);on('#sim-stop',()=>stopPrintingSimulation({restoreExterior:true}));
   document.querySelectorAll('[data-sim-speed]').forEach(b=>b.onclick=()=>{simulationState=engine?.setPrintingSimulationSpeed(+b.dataset.simSpeed)||simulationState;updateSimulationPanel(simulationState);});
   const pathToggle=$('#sim-path');if(pathToggle)pathToggle.onchange=e=>{simulationState=engine?.setPrintingSimulationPathVisible(e.target.checked)||simulationState;updateSimulationPanel(simulationState);};
@@ -380,8 +416,25 @@ function renderPanel(tab=activeTab){
   updateSimulationPanel(s);
 
   }
+ }else if(tab==='data'){
+   const meta=TAXONOMY_BY_ID.get(selectedTaxonomyId)||TAXONOMY_BY_ID.get(ACTIVE_ROOT);
+   const m=IS_GENERIC?GENERIC_CONFIG.machine:null;
+   const rows=[
+    ['Kode aset / Machine ID',m?.machineId||a?.asset_code],
+    ['SAP Code',m?.sapCode||a?.sap_code],
+    ['Pabrikan',m?.manufacturer||a?.manufacturer],
+    ['Model',m?.model||a?.model],
+    ['Serial Number',m?.serial||a?.serial],
+    ['Functional Location',m?.functionalLocation||a?.functional_location],
+    ['Area / lokasi',m?.area||a?.location],
+    ['Spesifikasi',m?.specification||a?.specification],
+    ['Node terpilih',meta?.name],
+    ['Tingkat struktur',meta?.level?('L'+meta.level):null],
+    ['Referensi teknis',TECHNICAL_SOURCES.length?TECHNICAL_SOURCES.length+' sumber':null]
+   ];
+   $('#panel-content').innerHTML=`<h3>Data aset</h3><p class="subtle">Hanya data yang tersedia dari registry, database, dokumen, atau konteks mesin aktif yang ditampilkan. Field yang belum didukung sumber ditandai belum tersedia.</p><dl class="data-list">${rows.map(([k,v])=>pair(k,v)).join('')}</dl><div class="card"><h4>Konteks aktif</h4><p>${esc(meta?.name||'Mesin')} · ${activeLayout()?'posisi denah tersedia':'posisi denah belum tersedia'}</p></div>`;
  }else if(tab==='exterior'){
-  $('#panel-content').innerHTML=`<h3>Buka Exterior</h3><p class="subtle">Mode ini membuka cover/panel luar agar <b>seluruh interior mesin terlihat</b>. Rangka utama, frame, support, support bridge, tangga, landing, dan struktur penyangga tetap ditampilkan.</p><div class="card accent exterior-overview"><h4>${exteriorMode?'Exterior terbuka · interior terlihat':'Exterior tertutup · tampilan normal'}</h4><p>${exteriorMode?'Cover luar sedang disembunyikan dan detail interior dipaksa tampil penuh. Pilih area di bawah hanya untuk memusatkan kamera; area lain tetap tersedia.':'Tekan Buka Semua Cover untuk melihat cylinder, roller, gripper, drive, dampening, inking, transfer, dan detail internal lain yang sudah dimodelkan.'}</p><div class="actions"><button id="exterior-open" class="primary">Buka Semua Cover</button><button id="exterior-close" class="secondary">Tutup Exterior</button></div></div><h4>Fokus area saat exterior terbuka</h4><div class="exterior-area-list">${exteriorAreas().map(area=>`<button data-exterior-area="${esc(area.key)}" class="exterior-area-button ${exteriorFocusKey===area.key?'active':''}"><span><b>${esc(area.name)}</b><small>Interior + frame/support</small></span><span>Fokus ›</span></button>`).join('')}</div><p class="subtle">Mode ini hanya mengubah visibilitas cover dan level detail. Dimensi, posisi, serta geometri frame/support tidak diubah.</p>`;
+  $('#panel-content').innerHTML=`<h3>Buka Interior</h3><p class="subtle">Mode ini membuka cover/panel luar agar <b>seluruh interior mesin terlihat</b>. Rangka utama, frame, support, support bridge, tangga, landing, dan struktur penyangga tetap ditampilkan.</p><div class="card accent exterior-overview"><h4>${exteriorMode?'Interior terbuka · interior terlihat':'Interior tertutup · tampilan normal'}</h4><p>${exteriorMode?'Cover luar sedang disembunyikan dan detail interior dipaksa tampil penuh. Pilih area di bawah hanya untuk memusatkan kamera; area lain tetap tersedia.':'Tekan Buka Semua Cover untuk melihat cylinder, roller, gripper, drive, dampening, inking, transfer, dan detail internal lain yang sudah dimodelkan.'}</p><div class="actions"><button id="exterior-open" class="primary">Buka Semua Cover</button><button id="exterior-close" class="secondary">Tutup Interior</button></div></div><h4>Fokus area saat interior terbuka</h4><div class="exterior-area-list">${exteriorAreas().map(area=>`<button data-exterior-area="${esc(area.key)}" class="exterior-area-button ${exteriorFocusKey===area.key?'active':''}"><span><b>${esc(area.name)}</b><small>Interior + frame/support</small></span><span>Fokus ›</span></button>`).join('')}</div><p class="subtle">Mode ini hanya mengubah visibilitas cover dan level detail. Dimensi, posisi, serta geometri frame/support tidak diubah.</p>`;
   on('#exterior-open',showExteriorAll);on('#exterior-close',resetExteriorView);
   document.querySelectorAll('[data-exterior-area]').forEach(b=>b.onclick=()=>focusExteriorArea(b.dataset.exteriorArea));
  }else{
@@ -417,29 +470,29 @@ function setView(view){
  if(view==='factory'&&!l){layoutDialog();return;}
  if(view==='factory'&&engine?.isPrintingSimulationActive()){engine.stopPrintingSimulation();simulationState=engine.getPrintingSimulationState();simulationOwnsExterior=false;}if(view==='factory'&&exteriorMode)exitExteriorMode();editing=false;if(engine)engine.onTransform=null;explode=0;selectedPart=null;engine?.setView(view,state);
  $$('.rail>button').forEach(b=>b.classList.remove('active'));
- $('#nav-'+(view==='factory'?'layout':'machine'))?.classList.add('active');
+ $('#nav-machine')?.classList.add('active');
  const machineName=IS_OFFSET10?'OFFSET 10':IS_APM2?'APM 2':IS_SHEETING?'SHEETING LEXUS':IS_GENERIC?GENERIC_CONFIG.machine.name:'OFFSET 5';
  const machineSubtitle=IS_OFFSET10?'Heidelberg Speedmaster · CX 104 · Full UV + FoilStar':IS_APM2?'BOBST · SP 102 · 1994 · Automatic Flatbed Die Cutter':IS_SHEETING?'LEXUS · HSM-CTM7 · SBM-2 · RIGHT → LEFT':IS_GENERIC?(GENERIC_CONFIG.label+' · '+(GENERIC_CONFIG.machine.model||'Model belum tersedia')):'OFU-1 · Heidelberg Speedmaster · CD 102-8+L';
- $('#view-kicker').textContent=view==='factory'?'DENAH PABRIK':'TAMPILAN MESIN 3D';
- $('#view-title').textContent=view==='factory'?'Denah Pabrik':machineName;
+ $('#view-kicker').textContent=view==='factory'?'PABRIK · 3D':'TAMPILAN MESIN 3D';
+ $('#view-title').textContent=view==='factory'?'Pabrik Packaging Offset':machineName;
  $('#view-subtitle').textContent=view==='factory'?'Posisi mesin dan area produksi':machineSubtitle;
  $('#lod-status').textContent=view==='factory'?'Denah siap':'Model siap';
- $('#geometry-caption').textContent=view==='factory'?'Denah Pabrik':'Model '+machineName;
+ $('#geometry-caption').textContent=view==='factory'?'Pabrik · 3D':'Model '+machineName;
  const title=$('#notice-title'),note=$('#notice-text');
  if(title&&note){
   title.textContent=view==='factory'?'Informasi denah':'Catatan tampilan';
   note.textContent=view==='factory'?'Posisi mesin ditampilkan mengikuti denah yang tersedia. Beberapa tinggi bangunan masih berupa perkiraan visual.':(IS_OFFSET10?'Offset 10 direkonstruksi dari dokumen proyek BMJ dan referensi resmi Heidelberg; foto aktual mesin belum tersedia.':IS_APM2?'APM 2 memakai identitas database BMJ dan referensi legacy BOBST SP 102; suffix mesin dan foto aktual belum tersedia.':IS_SHEETING?'Sheeting mempertahankan baseline visual yang sudah dikoreksi: input reel di kanan, web bergerak kanan ke kiri, lalu cutter, delivery/layboy dan output stack di kiri.':'Model dibuat dengan mengacu pada foto aktual dan dokumen mesin yang tersedia.');
  }
- renderPanel();redrawPlantPlan();
+ renderPanel();redrawPlantPlan();emitDomainState({activeSection:'factory',viewMode:'3d'});
 }
 function showHome(){
  setView('factory');
  $$('.rail>button').forEach(b=>b.classList.remove('active'));
  $('#nav-machine')?.classList.add('active');
- $('#view-kicker').textContent='HOME · SMART FACTORY';
- $('#view-title').textContent='Home';
- $('#view-subtitle').textContent='Layout aktual bangunan dan seluruh mesin Packaging Offset';
- $('#geometry-caption').textContent='Home · Seluruh Pabrik';
+ $('#view-kicker').textContent='PABRIK · DIGITAL TWIN';
+ $('#view-title').textContent='Packaging Offset Factory';
+ $('#view-subtitle').textContent='Bangunan, area, mesin, dan utilitas dalam satu konteks';
+ $('#geometry-caption').textContent='Pabrik · Seluruh Area';
 }
 function connectionDialog(){
  modal('Sambungkan Data',`<p>Gunakan bagian ini jika Anda memiliki akses ke data tersimpan bersama. Untuk sekadar mencoba tampilan 3D, mode lokal sudah dapat digunakan.</p><form id="connection-form"><label for="api-base">Alamat layanan data</label><input id="api-base" type="url" value="${esc(apiBase)}" placeholder="https://alamat-layanan-data" required><label for="api-token">Kunci akses</label><input id="api-token" type="password" autocomplete="off" required><label class="check"><input id="enable-cache" type="checkbox" ${cacheEnabled?'checked':''}> Simpan salinan data di perangkat ini</label><p class="subtle">Gunakan pada perangkat pribadi jika ingin membuka data lebih cepat saat koneksi tidak stabil.</p><div class="actions"><button type="submit" class="primary">Sambungkan</button><button type="button" id="disconnect" class="secondary">Gunakan Mode Lokal</button></div><p id="connection-error" class="inline-error" role="alert"></p></form>`);
@@ -484,7 +537,7 @@ function editorPanel(){
 function machineDetailDialog(machine){
  const status=machine.has3D?'Model 3D tersedia':'Terdaftar di database · model 3D belum dibuat';
  modal(machine.name,`<div class="card accent"><h4>${esc(status)}</h4><p>${machine.has3D?'Buka tampilan 3D untuk eksplorasi detail mesin.':'Record master sudah tersedia. Posisi dan geometry 3D tidak akan dibuat sebelum data referensi tersedia.'}</p></div><dl class="data-list">${pair('Machine ID',machine.machineId)+pair('Area',machine.area)+pair('Model',machine.model)+pair('Serial Number',machine.serial)+pair('SAP Functional Location',machine.functionalLocation)+pair('SAP Code',machine.sapCode)+pair('Tahun',machine.year)+pair('Sumber',machine.source==='USER_CONFIRMED'?'Konfirmasi pengguna':'Database mesin')}</dl>${machine.note?`<div class="card"><h4>Catatan data</h4><p>${esc(machine.note)}</p></div>`:''}${machine.has3D?'<div class="actions"><button id="open-machine-3d" class="primary">Buka Model 3D</button></div>':''}`);
- if(machine.has3D)on('#open-machine-3d',()=>{const route=machine.machineId==='BMJ-MCH-0009'?'offset10':machine.machineId==='BMJ-MCH-0010'?'apm2':machine.machineId==='BMJ-MCH-0002'?'sheeting':machine.machineId==='BMJ-MCH-0003'?'offset5':machine.machineId;if(route!==MACHINE_KEY){switchActiveMachine(route);return;}closeModal();setView('machine');showPanel();renderPanel('overview');});
+ if(machine.has3D)on('#open-machine-3d',()=>{const route=machineRoute(machine);if(route!==MACHINE_KEY){switchActiveMachine(route);return;}closeModal();setView('machine');showPanel();renderPanel('overview');});
 }
 async function switchActiveMachine(route,{historyMode='push'}={}){
  if(route===MACHINE_KEY){closeModal();setView('machine');return;}
@@ -493,46 +546,148 @@ async function switchActiveMachine(route,{historyMode='push'}={}){
  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
  try{
   configureActiveMachine(route);applyActiveMachineState();selectedPart=null;selectedTaxonomyId=ACTIVE_ROOT;explode=0;exteriorMode=false;simulationOwnsExterior=false;
-  if(historyMode==='push'){const url=new URL(location.href);url.searchParams.set('machine',route);url.searchParams.set('v','80');history.pushState({machine:route},'',url);}
+  if(historyMode==='push'){const url=new URL(location.href);url.searchParams.set('machine',route);url.searchParams.set('asset',normalizeMachineKey(route));url.searchParams.delete('node');history.pushState({machine:route},'',url);}
   applyMachineShell();
   if(engine){engine.switchMachine(MACHINE_KEY);engine.onTaxonomySelect=id=>selectTaxonomy(id,{revealPanel:false});engine.onSimulationUpdate=next=>{simulationState=next;updateSimulationPanel(next);};engine.onReset=()=>{explode=0;selectedPart=null;selectedTaxonomyId=ACTIVE_ROOT;renderPanel();};engine.onError=message=>toast(message,true);if(bundledLayout)engine.loadLayout(bundledLayout);engine.setView('machine',state);}
   else{qStaticFallbackClear();renderStaticMachineFallback(new Error('3D renderer unavailable'));}
   const taxCount=$('#taxonomy-count');if(taxCount)taxCount.textContent=taxonomyStats().total.toLocaleString('id-ID');
-  renderStatus();redrawPlantPlan();renderPanel('overview');$('#engine-status').textContent='Tampilan 3D siap';
+  renderStatus();redrawPlantPlan();renderPanel('overview');$('#engine-status').textContent='Tampilan 3D siap';emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:null});
  }catch(error){toast('Model mesin gagal diganti: '+error.message,true);}
  finally{if(boot)boot.hidden=true;document.body.classList.remove('scene-switching');}
 }
 function qStaticFallbackClear(){const viewport=$('#viewport');viewport?.querySelectorAll('.static-machine-fallback').forEach(node=>node.remove());}
-addEventListener('popstate',()=>switchActiveMachine(new URLSearchParams(location.search).get('machine')||'offset5',{historyMode:'none'}));
-function assetDialog(){
+addEventListener('popstate',()=>{const params=new URLSearchParams(location.search);switchActiveMachine(params.get('machine')||params.get('asset')||'offset5',{historyMode:'none'});});
+function machineRoute(machine){
+ return machine?.machineId==='BMJ-MCH-0009'?'offset10':machine?.machineId==='BMJ-MCH-0010'?'apm2':machine?.machineId==='BMJ-MCH-0002'?'sheeting':machine?.machineId==='BMJ-MCH-0003'?'offset5':machine?.machineId||'offset5';
+}
+function searchableTaxonomy(route){
+ const key=normalizeMachineKey(route);
+ if(key==='offset5')return OFFSET5_TAXONOMY;
+ if(key==='offset10')return OFFSET10_TAXONOMY;
+ if(key==='apm2')return APM2_TAXONOMY;
+ if(key==='sheeting')return SHEETING_TAXONOMY;
+ try{return universalTaxonomy(key)||[];}catch{return [];}
+}
+function searchableSources(route){
+ const key=normalizeMachineKey(route);
+ if(key==='offset5')return OFFSET5_SOURCES;
+ if(key==='offset10')return OFFSET10_TECHNICAL_SOURCES;
+ if(key==='apm2')return APM2_TECHNICAL_SOURCES;
+ if(key==='sheeting')return SHEETING_TECHNICAL_SOURCES;
+ try{return universalTechnicalSources(key)||[];}catch{return [];}
+}
+function searchablePhotos(route){
+ const key=normalizeMachineKey(route);
+ if(key==='offset5')return OFFSET5_PHOTOS;
+ if(key==='offset10')return OFFSET10_PHOTO_REGISTRY;
+ if(key==='apm2')return APM2_PHOTO_REGISTRY;
+ if(key==='sheeting')return SHEETING_PHOTO_REGISTRY;
+ return [];
+}
+const normalizeSearchText=value=>String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+let UNIVERSAL_SEARCH_INDEX=null;
+function buildUniversalSearchIndex(){
+ if(UNIVERSAL_SEARCH_INDEX)return UNIVERSAL_SEARCH_INDEX;
+ const items=[],areas=new Set(),documentSeen=new Set(),photoSeen=new Set();
+ for(const machine of MACHINE_REGISTRY){
+  const route=machineRoute(machine);
+  if(machine.area)areas.add(machine.area);
+  items.push({type:'machine',group:'MESIN',title:machine.name,subtitle:[machine.area,machine.sapCode,machine.model].filter(Boolean).join(' · '),route,machineId:machine.machineId,has3D:Boolean(machine.has3D),keywords:[machine.name,machine.machineId,machine.sapCode,machine.functionalLocation,machine.model,machine.serial,machine.area].filter(Boolean).join(' ')});
+  if(!machine.has3D)continue;
+  const taxonomy=searchableTaxonomy(route),byId=new Map(taxonomy.map(node=>[node.id,node]));
+  const pathFor=node=>{const path=[];let cursor=node,guard=0;while(cursor&&guard++<8){path.unshift(cursor.name||cursor.id);cursor=cursor.parentId?byId.get(cursor.parentId):null;}return path.join(' / ')};
+  for(const node of taxonomy){
+   if((node.level||1)<=1)continue;
+   const path=pathFor(node);
+   items.push({type:'component',group:'KOMPONEN',title:node.name||node.id,subtitle:machine.name+' / '+path,route,machineId:machine.machineId,nodeId:node.id,keywords:[node.id,node.name,path,machine.name,machine.model].filter(Boolean).join(' ')});
+  }
+  for(const source of searchableSources(route)){
+   const sourceKey=route+'|'+(source.id||source.title||source.url);if(documentSeen.has(sourceKey))continue;documentSeen.add(sourceKey);
+   items.push({type:'reference',group:'DOKUMEN',title:source.title||source.id||'Dokumen',subtitle:[machine.name,source.publisher,source.type].filter(Boolean).join(' · '),route,machineId:machine.machineId,referenceId:source.id||source.title,keywords:[source.title,source.publisher,source.type,source.id,machine.name].filter(Boolean).join(' ')});
+  }
+  for(const photo of searchablePhotos(route)){
+   const photoKey=route+'|'+(photo.filename||photo.id);if(photoSeen.has(photoKey))continue;photoSeen.add(photoKey);
+   items.push({type:'reference',group:'FOTO',title:photo.filename||photo.id||'Foto',subtitle:[machine.name,photo.machineZone,photo.viewDirection].filter(Boolean).join(' · '),route,machineId:machine.machineId,referenceId:photo.filename||photo.id,keywords:[photo.filename,photo.machineZone,photo.viewDirection,machine.name].filter(Boolean).join(' ')});
+  }
+ }
+ for(const area of [...areas].filter(Boolean).sort())items.push({type:'area',group:'AREA',title:area,subtitle:'Area pabrik',keywords:area});
+ for(const system of [
+  {title:'HVAC',key:'hvac',keywords:'ahu ducting tata udara cooling ventilation'},
+  {title:'Compressed Air',key:'compressedAir',keywords:'compressor compressed air piping ring main'},
+  {title:'Water / IPAL',key:'water',keywords:'water ipal wastewater treatment'},
+  {title:'Electrical',key:'electrical',keywords:'electrical listrik power'},
+  {title:'Utility Routing',key:'routing',keywords:'utility routing piping ducting'}
+ ])items.push({type:'system',group:'SISTEM',title:system.title,subtitle:'Sistem utilitas',system:system.key,keywords:system.title+' '+system.keywords});
+ UNIVERSAL_SEARCH_INDEX=items.map(item=>({...item,_search:normalizeSearchText([item.title,item.subtitle,item.keywords].join(' '))}));
+ return UNIVERSAL_SEARCH_INDEX;
+}
+function universalSearchResults(query){
+ const q=normalizeSearchText(query).trim();if(!q)return [];
+ const words=q.split(/\s+/).filter(Boolean);
+ return buildUniversalSearchIndex().map(item=>{
+  if(!words.every(word=>item._search.includes(word)))return null;
+  const title=normalizeSearchText(item.title),subtitle=normalizeSearchText(item.subtitle);
+  let score=title===q?100:title.startsWith(q)?80:title.includes(q)?60:subtitle.includes(q)?35:20;
+  if(item.type==='component'&&title.includes(q))score+=12;
+  if(item.type==='machine')score+=8;
+  return {...item,score,_search:undefined};
+ }).filter(Boolean).sort((a,b)=>b.score-a.score||a.group.localeCompare(b.group,'id')||a.title.localeCompare(b.title,'id')).slice(0,48);
+}
+addEventListener('bmj:searchrequest',event=>{
+ const query=event.detail?.query||'';
+ dispatchEvent(new CustomEvent('bmj:searchresults',{detail:{query,results:universalSearchResults(query)}}));
+});
+addEventListener('bmj:searchselect',async event=>{
+ const item=event.detail?.item;if(!item)return;
+ try{
+  if(item.type==='system'){dispatchEvent(new CustomEvent('bmj:systemsearchselect',{detail:{system:item.system}}));return;}
+  if(item.type==='area'){emitDomainState({selectedArea:item.title,activeSection:'asset'});assetDialog(item.title);return;}
+  if(item.type==='machine'&&!item.has3D){const record=MACHINE_REGISTRY_BY_ID.get(item.machineId);emitDomainState({selectedAsset:item.machineId,selectedNode:null,activeSection:'asset'});if(record)machineDetailDialog(record);return;}
+  if(item.route&&normalizeMachineKey(item.route)!==MACHINE_KEY)await switchActiveMachine(item.route);
+  setView('machine');
+  if(item.type==='component'){
+   selectTaxonomy(item.nodeId,{revealPanel:true});showPanel();renderPanel('structure');
+   emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:item.nodeId,activeSection:'asset'});
+  }else if(item.type==='reference'){
+   showPanel();renderPanel('sources');emitDomainState({selectedAsset:MACHINE_KEY,activeReference:item.referenceId,activeSection:'reference'});
+  }else{
+   showPanel();renderPanel('overview');emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:null,activeSection:'asset'});
+  }
+ }catch(error){toast('Hasil pencarian tidak dapat dibuka: '+error.message,true);}
+});
+function assetDialog(initialQuery=''){
  modal('Daftar Mesin',`<div class="card accent"><h4>${MACHINE_REGISTRY_STATS.total} equipment terdaftar</h4><p>OFFSET PRINTING ${MACHINE_REGISTRY_STATS.byArea['OFFSET PRINTING']} · OFFSET CONVERTING ${MACHINE_REGISTRY_STATS.byArea['OFFSET CONVERTING']} · PDS ${MACHINE_REGISTRY_STATS.byArea.PDS} · UTILITY ${MACHINE_REGISTRY_STATS.byArea.UTILITY}</p></div><label for="asset-search">Cari nama, SAP Code, Functional Location, model, atau serial</label><input id="asset-search" type="search" placeholder="Contoh: OFFSET 10, APM-7, AHU 5…"><div id="asset-results"></div><p class="subtle" style="margin-top:18px">Seluruh equipment memiliki route model 3D. Mesin dengan model atau varian yang belum tercatat memakai rekonstruksi parametrik tingkat keluarga dan ditandai sesuai tingkat keyakinannya.</p>`);
  const render=()=>{
    const found=searchMachines($('#asset-search').value).slice(0,60);
    $('#asset-results').innerHTML=found.length?found.map(machine=>`<button data-machine-id="${machine.machineId}" class="list-button"><span class="asset-icon">${String(machine.no).padStart(2,'0')}</span><span><strong>${esc(machine.name)}</strong><small>${esc(machine.area)} · ${esc(machine.sapCode||'SAP Code belum tersedia')} · ${esc(machine.model||'Model belum tersedia')}${machine.has3D?' · 3D tersedia':''}</small></span></button>`).join(''):'<p class="empty">Tidak ada mesin yang sesuai.</p>';
    document.querySelectorAll('[data-machine-id]').forEach(button=>button.onclick=()=>{const machine=MACHINE_REGISTRY_BY_ID.get(button.dataset.machineId);if(machine)machineDetailDialog(machine);});
  };
- $('#asset-search').oninput=render;render();
+ $('#asset-search').value=initialQuery;$('#asset-search').oninput=render;render();
 }
 function settingsDialog(){
- modal('Pengaturan Tampilan',`<label class="check"><input id="low-mode" type="checkbox" ${engine?.low?'checked':''} ${exteriorMode?'disabled':''}> Mode ringan untuk perangkat dengan performa terbatas</label>${exteriorMode?'<p class="subtle">Mode ringan sementara dinonaktifkan saat exterior terbuka agar seluruh detail interior tetap terlihat.</p>':''}<label class="check"><input id="label-mode" type="checkbox" ${engine?.labels?'checked':''}> Tampilkan label mesin</label><h3>Data di perangkat</h3><p>${cacheEnabled?'Salinan data di perangkat aktif.':'Salinan data di perangkat tidak aktif.'}</p><button id="clear-cache" class="secondary">Bersihkan Data Tersimpan</button>`);
+ modal('Pengaturan Tampilan',`<label class="check"><input id="low-mode" type="checkbox" ${engine?.low?'checked':''} ${exteriorMode?'disabled':''}> Mode ringan untuk perangkat dengan performa terbatas</label>${exteriorMode?'<p class="subtle">Mode ringan sementara dinonaktifkan saat interior terbuka agar seluruh detail interior tetap terlihat.</p>':''}<label class="check"><input id="label-mode" type="checkbox" ${engine?.labels?'checked':''}> Tampilkan label mesin</label><h3>Data di perangkat</h3><p>${cacheEnabled?'Salinan data di perangkat aktif.':'Salinan data di perangkat tidak aktif.'}</p><button id="clear-cache" class="secondary">Bersihkan Data Tersimpan</button>`);
  $('#low-mode').onchange=e=>{engine?.setLow(e.target.checked);localStorage.setItem('offset5-low',e.target.checked?'1':'0');};
  $('#label-mode').onchange=e=>{if(engine)engine.labels=e.target.checked;$('#labels').classList.toggle('active',e.target.checked);};
  on('#clear-cache',async()=>{await cache.clear();toast('Data tersimpan di perangkat sudah dibersihkan.');});
 }
 function helpDialog(){
- modal('Panduan Penggunaan',`<h3>Navigasi 3D</h3><p>Seret untuk memutar mesin. Cubit atau scroll untuk memperbesar dan memperkecil. Gunakan tombol Atas, Fokus, Geser, dan Reset untuk berpindah tampilan dengan cepat.</p><h3>Melihat struktur mesin</h3><p>Klik bagian mesin atau buka menu Struktur Mesin. Label pada objek 3D dapat diklik untuk turun ke tingkat berikutnya sampai 6 tingkat. Gunakan tombol Naik pada label untuk kembali ke induknya, lalu gunakan Urai atau Tampilkan Sendiri bila perlu.</p><h3>Buka Exterior</h3><p>Gunakan menu Exterior lalu pilih Buka Semua Cover untuk melihat interior mesin sambil mempertahankan support mekanis yang dibutuhkan.</p><h3>Simulasi Proses</h3><p>Buka tab Simulasi. Pada mesin printing, simulasi memperlihatkan sheet travel dan sistem tinta/UV. Pada APM 2, simulasi memperlihatkan feeder, register/SideLay, gripper chain, die-cutting platen, stripping dan delivery.</p><h3>Panel informasi</h3><p>Filter, Denah Mini, Catatan, Detail Mesin, dan Panel Info dapat ditutup kapan saja. Gunakan tombol Panel untuk menampilkannya kembali.</p><h3>Data yang tersedia</h3><p>Offset 5 mengacu pada foto aktual dan dokumen mesin. Offset 10 mengacu pada final drawing/dokumen proyek BMJ serta referensi resmi Heidelberg. APM 2 memakai identitas database BMJ dan referensi legacy BOBST SP 102 karena foto aktual serta suffix variannya belum tersedia. Informasi yang belum didukung sumber tetap ditandai sebagai belum tersedia atau rekonstruksi visual.</p>`);
+  modal('Panduan Penggunaan',`<h3>Navigasi 3D</h3><p>Seret untuk memutar mesin. Cubit atau scroll untuk memperbesar dan memperkecil. Gunakan Pusatkan, Urai, Isolasi, dan pilihan tampilan untuk memeriksa object tanpa kehilangan konteks.</p><h3>Melihat struktur mesin</h3><p>Pilih mesin dari Pabrik atau Aset, lalu buka tab Struktur. Klik node sampai enam tingkat; pilihan yang sama akan di-highlight dan dipusatkan pada model 3D.</p><h3>Buka Interior</h3><p>Gunakan aksi Buka Interior pada toolbar inspeksi untuk menyembunyikan cover luar tanpa mengubah geometri frame, support, atau posisi komponen.</p><h3>Simulasi Proses</h3><p>Pilih Simulasi pada navigasi utama. Kontrol proses muncul tanpa memuat ulang aplikasi dan memakai simulation engine mesin yang sedang aktif.</p><h3>2D dan 3D</h3><p>Pindah 2D dan 3D dari workspace. Mesin atau komponen yang sedang dipilih tetap menjadi konteks aktif.</p><h3>Pencarian</h3><p>Gunakan pencarian universal untuk menemukan mesin, area, komponen, sistem, dokumen, atau foto. Memilih hasil langsung membuka konteks terkait.</p><h3>Data yang tersedia</h3><p>Informasi yang belum didukung sumber tetap ditandai belum tersedia atau belum terverifikasi. Aplikasi tidak membuat status operasi, ukuran, atau konfigurasi mesin yang tidak memiliki dasar data.</p>`);
 }
 renderPanel();renderStatus();const taxCount=$('#taxonomy-count');if(taxCount)taxCount.textContent=taxonomyStats().total.toLocaleString('id-ID');if(matchMedia('(max-width:800px)').matches)document.body.classList.add('panel-hidden');
 try{engine=new FactoryEngine($('#viewport'),part=>{const meta=taxonomyForPart(part);if(meta)selectedTaxonomyId=meta.id;choosePart(part);showPanel();renderPanel('structure');});engine.onTaxonomySelect=id=>selectTaxonomy(id,{revealPanel:false});engine.onSimulationUpdate=next=>{simulationState=next;updateSimulationPanel(next);};simulationState=engine.getPrintingSimulationState();engine.onReset=()=>{explode=0;selectedPart=null;selectedTaxonomyId=ACTIVE_ROOT;renderPanel();};engine.onError=message=>toast(message,true);$('#boot').hidden=true;$('#engine-status').textContent='Tampilan 3D siap';try{engine.setLow(localStorage.getItem('offset5-low')==='1'||matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse) and (max-width:1024px)').matches);}catch{}}catch(e){renderStaticMachineFallback(e);}
-try{bundledLayout=await loadBundledPlantLayout();bundledLayout.fleet=await loadFactoryFleet();engine?.loadLayout(activeLayout());if(engine)engine.onFactorySelect=id=>{const m=MACHINE_REGISTRY.find(m=>m.machineId===id);if(m)machineDetailDialog(m);};renderStatus();redrawPlantPlan();if(engine)showHome();}catch(e){toast('Denah pabrik gagal dimuat.',true);}
+try{bundledLayout=await loadBundledPlantLayout();bundledLayout.fleet=await loadFactoryFleet();engine?.loadLayout(activeLayout());if(engine)engine.onFactorySelect=id=>{const m=MACHINE_REGISTRY.find(m=>m.machineId===id);if(m)machineDetailDialog(m);};renderStatus();redrawPlantPlan();if(engine)showHome();const deepNode=INITIAL_URL_STATE.get('node');if(engine&&deepNode&&TAXONOMY_BY_ID.has(deepNode)){setView('machine');selectTaxonomy(deepNode,{revealPanel:true});showPanel();renderPanel('structure');}}catch(e){toast('Denah pabrik gagal dimuat.',true);}
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{if(editing){engine.edit(false);engine.applyPlacement(state);engine.onTransform=null;editing=false;}renderPanel(b.dataset.tab);});
 on('#modal-close',closeModal);on('#connect',connectionDialog);on('#nav-machine',()=>activeLayout()?showHome():layoutDialog());on('#nav-layout',()=>activeLayout()?setView('factory'):layoutDialog());on('#notice-details',layoutDialog);on('#nav-assets',assetDialog);on('#nav-sources',()=>{showPanel();renderPanel('sources');});on('#nav-help',helpDialog);on('#settings',settingsDialog);on('#close-panel',()=>document.body.classList.add('panel-hidden'));on('#focus-machine',()=>{if(!engine?.machine.visible)setView('machine');engine?.fit(engine.machine);});on('#edit-position',editorPanel);
-$$('[data-camera]').forEach(b=>b.onclick=()=>{if(!engine)return;const mode=b.dataset.camera;$$('[data-camera]').forEach(c=>c.classList.toggle('active',c===b));const target=engine.view==='factory'?engine.factory:engine.machine;if(mode==='reset'){explode=0;selectedPart=null;engine.isolated=false;engine.template.reset();engine.clearPartLabels();renderPanel();engine.fit(target,'iso');}else engine.fit(target,mode==='top'?'top':'iso');});
+$$('[data-camera]').forEach(b=>b.onclick=()=>{if(!engine)return;const mode=b.dataset.camera;$$('[data-camera]').forEach(c=>c.classList.toggle('active',c===b));const target=engine.view==='factory'?engine.factory:engine.machine;if(mode==='reset'){explode=0;selectedPart=null;engine.isolated=false;engine.template.reset();engine.clearPartLabels();$('#tool-explode')?.classList.remove('active');$('#tool-isolate')?.classList.remove('active');emitDomainState({inspectionMode:{explode:false,isolate:false,section:false},selectedNode:null});renderPanel();engine.fit(target,'iso');}else engine.fit(target,mode==='top'?'top':'iso');emitDomainState({cameraPreset:mode==='reset'?'iso':mode});});
 on('#tool-pan',()=>{if(!engine)return;engine.controls.enablePan=!engine.controls.enablePan;$('#tool-pan').classList.toggle('active',engine.controls.enablePan);toast(engine.controls.enablePan?'Mode pan aktif · gunakan dua jari / klik kanan':'Mode pan nonaktif');});
-on('#tool-explode',()=>{if(simulationLocksStructure())return;showPanel();selectedTaxonomyId=selectedTaxonomyId||ACTIVE_ROOT;renderPanel('structure');explode=explode>.01?0:.65;engine?.template.explode(explode,selectedPart);renderPanel('structure');});
-on('#tool-isolate',()=>{if(simulationLocksStructure())return;if(!engine||!selectedPart){showPanel();renderPanel('structure');toast('Pilih bagian mesin terlebih dahulu.',true);return;}engine.isolated=!engine.isolated;engine.template.isolate(selectedPart,engine.isolated);$('#tool-isolate').classList.toggle('active',engine.isolated);});
+on('#tool-explode',()=>{if(simulationLocksStructure())return;showPanel();selectedTaxonomyId=selectedTaxonomyId||ACTIVE_ROOT;renderPanel('structure');explode=explode>.01?0:.65;engine?.template.explode(explode,selectedPart);$('#tool-explode')?.classList.toggle('active',explode>0);emitDomainState({inspectionMode:{explode:explode>0}});renderPanel('structure');});
+on('#tool-isolate',()=>{if(simulationLocksStructure())return;if(!engine||!selectedPart){showPanel();renderPanel('structure');toast('Pilih bagian mesin terlebih dahulu.',true);return;}engine.isolated=!engine.isolated;engine.template.isolate(selectedPart,engine.isolated);$('#tool-isolate').classList.toggle('active',engine.isolated);emitDomainState({inspectionMode:{isolate:engine.isolated}});});
 on('#tool-simulation',()=>{showPanel();renderPanel('simulation');});
-on('#labels',()=>{if(engine){engine.labels=!engine.labels;$('#labels').classList.toggle('active',engine.labels);}});on('#fullscreen',async()=>{if(!document.fullscreenEnabled){toast('Layar penuh tidak didukung browser ini.');return;}if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();});
+on('#labels',()=>{if(engine){engine.labels=!engine.labels;$('#labels').classList.toggle('active',engine.labels);emitDomainState({visibleLayers:{labels:engine.labels}});}});
+on('#tool-interior',()=>{if(!engine)return;if(exteriorMode)resetExteriorView();else showExteriorAll();$('#tool-interior')?.classList.toggle('active',exteriorMode);emitDomainState({inspectionMode:{interior:exteriorMode}});});
+window.addEventListener('bmj:layerchange',event=>{if(!engine)return;const {key,visible}=event.detail||{};const map={building:'building',roof:'roof',machines:'machines',labels:'labels',landscape:'landscape',reference:'reference',unidentified:'unidentified',compressedAir:'utility_compressed_air',ahuPiping:'utility_ahu_piping',ducting:'utility_ahu_ducting',utilityAnchors:'utility_anchors'};const layer=map[key];if(!layer)return;if(key==='labels'){engine.labels=Boolean(visible);$('#labels')?.classList.toggle('active',engine.labels);}engine.setFactoryLayer(layer,Boolean(visible));});
+window.addEventListener('bmj:systemfocus',event=>{if(!engine?.actualFactory?.layers)return;const system=event.detail?.system;const layerNames=system==='hvac'?['utility_ahu_ducting','utility_ahu_piping']:system==='compressedAir'?['utility_compressed_air']:['utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors'];const layers=layerNames.map(name=>engine.actualFactory.layers[name]).filter(Boolean);if(!layers.length){toast('Routing sistem ini belum tersedia.');return;}setView('factory');for(const name of layerNames)engine.setFactoryLayer(name,true);engine.fitObjects?.(layers);});
+on('#fullscreen',async()=>{if(!document.fullscreenEnabled){toast('Layar penuh tidak didukung browser ini.');return;}if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();});
 window.addEventListener('offline',()=>{$('#connection').textContent='Mode lokal';toast('Koneksi data terputus. Aplikasi tetap dapat digunakan secara lokal.');});window.addEventListener('online',()=>{$('#connection').textContent=role?'Data tersambung':'Mode lokal';if(role)request('/api/state').then(acceptState).then(()=>{$('#connection').textContent='Data tersambung';toast('Data berhasil diperbarui.');}).catch(e=>toast(e.message,true));});
 try{const config=await fetch('./config.json').then(r=>r.json());apiBase=localStorage.getItem('offset5-api-base')||config.apiBase||'';if(cacheEnabled&&apiBase){const cached=await cache.get(apiBase);if(cached?.state){state=cached.state;engine?.loadLayout(activeLayout());renderStatus();renderPanel();$('#connection').textContent='Data perangkat · '+new Date(cached.savedAt).toLocaleDateString('id-ID');}}}catch(e){toast('Data tersimpan tidak dapat dibaca. Mode lokal tetap tersedia.',true);}
 window.addEventListener('resize',redrawPlantPlan,{passive:true});$('#ui-workbench-toggle')?.addEventListener('click',()=>setTimeout(redrawPlantPlan,80));$$('[data-workbench="dwg"]').forEach(b=>b.addEventListener('click',()=>setTimeout(redrawPlantPlan,40)));if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});

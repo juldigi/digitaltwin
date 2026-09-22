@@ -69,21 +69,12 @@ function bindShell(){
   $('#ui-asset-panel')?.addEventListener('click',()=>showDetail());
   $('#panel-toggle')?.addEventListener('click',()=>{if(document.body.classList.contains('panel-hidden'))showDetail();else hideDetail();});
   $('#close-panel')?.addEventListener('click',hideDetail);
-  $('#ui-backdrop')?.addEventListener('click',closeTransientPanels);
 
   $('#legend-all')?.addEventListener('click',()=>{setLegendActive('legend-all');document.body.classList.remove('clean-view');setFloatVisible('.floating-filter',true);setFloatVisible('.keyplan-mini',true);setFloatVisible('#scene-notice',true);uiNotice('Semua informasi tampilan ditampilkan.');});
   $('#legend-machine')?.addEventListener('click',()=>{setLegendActive('legend-machine');document.body.classList.remove('clean-view');setFloatVisible('.floating-filter',false);setFloatVisible('.keyplan-mini',false);setFloatVisible('#scene-notice',false);hideDetail();$('#focus-machine')?.click();uiNotice('Fokus pada mesin.');});
   $('#legend-info')?.addEventListener('click',()=>{setLegendActive('legend-info');document.body.classList.remove('clean-view');showDetail('overview');});
   $('#legend-clean')?.addEventListener('click',()=>{setLegendActive('legend-clean');document.body.classList.add('clean-view');setFloatVisible('.floating-filter',false);setFloatVisible('.keyplan-mini',false);setFloatVisible('#scene-notice',false);hideDetail();document.body.classList.remove('ui-workbench-open');uiNotice('Tampilan bersih aktif. Gunakan tombol Panel untuk menampilkan informasi kembali.');});
 
-  $('#global-search')?.addEventListener('keydown',e=>{
-    if(e.key!=='Enter')return;
-    const q=e.currentTarget.value.trim();
-    $('#nav-assets')?.click();
-    setTimeout(()=>{const input=$('#asset-search');if(input){input.value=q;input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();}},0);
-  });
-
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeTransientPanels();hideDetail();setFloatVisible('#scene-notice',false);}});
 }
 
 function bindWorkbench(){

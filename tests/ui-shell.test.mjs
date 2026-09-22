@@ -48,9 +48,9 @@ test('geometry baseline remains unchanged while the user interface is rebuilt',(
 });
 
 test('test-user shell uses clear user-facing navigation',()=>{
-  for(const label of ['3D','Denah','Mesin','Struktur','Exterior','Referensi','Panel','Panduan'])assert.match(html,new RegExp(label));assert.match(html,/id="taxonomy-count"/);
-  assert.match(html,/Mode uji/);
-  assert.match(html,/Siap diuji/);
+  for(const label of ['Pabrik','Aset','Sistem','Simulasi','Referensi','Bantuan','Pengaturan'])assert.match(html,new RegExp(label));assert.match(html,/id="taxonomy-count"/);
+  assert.doesNotMatch(html,/Mode uji/);
+  assert.doesNotMatch(html,/Siap diuji/);
 });
 
 test('v128 keeps one supplied BMJ identity in the global header and splash screen',()=>{
@@ -80,16 +80,18 @@ test('all static buttons are actionable and none is permanently disabled',()=>{
     tab:(m[1].match(/\bdata-tab="([^"]+)"/)||[])[1]||null,
     workbench:(m[1].match(/\bdata-workbench="([^"]+)"/)||[])[1]||null,
     partBack:/\bdata-part-label-back\b/.test(m[1]),
-    mobile:(m[1].match(/\bdata-mobile-nav="([^"]+)"/)||[])[1]||null
+    mobile:(m[1].match(/\bdata-mobile-nav="([^"]+)"/)||[])[1]||null,
+    breadcrumb:/\bdata-breadcrumb-factory\b/.test(m[1])
   }));
   assert.equal(buttons.filter(b=>/\bdisabled\b/.test(b.attrs)).length,0,'a visible static button is disabled');
   for(const b of buttons){
-    if(b.id)assert.ok(app.includes(b.id)||ui.includes(b.id),`button #${b.id} has no handler reference`);
+    if(b.id)assert.ok(app.includes(b.id)||ui.includes(b.id)||mobileStableUi.includes(b.id),`button #${b.id} has no handler reference`);
     else if(b.camera)assert.match(app,/data-camera|dataset\.camera/);
     else if(b.tab)assert.match(app,/data-tab|dataset\.tab/);
     else if(b.workbench)assert.match(ui,/data-workbench|dataset\.workbench/);
     else if(b.partBack)assert.match(engine,/data-part-label-back/);
     else if(b.mobile)assert.ok(mobileStableUi.includes('data-mobile-nav'),`mobile nav ${b.mobile} has no handler`);
+    else if(b.breadcrumb)assert.match(app,/data-breadcrumb-factory/);
     else assert.fail('button without id or delegated data attribute');
   }
 });
@@ -111,7 +113,7 @@ test('mobile portrait and landscape keep panels inside the viewport',()=>{
   assert.match(appShellCss,/100dvh/);
   assert.match(mobileStableUi,/visualViewport/);
   assert.match(mobileStableUi,/data-mobile-nav/);
-  assert.match(mobileStableUi,/closeNav/);
+  assert.match(mobileStableUi,/closeDrawer/);
 });
 
 test('visible shell avoids deployment and prototype terminology',()=>{
@@ -127,7 +129,7 @@ test('conditional controls explain requirements rather than failing silently',()
 });
 
 test('service worker refreshes the redesigned shell',()=>{
-  assert.match(sw,/factory-digital-twin-v145-micro-realism-r1-20260922/);
+  assert.match(sw,/factory-digital-twin-v149-safe-shell-20260922/);
   assert.match(sw,/src\/universal-machine\.js/);
   assert.match(app,/template\.ghost\(true,part\)/,'object selection must automatically ghost all non-selected geometry');
   for(const asset of ['app-shell-v79.css','src/app-shell-v79.js','assets/splash-industrial-v79.webp','src/ui-v5.js','src/app.js','src/simulation.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
@@ -143,15 +145,15 @@ test('v41 keeps every right-sidebar taxonomy item clickable after repeated selec
 
 test('v42 opens removable exterior covers while retaining frame and interior geometry',()=>{
   assert.match(html,/id="nav-exterior"/);
-  assert.match(html,/Buka Exterior/);
+  assert.match(html,/Buka Interior/);
   assert.match(html,/data-tab="exterior"/);
-  assert.match(html,/id="asset-exterior-shortcut"/);
+  assert.doesNotMatch(html,/id="asset-exterior-shortcut"/);
   assert.match(ui,/showDetail\('exterior'\)/);
   assert.match(app,/function enableExteriorOpen\(\)/);
   assert.match(app,/engine\.setLow\(false\)/);
   assert.match(app,/template\.setExteriorOpen\(true\)/);
   assert.match(app,/Buka Semua Cover/);
-  assert.match(app,/Tutup Exterior/);
+  assert.match(app,/Tutup Interior|Tutup Semua Cover/);
   assert.match(app,/Interior \+ frame\/support/);
   assert.match(app,/document\.querySelectorAll\('\[data-exterior-area\]'\)\.forEach/);
   assert.match(engine,/fitObjects\(objects=\[\]/);
@@ -194,7 +196,7 @@ test('v45 exposes a safe Printing Test simulation with continuous sheet flow',()
   assert.match(html,/id="tool-simulation"/);
   assert.match(html,/data-tab="simulation"/);
   assert.match(app,/PRINTING_SIMULATION_STAGES/);
-  assert.match(app,/Mulai Printing Test/);
+  assert.match(app,/Mulai Simulasi Proses/);
   assert.match(app,/simulationLocksStructure\(\)/);
   assert.match(app,/engine\.startPrintingSimulation\(\)/);
   assert.match(app,/engine\.pausePrintingSimulation\(\)/);
@@ -302,13 +304,13 @@ test('v54 keeps APM2 as a dedicated 3D machine with process-specific UI and no i
   assert.match(app,/\['offset10','apm2','sheeting'\]\.includes\(requested\)/);
   assert.match(app,/IS_APM2=MACHINE_KEY==='apm2'/);
   assert.match(app,/ACTIVE_ROOT=IS_OFFSET10\?'O10':IS_APM2\?'APM2':IS_SHEETING\?'SH':IS_GENERIC\?GENERIC_ROOT:'O5'/);
-  assert.match(app,/machine\.machineId==='BMJ-MCH-0010'\?'apm2'/);
+  assert.match(app,/normalizeMachineKey\(route\)/);
   assert.match(app,/switchActiveMachine\(route\)/);
   assert.match(engine,/switchMachine\(key\)/);
   assert.match(app,/Simulasi Proses APM 2/);
   assert.match(app,/register dan SideLay/);
   assert.match(app,/suffix E\/SE\/CER\/BMA tidak tersedia/);
-  assert.match(app,/machine\.machineId==='BMJ-MCH-0010'\?'apm2'/);
+  assert.match(app,/normalizeMachineKey\(route\)/);
   assert.match(runtime,/APM2MachineTemplate/);
   assert.match(runtime,/APM2ProcessSimulation/);
   assert.match(runtime,/if\(k==='apm2'\)return new APM2MachineTemplate\(\)/);
@@ -329,7 +331,7 @@ test('v54 keeps APM2 as a dedicated 3D machine with process-specific UI and no i
 
 test('v57 routes Sheeting Lexus as a dedicated right-to-left twin',()=>{
   assert.match(app,/IS_SHEETING=MACHINE_KEY==='sheeting'/);
-  assert.match(app,/machine\.machineId==='BMJ-MCH-0002'\?'sheeting'/);
+  assert.match(app,/normalizeMachineKey\(route\)/);
   assert.match(app,/SHEETING LEXUS/);
   assert.match(app,/RIGHT → LEFT/);
   assert.match(app,/Simulasi Proses Sheeting/);
@@ -378,13 +380,13 @@ test('v40 labels drill through the six-level taxonomy with individually mapped g
   assert.match(experienceCss,/\.part-label\.is-reference/);
 });
 
-test('V119 adaptive shell prevents duplicate mobile drawer toggles and restores workbench visibility',()=>{
-  assert.match(appShellCss,/V119 adaptive layout hardening/);
-  assert.match(appShellCss,/\.ui-workbench-open \.engineering-workbench/);
-  assert.match(appShellCss,/var\(--app-vh,100dvh\)/);
-  assert.match(appShellCss,/body:not\(\.panel-hidden\) \.scene-bottom/);
-  assert.doesNotMatch(ui,/document\.body\.classList\.toggle\('nav-open'\)/);
-  assert.match(ui,/app-shell-v79\.js owns the nav-open toggle/);
+test('V149 adaptive shell has one overlay owner and uses the legacy drawing canvas only as the 2D workspace',()=>{
+  assert.match(appShellCss,/V149 canonical production shell/);
+  assert.match(appShellCss,/\.workspace-2d \.engineering-workbench/);
+  assert.match(appShellCss,/\.legacy-nav-entry,\.legacy-tool-entry/);
+  assert.doesNotMatch(ui,/document\.addEventListener\('keydown'/);
+  assert.doesNotMatch(ui,/#ui-backdrop'\)\?\.addEventListener/);
+  assert.match(mobileStableUi,/document\.addEventListener\('keydown'/);
 });
 
 test('V79 interface keeps the scene primary, readable and secondary panels dismissible',()=>{
@@ -412,9 +414,9 @@ test('runtime binds every workbench button and provides a visual fallback withou
   assert.match(app,/Final CU → X3 Delivery/);
 });
 
-test('startup routes splash directly to Home factory overview',()=>{
-  assert.match(html,/id="nav-machine"[^>]*>[\s\S]*?<small>Home<\/small>/);
-  assert.match(mobileStableUi,/machine:\['home','Home','nav-machine'\]/);
+test('startup routes splash directly to the Pabrik factory overview',()=>{
+  assert.match(html,/id="nav-machine"[^>]*>[\s\S]*?<small>Pabrik<\/small>/);
+  assert.match(mobileStableUi,/factory:'nav-machine'/);
   assert.match(app,/if\(engine\)showHome\(\)/);
   assert.match(app,/function showHome\(\)[\s\S]*setView\('factory'\)/);
 });

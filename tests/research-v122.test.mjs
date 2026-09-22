@@ -77,10 +77,10 @@ test('V122 Sheeting keeps HSM-CTM7 exact boundary while adding tension slitter k
 test('V123 reference-family machines inherit the newer research metadata without becoming engineering CAD',()=>{
  for(const id of REFERENCE_MACHINE_IDS){
   const m=createMachineTemplate(id);
-  assert.equal(m.root.userData.researchVersion,'V123',id);
+  assert.equal(m.root.userData.researchVersion,'V139',id);
   assert.ok(m.root.userData.researchSourceCount>=195,id);
   assert.equal(m.root.userData.engineeringDimensions,false,id);
-  assert.equal(m.root.userData.referenceBuilder,'V123_RESEARCH_GROUNDED_BUILDER',id);
+  assert.equal(m.root.userData.referenceBuilder,'V139_RESEARCH_GROUNDED_BUILDER',id);
   m.dispose();
  }
 });

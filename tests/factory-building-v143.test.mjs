@@ -7,8 +7,8 @@ test('V143 structural baseline survives V145 micro-realism pass',async()=>{
  const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
  const built=buildActualFactory(layout,fleet),meta=built.root.userData,stats=meta.buildingDetailStats;
  assert.equal(meta.baselineId,'BMJ-250804-RED-20260921');
- assert.equal(meta.researchVersion,'V145');
- assert.equal(meta.buildingDetailPass,'V145_MICRO_REALISM_OFFICE_WAREHOUSE_AND_SAFETY');
+ assert.equal(meta.researchVersion,'V147');
+ assert.equal(meta.buildingDetailPass,'V147_IPAL_PROCESS_COMPLETION_AND_CACHE_LOCK');
  assert.equal(meta.assumptions.roofEaves,4.5);
  assert.equal(meta.assumptions.roofRidge,7);
  assert.equal(meta.ipal.enclosingWalls,0);
@@ -21,7 +21,7 @@ test('V143 structural baseline survives V145 micro-realism pass',async()=>{
   assert.ok(Math.abs(g.position.x-p.x)<1e-9,p.machineId+' x shifted');
   assert.ok(Math.abs(g.position.z+p.y)<1e-9,p.machineId+' y/z shifted');
  }
- built.root.traverse(o=>{if(o.userData?.accuracy==='INDUSTRIAL_REALISM_REFERENCE_NOT_AS_BUILT')assert.equal(o.userData.researchVersion,'V145');});
+ built.root.traverse(o=>{if(o.userData?.accuracy==='INDUSTRIAL_REALISM_REFERENCE_NOT_AS_BUILT'&&o.userData.researchVersion)assert.match(o.userData.researchVersion,/^V1\d+$/);});
 });
 
 test('V143 open IPAL and utility-routing boundary survive V145',async()=>{

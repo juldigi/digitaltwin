@@ -51,7 +51,7 @@ test('reference simulation respects blocked assets and never moves ordinary unta
     const template=createMachineTemplate(machine.machineId),sim=createMachineSimulation(machine.machineId,template.root,template),blocked=blockedReferenceIds.has(machine.machineId);
     assert.ok(template instanceof ReferenceMachineTemplate,machine.machineId);
     assert.ok(sim instanceof ReferenceProcessSimulation,machine.machineId);
-    const untagged=template.activeMeshes.filter(m=>!m.userData.motion&&m.userData.simulationEnabled!==false).map(m=>({m,p:m.position.clone(),q:m.quaternion.clone()}));
+    const untagged=template.activeMeshes.filter(m=>!m.userData.motion&&!m.userData.folderDriveRestQuaternion&&m.userData.simulationEnabled!==false).map(m=>({m,p:m.position.clone(),q:m.quaternion.clone()}));
     const state=sim.start();assert.equal(state.blocked,blocked);assert.equal(state.referenceModel,true);
     let now=0;for(let i=0;i<50;i++){now+=100;sim.update(now);}
     if(blocked){

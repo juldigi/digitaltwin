@@ -38,7 +38,7 @@ test('V123 CX104 Offset 8 LYYL exposes chamber doctor blade Venturi and Preset P
 
 test('V123 Diana Eye 55 exposes feeder knife air blowing ultrasonic double-sheet camera and bounded ejection',()=>{
  const m=new DianaEye55MachineTemplate();
- assert.equal(m.root.userData.researchVersion,'V123');assert.ok(m.root.userData.researchSourceCount>=195);
+ assert.equal(m.root.userData.researchVersion,'V141');assert.ok(m.root.userData.researchSourceCount>=195);
  requireRoles(m,['patented-feeding-knife-reference','vibration-motor-reference','feeder-air-manifold','feeder-air-blowing-nozzle','ultrasonic-double-sheet-emitter','ultrasonic-double-sheet-receiver','reject-confirmation-sensor']);
  assert.equal(m.findNode('diana55-feed-double').userData.oemTechnology,'ULTRASONIC_DOUBLE_SHEET_DETECTION');
  assert.equal(m.findNode('diana55-light').userData.oemIlluminationModes,4);
@@ -49,7 +49,7 @@ test('V123 Diana Eye 55 exposes feeder knife air blowing ultrasonic double-sheet
 
 test('V123 Suprasetter reference exposes debris and temperature capabilities only as unverified option boundaries',()=>{
  const m=createMachineTemplate('BMJ-MCH-0025');
- assert.equal(m.root.userData.researchVersion,'V123');
+ assert.equal(m.root.userData.researchVersion,'V139');
  requireRoles(m,['temperature-stabilizer-option','temperature-control-line-option','debris-removal-vacuum-option','debris-filter-option']);
  assert.equal(m.findNode('ctp-debris-option').userData.installedOptionVerified,false);
  assert.equal(m.findNode('ctp-temp-stabilizer-option').userData.installedOptionVerified,false);
@@ -78,7 +78,7 @@ test('V123 Atlas compressor reference follows GA/G oil-injected family flow with
 
 test('V123 R2 YA1A1A Offset 7 exposes bounded sheet-fed gravure mechanisms and blocks invented simulation',()=>{
  const m=createMachineTemplate('BMJ-MCH-0004');
- assert.equal(m.root.userData.researchVersion,'V123');
+ assert.equal(m.root.userData.researchVersion,'V139');
  assert.equal(m.root.userData.simulationStatus,'BLOCKED_PENDING_YA1A1A_TRANSPORT_DRIVE_VERIFICATION');
  requireRoles(m,[
   'swing-gripper-shaft','swing-pawl-gripper','ink-pan-bottom','ink-pan-lift-screw',
@@ -105,8 +105,8 @@ test('V123 R2 YA1A1A Offset 7 exposes bounded sheet-fed gravure mechanisms and b
 
 test('V123 R3 QF-100CS ABM-2 uses one bounded family working bay with XY-safe hydraulic blanking logic',()=>{
  const m=createMachineTemplate('BMJ-MCH-0021');
- assert.equal(m.root.userData.researchVersion,'V123');
- assert.equal(m.root.userData.detailPass,'V123_R3_QF100CS_BOUNDED_FAMILY_RECONSTRUCTION');
+ assert.equal(m.root.userData.researchVersion,'V139');
+ assert.equal(m.root.userData.detailPass,'V138_QF100CS_SERVO_HYDRAULIC_CONTROL_CHAIN');
  assert.equal(m.root.userData.exactModelPublicDocumentationFound,false);
  assert.equal(m.root.userData.installedBlankingHeadCountVerified,false);
  assert.equal(m.root.userData.installedCollectorStackerVerified,false);
@@ -265,7 +265,7 @@ test('V123 R4 SX52 Offset 9 binds official feeder AutoPlate inking Alcolor trans
 
 test('V123 R4 collator uses bounded multi-vendor suction-tower mechanics and per-bin gathering simulation',()=>{
  const m=createMachineTemplate('BMJ-MCH-0023');
- assert.equal(m.root.userData.detailPass,'V123_R4_MULTI_VENDOR_SUCTION_COLLATOR_RECONSTRUCTION');
+ assert.equal(m.root.userData.detailPass,'V138_COLLATOR_SUCTION_AND_SEPARATION_AIR_CONTROL_CHAIN');
  assert.equal(m.root.userData.exactCollatorOemVerified,false);
  assert.equal(m.root.userData.exactCollatorModelVerified,false);
  assert.equal(m.root.userData.modeledReferenceBinCount,10);
@@ -277,7 +277,7 @@ test('V123 R4 collator uses bounded multi-vendor suction-tower mechanics and per
   'feed-bin-shelf','bin-sheet-stack-reference','bin-side-guide-reference',
   'suction-rotor','feed-nip-roller-reference','bin-air-separation-nozzle',
   'vacuum-blower','vacuum-main-manifold','vacuum-bin-branch',
-  'double-miss-feed-sensor-reference','bin-empty-sheet-presence-sensor',
+  'double-feed-ir-emitter-reference','double-feed-ir-receiver-reference','bin-empty-sheet-presence-sensor',
   'vertical-gather-guide','gather-guide-plate','gather-transport-roller',
   'delivery-belt','set-jogger','downstream-finisher-interface-boundary',
   'collator-touchscreen-reference','collator-control-io-cabinet','bin-control-io-reference'
@@ -315,7 +315,7 @@ test('V123 R4 collator uses bounded multi-vendor suction-tower mechanics and per
 test('V123 R5 Suprasetter CTP-1/2 expose common Heidelberg mechanics while loader punch debris and temperature systems remain option-bounded',()=>{
  for(const id of ['BMJ-MCH-0025','BMJ-MCH-0026']){
   const m=createMachineTemplate(id);
-  assert.equal(m.root.userData.detailPass,'V123_R5_SUPRASETTER_MULTI_MODEL_FAMILY_RECONSTRUCTION',id);
+  assert.equal(m.root.userData.detailPass,'V139_SUPRASETTER_DRIVE_SENSOR_INTERLOCK_CHAIN',id);
   assert.equal(m.root.userData.exactSuprasetterModelVerified,false,id);
   assert.equal(m.root.userData.exactPlateFormatVerified,false,id);
   assert.deepEqual(m.root.userData.familyCandidates,['A52','A75','A106','106'],id);
@@ -352,7 +352,7 @@ test('V123 R5 Suprasetter CTP-1/2 expose common Heidelberg mechanics while loade
 
   const sim=createMachineSimulation(id,m.root,m),start=sim.start();
   assert.equal(start.available,true,id);assert.equal(start.blocked,false,id);
-  assert.equal(start.simulationBoundary,'SUPRASETTER_COMMON_PROCESS_ONLY__PUNCH_LOADER_DEBRIS_TEMP_OPTIONS_NOT_SIMULATED',id);
+  assert.equal(start.simulationBoundary,'SUPRASETTER_EXTERNAL_DRUM_LOAD_CLAMP_IMAGE_UNLOAD__MODEL_OPTIONS_NOT_INFERRED',id);
   assert.equal(sim.stages.some(s=>/punch/i.test(s)),false,id+' punch stage must be bypassed when installation is unverified');
   const optionRoles=/internal-punch|debris-removal|temperature-stabilizer|automatic-loader/i;
   assert.ok(sim.motions.every(item=>!optionRoles.test(String(item.mesh.userData.mechanismRole||''))),id+' unverified option leaked into active simulation');
@@ -365,7 +365,7 @@ test('V123 R5 Suprasetter CTP-1/2 expose common Heidelberg mechanics while loade
 
 test('V123 R6 SCREEN CTF uses capstan slack gravity polygon laser and bounded output architecture without inventing exact model',()=>{
  const m=createMachineTemplate('BMJ-MCH-0027');
- assert.equal(m.root.userData.detailPass,'V123_R6_SCREEN_FTR_KATANA_MULTI_MODEL_RECONSTRUCTION');
+ assert.equal(m.root.userData.detailPass,'V139_SCREEN_MEDIA_DRIVE_TENSION_EXPOSURE_INTERLOCK_CHAIN');
  assert.equal(m.root.userData.exactScreenModelVerified,false);
  assert.deepEqual(m.root.userData.familyCandidates,['FT-R3035','FT-R3050','Katana 5040','Katana 5055']);
  assert.equal(m.root.userData.processArchitecture,'CAPSTAN_FLATBED_SCAN__NOT_IMAGING_DRUM');
@@ -428,7 +428,7 @@ test('V123 R6 SCREEN CTF uses capstan slack gravity polygon laser and bounded ou
 
 test('V123 R7 Zünd keeps tool camera initialization and handling packages bounded while simulating vacuum plus XY platform only',()=>{
  const m=createMachineTemplate('BMJ-MCH-0028');
- assert.equal(m.root.userData.detailPass,'V123_R7_ZUND_MODULAR_PLATFORM_RECONSTRUCTION');
+ assert.equal(m.root.userData.detailPass,'V138_ZUND_VACUUM_CONTROL_AND_MODULE_Z_CHAIN');
  assert.equal(m.root.userData.exactZundModelVerified,false);
  assert.deepEqual(m.root.userData.familyCandidates,['G3','S3']);
  assert.equal(m.root.userData.installedToolPackageVerified,false);
@@ -483,7 +483,7 @@ test('V123 R7 Zünd keeps tool camera initialization and handling packages bound
 
 test('V123 R8 generic AHU remains Eurovent-functional with unknown section order airflow direction and installed configuration',()=>{
  const m=createMachineTemplate('BMJ-MCH-0036');
- assert.equal(m.root.userData.detailPass,'V123_R8_EUROVENT_SECTIONAL_AHU_FUNCTIONAL_RECONSTRUCTION');
+ assert.equal(m.root.userData.detailPass,'V132_EUROVENT_SECTIONAL_AHU_DUCT_AIRFLOW_RECONSTRUCTION');
  assert.equal(m.root.userData.exactAhuModelVerified,false);
  assert.equal(m.root.userData.sectionOrderVerified,false);
  assert.equal(m.root.userData.airflowDirectionVerified,false);
@@ -535,7 +535,7 @@ test('V123 R8 generic AHU remains Eurovent-functional with unknown section order
 
 test('V123 R8 SANSIN AHU 7 separates wet-curtain evaporator indoor airflow from outdoor refrigeration family module',()=>{
  const m=createMachineTemplate('BMJ-MCH-0040');
- assert.equal(m.root.userData.detailPass,'V123_R8_SANSIN_NES_YZKJ_TWO_STAGE_COOLING_RECONSTRUCTION');
+ assert.equal(m.root.userData.detailPass,'V132_SANSIN_INDOOR_OUTDOOR_DUCT_AIRFLOW_RECONSTRUCTION');
  assert.equal(m.root.userData.exactSansinModelVerified,false);
  assert.deepEqual(m.root.userData.familyCandidates,['YZKJ-45N','YZKJ-90N']);
  assert.equal(m.root.userData.exactCoolingCapacityVerified,false);
@@ -585,7 +585,7 @@ test('V123 R8 SANSIN AHU 7 separates wet-curtain evaporator indoor airflow from 
 
 test('V123 R9 FGM-2 is a neutral folder-gluer process twin and does not inherit MEDIA 100 II identity or optional box-style hardware',()=>{
  const m=createMachineTemplate('BMJ-MCH-0017');
- assert.equal(m.root.userData.detailPass,'V123_R9_FGM2_MULTI_VENDOR_PROCESS_RECONSTRUCTION');
+ assert.equal(m.root.userData.detailPass,'V138_FGM2_SECTIONAL_DRIVE_TRANSMISSION_AND_CONTACT');
  assert.equal(m.root.userData.exactFolderGluerOemVerified,false);
  assert.equal(m.root.userData.exactFolderGluerModelVerified,false);
  assert.equal(m.root.userData.neighborMedia100IdentityProof,false);
