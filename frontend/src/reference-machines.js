@@ -1798,14 +1798,23 @@ export class ReferenceProcessSimulation{
    laser:role('red-laser-source-reference'),
    cutter:role('media-cross-cutter'),
    supplyRoll:role('media-supply-roll'),
+   supplyBrake:role('ctf-supply-roll-brake-reference'),
    capstan:role('capstan-drive-roller'),
+   capstanMotor:role('ctf-capstan-drive-motor-reference'),
+   capstanEncoder:role('ctf-capstan-encoder-reference'),
    gravityRoller:role('gravity-tension-roller'),
+   polygonSpeedSensor:role('ctf-polygon-speed-sensor-reference'),
+   cutterActuator:role('ctf-cutter-actuator-reference'),
+   cutterHomeSensor:role('ctf-cutter-home-sensor-reference'),
+   outputSensor:role('ctf-output-media-sensor-reference'),
    punch:this.template.findNode('ctf-punch-option'),
    processor:this.template.findNode('ctf-processor-boundary'),
    outputCassette:this.template.findNode('ctf-output-cassette'),
-   exposureActive:false,cuttingActive:false,capstanAdvanceActive:false,tensionRegulationActive:false,outputBoundaryActive:false,mediaContactStage:'SUPPLY'
+   mediaPresent:false,supplyBrakeActive:false,tensionValid:false,capstanEncoderActive:false,polygonAtSpeed:false,exposurePermit:false,exposureActive:false,exposureComplete:false,
+   cutterPermit:false,cutterHomeConfirmed:true,cuttingActive:false,capstanAdvanceActive:false,tensionRegulationActive:false,outputBoundaryActive:false,outputDetected:false,interlockSafe:true,mediaContactStage:'SUPPLY'
   };
-  for(const key of ['polygon','supplyRoll','capstan','gravityRoller']){const o=this.imagesetter[key];if(o&&!o.userData.imagesetterRestQuaternion)o.userData.imagesetterRestQuaternion=o.quaternion.clone();}
+  for(const key of ['polygon','supplyRoll','capstan','gravityRoller','capstanMotor']){const o=this.imagesetter[key];if(o&&!o.userData.imagesetterRestQuaternion)o.userData.imagesetterRestQuaternion=o.quaternion.clone();}
+  if(this.imagesetter.cutter)this.imagesetter.cutterRestPosition=this.imagesetter.cutter.position.clone();
   this.imagesetterMediaGeometry=new THREE.BoxGeometry(.38,.014,.68);
   this.imagesetterMediaMaterial=new THREE.MeshStandardMaterial({color:0xb9c1c2,roughness:.46,metalness:.05});
   this.imagesetterMedia=new THREE.Mesh(this.imagesetterMediaGeometry,this.imagesetterMediaMaterial);
@@ -1813,14 +1822,16 @@ export class ReferenceProcessSimulation{
  }
  imagesetterStatus(){
   const p=this.active?(this.elapsed%this.cycle)/this.cycle:0;
-  let idx=0,exposure=false,cutting=false,output=false;
-  if(p<.16)idx=0;
-  else if(p<.38)idx=1;
-  else if(p<.57){idx=2;exposure=true;}
+  let idx=0,loading=false,tensioning=false,scannerSpinup=false,exposure=false,cutting=false,output=false;
+  if(p<.16){idx=0;loading=true;}
+  else if(p<.34){idx=1;tensioning=true;}
+  else if(p<.40){idx=2;scannerSpinup=true;tensioning=true;}
   else if(p<.72){idx=3;exposure=true;}
   else if(p<.86){idx=4;cutting=true;}
   else {idx=5;output=true;}
-  return {p,idx,exposure,cutting,output};
+  const mediaPresent=p>=.05&&p<.98,tensionValid=p>=.28&&p<.86,capstanEncoder=p>=.16&&p<.86,polygonAtSpeed=p>=.40&&p<.72,exposurePermit=mediaPresent&&tensionValid&&capstanEncoder&&polygonAtSpeed;
+  const exposureComplete=p>=.72,cutterHomeConfirmed=!cutting||p<.75||p>.84,cutterPermit=cutting&&exposureComplete&&mediaPresent,outputDetected=p>=.92;
+  return {p,idx,loading,tensioning,scannerSpinup,exposure:exposure&&exposurePermit,cutting:cutting&&cutterPermit,output,mediaPresent,tensionValid,capstanEncoder,polygonAtSpeed,exposurePermit,exposureComplete,cutterPermit,cutterHomeConfirmed,outputDetected};
  }
  updateImagesetter(){
   if(!this.imagesetter||!this.imagesetterMedia)return;
@@ -1828,15 +1839,16 @@ export class ReferenceProcessSimulation{
   const lerp=THREE.MathUtils.lerp,smooth=t=>{t=THREE.MathUtils.clamp(t,0,1);return t*t*(3-2*t);};
   let x=-.82,y=.68,rz=0;
   if(p<.16){const t=smooth(p/.16);x=lerp(-.82,-.48,t);y=lerp(.68,.78,t);}
-  else if(p<.38){const t=smooth((p-.16)/.22);x=lerp(-.48,-.12,t);y=.78-.22*Math.sin(Math.PI*t);rz=.08*Math.sin(Math.PI*t);}
-  else if(p<.72){const t=smooth((p-.38)/.34);x=lerp(-.12,.34,t);y=.80;}
+  else if(p<.40){const t=smooth((p-.16)/.24);x=lerp(-.48,-.12,t);y=.78-.22*Math.sin(Math.PI*t);rz=.08*Math.sin(Math.PI*t);}
+  else if(p<.72){const t=smooth((p-.40)/.32);x=lerp(-.12,.34,t);y=.80;}
   else if(p<.86){const t=smooth((p-.72)/.14);x=lerp(.34,.58,t);y=.78-.16*Math.sin(Math.PI*t);rz=-.07*Math.sin(Math.PI*t);}
   else {const t=smooth((p-.86)/.14);x=lerp(.58,.90,t);y=lerp(.76,.56,t);}
   m.position.set(x,y,0);m.rotation.set(0,0,rz);m.visible=this.active;
   const spin=(obj,rate,on)=>{if(!obj)return;obj.quaternion.copy(obj.userData.imagesetterRestQuaternion||new THREE.Quaternion());if(on)obj.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(AXIS.z,this.elapsed*rate));};
-  spin(i.supplyRoll,2.1,p<.86);spin(i.capstan,6.2,p>=.12&&p<.86);spin(i.gravityRoller,4.4,p>=.16&&p<.80);
-  if(i.polygon){i.polygon.quaternion.copy(i.polygon.userData.imagesetterRestQuaternion||new THREE.Quaternion());if(s.exposure)i.polygon.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(AXIS.y,this.elapsed*18));}
-  i.exposureActive=s.exposure;i.cuttingActive=s.cutting;i.capstanAdvanceActive=p>=.12&&p<.86;i.tensionRegulationActive=p>=.16&&p<.80;i.outputBoundaryActive=p>=.86;i.mediaContactStage=p<.16?'SUPPLY_ROLL':p<.38?'FRONT_SLACK_TENSION':p<.72?'CAPSTAN_NIP_AND_EXPOSURE':p<.86?'REAR_SLACK_AND_CUTTER':'OUTPUT_HANDOFF';
+  spin(i.supplyRoll,2.1,p<.86);spin(i.capstan,6.2,s.capstanEncoder);spin(i.gravityRoller,4.4,p>=.16&&p<.80);spin(i.capstanMotor,6.2,s.capstanEncoder);
+  if(i.polygon){i.polygon.quaternion.copy(i.polygon.userData.imagesetterRestQuaternion||new THREE.Quaternion());if(s.polygonAtSpeed||s.exposure)i.polygon.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(AXIS.y,this.elapsed*18));}
+  if(i.cutter&&i.cutterRestPosition){i.cutter.position.copy(i.cutterRestPosition);if(s.cutting){const q=THREE.MathUtils.clamp((p-.72)/.14,0,1);i.cutter.position.y-=Math.sin(Math.PI*q)*.045;}}
+  i.mediaPresent=s.mediaPresent;i.supplyBrakeActive=p>=.16&&p<.72;i.tensionValid=s.tensionValid;i.capstanEncoderActive=s.capstanEncoder;i.polygonAtSpeed=s.polygonAtSpeed;i.exposurePermit=s.exposurePermit;i.exposureActive=s.exposure;i.exposureComplete=s.exposureComplete;i.cutterPermit=s.cutterPermit;i.cutterHomeConfirmed=s.cutterHomeConfirmed;i.cuttingActive=s.cutting;i.capstanAdvanceActive=s.capstanEncoder;i.tensionRegulationActive=p>=.16&&p<.80;i.outputBoundaryActive=p>=.86;i.outputDetected=s.outputDetected;i.interlockSafe=(!s.exposure||s.exposurePermit)&&(!s.cutting||s.cutterPermit);i.mediaContactStage=p<.16?'SUPPLY_ROLL':p<.40?'FRONT_SLACK_TENSION':p<.72?'CAPSTAN_NIP_AND_EXPOSURE':p<.86?'REAR_SLACK_AND_CUTTER':'OUTPUT_HANDOFF';
   if(i.laser?.material?.emissive){i.laser.material.emissive.setHex(s.exposure?0x7b1616:0);i.laser.material.emissiveIntensity=s.exposure?.85:0;}
  }
  bindZund(){
