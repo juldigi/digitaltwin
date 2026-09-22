@@ -7,9 +7,9 @@ const js=fs.readFileSync(new URL('../frontend/src/app-shell-v79.js',import.meta.
 const html=fs.readFileSync(new URL('../frontend/index.html',import.meta.url),'utf8');
 const sw=fs.readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 
-test('V119 loads one unified adaptive shell after the stable base styles',()=>{
-  assert.match(html,/style\.css[\s\S]*runtime-fallback\.css[\s\S]*app-shell-v79\.css\?v=119/);
-  assert.match(html,/app\.js\?v=147\.1[\s\S]*ui-v5\.js\?v=119[\s\S]*experience-v37\.js\?v=81[\s\S]*app-shell-v79\.js\?v=119/);
+test('V149 loads one unified adaptive shell after the stable base styles',()=>{
+  assert.match(html,/style\.css[\s\S]*runtime-fallback\.css[\s\S]*app-shell-v79\.css\?v=149/);
+  assert.match(html,/app\.js\?v=149[\s\S]*ui-v5\.js\?v=149[\s\S]*experience-v37\.js\?v=81[\s\S]*app-shell-v79\.js\?v=149/);
   for(const stale of ['ui-premium-v73.css','ui-corporate-v74.css','reference-v76.css','mobile-stable-v78.css','reference-v76.js','mobile-stable-v78.js'])assert.doesNotMatch(html,new RegExp(stale.replaceAll('.','\\.')));
 });
 
@@ -34,7 +34,7 @@ test('detail is an in-flow desktop inspector and a full mobile page',()=>{
 test('mobile navigation and drawer have one state owner',()=>{
   assert.match(css,/body\.nav-open \.rail\{transform:none\}/);
   assert.match(css,/\.mobile-nav\{position:fixed/);
-  assert.match(js,/const closeNav=/);
+  assert.match(js,/function closeDrawer\(\)/);
   assert.match(js,/data-mobile-nav/);
   assert.match(js,/aria-expanded/);
 });
@@ -48,14 +48,14 @@ test('premium generated splash is bounded and cannot get stuck',()=>{
 });
 
 test('icons use one accessible vector family without emoji runtime controls',()=>{
-  assert.match(js,/<symbol id="i-home"/);
+  assert.match(js,/<symbol id="i-factory"/);
   assert.match(js,/<symbol id="i-settings"/);
   assert.match(js,/aria-hidden="true"/);
   assert.match(js,/viewBox="0 0 24 24"/);
 });
 
 test('service worker owns the current OEM-deep-detail shell assets',()=>{
- assert.match(sw,/factory-digital-twin-v147-mobile-routing-hotfix1-20260922/);
+ assert.match(sw,/factory-digital-twin-v149-safe-shell-20260922/);
   assert.match(sw,/app-shell-v79\.css/);
   assert.match(sw,/src\/app-shell-v79\.js/);
   assert.match(sw,/assets\/splash-industrial-v79\.webp/);
