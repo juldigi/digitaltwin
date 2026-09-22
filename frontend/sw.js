@@ -1,4 +1,4 @@
-const VERSION='factory-digital-twin-v157-foundation-runtime-20260922';
+const VERSION='factory-digital-twin-v158-spatial-registry-20260922';
 const SHELL=[
  './','./index.html','./config.json','./assets/favicon.svg','./assets/splash-industrial-v79.webp',
  './style.css','./runtime-fallback.css','./app-shell-v79.css','./ui-v5.css','./responsive-v5.css','./experience-v37.css',
@@ -7,7 +7,7 @@ const SHELL=[
  './src/data/foundation-scope.js','./src/data/truth-status.js','./src/data/dwg-fidelity.js',
  './src/data/dimensions-offset5.js','./src/data/confidence.js','./src/data/sources-offset5.js','./src/data/taxonomy-offset5.js',
  './src/data/plant-layout-data.js','./src/data/plant-layout-deep.js','./src/data/plant-actual.js','./src/data/plant-actual-data.js',
- './src/data/machine-registry.js','./src/factory-building.js','./src/utility-routing.js',
+ './src/data/foundation-assets.js','./src/factory-building.js','./src/utility-routing.js',
  './src/data/compressed-air-routes.js','./src/data/ahu-pipe-routes.js','./src/data/ahu-duct-routes.js',
  './src/data/factory-fleet-data.js',
  ...Array.from({length:9},(_,i)=>`./src/data/factory-fleet-chunk-${i}.js`),
