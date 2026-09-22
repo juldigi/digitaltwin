@@ -30,7 +30,7 @@ test('V162 exposes Systems in both navigation surfaces and keeps identifiers coh
  assert.match(html,/id="nav-systems" data-section="system"/);
  assert.match(html,/data-mobile-nav="system" aria-label="Sistem utilitas"/);
  assert.match(html,/app-shell-v79\.css\?v=162/);
- assert.match(html,/src\/app\.js\?v=162/);
+ assert.match(html,/src\/app\.js\?v=163/);
  assert.match(html,/src\/app-shell-v79\.js\?v=162/);
  assert.match(shell,/v162-factory-first-systems/);
  assert.match(sw,/factory-digital-twin-v162-factory-first-systems-20260922/);
