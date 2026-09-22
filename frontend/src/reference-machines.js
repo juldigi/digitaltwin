@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {UniversalMachineTemplate} from './universal-machine.js';
-import {V138_SOURCE_STATS} from './data/research-v138.js';
+import {V139_SOURCE_STATS} from './data/research-v139.js';
 
 const AXIS={x:new THREE.Vector3(1,0,0),y:new THREE.Vector3(0,1,0),z:new THREE.Vector3(0,0,1)};
 export const REFERENCE_MACHINE_IDS=Object.freeze([
@@ -15,12 +15,12 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  constructor(machineId){
   super(machineId);
   this.root.name=this.cfg.machine.name+' · REFERENCE-GROUNDED';
-  this.root.userData.referenceBuilder='V138_RESEARCH_GROUNDED_BUILDER';
+  this.root.userData.referenceBuilder='V139_RESEARCH_GROUNDED_BUILDER';
   this.root.userData.engineeringDimensions=false;
   this.root.userData.referenceBoundary=this.cfg.profile?.unknowns||[];
-  this.root.userData.researchVersion='V138';
-  this.root.userData.researchSourceCount=V138_SOURCE_STATS.total;
-  this.root.userData.newReviewedSources=V138_SOURCE_STATS.newReviewed;this.root.userData.uniqueResearchUrls=V138_SOURCE_STATS.uniqueUrls;
+  this.root.userData.researchVersion='V139';
+  this.root.userData.researchSourceCount=V139_SOURCE_STATS.total;
+  this.root.userData.newReviewedSources=V139_SOURCE_STATS.newReviewed;this.root.userData.uniqueResearchUrls=V139_SOURCE_STATS.uniqueUrls;
   this.enrichV121();
   for(const n of this.nodes){
    if(!n.userData.rest)n.userData.rest=n.position.clone();
@@ -496,7 +496,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  }
  enrichCTP(){
   const load=this.activeGroup(1),transport=this.activeGroup(2),drumUnit=this.activeGroup(3),laserUnit=this.activeGroup(4),punchUnit=this.activeGroup(5),out=this.activeGroup(6);
-  this.root.userData.detailPass='V137_SUPRASETTER_DRUM_CLAMP_LASER_CONTACT_MECHANICS';
+  this.root.userData.detailPass='V139_SUPRASETTER_DRIVE_SENSOR_INTERLOCK_CHAIN';
   this.root.userData.exactSuprasetterModelVerified=false;
   this.root.userData.exactPlateFormatVerified=false;
   this.root.userData.suprasetterOptions={
@@ -552,7 +552,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  }
  enrichImagesetter(){
   const supply=this.activeGroup(1),transport=this.activeGroup(2),scan=this.activeGroup(3),laser=this.activeGroup(4),cut=this.activeGroup(5),out=this.activeGroup(6);
-  this.root.userData.detailPass='V137_SCREEN_CAPSTAN_WEB_CONTACT_MECHANICS';
+  this.root.userData.detailPass='V139_SCREEN_MEDIA_DRIVE_TENSION_EXPOSURE_INTERLOCK_CHAIN';
   this.root.userData.exactScreenModelVerified=false;
   this.root.userData.familyCandidates=['FT-R3035','FT-R3050','Katana 5040','Katana 5055'];
   this.root.userData.exactLaserWavelengthVerified=false;
