@@ -1,4 +1,4 @@
-const SRC=Object.freeze(['BMJ-ASSET-REGISTRY-FZ','UANCHOR-FZ1200-EXACT-MODEL','JMM-FZ1200-BMJ','FZ1200-EVIDENCE-BOUNDARY']);
+const SRC=Object.freeze(['BMJ-ASSET-REGISTRY-FZ','UANCHOR-FZ1200-EXACT-MODEL','RYFZ1200-CLOSE-FAMILY-COMPONENTS','JMM-FZ1200-BMJ','FZ1200-EVIDENCE-BOUNDARY','V140-FZ1200-DRIVE-HYDRAULIC-INTERLOCK']);
 const NAMES=Object.freeze({
  'BMJ-MCH-0007':'PLT 1 · PILE TURNER 01 · FZ 1200',
  'BMJ-MCH-0008':'PLT 3 · PILE TURNER 03 · FZ 1200',
@@ -8,22 +8,28 @@ const COMPONENTS=Object.freeze({
  BASE:Object.freeze([
   ['FRAME','Floor Base Frame','fz1200-base-frame','Main floor base / longitudinal support rails'],
   ['LIFT','Vertical Lift Carriage','fz1200-base-lift','Lift columns / carriage guiding the pile assembly vertically'],
-  ['PALLET','Lower Pallet Platform','fz1200-base-pallet','Lower pile/pallet support platform']
+  ['PALLET','Lower Pallet Platform','fz1200-base-pallet','Lower pile/pallet support platform'],
+  ['FORK','Fork Housing / Lift Crosshead','fz1200-base-fork','Close-family fork housing / crosshead reference supporting vertical lift architecture']
  ]),
  CLAMP:Object.freeze([
   ['UPPER','Upper Clamp Plate','fz1200-clamp-upper','Movable upper pile-clamping plate'],
   ['LOWER','Lower Clamp / Pallet Plate','fz1200-clamp-lower','Lower clamp/support plate'],
-  ['COLUMN','Clamp Guide Columns','fz1200-clamp-column','Clamp guide columns / sliding supports']
+  ['COLUMN','Clamp Guide Columns','fz1200-clamp-column','Clamp guide columns / sliding supports'],
+  ['CYL','Clamp Hydraulic Actuation','fz1200-clamp-cylinder','Close-family clamping-cylinder reference; installed count and bore/stroke on BMJ units remain unverified'],
+  ['SENSE','Clamp Position / Pressure Confirmation','fz1200-clamp-sensing','Functional clamp-confirmation sensor boundary used by the process interlock model']
  ]),
  TURN:Object.freeze([
   ['YOKE','Turning Yoke','fz1200-turn-yoke','Rotating structure carrying the clamped pile'],
   ['TRUNNION','Trunnion Bearings & Shaft','fz1200-turn-trunnion','Horizontal turning pivot / bearing supports'],
-  ['DRIVE','Rotation Drive Interface','fz1200-turn-drive','Rotation motor/gear interface reference']
+  ['DRIVE','Rotation Drive Interface','fz1200-turn-drive','Rotation motor/gear interface reference'],
+  ['CYL','Tilting / Turning Cylinder','fz1200-turn-cylinder','Close-family tilting-cylinder reference; exact FZ1200 installed turning actuator remains unverified'],
+  ['LOCK','Turning Position Lock','fz1200-turn-lock','Mechanical lock / confirmation reference that secures 180° position before airing and jogging']
  ]),
  AIR:Object.freeze([
   ['BLOWER','High-Pressure Air Blower','fz1200-air-blower','High-pressure air source for airing / separation'],
   ['NOZZLE','Air-Jet Manifold','fz1200-air-nozzle','Air manifold / nozzle bank; installed nozzle count unverified'],
-  ['DUST','Dust / Powder Removal Path','fz1200-air-dust','Dust extraction / collection path reference']
+  ['DUST','Dust / Powder Removal Path','fz1200-air-dust','Dust extraction / collection path reference'],
+  ['VENT','Ventilation Plate / Aerating Interface','fz1200-air-ventilation','Close-family ventilation plate / aerating interface reference used to visualize pile separation']
  ]),
  JOG:Object.freeze([
   ['SIDE','Side Jogger Plates','fz1200-jog-side','Side alignment plates acting across pile width'],
@@ -34,12 +40,14 @@ const COMPONENTS=Object.freeze({
  HYD:Object.freeze([
   ['CYL','Hydraulic Cylinders','fz1200-hyd-cylinder','Hydraulic lift / clamp cylinder reference; installed cylinder count unverified'],
   ['POWER','Hydraulic Station / Power Pack','fz1200-hyd-power','Hydraulic pump, motor and reservoir station reference'],
-  ['HOSE','Hydraulic Hose Routing','fz1200-hyd-hose','Hydraulic hose / line routing interface']
+  ['HOSE','Hydraulic Hose Routing','fz1200-hyd-hose','Hydraulic hose / line routing interface'],
+  ['CTRL','Hydraulic Manifold / Solenoid Control','fz1200-hyd-power','Pump motor, manifold, solenoid-valve bank, pressure gauge and return-filter functional reference']
  ]),
  CONTROL:Object.freeze([
   ['HMI','Operator Control Panel','fz1200-control-hmi','Operator control / status panel'],
   ['SAFETY','Safety Interlock / E-Stop','fz1200-control-safety','Emergency-stop and safety-interlock architecture'],
-  ['GUARD','Perimeter Guard','fz1200-control-guard','Machine perimeter / access guarding reference']
+  ['GUARD','Perimeter Guard','fz1200-control-guard','Machine perimeter / access guarding reference'],
+  ['PERMIT','Turn / Air / Release Interlock Chain','fz1200-control-safety','Functional permissive chain: guard safe → clamp confirmed → lift clearance → turn complete/locked → airing/jogging → lower/release']
  ])
 });
 const buildRows=(assetId='BMJ-MCH-0007')=>{
