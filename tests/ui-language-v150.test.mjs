@@ -12,10 +12,10 @@ test('V150 removes internal routing jargon from user-facing factory copy',()=>{
 });
 
 test('V150 asset and reference copy is human-first without changing technical source data',()=>{
-  assert.equal(app.includes('<small>DAFTAR ASET</small>'),true);
+  assert.equal(app.includes('<small>FASE FONDASI</small>'),true);
   assert.equal(app.includes('<small>ASSET BROWSER</small>'),false);
-  assert.equal(app.includes('<span>Merek</span>'),true);
-  assert.equal(app.includes('komponen struktur ditampilkan'),true);
+  assert.equal(app.includes('<span>Merek</span>'),false);
+  assert.equal(app.includes('komponen OFFSET 5 ditampilkan'),true);
   assert.equal(app.includes('Gambar / Denah'),true);
   assert.equal(app.includes('Bukti / Sumber'),true);
   assert.equal(app.includes('sisi operator'),true);
