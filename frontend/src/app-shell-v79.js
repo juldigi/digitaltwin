@@ -69,15 +69,21 @@ for(const [id,name]of Object.entries(iconMap)){
 const mobileIcons={factory:'factory',asset:'machine',system:'system',simulation:'simulation',more:'more'};
 qa('[data-mobile-nav]').forEach(el=>{const label=q('small',el)?.textContent||el.getAttribute('aria-label')||'';el.innerHTML=icon(mobileIcons[el.dataset.mobileNav]||'more')+`<small>${label}</small>`});
 const mobileContextTools=document.createElement('section');mobileContextTools.className='mobile-context-tools';mobileContextTools.setAttribute('aria-label','Aksi tampilan dan inspeksi');mobileContextTools.innerHTML=`<small>INSPEKSI & TAMPILAN</small>
+<button type="button" data-mobile-tool="iso">${icon('focus')}<span>Isometrik</span></button>
 <button type="button" data-mobile-tool="top">${icon('focus')}<span>Tampak Atas</span></button>
+<button type="button" data-mobile-tool="fit-machine">${icon('machine')}<span>Pusatkan Mesin</span></button>
+<button type="button" data-mobile-tool="fit-factory">${icon('factory')}<span>Seluruh Pabrik</span></button>
 <button type="button" data-mobile-tool="interior">${icon('interior')}<span>Buka Interior</span></button>
 <button type="button" data-mobile-tool="labels">${icon('label')}<span>Label</span></button>
-<button type="button" data-mobile-tool="home">${icon('home-view')}<span>Tampilan Awal</span></button>
+<button type="button" data-mobile-tool="home">${icon('home-view')}<span>Reset Tampilan</span></button>
 <button type="button" data-mobile-tool="fullscreen">${icon('fullscreen')}<span>Layar Penuh</span></button>`;
 q('.rail-bottom')?.before(mobileContextTools);
 qa('[data-mobile-tool]',mobileContextTools).forEach(button=>button.addEventListener('click',()=>{
  const action=button.dataset.mobileTool;
+ if(action==='iso')q('[data-camera="iso"]')?.click();
  if(action==='top')q('[data-camera="top"]')?.click();
+ if(action==='fit-machine')q('[data-camera="fit"]')?.click();
+ if(action==='fit-factory')q('[data-camera="factory"]')?.click();
  if(action==='interior')q('#tool-interior')?.click();
  if(action==='labels')q('#labels')?.click();
  if(action==='home')q('[data-camera="reset"]')?.click();
@@ -86,9 +92,10 @@ qa('[data-mobile-tool]',mobileContextTools).forEach(button=>button.addEventListe
 }));
 
 const splash=q('.app-splash');
-const firstVisit=!sessionStorage.getItem('bmj-splash-seen');
 const finishSplash=()=>{if(!splash||splash.classList.contains('is-done'))return;splash.classList.add('is-done');sessionStorage.setItem('bmj-splash-seen','1');setTimeout(()=>splash.remove(),600)};
-addEventListener('load',()=>setTimeout(finishSplash,firstVisit?1250:180),{once:true});setTimeout(finishSplash,5000);
+addEventListener('bmj:factoryready',finishSplash,{once:true});
+addEventListener('bmj:factoryerror',finishSplash,{once:true});
+setTimeout(()=>{if(!splash||splash.classList.contains('is-done'))return;const copy=q('.splash-content p',splash);if(copy)copy.textContent='Factory membutuhkan waktu lebih lama dari biasanya. Status pemuatan akan ditampilkan setelah splash ditutup.';finishSplash();},15000);
 
 const SECTION_BUTTONS={factory:'nav-machine',asset:'nav-assets',system:'nav-systems',simulation:'nav-simulation-mode',reference:'nav-sources'};
 function markSection(section){
