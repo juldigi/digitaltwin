@@ -29,9 +29,9 @@ export class FactoryEngine {
     const grid=new THREE.GridHelper(150,100,0xd4dfe5,0xdce5ea);grid.material.transparent=true;grid.material.opacity=.38;this.studio.add(grid);this.scene.add(this.studio);
     this.template=new OffsetMachineTemplate();this.machine=this.template.root;this.scene.add(this.machine);
     this.simulation=new PrintingSimulation(this.machine,this.template);this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);
-    this.factory=new THREE.Group();this.scene.add(this.factory);
+    this.factory=new THREE.Group();this.scene.add(this.factory);this.factorySelectionId=null;this.factorySelectionHelper=null;
     this.gizmo=new TransformControls(this.camera,this.renderer.domElement);this.scene.add(this.gizmo.getHelper());this.gizmo.addEventListener('dragging-changed',e=>{this.controls.enabled=!e.value;});this.gizmo.addEventListener('objectChange',()=>{if(this.gizmo.mode==='scale')this.machine.scale.setScalar(Math.max(.0001,this.machine.scale.x));this.onTransform?.();});
-    this.ray=new THREE.Raycaster();this.down=null;this.renderer.domElement.addEventListener('dblclick',()=>{this.template.reset();this.clearPartLabels();this.isolated=false;this.fit(this.view==='factory'?this.factory:this.machine);this.onReset?.();});
+    this.ray=new THREE.Raycaster();this.down=null;this.renderer.domElement.addEventListener('dblclick',()=>{this.template.reset();this.clearPartLabels();this.isolated=false;if(this.view==='factory'){this.clearFactorySelection();this.fit(this.factory);}else this.fit(this.machine);this.onReset?.();});
     this.renderer.domElement.addEventListener('pointerdown',e=>this.down=[e.clientX,e.clientY]);
     this.renderer.domElement.addEventListener('pointerup',e=>{if(!this.down||Math.hypot(e.clientX-this.down[0],e.clientY-this.down[1])>5||this.gizmo.dragging||this.simulation?.active)return;const r=this.renderer.domElement.getBoundingClientRect();this.ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),this.camera);if(this.view==='factory'&&this.actualFactory){const hit=this.ray.intersectObjects([...this.actualFactory.assets.values()],true).find(h=>{for(let p=h.object;p;p=p.parent)if(!p.visible)return false;return true;});if(hit)this.onFactorySelect?.(hit.object.userData.machineId);return;}const hit=this.ray.intersectObject(this.machine,true).find(h=>{for(let p=h.object;p;p=p.parent)if(!p.visible)return false;return true;});if(hit&&this.machine.visible){const part=this.template.resolvePart(hit.object);if(part)this.onSelect(part);}});
     this.resizeObserver=new ResizeObserver(()=>this.resize());this.resizeObserver.observe(container);
@@ -138,9 +138,9 @@ export class FactoryEngine {
   setPrintingSimulationInkFlowVisible(on){return this.simulation?.setInkFlowVisible(on);}
   getPrintingSimulationState(){return this.simulation?.state()||{active:false,running:false,paused:false,speed:1,stage:'Feeder',completed:0,progress:0,sheetsVisible:0,rotorCount:0};}
   isPrintingSimulationActive(){return !!this.simulation?.active;}
-  setView(view,state){if(view!=='machine'&&this.simulation?.active)this.simulation.stop();this.view=view;this.gizmo.detach();this.template.reset();this.clearPartLabels();this.isolated=false;this.machine.position.set(0,0,0);this.machine.rotation.set(0,0,0);this.machine.scale.setScalar(1);this.studio.visible=view==='machine';this.factory.visible=view==='factory';
+  setView(view,state){if(view!=='machine'&&this.simulation?.active)this.simulation.stop();this.view=view;this.gizmo.detach();this.template.reset();this.clearPartLabels();this.isolated=false;this.machine.position.set(0,0,0);this.machine.rotation.set(0,0,0);this.machine.scale.setScalar(1);this.studio.visible=view==='machine';this.factory.visible=view==='factory';if(this.factorySelectionHelper)this.factorySelectionHelper.visible=view==='factory';
     if(view==='factory')this.applyPlacement(state,this.layout||state.layout);else this.machine.visible=true;
-    this.fit(view==='factory'?this.factory:this.machine);
+    this.fit(view==='factory'?(this.currentFactoryTarget()||this.factory):this.machine);
   }
   applyPlacement(state,layout=this.layout||state.layout){const a=state.asset,l=layout;this.machine.visible=false;if(!l)return;if(l.baselineId){return;}
     if(a.layout_x!==null){this.machine.position.set(a.layout_x,a.layout_y,a.layout_z);this.machine.rotation.y=a.rotation*Math.PI/180;this.machine.scale.setScalar(a.scale);this.machine.visible=true;}
@@ -237,9 +237,19 @@ export class FactoryEngine {
       this.layoutStats.rendered++;
     }
   }
-  setFactoryLayer(name,on){if(this.actualFactory?.layers[name])this.actualFactory.layers[name].visible=!!on;}
-  focusFactoryAsset(id){const o=this.actualFactory?.assets.get(id);if(o)this.fit(o);}
-  clearFactory(){this.actualFactory=null;this.factory.traverse(o=>{o.geometry?.dispose();if(Array.isArray(o.material))o.material.forEach(m=>{m.map?.dispose();m.dispose();});else{o.material?.map?.dispose();o.material?.dispose();}});this.factory.clear();}
+  setFactoryLayer(name,on){if(this.actualFactory?.layers[name])this.actualFactory.layers[name].visible=!!on;if(this.factorySelectionHelper&&this.factorySelectionId){const selected=this.actualFactory?.assets.get(this.factorySelectionId);this.factorySelectionHelper.visible=this.view==='factory'&&!!selected&&this.isObjectVisible(selected);}}
+  isObjectVisible(object){for(let node=object;node;node=node.parent)if(node.visible===false)return false;return true;}
+  clearFactorySelection(){this.factorySelectionId=null;if(this.factorySelectionHelper){this.scene.remove(this.factorySelectionHelper);this.factorySelectionHelper.geometry?.dispose();this.factorySelectionHelper.material?.dispose();this.factorySelectionHelper=null;}return true;}
+  selectFactoryAsset(id,{focus=false,mode='iso'}={}){
+    const object=this.actualFactory?.assets.get(id);if(!object)return null;
+    this.clearFactorySelection();this.factorySelectionId=id;
+    const helper=new THREE.BoxHelper(object,0x1677d2);helper.name='FACTORY_ASSET_SELECTION_OVERLAY';helper.userData={semantic:'SELECTION_OVERLAY',machineId:id,sourceType:'UI_STATE_NOT_FACTORY_GEOMETRY'};helper.material.transparent=true;helper.material.opacity=.92;helper.material.depthTest=false;helper.renderOrder=999;helper.visible=this.view==='factory'&&this.isObjectVisible(object);this.factorySelectionHelper=helper;this.scene.add(helper);
+    if(focus)this.fit(object,mode);return object;
+  }
+  currentFactoryTarget(){return this.factorySelectionId?this.actualFactory?.assets.get(this.factorySelectionId)||this.factory:this.factory;}
+  focusFactorySelection(mode='iso'){const target=this.currentFactoryTarget();if(target)this.fit(target,mode);return target;}
+  focusFactoryAsset(id,mode='iso'){return this.selectFactoryAsset(id,{focus:true,mode});}
+  clearFactory(){this.clearFactorySelection();this.actualFactory=null;this.factory.traverse(o=>{o.geometry?.dispose();if(Array.isArray(o.material))o.material.forEach(m=>{m.map?.dispose();m.dispose();});else{o.material?.map?.dispose();o.material?.dispose();}});this.factory.clear();}
   edit(on){if(on&&this.view==='factory'&&this.layout){this.machine.visible=true;this.gizmo.attach(this.machine);}else this.gizmo.detach();}
   setLow(on){this.low=on;this.renderer.setPixelRatio(on?1:Math.min(devicePixelRatio,1.7));this.renderer.shadowMap.enabled=!on;this.template.setLow(on);this.resize();}
   switchMachine(key){
@@ -253,6 +263,6 @@ export class FactoryEngine {
     this.simulation=new PrintingSimulation(this.machine,this.template);
     this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);this.isolated=false;this.view='machine';this.machine.visible=true;this.factory.visible=false;this.template.setLow(this.low);this.fit(this.machine);this.resize();return true;
   }
-  dispose(){cancelAnimationFrame(this.frame);this.clearPartLabels();this.resizeObserver.disconnect();this.controls.dispose();this.gizmo.dispose();this.simulation?.dispose();this.template.dispose();this.clearFactory();this.studio.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});this.renderer.dispose();}
+  dispose(){cancelAnimationFrame(this.frame);this.clearPartLabels();this.clearFactorySelection();this.resizeObserver.disconnect();this.controls.dispose();this.gizmo.dispose();this.simulation?.dispose();this.template.dispose();this.clearFactory();this.studio.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});this.renderer.dispose();}
 }
 
