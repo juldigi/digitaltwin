@@ -5,17 +5,16 @@ import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import { cadToWorld } from './model.js';
 import { plantDisplayPoint } from './data/plant-layout-data.js';
 
-import {createMachineTemplate,createMachineSimulation,normalizeMachineKey} from './machine-runtime.js';
+import {OffsetMachineTemplate} from './offset5.js';
+import {PrintingSimulation} from './simulation.js';
 import {FOUNDATION_SCOPE,canOpenTechnical3D} from './data/foundation-scope.js';
-export {OffsetMachineTemplate} from './offset5.js';
-export {Offset10MachineTemplate} from './offset10.js';
-export {APM2MachineTemplate} from './apm2.js';
-export {SheetingMachineTemplate} from './sheeting.js';
+export {OffsetMachineTemplate};
+const normalizeFoundationMachineKey=key=>key==='BMJ-MCH-0003'||key==='offset5'||!key?FOUNDATION_SCOPE.primaryRoute:String(key);
 
 export class FactoryEngine {
   constructor(container,onSelect){
     this.container=container;this.onSelect=onSelect;this.onTaxonomySelect=null;this.view='machine';this.layout=null;this.low=false;this.labels=true;this.isolated=false;this.partLabelEntries=[];
-    {const requested=normalizeMachineKey(new URLSearchParams(location.search).get('machine'));this.requestedMachineKey=requested;this.machineKey=canOpenTechnical3D(requested)?requested:FOUNDATION_SCOPE.primaryRoute;}
+    {const requested=normalizeFoundationMachineKey(new URLSearchParams(location.search).get('machine'));this.requestedMachineKey=requested;this.machineKey=canOpenTechnical3D(requested)?FOUNDATION_SCOPE.primaryRoute:FOUNDATION_SCOPE.primaryRoute;}
     this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'low-power'});
     this.renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));this.renderer.shadowMap.enabled=true;this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.2;
     container.appendChild(this.renderer.domElement);const ariaMachine=FOUNDATION_SCOPE.primaryAssetName;this.renderer.domElement.setAttribute('aria-label',`Model 3D prosedural ${ariaMachine}. Gunakan tombol sudut pandang untuk navigasi.`);this.renderer.domElement.setAttribute('tabindex','0');
@@ -28,8 +27,8 @@ export class FactoryEngine {
     this.studio=new THREE.Group();this.studio.name='Inspection studio — not factory';
     const floor=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.ShadowMaterial({opacity:.12}));floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;floor.position.y=.01;this.studio.add(floor);
     const grid=new THREE.GridHelper(150,100,0xd4dfe5,0xdce5ea);grid.material.transparent=true;grid.material.opacity=.38;this.studio.add(grid);this.scene.add(this.studio);
-    this.template=createMachineTemplate(this.machineKey);this.machine=this.template.root;this.scene.add(this.machine);
-    this.simulation=createMachineSimulation(this.machineKey,this.machine,this.template);this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);
+    this.template=new OffsetMachineTemplate();this.machine=this.template.root;this.scene.add(this.machine);
+    this.simulation=new PrintingSimulation(this.machine,this.template);this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);
     this.factory=new THREE.Group();this.scene.add(this.factory);
     this.gizmo=new TransformControls(this.camera,this.renderer.domElement);this.scene.add(this.gizmo.getHelper());this.gizmo.addEventListener('dragging-changed',e=>{this.controls.enabled=!e.value;});this.gizmo.addEventListener('objectChange',()=>{if(this.gizmo.mode==='scale')this.machine.scale.setScalar(Math.max(.0001,this.machine.scale.x));this.onTransform?.();});
     this.ray=new THREE.Raycaster();this.down=null;this.renderer.domElement.addEventListener('dblclick',()=>{this.template.reset();this.clearPartLabels();this.isolated=false;this.fit(this.view==='factory'?this.factory:this.machine);this.onReset?.();});
@@ -244,14 +243,14 @@ export class FactoryEngine {
   edit(on){if(on&&this.view==='factory'&&this.layout){this.machine.visible=true;this.gizmo.attach(this.machine);}else this.gizmo.detach();}
   setLow(on){this.low=on;this.renderer.setPixelRatio(on?1:Math.min(devicePixelRatio,1.7));this.renderer.shadowMap.enabled=!on;this.template.setLow(on);this.resize();}
   switchMachine(key){
-    const requested=normalizeMachineKey(key);
+    const requested=normalizeFoundationMachineKey(key);
     if(!canOpenTechnical3D(requested)){this.onError?.('Aset ini masih berupa placeholder tata letak. Detail 3D teknis saat ini hanya dibuka untuk OFFSET 5.');return false;}
-    if(!requested||requested===this.machineKey)return true;
+    if(this.machineKey===FOUNDATION_SCOPE.primaryRoute)return true;
     this.gizmo.detach();this.clearPartLabels();this.simulation?.dispose();this.template?.dispose();if(this.machine)this.scene.remove(this.machine);
-    this.machineKey=requested;
-    this.template=createMachineTemplate(this.machineKey);
+    this.machineKey=FOUNDATION_SCOPE.primaryRoute;
+    this.template=new OffsetMachineTemplate();
     this.machine=this.template.root;this.scene.add(this.machine);
-    this.simulation=createMachineSimulation(this.machineKey,this.machine,this.template);
+    this.simulation=new PrintingSimulation(this.machine,this.template);
     this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);this.isolated=false;this.view='machine';this.machine.visible=true;this.factory.visible=false;this.template.setLow(this.low);this.fit(this.machine);this.resize();return true;
   }
   dispose(){cancelAnimationFrame(this.frame);this.clearPartLabels();this.resizeObserver.disconnect();this.controls.dispose();this.gizmo.dispose();this.simulation?.dispose();this.template.dispose();this.clearFactory();this.studio.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});this.renderer.dispose();}
