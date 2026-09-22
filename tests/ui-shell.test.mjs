@@ -256,7 +256,7 @@ test('v49 exposes the normalized 41-machine plant registry through the contextua
   assert.match(app,/MACHINE_REGISTRY_STATS/);
   assert.match(app,/searchMachines\(/);
   assert.match(app,/data-machine-id/);
-  assert.match(app,/ASSET BROWSER/);
+  assert.match(app,/DAFTAR ASET/);
   assert.match(app,/aset Digital Twin/);
   assert.match(app,/asset-data-status/);
   assert.match(sw,/src\/data\/machine-registry\.js/);
