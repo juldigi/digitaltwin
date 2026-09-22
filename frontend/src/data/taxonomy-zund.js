@@ -1,5 +1,5 @@
 const SRC=Object.freeze([
- 'BMJ-MACHINE-DATABASE','V123-ZUND-G3','V123-ZUND-S3','V123-ZUND-TOOLS','V123-ZUND-GEN3-PDF','V123-ZUND-URT','V123-ZUND-UM'
+ 'BMJ-MACHINE-DATABASE','V123-ZUND-G3','V123-ZUND-S3','V123-ZUND-TOOLS','V123-ZUND-GEN3-PDF','V123-ZUND-URT','V123-ZUND-UM','V138-ZUND-VACUUM-MODULE-Z-CONTROL'
 ]);
 const rows=[];
 const add=(id,parentId,level,levelName,name,meshRefs,description,confidence='ZUND_G3_S3_FAMILY_REFERENCE')=>rows.push(Object.freeze({
@@ -22,11 +22,13 @@ chain(u,'ZONE','Vacuum Zone / Distribution','Vacuum Distribution Block','Vacuum 
 
 u=unit('GANTRY','X-Axis Travelling Beam','universal-module-2','Precision travelling beam / gantry.');
 chain(u,'GUIDE','Beam Linear Motion','X-Axis Guide Block','Beam Motion Service Group','Linear Guide / Rack Reference','zund-gantry-guide','Precision X-axis family representation; exact drive technology/model-specific arrangement unverified.');
+chain(u,'XDRIVE','Gantry Drive Service Chain','Servo / Rack-Pinion Block','Gantry Drive Service Group','Servo / Pinion / Linear-Bearing Reference','zund-gantry-guide','Drive components are functional service references; exact G3/S3 drive package on BMJ unit remains unverified.');
 chain(u,'BEAM','Travelling Beam','Beam Structure Block','Beam Service Group','Gantry Beam / Carriage Rail','zund-gantry-beam','Common modular cutter travelling-beam architecture.');
 
 u=unit('CARRIAGE','Y/Z Tool Carriage & Module Slots','universal-module-3','Tool carriage with modular carrier positions.');
 chain(u,'Y','Carriage Traverse','Y-Axis Motion Block','Carriage Traverse Service Group','Carriage Linear Guide / Drive Reference','zund-carriage-y','Cross-beam carriage motion reference.');
 chain(u,'SLOTS','Module Carrier Slots','Module Carrier Block','Module Interface Group','Universal Module Carrier / Tool Detection Reference','zund-module-slots','Zünd modular carriers accept multiple tool families; exact installed modules are unknown.');
+chain(u,'ZACT','Module Z Pressure / Position Actuation','Module Z-Axis Block','Module Z Service Group','Z Actuator / Tool Detection / Bayonet Interface','zund-module-slots','Universal Module supports tool detection plus pressure/position modes; installed module version and tool remain unknown.');
 
 u=unit('TOOLS','Installed Tool Package Boundary','universal-module-4','Tool heads are configurable and must not be assumed installed.');
 chain(u,'CUT','Knife / Oscillating Tool Capability','Cutting Tool Option Block','Cutting Tool Capability Group','UCT / EOT / POT Family Boundary','zund-cut-tool-option','Compatible cutting tools are documented across G3/S3 but BMJ installed tool is unverified.','OPTION_BOUNDARY');
@@ -41,6 +43,7 @@ chain(u,'ITI','Tool Initialization Capability','Initialization Option Block','To
 u=unit('CTRL','Operator / Vacuum / Material Handling','universal-module-6','Control console, vacuum generation and material-handling boundary.');
 chain(u,'HMI','Operator Console','Control Console Block','Operator Interface Group','Display / Control Reference','zund-control','Family-level operator control representation.');
 chain(u,'VAC','Vacuum Generator Interface','Vacuum Supply Block','Vacuum Generator Group','Vacuum Generator / Duct Interface','zund-vacuum-generator','Supplies table hold-down; exact pump/blower installation unverified.');
+chain(u,'VACCTRL','Vacuum Hold-Down Control Chain','Vacuum Control Block','Vacuum Service Group','Control Valve / Pressure Sensor / Manifold / Zone Branches','zund-vacuum-generator','Zünd family documents adjustable vacuum hold-down; exact BMJ zone topology and generator model are not inferred.');
 chain(u,'HANDLING','Conveyor / Roll-Off / Tandem Boundary','Material Handling Option Block','Material Handling Capability Group','Conveyor / Roll-Off / Tandem Family Boundary','zund-handling-option','Material-handling automation depends on model/configuration and is not asserted on BMJ asset.','OPTION_BOUNDARY');
 
 export const ZUND_TAXONOMY=Object.freeze(rows);
