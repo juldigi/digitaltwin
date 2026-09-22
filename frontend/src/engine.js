@@ -14,7 +14,7 @@ const normalizeFoundationMachineKey=key=>key==='BMJ-MCH-0003'||key==='offset5'||
 export class FactoryEngine {
   constructor(container,onSelect){
     this.container=container;this.onSelect=onSelect;this.onTaxonomySelect=null;this.view='machine';this.layout=null;this.low=false;this.labels=true;this.isolated=false;this.partLabelEntries=[];
-    {const requested=normalizeFoundationMachineKey(new URLSearchParams(location.search).get('machine'));this.requestedMachineKey=requested;this.machineKey=canOpenTechnical3D(requested)?FOUNDATION_SCOPE.primaryRoute:FOUNDATION_SCOPE.primaryRoute;}
+    {const requested=normalizeFoundationMachineKey(new URLSearchParams(location.search).get('machine'));this.requestedMachineKey=requested;this.machineKey=FOUNDATION_SCOPE.primaryRoute;}
     this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'low-power'});
     this.renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));this.renderer.shadowMap.enabled=true;this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.2;
     container.appendChild(this.renderer.domElement);const ariaMachine=FOUNDATION_SCOPE.primaryAssetName;this.renderer.domElement.setAttribute('aria-label',`Model 3D prosedural ${ariaMachine}. Gunakan tombol sudut pandang untuk navigasi.`);this.renderer.domElement.setAttribute('tabindex','0');
