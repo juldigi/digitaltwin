@@ -57,6 +57,8 @@ test('camera contract includes isometric top fit machine fit factory and reset o
  assert.match(app,/if\(mode==='factory'\)/);
  assert.match(app,/if\(mode==='fit'\)/);
  assert.match(app,/if\(mode==='reset'\)/);
+ assert.match(app,/\$\$\('\[data-camera\]'\)\.forEach/);
+ assert.doesNotMatch(app,/^\s*\$\('\[data-camera\]'\)\.forEach/m);
  assert.match(shell,/data-mobile-tool="iso"/);
  assert.match(shell,/data-mobile-tool="fit-machine"/);
  assert.match(shell,/data-mobile-tool="fit-factory"/);
