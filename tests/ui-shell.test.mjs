@@ -251,15 +251,15 @@ test('v48 removes the odd PU8 step, uses structural UV supports and accumulates 
   assert.match(app,/gripper melepaskan sheet tepat di atas main pile/);
 });
 
-test('v49 exposes the normalized 41-machine plant registry through the contextual Asset Browser',()=>{
+test('v156 keeps the normalized plant registry as spatial context while exposing one technical asset',()=>{
   assert.match(html,/id="machine-count">41/);
-  assert.match(app,/MACHINE_REGISTRY_STATS/);
-  assert.match(app,/searchMachines\(/);
+  assert.match(app,/MACHINE_REGISTRY/);
+  assert.match(app,/foundationAssetMatches\(/);
   assert.match(app,/data-machine-id/);
-  assert.match(app,/DAFTAR ASET/);
-  assert.match(app,/aset terdaftar/);
-  assert.match(app,/aset 3D teknis/);
-  assert.match(app,/asset-data-status/);
+  assert.match(app,/FASE FONDASI/);
+  assert.match(app,/1 aset teknis/);
+  assert.match(app,/Placeholder/);
+  assert.doesNotMatch(app,/id="asset-data-status"/);
   assert.match(sw,/src\/data\/machine-registry\.js/);
 });
 
@@ -300,7 +300,7 @@ test('v53 retains the document-grounded CX104 expansion asset while foundation r
   assert.match(dimensions10,/baseReferenceLength:27\.749/);
   assert.match(sources10,/O10-CX104-OFFICIAL/);
   assert.match(sources10,/O10-FOILSTAR-OFFICIAL/);
-  for(const asset of ['src/offset10.js','src/simulation-offset10.js','src/data/dimensions-offset10.js','src/data/sources-offset10.js','src/data/taxonomy-offset10.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
+  for(const asset of ['src/offset10.js','src/simulation-offset10.js','src/data/dimensions-offset10.js','src/data/sources-offset10.js','src/data/taxonomy-offset10.js'])assert.doesNotMatch(sw,new RegExp(asset.replaceAll('/','\\/')));
 });
 
 test('v54 retains the APM2 expansion implementation without exposing it as a Phase-1 technical asset',()=>{
@@ -330,7 +330,7 @@ test('v54 retains the APM2 expansion implementation without exposing it as a Pha
   assert.doesNotMatch(dimensionsApm2,/model:'SP 102 (?:E|SE|CER|BMA)'/);
   assert.match(sourcesApm2,/APM2-BMJ-DATABASE/);
   assert.match(registry,/BMJ-MCH-0010[^\n]*1994,true/);
-  for(const asset of ['src/apm2.js','src/simulation-apm2.js','src/data/dimensions-apm2.js','src/data/sources-apm2.js','src/data/taxonomy-apm2.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
+  for(const asset of ['src/apm2.js','src/simulation-apm2.js','src/data/dimensions-apm2.js','src/data/sources-apm2.js','src/data/taxonomy-apm2.js'])assert.doesNotMatch(sw,new RegExp(asset.replaceAll('/','\\/')));
 });
 
 test('v57 routes Sheeting Lexus as a dedicated right-to-left twin',()=>{
@@ -350,7 +350,7 @@ test('v57 routes Sheeting Lexus as a dedicated right-to-left twin',()=>{
   assert.match(taxonomySheeting,/SHEETING LEXUS · HSM-CTM7/);
   assert.match(sourcesSheeting,/HSM 56/);
   assert.match(sourcesSheeting,/USER_CONFIRMED_REFERENCE/);
-  for(const asset of ['src/sheeting.js','src/simulation-sheeting.js','src/data/sources-sheeting.js','src/data/taxonomy-sheeting.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
+  for(const asset of ['src/sheeting.js','src/simulation-sheeting.js','src/data/sources-sheeting.js','src/data/taxonomy-sheeting.js'])assert.doesNotMatch(sw,new RegExp(asset.replaceAll('/','\\/')));
 });
 
 test('selected assemblies expose camera-tracked component labels with leader lines',()=>{
