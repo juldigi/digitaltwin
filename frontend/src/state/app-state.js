@@ -12,7 +12,7 @@ const DEFAULT_STATE={
     ducting:false,utilityAnchors:false
   },
   inspectionMode:{explode:false,isolate:false,section:false,interior:false,labels:true},
-  simulationState:{active:false,playing:false,stage:null,speed:1,progress:0},
+  simulationState:{active:false,playing:false,stage:null,speed:1,progress:0,stageOrder:[],stageIndex:0,canSeekStages:false},
   searchState:{open:false,query:''},
   inspectorState:{open:false,tab:'overview'},
   activeReference:null,
