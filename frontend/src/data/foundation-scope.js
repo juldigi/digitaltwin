@@ -3,12 +3,15 @@
 // exposed as a full technical 3D asset. Other registered assets remain searchable
 // and selectable as spatial/layout placeholders until the expansion phase is unlocked.
 export const FOUNDATION_SCOPE=Object.freeze({
-  release:'V153',
+  release:'V156',
   phase:'DWG_FACTORY_FOUNDATION',
   primaryMachineId:'BMJ-MCH-0003',
   primaryRoute:'offset5',
   primaryAssetName:'OFFSET 5',
-  expansionMode:'LAYOUT_PLACEHOLDERS_ONLY'
+  expansionMode:'LAYOUT_PLACEHOLDERS_ONLY',
+  showUtilitySystems:false,
+  exposePlaceholderTechnicalMetadata:false,
+  indexUtilitySystemsInSearch:false
 });
 
 const LEGACY_ROUTE_TO_ID=Object.freeze({
