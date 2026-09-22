@@ -13,7 +13,11 @@ export function materializeRoutingSystem(template,override={}){
  const nodePatch=override.nodes||{},segmentPatch=override.segments||{};
  const nodes=template.nodes.map(n=>Object.freeze({...n,...(nodePatch[n.id]||{}),p:Object.freeze(clonePoint((nodePatch[n.id]||{}).p||n.p))}));
  const segments=template.segments.map(s=>Object.freeze({...s,...(segmentPatch[s.id]||{})}));
- return Object.freeze({...template,...override,previewOrigin:Object.freeze(clonePoint(override.previewOrigin||template.previewOrigin)),engineeringBoundary:Object.freeze({...template.engineeringBoundary,...(override.engineeringBoundary||{})}),nodes:Object.freeze(nodes),segments:Object.freeze(segments),equipmentAnchors:Object.freeze(override.equipmentAnchors||template.equipmentAnchors)});
+ const requestedActual=override.engineeringBoundary?.actualRouteVerified===true;
+ const actualGate=requestedActual&&override.complete===true&&override.coordinateSpace==='FACTORY_WORLD_METRES';
+ const engineeringBoundary=Object.freeze({...template.engineeringBoundary,...(override.engineeringBoundary||{}),actualRouteVerified:actualGate});
+ const validation=Object.freeze({requestedActual,actualGate,complete:override.complete===true,coordinateSpace:override.coordinateSpace||'TEMPLATE_LOCAL',requiresCompleteWorldCoordinates:true});
+ return Object.freeze({...template,...override,previewOrigin:Object.freeze(clonePoint(override.previewOrigin||template.previewOrigin)),engineeringBoundary,overrideValidation:validation,nodes:Object.freeze(nodes),segments:Object.freeze(segments),equipmentAnchors:Object.freeze(override.equipmentAnchors||template.equipmentAnchors)});
 }
 export function routingPathPoints(system,segmentIds=null){
  const ids=segmentIds?new Set(segmentIds):null,map=new Map(system.nodes.map(n=>[n.id,n])),out=[];
@@ -93,6 +97,6 @@ export function buildUtilityRoutingScaffold(layers,overrides={}){
  const actualCount=summaries.filter(s=>s.actualRouteVerified).length,mode=actualCount===0?'TEMPLATE_ONLY':actualCount===summaries.length?'AS_BUILT_OR_DRAWING_APPLIED':'MIXED_TEMPLATE_AND_APPLIED';
  return Object.freeze({mode,schemaVersion:1,systems:Object.freeze(summaries.map(Object.freeze)),actualRoutingApplied:actualCount>0,appliedSystemCount:actualCount,overrideContract:Object.freeze({
   nodes:'{ [nodeId]: { p:[x,y,z], kind?, status? } }',segments:'{ [segmentId]: { width?, height?, diameterMm?, radius?, status? } }',
-  activation:'Pass per-system overrides into buildUtilityRoutingScaffold after routing drawing extraction.'
+  coordinateSpace:'Use FACTORY_WORLD_METRES for applied routes: X = plant east/right, Y = elevation, Z = negative plan-Y.',verificationGate:'actualRouteVerified requires complete:true + coordinateSpace FACTORY_WORLD_METRES.',activation:'Pass per-system overrides into buildUtilityRoutingScaffold after routing drawing extraction.'
  })});
 }
