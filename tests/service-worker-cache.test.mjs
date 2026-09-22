@@ -25,6 +25,7 @@ test('service-worker shell cache references only deployable frontend files',()=>
  assert.ok(paths.includes('src/data/research-v121.js'));
  assert.ok(paths.includes('src/data/research-v122.js'));
  assert.ok(paths.includes('src/data/research-v123.js'));
+ assert.ok(paths.includes('src/data/research-v136.js'));
  assert.ok(paths.includes('src/data/taxonomy-offset7.js'));
  assert.ok(paths.includes('src/data/taxonomy-qf100cs.js'));
  assert.ok(paths.includes('src/data/taxonomy-compressors.js'));
@@ -41,7 +42,7 @@ test('service-worker shell cache references only deployable frontend files',()=>
 });
 
 test('service-worker cache version advances with the centralized runtime release',()=>{
- assert.match(sw,/factory-digital-twin-v135-utility-routing-scaffold-r2-20260922/);
+ assert.match(sw,/factory-digital-twin-v136-reference-mechanics-r1-20260922/);
 });
 
 
