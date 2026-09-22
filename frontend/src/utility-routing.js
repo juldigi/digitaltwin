@@ -12,7 +12,12 @@ export function materializeRoutingSystem(template,override={}){
  const nodePatch=override.nodes||{},segmentPatch=override.segments||{};
  const nodes=template.nodes.map(n=>Object.freeze({...n,...(nodePatch[n.id]||{}),p:Object.freeze(clonePoint((nodePatch[n.id]||{}).p||n.p))}));
  const segments=template.segments.map(s=>Object.freeze({...s,...(segmentPatch[s.id]||{})}));
- return Object.freeze({...template,...override,previewOrigin:Object.freeze(clonePoint(override.previewOrigin||template.previewOrigin)),nodes:Object.freeze(nodes),segments:Object.freeze(segments),equipmentAnchors:template.equipmentAnchors});
+ return Object.freeze({...template,...override,previewOrigin:Object.freeze(clonePoint(override.previewOrigin||template.previewOrigin)),engineeringBoundary:Object.freeze({...template.engineeringBoundary,...(override.engineeringBoundary||{})}),nodes:Object.freeze(nodes),segments:Object.freeze(segments),equipmentAnchors:Object.freeze(override.equipmentAnchors||template.equipmentAnchors)});
+}
+export function routingPathPoints(system,segmentIds=null){
+ const ids=segmentIds?new Set(segmentIds):null,map=new Map(system.nodes.map(n=>[n.id,n])),out=[];
+ for(const seg of system.segments){if(ids&&!ids.has(seg.id))continue;const a=map.get(seg.from),b=map.get(seg.to);if(!a||!b)continue;out.push(Object.freeze({segmentId:seg.id,kind:seg.kind,from:Object.freeze(point(system,a).toArray()),to:Object.freeze(point(system,b).toArray())}));}
+ return Object.freeze(out);
 }
 
 const palette=Object.freeze({
