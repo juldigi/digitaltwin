@@ -74,3 +74,13 @@ test('References are categorized and prioritized from the active asset taxonomy 
  assert.match(css,/\.reference-filter-strip/);
  assert.match(css,/\.context-reference-card\.is-priority/);
 });
+
+test('Asset Browser has explicit Mesin Peralatan Komponen categories without inventing a second component database',()=>{
+ for(const key of ['machine','equipment','component'])assert.match(app,new RegExp('data-asset-category="'+key+'"'));
+ for(const label of ['Mesin','Peralatan','Komponen'])assert.match(app,new RegExp('>'+label+'<'));
+ assert.match(app,/ACTIVE_TAXONOMY\.filter/);
+ assert.match(app,/data-component-id/);
+ assert.match(app,/selectTaxonomy\(button\.dataset\.componentId/);
+ assert.match(app,/machine\.area==='UTILITY'/);
+ assert.match(css,/\.asset-category-tabs/);
+});
