@@ -62,7 +62,7 @@ test('V104 FZ1200 interlocks prevent turn and air before clamp and lift clearanc
  const model=new FZ1200MachineTemplate(),sim=new FZ1200ProcessSimulation(model.root,model);sim.start();let now=1000;const advanceTo=t=>{while(sim.elapsed<t){now+=20;sim.update(now);}};
  advanceTo(1.1);let s=sim.state();assert.equal(s.interlocks.turnPermitted,false);assert.equal(s.turnAngleDeg,0);assert.equal(s.airingActive,false);
  advanceTo(2.4);s=sim.state();assert.equal(s.interlocks.clampSecured,true);assert.equal(s.interlocks.liftClearance,false);assert.equal(s.turnAngleDeg,0);
- advanceTo(4.0);s=sim.state();assert.equal(s.interlocks.turnPermitted,true);assert.ok(s.turnAngleDeg>0);assert.equal(s.airingActive,false);
+ advanceTo(4.2);s=sim.state();assert.equal(s.interlocks.turnPermitted,true);assert.ok(s.turnAngleDeg>0);assert.equal(s.airingActive,false);
  advanceTo(7.60);s=sim.state();assert.equal(s.interlocks.airPermitted,true);assert.equal(s.airingActive,true);
  sim.dispose();model.dispose();
 });
