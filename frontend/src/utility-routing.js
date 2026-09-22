@@ -3,6 +3,7 @@ import {COMPRESSED_AIR_ROUTING_TEMPLATE} from './data/compressed-air-routes.js';
 import {AHU_PIPE_ROUTING_TEMPLATE} from './data/ahu-pipe-routes.js';
 import {AHU_DUCT_ROUTING_TEMPLATE} from './data/ahu-duct-routes.js';
 
+export const ROUTING_STATUS_LEVELS=Object.freeze(['TEMPLATE_ONLY','LAYOUT_ESTIMATED','DRAWING_BASED','FIELD_VERIFIED','AS_BUILT_CONFIRMED']);
 export const UTILITY_ROUTING_TEMPLATES=Object.freeze([
  COMPRESSED_AIR_ROUTING_TEMPLATE,AHU_PIPE_ROUTING_TEMPLATE,AHU_DUCT_ROUTING_TEMPLATE
 ]);
@@ -78,6 +79,7 @@ function renderSystem(system,parent,anchorLayer){
  const title=label(system.system.replaceAll('_',' ')+' · TEMPLATE ONLY',new T.Vector3(system.previewOrigin[0]+5.3,5.35,system.previewOrigin[2]),group);
  if(title)title.userData={utilityRoutingLabel:true,status:'TEMPLATE_ONLY'};
  const anchorGroup=new T.Group();anchorGroup.name=system.id+' · FUTURE EQUIPMENT ANCHORS';anchorGroup.userData={equipmentAnchors:system.equipmentAnchors,status:'UNPLACED'};anchorLayer.add(anchorGroup);
+ system.equipmentAnchors.forEach((anchor,i)=>{const marker=new T.Mesh(new T.SphereGeometry(.065,8,6),material(color,.72)),col=i%8,row=Math.floor(i/8);marker.position.set(system.previewOrigin[0]+.35+col*.28,.25+row*.24,system.previewOrigin[2]-5.0);marker.name=anchor.id;marker.userData={utilityEquipmentAnchor:true,...anchor};anchorGroup.add(marker);});
  return {id:system.id,system:system.system,status:system.status,nodeCount:system.nodes.length,segmentCount:system.segments.length,equipmentAnchorCount:system.equipmentAnchors.length,actualRouteVerified:system.engineeringBoundary.actualRouteVerified===true};
 }
 
@@ -88,7 +90,8 @@ export function buildUtilityRoutingScaffold(layers,overrides={}){
   const parent=layers[system.layerKey];if(parent&&anchorLayer)summaries.push(renderSystem(system,parent,anchorLayer));
  }
  if(anchorLayer)anchorLayer.userData={utilityRoutingAnchors:true,status:'UNPLACED_UNTIL_DRAWING_AVAILABLE',systems:summaries.map(s=>s.id)};
- return Object.freeze({mode:'TEMPLATE_ONLY',schemaVersion:1,systems:Object.freeze(summaries.map(Object.freeze)),actualRoutingApplied:false,overrideContract:Object.freeze({
+ const actualCount=summaries.filter(s=>s.actualRouteVerified).length,mode=actualCount===0?'TEMPLATE_ONLY':actualCount===summaries.length?'AS_BUILT_OR_DRAWING_APPLIED':'MIXED_TEMPLATE_AND_APPLIED';
+ return Object.freeze({mode,schemaVersion:1,systems:Object.freeze(summaries.map(Object.freeze)),actualRoutingApplied:actualCount>0,appliedSystemCount:actualCount,overrideContract:Object.freeze({
   nodes:'{ [nodeId]: { p:[x,y,z], kind?, status? } }',segments:'{ [segmentId]: { width?, height?, diameterMm?, radius?, status? } }',
   activation:'Pass per-system overrides into buildUtilityRoutingScaffold after routing drawing extraction.'
  })});
