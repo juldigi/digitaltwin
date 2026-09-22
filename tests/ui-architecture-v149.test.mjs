@@ -164,3 +164,29 @@ test('V149 universal search never forces unverified machine geometry',()=>{
  assert.match(app,/machineDetailDialog\(record\)/);
  assert.match(app,/selectedArea:item\.title/);
 });
+
+test('V149 taxonomy linkage uses parent relationships and a clickable contextual breadcrumb',()=>{
+ assert.match(html,/id="context-breadcrumb"/);
+ assert.match(app,/function taxonomyPath/);
+ assert.match(app,/meta\.parentId\?TAXONOMY_BY_ID\.get\(meta\.parentId\)/);
+ assert.match(app,/selectedPath\.has\(n\.id\)/);
+ assert.doesNotMatch(app,/selectedTaxonomyId\.startsWith\(n\.id\)/);
+ assert.match(app,/data-breadcrumb-node/);
+ assert.match(app,/selectTaxonomy\(id,\{revealPanel:true\}\)/);
+ assert.match(css,/\.context-breadcrumb/);
+});
+
+test('V149 evidence status is progressive and source-derived rather than a permanent static confidence card',()=>{
+ assert.doesNotMatch(html,/class="confidence-panel"/);
+ assert.match(html,/class="evidence-status"/);
+ assert.match(app,/function updateEvidenceStatus/);
+ assert.match(app,/Array\.isArray\(PHOTO_REGISTRY\)/);
+ assert.match(app,/Array\.isArray\(TECHNICAL_SOURCES\)/);
+ assert.match(css,/\.evidence-status/);
+});
+
+test('V149 taxonomy level names are human-first with L1-L6 only as secondary technical indicators',()=>{
+ for(const label of ['Mesin','Unit Utama','Sub','Block','Part','Spesifik Part'])assert.match(app,new RegExp(label));
+ assert.match(app,/<small>L\\\$\{level\}<\\\/small>/);
+ assert.match(css,/\.stage-strip button small/);
+});
