@@ -70,6 +70,39 @@ export function createMachineTemplate(key){
  return new OffsetMachineTemplate();
 }
 
+export function seekSimulationStage(simulation,targetStage,{stepMs=120,maxSteps=3000,pause=true}={}){
+ if(!simulation||!targetStage||typeof simulation.state!=='function'||typeof simulation.update!=='function')return null;
+ const initial=simulation.state(),callback=simulation.onUpdate,originalSpeed=Number(initial?.speed||simulation.speed||1);
+ if(initial?.blocked||initial?.available===false)return {...initial,stageSeekSupported:false,seekTargetFound:false};
+ let finalState=initial,found=false;
+ try{
+  simulation.onUpdate=null;
+  simulation.stop?.();
+  finalState=simulation.start?.()||simulation.state();
+  if(finalState?.blocked||finalState?.available===false)return {...finalState,stageSeekSupported:false,seekTargetFound:false};
+  simulation.setSpeed?.(1);
+  let now=0;
+  simulation.update(0);
+  finalState=simulation.state();
+  found=finalState?.stage===targetStage;
+  for(let step=0;step<maxSteps&&!found;step++){
+   now+=stepMs;simulation.update(now);finalState=simulation.state();found=finalState?.stage===targetStage;
+   if(finalState?.blocked||finalState?.available===false)break;
+  }
+  if(!found){
+   simulation.stop?.();finalState=simulation.state();
+  }else if(pause&&simulation.active){
+   simulation.pause?.();finalState=simulation.state();
+  }
+  simulation.setSpeed?.(originalSpeed);finalState=simulation.state();
+ }finally{
+  simulation.onUpdate=callback;
+ }
+ const result={...finalState,stageSeekSupported:true,seekTargetFound:found};
+ callback?.(result);
+ return result;
+}
+
 export function createMachineSimulation(key,machine,template){
  const k=normalizeMachineKey(key);
  if(k==='offset5')return new PrintingSimulation(machine,template);
