@@ -160,6 +160,44 @@ test('V133 compressor twins expose detailed package flow and distribution piping
  }
 });
 
+
+test('V134 compressor airflow exposes twin-screw internals swan-neck drops pressure gradient and condensate treatment',()=>{
+ const ids=['BMJ-MCH-0029','BMJ-MCH-0031','BMJ-MCH-0033'];
+ for(const id of ids){
+  const template=createMachineTemplate(id),roles=new Set();
+  template.root.traverse(o=>{if(o.userData?.mechanismRole)roles.add(o.userData.mechanismRole);});
+  const prefix=id==='BMJ-MCH-0029'?'atlas':id==='BMJ-MCH-0031'?'kaeser':'swan';
+  assert.ok(roles.has(prefix+'-male-screw-rotor-reference'),id);
+  assert.ok(roles.has(prefix+'-female-screw-rotor-reference'),id);
+  assert.ok(roles.has(prefix+'-oil-injection-nozzle-reference'),id);
+  assert.ok(roles.has('compressed-air-swan-neck-rise-reference'),id);
+  assert.ok(roles.has('compressed-air-swan-neck-top-takeoff-reference'),id);
+  assert.ok(roles.has('compressor-condensate-collection-manifold-reference'),id);
+  assert.ok(roles.has('compressor-oil-water-separator-option-boundary'),id);
+  assert.equal(template.root.userData.distributionDesignReference.serviceTakeoffCondensatePractice,'SWAN_NECK_TOP_TAKEOFF_WHERE_CONDENSATION_RISK_EXISTS',id);
+  const sim=createMachineSimulation(id,template.root,template),started=sim.start();
+  assert.equal(started.pathVisible,true,id);
+  sim.update(0);sim.update(120);
+  const st=sim.state(),p=st.compressorPressureProfile;
+  assert.ok(p.package>p.receiver&&p.receiver>p.afterTreatment&&p.afterTreatment>p.ringNear&&p.ringNear>p.ringFar,id);
+  assert.ok(p.service[0]>p.service[1]&&p.service[1]>p.service[2],id);
+  sim.setPathVisible(false);assert.equal(sim.state().pathVisible,false,id);
+  assert.equal(template.findNode('compressor-air-distribution').visible,false,id);
+  sim.setPathVisible(true);assert.equal(template.findNode('compressor-air-distribution').visible,true,id);
+  sim.dispose();template.dispose();
+ }
+});
+
+test('V134 compressor taxonomy reaches detailed rotor and condensate-treatment nodes',()=>{
+ for(const id of ['BMJ-MCH-0029','BMJ-MCH-0031','BMJ-MCH-0033']){
+  const tax=universalTaxonomy(id);
+  assert.ok(tax.some(n=>n.level===3&&/Twin Screw Rotor/.test(n.name)),id);
+  assert.ok(tax.some(n=>n.level===3&&/Condensate Collection/.test(n.name)),id);
+  assert.ok(tax.some(n=>n.level===6&&/Twin Screw Rotor/.test(n.name)),id);
+  assert.ok(tax.some(n=>n.level===6&&/Oil-Water Separation/.test(n.name)),id);
+ }
+});
+
 test('V133 compressor brand details remain evidence-bounded and source-specific',()=>{
  const atlas=createMachineTemplate('BMJ-MCH-0029'),aroles=new Set();atlas.root.traverse(o=>{if(o.userData?.mechanismRole)aroles.add(o.userData.mechanismRole);});
  assert.ok(aroles.has('atlas-airend-non-return-valve-reference'));assert.ok(aroles.has('atlas-separator-scavenge-line-reference'));assert.ok(aroles.has('atlas-oil-stop-valve-reference'));
