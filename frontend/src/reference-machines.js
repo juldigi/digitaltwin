@@ -1408,9 +1408,15 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.root.userData.referenceBrandFamily='PT Sansin Indonesia / NES YZKJ industrial central cooling family';
   this.root.userData.exactSansinModelVerified=false;
   this.root.userData.familyCandidates=['YZKJ-45N','YZKJ-90N'];
+  this.root.userData.familyCandidateDimensions={
+   'YZKJ-45N':{indoor:[1.00,1.40,2.28],outdoor:[.95,1.56,2.16],indoorUnitCount:1},
+   'YZKJ-90N':{indoor:[1.00,1.40,2.28],outdoor:[1.37,1.93,2.27],indoorUnitCount:2}
+  };
+  this.root.userData.familyDuctOptions=['PHENOLIC_DUCTING','BULL_EYE_FIXED_POINT_BLOWER','SOX_FIBRE_OVERALL_DUCTING','SOX_FIXED_POINT_DUCTING'];
+  this.root.userData.installedDuctTypeVerified=false;
   this.root.userData.familyVisualEnvelope=[5.0,2.50,2.30];
   this.root.userData.engineeringDimensions=false;
-  this.root.userData.referenceNote='Registry verifies SANSIN brand but not model. The twin follows the documented NES/YZKJ two-stage industrial cooling family: filtration, wet-curtain pre-cooling, fin evaporator, indoor supply fan, outdoor refrigeration/evaporative condenser, water/refrigerant services and controls. YZKJ-45N/90N capacities and component counts are not assigned to the BMJ unit.';
+  this.root.userData.referenceNote='Registry verifies SANSIN brand but not model. The twin follows the documented NES/YZKJ two-stage industrial cooling family: filtration, wet-curtain pre-cooling, fin evaporator, indoor supply fan, outdoor refrigeration/evaporative condenser, water/refrigerant services and controls. Public family dimensions and ducting options are stored only as candidate metadata; YZKJ-45N/90N identity, capacity, indoor-unit count and installed duct type are not assigned to the BMJ unit.';
  }
 
 }
