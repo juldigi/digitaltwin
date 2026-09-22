@@ -171,11 +171,12 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  }
  enrichFolder(){
   const feed=this.activeGroup(1),align=this.activeGroup(2),fold1=this.activeGroup(3),glue=this.activeGroup(4),fold2=this.activeGroup(5),press=this.activeGroup(6),out=this.activeGroup(7);
-  this.root.userData.detailPass='V137_FGM2_BELT_BEARING_CONTACT_MECHANICS';
+  this.root.userData.detailPass='V138_FGM2_SECTIONAL_DRIVE_TRANSMISSION_AND_CONTACT';
   this.root.userData.exactFolderGluerOemVerified=false;
   this.root.userData.exactFolderGluerModelVerified=false;
   this.root.userData.neighborMedia100IdentityProof=false;
   this.root.userData.localSupplierFamilyEvidence={source:'Jaya Makmur Mesindo',bmjCustomerAssociation:true,folderGluerCatalogue:true,installationProof:false,modelProof:false};
+  this.root.userData.fgm2DriveArchitecture={installedArchitectureVerified:false,reference:'SECTIONAL_DRIVE_CAPABILITY',notes:'Independent/sectional drives are supported by BOBST family references; exact FGM-2 motor/gearbox topology remains unverified.'};
   this.root.userData.fgm2Capabilities={
    crashLock:'UNVERIFIED',
    fourSixCorner:'UNVERIFIED',
@@ -198,6 +199,8 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    if(drive){
     for(const z of [-.45,-.15,.15,.45]){const belt=this.box(drive,[1.12,.025,.07],[.03,.75,z],'dark',.004);this.tag(belt,'feeder-transport-belt','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
     for(const x of [-.49,.49])for(const z of [-.45,-.15,.15,.45]){const r=this.motion(this.cyl(drive,.045,.07,[x,.75,z],'dark','z'),'spin','z',7,.01,z,0);this.tag(r,'feeder-drive-roller','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+    const motor=this.active(this.cyl(drive,.090,.22,[-.61,.56,.57],'dark','x'));this.tag(motor,'fgm-feeder-section-motor-reference','FOLDER_GLUER_SECTIONAL_DRIVE_REFERENCE');
+    const pulley=this.cyl(drive,.070,.055,[-.49,.75,.57],'accent','z');this.tag(pulley,'fgm-feeder-drive-pulley-reference','FOLDER_GLUER_SECTIONAL_DRIVE_REFERENCE');
    }
    const sep=this.findNode('fgm2-feed-separator');
    if(sep){
@@ -225,6 +228,8 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
     for(const z of [-.52,-.20,.20,.52]){const b=this.box(belts,[1.40,.025,.075],[0,.77,z],'dark',.004);this.tag(b,'primary-fold-transport-belt','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
     for(const z of [-.58,.58]){const guide=this.box(belts,[1.32,.035,.045],[0,1.04,z],'steel',.004);guide.rotation.z=z<0?.18:-.18;guide.rotation.x=z<0?.18:-.18;this.tag(guide,'primary-fold-guide','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
     for(const z of [-.52,.52]){const idler=this.cyl(belts,.050,.085,[.56,.82,z],'steel','z');this.tag(idler,'primary-fold-belt-idler-reference','BOBST_BELT_SERVICE_REFERENCE');const tension=this.cyl(belts,.038,.085,[-.58,.92,z],'dark','z');this.tag(tension,'primary-fold-belt-tensioner-reference','BOBST_BELT_SERVICE_REFERENCE');for(const x of [-.58,.56]){const brg=this.box(belts,[.10,.10,.10],[x,.82,z],'dark',.008);this.tag(brg,'folder-gluer-bearing-block-reference','BOBST_BEARING_SERVICE_REFERENCE');}}
+    const motor=this.active(this.cyl(belts,.095,.24,[-.66,.59,.64],'dark','x'));this.tag(motor,'fgm-primary-fold-section-motor-reference','FOLDER_GLUER_SECTIONAL_DRIVE_REFERENCE');
+    const gearbox=this.box(belts,[.16,.18,.16],[-.48,.60,.64],'steel',.010);this.tag(gearbox,'fgm-primary-fold-gearbox-reference','FOLDER_GLUER_SECTIONAL_DRIVE_REFERENCE');
    }
    const lock=this.findNode('fgm2-lockbottom-boundary');
    tagOption(lock,'Crash-lock bottom module is common in folder-gluer families but no evidence confirms installation on FGM-2.');
@@ -270,6 +275,8 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
     for(const x of [-.56,.56])for(const z of [-.48,.48]){const r=this.motion(this.cyl(belts,.052,.08,[x,.88,z],'dark','z'),'spin','z',6,.01,z,5);this.tag(r,'compression-belt-drive-roller','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
     for(const x of [-.42,-.14,.14,.42])for(const z of [-.48,.48]){const pr=this.cyl(belts,.034,.08,[x,1.01,z],'steel','z');this.tag(pr,'compression-pressure-roller-reference','BOBST_DELIVERY_PRESSURE_REFERENCE');}
     for(const z of [-.48,.48]){const t=this.cyl(belts,.038,.08,[.63,.90,z],'dark','z');this.tag(t,'compression-belt-tensioner-reference','BOBST_BELT_SERVICE_REFERENCE');}
+    const motor=this.active(this.cyl(belts,.10,.25,[-.68,.60,.64],'dark','x'));this.tag(motor,'fgm-compression-section-motor-reference','FOLDER_GLUER_SECTIONAL_DRIVE_REFERENCE');
+    const reducer=this.box(belts,[.18,.19,.18],[-.49,.61,.64],'steel',.010);this.tag(reducer,'fgm-compression-drive-reducer-reference','FOLDER_GLUER_SECTIONAL_DRIVE_REFERENCE');
    }
    const pressure=this.findNode('fgm2-pressure-reference');
    if(pressure){
@@ -283,6 +290,8 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    if(delivery){
     for(const z of [-.46,-.15,.15,.46]){const belt=this.box(delivery,[1.16,.028,.075],[-.04,.74,z],'dark',.004);this.tag(belt,'delivery-transport-belt','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
     for(const x of [-.46,.46])for(const z of [-.46,-.15,.15,.46]){const r=this.motion(this.cyl(delivery,.048,.075,[x,.74,z],'dark','z'),'spin','z',6,.01,z,6);this.tag(r,'delivery-drive-roller','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+    const motor=this.active(this.cyl(delivery,.090,.22,[-.58,.56,.58],'dark','x'));this.tag(motor,'fgm-delivery-section-motor-reference','BOBST_INDEPENDENT_DELIVERY_DRIVE_REFERENCE');
+    const coupling=this.cyl(delivery,.045,.10,[-.47,.56,.58],'accent','x');this.tag(coupling,'fgm-delivery-drive-coupling-reference','FOLDER_GLUER_SECTIONAL_DRIVE_REFERENCE');
    }
    const regulator=this.group(delivery||out,'fgm2-box-stream-regulator-reference','Box stream regulator reference',[0,0,0],[.10,.08,0]);
    for(const z of [-.38,.38]){const rr=this.cyl(regulator,.042,.08,[.36,.79,z],'steel','z');this.tag(rr,'box-stream-regulator-roller-reference','BOBST_DELIVERY_REFERENCE');}
