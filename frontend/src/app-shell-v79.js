@@ -17,13 +17,22 @@ const symbols=`<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
 <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="19" cy="12" r="1" fill="currentColor"/></symbol>
 <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></symbol>
 <symbol id="i-theme" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9Z"/></symbol>
+<symbol id="i-focus" viewBox="0 0 24 24"><path d="M8 3H4a1 1 0 0 0-1 1v4M16 3h4a1 1 0 0 1 1 1v4M21 16v4a1 1 0 0 1-1 1h-4M8 21H4a1 1 0 0 1-1-1v-4"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-zoom-in" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5M10.5 7.5v6M7.5 10.5h6"/></symbol>
+<symbol id="i-zoom-out" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5M7.5 10.5h6"/></symbol>
+<symbol id="i-fullscreen" viewBox="0 0 24 24"><path d="M8 3H4a1 1 0 0 0-1 1v4M16 3h4a1 1 0 0 1 1 1v4M21 16v4a1 1 0 0 1-1 1h-4M8 21H4a1 1 0 0 1-1-1v-4"/></symbol>
+<symbol id="i-label" viewBox="0 0 24 24"><path d="M4 5h10l6 7-6 7H4z"/><circle cx="8" cy="9" r="1"/></symbol>
+<symbol id="i-interior" viewBox="0 0 24 24"><path d="M4 4h16v16H4zM12 4v16M7 8h2m6 0h2M7 12h2m6 0h2M7 16h2m6 0h2"/></symbol>
+<symbol id="i-home-view" viewBox="0 0 24 24"><path d="m3 11 9-7 9 7M6 9v11h12V9M10 20v-6h4v6"/></symbol>
+<symbol id="i-panel" viewBox="0 0 24 24"><path d="M4 4h16v16H4zM15 4v16M7 8h5M7 12h5M7 16h3"/></symbol>
 </svg>`;
 document.body.insertAdjacentHTML('afterbegin',symbols);
 
 const iconMap={
  'nav-machine':'factory','nav-assets':'machine','nav-systems':'system','nav-simulation-mode':'simulation',
  'nav-sources':'file','nav-help':'help','nav-settings':'settings','ui-menu-toggle':'menu','settings':'settings',
- 'close-panel':'close','modal-close':'close','ui-theme-toggle':'theme','global-search-icon':'search','mobile-search-toggle':'search','layer-manager-button':'layers'
+ 'close-panel':'close','modal-close':'close','ui-theme-toggle':'theme','global-search-icon':'search','mobile-search-toggle':'search','layer-manager-button':'layers',
+ 'panel-toggle':'panel','zoom-plus':'zoom-in','zoom-fit':'focus','zoom-minus':'zoom-out','labels':'label','fullscreen':'fullscreen'
 };
 for(const [id,name]of Object.entries(iconMap)){
  const el=q('#'+id);if(!el)continue;
@@ -34,6 +43,22 @@ for(const [id,name]of Object.entries(iconMap)){
 }
 const mobileIcons={factory:'factory',asset:'machine',system:'system',simulation:'simulation',more:'more'};
 qa('[data-mobile-nav]').forEach(el=>{const label=q('small',el)?.textContent||el.getAttribute('aria-label')||'';el.innerHTML=icon(mobileIcons[el.dataset.mobileNav]||'more')+`<small>${label}</small>`});
+const mobileContextTools=document.createElement('section');mobileContextTools.className='mobile-context-tools';mobileContextTools.setAttribute('aria-label','Aksi tampilan dan inspeksi');mobileContextTools.innerHTML=`<small>INSPEKSI & TAMPILAN</small>
+<button type="button" data-mobile-tool="top">${icon('focus')}<span>Tampak Atas</span></button>
+<button type="button" data-mobile-tool="interior">${icon('interior')}<span>Buka Interior</span></button>
+<button type="button" data-mobile-tool="labels">${icon('label')}<span>Label</span></button>
+<button type="button" data-mobile-tool="home">${icon('home-view')}<span>Tampilan Awal</span></button>
+<button type="button" data-mobile-tool="fullscreen">${icon('fullscreen')}<span>Layar Penuh</span></button>`;
+q('.rail-bottom')?.before(mobileContextTools);
+qa('[data-mobile-tool]',mobileContextTools).forEach(button=>button.addEventListener('click',()=>{
+ const action=button.dataset.mobileTool;
+ if(action==='top')q('[data-camera="top"]')?.click();
+ if(action==='interior')q('#tool-interior')?.click();
+ if(action==='labels')q('#labels')?.click();
+ if(action==='home')q('[data-camera="reset"]')?.click();
+ if(action==='fullscreen')q('#fullscreen')?.click();
+ closeDrawer();closeOverlay();
+}));
 
 const splash=q('.app-splash');
 const firstVisit=!sessionStorage.getItem('bmj-splash-seen');
@@ -53,10 +78,17 @@ function closeDrawer(){document.body.classList.remove('nav-open');q('#ui-menu-to
 function closeLayerManager(){const panel=q('#layer-manager');if(panel)panel.hidden=true;if(getState().overlay==='layers')closeOverlay()}
 function closeInspector(){document.body.classList.add('panel-hidden');document.body.classList.remove('mobile-panel-open');setInspector(false)}
 function beforeMajorOverlay(name){
- const state=getState();
- if(state.overlay&&state.overlay!==name)closeLayerManager();
+ const current=getState().overlay;
+ if(current&&current!==name){
+  if(current==='search')closeSearch();
+  else if(current==='layers')closeLayerManager();
+  else if(current==='navigation')closeDrawer();
+  else if(current==='inspector')closeInspector();
+  else if(current==='modal'&&q('#modal')?.open)q('#modal-close')?.click();
+  if(getState().overlay===current)closeOverlay();
+ }
  if(name!=='inspector'&&!document.body.classList.contains('panel-hidden'))closeInspector();
- closeDrawer();
+ if(name!=='navigation')closeDrawer();
 }
 function openSystemLayers(){
  beforeMajorOverlay('layers');ensureLayerManager();
@@ -64,7 +96,7 @@ function openSystemLayers(){
 }
 function enterSimulation(){
  beforeMajorOverlay('inspector');setActiveSection('simulation');markSection('simulation');
- document.body.classList.remove('workspace-2d');
+ document.body.classList.remove('workspace-2d');setViewMode('3d');
  q('#tool-simulation')?.click();
  setInspector(true,'simulation');openOverlay('inspector');
  requestAnimationFrame(syncSimulationTransport);
@@ -133,7 +165,7 @@ globalSearch?.addEventListener('input',event=>{if(getState().overlay!=='search')
 globalSearch?.addEventListener('keydown',event=>{if(event.key==='ArrowDown'||event.key==='Enter'){event.preventDefault();openSearch(globalSearch.value)}});
 q('#mobile-search-toggle')?.addEventListener('click',()=>openSearch(''));
 addEventListener('bmj:searchresults',event=>renderSearchResults(event.detail));
-addEventListener('bmj:systemsearchselect',event=>{setState({selectedSystem:event.detail?.system||null},{url:false});openSystemLayers()});
+addEventListener('bmj:systemsearchselect',event=>{const system=event.detail?.system||null;setState({selectedSystem:system},{url:false});openSystemLayers();if(['hvac','compressedAir','routing'].includes(system))q(`[data-system-focus="${system}"]`)?.click()});
 q('#nav-machine')?.addEventListener('click',()=>{setActiveSection('factory');document.body.classList.remove('workspace-2d');setViewMode('3d');markSection('factory');closeLayerManager()});
 q('#nav-assets')?.addEventListener('click',()=>{beforeMajorOverlay('modal');setActiveSection('asset');markSection('asset');openOverlay('modal')});
 q('#nav-systems')?.addEventListener('click',openSystemLayers);
@@ -185,9 +217,9 @@ function ensureLayerManager(){
  }));
  qa('[data-system-focus]',panel).forEach(button=>button.addEventListener('click',()=>{
   const system=button.dataset.systemFocus,keys=system==='hvac'?['ahuPiping','ducting']:system==='compressedAir'?['compressedAir']:['compressedAir','ahuPiping','ducting','utilityAnchors'];
-  setState({selectedSystem:system},{url:false});
+  document.body.classList.remove('workspace-2d');setViewMode('3d');setState({selectedSystem:system,activeSection:'system'},{url:false});
   for(const key of keys){setLayer(key,true);dispatchEvent(new CustomEvent('bmj:layerchange',{detail:{key,visible:true}}))}
-  syncLayerControls();dispatchEvent(new CustomEvent('bmj:systemfocus',{detail:{system}}));
+  syncLayerControls();closeLayerManager();markSection('system');dispatchEvent(new CustomEvent('bmj:systemfocus',{detail:{system}}));
  }));
 }
 function syncLayerControls(){
