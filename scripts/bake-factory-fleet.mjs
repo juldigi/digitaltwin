@@ -23,5 +23,11 @@ for(const place of MACHINE_PLACEMENTS){
  const placement={...place};if(place.status==='UNIDENTIFIED'){placement.x=112+(unknown%3)*12;placement.y=8+Math.floor(unknown/3)*12;unknown++;}
  result.push({placement,size:size.toArray(),center:center.toArray(),floor:box.min.y,meshes});t.dispose();
 }
-const encoded=gzipSync(JSON.stringify(result)).toString('base64');writeFileSync('frontend/src/data/factory-fleet-data.js',"// Distant-view geometry baked from existing machine templates; no detailed model edits.\nexport const FACTORY_FLEET_GZIP='"+encoded+"';\n");
+const encoded=gzipSync(JSON.stringify(result)).toString('base64'),chunkSize=180000;
+const chunks=Array.from({length:Math.ceil(encoded.length/chunkSize)},(_,i)=>encoded.slice(i*chunkSize,(i+1)*chunkSize));
+chunks.forEach((chunk,i)=>writeFileSync(`frontend/src/data/factory-fleet-chunk-${i}.js`,`export default '${chunk}';\n`));
+writeFileSync('frontend/src/data/factory-fleet-data.js',
+  `// Distant-view geometry baked from existing machine templates; no detailed model edits.\n`+
+  chunks.map((_,i)=>`import c${i} from './factory-fleet-chunk-${i}.js';`).join('\n')+
+  `\nexport const FACTORY_FLEET_GZIP=[${chunks.map((_,i)=>`c${i}`).join(',')}].join('');\n`);
 console.log({machines:result.length,unidentified:unknown,bytes:encoded.length});

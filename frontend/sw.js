@@ -14,7 +14,7 @@ SHELL.push(
  './src/fz1200.js','./src/simulation-fz1200.js','./src/data/dimensions-fz1200.js','./src/data/taxonomy-fz1200.js','./src/data/sources-fz1200.js',
  './src/upg-ly300.js','./src/simulation-upg-ly300.js','./src/data/dimensions-upg-ly300.js','./src/data/taxonomy-upg-ly300.js','./src/data/sources-upg-ly300.js'
 );
-SHELL.push('./src/factory-building.js','./src/data/plant-actual.js','./src/data/plant-actual-data.js','./src/data/factory-fleet-data.js');
+SHELL.push('./src/factory-building.js','./src/data/plant-actual.js','./src/data/plant-actual-data.js','./src/data/factory-fleet-data.js',...Array.from({length:9},(_,i)=>`./src/data/factory-fleet-chunk-${i}.js`));
 self.addEventListener('install',event=>event.waitUntil(caches.open(VERSION).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==VERSION&&(k.startsWith('offset5-')||k.startsWith('factory-digital-twin-'))).map(k=>caches.delete(k)))),self.clients.claim()])));
 self.addEventListener('fetch',event=>{const u=new URL(event.request.url);if(event.request.method!=='GET'||u.origin!==self.location.origin||u.pathname.includes('/api/'))return;event.respondWith(fetch(event.request,{cache:'no-store'}).then(response=>{if(response.ok){const copy=response.clone();event.waitUntil(caches.open(VERSION).then(c=>c.put(event.request,copy)));}return response;}).catch(()=>caches.match(event.request).then(cached=>cached||new Response('Offline: berkas belum tersimpan.',{status:503}))));});
