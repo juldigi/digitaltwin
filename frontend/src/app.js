@@ -309,7 +309,7 @@ function renderReferencePanel(){
  const intro=IS_OFFSET10?'Model Offset 10 dibangun dari final drawing, proposal, layout UV, pre-installation, system diagram, technical data final, serta referensi resmi Heidelberg CX 104 dan FoilStar.':IS_APM2?'Identitas APM 2 berasal dari database BMJ; referensi SP 102 digunakan sesuai evidence boundary.':IS_SHEETING?'Identitas HSM-CTM7 berasal dari database BMJ; referensi HSM 56 dan referensi proses dipisahkan dari klaim bentuk exact.':IS_GENERIC?'Referensi mengikuti evidence map mesin aktif; detail khusus serial yang belum tersedia tetap dibatasi.':'Foto aktual dan dokumen CD102 diprioritaskan berdasarkan komponen yang sedang dipilih.';
  const filters=[['all','Semua'],['photo','Foto'],['document','Dokumen'],['manual','Manual'],['drawing','Gambar / Denah'],['evidence','Bukti / Sumber']];
  const cards=filtered.map(item=>{
-  if(item.kind==='photo'){const p=item.photo;return `<article class="context-reference-card ${item.score>0?'is-priority':''} ${item.active?'is-active':''}" data-reference-card="${esc(p.id)}"><header><span class="reference-kind">Foto</span>${item.score>0?'<em>Relevan ke konteks</em>':''}</header><h4>${esc(p.filename)}</h4><p>${esc(p.machineZone)} · ${esc(p.viewDirection)}</p><small>${esc(p.category||'Foto aktual')}</small></article>`;}
+  if(item.kind==='photo'){const p=item.photo;return `<article class="context-reference-card ${item.score>0?'is-priority':''} ${item.active?'is-active':''}" data-reference-card="${esc(p.id)}"><header><span class="reference-kind">Foto</span>${item.score>0?'<em>Relevan ke konteks</em>':''}</header><h4>${esc(p.filename)}</h4><p>${esc(p.machineZone)} · ${esc(p.viewDirection)}</p><div class="reference-truth-row"><span>Confidence</span><strong>${esc(truthStatus(p.confidence,'UNVERIFIED'))}</strong></div><small>${esc(p.category||'Foto aktual')}</small></article>`;}
   const src=item.source,file=src.file||src.localFile||null,label=item.kind==='manual'?'Manual':item.kind==='drawing'?'Gambar / Denah':item.kind==='evidence'?'Bukti / Sumber':'Dokumen';
   return `<article class="context-reference-card ${item.score>0?'is-priority':''} ${item.active?'is-active':''}" data-reference-card="${esc(src.id||'source-'+item.index)}"><header><span class="reference-kind">${label}</span>${item.score>0?'<em>Relevan ke konteks</em>':''}</header><h4>${esc(src.title)}</h4><p>${esc(src.publisher||'Sumber teknis')}</p><div class="reference-truth-row"><span>Confidence</span><strong>${esc(truthStatus(src.confidence,'UNVERIFIED'))}</strong></div>${Array.isArray(src.supports)&&src.supports.length?`<small>${src.supports.length} fakta/fitur didukung</small>`:''}${file?`<small>${esc(file)}</small>`:''}${src.url?`<a href="${esc(src.url)}" target="_blank" rel="noopener">Buka sumber ↗</a>`:''}</article>`;
  }).join('');
@@ -533,7 +533,8 @@ function setView(view){
  $('#view-kicker').textContent=view==='factory'?'PABRIK · 3D':'TAMPILAN MESIN 3D';
  $('#view-title').textContent=view==='factory'?'Pabrik Packaging Offset':machineName;
  $('#view-subtitle').textContent=view==='factory'?'Posisi mesin dan area produksi':machineSubtitle;
- $('#lod-status').textContent=view==='factory'?'Denah siap':'Model siap';
+ const viewLayoutTruth=layoutTruth(l),viewAssetTruth=assetTruth(state?.asset,{placement:placementForMachine?.('BMJ-MCH-0003')||null,sourceCount:TECHNICAL_SOURCES.length});
+ $('#lod-status').textContent=view==='factory'?`Elevasi · ${viewLayoutTruth.elevation}`:`3D · ${viewAssetTruth.source3D}`;
  $('#geometry-caption').textContent=view==='factory'?'Pabrik · 3D':'Model '+machineName;
  const title=$('#notice-title'),note=$('#notice-text');
  if(title&&note){
