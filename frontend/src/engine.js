@@ -6,7 +6,7 @@ import { cadToWorld } from './model.js';
 import { plantDisplayPoint } from './data/plant-layout-data.js';
 
 import {createMachineTemplate,createMachineSimulation,normalizeMachineKey} from './machine-runtime.js';
-import {universalMachineConfig} from './universal-machine.js';
+import {FOUNDATION_SCOPE,canOpenTechnical3D} from './data/foundation-scope.js';
 export {OffsetMachineTemplate} from './offset5.js';
 export {Offset10MachineTemplate} from './offset10.js';
 export {APM2MachineTemplate} from './apm2.js';
@@ -15,7 +15,7 @@ export {SheetingMachineTemplate} from './sheeting.js';
 export class FactoryEngine {
   constructor(container,onSelect){
     this.container=container;this.onSelect=onSelect;this.onTaxonomySelect=null;this.view='machine';this.layout=null;this.low=false;this.labels=true;this.isolated=false;this.partLabelEntries=[];
-    {const requested=normalizeMachineKey(new URLSearchParams(location.search).get('machine'));this.machineKey=['offset5','offset10','apm2','sheeting'].includes(requested)||universalMachineConfig(requested)?requested:'offset5';}
+    {const requested=normalizeMachineKey(new URLSearchParams(location.search).get('machine'));this.requestedMachineKey=requested;this.machineKey=canOpenTechnical3D(requested)?requested:FOUNDATION_SCOPE.primaryRoute;}
     this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'low-power'});
     this.renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));this.renderer.shadowMap.enabled=true;this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.2;
     container.appendChild(this.renderer.domElement);const generic=universalMachineConfig(this.machineKey),ariaMachine=this.machineKey==='offset10'?'OFFSET 10':this.machineKey==='apm2'?'APM 2':this.machineKey==='sheeting'?'SHEETING LEXUS':generic?.machine.name||'OFFSET 5';this.renderer.domElement.setAttribute('aria-label',`Model 3D prosedural ${ariaMachine}. Gunakan tombol sudut pandang untuk navigasi.`);this.renderer.domElement.setAttribute('tabindex','0');
@@ -244,13 +244,15 @@ export class FactoryEngine {
   edit(on){if(on&&this.view==='factory'&&this.layout){this.machine.visible=true;this.gizmo.attach(this.machine);}else this.gizmo.detach();}
   setLow(on){this.low=on;this.renderer.setPixelRatio(on?1:Math.min(devicePixelRatio,1.7));this.renderer.shadowMap.enabled=!on;this.template.setLow(on);this.resize();}
   switchMachine(key){
-    if(!key||key===this.machineKey)return;
+    const requested=normalizeMachineKey(key);
+    if(!canOpenTechnical3D(requested)){this.onError?.('Aset ini masih berupa placeholder tata letak. Detail 3D teknis saat ini hanya dibuka untuk OFFSET 5.');return false;}
+    if(!requested||requested===this.machineKey)return true;
     this.gizmo.detach();this.clearPartLabels();this.simulation?.dispose();this.template?.dispose();if(this.machine)this.scene.remove(this.machine);
-    this.machineKey=normalizeMachineKey(key);
+    this.machineKey=requested;
     this.template=createMachineTemplate(this.machineKey);
     this.machine=this.template.root;this.scene.add(this.machine);
     this.simulation=createMachineSimulation(this.machineKey,this.machine,this.template);
-    this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);this.isolated=false;this.view='machine';this.machine.visible=true;this.factory.visible=false;this.template.setLow(this.low);this.fit(this.machine);this.resize();
+    this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);this.isolated=false;this.view='machine';this.machine.visible=true;this.factory.visible=false;this.template.setLow(this.low);this.fit(this.machine);this.resize();return true;
   }
   dispose(){cancelAnimationFrame(this.frame);this.clearPartLabels();this.resizeObserver.disconnect();this.controls.dispose();this.gizmo.dispose();this.simulation?.dispose();this.template.dispose();this.clearFactory();this.studio.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});this.renderer.dispose();}
 }
