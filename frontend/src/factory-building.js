@@ -60,14 +60,14 @@ export function buildActualFactory(layout,fleet){
  // Concrete control-joint grid is a subdued realism reference, not an as-built joint survey.
  for(let x=10;x<=94;x+=8){const j=box(b,x,.002,-49,.018,.004,82,0x7f8987);detail(j,'FLOOR_CONTROL_JOINT_REFERENCE');buildingDetailStats.floorControlJoints++;}
  for(let y=10;y<=90;y+=8){const j=box(b,51,.002,-y,86,.004,.018,0x7f8987);detail(j,'FLOOR_CONTROL_JOINT_REFERENCE');buildingDetailStats.floorControlJoints++;}
- const ringLine=(x,z,w,d,color=0xb59b3d)=>{for(const [px,pz,pw,pd] of [[x,z-d/2,w,.025],[x,z+d/2,w,.025],[x-w/2,z,.025,d],[x+w/2,z,.025,d]])detail(box(b,px,.008,pz,pw,.016,pd,color),'FLOOR_SERVICE_CLEARANCE_MARKING_REFERENCE');};
- for(const c of serviceClearances||[]){ringLine((c.minX+c.maxX)/2,-(c.minY+c.maxY)/2,c.maxX-c.minX,c.maxY-c.minY);buildingDetailStats.serviceClearanceMarkings+=4;}
  box(layers.landscape,47,-.25,-57,117,.35,137,0x9ea9a5);
  box(layers.landscape,47,-.06,1.8,110,.04,7.5,0x626d73);
  box(layers.landscape,-9,-.06,-53,5,.04,110,0x626d73);
  const machineBoxes=[];
  for(const f of fleet){const p=f.placement,r=p.rotation*Math.PI/180,c=Math.abs(Math.cos(r)),s=Math.abs(Math.sin(r));machineBoxes.push({p,minX:p.x-(f.size[0]*c+f.size[2]*s)/2,maxX:p.x+(f.size[0]*c+f.size[2]*s)/2,minY:p.y-(f.size[0]*s+f.size[2]*c)/2,maxY:p.y+(f.size[0]*s+f.size[2]*c)/2});}
  const serviceClearances=machineClearanceBoxes(fleet);
+ const ringLine=(x,z,w,d,color=0xb59b3d)=>{for(const [px,pz,pw,pd] of [[x,z-d/2,w,.025],[x,z+d/2,w,.025],[x-w/2,z,.025,d],[x+w/2,z,.025,d]])detail(box(b,px,.008,pz,pw,.016,pd,color),'FLOOR_SERVICE_CLEARANCE_MARKING_REFERENCE');};
+ for(const c of serviceClearances){ringLine((c.minX+c.maxX)/2,-(c.minY+c.maxY)/2,c.maxX-c.minX,c.maxY-c.minY);buildingDetailStats.serviceClearanceMarkings+=4;}
  const pressRooms=pressRoomEnvelopes(fleet);
  const ipalZone={minX:32.8,maxX:60,minY:103.45,maxY:118.4};
  const wallInsideIpal=w=>{const x=(w.a[0]+w.b[0])/2,y=(w.a[1]+w.b[1])/2;return x>=ipalZone.minX&&x<=ipalZone.maxX&&y>=ipalZone.minY&&y<=ipalZone.maxY;};
