@@ -236,3 +236,12 @@ aside#detail-panel{overscroll-behavior:contain}
  .canonical-simulation-transport .sim-context{grid-column:auto}.canonical-simulation-transport progress{grid-column:auto;order:initial}
  .canonical-layer-manager{left:72px;right:8px;top:calc(var(--header-h) + 6px);bottom:8px}
 }
+
+.legacy-inspector-tab{display:none!important}
+@media(max-width:767px){
+  .scene-bottom .view-switch button{display:none!important}
+  .scene-bottom .view-switch [data-camera="iso"],
+  .scene-bottom .view-switch [data-camera="fit"],
+  .scene-bottom .view-switch #tool-explode,
+  .scene-bottom .view-switch #tool-isolate{display:block!important}
+}
