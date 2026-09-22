@@ -1,5 +1,6 @@
 import {ACTUAL_PLANT_GZIP} from './plant-actual-data.js';
 import {MACHINE_REGISTRY} from './machine-registry.js';
+import {buildDwgFidelityLedger} from './dwg-fidelity.js';
 export const BASELINE_ID='BMJ-250804-RED-20260921';
 const known={
  'BMJ-MCH-0001':[94.19,59.45,90,'POLAR 115','ANNOTATION'],
@@ -39,6 +40,7 @@ export async function loadActualPlantLayout(){
  referenceBatches:[{layer:'250804',semantic:'CAD_REFERENCE',points:data.segments.flat()}],
  identifiedLabels:data.labels.map(l=>({...l,layer:'0'})),assetCandidates:MACHINE_PLACEMENTS.filter(p=>p.status!=='UNIDENTIFIED'),areaCandidates:data.labels.filter(l=>/room|r\.|workshop|toilet|mushola|dock|rms|fps|sparepart/i.test(l.text)).map(l=>({...l,label:l.text})),
  audit:{unitFinding:'Skala grid 600 unit = 6 m.',sourceFinding:'DXF 250804 + revisi posisi pengguna; elevasi dan lanskap perkiraan visual.'},positionStatus:'BASELINE REVISI PENGGUNA',extractionRevision:124};
+ cache.dwgFidelity=buildDwgFidelityLedger(cache);
  return cache;
 }
 // A selected baseline cannot be displaced by cached coordinates from another drawing.
