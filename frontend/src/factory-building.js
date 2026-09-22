@@ -3,6 +3,7 @@ import {FACTORY_FLEET_GZIP} from './data/factory-fleet-data.js';
 import {decodePlantData} from './data/plant-actual.js';
 import {buildUtilityRoutingScaffold} from './utility-routing.js';
 import {V147_SOURCE_STATS} from './data/research-v147.js';
+import {isFoundationPrimary} from './data/foundation-scope.js';
 let fleetCache;
 export async function loadFactoryFleet(){return fleetCache||(fleetCache=await decodePlantData(FACTORY_FLEET_GZIP));}
 export const MACHINE_SERVICE_CLEARANCE=1.2;
@@ -570,8 +571,8 @@ export function buildActualFactory(layout,fleet){
  box(layers.landscape,-9,1.15,-64.5,.09,2.1,5,0x617b86,0,.55);label('GERBANG',-9,3.7,-64.5,6,'#244b5c');
  // All assets use existing silhouette meshes at unit scale, centred inside their own footprint.
  const assets=new Map();
- for(const f of fleet){const p=f.placement,g=new T.Group();g.name=p.label;g.position.set(p.x,0,-p.y);g.rotation.y=p.rotation*Math.PI/180;g.userData={machineId:p.machineId,placementStatus:p.status,semantic:'FACTORY_MACHINE',scaleFitApplied:false};
-  for(const s of f.meshes){const geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(s.p,3));geo.setIndex(s.i);geo.computeVertexNormals();const mesh=new T.Mesh(geo,material(s.color));mesh.userData.machineId=p.machineId;g.add(mesh);}
+ for(const f of fleet){const p=f.placement,g=new T.Group(),foundationScope=isFoundationPrimary(p.machineId)?'PRIMARY_TECHNICAL_ASSET':'LAYOUT_PLACEHOLDER';g.name=p.label;g.position.set(p.x,0,-p.y);g.rotation.y=p.rotation*Math.PI/180;g.userData={machineId:p.machineId,placementStatus:p.status,semantic:'FACTORY_MACHINE',scaleFitApplied:false,foundationScope,technical3DEnabled:foundationScope==='PRIMARY_TECHNICAL_ASSET'};
+  for(const s of f.meshes){const geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(s.p,3));geo.setIndex(s.i);geo.computeVertexNormals();const mesh=new T.Mesh(geo,material(s.color));mesh.userData={machineId:p.machineId,foundationScope};g.add(mesh);}
   (p.status==='UNIDENTIFIED'?layers.unidentified:layers.machines).add(g);assets.set(p.machineId,g);
   label(p.label,p.x,Math.max(3.3,f.size[1]+.6),-p.y,Math.min(9,4+p.label.length*.08),p.status==='UNIDENTIFIED'?'#8a5921':'#244b5c',p.status==='UNIDENTIFIED'?layers.unidentified:layers.labels);
  }
