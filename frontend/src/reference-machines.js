@@ -718,6 +718,19 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   circuit:this.activeGroup(5),cool:this.activeGroup(6),ctl:this.activeGroup(7)
  };}
  compressorPart(parent,id,name){return parent?this.group(parent,id,name,[0,0,0],[0,.08,.08]):null;}
+ addTwinScrewInternals(parent,prefix,evidence){
+  if(!parent)return;
+  const internals=this.compressorPart(parent,prefix+'-twin-screw-internals','Twin Screw Compression Element Internals');
+  const male=this.motion(this.cyl(internals,.105,.46,[0,.74,-.105],'steel','x'),'spin','x',8,.01,0,null);this.tag(male,prefix+'-male-screw-rotor-reference',evidence);male.userData.installedRotorProfileVerified=false;
+  const female=this.motion(this.cyl(internals,.118,.46,[0,.74,.105],'accent','x'),'spin','x',-6,.01,.35,null);this.tag(female,prefix+'-female-screw-rotor-reference',evidence);female.userData.installedRotorProfileVerified=false;
+  for(const [z,role] of [[-.105,'male'],[.105,'female']]){
+   for(const x of [-.25,.25]){const bearing=this.cyl(internals,.135,.055,[x,.74,z],'dark','x');this.tag(bearing,prefix+'-'+role+'-rotor-bearing-reference',evidence);bearing.userData.bearingTypeVerified=false;}
+  }
+  const inlet=this.box(internals,[.16,.24,.34],[-.30,.78,0],'dark',.015);this.tag(inlet,prefix+'-airend-inlet-port-reference',evidence);
+  const discharge=this.box(internals,[.16,.20,.28],[.30,.88,0],'accent',.015);this.tag(discharge,prefix+'-airend-discharge-port-reference',evidence);
+  for(const z of [-.16,0,.16]){const nozzle=this.cyl(internals,.010,.12,[.02,.58,z],'orange','y');this.tag(nozzle,prefix+'-oil-injection-nozzle-reference',evidence);nozzle.userData.installedNozzleCountVerified=false;}
+  internals.userData.rotorGeometry='SCHEMATIC_TWIN_SCREW_MALE_FEMALE__PROFILE_NOT_ENGINEERING';
+ }
  enrichCompressorCabinet(){
   const no=this.cfg.machine.no,swan=no===33,L=swan?2.10:2.55,H=1.48,D=1.30;
   for(let i=1;i<=7;i++){const g=this.findNode('universal-module-'+i);if(g)for(const child of g.children)if(child.isMesh&&child.userData.exteriorCover){child.visible=false;child.userData.replacedByUnifiedCabinet=true;}}
@@ -744,7 +757,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.root.userData.lineFilterPackageInstalledVerified=false;
   this.root.userData.ringMainInstalledVerified=false;
   this.root.userData.pressureValuesAreNormalized=true;
-  this.root.userData.distributionDesignReference={ringMainPreferred:true,airMainPressureDropReferenceBar:.03,fixedNetworkPressureDropReferenceMaxBar:.10,installedPressureDropMeasured:false,serviceTakeoffCondensatePractice:'TOP_OF_MAIN_WHERE_CONDENSATION_RISK_EXISTS'};
+  this.root.userData.distributionDesignReference={ringMainPreferred:true,airMainPressureDropReferenceBar:.03,distributionPressureDropReferenceBar:.03,connectionPressureDropReferenceBar:.04,dryerPressureDropGuideBar:.20,fixedNetworkPressureDropReferenceMaxBar:.10,installedPressureDropMeasured:false,serviceTakeoffCondensatePractice:'SWAN_NECK_TOP_TAKEOFF_WHERE_CONDENSATION_RISK_EXISTS',pressureProfileMode:'NORMALIZED_VISUAL_ONLY'};
   const site=this.group(this.root,'compressor-air-distribution','Compressed-Air Discharge & Distribution Reference',[0,0,0],[.18,.10,0]);
   site.userData.installedRouteVerified=false;site.userData.visualizationOnly=true;
   const discharge=this.group(site,'compressor-discharge-piping','Compressor Discharge Piping',[0,0,0],[.12,.08,0]);
@@ -765,6 +778,10 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   const dryer=this.box(treatment,[.72,1.02,.82],[3.35,.64,0],'glass',.035);this.tag(dryer,'compressed-air-dryer-option-boundary','SYSTEM_OPTION_BOUNDARY');dryer.userData.installedOptionVerified=false;
   const pre=this.cyl(treatment,.095,.34,[2.95,.72,-.54],'filter','y');this.tag(pre,'compressed-air-prefilter-option-reference','SYSTEM_OPTION_BOUNDARY');pre.userData.installedOptionVerified=false;
   const post=this.cyl(treatment,.085,.34,[3.75,.72,-.54],'filter','y');this.tag(post,'compressed-air-postfilter-option-reference','SYSTEM_OPTION_BOUNDARY');post.userData.installedOptionVerified=false;
+  const preLink=this.cyl(treatment,.032,.40,[3.15,.72,-.54],'blue','x');this.tag(preLink,'compressed-air-prefilter-to-dryer-reference','SYSTEM_OPTION_BOUNDARY');
+  const postLink=this.cyl(treatment,.032,.40,[3.55,.72,-.54],'blue','x');this.tag(postLink,'compressed-air-dryer-to-postfilter-reference','SYSTEM_OPTION_BOUNDARY');
+  const bypass=this.cyl(treatment,.026,.86,[3.35,1.30,-.54],'blue','x');this.tag(bypass,'compressed-air-dryer-bypass-reference','SYSTEM_OPTION_BOUNDARY');bypass.userData.installedOptionVerified=false;
+  for(const x of [2.92,3.35,3.78]){const valve=this.cyl(treatment,.050,.11,[x,1.30,-.54],'accent','x');this.tag(valve,'compressed-air-dryer-bypass-valve-reference','SYSTEM_OPTION_BOUNDARY');valve.userData.installedOptionVerified=false;}
   const tDrain=this.cyl(treatment,.020,.24,[3.35,.08,.36],'dark','y');this.tag(tDrain,'air-treatment-condensate-drain-reference','CONDENSATE_MANAGEMENT_REFERENCE');
 
   const ring=this.group(site,'compressor-ring-main-reference','Closed-Loop Ring Main Reference',[0,0,0],[.14,.08,0]);ring.userData.installedRouteVerified=false;
@@ -775,11 +792,18 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   const link=this.cyl(ring,.038,.84,[3.63,.80,0],'blue','x');this.tag(link,'compressed-air-treatment-to-riser-reference','DISTRIBUTION_FUNCTIONAL_REFERENCE');
 
   for(const [i,x,z] of [[1,4.65,z0],[2,5.60,z1],[3,6.55,z0]]){
-   const drop=this.cyl(ring,.026,1.00,[x,.98,z],'blue','y');this.tag(drop,'compressed-air-service-drop-reference','DISTRIBUTION_FUNCTIONAL_REFERENCE');drop.userData.servicePointIndex=i;
-   const valve=this.cyl(ring,.055,.12,[x,.48,z],'accent','y');this.tag(valve,'compressed-air-service-isolation-valve-reference','DISTRIBUTION_FUNCTIONAL_REFERENCE');
-   const offtake=this.cyl(ring,.026,.42,[x+.21,.44,z],'blue','x');this.tag(offtake,'compressed-air-service-offtake-reference','DISTRIBUTION_FUNCTIONAL_REFERENCE');
-   const drip=this.cyl(ring,.018,.28,[x,.34,z],'dark','y');this.tag(drip,'compressed-air-drip-leg-reference','CONDENSATE_MANAGEMENT_REFERENCE');
+   const neckRise=this.cyl(ring,.026,.34,[x,1.65,z],'blue','y');this.tag(neckRise,'compressed-air-swan-neck-rise-reference','DISTRIBUTION_FUNCTIONAL_REFERENCE');neckRise.userData.servicePointIndex=i;
+   const neckCross=this.cyl(ring,.026,.32,[x+.16,1.82,z],'blue','x');this.tag(neckCross,'compressed-air-swan-neck-top-takeoff-reference','DISTRIBUTION_FUNCTIONAL_REFERENCE');
+   const dropX=x+.32,drop=this.cyl(ring,.026,1.32,[dropX,1.16,z],'blue','y');this.tag(drop,'compressed-air-service-drop-reference','DISTRIBUTION_FUNCTIONAL_REFERENCE');drop.userData.servicePointIndex=i;
+   const valve=this.cyl(ring,.055,.12,[dropX,.51,z],'accent','y');this.tag(valve,'compressed-air-service-isolation-valve-reference','DISTRIBUTION_FUNCTIONAL_REFERENCE');
+   const offtake=this.cyl(ring,.026,.42,[dropX+.21,.46,z],'blue','x');this.tag(offtake,'compressed-air-service-offtake-reference','DISTRIBUTION_FUNCTIONAL_REFERENCE');
+   const pointGauge=this.cyl(ring,.060,.030,[dropX+.10,.70,z-.06],'glass','z');this.tag(pointGauge,'compressed-air-point-pressure-gauge-reference','DISTRIBUTION_FUNCTIONAL_REFERENCE');pointGauge.userData.servicePointIndex=i;pointGauge.userData.pressureScaleVerified=false;
+   const drip=this.cyl(ring,.018,.30,[dropX,.30,z],'dark','y');this.tag(drip,'compressed-air-drip-leg-reference','CONDENSATE_MANAGEMENT_REFERENCE');
   }
+  const condensate=this.group(site,'compressor-condensate-treatment-boundary','Condensate Collection / Oil-Water Separation Boundary',[0,0,0],[.08,.06,.12]);condensate.userData.installedConfigurationVerified=false;
+  const manifold=this.cyl(condensate,.018,2.28,[2.75,.08,.72],'dark','x');this.tag(manifold,'compressor-condensate-collection-manifold-reference','CONDENSATE_MANAGEMENT_REFERENCE');
+  for(const x of [1.62,2.48,3.35,3.75]){const leg=this.cyl(condensate,.014,.64,[x,.40,.72],'dark','y');this.tag(leg,'compressor-condensate-collection-leg-reference','CONDENSATE_MANAGEMENT_REFERENCE');}
+  const oilWater=this.box(condensate,[.58,.62,.48],[4.20,.34,.72],'glass',.025);this.tag(oilWater,'compressor-oil-water-separator-option-boundary','CONDENSATE_TREATMENT_OPTION_BOUNDARY');oilWater.userData.installedOptionVerified=false;
  }
  enrichAtlasCompressor(){
   const {intake,motor,airend,sep,circuit,cool,ctl}=this.compressorGroups(),E='ATLAS_GA_G_FAMILY_PRIMARY',P=(p,id,n)=>this.compressorPart(p,id,n);
@@ -800,6 +824,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    const ae=P(airend,'atlas-airend-group','Atlas oil-injected screw airend');
    this.tag(this.cyl(ae,.12,.40,[0,.70,-.10],'steel','x'),'atlas-oil-injected-screw-airend',E);
    const shaft=this.motion(this.cyl(ae,.045,.45,[0,.76,.05],'dark','x'),'spin','x',8,.01,0,null);this.tag(shaft,'atlas-airend-shaft-reference',E);
+   this.addTwinScrewInternals(ae,'atlas',E);
   }
   if(sep){
    const vessel=P(sep,'atlas-separator-group','Atlas oil / air separator');
@@ -852,6 +877,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    const ae=P(airend,'kaeser-airend-group','KAESER SIGMA PROFILE airend');
    this.tag(this.cyl(ae,.13,.42,[0,.70,-.08],'steel','x'),'kaeser-sigma-profile-airend',E);
    const shaft=this.motion(this.cyl(ae,.048,.46,[0,.76,.06],'dark','x'),'spin','x',8,.01,0,null);this.tag(shaft,'kaeser-airend-shaft-reference',E);
+   this.addTwinScrewInternals(ae,'kaeser',E);
   }
   if(sep){
    const vessel=P(sep,'kaeser-separator-group','KAESER cooling-fluid separator');
@@ -900,6 +926,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    const ae=P(airend,'swan-airend-group','SWAN screw airend');
    this.tag(this.cyl(ae,.13,.42,[0,.70,-.08],'steel','x'),'swan-screw-airend',E);
    const shaft=this.motion(this.cyl(ae,.048,.46,[0,.76,.06],'dark','x'),'spin','x',8,.01,0,null);this.tag(shaft,'swan-airend-shaft-reference',E);
+   this.addTwinScrewInternals(ae,'swan',E);
   }
   if(sep){
    const sg=P(sep,'swan-separation-group','SWAN oil / air separation package boundary');
@@ -1681,7 +1708,7 @@ export class ReferenceProcessSimulation{
  }
  bindCompressor(){
   const no=this.template.cfg.machine.no,brand=[29,30,35].includes(no)?'ATLAS':[31,32,34].includes(no)?'KAESER':'SWAN';
-  this.compressor={brand,exactModelVerified:false,plantRouteVerified:this.template.root.userData.plantCompressedAirRouteVerified===true,receiverInstalledVerified:this.template.root.userData.airReceiverInstalledVerified===true,dryerInstalledVerified:this.template.root.userData.airDryerInstalledVerified===true,ringMainInstalledVerified:this.template.root.userData.ringMainInstalledVerified===true,intakeActive:false,compressionActive:false,separationActive:false,aftercoolingActive:false,distributionActive:false,condensateDrainActive:false,oilCircuitActive:false,pressureNormalizedPct:0};
+  this.compressor={brand,exactModelVerified:false,plantRouteVerified:this.template.root.userData.plantCompressedAirRouteVerified===true,receiverInstalledVerified:this.template.root.userData.airReceiverInstalledVerified===true,dryerInstalledVerified:this.template.root.userData.airDryerInstalledVerified===true,ringMainInstalledVerified:this.template.root.userData.ringMainInstalledVerified===true,intakeActive:false,compressionActive:false,separationActive:false,aftercoolingActive:false,distributionActive:false,condensateDrainActive:false,oilCircuitActive:false,pressureNormalizedPct:0,pressureProfile:{package:0,receiver:0,afterTreatment:0,ringNear:0,ringFar:0,service:[0,0,0]}};
   this.compressorParticleGeometry=new THREE.SphereGeometry(.024,10,8);
   this.compressorAmbientMaterial=new THREE.MeshStandardMaterial({color:0xaebbc0,roughness:.50,metalness:0,transparent:true,opacity:.70});
   this.compressorAirMaterial=new THREE.MeshStandardMaterial({color:0x4d91b5,roughness:.38,metalness:0,transparent:true,opacity:.86});
@@ -1708,8 +1735,8 @@ export class ReferenceProcessSimulation{
    if(item.kind==='air'){
     m.material=q<.12?this.compressorAmbientMaterial:this.compressorAirMaterial;
     if(q<.12){const t=smooth(q/.12);m.position.set(lerp(-1.42,-1.02,t),.78+lane,0);}
-    else if(q<.28){const t=smooth((q-.12)/.16);m.position.set(lerp(-1.02,-.28,t),lerp(.78,.72,t)+lane,0);}
-    else if(q<.45){const t=smooth((q-.28)/.17);m.position.set(lerp(-.28,.18,t),lerp(.72,.88,t)+lane,.04);}
+    else if(q<.28){const t=smooth((q-.12)/.16),spin=t*Math.PI*5+item.phase*Math.PI*2;m.position.set(lerp(-1.02,-.28,t),.74+Math.sin(spin)*.085+lane*.35,Math.cos(spin)*.105);}
+    else if(q<.45){const t=smooth((q-.28)/.17),spin=t*Math.PI*4+item.phase*Math.PI*2;m.position.set(lerp(-.28,.18,t),lerp(.74,.92,t)+Math.sin(spin)*.055+lane*.25,.10+Math.cos(spin)*.12);}
     else if(q<.58){const t=smooth((q-.45)/.13);m.position.set(lerp(.18,.88,t),.90+lane,lerp(.04,.22,t));}
     else if(q<.70){const t=smooth((q-.58)/.12);m.position.set(lerp(.88,1.84,t),lerp(.90,.80,t)+lane,lerp(.22,0,t));}
     else {const t=smooth((q-.70)/.30);m.position.set(lerp(1.84,2.48,t),lerp(.80,.98,t)+lane,0);}
@@ -1718,7 +1745,12 @@ export class ReferenceProcessSimulation{
     else if(q<.32){const t=smooth((q-.18)/.14);m.position.set(lerp(3.60,4.15,t),lerp(.78,1.48,t)+lane,0);}
     else if(q<.66){const t=smooth((q-.32)/.34),z=item.branch===1?1.10:-1.10;m.position.set(lerp(4.15,6.72,t),1.48+lane,lerp(0,z,t));}
     else if(q<.84){const t=smooth((q-.66)/.18),x=[4.65,5.60,6.55][item.branch],z=item.branch===1?1.10:-1.10;m.position.set(lerp(6.72,x,t),1.48+lane,z);}
-    else {const t=smooth((q-.84)/.16),x=[4.65,5.60,6.55][item.branch],z=item.branch===1?1.10:-1.10;m.position.set(lerp(x,x+.21,t),lerp(1.48,.44,t)+lane,z);}
+    else {
+     const x=[4.65,5.60,6.55][item.branch],z=item.branch===1?1.10:-1.10,dropX=x+.32;
+     if(q<.89){const t=smooth((q-.84)/.05);m.position.set(x,lerp(1.48,1.82,t)+lane,z);}
+     else if(q<.94){const t=smooth((q-.89)/.05);m.position.set(lerp(x,dropX,t),1.82+lane,z);}
+     else {const t=smooth((q-.94)/.06);m.position.set(lerp(dropX,dropX+.21,t),lerp(1.82,.46,t)+lane,z);}
+    }
    }else if(item.kind==='oil'){
     if(q<.25){const t=smooth(q/.25);m.position.set(lerp(.18,.92,t),lerp(.68,.82,t),-.30);}
     else if(q<.50){const t=smooth((q-.25)/.25);m.position.set(lerp(.92,.45,t),lerp(.82,.58,t),-.30);}
@@ -1731,7 +1763,16 @@ export class ReferenceProcessSimulation{
    m.visible=this.active;
   }
   c.intakeActive=this.active;c.compressionActive=this.active;c.separationActive=this.active;c.aftercoolingActive=this.active;c.distributionActive=this.active;c.oilCircuitActive=this.active;c.condensateDrainActive=this.active;
-  c.pressureNormalizedPct=this.active?Math.round(90+5*Math.sin(this.elapsed*.8)):0;
+  const pulse=this.active?Math.sin(this.elapsed*.8):0,base=this.active?100:0;
+  c.pressureProfile=this.active?{
+   package:Math.round((base-1.0+pulse*.35)*10)/10,
+   receiver:Math.round((base-1.6+pulse*.30)*10)/10,
+   afterTreatment:Math.round((base-4.2+pulse*.25)*10)/10,
+   ringNear:Math.round((base-5.0+pulse*.22)*10)/10,
+   ringFar:Math.round((base-6.0+pulse*.20)*10)/10,
+   service:[6.7,7.2,7.8].map((loss,i)=>Math.round((base-loss+pulse*(.18-i*.02))*10)/10)
+  }:{package:0,receiver:0,afterTreatment:0,ringNear:0,ringFar:0,service:[0,0,0]};
+  c.pressureNormalizedPct=c.pressureProfile.ringNear;
  }
  bindAHU(){
   const sansin=this.template.cfg.machine.no===40;
@@ -1860,7 +1901,7 @@ export class ReferenceProcessSimulation{
    modeledBinCount:collatorState?.modeledBinCount??null,installedBinCountVerified:collatorState?.installedBinCountVerified??null,activeBinFeeds:this.collator?.activeFeedCount??0,completedSheetsInSet:this.collator?.completedSheetsInSet??0,
    exposureActive:imagesetterState?.exposure??false,cuttingActive:imagesetterState?.cutting??false,punchInstalledVerified:this.imagesetter?.punch?.userData.installedOptionVerified===true,processorInstalledVerified:this.imagesetter?.processor?.userData.installedOptionVerified===true,exactScreenModelVerified:this.family==='imagesetter'?this.template.root.userData.exactScreenModelVerified:null,
    vacuumHoldActive:zundState?.vacuumHold??false,zundAxisMotionActive:zundState?.axisMotion??false,installedToolPackageVerified:this.family==='zund'?(this.zund?.installedToolPackageVerified??false):null,toolActionEnabled:this.family==='zund'?(this.zund?.installedToolPackageVerified===true):null,registrationCameraInstalledVerified:this.family==='zund'?(this.zund?.installedIccVerified??false):null,toolInitializationInstalledVerified:this.family==='zund'?(this.zund?.installedItiVerified??false):null,
-   compressorBrand:this.family==='compressor'?(this.compressor?.brand??null):null,compressorIntakeActive:this.family==='compressor'?(this.compressor?.intakeActive??false):false,compressorCompressionActive:this.family==='compressor'?(this.compressor?.compressionActive??false):false,compressorSeparationActive:this.family==='compressor'?(this.compressor?.separationActive??false):false,compressorAftercoolingActive:this.family==='compressor'?(this.compressor?.aftercoolingActive??false):false,compressorOilCircuitActive:this.family==='compressor'?(this.compressor?.oilCircuitActive??false):false,compressorCondensateDrainActive:this.family==='compressor'?(this.compressor?.condensateDrainActive??false):false,compressorDistributionActive:this.family==='compressor'?(this.compressor?.distributionActive??false):false,compressorPressureNormalizedPct:this.family==='compressor'?(this.compressor?.pressureNormalizedPct??0):null,plantCompressedAirRouteVerified:this.family==='compressor'?(this.compressor?.plantRouteVerified??false):null,airReceiverInstalledVerified:this.family==='compressor'?(this.compressor?.receiverInstalledVerified??false):null,airDryerInstalledVerified:this.family==='compressor'?(this.compressor?.dryerInstalledVerified??false):null,ringMainInstalledVerified:this.family==='compressor'?(this.compressor?.ringMainInstalledVerified??false):null,
+   compressorBrand:this.family==='compressor'?(this.compressor?.brand??null):null,compressorIntakeActive:this.family==='compressor'?(this.compressor?.intakeActive??false):false,compressorCompressionActive:this.family==='compressor'?(this.compressor?.compressionActive??false):false,compressorSeparationActive:this.family==='compressor'?(this.compressor?.separationActive??false):false,compressorAftercoolingActive:this.family==='compressor'?(this.compressor?.aftercoolingActive??false):false,compressorOilCircuitActive:this.family==='compressor'?(this.compressor?.oilCircuitActive??false):false,compressorCondensateDrainActive:this.family==='compressor'?(this.compressor?.condensateDrainActive??false):false,compressorDistributionActive:this.family==='compressor'?(this.compressor?.distributionActive??false):false,compressorPressureNormalizedPct:this.family==='compressor'?(this.compressor?.pressureNormalizedPct??0):null,compressorPressureProfile:this.family==='compressor'?(this.compressor?.pressureProfile??null):null,plantCompressedAirRouteVerified:this.family==='compressor'?(this.compressor?.plantRouteVerified??false):null,airReceiverInstalledVerified:this.family==='compressor'?(this.compressor?.receiverInstalledVerified??false):null,airDryerInstalledVerified:this.family==='compressor'?(this.compressor?.dryerInstalledVerified??false):null,ringMainInstalledVerified:this.family==='compressor'?(this.compressor?.ringMainInstalledVerified??false):null,
    ahuSectionOrderVerified:this.family==='ahu'?(this.ahu?.sectionOrderVerified??false):null,ahuExactModelVerified:this.family==='ahu'?(this.ahu?.exactModelVerified??false):null,supplyAirActive:this.family==='ahu'?(this.ahu?.supplyAirActive??false):false,returnAirReferenceActive:this.family==='ahu'?(this.ahu?.returnAirReferenceActive??false):false,outdoorHeatRejectionActive:this.family==='ahu'?(this.ahu?.outdoorHeatRejectionActive??false):false,plantDuctRouteVerified:this.family==='ahu'?(this.template.root.userData.plantDuctRouteVerified===true):null,evaporativePrecoolActive:this.family==='ahu'?(this.ahu?.evaporativePrecoolActive??false):false,dxEvaporatorActive:this.family==='ahu'?(this.ahu?.dxEvaporatorActive??false):false,genericCoilConditioningActive:this.family==='ahu'?(this.ahu?.genericCoilActive??false):false,
    cartonBlankGeometryIsSchematic:this.family==='folder'?(this.folder?.cartonBlankGeometryIsSchematic??true):null,foldingActive:folderState?.folding??false,glueZoneActive:folderState?.gluing??false,compressionActive:folderState?.compressing??false,crashLockInstalledVerified:this.family==='folder'?(this.folder?.installedCrashLockVerified??false):null,fourSixCornerInstalledVerified:this.family==='folder'?(this.folder?.installedFourSixCornerVerified??false):null,glueApplicatorTypeVerified:this.family==='folder'?(this.folder?.glueApplicatorTypeVerified??false):null,
    simulationBoundary:this.family==='blanker'?'QF_LQF_1080_FAMILY_PROCESS_ONLY':this.family==='collator'?'MULTI_VENDOR_SUCTION_COLLATOR_PROCESS_ONLY__TEN_BIN_REFERENCE_NOT_INSTALLATION_CLAIM':this.family==='ctp'?'SUPRASETTER_COMMON_PROCESS_ONLY__PUNCH_LOADER_DEBRIS_TEMP_OPTIONS_NOT_SIMULATED':this.family==='imagesetter'?'SCREEN_FTR_KATANA_COMMON_PROCESS_ONLY__PUNCH_PROCESSOR_MODEL_OPTIONS_NOT_INFERRED':this.family==='zund'?'ZUND_XY_PLATFORM_MOTION_ONLY__INSTALLED_TOOL_CAMERA_INIT_PACKAGE_NOT_INFERRED':this.family==='compressor'?'BRAND_FAMILY_OIL_INJECTED_SCREW_AIRFLOW__LOCAL_RING_MAIN_FUNCTIONAL_REFERENCE__PLANT_ROUTE_UNVERIFIED':this.family==='ahu'?(this.ahu?.sansin?'SANSIN_NES_YZKJ_INDOOR_AIR_PATH_FAMILY_REFERENCE__MODEL_CAPACITY_UNVERIFIED':'EUROVENT_CANONICAL_AHU_AIR_PATH_REFERENCE__SECTION_ORDER_DIRECTION_UNVERIFIED'):this.family==='folder'?'FGM2_MULTI_VENDOR_COMMON_FOLD_GLUE_PROCESS_ONLY__BOX_STYLE_GLUE_HARDWARE_OPTIONS_NOT_INFERRED':null,referenceBoundary:this.template.cfg.profile?.unknowns||[]};
@@ -1871,7 +1912,7 @@ export class ReferenceProcessSimulation{
  setSpeed(v){this.speed=Math.max(.25,Math.min(3,Number(v)||1));return this.state();}
  setPathVisible(){this.pathVisible=false;return this.state();}
  setInkFlowVisible(){this.inkFlowVisible=false;return this.state();}
- resetMotion(){for(const item of this.motions){item.mesh.position.copy(item.position);item.mesh.quaternion.copy(item.quaternion);}if(this.blanker){if(this.blanker.platform)this.blanker.platform.position.copy(this.blanker.platformRest);if(this.blanker.ram)this.blanker.ram.position.copy(this.blanker.ramRest);}if(this.processPiece){if(this.family==='blanker'&&this.processPiece.userData.blankerRest)this.processPiece.position.copy(this.processPiece.userData.blankerRest);else this.processPiece.position.x=this.processPiece.userData.startX;this.processPiece.visible=this.active;}for(const s of this.collatorSheets){s.mesh.position.copy(s.start);s.mesh.visible=this.active;}if(this.collator){this.collator.activeFeedCount=0;this.collator.completedSheetsInSet=0;}if(this.imagesetterMedia){this.imagesetterMedia.position.set(-.82,.68,0);this.imagesetterMedia.visible=this.active;}if(this.imagesetter){this.imagesetter.exposureActive=false;this.imagesetter.cuttingActive=false;if(this.imagesetter.laser?.material?.emissive){this.imagesetter.laser.material.emissive.setHex(0);this.imagesetter.laser.material.emissiveIntensity=0;}}if(this.zund){if(this.zund.beam)this.zund.beam.position.copy(this.zund.beamRest);if(this.zund.carriage)this.zund.carriage.position.copy(this.zund.carriageRest);this.zund.vacuumHoldActive=false;}if(this.zundMaterial){this.zundMaterial.position.set(0,.69,0);this.zundMaterial.visible=this.active;}for(const p of this.compressorParticles)p.mesh.visible=this.active;if(this.compressor){this.compressor.intakeActive=this.active;this.compressor.compressionActive=this.active;this.compressor.separationActive=this.active;this.compressor.aftercoolingActive=this.active;this.compressor.distributionActive=this.active;this.compressor.oilCircuitActive=this.active;this.compressor.condensateDrainActive=this.active;this.compressor.pressureNormalizedPct=this.active?90:0;}for(const p of this.ahuParticles)p.mesh.visible=this.active;if(this.ahu){this.ahu.supplyAirActive=this.active;this.ahu.returnAirReferenceActive=this.active;this.ahu.outdoorHeatRejectionActive=false;this.ahu.evaporativePrecoolActive=false;this.ahu.dxEvaporatorActive=false;this.ahu.genericCoilActive=false;}if(this.folderBlank){this.folderBlank.position.set(-5.20,.82,0);this.folderBlank.visible=this.active;}if(this.folder){this.folder.leftPivot.rotation.x=0;this.folder.rightPivot.rotation.x=0;this.folder.glueStrip.visible=false;this.folder.foldingActive=false;this.folder.glueZoneActive=false;this.folder.compressionActive=false;}}
+ resetMotion(){for(const item of this.motions){item.mesh.position.copy(item.position);item.mesh.quaternion.copy(item.quaternion);}if(this.blanker){if(this.blanker.platform)this.blanker.platform.position.copy(this.blanker.platformRest);if(this.blanker.ram)this.blanker.ram.position.copy(this.blanker.ramRest);}if(this.processPiece){if(this.family==='blanker'&&this.processPiece.userData.blankerRest)this.processPiece.position.copy(this.processPiece.userData.blankerRest);else this.processPiece.position.x=this.processPiece.userData.startX;this.processPiece.visible=this.active;}for(const s of this.collatorSheets){s.mesh.position.copy(s.start);s.mesh.visible=this.active;}if(this.collator){this.collator.activeFeedCount=0;this.collator.completedSheetsInSet=0;}if(this.imagesetterMedia){this.imagesetterMedia.position.set(-.82,.68,0);this.imagesetterMedia.visible=this.active;}if(this.imagesetter){this.imagesetter.exposureActive=false;this.imagesetter.cuttingActive=false;if(this.imagesetter.laser?.material?.emissive){this.imagesetter.laser.material.emissive.setHex(0);this.imagesetter.laser.material.emissiveIntensity=0;}}if(this.zund){if(this.zund.beam)this.zund.beam.position.copy(this.zund.beamRest);if(this.zund.carriage)this.zund.carriage.position.copy(this.zund.carriageRest);this.zund.vacuumHoldActive=false;}if(this.zundMaterial){this.zundMaterial.position.set(0,.69,0);this.zundMaterial.visible=this.active;}for(const p of this.compressorParticles)p.mesh.visible=this.active;if(this.compressor){this.compressor.intakeActive=this.active;this.compressor.compressionActive=this.active;this.compressor.separationActive=this.active;this.compressor.aftercoolingActive=this.active;this.compressor.distributionActive=this.active;this.compressor.oilCircuitActive=this.active;this.compressor.condensateDrainActive=this.active;this.compressor.pressureNormalizedPct=this.active?95:0;this.compressor.pressureProfile=this.active?{package:99,receiver:98.4,afterTreatment:95.8,ringNear:95,ringFar:94,service:[93.3,92.8,92.2]}:{package:0,receiver:0,afterTreatment:0,ringNear:0,ringFar:0,service:[0,0,0]};}for(const p of this.ahuParticles)p.mesh.visible=this.active;if(this.ahu){this.ahu.supplyAirActive=this.active;this.ahu.returnAirReferenceActive=this.active;this.ahu.outdoorHeatRejectionActive=false;this.ahu.evaporativePrecoolActive=false;this.ahu.dxEvaporatorActive=false;this.ahu.genericCoilActive=false;}if(this.folderBlank){this.folderBlank.position.set(-5.20,.82,0);this.folderBlank.visible=this.active;}if(this.folder){this.folder.leftPivot.rotation.x=0;this.folder.rightPivot.rotation.x=0;this.folder.glueStrip.visible=false;this.folder.foldingActive=false;this.folder.glueZoneActive=false;this.folder.compressionActive=false;}}
  update(now){
   if(!this.active||!this.running){this.lastNow=now;return;}
   if(this.lastNow===null){this.lastNow=now;return;}
