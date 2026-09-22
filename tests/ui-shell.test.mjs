@@ -257,7 +257,7 @@ test('v49 exposes the normalized 41-machine plant registry through the contextua
   assert.match(app,/searchMachines\(/);
   assert.match(app,/data-machine-id/);
   assert.match(app,/DAFTAR ASET/);
-  assert.match(app,/aset Digital Twin/);
+  assert.match(app,/aset terdaftar/);\n  assert.match(app,/aset 3D teknis/);
   assert.match(app,/asset-data-status/);
   assert.match(sw,/src\/data\/machine-registry\.js/);
 });
@@ -271,11 +271,11 @@ test('v52 Offset 10 simulation uses the same full-interior cutaway workflow as O
   assert.match(offset10,/this\.cover\(this\.tread\(ds/);
 });
 
-test('v53 routes a rebuilt document-grounded CX104 twin without Offset 5 UI leakage',()=>{
+test('v53 retains the document-grounded CX104 expansion asset while foundation runtime keeps it gated',()=>{
   assert.match(app,/MACHINE_KEY/);
   assert.match(app,/ACTIVE_ROOT/);
   assert.match(app,/selectedTaxonomyId=selectedTaxonomyId\|\|ACTIVE_ROOT/);
-  assert.match(app,/switchActiveMachine\(route\)/);
+  assert.match(app,/if\(!canOpenTechnical3D\(route\)\)/);\n  assert.match(app,/focusFoundationPlaceholder\(record/);
   assert.match(app,/history\.pushState/);
   assert.doesNotMatch(app,/machine=\$\{route\}&v=50/);
   assert.match(app,/Tidak ada foto aktual Offset 10 yang tersedia/);
@@ -301,12 +301,12 @@ test('v53 routes a rebuilt document-grounded CX104 twin without Offset 5 UI leak
   for(const asset of ['src/offset10.js','src/simulation-offset10.js','src/data/dimensions-offset10.js','src/data/sources-offset10.js','src/data/taxonomy-offset10.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
 });
 
-test('v54 keeps APM2 as a dedicated 3D machine with process-specific UI and no invented suffix',()=>{
+test('v54 retains the APM2 expansion implementation without exposing it as a Phase-1 technical asset',()=>{
   assert.match(app,/\['offset10','apm2','sheeting'\]\.includes\(requested\)/);
   assert.match(app,/IS_APM2=MACHINE_KEY==='apm2'/);
   assert.match(app,/ACTIVE_ROOT=IS_OFFSET10\?'O10':IS_APM2\?'APM2':IS_SHEETING\?'SH':IS_GENERIC\?GENERIC_ROOT:'O5'/);
   assert.match(app,/normalizeMachineKey\(route\)/);
-  assert.match(app,/switchActiveMachine\(route\)/);
+  assert.match(app,/if\(!isFoundationPrimary\(machine\)\)/);\n  assert.match(engine,/if\(!canOpenTechnical3D\(requested\)\)/);
   assert.match(engine,/switchMachine\(key\)/);
   assert.match(app,/Simulasi Proses APM 2/);
   assert.match(app,/register dan SideLay/);
@@ -418,6 +418,6 @@ test('runtime binds every workbench button and provides a visual fallback withou
 test('startup routes splash directly to the Pabrik factory overview',()=>{
   assert.match(html,/id="nav-machine"[^>]*>[\s\S]*?<small>Pabrik<\/small>/);
   assert.match(mobileStableUi,/factory:'nav-machine'/);
-  assert.match(app,/if\(engine\)showHome\(\)/);
+  assert.match(app,/else showHome\(\)/);\n  assert.match(app,/Menyiapkan denah pabrik/);
   assert.match(app,/function showHome\(\)[\s\S]*setView\('factory'\)/);
 });
