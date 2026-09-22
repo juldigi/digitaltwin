@@ -37,7 +37,7 @@ test('service-worker shell cache references only deployable frontend files',()=>
 });
 
 test('service-worker cache version advances with the centralized runtime release',()=>{
- assert.match(sw,/factory-digital-twin-v127-roof-rooms-branding-20260922/);
+ assert.match(sw,/factory-digital-twin-v128-centered-offset-rooms-splash-20260922/);
 });
 
 
