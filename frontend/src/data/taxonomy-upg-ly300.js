@@ -6,14 +6,14 @@ for(const [id,name,ref] of [
  ['REJECT','Plate-turn reject','ly300-reject'],['COLLECT','Collection / strapping interface','ly300-collect'],['CONTROL','PLC / servo electrical control','ly300-control'],['ACCESS','Enclosure and service access','ly300-access']
 ])add(`LY300.${id}`,name,2,'LY300',[ref],'unit',true);
 const branches={
- FEED:[['STACK','Input pile support','ly300-feed-stack'],['BAFFLE','Baffle feeder','ly300-feed-baffle'],['PAGER','Automatic paging mechanism','ly300-feed-pager'],['DOUBLE','Double-sheet sensing zone','ly300-feed-double']],
- TRANSPORT:[['BELT','High-temperature PU conveyor belt','ly300-transport-belt'],['SERVO','Servo transport drive','ly300-transport-servo'],['ENCODER','Encoder / positioning reference','ly300-transport-encoder']],
- PRINT:[['HEAD','Ricoh G5 printhead module reference · installed count unverified','ly300-print-head'],['NOZZLE','Nozzle / jetting interface','ly300-print-nozzle'],['HEIGHT','Printhead mounting / height interface','ly300-print-height']],
- INK:[['TANK','UV ink reservoir','ly300-ink-tank'],['NEGATIVE','Negative-pressure system','ly300-ink-negative'],['TUBE','Ink tube / connector routing','ly300-ink-tube']],
- UV:[['LED','LED UV curing head','ly300-uv-led'],['SHIELD','UV lamp shield','ly300-uv-shield'],['POWER','UV power interface','ly300-uv-power']],
- CAMERA:[['LINE','2K line-scan camera','ly300-camera-line'],['LIGHT','Inspection illumination','ly300-camera-light'],['TRACE','Detection / traceability interface','ly300-camera-trace']],
- REJECT:[['PLATE','Plate-turn reject actuator','ly300-reject-plate'],['CYL','Air-cylinder actuation','ly300-reject-cylinder'],['BIN','Rejected-product path','ly300-reject-bin']],
- COLLECT:[['STACK','Output collection','ly300-collect-stack'],['ALIGN','Collection alignment','ly300-collect-align'],['STRAP','Strapping-machine interface reference · installed make unverified','ly300-collect-strap']],
+ FEED:[['STACK','Input pile support','ly300-feed-stack'],['BAFFLE','Baffle feeder','ly300-feed-baffle'],['PAGER','Automatic paging mechanism / feeder VFD motor','ly300-feed-pager'],['DOUBLE','Material presence / double-sheet sensing zone','ly300-feed-double']],
+ TRANSPORT:[['BELT','High-temperature PU conveyor belt','ly300-transport-belt'],['SERVO','Servo transport drive / coupling','ly300-transport-servo'],['ENCODER','Encoder / positioning reference','ly300-transport-encoder'],['TRIGGER','Print trigger / position confirmation','ly300-transport-trigger']],
+ PRINT:[['HEAD','Ricoh G5 printhead module reference · installed count unverified','ly300-print-head'],['NOZZLE','Nozzle / jetting interface','ly300-print-nozzle'],['HEIGHT','Printhead height screw / position sensing interface','ly300-print-height']],
+ INK:[['TANK','UV ink reservoir','ly300-ink-tank'],['NEGATIVE','Negative-pressure pump / gauge / ready sensing / filter','ly300-ink-negative'],['TUBE','Ink tube / connector routing','ly300-ink-tube']],
+ UV:[['LED','LED UV curing head','ly300-uv-led'],['SHIELD','UV lamp shield / interlock sensing','ly300-uv-shield'],['POWER','UV power / ready sensing interface','ly300-uv-power']],
+ CAMERA:[['LINE','2K line-scan camera / trigger sensing','ly300-camera-line'],['LIGHT','Inspection illumination','ly300-camera-light'],['TRACE','Detection / traceability interface','ly300-camera-trace']],
+ REJECT:[['PLATE','Plate-turn reject actuator','ly300-reject-plate'],['CYL','Air-cylinder / solenoid / home sensing','ly300-reject-cylinder'],['BIN','Rejected-product path / confirmation sensing','ly300-reject-bin'],['PERMIT','Inspection decision → reject permit chain','ly300-reject']],
+ COLLECT:[['STACK','Output collection / output sensing','ly300-collect-stack'],['ALIGN','Collection alignment','ly300-collect-align'],['STRAP','Strapping-machine interface reference · installed make unverified','ly300-collect-strap']],
  CONTROL:[['PLC','PLC control cabinet','ly300-control-plc'],['HMI','Touchscreen / industrial-PC interface','ly300-control-hmi'],['DRIVE','Servo and VFD drive electronics','ly300-control-drive']],
  ACCESS:[['FRAME','4230 mm machine base reference','ly300-access-frame'],['COVER','Service enclosure panels','ly300-access-cover'],['DOOR','Service doors / ventilation','ly300-access-door']]
 };
