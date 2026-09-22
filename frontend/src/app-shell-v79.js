@@ -1,4 +1,4 @@
-import{getState,setActiveSection,setViewMode,setLayer,setSimulation,setInspector,openOverlay,closeOverlay,hydrateUrl,subscribe}from'./state/app-state.js';
+import{getState,setState,setActiveSection,setViewMode,setLayer,setSimulation,setInspector,openOverlay,closeOverlay,hydrateUrl,subscribe}from'./state/app-state.js';
 
 const q=(s,r=document)=>r.querySelector(s);
 const qa=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -30,6 +30,8 @@ for(const [id,name]of Object.entries(iconMap)){
   el.innerHTML=icon(name)+`<small>${label}</small>`;
  }else el.innerHTML=icon(name);
 }
+const mobileIcons={factory:'factory',asset:'machine',system:'system',simulation:'simulation',more:'more'};
+qa('[data-mobile-nav]').forEach(el=>{const label=q('small',el)?.textContent||el.getAttribute('aria-label')||'';el.innerHTML=icon(mobileIcons[el.dataset.mobileNav]||'more')+`<small>${label}</small>`});
 
 const splash=q('.app-splash');
 const firstVisit=!sessionStorage.getItem('bmj-splash-seen');
@@ -51,7 +53,7 @@ function closeInspector(){document.body.classList.add('panel-hidden');document.b
 function beforeMajorOverlay(name){
  const state=getState();
  if(state.overlay&&state.overlay!==name)closeLayerManager();
- if(name==='layers'&&!document.body.classList.contains('panel-hidden'))closeInspector();
+ if(name!=='inspector'&&!document.body.classList.contains('panel-hidden'))closeInspector();
  closeDrawer();
 }
 function openSystemLayers(){
@@ -66,10 +68,10 @@ function enterSimulation(){
  requestAnimationFrame(syncSimulationTransport);
 }
 q('#nav-machine')?.addEventListener('click',()=>{setActiveSection('factory');document.body.classList.remove('workspace-2d');setViewMode('3d');markSection('factory');closeLayerManager()});
-q('#nav-assets')?.addEventListener('click',()=>{setActiveSection('asset');markSection('asset');closeLayerManager()});
+q('#nav-assets')?.addEventListener('click',()=>{beforeMajorOverlay('modal');setActiveSection('asset');markSection('asset');openOverlay('modal')});
 q('#nav-systems')?.addEventListener('click',openSystemLayers);
 q('#nav-simulation-mode')?.addEventListener('click',enterSimulation);
-q('#nav-sources')?.addEventListener('click',()=>{setActiveSection('reference');markSection('reference');closeLayerManager()});
+q('#nav-sources')?.addEventListener('click',()=>{beforeMajorOverlay('inspector');setActiveSection('reference');markSection('reference');setInspector(true,'sources');openOverlay('inspector')});
 q('#nav-help')?.addEventListener('click',()=>{beforeMajorOverlay('modal');openOverlay('modal')});
 q('#nav-settings')?.addEventListener('click',()=>{beforeMajorOverlay('modal');q('#settings')?.click();openOverlay('modal')});
 
@@ -145,8 +147,7 @@ bodyObserver.observe(document.body,{attributes:true,attributeFilter:['class']});
 
 addEventListener('bmj:domainstate',event=>{
  const detail=event.detail||{};
- if(detail.simulationState)setSimulation(detail.simulationState);
- if(detail.viewMode)setViewMode(detail.viewMode);
+ setState(detail,{url:false});
 });
 const syncViewport=()=>{document.documentElement.style.setProperty('--app-vh',`${visualViewport?.height||innerHeight}px`);const w=innerWidth;setTimeout(()=>window.BMJAppState?.setState({deviceMode:w<768?'mobile':w<=1180?'tablet':'desktop'},{url:false}),0)};
 syncViewport();addEventListener('resize',syncViewport,{passive:true});visualViewport?.addEventListener('resize',syncViewport,{passive:true});
