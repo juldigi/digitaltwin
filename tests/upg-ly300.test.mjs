@@ -22,23 +22,23 @@ test('UPG LY300 geometry preserves exact OEM station train but bounds installed 
 });
 
 test('UPG LY300 rotor whitelist excludes camera lens ink line and pneumatic reject cylinder',()=>{
- const model=new UpgLy300MachineTemplate(),sim=new UpgLy300ProcessSimulation(model.root,model),allowed=/^(pager-wheel|belt-pulley|servo|encoder|negative-pump)$/;
- assert.equal(sim.rotors.length,8);assert.equal(sim.rotors.some(r=>!allowed.test(r.userData.mechanismRole||'')),false);
+ const model=new UpgLy300MachineTemplate(),sim=new UpgLy300ProcessSimulation(model.root,model),allowed=/^(pager-wheel|feeder-vfd-motor|belt-pulley|servo|encoder|negative-pump)$/;
+ assert.equal(sim.rotors.length,9);assert.equal(sim.rotors.some(r=>!allowed.test(r.userData.mechanismRole||'')),false);
  assert.equal(model.meshes.some(m=>m.userData.rotor&&['camera-lens','ink-line','reject-cylinder'].includes(m.userData.mechanismRole)),false);assert.equal(sim.uvLamps.length,1);assert.equal(sim.inspectionLights.length,2);sim.dispose();model.dispose();
 });
 
 test('UPG LY300 target item must print then cure then inspect before reject routing',()=>{
  const model=new UpgLy300MachineTemplate(),sim=new UpgLy300ProcessSimulation(model.root,model),item=sim.items[0];sim.start();let now=1000;const advanceTo=t=>{while(sim.elapsed<t){now+=20;sim.update(now);}};
  advanceTo(1.0);assert.equal(item.printed,false);assert.equal(item.cured,false);assert.equal(item.inspected,false);assert.equal(item.result,null);
- advanceTo(2.5);assert.equal(item.printed,true);assert.equal(item.cured,false);assert.equal(item.inspected,false);assert.equal(item.code.visible,true);
- advanceTo(3.6);assert.equal(item.printed,true);assert.equal(item.cured,true);assert.equal(item.inspected,false);
+ advanceTo(2.9);assert.equal(item.printed,true);assert.equal(item.cured,false);assert.equal(item.inspected,false);assert.equal(item.code.visible,true);
+ advanceTo(3.8);assert.equal(item.printed,true);assert.equal(item.cured,true);assert.equal(item.inspected,false);
  advanceTo(4.5);let state=sim.state();assert.equal(item.printed,true);assert.equal(item.cured,true);assert.equal(item.inspected,true);assert.equal(item.result,'REJECT_DEMO');assert.ok(state.inspectedDemoCount>0);
  advanceTo(5.65);state=sim.state();assert.equal(state.rejectTrackingActive,true);assert.equal(state.demoRejectActive,true);assert.ok(item.group.position.z>0);assert.equal(state.demoRejectOnly,true);
  sim.dispose();model.dispose();
 });
 
 test('UPG LY300 UV and camera activity are occupancy-driven and respect upstream prerequisites',()=>{
- const model=new UpgLy300MachineTemplate(),sim=new UpgLy300ProcessSimulation(model.root,model);sim.start();let now=1000,seenPrint=false,seenUv=false,seenCamera=false;for(let i=0;i<430;i++){now+=20;sim.update(now);const s=sim.state();seenPrint||=s.printingActive;seenUv||=s.uvActive;seenCamera||=s.cameraActive;if(s.uvActive)assert.ok(sim.items.some(i=>i.cured));if(s.cameraActive)assert.ok(sim.items.some(i=>i.inspected));}
+ const model=new UpgLy300MachineTemplate(),sim=new UpgLy300ProcessSimulation(model.root,model);sim.start();let now=1000,seenPrint=false,seenUv=false,seenCamera=false;for(let i=0;i<430;i++){now+=20;sim.update(now);const s=sim.state();seenPrint||=s.printingActive;seenUv||=s.uvActive;seenCamera||=s.cameraActive;if(s.uvActive)assert.ok(sim.items.some(i=>i.printed));if(s.cameraActive)assert.ok(sim.items.some(i=>i.cured));}
  const state=sim.state();assert.ok(seenPrint&&seenUv&&seenCamera);assert.ok(state.printedDemoCount>=state.curedDemoCount);assert.ok(state.curedDemoCount>=state.inspectedDemoCount);assert.equal(state.installedPrintheadCountVerified,false);sim.dispose();model.dispose();
 });
 
