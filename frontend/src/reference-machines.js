@@ -1686,6 +1686,7 @@ export class ReferenceProcessSimulation{
   for(const item of this.compressorParticles){
    const q=(s.p+item.phase)%1,m=item.mesh,lane=item.lane*.07;
    if(item.kind==='air'){
+    m.material=q<.12?this.compressorAmbientMaterial:this.compressorAirMaterial;
     if(q<.12){const t=smooth(q/.12);m.position.set(lerp(-1.42,-1.02,t),.78+lane,0);}
     else if(q<.28){const t=smooth((q-.12)/.16);m.position.set(lerp(-1.02,-.28,t),lerp(.78,.72,t)+lane,0);}
     else if(q<.45){const t=smooth((q-.28)/.17);m.position.set(lerp(-.28,.18,t),lerp(.72,.88,t)+lane,.04);}
