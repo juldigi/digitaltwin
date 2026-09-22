@@ -50,7 +50,7 @@ test('System context is sourced from real routing summaries and explicit data bo
  assert.match(app,/actualRouteVerified:item\.actualRouteVerified===true/);
  assert.match(app,/consumerText:/);
  assert.match(app,/sourceText:/);
- assert.match(app,/drawing as-built|routing drawing/i);
+ assert.match(app,/gambar aktual|gambar jalur/i);
  assert.match(app,/bmj:systemassetselect/);
 });
 
