@@ -11,7 +11,8 @@ test('V151 browser history restores machine component and workspace view without
   assert.match(app,/params\.get\('machine'\)\|\|params\.get\('asset'\)\|\|FOUNDATION_SCOPE\.primaryRoute/);
   assert.match(app,/params\.get\('node'\)/);
   assert.match(app,/params\.get\('view'\)==='2d'\?'2d':'3d'/);
-  assert.match(app,/await switchActiveMachine\(FOUNDATION_SCOPE\.primaryRoute,\{historyMode:'none'\}\)/);\n  assert.match(app,/focusFoundationPlaceholder\(record,\{historyMode:'none',openDialog:false\}\)/);
+  assert.match(app,/await switchActiveMachine\(FOUNDATION_SCOPE\.primaryRoute,\{historyMode:'none'\}\)/);
+  assert.match(app,/focusFoundationPlaceholder\(record,\{historyMode:'none',openDialog:false\}\)/);
   assert.match(app,/selectTaxonomy\(node,\{revealPanel:true\}\)/);
   assert.match(app,/bmj:historyrestore/);
   assert.doesNotMatch(app,/location\.(?:reload|assign|replace)\(/);
