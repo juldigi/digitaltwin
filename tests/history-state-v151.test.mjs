@@ -8,13 +8,15 @@ const state=fs.readFileSync(new URL('../frontend/src/state/app-state.js',import.
 
 test('V151 browser history restores machine component and workspace view without reload',()=>{
   assert.match(app,/async function restoreHistoryContext\(\)/);
-  assert.match(app,/params\.get\('machine'\)\|\|params\.get\('asset'\)\|\|'offset5'/);
+  assert.match(app,/params\.get\('machine'\)\|\|params\.get\('asset'\)\|\|FOUNDATION_SCOPE\.primaryRoute/);
   assert.match(app,/params\.get\('node'\)/);
   assert.match(app,/params\.get\('view'\)==='2d'\?'2d':'3d'/);
-  assert.match(app,/await switchActiveMachine\(route,\{historyMode:'none'\}\)/);
+  assert.match(app,/await switchActiveMachine\(FOUNDATION_SCOPE\.primaryRoute,\{historyMode:'none'\}\)/);
+  assert.match(app,/focusFoundationPlaceholder\(record,\{historyMode:'none',openDialog:false\}\)/);
   assert.match(app,/selectTaxonomy\(node,\{revealPanel:true\}\)/);
   assert.match(app,/bmj:historyrestore/);
-  assert.doesNotMatch(app,/location\.(?:reload|assign|replace)\(/);
+  const restoreBody=app.slice(app.indexOf('async function restoreHistoryContext'),app.indexOf("addEventListener('popstate'"));
+  assert.doesNotMatch(restoreBody,/location\.(?:reload|assign|replace)\(/);
 });
 
 test('V151 shell applies restored 2D or 3D mode through canonical controls',()=>{

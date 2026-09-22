@@ -24,9 +24,11 @@ test('Asset selection updates one digital-twin context without page reload',()=>
  assert.match(app,/async function openAssetContext\(machine\)/);
  assert.match(app,/await switchActiveMachine\(route,\{historyMode:'push'\}\)/);
  assert.match(app,/selectedArea:machine\.area/);
- assert.match(app,/selectedAsset:normalizeMachineKey\(route\)/);
+ assert.match(app,/selectedAsset:route/);
+ assert.match(app,/focusFoundationPlaceholder\(machine,\{historyMode:'push',openDialog:true\}\)/);
  assert.match(app,/showPanel\(\);renderPanel\('overview'\)/);
- assert.doesNotMatch(app,/location\.reload\(\)/);
+ const assetContext=app.slice(app.indexOf('async function openAssetContext'),app.indexOf('function assetDialog'));
+ assert.doesNotMatch(assetContext,/location\.(?:reload|assign|replace)\(/);
 });
 
 test('Systems workspace exposes all required initial categories and network context',()=>{
