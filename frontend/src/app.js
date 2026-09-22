@@ -46,7 +46,7 @@ const esc=s=>String(s??'Belum tersedia').replace(/[&<>"']/g,c=>({'&':'&amp;','<'
 const number=n=>Number.isFinite(n)?n.toLocaleString('id-ID',{maximumFractionDigits:4}):'Belum tersedia';
 let state,engine,activeTab='overview',apiBase='',token='',role=null,editing=false,explode=0,selectedPart=null,selectedTaxonomyId=ACTIVE_ROOT,exteriorMode=false,exteriorPreviousLow=null,exteriorFocusKey=null,simulationState,simulationOwnsExterior=false,simulationSceneSnapshot=null,referenceCategoryFilter='all',toastTimer,bundledLayout=null;
 function applyActiveMachineState(){
- state=structuredClone(initialState);referenceCategoryFilter='all';
+ state=structuredClone(initialState);referenceCategoryFilter='all';simulationSceneSnapshot=null;
  simulationState={active:false,running:false,paused:false,speed:1,stage:'Feeder',completed:0,progress:0,sheetsVisible:0,pileSheetsVisible:0,rotorCount:0,oscillatorCount:0,mechanismCount:0,inkFlowCount:0,uvLampCount:0,uvActive:false,pathVisible:IS_SHEETING?false:true,inkFlowVisible:true};
  if(IS_OFFSET10)state.asset={...state.asset,asset_id:'MACHINE-OFFSET10',asset_code:'OFFSET-10',codename:null,model:'CX104-2+LY-8+LY-1+L UV + FoilStar',description:'OFFSET 10',source_description:'OFFSET - 10 MACHINE',manufacturer:'Heidelberg',specification:'Speedmaster CX 104 · Full UV · FoilStar Gen.3 · X3 delivery',configuration:'CX104-2+LY-8+LY-1+L UV + FoilStar / X3','3d_status':'PROCEDURAL / DOCUMENT-GROUNDED',data_confidence:'HIGH CONFIDENCE',discovery_status:'OFFICIAL_DOCUMENTS_AVAILABLE',sources:OFFSET10_TECHNICAL_SOURCES};
  if(IS_APM2)state.asset={...state.asset,asset_id:'MACHINE-APM2',asset_code:'APM-2',codename:'APM-2',model:'SP 102',description:'AUTOPLATEN - 2 MACHINE',source_description:'BMJ Machine Database',manufacturer:'BOBST',specification:'Automatic flatbed die cutter · SP 102 family · 1994',configuration:'Feeder · Register / SideLay · Gripper Chain · Flatbed Platen · Stripping · Delivery','3d_status':'PROCEDURAL / DATABASE + LEGACY FAMILY REFERENCES',data_confidence:'IDENTITY VERIFIED / VARIANT REFERENCE',discovery_status:'SP102_FAMILY_REFERENCE_AVAILABLE',serial_number:'57115506',functional_location:'PC-PK2-CON-AUT-AUTOPLAT02',year:1994,sources:APM2_TECHNICAL_SOURCES};
@@ -232,7 +232,7 @@ function captureSimulationScene(){
 }
 function restoreSimulationScene(){
  const snapshot=simulationSceneSnapshot;simulationSceneSnapshot=null;if(!snapshot||!engine)return false;
- const restoreCamera=()=>{if(snapshot.cameraPosition?.length===3)engine.camera.position.fromArray(snapshot.cameraPosition);if(snapshot.cameraTarget?.length===3)engine.controls.target.fromArray(snapshot.cameraTarget);engine.controls.update();};
+ const restoreCamera=()=>{engine.transition=null;if(snapshot.cameraPosition?.length===3)engine.camera.position.fromArray(snapshot.cameraPosition);if(snapshot.cameraTarget?.length===3)engine.controls.target.fromArray(snapshot.cameraTarget);engine.controls.update();};
  if(snapshot.view==='factory'&&activeLayout()){setView('factory');activeTab=snapshot.activeTab||'overview';renderPanel(activeTab);restoreCamera();}
  else{
   setView('machine');
