@@ -1,0 +1,59 @@
+// V135 routing scaffold. TEMPLATE_ONLY until BMJ as-built routing is supplied.
+const compressorIds=['BMJ-MCH-0029','BMJ-MCH-0030','BMJ-MCH-0031','BMJ-MCH-0032','BMJ-MCH-0033','BMJ-MCH-0034','BMJ-MCH-0035'];
+export const COMPRESSED_AIR_ROUTING_TEMPLATE=Object.freeze({
+ id:'BMJ-UTILITY-COMPRESSED-AIR-V1',system:'COMPRESSED_AIR',layerKey:'utility_compressed_air',status:'TEMPLATE_ONLY',schemaVersion:1,
+ previewOrigin:Object.freeze([108,0,-15]),
+ defaults:Object.freeze({shape:'pipe',diameterMm:null,material:null,pressureBar:null,elevationM:null,status:'TEMPLATE_ONLY'}),
+ engineeringBoundary:Object.freeze({
+  actualRouteVerified:false,actualPipeSizeVerified:false,actualMaterialVerified:false,actualPressureVerified:false,
+  note:'Geometry is a reusable routing scaffold. No preview segment is an as-built BMJ piping claim.'
+ }),
+ equipmentAnchors:Object.freeze(compressorIds.map((machineId,i)=>Object.freeze({
+  id:'CA-COMP-'+String(i+1).padStart(2,'0')+'-OUT',machineId,port:'PACKAGE_DISCHARGE',status:'UNPLACED_EQUIPMENT_ANCHOR',
+  futureFields:Object.freeze(['x','y','z','direction','connectionSizeMm','elevationM'])
+ }))),
+ componentCatalog:Object.freeze([
+  'STRAIGHT_PIPE','ELBOW_90','ELBOW_45','TEE','REDUCER','FLEX_CONNECTOR','CHECK_VALVE','ISOLATION_VALVE','PRESSURE_GAUGE',
+  'AIR_RECEIVER','PREFILTER','DRYER','POSTFILTER','BYPASS','SWAN_NECK_TOP_TAKEOFF','SERVICE_DROP','DRIP_LEG','CONDENSATE_DRAIN','FUTURE_CAP'
+ ]),
+ nodes:Object.freeze([
+  {id:'CA-PKG-OUT',p:[0,1.10,0],kind:'SOURCE',label:'Compressor package discharge'},
+  {id:'CA-FLEX',p:[.70,1.10,0],kind:'FLEX_CONNECTOR'},
+  {id:'CA-CHECK',p:[1.20,1.10,0],kind:'CHECK_VALVE'},
+  {id:'CA-ISO',p:[1.65,1.10,0],kind:'ISOLATION_VALVE'},
+  {id:'CA-RECEIVER-IN',p:[2.25,1.10,0],kind:'AIR_RECEIVER'},
+  {id:'CA-RECEIVER-OUT',p:[2.90,1.10,0],kind:'AIR_RECEIVER'},
+  {id:'CA-PREFILTER',p:[3.50,1.10,0],kind:'PREFILTER'},
+  {id:'CA-DRYER',p:[4.15,1.10,0],kind:'DRYER'},
+  {id:'CA-POSTFILTER',p:[4.80,1.10,0],kind:'POSTFILTER'},
+  {id:'CA-RISER-BASE',p:[5.35,1.10,0],kind:'TEE'},
+  {id:'CA-RISER-TOP',p:[5.35,4.00,0],kind:'ELBOW_90'},
+  {id:'CA-RING-NW',p:[5.35,4.00,-3.60],kind:'ELBOW_90'},
+  {id:'CA-RING-NE',p:[13.20,4.00,-3.60],kind:'ELBOW_90'},
+  {id:'CA-RING-SE',p:[13.20,4.00,3.60],kind:'ELBOW_90'},
+  {id:'CA-RING-SW',p:[5.35,4.00,3.60],kind:'ELBOW_90'},
+  {id:'CA-DROP1-TAKE',p:[7.15,4.00,-3.60],kind:'TEE'},
+  {id:'CA-DROP1-TOP',p:[7.15,4.42,-3.60],kind:'SWAN_NECK_TOP_TAKEOFF'},
+  {id:'CA-DROP1-DOWN',p:[7.60,4.42,-3.60],kind:'ELBOW_90'},
+  {id:'CA-DROP1-USE',p:[7.60,.85,-3.60],kind:'SERVICE_POINT'},
+  {id:'CA-DROP2-TAKE',p:[9.60,4.00,3.60],kind:'TEE'},
+  {id:'CA-DROP2-TOP',p:[9.60,4.42,3.60],kind:'SWAN_NECK_TOP_TAKEOFF'},
+  {id:'CA-DROP2-DOWN',p:[10.05,4.42,3.60],kind:'ELBOW_90'},
+  {id:'CA-DROP2-USE',p:[10.05,.85,3.60],kind:'SERVICE_POINT'},
+  {id:'CA-DROP3-TAKE',p:[12.00,4.00,-3.60],kind:'TEE'},
+  {id:'CA-DROP3-TOP',p:[12.00,4.42,-3.60],kind:'SWAN_NECK_TOP_TAKEOFF'},
+  {id:'CA-DROP3-DOWN',p:[12.45,4.42,-3.60],kind:'ELBOW_90'},
+  {id:'CA-DROP3-USE',p:[12.45,.85,-3.60],kind:'SERVICE_POINT'},
+  {id:'CA-FUTURE',p:[13.20,4.00,0],kind:'FUTURE_CAP'}
+ ].map(n=>Object.freeze({...n,p:Object.freeze(n.p),status:'TEMPLATE_ONLY'}))),
+ segments:Object.freeze([
+  ['CA-S01','CA-PKG-OUT','CA-FLEX','FLEX_CONNECTOR'],['CA-S02','CA-FLEX','CA-CHECK','STRAIGHT_PIPE'],['CA-S03','CA-CHECK','CA-ISO','STRAIGHT_PIPE'],
+  ['CA-S04','CA-ISO','CA-RECEIVER-IN','STRAIGHT_PIPE'],['CA-S05','CA-RECEIVER-OUT','CA-PREFILTER','STRAIGHT_PIPE'],['CA-S06','CA-PREFILTER','CA-DRYER','STRAIGHT_PIPE'],
+  ['CA-S07','CA-DRYER','CA-POSTFILTER','STRAIGHT_PIPE'],['CA-S08','CA-POSTFILTER','CA-RISER-BASE','STRAIGHT_PIPE'],['CA-S09','CA-RISER-BASE','CA-RISER-TOP','STRAIGHT_PIPE'],
+  ['CA-S10','CA-RISER-TOP','CA-RING-NW','STRAIGHT_PIPE'],['CA-S11','CA-RING-NW','CA-RING-NE','RING_MAIN'],['CA-S12','CA-RING-NE','CA-RING-SE','RING_MAIN'],
+  ['CA-S13','CA-RING-SE','CA-RING-SW','RING_MAIN'],['CA-S14','CA-RING-SW','CA-RING-NW','RING_MAIN'],
+  ['CA-S15','CA-DROP1-TAKE','CA-DROP1-TOP','SWAN_NECK'],['CA-S16','CA-DROP1-TOP','CA-DROP1-DOWN','SWAN_NECK'],['CA-S17','CA-DROP1-DOWN','CA-DROP1-USE','SERVICE_DROP'],
+  ['CA-S18','CA-DROP2-TAKE','CA-DROP2-TOP','SWAN_NECK'],['CA-S19','CA-DROP2-TOP','CA-DROP2-DOWN','SWAN_NECK'],['CA-S20','CA-DROP2-DOWN','CA-DROP2-USE','SERVICE_DROP'],
+  ['CA-S21','CA-DROP3-TAKE','CA-DROP3-TOP','SWAN_NECK'],['CA-S22','CA-DROP3-TOP','CA-DROP3-DOWN','SWAN_NECK'],['CA-S23','CA-DROP3-DOWN','CA-DROP3-USE','SERVICE_DROP']
+ ].map(([id,from,to,kind])=>Object.freeze({id,from,to,kind,shape:'pipe',diameterMm:null,status:'TEMPLATE_ONLY'})))
+});
