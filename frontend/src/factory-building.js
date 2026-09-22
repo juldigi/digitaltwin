@@ -2,7 +2,7 @@ import * as T from 'three';
 import {FACTORY_FLEET_GZIP} from './data/factory-fleet-data.js';
 import {decodePlantData} from './data/plant-actual.js';
 import {buildUtilityRoutingScaffold} from './utility-routing.js';
-import {V142_SOURCE_STATS} from './data/research-v142.js';
+import {V143_SOURCE_STATS} from './data/research-v143.js';
 let fleetCache;
 export async function loadFactoryFleet(){return fleetCache||(fleetCache=await decodePlantData(FACTORY_FLEET_GZIP));}
 export const MACHINE_SERVICE_CLEARANCE=1.2;
@@ -52,14 +52,16 @@ export function buildActualFactory(layout,fleet){
   const texture=new T.CanvasTexture(c);texture.colorSpace=T.SRGBColorSpace;const s=new T.Sprite(new T.SpriteMaterial({map:texture,depthTest:false}));s.position.set(x,y,z);s.scale.set(width,width*80/512,1);parent.add(s);return s;
  };
  const data=layout.actual,b=layers.building;
- const buildingDetailStats={floorControlJoints:0,columnBasePlates:0,columnAnchorBolts:0,wallPanelJoints:0,primaryRoofFrames:0,roofPurlins:0,roofBracing:0,roofGutters:0,roofDownpipes:0,linearLights:0,doorPersonnel:0,doorWide:0,doorProtection:0,dockSafetyElements:0,ipalFrameBraces:0,ipalGuardrails:0};
- const detail=(o,semantic,accuracy='INDUSTRIAL_REALISM_REFERENCE_NOT_AS_BUILT')=>{if(o)o.userData={...o.userData,semantic,accuracy,researchVersion:'V142'};return o;};
+ const buildingDetailStats={floorControlJoints:0,serviceClearanceMarkings:0,columnBasePlates:0,columnAnchorBolts:0,columnPedestals:0,columnStiffeners:0,wallPanelJoints:0,wallGirts:0,wallBaseFlashings:0,primaryRoofFrames:0,eaveHaunches:0,eaveStruts:0,apexSplices:0,roofPurlins:0,purlinAntiSag:0,flyBracing:0,roofBracing:0,roofGutters:0,roofDownpipes:0,downpipeShoes:0,linearLights:0,doorPersonnel:0,doorWide:0,doorProtection:0,dockSafetyElements:0,pressRoomProtection:0,ipalFrameBraces:0,ipalGuardrails:0};
+ const detail=(o,semantic,accuracy='INDUSTRIAL_REALISM_REFERENCE_NOT_AS_BUILT')=>{if(o)o.userData={...o.userData,semantic,accuracy,researchVersion:'V143'};return o;};
  // The outline follows the source production hall and attached office/service wings.
  const outline=[[-4,2],[6,2],[6,6],[96,6],[96,90],[90,96],[73,96],[73,103],[23,103],[23,96],[6,96],[6,55],[-5,55],[-5,11],[-4,11]];
  const shape=new T.Shape(outline.map(([x,y])=>new T.Vector2(x,y))),floor=new T.Mesh(new T.ShapeGeometry(shape),material(0xd8dcda));floor.rotation.x=-Math.PI/2;floor.position.y=-.015;floor.receiveShadow=true;floor.userData={semantic:'REINFORCED_CONCRETE_FLOOR',accuracy:'SOURCE_OUTLINE_WITH_VISUAL_MATERIAL_REFERENCE'};b.add(floor);
  // Concrete control-joint grid is a subdued realism reference, not an as-built joint survey.
  for(let x=10;x<=94;x+=8){const j=box(b,x,.002,-49,.018,.004,82,0x7f8987);detail(j,'FLOOR_CONTROL_JOINT_REFERENCE');buildingDetailStats.floorControlJoints++;}
  for(let y=10;y<=90;y+=8){const j=box(b,51,.002,-y,86,.004,.018,0x7f8987);detail(j,'FLOOR_CONTROL_JOINT_REFERENCE');buildingDetailStats.floorControlJoints++;}
+ const ringLine=(x,z,w,d,color=0xb59b3d)=>{for(const [px,pz,pw,pd] of [[x,z-d/2,w,.025],[x,z+d/2,w,.025],[x-w/2,z,.025,d],[x+w/2,z,.025,d]])detail(box(b,px,.008,pz,pw,.016,pd,color),'FLOOR_SERVICE_CLEARANCE_MARKING_REFERENCE');};
+ for(const c of serviceClearances||[]){ringLine((c.minX+c.maxX)/2,-(c.minY+c.maxY)/2,c.maxX-c.minX,c.maxY-c.minY);buildingDetailStats.serviceClearanceMarkings+=4;}
  box(layers.landscape,47,-.25,-57,117,.35,137,0x9ea9a5);
  box(layers.landscape,47,-.06,1.8,110,.04,7.5,0x626d73);
  box(layers.landscape,-9,-.06,-53,5,.04,110,0x626d73);
@@ -76,7 +78,7 @@ export function buildActualFactory(layout,fleet){
  for(const w of wallPieces){const [a,c]=[w.a,w.b];
   const dx=c[0]-a[0],dy=c[1]-a[1],len=Math.hypot(dx,dy),r=Math.atan2(dy,dx),x=(a[0]+c[0])/2,z=-(a[1]+c[1])/2;
   const wall=box(b,x,1.75,z,len,3.5,w.width,0xe8e5df,r);wall.castShadow=true;wall.userData={semantic:'WALL',sourceHandles:w.handles,heightStatus:'VISUAL_ESTIMATE',machineClearance:MACHINE_SERVICE_CLEARANCE};
-  box(b,x,.12,z,len,.24,w.width+.035,0x64777e,r);box(b,x,3.46,z,len,.08,w.width+.025,0x71878b,r);
+  const plinth=box(b,x,.12,z,len,.24,w.width+.035,0x64777e,r);detail(plinth,'WALL_BASE_PLINTH_REFERENCE');const head=box(b,x,3.46,z,len,.08,w.width+.025,0x71878b,r);detail(head,'WALL_HEAD_FLASHING_REFERENCE');for(const gy of [.72,1.48,2.24,3.0]){const girt=box(b,x,gy,z,len,.045,w.width+.06,0x74868b,r);detail(girt,'WALL_GIRT_REFERENCE');buildingDetailStats.wallGirts++;}const baseFlash=box(b,x,.28,z,len,.055,w.width+.07,0x5f747c,r);detail(baseFlash,'WALL_BASE_FLASHING_REFERENCE');buildingDetailStats.wallBaseFlashings++;
   // Clerestory window treatment has source-aligned position, with assumed sill and glass detail.
   if(len>5.5){const glass=box(b,x,2.35,z,Math.max(.6,len-.7),.55,w.width+.025,0xa5cbd0,r,.38);glass.userData.semantic='FROSTED_CLERESTORY';
    const joints=Math.min(12,Math.floor(len/1.45));for(let i=1;i<joints;i++){const u=i/joints,px=a[0]+dx*u,py=a[1]+dy*u;const joint=box(b,px,1.62,-py,.024,3.22,w.width+.04,0xcbd1ce,r);detail(joint,'WALL_PANEL_OR_CONTROL_JOINT_REFERENCE');buildingDetailStats.wallPanelJoints++;}}
