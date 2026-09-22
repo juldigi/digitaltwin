@@ -1,4 +1,4 @@
-const VERSION='factory-digital-twin-v131-ipal-safety-detail-20260922';
+const VERSION='factory-digital-twin-v132-ahu-airflow-detail-20260922';
 const SHELL=['./','./index.html','./config.json','./assets/favicon.svg',
   './assets/splash-industrial-v79.webp',
   './app-shell-v79.css',
