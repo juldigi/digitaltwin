@@ -71,3 +71,42 @@ test('V120 reference assets expose UI taxonomy and technical-source evidence',()
   assert.deepEqual([...new Set(tax.map(n=>n.level))].sort(),[1,2,3,4,5,6],id);
  }
 });
+
+test('V132 AHU twins expose indoor/outdoor duct interfaces and separate supply return airflow simulation',()=>{
+ const ids=['BMJ-MCH-0036','BMJ-MCH-0037','BMJ-MCH-0038','BMJ-MCH-0039','BMJ-MCH-0040','BMJ-MCH-0041'];
+ for(const id of ids){
+  const template=createMachineTemplate(id),roles=new Set(),nodes=new Set();
+  template.root.traverse(o=>{if(o.userData?.mechanismRole)roles.add(o.userData.mechanismRole);if(o.userData?.nodeId)nodes.add(o.userData.nodeId);});
+  assert.equal(template.root.userData.plantDuctRouteVerified,false,id);
+  assert.ok(nodes.has(id==='BMJ-MCH-0040'?'sansin-air-distribution':'ahu-air-distribution'),id);
+  assert.ok(nodes.has(id==='BMJ-MCH-0040'?'sansin-supply-duct':'ahu-supply-duct'),id);
+  assert.ok(nodes.has(id==='BMJ-MCH-0040'?'sansin-return-duct':'ahu-return-duct'),id);
+  assert.ok(roles.has(id==='BMJ-MCH-0040'?'sansin-supply-duct-trunk-reference':'ahu-supply-duct-trunk-reference'),id);
+  const taxonomy=universalTaxonomy(id);assert.ok(taxonomy.some(n=>/Duct|Air Distribution/i.test(n.name)&&n.level===2),id+' duct taxonomy missing');
+  const sim=createMachineSimulation(id,template.root,template),started=sim.start();
+  assert.ok(started.airflowParticleCount>=28,id);
+  assert.equal(started.supplyAirflowParticleCount,18,id);
+  assert.equal(started.returnAirflowParticleCount,10,id);
+  if(id==='BMJ-MCH-0040')assert.equal(started.outdoorAirflowParticleCount,8,id);else assert.equal(started.outdoorAirflowParticleCount,0,id);
+  sim.update(0);sim.update(120);const state=sim.state();
+  assert.equal(state.supplyAirActive,true,id);assert.equal(state.returnAirReferenceActive,true,id);
+  assert.equal(state.plantDuctRouteVerified,false,id);
+  sim.dispose();template.dispose();
+ }
+});
+
+test('V132 generic AHUs never invent an outdoor condenser while SANSIN keeps the family outdoor heat-rejection package',()=>{
+ for(const id of ['BMJ-MCH-0036','BMJ-MCH-0037','BMJ-MCH-0038','BMJ-MCH-0039','BMJ-MCH-0041']){
+  const template=createMachineTemplate(id),roles=new Set();template.root.traverse(o=>{if(o.userData?.mechanismRole)roles.add(o.userData.mechanismRole);});
+  assert.equal(template.root.userData.outdoorCondensingUnitAssumed,false,id);
+  assert.ok(roles.has('ahu-weather-hood-boundary'),id);
+  assert.ok(!roles.has('sansin-refrigeration-compressor-reference'),id);
+  template.dispose();
+ }
+ const sansin=createMachineTemplate('BMJ-MCH-0040'),roles=new Set();sansin.root.traverse(o=>{if(o.userData?.mechanismRole)roles.add(o.userData.mechanismRole);});
+ assert.ok(roles.has('sansin-refrigeration-compressor-reference'));
+ assert.ok(roles.has('sansin-outdoor-condenser-fan-reference'));
+ assert.ok(roles.has('sansin-refrigerant-interconnect-reference'));
+ assert.ok(roles.has('sansin-outdoor-fan-guard-reference'));
+ sansin.dispose();
+});
