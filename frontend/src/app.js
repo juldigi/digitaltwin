@@ -373,7 +373,7 @@ function renderFactoryPanel(){
 function renderPanel(tab=activeTab){
  if(editing&&engine){engine.edit(false);engine.onTransform=null;engine.applyPlacement(state);editing=false;}
  activeTab=tab;renderContextBreadcrumb();
- if(engine?.view==='factory'&&renderFactoryPanel())return;
+ if(engine?.view==='factory'&&!factoryAssetContextId&&renderFactoryPanel())return;
  $$('[data-tab]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===tab)));
  const a=state.asset;
  if(tab==='overview'){
@@ -525,7 +525,7 @@ function updateConnectionTruth(){
 async function acceptState(next){state=next;engine?.loadLayout(activeLayout());if(engine?.view==='factory')engine.setView('factory',state);renderStatus();renderPanel();if(cacheEnabled){try{await cache.set(apiBase,{state,savedAt:new Date().toISOString()});}catch{toast('Data berhasil dimuat, tetapi salinan di perangkat tidak dapat disimpan.',true);}}}
 function setView(view){
  const l=activeLayout();
- if(view==='factory'&&!l){layoutDialog();return;}
+ if(view==='factory'&&!l){layoutDialog();return;}if(view!=='factory')factoryAssetContextId=null;
  if(view==='factory'&&engine?.isPrintingSimulationActive()){engine.stopPrintingSimulation();simulationState=engine.getPrintingSimulationState();simulationOwnsExterior=false;}if(view==='factory'&&exteriorMode)exitExteriorMode();editing=false;if(engine)engine.onTransform=null;explode=0;selectedPart=null;engine?.setView(view,state);
  $$('.rail>button').forEach(b=>b.classList.remove('active'));
  $('#nav-machine')?.classList.add('active');
@@ -545,7 +545,7 @@ function setView(view){
  renderPanel();redrawPlantPlan();emitDomainState({activeSection:'factory',viewMode:'3d'});
 }
 function showHome(){
- setView('factory');
+ factoryAssetContextId=null;setView('factory');
  $$('.rail>button').forEach(b=>b.classList.remove('active'));
  $('#nav-machine')?.classList.add('active');
  $('#view-kicker').textContent='PABRIK · DIGITAL TWIN';
