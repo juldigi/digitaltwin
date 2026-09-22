@@ -366,8 +366,8 @@ const relabel=()=>{
  qa('[data-tab]').forEach(btn=>{if(labels[btn.dataset.tab])btn.textContent=labels[btn.dataset.tab]});
  const focus=q('#focus-machine');if(focus)focus.textContent='Pusatkan di 3D';
  const top=q('.panel-top .eyebrow');if(top)top.textContent='KONTEKS TERPILIH';
- const search=q('#global-search');if(search)search.placeholder='Cari mesin, area, komponen, sistem, atau dokumen…';
+ const search=q('#global-search');if(search)search.placeholder='Cari OFFSET 5, komponen, area, atau dokumen…';
  const connection=q('#connection');if(connection)connection.textContent=navigator.onLine?'Data tersedia':'Offline';
 };
 relabel();const hydratedState=hydrateUrl();if(hydratedState.viewMode==='2d')q('#mode-2d')?.click();subscribe(state=>{markSection(state.activeSection);syncLayerControls()});
-document.documentElement.dataset.uiArchitecture='v158-phase3-interaction';
+document.documentElement.dataset.uiArchitecture='v159-status-truth-map-editor';
