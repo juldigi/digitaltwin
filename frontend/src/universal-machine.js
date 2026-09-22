@@ -107,7 +107,9 @@ const FAMILY_SOURCES={
   ['HEIDELBERG Suprasetter A75 official product page','https://www.heidelberg.com/global/en/print_and_packaging/products/computer_to_plate_1/suprasetter_a52_a75/product_information_94/suprasetter_a52_a75.jsp'],
   ['HEIDELBERG Suprasetter A106/106 official product page','https://www.heidelberg.com/global/en/print_and_packaging/products/computer_to_plate_1/suprasetter_a106_106__106_uv/product_information_95/suprasetter_a106_106.jsp'],
   ['HEIDELBERG Suprasetter family technical data','https://www.heidelberg.com/global/media/l1/global_media/products___ctp/pdf_5/suprasetter_fam_tec_specs.pdf'],
-  ['HEIDELBERG Suprasetter A52/A75 product guide','https://www.heidelberg.com/global/media/en/global_media/products___ctp/pdf_5/a52_a75_product_guide.pdf']
+  ['HEIDELBERG Suprasetter A52/A75 product guide','https://www.heidelberg.com/global/media/en/global_media/products___ctp/pdf_5/a52_a75_product_guide.pdf'],
+  ['HEIDELBERG current CtP / Suprasetter overview','https://www.heidelberg.com/us/en/products/computer_to_plate_1/prepress_overview.jsp'],
+  ['HEIDELBERG current Suprasetter family brochure','https://www.heidelberg.com/global/media/en/global_media/products___ctp/pdf_5/331561_PB_Suprasetter_EN_WEB.pdf']
  ],
  imagesetter:[
   ['SCREEN Katana 5040/5055 official technical article','https://www.screen.co.jp/ga_dtp/en/news/pdf/newsbox/vol9_pdf/newsbox_9_4.pdf'],
