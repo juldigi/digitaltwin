@@ -214,7 +214,7 @@ export function buildActualFactory(layout,fleet){
   officePanelLight(x-.31,y,tag);officePanelLight(x+.31,y,tag);
   fixture(x-.62,y+.62,.48,.035,.48,0xd5dcdb,tag+'_SUPPLY_DIFFUSER',true,2.90);for(const s of [-.14,0,.14])fixture(x-.62+s,y+.62,.018,.018,.40,0x7d8d91,tag+'_DIFFUSER_SLOT',true,2.875);
   fixture(x+.62,y+.62,.48,.035,.48,0x66787f,tag+'_RETURN_GRILLE',true,2.90);for(const s of [-.16,-.08,0,.08,.16])fixture(x+.62+s,y+.62,.012,.018,.40,0x36464d,tag+'_RETURN_GRILLE_SLOT',true,2.875);
-  const sensor=new T.Mesh(new T.CylinderGeometry(.075,.075,.025,18),material(0xf0f1ed));sensor.position.set(x,y-.62?2.895:2.895,-(y-.62));sensor.rotation.x=Math.PI/2;sensor.userData={semantic:tag+'_CEILING_SENSOR_REFERENCE',accuracy:'INDUSTRIAL_PACKAGING_INTERIOR_REFERENCE_NOT_AS_BUILT',researchVersion:'V145'};b.add(sensor);
+  const sensor=new T.Mesh(new T.CylinderGeometry(.075,.075,.025,18),material(0xf0f1ed));sensor.position.set(x,2.895,-(y-.62));sensor.rotation.x=Math.PI/2;sensor.userData={semantic:tag+'_CEILING_SENSOR_REFERENCE',accuracy:'INDUSTRIAL_PACKAGING_INTERIOR_REFERENCE_NOT_AS_BUILT',researchVersion:'V145'};b.add(sensor);
   buildingDetailStats.officeSupplyDiffusers++;buildingDetailStats.officeReturnGrilles++;buildingDetailStats.officeCeilingSensors++;
  };
  const deskPowerData=(x,y,tag)=>{
@@ -331,7 +331,7 @@ export function buildActualFactory(layout,fleet){
  const mirrorMat=new T.MeshStandardMaterial({color:0xbcc9cc,metalness:.55,roughness:.16,side:T.DoubleSide});const mirrorDisc=new T.Mesh(new T.CircleGeometry(.28,24),mirrorMat);mirrorDisc.rotation.y=-Math.PI/2;mirrorGroup.add(mirrorDisc);const rim=new T.Mesh(new T.TorusGeometry(.30,.025,8,24),material(0xe0b436));rim.rotation.y=Math.PI/2;mirrorGroup.add(rim);detail(line(mirrorGroup,new T.Vector3(.05,0,0),new T.Vector3(.45,-.18,0),.018,0x617279),'RMS_CONVEX_MIRROR_BRACKET_REFERENCE');buildingDetailStats.warehouseConvexMirrors++;
  const trafficCue=box(b,82.25,1.20,-73.0,.06,2.4,.06,0x617279);detail(trafficCue,'RMS_TRAFFIC_SIGN_POST_REFERENCE');const trafficPlate=box(b,82.25,2.14,-73.0,.58,.42,.045,0xe0b436);detail(trafficPlate,'RMS_PEDESTRIAN_TRAFFIC_CUE_REFERENCE');buildingDetailStats.warehouseTrafficCues++;
  for(const [x,y,rot] of [[83.05,74.1,0],[83.05,86.0,Math.PI]])palletJack(x,y,rot,'RMS');
- for(const [x,y,rot] of [[83.0,75.8,-.05],[83.1,83.8,.04]]){for(let i=0;i<3;i++){const scuff=box(b,x+i*.13,.009,-(y+i*.52),.055,.008,1.0,0x4c5354,rot,.16);scuff.userData={semantic:'WAREHOUSE_FORK_WHEEL_SCuff_REFERENCE',accuracy:'SUBTLE_FLOOR_WEAR_REFERENCE_NOT_AS_BUILT',researchVersion:'V145'};buildingDetailStats.warehouseWearMarks++;}}
+ for(const [x,y,rot] of [[83.0,75.8,-.05],[83.1,83.8,.04]]){for(let i=0;i<3;i++){const scuff=box(b,x+i*.13,.009,-(y+i*.52),.055,.008,1.0,0x4c5354,rot,.16);scuff.userData={semantic:'WAREHOUSE_FORK_WHEEL_SCUFF_REFERENCE',accuracy:'SUBTLE_FLOOR_WEAR_REFERENCE_NOT_AS_BUILT',researchVersion:'V145'};buildingDetailStats.warehouseWearMarks++;}}
  label('RMS',88.5,3.8,-81,5);
 
  // Finished-goods areas are populated only when an FG label exists in the source layout.
