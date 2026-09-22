@@ -35,6 +35,7 @@ export async function loadActualPlantLayout(){
  cache={baselineId:BASELINE_ID,actual:data,placements:MACHINE_PLACEMENTS,source:{...s,derivedFile:s.file,unitStatus:'GRID_CALIBRATED',unitResolution:'600 DXF units = 6000 mm; 0.01 metre/source unit'},bounds:data.bounds,
  transform:{originX:s.originX,originY:s.originY,scale:.01,rotation:0,sourceUnits:'drawing-unit'},
  displayTransform:{originX:0,originY:0,scale:1,rotation:0,flipY:true},
+ utilityRoutingStatus:'TEMPLATE_ONLY',utilityRoutingOverrides:{},
  referenceBatches:[{layer:'250804',semantic:'CAD_REFERENCE',points:data.segments.flat()}],
  identifiedLabels:data.labels.map(l=>({...l,layer:'0'})),assetCandidates:MACHINE_PLACEMENTS.filter(p=>p.status!=='UNIDENTIFIED'),areaCandidates:data.labels.filter(l=>/room|r\.|workshop|toilet|mushola|dock|rms|fps|sparepart/i.test(l.text)).map(l=>({...l,label:l.text})),
  audit:{unitFinding:'Skala grid 600 unit = 6 m.',sourceFinding:'DXF 250804 + revisi posisi pengguna; elevasi dan lanskap perkiraan visual.'},positionStatus:'BASELINE REVISI PENGGUNA',extractionRevision:124};
