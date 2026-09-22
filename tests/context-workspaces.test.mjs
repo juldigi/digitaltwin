@@ -14,8 +14,8 @@ test('Asset Browser exposes the master-prompt search and filter dimensions',()=>
  assert.match(app,/function registryBrand\(machine\)/);
  assert.match(app,/function registryType\(machine\)/);
  assert.match(app,/function registryDataStatus\(machine\)/);
- assert.match(app,/Status data/);
- assert.match(app,/Machine ID|machineId/);
+ assert.doesNotMatch(app,/<span>Status data<\/span>/);
+ assert.match(app,/ID posisi|machineId/);
  assert.match(css,/\.asset-filter-grid/);
  assert.match(css,/\.asset-browser-row/);
  assert.match(css,/\.asset-thumbnail/);
