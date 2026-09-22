@@ -43,13 +43,13 @@ test('placeholder route compatibility remains lightweight and cannot unlock tech
  assert.match(engine,/if\(!canOpenTechnical3D\(requested\)\)/);
 });
 
-test('V157 release identifiers describe the foundation-only runtime',()=>{
- assert.match(scope,/release:'V157'/);
- assert.match(html,/app-shell-v79\.css\?v=160/);
- assert.match(html,/src\/app\.js\?v=160/);
- assert.match(html,/src\/app-shell-v79\.js\?v=160/);
- assert.match(shell,/v160-context-inspector/);
- assert.match(sw,/factory-digital-twin-v160-context-inspector-20260922/);
+test('V161 release identifiers keep technical 3D foundation-only while restoring factory context',()=>{
+ assert.match(scope,/release:'V161'/);
+ assert.match(html,/app-shell-v79\.css\?v=161/);
+ assert.match(html,/src\/app\.js\?v=161/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=161/);
+ assert.match(shell,/v161-factory-first-systems/);
+ assert.match(sw,/factory-digital-twin-v161-factory-first-systems-20260922/);
 });
 
 test('offline shell also stays free from expansion runtime modules',()=>{

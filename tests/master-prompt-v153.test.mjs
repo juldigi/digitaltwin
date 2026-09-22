@@ -13,7 +13,8 @@ test('master-prompt foundation scope exposes exactly OFFSET 5 as the primary tec
   assert.match(scope,/primaryMachineId:'BMJ-MCH-0003'/);
   assert.match(scope,/primaryRoute:'offset5'/);
   assert.match(scope,/primaryAssetName:'OFFSET 5'/);
-  assert.match(scope,/expansionMode:'LAYOUT_PLACEHOLDERS_ONLY'/);
+  assert.match(scope,/expansionMode:'EVIDENCE_GATED_CONTEXT'/);
+  assert.match(scope,/showUtilitySystems:true/);
   assert.match(scope,/return Boolean\(machine\?\.has3D\)&&isFoundationPrimary\(machine\)/);
 });
 
@@ -51,9 +52,9 @@ test('factory-first boot stays covered until CAD layout is loaded and failures a
 });
 
 test('V153 cache includes the foundation policy and current cache-busted controller',()=>{
-  assert.match(html,/app-shell-v79\.css\?v=160/);
-  assert.match(html,/src\/app\.js\?v=160/);
-  assert.match(html,/src\/app-shell-v79\.js\?v=160/);
-  assert.match(sw,/factory-digital-twin-v160-context-inspector-20260922/);
+  assert.match(html,/app-shell-v79\.css\?v=161/);
+  assert.match(html,/src\/app\.js\?v=161/);
+  assert.match(html,/src\/app-shell-v79\.js\?v=161/);
+  assert.match(sw,/factory-digital-twin-v161-factory-first-systems-20260922/);
   assert.match(sw,/src\/data\/foundation-scope\.js/);
 });

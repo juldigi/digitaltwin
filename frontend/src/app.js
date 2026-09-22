@@ -532,7 +532,9 @@ function setView(view){
  renderPanel();redrawPlantPlan();emitDomainState({activeSection:'factory',viewMode:'3d'});
 }
 function showHome(){
- engine?.clearFactorySelection();setView('factory');engine?.fit(engine.factory,'iso');
+ qStaticFallbackClear();engine?.clearFactorySelection();setView('factory');engine?.fit(engine.factory,'iso');
+ document.title='Packaging Offset Factory Digital Twin';
+ document.body.classList.add('panel-hidden');document.body.classList.remove('mobile-panel-open');
  $$('.rail>button').forEach(b=>b.classList.remove('active'));
  $('#nav-machine')?.classList.add('active');
  $('#view-kicker').textContent='PABRIK · DIGITAL TWIN';
@@ -540,7 +542,7 @@ function showHome(){
  $('#view-subtitle').textContent='Bangunan, area, mesin, dan utilitas dalam satu konteks';
  $('#geometry-caption').textContent='Pabrik · Seluruh Area';
  $('#scene-hint').textContent='Klik aset untuk memilih · seret untuk memutar · zoom dengan cubit/scroll';
- emitDomainState({selectedAsset:null,selectedArea:null,selectedNode:null,activeReference:null,activeSection:'factory',cameraPreset:'iso'});
+ emitDomainState({selectedAsset:null,selectedArea:null,selectedNode:null,activeReference:null,activeSection:'factory',cameraPreset:'iso',inspectorState:{open:false,tab:'overview'}});
 }
 function connectionDialog(){
  modal('Sambungkan Data',`<p>Gunakan bagian ini jika Anda memiliki akses ke data tersimpan bersama. Untuk sekadar mencoba tampilan 3D, mode lokal sudah dapat digunakan.</p><form id="connection-form"><label for="api-base">Alamat layanan data</label><input id="api-base" type="url" value="${esc(apiBase)}" placeholder="https://alamat-layanan-data" required><label for="api-token">Kunci akses</label><input id="api-token" type="password" autocomplete="off" required><label class="check"><input id="enable-cache" type="checkbox" ${cacheEnabled?'checked':''}> Simpan salinan data di perangkat ini</label><p class="subtle">Gunakan pada perangkat pribadi jika ingin membuka data lebih cepat saat koneksi tidak stabil.</p><div class="actions"><button type="submit" class="primary">Sambungkan</button><button type="button" id="disconnect" class="secondary">Gunakan Mode Lokal</button></div><p id="connection-error" class="inline-error" role="alert"></p></form>`);
