@@ -49,10 +49,10 @@ function bindShell(){
   $('#nav-machine')?.addEventListener('click',()=>{$('#mode-3d')?.classList.add('active');$('#mode-2d')?.classList.remove('active');document.body.classList.remove('nav-open');});
   $('#nav-components')?.addEventListener('click',()=>{showDetail('structure');document.body.classList.remove('nav-open');});
   $('#nav-exterior')?.addEventListener('click',()=>{showDetail('exterior');document.body.classList.remove('nav-open');});
-  $('#nav-view-panels')?.addEventListener('click',()=>{toggleLauncher(true);document.body.classList.remove('nav-open');});
+  $('#nav-view-panels')?.addEventListener('click',()=>{window.dispatchEvent(new CustomEvent('bmj:foundationstatusrequest'));document.body.classList.remove('nav-open');});
 
   $('#ui-theme-toggle')?.addEventListener('click',()=>document.body.classList.toggle('light-mode'));
-  $('#panel-launcher')?.addEventListener('click',e=>{e.stopPropagation();toggleLauncher();});
+  $('#panel-launcher')?.addEventListener('click',e=>{e.stopPropagation();window.dispatchEvent(new CustomEvent('bmj:foundationstatusrequest'));});
   $('#panel-launcher-close')?.addEventListener('click',()=>toggleLauncher(false));
 
   $('#filter-close')?.addEventListener('click',()=>setFloatVisible('.floating-filter',false));
