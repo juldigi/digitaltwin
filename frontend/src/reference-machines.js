@@ -517,15 +517,31 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   }
   if(transport){
    const path=this.findNode('ctp-transport');
-   if(path)for(const y of [.62,.82,.98]){const r=this.motion(this.cyl(path,.045,1.02,[0,y,0],'dark','z'),'spin','z',3.4,.01,y,1);this.tag(r,'plate-transport-roller','SUPRASETTER_FAMILY_PRIMARY');}
+   if(path){
+    for(const y of [.62,.82,.98]){const r=this.motion(this.cyl(path,.045,1.02,[0,y,0],'dark','z'),'spin','z',3.4,.01,y,1);this.tag(r,'plate-transport-roller','SUPRASETTER_FAMILY_PRIMARY');}
+    const motor=this.cyl(path,.085,.20,[-.46,.64,.56],'dark','x');this.tag(motor,'ctp-plate-transport-motor-reference','SUPRASETTER_FUNCTIONAL_DRIVE_REFERENCE');
+    const coupling=this.cyl(path,.038,.10,[-.34,.64,.56],'accent','x');this.tag(coupling,'ctp-plate-transport-coupling-reference','SUPRASETTER_FUNCTIONAL_DRIVE_REFERENCE');
+    const encoder=this.cyl(path,.055,.026,[.34,.82,.56],'glass','z');this.tag(encoder,'ctp-transport-encoder-reference','SUPRASETTER_POSITION_REFERENCE');
+   }
    const reg=this.findNode('ctp-register');
-   if(reg){for(const z of [-.42,.42])this.tag(this.box(reg,[.075,.055,.055],[.24,.87,z],'accent',.005),'plate-position-sensor-reference','SUPRASETTER_FAMILY_PROCESS');this.tag(this.box(reg,[.06,.32,1.00],[-.24,.82,0],'steel',.004),'plate-register-stop-reference','SUPRASETTER_FAMILY_PROCESS');}
+   if(reg){
+    for(const z of [-.42,.42]){this.tag(this.box(reg,[.075,.055,.055],[.24,.87,z],'accent',.005),'plate-position-sensor-reference','SUPRASETTER_FAMILY_PROCESS');const prox=this.box(reg,[.040,.050,.040],[-.16,.91,z],'blue',.003);this.tag(prox,'ctp-register-confirm-sensor-reference','SUPRASETTER_POSITION_REFERENCE');}
+    const stop=this.box(reg,[.06,.32,1.00],[-.24,.82,0],'steel',.004);this.tag(stop,'plate-register-stop-reference','SUPRASETTER_FAMILY_PROCESS');
+    const stopAct=this.cyl(reg,.020,.14,[-.31,.83,.45],'steel','x');this.tag(stopAct,'ctp-register-stop-actuator-reference','SUPRASETTER_FUNCTIONAL_ACTUATOR_REFERENCE');
+   }
   }
   if(drumUnit){
    const drum=this.findNode('ctp-drum');
-   if(drum){const d=this.motion(this.cyl(drum,.34,1.10,[0,.82,0],'dark','z'),'spin','z',2.8,.01,0,2);this.tag(d,'external-imaging-drum','SUPRASETTER_FAMILY_PRIMARY');d.userData.imagingDrum=true;for(const z of [-.57,.57]){this.tag(this.cyl(drum,.060,.12,[0,.82,z],'steel','z'),'imaging-drum-bearing-reference','SUPRASETTER_FAMILY_PROCESS');const housing=this.box(drum,[.18,.18,.12],[0,.82,z],'dark',.012);this.tag(housing,'imaging-drum-bearing-housing-reference','SUPRASETTER_SERVICE_REFERENCE');}const enc=this.cyl(drum,.085,.035,[0,.82,.69],'accent','z');this.tag(enc,'imaging-drum-encoder-reference','SUPRASETTER_POSITION_REFERENCE');}
+   if(drum){
+    const d=this.motion(this.cyl(drum,.34,1.10,[0,.82,0],'dark','z'),'spin','z',2.8,.01,0,2);this.tag(d,'external-imaging-drum','SUPRASETTER_FAMILY_PRIMARY');d.userData.imagingDrum=true;
+    for(const z of [-.57,.57]){this.tag(this.cyl(drum,.060,.12,[0,.82,z],'steel','z'),'imaging-drum-bearing-reference','SUPRASETTER_FAMILY_PROCESS');const housing=this.box(drum,[.18,.18,.12],[0,.82,z],'dark',.012);this.tag(housing,'imaging-drum-bearing-housing-reference','SUPRASETTER_SERVICE_REFERENCE');}
+    const enc=this.cyl(drum,.085,.035,[0,.82,.69],'accent','z');this.tag(enc,'imaging-drum-encoder-reference','SUPRASETTER_POSITION_REFERENCE');
+    const motor=this.cyl(drum,.11,.28,[-.52,.82,.67],'dark','x');this.tag(motor,'ctp-drum-drive-motor-reference','SUPRASETTER_FUNCTIONAL_DRIVE_REFERENCE');
+    const coupling=this.cyl(drum,.050,.10,[-.37,.82,.67],'accent','x');this.tag(coupling,'ctp-drum-drive-coupling-reference','SUPRASETTER_FUNCTIONAL_DRIVE_REFERENCE');
+    const brake=this.box(drum,[.14,.16,.11],[.28,.82,.67],'steel',.008);this.tag(brake,'ctp-drum-position-brake-reference','SUPRASETTER_POSITION_REFERENCE');
+   }
    const clamp=this.findNode('ctp-drum-clamp');
-   if(clamp){for(const z of [-.43,.43]){const bar=this.box(clamp,[.12,.055,.13],[-.23,.98,z],'accent',.005);this.tag(bar,'plate-clamp-reference','SUPRASETTER_FAMILY_PROCESS');const actuator=this.cyl(clamp,.020,.16,[-.30,1.04,z],'steel','x');this.tag(actuator,'plate-clamp-actuator-reference','SUPRASETTER_SERVICE_REFERENCE');}}
+   if(clamp){for(const z of [-.43,.43]){const bar=this.box(clamp,[.12,.055,.13],[-.23,.98,z],'accent',.005);this.tag(bar,'plate-clamp-reference','SUPRASETTER_FAMILY_PROCESS');const actuator=this.cyl(clamp,.020,.16,[-.30,1.04,z],'steel','x');this.tag(actuator,'plate-clamp-actuator-reference','SUPRASETTER_SERVICE_REFERENCE');const sensor=this.box(clamp,[.040,.050,.040],[-.15,1.03,z],'blue',.003);this.tag(sensor,'ctp-clamp-confirm-sensor-reference','SUPRASETTER_INTERLOCK_REFERENCE');}}
   }
   if(laserUnit){
    const rail=this.findNode('ctp-laser-rail');
@@ -541,7 +557,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   }
   if(out){
    const unload=this.findNode('ctp-unload');
-   if(unload){for(const z of [-.42,.42])this.tag(this.box(unload,[.66,.025,.05],[.08,.66,z],'steel',.004),'plate-unload-guide','SUPRASETTER_FAMILY_PRIMARY');this.tag(this.box(unload,[.64,.025,.92],[.12,.69,0],'steel',.003),'plate-output-bed-reference','SUPRASETTER_FAMILY_PROCESS');}
+   if(unload){for(const z of [-.42,.42])this.tag(this.box(unload,[.66,.025,.05],[.08,.66,z],'steel',.004),'plate-unload-guide','SUPRASETTER_FAMILY_PRIMARY');this.tag(this.box(unload,[.64,.025,.92],[.12,.69,0],'steel',.003),'plate-output-bed-reference','SUPRASETTER_FAMILY_PROCESS');const sensor=this.box(unload,[.050,.060,.045],[.34,.74,-.40],'accent',.004);this.tag(sensor,'ctp-output-plate-sensor-reference','SUPRASETTER_INTERLOCK_REFERENCE');}
    const processor=this.findNode('ctp-processor-boundary');
    if(processor){processor.userData.installedOptionVerified=false;const env=this.box(processor,[.44,.30,1.02],[.44,.54,0],'glass',.015);env.userData.optionReference=true;this.tag(env,'processor-stacker-interface-boundary','OPTION_BOUNDARY');}
    const debris=this.findNode('ctp-debris-option');
