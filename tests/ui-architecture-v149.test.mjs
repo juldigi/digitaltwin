@@ -91,3 +91,21 @@ test('visible product copy removes prototype and test-mode terms',()=>{
  assert.match(html,/Buka Interior/);
  assert.match(html,/Pusatkan di 3D/);
 });
+
+test('V149 inspector exposes five canonical tabs and keeps interior as an inspection action',()=>{
+ for(const tab of ['overview','structure','simulation','data','sources'])assert.match(html,new RegExp(`data-tab="${tab}"`));
+ assert.match(html,/id="tool-interior"/);
+ assert.match(html,/class="legacy-inspector-tab"[^>]*data-tab="exterior"/);
+ assert.match(css,/\.legacy-inspector-tab\{display:none!important\}/);
+ assert.doesNotMatch(app,/Printing Test/);
+});
+
+test('V149 universal search covers machines areas components systems documents and photos',()=>{
+ for(const token of ['universalSearchResults','searchableTaxonomy','searchableSources','searchablePhotos','bmj:searchrequest','bmj:searchselect'])assert.match(app,new RegExp(token));
+ for(const group of ["'MESIN'","'KOMPONEN'","'AREA'","'SISTEM'","'DOKUMEN'","'FOTO'"])assert.match(app,new RegExp(group));
+ assert.match(shell,/universal-search-panel/);
+ assert.match(shell,/bmj:searchresults/);
+ assert.match(shell,/mobile-search-toggle/);
+ assert.match(html,/id="mobile-search-toggle"/);
+ assert.doesNotMatch(ui,/global-search[\s\S]{0,160}nav-assets/);
+});
