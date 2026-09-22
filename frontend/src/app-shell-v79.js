@@ -276,6 +276,11 @@ addEventListener('bmj:domainstate',event=>{
  const carriesDeepLink=Object.prototype.hasOwnProperty.call(detail,'selectedAsset')||Object.prototype.hasOwnProperty.call(detail,'selectedNode')||Object.prototype.hasOwnProperty.call(detail,'viewMode');
  setState(detail,{url:carriesDeepLink});
 });
+addEventListener('bmj:historyrestore',event=>{
+ const detail=event.detail||{},viewMode=detail.viewMode==='2d'?'2d':'3d';
+ setState({selectedAsset:detail.selectedAsset||null,selectedNode:detail.selectedNode||null,viewMode},{url:false});
+ if(viewMode==='2d')q('#mode-2d')?.click();else q('#mode-3d')?.click();
+});
 const syncViewport=()=>{document.documentElement.style.setProperty('--app-vh',`${window.visualViewport?.height||innerHeight}px`);const w=innerWidth;setTimeout(()=>window.BMJAppState?.setState({deviceMode:w<768?'mobile':w<=1180?'tablet':'desktop'},{url:false}),0)};
 syncViewport();addEventListener('resize',syncViewport,{passive:true});window.visualViewport?.addEventListener('resize',syncViewport,{passive:true});
 
