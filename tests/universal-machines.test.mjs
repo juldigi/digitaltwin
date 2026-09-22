@@ -26,7 +26,7 @@ test('all 21 formerly generic assets now route to evidence-grounded reference bu
 
 test('every reference machine has finite non-placeholder geometry and contiguous six-level taxonomy',()=>{
  for(const machine of referenceAssets){
-  const model=createMachineTemplate(machine.machineId),box=new THREE.Box3().setFromObject(model.root),tax=universalTaxonomy(machine.machineId);
+  const model=createMachineTemplate(machine.machineId),box=new THREE.Box3().setFromObject(model.root),tax=universalTaxonomy(machine.machineId),cfg=universalMachineConfig(machine.machineId);
   assert.ok(!box.isEmpty(),machine.machineId);
   for(const v of [...box.min.toArray(),...box.max.toArray()])assert.ok(Number.isFinite(v),machine.machineId);
   assert.ok(box.min.y>=-0.011,`${machine.machineId} below floor: ${box.min.y}`);
