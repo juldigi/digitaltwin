@@ -194,7 +194,7 @@ test('v45 exposes a safe Printing Test simulation with continuous sheet flow',()
   assert.match(html,/id="tool-simulation"/);
   assert.match(html,/data-tab="simulation"/);
   assert.match(app,/PRINTING_SIMULATION_STAGES/);
-  assert.match(app,/Mulai Printing Test/);
+  assert.match(app,/Mulai Simulasi Proses/);
   assert.match(app,/simulationLocksStructure\(\)/);
   assert.match(app,/engine\.startPrintingSimulation\(\)/);
   assert.match(app,/engine\.pausePrintingSimulation\(\)/);
