@@ -1,4 +1,4 @@
-const VERSION='factory-digital-twin-v135-utility-routing-scaffold-20260922';
+const VERSION='factory-digital-twin-v135-utility-routing-scaffold-r2-20260922';
 const SHELL=['./','./index.html','./config.json','./assets/favicon.svg',
   './assets/splash-industrial-v79.webp',
   './app-shell-v79.css',
