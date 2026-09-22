@@ -135,7 +135,10 @@ test('V133 compressor twins expose detailed package flow and distribution piping
   assert.equal(template.root.userData.airDryerInstalledVerified,false,id);
   assert.equal(template.root.userData.ringMainInstalledVerified,false,id);
   for(const node of ['compressor-air-distribution','compressor-discharge-piping','compressor-air-receiver-boundary','compressor-air-treatment-boundary','compressor-ring-main-reference'])assert.ok(nodes.has(node),id+' missing '+node);
-  for(const role of ['compressor-flexible-discharge-connector-reference','compressor-discharge-check-valve-reference','compressor-discharge-isolation-valve-reference','compressed-air-receiver-reference','compressed-air-dryer-option-boundary','compressed-air-ring-main-reference','compressed-air-service-drop-reference','compressed-air-drip-leg-reference'])assert.ok(roles.has(role),id+' missing '+role);
+  for(const role of ['compressor-service-door-reference','compressor-cooling-air-inlet-louvre-reference','compressor-cooling-air-exhaust-grille-reference','compressor-flexible-discharge-connector-reference','compressor-discharge-check-valve-reference','compressor-discharge-isolation-valve-reference','compressed-air-receiver-reference','compressed-air-dryer-option-boundary','compressed-air-ring-main-reference','compressed-air-service-drop-reference','compressed-air-drip-leg-reference'])assert.ok(roles.has(role),id+' missing '+role);
+  assert.equal(template.root.userData.unifiedCompressorCabinet,true,id);
+  assert.equal(template.root.userData.distributionDesignReference.ringMainPreferred,true,id);
+  assert.equal(template.root.userData.distributionDesignReference.installedPressureDropMeasured,false,id);
   const taxonomy=universalTaxonomy(id);assert.ok(taxonomy.some(n=>n.level===2&&n.name==='Compressed-Air Discharge / Distribution'),id+' missing distribution taxonomy');
   const sim=createMachineSimulation(id,template.root,template),started=sim.start();
   assert.equal(started.compressedAirParticleCount,26,id);
