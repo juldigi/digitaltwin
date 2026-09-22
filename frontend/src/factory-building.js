@@ -3,6 +3,33 @@ import {FACTORY_FLEET_GZIP} from './data/factory-fleet-data.js';
 import {decodePlantData} from './data/plant-actual.js';
 let fleetCache;
 export async function loadFactoryFleet(){return fleetCache||(fleetCache=await decodePlantData(FACTORY_FLEET_GZIP));}
+export const MACHINE_SERVICE_CLEARANCE=1.2;
+export function machineClearanceBoxes(fleet,clearance=MACHINE_SERVICE_CLEARANCE){
+ return fleet.filter(f=>f.placement.status!=='UNIDENTIFIED').map(f=>{const p=f.placement,r=p.rotation*Math.PI/180,c=Math.abs(Math.cos(r)),s=Math.abs(Math.sin(r)),w=f.size[0]*c+f.size[2]*s,d=f.size[0]*s+f.size[2]*c;return {machineId:p.machineId,label:p.label,minX:p.x-w/2-clearance,maxX:p.x+w/2+clearance,minY:p.y-d/2-clearance,maxY:p.y+d/2+clearance};});
+}
+function intervalInBox(a,c,b){
+ const dx=c[0]-a[0],dy=c[1]-a[1];let lo=0,hi=1;
+ for(const [p,q] of [[-dx,a[0]-b.minX],[dx,b.maxX-a[0]],[-dy,a[1]-b.minY],[dy,b.maxY-a[1]]]){
+  if(Math.abs(p)<1e-9){if(q<0)return null;continue;}const t=q/p;if(p<0)lo=Math.max(lo,t);else hi=Math.min(hi,t);if(lo>hi)return null;
+ }
+ return [Math.max(0,lo),Math.min(1,hi)];
+}
+export function clipWallToMachineClearance(w,clearances,minLength=.28){
+ const [a,c]=[w.a,w.b],dx=c[0]-a[0],dy=c[1]-a[1],blocked=clearances.map(b=>intervalInBox(a,c,b)).filter(Boolean).sort((u,v)=>u[0]-v[0]);
+ const merged=[];for(const i of blocked){const last=merged.at(-1);if(last&&i[0]<=last[1]+1e-6)last[1]=Math.max(last[1],i[1]);else merged.push([...i]);}
+ const visible=[];let cursor=0;for(const [lo,hi] of merged){if(lo>cursor)visible.push([cursor,lo]);cursor=Math.max(cursor,hi);}if(cursor<1)visible.push([cursor,1]);
+ return visible.map(([u,v])=>({...w,a:[a[0]+dx*u,a[1]+dy*u],b:[a[0]+dx*v,a[1]+dy*v]})).filter(s=>Math.hypot(s.b[0]-s.a[0],s.b[1]-s.a[1])>=minLength);
+}
+export function resolvePortalClearance(portal,clearances,margin=.35){
+ const p={...portal,sourceX:portal.x,sourceY:portal.y,clearanceAdjusted:false};
+ for(let pass=0;pass<clearances.length;pass++){
+  const hit=clearances.find(b=>p.x>b.minX&&p.x<b.maxX&&p.y>b.minY&&p.y<b.maxY);if(!hit)break;
+  if(Math.abs((p.rotation||0)%180)===90){const left=hit.minX-p.x-margin,right=hit.maxX-p.x+margin;p.x+=Math.abs(left)<=Math.abs(right)?left:right;}
+  else{const down=hit.minY-p.y-margin,up=hit.maxY-p.y+margin;p.y+=Math.abs(down)<=Math.abs(up)?down:up;}
+  p.clearanceAdjusted=true;
+ }
+ return p;
+}
 export function buildActualFactory(layout,fleet){
  const root=new T.Group();root.name='BMJ · baseline 250804 + revisi';const layers={};
  for(const name of ['building','roof','machines','labels','landscape','reference','unidentified']){layers[name]=new T.Group();layers[name].name=name;root.add(layers[name]);}
@@ -25,27 +52,32 @@ export function buildActualFactory(layout,fleet){
  box(layers.landscape,-9,-.06,-53,5,.04,110,0x626d73);
  const machineBoxes=[];
  for(const f of fleet){const p=f.placement,r=p.rotation*Math.PI/180,c=Math.abs(Math.cos(r)),s=Math.abs(Math.sin(r));machineBoxes.push({p,minX:p.x-(f.size[0]*c+f.size[2]*s)/2,maxX:p.x+(f.size[0]*c+f.size[2]*s)/2,minY:p.y-(f.size[0]*s+f.size[2]*c)/2,maxY:p.y+(f.size[0]*s+f.size[2]*c)/2});}
+ const serviceClearances=machineClearanceBoxes(fleet);
  const intersectsMachine=(a,c)=>machineBoxes.some(m=>m.p.status!=='UNIDENTIFIED'&&Math.max(a[0],c[0])>m.minX+.05&&Math.min(a[0],c[0])<m.maxX-.05&&Math.max(a[1],c[1])>m.minY+.05&&Math.min(a[1],c[1])<m.maxY-.05);
  const omitted=[];
- for(const w of data.walls){const [a,c]=[w.a,w.b];if(intersectsMachine(a,c)){omitted.push(w);continue;}
+ const wallPieces=[];for(const w of data.walls){const pieces=clipWallToMachineClearance(w,serviceClearances);if(pieces.length!==1||pieces[0].a[0]!==w.a[0]||pieces[0].a[1]!==w.a[1]||pieces[0].b[0]!==w.b[0]||pieces[0].b[1]!==w.b[1])omitted.push(w);wallPieces.push(...pieces);}
+ for(const w of wallPieces){const [a,c]=[w.a,w.b];
   const dx=c[0]-a[0],dy=c[1]-a[1],len=Math.hypot(dx,dy),r=Math.atan2(dy,dx),x=(a[0]+c[0])/2,z=-(a[1]+c[1])/2;
-  const wall=box(b,x,1.6,z,len,3.2,w.width,0xe8e5df,r);wall.userData={semantic:'WALL',sourceHandles:w.handles,heightStatus:'VISUAL_ESTIMATE'};
-  box(b,x,.2,z,len,.4,w.width+.015,0x6b8289,r);
+  const wall=box(b,x,1.75,z,len,3.5,w.width,0xe8e5df,r);wall.castShadow=true;wall.userData={semantic:'WALL',sourceHandles:w.handles,heightStatus:'VISUAL_ESTIMATE',machineClearance:MACHINE_SERVICE_CLEARANCE};
+  box(b,x,.12,z,len,.24,w.width+.035,0x64777e,r);box(b,x,3.46,z,len,.08,w.width+.025,0x71878b,r);
   // Clerestory window treatment has source-aligned position, with assumed sill and glass detail.
-  if(len>4){box(b,x,2.15,z,Math.max(.6,len-.55),.65,w.width+.02,0xa5cbd0,r,.48);}
+  if(len>5.5){const glass=box(b,x,2.35,z,Math.max(.6,len-.7),.55,w.width+.025,0xa5cbd0,r,.38);glass.userData.semantic='FROSTED_CLERESTORY';}
  }
  for(const [x,y] of data.columns){if(intersectsMachine([x-.3,y-.3],[x+.3,y+.3]))continue;box(b,x,3.4,-y,.32,6.8,.32,0x819397);box(b,x,.18,-y,.55,.36,.55,0xa1aaa8);}
- for(const d of data.doors){const g=new T.Group();g.position.set(d.x,0,-d.y);g.rotation.y=d.rotation*Math.PI/180;b.add(g);g.userData={semantic:'DOOR',evidence:d.evidence};
-  box(g,-d.width/2,1.2,0,.07,2.4,.13,0x526b75);box(g,d.width/2,1.2,0,.07,2.4,.13,0x526b75);box(g,0,2.38,0,d.width+.1,.08,.13,0x526b75);
-  const leaf=box(g,-d.width/2+.15,1.13,-d.width*.38,d.width*.9,2.25,.045,0xa7bdc4,Math.PI/2.6);leaf.userData.semantic='OPEN_DOOR_LEAF';
+ const adjustedPortals=[];
+ for(const source of data.doors){const d=resolvePortalClearance({...source,width:Math.max(.9,source.width)},serviceClearances);if(d.clearanceAdjusted)adjustedPortals.push(d);const g=new T.Group();g.position.set(d.x,0,-d.y);g.rotation.y=d.rotation*Math.PI/180;b.add(g);g.userData={semantic:'DOOR',evidence:d.evidence,clearanceAdjusted:d.clearanceAdjusted,sourcePosition:[d.sourceX,d.sourceY]};
+  box(g,-d.width/2,1.25,0,.085,2.5,.16,0x526b75);box(g,d.width/2,1.25,0,.085,2.5,.16,0x526b75);box(g,0,2.47,0,d.width+.17,.09,.16,0x526b75);
+  const leaf=box(g,-d.width/2+.08,1.18,-d.width*.43,d.width*.96,2.34,.052,0x9db5bd,Math.PI/2.35);leaf.castShadow=true;leaf.userData.semantic='OPEN_DOOR_LEAF';
+  const handle=new T.Mesh(new T.SphereGeometry(.035,8,6),material(0xd5c6a2));handle.position.set(d.width*.34,1.08,-.055);leaf.add(handle);
  }
- for(const d of data.curtains){const g=new T.Group();g.position.set(d.x,0,-d.y);g.rotation.y=d.rotation*Math.PI/180;b.add(g);g.userData={semantic:'PVC_CURTAIN',evidence:d.evidence};
-  box(g,0,2.86,0,d.width+.2,.14,.16,0x526e7c);
-  const n=Math.ceil(d.width/.22);for(let i=0;i<n;i++)box(g,-d.width/2+(i+.5)*d.width/n,1.4,.015*(i%2),d.width/n+.025,2.75,.012,0xb2e1e4,0,.22);
+ for(const source of data.curtains){const d=resolvePortalClearance({...source,width:Math.max(2.6,source.width)},serviceClearances);if(d.clearanceAdjusted)adjustedPortals.push(d);const g=new T.Group();g.position.set(d.x,0,-d.y);g.rotation.y=d.rotation*Math.PI/180;b.add(g);g.userData={semantic:'PVC_CURTAIN',evidence:d.evidence,clearanceAdjusted:d.clearanceAdjusted,sourcePosition:[d.sourceX,d.sourceY]};
+  box(g,0,3.12,0,d.width+.32,.18,.2,0x526e7c);box(g,-d.width/2-.12,1.55,0,.14,3.1,.2,0x526e7c);box(g,d.width/2+.12,1.55,0,.14,3.1,.2,0x526e7c);
+  const n=Math.ceil(d.width/.2);for(let i=0;i<n;i++){const strip=box(g,-d.width/2+(i+.5)*d.width/n,1.52,.012*(i%2),d.width/n+.035,2.95,.014,i%2?0xaddde1:0xc4eaec,0,.26);strip.userData.semantic='PVC_STRIP';}
+  for(const x of [-d.width/2-.42,d.width/2+.42]){box(g,x,.48,-.28,.18,.96,.18,0xe2b428);box(g,x,.48,-.28,.19,.18,.19,0x313b40);}
  }
  // Open loading dock, bumpers, canopy and source folding-gate entrance.
  box(b,84,.42,-4.1,7.5,.85,3.2,0x8d9798);for(const x of [81,83,85,87])box(b,x,.75,-2.45,.32,.6,.18,0x303b42);
- box(layers.roof,84,4.5,-4.2,9,.15,5,0x536e7a);box(b,14,1.25,-2.2,4.5,2.5,.09,0x8a9da3,0,.6);
+ box(b,84,4.5,-4.2,9,.15,5,0x536e7a);for(const x of [80,88])box(b,x,2.25,-2.3,.18,4.5,.18,0x526b75);box(b,14,1.25,-2.2,4.5,2.5,.09,0x8a9da3,0,.6);
  // Roof panels and trusses are elevations inferred from the footprint, independently hideable.
  for(const [x,w,z,d] of [[51,90,-51,90],[47.5,51,-99.5,7],[.5,11,-33,44]]){
   const half=w/2,slope=Math.atan2(2,half),len=Math.hypot(half,2);
@@ -81,6 +113,6 @@ export function buildActualFactory(layout,fleet){
  }
  box(layers.unidentified,124,-.07,-44,38,.1,86,0xd9d4c5);label('POSISI AKTUAL BELUM TERIDENTIFIKASI',124,4,-90,30,'#835a2c',layers.unidentified);
  const pts=data.segments.flatMap(s=>[s[0],.012,-s[1],s[2],.012,-s[3]]),geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(pts,3));layers.reference.add(new T.LineSegments(geo,new T.LineBasicMaterial({color:0x355e72,transparent:true,opacity:.4})));
- root.userData={baselineId:layout.baselineId,assumptions:data.assumptions,omittedCollisionWalls:omitted.length,legacyWalls:data.legacyWalls.length};
+ root.userData={baselineId:layout.baselineId,assumptions:{...data.assumptions,machineServiceClearance:MACHINE_SERVICE_CLEARANCE,wallTreatment:'SOURCE_SEGMENTS_CLIPPED_TO_SERVICE_ENVELOPE',portalTreatment:'SOURCE_PORTALS_SHIFTED_ONLY_WHEN_CLEARANCE_CONFLICTS'},omittedCollisionWalls:0,trimmedCollisionWalls:omitted.length,adjustedPortals:adjustedPortals.map(p=>({semantic:p.evidence,x:p.x,y:p.y,sourceX:p.sourceX,sourceY:p.sourceY})),legacyWalls:data.legacyWalls.length};
  return {root,layers,assets,machineBoxes};
 }

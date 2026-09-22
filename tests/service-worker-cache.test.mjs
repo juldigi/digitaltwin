@@ -37,7 +37,7 @@ test('service-worker shell cache references only deployable frontend files',()=>
 });
 
 test('service-worker cache version advances with the centralized runtime release',()=>{
- assert.match(sw,/factory-digital-twin-v125-home-offset-direction-20260922/);
+ assert.match(sw,/factory-digital-twin-v126-realistic-building-clearance-20260922/);
 });
 
 
