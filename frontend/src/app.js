@@ -864,8 +864,8 @@ try{
 }
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{if(editing){engine.edit(false);engine.applyPlacement(state);engine.onTransform=null;editing=false;}renderPanel(b.dataset.tab);});
 on('#modal-close',closeModal);on('#connect',connectionDialog);on('#nav-machine',()=>activeLayout()?showHome():layoutDialog());on('#nav-layout',()=>activeLayout()?setView('factory'):layoutDialog());on('#notice-details',layoutDialog);on('#nav-assets',assetDialog);on('#nav-sources',()=>{showPanel();renderPanel('sources');});on('#nav-help',helpDialog);on('#settings',settingsDialog);on('#close-panel',()=>document.body.classList.add('panel-hidden'));on('#focus-machine',()=>{if(!engine?.machine.visible)setView('machine');engine?.fit(engine.machine);});on('#edit-position',editorPanel);
-$('[data-camera]').forEach(b=>b.onclick=()=>{
- if(!engine)return;const mode=b.dataset.camera;$('[data-camera]').forEach(c=>c.classList.toggle('active',c===b));
+$$('[data-camera]').forEach(b=>b.onclick=()=>{
+ if(!engine)return;const mode=b.dataset.camera;$$('[data-camera]').forEach(c=>c.classList.toggle('active',c===b));
  if(mode==='reset'){
   explode=0;selectedPart=null;selectedTaxonomyId=ACTIVE_ROOT;factoryAssetContextId=null;engine.isolated=false;engine.template.reset();engine.clearPartLabels();$('#tool-explode')?.classList.remove('active');$('#tool-isolate')?.classList.remove('active');
   emitDomainState({inspectionMode:{explode:false,isolate:false,section:false},selectedNode:null,cameraPreset:'iso'});if(activeLayout())showHome();else engine.fit(engine.machine,'iso');return;
