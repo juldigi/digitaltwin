@@ -62,7 +62,7 @@ test('V158 keeps the V157 foundation-only startup graph while advancing interact
   assert.ok(!engine.includes(forbidden),forbidden+' must remain absent from engine startup graph');
  }
  assert.match(html,/app-shell-v79\.css\?v=162/);
- assert.match(html,/src\/app\.js\?v=164/);
+ assert.match(html,/src\/app\.js\?v=165/);
  assert.match(html,/src\/app-shell-v79\.js\?v=162/);
  assert.match(app,/pair\('Versi aplikasi','V162'\)/);
  assert.match(shell,/v162-factory-first-systems/);

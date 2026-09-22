@@ -780,7 +780,7 @@ function registryDataStatus(machine){
 }
 async function openAssetContext(machine){
  if(!machine)return;
- if(!isFoundationPrimary(machine)){focusFoundationPlaceholder(machine,{historyMode:'push',openDialog:true});return;}
+ if(!isFoundationPrimary(machine)){focusFoundationPlaceholder(machine,{historyMode:'push',openDialog:false});machineDetailDialog(machine);return;}
  const route=FOUNDATION_SCOPE.primaryRoute;
  if(route!==MACHINE_KEY)await switchActiveMachine(route,{historyMode:'push'});
  else{closeModal();setView('machine');showPanel();renderPanel('overview');engine?.fit(engine.machine);}

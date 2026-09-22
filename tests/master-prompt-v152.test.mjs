@@ -10,7 +10,7 @@ const sw=fs.readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 
 test('V155 release cache keys move beyond V149/V151 sources',()=>{
   assert.match(html,/app-shell-v79\.css\?v=162/);
-  assert.match(html,/src\/app\.js\?v=164/);
+  assert.match(html,/src\/app\.js\?v=165/);
   assert.match(html,/src\/ui-v5\.js\?v=162/);
   assert.match(html,/src\/app-shell-v79\.js\?v=162/);
   assert.doesNotMatch(html,/\?v=149/);
