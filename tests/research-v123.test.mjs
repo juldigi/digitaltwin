@@ -352,7 +352,7 @@ test('V123 R5 Suprasetter CTP-1/2 expose common Heidelberg mechanics while loade
 
   const sim=createMachineSimulation(id,m.root,m),start=sim.start();
   assert.equal(start.available,true,id);assert.equal(start.blocked,false,id);
-  assert.equal(start.simulationBoundary,'SUPRASETTER_COMMON_PROCESS_ONLY__PUNCH_LOADER_DEBRIS_TEMP_OPTIONS_NOT_SIMULATED',id);
+  assert.equal(start.simulationBoundary,'SUPRASETTER_EXTERNAL_DRUM_LOAD_CLAMP_IMAGE_UNLOAD__MODEL_OPTIONS_NOT_INFERRED',id);
   assert.equal(sim.stages.some(s=>/punch/i.test(s)),false,id+' punch stage must be bypassed when installation is unverified');
   const optionRoles=/internal-punch|debris-removal|temperature-stabilizer|automatic-loader/i;
   assert.ok(sim.motions.every(item=>!optionRoles.test(String(item.mesh.userData.mechanismRole||''))),id+' unverified option leaked into active simulation');
