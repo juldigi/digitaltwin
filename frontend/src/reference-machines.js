@@ -1780,7 +1780,7 @@ export class ReferenceProcessSimulation{
   if(z.beam)z.beam.position.copy(z.beamRest);if(z.carriage)z.carriage.position.copy(z.carriageRest);
   if(s.axisMotion){
    const q=THREE.MathUtils.clamp((s.p-.22)/.60,0,1),pts=z.pathPoints,n=pts.length-1,scaled=q*n,k=Math.min(n-1,Math.floor(scaled)),t=scaled-k,a=pts[k],b=pts[k+1],x=THREE.MathUtils.lerp(a[0],b[0],t),zz=THREE.MathUtils.lerp(a[1],b[1],t);
-   if(z.beam)z.beam.position.x+=x;if(z.carriage)z.carriage.position.z+=zz;
+   if(z.beam)z.beam.position.x+=x;if(z.carriage){z.carriage.position.x+=x;z.carriage.position.z+=zz;}
   }
   if(this.zundMaterial)this.zundMaterial.visible=this.active;
   z.vacuumHoldActive=s.vacuumHold;z.toolActionActive=s.axisMotion&&z.installedToolPackageVerified===true;
