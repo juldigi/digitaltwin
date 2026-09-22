@@ -44,7 +44,7 @@ test('V121 QF reference exposes servo XY, linear guides, hydraulic blanking and 
 });
 
 test('V121 collator exposes suction, sensing, gathering and delivery mechanics',()=>{
- expectRoles('BMJ-MCH-0023',['feed-bin-shelf','vacuum-blower','vacuum-bin-branch','double-miss-feed-sensor-reference','gather-transport-roller','set-jogger']);
+ expectRoles('BMJ-MCH-0023',['feed-bin-shelf','vacuum-blower','vacuum-bin-branch','double-feed-ir-emitter-reference','double-feed-ir-receiver-reference','gather-transport-roller','set-jogger']);
 });
 
 test('V121 Heidelberg CTP exposes plate transport, external drum, laser and bounded punch detail',()=>{
