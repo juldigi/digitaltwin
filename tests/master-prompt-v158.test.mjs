@@ -64,7 +64,7 @@ test('V158 keeps the V157 foundation-only startup graph while advancing interact
  assert.match(html,/app-shell-v79\.css\?v=162/);
  assert.match(html,/src\/app\.js\?v=162/);
  assert.match(html,/src\/app-shell-v79\.js\?v=162/);
- assert.match(app,/pair\('Versi aplikasi','V159'\)/);
+ assert.match(app,/pair\('Versi aplikasi','V162'\)/);
  assert.match(shell,/v162-factory-first-systems/);
  assert.match(sw,/factory-digital-twin-v162-factory-first-systems-20260922/);
  for(const excluded of ['machine-runtime.js','universal-machine.js','offset10.js','apm2.js','sheeting.js'])assert.ok(!sw.includes(excluded),excluded+' must not be pre-cached');

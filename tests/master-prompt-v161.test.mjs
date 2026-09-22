@@ -39,4 +39,5 @@ test('V162 exposes Systems in both navigation surfaces and keeps identifiers coh
 test('asset navigation opens an empty search instead of serializing the click event',()=>{
  assert.match(app,/on\('#nav-assets',\(\)=>assetDialog\(\)\)/);
  assert.doesNotMatch(app,/on\('#nav-assets',assetDialog\)/);
+ assert.match(app,/if\(machine\)\{closeModal\(\);await openAssetContext\(machine\);\}/);
 });

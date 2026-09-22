@@ -56,7 +56,7 @@ test('user-facing system workspace no longer exposes implementation jargon',()=>
 test('technical diagnostics live inside Settings System Information and focus is visibly accessible',()=>{
   assert.match(app,/Informasi Sistem/);
   assert.match(app,/Diagnostik teknis ditempatkan di sini agar tampilan utama tetap sederhana/);
-  assert.match(app,/pair\('Versi aplikasi','V159'\)/);
+  assert.match(app,/pair\('Versi aplikasi','V162'\)/);
   assert.match(css,/:focus-visible/);
   assert.match(css,/prefers-reduced-motion/);
   assert.match(css,/prefers-contrast:more/);
