@@ -170,5 +170,5 @@ const relabel=()=>{
  const search=q('#global-search');if(search)search.placeholder='Cari mesin, area, komponen, sistem, atau dokumen…';
  const connection=q('#connection');if(connection)connection.textContent=navigator.onLine?'Data tersedia':'Offline';
 };
-relabel();hydrateUrl();subscribe(state=>{markSection(state.activeSection);syncLayerControls();if(state.activeSection==='simulation')syncSimulationTransport()});
+relabel();hydrateUrl();subscribe(state=>{markSection(state.activeSection);syncLayerControls()});
 document.documentElement.dataset.uiArchitecture='v149-safe-shell';
