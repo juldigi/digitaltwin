@@ -215,3 +215,76 @@ test('V133 compressor brand details remain evidence-bounded and source-specific'
  assert.match(kaeserUrls,/kaeser\.com/);assert.match(kaeserUrls,/37776/);
  assert.match(swanUrls,/swan-aircompressor\.com/);
 });
+
+
+test('V136 remaining reference twins use process-faithful motion boundaries instead of generic travel',()=>{
+ // Suprasetter external drum: no generic workpiece, clamp/expose only in the imaging window.
+ for(const id of ['BMJ-MCH-0025','BMJ-MCH-0026']){
+  const t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t);
+  assert.equal(t.root.userData.researchVersion,'V136',id);
+  assert.ok(t.root.userData.uniqueResearchUrls>200,id+' research ledger did not exceed 200 unique URLs');
+  assert.equal(sim.processPiece,null,id+' must not use generic linear workpiece');
+  sim.start();sim.elapsed=sim.cycle*.50;sim.updateCTP();const st=sim.state();
+  assert.equal(st.ctpPlateClamped,true,id);assert.equal(st.ctpExposureActive,true,id);assert.equal(st.ctpLaserTraverseActive,true,id);
+  assert.equal(st.ctpPunchInstalledVerified,false,id);
+  assert.equal(st.simulationBoundary,'SUPRASETTER_EXTERNAL_DRUM_LOAD_CLAMP_IMAGE_UNLOAD__MODEL_OPTIONS_NOT_INFERRED',id);
+  sim.dispose();t.dispose();
+ }
+ // Collator: only staggered active bins feed at once and sensing/gathering follows feed.
+ {
+  const id='BMJ-MCH-0023',t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t);sim.start();sim.elapsed=sim.cycle*.24;sim.updateCollator();const st=sim.state();
+  assert.ok(st.activeFeedBinIndexes.length>0,id);assert.ok(st.activeFeedBinIndexes.length<st.modeledBinCount,id);
+  assert.equal(st.doubleFeedCheckActive,true,id);assert.equal(st.gatherTransportActive,true,id);
+  sim.dispose();t.dispose();
+ }
+ // SCREEN CTF: capstan and tension regulation run in transport/exposure window; punch remains option-bounded.
+ {
+  const id='BMJ-MCH-0027',t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t);sim.start();sim.elapsed=sim.cycle*.45;sim.updateImagesetter();const st=sim.state();
+  assert.equal(st.capstanAdvanceActive,true,id);assert.equal(st.tensionRegulationActive,true,id);assert.equal(st.exposureActive,true,id);
+  assert.equal(st.punchInstalledVerified,false,id);assert.equal(st.processorInstalledVerified,false,id);
+  sim.dispose();t.dispose();
+ }
+ // Zünd: deterministic XY path is allowed, but no cutting action without installed tool evidence.
+ {
+  const id='BMJ-MCH-0028',t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t);sim.start();sim.elapsed=sim.cycle*.50;sim.updateZund();const st=sim.state();
+  assert.equal(st.zundAxisPathType,'SERPENTINE_REFERENCE_ONLY',id);assert.equal(st.zundAxisMotionActive,true,id);
+  assert.equal(st.installedToolPackageVerified,false,id);assert.equal(st.zundToolActionActive,false,id);
+  sim.dispose();t.dispose();
+ }
+});
+
+test('V136 blanker and folder-gluer process phases preserve mechanical interlocks and real process order',()=>{
+ {
+  const id='BMJ-MCH-0021',t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t);sim.start();
+  for(const fraction of [.08,.22,.40,.52,.64,.78,.92]){sim.elapsed=sim.cycle*fraction;sim.updateBlanker();const st=sim.state();assert.equal(st.mechanicalInterlockSafe,true,id+' at '+fraction);assert.equal(st.platformIndexing&&st.blankingHeadPressing,false,id+' simultaneous indexing/press');}
+  sim.elapsed=sim.cycle*.64;sim.updateBlanker();let st=sim.state();assert.equal(st.blankerPlatformAtPress,true);assert.equal(st.blankerHydraulicPressureActive,true);
+  sim.elapsed=sim.cycle*.78;sim.updateBlanker();st=sim.state();assert.equal(st.blankerSeparationActive,true);
+  sim.dispose();t.dispose();
+ }
+ {
+  const id='BMJ-MCH-0017',t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t);sim.start();
+  sim.elapsed=sim.cycle*.20;sim.updateFolder();let st=sim.state();assert.equal(st.alignmentActive,true);assert.equal(st.preBreakActive,true);assert.equal(st.glueZoneActive,false);
+  sim.elapsed=sim.cycle*.52;sim.updateFolder();st=sim.state();assert.equal(st.glueZoneActive,true);assert.equal(st.finalFoldActive,false);
+  sim.elapsed=sim.cycle*.68;sim.updateFolder();st=sim.state();assert.equal(st.finalFoldActive,true);
+  sim.elapsed=sim.cycle*.82;sim.updateFolder();st=sim.state();assert.equal(st.compressionActive,true);
+  sim.elapsed=sim.cycle*.95;sim.updateFolder();st=sim.state();assert.equal(st.folderDeliveryActive,true);
+  sim.dispose();t.dispose();
+ }
+});
+
+test('V136 generic-looking facade details are replaced with family-grounded service morphology',()=>{
+ const cases=[
+  ['BMJ-MCH-0021',['qf100-lower-cabinet']],
+  ['BMJ-MCH-0023',['collator-tower-detail']],
+  ['BMJ-MCH-0025',['ctp-family-facade']],
+  ['BMJ-MCH-0027',['ctf-family-facade']],
+  ['BMJ-MCH-0028',['zund-table-edge-detail']]
+ ];
+ for(const [id,nodes] of cases){const t=createMachineTemplate(id);for(const node of nodes)assert.ok(t.findNode(node),id+' missing '+node);t.dispose();}
+});
+
+test('V136 YA1A1A remains blocked rather than inventing an unverified gravure transport simulation',()=>{
+ const id='BMJ-MCH-0004',t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t),st=sim.start();
+ assert.equal(st.blocked,true);assert.equal(st.active,false);assert.match(st.blockedReason,/YA1A1A|gravure|transport|drive/i);
+ sim.dispose();t.dispose();
+});
