@@ -15,13 +15,15 @@ const symbols=`<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
 <symbol id="i-layers" viewBox="0 0 24 24"><path d="m4 7 8-4 8 4-8 4Z"/><path d="m4 12 8 4 8-4M4 17l8 4 8-4"/></symbol>
 <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
 <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="19" cy="12" r="1" fill="currentColor"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></symbol>
+<symbol id="i-theme" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9Z"/></symbol>
 </svg>`;
 document.body.insertAdjacentHTML('afterbegin',symbols);
 
 const iconMap={
  'nav-machine':'factory','nav-assets':'machine','nav-systems':'system','nav-simulation-mode':'simulation',
  'nav-sources':'file','nav-help':'help','nav-settings':'settings','ui-menu-toggle':'menu','settings':'settings',
- 'close-panel':'close','layer-manager-button':'layers'
+ 'close-panel':'close','modal-close':'close','ui-theme-toggle':'theme','global-search-icon':'search','layer-manager-button':'layers'
 };
 for(const [id,name]of Object.entries(iconMap)){
  const el=q('#'+id);if(!el)continue;
