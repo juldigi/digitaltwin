@@ -17,6 +17,9 @@ const symbols=`<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
 <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="19" cy="12" r="1" fill="currentColor"/></symbol>
 <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></symbol>
 <symbol id="i-theme" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9Z"/></symbol>
+<symbol id="i-prev" viewBox="0 0 24 24"><path d="M7 5v14M18 6l-8 6 8 6z"/></symbol>
+<symbol id="i-next" viewBox="0 0 24 24"><path d="M17 5v14M6 6l8 6-8 6z"/></symbol>
+<symbol id="i-stop" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="1"/></symbol>
 <symbol id="i-focus" viewBox="0 0 24 24"><path d="M8 3H4a1 1 0 0 0-1 1v4M16 3h4a1 1 0 0 1 1 1v4M21 16v4a1 1 0 0 1-1 1h-4M8 21H4a1 1 0 0 1-1-1v-4"/><circle cx="12" cy="12" r="3"/></symbol>
 <symbol id="i-zoom-in" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5M10.5 7.5v6M7.5 10.5h6"/></symbol>
 <symbol id="i-zoom-out" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5M7.5 10.5h6"/></symbol>
@@ -95,6 +98,7 @@ function openSystemLayers(){
  const panel=q('#layer-manager');panel.hidden=false;openOverlay('layers');setActiveSection('system');markSection('system');syncLayerControls();
 }
 function enterSimulation(){
+ dispatchEvent(new CustomEvent('bmj:simulationenter'));
  beforeMajorOverlay('inspector');setActiveSection('simulation');markSection('simulation');
  document.body.classList.remove('workspace-2d');setViewMode('3d');
  q('#tool-simulation')?.click();
@@ -241,8 +245,10 @@ addEventListener('bmj:systemcontext',event=>renderSystemContext(event.detail));
 function ensureSimulationTransport(){
  let bar=q('#simulation-transport');if(bar)return bar;
  bar=document.createElement('section');bar.id='simulation-transport';bar.className='canonical-simulation-transport';bar.hidden=true;bar.setAttribute('aria-label','Kontrol simulasi');
- bar.innerHTML=`<div class="sim-context"><small>SIMULASI PROSES</small><strong data-transport-stage>Siap</strong></div><button type="button" data-transport-play class="primary" aria-label="Mulai atau jeda simulasi">Mulai</button><label>Kecepatan<select data-transport-speed aria-label="Kecepatan simulasi"><option value=".5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select></label><progress max="100" value="0" data-transport-progress aria-label="Progres simulasi"></progress><button type="button" data-transport-stop>Stop</button>`;
+ bar.innerHTML=`<div class="sim-context"><small>SIMULASI PROSES</small><strong data-transport-stage>Siap</strong><span data-transport-stage-count></span></div><button type="button" data-transport-prev class="stage-step" aria-label="Tahap sebelumnya" title="Tahap sebelumnya">${icon('prev')}<span>Sebelumnya</span></button><button type="button" data-transport-play class="primary" aria-label="Mulai atau jeda simulasi">Mulai</button><button type="button" data-transport-next class="stage-step" aria-label="Tahap berikutnya" title="Tahap berikutnya">${icon('next')}<span>Berikutnya</span></button><label>Kecepatan<select data-transport-speed aria-label="Kecepatan simulasi"><option value=".5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select></label><progress max="100" value="0" data-transport-progress aria-label="Progres simulasi"></progress><button type="button" data-transport-stop class="stop" aria-label="Hentikan simulasi">${icon('stop')}<span>Stop</span></button>`;
  q('.workspace')?.append(bar);
+ q('[data-transport-prev]',bar).addEventListener('click',()=>dispatchEvent(new CustomEvent('bmj:simulationstep',{detail:{direction:-1}})));
+ q('[data-transport-next]',bar).addEventListener('click',()=>dispatchEvent(new CustomEvent('bmj:simulationstep',{detail:{direction:1}})));
  q('[data-transport-play]',bar).addEventListener('click',()=>{const s=getState().simulationState;const target=s.active?(q('#sim-pause')||q('#sim-start')):q('#sim-start');target?.click();requestAnimationFrame(syncSimulationTransport)});
  q('[data-transport-stop]',bar).addEventListener('click',()=>{q('#sim-stop')?.click();requestAnimationFrame(syncSimulationTransport)});
  q('[data-transport-speed]',bar).addEventListener('change',e=>{q(`[data-sim-speed="${e.target.value}"]`)?.click();requestAnimationFrame(syncSimulationTransport)});
@@ -254,9 +260,14 @@ function syncSimulationTransport(){
  const progressStyle=q('#sim-progress-bar')?.style?.width||'0%';const progress=Math.max(0,Math.min(100,parseFloat(progressStyle)||0));
  const active=status==='RUNNING'||status==='PAUSED',playing=status==='RUNNING';
  setSimulation({active,playing,stage,progress});
+ const sim=getState().simulationState,order=Array.isArray(sim.stageOrder)?sim.stageOrder:[],index=Number.isInteger(sim.stageIndex)?sim.stageIndex:Math.max(0,order.indexOf(stage)),canSeek=Boolean(sim.canSeekStages&&active);
  bar.hidden=section!=='simulation';
  q('[data-transport-stage]',bar).textContent=stage;
+ q('[data-transport-stage-count]',bar).textContent=order.length?(index+1)+' / '+order.length:'';
  q('[data-transport-progress]',bar).value=progress;
+ const prev=q('[data-transport-prev]',bar),next=q('[data-transport-next]',bar);prev.disabled=!canSeek||index<=0;next.disabled=!canSeek||index>=order.length-1;
+ prev.title=!active?'Mulai simulasi untuk berpindah tahap':prev.disabled?'Sudah di tahap pertama':'Tahap sebelumnya';
+ next.title=!active?'Mulai simulasi untuk berpindah tahap':next.disabled?'Sudah di tahap terakhir':'Tahap berikutnya';
  const play=q('[data-transport-play]',bar);play.textContent=playing?'Jeda':active?'Lanjutkan':'Mulai';
  const activeSpeed=qa('[data-sim-speed]').find(b=>b.classList.contains('active'))?.dataset.simSpeed;if(activeSpeed)q('[data-transport-speed]',bar).value=activeSpeed;
 }
