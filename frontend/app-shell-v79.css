@@ -326,3 +326,23 @@ aside#detail-panel{overscroll-behavior:contain}
 .settings-section .check:first-of-type{border-top:0}
 .settings-section .check input{width:18px;height:18px;accent-color:var(--blue)}
 @media(max-width:560px){.help-grid{grid-template-columns:1fr}.help-intro{padding:12px}.help-grid section,.settings-section{padding:11px}}
+
+
+/* V152 master-prompt accessibility + diagnostics */
+:is(button,a,input,select,textarea,summary,[tabindex]):focus-visible{
+ outline:3px solid #1677d2;
+ outline-offset:2px;
+}
+.universal-search-panel[role="dialog"],.canonical-layer-manager[role="dialog"]{scroll-margin-top:var(--header-h)}
+.system-information{padding:0;overflow:hidden}
+.system-information>summary{min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;cursor:pointer;font-size:11px;font-weight:800;list-style:none}
+.system-information>summary::-webkit-details-marker{display:none}
+.system-information>summary:after{content:"+";font-size:17px;color:var(--muted)}
+.system-information[open]>summary{border-bottom:1px solid var(--line)}
+.system-information[open]>summary:after{content:"−"}
+.system-information>p{padding:10px 12px 0}
+.system-info-grid{display:grid;grid-template-columns:minmax(130px,.8fr) minmax(0,1.2fr);gap:0;margin:8px 12px 12px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#f8fbfe}
+.system-info-grid dt,.system-info-grid dd{margin:0;padding:8px 9px;border-bottom:1px solid #e5edf4;font-size:9px;line-height:1.4}
+.system-info-grid dt{color:var(--muted);font-weight:750;background:#f2f7fb}
+.system-info-grid dd{color:var(--ink);overflow-wrap:anywhere}
+@media(max-width:390px){.system-info-grid{grid-template-columns:1fr}.system-info-grid dt{border-bottom:0;padding-bottom:3px}.system-info-grid dd{padding-top:3px}}
