@@ -1664,7 +1664,7 @@ export class ReferenceProcessSimulation{
  }
  bindCTP(){
   const role=target=>{let found=null;this.template.root.traverse(o=>{if(!found&&o.userData?.mechanismRole===target)found=o;});return found;};
-  this.ctp={drum:role('external-imaging-drum'),laser:role('heidelberg-laser-carriage'),clamps:[],plateLoaded:false,plateClamped:false,exposureActive:false,laserTraverseActive:false,punchInstalledVerified:this.template.root.userData.suprasetterOptions?.internalPunch==='INSTALLED_VERIFIED'};
+  this.ctp={drum:role('external-imaging-drum'),laser:role('heidelberg-laser-carriage'),clamps:[],plateLoaded:false,plateClamped:false,exposureActive:false,laserTraverseActive:false,punchInstalledVerified:this.template.root.userData.suprasetterOptions?.internalPunch==='INSTALLED_VERIFIED'};if(this.ctp.drum)this.ctp.drumRestQuaternion=this.ctp.drum.quaternion.clone();if(this.ctp.laser)this.ctp.laserRestPosition=this.ctp.laser.position.clone();
   this.template.root.traverse(o=>{if(o.userData?.mechanismRole==='plate-clamp-reference')this.ctp.clamps.push(o);});
   this.ctpPlateMaterial=new THREE.MeshStandardMaterial({color:0xbac1c4,roughness:.38,metalness:.22,side:THREE.DoubleSide});
   this.ctpFlatGeometry=new THREE.BoxGeometry(.78,.012,1.00);
@@ -1696,7 +1696,8 @@ export class ReferenceProcessSimulation{
   }else{
    const t=smooth((s.p-.78)/.22);flat.visible=this.active;wrap.visible=false;flat.position.set(lerp(.28,1.06,t),lerp(.84,.66,t),0);flat.rotation.set(0,0,lerp(-.12,0,t));
   }
-  if(this.ctp.drum&&s.exposure){group.rotation.z=this.ctp.drum.rotation.z;}
+  if(this.ctp.drum){this.ctp.drum.quaternion.copy(this.ctp.drumRestQuaternion);if(s.exposure)this.ctp.drum.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(AXIS.z,this.elapsed*5.2));group.rotation.z=s.exposure?this.elapsed*5.2:0;}
+  if(this.ctp.laser){this.ctp.laser.position.copy(this.ctp.laserRestPosition);if(s.exposure)this.ctp.laser.position.z+=THREE.MathUtils.lerp(-.38,.38,(Math.sin(this.elapsed*1.45)+1)/2);}
   if(this.ctp.laser?.material?.emissive){this.ctp.laser.material.emissive.setHex(s.exposure?0x4c1515:0);this.ctp.laser.material.emissiveIntensity=s.exposure?.65:0;}
   this.ctp.plateLoaded=s.p>=.18&&s.p<.96;this.ctp.plateClamped=s.clamped;this.ctp.exposureActive=s.exposure;this.ctp.laserTraverseActive=s.laserTraverse;
  }
@@ -1706,11 +1707,15 @@ export class ReferenceProcessSimulation{
    polygon:role('five-facet-polygon-mirror-reference'),
    laser:role('red-laser-source-reference'),
    cutter:role('media-cross-cutter'),
+   supplyRoll:role('media-supply-roll'),
+   capstan:role('capstan-drive-roller'),
+   gravityRoller:role('gravity-tension-roller'),
    punch:this.template.findNode('ctf-punch-option'),
    processor:this.template.findNode('ctf-processor-boundary'),
    outputCassette:this.template.findNode('ctf-output-cassette'),
-   exposureActive:false,cuttingActive:false
+   exposureActive:false,cuttingActive:false,capstanAdvanceActive:false,tensionRegulationActive:false,outputBoundaryActive:false
   };
+  for(const key of ['polygon','supplyRoll','capstan','gravityRoller']){const o=this.imagesetter[key];if(o&&!o.userData.imagesetterRestQuaternion)o.userData.imagesetterRestQuaternion=o.quaternion.clone();}
   this.imagesetterMediaGeometry=new THREE.BoxGeometry(.38,.014,.68);
   this.imagesetterMediaMaterial=new THREE.MeshStandardMaterial({color:0xb9c1c2,roughness:.46,metalness:.05});
   this.imagesetterMedia=new THREE.Mesh(this.imagesetterMediaGeometry,this.imagesetterMediaMaterial);
@@ -1729,18 +1734,20 @@ export class ReferenceProcessSimulation{
  }
  updateImagesetter(){
   if(!this.imagesetter||!this.imagesetterMedia)return;
-  const s=this.imagesetterStatus(),p=s.p,m=this.imagesetterMedia;
+  const s=this.imagesetterStatus(),p=s.p,m=this.imagesetterMedia,i=this.imagesetter;
   const lerp=THREE.MathUtils.lerp,smooth=t=>{t=THREE.MathUtils.clamp(t,0,1);return t*t*(3-2*t);};
-  let x=-.82,y=.68;
-  if(p<.16){const t=smooth(p/.16);x=lerp(-.82,-.45,t);y=lerp(.68,.78,t);}
-  else if(p<.38){const t=smooth((p-.16)/.22);x=lerp(-.45,-.08,t);y=.78-.13*Math.sin(Math.PI*t);}
-  else if(p<.57){const t=smooth((p-.38)/.19);x=lerp(-.08,.16,t);y=.80;}
-  else if(p<.72){const t=smooth((p-.57)/.15);x=lerp(.16,.38,t);y=.80;}
-  else if(p<.86){const t=smooth((p-.72)/.14);x=lerp(.38,.58,t);y=.77;}
-  else {const t=smooth((p-.86)/.14);x=lerp(.58,.88,t);y=lerp(.77,.56,t);}
-  m.position.set(x,y,0);m.visible=this.active;
-  this.imagesetter.exposureActive=s.exposure;this.imagesetter.cuttingActive=s.cutting;
-  if(this.imagesetter.laser?.material?.emissive){this.imagesetter.laser.material.emissive.setHex(s.exposure?0x7b1616:0);this.imagesetter.laser.material.emissiveIntensity=s.exposure?.85:0;}
+  let x=-.82,y=.68,rz=0;
+  if(p<.16){const t=smooth(p/.16);x=lerp(-.82,-.48,t);y=lerp(.68,.78,t);}
+  else if(p<.38){const t=smooth((p-.16)/.22);x=lerp(-.48,-.12,t);y=.78-.22*Math.sin(Math.PI*t);rz=.08*Math.sin(Math.PI*t);}
+  else if(p<.72){const t=smooth((p-.38)/.34);x=lerp(-.12,.34,t);y=.80;}
+  else if(p<.86){const t=smooth((p-.72)/.14);x=lerp(.34,.58,t);y=.78-.16*Math.sin(Math.PI*t);rz=-.07*Math.sin(Math.PI*t);}
+  else {const t=smooth((p-.86)/.14);x=lerp(.58,.90,t);y=lerp(.76,.56,t);}
+  m.position.set(x,y,0);m.rotation.set(0,0,rz);m.visible=this.active;
+  const spin=(obj,rate,on)=>{if(!obj)return;obj.quaternion.copy(obj.userData.imagesetterRestQuaternion||new THREE.Quaternion());if(on)obj.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(AXIS.z,this.elapsed*rate));};
+  spin(i.supplyRoll,2.1,p<.86);spin(i.capstan,6.2,p>=.12&&p<.86);spin(i.gravityRoller,4.4,p>=.16&&p<.80);
+  if(i.polygon){i.polygon.quaternion.copy(i.polygon.userData.imagesetterRestQuaternion||new THREE.Quaternion());if(s.exposure)i.polygon.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(AXIS.y,this.elapsed*18));}
+  i.exposureActive=s.exposure;i.cuttingActive=s.cutting;i.capstanAdvanceActive=p>=.12&&p<.86;i.tensionRegulationActive=p>=.16&&p<.80;i.outputBoundaryActive=p>=.86;
+  if(i.laser?.material?.emissive){i.laser.material.emissive.setHex(s.exposure?0x7b1616:0);i.laser.material.emissiveIntensity=s.exposure?.85:0;}
  }
  bindZund(){
   const beam=this.template.findNode('zund-gantry-beam'),carriage=this.template.findNode('zund-carriage-y');
@@ -1751,7 +1758,8 @@ export class ReferenceProcessSimulation{
    installedToolPackageVerified:this.template.root.userData.installedToolPackageVerified===true,
    installedIccVerified:this.template.root.userData.installedIccVerified===true,
    installedItiVerified:this.template.root.userData.installedItiVerified===true,
-   vacuumHoldActive:false
+   vacuumHoldActive:false,axisPathType:'SERPENTINE_REFERENCE_ONLY',toolActionActive:false,
+   pathPoints:[[-1.90,-.80],[1.90,-.80],[1.90,-.28],[-1.90,-.28],[-1.90,.28],[1.90,.28],[1.90,.80],[-1.90,.80]]
   };
   this.zundMaterialGeometry=new THREE.BoxGeometry(2.6,.018,1.45);
   this.zundMaterialMaterial=new THREE.MeshStandardMaterial({color:0xc9b89b,roughness:.86,metalness:0});
@@ -1766,11 +1774,13 @@ export class ReferenceProcessSimulation{
  updateZund(){
   if(!this.zund)return;
   const s=this.zundStatus(),z=this.zund;
-  const q=s.axisMotion?(s.p-.22)/.60:0;
-  if(z.beam){z.beam.position.copy(z.beamRest);if(s.axisMotion)z.beam.position.x+=Math.sin(q*Math.PI*2)*1.85;}
-  if(z.carriage){z.carriage.position.copy(z.carriageRest);if(s.axisMotion)z.carriage.position.z+=Math.sin(q*Math.PI*4+.65)*.82;}
+  if(z.beam)z.beam.position.copy(z.beamRest);if(z.carriage)z.carriage.position.copy(z.carriageRest);
+  if(s.axisMotion){
+   const q=THREE.MathUtils.clamp((s.p-.22)/.60,0,1),pts=z.pathPoints,n=pts.length-1,scaled=q*n,k=Math.min(n-1,Math.floor(scaled)),t=scaled-k,a=pts[k],b=pts[k+1],x=THREE.MathUtils.lerp(a[0],b[0],t),zz=THREE.MathUtils.lerp(a[1],b[1],t);
+   if(z.beam)z.beam.position.x+=x;if(z.carriage)z.carriage.position.z+=zz;
+  }
   if(this.zundMaterial)this.zundMaterial.visible=this.active;
-  z.vacuumHoldActive=s.vacuumHold;
+  z.vacuumHoldActive=s.vacuumHold;z.toolActionActive=s.axisMotion&&z.installedToolPackageVerified===true;
  }
  bindCompressor(){
   const no=this.template.cfg.machine.no,brand=[29,30,35].includes(no)?'ATLAS':[31,32,34].includes(no)?'KAESER':'SWAN';
@@ -1965,8 +1975,8 @@ export class ReferenceProcessSimulation{
    oscillatorCount:this.motions.filter(x=>x.motion.type!=='spin').length,mechanismCount:this.family==='blanker'?this.template.activeMeshes.length:this.family==='zund'?2:this.motions.length,inkFlowCount:0,uvLampCount:0,uvActive:false,pathVisible:false,inkFlowVisible:false,
    platformIndexing:blankerState?.indexing??false,blankingHeadPressing:blankerState?.pressing??false,mechanicalInterlockSafe:blankerState?.interlockSafe??true,
    modeledBinCount:collatorState?.modeledBinCount??null,installedBinCountVerified:collatorState?.installedBinCountVerified??null,activeBinFeeds:this.collator?.activeFeedCount??0,activeFeedBinIndexes:this.collator?.activeFeedBins??[],doubleFeedCheckActive:this.family==='collator'?(this.collator?.doubleFeedCheckActive??false):false,gatherTransportActive:this.family==='collator'?(this.collator?.gatherTransportActive??false):false,completedSheetsInSet:this.collator?.completedSheetsInSet??0,
-   exposureActive:imagesetterState?.exposure??false,cuttingActive:imagesetterState?.cutting??false,punchInstalledVerified:this.imagesetter?.punch?.userData.installedOptionVerified===true,processorInstalledVerified:this.imagesetter?.processor?.userData.installedOptionVerified===true,exactScreenModelVerified:this.family==='imagesetter'?this.template.root.userData.exactScreenModelVerified:null,
-   vacuumHoldActive:zundState?.vacuumHold??false,zundAxisMotionActive:zundState?.axisMotion??false,ctpPlateLoaded:this.family==='ctp'?(this.ctp?.plateLoaded??false):false,ctpPlateClamped:this.family==='ctp'?(this.ctp?.plateClamped??false):false,ctpExposureActive:this.family==='ctp'?(this.ctp?.exposureActive??false):false,ctpLaserTraverseActive:this.family==='ctp'?(this.ctp?.laserTraverseActive??false):false,ctpPunchInstalledVerified:this.family==='ctp'?(this.ctp?.punchInstalledVerified??false):null,installedToolPackageVerified:this.family==='zund'?(this.zund?.installedToolPackageVerified??false):null,toolActionEnabled:this.family==='zund'?(this.zund?.installedToolPackageVerified===true):null,registrationCameraInstalledVerified:this.family==='zund'?(this.zund?.installedIccVerified??false):null,toolInitializationInstalledVerified:this.family==='zund'?(this.zund?.installedItiVerified??false):null,
+   exposureActive:imagesetterState?.exposure??false,cuttingActive:imagesetterState?.cutting??false,capstanAdvanceActive:this.family==='imagesetter'?(this.imagesetter?.capstanAdvanceActive??false):false,tensionRegulationActive:this.family==='imagesetter'?(this.imagesetter?.tensionRegulationActive??false):false,outputBoundaryActive:this.family==='imagesetter'?(this.imagesetter?.outputBoundaryActive??false):false,punchInstalledVerified:this.imagesetter?.punch?.userData.installedOptionVerified===true,processorInstalledVerified:this.imagesetter?.processor?.userData.installedOptionVerified===true,exactScreenModelVerified:this.family==='imagesetter'?this.template.root.userData.exactScreenModelVerified:null,
+   vacuumHoldActive:zundState?.vacuumHold??false,zundAxisMotionActive:zundState?.axisMotion??false,zundAxisPathType:this.family==='zund'?(this.zund?.axisPathType??null):null,zundToolActionActive:this.family==='zund'?(this.zund?.toolActionActive??false):false,ctpPlateLoaded:this.family==='ctp'?(this.ctp?.plateLoaded??false):false,ctpPlateClamped:this.family==='ctp'?(this.ctp?.plateClamped??false):false,ctpExposureActive:this.family==='ctp'?(this.ctp?.exposureActive??false):false,ctpLaserTraverseActive:this.family==='ctp'?(this.ctp?.laserTraverseActive??false):false,ctpPunchInstalledVerified:this.family==='ctp'?(this.ctp?.punchInstalledVerified??false):null,installedToolPackageVerified:this.family==='zund'?(this.zund?.installedToolPackageVerified??false):null,toolActionEnabled:this.family==='zund'?(this.zund?.installedToolPackageVerified===true):null,registrationCameraInstalledVerified:this.family==='zund'?(this.zund?.installedIccVerified??false):null,toolInitializationInstalledVerified:this.family==='zund'?(this.zund?.installedItiVerified??false):null,
    compressorBrand:this.family==='compressor'?(this.compressor?.brand??null):null,compressorIntakeActive:this.family==='compressor'?(this.compressor?.intakeActive??false):false,compressorCompressionActive:this.family==='compressor'?(this.compressor?.compressionActive??false):false,compressorSeparationActive:this.family==='compressor'?(this.compressor?.separationActive??false):false,compressorAftercoolingActive:this.family==='compressor'?(this.compressor?.aftercoolingActive??false):false,compressorOilCircuitActive:this.family==='compressor'?(this.compressor?.oilCircuitActive??false):false,compressorCondensateDrainActive:this.family==='compressor'?(this.compressor?.condensateDrainActive??false):false,compressorDistributionActive:this.family==='compressor'?(this.compressor?.distributionActive??false):false,compressorPressureNormalizedPct:this.family==='compressor'?(this.compressor?.pressureNormalizedPct??0):null,compressorPressureProfile:this.family==='compressor'?(this.compressor?.pressureProfile??null):null,plantCompressedAirRouteVerified:this.family==='compressor'?(this.compressor?.plantRouteVerified??false):null,airReceiverInstalledVerified:this.family==='compressor'?(this.compressor?.receiverInstalledVerified??false):null,airDryerInstalledVerified:this.family==='compressor'?(this.compressor?.dryerInstalledVerified??false):null,ringMainInstalledVerified:this.family==='compressor'?(this.compressor?.ringMainInstalledVerified??false):null,
    ahuSectionOrderVerified:this.family==='ahu'?(this.ahu?.sectionOrderVerified??false):null,ahuExactModelVerified:this.family==='ahu'?(this.ahu?.exactModelVerified??false):null,supplyAirActive:this.family==='ahu'?(this.ahu?.supplyAirActive??false):false,returnAirReferenceActive:this.family==='ahu'?(this.ahu?.returnAirReferenceActive??false):false,outdoorHeatRejectionActive:this.family==='ahu'?(this.ahu?.outdoorHeatRejectionActive??false):false,plantDuctRouteVerified:this.family==='ahu'?(this.template.root.userData.plantDuctRouteVerified===true):null,evaporativePrecoolActive:this.family==='ahu'?(this.ahu?.evaporativePrecoolActive??false):false,dxEvaporatorActive:this.family==='ahu'?(this.ahu?.dxEvaporatorActive??false):false,genericCoilConditioningActive:this.family==='ahu'?(this.ahu?.genericCoilActive??false):false,
    cartonBlankGeometryIsSchematic:this.family==='folder'?(this.folder?.cartonBlankGeometryIsSchematic??true):null,foldingActive:folderState?.folding??false,glueZoneActive:folderState?.gluing??false,compressionActive:folderState?.compressing??false,crashLockInstalledVerified:this.family==='folder'?(this.folder?.installedCrashLockVerified??false):null,fourSixCornerInstalledVerified:this.family==='folder'?(this.folder?.installedFourSixCornerVerified??false):null,glueApplicatorTypeVerified:this.family==='folder'?(this.folder?.glueApplicatorTypeVerified??false):null,
