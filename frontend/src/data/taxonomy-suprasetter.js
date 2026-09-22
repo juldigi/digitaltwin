@@ -2,7 +2,7 @@ const ASSETS=Object.freeze({
  'BMJ-MCH-0025':{no:25,label:'CTP HEIDELBERG MACHINE · CTP-1',sap:'CTP-1'},
  'BMJ-MCH-0026':{no:26,label:'CTP HEIDELBERG MACHINE · CTP-2',sap:'CTP-2'}
 });
-const SRC=Object.freeze(['BMJ-MACHINE-DATABASE','V123-SUPRA-A75','V123-SUPRA-A106','V123-SUPRA-TECH','V123-SUPRA-A52A75-GUIDE']);
+const SRC=Object.freeze(['BMJ-MACHINE-DATABASE','V123-SUPRA-A75','V123-SUPRA-A106','V123-SUPRA-TECH','V123-SUPRA-A52A75-GUIDE','V139-SUPRA-DRIVE-INTERLOCK']);
 const rowsFor=machineId=>{
  const a=ASSETS[machineId];if(!a)return [];
  const root='CTP'+a.no,rows=[];
@@ -25,11 +25,15 @@ const rowsFor=machineId=>{
 
  u=unit('TRANSPORT','Plate Transport & Registration','universal-module-2','Plate transport from entry to imaging drum.');
  chain(u,'ROLLERS','Plate Transport','Transport Roller Block','Plate Transport Service Group','Transport Rollers / Guides','ctp-transport','Common plate handling path; exact roller count and loader-specific transport geometry remain unknown.');
+ chain(u,'DRIVE','Plate Transport Drive / Position Feedback','Transport Drive Block','Transport Drive Service Group','Motor / Coupling / Encoder Reference','ctp-transport','Functional transport drive and encoder reference only; exact BMJ motor/gear ratio and encoder hardware remain unverified.');
  chain(u,'REGISTER','Plate Positioning','Register / Position Block','Plate Position Service Group','Plate Presence / Position Sensor Reference','ctp-register','Functional registration/sensing reference, not a serial-specific sensor claim.');
+ chain(u,'INTERLOCK','Register Confirmation / Stop Actuation','Register Interlock Block','Register Interlock Service Group','Register Stop Actuator / Confirm Sensors','ctp-register','Exposure sequence requires confirmed plate positioning in the simulation; actual sensor/actuator hardware remains serial-specific.');
 
  u=unit('DRUM','External Imaging Drum','universal-module-3','External-drum Suprasetter imaging architecture.');
  chain(u,'BODY','Imaging Drum','External Drum Block','Drum Service Group','External Imaging Drum Surface','ctp-drum','External imaging drum is a Suprasetter family process reference.');
+ chain(u,'DRIVE','Drum Drive / Encoder / Position Brake','Drum Drive Block','Drum Drive Service Group','Drive Motor / Coupling / Encoder / Position Brake','ctp-drum','Functional drive and position-control chain; exact Suprasetter motor, brake and feedback hardware on BMJ assets are unverified.');
  chain(u,'CLAMP','Plate Clamping','Drum Clamp Block','Plate Clamp Service Group','Leading / Trailing Clamp Reference','ctp-drum-clamp','Plate retention on drum; exact clamp mechanism remains family-level.');
+ chain(u,'CLAMPINT','Clamp Confirmation Interlock','Clamp Interlock Block','Clamp Interlock Service Group','Clamp Actuator / Confirmation Sensor Reference','ctp-drum-clamp','Simulation requires clamp confirmation before exposure; installed sensor topology is not asserted.');
 
  u=unit('LASER','HEIDELBERG Thermal Laser / IDS','universal-module-4','HEIDELBERG-developed laser family with Intelligent Diode System.');
  chain(u,'RAIL','Laser Carriage','Laser Traverse Block','Laser Carriage Service Group','Linear Rail / Carriage','ctp-laser-rail','Laser carriage traverses imaging area in the family representation.');
@@ -41,6 +45,7 @@ const rowsFor=machineId=>{
 
  u=unit('OUT','Unload / Environmental Options','universal-module-6','Plate unload plus model-dependent debris and temperature-control capabilities.');
  chain(u,'UNLOAD','Plate Unload','Unload Path Block','Plate Unload Service Group','Unload Guides / Processor Handoff','ctp-unload','Common output path toward processor/stacker boundary.');
+ chain(u,'OUTSENSE','Output Plate Confirmation','Output Sensor Block','Output Detection Service Group','Output Plate Sensor Reference','ctp-unload','Functional output-confirmation reference; actual sensor type on BMJ CTP-1/2 is unverified.');
  chain(u,'PROCESSOR','Processor / Stacker Boundary','Downstream Interface Block','Downstream Handoff Group','Processor / Stacker Interface','ctp-processor-boundary','No exact online processor or stacker is verified for the BMJ assets.','OPTION_BOUNDARY');
  chain(u,'DEBRIS','Debris Removal Capability','Debris Option Block','Vacuum / Filter Capability Group','Debris Vacuum / Filter Reference','ctp-debris-option','Optional debris-removal system is documented on A75 and family variants; installation is unverified.','OPTION_BOUNDARY');
  chain(u,'TEMP','Temperature Stabilization Capability','Temperature Option Block','Temperature Control Capability Group','Temperature Stabilizer Reference','ctp-temp-stabilizer-option','A106/106 documents integrated temperature stabilization; exact BMJ model is unknown so this remains a capability boundary.','OPTION_BOUNDARY');
