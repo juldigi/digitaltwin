@@ -4,11 +4,12 @@ import * as THREE from 'three';
 import {COMPRESSED_AIR_ROUTING_TEMPLATE} from '../frontend/src/data/compressed-air-routes.js';
 import {AHU_PIPE_ROUTING_TEMPLATE} from '../frontend/src/data/ahu-pipe-routes.js';
 import {AHU_DUCT_ROUTING_TEMPLATE} from '../frontend/src/data/ahu-duct-routes.js';
-import {UTILITY_ROUTING_TEMPLATES,materializeRoutingSystem,routingPathPoints,buildUtilityRoutingScaffold} from '../frontend/src/utility-routing.js';
+import {ROUTING_STATUS_LEVELS,UTILITY_ROUTING_TEMPLATES,materializeRoutingSystem,routingPathPoints,buildUtilityRoutingScaffold} from '../frontend/src/utility-routing.js';
 
 const templates=[COMPRESSED_AIR_ROUTING_TEMPLATE,AHU_PIPE_ROUTING_TEMPLATE,AHU_DUCT_ROUTING_TEMPLATE];
 
 test('V135 utility route schemas are node-segment based, unique and template-only',()=>{
+ assert.deepEqual(ROUTING_STATUS_LEVELS,['TEMPLATE_ONLY','LAYOUT_ESTIMATED','DRAWING_BASED','FIELD_VERIFIED','AS_BUILT_CONFIRMED']);
  assert.equal(UTILITY_ROUTING_TEMPLATES.length,3);
  for(const system of templates){
   assert.equal(system.status,'TEMPLATE_ONLY',system.id);
@@ -39,7 +40,7 @@ test('V135 utility route templates expose prepared compressor, AHU-pipe and AHU-
 
 test('V135 routing override contract can accept future drawing coordinates without rebuilding schemas',()=>{
  const actual=materializeRoutingSystem(COMPRESSED_AIR_ROUTING_TEMPLATE,{
-  status:'DRAWING_BASED',previewOrigin:[0,0,0],
+  status:'DRAWING_BASED',previewOrigin:[0,0,0],complete:true,coordinateSpace:'FACTORY_WORLD_METRES',
   engineeringBoundary:{actualRouteVerified:true,actualPipeSizeVerified:true},
   nodes:{'CA-PKG-OUT':{p:[1,2,3],status:'DRAWING_BASED'}},
   segments:{'CA-S01':{diameterMm:80,status:'DRAWING_BASED'}}
@@ -81,7 +82,7 @@ test('V135 drawing override can promote one system while untouched systems remai
  for(const key of ['utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors'])layers[key]=new THREE.Group();
  const result=buildUtilityRoutingScaffold(layers,{
   'BMJ-UTILITY-COMPRESSED-AIR-V1':{
-   status:'DRAWING_BASED',
+   status:'DRAWING_BASED',complete:true,coordinateSpace:'FACTORY_WORLD_METRES',
    engineeringBoundary:{actualRouteVerified:true},
    nodes:{'CA-PKG-OUT':{p:[2,1,0],status:'DRAWING_BASED'}}
   }
@@ -90,4 +91,13 @@ test('V135 drawing override can promote one system while untouched systems remai
  const ahu=result.systems.find(s=>s.system==='AHU_PIPING');
  assert.equal(ca.actualRouteVerified,true);
  assert.equal(ahu.actualRouteVerified,false);
+ assert.equal(result.actualRoutingApplied,true);
+ assert.equal(result.mode,'MIXED_TEMPLATE_AND_APPLIED');
+});
+
+test('V135 incomplete override cannot be promoted to verified actual routing',()=>{
+ const partial=materializeRoutingSystem(COMPRESSED_AIR_ROUTING_TEMPLATE,{status:'DRAWING_BASED',engineeringBoundary:{actualRouteVerified:true},nodes:{'CA-PKG-OUT':{p:[2,2,2]}}});
+ assert.equal(partial.engineeringBoundary.actualRouteVerified,false);
+ assert.equal(partial.overrideValidation.requestedActual,true);
+ assert.equal(partial.overrideValidation.actualGate,false);
 });
