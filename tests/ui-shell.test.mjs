@@ -251,13 +251,14 @@ test('v48 removes the odd PU8 step, uses structural UV supports and accumulates 
   assert.match(app,/gripper melepaskan sheet tepat di atas main pile/);
 });
 
-test('v49 exposes the normalized 41-machine plant registry without inventing geometry',()=>{
+test('v49 exposes the normalized 41-machine plant registry through the contextual Asset Browser',()=>{
   assert.match(html,/id="machine-count">41/);
   assert.match(app,/MACHINE_REGISTRY_STATS/);
   assert.match(app,/searchMachines\(/);
   assert.match(app,/data-machine-id/);
-  assert.match(app,/equipment terdaftar/);
-  assert.match(app,/Seluruh equipment memiliki route model 3D/);
+  assert.match(app,/ASSET BROWSER/);
+  assert.match(app,/aset Digital Twin/);
+  assert.match(app,/asset-data-status/);
   assert.match(sw,/src\/data\/machine-registry\.js/);
 });
 

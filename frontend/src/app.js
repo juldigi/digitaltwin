@@ -44,9 +44,9 @@ configureActiveMachine(INITIAL_URL_STATE.get('machine')||INITIAL_URL_STATE.get('
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'Belum tersedia').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const number=n=>Number.isFinite(n)?n.toLocaleString('id-ID',{maximumFractionDigits:4}):'Belum tersedia';
-let state,engine,activeTab='overview',apiBase='',token='',role=null,editing=false,explode=0,selectedPart=null,selectedTaxonomyId=ACTIVE_ROOT,exteriorMode=false,exteriorPreviousLow=null,exteriorFocusKey=null,simulationState,simulationOwnsExterior=false,toastTimer,bundledLayout=null;
+let state,engine,activeTab='overview',apiBase='',token='',role=null,editing=false,explode=0,selectedPart=null,selectedTaxonomyId=ACTIVE_ROOT,exteriorMode=false,exteriorPreviousLow=null,exteriorFocusKey=null,simulationState,simulationOwnsExterior=false,referenceCategoryFilter='all',toastTimer,bundledLayout=null;
 function applyActiveMachineState(){
- state=structuredClone(initialState);
+ state=structuredClone(initialState);referenceCategoryFilter='all';
  simulationState={active:false,running:false,paused:false,speed:1,stage:'Feeder',completed:0,progress:0,sheetsVisible:0,pileSheetsVisible:0,rotorCount:0,oscillatorCount:0,mechanismCount:0,inkFlowCount:0,uvLampCount:0,uvActive:false,pathVisible:IS_SHEETING?false:true,inkFlowVisible:true};
  if(IS_OFFSET10)state.asset={...state.asset,asset_id:'MACHINE-OFFSET10',asset_code:'OFFSET-10',codename:null,model:'CX104-2+LY-8+LY-1+L UV + FoilStar',description:'OFFSET 10',source_description:'OFFSET - 10 MACHINE',manufacturer:'Heidelberg',specification:'Speedmaster CX 104 · Full UV · FoilStar Gen.3 · X3 delivery',configuration:'CX104-2+LY-8+LY-1+L UV + FoilStar / X3','3d_status':'PROCEDURAL / DOCUMENT-GROUNDED',data_confidence:'HIGH CONFIDENCE',discovery_status:'OFFICIAL_DOCUMENTS_AVAILABLE',sources:OFFSET10_TECHNICAL_SOURCES};
  if(IS_APM2)state.asset={...state.asset,asset_id:'MACHINE-APM2',asset_code:'APM-2',codename:'APM-2',model:'SP 102',description:'AUTOPLATEN - 2 MACHINE',source_description:'BMJ Machine Database',manufacturer:'BOBST',specification:'Automatic flatbed die cutter · SP 102 family · 1994',configuration:'Feeder · Register / SideLay · Gripper Chain · Flatbed Platen · Stripping · Delivery','3d_status':'PROCEDURAL / DATABASE + LEGACY FAMILY REFERENCES',data_confidence:'IDENTITY VERIFIED / VARIANT REFERENCE',discovery_status:'SP102_FAMILY_REFERENCE_AVAILABLE',serial_number:'57115506',functional_location:'PC-PK2-CON-AUT-AUTOPLAT02',year:1994,sources:APM2_TECHNICAL_SOURCES};
@@ -272,6 +272,49 @@ function taxonomyPath(id=selectedTaxonomyId){
  while(meta&&guard++<8){path.unshift(meta);meta=meta.parentId?TAXONOMY_BY_ID.get(meta.parentId):null;}
  return path;
 }
+function referenceKind(source){
+ const text=[source?.type,source?.title,source?.file,source?.localFile].filter(Boolean).join(' ').toLowerCase();
+ if(/manual|procedure|service manual|operating manual/.test(text))return'manual';
+ if(/drawing|layout|system diagram|preinstall|pre-install|technical data/.test(text))return'drawing';
+ if(/database|evidence|user[_ -]?supplied|user[_ -]?provided|user[_ -]?evidence|source ledger/.test(text))return'evidence';
+ return'document';
+}
+function referenceContextTokens(){
+ const path=taxonomyPath();if(path.length<=1)return[];
+ const stop=new Set(['mesin','machine','unit','utama','main','system','sistem','part','spesifik','specific','assembly','offset','reference','referensi','component','komponen']);
+ const tokens=[];
+ for(const node of path.slice(-3)){
+  const raw=[node.name,node.description,node.levelName].filter(Boolean).join(' ').toLowerCase();
+  for(const token of raw.split(/[^a-z0-9]+/).filter(Boolean))if(token.length>=4&&!stop.has(token)&&!tokens.includes(token))tokens.push(token);
+ }
+ return tokens.slice(0,18);
+}
+function contextualReferenceData(){
+ const tokens=referenceContextTokens(),activeReference=window.BMJAppState?.getState?.().activeReference||null;
+ const score=text=>tokens.reduce((sum,token)=>sum+(String(text||'').toLowerCase().includes(token)?1:0),0);
+ const technical=TECHNICAL_SOURCES.map((source,index)=>{
+  const support=Array.isArray(source.supports)?source.supports.join(' '):'',text=[source.title,source.publisher,source.type,source.note,support,source.file,source.localFile].filter(Boolean).join(' ');
+  return{kind:referenceKind(source),source,index,score:score(text),active:source.id===activeReference};
+ }).sort((a,b)=>b.score-a.score||a.index-b.index);
+ const photos=PHOTO_REGISTRY.map((photo,index)=>({kind:'photo',photo,index,score:score([photo.filename,photo.machineZone,photo.viewDirection,photo.category].join(' ')),active:photo.id===activeReference})).sort((a,b)=>b.score-a.score||a.index-b.index);
+ return{tokens,technical,photos,activeReference};
+}
+function renderReferencePanel(){
+ const runtimeOrientation=engine?.template?.root?.userData?.orientation||ORIENTATION,flow=runtimeOrientation.feedDirection||runtimeOrientation.sheetFlow||runtimeOrientation.processFlow||'Arah proses mengikuti model referensi',op=runtimeOrientation.operatorSide||'Belum terverifikasi',ds=runtimeOrientation.driveSide||runtimeOrientation.gearSide||'Belum terverifikasi';
+ const context=contextualReferenceData(),path=taxonomyPath(),selectedMeta=path.at(-1),all=[...context.photos,...context.technical],counts={all:all.length,photo:context.photos.length,document:0,manual:0,drawing:0,evidence:0};for(const item of context.technical)counts[item.kind]=(counts[item.kind]||0)+1;
+ const filtered=referenceCategoryFilter==='all'?all:all.filter(item=>item.kind===referenceCategoryFilter),priorityCount=filtered.filter(item=>item.score>0).length;
+ const contextLabel=selectedMeta&&selectedMeta.id!==ACTIVE_ROOT?selectedMeta.name:(IS_GENERIC?GENERIC_CONFIG.machine.name:state?.asset?.description||'Mesin aktif');
+ const intro=IS_OFFSET10?'Model Offset 10 dibangun dari final drawing, proposal, layout UV, pre-installation, system diagram, technical data final, serta referensi resmi Heidelberg CX 104 dan FoilStar.':IS_APM2?'Identitas APM 2 berasal dari database BMJ; referensi SP 102 digunakan sesuai evidence boundary.':IS_SHEETING?'Identitas HSM-CTM7 berasal dari database BMJ; referensi HSM 56 dan process references dipisahkan dari klaim exact geometry.':IS_GENERIC?'Referensi mengikuti evidence map mesin aktif; detail serial-specific yang belum tersedia tetap dibatasi.':'Foto aktual dan dokumen CD102 diprioritaskan berdasarkan komponen yang sedang dipilih.';
+ const filters=[['all','Semua'],['photo','Foto'],['document','Dokumen'],['manual','Manual'],['drawing','Drawing / Layout'],['evidence','Evidence / Source']];
+ const cards=filtered.map(item=>{
+  if(item.kind==='photo'){const p=item.photo;return `<article class="context-reference-card ${item.score>0?'is-priority':''} ${item.active?'is-active':''}" data-reference-card="${esc(p.id)}"><header><span class="reference-kind">Foto</span>${item.score>0?'<em>Relevan ke konteks</em>':''}</header><h4>${esc(p.filename)}</h4><p>${esc(p.machineZone)} · ${esc(p.viewDirection)}</p><small>${esc(p.category||'Foto aktual')}</small></article>`;}
+  const src=item.source,file=src.file||src.localFile||null,label=item.kind==='manual'?'Manual':item.kind==='drawing'?'Drawing / Layout':item.kind==='evidence'?'Evidence / Source':'Dokumen';
+  return `<article class="context-reference-card ${item.score>0?'is-priority':''} ${item.active?'is-active':''}" data-reference-card="${esc(src.id||'source-'+item.index)}"><header><span class="reference-kind">${label}</span>${item.score>0?'<em>Relevan ke konteks</em>':''}</header><h4>${esc(src.title)}</h4><p>${esc(src.publisher||'Sumber teknis')}</p>${file?`<small>${esc(file)}</small>`:''}${src.url?`<a href="${esc(src.url)}" target="_blank" rel="noopener">Buka sumber ↗</a>`:''}</article>`;
+ }).join('');
+ $('#panel-content').innerHTML=`<h3>Referensi</h3><div class="card accent reference-context-summary"><h4>Konteks: ${esc(contextLabel)}</h4><p>${esc(intro)}</p><span class="tag">${priorityCount?priorityCount+' sumber diprioritaskan':'Sumber mesin aktif'}</span><span class="tag">${all.length} total referensi</span></div><div class="reference-filter-strip">${filters.map(([key,label])=>`<button type="button" data-reference-filter="${key}" class="${referenceCategoryFilter===key?'active':''}">${label}<small>${counts[key]||0}</small></button>`).join('')}</div><div class="context-reference-list">${cards||'<p class="empty">Tidak ada referensi pada kategori ini.</p>'}</div><div class="card"><h4>Arah mesin</h4><p>${esc(flow)} · operator side ${esc(op)} · drive/gear side ${esc(ds)}</p></div><p class="subtle">Prioritas hanya dibuat bila istilah pada taxonomy terpilih benar-benar ditemukan pada metadata/support sumber. Sumber lain tetap tersedia sebagai konteks mesin, bukan dianggap bukti langsung komponen.</p>`;
+ $$('[data-reference-filter]').forEach(button=>button.onclick=()=>{referenceCategoryFilter=button.dataset.referenceFilter;renderReferencePanel();});
+ $$('[data-reference-card]').forEach(card=>card.onclick=event=>{if(event.target.closest('a'))return;emitDomainState({activeReference:card.dataset.referenceCard,activeSection:'reference'});$$('[data-reference-card]').forEach(x=>x.classList.toggle('is-active',x===card));});
+}
 function resetTaxonomyRoot(){
  selectedTaxonomyId=ACTIVE_ROOT;selectedPart=null;explode=0;
  if(engine){engine.template.reset();engine.clearPartLabels();engine.isolated=false;engine.fit(engine.machine);}
@@ -438,8 +481,7 @@ function renderPanel(tab=activeTab){
   on('#exterior-open',showExteriorAll);on('#exterior-close',resetExteriorView);
   document.querySelectorAll('[data-exterior-area]').forEach(b=>b.onclick=()=>focusExteriorArea(b.dataset.exteriorArea));
  }else{
-   const ps=photoStats(),runtimeOrientation=engine?.template?.root?.userData?.orientation||ORIENTATION,flow=runtimeOrientation.feedDirection||runtimeOrientation.sheetFlow||runtimeOrientation.processFlow||'Arah proses mengikuti model referensi',op=runtimeOrientation.operatorSide||'Belum terverifikasi',ds=runtimeOrientation.driveSide||runtimeOrientation.gearSide||'Belum terverifikasi';
-  $('#panel-content').innerHTML=`<h3>Referensi</h3><div class="card accent"><h4>${IS_GENERIC?TECHNICAL_SOURCES.length+' referensi teknis':IS_OFFSET10||IS_APM2||IS_SHEETING?TECHNICAL_SOURCES.length+' referensi teknis':ps.unique+' foto mesin tersedia'}</h4><p>${IS_OFFSET10?'Model Offset 10 dibangun dari final drawing, proposal, layout UV, pre-installation, system diagram, technical data final, serta referensi resmi Heidelberg CX 104 dan FoilStar. Tidak ada foto aktual Offset 10 yang digunakan.':IS_APM2?'Identitas APM 2 berasal dari database BMJ. Geometry dan fungsi memakai referensi legacy BOBST SP 102 se-era karena foto aktual dan suffix varian mesin belum tersedia.':IS_SHEETING?'Identitas HSM-CTM7, serial 00982, SAP SBM-2 dan tahun 2014 berasal dari database BMJ. Geometry V68 mempertahankan anchor HSM 56 dan sekarang memberi fungsi nyata pada roll besar turquoise sebagai Main Draw / Traction Drum family reference: web benar-benar wrap pada permukaannya, putaran drum mengikuti jarak web yang maju, dan cut dipicu oleh target web advance. Upstream tetap continuous ribbon, sheet tidak boleh teleport/bergerak balik, dan lift table turun mengikuti pile.':IS_GENERIC?(IS_VERIFIED_REGISTRY_SIM?'Dedicated twin memakai source map dan evidence boundary yang tercatat untuk model/family mesin ini. Detail yang belum serial-specific tetap dibatasi.':'Model referensi tetap dibatasi oleh evidence gate; simulasi tidak dijalankan sampai alur mekanis cukup tervalidasi.'):'Foto digunakan untuk membantu menyusun bentuk luar dan orientasi mesin. Dokumen mesin digunakan untuk membantu mengenali nama dan fungsi bagian.'}</p><span class="tag">${IS_OFFSET10?'DOKUMEN PROYEK':IS_APM2?'DATABASE BMJ':IS_SHEETING?'DATABASE + FAMILY REF':IS_GENERIC?GENERIC_CONFIG.evidence.grade:'FOTO MESIN'}</span><span class="tag">DOKUMEN TEKNIS</span></div>${PHOTO_REGISTRY.length?'<h3>Foto aktual</h3>':''}${PHOTO_REGISTRY.map(p=>`<div class="card source-photo"><h4>${esc(p.filename)}</h4><p>${esc(p.machineZone)} · ${esc(p.viewDirection)}</p></div>`).join('')}<h3>Dokumen mesin</h3>${TECHNICAL_SOURCES.map(src=>`<div class="card"><h4>${esc(src.title)}</h4><p>${esc(src.publisher)}</p>${src.url?`<p><a href="${esc(src.url)}" target="_blank" rel="noopener">Buka dokumen ↗</a></p>`:''}</div>`).join('')}<div class="card"><h4>Arah mesin</h4><p>${esc(flow)} · operator side ${esc(op)} · drive/gear side ${esc(ds)}</p></div><p class="subtle">Jika data ukuran belum tersedia, aplikasi menampilkannya sebagai belum tersedia.</p>`;
+   renderReferencePanel();
  }
 }
 function renderStatus(){
@@ -551,7 +593,7 @@ async function switchActiveMachine(route,{historyMode='push'}={}){
   if(engine){engine.switchMachine(MACHINE_KEY);engine.onTaxonomySelect=id=>selectTaxonomy(id,{revealPanel:false});engine.onSimulationUpdate=next=>{simulationState=next;updateSimulationPanel(next);};engine.onReset=()=>{explode=0;selectedPart=null;selectedTaxonomyId=ACTIVE_ROOT;renderPanel();};engine.onError=message=>toast(message,true);if(bundledLayout)engine.loadLayout(bundledLayout);engine.setView('machine',state);}
   else{qStaticFallbackClear();renderStaticMachineFallback(new Error('3D renderer unavailable'));}
   const taxCount=$('#taxonomy-count');if(taxCount)taxCount.textContent=taxonomyStats().total.toLocaleString('id-ID');
-  renderStatus();redrawPlantPlan();renderPanel('overview');$('#engine-status').textContent='Tampilan 3D siap';emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:null});
+  renderStatus();redrawPlantPlan();showPanel();renderPanel('overview');engine?.fit(engine.machine);$('#engine-status').textContent='Tampilan 3D siap';emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:null,activeReference:null,activeSection:'asset'});
  }catch(error){toast('Model mesin gagal diganti: '+error.message,true);}
  finally{if(boot)boot.hidden=true;document.body.classList.remove('scene-switching');}
 }
@@ -655,14 +697,56 @@ addEventListener('bmj:searchselect',async event=>{
   }
  }catch(error){toast('Hasil pencarian tidak dapat dibuka: '+error.message,true);}
 });
+function registryBrand(machine){
+ const text=[machine.name,machine.model,machine.source].filter(Boolean).join(' ').toUpperCase();
+ const rules=[['HEIDELBERG','Heidelberg'],['BOBST','BOBST'],['MASTERWORK','Masterwork'],['MK 9','Masterwork'],['MK 1060','Masterwork'],['PROMATRIX','Heidelberg'],['POLAR','Polar'],['LEXUS','Lexus'],['FOCUSIGHT','Focusight'],['DIANA','Heidelberg'],['ATLAS COPCO','Atlas Copco'],['KAESER','Kaeser'],['SWAN','Swan'],['SANSIN','Sansin'],['ZUND','Zünd'],['SCREEN','SCREEN'],['UPG','UPG']];
+ const match=rules.find(([token])=>text.includes(token));return match?.[1]||'Belum teridentifikasi';
+}
+function registryType(machine){
+ const name=String(machine.name||'').toUpperCase();
+ if(name.includes('COMPRESSOR'))return'Air Compressor';if(name.includes('AHU'))return'AHU';
+ if(name.includes('OFFSET'))return'Printing Press';if(name.includes('AUTOPLATEN')||name.includes('AUTOBLANKING'))return'Die Cutting / Blanking';
+ if(name.includes('FOLDER GLUER'))return'Folder Gluer';if(name.includes('INSPECTION'))return'Inspection';
+ if(name.includes('PILE TURNER'))return'Pile Turner';if(name.includes('SHEETING'))return'Sheeting';if(name.includes('GUILOTINE'))return'Guillotine';
+ if(name.includes('CTP')||name.includes('CTF')||name.includes('ZUND'))return'Prepress';if(name.includes('INKJET'))return'Digital Printing';
+ if(name.includes('COLLATOR'))return'Collator';return machine.area==='UTILITY'?'Utility Equipment':'Production Equipment';
+}
+function registryDataStatus(machine){
+ const fields=[machine.model,machine.serial,machine.functionalLocation,machine.sapCode,machine.year],count=fields.filter(v=>v!==null&&v!==undefined&&String(v).trim()!=='').length;
+ return count>=4?'Lengkap':count>=2?'Sebagian':'Terbatas';
+}
+async function openAssetContext(machine){
+ if(!machine)return;const route=machineRoute(machine);
+ if(route!==MACHINE_KEY)await switchActiveMachine(route,{historyMode:'push'});
+ else{closeModal();setView('machine');showPanel();renderPanel('overview');engine?.fit(engine.machine);}
+ emitDomainState({selectedAsset:normalizeMachineKey(route),selectedArea:machine.area||null,selectedNode:null,activeReference:null,activeSection:'asset'});
+ showPanel();renderPanel('overview');
+}
 function assetDialog(initialQuery=''){
- modal('Daftar Mesin',`<div class="card accent"><h4>${MACHINE_REGISTRY_STATS.total} equipment terdaftar</h4><p>OFFSET PRINTING ${MACHINE_REGISTRY_STATS.byArea['OFFSET PRINTING']} · OFFSET CONVERTING ${MACHINE_REGISTRY_STATS.byArea['OFFSET CONVERTING']} · PDS ${MACHINE_REGISTRY_STATS.byArea.PDS} · UTILITY ${MACHINE_REGISTRY_STATS.byArea.UTILITY}</p></div><label for="asset-search">Cari nama, SAP Code, Functional Location, model, atau serial</label><input id="asset-search" type="search" placeholder="Contoh: OFFSET 10, APM-7, AHU 5…"><div id="asset-results"></div><p class="subtle" style="margin-top:18px">Seluruh equipment memiliki route model 3D. Mesin dengan model atau varian yang belum tercatat memakai rekonstruksi parametrik tingkat keluarga dan ditandai sesuai tingkat keyakinannya.</p>`);
- const render=()=>{
-   const found=searchMachines($('#asset-search').value).slice(0,60);
-   $('#asset-results').innerHTML=found.length?found.map(machine=>`<button data-machine-id="${machine.machineId}" class="list-button"><span class="asset-icon">${String(machine.no).padStart(2,'0')}</span><span><strong>${esc(machine.name)}</strong><small>${esc(machine.area)} · ${esc(machine.sapCode||'SAP Code belum tersedia')} · ${esc(machine.model||'Model belum tersedia')}${machine.has3D?' · 3D tersedia':''}</small></span></button>`).join(''):'<p class="empty">Tidak ada mesin yang sesuai.</p>';
-   document.querySelectorAll('[data-machine-id]').forEach(button=>button.onclick=()=>{const machine=MACHINE_REGISTRY_BY_ID.get(button.dataset.machineId);if(machine)machineDetailDialog(machine);});
+ const areas=[...new Set(MACHINE_REGISTRY.map(m=>m.area))].sort(),types=[...new Set(MACHINE_REGISTRY.map(registryType))].sort(),brands=[...new Set(MACHINE_REGISTRY.map(registryBrand))].sort();
+ const options=(items,label)=>`<option value="">${label}</option>`+items.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
+ let assetCategory='machine';
+ modal('Aset',`<div class="asset-browser"><header><div><small>ASSET BROWSER</small><h3>${MACHINE_REGISTRY_STATS.total} aset Digital Twin</h3><p>Mesin dan peralatan berasal dari registry BMJ. Komponen berasal dari taxonomy mesin aktif.</p></div><div class="asset-browser-stat"><strong>${MACHINE_REGISTRY_STATS.modeled3D}</strong><span>model 3D</span></div></header><div class="asset-category-tabs" role="tablist" aria-label="Kategori aset"><button type="button" data-asset-category="machine" class="active">Mesin</button><button type="button" data-asset-category="equipment">Peralatan</button><button type="button" data-asset-category="component">Komponen</button></div><div class="asset-filter-grid"><label class="asset-search-wide"><span>Cari</span><input id="asset-search" type="search" autocomplete="off" placeholder="Nama mesin, SAP Code, FLOC, model, serial, atau komponen…"></label><label data-asset-registry-filter><span>Area</span><select id="asset-area">${options(areas,'Semua area')}</select></label><label data-asset-registry-filter><span>Tipe</span><select id="asset-type">${options(types,'Semua tipe')}</select></label><label data-asset-registry-filter><span>Brand</span><select id="asset-brand">${options(brands,'Semua brand')}</select></label><label data-asset-registry-filter><span>Status data</span><select id="asset-data-status"><option value="">Semua status</option><option>Lengkap</option><option>Sebagian</option><option>Terbatas</option></select></label></div><div class="asset-result-summary" id="asset-result-summary"></div><div id="asset-results" class="asset-browser-results"></div></div>`);
+ const renderComponents=query=>{
+  const raw=String(query||'').trim().toLowerCase(),nodes=ACTIVE_TAXONOMY.filter(node=>node.id!==ACTIVE_ROOT&&(!raw||[node.name,node.description,node.id,node.levelName].some(v=>String(v||'').toLowerCase().includes(raw)))).slice(0,100);
+  $('#asset-result-summary').textContent=nodes.length+' komponen taxonomy ditampilkan · '+(IS_GENERIC?GENERIC_CONFIG.machine.name:state?.asset?.description||'mesin aktif');
+  $('#asset-results').innerHTML=nodes.length?nodes.map(node=>`<button type="button" data-component-id="${esc(node.id)}" class="asset-browser-row component-row"><span class="asset-thumbnail"><b>L${node.level}</b><small>${esc(node.levelName||'Struktur')}</small></span><span class="asset-browser-copy"><strong>${esc(node.name)}</strong><small>${esc(node.id)}</small><span>${esc(node.description||'Komponen taxonomy mesin aktif')}</span></span><em class="asset-data-badge">${engine?.template.resolveTaxonomyNode(node.id)?'Model':'Referensi'}</em></button>`).join(''):'<p class="empty">Tidak ada komponen yang sesuai.</p>';
+  $$('[data-component-id]').forEach(button=>button.onclick=()=>{closeModal();setView('machine');selectTaxonomy(button.dataset.componentId,{revealPanel:true});showPanel();renderPanel('structure');emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:button.dataset.componentId,activeSection:'asset'});});
  };
- $('#asset-search').value=initialQuery;$('#asset-search').oninput=render;render();
+ const render=()=>{
+   const query=$('#asset-search').value;
+   $$('[data-asset-registry-filter]').forEach(el=>el.hidden=assetCategory==='component');
+   if(assetCategory==='component'){renderComponents(query);return;}
+   const area=$('#asset-area').value,type=$('#asset-type').value,brand=$('#asset-brand').value,dataStatus=$('#asset-data-status').value;
+   const categoryFilter=machine=>assetCategory==='equipment'?machine.area==='UTILITY':machine.area!=='UTILITY';
+   const found=searchMachines(query).filter(machine=>categoryFilter(machine)&&(!area||machine.area===area)&&(!type||registryType(machine)===type)&&(!brand||registryBrand(machine)===brand)&&(!dataStatus||registryDataStatus(machine)===dataStatus)).slice(0,80);
+   $('#asset-result-summary').textContent=found.length+' '+(assetCategory==='equipment'?'peralatan':'mesin')+' ditampilkan';
+   $('#asset-results').innerHTML=found.length?found.map(machine=>{const brandName=registryBrand(machine),typeName=registryType(machine),status=registryDataStatus(machine);return`<button type="button" data-machine-id="${machine.machineId}" class="asset-browser-row"><span class="asset-thumbnail"><b>${String(machine.no).padStart(2,'0')}</b><small>${esc(typeName)}</small></span><span class="asset-browser-copy"><strong>${esc(machine.name)}</strong><small>${esc(machine.machineId)} · ${esc(machine.sapCode||'SAP belum tersedia')}</small><span>${esc(machine.model||'Model belum tersedia')} · ${esc(machine.area)} · ${esc(brandName)}</span></span><em class="asset-data-badge" data-status="${status.toLowerCase()}">${status}</em></button>`;}).join(''):'<p class="empty">Tidak ada aset yang sesuai dengan filter.</p>';
+   $$('[data-machine-id]').forEach(button=>button.onclick=async()=>{const machine=MACHINE_REGISTRY_BY_ID.get(button.dataset.machineId);if(machine)await openAssetContext(machine);});
+ };
+ $('#asset-search').value=initialQuery;
+ $$('[data-asset-category]').forEach(button=>button.onclick=()=>{assetCategory=button.dataset.assetCategory;$$('[data-asset-category]').forEach(x=>x.classList.toggle('active',x===button));render();});
+ for(const id of ['#asset-search','#asset-area','#asset-type','#asset-brand','#asset-data-status']){$(id).oninput=render;$(id).onchange=render;}render();
 }
 function settingsDialog(){
  modal('Pengaturan Tampilan',`<label class="check"><input id="low-mode" type="checkbox" ${engine?.low?'checked':''} ${exteriorMode?'disabled':''}> Mode ringan untuk perangkat dengan performa terbatas</label>${exteriorMode?'<p class="subtle">Mode ringan sementara dinonaktifkan saat interior terbuka agar seluruh detail interior tetap terlihat.</p>':''}<label class="check"><input id="label-mode" type="checkbox" ${engine?.labels?'checked':''}> Tampilkan label mesin</label><h3>Data di perangkat</h3><p>${cacheEnabled?'Salinan data di perangkat aktif.':'Salinan data di perangkat tidak aktif.'}</p><button id="clear-cache" class="secondary">Bersihkan Data Tersimpan</button>`);
@@ -686,7 +770,29 @@ on('#tool-simulation',()=>{showPanel();renderPanel('simulation');});
 on('#labels',()=>{if(engine){engine.labels=!engine.labels;$('#labels').classList.toggle('active',engine.labels);emitDomainState({visibleLayers:{labels:engine.labels}});}});
 on('#tool-interior',()=>{if(!engine)return;if(exteriorMode)resetExteriorView();else showExteriorAll();$('#tool-interior')?.classList.toggle('active',exteriorMode);emitDomainState({inspectionMode:{interior:exteriorMode}});});
 window.addEventListener('bmj:layerchange',event=>{if(!engine)return;const {key,visible}=event.detail||{};const map={building:'building',roof:'roof',machines:'machines',labels:'labels',landscape:'landscape',reference:'reference',unidentified:'unidentified',compressedAir:'utility_compressed_air',ahuPiping:'utility_ahu_piping',ducting:'utility_ahu_ducting',utilityAnchors:'utility_anchors'};const layer=map[key];if(!layer)return;if(key==='labels'){engine.labels=Boolean(visible);$('#labels')?.classList.toggle('active',engine.labels);}engine.setFactoryLayer(layer,Boolean(visible));});
-window.addEventListener('bmj:systemfocus',event=>{if(!engine?.actualFactory?.layers)return;const system=event.detail?.system;const layerNames=system==='hvac'?['utility_ahu_ducting','utility_ahu_piping']:system==='compressedAir'?['utility_compressed_air']:['utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors'];const layers=layerNames.map(name=>engine.actualFactory.layers[name]).filter(Boolean);if(!layers.length){toast('Routing sistem ini belum tersedia.');return;}setView('factory');for(const name of layerNames)engine.setFactoryLayer(name,true);engine.fitObjects?.(layers);});
+window.addEventListener('bmj:systemfocus',event=>{
+ if(!engine?.actualFactory?.layers)return;const system=event.detail?.system;
+ const layerNames=system==='hvac'?['utility_ahu_ducting','utility_ahu_piping']:system==='compressedAir'?['utility_compressed_air']:system==='routing'?['utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors']:[];
+ const layers=layerNames.map(name=>engine.actualFactory.layers[name]).filter(Boolean),routing=engine.actualFactory.utilityRouting||engine.actualFactory.root?.userData?.utilityRouting||null;
+ const wantedSystems=system==='hvac'?['AHU_PIPING','AHU_DUCTING']:system==='compressedAir'?['COMPRESSED_AIR']:system==='routing'?['COMPRESSED_AIR','AHU_PIPING','AHU_DUCTING']:[];
+ const networks=(routing?.systems||[]).filter(item=>wantedSystems.includes(item.system));
+ const equipment=system==='hvac'?MACHINE_REGISTRY.filter(m=>/^AHU\b/i.test(m.name)):system==='compressedAir'?MACHINE_REGISTRY.filter(m=>/COMPRESSOR/i.test(m.name)):system==='routing'?MACHINE_REGISTRY.filter(m=>/^AHU\b/i.test(m.name)||/COMPRESSOR/i.test(m.name)):[];
+ if(layers.length){setView('factory');for(const name of layerNames)engine.setFactoryLayer(name,true);engine.fitObjects?.(layers);}
+ else if(system==='water'||system==='electrical')toast('Routing terpisah sistem ini belum tersedia. Model pabrik tetap dipertahankan tanpa mengarang jalur as-built.');
+ dispatchEvent(new CustomEvent('bmj:systemcontext',{detail:{
+  system,
+  title:system==='hvac'?'HVAC':system==='compressedAir'?'Compressed Air':system==='routing'?'Utility Routing':system==='water'?'Water / IPAL':'Electrical',
+  available:layers.length>0,
+  routeMode:routing?.mode||'BELUM TERSEDIA',
+  actualRoutingApplied:routing?.actualRoutingApplied===true,
+  networks:networks.map(item=>({system:item.system,status:item.status,nodeCount:item.nodeCount,segmentCount:item.segmentCount,equipmentAnchorCount:item.equipmentAnchorCount,actualRouteVerified:item.actualRouteVerified===true})),
+  equipment:equipment.map(m=>({machineId:m.machineId,name:m.name,model:m.model,sapCode:m.sapCode,area:m.area})),
+  consumerText:system==='compressedAir'?'Service-point consumer belum dipetakan ke machine ID aktual karena drawing distribusi compressed air belum tersedia.':system==='hvac'?'Supply/return branch tersedia sebagai functional routing reference; ruang dan terminal consumer aktual belum dipetakan.':system==='routing'?'Consumer aktual mengikuti masing-masing sistem dan tetap menunggu routing drawing terverifikasi.':'Consumer network belum tersedia sebagai data terpisah.',
+  sourceText:system==='compressedAir'?'Database mesin BMJ + compressed-air routing scaffold':system==='hvac'?'Database AHU BMJ + AHU piping/ducting routing scaffold':system==='routing'?'Utility routing scaffold + database equipment BMJ':'Model bangunan BMJ; network routing terpisah belum tersedia',
+  boundary:system==='water'?'IPAL equipment tersedia pada model bangunan, tetapi routing water/process piping terpisah belum dipetakan sebagai network terverifikasi.':system==='electrical'?'Electrical tetap mengikuti model bangunan; single-line diagram, cable tray, panel feeder, dan routing kabel aktual belum tersedia.':'Routing yang tampil adalah scaffold/template sampai drawing as-built atau verifikasi lapangan diterapkan.'
+ }}));
+});
+window.addEventListener('bmj:systemassetselect',async event=>{const machine=MACHINE_REGISTRY_BY_ID.get(event.detail?.machineId);if(machine)await openAssetContext(machine);});
 on('#fullscreen',async()=>{if(!document.fullscreenEnabled){toast('Layar penuh tidak didukung browser ini.');return;}if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();});
 window.addEventListener('offline',()=>{$('#connection').textContent='Mode lokal';toast('Koneksi data terputus. Aplikasi tetap dapat digunakan secara lokal.');});window.addEventListener('online',()=>{$('#connection').textContent=role?'Data tersambung':'Mode lokal';if(role)request('/api/state').then(acceptState).then(()=>{$('#connection').textContent='Data tersambung';toast('Data berhasil diperbarui.');}).catch(e=>toast(e.message,true));});
 try{const config=await fetch('./config.json').then(r=>r.json());apiBase=localStorage.getItem('offset5-api-base')||config.apiBase||'';if(cacheEnabled&&apiBase){const cached=await cache.get(apiBase);if(cached?.state){state=cached.state;engine?.loadLayout(activeLayout());renderStatus();renderPanel();$('#connection').textContent='Data perangkat · '+new Date(cached.savedAt).toLocaleDateString('id-ID');}}}catch(e){toast('Data tersimpan tidak dapat dibaca. Mode lokal tetap tersedia.',true);}
