@@ -497,13 +497,13 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   }
   if(drumUnit){
    const drum=this.findNode('ctp-drum');
-   if(drum){const d=this.motion(this.cyl(drum,.34,1.10,[0,.82,0],'dark','z'),'spin','z',2.8,.01,0,2);this.tag(d,'external-imaging-drum','SUPRASETTER_FAMILY_PRIMARY');d.userData.imagingDrum=true;for(const z of [-.57,.57])this.tag(this.cyl(drum,.060,.12,[0,.82,z],'steel','z'),'imaging-drum-bearing-reference','SUPRASETTER_FAMILY_PROCESS');}
+   if(drum){const d=this.motion(this.cyl(drum,.34,1.10,[0,.82,0],'dark','z'),'spin','z',2.8,.01,0,2);this.tag(d,'external-imaging-drum','SUPRASETTER_FAMILY_PRIMARY');d.userData.imagingDrum=true;for(const z of [-.57,.57]){this.tag(this.cyl(drum,.060,.12,[0,.82,z],'steel','z'),'imaging-drum-bearing-reference','SUPRASETTER_FAMILY_PROCESS');const housing=this.box(drum,[.18,.18,.12],[0,.82,z],'dark',.012);this.tag(housing,'imaging-drum-bearing-housing-reference','SUPRASETTER_SERVICE_REFERENCE');}const enc=this.cyl(drum,.085,.035,[0,.82,.69],'accent','z');this.tag(enc,'imaging-drum-encoder-reference','SUPRASETTER_POSITION_REFERENCE');}
    const clamp=this.findNode('ctp-drum-clamp');
-   if(clamp){for(const z of [-.43,.43]){const bar=this.box(clamp,[.12,.055,.13],[-.23,.98,z],'accent',.005);this.tag(bar,'plate-clamp-reference','SUPRASETTER_FAMILY_PROCESS');}}
+   if(clamp){for(const z of [-.43,.43]){const bar=this.box(clamp,[.12,.055,.13],[-.23,.98,z],'accent',.005);this.tag(bar,'plate-clamp-reference','SUPRASETTER_FAMILY_PROCESS');const actuator=this.cyl(clamp,.020,.16,[-.30,1.04,z],'steel','x');this.tag(actuator,'plate-clamp-actuator-reference','SUPRASETTER_SERVICE_REFERENCE');}}
   }
   if(laserUnit){
    const rail=this.findNode('ctp-laser-rail');
-   if(rail)this.tag(this.box(rail,[.055,.055,1.02],[0,1.23,0],'steel',.004),'laser-linear-rail','SUPRASETTER_FAMILY_PRIMARY');
+   if(rail){this.tag(this.box(rail,[.055,.055,1.02],[0,1.23,0],'steel',.004),'laser-linear-rail','SUPRASETTER_FAMILY_PRIMARY');this.tag(this.box(rail,[.018,.018,1.02],[.05,1.18,0],'accent',.002),'laser-carriage-encoder-strip-reference','SUPRASETTER_POSITION_REFERENCE');for(const z of [-.36,.36]){const block=this.box(rail,[.11,.08,.10],[0,1.23,z],'dark',.006);this.tag(block,'laser-linear-bearing-block-reference','SUPRASETTER_SERVICE_REFERENCE');}}
    const module=this.findNode('ctp-laser-module');
    if(module){const carriage=this.motion(this.box(module,[.19,.17,.24],[0,1.23,0],'accent',.014),'oscillate','z',3.8,.38,0,3);this.tag(carriage,'heidelberg-laser-carriage','SUPRASETTER_FAMILY_PRIMARY');carriage.userData.installedLaserModuleCountVerified=false;for(const z of [-.07,.07])this.tag(this.box(module,[.055,.055,.065],[.08,1.22,z],'blue',.004),'heidelberg-laser-module-reference','SUPRASETTER_FAMILY_PRIMARY');}
    const ids=this.findNode('ctp-ids');
@@ -556,6 +556,8 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    if(capstan){
     const drive=this.motion(this.cyl(capstan,.075,.86,[0,.79,0],'dark','z'),'spin','z',6.2,.01,0,1);this.tag(drive,'capstan-drive-roller','SCREEN_FTR_KATANA_FAMILY');
     const nip=this.motion(this.cyl(capstan,.046,.86,[.15,.79,0],'steel','z'),'spin','z',6.2,.01,.2,1);this.tag(nip,'capstan-nip-roller','SCREEN_FTR_KATANA_FAMILY');
+    for(const z of [-.46,.46]){const bh=this.box(capstan,[.12,.12,.09],[0,.79,z],'dark',.008);this.tag(bh,'capstan-bearing-housing-reference','SCREEN_SERVICE_REFERENCE');}
+    const arm=this.box(capstan,[.26,.035,.045],[.12,.92,-.45],'steel',.004);arm.rotation.z=-.34;this.tag(arm,'capstan-nip-pressure-arm-reference','SCREEN_SERVICE_REFERENCE');
     this.tag(this.box(capstan,[.42,.014,.78],[-.08,.87,0],'paper',.002),'media-web-reference','PROCESS_WORKPIECE_REFERENCE');
    }
    const front=this.findNode('ctf-front-slack');
@@ -567,7 +569,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    const gravity=this.findNode('ctf-gravity-roller');
    if(gravity){
     const gr=this.motion(this.cyl(gravity,.052,.84,[0,.49,0],'steel','z'),'spin','z',4.4,.01,0,1);this.tag(gr,'gravity-tension-roller','KATANA_OFFICIAL');
-    gr.userData.tensionRegulationReference=true;
+    gr.userData.tensionRegulationReference=true;const arm=this.box(gravity,[.28,.035,.045],[-.12,.58,-.42],'steel',.004);arm.rotation.z=-.28;this.tag(arm,'gravity-tension-arm-reference','KATANA_OFFICIAL');const sensor=this.box(gravity,[.055,.070,.045],[.20,.56,-.42],'accent',.004);this.tag(sensor,'gravity-tension-position-sensor-reference','SCREEN_SERVICE_REFERENCE');
    }
    const rear=this.findNode('ctf-rear-slack');
    if(rear){
@@ -582,7 +584,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    if(mirror){
     const poly=this.motion(this.mesh(mirror,()=>new THREE.CylinderGeometry(.105,.105,.065,5),'ctf-polygon-five-facet','steel',[0,.82,0]),'spin','y',14,.01,0,2);this.tag(poly,'five-facet-polygon-mirror-reference','KATANA_OFFICIAL');
     poly.userData.documentedKatanaFacetCount=5;poly.userData.installedFacetCountVerified=false;poly.userData.documentedKatanaMaxRpm=14400;poly.userData.installedRpmVerified=false;
-    this.tag(this.box(mirror,[.34,.28,.34],[0,.82,0],'dark',.018),'polygon-scanner-housing','SCREEN_FTR_KATANA_FAMILY');
+    this.tag(this.box(mirror,[.34,.28,.34],[0,.82,0],'dark',.018),'polygon-scanner-housing','SCREEN_FTR_KATANA_FAMILY');for(const y of [.73,.91]){const brg=this.cyl(mirror,.125,.025,[0,y,0],'dark','y');this.tag(brg,'polygon-scanner-bearing-reference','SCREEN_SERVICE_REFERENCE');}
    }
    const drive=this.findNode('ctf-polygon-drive');
    if(drive){
@@ -671,7 +673,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
 
   if(beamUnit){
    const guide=this.findNode('zund-gantry-guide');
-   if(guide){for(const z of [-1.16,1.16])this.tag(this.box(guide,[5.20,.045,.055],[0,.84,z],'steel',.005),'gantry-linear-guide-reference','ZUND_G3_S3_FAMILY');this.tag(this.box(guide,[4.95,.025,.035],[0,.79,-1.12],'dark',.003),'gantry-drive-rack-reference','ZUND_FAMILY_REFERENCE');}
+   if(guide){for(const z of [-1.16,1.16]){this.tag(this.box(guide,[5.20,.045,.055],[0,.84,z],'steel',.005),'gantry-linear-guide-reference','ZUND_G3_S3_FAMILY');for(const x of [-1.6,1.6]){const block=this.box(guide,[.18,.12,.12],[x,.84,z],'dark',.008);this.tag(block,'gantry-linear-bearing-block-reference','ZUND_SERVICE_REFERENCE');}}this.tag(this.box(guide,[4.95,.025,.035],[0,.79,-1.12],'dark',.003),'gantry-drive-rack-reference','ZUND_FAMILY_REFERENCE');const servo=this.cyl(guide,.10,.22,[-2.18,.72,-1.18],'dark','x');this.tag(servo,'gantry-servo-motor-reference','ZUND_SERVICE_REFERENCE');const pinion=this.cyl(guide,.055,.055,[-2.00,.79,-1.12],'steel','z');this.tag(pinion,'gantry-rack-pinion-reference','ZUND_SERVICE_REFERENCE');}
    const beam=this.findNode('zund-gantry-beam');
    if(beam){this.tag(this.box(beam,[.17,.90,2.55],[0,1.18,0],'accent',.025),'travelling-beam-structure','ZUND_G3_S3_FAMILY');for(const z of [-1.08,1.08])this.tag(this.box(beam,[.26,.20,.16],[0,.86,z],'dark',.010),'beam-guide-carriage-reference','ZUND_FAMILY_REFERENCE');}
   }
@@ -682,8 +684,9 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    const slots=this.findNode('zund-module-slots');
    if(slots){
     slots.userData.installedModuleCountVerified=false;
-    for(const z of [-.14,.14]){const holder=this.box(slots,[.18,.30,.17],[0,.92,z],'steel',.010);this.tag(holder,'universal-module-carrier-reference','ZUND_UM_PRIMARY');holder.userData.toolDetectionFamilyCapability=true;}
+    for(const z of [-.14,.14]){const holder=this.box(slots,[.18,.30,.17],[0,.92,z],'steel',.010);this.tag(holder,'universal-module-carrier-reference','ZUND_UM_PRIMARY');holder.userData.toolDetectionFamilyCapability=true;const det=this.box(slots,[.045,.060,.040],[.09,1.02,z],'accent',.004);this.tag(det,'module-tool-detection-sensor-reference','ZUND_UM_PRIMARY');}
     this.tag(this.box(slots,[.12,.06,.36],[.17,1.04,0],'accent',.006),'module-bayonet-interface-reference','ZUND_UM_PRIMARY');
+    const zAct=this.cyl(slots,.035,.24,[-.12,1.03,0],'steel','y');this.tag(zAct,'module-z-pressure-position-actuator-reference','ZUND_UM_PRIMARY');
    }
   }
 
