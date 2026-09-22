@@ -859,10 +859,10 @@ try{
   else if(initialPrimary)openPrimaryFactoryContext(initialPrimary,{historyMode:'none'});
   else showHome();
  }
- const boot=$('#boot');if(boot)boot.hidden=true;$('#engine-status').textContent=engine?'Pabrik 3D siap':'Denah tersedia · penampil 3D belum siap';
+ const boot=$('#boot');if(boot)boot.hidden=true;$('#engine-status').textContent=engine?'Pabrik 3D siap':'Denah tersedia · penampil 3D belum siap';document.documentElement.dataset.factoryReady='true';dispatchEvent(new CustomEvent('bmj:factoryready',{detail:{engineReady:Boolean(engine),layoutReady:true,primaryIntegrated:Boolean(engine?.primaryFactoryPlaced)}}));
 }catch(e){
  const boot=$('#boot');if(boot){boot.hidden=false;boot.innerHTML='<strong>Denah pabrik belum dapat dimuat</strong><p>Data CAD tersimpan tidak berhasil dibuka. Tidak ada geometri pengganti yang dibuat.</p><button id="boot-retry" class="primary">Muat Ulang</button>';on('#boot-retry',()=>location.reload());}
- $('#engine-status').textContent='Denah belum tersedia';toast('Denah pabrik gagal dimuat: '+e.message,true);
+ $('#engine-status').textContent='Denah belum tersedia';document.documentElement.dataset.factoryError='true';dispatchEvent(new CustomEvent('bmj:factoryerror',{detail:{message:e.message}}));toast('Denah pabrik gagal dimuat: '+e.message,true);
 }
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{if(editing){engine.edit(false);engine.applyPlacement(state);engine.onTransform=null;editing=false;}renderPanel(b.dataset.tab);});
 on('#modal-close',closeModal);on('#connect',connectionDialog);on('#nav-machine',()=>activeLayout()?showHome():layoutDialog());on('#nav-layout',()=>activeLayout()?setView('factory'):layoutDialog());on('#notice-details',layoutDialog);on('#nav-assets',assetDialog);on('#nav-sources',()=>{showPanel();renderPanel('sources');});on('#nav-help',helpDialog);on('#settings',settingsDialog);on('#close-panel',()=>document.body.classList.add('panel-hidden'));on('#focus-machine',()=>{if(!engine?.machine.visible)setView('machine');engine?.fit(engine.machine);});on('#edit-position',editorPanel);
