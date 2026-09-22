@@ -312,3 +312,29 @@ aside#detail-panel{overscroll-behavior:contain}
 
 .asset-category-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:4px;border:1px solid var(--line);border-radius:12px;background:#f5f8fb}.asset-category-tabs button{min-height:38px;border:0;border-radius:8px;background:transparent;color:#63778a;font-size:9px;font-weight:800}.asset-category-tabs button.active{background:#fff;color:#0b70df;box-shadow:0 2px 8px rgba(17,61,94,.08)}.asset-browser-row.component-row .asset-thumbnail{background:linear-gradient(145deg,#163b5b,#2877a7)}
 @media(max-width:390px){.asset-category-tabs button{font-size:8px}}
+
+/* Process-aware simulation transport */
+.canonical-simulation-transport{width:min(1080px,calc(100% - 32px));grid-template-columns:minmax(140px,1.25fr) auto auto auto auto minmax(150px,1.8fr) auto}
+.canonical-simulation-transport .sim-context span{margin-top:2px;color:var(--muted);font-size:8px;font-weight:700}
+.canonical-simulation-transport button{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.canonical-simulation-transport button svg{width:16px;height:16px;flex:0 0 auto}
+.canonical-simulation-transport button.stage-step{min-width:98px;padding-inline:10px}
+.canonical-simulation-transport button.stop{color:#7e3131}
+.canonical-simulation-transport button:disabled{opacity:.42;cursor:not-allowed;background:#f5f7f9;color:#7b8995}
+@media(max-width:767px){
+ .canonical-simulation-transport{grid-template-columns:auto minmax(82px,1fr) auto auto}
+ .canonical-simulation-transport .sim-context{grid-column:1/-1}
+ .canonical-simulation-transport button.stage-step{min-width:44px;padding-inline:10px}
+ .canonical-simulation-transport button.stage-step span{display:none}
+ .canonical-simulation-transport progress{grid-column:1/-1;order:initial}
+ .canonical-simulation-transport button.stop{grid-column:1/-1;min-height:36px}
+}
+@media(max-height:560px) and (orientation:landscape) and (max-width:932px){
+ .canonical-simulation-transport{grid-template-columns:minmax(105px,1fr) auto auto auto auto minmax(105px,1.2fr) auto;gap:6px}
+ .canonical-simulation-transport .sim-context{grid-column:auto}
+ .canonical-simulation-transport .sim-context span{display:none}
+ .canonical-simulation-transport button.stage-step{min-width:38px;padding-inline:8px}
+ .canonical-simulation-transport button.stage-step span,.canonical-simulation-transport button.stop span{display:none}
+ .canonical-simulation-transport button.stop{grid-column:auto;min-height:40px}
+ .canonical-simulation-transport progress{grid-column:auto}
+}
