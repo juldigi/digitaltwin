@@ -866,7 +866,20 @@ try{
 }
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{if(editing){engine.edit(false);engine.applyPlacement(state);engine.onTransform=null;editing=false;}renderPanel(b.dataset.tab);});
 on('#modal-close',closeModal);on('#connect',connectionDialog);on('#nav-machine',()=>activeLayout()?showHome():layoutDialog());on('#nav-layout',()=>activeLayout()?setView('factory'):layoutDialog());on('#notice-details',layoutDialog);on('#nav-assets',assetDialog);on('#nav-sources',()=>{showPanel();renderPanel('sources');});on('#nav-help',helpDialog);on('#settings',settingsDialog);on('#close-panel',()=>document.body.classList.add('panel-hidden'));on('#focus-machine',()=>{if(!engine?.machine.visible)setView('machine');engine?.fit(engine.machine);});on('#edit-position',editorPanel);
-$$('[data-camera]').forEach(b=>b.onclick=()=>{if(!engine)return;const mode=b.dataset.camera;$$('[data-camera]').forEach(c=>c.classList.toggle('active',c===b));const target=engine.view==='factory'?engine.factory:engine.machine;if(mode==='reset'){explode=0;selectedPart=null;engine.isolated=false;engine.template.reset();engine.clearPartLabels();$('#tool-explode')?.classList.remove('active');$('#tool-isolate')?.classList.remove('active');emitDomainState({inspectionMode:{explode:false,isolate:false,section:false},selectedNode:null});renderPanel();engine.fit(target,'iso');}else engine.fit(target,mode==='top'?'top':'iso');emitDomainState({cameraPreset:mode==='reset'?'iso':mode});});
+$('[data-camera]').forEach(b=>b.onclick=()=>{
+ if(!engine)return;const mode=b.dataset.camera;$('[data-camera]').forEach(c=>c.classList.toggle('active',c===b));
+ if(mode==='reset'){
+  explode=0;selectedPart=null;selectedTaxonomyId=ACTIVE_ROOT;factoryAssetContextId=null;engine.isolated=false;engine.template.reset();engine.clearPartLabels();$('#tool-explode')?.classList.remove('active');$('#tool-isolate')?.classList.remove('active');
+  emitDomainState({inspectionMode:{explode:false,isolate:false,section:false},selectedNode:null,cameraPreset:'iso'});if(activeLayout())showHome();else engine.fit(engine.machine,'iso');return;
+ }
+ if(mode==='factory'){
+  factoryAssetContextId=null;if(activeLayout()){setView('factory');renderPanel('overview');engine.fitObjects?.([engine.factory,engine.machine?.visible?engine.machine:null],'iso');}emitDomainState({cameraPreset:'factory'});return;
+ }
+ if(mode==='fit'){
+  if(engine.view==='factory'&&engine.primaryFactoryPlaced)engine.focusFactoryAsset(FOUNDATION_SCOPE.primaryMachineId);else engine.fit(engine.machine,'iso');emitDomainState({cameraPreset:'fit'});return;
+ }
+ const target=engine.view==='factory'?engine.factory:engine.machine;engine.fit(target,mode==='top'?'top':'iso');emitDomainState({cameraPreset:mode});
+});
 on('#tool-pan',()=>{if(!engine)return;engine.controls.enablePan=!engine.controls.enablePan;$('#tool-pan').classList.toggle('active',engine.controls.enablePan);toast(engine.controls.enablePan?'Mode pan aktif · gunakan dua jari / klik kanan':'Mode pan nonaktif');});
 on('#tool-explode',()=>{if(simulationLocksStructure())return;showPanel();selectedTaxonomyId=selectedTaxonomyId||ACTIVE_ROOT;renderPanel('structure');explode=explode>.01?0:.65;engine?.template.explode(explode,selectedPart);$('#tool-explode')?.classList.toggle('active',explode>0);emitDomainState({inspectionMode:{explode:explode>0}});renderPanel('structure');});
 on('#tool-isolate',()=>{if(simulationLocksStructure())return;if(!engine||!selectedPart){showPanel();renderPanel('structure');toast('Pilih bagian mesin terlebih dahulu.',true);return;}engine.isolated=!engine.isolated;engine.template.isolate(selectedPart,engine.isolated);$('#tool-isolate').classList.toggle('active',engine.isolated);emitDomainState({inspectionMode:{isolate:engine.isolated}});});
