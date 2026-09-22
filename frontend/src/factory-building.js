@@ -58,9 +58,12 @@ export function buildActualFactory(layout,fleet){
  for(const f of fleet){const p=f.placement,r=p.rotation*Math.PI/180,c=Math.abs(Math.cos(r)),s=Math.abs(Math.sin(r));machineBoxes.push({p,minX:p.x-(f.size[0]*c+f.size[2]*s)/2,maxX:p.x+(f.size[0]*c+f.size[2]*s)/2,minY:p.y-(f.size[0]*s+f.size[2]*c)/2,maxY:p.y+(f.size[0]*s+f.size[2]*c)/2});}
  const serviceClearances=machineClearanceBoxes(fleet);
  const pressRooms=pressRoomEnvelopes(fleet);
+ const ipalZone={minX:32.8,maxX:60,minY:103.45,maxY:118.4};
+ const wallInsideIpal=w=>{const x=(w.a[0]+w.b[0])/2,y=(w.a[1]+w.b[1])/2;return x>=ipalZone.minX&&x<=ipalZone.maxX&&y>=ipalZone.minY&&y<=ipalZone.maxY;};
  const intersectsMachine=(a,c)=>machineBoxes.some(m=>m.p.status!=='UNIDENTIFIED'&&Math.max(a[0],c[0])>m.minX+.05&&Math.min(a[0],c[0])<m.maxX-.05&&Math.max(a[1],c[1])>m.minY+.05&&Math.min(a[1],c[1])<m.maxY-.05);
  const omitted=[];
- const wallPieces=[];for(const w of data.walls){const pieces=clipWallToMachineClearance(w,[...serviceClearances,...pressRooms]);if(pieces.length!==1||pieces[0].a[0]!==w.a[0]||pieces[0].a[1]!==w.a[1]||pieces[0].b[0]!==w.b[0]||pieces[0].b[1]!==w.b[1])omitted.push(w);wallPieces.push(...pieces);}
+ const ipalRemovedWalls=[];
+ const wallPieces=[];for(const w of data.walls){if(wallInsideIpal(w)){ipalRemovedWalls.push(w);continue;}const pieces=clipWallToMachineClearance(w,[...serviceClearances,...pressRooms]);if(pieces.length!==1||pieces[0].a[0]!==w.a[0]||pieces[0].a[1]!==w.a[1]||pieces[0].b[0]!==w.b[0]||pieces[0].b[1]!==w.b[1])omitted.push(w);wallPieces.push(...pieces);}
  for(const w of wallPieces){const [a,c]=[w.a,w.b];
   const dx=c[0]-a[0],dy=c[1]-a[1],len=Math.hypot(dx,dy),r=Math.atan2(dy,dx),x=(a[0]+c[0])/2,z=-(a[1]+c[1])/2;
   const wall=box(b,x,1.75,z,len,3.5,w.width,0xe8e5df,r);wall.castShadow=true;wall.userData={semantic:'WALL',sourceHandles:w.handles,heightStatus:'VISUAL_ESTIMATE',machineClearance:MACHINE_SERVICE_CLEARANCE};
@@ -129,9 +132,26 @@ export function buildActualFactory(layout,fleet){
  // Raw-material racks stay in the northern RMS zone; Sheeting is below it, never on it.
  for(const x of [85,88.5,92])for(const y of [73,78,83]){box(b,x,.12,-y,1.8,.24,2.4,0x9b7c55);for(let n=0;n<3;n++){const roll=new T.Mesh(new T.CylinderGeometry(.48,.48,1.4,12),material(0xd9cbb0));roll.position.set(x+(n-1)*.55,.93,-y);b.add(roll);}}
  label('RMS',88.5,3.8,-81,5);
- // IPAL / utilities follow the northern service yard, not the machine registry.
- for(const [x,y,r,h] of [[55.5,112,2.7,2.1],[46,113,1.1,2],[46,108,1.1,2],[59.5,106.5,1,1.7]]){const tank=new T.Mesh(new T.CylinderGeometry(r,r,h,24),material(0x8fa59b));tank.position.set(x,h/2,-y);b.add(tank);}
- label('IPAL',52,3.5,-116,5);
+ // IPAL is an outdoor process yard: concrete slab + open steel frame + roof, with no enclosing walls.
+ const ipal=new T.Group();ipal.name='IPAL_OPEN_AIR_WATER_TREATMENT';b.add(ipal);
+ box(ipal,46.4,.08,-110.9,26.4,.16,14.1,0xaeb7b5).userData={semantic:'IPAL_CONCRETE_SLAB'};
+ const ipalEquipment=[];
+ const registerIpal=(o,semantic,bounds)=>{o.userData={...o.userData,semantic,accuracy:'FUNCTIONAL_WATER_TREATMENT_VISUALIZATION'};ipalEquipment.push({semantic,...bounds});return o;};
+ for(const x of [33.5,38.7,43.9,49.1,54.3,59.3])for(const y of [104,117.8]){const post=box(ipal,x,2.25,-y,.18,4.5,.18,0x526b75);post.userData={semantic:'IPAL_OPEN_FRAME_COLUMN'};box(ipal,x,.12,-y,.48,.24,.48,0x7c898a);}
+ const ridge=5.65,eave=4.5,half=7.15,slope=Math.atan2(ridge-eave,half),roofLen=Math.hypot(half,ridge-eave);
+ for(const sign of [-1,1]){const roof=box(layers.roof,46.4,(ridge+eave)/2,-110.9-sign*half/2,26.7,.12,roofLen,0x78929a);roof.rotation.x=sign*slope;roof.userData={semantic:'IPAL_CANOPY_ROOF',openSides:true,eavesHeight:eave,ridgeHeight:ridge};}
+ for(const x of [33.5,38.7,43.9,49.1,54.3,59.3]){line(ipal,new T.Vector3(x,4.5,-104),new T.Vector3(x,ridge,-110.9),.055,0x465f69);line(ipal,new T.Vector3(x,ridge,-110.9),new T.Vector3(x,4.5,-117.8),.055,0x465f69);}
+ const basin=(x,y,w,d,semantic,waterColor)=>{const g=new T.Group();g.position.set(x,0,-y);ipal.add(g);box(g,0,.06,0,w,.12,d,0x899695);box(g,0,.28,-d/2,w,.55,.16,0x9ba6a5);box(g,0,.28,d/2,w,.55,.16,0x9ba6a5);box(g,-w/2,.28,0,.16,.55,d,0x9ba6a5);box(g,w/2,.28,0,.16,.55,d,0x9ba6a5);const water=box(g,0,.2,0,w-.28,.035,d-.28,waterColor,0,.72);registerIpal(g,semantic,{minX:x-w/2,maxX:x+w/2,minY:y-d/2,maxY:y+d/2});water.userData.semantic='IPAL_WATER_SURFACE';for(const xx of [-w/2,w/2])for(let zz=-d/2;zz<=d/2;zz+=1.25)line(g,new T.Vector3(xx,.58,zz),new T.Vector3(xx,1.25,zz),.025,0xc8d3d2);return g;};
+ basin(36.7,107,5.6,4.4,'IPAL_EQUALIZATION_BASIN',0x527d83);basin(36.7,113.4,5.6,5,'IPAL_AERATION_BASIN',0x4c8992);
+ for(const x of [35.2,36.7,38.2]){const diffuser=new T.Mesh(new T.TorusGeometry(.32,.035,7,14),material(0xb7c8ca));diffuser.rotation.x=Math.PI/2;diffuser.position.set(x,.28,-113.4);diffuser.userData={semantic:'IPAL_AERATION_DIFFUSER',accuracy:'FUNCTIONAL_WATER_TREATMENT_VISUALIZATION'};ipal.add(diffuser);}
+ const tank=(x,y,r,h,color,semantic)=>{const g=new T.Group();g.position.set(x,0,-y);ipal.add(g);const shell=new T.Mesh(new T.CylinderGeometry(r,r,h,28,1,true),material(color));shell.position.y=h/2;g.add(shell);const cap=new T.Mesh(new T.CylinderGeometry(r*.95,r*.95,.08,28),material(0x90a19e));cap.position.y=h+.04;g.add(cap);registerIpal(g,semantic,{minX:x-r,maxX:x+r,minY:y-r,maxY:y+r});return g;};
+ const clarifier=tank(45.4,109,2.35,1.45,0x889c99,'IPAL_CLARIFIER');const bridge=box(clarifier,0,1.62,0,4.7,.12,.42,0x607680);bridge.userData.semantic='IPAL_CLARIFIER_BRIDGE';line(clarifier,new T.Vector3(0,1.5,0),new T.Vector3(0,.35,0),.06,0x50646c);
+ tank(45.4,114.6,1.55,2.15,0x768f8b,'IPAL_SLUDGE_HOLDING_TANK');
+ for(const [x,y,color,semantic] of [[51.1,106.2,0xd5c35e,'IPAL_CHEMICAL_TANK'],[53.1,106.2,0xe1d8a2,'IPAL_CHEMICAL_TANK']])tank(x,y,.72,1.65,color,semantic);
+ for(const x of [51.2,53.4]){const vessel=tank(x,111,.62,2.25,0x6d8790,'IPAL_FILTER_VESSEL');line(ipal,new T.Vector3(x,2.25,-111),new T.Vector3(x,2.8,-111),.045,0x526b75);vessel.userData.pressureFilterReference=true;}
+ const skid=box(ipal,56.7,.16,-114.2,3.7,.32,2.2,0x586b72);registerIpal(skid,'IPAL_PUMP_SKID',{minX:54.85,maxX:58.55,minY:113.1,maxY:115.3});for(const x of [55.8,57.5]){const pump=new T.Mesh(new T.CylinderGeometry(.25,.25,.72,16),material(0x3f7180));pump.rotation.z=Math.PI/2;pump.position.set(x,.62,-114.2);pump.userData={semantic:'IPAL_TRANSFER_PUMP',accuracy:'FUNCTIONAL_WATER_TREATMENT_VISUALIZATION'};ipal.add(pump);}
+ const path=box(ipal,48.2,.11,-114.5,2.1,.22,6.2,0x778486);path.userData={semantic:'IPAL_SERVICE_WALKWAY'};for(const [a,c] of [[[39.5,.72,-110],[43,.72,-110]],[[47.8,.72,-109],[50.1,.72,-109]],[[53.6,.72,-111],[56.7,.72,-113.1]]])line(ipal,new T.Vector3(...a),new T.Vector3(...c),.055,0x4c7881);
+ label('IPAL · WATER TREATMENT',46.4,3.7,-118.9,10);
  // Landscape is a visual assumption outside the measured building, explicitly recorded in metadata.
  for(let i=0;i<10;i++){const x=-13.1,z=-8-i*10;box(layers.landscape,x,.08,z,2.4,.22,4,0x69846b);line(layers.landscape,new T.Vector3(x,0,z),new T.Vector3(x,2,z),.13,0x87745c);for(const [dx,dy,dz] of [[0,3,0],[-.65,2.65,.2],[.65,2.6,-.2]]){const crown=new T.Mesh(new T.IcosahedronGeometry(1.1,1),material(0x4f785b));crown.position.set(x+dx,dy,z+dz);layers.landscape.add(crown);}}
  for(let i=0;i<12;i++){box(layers.landscape,26+i*4,.18,8,3,.35,1.6,0x879b87);const shrub=new T.Mesh(new T.IcosahedronGeometry(.65,1),material(0x50775d));shrub.position.set(26+i*4,.85,8);layers.landscape.add(shrub);}
@@ -146,6 +166,6 @@ export function buildActualFactory(layout,fleet){
  }
  box(layers.unidentified,124,-.07,-44,38,.1,86,0xd9d4c5);label('POSISI AKTUAL BELUM TERIDENTIFIKASI',124,4,-90,30,'#835a2c',layers.unidentified);
  const pts=data.segments.flatMap(s=>[s[0],.012,-s[1],s[2],.012,-s[3]]),geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(pts,3));layers.reference.add(new T.LineSegments(geo,new T.LineBasicMaterial({color:0x355e72,transparent:true,opacity:.4})));
- root.userData={baselineId:layout.baselineId,assumptions:{...data.assumptions,roofEaves:4.5,roofRidge:7,roofHeightEvidence:'USER_APPROXIMATE_MEASUREMENT',machineServiceClearance:MACHINE_SERVICE_CLEARANCE,offsetRoomClearance:1.85,wallTreatment:'SOURCE_SEGMENTS_CLIPPED_TO_SERVICE_ENVELOPE',portalTreatment:'SOURCE_PORTALS_SHIFTED_ONLY_WHEN_CLEARANCE_CONFLICTS',roomContents:'FUNCTION_SPECIFIC_VISUALIZATION_NOT_AS_BUILT_INVENTORY'},offsetRooms:pressRooms.map(r=>({...r,centerError:Math.hypot((r.minX+r.maxX)/2-r.centerX,(r.minY+r.maxY)/2-r.centerY)})),nonMachineCollisionAudit:{placedFixtures:fixtureBoxes.length,skippedFixtures:skippedFixtures.length,accidentalFixtureOverlaps:0},omittedCollisionWalls:0,trimmedCollisionWalls:omitted.length,adjustedPortals:adjustedPortals.map(p=>({semantic:p.evidence,x:p.x,y:p.y,sourceX:p.sourceX,sourceY:p.sourceY})),legacyWalls:data.legacyWalls.length};
+ root.userData={baselineId:layout.baselineId,assumptions:{...data.assumptions,roofEaves:4.5,roofRidge:7,roofHeightEvidence:'USER_APPROXIMATE_MEASUREMENT',machineServiceClearance:MACHINE_SERVICE_CLEARANCE,offsetRoomClearance:1.85,wallTreatment:'SOURCE_SEGMENTS_CLIPPED_TO_SERVICE_ENVELOPE',portalTreatment:'SOURCE_PORTALS_SHIFTED_ONLY_WHEN_CLEARANCE_CONFLICTS',roomContents:'FUNCTION_SPECIFIC_VISUALIZATION_NOT_AS_BUILT_INVENTORY',ipalTreatment:'OUTDOOR_OPEN_FRAME_FUNCTIONAL_RECONSTRUCTION'},offsetRooms:pressRooms.map(r=>({...r,centerError:Math.hypot((r.minX+r.maxX)/2-r.centerX,(r.minY+r.maxY)/2-r.centerY)})),ipal:{zone:ipalZone,enclosingWalls:0,removedSourceWallSegments:ipalRemovedWalls.length,openSides:true,equipment:ipalEquipment},nonMachineCollisionAudit:{placedFixtures:fixtureBoxes.length,skippedFixtures:skippedFixtures.length,accidentalFixtureOverlaps:0},omittedCollisionWalls:0,trimmedCollisionWalls:omitted.length,adjustedPortals:adjustedPortals.map(p=>({semantic:p.evidence,x:p.x,y:p.y,sourceX:p.sourceX,sourceY:p.sourceY})),legacyWalls:data.legacyWalls.length};
  return {root,layers,assets,machineBoxes};
 }
