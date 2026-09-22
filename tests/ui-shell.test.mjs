@@ -260,7 +260,7 @@ test('v156 keeps the normalized plant registry as spatial context while exposing
   assert.match(app,/1 aset teknis/);
   assert.match(app,/Placeholder/);
   assert.doesNotMatch(app,/id="asset-data-status"/);
-  assert.match(sw,/src\/data\/machine-registry\.js/);
+  assert.match(sw,/src\/data\/foundation-assets\.js/);
 });
 
 test('v52 Offset 10 simulation uses the same full-interior cutaway workflow as Offset 5',()=>{
