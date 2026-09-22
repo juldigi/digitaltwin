@@ -167,14 +167,27 @@ const GROUPS=[
 function ensureLayerManager(){
  if(q('#layer-manager'))return;
  const panel=document.createElement('section');panel.id='layer-manager';panel.className='canonical-layer-manager';panel.hidden=true;panel.setAttribute('aria-label','Kelola lapisan');
- panel.innerHTML=`<header><div><small>SISTEM & TAMPILAN</small><h3>Lapisan</h3></div><button type="button" data-layer-close class="icon-btn" aria-label="Tutup">${icon('close')}</button></header>
+ panel.innerHTML=`<header><div><small>SISTEM & TAMPILAN</small><h3>Sistem & Lapisan</h3></div><button type="button" data-layer-close class="icon-btn" aria-label="Tutup">${icon('close')}</button></header>
+ <div class="canonical-system-grid">
+  <button type="button" data-system-focus="hvac"><strong>HVAC</strong><small>AHU piping + ducting</small><span>Tampilkan & fokus</span></button>
+  <button type="button" data-system-focus="compressedAir"><strong>Compressed Air</strong><small>Distribution piping</small><span>Tampilkan & fokus</span></button>
+  <button type="button" data-system-focus="routing"><strong>Utility Routing</strong><small>Seluruh routing tersedia</small><span>Tampilkan & fokus</span></button>
+  <div class="system-unavailable"><strong>Water / IPAL</strong><small>Routing terpisah belum tersedia</small></div>
+  <div class="system-unavailable"><strong>Electrical</strong><small>Routing terpisah belum tersedia</small></div>
+ </div>
  ${GROUPS.map(([title,items])=>`<div class="canonical-layer-group"><h4>${title}</h4>${items.map(([key,label])=>`<label><span>${label}</span><input type="checkbox" data-canonical-layer="${key}"></label>`).join('')}</div>`).join('')}
- <div class="canonical-layer-group unavailable"><h4>Belum memiliki layer terpisah</h4><p>Water / IPAL dan Electrical tetap mengikuti model bangunan sampai routing aktual tersedia.</p></div>`;
+ <div class="canonical-layer-group unavailable"><h4>Batas data</h4><p>Water / IPAL dan Electrical tetap mengikuti model bangunan sampai routing aktual tersedia. Aplikasi tidak membuat jalur as-built tanpa drawing atau verifikasi lapangan.</p></div>`;
  q('.workspace')?.append(panel);
  q('[data-layer-close]',panel)?.addEventListener('click',closeLayerManager);
  qa('[data-canonical-layer]',panel).forEach(input=>input.addEventListener('change',()=>{
   const key=input.dataset.canonicalLayer,visible=input.checked;setLayer(key,visible);
   dispatchEvent(new CustomEvent('bmj:layerchange',{detail:{key,visible}}));
+ }));
+ qa('[data-system-focus]',panel).forEach(button=>button.addEventListener('click',()=>{
+  const system=button.dataset.systemFocus,keys=system==='hvac'?['ahuPiping','ducting']:system==='compressedAir'?['compressedAir']:['compressedAir','ahuPiping','ducting','utilityAnchors'];
+  setState({selectedSystem:system},{url:false});
+  for(const key of keys){setLayer(key,true);dispatchEvent(new CustomEvent('bmj:layerchange',{detail:{key,visible:true}}))}
+  syncLayerControls();dispatchEvent(new CustomEvent('bmj:systemfocus',{detail:{system}}));
  }));
 }
 function syncLayerControls(){
