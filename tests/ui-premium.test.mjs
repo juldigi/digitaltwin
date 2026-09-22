@@ -55,7 +55,7 @@ test('icons use one accessible vector family without emoji runtime controls',()=
 });
 
 test('service worker owns the V123 OEM-deep-detail shell assets',()=>{
-  assert.match(sw,/factory-digital-twin-v123-r10-fz1200-20260922/);
+  assert.match(sw,/factory-digital-twin-v124-actual-plant-20260921/);
   assert.match(sw,/app-shell-v79\.css/);
   assert.match(sw,/src\/app-shell-v79\.js/);
   assert.match(sw,/assets\/splash-industrial-v79\.webp/);
@@ -86,3 +86,4 @@ test('V81 prevents sidebar and toolbar overlap across constrained screens',()=>{
   assert.match(css,/html:fullscreen \.statusbar\{display:none\}/);
   assert.match(css,/\.rail\{width:100%;height:100%;min-height:0;overflow-y:auto/);
 });
+

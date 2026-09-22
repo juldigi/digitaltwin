@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {loadBundledPlantLayout,plantDisplayPoint} from '../frontend/src/data/plant-layout-data.js';
+import {loadLegacyPlantLayout as loadBundledPlantLayout,plantDisplayPoint} from '../frontend/src/data/plant-layout-data.js';
 
 test('bundled plant layout is traceable to supplied DWG and derived DXF',async()=>{
   const l=await loadBundledPlantLayout();
@@ -194,3 +194,4 @@ test('factory 3D profile preserves DXF plan geometry and labels unverified eleva
   assert.match(engine,/DXF_PLAN_EXTRUSION/);
   assert.match(engine,/3D_ASSUMED_HEIGHT/);
 });
+

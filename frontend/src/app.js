@@ -1,3 +1,5 @@
+import {selectPlantLayout} from './data/plant-actual.js';
+import {loadFactoryFleet} from './factory-building.js';
 import {FactoryEngine} from './engine.js';
 import {initialState,validateLayout,validatePosition,worldToCad} from './model.js';
 import {OFFSET5_TAXONOMY,TAXONOMY_BY_ID as OFFSET5_BY_ID,taxonomyChildren as offset5Children,taxonomyStats as offset5Stats} from './data/taxonomy-offset5.js';
@@ -138,7 +140,7 @@ function renderStaticMachineFallback(error){
 function modal(title,html){$('#modal-title').textContent=title;$('#modal-body').innerHTML=html;if(!$('#modal').open)$('#modal').showModal();}
 function closeModal(){$('#modal').close();}
 function showPanel(){document.body.classList.remove('panel-hidden');if(matchMedia('(max-width:767px)').matches)document.body.classList.add('mobile-panel-open');}
-const activeLayout=()=>state.layout||bundledLayout;
+const activeLayout=()=>selectPlantLayout(state.layout,bundledLayout);
 function redrawPlantPlan(){if(bundledLayout)drawPlantPlan($('#dwg-canvas'),bundledLayout);}
 function pair(label,value){return `<dt>${esc(label)}</dt><dd${value==null?' class="unknown"':''}>${esc(value)}</dd>`;}
 const exteriorAreas=()=>IS_APM2?[
@@ -273,9 +275,18 @@ function taxonomyTree(parentId=ACTIVE_ROOT){
   return `<div class="geometry-node"><button data-taxonomy="${esc(n.id)}" aria-pressed="${n.id===selectedTaxonomyId}">${esc(n.name)} <span class="tax-level">L${n.level}${mapped?' · Model':' · Referensi'}</span></button>${descendants.length?`<details ${selectedTaxonomyId.startsWith(n.id)?'open':''}><summary>${esc(n.levelName)}</summary>${taxonomyTree(n.id)}</details>`:''}</div>`;
  }).join('');
 }
+function renderFactoryPanel(){
+ const layout=activeLayout(),layers=engine?.actualFactory?.layers;if(!layout?.placements||!layers)return false;
+ const known=layout.placements.filter(p=>p.status!=='UNIDENTIFIED'),unknown=layout.placements.filter(p=>p.status==='UNIDENTIFIED');
+ $('#panel-content').innerHTML=`<h3>Bangunan & mesin</h3><p class="subtle">${known.length} mesin terpetakan · ${unknown.length} menunggu identifikasi posisi.</p><div class="card">${[['roof','Atap'],['building','Dinding & ruangan'],['machines','Mesin terpetakan'],['labels','Nama area & mesin'],['landscape','Taman & akses luar'],['unidentified','Area belum teridentifikasi'],['reference','Garis denah sumber']].map(([key,text])=>`<label class="check"><input type="checkbox" data-factory-layer="${key}" ${layers[key].visible?'checked':''}> ${text}</label>`).join('')}</div><label for="factory-asset-focus">Cari posisi mesin</label><select id="factory-asset-focus"><option value="">Pilih mesin</option>${layout.placements.map(p=>`<option value="${p.machineId}">${esc(p.label)}${p.status==='UNIDENTIFIED'?' · belum teridentifikasi':''}</option>`).join('')}</select><div class="actions"><button id="factory-overview" class="secondary">Lihat seluruh pabrik</button><button id="factory-unknown" class="secondary">Area belum teridentifikasi</button></div><div class="card"><h4>Ketelitian tampilan</h4><p>Denah 250804 mengikuti revisi posisi Anda. Tinggi bangunan, bentuk atap, detail pintu, taman, tanaman, dan perlengkapan ruang merupakan perkiraan visual. Posisi berbasis label masih berupa zona, bukan titik ukur. Arah feeder–delivery perlu verifikasi.</p></div>`;
+ $$('[data-factory-layer]').forEach(input=>input.onchange=()=>engine.setFactoryLayer(input.dataset.factoryLayer,input.checked));
+ $('#factory-asset-focus').onchange=e=>{if(e.target.value){const p=layout.placements.find(p=>p.machineId===e.target.value);engine.setFactoryLayer(p.status==='UNIDENTIFIED'?'unidentified':'machines',true);engine.focusFactoryAsset(e.target.value);}};
+ $('#factory-overview').onclick=()=>engine.fit(engine.factory);$('#factory-unknown').onclick=()=>{engine.setFactoryLayer('unidentified',true);engine.fit(layers.unidentified);};return true;
+}
 function renderPanel(tab=activeTab){
  if(editing&&engine){engine.edit(false);engine.onTransform=null;engine.applyPlacement(state);editing=false;}
  activeTab=tab;
+ if(engine?.view==='factory'&&renderFactoryPanel())return;
  $$('[data-tab]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===tab)));
  const a=state.asset;
  if(tab==='overview'){
@@ -373,7 +384,7 @@ function renderStatus(){
  const l=activeLayout(),machineCount=$('#machine-count');
  if(machineCount)machineCount.textContent=MACHINE_REGISTRY_STATS.total.toLocaleString('id-ID');
  $('#layout-status').textContent=l?'Denah tersedia':'Denah belum tersedia';
- $('#scale-status').textContent=(IS_APM2||IS_OFFSET10||IS_SHEETING)?'Posisi mesin belum divalidasi':l?.transform?.scale?'Posisi mesin tersedia':'Posisi perlu ditinjau';
+ $('#scale-status').textContent=l?.baselineId?'Baseline layout revisi':(IS_APM2||IS_OFFSET10||IS_SHEETING)?'Posisi mesin belum divalidasi':l?.transform?.scale?'Posisi mesin tersedia':'Posisi perlu ditinjau';
  $('#edit-position').disabled=false;
  $('#edit-position').setAttribute('aria-disabled',String(role!=='admin'||!state.layout));
  $('#edit-position').title=role!=='admin'?'Atur posisi tersedia untuk pengguna dengan izin pengaturan':!state.layout?'Sambungkan data terlebih dahulu untuk menyimpan posisi':'Atur posisi mesin';
@@ -391,7 +402,7 @@ class CacheManager {
 }
 const cache=new CacheManager();
 let cacheEnabled=false;try{cacheEnabled=localStorage.getItem('offset5-cache-enabled')==='1';}catch{}
-async function acceptState(next){state=next;engine?.loadLayout(state.layout||bundledLayout);if(engine?.view==='factory')engine.setView('factory',state);renderStatus();renderPanel();if(cacheEnabled){try{await cache.set(apiBase,{state,savedAt:new Date().toISOString()});}catch{toast('Data berhasil dimuat, tetapi salinan di perangkat tidak dapat disimpan.',true);}}}
+async function acceptState(next){state=next;engine?.loadLayout(activeLayout());if(engine?.view==='factory')engine.setView('factory',state);renderStatus();renderPanel();if(cacheEnabled){try{await cache.set(apiBase,{state,savedAt:new Date().toISOString()});}catch{toast('Data berhasil dimuat, tetapi salinan di perangkat tidak dapat disimpan.',true);}}}
 function setView(view){
  const l=activeLayout();
  if(view==='factory'&&!l){layoutDialog();return;}
@@ -495,7 +506,7 @@ function helpDialog(){
 }
 renderPanel();renderStatus();const taxCount=$('#taxonomy-count');if(taxCount)taxCount.textContent=taxonomyStats().total.toLocaleString('id-ID');if(matchMedia('(max-width:800px)').matches)document.body.classList.add('panel-hidden');
 try{engine=new FactoryEngine($('#viewport'),part=>{const meta=taxonomyForPart(part);if(meta)selectedTaxonomyId=meta.id;choosePart(part);showPanel();renderPanel('structure');});engine.onTaxonomySelect=id=>selectTaxonomy(id,{revealPanel:false});engine.onSimulationUpdate=next=>{simulationState=next;updateSimulationPanel(next);};simulationState=engine.getPrintingSimulationState();engine.onReset=()=>{explode=0;selectedPart=null;selectedTaxonomyId=ACTIVE_ROOT;renderPanel();};engine.onError=message=>toast(message,true);$('#boot').hidden=true;$('#engine-status').textContent='Tampilan 3D siap';try{engine.setLow(localStorage.getItem('offset5-low')==='1'||matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse) and (max-width:1024px)').matches);}catch{}}catch(e){renderStaticMachineFallback(e);}
-try{bundledLayout=await loadBundledPlantLayout();if(!state.layout)engine?.loadLayout(bundledLayout);renderStatus();redrawPlantPlan();if(engine)setView('machine');}catch(e){toast('Denah pabrik gagal dimuat.',true);}
+try{bundledLayout=await loadBundledPlantLayout();bundledLayout.fleet=await loadFactoryFleet();engine?.loadLayout(activeLayout());if(engine)engine.onFactorySelect=id=>{const m=MACHINE_REGISTRY.find(m=>m.machineId===id);if(m)machineDetailDialog(m);};renderStatus();redrawPlantPlan();if(engine)setView('machine');}catch(e){toast('Denah pabrik gagal dimuat.',true);}
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{if(editing){engine.edit(false);engine.applyPlacement(state);engine.onTransform=null;editing=false;}renderPanel(b.dataset.tab);});
 on('#modal-close',closeModal);on('#connect',connectionDialog);on('#nav-machine',()=>setView('machine'));on('#nav-layout',()=>activeLayout()?setView('factory'):layoutDialog());on('#notice-details',layoutDialog);on('#nav-assets',assetDialog);on('#nav-sources',()=>{showPanel();renderPanel('sources');});on('#nav-help',helpDialog);on('#settings',settingsDialog);on('#close-panel',()=>document.body.classList.add('panel-hidden'));on('#focus-machine',()=>{if(!engine?.machine.visible)setView('machine');engine?.fit(engine.machine);});on('#edit-position',editorPanel);
 $$('[data-camera]').forEach(b=>b.onclick=()=>{if(!engine)return;const mode=b.dataset.camera;$$('[data-camera]').forEach(c=>c.classList.toggle('active',c===b));const target=engine.view==='factory'?engine.factory:engine.machine;if(mode==='reset'){explode=0;selectedPart=null;engine.isolated=false;engine.template.reset();engine.clearPartLabels();renderPanel();engine.fit(target,'iso');}else engine.fit(target,mode==='top'?'top':'iso');});
@@ -505,6 +516,6 @@ on('#tool-isolate',()=>{if(simulationLocksStructure())return;if(!engine||!select
 on('#tool-simulation',()=>{showPanel();renderPanel('simulation');});
 on('#labels',()=>{if(engine){engine.labels=!engine.labels;$('#labels').classList.toggle('active',engine.labels);}});on('#fullscreen',async()=>{if(!document.fullscreenEnabled){toast('Layar penuh tidak didukung browser ini.');return;}if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();});
 window.addEventListener('offline',()=>{$('#connection').textContent='Mode lokal';toast('Koneksi data terputus. Aplikasi tetap dapat digunakan secara lokal.');});window.addEventListener('online',()=>{$('#connection').textContent=role?'Data tersambung':'Mode lokal';if(role)request('/api/state').then(acceptState).then(()=>{$('#connection').textContent='Data tersambung';toast('Data berhasil diperbarui.');}).catch(e=>toast(e.message,true));});
-try{const config=await fetch('./config.json').then(r=>r.json());apiBase=localStorage.getItem('offset5-api-base')||config.apiBase||'';if(cacheEnabled&&apiBase){const cached=await cache.get(apiBase);if(cached?.state){state=cached.state;engine?.loadLayout(state.layout||bundledLayout);renderStatus();renderPanel();$('#connection').textContent='Data perangkat · '+new Date(cached.savedAt).toLocaleDateString('id-ID');}}}catch(e){toast('Data tersimpan tidak dapat dibaca. Mode lokal tetap tersedia.',true);}
+try{const config=await fetch('./config.json').then(r=>r.json());apiBase=localStorage.getItem('offset5-api-base')||config.apiBase||'';if(cacheEnabled&&apiBase){const cached=await cache.get(apiBase);if(cached?.state){state=cached.state;engine?.loadLayout(activeLayout());renderStatus();renderPanel();$('#connection').textContent='Data perangkat · '+new Date(cached.savedAt).toLocaleDateString('id-ID');}}}catch(e){toast('Data tersimpan tidak dapat dibaca. Mode lokal tetap tersedia.',true);}
 window.addEventListener('resize',redrawPlantPlan,{passive:true});$('#ui-workbench-toggle')?.addEventListener('click',()=>setTimeout(redrawPlantPlan,80));$$('[data-workbench="dwg"]').forEach(b=>b.addEventListener('click',()=>setTimeout(redrawPlantPlan,40)));if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 window.addEventListener('pagehide',()=>{token='';});

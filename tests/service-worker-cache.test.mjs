@@ -37,7 +37,7 @@ test('service-worker shell cache references only deployable frontend files',()=>
 });
 
 test('service-worker cache version advances with the centralized runtime release',()=>{
- assert.match(sw,/factory-digital-twin-v123-r10-fz1200-20260922/);
+ assert.match(sw,/factory-digital-twin-v124-actual-plant-20260921/);
 });
 
 
@@ -48,3 +48,4 @@ test('machine-runtime dependencies are all present in the service-worker shell c
  const cached=new Set([...sw.matchAll(/['"]\.\/([^'"]+)['"]/g)].map(m=>m[1]));
  for(const dependency of imports)assert.ok(cached.has(dependency),'machine-runtime dependency missing from service-worker cache: '+dependency);
 });
+
