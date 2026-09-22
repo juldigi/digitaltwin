@@ -22,10 +22,14 @@ test('custom major overlays expose dialog semantics focus restoration and keyboa
   assert.match(shell,/setAttribute\('aria-modal','true'\)/);
   assert.match(shell,/function rememberOverlayFocus/);
   assert.match(shell,/function restoreOverlayFocus/);
+  assert.match(shell,/if\(!saved\)return/);
   assert.match(shell,/function trapOverlayFocus/);
   assert.match(shell,/event\.key==='Tab'/);
   assert.match(shell,/event\.key!=='Escape'/);
   assert.match(shell,/aria-activedescendant/);
+  assert.match(shell,/if\(overlay==='search'\)closeSearch\(\)/);
+  assert.match(shell,/else if\(overlay==='layers'\)closeLayerManager\(\)/);
+  assert.match(shell,/else if\(overlay==='navigation'\)closeDrawer\(\)/);
   assert.match(html,/<dialog id="modal" aria-labelledby="modal-title" aria-modal="true">/);
 });
 
