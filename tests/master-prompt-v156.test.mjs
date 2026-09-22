@@ -30,7 +30,10 @@ test('Phase-1 navigation does not present utility systems as an active product a
 
 test('placeholder assets expose spatial context but not inventory technical metadata in Phase-1',()=>{
  const detail=app.slice(app.indexOf('function machineDetailDialog(machine){'),app.indexOf('async function switchActiveMachine',app.indexOf('function machineDetailDialog(machine){')));
- assert.match(detail,/const placeholderData=pair\('ID posisi',machine\.machineId\)\+pair\('Area',machine\.area\)\+pair\('Dasar posisi'/);
+ assert.match(detail,/const placeholderData=pair\('ID posisi',machine\.machineId\)\+pair\('Area',machine\.area\)/);
+ assert.match(detail,/pair\('3D source','NOT_IMPLEMENTED · LAYOUT PLACEHOLDER'\)/);
+ assert.match(detail,/pair\('3D detail','NOT_IMPLEMENTED'\)/);
+ assert.match(detail,/pair\('Dasar posisi',positionStatusLabel\(policy\.positionStatus\)\)/);
  assert.match(detail,/pair\('Status detail','Belum dibuka pada fase fondasi'\)/);
  assert.match(detail,/primary\?primaryData:placeholderData/);
  assert.match(detail,/Metadata teknis inventori tidak ditampilkan pada fase fondasi/);
@@ -66,11 +69,11 @@ test('reference realism is retained in source but hidden from the default Phase-
 });
 
 test('offline cache prioritizes foundation and OFFSET 5 instead of preloading expansion machines',()=>{
- assert.match(sw,/factory-digital-twin-v157-foundation-runtime-20260922/);
+ assert.match(sw,/factory-digital-twin-v158-phase3-interaction-20260922/);
  for(const required of ['src/offset5.js','src/simulation.js','src/data/taxonomy-offset5.js','src/factory-building.js','src/data/dwg-fidelity.js'])assert.match(sw,new RegExp(required.replaceAll('/','\\/')));
  for(const excluded of ['src/offset10.js','src/apm2.js','src/sheeting.js','src/universal-machine.js','src/machine-runtime.js'])assert.doesNotMatch(sw,new RegExp(excluded.replaceAll('/','\\/')));
- assert.match(html,/app-shell-v79\.css\?v=157/);
- assert.match(html,/src\/app\.js\?v=157/);
- assert.match(html,/src\/app-shell-v79\.js\?v=157/);
- assert.match(shell,/v157-foundation-runtime/);
+ assert.match(html,/app-shell-v79\.css\?v=158/);
+ assert.match(html,/src\/app\.js\?v=158/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=158/);
+ assert.match(shell,/v158-phase3-interaction/);
 });
