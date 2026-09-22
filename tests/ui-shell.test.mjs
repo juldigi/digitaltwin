@@ -310,7 +310,7 @@ test('v54 keeps APM2 as a dedicated 3D machine with process-specific UI and no i
   assert.match(app,/Simulasi Proses APM 2/);
   assert.match(app,/register dan SideLay/);
   assert.match(app,/suffix E\/SE\/CER\/BMA tidak tersedia/);
-  assert.match(app,/machine\.machineId==='BMJ-MCH-0010'\?'apm2'/);
+  assert.match(app,/normalizeMachineKey\(machine\.machineId\)/);
   assert.match(runtime,/APM2MachineTemplate/);
   assert.match(runtime,/APM2ProcessSimulation/);
   assert.match(runtime,/if\(k==='apm2'\)return new APM2MachineTemplate\(\)/);
