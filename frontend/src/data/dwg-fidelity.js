@@ -89,11 +89,11 @@ export function buildDwgFidelityLedger(layout){
   });
 }
 
-export function dwgObjectSourceMetadata(layout,{semantic='UNKNOWN',sourceLayer='UNKNOWN',sourceEntityId='UNKNOWN',sourceHandles=null,confidence='UNVERIFIED',renderStatus='3D'}={}){
+export function dwgObjectSourceMetadata(layout,{sourceType='DWG',semantic='UNKNOWN',sourceLayer='UNKNOWN',sourceEntityId='UNKNOWN',sourceHandles=null,confidence='UNVERIFIED',renderStatus='3D'}={}){
   const sourceFile=layout?.source?.file||layout?.source?.derivedFile||'UNKNOWN';
   const handles=list(sourceHandles).filter(Boolean);
   return Object.freeze({
-    sourceType:'DWG',
+    sourceType:sourceType||'DWG',
     sourceLayer:sourceLayer||'UNKNOWN',
     sourceEntityId:sourceEntityId||handles[0]||'UNKNOWN',
     sourceHandles:handles,
