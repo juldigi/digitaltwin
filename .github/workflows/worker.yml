@@ -26,10 +26,19 @@ jobs:
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      - name: Deploy V147 application to Cloudflare Workers
+      - name: Deploy application to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: backend
           command: deploy
+      - name: Smoke-test deployed Worker
+        shell: bash
+        run: |
+          set -euo pipefail
+          endpoint="https://digitaltwin.offsetbmj.workers.dev/"
+          curl --fail --silent --show-error --location --retry 5 --retry-delay 3 --retry-all-errors "$endpoint" -o /tmp/digitaltwin-live.html
+          grep -Fq "Packaging Offset Factory Digital Twin" /tmp/digitaltwin-live.html
+          test "$(wc -c < /tmp/digitaltwin-live.html)" -gt 1000
+          echo "Live Worker smoke test passed: $endpoint"
