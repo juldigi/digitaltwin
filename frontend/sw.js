@@ -1,4 +1,4 @@
-const VERSION='factory-digital-twin-v155-dwg-fidelity-20260922';
+const VERSION='factory-digital-twin-v156-offset5-factory-20260922';
 const SHELL=['./','./index.html','./config.json','./assets/favicon.svg',
   './assets/splash-industrial-v79.webp',
   './app-shell-v79.css',

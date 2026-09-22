@@ -14,7 +14,7 @@ export {SheetingMachineTemplate} from './sheeting.js';
 
 export class FactoryEngine {
   constructor(container,onSelect){
-    this.container=container;this.onSelect=onSelect;this.onTaxonomySelect=null;this.view='machine';this.layout=null;this.low=false;this.labels=true;this.isolated=false;this.partLabelEntries=[];
+    this.container=container;this.onSelect=onSelect;this.onTaxonomySelect=null;this.onFactoryPartSelect=null;this.view='machine';this.layout=null;this.low=false;this.labels=true;this.isolated=false;this.partLabelEntries=[];this.factoryMachineLayerVisible=true;this.primaryFactoryPlaced=false;
     {const requested=normalizeMachineKey(new URLSearchParams(location.search).get('machine'));this.requestedMachineKey=requested;this.machineKey=canOpenTechnical3D(requested)?requested:FOUNDATION_SCOPE.primaryRoute;}
     this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'low-power'});
     this.renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));this.renderer.shadowMap.enabled=true;this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.2;
@@ -32,9 +32,9 @@ export class FactoryEngine {
     this.simulation=createMachineSimulation(this.machineKey,this.machine,this.template);this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);
     this.factory=new THREE.Group();this.scene.add(this.factory);
     this.gizmo=new TransformControls(this.camera,this.renderer.domElement);this.scene.add(this.gizmo.getHelper());this.gizmo.addEventListener('dragging-changed',e=>{this.controls.enabled=!e.value;});this.gizmo.addEventListener('objectChange',()=>{if(this.gizmo.mode==='scale')this.machine.scale.setScalar(Math.max(.0001,this.machine.scale.x));this.onTransform?.();});
-    this.ray=new THREE.Raycaster();this.down=null;this.renderer.domElement.addEventListener('dblclick',()=>{this.template.reset();this.clearPartLabels();this.isolated=false;this.fit(this.view==='factory'?this.factory:this.machine);this.onReset?.();});
+    this.ray=new THREE.Raycaster();this.down=null;this.renderer.domElement.addEventListener('dblclick',()=>{this.template.reset();this.clearPartLabels();this.isolated=false;if(this.view==='factory')this.fitObjects([this.factory,this.machine.visible?this.machine:null]);else this.fit(this.machine);this.onReset?.();});
     this.renderer.domElement.addEventListener('pointerdown',e=>this.down=[e.clientX,e.clientY]);
-    this.renderer.domElement.addEventListener('pointerup',e=>{if(!this.down||Math.hypot(e.clientX-this.down[0],e.clientY-this.down[1])>5||this.gizmo.dragging||this.simulation?.active)return;const r=this.renderer.domElement.getBoundingClientRect();this.ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),this.camera);if(this.view==='factory'&&this.actualFactory){const hit=this.ray.intersectObjects([...this.actualFactory.assets.values()],true).find(h=>{for(let p=h.object;p;p=p.parent)if(!p.visible)return false;return true;});if(hit)this.onFactorySelect?.(hit.object.userData.machineId);return;}const hit=this.ray.intersectObject(this.machine,true).find(h=>{for(let p=h.object;p;p=p.parent)if(!p.visible)return false;return true;});if(hit&&this.machine.visible){const part=this.template.resolvePart(hit.object);if(part)this.onSelect(part);}});
+    this.renderer.domElement.addEventListener('pointerup',e=>{if(!this.down||Math.hypot(e.clientX-this.down[0],e.clientY-this.down[1])>5||this.gizmo.dragging||this.simulation?.active)return;const r=this.renderer.domElement.getBoundingClientRect();this.ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),this.camera);if(this.view==='factory'&&this.actualFactory){const targets=[...this.actualFactory.assets.values()];if(this.machine.visible)targets.unshift(this.machine);const hit=this.ray.intersectObjects(targets,true).find(h=>{for(let p=h.object;p;p=p.parent)if(!p.visible)return false;return true;});if(hit){let id=null;for(let p=hit.object;p;p=p.parent){if(p===this.machine){const part=this.template.resolvePart(hit.object);if(part&&this.onFactoryPartSelect?.(part)===true)return;id=FOUNDATION_SCOPE.primaryMachineId;break;}if(p.userData?.machineId){id=p.userData.machineId;break;}}if(id)this.onFactorySelect?.(id);}return;}const hit=this.ray.intersectObject(this.machine,true).find(h=>{for(let p=h.object;p;p=p.parent)if(!p.visible)return false;return true;});if(hit&&this.machine.visible){const part=this.template.resolvePart(hit.object);if(part)this.onSelect(part);}});
     this.resizeObserver=new ResizeObserver(()=>this.resize());this.resizeObserver.observe(container);
     this.last=0;this.render=this.render.bind(this);this.fit(this.machine,'iso',false);this.resize();this.frame=requestAnimationFrame(this.render);
     this.renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();this.onError?.('Konteks grafis terputus. Muat ulang halaman untuk memulihkan penampil.');});
@@ -139,11 +139,21 @@ export class FactoryEngine {
   setPrintingSimulationInkFlowVisible(on){return this.simulation?.setInkFlowVisible(on);}
   getPrintingSimulationState(){return this.simulation?.state()||{active:false,running:false,paused:false,speed:1,stage:'Feeder',completed:0,progress:0,sheetsVisible:0,rotorCount:0};}
   isPrintingSimulationActive(){return !!this.simulation?.active;}
-  setView(view,state){if(view!=='machine'&&this.simulation?.active)this.simulation.stop();this.view=view;this.gizmo.detach();this.template.reset();this.clearPartLabels();this.isolated=false;this.machine.position.set(0,0,0);this.machine.rotation.set(0,0,0);this.machine.scale.setScalar(1);this.studio.visible=view==='machine';this.factory.visible=view==='factory';
-    if(view==='factory')this.applyPlacement(state,this.layout||state.layout);else this.machine.visible=true;
-    this.fit(view==='factory'?this.factory:this.machine);
+  primaryFactoryPlacement(layout=this.layout){
+    return layout?.placements?.find(p=>p.machineId===FOUNDATION_SCOPE.primaryMachineId)||layout?.fleet?.find(item=>item?.placement?.machineId===FOUNDATION_SCOPE.primaryMachineId)?.placement||null;
   }
-  applyPlacement(state,layout=this.layout||state.layout){const a=state.asset,l=layout;this.machine.visible=false;if(!l)return;if(l.baselineId){return;}
+  syncPrimaryFactoryRepresentation(){
+    const placeholder=this.actualFactory?.assets.get(FOUNDATION_SCOPE.primaryMachineId),integrated=this.view==='factory'&&this.machineKey===FOUNDATION_SCOPE.primaryRoute&&this.primaryFactoryPlaced&&this.factoryMachineLayerVisible;
+    if(placeholder)placeholder.visible=!integrated&&this.factoryMachineLayerVisible;
+    if(this.view==='factory'&&this.primaryFactoryPlaced)this.machine.visible=integrated;
+  }
+  setView(view,state){if(view!=='machine'&&this.simulation?.active)this.simulation.stop();this.view=view;this.gizmo.detach();this.template.reset();this.clearPartLabels();this.isolated=false;this.machine.position.set(0,0,0);this.machine.rotation.set(0,0,0);this.machine.scale.setScalar(1);this.studio.visible=view==='machine';this.factory.visible=view==='factory';this.primaryFactoryPlaced=false;
+    if(view==='factory')this.applyPlacement(state,this.layout||state.layout);else{this.machine.visible=true;this.syncPrimaryFactoryRepresentation();}
+    if(view==='factory')this.fitObjects([this.factory,this.machine.visible?this.machine:null]);else this.fit(this.machine);
+  }
+  applyPlacement(state,layout=this.layout||state.layout){const a=state.asset,l=layout;this.machine.visible=false;this.primaryFactoryPlaced=false;if(!l)return;
+    if(l.baselineId&&this.machineKey===FOUNDATION_SCOPE.primaryRoute){const p=this.primaryFactoryPlacement(l);if(p&&Number.isFinite(p.x)&&Number.isFinite(p.y)){this.machine.position.set(p.x,Number.isFinite(p.z)?p.z:0,-p.y);this.machine.rotation.y=(Number(p.rotation)||0)*Math.PI/180;this.machine.scale.setScalar(Number.isFinite(p.scale)&&p.scale>0?p.scale:1);this.primaryFactoryPlaced=true;this.machine.userData={...this.machine.userData,factoryIntegrated:true,factoryMachineId:FOUNDATION_SCOPE.primaryMachineId,factoryPlacementStatus:p.status||'UNKNOWN',factoryScaleFitApplied:false};this.syncPrimaryFactoryRepresentation();}return;}
+    if(l.baselineId)return;
     if(a.layout_x!==null){this.machine.position.set(a.layout_x,a.layout_y,a.layout_z);this.machine.rotation.y=a.rotation*Math.PI/180;this.machine.scale.setScalar(a.scale);this.machine.visible=true;}
     else if(l.machineAnchor&&this.machineKey==='offset5'){const anchor=l.machineAnchor,p=cadToWorld(anchor.x,anchor.y,l.transform);this.machine.position.set(p.x,anchor.z*(l.transform.scale??1),p.z);this.machine.rotation.y=-(anchor.rotation+l.transform.rotation)*Math.PI/180;this.machine.visible=true;}
   }
@@ -238,8 +248,8 @@ export class FactoryEngine {
       this.layoutStats.rendered++;
     }
   }
-  setFactoryLayer(name,on){if(this.actualFactory?.layers[name])this.actualFactory.layers[name].visible=!!on;}
-  focusFactoryAsset(id){const o=this.actualFactory?.assets.get(id);if(o)this.fit(o);}
+  setFactoryLayer(name,on){if(this.actualFactory?.layers[name])this.actualFactory.layers[name].visible=!!on;if(name==='machines'){this.factoryMachineLayerVisible=!!on;this.syncPrimaryFactoryRepresentation();}if(name==='labels')this.labels=!!on;}
+  focusFactoryAsset(id){if(id===FOUNDATION_SCOPE.primaryMachineId&&this.view==='factory'&&this.primaryFactoryPlaced&&this.machine.visible){this.fit(this.machine);return true;}const o=this.actualFactory?.assets.get(id);if(o){this.fit(o);return true;}return false;}
   clearFactory(){this.actualFactory=null;this.factory.traverse(o=>{o.geometry?.dispose();if(Array.isArray(o.material))o.material.forEach(m=>{m.map?.dispose();m.dispose();});else{o.material?.map?.dispose();o.material?.dispose();}});this.factory.clear();}
   edit(on){if(on&&this.view==='factory'&&this.layout){this.machine.visible=true;this.gizmo.attach(this.machine);}else this.gizmo.detach();}
   setLow(on){this.low=on;this.renderer.setPixelRatio(on?1:Math.min(devicePixelRatio,1.7));this.renderer.shadowMap.enabled=!on;this.template.setLow(on);this.resize();}

@@ -10,7 +10,7 @@
 <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
 <link rel="stylesheet" href="./style.css">
 <link rel="stylesheet" href="./runtime-fallback.css">
-<link rel="stylesheet" href="./app-shell-v79.css?v=155">
+<link rel="stylesheet" href="./app-shell-v79.css?v=156">
 <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/addons/"}}</script>
 </head>
 <body class="panel-hidden ui-simple">
@@ -96,13 +96,13 @@
         <div class="view-switch" role="group" aria-label="Kontrol tampilan">
           <button data-camera="iso" class="active">3D <span>Isometrik</span></button>
           <button data-camera="top">ATAS <span>Tampak Atas</span></button>
-          <button data-camera="fit">PUSATKAN <span>Pilihan</span></button>
+          <button data-camera="fit">MESIN <span>Fit Machine</span></button>\n          <button data-camera="factory">PABRIK <span>Fit Factory</span></button>
           <button id="tool-pan" class="legacy-tool-entry" aria-hidden="true" tabindex="-1">GESER <span>Pan</span></button>
           <button id="tool-explode">URAI <span>Komponen</span></button>
           <button id="tool-isolate">ISOLASI <span>Pilihan</span></button>
           <button id="tool-interior">Buka Interior <span>Potongan mesin</span></button>
           <button id="tool-simulation" class="legacy-tool-entry" aria-hidden="true" tabindex="-1">SIMULASI <span>Proses</span></button>
-          <button data-camera="reset">BERANDA <span>Tampilan awal</span></button>
+          <button data-camera="reset">RESET <span>Tampilan awal</span></button>
         </div>
         <div class="scene-options">
           <button id="labels" class="icon-btn active" title="Label" aria-label="Tampilkan atau sembunyikan label">Aa</button>
@@ -220,10 +220,10 @@
 
 <dialog id="modal" aria-labelledby="modal-title" aria-modal="true"><div class="modal-head"><h2 id="modal-title"></h2><button id="modal-close" class="icon-btn" aria-label="Tutup dialog"></button></div><div id="modal-body"></div></dialog>
 <div id="toast" role="status" aria-live="polite" hidden></div>
-<script type="module" src="./src/app.js?v=155"></script>
-<script type="module" src="./src/ui-v5.js?v=155"></script>
+<script type="module" src="./src/app.js?v=156"></script>
+<script type="module" src="./src/ui-v5.js?v=156"></script>
 <script type="module" src="./src/experience-v37.js?v=81"></script>
-<script type="module" src="./src/app-shell-v79.js?v=155"></script>
+<script type="module" src="./src/app-shell-v79.js?v=156"></script>
 <script>setTimeout(()=>{const b=document.getElementById('boot');if(b&&!b.hidden){b.innerHTML='<strong>Tampilan 3D belum berhasil dimuat</strong><p>Coba muat ulang halaman atau gunakan perangkat lain.</p>'; }},15000);</script>
 </body>
 </html>
