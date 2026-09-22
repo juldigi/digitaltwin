@@ -55,7 +55,7 @@ test('icons use one accessible vector family without emoji runtime controls',()=
 });
 
 test('service worker owns the V123 OEM-deep-detail shell assets',()=>{
-  assert.match(sw,/factory-digital-twin-v130-ipal-process-detail-20260922/);
+  assert.match(sw,/factory-digital-twin-v131-ipal-safety-detail-20260922/);
   assert.match(sw,/app-shell-v79\.css/);
   assert.match(sw,/src\/app-shell-v79\.js/);
   assert.match(sw,/assets\/splash-industrial-v79\.webp/);
