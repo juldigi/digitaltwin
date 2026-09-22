@@ -54,7 +54,7 @@ test('service-worker shell cache references only deployable frontend files',()=>
 });
 
 test('service-worker cache version advances with the centralized runtime release',()=>{
- assert.match(sw,/factory-digital-twin-v153-foundation-scope-20260922/);
+ assert.match(sw,/factory-digital-twin-v154-truth-layer-20260922/);
 });
 
 
