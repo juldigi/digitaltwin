@@ -2,6 +2,30 @@ import{getState,setState,setActiveSection,setViewMode,setLayer,setSimulation,set
 
 const q=(s,r=document)=>r.querySelector(s);
 const qa=(s,r=document)=>[...r.querySelectorAll(s)];
+const FOCUSABLE='button:not([disabled]):not([tabindex="-1"]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),summary,[tabindex]:not([tabindex="-1"])';
+const overlayReturnFocus=new Map();
+function rememberOverlayFocus(name){
+ const active=document.activeElement;
+ if(active instanceof HTMLElement&&active!==document.body)overlayReturnFocus.set(name,active);
+}
+function restoreOverlayFocus(name,fallback){
+ const saved=overlayReturnFocus.get(name),target=saved?.isConnected?saved:q(fallback);
+ overlayReturnFocus.delete(name);
+ if(target instanceof HTMLElement)requestAnimationFrame(()=>target.focus({preventScroll:true}));
+}
+function overlayFocusable(root){return root?qa(FOCUSABLE,root).filter(el=>!el.hidden&&el.getClientRects().length>0):[]}
+function focusOverlay(root,preferred){
+ const target=(preferred&&q(preferred,root))||overlayFocusable(root)[0]||root;
+ if(target instanceof HTMLElement)requestAnimationFrame(()=>target.focus({preventScroll:true}));
+}
+function trapOverlayFocus(event,root){
+ if(event.key!=='Tab'||!root)return false;
+ const items=overlayFocusable(root);if(!items.length){event.preventDefault();root.focus?.();return true}
+ const first=items[0],last=items.at(-1),active=document.activeElement;
+ if(event.shiftKey&&(active===first||!root.contains(active))){event.preventDefault();last.focus();return true}
+ if(!event.shiftKey&&(active===last||!root.contains(active))){event.preventDefault();first.focus();return true}
+ return false;
+}
 const icon=name=>`<svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-${name}"></use></svg>`;
 const symbols=`<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
 <symbol id="i-factory" viewBox="0 0 24 24"><path d="M3 21V9l6 3V8l6 4V5h6v16M3 21h18M7 17h2m4 0h2m4 0h2"/></symbol>
@@ -74,8 +98,8 @@ function markSection(section){
  }
  qa('[data-mobile-nav]').forEach(el=>{const active=el.dataset.mobileNav===section;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current')});
 }
-function closeDrawer(){document.body.classList.remove('nav-open');q('#ui-menu-toggle')?.setAttribute('aria-expanded','false')}
-function closeLayerManager(){const panel=q('#layer-manager');if(panel)panel.hidden=true;if(getState().overlay==='layers')closeOverlay()}
+function closeDrawer(){document.body.classList.remove('nav-open');q('#ui-menu-toggle')?.setAttribute('aria-expanded','false');restoreOverlayFocus('navigation','#ui-menu-toggle')}
+function closeLayerManager(){const panel=q('#layer-manager');if(panel)panel.hidden=true;if(getState().overlay==='layers')closeOverlay();restoreOverlayFocus('layers','#nav-systems')}
 function closeInspector(){document.body.classList.add('panel-hidden');document.body.classList.remove('mobile-panel-open');setInspector(false)}
 function beforeMajorOverlay(name){
  const current=getState().overlay;
@@ -91,8 +115,8 @@ function beforeMajorOverlay(name){
  if(name!=='navigation')closeDrawer();
 }
 function openSystemLayers(){
- beforeMajorOverlay('layers');ensureLayerManager();
- const panel=q('#layer-manager');panel.hidden=false;openOverlay('layers');setActiveSection('system');markSection('system');syncLayerControls();
+ beforeMajorOverlay('layers');rememberOverlayFocus('layers');ensureLayerManager();
+ const panel=q('#layer-manager');panel.hidden=false;openOverlay('layers');setActiveSection('system');markSection('system');syncLayerControls();focusOverlay(panel,'[data-layer-close]');
 }
 function enterSimulation(){
  beforeMajorOverlay('inspector');setActiveSection('simulation');markSection('simulation');
@@ -106,8 +130,8 @@ const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','
 let searchResults=[],searchActiveIndex=-1,searchTimer=0;
 function ensureSearchPalette(){
  let panel=q('#universal-search-panel');if(panel)return panel;
- panel=document.createElement('section');panel.id='universal-search-panel';panel.className='universal-search-panel';panel.hidden=true;panel.setAttribute('aria-label','Pencarian universal');
- panel.innerHTML=`<header><div class="universal-search-field">${icon('search')}<input id="universal-search-input" type="search" autocomplete="off" aria-label="Cari di seluruh digital twin" placeholder="Cari mesin, area, komponen, sistem, atau dokumen…"><button type="button" data-search-close class="icon-btn" aria-label="Tutup pencarian">${icon('close')}</button></div><small>Cari di seluruh Digital Twin</small></header><div class="universal-search-results" role="listbox" aria-label="Hasil pencarian"><p class="universal-search-empty">Ketik nama mesin, komponen, area, sistem, atau dokumen.</p></div>`;
+ panel=document.createElement('section');panel.id='universal-search-panel';panel.className='universal-search-panel';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-labelledby','universal-search-title');panel.setAttribute('tabindex','-1');
+ panel.innerHTML=`<header><div class="universal-search-field">${icon('search')}<input id="universal-search-input" type="search" autocomplete="off" aria-label="Cari di seluruh digital twin" aria-controls="universal-search-results" aria-autocomplete="list" aria-expanded="true" placeholder="Cari mesin, area, komponen, sistem, dokumen, atau foto…"><button type="button" data-search-close class="icon-btn" aria-label="Tutup pencarian">${icon('close')}</button></div><small id="universal-search-title">Cari di seluruh Digital Twin</small></header><div id="universal-search-results" class="universal-search-results" role="listbox" aria-label="Hasil pencarian"><p class="universal-search-empty">Ketik nama mesin, komponen, area, sistem, dokumen, atau foto.</p></div>`;
  document.body.append(panel);
  q('[data-search-close]',panel)?.addEventListener('click',closeSearch);
  q('#universal-search-input',panel)?.addEventListener('input',event=>requestUniversalSearch(event.currentTarget.value));
@@ -115,18 +139,19 @@ function ensureSearchPalette(){
  return panel;
 }
 function openSearch(seed=''){
- beforeMajorOverlay('search');
+ beforeMajorOverlay('search');rememberOverlayFocus('search');
  const panel=ensureSearchPalette(),input=q('#universal-search-input',panel);
- panel.hidden=false;openOverlay('search');document.body.classList.add('search-open');
+ panel.hidden=false;openOverlay('search');document.body.classList.add('search-open');input.setAttribute('aria-expanded','true');
  if(seed!==undefined)input.value=seed;
  searchActiveIndex=-1;requestUniversalSearch(input.value);
  requestAnimationFrame(()=>input.focus());
 }
 function closeSearch(){
- const panel=q('#universal-search-panel');if(panel)panel.hidden=true;
+ const panel=q('#universal-search-panel'),input=q('#universal-search-input',panel||document);if(panel)panel.hidden=true;
+ if(input){input.setAttribute('aria-expanded','false');input.removeAttribute('aria-activedescendant')}
  document.body.classList.remove('search-open');
  if(getState().overlay==='search')closeOverlay();
- searchActiveIndex=-1;
+ searchActiveIndex=-1;restoreOverlayFocus('search','#global-search');
 }
 function requestUniversalSearch(query){
  clearTimeout(searchTimer);
@@ -136,18 +161,18 @@ function requestUniversalSearch(query){
 function renderSearchResults(detail={}){
  const panel=ensureSearchPalette(),host=q('.universal-search-results',panel),query=String(detail.query||'').trim();
  searchResults=Array.isArray(detail.results)?detail.results:[];searchActiveIndex=searchResults.length?0:-1;
- if(!query){host.innerHTML='<p class="universal-search-empty">Ketik nama mesin, komponen, area, sistem, atau dokumen.</p>';return}
- if(!searchResults.length){host.innerHTML='<p class="universal-search-empty">Tidak ada hasil yang sesuai.</p>';return}
+ if(!query){host.innerHTML='<p class="universal-search-empty">Ketik nama mesin, komponen, area, sistem, dokumen, atau foto.</p>';q('#universal-search-input',panel)?.removeAttribute('aria-activedescendant');return}
+ if(!searchResults.length){host.innerHTML='<p class="universal-search-empty">Tidak ada hasil yang sesuai.</p>';q('#universal-search-input',panel)?.removeAttribute('aria-activedescendant');return}
  let lastGroup='';
  host.innerHTML=searchResults.map((item,index)=>{
   const heading=item.group!==lastGroup?(lastGroup=item.group,`<h4>${escapeHtml(item.group)}</h4>`):'';
-  return heading+`<button type="button" class="universal-search-result ${index===searchActiveIndex?'active':''}" data-search-index="${index}" role="option" aria-selected="${index===searchActiveIndex?'true':'false'}"><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.subtitle||'')}</small></span><em>${escapeHtml(item.type==='component'?'Komponen':item.type==='machine'?'Mesin':item.type==='reference'?'Referensi':item.type==='system'?'Sistem':'Area')}</em></button>`;
+  return heading+`<button id="universal-search-option-${index}" type="button" class="universal-search-result ${index===searchActiveIndex?'active':''}" data-search-index="${index}" role="option" aria-selected="${index===searchActiveIndex?'true':'false'}"><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.subtitle||'')}</small></span><em>${escapeHtml(item.type==='component'?'Komponen':item.type==='machine'?'Mesin':item.type==='reference'?'Referensi':item.type==='system'?'Sistem':'Area')}</em></button>`;
  }).join('');
  qa('[data-search-index]',host).forEach(button=>button.addEventListener('click',()=>chooseSearchResult(Number(button.dataset.searchIndex))));
 }
 function updateSearchActive(){
- const host=q('.universal-search-results',ensureSearchPalette());
- qa('[data-search-index]',host).forEach((button,index)=>{const active=index===searchActiveIndex;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active));if(active)button.scrollIntoView({block:'nearest'})});
+ const panel=ensureSearchPalette(),host=q('.universal-search-results',panel),input=q('#universal-search-input',panel);
+ qa('[data-search-index]',host).forEach((button,index)=>{const active=index===searchActiveIndex;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active));if(active){input?.setAttribute('aria-activedescendant',button.id);button.scrollIntoView({block:'nearest'})}});
 }
 function searchKeydown(event){
  if(!searchResults.length)return;
@@ -175,7 +200,7 @@ q('#nav-help')?.addEventListener('click',()=>{beforeMajorOverlay('modal');openOv
 q('#nav-settings')?.addEventListener('click',()=>{beforeMajorOverlay('modal');q('#settings')?.click();openOverlay('modal')});
 
 const menu=q('#ui-menu-toggle');
-menu?.addEventListener('click',()=>{const open=!document.body.classList.contains('nav-open');if(open)beforeMajorOverlay('navigation');document.body.classList.toggle('nav-open',open);menu.setAttribute('aria-expanded',String(open));if(open)openOverlay('navigation');else closeOverlay()});
+menu?.addEventListener('click',()=>{const open=!document.body.classList.contains('nav-open');if(open){beforeMajorOverlay('navigation');rememberOverlayFocus('navigation')}document.body.classList.toggle('nav-open',open);menu.setAttribute('aria-expanded',String(open));if(open){openOverlay('navigation');focusOverlay(q('.rail'),'.rail button:not([hidden])')}else{closeOverlay();restoreOverlayFocus('navigation','#ui-menu-toggle')}});
 q('#ui-backdrop')?.addEventListener('click',()=>{closeDrawer();closeLayerManager();if(getState().overlay!=='inspector')closeOverlay()});
 qa('.rail button').forEach(b=>b.addEventListener('click',()=>{if(innerWidth<768&&b.id!=='nav-systems')closeDrawer()}));
 
@@ -198,16 +223,16 @@ const GROUPS=[
 ];
 function ensureLayerManager(){
  if(q('#layer-manager'))return;
- const panel=document.createElement('section');panel.id='layer-manager';panel.className='canonical-layer-manager';panel.hidden=true;panel.setAttribute('aria-label','Kelola lapisan');
- panel.innerHTML=`<header><div><small>SISTEM & TAMPILAN</small><h3>Sistem & Lapisan</h3></div><button type="button" data-layer-close class="icon-btn" aria-label="Tutup">${icon('close')}</button></header>
+ const panel=document.createElement('section');panel.id='layer-manager';panel.className='canonical-layer-manager';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-labelledby','layer-manager-title');panel.setAttribute('tabindex','-1');
+ panel.innerHTML=`<header><div><small>SISTEM & TAMPILAN</small><h3 id="layer-manager-title">Sistem & Lapisan</h3></div><button type="button" data-layer-close class="icon-btn" aria-label="Tutup">${icon('close')}</button></header>
  <div class="canonical-system-grid">
-  <button type="button" data-system-focus="hvac"><strong>HVAC</strong><small>AHU piping + ducting</small><span>Buka network context</span></button>
-  <button type="button" data-system-focus="compressedAir"><strong>Compressed Air</strong><small>Distribution piping</small><span>Buka network context</span></button>
-  <button type="button" data-system-focus="routing"><strong>Utility Routing</strong><small>Semua routing tersedia</small><span>Buka network context</span></button>
-  <button type="button" data-system-focus="water" class="system-unavailable"><strong>Water / IPAL</strong><small>Equipment ada · routing belum tersedia</small><span>Lihat batas data</span></button>
-  <button type="button" data-system-focus="electrical" class="system-unavailable"><strong>Electrical</strong><small>Routing terpisah belum tersedia</small><span>Lihat batas data</span></button>
+  <button type="button" data-system-focus="hvac"><strong>HVAC</strong><small>Pipa AHU + ducting</small><span>Lihat jalur & peralatan</span></button>
+  <button type="button" data-system-focus="compressedAir"><strong>Udara Bertekanan</strong><small>Pipa distribusi udara</small><span>Lihat jalur & peralatan</span></button>
+  <button type="button" data-system-focus="routing"><strong>Jalur Utilitas</strong><small>Semua jalur yang tersedia</small><span>Lihat seluruh jalur</span></button>
+  <button type="button" data-system-focus="water" class="system-unavailable"><strong>Air / IPAL</strong><small>Peralatan tersedia · jalur belum tersedia</small><span>Lihat batas data</span></button>
+  <button type="button" data-system-focus="electrical" class="system-unavailable"><strong>Kelistrikan</strong><small>Jalur terpisah belum tersedia</small><span>Lihat batas data</span></button>
  </div>
- <section id="system-context" class="canonical-system-context" aria-live="polite"><p>Pilih sistem untuk melihat jaringan, equipment terkait, status routing, dan batas verifikasi.</p></section>
+ <section id="system-context" class="canonical-system-context" aria-live="polite"><p>Pilih sistem untuk melihat jalur, peralatan terkait, status data, dan batas verifikasi.</p></section>
  ${GROUPS.map(([title,items])=>`<div class="canonical-layer-group"><h4>${title}</h4>${items.map(([key,label])=>`<label><span>${label}</span><input type="checkbox" data-canonical-layer="${key}"></label>`).join('')}</div>`).join('')}
  <div class="canonical-layer-group unavailable"><h4>Batas data</h4><p>Jalur yang belum memiliki drawing atau verifikasi lapangan tetap ditandai belum tersedia. Aplikasi tidak membuat jalur as-built secara otomatis.</p></div>`;
  q('.workspace')?.append(panel);
@@ -230,9 +255,9 @@ function syncLayerControls(){
 function renderSystemContext(detail={}){
  const host=q('#system-context');if(!host)return;
  const networks=Array.isArray(detail.networks)?detail.networks:[],equipment=Array.isArray(detail.equipment)?detail.equipment:[];
- const networkRows=networks.length?networks.map(net=>`<div class="system-network-row"><span><strong>${escapeHtml(net.system.replaceAll('_',' '))}</strong><small>${escapeHtml(net.status||'')}</small></span><em>${net.nodeCount||0} node · ${net.segmentCount||0} segment · ${net.equipmentAnchorCount||0} anchor</em></div>`).join(''):'<p class="system-context-empty">Network routing terpisah belum tersedia untuk sistem ini.</p>';
- const equipmentRows=equipment.length?equipment.map(item=>`<button type="button" data-system-machine="${escapeHtml(item.machineId)}"><span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.model||item.sapCode||item.machineId)}</small></span><em>Buka aset</em></button>`).join(''):'<p class="system-context-empty">Belum ada equipment terhubung yang dapat ditampilkan sebagai network asset.</p>';
- host.innerHTML=`<header><div><small>SYSTEM CONTEXT</small><h4>${escapeHtml(detail.title||'Sistem')}</h4></div><span class="system-route-status ${detail.actualRoutingApplied?'verified':'reference'}">${detail.actualRoutingApplied?'Routing terverifikasi':'Reference / template'}</span></header><div class="system-context-actions"><button type="button" data-system-refocus="${escapeHtml(detail.system||'')}">${icon('focus')}<span>Fokus jaringan</span></button></div><h5>Jaringan</h5>${networkRows}<h5>Equipment terkait</h5><div class="system-equipment-list">${equipmentRows}</div><h5>Consumer</h5><p class="system-context-empty">${escapeHtml(detail.consumerText||'Consumer network belum tersedia.')}</p><h5>Evidence / source</h5><p class="system-context-empty">${escapeHtml(detail.sourceText||'Sumber network belum tersedia.')}</p><div class="system-boundary"><strong>Batas data</strong><p>${escapeHtml(detail.boundary||'Status routing belum tersedia.')}</p><small>Mode routing: ${escapeHtml(detail.routeMode||'BELUM TERSEDIA')}</small></div>`;
+ const networkRows=networks.length?networks.map(net=>`<div class="system-network-row"><span><strong>${escapeHtml(net.system.replaceAll('_',' '))}</strong><small>${escapeHtml(net.status||'')}</small></span><em>${net.nodeCount||0} titik · ${net.segmentCount||0} jalur · ${net.equipmentAnchorCount||0} titik peralatan</em></div>`).join(''):'<p class="system-context-empty">Jalur terpisah belum tersedia untuk sistem ini.</p>';
+ const equipmentRows=equipment.length?equipment.map(item=>`<button type="button" data-system-machine="${escapeHtml(item.machineId)}"><span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.model||item.sapCode||item.machineId)}</small></span><em>Buka aset</em></button>`).join(''):'<p class="system-context-empty">Belum ada peralatan terkait yang dapat ditampilkan pada jalur sistem ini.</p>';
+ host.innerHTML=`<header><div><small>KONTEKS SISTEM</small><h4>${escapeHtml(detail.title||'Sistem')}</h4></div><span class="system-route-status ${detail.actualRoutingApplied?'verified':'reference'}">${detail.actualRoutingApplied?'Jalur terverifikasi':'Acuan belum terverifikasi'}</span></header><div class="system-context-actions"><button type="button" data-system-refocus="${escapeHtml(detail.system||'')}">${icon('focus')}<span>Fokus jalur</span></button></div><h5>Jalur</h5>${networkRows}<h5>Peralatan terkait</h5><div class="system-equipment-list">${equipmentRows}</div><h5>Tujuan distribusi</h5><p class="system-context-empty">${escapeHtml(detail.consumerText||'Tujuan distribusi belum tersedia.')}</p><h5>Dasar data</h5><p class="system-context-empty">${escapeHtml(detail.sourceText||'Sumber data jalur belum tersedia.')}</p><div class="system-boundary"><strong>Batas data</strong><p>${escapeHtml(detail.boundary||'Status jalur belum tersedia.')}</p><small>Status data: ${escapeHtml(detail.routeMode||'BELUM TERSEDIA')}</small></div>`;
  qa('[data-system-machine]',host).forEach(button=>button.addEventListener('click',()=>dispatchEvent(new CustomEvent('bmj:systemassetselect',{detail:{machineId:button.dataset.systemMachine}}))));
  q('[data-system-refocus]',host)?.addEventListener('click',event=>dispatchEvent(new CustomEvent('bmj:systemfocus',{detail:{system:event.currentTarget.dataset.systemRefocus}})));
 }
@@ -284,7 +309,32 @@ addEventListener('bmj:historyrestore',event=>{
 const syncViewport=()=>{document.documentElement.style.setProperty('--app-vh',`${window.visualViewport?.height||innerHeight}px`);const w=innerWidth;setTimeout(()=>window.BMJAppState?.setState({deviceMode:w<768?'mobile':w<=1180?'tablet':'desktop'},{url:false}),0)};
 syncViewport();addEventListener('resize',syncViewport,{passive:true});window.visualViewport?.addEventListener('resize',syncViewport,{passive:true});
 
+function syncInspectorTabs(){
+ const tabs=qa('#detail-panel [role="tab"]').filter(tab=>tab.getAttribute('aria-hidden')!=='true');
+ const active=tabs.find(tab=>tab.getAttribute('aria-selected')==='true')||tabs[0];
+ tabs.forEach(tab=>{tab.setAttribute('aria-controls','panel-content');tab.tabIndex=tab===active?0:-1});
+}
+const inspectorTablist=q('#detail-panel .tabs');
+inspectorTablist?.addEventListener('keydown',event=>{
+ const tabs=qa('[role="tab"]',inspectorTablist).filter(tab=>tab.getAttribute('aria-hidden')!=='true');
+ const current=tabs.indexOf(document.activeElement);if(current<0)return;
+ let next=current;
+ if(event.key==='ArrowRight')next=(current+1)%tabs.length;
+ else if(event.key==='ArrowLeft')next=(current-1+tabs.length)%tabs.length;
+ else if(event.key==='Home')next=0;
+ else if(event.key==='End')next=tabs.length-1;
+ else return;
+ event.preventDefault();tabs[next].focus();tabs[next].click();
+});
+if(inspectorTablist)new MutationObserver(syncInspectorTabs).observe(inspectorTablist,{subtree:true,attributes:true,attributeFilter:['aria-selected']});
+syncInspectorTabs();
+
 document.addEventListener('keydown',event=>{
+ if(event.key==='Tab'){
+  const overlay=getState().overlay;
+  const root=overlay==='search'?q('#universal-search-panel'):overlay==='layers'?q('#layer-manager'):overlay==='navigation'?q('.rail'):overlay==='modal'?q('#modal'):overlay==='inspector'&&matchMedia('(max-width:767px)').matches?q('#detail-panel'):null;
+  if(root&&trapOverlayFocus(event,root))return;
+ }
  if(event.key!=='Escape')return;
  const overlay=getState().overlay;
  if(overlay==='search'){closeSearch();return}
@@ -304,4 +354,4 @@ const relabel=()=>{
  const connection=q('#connection');if(connection)connection.textContent=navigator.onLine?'Data tersedia':'Offline';
 };
 relabel();const hydratedState=hydrateUrl();if(hydratedState.viewMode==='2d')q('#mode-2d')?.click();subscribe(state=>{markSection(state.activeSection);syncLayerControls()});
-document.documentElement.dataset.uiArchitecture='v149-safe-shell';
+document.documentElement.dataset.uiArchitecture='v152-master-prompt';
