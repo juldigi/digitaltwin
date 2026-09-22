@@ -53,10 +53,11 @@ test('test-user shell uses clear user-facing navigation',()=>{
   assert.match(html,/Siap diuji/);
 });
 
-test('v53 uses the requested BMJ Digital Twin identity everywhere visible',()=>{
-  assert.match(html,/<title>BMJ Digital Twin<\/title>/);
-  assert.match(html,/>BMJ Digital Twin<small>Packaging Offset · Smart Factory<\/small>/);
-  assert.match(app,/document\.title='BMJ Digital Twin · '\+name/);
+test('v127 keeps the supplied BMJ logo and complete application identity in the global header',()=>{
+  assert.match(html,/<title>Packaging Offset Factory Digital Twin<\/title>/);
+  assert.match(html,/class="brand-logo" src="data:image\/jpeg;base64,[A-Za-z0-9+/=]+" alt="Logo BMJ"/);
+  assert.match(html,/<strong>Packaging Offset Factory Digital Twin<\/strong><small>© 2026 IDJ<\/small>/);
+  assert.match(app,/document\.title='Packaging Offset Factory Digital Twin · '\+name/);
   assert.doesNotMatch(html,/BMJ PACKAGING OFFSET · EKSPLORASI MESIN 3D/);
 });
 
@@ -121,7 +122,7 @@ test('conditional controls explain requirements rather than failing silently',()
 });
 
 test('service worker refreshes the redesigned shell',()=>{
-  assert.match(sw,/factory-digital-twin-v126-realistic-building-clearance-20260922/);
+  assert.match(sw,/factory-digital-twin-v127-roof-rooms-branding-20260922/);
   assert.match(sw,/src\/universal-machine\.js/);
   assert.match(app,/template\.ghost\(true,part\)/,'object selection must automatically ghost all non-selected geometry');
   for(const asset of ['app-shell-v79.css','src/app-shell-v79.js','assets/splash-industrial-v79.webp','src/ui-v5.js','src/app.js','src/simulation.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));

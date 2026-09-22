@@ -63,7 +63,7 @@ export function buildActualFactory(layout,fleet){
   // Clerestory window treatment has source-aligned position, with assumed sill and glass detail.
   if(len>5.5){const glass=box(b,x,2.35,z,Math.max(.6,len-.7),.55,w.width+.025,0xa5cbd0,r,.38);glass.userData.semantic='FROSTED_CLERESTORY';}
  }
- for(const [x,y] of data.columns){if(intersectsMachine([x-.3,y-.3],[x+.3,y+.3]))continue;box(b,x,3.4,-y,.32,6.8,.32,0x819397);box(b,x,.18,-y,.55,.36,.55,0xa1aaa8);}
+ for(const [x,y] of data.columns){if(intersectsMachine([x-.3,y-.3],[x+.3,y+.3]))continue;const column=box(b,x,2.25,-y,.32,4.5,.32,0x819397);column.castShadow=true;column.userData={semantic:'STRUCTURAL_COLUMN',height:4.5};box(b,x,.18,-y,.55,.36,.55,0xa1aaa8);}
  const adjustedPortals=[];
  for(const source of data.doors){const d=resolvePortalClearance({...source,width:Math.max(.9,source.width)},serviceClearances);if(d.clearanceAdjusted)adjustedPortals.push(d);const g=new T.Group();g.position.set(d.x,0,-d.y);g.rotation.y=d.rotation*Math.PI/180;b.add(g);g.userData={semantic:'DOOR',evidence:d.evidence,clearanceAdjusted:d.clearanceAdjusted,sourcePosition:[d.sourceX,d.sourceY]};
   box(g,-d.width/2,1.25,0,.085,2.5,.16,0x526b75);box(g,d.width/2,1.25,0,.085,2.5,.16,0x526b75);box(g,0,2.47,0,d.width+.17,.09,.16,0x526b75);
@@ -78,20 +78,37 @@ export function buildActualFactory(layout,fleet){
  // Open loading dock, bumpers, canopy and source folding-gate entrance.
  box(b,84,.42,-4.1,7.5,.85,3.2,0x8d9798);for(const x of [81,83,85,87])box(b,x,.75,-2.45,.32,.6,.18,0x303b42);
  box(b,84,4.5,-4.2,9,.15,5,0x536e7a);for(const x of [80,88])box(b,x,2.25,-2.3,.18,4.5,.18,0x526b75);box(b,14,1.25,-2.2,4.5,2.5,.09,0x8a9da3,0,.6);
- // Roof panels and trusses are elevations inferred from the footprint, independently hideable.
+ // User-confirmed vertical envelope: 4.5 m eaves and approximately 7 m ridge.
  for(const [x,w,z,d] of [[51,90,-51,90],[47.5,51,-99.5,7],[.5,11,-33,44]]){
-  const half=w/2,slope=Math.atan2(2,half),len=Math.hypot(half,2);
-  for(const sign of [-1,1]){const roof=box(layers.roof,x+sign*w/4,7.8,z,len,.16,d,0x6e8790);roof.rotation.z=-sign*slope;
-   for(let j=-d/2+1;j<d/2;j+=2)line(layers.roof,new T.Vector3(x,8.85,z+j),new T.Vector3(x+sign*w/2,6.85,z+j),.035,0xa7b8bc);
+  const half=w/2,rise=2.5,slope=Math.atan2(rise,half),len=Math.hypot(half,rise);
+  for(const sign of [-1,1]){const roof=box(layers.roof,x+sign*w/4,5.75,z,len,.16,d,0x6e8790);roof.rotation.z=-sign*slope;roof.userData={semantic:'ROOF_PANEL',eavesHeight:4.5,ridgeHeight:7};
+   for(let j=-d/2+1;j<d/2;j+=2)line(layers.roof,new T.Vector3(x,6.93,z+j),new T.Vector3(x+sign*w/2,4.43,z+j),.035,0xa7b8bc);
   }
-  for(let zz=z-d/2+3;zz<z+d/2;zz+=6){line(layers.roof,new T.Vector3(x-w/2,6.6,zz),new T.Vector3(x+w/2,6.6,zz),.07,0x4d6570);line(layers.roof,new T.Vector3(x-w/2,6.6,zz),new T.Vector3(x,8.7,zz),.07,0x4d6570);line(layers.roof,new T.Vector3(x,8.7,zz),new T.Vector3(x+w/2,6.6,zz),.07,0x4d6570);}
+  for(let zz=z-d/2+3;zz<z+d/2;zz+=6){line(layers.roof,new T.Vector3(x-w/2,4.35,zz),new T.Vector3(x+w/2,4.35,zz),.07,0x4d6570);line(layers.roof,new T.Vector3(x-w/2,4.35,zz),new T.Vector3(x,6.85,zz),.07,0x4d6570);line(layers.roof,new T.Vector3(x,6.85,zz),new T.Vector3(x+w/2,4.35,zz),.07,0x4d6570);}
  }
- // Source-labelled service rooms: modest furniture silhouettes, no invented machine identities.
+ // Source-labelled rooms receive function-specific, non-OEM interior silhouettes.
  const roomWords=/Workshop|Adm Room|QC Sample|R\.PDS|R\.Sample|R\.INCOMING|WH Spareparts|Mushola|Loading Dock|CTF|CTP|Toilet|R\.BROKE|R\.FPS|Electric room|PPIC/i;
+ const fixture=(x,y,w,h,d,color,semantic)=>{if(intersectsMachine([x-w/2,y-d/2],[x+w/2,y+d/2]))return null;const o=box(b,x,h/2,-y,w,h,d,color);o.castShadow=true;o.userData={semantic,accuracy:'FUNCTIONAL_ROOM_VISUALIZATION'};return o;};
  for(const l of data.labels){if(!roomWords.test(l.text))continue;if(l.x>34.7&&l.x<63.1&&l.y>56.9&&l.y<65.1)continue;
   label(l.text,l.x,3.45,-l.y,Math.min(8,3+l.text.length*.13),'#526772');
-  if(/Adm|QC|PPIC|PDS|Sample/i.test(l.text)){box(b,l.x,.75,-l.y,1.3,.09,.7,0xb89d78);for(const xx of [-.5,.5])box(b,l.x+xx,.37,-l.y,.06,.7,.5,0x63737b);box(b,l.x,.48,-l.y+.7,.5,.1,.5,0x526d7c);}
-  if(/Spareparts|Workshop/i.test(l.text))for(let i=0;i<3;i++)box(b,l.x+i*.9,1,-l.y,.75,2,.48,0x7d9195);
+  if(/Adm Room|PPIC|R\.PDS|QC Sample|R\.Sample|R\.INCOMING/i.test(l.text)){
+   fixture(l.x,l.y,1.5,.76,.72,0xb89d78,'ROOM_DESK');fixture(l.x-1.05,l.y,.55,.9,.55,0x647985,'OFFICE_CHAIR');fixture(l.x+1.05,l.y,.55,.9,.55,0x647985,'OFFICE_CHAIR');fixture(l.x,l.y+.9,1.8,1.85,.38,0x7d9195,'ROOM_STORAGE');
+   if(/QC|Sample|INCOMING/i.test(l.text)){fixture(l.x,l.y-1.05,1.8,.9,.62,0xd5d9d5,'QC_BENCH');fixture(l.x-.55,l.y-1.05,.38,.22,.32,0xd7e6ec,'QC_SAMPLE_TRAY');}
+  }else if(/Toilet/i.test(l.text)){
+   for(const dx of [-.72,.72]){fixture(l.x+dx,l.y,.08,2.15,1.55,0xd9e2e3,'TOILET_PARTITION');fixture(l.x+dx*.5,l.y+.28,.42,.43,.62,0xf0f3f1,'TOILET_FIXTURE');}fixture(l.x,l.y-1.02,1.2,.82,.46,0xd4dde0,'WASH_BASIN_COUNTER');
+  }else if(/Electric room/i.test(l.text)){
+   for(let i=-1;i<=1;i++){fixture(l.x+i*.82,l.y+.45,.7,2.05,.36,0x667985,'ELECTRICAL_PANEL');for(let lamp=0;lamp<3;lamp++)fixture(l.x+i*.82-.18+lamp*.18,l.y+.24,.055,.055,.04,lamp===0?0x46b879:lamp===1?0xe0b436:0xc54b4b,'PANEL_INDICATOR');}fixture(l.x,l.y-.72,2.8,.025,1.15,0xd8b532,'ELECTRICAL_CLEARANCE_ZONE');
+  }else if(/WH Spareparts/i.test(l.text)){
+   for(const dx of [-1.05,0,1.05]){fixture(l.x+dx,l.y,.82,2.15,.52,0x72868d,'SPAREPART_RACK');for(let shelf=.42;shelf<1.9;shelf+=.48)fixture(l.x+dx,l.y-.02,.78,.055,.56,0xaeb9b6,'RACK_SHELF');}
+  }else if(/Workshop/i.test(l.text)){
+   fixture(l.x,l.y,2.25,.88,.82,0x8a7359,'WORKBENCH');fixture(l.x,l.y+.62,2.3,.92,.12,0x617681,'TOOL_BOARD');for(const dx of [-.78,0,.78])fixture(l.x+dx,l.y+.55,.18,.18,.09,0xe0b436,'WORKSHOP_TOOL');fixture(l.x+1.55,l.y,0.72,1.9,.46,0x71858d,'WORKSHOP_CABINET');
+  }else if(/Mushola/i.test(l.text)){
+   for(let i=-2;i<=2;i++)fixture(l.x+i*.52,l.y,.46,.018,2.25,i%2?0x668c7f:0x759c8e,'PRAYER_MAT');fixture(l.x-1.75,l.y+1.05,1.1,1.15,.32,0x8b765c,'SHOE_RACK');
+  }else if(/R\.FPS/i.test(l.text)){
+   fixture(l.x,l.y,2.2,.18,1.35,0x566b73,'FIRE_PUMP_SKID');for(const dx of [-.62,.62]){const pump=new T.Mesh(new T.CylinderGeometry(.25,.25,.85,16),material(0xb94343));pump.rotation.z=Math.PI/2;pump.position.set(l.x+dx,.55,-l.y);pump.userData={semantic:'FIRE_PUMP_FUNCTIONAL_REFERENCE',accuracy:'ROOM_FUNCTION_VISUALIZATION'};b.add(pump);}line(b,new T.Vector3(l.x-1.2,.78,-l.y),new T.Vector3(l.x+1.2,.78,-l.y),.06,0xb94343);
+  }else if(/R\.BROKE/i.test(l.text)){
+   for(const dx of [-.75,.75])fixture(l.x+dx,l.y,1.15,.75,1.1,0xb08d60,'BROKE_COLLECTION_BIN');
+  }
  }
  // Raw-material racks stay in the northern RMS zone; Sheeting is below it, never on it.
  for(const x of [85,88.5,92])for(const y of [73,78,83]){box(b,x,.12,-y,1.8,.24,2.4,0x9b7c55);for(let n=0;n<3;n++){const roll=new T.Mesh(new T.CylinderGeometry(.48,.48,1.4,12),material(0xd9cbb0));roll.position.set(x+(n-1)*.55,.93,-y);b.add(roll);}}
@@ -113,6 +130,6 @@ export function buildActualFactory(layout,fleet){
  }
  box(layers.unidentified,124,-.07,-44,38,.1,86,0xd9d4c5);label('POSISI AKTUAL BELUM TERIDENTIFIKASI',124,4,-90,30,'#835a2c',layers.unidentified);
  const pts=data.segments.flatMap(s=>[s[0],.012,-s[1],s[2],.012,-s[3]]),geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(pts,3));layers.reference.add(new T.LineSegments(geo,new T.LineBasicMaterial({color:0x355e72,transparent:true,opacity:.4})));
- root.userData={baselineId:layout.baselineId,assumptions:{...data.assumptions,machineServiceClearance:MACHINE_SERVICE_CLEARANCE,wallTreatment:'SOURCE_SEGMENTS_CLIPPED_TO_SERVICE_ENVELOPE',portalTreatment:'SOURCE_PORTALS_SHIFTED_ONLY_WHEN_CLEARANCE_CONFLICTS'},omittedCollisionWalls:0,trimmedCollisionWalls:omitted.length,adjustedPortals:adjustedPortals.map(p=>({semantic:p.evidence,x:p.x,y:p.y,sourceX:p.sourceX,sourceY:p.sourceY})),legacyWalls:data.legacyWalls.length};
+ root.userData={baselineId:layout.baselineId,assumptions:{...data.assumptions,roofEaves:4.5,roofRidge:7,roofHeightEvidence:'USER_APPROXIMATE_MEASUREMENT',machineServiceClearance:MACHINE_SERVICE_CLEARANCE,wallTreatment:'SOURCE_SEGMENTS_CLIPPED_TO_SERVICE_ENVELOPE',portalTreatment:'SOURCE_PORTALS_SHIFTED_ONLY_WHEN_CLEARANCE_CONFLICTS',roomContents:'FUNCTION_SPECIFIC_VISUALIZATION_NOT_AS_BUILT_INVENTORY'},omittedCollisionWalls:0,trimmedCollisionWalls:omitted.length,adjustedPortals:adjustedPortals.map(p=>({semantic:p.evidence,x:p.x,y:p.y,sourceX:p.sourceX,sourceY:p.sourceY})),legacyWalls:data.legacyWalls.length};
  return {root,layers,assets,machineBoxes};
 }

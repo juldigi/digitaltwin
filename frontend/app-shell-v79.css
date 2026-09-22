@@ -187,3 +187,29 @@ aside#detail-panel{overscroll-behavior:contain}
  .scene-bottom{bottom:8px}
  .view-switch button{height:40px}
 }
+
+/* V127 persistent BMJ identity: the same complete header is retained on every view. */
+.topbar{grid-template-columns:minmax(390px,470px) minmax(180px,1fr) auto}
+.brand{gap:12px;min-width:0;overflow:visible}
+.brand-logo{display:block!important;width:92px;height:42px;object-fit:contain;object-position:left center;flex:0 0 92px;border-radius:0;background:#fff}
+.brand-copy{display:flex!important;min-width:0;flex-direction:column;justify-content:center;overflow:visible!important;white-space:normal!important;text-overflow:clip!important;line-height:1.15}
+.brand-copy strong{display:block;font-size:15px;font-weight:800;letter-spacing:-.018em;white-space:nowrap}
+.brand-copy small{display:block;margin-top:4px;color:var(--muted);font-size:10px;font-weight:400;letter-spacing:.02em;text-transform:none}
+@media (min-width:768px) and (max-width:1180px){
+ .topbar{grid-template-columns:minmax(360px,1fr) auto}
+ .brand-copy{max-width:none!important}
+}
+@media (max-width:767px){
+ :root{--header-h:calc(64px + env(safe-area-inset-top))}
+ .topbar{height:var(--header-h);min-height:var(--header-h);display:flex!important}
+ .topbar .brand{display:flex!important;flex:1 1 auto!important;gap:8px!important;max-width:none!important}
+ .topbar .brand-logo{display:block!important;width:66px!important;height:34px!important;min-width:66px!important;flex-basis:66px!important}
+ .topbar .brand-copy{display:flex!important;max-width:none!important}
+ .brand-copy strong{font-size:clamp(10px,3.05vw,12px);white-space:nowrap}
+ .brand-copy small{display:block!important;margin-top:3px;font-size:8px}
+ .header-actions #settings{display:none!important}
+}
+@media (max-width:370px){
+ .topbar .brand-logo{width:58px!important;min-width:58px!important;flex-basis:58px!important}
+ .brand-copy strong{font-size:9.5px}
+}
