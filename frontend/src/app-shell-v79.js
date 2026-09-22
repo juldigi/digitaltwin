@@ -9,8 +9,9 @@ function rememberOverlayFocus(name){
  if(active instanceof HTMLElement&&active!==document.body)overlayReturnFocus.set(name,active);
 }
 function restoreOverlayFocus(name,fallback){
- const saved=overlayReturnFocus.get(name),target=saved?.isConnected?saved:q(fallback);
- overlayReturnFocus.delete(name);
+ const saved=overlayReturnFocus.get(name);overlayReturnFocus.delete(name);
+ if(!saved)return;
+ const target=saved.isConnected?saved:q(fallback);
  if(target instanceof HTMLElement)requestAnimationFrame(()=>target.focus({preventScroll:true}));
 }
 function overlayFocusable(root){return root?qa(FOCUSABLE,root).filter(el=>!el.hidden&&el.getClientRects().length>0):[]}
