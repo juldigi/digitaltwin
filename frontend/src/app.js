@@ -503,7 +503,7 @@ function editorPanel(){
 function machineDetailDialog(machine){
  const status=machine.has3D?'Model 3D tersedia':'Terdaftar di database · model 3D belum dibuat';
  modal(machine.name,`<div class="card accent"><h4>${esc(status)}</h4><p>${machine.has3D?'Buka tampilan 3D untuk eksplorasi detail mesin.':'Record master sudah tersedia. Posisi dan geometry 3D tidak akan dibuat sebelum data referensi tersedia.'}</p></div><dl class="data-list">${pair('Machine ID',machine.machineId)+pair('Area',machine.area)+pair('Model',machine.model)+pair('Serial Number',machine.serial)+pair('SAP Functional Location',machine.functionalLocation)+pair('SAP Code',machine.sapCode)+pair('Tahun',machine.year)+pair('Sumber',machine.source==='USER_CONFIRMED'?'Konfirmasi pengguna':'Database mesin')}</dl>${machine.note?`<div class="card"><h4>Catatan data</h4><p>${esc(machine.note)}</p></div>`:''}${machine.has3D?'<div class="actions"><button id="open-machine-3d" class="primary">Buka Model 3D</button></div>':''}`);
- if(machine.has3D)on('#open-machine-3d',()=>{const route=machine.machineId==='BMJ-MCH-0009'?'offset10':machine.machineId==='BMJ-MCH-0010'?'apm2':machine.machineId==='BMJ-MCH-0002'?'sheeting':machine.machineId==='BMJ-MCH-0003'?'offset5':machine.machineId;if(route!==MACHINE_KEY){switchActiveMachine(route);return;}closeModal();setView('machine');showPanel();renderPanel('overview');});
+ if(machine.has3D)on('#open-machine-3d',()=>{const route=machineRoute(machine);if(route!==MACHINE_KEY){switchActiveMachine(route);return;}closeModal();setView('machine');showPanel();renderPanel('overview');});
 }
 async function switchActiveMachine(route,{historyMode='push'}={}){
  if(route===MACHINE_KEY){closeModal();setView('machine');return;}
@@ -523,7 +523,104 @@ async function switchActiveMachine(route,{historyMode='push'}={}){
 }
 function qStaticFallbackClear(){const viewport=$('#viewport');viewport?.querySelectorAll('.static-machine-fallback').forEach(node=>node.remove());}
 addEventListener('popstate',()=>switchActiveMachine(new URLSearchParams(location.search).get('machine')||'offset5',{historyMode:'none'}));
-function assetDialog(){
+function machineRoute(machine){
+ return machine?.machineId==='BMJ-MCH-0009'?'offset10':machine?.machineId==='BMJ-MCH-0010'?'apm2':machine?.machineId==='BMJ-MCH-0002'?'sheeting':machine?.machineId==='BMJ-MCH-0003'?'offset5':machine?.machineId||'offset5';
+}
+function searchableTaxonomy(route){
+ const key=normalizeMachineKey(route);
+ if(key==='offset5')return OFFSET5_TAXONOMY;
+ if(key==='offset10')return OFFSET10_TAXONOMY;
+ if(key==='apm2')return APM2_TAXONOMY;
+ if(key==='sheeting')return SHEETING_TAXONOMY;
+ try{return universalTaxonomy(key)||[];}catch{return [];}
+}
+function searchableSources(route){
+ const key=normalizeMachineKey(route);
+ if(key==='offset5')return OFFSET5_SOURCES;
+ if(key==='offset10')return OFFSET10_TECHNICAL_SOURCES;
+ if(key==='apm2')return APM2_TECHNICAL_SOURCES;
+ if(key==='sheeting')return SHEETING_TECHNICAL_SOURCES;
+ try{return universalTechnicalSources(key)||[];}catch{return [];}
+}
+function searchablePhotos(route){
+ const key=normalizeMachineKey(route);
+ if(key==='offset5')return OFFSET5_PHOTOS;
+ if(key==='offset10')return OFFSET10_PHOTO_REGISTRY;
+ if(key==='apm2')return APM2_PHOTO_REGISTRY;
+ if(key==='sheeting')return SHEETING_PHOTO_REGISTRY;
+ return [];
+}
+const normalizeSearchText=value=>String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+let UNIVERSAL_SEARCH_INDEX=null;
+function buildUniversalSearchIndex(){
+ if(UNIVERSAL_SEARCH_INDEX)return UNIVERSAL_SEARCH_INDEX;
+ const items=[],areas=new Set(),documentSeen=new Set(),photoSeen=new Set();
+ for(const machine of MACHINE_REGISTRY){
+  const route=machineRoute(machine);
+  if(machine.area)areas.add(machine.area);
+  items.push({type:'machine',group:'MESIN',title:machine.name,subtitle:[machine.area,machine.sapCode,machine.model].filter(Boolean).join(' · '),route,machineId:machine.machineId,keywords:[machine.name,machine.machineId,machine.sapCode,machine.functionalLocation,machine.model,machine.serial,machine.area].filter(Boolean).join(' ')});
+  if(!machine.has3D)continue;
+  const taxonomy=searchableTaxonomy(route),byId=new Map(taxonomy.map(node=>[node.id,node]));
+  const pathFor=node=>{const path=[];let cursor=node,guard=0;while(cursor&&guard++<8){path.unshift(cursor.name||cursor.id);cursor=cursor.parentId?byId.get(cursor.parentId):null;}return path.join(' / ')};
+  for(const node of taxonomy){
+   if((node.level||1)<=1)continue;
+   const path=pathFor(node);
+   items.push({type:'component',group:'KOMPONEN',title:node.name||node.id,subtitle:machine.name+' / '+path,route,machineId:machine.machineId,nodeId:node.id,keywords:[node.id,node.name,path,machine.name,machine.model].filter(Boolean).join(' ')});
+  }
+  for(const source of searchableSources(route)){
+   const sourceKey=route+'|'+(source.id||source.title||source.url);if(documentSeen.has(sourceKey))continue;documentSeen.add(sourceKey);
+   items.push({type:'reference',group:'DOKUMEN',title:source.title||source.id||'Dokumen',subtitle:[machine.name,source.publisher,source.type].filter(Boolean).join(' · '),route,machineId:machine.machineId,referenceId:source.id||source.title,keywords:[source.title,source.publisher,source.type,source.id,machine.name].filter(Boolean).join(' ')});
+  }
+  for(const photo of searchablePhotos(route)){
+   const photoKey=route+'|'+(photo.filename||photo.id);if(photoSeen.has(photoKey))continue;photoSeen.add(photoKey);
+   items.push({type:'reference',group:'FOTO',title:photo.filename||photo.id||'Foto',subtitle:[machine.name,photo.machineZone,photo.viewDirection].filter(Boolean).join(' · '),route,machineId:machine.machineId,referenceId:photo.filename||photo.id,keywords:[photo.filename,photo.machineZone,photo.viewDirection,machine.name].filter(Boolean).join(' ')});
+  }
+ }
+ for(const area of [...areas].filter(Boolean).sort())items.push({type:'area',group:'AREA',title:area,subtitle:'Area pabrik',keywords:area});
+ for(const system of [
+  {title:'HVAC',key:'hvac',keywords:'ahu ducting tata udara cooling ventilation'},
+  {title:'Compressed Air',key:'compressedAir',keywords:'compressor compressed air piping ring main'},
+  {title:'Water / IPAL',key:'water',keywords:'water ipal wastewater treatment'},
+  {title:'Electrical',key:'electrical',keywords:'electrical listrik power'},
+  {title:'Utility Routing',key:'routing',keywords:'utility routing piping ducting'}
+ ])items.push({type:'system',group:'SISTEM',title:system.title,subtitle:'Sistem utilitas',system:system.key,keywords:system.title+' '+system.keywords});
+ UNIVERSAL_SEARCH_INDEX=items.map(item=>({...item,_search:normalizeSearchText([item.title,item.subtitle,item.keywords].join(' '))}));
+ return UNIVERSAL_SEARCH_INDEX;
+}
+function universalSearchResults(query){
+ const q=normalizeSearchText(query).trim();if(!q)return [];
+ const words=q.split(/\s+/).filter(Boolean);
+ return buildUniversalSearchIndex().map(item=>{
+  if(!words.every(word=>item._search.includes(word)))return null;
+  const title=normalizeSearchText(item.title),subtitle=normalizeSearchText(item.subtitle);
+  let score=title===q?100:title.startsWith(q)?80:title.includes(q)?60:subtitle.includes(q)?35:20;
+  if(item.type==='component'&&title.includes(q))score+=12;
+  if(item.type==='machine')score+=8;
+  return {...item,score,_search:undefined};
+ }).filter(Boolean).sort((a,b)=>b.score-a.score||a.group.localeCompare(b.group,'id')||a.title.localeCompare(b.title,'id')).slice(0,48);
+}
+addEventListener('bmj:searchrequest',event=>{
+ const query=event.detail?.query||'';
+ dispatchEvent(new CustomEvent('bmj:searchresults',{detail:{query,results:universalSearchResults(query)}}));
+});
+addEventListener('bmj:searchselect',async event=>{
+ const item=event.detail?.item;if(!item)return;
+ try{
+  if(item.type==='system'){dispatchEvent(new CustomEvent('bmj:systemsearchselect',{detail:{system:item.system}}));return;}
+  if(item.type==='area'){assetDialog(item.title);return;}
+  if(item.route&&normalizeMachineKey(item.route)!==MACHINE_KEY)await switchActiveMachine(item.route);
+  setView('machine');
+  if(item.type==='component'){
+   selectTaxonomy(item.nodeId,{revealPanel:true});showPanel();renderPanel('structure');
+   emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:item.nodeId,activeSection:'asset'});
+  }else if(item.type==='reference'){
+   showPanel();renderPanel('sources');emitDomainState({selectedAsset:MACHINE_KEY,activeReference:item.referenceId,activeSection:'reference'});
+  }else{
+   showPanel();renderPanel('overview');emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:null,activeSection:'asset'});
+  }
+ }catch(error){toast('Hasil pencarian tidak dapat dibuka: '+error.message,true);}
+});
+function assetDialog(initialQuery=''){
  modal('Daftar Mesin',`<div class="card accent"><h4>${MACHINE_REGISTRY_STATS.total} equipment terdaftar</h4><p>OFFSET PRINTING ${MACHINE_REGISTRY_STATS.byArea['OFFSET PRINTING']} · OFFSET CONVERTING ${MACHINE_REGISTRY_STATS.byArea['OFFSET CONVERTING']} · PDS ${MACHINE_REGISTRY_STATS.byArea.PDS} · UTILITY ${MACHINE_REGISTRY_STATS.byArea.UTILITY}</p></div><label for="asset-search">Cari nama, SAP Code, Functional Location, model, atau serial</label><input id="asset-search" type="search" placeholder="Contoh: OFFSET 10, APM-7, AHU 5…"><div id="asset-results"></div><p class="subtle" style="margin-top:18px">Seluruh equipment memiliki route model 3D. Mesin dengan model atau varian yang belum tercatat memakai rekonstruksi parametrik tingkat keluarga dan ditandai sesuai tingkat keyakinannya.</p>`);
  const render=()=>{
    const found=searchMachines($('#asset-search').value).slice(0,60);
