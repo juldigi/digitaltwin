@@ -95,11 +95,14 @@ export function buildActualFactory(layout,fleet){
   roomWall([room.minX,room.minY],[leftEnd,room.minY],room);roomWall([rightStart,room.minY],[room.maxX,room.minY],room);
   roomWall([room.minX,room.maxY],[room.maxX,room.maxY],room);roomWall([room.minX,room.minY],[room.minX,room.maxY],room);roomWall([room.maxX,room.minY],[room.maxX,room.maxY],room);
   const zone=box(b,room.centerX,.006,-room.centerY,room.maxX-room.minX,.012,room.maxY-room.minY,0xdde6e4,0,.18);zone.userData={semantic:'PRESS_ROOM_FLOOR',machineId:room.machineId,roomCentered:true};
+  for(const [cx,cz] of [[room.minX+.22,-room.minY-.22],[room.maxX-.22,-room.minY-.22],[room.minX+.22,-room.maxY+.22],[room.maxX-.22,-room.maxY+.22]]){const guard=box(b,cx,.38,cz,.12,.76,.12,0xe3b52e);detail(guard,'PRESS_ROOM_CORNER_PROTECTION_REFERENCE');buildingDetailStats.pressRoomProtection++;}
  }
- for(const [x,y] of data.columns){if(intersectsMachine([x-.3,y-.3],[x+.3,y+.3]))continue;const column=box(b,x,2.25,-y,.32,4.5,.32,0x819397);column.castShadow=true;column.userData={semantic:'STRUCTURAL_COLUMN',height:4.5,evidence:'DXF_COLUMN_POSITION'};
-  const plate=box(b,x,.055,-y,.62,.11,.62,0x66777b);detail(plate,'COLUMN_BASE_PLATE_REFERENCE');buildingDetailStats.columnBasePlates++;
-  for(const dx of [-.22,.22])for(const dz of [-.22,.22]){const bolt=new T.Mesh(new T.CylinderGeometry(.028,.028,.08,10),material(0x4f5d61));bolt.position.set(x+dx,.11,-y+dz);bolt.userData={semantic:'COLUMN_ANCHOR_BOLT_REFERENCE',accuracy:'INDUSTRIAL_REALISM_REFERENCE_NOT_AS_BUILT'};b.add(bolt);buildingDetailStats.columnAnchorBolts++;}
-  const cap=box(b,x,4.34,-y,.54,.12,.54,0x6e8288);detail(cap,'COLUMN_EAVE_CAP_REFERENCE');
+ for(const [x,y] of data.columns){if(intersectsMachine([x-.3,y-.3],[x+.3,y+.3]))continue;const pedestal=box(b,x,.18,-y,.72,.36,.72,0x9aa4a1);detail(pedestal,'COLUMN_CONCRETE_PEDESTAL_REFERENCE');buildingDetailStats.columnPedestals++;
+  const column=box(b,x,2.43,-y,.32,4.14,.32,0x819397);column.castShadow=true;column.userData={semantic:'STRUCTURAL_COLUMN',height:4.5,evidence:'DXF_COLUMN_POSITION'};
+  const plate=box(b,x,.405,-y,.62,.09,.62,0x66777b);detail(plate,'COLUMN_BASE_PLATE_REFERENCE');buildingDetailStats.columnBasePlates++;
+  for(const dx of [-.22,.22])for(const dz of [-.22,.22]){const bolt=new T.Mesh(new T.CylinderGeometry(.028,.028,.08,10),material(0x4f5d61));bolt.position.set(x+dx,.49,-y+dz);bolt.userData={semantic:'COLUMN_ANCHOR_BOLT_REFERENCE',accuracy:'INDUSTRIAL_REALISM_REFERENCE_NOT_AS_BUILT'};b.add(bolt);buildingDetailStats.columnAnchorBolts++;}
+  for(const sx of [-1,1]){const st=box(b,x+sx*.20,.61,-y,.10,.34,.28,0x6d8086);st.rotation.z=sx*.32;detail(st,'COLUMN_BASE_STIFFENER_REFERENCE');buildingDetailStats.columnStiffeners++;}
+  const cap=box(b,x,4.46,-y,.54,.12,.54,0x6e8288);detail(cap,'COLUMN_EAVE_CAP_REFERENCE');
  }
  const adjustedPortals=[];
  for(const source of data.doors){const d=resolvePortalClearance({...source,width:Math.max(.9,source.width)},serviceClearances);if(d.clearanceAdjusted)adjustedPortals.push(d);const g=new T.Group();g.position.set(d.x,0,-d.y);g.rotation.y=d.rotation*Math.PI/180;b.add(g);
