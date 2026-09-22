@@ -609,7 +609,7 @@ function machineRecordForRoute(route){
 }
 function focusFoundationPlaceholder(machine,{historyMode='push',openDialog=false}={}){
  if(!machine)return false;
- setView('factory');engine?.focusFactoryAsset(machine.machineId);
+ factoryAssetContextId=null;setView('factory');engine?.focusFactoryAsset(machine.machineId);
  emitDomainState({selectedAsset:machine.machineId,selectedArea:machine.area||null,selectedNode:null,activeReference:null,activeSection:'asset'});
  if(historyMode==='push'){
   const url=new URL(location.href);url.searchParams.delete('machine');url.searchParams.set('asset',machine.machineId);url.searchParams.delete('node');url.searchParams.set('view','3d');history.pushState({asset:machine.machineId},'',url);
@@ -617,8 +617,23 @@ function focusFoundationPlaceholder(machine,{historyMode='push',openDialog=false
  if(openDialog)machineDetailDialog(machine);
  return true;
 }
+function openPrimaryFactoryContext(machine,{historyMode='push'}={}){
+ if(!machine||!isFoundationPrimary(machine))return false;
+ factoryAssetContextId=machine.machineId;setView('factory');factoryAssetContextId=machine.machineId;
+ engine?.setFactoryLayer('machines',true);engine?.focusFactoryAsset(machine.machineId);
+ selectedTaxonomyId=ACTIVE_ROOT;selectedPart=null;explode=0;
+ $('#view-kicker').textContent='ASET UTAMA · DWG FACTORY';
+ $('#view-title').textContent='OFFSET 5';
+ $('#view-subtitle').textContent='OFU-1 · Heidelberg Speedmaster · CD 102-8+L · posisi pabrik';
+ $('#geometry-caption').textContent='OFFSET 5 · Full 3D di Pabrik';
+ showPanel();renderPanel('overview');
+ emitDomainState({selectedAsset:FOUNDATION_SCOPE.primaryRoute,selectedArea:machine.area||null,selectedNode:null,activeReference:null,activeSection:'asset',viewMode:'3d'});
+ if(historyMode==='push'){const url=new URL(location.href);url.searchParams.delete('machine');url.searchParams.set('asset',FOUNDATION_SCOPE.primaryRoute);url.searchParams.delete('node');url.searchParams.set('view','3d');history.pushState({asset:FOUNDATION_SCOPE.primaryRoute,context:'factory'},'',url);}
+ return true;
+}
 function machineDetailDialog(machine){
  const policy=foundationAssetPolicy(machine,placementForMachine(machine.machineId)),primary=policy.canOpenTechnical3D;
+ if(primary){openPrimaryFactoryContext(machine);return;}
  const status=primary?'Aset 3D teknis utama':'Placeholder tata letak';
  const copy=primary?'OFFSET 5 adalah aset teknis utama pada fase fondasi. Struktur, detail 3D, sumber, dan simulasi dibuka dari satu konteks yang tervalidasi.':'Aset ini tetap dipertahankan pada posisi pabrik sebagai konteks tata letak. Detail 3D teknis belum dibuka sampai fase ekspansi agar aplikasi tidak menyajikan rekonstruksi sebagai data terverifikasi.';
  modal(machine.name,`<div class="card accent"><h4>${esc(status)}</h4><p>${esc(copy)}</p></div><dl class="data-list">${pair('Machine ID',machine.machineId)+pair('Area',machine.area)+pair('Model',machine.model)+pair('Serial Number',machine.serial)+pair('SAP Functional Location',machine.functionalLocation)+pair('SAP Code',machine.sapCode)+pair('Tahun',machine.year)+pair('Dasar posisi',positionStatusLabel(policy.positionStatus))+pair('Sumber identitas',machine.source==='USER_CONFIRMED'?'Konfirmasi pengguna':'Registry mesin')}</dl>${machine.note?`<div class="card"><h4>Catatan sumber</h4><p>${esc(machine.note)}</p></div>`:''}<div class="actions"><button id="${primary?'open-machine-3d':'focus-layout-asset'}" class="primary">${primary?'Buka Model 3D':'Pusatkan di Pabrik'}</button></div>`);
@@ -649,10 +664,14 @@ async function switchActiveMachine(route,{historyMode='push'}={}){
 }
 function qStaticFallbackClear(){const viewport=$('#viewport');viewport?.querySelectorAll('.static-machine-fallback').forEach(node=>node.remove());}
 async function restoreHistoryContext(){
- const params=new URLSearchParams(location.search),route=params.get('machine')||params.get('asset')||FOUNDATION_SCOPE.primaryRoute,node=params.get('node'),viewMode=params.get('view')==='2d'?'2d':'3d';
+ const params=new URLSearchParams(location.search),machineParam=params.get('machine'),assetParam=params.get('asset'),route=machineParam||assetParam||FOUNDATION_SCOPE.primaryRoute,node=params.get('node'),viewMode=params.get('view')==='2d'?'2d':'3d';
  if(!canOpenTechnical3D(route)){
   const record=machineRecordForRoute(route);
   if(record){focusFoundationPlaceholder(record,{historyMode:'none',openDialog:false});dispatchEvent(new CustomEvent('bmj:historyrestore',{detail:{selectedAsset:record.machineId,selectedNode:null,viewMode}}));return;}
+ }
+ if(!machineParam&&assetParam&&canOpenTechnical3D(assetParam)&&!node){
+  const record=machineRecordForRoute(assetParam);
+  if(record){openPrimaryFactoryContext(record,{historyMode:'none'});dispatchEvent(new CustomEvent('bmj:historyrestore',{detail:{selectedAsset:FOUNDATION_SCOPE.primaryRoute,selectedNode:null,viewMode}}));return;}
  }
  await switchActiveMachine(FOUNDATION_SCOPE.primaryRoute,{historyMode:'none'});
  if(node&&TAXONOMY_BY_ID.has(node)){
