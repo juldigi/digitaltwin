@@ -87,12 +87,26 @@ test('V132 AHU twins expose indoor/outdoor duct interfaces and separate supply r
   assert.ok(started.airflowParticleCount>=28,id);
   assert.equal(started.supplyAirflowParticleCount,18,id);
   assert.equal(started.returnAirflowParticleCount,10,id);
-  if(id==='BMJ-MCH-0040')assert.equal(started.outdoorAirflowParticleCount,8,id);else assert.equal(started.outdoorAirflowParticleCount,0,id);
+  if(id==='BMJ-MCH-0040'){
+   assert.equal(started.outdoorAirflowParticleCount,8,id);
+   const indoor=template.findNode('universal-module-4'),outdoor=template.findNode('universal-module-5');
+   assert.ok(outdoor.position.z-indoor.position.z>1.5,'SANSIN indoor/outdoor envelopes are not visibly separated');
+   const oldBase=template.findNode('universal-base');assert.ok(oldBase.children.filter(c=>c.isMesh).every(m=>m.visible===false),'legacy continuous SANSIN base should be hidden');
+  }else assert.equal(started.outdoorAirflowParticleCount,0,id);
   sim.update(0);sim.update(120);const state=sim.state();
   assert.equal(state.supplyAirActive,true,id);assert.equal(state.returnAirReferenceActive,true,id);
   assert.equal(state.plantDuctRouteVerified,false,id);
   sim.dispose();template.dispose();
  }
+});
+
+test('V132 keeps generic AHU evidence vendor-neutral and SANSIN evidence brand-specific',()=>{
+ for(const id of ['BMJ-MCH-0036','BMJ-MCH-0037','BMJ-MCH-0038','BMJ-MCH-0039','BMJ-MCH-0041']){
+  const urls=universalTechnicalSources(id).map(s=>s.url).join(' ');
+  assert.doesNotMatch(urls,/sansin|nesacsentral|made-in-china/i,id);
+ }
+ const urls=universalTechnicalSources('BMJ-MCH-0040').map(s=>s.url).join(' ');
+ assert.match(urls,/nesacsentral/i);
 });
 
 test('V132 generic AHUs never invent an outdoor condenser while SANSIN keeps the family outdoor heat-rejection package',()=>{
