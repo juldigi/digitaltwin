@@ -109,3 +109,35 @@ test('V149 universal search covers machines areas components systems documents a
  assert.match(html,/id="mobile-search-toggle"/);
  assert.doesNotMatch(ui,/global-search[\s\S]{0,160}nav-assets/);
 });
+
+test('V149 Systems is a real network context without invented Water or Electrical routes',()=>{
+ assert.match(shell,/data-system-focus="hvac"/);
+ assert.match(shell,/data-system-focus="compressedAir"/);
+ assert.match(shell,/data-system-focus="routing"/);
+ assert.match(shell,/Water \/ IPAL[\s\S]*Routing terpisah belum tersedia/);
+ assert.match(shell,/Electrical[\s\S]*Routing terpisah belum tersedia/);
+ assert.match(shell,/bmj:systemfocus/);
+ assert.match(app,/window\.addEventListener\('bmj:systemfocus'/);
+ assert.match(app,/utility_ahu_ducting/);
+ assert.match(app,/utility_compressed_air/);
+ assert.match(css,/\.canonical-system-grid/);
+});
+
+test('V149 inspection and legacy factory layer actions synchronize into centralized state',()=>{
+ assert.match(app,/inspectionMode:\{explode:explode>0\}/);
+ assert.match(app,/inspectionMode:\{isolate:engine\.isolated\}/);
+ assert.match(app,/inspectionMode:\{interior:exteriorMode\}/);
+ assert.match(app,/canonicalFactoryLayer=/);
+ assert.match(app,/visibleLayers:\{\[canonical\]:visible\}/);
+ assert.match(app,/cameraPreset:/);
+});
+
+test('V149 deep links preserve machine asset node and workspace view without navigation reload',()=>{
+ assert.match(state,/params\.set\('asset',state\.selectedAsset\)/);
+ assert.match(state,/params\.set\('node',state\.selectedNode\)/);
+ assert.match(state,/params\.set\('view',state\.viewMode\)/);
+ assert.match(app,/INITIAL_URL_STATE\.get\('node'\)/);
+ assert.match(app,/INITIAL_URL_STATE\.get\('machine'\)\|\|INITIAL_URL_STATE\.get\('asset'\)/);
+ assert.match(app,/history\.pushState/);
+ assert.doesNotMatch(app,/location\.(?:href|assign|replace)\s*=/);
+});
