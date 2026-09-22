@@ -1737,8 +1737,15 @@ export class ReferenceProcessSimulation{
  }
  bindCTP(){
   const role=target=>{let found=null;this.template.root.traverse(o=>{if(!found&&o.userData?.mechanismRole===target)found=o;});return found;};
-  this.ctp={drum:role('external-imaging-drum'),laser:role('heidelberg-laser-carriage'),clamps:[],plateLoaded:false,plateClamped:false,exposureActive:false,laserTraverseActive:false,punchInstalledVerified:this.template.root.userData.suprasetterOptions?.internalPunch==='INSTALLED_VERIFIED'};if(this.ctp.drum)this.ctp.drumRestQuaternion=this.ctp.drum.quaternion.clone();if(this.ctp.laser)this.ctp.laserRestPosition=this.ctp.laser.position.clone();
-  this.template.root.traverse(o=>{if(o.userData?.mechanismRole==='plate-clamp-reference')this.ctp.clamps.push(o);});
+  this.ctp={
+   drum:role('external-imaging-drum'),laser:role('heidelberg-laser-carriage'),transportMotor:role('ctp-plate-transport-motor-reference'),drumMotor:role('ctp-drum-drive-motor-reference'),
+   outputSensor:role('ctp-output-plate-sensor-reference'),clamps:[],registerSensors:[],clampSensors:[],
+   plateLoaded:false,platePresent:false,registerConfirmed:false,drumAtLoadPosition:false,plateClamped:false,clampConfirmed:false,transportDriveActive:false,drumDriveActive:false,
+   drumEncoderSync:false,exposurePermit:false,exposureActive:false,laserTraverseActive:false,unloadPermit:false,outputDetected:false,interlockSafe:true,
+   punchInstalledVerified:this.template.root.userData.suprasetterOptions?.internalPunch==='INSTALLED_VERIFIED'
+  };
+  for(const key of ['drum','transportMotor','drumMotor']){const o=this.ctp[key];if(o)o.userData.ctpRestQuaternion=o.quaternion.clone();}if(this.ctp.laser)this.ctp.laserRestPosition=this.ctp.laser.position.clone();
+  this.template.root.traverse(o=>{const r=o.userData?.mechanismRole;if(r==='plate-clamp-reference')this.ctp.clamps.push(o);else if(r==='ctp-register-confirm-sensor-reference')this.ctp.registerSensors.push(o);else if(r==='ctp-clamp-confirm-sensor-reference')this.ctp.clampSensors.push(o);});
   this.ctpPlateMaterial=new THREE.MeshStandardMaterial({color:0xbac1c4,roughness:.38,metalness:.22,side:THREE.DoubleSide});
   this.ctpFlatGeometry=new THREE.BoxGeometry(.78,.012,1.00);
   this.ctpFlatPlate=new THREE.Mesh(this.ctpFlatGeometry,this.ctpPlateMaterial);this.ctpFlatPlate.name='SUPRASETTER-FLAT-PLATE-REFERENCE';this.ctpFlatPlate.visible=false;this.root.add(this.ctpFlatPlate);
@@ -1754,30 +1761,35 @@ export class ReferenceProcessSimulation{
  }
  ctpStatus(){
   const p=this.active?(this.elapsed%this.cycle)/this.cycle:0;
-  let idx=0,loading=false,clamped=false,exposure=false,unloading=false;
-  if(p<.20){idx=0;loading=true;}
-  else if(p<.27){idx=1;loading=true;}
-  else if(p<.34){idx=2;loading=true;clamped=true;}
-  else if(p<.78){idx=3;clamped=true;exposure=true;}
-  else {idx=4;unloading=true;}
-  return {p,idx,loading,clamped,exposure,unloading,laserTraverse:exposure};
+  let idx=0,loading=false,registering=false,clamping=false,clamped=false,exposure=false,release=false,unloading=false;
+  if(p<.15){idx=0;loading=true;}
+  else if(p<.25){idx=1;loading=true;registering=true;}
+  else if(p<.33){idx=2;clamping=true;clamped=p>=.29;}
+  else if(p<.76){idx=3;clamped=true;exposure=true;}
+  else if(p<.84){idx=4;release=true;clamped=p<.80;}
+  else {idx=5;unloading=true;}
+  const platePresent=p>=.07&&p<.97,registerConfirmed=p>=.22&&p<.84,drumAtLoadPosition=(p>=.22&&p<.33)||(p>=.76&&p<.84),clampConfirmed=p>=.29&&p<.80,drumEncoderSync=exposure;
+  const exposurePermit=platePresent&&registerConfirmed&&clampConfirmed&&drumEncoderSync,unloadPermit=p>=.84&&!clampConfirmed;
+  return {p,idx,loading,registering,clamping,clamped,exposure:exposure&&exposurePermit,release,unloading,platePresent,registerConfirmed,drumAtLoadPosition,clampConfirmed,drumEncoderSync,exposurePermit,unloadPermit,laserTraverse:exposure&&exposurePermit};
  }
  updateCTP(){
   if(!this.ctp)return;
   const s=this.ctpStatus(),smooth=v=>{v=THREE.MathUtils.clamp(v,0,1);return v*v*(3-2*v);},lerp=THREE.MathUtils.lerp;
   const flat=this.ctpFlatPlate,wrap=this.ctpWrappedPlate,group=this.ctpWrappedGroup;
-  if(s.p<.30){
-   const t=smooth(s.p/.30);flat.visible=this.active;wrap.visible=false;flat.position.set(lerp(-1.10,-.26,t),lerp(.68,.84,t),0);flat.rotation.set(0,0,lerp(0,.14,t));
-  }else if(s.p<.78){
-   flat.visible=false;wrap.visible=this.active;const t=(s.p-.30)/.48;group.rotation.z=t*Math.PI*5.6;
+  if(s.p<.29){
+   const t=smooth(s.p/.29);flat.visible=this.active;wrap.visible=false;flat.position.set(lerp(-1.10,-.26,t),lerp(.68,.84,t),0);flat.rotation.set(0,0,lerp(0,.14,t));
+  }else if(s.p<.80){
+   flat.visible=false;wrap.visible=this.active;const t=THREE.MathUtils.clamp((s.p-.33)/.43,0,1);group.rotation.z=s.exposure?t*Math.PI*5.6:0;
   }else{
-   const t=smooth((s.p-.78)/.22);flat.visible=this.active;wrap.visible=false;flat.position.set(lerp(.28,1.06,t),lerp(.84,.66,t),0);flat.rotation.set(0,0,lerp(-.12,0,t));
+   const t=smooth((s.p-.80)/.20);flat.visible=this.active;wrap.visible=false;flat.position.set(lerp(.28,1.06,t),lerp(.84,.66,t),0);flat.rotation.set(0,0,lerp(-.12,0,t));
   }
-  if(this.ctp.drum){this.ctp.drum.quaternion.copy(this.ctp.drumRestQuaternion);if(s.exposure)this.ctp.drum.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(AXIS.z,this.elapsed*5.2));group.rotation.z=s.exposure?this.elapsed*5.2:0;}
+  if(this.ctp.drum){this.ctp.drum.quaternion.copy(this.ctp.drumRestQuaternion||this.ctp.drum.userData.ctpRestQuaternion);if(s.exposure)this.ctp.drum.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(AXIS.z,this.elapsed*5.2));}
+  const spinDrive=(obj,on,axis=AXIS.x,rate=7)=>{if(!obj)return;obj.quaternion.copy(obj.userData.ctpRestQuaternion||new THREE.Quaternion());if(on)obj.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(axis,this.elapsed*rate));};
+  spinDrive(this.ctp.transportMotor,s.loading||s.unloading,AXIS.x,6.2);spinDrive(this.ctp.drumMotor,s.exposure,AXIS.x,5.2);
   let laserZ=0;if(this.ctp.laser){this.ctp.laser.position.copy(this.ctp.laserRestPosition);if(s.exposure){laserZ=THREE.MathUtils.lerp(-.38,.38,(Math.sin(this.elapsed*1.45)+1)/2);this.ctp.laser.position.z+=laserZ;}}
   if(this.ctpLaserBeam){this.ctpLaserBeam.visible=this.active&&s.exposure;this.ctpLaserBeam.position.z=laserZ;}if(this.ctpLaserSpot){this.ctpLaserSpot.visible=this.active&&s.exposure;this.ctpLaserSpot.position.z=laserZ;}
   if(this.ctp.laser?.material?.emissive){this.ctp.laser.material.emissive.setHex(s.exposure?0x4c1515:0);this.ctp.laser.material.emissiveIntensity=s.exposure?.65:0;}
-  this.ctp.plateLoaded=s.p>=.18&&s.p<.96;this.ctp.plateClamped=s.clamped;this.ctp.exposureActive=s.exposure;this.ctp.laserTraverseActive=s.laserTraverse;this.ctp.laserBeamVisible=this.ctpLaserBeam?.visible===true;this.ctp.materialContact=s.exposure?'DRUM_SURFACE':s.loading?'ENTRY_TRANSPORT':s.unloading?'OUTPUT_GUIDE':'NONE';
+  this.ctp.plateLoaded=s.platePresent;this.ctp.platePresent=s.platePresent;this.ctp.registerConfirmed=s.registerConfirmed;this.ctp.drumAtLoadPosition=s.drumAtLoadPosition;this.ctp.plateClamped=s.clamped;this.ctp.clampConfirmed=s.clampConfirmed;this.ctp.transportDriveActive=s.loading||s.unloading;this.ctp.drumDriveActive=s.exposure;this.ctp.drumEncoderSync=s.drumEncoderSync;this.ctp.exposurePermit=s.exposurePermit;this.ctp.exposureActive=s.exposure;this.ctp.laserTraverseActive=s.laserTraverse;this.ctp.unloadPermit=s.unloadPermit;this.ctp.outputDetected=s.p>=.92;this.ctp.interlockSafe=!s.exposure||s.exposurePermit;this.ctp.laserBeamVisible=this.ctpLaserBeam?.visible===true;this.ctp.materialContact=s.exposure?'DRUM_SURFACE':s.registering?'REGISTER_STOPS':s.clamping?'CLAMP_LOAD_POSITION':s.loading?'ENTRY_TRANSPORT':s.unloading?'OUTPUT_GUIDE':'NONE';
  }
  bindImagesetter(){
   const role=target=>{let found=null;this.template.root.traverse(o=>{if(!found&&o.userData?.mechanismRole===target)found=o;});return found;};
