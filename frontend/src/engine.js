@@ -5,7 +5,7 @@ import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import { cadToWorld } from './model.js';
 import { plantDisplayPoint } from './data/plant-layout-data.js';
 
-import {createMachineTemplate,createMachineSimulation,normalizeMachineKey} from './machine-runtime.js';
+import {createMachineTemplate,createMachineSimulation,normalizeMachineKey,seekSimulationStage} from './machine-runtime.js';
 import {universalMachineConfig} from './universal-machine.js';
 export {OffsetMachineTemplate} from './offset5.js';
 export {Offset10MachineTemplate} from './offset10.js';
@@ -138,6 +138,7 @@ export class FactoryEngine {
   setPrintingSimulationPathVisible(on){return this.simulation?.setPathVisible(on);}
   setPrintingSimulationInkFlowVisible(on){return this.simulation?.setInkFlowVisible(on);}
   getPrintingSimulationState(){return this.simulation?.state()||{active:false,running:false,paused:false,speed:1,stage:'Feeder',completed:0,progress:0,sheetsVisible:0,rotorCount:0};}
+  seekPrintingSimulationStage(targetStage){return seekSimulationStage(this.simulation,targetStage);}
   isPrintingSimulationActive(){return !!this.simulation?.active;}
   setView(view,state){if(view!=='machine'&&this.simulation?.active)this.simulation.stop();this.view=view;this.gizmo.detach();this.template.reset();this.clearPartLabels();this.isolated=false;this.machine.position.set(0,0,0);this.machine.rotation.set(0,0,0);this.machine.scale.setScalar(1);this.studio.visible=view==='machine';this.factory.visible=view==='factory';
     if(view==='factory')this.applyPlacement(state,this.layout||state.layout);else this.machine.visible=true;
