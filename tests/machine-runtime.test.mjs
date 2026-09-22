@@ -221,7 +221,7 @@ test('V136 remaining reference twins use process-faithful motion boundaries inst
  // Suprasetter external drum: no generic workpiece, clamp/expose only in the imaging window.
  for(const id of ['BMJ-MCH-0025','BMJ-MCH-0026']){
   const t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t);
-  assert.equal(t.root.userData.researchVersion,'V137',id);
+  assert.equal(t.root.userData.researchVersion,'V138',id);
   assert.ok(t.root.userData.uniqueResearchUrls>200,id+' research ledger did not exceed 200 unique URLs');
   assert.equal(sim.processPiece,null,id+' must not use generic linear workpiece');
   sim.start();sim.elapsed=sim.cycle*.50;sim.updateCTP();const st=sim.state();
@@ -295,7 +295,7 @@ test('V137 service-component contact mechanics are present on the least-specific
  {
   const {t,roles}=rolesFor('BMJ-MCH-0017');
   for(const role of ['primary-fold-belt-tensioner-reference','folder-gluer-bearing-block-reference','compression-pressure-roller-reference','box-stream-photoeye-reference'])assert.ok(roles.has(role),role);
-  assert.equal(t.root.userData.researchVersion,'V137');assert.ok(t.root.userData.uniqueResearchUrls>205);t.dispose();
+  assert.equal(t.root.userData.researchVersion,'V138');assert.ok(t.root.userData.uniqueResearchUrls>205);t.dispose();
  }
  {
   const {t,roles}=rolesFor('BMJ-MCH-0023');
@@ -355,4 +355,60 @@ test('V137 FGM2 blank enters skewed then aligns while remaining in belt contact 
  sim.elapsed=sim.cycle*.25;sim.updateFolder();st=sim.state();assert.equal(st.alignmentActive,true);assert.ok(Math.abs(sim.folderBlank.position.z)<.075);
  sim.elapsed=sim.cycle*.52;sim.updateFolder();st=sim.state();assert.equal(st.glueZoneActive,true);assert.equal(st.folderMaterialContactZone,3);
  sim.dispose();t.dispose();
+});
+
+
+test('V138 selective drive and control chains match physical process phases',()=>{
+ {
+  const id='BMJ-MCH-0021',t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t);sim.start();
+  sim.elapsed=sim.cycle*.22;sim.updateBlanker();let st=sim.state();
+  assert.equal(st.blankerXServoActive,true);assert.equal(st.blankerYServoActive,false);assert.equal(st.blankerHydraulicPumpActive,false);assert.equal(st.blankerPositionFeedbackActive,true);
+  sim.elapsed=sim.cycle*.40;sim.updateBlanker();st=sim.state();
+  assert.equal(st.blankerXServoActive,false);assert.equal(st.blankerYServoActive,true);assert.equal(st.blankerHydraulicValvePressActive,false);
+  sim.elapsed=sim.cycle*.64;sim.updateBlanker();st=sim.state();
+  assert.equal(st.blankerXServoActive,false);assert.equal(st.blankerYServoActive,false);assert.equal(st.blankerHydraulicPumpActive,true);assert.equal(st.blankerHydraulicValvePressActive,true);assert.equal(st.blankingHeadPressing,true);
+  sim.elapsed=sim.cycle*.78;sim.updateBlanker();st=sim.state();
+  assert.equal(st.blankerHydraulicValvePressActive,false);assert.equal(st.blankerHydraulicValveReturnActive,true);assert.equal(st.blankerSeparationActive,true);
+  sim.dispose();t.dispose();
+ }
+ {
+  const id='BMJ-MCH-0017',t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t);sim.start();
+  sim.elapsed=sim.cycle*.10;sim.updateFolder();let st=sim.state();assert.equal(st.folderFeederDriveActive,true);assert.equal(st.folderFoldDriveActive,false);
+  sim.elapsed=sim.cycle*.38;sim.updateFolder();st=sim.state();assert.equal(st.folderFeederDriveActive,false);assert.equal(st.folderFoldDriveActive,true);assert.equal(st.folderCompressionDriveActive,false);
+  sim.elapsed=sim.cycle*.83;sim.updateFolder();st=sim.state();assert.equal(st.folderFoldDriveActive,false);assert.equal(st.folderCompressionDriveActive,true);assert.equal(st.folderDeliveryDriveActive,false);
+  sim.elapsed=sim.cycle*.95;sim.updateFolder();st=sim.state();assert.equal(st.folderDeliveryDriveActive,true);assert.equal(st.folderCompressionDriveActive,false);
+  sim.dispose();t.dispose();
+ }
+ {
+  const id='BMJ-MCH-0023',t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t);sim.start();sim.elapsed=sim.cycle*.18;sim.updateCollator();const st=sim.state();
+  assert.equal(st.collatorSuctionBlowerActive,true);assert.equal(st.collatorSeparationAirControlActive,true);assert.equal(st.airSeparationActive,true);assert.equal(st.rotorPickupActive,true);
+  sim.dispose();t.dispose();
+ }
+ {
+  const id='BMJ-MCH-0028',t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t);sim.start();sim.elapsed=sim.cycle*.50;sim.updateZund();const st=sim.state();
+  assert.equal(st.zundVacuumMode,'HOLD');assert.equal(st.zundVacuumControlActive,true);assert.equal(st.zundVacuumContactActive,true);assert.equal(st.zundToolActionActive,false);
+  sim.dispose();t.dispose();
+ }
+});
+
+test('V138 service-transmission morphology is exposed through six-level taxonomy',()=>{
+ const cases=[
+  ['BMJ-MCH-0021',['qf100-x-transmission-service','qf100-y-transmission-service'],['Servo Transmission Support','Hydraulic Pressure / Valve Control']],
+  ['BMJ-MCH-0017',[],['Section Drive','Compression Section Drive','Delivery Independent Drive']],
+  ['BMJ-MCH-0023',[],['Separation-Air Adjustment','Suction Air Control']],
+  ['BMJ-MCH-0028',[],['Gantry Drive Service Chain','Module Z Pressure / Position Actuation','Vacuum Hold-Down Control Chain']]
+ ];
+ for(const [id,nodes,terms] of cases){
+  const t=createMachineTemplate(id);for(const n of nodes)assert.ok(t.findNode(n),id+' missing '+n);
+  const names=universalTaxonomy(id).map(x=>x.name).join(' | ').toLowerCase();
+  for(const term of terms)assert.ok(names.includes(term.toLowerCase()),id+' missing taxonomy '+term);
+  t.dispose();
+ }
+});
+
+test('V138 QF close-family component brands remain reference metadata and not BMJ installed claims',()=>{
+ const id='BMJ-MCH-0021',t=createMachineTemplate(id),meta=t.root.userData.qf1080PublishedComponentReference;
+ assert.equal(meta.installedOnBmjVerified,false);
+ assert.match(meta.plcHmi,/Delta/);assert.match(meta.leadscrew,/TBI/);assert.match(meta.hydraulicStation,/Oiltec/);assert.match(meta.hydraulicCylinder,/SMC/);
+ t.dispose();
 });
