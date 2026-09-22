@@ -22,9 +22,9 @@ test('Asset Browser exposes the master-prompt search and filter dimensions',()=>
 
 test('Asset selection updates one digital-twin context without page reload',()=>{
  assert.match(app,/async function openAssetContext\(machine\)/);
- assert.match(app,/await switchActiveMachine\(route,\{historyMode:'push'\}\)/);
+ assert.match(app,/openPrimaryFactoryContext\(machine,\{historyMode:'push'\}\)/);
  assert.match(app,/selectedArea:machine\.area/);
- assert.match(app,/selectedAsset:route/);
+ assert.match(app,/selectedAsset:FOUNDATION_SCOPE\.primaryRoute/);
  assert.match(app,/focusFoundationPlaceholder\(machine,\{historyMode:'push',openDialog:true\}\)/);
  assert.match(app,/showPanel\(\);renderPanel\('overview'\)/);
  const assetContext=app.slice(app.indexOf('async function openAssetContext'),app.indexOf('function assetDialog'));
