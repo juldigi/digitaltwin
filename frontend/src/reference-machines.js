@@ -1581,32 +1581,34 @@ export class ReferenceProcessSimulation{
  }
  blankerStatus(){
   const p=this.active?(this.elapsed%this.cycle)/this.cycle:0;
-  let idx=0,indexing=false,pressing=false;
-  if(p<.15)idx=0;
-  else if(p<.35){idx=1;indexing=true;}
-  else if(p<.50){idx=2;indexing=true;}
-  else if(p<.62)idx=2;
-  else if(p<.75){idx=3;pressing=true;}
-  else if(p<.86)idx=4;
-  else {idx=6;indexing=true;}
-  return {p,idx,indexing,pressing,interlockSafe:!(indexing&&pressing)};
+  let idx=0,indexing=false,pressing=false,loading=false,separating=false,returning=false,platformAtPress=false,hydraulicPressure=false;
+  if(p<.15){idx=0;loading=true;}
+  else if(p<.32){idx=1;indexing=true;}
+  else if(p<.48){idx=2;indexing=true;}
+  else if(p<.58){idx=2;platformAtPress=true;}
+  else if(p<.72){idx=3;pressing=true;platformAtPress=true;hydraulicPressure=true;}
+  else if(p<.84){idx=4;platformAtPress=true;separating=true;}
+  else {idx=6;indexing=true;returning=true;}
+  return {p,idx,indexing,pressing,loading,separating,returning,platformAtPress,hydraulicPressure,interlockSafe:!(indexing&&pressing)};
  }
  updateBlanker(){
   if(!this.blanker)return;
-  const {p,indexing,pressing}=this.blankerStatus(),b=this.blanker;
-  const smooth=t=>t*t*(3-2*t);
-  let x=-.55,z=0,ramDrop=0,sepDrop=0;
-  if(p>=.15&&p<.35)x=THREE.MathUtils.lerp(-.55,0,smooth((p-.15)/.20));
-  else if(p>=.35&&p<.50){x=0;z=THREE.MathUtils.lerp(0,.18,smooth((p-.35)/.15));}
-  else if(p>=.50&&p<.86){x=0;z=.18;}
-  else if(p>=.86){const t=smooth((p-.86)/.14);x=THREE.MathUtils.lerp(0,-.55,t);z=THREE.MathUtils.lerp(.18,0,t);}
-  if(pressing){const t=(p-.62)/.13;ramDrop=Math.sin(Math.PI*THREE.MathUtils.clamp(t,0,1))*.16;}
-  if(p>=.75&&p<.86)sepDrop=.035*smooth((p-.75)/.11);
+  const {p,indexing,pressing,loading,separating}=this.blankerStatus(),b=this.blanker;
+  const smooth=t=>{t=THREE.MathUtils.clamp(t,0,1);return t*t*(3-2*t);};
+  let x=-.55,z=0,ramDrop=0,sepDrop=0,pieceX=-.55,pieceZ=0;
+  if(p<.15){const t=smooth(p/.15);pieceX=THREE.MathUtils.lerp(-1.48,-.55,t);}
+  else if(p<.32){const t=smooth((p-.15)/.17);x=THREE.MathUtils.lerp(-.55,0,t);pieceX=x;}
+  else if(p<.48){const t=smooth((p-.32)/.16);x=0;z=THREE.MathUtils.lerp(0,.18,t);pieceX=x;pieceZ=z;}
+  else if(p<.84){x=0;z=.18;pieceX=x;pieceZ=z;}
+  else {const t=smooth((p-.84)/.16);x=THREE.MathUtils.lerp(0,-.55,t);z=THREE.MathUtils.lerp(.18,0,t);pieceX=x;pieceZ=z;}
+  if(pressing){const t=(p-.58)/.14;ramDrop=Math.sin(Math.PI*THREE.MathUtils.clamp(t,0,1))*.16;}
+  if(separating)sepDrop=.045*smooth((p-.72)/.12);
   if(b.platform){b.platform.position.copy(b.platformRest);b.platform.position.x+=x+.55;b.platform.position.z+=z;}
   if(b.ram){b.ram.position.copy(b.ramRest);b.ram.position.y-=ramDrop;}
   if(this.processPiece){
    this.processPiece.visible=this.active;
-   this.processPiece.position.set(x,.81-sepDrop,z);
+   this.processPiece.position.set(pieceX,.81-sepDrop,pieceZ);
+   this.processPiece.userData.loadingToPlatform=loading;
   }
   const spin=indexing?this.elapsed*10:0;
   for(const m of this.template.activeMeshes){
@@ -1936,35 +1938,39 @@ export class ReferenceProcessSimulation{
   const right=new THREE.Mesh(flapGeo,paper);right.position.z=.11;right.name='FGM2-RIGHT-FLAP';rightPivot.add(right);
   const glueStrip=new THREE.Mesh(glueGeo,glueMat);glueStrip.position.set(.02,.018,.31);glueStrip.visible=false;glueStrip.name='FGM2-ADHESIVE-ZONE-VISUAL';g.add(glueStrip);
   this.folderBlank=g;
-  this.folder={leftPivot,rightPivot,glueStrip,cartonBlankGeometryIsSchematic:true,installedCrashLockVerified:false,installedFourSixCornerVerified:false,glueApplicatorTypeVerified:false,foldingActive:false,glueZoneActive:false,compressionActive:false};
+  this.folder={leftPivot,rightPivot,glueStrip,cartonBlankGeometryIsSchematic:true,installedCrashLockVerified:false,installedFourSixCornerVerified:false,glueApplicatorTypeVerified:false,foldingActive:false,prebreakActive:false,alignmentActive:false,glueZoneActive:false,finalFoldActive:false,compressionActive:false,deliveryActive:false,zonePositions:[-5.20,-3.45,-1.75,0,1.75,3.55,5.20]};
  }
  folderStatus(){
   const p=this.active?(this.elapsed%this.cycle)/this.cycle:0;
-  let idx=0,folding=false,gluing=false,compressing=false;
+  let idx=0,folding=false,gluing=false,compressing=false,alignment=false,prebreak=false,finalFold=false,delivery=false;
   if(p<.14)idx=0;
-  else if(p<.28)idx=1;
-  else if(p<.48){idx=2;folding=true;}
-  else if(p<.62){idx=3;gluing=true;}
-  else if(p<.76){idx=4;folding=true;}
-  else if(p<.90){idx=5;compressing=true;}
-  else idx=6;
-  return {p,idx,folding,gluing,compressing};
+  else if(p<.29){idx=1;alignment=true;prebreak=true;}
+  else if(p<.46){idx=2;folding=true;}
+  else if(p<.59){idx=3;gluing=true;}
+  else if(p<.75){idx=4;folding=true;finalFold=true;}
+  else if(p<.91){idx=5;compressing=true;}
+  else {idx=6;delivery=true;}
+  return {p,idx,folding,gluing,compressing,alignment,prebreak,finalFold,delivery};
  }
  updateFolder(){
   if(!this.folder||!this.folderBlank)return;
-  const s=this.folderStatus(),smooth=v=>{v=THREE.MathUtils.clamp(v,0,1);return v*v*(3-2*v);};
+  const s=this.folderStatus(),f=this.folder,smooth=v=>{v=THREE.MathUtils.clamp(v,0,1);return v*v*(3-2*v);};
   this.folderBlank.visible=this.active;
-  this.folderBlank.position.x=THREE.MathUtils.lerp(-5.20,5.22,smooth(s.p));
+  const cuts=[0,.14,.29,.46,.59,.75,.91,1],zones=f.zonePositions;
+  let x=zones[0];
+  for(let i=0;i<7;i++)if(s.p>=cuts[i]&&s.p<=cuts[i+1]){const t=smooth((s.p-cuts[i])/(cuts[i+1]-cuts[i]));x=THREE.MathUtils.lerp(zones[Math.min(i,zones.length-1)],zones[Math.min(i+1,zones.length-1)],t);break;}
+  this.folderBlank.position.x=x;
   let angle=0;
-  if(s.p>=.28&&s.p<.48)angle=THREE.MathUtils.lerp(0,.62,smooth((s.p-.28)/.20));
-  else if(s.p>=.48&&s.p<.62)angle=.62;
-  else if(s.p>=.62&&s.p<.76)angle=THREE.MathUtils.lerp(.62,1.25,smooth((s.p-.62)/.14));
-  else if(s.p>=.76)angle=1.25;
-  this.folder.leftPivot.rotation.x=angle;
-  this.folder.rightPivot.rotation.x=-angle;
-  this.folder.glueStrip.visible=this.active&&s.p>=.48;
-  this.folderBlank.position.y=s.compressing?.79:.82;
-  this.folder.foldingActive=s.folding;this.folder.glueZoneActive=s.gluing;this.folder.compressionActive=s.compressing;
+  if(s.p>=.14&&s.p<.29)angle=THREE.MathUtils.lerp(0,.20,smooth((s.p-.14)/.15));
+  else if(s.p>=.29&&s.p<.46)angle=THREE.MathUtils.lerp(.20,.66,smooth((s.p-.29)/.17));
+  else if(s.p>=.46&&s.p<.59)angle=.66;
+  else if(s.p>=.59&&s.p<.75)angle=THREE.MathUtils.lerp(.66,1.28,smooth((s.p-.59)/.16));
+  else if(s.p>=.75)angle=1.28;
+  this.folder.leftPivot.rotation.x=angle;this.folder.rightPivot.rotation.x=-angle;
+  this.folder.glueStrip.visible=this.active&&s.p>=.46;
+  this.folderBlank.position.y=s.compressing?THREE.MathUtils.lerp(.82,.775,smooth((s.p-.75)/.16)):.82;
+  this.folderBlank.scale.y=s.compressing?THREE.MathUtils.lerp(1,.72,smooth((s.p-.75)/.16)):1;
+  f.foldingActive=s.folding;f.prebreakActive=s.prebreak;f.alignmentActive=s.alignment;f.glueZoneActive=s.gluing;f.finalFoldActive=s.finalFold;f.compressionActive=s.compressing;f.deliveryActive=s.delivery;
  }
  stageIndex(){const p=this.active?(this.elapsed%this.cycle)/this.cycle:0;return Math.min(this.stages.length-1,Math.floor(p*this.stages.length));}
  state(){
@@ -1973,13 +1979,13 @@ export class ReferenceProcessSimulation{
    active:this.active,running:this.running,paused:this.paused,speed:this.speed,stage:this.blocked?'Simulasi belum tervalidasi':(this.stages[idx]||'Reference process'),completed:this.completed,progress,
    sheetsVisible:this.family==='collator'?this.collatorSheets.filter(s=>s.mesh.visible).length:this.family==='imagesetter'?(this.imagesetterMedia?.visible?1:0):this.family==='folder'?(this.folderBlank?.visible?1:0):(this.processPiece?.visible?1:0),pileSheetsVisible:0,airflowParticleCount:this.family==='ahu'?this.ahuParticles.filter(p=>p.mesh.visible).length:this.family==='compressor'?this.compressorParticles.filter(p=>['air','distribution'].includes(p.kind)&&p.mesh.visible).length:0,supplyAirflowParticleCount:this.family==='ahu'?this.ahuParticles.filter(p=>p.kind==='supply'&&p.mesh.visible).length:0,returnAirflowParticleCount:this.family==='ahu'?this.ahuParticles.filter(p=>p.kind==='return'&&p.mesh.visible).length:0,outdoorAirflowParticleCount:this.family==='ahu'?this.ahuParticles.filter(p=>p.kind==='outdoor'&&p.mesh.visible).length:0,compressedAirParticleCount:this.family==='compressor'?this.compressorParticles.filter(p=>p.kind==='air'&&p.mesh.visible).length:0,distributionAirParticleCount:this.family==='compressor'?this.compressorParticles.filter(p=>p.kind==='distribution'&&p.mesh.visible).length:0,oilFlowParticleCount:this.family==='compressor'?this.compressorParticles.filter(p=>p.kind==='oil'&&p.mesh.visible).length:0,condensateParticleCount:this.family==='compressor'?this.compressorParticles.filter(p=>p.kind==='condensate'&&p.mesh.visible).length:0,rotorCount:this.motions.filter(x=>x.motion.type==='spin').length,
    oscillatorCount:this.motions.filter(x=>x.motion.type!=='spin').length,mechanismCount:this.family==='blanker'?this.template.activeMeshes.length:this.family==='zund'?2:this.motions.length,inkFlowCount:0,uvLampCount:0,uvActive:false,pathVisible:false,inkFlowVisible:false,
-   platformIndexing:blankerState?.indexing??false,blankingHeadPressing:blankerState?.pressing??false,mechanicalInterlockSafe:blankerState?.interlockSafe??true,
+   platformIndexing:blankerState?.indexing??false,blankerLoading:blankerState?.loading??false,blankerPlatformAtPress:blankerState?.platformAtPress??false,blankerHydraulicPressureActive:blankerState?.hydraulicPressure??false,blankerSeparationActive:blankerState?.separating??false,blankerReturning:blankerState?.returning??false,blankingHeadPressing:blankerState?.pressing??false,mechanicalInterlockSafe:blankerState?.interlockSafe??true,
    modeledBinCount:collatorState?.modeledBinCount??null,installedBinCountVerified:collatorState?.installedBinCountVerified??null,activeBinFeeds:this.collator?.activeFeedCount??0,activeFeedBinIndexes:this.collator?.activeFeedBins??[],doubleFeedCheckActive:this.family==='collator'?(this.collator?.doubleFeedCheckActive??false):false,gatherTransportActive:this.family==='collator'?(this.collator?.gatherTransportActive??false):false,completedSheetsInSet:this.collator?.completedSheetsInSet??0,
    exposureActive:imagesetterState?.exposure??false,cuttingActive:imagesetterState?.cutting??false,capstanAdvanceActive:this.family==='imagesetter'?(this.imagesetter?.capstanAdvanceActive??false):false,tensionRegulationActive:this.family==='imagesetter'?(this.imagesetter?.tensionRegulationActive??false):false,outputBoundaryActive:this.family==='imagesetter'?(this.imagesetter?.outputBoundaryActive??false):false,punchInstalledVerified:this.imagesetter?.punch?.userData.installedOptionVerified===true,processorInstalledVerified:this.imagesetter?.processor?.userData.installedOptionVerified===true,exactScreenModelVerified:this.family==='imagesetter'?this.template.root.userData.exactScreenModelVerified:null,
    vacuumHoldActive:zundState?.vacuumHold??false,zundAxisMotionActive:zundState?.axisMotion??false,zundAxisPathType:this.family==='zund'?(this.zund?.axisPathType??null):null,zundToolActionActive:this.family==='zund'?(this.zund?.toolActionActive??false):false,ctpPlateLoaded:this.family==='ctp'?(this.ctp?.plateLoaded??false):false,ctpPlateClamped:this.family==='ctp'?(this.ctp?.plateClamped??false):false,ctpExposureActive:this.family==='ctp'?(this.ctp?.exposureActive??false):false,ctpLaserTraverseActive:this.family==='ctp'?(this.ctp?.laserTraverseActive??false):false,ctpPunchInstalledVerified:this.family==='ctp'?(this.ctp?.punchInstalledVerified??false):null,installedToolPackageVerified:this.family==='zund'?(this.zund?.installedToolPackageVerified??false):null,toolActionEnabled:this.family==='zund'?(this.zund?.installedToolPackageVerified===true):null,registrationCameraInstalledVerified:this.family==='zund'?(this.zund?.installedIccVerified??false):null,toolInitializationInstalledVerified:this.family==='zund'?(this.zund?.installedItiVerified??false):null,
    compressorBrand:this.family==='compressor'?(this.compressor?.brand??null):null,compressorIntakeActive:this.family==='compressor'?(this.compressor?.intakeActive??false):false,compressorCompressionActive:this.family==='compressor'?(this.compressor?.compressionActive??false):false,compressorSeparationActive:this.family==='compressor'?(this.compressor?.separationActive??false):false,compressorAftercoolingActive:this.family==='compressor'?(this.compressor?.aftercoolingActive??false):false,compressorOilCircuitActive:this.family==='compressor'?(this.compressor?.oilCircuitActive??false):false,compressorCondensateDrainActive:this.family==='compressor'?(this.compressor?.condensateDrainActive??false):false,compressorDistributionActive:this.family==='compressor'?(this.compressor?.distributionActive??false):false,compressorPressureNormalizedPct:this.family==='compressor'?(this.compressor?.pressureNormalizedPct??0):null,compressorPressureProfile:this.family==='compressor'?(this.compressor?.pressureProfile??null):null,plantCompressedAirRouteVerified:this.family==='compressor'?(this.compressor?.plantRouteVerified??false):null,airReceiverInstalledVerified:this.family==='compressor'?(this.compressor?.receiverInstalledVerified??false):null,airDryerInstalledVerified:this.family==='compressor'?(this.compressor?.dryerInstalledVerified??false):null,ringMainInstalledVerified:this.family==='compressor'?(this.compressor?.ringMainInstalledVerified??false):null,
    ahuSectionOrderVerified:this.family==='ahu'?(this.ahu?.sectionOrderVerified??false):null,ahuExactModelVerified:this.family==='ahu'?(this.ahu?.exactModelVerified??false):null,supplyAirActive:this.family==='ahu'?(this.ahu?.supplyAirActive??false):false,returnAirReferenceActive:this.family==='ahu'?(this.ahu?.returnAirReferenceActive??false):false,outdoorHeatRejectionActive:this.family==='ahu'?(this.ahu?.outdoorHeatRejectionActive??false):false,plantDuctRouteVerified:this.family==='ahu'?(this.template.root.userData.plantDuctRouteVerified===true):null,evaporativePrecoolActive:this.family==='ahu'?(this.ahu?.evaporativePrecoolActive??false):false,dxEvaporatorActive:this.family==='ahu'?(this.ahu?.dxEvaporatorActive??false):false,genericCoilConditioningActive:this.family==='ahu'?(this.ahu?.genericCoilActive??false):false,
-   cartonBlankGeometryIsSchematic:this.family==='folder'?(this.folder?.cartonBlankGeometryIsSchematic??true):null,foldingActive:folderState?.folding??false,glueZoneActive:folderState?.gluing??false,compressionActive:folderState?.compressing??false,crashLockInstalledVerified:this.family==='folder'?(this.folder?.installedCrashLockVerified??false):null,fourSixCornerInstalledVerified:this.family==='folder'?(this.folder?.installedFourSixCornerVerified??false):null,glueApplicatorTypeVerified:this.family==='folder'?(this.folder?.glueApplicatorTypeVerified??false):null,
+   cartonBlankGeometryIsSchematic:this.family==='folder'?(this.folder?.cartonBlankGeometryIsSchematic??true):null,alignmentActive:this.family==='folder'?(this.folder?.alignmentActive??false):false,preBreakActive:this.family==='folder'?(this.folder?.prebreakActive??false):false,foldingActive:folderState?.folding??false,glueZoneActive:folderState?.gluing??false,finalFoldActive:this.family==='folder'?(this.folder?.finalFoldActive??false):false,compressionActive:folderState?.compressing??false,folderDeliveryActive:this.family==='folder'?(this.folder?.deliveryActive??false):false,crashLockInstalledVerified:this.family==='folder'?(this.folder?.installedCrashLockVerified??false):null,fourSixCornerInstalledVerified:this.family==='folder'?(this.folder?.installedFourSixCornerVerified??false):null,glueApplicatorTypeVerified:this.family==='folder'?(this.folder?.glueApplicatorTypeVerified??false):null,
    simulationBoundary:this.family==='blanker'?'QF_LQF_1080_FAMILY_PROCESS_ONLY':this.family==='collator'?'MULTI_VENDOR_SUCTION_COLLATOR_PROCESS_ONLY__TEN_BIN_REFERENCE_NOT_INSTALLATION_CLAIM':this.family==='ctp'?'SUPRASETTER_COMMON_PROCESS_ONLY__PUNCH_LOADER_DEBRIS_TEMP_OPTIONS_NOT_SIMULATED':this.family==='imagesetter'?'SCREEN_FTR_KATANA_COMMON_PROCESS_ONLY__PUNCH_PROCESSOR_MODEL_OPTIONS_NOT_INFERRED':this.family==='ctp'?'SUPRASETTER_EXTERNAL_DRUM_LOAD_CLAMP_IMAGE_UNLOAD__MODEL_OPTIONS_NOT_INFERRED':this.family==='zund'?'ZUND_XY_PLATFORM_MOTION_ONLY__INSTALLED_TOOL_CAMERA_INIT_PACKAGE_NOT_INFERRED':this.family==='compressor'?'BRAND_FAMILY_OIL_INJECTED_SCREW_AIRFLOW__LOCAL_RING_MAIN_FUNCTIONAL_REFERENCE__PLANT_ROUTE_UNVERIFIED':this.family==='ahu'?(this.ahu?.sansin?'SANSIN_NES_YZKJ_INDOOR_AIR_PATH_FAMILY_REFERENCE__MODEL_CAPACITY_UNVERIFIED':'EUROVENT_CANONICAL_AHU_AIR_PATH_REFERENCE__SECTION_ORDER_DIRECTION_UNVERIFIED'):this.family==='folder'?'FGM2_MULTI_VENDOR_COMMON_FOLD_GLUE_PROCESS_ONLY__BOX_STYLE_GLUE_HARDWARE_OPTIONS_NOT_INFERRED':null,referenceBoundary:this.template.cfg.profile?.unknowns||[]};
  }
  start(){if(this.blocked){this.active=false;this.running=false;this.paused=false;this.onUpdate?.(this.state());return this.state();}this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;if(this.processPiece)this.processPiece.visible=true;for(const s of this.collatorSheets)s.mesh.visible=true;if(this.imagesetterMedia)this.imagesetterMedia.visible=true;if(this.ctpFlatPlate)this.ctpFlatPlate.visible=true;if(this.ctpWrappedPlate)this.ctpWrappedPlate.visible=false;if(this.zundMaterial)this.zundMaterial.visible=true;for(const p of this.compressorParticles)p.mesh.visible=true;for(const p of this.ahuParticles)p.mesh.visible=true;if(this.folderBlank)this.folderBlank.visible=true;this.resetMotion();this.onUpdate?.(this.state());return this.state();}
@@ -1993,7 +1999,7 @@ export class ReferenceProcessSimulation{
   return this.state();
  }
  setInkFlowVisible(){this.inkFlowVisible=false;return this.state();}
- resetMotion(){for(const item of this.motions){item.mesh.position.copy(item.position);item.mesh.quaternion.copy(item.quaternion);}if(this.blanker){if(this.blanker.platform)this.blanker.platform.position.copy(this.blanker.platformRest);if(this.blanker.ram)this.blanker.ram.position.copy(this.blanker.ramRest);}if(this.processPiece){if(this.family==='blanker'&&this.processPiece.userData.blankerRest)this.processPiece.position.copy(this.processPiece.userData.blankerRest);else this.processPiece.position.x=this.processPiece.userData.startX;this.processPiece.visible=this.active;}for(const s of this.collatorSheets){s.mesh.position.copy(s.start);s.mesh.visible=this.active;}if(this.collator){this.collator.activeFeedCount=0;this.collator.activeFeedBins=[];this.collator.doubleFeedCheckActive=false;this.collator.gatherTransportActive=false;this.collator.completedSheetsInSet=0;for(const rotor of this.collator.rotors)rotor.quaternion.copy(rotor.userData.collatorRestQuaternion||new THREE.Quaternion());}if(this.imagesetterMedia){this.imagesetterMedia.position.set(-.82,.68,0);this.imagesetterMedia.visible=this.active;}if(this.ctpFlatPlate){this.ctpFlatPlate.position.set(-1.10,.68,0);this.ctpFlatPlate.rotation.set(0,0,0);this.ctpFlatPlate.visible=this.active;}if(this.ctpWrappedGroup)this.ctpWrappedGroup.rotation.set(0,0,0);if(this.ctpWrappedPlate)this.ctpWrappedPlate.visible=false;if(this.ctp){this.ctp.plateLoaded=false;this.ctp.plateClamped=false;this.ctp.exposureActive=false;this.ctp.laserTraverseActive=false;if(this.ctp.laser?.material?.emissive){this.ctp.laser.material.emissive.setHex(0);this.ctp.laser.material.emissiveIntensity=0;}}if(this.imagesetter){this.imagesetter.exposureActive=false;this.imagesetter.cuttingActive=false;if(this.imagesetter.laser?.material?.emissive){this.imagesetter.laser.material.emissive.setHex(0);this.imagesetter.laser.material.emissiveIntensity=0;}}if(this.zund){if(this.zund.beam)this.zund.beam.position.copy(this.zund.beamRest);if(this.zund.carriage)this.zund.carriage.position.copy(this.zund.carriageRest);this.zund.vacuumHoldActive=false;}if(this.zundMaterial){this.zundMaterial.position.set(0,.69,0);this.zundMaterial.visible=this.active;}for(const p of this.compressorParticles)p.mesh.visible=this.active;if(this.compressor){this.compressor.intakeActive=this.active;this.compressor.compressionActive=this.active;this.compressor.separationActive=this.active;this.compressor.aftercoolingActive=this.active;this.compressor.distributionActive=this.active;this.compressor.oilCircuitActive=this.active;this.compressor.condensateDrainActive=this.active;this.compressor.pressureNormalizedPct=this.active?95:0;this.compressor.pressureProfile=this.active?{package:99,receiver:98.4,afterTreatment:95.8,ringNear:95,ringFar:94,service:[93.3,92.8,92.2]}:{package:0,receiver:0,afterTreatment:0,ringNear:0,ringFar:0,service:[0,0,0]};}for(const p of this.ahuParticles)p.mesh.visible=this.active;if(this.ahu){this.ahu.supplyAirActive=this.active;this.ahu.returnAirReferenceActive=this.active;this.ahu.outdoorHeatRejectionActive=false;this.ahu.evaporativePrecoolActive=false;this.ahu.dxEvaporatorActive=false;this.ahu.genericCoilActive=false;}if(this.folderBlank){this.folderBlank.position.set(-5.20,.82,0);this.folderBlank.visible=this.active;}if(this.folder){this.folder.leftPivot.rotation.x=0;this.folder.rightPivot.rotation.x=0;this.folder.glueStrip.visible=false;this.folder.foldingActive=false;this.folder.glueZoneActive=false;this.folder.compressionActive=false;}}
+ resetMotion(){for(const item of this.motions){item.mesh.position.copy(item.position);item.mesh.quaternion.copy(item.quaternion);}if(this.blanker){if(this.blanker.platform)this.blanker.platform.position.copy(this.blanker.platformRest);if(this.blanker.ram)this.blanker.ram.position.copy(this.blanker.ramRest);}if(this.processPiece){if(this.family==='blanker'&&this.processPiece.userData.blankerRest)this.processPiece.position.copy(this.processPiece.userData.blankerRest);else this.processPiece.position.x=this.processPiece.userData.startX;this.processPiece.visible=this.active;}for(const s of this.collatorSheets){s.mesh.position.copy(s.start);s.mesh.visible=this.active;}if(this.collator){this.collator.activeFeedCount=0;this.collator.activeFeedBins=[];this.collator.doubleFeedCheckActive=false;this.collator.gatherTransportActive=false;this.collator.completedSheetsInSet=0;for(const rotor of this.collator.rotors)rotor.quaternion.copy(rotor.userData.collatorRestQuaternion||new THREE.Quaternion());}if(this.imagesetterMedia){this.imagesetterMedia.position.set(-.82,.68,0);this.imagesetterMedia.visible=this.active;}if(this.ctpFlatPlate){this.ctpFlatPlate.position.set(-1.10,.68,0);this.ctpFlatPlate.rotation.set(0,0,0);this.ctpFlatPlate.visible=this.active;}if(this.ctpWrappedGroup)this.ctpWrappedGroup.rotation.set(0,0,0);if(this.ctpWrappedPlate)this.ctpWrappedPlate.visible=false;if(this.ctp){this.ctp.plateLoaded=false;this.ctp.plateClamped=false;this.ctp.exposureActive=false;this.ctp.laserTraverseActive=false;if(this.ctp.laser?.material?.emissive){this.ctp.laser.material.emissive.setHex(0);this.ctp.laser.material.emissiveIntensity=0;}}if(this.imagesetter){this.imagesetter.exposureActive=false;this.imagesetter.cuttingActive=false;if(this.imagesetter.laser?.material?.emissive){this.imagesetter.laser.material.emissive.setHex(0);this.imagesetter.laser.material.emissiveIntensity=0;}}if(this.zund){if(this.zund.beam)this.zund.beam.position.copy(this.zund.beamRest);if(this.zund.carriage)this.zund.carriage.position.copy(this.zund.carriageRest);this.zund.vacuumHoldActive=false;}if(this.zundMaterial){this.zundMaterial.position.set(0,.69,0);this.zundMaterial.visible=this.active;}for(const p of this.compressorParticles)p.mesh.visible=this.active;if(this.compressor){this.compressor.intakeActive=this.active;this.compressor.compressionActive=this.active;this.compressor.separationActive=this.active;this.compressor.aftercoolingActive=this.active;this.compressor.distributionActive=this.active;this.compressor.oilCircuitActive=this.active;this.compressor.condensateDrainActive=this.active;this.compressor.pressureNormalizedPct=this.active?95:0;this.compressor.pressureProfile=this.active?{package:99,receiver:98.4,afterTreatment:95.8,ringNear:95,ringFar:94,service:[93.3,92.8,92.2]}:{package:0,receiver:0,afterTreatment:0,ringNear:0,ringFar:0,service:[0,0,0]};}for(const p of this.ahuParticles)p.mesh.visible=this.active;if(this.ahu){this.ahu.supplyAirActive=this.active;this.ahu.returnAirReferenceActive=this.active;this.ahu.outdoorHeatRejectionActive=false;this.ahu.evaporativePrecoolActive=false;this.ahu.dxEvaporatorActive=false;this.ahu.genericCoilActive=false;}if(this.folderBlank){this.folderBlank.position.set(-5.20,.82,0);this.folderBlank.visible=this.active;}if(this.folder){this.folder.leftPivot.rotation.x=0;this.folder.rightPivot.rotation.x=0;this.folder.glueStrip.visible=false;this.folderBlank.scale.set(1,1,1);this.folder.foldingActive=false;this.folder.prebreakActive=false;this.folder.alignmentActive=false;this.folder.glueZoneActive=false;this.folder.finalFoldActive=false;this.folder.compressionActive=false;this.folder.deliveryActive=false;}}
  update(now){
   if(!this.active||!this.running){this.lastNow=now;return;}
   if(this.lastNow===null){this.lastNow=now;return;}
