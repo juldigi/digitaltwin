@@ -224,6 +224,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    if(belts){
     for(const z of [-.52,-.20,.20,.52]){const b=this.box(belts,[1.40,.025,.075],[0,.77,z],'dark',.004);this.tag(b,'primary-fold-transport-belt','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
     for(const z of [-.58,.58]){const guide=this.box(belts,[1.32,.035,.045],[0,1.04,z],'steel',.004);guide.rotation.z=z<0?.18:-.18;guide.rotation.x=z<0?.18:-.18;this.tag(guide,'primary-fold-guide','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+    for(const z of [-.52,.52]){const idler=this.cyl(belts,.050,.085,[.56,.82,z],'steel','z');this.tag(idler,'primary-fold-belt-idler-reference','BOBST_BELT_SERVICE_REFERENCE');const tension=this.cyl(belts,.038,.085,[-.58,.92,z],'dark','z');this.tag(tension,'primary-fold-belt-tensioner-reference','BOBST_BELT_SERVICE_REFERENCE');for(const x of [-.58,.56]){const brg=this.box(belts,[.10,.10,.10],[x,.82,z],'dark',.008);this.tag(brg,'folder-gluer-bearing-block-reference','BOBST_BEARING_SERVICE_REFERENCE');}}
    }
    const lock=this.findNode('fgm2-lockbottom-boundary');
    tagOption(lock,'Crash-lock bottom module is common in folder-gluer families but no evidence confirms installation on FGM-2.');
@@ -256,6 +257,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    if(belts){
     for(const y of [.75,.98])for(const z of [-.46,-.15,.15,.46]){const b=this.box(belts,[1.48,.025,.07],[0,y,z],'dark',.004);this.tag(b,y>.8?'upper-final-fold-belt':'lower-final-fold-belt','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
     for(const z of [-.56,.56]){const rail=this.box(belts,[1.34,.035,.045],[0,1.10,z],'steel',.004);rail.rotation.z=z<0?.12:-.12;this.tag(rail,'final-fold-guide-rail','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+    for(const z of [-.46,.46]){const upper=this.cyl(belts,.046,.085,[.58,1.00,z],'dark','z');this.tag(upper,'final-fold-upper-belt-idler-reference','BOBST_BELT_SERVICE_REFERENCE');const lower=this.cyl(belts,.046,.085,[-.58,.76,z],'steel','z');this.tag(lower,'final-fold-lower-belt-idler-reference','BOBST_BELT_SERVICE_REFERENCE');}
    }
    const square=this.findNode('fgm2-squaring');
    if(square){for(const z of [-.58,.58])this.tag(this.box(square,[.72,.32,.035],[.30,.86,z],'steel',.006),'squaring-guide-plate','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
@@ -266,6 +268,8 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    if(belts){
     for(const y of [.74,1.02])for(const z of [-.48,-.16,.16,.48]){const b=this.box(belts,[1.42,.035,.08],[0,y,z],'dark',.004);this.tag(b,y>.8?'upper-compression-belt':'lower-compression-belt','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
     for(const x of [-.56,.56])for(const z of [-.48,.48]){const r=this.motion(this.cyl(belts,.052,.08,[x,.88,z],'dark','z'),'spin','z',6,.01,z,5);this.tag(r,'compression-belt-drive-roller','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+    for(const x of [-.42,-.14,.14,.42])for(const z of [-.48,.48]){const pr=this.cyl(belts,.034,.08,[x,1.01,z],'steel','z');this.tag(pr,'compression-pressure-roller-reference','BOBST_DELIVERY_PRESSURE_REFERENCE');}
+    for(const z of [-.48,.48]){const t=this.cyl(belts,.038,.08,[.63,.90,z],'dark','z');this.tag(t,'compression-belt-tensioner-reference','BOBST_BELT_SERVICE_REFERENCE');}
    }
    const pressure=this.findNode('fgm2-pressure-reference');
    if(pressure){
@@ -280,6 +284,9 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
     for(const z of [-.46,-.15,.15,.46]){const belt=this.box(delivery,[1.16,.028,.075],[-.04,.74,z],'dark',.004);this.tag(belt,'delivery-transport-belt','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
     for(const x of [-.46,.46])for(const z of [-.46,-.15,.15,.46]){const r=this.motion(this.cyl(delivery,.048,.075,[x,.74,z],'dark','z'),'spin','z',6,.01,z,6);this.tag(r,'delivery-drive-roller','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
    }
+   const regulator=this.group(delivery||out,'fgm2-box-stream-regulator-reference','Box stream regulator reference',[0,0,0],[.10,.08,0]);
+   for(const z of [-.38,.38]){const rr=this.cyl(regulator,.042,.08,[.36,.79,z],'steel','z');this.tag(rr,'box-stream-regulator-roller-reference','BOBST_DELIVERY_REFERENCE');}
+   const streamSensor=this.box(regulator,[.06,.10,.06],[.48,.88,-.48],'accent',.004);this.tag(streamSensor,'box-stream-photoeye-reference','BOBST_DELIVERY_REFERENCE');
    const count=this.findNode('fgm2-counter-boundary');
    tagOption(count,'Counter/kicker hardware is common on many folder-gluers but is not verified on FGM-2.');
    if(count){const marker=this.box(count,[.28,.24,.72],[.22,.92,0],'glass',.012);marker.userData.optionReference=true;this.tag(marker,'counter-kicker-capability-envelope','OPTION_BOUNDARY');}
