@@ -424,8 +424,10 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
      for(const z of [-.47,.47])this.tag(this.box(trays,[.06,.10,.035],[-.33,y+.06,z],'steel',.004),'bin-side-guide-reference','MULTI_VENDOR_COLLATOR_FAMILY');
     }
     if(feeds){
-     const rotor=this.motion(this.cyl(feeds,.035,.82,[.30,y+.045,0],'dark','z'),'spin','z',8,.01,b*.17,0);this.tag(rotor,'suction-rotor','MULTI_VENDOR_COLLATOR_FAMILY');rotor.userData.binIndex=b;
+     const rotor=this.motion(this.cyl(feeds,.035,.82,[.30,y+.045,0],'dark','z'),'spin','z',8,.01,b*.17,0);this.tag(rotor,'suction-rotor','HORIZON_SUCTION_ROTOR_REFERENCE');rotor.userData.binIndex=b;
+     for(const z of [-.30,0,.30]){const port=this.cyl(feeds,.009,.025,[.30,y+.080,z],'accent','y');this.tag(port,'suction-rotor-vacuum-port-reference','HORIZON_SUCTION_ROTOR_REFERENCE');port.userData.binIndex=b;}
      const nip=this.cyl(feeds,.024,.82,[.39,y+.045,0],'steel','z');this.tag(nip,'feed-nip-roller-reference','VERTICAL_COLLATOR_PATENT');nip.userData.binIndex=b;
+     for(const z of [-.32,.32]){const pad=this.box(feeds,[.055,.045,.065],[.18,y+.030,z],'dark',.005);this.tag(pad,'double-feed-stop-pad-reference','HORIZON_SUCTION_ROTOR_REFERENCE');pad.userData.binIndex=b;}
     }
     if(air){
      for(const z of [-.32,.32]){const n=this.cyl(air,.010,.065,[.02,y+.075,z],'accent','x');this.tag(n,'bin-air-separation-nozzle','MULTI_VENDOR_COLLATOR_FAMILY');n.userData.binIndex=b;}
@@ -441,7 +443,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   if(sense){
    const feed=this.findNode('collator-double-feed'),empty=this.findNode('collator-bin-empty');
    for(let b=0;b<10;b++){const y=.34+b*.145;
-    if(feed){const s=this.box(feed,[.055,.065,.045],[.48,y+.045,-.47],'accent',.004);this.tag(s,'double-miss-feed-sensor-reference','MULTI_VENDOR_COLLATOR_FAMILY');s.userData.binIndex=b;}
+    if(feed){const emitter=this.box(feed,[.045,.060,.040],[.48,y+.045,-.47],'accent',.004);this.tag(emitter,'double-feed-ir-emitter-reference','HORIZON_IR_DOUBLE_FEED_REFERENCE');emitter.userData.binIndex=b;const receiver=this.box(feed,[.045,.060,.040],[.48,y+.045,.47],'blue',.004);this.tag(receiver,'double-feed-ir-receiver-reference','HORIZON_IR_DOUBLE_FEED_REFERENCE');receiver.userData.binIndex=b;const beam=this.box(feed,[.012,.012,.88],[.48,y+.045,0],'glass',.001);this.tag(beam,'double-feed-ir-beam-reference','PROCESS_VISUALIZATION');beam.userData.binIndex=b;}
     if(empty){const s=this.box(empty,[.050,.055,.040],[-.28,y+.055,-.48],'blue',.004);this.tag(s,'bin-empty-sheet-presence-sensor','MULTI_VENDOR_COLLATOR_FAMILY');s.userData.binIndex=b;}
    }
   }
@@ -449,7 +451,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    const guide=this.findNode('collator-gather-guide');
    if(guide){for(const z of [-.40,.40])this.tag(this.box(guide,[.065,1.42,.055],[0,.92,z],'steel',.005),'vertical-gather-guide','VERTICAL_COLLATOR_PATENT');for(const y of [.40,.72,1.04,1.36])this.tag(this.box(guide,[.34,.022,.86],[-.02,y,0],'steel',.003),'gather-guide-plate','VERTICAL_COLLATOR_PATENT');}
    const drive=this.findNode('collator-gather-drive');
-   if(drive)for(const y of [.42,.70,.98,1.26]){const r=this.motion(this.cyl(drive,.047,.82,[.03,y,0],'dark','z'),'spin','z',7,.01,y,3);this.tag(r,'gather-transport-roller','MULTI_VENDOR_COLLATOR_FAMILY');}
+   if(drive){for(const y of [.42,.70,.98,1.26]){const r=this.motion(this.cyl(drive,.047,.82,[.03,y,0],'dark','z'),'spin','z',7,.01,y,3);this.tag(r,'gather-transport-roller','MULTI_VENDOR_COLLATOR_FAMILY');for(const z of [-.44,.44]){const brg=this.box(drive,[.10,.10,.08],[.03,y,z],'dark',.006);this.tag(brg,'gather-roller-bearing-block-reference','SERVICE_MECHANISM_REFERENCE');}}}
   }
   if(delivery){
    const belt=this.findNode('collator-delivery-belt');
