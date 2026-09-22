@@ -66,7 +66,7 @@ test('References are categorized and prioritized from the active asset taxonomy 
  assert.match(app,/function referenceContextTokens\(\)/);
  assert.match(app,/function contextualReferenceData\(\)/);
  assert.match(app,/function renderReferencePanel\(\)/);
- for(const label of ['Foto','Dokumen','Manual','Drawing / Layout','Evidence / Source'])assert.match(app,new RegExp(label.replace('/','\\/')));
+ for(const label of ['Foto','Dokumen','Manual','Gambar / Denah','Bukti / Sumber'])assert.match(app,new RegExp(label.replace('/','\\/')));
  assert.match(app,/source\.supports/);
  assert.match(app,/taxonomyPath\(\)/);
  assert.match(app,/activeReference/);
