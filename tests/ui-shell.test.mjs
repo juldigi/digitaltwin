@@ -304,9 +304,9 @@ test('v53 retains the document-grounded CX104 expansion asset while foundation r
 });
 
 test('v54 retains the APM2 expansion implementation without exposing it as a Phase-1 technical asset',()=>{
-  assert.match(app,/\['offset10','apm2','sheeting'\]\.includes\(requested\)/);
-  assert.match(app,/IS_APM2=MACHINE_KEY==='apm2'/);
-  assert.match(app,/ACTIVE_ROOT=IS_OFFSET10\?'O10':IS_APM2\?'APM2':IS_SHEETING\?'SH':IS_GENERIC\?GENERIC_ROOT:'O5'/);
+  assert.match(app,/MACHINE_KEY=FOUNDATION_SCOPE\.primaryRoute/);
+  assert.match(app,/IS_OFFSET10=false,IS_APM2=false,IS_SHEETING=false/);
+  assert.doesNotMatch(app,/from '\.\/data\/taxonomy-apm2\.js'/);
   assert.match(app,/normalizeMachineKey\(route\)/);
   assert.match(app,/if\(!isFoundationPrimary\(machine\)\)/);
   assert.match(engine,/if\(!canOpenTechnical3D\(requested\)\)/);
@@ -334,7 +334,8 @@ test('v54 retains the APM2 expansion implementation without exposing it as a Pha
 });
 
 test('v57 routes Sheeting Lexus as a dedicated right-to-left twin',()=>{
-  assert.match(app,/IS_SHEETING=MACHINE_KEY==='sheeting'/);
+  assert.match(app,/IS_OFFSET10=false,IS_APM2=false,IS_SHEETING=false/);
+  assert.doesNotMatch(app,/from '\.\/data\/taxonomy-sheeting\.js'/);
   assert.match(app,/normalizeMachineKey\(route\)/);
   assert.match(app,/SHEETING LEXUS/);
   assert.match(app,/RIGHT → LEFT/);
