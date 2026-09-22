@@ -707,6 +707,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  enrichCompressor(){
   for(let i=1;i<=7;i++){const a=this.activeGroup(i);if(a)for(const child of [...a.children])if(child.isMesh){child.visible=false;child.userData.referencePlaceholder=true;}}
   const no=this.cfg.machine.no;
+  this.enrichCompressorCabinet();
   if([29,30,35].includes(no))this.enrichAtlasCompressor();
   else if([31,32,34].includes(no))this.enrichKaeserCompressor();
   else if(no===33)this.enrichSwanCompressor();
@@ -717,6 +718,24 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   circuit:this.activeGroup(5),cool:this.activeGroup(6),ctl:this.activeGroup(7)
  };}
  compressorPart(parent,id,name){return parent?this.group(parent,id,name,[0,0,0],[0,.08,.08]):null;}
+ enrichCompressorCabinet(){
+  const no=this.cfg.machine.no,swan=no===33,L=swan?2.10:2.55,H=1.48,D=1.30;
+  for(let i=1;i<=7;i++){const g=this.findNode('universal-module-'+i);if(g)for(const child of g.children)if(child.isMesh&&child.userData.exteriorCover){child.visible=false;child.userData.replacedByUnifiedCabinet=true;}}
+  const cab=this.group(this.root,'compressor-package-cabinet','Unified Compressor Cabinet',[0,0,0],[0,.16,0]);cab.userData.familyExteriorReference=true;
+  const plinth=this.box(cab,[L+.12,.18,D+.08],[0,.12,0],'dark',.025);this.tag(plinth,'compressor-cabinet-plinth-reference','BRAND_FAMILY_VISUAL_REFERENCE');
+  for(const x of [-L*.30,L*.30]){const pocket=this.box(cab,[.34,.09,D+.12],[x,.11,0],'dark',.006);this.tag(pocket,'compressor-fork-pocket-reference','INSTALLATION_VISUAL_REFERENCE');}
+  const top=this.cover(this.box(cab,[L,.065,D],[0,H+.11,0],'body',.025));this.tag(top,'compressor-cabinet-top-panel-reference','BRAND_FAMILY_VISUAL_REFERENCE');
+  for(const x of [-L/2,L/2]){const side=this.cover(this.box(cab,[.055,H,D],[x,.78,0],'body',.018));this.tag(side,'compressor-cabinet-side-panel-reference','BRAND_FAMILY_VISUAL_REFERENCE');}
+  const rear=this.cover(this.box(cab,[L,H,.050],[0,.78,D/2],'body',.018));this.tag(rear,'compressor-cabinet-rear-panel-reference','BRAND_FAMILY_VISUAL_REFERENCE');
+  const doorW=(L-.10)/3;
+  for(let i=0;i<3;i++){
+   const x=-L/2+.05+doorW/2+i*doorW,door=this.cover(this.box(cab,[doorW-.025,H-.16,.045],[x,.80,-D/2],'body',.015));this.tag(door,'compressor-service-door-reference','BRAND_FAMILY_VISUAL_REFERENCE');door.userData.serviceDoorIndex=i+1;
+   const handle=this.box(cab,[.025,.20,.025],[x+doorW*.34,.83,-D/2-.035],'dark',.004);this.tag(handle,'compressor-service-door-handle-reference','BRAND_FAMILY_VISUAL_REFERENCE');
+  }
+  for(let y=.42;y<=1.20;y+=.10){const louvre=this.box(cab,[.025,.035,.46],[-L/2-.034,y,.25],'dark',.002);this.tag(louvre,'compressor-cooling-air-inlet-louvre-reference','BRAND_FAMILY_VISUAL_REFERENCE');}
+  for(let x=-L*.24;x<=L*.24;x+=.10){const slot=this.box(cab,[.045,.025,.50],[x,H+.15,.22],'dark',.002);this.tag(slot,'compressor-cooling-air-exhaust-grille-reference','BRAND_FAMILY_VISUAL_REFERENCE');}
+  this.root.userData.unifiedCompressorCabinet=true;this.root.userData.exteriorVisualReference='BRAND_FAMILY_CABINET__MODEL_SPECIFIC_PANEL_LAYOUT_UNVERIFIED';
+ }
  enrichCompressedAirDistribution(){
   this.root.userData.compressedAirDistributionVisualization='LOCAL_DISCHARGE_TREATMENT_RING_MAIN_FUNCTIONAL_REFERENCE';
   this.root.userData.plantCompressedAirRouteVerified=false;
@@ -725,6 +744,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.root.userData.lineFilterPackageInstalledVerified=false;
   this.root.userData.ringMainInstalledVerified=false;
   this.root.userData.pressureValuesAreNormalized=true;
+  this.root.userData.distributionDesignReference={ringMainPreferred:true,airMainPressureDropReferenceBar:.03,fixedNetworkPressureDropReferenceMaxBar:.10,installedPressureDropMeasured:false,serviceTakeoffCondensatePractice:'TOP_OF_MAIN_WHERE_CONDENSATION_RISK_EXISTS'};
   const site=this.group(this.root,'compressor-air-distribution','Compressed-Air Discharge & Distribution Reference',[0,0,0],[.18,.10,0]);
   site.userData.installedRouteVerified=false;site.userData.visualizationOnly=true;
   const discharge=this.group(site,'compressor-discharge-piping','Compressor Discharge Piping',[0,0,0],[.12,.08,0]);
