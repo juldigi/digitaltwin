@@ -52,7 +52,7 @@ export function buildActualFactory(layout,fleet){
   const texture=new T.CanvasTexture(c);texture.colorSpace=T.SRGBColorSpace;const s=new T.Sprite(new T.SpriteMaterial({map:texture,depthTest:false}));s.position.set(x,y,z);s.scale.set(width,width*80/512,1);parent.add(s);return s;
  };
  const data=layout.actual,b=layers.building;
- const buildingDetailStats={floorControlJoints:0,columnBasePlates:0,columnAnchorBolts:0,roofPurlins:0,roofBracing:0,roofGutters:0,roofDownpipes:0,linearLights:0,doorPersonnel:0,doorWide:0,dockSafetyElements:0};
+ const buildingDetailStats={floorControlJoints:0,columnBasePlates:0,columnAnchorBolts:0,wallPanelJoints:0,primaryRoofFrames:0,roofPurlins:0,roofBracing:0,roofGutters:0,roofDownpipes:0,linearLights:0,doorPersonnel:0,doorWide:0,doorProtection:0,dockSafetyElements:0,ipalFrameBraces:0,ipalGuardrails:0};
  const detail=(o,semantic,accuracy='INDUSTRIAL_REALISM_REFERENCE_NOT_AS_BUILT')=>{if(o)o.userData={...o.userData,semantic,accuracy,researchVersion:'V142'};return o;};
  // The outline follows the source production hall and attached office/service wings.
  const outline=[[-4,2],[6,2],[6,6],[96,6],[96,90],[90,96],[73,96],[73,103],[23,103],[23,96],[6,96],[6,55],[-5,55],[-5,11],[-4,11]];
@@ -78,7 +78,8 @@ export function buildActualFactory(layout,fleet){
   const wall=box(b,x,1.75,z,len,3.5,w.width,0xe8e5df,r);wall.castShadow=true;wall.userData={semantic:'WALL',sourceHandles:w.handles,heightStatus:'VISUAL_ESTIMATE',machineClearance:MACHINE_SERVICE_CLEARANCE};
   box(b,x,.12,z,len,.24,w.width+.035,0x64777e,r);box(b,x,3.46,z,len,.08,w.width+.025,0x71878b,r);
   // Clerestory window treatment has source-aligned position, with assumed sill and glass detail.
-  if(len>5.5){const glass=box(b,x,2.35,z,Math.max(.6,len-.7),.55,w.width+.025,0xa5cbd0,r,.38);glass.userData.semantic='FROSTED_CLERESTORY';}
+  if(len>5.5){const glass=box(b,x,2.35,z,Math.max(.6,len-.7),.55,w.width+.025,0xa5cbd0,r,.38);glass.userData.semantic='FROSTED_CLERESTORY';
+   const joints=Math.min(12,Math.floor(len/1.45));for(let i=1;i<joints;i++){const u=i/joints,px=a[0]+dx*u,py=a[1]+dy*u;const joint=box(b,px,1.62,-py,.024,3.22,w.width+.04,0xcbd1ce,r);detail(joint,'WALL_PANEL_OR_CONTROL_JOINT_REFERENCE');buildingDetailStats.wallPanelJoints++;}}
  }
  const roomWall=(a,c,room)=>{const dx=c[0]-a[0],dy=c[1]-a[1],len=Math.hypot(dx,dy);if(len<.25)return;const r=Math.atan2(dy,dx),x=(a[0]+c[0])/2,z=-(a[1]+c[1])/2;
   const lower=box(b,x,1.05,z,len,2.10,.13,0xe4e7e3,r,.96);lower.castShadow=true;lower.userData={semantic:'PRESS_ROOM_LOWER_PARTITION',machineId:room.machineId,roomCentered:true,accuracy:'FUNCTIONAL_PARTITION_VISUALIZATION'};
@@ -103,7 +104,7 @@ export function buildActualFactory(layout,fleet){
   const personnel=d.width<1.8;g.userData={semantic:'DOOR',evidence:d.evidence,clearanceAdjusted:d.clearanceAdjusted,sourcePosition:[d.sourceX,d.sourceY],openingTypeReference:personnel?'PERSONNEL_HINGED':'WIDE_SECTIONAL_OR_SLIDING_REFERENCE',asBuiltTypeVerified:false};
   const h=personnel?2.45:3.05;box(g,-d.width/2,h/2,0,.095,h,.18,0x526b75);box(g,d.width/2,h/2,0,.095,h,.18,0x526b75);box(g,0,h-.045,0,d.width+.18,.09,.18,0x526b75);
   if(personnel){buildingDetailStats.doorPersonnel++;const leaf=box(g,-d.width/2+.08,1.16,-d.width*.43,d.width*.96,2.30,.052,0x9db5bd,Math.PI/2.35);leaf.castShadow=true;detail(leaf,'PERSONNEL_DOOR_LEAF_REFERENCE');const handle=new T.Mesh(new T.SphereGeometry(.035,8,6),material(0xd5c6a2));handle.position.set(d.width*.34,1.08,-.055);leaf.add(handle);}
-  else{buildingDetailStats.doorWide++;for(let yy=.22;yy<h-.18;yy+=.22){const slat=box(g,0,yy,.035,d.width-.12,.19,.045,yy>h*.58?0x8299a1:0x9caeb3);detail(slat,'WIDE_DOOR_SECTIONAL_SLAT_REFERENCE');}for(const sx of [-d.width/2+.10,d.width/2-.10])detail(box(g,sx,h/2,.08,.055,h-.18,.055,0x42565f),'WIDE_DOOR_GUIDE_TRACK_REFERENCE');}
+  else{buildingDetailStats.doorWide++;for(let yy=.22;yy<h-.18;yy+=.22){const slat=box(g,0,yy,.035,d.width-.12,.19,.045,yy>h*.58?0x8299a1:0x9caeb3);detail(slat,'WIDE_DOOR_SECTIONAL_SLAT_REFERENCE');}for(const sx of [-d.width/2+.10,d.width/2-.10])detail(box(g,sx,h/2,.08,.055,h-.18,.055,0x42565f),'WIDE_DOOR_GUIDE_TRACK_REFERENCE');for(const sx of [-d.width/2-.25,d.width/2+.25]){detail(box(g,sx,.46,-.28,.17,.92,.17,0xe2b428),'WIDE_DOOR_BOLLARD_REFERENCE');detail(box(g,sx,.61,-.28,.18,.10,.18,0x303b42),'WIDE_DOOR_BOLLARD_CAP_REFERENCE');buildingDetailStats.doorProtection++;}}
  }
  const addCurtain=(d,semantic='PVC_CURTAIN',machineId=null)=>{const g=new T.Group();g.position.set(d.x,0,-d.y);g.rotation.y=d.rotation*Math.PI/180;b.add(g);g.userData={semantic,evidence:d.evidence,clearanceAdjusted:d.clearanceAdjusted,sourcePosition:[d.sourceX,d.sourceY],machineId};
   box(g,0,3.12,0,d.width+.32,.18,.2,0x526e7c);box(g,-d.width/2-.12,1.55,0,.14,3.1,.2,0x526e7c);box(g,d.width/2+.12,1.55,0,.14,3.1,.2,0x526e7c);
@@ -134,9 +135,9 @@ export function buildActualFactory(layout,fleet){
   }
   // Portal rafters / transverse frames.
   for(let zz=z-d/2+3;zz<z+d/2;zz+=6){
-   const eave=line(layers.roof,new T.Vector3(x-w/2,4.35,zz),new T.Vector3(x+w/2,4.35,zz),.055,0x4d6570);detail(eave,'PORTAL_EAVE_TIE_REFERENCE');
-   const r1=line(layers.roof,new T.Vector3(x-w/2,4.35,zz),new T.Vector3(x,6.85,zz),.075,0x4d6570);detail(r1,'PORTAL_RAFTER_REFERENCE');
-   const r2=line(layers.roof,new T.Vector3(x,6.85,zz),new T.Vector3(x+w/2,4.35,zz),.075,0x4d6570);detail(r2,'PORTAL_RAFTER_REFERENCE');
+   const eave=line(b,new T.Vector3(x-w/2,4.35,zz),new T.Vector3(x+w/2,4.35,zz),.055,0x4d6570);detail(eave,'PORTAL_EAVE_TIE_REFERENCE');
+   const r1=line(b,new T.Vector3(x-w/2,4.35,zz),new T.Vector3(x,6.85,zz),.075,0x4d6570);detail(r1,'PORTAL_RAFTER_REFERENCE');
+   const r2=line(b,new T.Vector3(x,6.85,zz),new T.Vector3(x+w/2,4.35,zz),.075,0x4d6570);detail(r2,'PORTAL_RAFTER_REFERENCE');buildingDetailStats.primaryRoofFrames++;
   }
   // Longitudinal purlins sit below the cladding and make the roof read as a real industrial frame.
   const purlinStep=Math.max(2.6,Math.min(5,half/5));for(let rx=-half+purlinStep;rx<half;rx+=purlinStep){const py=roofY(rx)-.12;const p=line(layers.roof,new T.Vector3(x+rx,py,z-d/2+.35),new T.Vector3(x+rx,py,z+d/2-.35),.028,0x6f858c);detail(p,'ROOF_PURLIN_REFERENCE');buildingDetailStats.roofPurlins++;}
