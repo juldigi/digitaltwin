@@ -715,7 +715,27 @@ on('#tool-simulation',()=>{showPanel();renderPanel('simulation');});
 on('#labels',()=>{if(engine){engine.labels=!engine.labels;$('#labels').classList.toggle('active',engine.labels);emitDomainState({visibleLayers:{labels:engine.labels}});}});
 on('#tool-interior',()=>{if(!engine)return;if(exteriorMode)resetExteriorView();else showExteriorAll();$('#tool-interior')?.classList.toggle('active',exteriorMode);emitDomainState({inspectionMode:{interior:exteriorMode}});});
 window.addEventListener('bmj:layerchange',event=>{if(!engine)return;const {key,visible}=event.detail||{};const map={building:'building',roof:'roof',machines:'machines',labels:'labels',landscape:'landscape',reference:'reference',unidentified:'unidentified',compressedAir:'utility_compressed_air',ahuPiping:'utility_ahu_piping',ducting:'utility_ahu_ducting',utilityAnchors:'utility_anchors'};const layer=map[key];if(!layer)return;if(key==='labels'){engine.labels=Boolean(visible);$('#labels')?.classList.toggle('active',engine.labels);}engine.setFactoryLayer(layer,Boolean(visible));});
-window.addEventListener('bmj:systemfocus',event=>{if(!engine?.actualFactory?.layers)return;const system=event.detail?.system;const layerNames=system==='hvac'?['utility_ahu_ducting','utility_ahu_piping']:system==='compressedAir'?['utility_compressed_air']:['utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors'];const layers=layerNames.map(name=>engine.actualFactory.layers[name]).filter(Boolean);if(!layers.length){toast('Routing sistem ini belum tersedia.');return;}setView('factory');for(const name of layerNames)engine.setFactoryLayer(name,true);engine.fitObjects?.(layers);});
+window.addEventListener('bmj:systemfocus',event=>{
+ if(!engine?.actualFactory?.layers)return;const system=event.detail?.system;
+ const layerNames=system==='hvac'?['utility_ahu_ducting','utility_ahu_piping']:system==='compressedAir'?['utility_compressed_air']:system==='routing'?['utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors']:[];
+ const layers=layerNames.map(name=>engine.actualFactory.layers[name]).filter(Boolean),routing=engine.actualFactory.utilityRouting||engine.actualFactory.root?.userData?.utilityRouting||null;
+ const wantedSystems=system==='hvac'?['AHU_PIPING','AHU_DUCTING']:system==='compressedAir'?['COMPRESSED_AIR']:system==='routing'?['COMPRESSED_AIR','AHU_PIPING','AHU_DUCTING']:[];
+ const networks=(routing?.systems||[]).filter(item=>wantedSystems.includes(item.system));
+ const equipment=system==='hvac'?MACHINE_REGISTRY.filter(m=>/^AHU\b/i.test(m.name)):system==='compressedAir'?MACHINE_REGISTRY.filter(m=>/COMPRESSOR/i.test(m.name)):system==='routing'?MACHINE_REGISTRY.filter(m=>/^AHU\b/i.test(m.name)||/COMPRESSOR/i.test(m.name)):[];
+ if(layers.length){setView('factory');for(const name of layerNames)engine.setFactoryLayer(name,true);engine.fitObjects?.(layers);}
+ else if(system==='water'||system==='electrical')toast('Routing terpisah sistem ini belum tersedia. Model pabrik tetap dipertahankan tanpa mengarang jalur as-built.');
+ dispatchEvent(new CustomEvent('bmj:systemcontext',{detail:{
+  system,
+  title:system==='hvac'?'HVAC':system==='compressedAir'?'Compressed Air':system==='routing'?'Utility Routing':system==='water'?'Water / IPAL':'Electrical',
+  available:layers.length>0,
+  routeMode:routing?.mode||'BELUM TERSEDIA',
+  actualRoutingApplied:routing?.actualRoutingApplied===true,
+  networks:networks.map(item=>({system:item.system,status:item.status,nodeCount:item.nodeCount,segmentCount:item.segmentCount,equipmentAnchorCount:item.equipmentAnchorCount,actualRouteVerified:item.actualRouteVerified===true})),
+  equipment:equipment.map(m=>({machineId:m.machineId,name:m.name,model:m.model,sapCode:m.sapCode,area:m.area})),
+  boundary:system==='water'?'IPAL equipment tersedia pada model bangunan, tetapi routing water/process piping terpisah belum dipetakan sebagai network terverifikasi.':system==='electrical'?'Electrical tetap mengikuti model bangunan; single-line diagram, cable tray, panel feeder, dan routing kabel aktual belum tersedia.':'Routing yang tampil adalah scaffold/template sampai drawing as-built atau verifikasi lapangan diterapkan.'
+ }}));
+});
+window.addEventListener('bmj:systemassetselect',async event=>{const machine=MACHINE_REGISTRY_BY_ID.get(event.detail?.machineId);if(machine)await openAssetContext(machine);});
 on('#fullscreen',async()=>{if(!document.fullscreenEnabled){toast('Layar penuh tidak didukung browser ini.');return;}if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();});
 window.addEventListener('offline',()=>{$('#connection').textContent='Mode lokal';toast('Koneksi data terputus. Aplikasi tetap dapat digunakan secara lokal.');});window.addEventListener('online',()=>{$('#connection').textContent=role?'Data tersambung':'Mode lokal';if(role)request('/api/state').then(acceptState).then(()=>{$('#connection').textContent='Data tersambung';toast('Data berhasil diperbarui.');}).catch(e=>toast(e.message,true));});
 try{const config=await fetch('./config.json').then(r=>r.json());apiBase=localStorage.getItem('offset5-api-base')||config.apiBase||'';if(cacheEnabled&&apiBase){const cached=await cache.get(apiBase);if(cached?.state){state=cached.state;engine?.loadLayout(activeLayout());renderStatus();renderPanel();$('#connection').textContent='Data perangkat · '+new Date(cached.savedAt).toLocaleDateString('id-ID');}}}catch(e){toast('Data tersimpan tidak dapat dibaca. Mode lokal tetap tersedia.',true);}
