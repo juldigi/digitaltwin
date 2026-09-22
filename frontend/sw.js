@@ -1,4 +1,4 @@
-const VERSION='factory-digital-twin-v133-compressor-airflow-piping-r2-20260922';
+const VERSION='factory-digital-twin-v134-compressor-pressure-condensate-20260922';
 const SHELL=['./','./index.html','./config.json','./assets/favicon.svg',
   './assets/splash-industrial-v79.webp',
   './app-shell-v79.css',
