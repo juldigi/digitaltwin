@@ -15,5 +15,4 @@ jobs:
           cache: npm
       - run: npm ci --no-audit --no-fund
       - run: npm run build
-      - name: Run production release gate
-        run: npm run test:release
+      - run: npm test

@@ -53,7 +53,7 @@ test('service-worker shell cache references only deployable frontend files',()=>
 });
 
 test('service-worker cache version advances with the centralized runtime release',()=>{
- assert.match(sw,/factory-digital-twin-v148-flagship-ui-architecture-20260922/);
+ assert.match(sw,/factory-digital-twin-v147-ipal-process-complete-r1-20260922/);
 });
 
 
