@@ -1560,10 +1560,10 @@ export class ReferenceProcessSimulation{
   this.family=template.cfg.family;
   this.stages=template.cfg.profile?.process||template.cfg.modules;if(this.family==='ctp')this.stages=this.stages.filter((_,i)=>i!==4);this.cycle=Math.max(8,this.stages.length*1.35);
   this.motions=this.blocked?[]:template.activeMeshes.filter(m=>m.userData.motion&&!m.userData.referencePlaceholder&&m.userData.simulationEnabled!==false).map(mesh=>({mesh,motion:mesh.userData.motion,position:mesh.position.clone(),quaternion:mesh.quaternion.clone()}));
- this.pathVisible=['compressor','ahu'].includes(this.family);this.inkFlowVisible=false;this.processPiece=null;this.processMaterial=null;this.processGeometry=null;this.blanker=null;this.collator=null;this.collatorSheets=[];this.collatorSheetGeometry=null;this.collatorSheetMaterial=null;this.imagesetter=null;this.imagesetterMedia=null;this.imagesetterMediaGeometry=null;this.imagesetterMediaMaterial=null;this.zund=null;this.zundMaterial=null;this.zundMaterialGeometry=null;this.zundMaterialMaterial=null;this.ahu=null;this.ahuParticles=[];this.ahuParticleGeometry=null;this.ahuParticleMaterial=null;this.ahuReturnParticleMaterial=null;this.ahuOutdoorParticleMaterial=null;this.compressor=null;this.compressorParticles=[];this.compressorParticleGeometry=null;this.compressorAmbientMaterial=null;this.compressorAirMaterial=null;this.compressorOilMaterial=null;this.compressorCondensateMaterial=null;this.folder=null;this.folderBlank=null;this.folderGeometries=[];this.folderMaterials=[];if(!this.blocked)this.buildProcessPiece();if(!this.blocked&&this.family==='blanker')this.bindBlanker();if(!this.blocked&&this.family==='collator')this.bindCollator();if(!this.blocked&&this.family==='imagesetter')this.bindImagesetter();if(!this.blocked&&this.family==='zund')this.bindZund();if(!this.blocked&&this.family==='compressor')this.bindCompressor();if(!this.blocked&&this.family==='ahu')this.bindAHU();if(!this.blocked&&this.family==='folder')this.bindFolder();
+ this.pathVisible=['compressor','ahu'].includes(this.family);this.inkFlowVisible=false;this.processPiece=null;this.processMaterial=null;this.processGeometry=null;this.blanker=null;this.collator=null;this.collatorSheets=[];this.collatorSheetGeometry=null;this.collatorSheetMaterial=null;this.ctp=null;this.ctpFlatPlate=null;this.ctpFlatGeometry=null;this.ctpWrappedGroup=null;this.ctpWrappedPlate=null;this.ctpWrappedGeometry=null;this.ctpPlateMaterial=null;this.imagesetter=null;this.imagesetterMedia=null;this.imagesetterMediaGeometry=null;this.imagesetterMediaMaterial=null;this.zund=null;this.zundMaterial=null;this.zundMaterialGeometry=null;this.zundMaterialMaterial=null;this.ahu=null;this.ahuParticles=[];this.ahuParticleGeometry=null;this.ahuParticleMaterial=null;this.ahuReturnParticleMaterial=null;this.ahuOutdoorParticleMaterial=null;this.compressor=null;this.compressorParticles=[];this.compressorParticleGeometry=null;this.compressorAmbientMaterial=null;this.compressorAirMaterial=null;this.compressorOilMaterial=null;this.compressorCondensateMaterial=null;this.folder=null;this.folderBlank=null;this.folderGeometries=[];this.folderMaterials=[];if(!this.blocked)this.buildProcessPiece();if(!this.blocked&&this.family==='blanker')this.bindBlanker();if(!this.blocked&&this.family==='collator')this.bindCollator();if(!this.blocked&&this.family==='ctp')this.bindCTP();if(!this.blocked&&this.family==='imagesetter')this.bindImagesetter();if(!this.blocked&&this.family==='zund')this.bindZund();if(!this.blocked&&this.family==='compressor')this.bindCompressor();if(!this.blocked&&this.family==='ahu')this.bindAHU();if(!this.blocked&&this.family==='folder')this.bindFolder();
  }
  buildProcessPiece(){
-  const family=this.family;if(['compressor','ahu','collator','imagesetter','zund','folder'].includes(family))return;
+  const family=this.family;if(['compressor','ahu','collator','ctp','imagesetter','zund','folder'].includes(family))return;
   const bounds=new THREE.Box3().setFromObject(this.root),size=bounds.getSize(new THREE.Vector3()),center=bounds.getCenter(new THREE.Vector3());
   const metal=['ctp','imagesetter','zund'].includes(family);
   const blanker=family==='blanker';
@@ -1654,6 +1654,44 @@ export class ReferenceProcessSimulation{
    }
   }
   this.collator.activeFeedCount=activeFeedCount;this.collator.completedSheetsInSet=completedInSet;
+ }
+ bindCTP(){
+  const role=target=>{let found=null;this.template.root.traverse(o=>{if(!found&&o.userData?.mechanismRole===target)found=o;});return found;};
+  this.ctp={drum:role('external-imaging-drum'),laser:role('heidelberg-laser-carriage'),clamps:[],plateLoaded:false,plateClamped:false,exposureActive:false,laserTraverseActive:false,punchInstalledVerified:this.template.root.userData.suprasetterOptions?.internalPunch==='INSTALLED_VERIFIED'};
+  this.template.root.traverse(o=>{if(o.userData?.mechanismRole==='plate-clamp-reference')this.ctp.clamps.push(o);});
+  this.ctpPlateMaterial=new THREE.MeshStandardMaterial({color:0xbac1c4,roughness:.38,metalness:.22,side:THREE.DoubleSide});
+  this.ctpFlatGeometry=new THREE.BoxGeometry(.78,.012,1.00);
+  this.ctpFlatPlate=new THREE.Mesh(this.ctpFlatGeometry,this.ctpPlateMaterial);this.ctpFlatPlate.name='SUPRASETTER-FLAT-PLATE-REFERENCE';this.ctpFlatPlate.visible=false;this.root.add(this.ctpFlatPlate);
+  const seg=28,r=.355,w=1.00,a0=-Math.PI*.72,a1=Math.PI*.72,verts=[],idx=[];
+  for(let i=0;i<=seg;i++){const a=THREE.MathUtils.lerp(a0,a1,i/seg),x=Math.cos(a)*r,y=Math.sin(a)*r;verts.push(x,y,-w/2,x,y,w/2);}
+  for(let i=0;i<seg;i++){const j=i*2;idx.push(j,j+2,j+1,j+2,j+3,j+1);}
+  this.ctpWrappedGeometry=new THREE.BufferGeometry();this.ctpWrappedGeometry.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));this.ctpWrappedGeometry.setIndex(idx);this.ctpWrappedGeometry.computeVertexNormals();
+  this.ctpWrappedGroup=new THREE.Group();this.ctpWrappedGroup.position.set(0,.82,0);this.root.add(this.ctpWrappedGroup);
+  this.ctpWrappedPlate=new THREE.Mesh(this.ctpWrappedGeometry,this.ctpPlateMaterial);this.ctpWrappedPlate.name='SUPRASETTER-WRAPPED-PLATE-REFERENCE';this.ctpWrappedPlate.visible=false;this.ctpWrappedGroup.add(this.ctpWrappedPlate);
+ }
+ ctpStatus(){
+  const p=this.active?(this.elapsed%this.cycle)/this.cycle:0;
+  let idx=0,loading=false,clamped=false,exposure=false,unloading=false;
+  if(p<.20){idx=0;loading=true;}
+  else if(p<.34){idx=1;loading=true;clamped=p>.27;}
+  else if(p<.78){idx=2;clamped=true;exposure=true;}
+  else {idx=4;unloading=true;}
+  return {p,idx,loading,clamped,exposure,unloading,laserTraverse:exposure};
+ }
+ updateCTP(){
+  if(!this.ctp)return;
+  const s=this.ctpStatus(),smooth=v=>{v=THREE.MathUtils.clamp(v,0,1);return v*v*(3-2*v);},lerp=THREE.MathUtils.lerp;
+  const flat=this.ctpFlatPlate,wrap=this.ctpWrappedPlate,group=this.ctpWrappedGroup;
+  if(s.p<.30){
+   const t=smooth(s.p/.30);flat.visible=this.active;wrap.visible=false;flat.position.set(lerp(-1.10,-.26,t),lerp(.68,.84,t),0);flat.rotation.set(0,0,lerp(0,.14,t));
+  }else if(s.p<.78){
+   flat.visible=false;wrap.visible=this.active;const t=(s.p-.30)/.48;group.rotation.z=t*Math.PI*5.6;
+  }else{
+   const t=smooth((s.p-.78)/.22);flat.visible=this.active;wrap.visible=false;flat.position.set(lerp(.28,1.06,t),lerp(.84,.66,t),0);flat.rotation.set(0,0,lerp(-.12,0,t));
+  }
+  if(this.ctp.drum&&s.exposure){group.rotation.z=this.ctp.drum.rotation.z;}
+  if(this.ctp.laser?.material?.emissive){this.ctp.laser.material.emissive.setHex(s.exposure?0x4c1515:0);this.ctp.laser.material.emissiveIntensity=s.exposure?.65:0;}
+  this.ctp.plateLoaded=s.p>=.18&&s.p<.96;this.ctp.plateClamped=s.clamped;this.ctp.exposureActive=s.exposure;this.ctp.laserTraverseActive=s.laserTraverse;
  }
  bindImagesetter(){
   const role=target=>{let found=null;this.template.root.traverse(o=>{if(!found&&o.userData?.mechanismRole===target)found=o;});return found;};
