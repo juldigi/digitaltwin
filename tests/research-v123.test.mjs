@@ -277,7 +277,7 @@ test('V123 R4 collator uses bounded multi-vendor suction-tower mechanics and per
   'feed-bin-shelf','bin-sheet-stack-reference','bin-side-guide-reference',
   'suction-rotor','feed-nip-roller-reference','bin-air-separation-nozzle',
   'vacuum-blower','vacuum-main-manifold','vacuum-bin-branch',
-  'double-miss-feed-sensor-reference','bin-empty-sheet-presence-sensor',
+  'double-feed-ir-emitter-reference','double-feed-ir-receiver-reference','bin-empty-sheet-presence-sensor',
   'vertical-gather-guide','gather-guide-plate','gather-transport-roller',
   'delivery-belt','set-jogger','downstream-finisher-interface-boundary',
   'collator-touchscreen-reference','collator-control-io-cabinet','bin-control-io-reference'
