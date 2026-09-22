@@ -555,6 +555,18 @@ function layoutDialog(){
  const input=$('#layout-file');
  if(input)input.onchange=async e=>{try{const f=e.target.files[0];if(!f)return;if(f.size>4*1024*1024)throw new Error('Ukuran file terlalu besar.');const layout=validateLayout(JSON.parse(await f.text()));const next=await request('/api/layout',{method:'PUT',data:layout});await acceptState(next);closeModal();setView('factory');toast('Denah berhasil diperbarui.');}catch(err){$('#layout-error').textContent=err.message;}};
 }
+function foundationStatusDialog(){
+ const l=activeLayout(),layoutStatus=layoutTruth(l),fidelity=l?(l.dwgFidelity||buildDwgFidelityLedger(l)):buildDwgFidelityLedger(null);
+ const placement=placementForMachine?.(FOUNDATION_SCOPE.primaryMachineId)||null,assetStatus=assetTruth(state?.asset,{placement,sourceCount:TECHNICAL_SOURCES.length});
+ const placements=Array.isArray(l?.placements)?l.placements:[],mapped=placements.filter(p=>p.status!=='UNIDENTIFIED'),unidentified=placements.filter(p=>p.status==='UNIDENTIFIED');
+ const placeholders=mapped.filter(p=>p.machineId!==FOUNDATION_SCOPE.primaryMachineId);
+ const connection=connectionTruth({online:navigator.onLine,cached:cachedDataActive,connected:Boolean(role)});
+ const unimplemented=fidelity?.unimplemented||[],reviewCount=unimplemented.reduce((sum,item)=>sum+(Number.isFinite(item.count)?item.count:0),0);
+ modal('Status Fondasi',`<div class="card accent"><h4>Phase 1 · DWG + OFFSET 5</h4><p>Status ini dihitung dari sumber layout, ledger fidelity, metadata aset, dan kondisi koneksi saat ini. Nilai yang belum didukung sumber tetap ditampilkan sebagai UNKNOWN, UNVERIFIED, APPROXIMATE, atau CONFLICTING.</p></div><h3>DWG / Pabrik</h3><dl class="data-list">${pair('Source',layoutStatus.source)+pair('Nama sumber',layoutStatus.sourceFile)+pair('Plan geometry',layoutStatus.planGeometry)+pair('Source units',layoutStatus.sourceUnits)+pair('Scale',layoutStatus.scale)+pair('Elevation',layoutStatus.elevation)+pair('Fidelity',fidelity?.preservation||'UNKNOWN')+pair('Elemen belum 3D',unimplemented.length?`${unimplemented.length} kelas · ${reviewCount||'jumlah parsial'}`:'Tidak ada yang tercatat')}</dl><h3>OFFSET 5</h3><dl class="data-list">${pair('Asset',state?.asset?.description||'OFFSET 5')+pair('Model',state?.asset?.model)+pair('Posisi',assetStatus.position)+pair('3D source',assetStatus.source3D)+pair('3D detail',assetStatus.detail3D)+pair('Data confidence',assetStatus.dataConfidence)+pair('Status operasi',assetStatus.operatingStatus)+pair('Health score',assetStatus.healthScore)+pair('Source count',assetStatus.sourceCount?assetStatus.sourceCount+' sumber':'UNKNOWN')}</dl><h3>Scope & Koneksi</h3><dl class="data-list">${pair('Aset 3D teknis','1 · OFFSET 5')+pair('Placeholder terpetakan',placeholders.length)+pair('Posisi belum teridentifikasi',unidentified.length)+pair('Koneksi data',connection)+pair('Cache lokal',cacheEnabled?(cachedDataActive?'Aktif · sedang memakai cache':'Aktif'):'Tidak aktif')}</dl><div class="actions"><button id="status-open-layout" class="primary">Fidelity DWG</button><button id="status-open-offset5" class="secondary">Detail OFFSET 5</button></div>`);
+ on('#status-open-layout',()=>{closeModal();layoutDialog();});
+ on('#status-open-offset5',()=>{closeModal();setView('machine');showPanel();renderPanel('overview');engine?.fit(engine.machine);});
+}
+addEventListener('bmj:foundationstatusrequest',foundationStatusDialog);
 function download(name,data){const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 function mappingDialog(){
  const l=state.layout;
