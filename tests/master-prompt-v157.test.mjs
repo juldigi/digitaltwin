@@ -45,11 +45,11 @@ test('placeholder route compatibility remains lightweight and cannot unlock tech
 
 test('V157 release identifiers describe the foundation-only runtime',()=>{
  assert.match(scope,/release:'V157'/);
- assert.match(html,/app-shell-v79\.css\?v=159/);
- assert.match(html,/src\/app\.js\?v=159/);
- assert.match(html,/src\/app-shell-v79\.js\?v=159/);
- assert.match(shell,/v159-status-truth-map-editor/);
- assert.match(sw,/factory-digital-twin-v159-status-truth-map-editor-20260922/);
+ assert.match(html,/app-shell-v79\.css\?v=160/);
+ assert.match(html,/src\/app\.js\?v=160/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=160/);
+ assert.match(shell,/v160-context-inspector/);
+ assert.match(sw,/factory-digital-twin-v160-context-inspector-20260922/);
 });
 
 test('offline shell also stays free from expansion runtime modules',()=>{

@@ -61,11 +61,11 @@ test('V158 keeps the V157 foundation-only startup graph while advancing interact
   assert.ok(!app.includes(forbidden),forbidden+' must remain absent from app startup graph');
   assert.ok(!engine.includes(forbidden),forbidden+' must remain absent from engine startup graph');
  }
- assert.match(html,/app-shell-v79\.css\?v=159/);
- assert.match(html,/src\/app\.js\?v=159/);
- assert.match(html,/src\/app-shell-v79\.js\?v=159/);
+ assert.match(html,/app-shell-v79\.css\?v=160/);
+ assert.match(html,/src\/app\.js\?v=160/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=160/);
  assert.match(app,/pair\('Versi aplikasi','V159'\)/);
- assert.match(shell,/v159-status-truth-map-editor/);
- assert.match(sw,/factory-digital-twin-v159-status-truth-map-editor-20260922/);
+ assert.match(shell,/v160-context-inspector/);
+ assert.match(sw,/factory-digital-twin-v160-context-inspector-20260922/);
  for(const excluded of ['machine-runtime.js','universal-machine.js','offset10.js','apm2.js','sheeting.js'])assert.ok(!sw.includes(excluded),excluded+' must not be pre-cached');
 });
