@@ -24,7 +24,8 @@ test('Asset selection updates one digital-twin context without page reload',()=>
  assert.match(app,/async function openAssetContext\(machine\)/);
  assert.match(app,/await switchActiveMachine\(route,\{historyMode:'push'\}\)/);
  assert.match(app,/selectedArea:machine\.area/);
- assert.match(app,/selectedAsset:route/);\n assert.match(app,/focusFoundationPlaceholder\(machine,\{historyMode:'push',openDialog:true\}\)/);
+ assert.match(app,/selectedAsset:route/);
+ assert.match(app,/focusFoundationPlaceholder\(machine,\{historyMode:'push',openDialog:true\}\)/);
  assert.match(app,/showPanel\(\);renderPanel\('overview'\)/);
  assert.doesNotMatch(app,/location\.reload\(\)[\s\S]*openAssetContext/);
 });
