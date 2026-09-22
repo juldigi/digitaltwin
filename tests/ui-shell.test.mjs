@@ -48,9 +48,9 @@ test('geometry baseline remains unchanged while the user interface is rebuilt',(
 });
 
 test('test-user shell uses clear user-facing navigation',()=>{
-  for(const label of ['3D','Denah','Mesin','Struktur','Exterior','Referensi','Panel','Panduan'])assert.match(html,new RegExp(label));assert.match(html,/id="taxonomy-count"/);
-  assert.match(html,/Mode uji/);
-  assert.match(html,/Siap diuji/);
+  for(const label of ['Pabrik','Aset','Sistem','Simulasi','Referensi','Bantuan','Pengaturan'])assert.match(html,new RegExp(label));assert.match(html,/id="taxonomy-count"/);
+  assert.doesNotMatch(html,/Mode uji/);
+  assert.doesNotMatch(html,/Siap diuji/);
 });
 
 test('v128 keeps one supplied BMJ identity in the global header and splash screen',()=>{
@@ -84,7 +84,7 @@ test('all static buttons are actionable and none is permanently disabled',()=>{
   }));
   assert.equal(buttons.filter(b=>/\bdisabled\b/.test(b.attrs)).length,0,'a visible static button is disabled');
   for(const b of buttons){
-    if(b.id)assert.ok(app.includes(b.id)||ui.includes(b.id),`button #${b.id} has no handler reference`);
+    if(b.id)assert.ok(app.includes(b.id)||ui.includes(b.id)||mobileStableUi.includes(b.id),`button #${b.id} has no handler reference`);
     else if(b.camera)assert.match(app,/data-camera|dataset\.camera/);
     else if(b.tab)assert.match(app,/data-tab|dataset\.tab/);
     else if(b.workbench)assert.match(ui,/data-workbench|dataset\.workbench/);
@@ -111,7 +111,7 @@ test('mobile portrait and landscape keep panels inside the viewport',()=>{
   assert.match(appShellCss,/100dvh/);
   assert.match(mobileStableUi,/visualViewport/);
   assert.match(mobileStableUi,/data-mobile-nav/);
-  assert.match(mobileStableUi,/closeNav/);
+  assert.match(mobileStableUi,/closeDrawer/);
 });
 
 test('visible shell avoids deployment and prototype terminology',()=>{
@@ -143,9 +143,9 @@ test('v41 keeps every right-sidebar taxonomy item clickable after repeated selec
 
 test('v42 opens removable exterior covers while retaining frame and interior geometry',()=>{
   assert.match(html,/id="nav-exterior"/);
-  assert.match(html,/Buka Exterior/);
+  assert.match(html,/Buka Interior/);
   assert.match(html,/data-tab="exterior"/);
-  assert.match(html,/id="asset-exterior-shortcut"/);
+  assert.doesNotMatch(html,/id="asset-exterior-shortcut"/);
   assert.match(ui,/showDetail\('exterior'\)/);
   assert.match(app,/function enableExteriorOpen\(\)/);
   assert.match(app,/engine\.setLow\(false\)/);
@@ -378,13 +378,13 @@ test('v40 labels drill through the six-level taxonomy with individually mapped g
   assert.match(experienceCss,/\.part-label\.is-reference/);
 });
 
-test('V119 adaptive shell prevents duplicate mobile drawer toggles and restores workbench visibility',()=>{
-  assert.match(appShellCss,/V119 adaptive layout hardening/);
-  assert.match(appShellCss,/\.ui-workbench-open \.engineering-workbench/);
-  assert.match(appShellCss,/var\(--app-vh,100dvh\)/);
-  assert.match(appShellCss,/body:not\(\.panel-hidden\) \.scene-bottom/);
-  assert.doesNotMatch(ui,/document\.body\.classList\.toggle\('nav-open'\)/);
-  assert.match(ui,/app-shell-v79\.js owns the nav-open toggle/);
+test('V149 adaptive shell has one overlay owner and uses the legacy drawing canvas only as the 2D workspace',()=>{
+  assert.match(appShellCss,/V149 canonical production shell/);
+  assert.match(appShellCss,/\.workspace-2d \.engineering-workbench/);
+  assert.match(appShellCss,/\.legacy-nav-entry,\.legacy-tool-entry/);
+  assert.doesNotMatch(ui,/addEventListener\('keydown'/);
+  assert.doesNotMatch(ui,/#ui-backdrop'\)\?\.addEventListener/);
+  assert.match(mobileStableUi,/document\.addEventListener\('keydown'/);
 });
 
 test('V79 interface keeps the scene primary, readable and secondary panels dismissible',()=>{
@@ -412,9 +412,9 @@ test('runtime binds every workbench button and provides a visual fallback withou
   assert.match(app,/Final CU → X3 Delivery/);
 });
 
-test('startup routes splash directly to Home factory overview',()=>{
-  assert.match(html,/id="nav-machine"[^>]*>[\s\S]*?<small>Home<\/small>/);
-  assert.match(mobileStableUi,/machine:\['home','Home','nav-machine'\]/);
+test('startup routes splash directly to the Pabrik factory overview',()=>{
+  assert.match(html,/id="nav-machine"[^>]*>[\s\S]*?<small>Pabrik<\/small>/);
+  assert.match(mobileStableUi,/factory:'nav-machine'/);
   assert.match(app,/if\(engine\)showHome\(\)/);
   assert.match(app,/function showHome\(\)[\s\S]*setView\('factory'\)/);
 });
