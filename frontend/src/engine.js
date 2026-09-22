@@ -248,7 +248,7 @@ export class FactoryEngine {
       this.layoutStats.rendered++;
     }
   }
-  setFactoryLayer(name,on){if(this.actualFactory?.layers[name])this.actualFactory.layers[name].visible=!!on;if(name==='machines'){this.factoryMachineLayerVisible=!!on;this.syncPrimaryFactoryRepresentation();}}
+  setFactoryLayer(name,on){if(this.actualFactory?.layers[name])this.actualFactory.layers[name].visible=!!on;if(name==='machines'){this.factoryMachineLayerVisible=!!on;this.syncPrimaryFactoryRepresentation();}if(name==='labels')this.labels=!!on;}
   focusFactoryAsset(id){if(id===FOUNDATION_SCOPE.primaryMachineId&&this.view==='factory'&&this.primaryFactoryPlaced&&this.machine.visible){this.fit(this.machine);return true;}const o=this.actualFactory?.assets.get(id);if(o){this.fit(o);return true;}return false;}
   clearFactory(){this.actualFactory=null;this.factory.traverse(o=>{o.geometry?.dispose();if(Array.isArray(o.material))o.material.forEach(m=>{m.map?.dispose();m.dispose();});else{o.material?.map?.dispose();o.material?.dispose();}});this.factory.clear();}
   edit(on){if(on&&this.view==='factory'&&this.layout){this.machine.visible=true;this.gizmo.attach(this.machine);}else this.gizmo.detach();}
