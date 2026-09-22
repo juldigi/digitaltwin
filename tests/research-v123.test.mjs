@@ -20,7 +20,7 @@ test(`V123 research ledger contains ${V123_SOURCE_STATS.total} unique sources af
 
 test('V123 CX104 Offset 10 exposes OEM coating AirTransfer delivery brake and FoilStar sensing detail',()=>{
  const m=new Offset10MachineTemplate();
- assert.equal(m.root.userData.researchVersion,'V141');assert.ok(m.root.userData.researchSourceCount>=195);
+ assert.equal(m.root.userData.researchVersion,'V123');assert.ok(m.root.userData.researchSourceCount>=195);
  requireRoles(m,['doctor-blade-metering-edge','doctor-blade-sealing-edge','compact-anilox-bearing-unit','coating-level-sensor','airtransfer-venturi-nozzle','sheet-brake-belt-reference','sheet-brake-position-sensor','delivery-pile-height-sensor','foil-unwind-index-encoder','foil-rewind-index-encoder','foil-dancer-position-sensor']);
  assert.equal(m.findNode('o10-foilstar').userData.oemIndexingConfirmed,true);
  assert.equal(m.findNode('o10-foilstar').userData.minimumFoilThicknessMicron,6);
@@ -38,7 +38,7 @@ test('V123 CX104 Offset 8 LYYL exposes chamber doctor blade Venturi and Preset P
 
 test('V123 Diana Eye 55 exposes feeder knife air blowing ultrasonic double-sheet camera and bounded ejection',()=>{
  const m=new DianaEye55MachineTemplate();
- assert.equal(m.root.userData.researchVersion,'V123');assert.ok(m.root.userData.researchSourceCount>=195);
+ assert.equal(m.root.userData.researchVersion,'V141');assert.ok(m.root.userData.researchSourceCount>=195);
  requireRoles(m,['patented-feeding-knife-reference','vibration-motor-reference','feeder-air-manifold','feeder-air-blowing-nozzle','ultrasonic-double-sheet-emitter','ultrasonic-double-sheet-receiver','reject-confirmation-sensor']);
  assert.equal(m.findNode('diana55-feed-double').userData.oemTechnology,'ULTRASONIC_DOUBLE_SHEET_DETECTION');
  assert.equal(m.findNode('diana55-light').userData.oemIlluminationModes,4);
