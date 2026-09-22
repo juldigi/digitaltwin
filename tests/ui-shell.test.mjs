@@ -304,13 +304,13 @@ test('v54 keeps APM2 as a dedicated 3D machine with process-specific UI and no i
   assert.match(app,/\['offset10','apm2','sheeting'\]\.includes\(requested\)/);
   assert.match(app,/IS_APM2=MACHINE_KEY==='apm2'/);
   assert.match(app,/ACTIVE_ROOT=IS_OFFSET10\?'O10':IS_APM2\?'APM2':IS_SHEETING\?'SH':IS_GENERIC\?GENERIC_ROOT:'O5'/);
-  assert.match(app,/normalizeMachineKey\(machine\.machineId\)/);
+  assert.match(app,/normalizeMachineKey\(route\)/);
   assert.match(app,/switchActiveMachine\(route\)/);
   assert.match(engine,/switchMachine\(key\)/);
   assert.match(app,/Simulasi Proses APM 2/);
   assert.match(app,/register dan SideLay/);
   assert.match(app,/suffix E\/SE\/CER\/BMA tidak tersedia/);
-  assert.match(app,/normalizeMachineKey\(machine\.machineId\)/);
+  assert.match(app,/normalizeMachineKey\(route\)/);
   assert.match(runtime,/APM2MachineTemplate/);
   assert.match(runtime,/APM2ProcessSimulation/);
   assert.match(runtime,/if\(k==='apm2'\)return new APM2MachineTemplate\(\)/);
@@ -331,7 +331,7 @@ test('v54 keeps APM2 as a dedicated 3D machine with process-specific UI and no i
 
 test('v57 routes Sheeting Lexus as a dedicated right-to-left twin',()=>{
   assert.match(app,/IS_SHEETING=MACHINE_KEY==='sheeting'/);
-  assert.match(app,/normalizeMachineKey\(machine\.machineId\)/);
+  assert.match(app,/normalizeMachineKey\(route\)/);
   assert.match(app,/SHEETING LEXUS/);
   assert.match(app,/RIGHT → LEFT/);
   assert.match(app,/Simulasi Proses Sheeting/);
