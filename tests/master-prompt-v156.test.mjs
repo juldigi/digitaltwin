@@ -12,9 +12,12 @@ const sw=fs.readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 test('OFFSET 5 full technical model is integrated at its factory placement without scale fitting',()=>{
  assert.match(engine,/primaryFactoryPlacement\(layout=this\.layout\)/);
  assert.match(engine,/FOUNDATION_SCOPE\.primaryMachineId/);
- assert.match(engine,/this\.machine\.position\.set\(p\.x,Number\.isFinite\(p\.z\)\?p\.z:0,-p\.y\)/);
- assert.match(engine,/this\.machine\.rotation\.y=\(Number\(p\.rotation\)\|\|0\)\*Math\.PI\/180/);
- assert.match(engine,/this\.machine\.scale\.setScalar\(Number\.isFinite\(p\.scale\)&&p\.scale>0\?p\.scale:1\)/);
+ assert.match(engine,/localBox=new THREE\.Box3\(\)\.setFromObject\(this\.machine\)/);
+ assert.match(engine,/horizontalAnchor=new THREE\.Vector3\(localCenter\.x,0,localCenter\.z\)/);
+ assert.match(engine,/this\.machine\.position\.set\(p\.x-horizontalAnchor\.x/);
+ assert.match(engine,/this\.machine\.rotation\.y=rotation/);
+ assert.match(engine,/this\.machine\.scale\.setScalar\(scale\)/);
+ assert.match(engine,/factoryAnchorMode:'DXF_FOOTPRINT_CENTER_TO_MODEL_BOUNDS'/);
  assert.match(engine,/factoryScaleFitApplied:false/);
  assert.match(engine,/factoryIntegrated:true/);
 });
