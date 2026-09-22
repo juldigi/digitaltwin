@@ -397,6 +397,9 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.root.userData.detailPass='V123_R4_MULTI_VENDOR_SUCTION_COLLATOR_RECONSTRUCTION';
   this.root.userData.exactCollatorOemVerified=false;
   this.root.userData.exactCollatorModelVerified=false;
+  const towerDetails=this.group(this.root,'collator-tower-detail','Collator tower service detail',[0,0,0],[0,.12,0]);
+  for(let b=0;b<10;b++){const y=.34+b*.145;const lip=this.cover(this.box(towerDetails,[.68,.035,.045],[-.70,y+.09,-.57],'body',.004));this.tag(lip,'collator-bin-front-lip-reference','MULTI_VENDOR_COLLATOR_VISUAL');const knob=this.cover(this.cyl(towerDetails,.024,.028,[-.35,y+.09,-.60],'dark','z'));this.tag(knob,'collator-bin-adjustment-knob-reference','MULTI_VENDOR_COLLATOR_VISUAL');}
+  const plenum=this.cover(this.box(towerDetails,[.28,1.55,.18],[-1.08,1.02,.48],'dark',.018));this.tag(plenum,'collator-bin-air-plenum-reference','MULTI_VENDOR_COLLATOR_VISUAL');
   this.root.userData.modeledReferenceBinCount=10;
   this.root.userData.installedBinCountVerified=false;
   this.root.userData.crossFamilyReferences=['HORIZON_VAC1000','HORIZON_VAC600H','DUPLO_DSC10_60I','VERTICAL_COLLATOR_PATENT'];
@@ -631,6 +634,9 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  enrichZund(){
   const table=this.activeGroup(1),beamUnit=this.activeGroup(2),carUnit=this.activeGroup(3),tools=this.activeGroup(4),sense=this.activeGroup(5),ctl=this.activeGroup(6);
   this.root.userData.detailPass='V123_R7_ZUND_MODULAR_PLATFORM_RECONSTRUCTION';
+  const edge=this.group(this.root,'zund-table-edge-detail','Zünd flatbed edge / cable management',[0,0,0],[0,.12,0]);
+  for(const z of [-1.27,1.27]){const rail=this.cover(this.box(edge,[5.45,.16,.10],[0,.55,z],'dark',.015));this.tag(rail,'zund-table-side-rail-reference','ZUND_G3_S3_VISUAL');}
+  const chain=this.group(edge,'zund-cable-chain-reference','Travelling cable-chain reference',[0,0,0],[0,.12,0]);for(let x=-2.20;x<=2.20;x+=.20){const link=this.box(chain,[.14,.08,.12],[x,.80,1.18],'dark',.015);this.tag(link,'zund-cable-chain-link-reference','ZUND_FAMILY_VISUAL');}
   this.root.userData.exactZundModelVerified=false;
   this.root.userData.familyCandidates=['G3','S3'];
   this.root.userData.installedToolPackageVerified=false;
@@ -1275,6 +1281,9 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   const plc=this.group(m7.a,'qf100-plc-cabinet','PLC / servo cabinet',[0,0,0],[0,.12,.12]);
   this.cover(this.box(m7.g,[.52,1.52,.62],[0,.86,0],'body',.035));
 
+  const lowerCab=this.group(this.root,'qf100-lower-cabinet','Lower service cabinet',[0,0,0],[0,.12,0]);
+  for(const x of [-1.22,-.40,.42,1.24]){const door=this.cover(this.box(lowerCab,[.72,.58,.055],[x,.36,-.86],'body',.018));this.tag(door,'qf-lower-service-door-reference','QF_CLOSE_FAMILY_VISUAL');const latch=this.cover(this.box(lowerCab,[.035,.11,.026],[x+.25,.37,-.895],'dark',.004));this.tag(latch,'qf-service-door-latch-reference','QF_CLOSE_FAMILY_VISUAL');}
+  const stripe=this.cover(this.box(lowerCab,[3.74,.065,.060],[0,.69,-.89],'orange',.006));this.tag(stripe,'qf-family-accent-stripe-reference','QF_CLOSE_FAMILY_VISUAL');
   this.root.userData.familyVisualEnvelope=[4.31,1.75,1.95];
   this.root.userData.familyVisualEnvelopeSource='LQF-1080CS_CLOSE_FAMILY_ONLY';
   this.root.userData.engineeringDimensions=false;
@@ -1336,6 +1345,12 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.cover(this.box(shell,[2.20,.38,1.50],[-.05,1.47,0],'body',.07));
   this.cover(this.box(shell,[1.36,.48,1.62],[-.35,.42,0],'dark',.05));
   shell.userData.visualBoundary='MULTI_MODEL_SUPRASETTER_FAMILY_SILHOUETTE_NOT_MODEL_IDENTIFICATION';
+  const facade=this.group(this.root,'ctp-family-facade','Suprasetter family facade detail',[0,0,0],[0,.16,0]);
+  const entrySlot=this.cover(this.box(facade,[.62,.095,.86],[-1.12,.67,-.82],'dark',.012));this.tag(entrySlot,'ctp-plate-entry-slot-reference','SUPRASETTER_FAMILY_VISUAL');
+  const outputSlot=this.cover(this.box(facade,[.58,.085,.82],[1.03,.64,-.82],'dark',.012));this.tag(outputSlot,'ctp-plate-output-slot-reference','SUPRASETTER_FAMILY_VISUAL');
+  for(const y of [.56,.68,.80,.92]){const vent=this.cover(this.box(facade,[.52,.030,.040],[.72,y,.81],'dark',.003));this.tag(vent,'ctp-cooling-vent-reference','SUPRASETTER_FAMILY_VISUAL');}
+  const hmiPost=this.cover(this.box(facade,[.12,.72,.14],[-1.08,.76,-1.00],'dark',.018));this.tag(hmiPost,'ctp-hmi-post-reference','SUPRASETTER_FAMILY_VISUAL');
+  const hmi=this.cover(this.box(facade,[.30,.22,.035],[-1.08,1.18,-1.00],'glass',.010));this.tag(hmi,'ctp-hmi-display-reference','SUPRASETTER_FAMILY_VISUAL');
 
   const m1=this.mod(1,[-.84,0,0],[-.34,.18,0]);
   this.group(m1.a,'ctp-manual-entry','Manual plate entry',[0,0,0],[0,.10,.10]);
@@ -1376,6 +1391,12 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.cover(this.box(shell,[2.05,1.05,1.10],[0,.69,0],'body',.07));
   this.cover(this.box(shell,[1.72,.24,1.05],[.04,1.28,0],'body',.05));
   shell.userData.visualBoundary='MULTI_MODEL_SCREEN_FTR_KATANA_SILHOUETTE_NOT_MODEL_IDENTIFICATION';
+  const facade=this.group(this.root,'ctf-family-facade','SCREEN imagesetter family facade detail',[0,0,0],[0,.16,0]);
+  const cassetteDoor=this.cover(this.box(facade,[.64,.78,.055],[-.70,.58,-.58],'body',.030));this.tag(cassetteDoor,'ctf-media-cassette-door-reference','SCREEN_FTR_KATANA_VISUAL');
+  const scanDoor=this.cover(this.box(facade,[.70,.82,.055],[.05,.65,-.58],'body',.030));this.tag(scanDoor,'ctf-scanner-service-door-reference','SCREEN_FTR_KATANA_VISUAL');
+  const outDoor=this.cover(this.box(facade,[.44,.62,.055],[.72,.53,-.58],'body',.025));this.tag(outDoor,'ctf-output-service-door-reference','SCREEN_FTR_KATANA_VISUAL');
+  const mediaSlot=this.cover(this.box(facade,[.42,.060,.060],[.88,.75,-.60],'dark',.008));this.tag(mediaSlot,'ctf-media-output-slot-reference','SCREEN_FTR_KATANA_VISUAL');
+  const statusPanel=this.cover(this.box(facade,[.26,.14,.030],[-.64,1.10,-.61],'glass',.008));this.tag(statusPanel,'ctf-status-panel-reference','SCREEN_FTR_KATANA_VISUAL');
 
   const m1=this.mod(1,[-.72,0,0],[-.32,.18,0]);
   this.group(m1.a,'ctf-media-cassette','Media supply cassette',[0,0,0],[-.12,.10,0]);
