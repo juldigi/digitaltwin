@@ -2,6 +2,7 @@ import * as T from 'three';
 import {FACTORY_FLEET_GZIP} from './data/factory-fleet-data.js';
 import {decodePlantData} from './data/plant-actual.js';
 import {buildUtilityRoutingScaffold} from './utility-routing.js';
+import {V142_SOURCE_STATS} from './data/research-v142.js';
 let fleetCache;
 export async function loadFactoryFleet(){return fleetCache||(fleetCache=await decodePlantData(FACTORY_FLEET_GZIP));}
 export const MACHINE_SERVICE_CLEARANCE=1.2;
@@ -50,9 +51,14 @@ export function buildActualFactory(layout,fleet){
   const texture=new T.CanvasTexture(c);texture.colorSpace=T.SRGBColorSpace;const s=new T.Sprite(new T.SpriteMaterial({map:texture,depthTest:false}));s.position.set(x,y,z);s.scale.set(width,width*80/512,1);parent.add(s);return s;
  };
  const data=layout.actual,b=layers.building;
+ const buildingDetailStats={floorControlJoints:0,columnBasePlates:0,columnAnchorBolts:0,roofPurlins:0,roofBracing:0,roofGutters:0,roofDownpipes:0,linearLights:0,doorPersonnel:0,doorWide:0,dockSafetyElements:0};
+ const detail=(o,semantic,accuracy='INDUSTRIAL_REALISM_REFERENCE_NOT_AS_BUILT')=>{if(o)o.userData={...o.userData,semantic,accuracy,researchVersion:'V142'};return o;};
  // The outline follows the source production hall and attached office/service wings.
  const outline=[[-4,2],[6,2],[6,6],[96,6],[96,90],[90,96],[73,96],[73,103],[23,103],[23,96],[6,96],[6,55],[-5,55],[-5,11],[-4,11]];
- const shape=new T.Shape(outline.map(([x,y])=>new T.Vector2(x,y))),floor=new T.Mesh(new T.ShapeGeometry(shape),material(0xd8dcda));floor.rotation.x=-Math.PI/2;floor.position.y=-.015;floor.receiveShadow=true;b.add(floor);
+ const shape=new T.Shape(outline.map(([x,y])=>new T.Vector2(x,y))),floor=new T.Mesh(new T.ShapeGeometry(shape),material(0xd8dcda));floor.rotation.x=-Math.PI/2;floor.position.y=-.015;floor.receiveShadow=true;floor.userData={semantic:'REINFORCED_CONCRETE_FLOOR',accuracy:'SOURCE_OUTLINE_WITH_VISUAL_MATERIAL_REFERENCE'};b.add(floor);
+ // Concrete control-joint grid is a subdued realism reference, not an as-built joint survey.
+ for(let x=10;x<=94;x+=8){const j=box(b,x,.002,-51,.018,.004,86,0x7f8987);detail(j,'FLOOR_CONTROL_JOINT_REFERENCE');buildingDetailStats.floorControlJoints++;}
+ for(let y=10;y<=94;y+=8){const j=box(b,51,.002,-y,86,.004,.018,0x7f8987);detail(j,'FLOOR_CONTROL_JOINT_REFERENCE');buildingDetailStats.floorControlJoints++;}
  box(layers.landscape,47,-.25,-57,117,.35,137,0x9ea9a5);
  box(layers.landscape,47,-.06,1.8,110,.04,7.5,0x626d73);
  box(layers.landscape,-9,-.06,-53,5,.04,110,0x626d73);
@@ -73,14 +79,24 @@ export function buildActualFactory(layout,fleet){
   // Clerestory window treatment has source-aligned position, with assumed sill and glass detail.
   if(len>5.5){const glass=box(b,x,2.35,z,Math.max(.6,len-.7),.55,w.width+.025,0xa5cbd0,r,.38);glass.userData.semantic='FROSTED_CLERESTORY';}
  }
- const roomWall=(a,c,room)=>{const dx=c[0]-a[0],dy=c[1]-a[1],len=Math.hypot(dx,dy);if(len<.25)return;const r=Math.atan2(dy,dx),x=(a[0]+c[0])/2,z=-(a[1]+c[1])/2,g=box(b,x,1.82,z,len,3.64,.13,0xe4e7e3,r,.92);g.castShadow=true;g.userData={semantic:'PRESS_ROOM_WALL',machineId:room.machineId,roomCentered:true};box(b,x,.11,z,len,.22,.17,0x60757d,r);const glass=box(b,x,2.58,z,Math.max(.2,len-.16),.72,.145,0xaed8dc,r,.32);glass.userData={semantic:'PRESS_ROOM_CLERESTORY',machineId:room.machineId};};
+ const roomWall=(a,c,room)=>{const dx=c[0]-a[0],dy=c[1]-a[1],len=Math.hypot(dx,dy);if(len<.25)return;const r=Math.atan2(dy,dx),x=(a[0]+c[0])/2,z=-(a[1]+c[1])/2;
+  const lower=box(b,x,1.05,z,len,2.10,.13,0xe4e7e3,r,.96);lower.castShadow=true;lower.userData={semantic:'PRESS_ROOM_LOWER_PARTITION',machineId:room.machineId,roomCentered:true,accuracy:'FUNCTIONAL_PARTITION_VISUALIZATION'};
+  box(b,x,.11,z,len,.22,.17,0x60757d,r);
+  const glass=box(b,x,2.66,z,Math.max(.2,len-.12),1.12,.115,0xaed8dc,r,.28);glass.userData={semantic:'PRESS_ROOM_UPPER_GLAZING',machineId:room.machineId,accuracy:'FUNCTIONAL_PARTITION_VISUALIZATION'};
+  const top=box(b,x,3.25,z,len,.10,.16,0x60757d,r);top.userData={semantic:'PRESS_ROOM_GLAZING_HEAD',machineId:room.machineId};
+  const mullions=Math.max(1,Math.floor(len/1.5));for(let i=1;i<mullions;i++){const u=i/mullions,px=a[0]+dx*u,py=a[1]+dy*u;const m=box(b,px,2.66,-py,.045,1.12,.16,0x6f858a,r);m.userData={semantic:'PRESS_ROOM_GLAZING_MULLION',machineId:room.machineId};}
+ };
  for(const room of pressRooms){
   const gap=room.curtainWidth/2,leftEnd=room.centerX-gap,rightStart=room.centerX+gap;
   roomWall([room.minX,room.minY],[leftEnd,room.minY],room);roomWall([rightStart,room.minY],[room.maxX,room.minY],room);
   roomWall([room.minX,room.maxY],[room.maxX,room.maxY],room);roomWall([room.minX,room.minY],[room.minX,room.maxY],room);roomWall([room.maxX,room.minY],[room.maxX,room.maxY],room);
   const zone=box(b,room.centerX,.006,-room.centerY,room.maxX-room.minX,.012,room.maxY-room.minY,0xdde6e4,0,.18);zone.userData={semantic:'PRESS_ROOM_FLOOR',machineId:room.machineId,roomCentered:true};
  }
- for(const [x,y] of data.columns){if(intersectsMachine([x-.3,y-.3],[x+.3,y+.3]))continue;const column=box(b,x,2.25,-y,.32,4.5,.32,0x819397);column.castShadow=true;column.userData={semantic:'STRUCTURAL_COLUMN',height:4.5};box(b,x,.18,-y,.55,.36,.55,0xa1aaa8);}
+ for(const [x,y] of data.columns){if(intersectsMachine([x-.3,y-.3],[x+.3,y+.3]))continue;const column=box(b,x,2.25,-y,.32,4.5,.32,0x819397);column.castShadow=true;column.userData={semantic:'STRUCTURAL_COLUMN',height:4.5,evidence:'DXF_COLUMN_POSITION'};
+  const plate=box(b,x,.055,-y,.62,.11,.62,0x66777b);detail(plate,'COLUMN_BASE_PLATE_REFERENCE');buildingDetailStats.columnBasePlates++;
+  for(const dx of [-.22,.22])for(const dz of [-.22,.22]){const bolt=new T.Mesh(new T.CylinderGeometry(.028,.028,.08,10),material(0x4f5d61));bolt.position.set(x+dx,.11,-y+dz);bolt.userData={semantic:'COLUMN_ANCHOR_BOLT_REFERENCE',accuracy:'INDUSTRIAL_REALISM_REFERENCE_NOT_AS_BUILT'};b.add(bolt);buildingDetailStats.columnAnchorBolts++;}
+  const cap=box(b,x,4.34,-y,.54,.12,.54,0x6e8288);detail(cap,'COLUMN_EAVE_CAP_REFERENCE');
+ }
  const adjustedPortals=[];
  for(const source of data.doors){const d=resolvePortalClearance({...source,width:Math.max(.9,source.width)},serviceClearances);if(d.clearanceAdjusted)adjustedPortals.push(d);const g=new T.Group();g.position.set(d.x,0,-d.y);g.rotation.y=d.rotation*Math.PI/180;b.add(g);g.userData={semantic:'DOOR',evidence:d.evidence,clearanceAdjusted:d.clearanceAdjusted,sourcePosition:[d.sourceX,d.sourceY]};
   box(g,-d.width/2,1.25,0,.085,2.5,.16,0x526b75);box(g,d.width/2,1.25,0,.085,2.5,.16,0x526b75);box(g,0,2.47,0,d.width+.17,.09,.16,0x526b75);
