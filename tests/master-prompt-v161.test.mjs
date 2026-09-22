@@ -35,3 +35,8 @@ test('V162 exposes Systems in both navigation surfaces and keeps identifiers coh
  assert.match(shell,/v162-factory-first-systems/);
  assert.match(sw,/factory-digital-twin-v162-factory-first-systems-20260922/);
 });
+
+test('asset navigation opens an empty search instead of serializing the click event',()=>{
+ assert.match(app,/on\('#nav-assets',\(\)=>assetDialog\(\)\)/);
+ assert.doesNotMatch(app,/on\('#nav-assets',assetDialog\)/);
+});
