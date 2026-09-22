@@ -60,3 +60,17 @@ test('CI labels no longer claim obsolete UI versions',()=>{
  assert.doesNotMatch(pages,/V78/);
  assert.match(pages,/name: Verify frontend/);
 });
+
+test('References are categorized and prioritized from the active asset taxonomy context',()=>{
+ assert.match(app,/function referenceKind\(source\)/);
+ assert.match(app,/function referenceContextTokens\(\)/);
+ assert.match(app,/function contextualReferenceData\(\)/);
+ assert.match(app,/function renderReferencePanel\(\)/);
+ for(const label of ['Foto','Dokumen','Manual','Drawing / Layout','Evidence / Source'])assert.match(app,new RegExp(label.replace('/','\\/')));
+ assert.match(app,/source\.supports/);
+ assert.match(app,/taxonomyPath\(\)/);
+ assert.match(app,/activeReference/);
+ assert.match(app,/Prioritas hanya dibuat bila istilah pada taxonomy terpilih benar-benar ditemukan/);
+ assert.match(css,/\.reference-filter-strip/);
+ assert.match(css,/\.context-reference-card\.is-priority/);
+});
