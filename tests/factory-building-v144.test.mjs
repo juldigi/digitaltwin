@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 import {buildActualFactory,loadFactoryFleet} from '../frontend/src/factory-building.js';
 import {loadActualPlantLayout} from '../frontend/src/data/plant-actual.js';
 
-test('V144 adds packaging-office and warehouse realism without moving machines',async()=>{
+test('V144 packaging-office and warehouse baseline survives V145 without moving machines',async()=>{
  const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
  const built=buildActualFactory(layout,fleet),meta=built.root.userData,stats=meta.buildingDetailStats;
  assert.equal(meta.baselineId,'BMJ-250804-RED-20260921');
- assert.equal(meta.researchVersion,'V144');
- assert.equal(meta.buildingDetailPass,'V144_PACKAGING_INTERIORS_AND_WAREHOUSE_REALISM');
+ assert.equal(meta.researchVersion,'V145');
+ assert.equal(meta.buildingDetailPass,'V145_MICRO_REALISM_OFFICE_WAREHOUSE_AND_SAFETY');
  assert.equal(meta.architecturalEvidenceBoundary.notAsBuilt,true);
  assert.match(meta.assumptions.roomContents,/NOT_AS_BUILT/);
  assert.match(meta.assumptions.rmsEnvironmentIndustryReference,/NOT_PLANT_SETPOINT/);
@@ -29,7 +29,7 @@ test('V144 adds packaging-office and warehouse realism without moving machines',
  assert.deepEqual(monitor.userData.industryReference.paperboardRH,[50,55]);
 });
 
-test('V144 creates richer room interiors only where source room labels exist',async()=>{
+test('V144 room-interior rules survive V145 and remain source-label gated',async()=>{
  const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
  const built=buildActualFactory(layout,fleet),stats=built.root.userData.buildingDetailStats;
  const labels=layout.actual.labels.map(l=>l.text);
