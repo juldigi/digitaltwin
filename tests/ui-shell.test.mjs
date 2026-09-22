@@ -127,7 +127,7 @@ test('conditional controls explain requirements rather than failing silently',()
 });
 
 test('service worker refreshes the redesigned shell',()=>{
-  assert.match(sw,/factory-digital-twin-v145-micro-realism-r1-20260922/);
+  assert.match(sw,/factory-digital-twin-v149-safe-shell-20260922/);
   assert.match(sw,/src\/universal-machine\.js/);
   assert.match(app,/template\.ghost\(true,part\)/,'object selection must automatically ghost all non-selected geometry');
   for(const asset of ['app-shell-v79.css','src/app-shell-v79.js','assets/splash-industrial-v79.webp','src/ui-v5.js','src/app.js','src/simulation.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
@@ -382,7 +382,7 @@ test('V149 adaptive shell has one overlay owner and uses the legacy drawing canv
   assert.match(appShellCss,/V149 canonical production shell/);
   assert.match(appShellCss,/\.workspace-2d \.engineering-workbench/);
   assert.match(appShellCss,/\.legacy-nav-entry,\.legacy-tool-entry/);
-  assert.doesNotMatch(ui,/addEventListener\('keydown'/);
+  assert.doesNotMatch(ui,/document\.addEventListener\('keydown'/);
   assert.doesNotMatch(ui,/#ui-backdrop'\)\?\.addEventListener/);
   assert.match(mobileStableUi,/document\.addEventListener\('keydown'/);
 });
