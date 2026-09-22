@@ -26,8 +26,8 @@ test('SHARK geometry keeps feeder camera reject and collection alternatives as r
 });
 
 test('SHARK rotor whitelist excludes suction cups camera lenses and air nozzles',()=>{
- const model=new SharkN650MachineTemplate(),sim=new SharkN650ProcessSimulation(model.root,model),allowed=/^(transport-pulley|vacuum-blower|good-return|bad-return)$/;
- assert.equal(sim.rotors.length,25);assert.equal(sim.rotors.some(r=>!allowed.test(r.userData.mechanismRole||'')),false);assert.equal(sim.suckers.length,4);assert.equal(sim.airNozzles.length,3);
+ const model=new SharkN650MachineTemplate(),sim=new SharkN650ProcessSimulation(model.root,model),allowed=/^(transport-pulley|transfer-drive-motor|transfer-encoder|vacuum-blower|inspection-encoder-wheel|good-return|good-return-motor|bad-return|bad-return-motor)$/;
+ assert.equal(sim.rotors.length,30);assert.equal(sim.rotors.some(r=>!allowed.test(r.userData.mechanismRole||'')),false);assert.equal(sim.suckers.length,4);assert.equal(sim.airNozzles.length,3);
  assert.equal(model.meshes.some(m=>m.userData.rotor&&['suction-cup','camera-lens','air-nozzle'].includes(m.userData.mechanismRole)),false);sim.dispose();model.dispose();
 });
 
