@@ -21,6 +21,7 @@ const COMPONENTS=Object.freeze({
   [1,'INLET_VALVE','Load / Unload Inlet Valve','atlas-inlet-valve-group','GA/G family inlet/load-unload valve reference.'],
   [2,'DRIVE','Motor / Drive Interface','atlas-drive-group','Motor and drive interface; exact drive/VSD variant remains unverified.'],
   [3,'AIREND','Oil-Injected Screw Airend','atlas-airend-group','Oil-injected rotary screw compression element family reference.'],
+  [3,'ROTOR_SET','Twin Screw Rotor / Bearing / Oil-Injection Internals','atlas-twin-screw-internals','Schematic male/female rotor, bearing and oil-injection service internals; rotor lobe geometry and clearances are not engineering dimensions.'],
   [4,'SEPARATOR','Oil / Air Separator Vessel & Element','atlas-separator-group','Separator vessel and replaceable separator-element architecture.'],
   [4,'MPV','Minimum Pressure Valve','atlas-mpv-group','Minimum-pressure path downstream of separation.'],
   [5,'OIL_FILTER','Oil Filter','atlas-oil-filter-group','Oil filtration in the injected-oil circuit.'],
@@ -34,13 +35,15 @@ const COMPONENTS=Object.freeze({
   [8,'DISCHARGE','Discharge Piping / Isolation','compressor-discharge-piping','Flexible connector, check/isolation valve and gauge reference between package and station header.'],
   [8,'RECEIVER','Air Receiver Boundary','compressor-air-receiver-boundary','Receiver is a system-level reference only; installed volume and actual BMJ receiver arrangement are unverified.'],
   [8,'TREATMENT','Dryer / Filtration Boundary','compressor-air-treatment-boundary','Dryer and line-filter package shown as explicit option boundary, not an installed claim.'],
-  [8,'RING','Closed-Loop Ring Main Reference','compressor-ring-main-reference','Closed-loop main with service drops and drip legs illustrates efficient plant distribution; actual BMJ route/diameter remain unverified.']
+  [8,'RING','Closed-Loop Ring Main Reference','compressor-ring-main-reference','Closed-loop main uses swan-neck top take-offs, service isolation and drip-leg references; actual BMJ route/diameter remain unverified.'],
+  [8,'CONDENSATE_TREATMENT','Condensate Collection / Oil-Water Separation Boundary','compressor-condensate-treatment-boundary','Condensate collection and oil-water treatment are represented as a system boundary because oil-injected compressor condensate may contain lubricant; installed BMJ treatment hardware is unverified.']
  ]),
  KAESER:Object.freeze([
   [1,'INTAKE_FILTER','Dry Intake Filter','kaeser-intake-filter-group','Dry intake filtration ahead of inlet/vent valve.'],
   [1,'INLET_VALVE','Inlet / Vent Valve','kaeser-inlet-valve-group','KAESER inlet/vent valve family reference.'],
   [2,'DRIVE','Motor / Drive Interface','kaeser-drive-group','Drive interface with belt versus 1:1 direct drive intentionally unresolved.'],
   [3,'AIREND','SIGMA PROFILE Airend','kaeser-airend-group','KAESER SIGMA PROFILE screw airend family reference.'],
+  [3,'ROTOR_SET','Twin Screw Rotor / Bearing / Oil-Injection Internals','kaeser-twin-screw-internals','Schematic twin-rotor and oil-injection internals; exact SIGMA PROFILE rotor geometry is not reverse-engineered.'],
   [4,'SEPARATOR','Cooling-Fluid Separator Tank / Cartridge','kaeser-separator-group','Fluid separator tank and cartridge; exact separator generation/stage count unverified.'],
   [4,'MPV','Minimum-Pressure Check Valve','kaeser-mpv-group','Minimum-pressure check-valve family reference.'],
   [5,'FLUID_FILTER','ECO Fluid Filter','kaeser-fluid-filter-group','Cooling-fluid filtration family reference.'],
@@ -54,13 +57,15 @@ const COMPONENTS=Object.freeze({
   [8,'DISCHARGE','Discharge Piping / Isolation','compressor-discharge-piping','Flexible connector, check/isolation valve and gauge reference between package and station header.'],
   [8,'RECEIVER','Air Receiver Boundary','compressor-air-receiver-boundary','Receiver is a system-level reference only; installed volume and actual BMJ receiver arrangement are unverified.'],
   [8,'TREATMENT','Dryer / Filtration Boundary','compressor-air-treatment-boundary','Dryer and line-filter package shown as explicit option boundary, not an installed claim.'],
-  [8,'RING','Closed-Loop Ring Main Reference','compressor-ring-main-reference','Ring-main reference follows compressed-air engineering guidance; actual BMJ route, pipe material and diameter are unverified.']
+  [8,'RING','Closed-Loop Ring Main Reference','compressor-ring-main-reference','Ring-main reference includes swan-neck top take-offs to reduce condensate carry-over risk; actual BMJ route, pipe material and diameter are unverified.'],
+  [8,'CONDENSATE_TREATMENT','Condensate Collection / Oil-Water Separation Boundary','compressor-condensate-treatment-boundary','System-level condensate treatment reference only; actual BMJ oil-water separator model and discharge route are unverified.']
  ]),
  SWAN:Object.freeze([
   [1,'INTAKE_FILTER','Air Filter Assembly','swan-intake-filter-group','SWAN family air-filter assembly.'],
   [1,'INLET','Inlet Interface','swan-inlet-group','Inlet interface reference; exact valve package not asserted.'],
   [2,'DRIVE','Drive Interface','swan-drive-group','TS-AD coupling versus TMV PM-direct drive remains unresolved.'],
   [3,'AIREND','Screw Airend','swan-airend-group','SWAN screw airend family reference.'],
+  [3,'ROTOR_SET','Twin Screw Rotor / Bearing / Oil-Injection Internals','swan-twin-screw-internals','Schematic twin-screw compression internals; exact TS-AD/TMV rotor profile and bearing package remain model-specific.'],
   [4,'SEPARATION','Oil / Air Separation Package Boundary','swan-separation-group','Package-level separation reference only; internal separator topology is not claimed.'],
   [5,'OIL_CIRCUIT','Oil / Air Service Circuit','swan-circuit-group','Conservative service-circuit representation; detailed internal routing unverified.'],
   [6,'COOLER','Built-In Oil / Air Cooler','swan-cooler-group','SWAN built-in oil/air cooler family reference.'],
@@ -70,7 +75,8 @@ const COMPONENTS=Object.freeze({
   [8,'DISCHARGE','Discharge Piping / Isolation','compressor-discharge-piping','Flexible connector, check/isolation valve and gauge reference between package and station header.'],
   [8,'RECEIVER','Air Receiver Boundary','compressor-air-receiver-boundary','Receiver is a system-level reference only; installed volume and actual BMJ receiver arrangement are unverified.'],
   [8,'TREATMENT','Dryer / Filtration Boundary','compressor-air-treatment-boundary','Dryer and line-filter package shown as explicit option boundary, not an installed claim.'],
-  [8,'RING','Closed-Loop Ring Main Reference','compressor-ring-main-reference','Functional ring-main distribution reference; actual BMJ route/diameter remain unverified.']
+  [8,'RING','Closed-Loop Ring Main Reference','compressor-ring-main-reference','Functional ring-main distribution reference with top take-off service drops; actual BMJ route/diameter remain unverified.'],
+  [8,'CONDENSATE_TREATMENT','Condensate Collection / Oil-Water Separation Boundary','compressor-condensate-treatment-boundary','Oil-water treatment is shown as an environmental/service boundary, not as an installed BMJ claim.']
  ])
 });
 export function compressorTaxonomyFor(machineId){
