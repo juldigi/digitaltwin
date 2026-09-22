@@ -53,7 +53,13 @@ export class FZ1200ProcessSimulation{
   this.turnAngleDeg=0;this.pileLoaded=false;this.clamped=false;this.clampCommand=false;this.clampConfirmed=false;this.liftActive=false;this.liftClearance=false;this.turnPermitted=false;this.turningActive=false;this.turnComplete=false;this.turnLockCommand=false;this.turnLockConfirmed=false;this.airPermitted=false;this.airPressureReady=false;this.airingActive=false;this.joggingActive=false;this.alignmentComplete=false;this.loweringActive=false;this.releasePermit=false;this.unloadReady=false;this.guardInterlockSafe=true;this.interlockSafe=true;this.hydraulicActive=false;
  }
  spinActiveRotors(dt,phase,air,jog,hyd){
-  for(const r of this.rotors){const role=String(r.userData.mechanismRole||''),turnDrive=/^(trunnion-shaft|rotation-gear)$/.test(role)&&phase>.28&&phase<.51,move=turnDrive||role==='blower'&&air||role==='vibration'&&jog||role==='hyd-pump'&&hyd;if(!move)continue;const dir=r.userData.spinDirection||1,rate=role==='blower'?9:role==='vibration'?11:role==='hyd-pump'?6:4.4,q=new THREE.Quaternion().setFromAxisAngle(Y_AXIS,dir*rate*dt);r.quaternion.multiply(q).normalize();}
+  const liftDrive=(phase>.18&&phase<.30)||(phase>.84&&phase<.95);
+  for(const r of this.rotors){
+   const role=String(r.userData.mechanismRole||''),turnDrive=/^(trunnion-shaft|rotation-gear)$/.test(role)&&phase>.29&&phase<.49;
+   const blowerDrive=/^(blower|blower-motor)$/.test(role)&&air,hydDrive=/^(hyd-pump|hyd-pump-motor)$/.test(role)&&hyd,chainDrive=role==='lift-chain-sprocket'&&liftDrive,move=turnDrive||blowerDrive||role==='vibration'&&jog||hydDrive||chainDrive;
+   if(!move)continue;
+   const dir=r.userData.spinDirection||1,rate=blowerDrive?9:role==='vibration'?11:hydDrive?6:chainDrive?5.5:4.4,axis=r.userData.rotorAxis==='x'?new THREE.Vector3(1,0,0):r.userData.rotorAxis==='z'?Z_AXIS:Y_AXIS,q=new THREE.Quaternion().setFromAxisAngle(axis,dir*rate*dt);r.quaternion.multiply(q).normalize();
+  }
  }
  update(now){
   if(!this.active||!this.running){this.lastNow=now;return;}if(this.lastNow===null){this.lastNow=now;return;}
@@ -82,7 +88,7 @@ export class FZ1200ProcessSimulation{
   this.paperLayers.forEach((layer,i)=>{const r=this.rest.paperLayerPosition[i];layer.position.copy(r);if(airPressureReady){const centered=i-(this.paperLayers.length-1)/2,gap=centered*.0019*(air?1:.35),flutter=air?Math.sin(this.elapsed*10+i*.65)*.004:0;layer.position.y=r.y+gap;layer.position.z=r.z+flutter;}if(jog)layer.position.x=r.x+Math.sin(this.elapsed*23+i*.3)*.0025;});
   for(const [i,jet] of this.airJets.entries()){jet.visible=airPressureReady&&air;if(jet.visible)jet.material.opacity=.18+.16*(.5+.5*Math.sin(this.elapsed*11+i*.7));}
   this.spinActiveRotors(dt,phase,air,jog,hyd);
-  const interlockSafe=(!this.turningActive||turnPermitted)&&(!air||airPermitted)&&(!jog||airPressureReady)&&(!releasePermit||(!turnLockCommand&&lift<.08));
+  const interlockSafe=(!(turn>0&&turn<.999)||turnPermitted)&&(!air||airPermitted)&&(!jog||airPressureReady)&&(!releasePermit||(!turnLockCommand&&lift<.08));
   this.completed=cycleIndex;this.pileLoaded=pileLoaded;this.clampCommand=clampCommand;this.clamped=clampConfirmed;this.clampConfirmed=clampConfirmed;this.liftActive=lift>.02;this.liftClearance=liftClearance;this.turnPermitted=turnPermitted;this.turningActive=turn>0&&turn<.999;this.turnComplete=turnComplete;this.turnAngleDeg=turn*180;this.turnLockCommand=turnLockCommand;this.turnLockConfirmed=turnLockConfirmed;this.airPermitted=airPermitted;this.airPressureReady=airPressureReady;this.airingActive=air;this.joggingActive=jog;this.alignmentComplete=alignmentComplete;this.loweringActive=lowering;this.releasePermit=releasePermit;this.unloadReady=unloadReady;this.guardInterlockSafe=guardSafe;this.interlockSafe=interlockSafe;this.hydraulicActive=hyd;
   this.onUpdate?.(this.state());
  }
