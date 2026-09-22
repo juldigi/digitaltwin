@@ -58,8 +58,8 @@ export function buildActualFactory(layout,fleet){
  const outline=[[-4,2],[6,2],[6,6],[96,6],[96,90],[90,96],[73,96],[73,103],[23,103],[23,96],[6,96],[6,55],[-5,55],[-5,11],[-4,11]];
  const shape=new T.Shape(outline.map(([x,y])=>new T.Vector2(x,y))),floor=new T.Mesh(new T.ShapeGeometry(shape),material(0xd8dcda));floor.rotation.x=-Math.PI/2;floor.position.y=-.015;floor.receiveShadow=true;floor.userData={semantic:'REINFORCED_CONCRETE_FLOOR',accuracy:'SOURCE_OUTLINE_WITH_VISUAL_MATERIAL_REFERENCE'};b.add(floor);
  // Concrete control-joint grid is a subdued realism reference, not an as-built joint survey.
- for(let x=10;x<=94;x+=8){const j=box(b,x,.002,-51,.018,.004,86,0x7f8987);detail(j,'FLOOR_CONTROL_JOINT_REFERENCE');buildingDetailStats.floorControlJoints++;}
- for(let y=10;y<=94;y+=8){const j=box(b,51,.002,-y,86,.004,.018,0x7f8987);detail(j,'FLOOR_CONTROL_JOINT_REFERENCE');buildingDetailStats.floorControlJoints++;}
+ for(let x=10;x<=94;x+=8){const j=box(b,x,.002,-49,.018,.004,82,0x7f8987);detail(j,'FLOOR_CONTROL_JOINT_REFERENCE');buildingDetailStats.floorControlJoints++;}
+ for(let y=10;y<=90;y+=8){const j=box(b,51,.002,-y,86,.004,.018,0x7f8987);detail(j,'FLOOR_CONTROL_JOINT_REFERENCE');buildingDetailStats.floorControlJoints++;}
  box(layers.landscape,47,-.25,-57,117,.35,137,0x9ea9a5);
  box(layers.landscape,47,-.06,1.8,110,.04,7.5,0x626d73);
  box(layers.landscape,-9,-.06,-53,5,.04,110,0x626d73);
@@ -124,13 +124,33 @@ export function buildActualFactory(layout,fleet){
  const dockGutter=line(b,new T.Vector3(79.7,4.39,-6.55),new T.Vector3(88.3,4.39,-6.55),.045,0x526b75);detail(dockGutter,'DOCK_CANOPY_GUTTER_REFERENCE');for(const x of [80,88]){const down=line(b,new T.Vector3(x,4.38,-6.5),new T.Vector3(x,.18,-6.5),.038,0x526b75);detail(down,'DOCK_CANOPY_DOWNPIPE_REFERENCE');}
  box(b,14,1.25,-2.2,4.5,2.5,.09,0x8a9da3,0,.6);
  // User-confirmed vertical envelope: 4.5 m eaves and approximately 7 m ridge.
- for(const [x,w,z,d] of [[51,90,-51,90],[47.5,51,-99.5,7],[.5,11,-33,44]]){
-  const half=w/2,rise=2.5,slope=Math.atan2(rise,half),len=Math.hypot(half,rise);
-  for(const sign of [-1,1]){const roof=box(layers.roof,x+sign*w/4,5.75,z,len,.16,d,0x6e8790);roof.rotation.z=-sign*slope;roof.userData={semantic:'ROOF_PANEL',eavesHeight:4.5,ridgeHeight:7};
-   for(let j=-d/2+1;j<d/2;j+=2)line(layers.roof,new T.Vector3(x,6.93,z+j),new T.Vector3(x+sign*w/2,4.43,z+j),.035,0xa7b8bc);
+ const roofSections=[[51,90,-51,90,'MAIN_HALL'],[47.5,51,-99.5,7,'NORTH_WING'],[.5,11,-33,44,'WEST_WING']];
+ for(const [x,w,z,d,roofId] of roofSections){
+  const half=w/2,rise=2.5,slope=Math.atan2(rise,half),len=Math.hypot(half,rise),roofY=rx=>6.93-rise*Math.abs(rx)/half;
+  for(const sign of [-1,1]){
+   const roof=box(layers.roof,x+sign*w/4,5.75,z,len,.16,d,0x6e8790);roof.rotation.z=-sign*slope;roof.userData={semantic:'ROOF_PANEL',roofId,eavesHeight:4.5,ridgeHeight:7,heightEvidence:'USER_APPROXIMATE_MEASUREMENT'};
+   // Sheet rib / standing-seam visual rhythm.
+   for(let j=-d/2+1;j<d/2;j+=2){const rib=line(layers.roof,new T.Vector3(x,6.93,z+j),new T.Vector3(x+sign*w/2,4.43,z+j),.024,0xa7b8bc);detail(rib,'ROOF_PANEL_RIB_REFERENCE');}
   }
-  for(let zz=z-d/2+3;zz<z+d/2;zz+=6){line(layers.roof,new T.Vector3(x-w/2,4.35,zz),new T.Vector3(x+w/2,4.35,zz),.07,0x4d6570);line(layers.roof,new T.Vector3(x-w/2,4.35,zz),new T.Vector3(x,6.85,zz),.07,0x4d6570);line(layers.roof,new T.Vector3(x,6.85,zz),new T.Vector3(x+w/2,4.35,zz),.07,0x4d6570);}
+  // Portal rafters / transverse frames.
+  for(let zz=z-d/2+3;zz<z+d/2;zz+=6){
+   const eave=line(layers.roof,new T.Vector3(x-w/2,4.35,zz),new T.Vector3(x+w/2,4.35,zz),.055,0x4d6570);detail(eave,'PORTAL_EAVE_TIE_REFERENCE');
+   const r1=line(layers.roof,new T.Vector3(x-w/2,4.35,zz),new T.Vector3(x,6.85,zz),.075,0x4d6570);detail(r1,'PORTAL_RAFTER_REFERENCE');
+   const r2=line(layers.roof,new T.Vector3(x,6.85,zz),new T.Vector3(x+w/2,4.35,zz),.075,0x4d6570);detail(r2,'PORTAL_RAFTER_REFERENCE');
+  }
+  // Longitudinal purlins sit below the cladding and make the roof read as a real industrial frame.
+  const purlinStep=Math.max(2.6,Math.min(5,half/5));for(let rx=-half+purlinStep;rx<half;rx+=purlinStep){const py=roofY(rx)-.12;const p=line(layers.roof,new T.Vector3(x+rx,py,z-d/2+.35),new T.Vector3(x+rx,py,z+d/2-.35),.028,0x6f858c);detail(p,'ROOF_PURLIN_REFERENCE');buildingDetailStats.roofPurlins++;}
+  const ridge=line(layers.roof,new T.Vector3(x,7.02,z-d/2),new T.Vector3(x,7.02,z+d/2),.045,0x9aabad);detail(ridge,'ROOF_RIDGE_CAP_REFERENCE');
+  // Roof-plane X bracing at the first and last frame bays.
+  if(d>10)for(const zz of [z-d/2+4.5,z+d/2-4.5]){const a1=new T.Vector3(x-half*.72,roofY(-half*.72)-.16,zz-2.2),a2=new T.Vector3(x+half*.72,roofY(half*.72)-.16,zz+2.2),a3=new T.Vector3(x+half*.72,roofY(half*.72)-.16,zz-2.2),a4=new T.Vector3(x-half*.72,roofY(-half*.72)-.16,zz+2.2);detail(line(layers.roof,a1,a2,.018,0x72858a),'ROOF_X_BRACING_REFERENCE');detail(line(layers.roof,a3,a4,.018,0x72858a),'ROOF_X_BRACING_REFERENCE');buildingDetailStats.roofBracing+=2;}
+  // Eave gutters and approximate downpipe spacing are reference-only until facade photos/as-built MEP are supplied.
+  for(const sign of [-1,1]){const ex=x+sign*half;const gutter=line(layers.roof,new T.Vector3(ex,4.43,z-d/2),new T.Vector3(ex,4.43,z+d/2),.042,0x536b73);detail(gutter,'MAIN_ROOF_GUTTER_REFERENCE');buildingDetailStats.roofGutters++;
+   for(let zz=z-d/2+4;zz<z+d/2-2;zz+=18){const down=line(b,new T.Vector3(ex,4.40,zz),new T.Vector3(ex,.16,zz),.035,0x536b73);detail(down,'MAIN_ROOF_DOWNPIPE_REFERENCE');buildingDetailStats.roofDownpipes++;}}
  }
+ // Suspended linear lighting: functional density reference from industrial print halls, not an as-built fixture survey.
+ const addLinearLight=(x,z,len=1.6)=>{const g=new T.Group();g.position.set(x,0,z);b.add(g);const rod1=line(g,new T.Vector3(-len*.35,4.42,0),new T.Vector3(-len*.35,4.08,0),.008,0x718087),rod2=line(g,new T.Vector3(len*.35,4.42,0),new T.Vector3(len*.35,4.08,0),.008,0x718087);detail(rod1,'LIGHT_SUSPENSION_REFERENCE');detail(rod2,'LIGHT_SUSPENSION_REFERENCE');const fixture=new T.Mesh(boxGeo,lightMaterial);fixture.position.set(0,4.04,0);fixture.scale.set(len,.055,.12);fixture.userData={semantic:'SUSPENDED_LINEAR_LED_REFERENCE',accuracy:'INDUSTRIAL_REALISM_REFERENCE_NOT_AS_BUILT'};g.add(fixture);buildingDetailStats.linearLights++;};
+ for(const x of [14,29,44,59,74,89])for(let y=12;y<=86;y+=8)addLinearLight(x,-y,1.65);
+
  // Source-labelled rooms receive function-specific, non-OEM interior silhouettes.
  const roomWords=/Workshop|Adm Room|QC Sample|R\.PDS|R\.Sample|R\.INCOMING|WH Spareparts|Mushola|Loading Dock|CTF|CTP|Toilet|R\.BROKE|R\.FPS|Electric room|PPIC/i;
  const fixtureBoxes=[],skippedFixtures=[];
