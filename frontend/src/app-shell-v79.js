@@ -170,6 +170,7 @@ function renderSearchResults(detail={}){
   return heading+`<button id="universal-search-option-${index}" type="button" class="universal-search-result ${index===searchActiveIndex?'active':''}" data-search-index="${index}" role="option" aria-selected="${index===searchActiveIndex?'true':'false'}"><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.subtitle||'')}</small></span><em>${escapeHtml(item.type==='component'?'Komponen':item.type==='machine'?'Mesin':item.type==='reference'?'Referensi':item.type==='system'?'Sistem':'Area')}</em></button>`;
  }).join('');
  qa('[data-search-index]',host).forEach(button=>button.addEventListener('click',()=>chooseSearchResult(Number(button.dataset.searchIndex))));
+ updateSearchActive();
 }
 function updateSearchActive(){
  const panel=ensureSearchPalette(),host=q('.universal-search-results',panel),input=q('#universal-search-input',panel);
@@ -202,7 +203,15 @@ q('#nav-settings')?.addEventListener('click',()=>{beforeMajorOverlay('modal');q(
 
 const menu=q('#ui-menu-toggle');
 menu?.addEventListener('click',()=>{const open=!document.body.classList.contains('nav-open');if(open){beforeMajorOverlay('navigation');rememberOverlayFocus('navigation')}document.body.classList.toggle('nav-open',open);menu.setAttribute('aria-expanded',String(open));if(open){openOverlay('navigation');focusOverlay(q('.rail'),'.rail button:not([hidden])')}else{closeOverlay();restoreOverlayFocus('navigation','#ui-menu-toggle')}});
-q('#ui-backdrop')?.addEventListener('click',()=>{closeDrawer();closeLayerManager();if(getState().overlay!=='inspector')closeOverlay()});
+q('#ui-backdrop')?.addEventListener('click',()=>{
+ const overlay=getState().overlay;
+ if(overlay==='search')closeSearch();
+ else if(overlay==='layers')closeLayerManager();
+ else if(overlay==='navigation')closeDrawer();
+ else if(overlay==='inspector')closeInspector();
+ else if(overlay==='modal'&&q('#modal')?.open)q('#modal-close')?.click();
+ else closeOverlay();
+});
 qa('.rail button').forEach(b=>b.addEventListener('click',()=>{if(innerWidth<768&&b.id!=='nav-systems')closeDrawer()}));
 
 const MOBILE_TARGET={factory:'nav-machine',asset:'nav-assets',system:'nav-systems',simulation:'nav-simulation-mode'};
