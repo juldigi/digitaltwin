@@ -9,7 +9,7 @@ const sw=fs.readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 
 test('V158 loads one unified adaptive shell after the stable base styles',()=>{
   assert.match(html,/style\.css[\s\S]*runtime-fallback\.css[\s\S]*app-shell-v79\.css\?v=162/);
-  assert.match(html,/app\.js\?v=163[\s\S]*ui-v5\.js\?v=162[\s\S]*experience-v37\.js\?v=81[\s\S]*app-shell-v79\.js\?v=162/);
+  assert.match(html,/app\.js\?v=164[\s\S]*ui-v5\.js\?v=162[\s\S]*experience-v37\.js\?v=81[\s\S]*app-shell-v79\.js\?v=162/);
   for(const stale of ['ui-premium-v73.css','ui-corporate-v74.css','reference-v76.css','mobile-stable-v78.css','reference-v76.js','mobile-stable-v78.js'])assert.doesNotMatch(html,new RegExp(stale.replaceAll('.','\\.')));
 });
 

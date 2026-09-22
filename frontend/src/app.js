@@ -138,7 +138,7 @@ function renderStaticMachineFallback(error){
  console.warn('Fallback mesin aktif:',error?.message||error);
 }
 function modal(title,html){$('#modal-title').textContent=title;$('#modal-body').innerHTML=html;if(!$('#modal').open)$('#modal').showModal();}
-function closeModal(){$('#modal').close();}
+function closeModal(){const dialog=$('#modal');if(dialog?.open)dialog.close();}
 function emitDomainState(detail){window.dispatchEvent(new CustomEvent('bmj:domainstate',{detail}));}
 function showPanel(){document.body.classList.remove('panel-hidden');if(matchMedia('(max-width:767px)').matches)document.body.classList.add('mobile-panel-open');emitDomainState({inspectorState:{open:true,tab:activeTab}});}
 const activeLayout=()=>selectPlantLayout(state.layout,bundledLayout);
