@@ -33,9 +33,9 @@ test('Systems workspace exposes all required initial categories and network cont
  for(const system of ['hvac','compressedAir','routing','water','electrical'])assert.match(shell,new RegExp('data-system-focus="'+system+'"'));
  assert.match(shell,/id="system-context"/);
  assert.match(shell,/function renderSystemContext/);
- assert.match(shell,/Equipment terkait/);
- assert.match(shell,/Consumer/);
- assert.match(shell,/Evidence \/ source/);
+ assert.match(shell,/Peralatan terkait/);
+ assert.match(shell,/Tujuan distribusi/);
+ assert.match(shell,/Dasar data/);
  assert.match(css,/\.canonical-system-context/);
  assert.match(css,/\.system-network-row/);
  assert.match(css,/\.system-equipment-list/);
