@@ -69,7 +69,6 @@ function bindShell(){
   $('#ui-asset-panel')?.addEventListener('click',()=>showDetail());
   $('#panel-toggle')?.addEventListener('click',()=>{if(document.body.classList.contains('panel-hidden'))showDetail();else hideDetail();});
   $('#close-panel')?.addEventListener('click',hideDetail);
-  $('#ui-backdrop')?.addEventListener('click',closeTransientPanels);
 
   $('#legend-all')?.addEventListener('click',()=>{setLegendActive('legend-all');document.body.classList.remove('clean-view');setFloatVisible('.floating-filter',true);setFloatVisible('.keyplan-mini',true);setFloatVisible('#scene-notice',true);uiNotice('Semua informasi tampilan ditampilkan.');});
   $('#legend-machine')?.addEventListener('click',()=>{setLegendActive('legend-machine');document.body.classList.remove('clean-view');setFloatVisible('.floating-filter',false);setFloatVisible('.keyplan-mini',false);setFloatVisible('#scene-notice',false);hideDetail();$('#focus-machine')?.click();uiNotice('Fokus pada mesin.');});
@@ -83,7 +82,6 @@ function bindShell(){
     setTimeout(()=>{const input=$('#asset-search');if(input){input.value=q;input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();}},0);
   });
 
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeTransientPanels();hideDetail();setFloatVisible('#scene-notice',false);}});
 }
 
 function bindWorkbench(){
