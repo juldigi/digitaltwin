@@ -551,7 +551,7 @@ async function switchActiveMachine(route,{historyMode='push'}={}){
   if(engine){engine.switchMachine(MACHINE_KEY);engine.onTaxonomySelect=id=>selectTaxonomy(id,{revealPanel:false});engine.onSimulationUpdate=next=>{simulationState=next;updateSimulationPanel(next);};engine.onReset=()=>{explode=0;selectedPart=null;selectedTaxonomyId=ACTIVE_ROOT;renderPanel();};engine.onError=message=>toast(message,true);if(bundledLayout)engine.loadLayout(bundledLayout);engine.setView('machine',state);}
   else{qStaticFallbackClear();renderStaticMachineFallback(new Error('3D renderer unavailable'));}
   const taxCount=$('#taxonomy-count');if(taxCount)taxCount.textContent=taxonomyStats().total.toLocaleString('id-ID');
-  renderStatus();redrawPlantPlan();renderPanel('overview');$('#engine-status').textContent='Tampilan 3D siap';emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:null});
+  renderStatus();redrawPlantPlan();showPanel();renderPanel('overview');engine?.fit(engine.machine);$('#engine-status').textContent='Tampilan 3D siap';emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:null,activeReference:null,activeSection:'asset'});
  }catch(error){toast('Model mesin gagal diganti: '+error.message,true);}
  finally{if(boot)boot.hidden=true;document.body.classList.remove('scene-switching');}
 }
@@ -655,14 +655,43 @@ addEventListener('bmj:searchselect',async event=>{
   }
  }catch(error){toast('Hasil pencarian tidak dapat dibuka: '+error.message,true);}
 });
+function registryBrand(machine){
+ const text=[machine.name,machine.model,machine.source].filter(Boolean).join(' ').toUpperCase();
+ const rules=[['HEIDELBERG','Heidelberg'],['BOBST','BOBST'],['MASTERWORK','Masterwork'],['MK 9','Masterwork'],['MK 1060','Masterwork'],['PROMATRIX','Heidelberg'],['POLAR','Polar'],['LEXUS','Lexus'],['FOCUSIGHT','Focusight'],['DIANA','Heidelberg'],['ATLAS COPCO','Atlas Copco'],['KAESER','Kaeser'],['SWAN','Swan'],['SANSIN','Sansin'],['ZUND','Zünd'],['SCREEN','SCREEN'],['UPG','UPG']];
+ const match=rules.find(([token])=>text.includes(token));return match?.[1]||'Belum teridentifikasi';
+}
+function registryType(machine){
+ const name=String(machine.name||'').toUpperCase();
+ if(name.includes('COMPRESSOR'))return'Air Compressor';if(name.includes('AHU'))return'AHU';
+ if(name.includes('OFFSET'))return'Printing Press';if(name.includes('AUTOPLATEN')||name.includes('AUTOBLANKING'))return'Die Cutting / Blanking';
+ if(name.includes('FOLDER GLUER'))return'Folder Gluer';if(name.includes('INSPECTION'))return'Inspection';
+ if(name.includes('PILE TURNER'))return'Pile Turner';if(name.includes('SHEETING'))return'Sheeting';if(name.includes('GUILOTINE'))return'Guillotine';
+ if(name.includes('CTP')||name.includes('CTF')||name.includes('ZUND'))return'Prepress';if(name.includes('INKJET'))return'Digital Printing';
+ if(name.includes('COLLATOR'))return'Collator';return machine.area==='UTILITY'?'Utility Equipment':'Production Equipment';
+}
+function registryDataStatus(machine){
+ const fields=[machine.model,machine.serial,machine.functionalLocation,machine.sapCode,machine.year],count=fields.filter(v=>v!==null&&v!==undefined&&String(v).trim()!=='').length;
+ return count>=4?'Lengkap':count>=2?'Sebagian':'Terbatas';
+}
+async function openAssetContext(machine){
+ if(!machine)return;const route=machineRoute(machine);
+ if(route!==MACHINE_KEY)await switchActiveMachine(route,{historyMode:'push'});
+ else{closeModal();setView('machine');showPanel();renderPanel('overview');engine?.fit(engine.machine);}
+ emitDomainState({selectedAsset:normalizeMachineKey(route),selectedNode:null,activeReference:null,activeSection:'asset'});
+ showPanel();renderPanel('overview');
+}
 function assetDialog(initialQuery=''){
- modal('Daftar Mesin',`<div class="card accent"><h4>${MACHINE_REGISTRY_STATS.total} equipment terdaftar</h4><p>OFFSET PRINTING ${MACHINE_REGISTRY_STATS.byArea['OFFSET PRINTING']} · OFFSET CONVERTING ${MACHINE_REGISTRY_STATS.byArea['OFFSET CONVERTING']} · PDS ${MACHINE_REGISTRY_STATS.byArea.PDS} · UTILITY ${MACHINE_REGISTRY_STATS.byArea.UTILITY}</p></div><label for="asset-search">Cari nama, SAP Code, Functional Location, model, atau serial</label><input id="asset-search" type="search" placeholder="Contoh: OFFSET 10, APM-7, AHU 5…"><div id="asset-results"></div><p class="subtle" style="margin-top:18px">Seluruh equipment memiliki route model 3D. Mesin dengan model atau varian yang belum tercatat memakai rekonstruksi parametrik tingkat keluarga dan ditandai sesuai tingkat keyakinannya.</p>`);
+ const areas=[...new Set(MACHINE_REGISTRY.map(m=>m.area))].sort(),types=[...new Set(MACHINE_REGISTRY.map(registryType))].sort(),brands=[...new Set(MACHINE_REGISTRY.map(registryBrand))].sort();
+ const options=(items,label)=>`<option value="">${label}</option>`+items.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
+ modal('Aset',`<div class="asset-browser"><header><div><small>ASSET BROWSER</small><h3>${MACHINE_REGISTRY_STATS.total} aset Digital Twin</h3><p>Pilih aset untuk fokus langsung ke model 3D dan inspector contextual.</p></div><div class="asset-browser-stat"><strong>${MACHINE_REGISTRY_STATS.modeled3D}</strong><span>model 3D</span></div></header><div class="asset-filter-grid"><label class="asset-search-wide"><span>Cari</span><input id="asset-search" type="search" autocomplete="off" placeholder="Nama mesin, SAP Code, FLOC, model, serial…"></label><label><span>Area</span><select id="asset-area">${options(areas,'Semua area')}</select></label><label><span>Tipe</span><select id="asset-type">${options(types,'Semua tipe')}</select></label><label><span>Brand</span><select id="asset-brand">${options(brands,'Semua brand')}</select></label><label><span>Status data</span><select id="asset-data-status"><option value="">Semua status</option><option>Lengkap</option><option>Sebagian</option><option>Terbatas</option></select></label></div><div class="asset-result-summary" id="asset-result-summary"></div><div id="asset-results" class="asset-browser-results"></div></div>`);
  const render=()=>{
-   const found=searchMachines($('#asset-search').value).slice(0,60);
-   $('#asset-results').innerHTML=found.length?found.map(machine=>`<button data-machine-id="${machine.machineId}" class="list-button"><span class="asset-icon">${String(machine.no).padStart(2,'0')}</span><span><strong>${esc(machine.name)}</strong><small>${esc(machine.area)} · ${esc(machine.sapCode||'SAP Code belum tersedia')} · ${esc(machine.model||'Model belum tersedia')}${machine.has3D?' · 3D tersedia':''}</small></span></button>`).join(''):'<p class="empty">Tidak ada mesin yang sesuai.</p>';
-   document.querySelectorAll('[data-machine-id]').forEach(button=>button.onclick=()=>{const machine=MACHINE_REGISTRY_BY_ID.get(button.dataset.machineId);if(machine)machineDetailDialog(machine);});
+   const query=$('#asset-search').value,area=$('#asset-area').value,type=$('#asset-type').value,brand=$('#asset-brand').value,dataStatus=$('#asset-data-status').value;
+   const found=searchMachines(query).filter(machine=>(!area||machine.area===area)&&(!type||registryType(machine)===type)&&(!brand||registryBrand(machine)===brand)&&(!dataStatus||registryDataStatus(machine)===dataStatus)).slice(0,80);
+   $('#asset-result-summary').textContent=found.length+' aset ditampilkan';
+   $('#asset-results').innerHTML=found.length?found.map(machine=>{const brandName=registryBrand(machine),typeName=registryType(machine),status=registryDataStatus(machine);return`<button type="button" data-machine-id="${machine.machineId}" class="asset-browser-row"><span class="asset-thumbnail"><b>${String(machine.no).padStart(2,'0')}</b><small>${esc(typeName)}</small></span><span class="asset-browser-copy"><strong>${esc(machine.name)}</strong><small>${esc(machine.machineId)} · ${esc(machine.sapCode||'SAP belum tersedia')}</small><span>${esc(machine.model||'Model belum tersedia')} · ${esc(machine.area)} · ${esc(brandName)}</span></span><em class="asset-data-badge" data-status="${status.toLowerCase()}">${status}</em></button>`;}).join(''):'<p class="empty">Tidak ada aset yang sesuai dengan filter.</p>';
+   document.querySelectorAll('[data-machine-id]').forEach(button=>button.onclick=async()=>{const machine=MACHINE_REGISTRY_BY_ID.get(button.dataset.machineId);if(machine)await openAssetContext(machine);});
  };
- $('#asset-search').value=initialQuery;$('#asset-search').oninput=render;render();
+ $('#asset-search').value=initialQuery;for(const id of ['#asset-search','#asset-area','#asset-type','#asset-brand','#asset-data-status']){$(id).oninput=render;$(id).onchange=render;}render();
 }
 function settingsDialog(){
  modal('Pengaturan Tampilan',`<label class="check"><input id="low-mode" type="checkbox" ${engine?.low?'checked':''} ${exteriorMode?'disabled':''}> Mode ringan untuk perangkat dengan performa terbatas</label>${exteriorMode?'<p class="subtle">Mode ringan sementara dinonaktifkan saat interior terbuka agar seluruh detail interior tetap terlihat.</p>':''}<label class="check"><input id="label-mode" type="checkbox" ${engine?.labels?'checked':''}> Tampilkan label mesin</label><h3>Data di perangkat</h3><p>${cacheEnabled?'Salinan data di perangkat aktif.':'Salinan data di perangkat tidak aktif.'}</p><button id="clear-cache" class="secondary">Bersihkan Data Tersimpan</button>`);
