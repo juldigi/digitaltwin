@@ -105,7 +105,7 @@ function applyMachineShell(){
 }
 applyMachineShell();
 const toast=(message,error=false)=>{clearTimeout(toastTimer);$('#toast').textContent=message;$('#toast').classList.toggle('error',error);$('#toast').hidden=false;toastTimer=setTimeout(()=>$('#toast').hidden=true,error?9000:5000);};
-const safe=fn=>async(...args)=>{try{await fn(...args);}catch(e){toast(e.message,true);}};
+const safe=fn=>async(...args)=>{try{await fn(...args);}catch(e){console.error('[Digital Twin UI]',e);toast('Tindakan belum dapat dijalankan. Silakan coba kembali.',true);}};
 const on=(id,fn)=>$(id)?.addEventListener('click',safe(fn));
 function renderStaticMachineFallback(error){
  const viewport=$('#viewport');
