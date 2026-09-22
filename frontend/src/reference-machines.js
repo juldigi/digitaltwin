@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {UniversalMachineTemplate} from './universal-machine.js';
-import {V136_SOURCE_STATS} from './data/research-v136.js';
+import {V137_SOURCE_STATS} from './data/research-v137.js';
 
 const AXIS={x:new THREE.Vector3(1,0,0),y:new THREE.Vector3(0,1,0),z:new THREE.Vector3(0,0,1)};
 export const REFERENCE_MACHINE_IDS=Object.freeze([
@@ -15,12 +15,12 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  constructor(machineId){
   super(machineId);
   this.root.name=this.cfg.machine.name+' · REFERENCE-GROUNDED';
-  this.root.userData.referenceBuilder='V136_RESEARCH_GROUNDED_BUILDER';
+  this.root.userData.referenceBuilder='V137_RESEARCH_GROUNDED_BUILDER';
   this.root.userData.engineeringDimensions=false;
   this.root.userData.referenceBoundary=this.cfg.profile?.unknowns||[];
-  this.root.userData.researchVersion='V136';
-  this.root.userData.researchSourceCount=V136_SOURCE_STATS.total;
-  this.root.userData.newReviewedSources=V136_SOURCE_STATS.newReviewed;this.root.userData.uniqueResearchUrls=V136_SOURCE_STATS.uniqueUrls;
+  this.root.userData.researchVersion='V137';
+  this.root.userData.researchSourceCount=V137_SOURCE_STATS.total;
+  this.root.userData.newReviewedSources=V137_SOURCE_STATS.newReviewed;this.root.userData.uniqueResearchUrls=V137_SOURCE_STATS.uniqueUrls;
   this.enrichV121();
   for(const n of this.nodes){
    if(!n.userData.rest)n.userData.rest=n.position.clone();
@@ -171,7 +171,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  }
  enrichFolder(){
   const feed=this.activeGroup(1),align=this.activeGroup(2),fold1=this.activeGroup(3),glue=this.activeGroup(4),fold2=this.activeGroup(5),press=this.activeGroup(6),out=this.activeGroup(7);
-  this.root.userData.detailPass='V123_R9_FGM2_MULTI_VENDOR_PROCESS_RECONSTRUCTION';
+  this.root.userData.detailPass='V137_FGM2_BELT_BEARING_CONTACT_MECHANICS';
   this.root.userData.exactFolderGluerOemVerified=false;
   this.root.userData.exactFolderGluerModelVerified=false;
   this.root.userData.neighborMedia100IdentityProof=false;
@@ -394,7 +394,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  enrichCollator(){
   const tower=this.activeGroup(1),vac=this.activeGroup(2),sense=this.activeGroup(3),gather=this.activeGroup(4),delivery=this.activeGroup(5),control=this.activeGroup(6);
   const part=(parent,id,name)=>parent?this.group(parent,id,name,[0,0,0],[0,.08,.08]):null;
-  this.root.userData.detailPass='V123_R4_MULTI_VENDOR_SUCTION_COLLATOR_RECONSTRUCTION';
+  this.root.userData.detailPass='V137_COLLATOR_SUCTION_ROTOR_STOP_PAD_CONTACT_MECHANICS';
   this.root.userData.exactCollatorOemVerified=false;
   this.root.userData.exactCollatorModelVerified=false;
   const towerDetails=this.group(this.root,'collator-tower-detail','Collator tower service detail',[0,0,0],[0,.12,0]);
@@ -461,7 +461,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  }
  enrichCTP(){
   const load=this.activeGroup(1),transport=this.activeGroup(2),drumUnit=this.activeGroup(3),laserUnit=this.activeGroup(4),punchUnit=this.activeGroup(5),out=this.activeGroup(6);
-  this.root.userData.detailPass='V123_R5_SUPRASETTER_MULTI_MODEL_FAMILY_RECONSTRUCTION';
+  this.root.userData.detailPass='V137_SUPRASETTER_DRUM_CLAMP_LASER_CONTACT_MECHANICS';
   this.root.userData.exactSuprasetterModelVerified=false;
   this.root.userData.exactPlateFormatVerified=false;
   this.root.userData.suprasetterOptions={
@@ -517,7 +517,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  }
  enrichImagesetter(){
   const supply=this.activeGroup(1),transport=this.activeGroup(2),scan=this.activeGroup(3),laser=this.activeGroup(4),cut=this.activeGroup(5),out=this.activeGroup(6);
-  this.root.userData.detailPass='V123_R6_SCREEN_FTR_KATANA_MULTI_MODEL_RECONSTRUCTION';
+  this.root.userData.detailPass='V137_SCREEN_CAPSTAN_WEB_CONTACT_MECHANICS';
   this.root.userData.exactScreenModelVerified=false;
   this.root.userData.familyCandidates=['FT-R3035','FT-R3050','Katana 5040','Katana 5055'];
   this.root.userData.exactLaserWavelengthVerified=false;
@@ -633,7 +633,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  }
  enrichZund(){
   const table=this.activeGroup(1),beamUnit=this.activeGroup(2),carUnit=this.activeGroup(3),tools=this.activeGroup(4),sense=this.activeGroup(5),ctl=this.activeGroup(6);
-  this.root.userData.detailPass='V123_R7_ZUND_MODULAR_PLATFORM_RECONSTRUCTION';
+  this.root.userData.detailPass='V137_ZUND_VACUUM_BEAM_MODULE_SERVICE_MECHANICS';
   const edge=this.group(this.root,'zund-table-edge-detail','Zünd flatbed edge / cable management',[0,0,0],[0,.12,0]);
   for(const z of [-1.27,1.27]){const rail=this.cover(this.box(edge,[5.45,.16,.10],[0,.55,z],'dark',.015));this.tag(rail,'zund-table-side-rail-reference','ZUND_G3_S3_VISUAL');}
   const chain=this.group(edge,'zund-cable-chain-reference','Travelling cable-chain reference',[0,0,0],[0,.12,0]);for(let x=-2.20;x<=2.20;x+=.20){const link=this.box(chain,[.14,.08,.12],[x,.80,1.18],'dark',.015);this.tag(link,'zund-cable-chain-link-reference','ZUND_FAMILY_VISUAL');}
