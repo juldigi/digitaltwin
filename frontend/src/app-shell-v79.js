@@ -78,7 +78,7 @@ q('#nav-help')?.addEventListener('click',()=>{beforeMajorOverlay('modal');openOv
 q('#nav-settings')?.addEventListener('click',()=>{beforeMajorOverlay('modal');q('#settings')?.click();openOverlay('modal')});
 
 const menu=q('#ui-menu-toggle');
-menu?.addEventListener('click',()=>{const open=!document.body.classList.contains('nav-open');document.body.classList.toggle('nav-open',open);menu.setAttribute('aria-expanded',String(open));if(open)openOverlay('navigation');else closeOverlay()});
+menu?.addEventListener('click',()=>{const open=!document.body.classList.contains('nav-open');if(open)beforeMajorOverlay('navigation');document.body.classList.toggle('nav-open',open);menu.setAttribute('aria-expanded',String(open));if(open)openOverlay('navigation');else closeOverlay()});
 q('#ui-backdrop')?.addEventListener('click',()=>{closeDrawer();closeLayerManager();if(getState().overlay!=='inspector')closeOverlay()});
 qa('.rail button').forEach(b=>b.addEventListener('click',()=>{if(innerWidth<768&&b.id!=='nav-systems')closeDrawer()}));
 
@@ -86,7 +86,7 @@ const MOBILE_TARGET={factory:'nav-machine',asset:'nav-assets',system:'nav-system
 qa('[data-mobile-nav]').forEach(button=>button.addEventListener('click',event=>{
  if(!matchMedia('(max-width:767px)').matches)return;
  const key=button.dataset.mobileNav;
- if(key==='more'){event.preventDefault();const open=!document.body.classList.contains('nav-open');document.body.classList.toggle('nav-open',open);menu?.setAttribute('aria-expanded',String(open));if(open)openOverlay('navigation');return}
+ if(key==='more'){event.preventDefault();const open=!document.body.classList.contains('nav-open');if(open)beforeMajorOverlay('navigation');document.body.classList.toggle('nav-open',open);menu?.setAttribute('aria-expanded',String(open));if(open)openOverlay('navigation');else closeOverlay();return}
  const target=MOBILE_TARGET[key];if(target)q('#'+target)?.click();
 }));
 
@@ -141,6 +141,8 @@ function syncSimulationTransport(){
 ensureLayerManager();ensureSimulationTransport();
 
 const panelContent=q('#panel-content');if(panelContent)new MutationObserver(()=>requestAnimationFrame(syncSimulationTransport)).observe(panelContent,{childList:true,subtree:true});
+q('[data-tab="simulation"]')?.addEventListener('click',()=>{setActiveSection('simulation');markSection('simulation');requestAnimationFrame(syncSimulationTransport)});
+const modalElement=q('#modal');if(modalElement)new MutationObserver(()=>{if(modalElement.open){beforeMajorOverlay('modal');openOverlay('modal')}else if(getState().overlay==='modal')closeOverlay()}).observe(modalElement,{attributes:true,attributeFilter:['open']});
 const bodyObserver=new MutationObserver(()=>{
  const open=!document.body.classList.contains('panel-hidden');setInspector(open);
  if(!open&&getState().overlay==='inspector')closeOverlay();
@@ -151,8 +153,8 @@ addEventListener('bmj:domainstate',event=>{
  const detail=event.detail||{};
  setState(detail,{url:false});
 });
-const syncViewport=()=>{document.documentElement.style.setProperty('--app-vh',`${visualViewport?.height||innerHeight}px`);const w=innerWidth;setTimeout(()=>window.BMJAppState?.setState({deviceMode:w<768?'mobile':w<=1180?'tablet':'desktop'},{url:false}),0)};
-syncViewport();addEventListener('resize',syncViewport,{passive:true});visualViewport?.addEventListener('resize',syncViewport,{passive:true});
+const syncViewport=()=>{document.documentElement.style.setProperty('--app-vh',`${window.visualViewport?.height||innerHeight}px`);const w=innerWidth;setTimeout(()=>window.BMJAppState?.setState({deviceMode:w<768?'mobile':w<=1180?'tablet':'desktop'},{url:false}),0)};
+syncViewport();addEventListener('resize',syncViewport,{passive:true});window.visualViewport?.addEventListener('resize',syncViewport,{passive:true});
 
 document.addEventListener('keydown',event=>{
  if(event.key!=='Escape')return;
