@@ -140,3 +140,27 @@ test('V149 deep links preserve machine asset node and workspace view without nav
  assert.match(app,/history\.pushState/);
  assert.doesNotMatch(app,/location\.(?:href|assign|replace)\s*=/);
 });
+
+test('V149 mobile Lainnya keeps primary viewport actions limited and preserves contextual inspection access',()=>{
+ assert.match(css,/\.mobile-context-tools\{display:none\}/);
+ assert.match(css,/@media\(max-width:767px\)[\s\S]*\.mobile-context-tools\{display:grid/);
+ for(const action of ['top','interior','labels','home','fullscreen'])assert.match(shell,new RegExp(`data-mobile-tool="${action}"`));
+ assert.match(shell,/tool-interior/);
+ assert.match(shell,/data-camera="reset"/);
+ assert.match(shell,/#fullscreen/);
+});
+
+test('V149 one-major-overlay policy explicitly closes the current major surface before opening another',()=>{
+ assert.match(shell,/if\(current==='search'\)closeSearch\(\)/);
+ assert.match(shell,/else if\(current==='layers'\)closeLayerManager\(\)/);
+ assert.match(shell,/else if\(current==='navigation'\)closeDrawer\(\)/);
+ assert.match(shell,/else if\(current==='inspector'\)closeInspector\(\)/);
+ assert.match(shell,/current==='modal'/);
+});
+
+test('V149 universal search never forces unverified machine geometry',()=>{
+ assert.match(app,/has3D:Boolean\(machine\.has3D\)/);
+ assert.match(app,/item\.type==='machine'&&!item\.has3D/);
+ assert.match(app,/machineDetailDialog\(record\)/);
+ assert.match(app,/selectedArea:item\.title/);
+});
