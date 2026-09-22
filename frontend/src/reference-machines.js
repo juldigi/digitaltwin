@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {UniversalMachineTemplate} from './universal-machine.js';
-import {V123_SOURCE_STATS} from './data/research-v123.js';
+import {V136_SOURCE_STATS} from './data/research-v136.js';
 
 const AXIS={x:new THREE.Vector3(1,0,0),y:new THREE.Vector3(0,1,0),z:new THREE.Vector3(0,0,1)};
 export const REFERENCE_MACHINE_IDS=Object.freeze([
@@ -15,12 +15,12 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  constructor(machineId){
   super(machineId);
   this.root.name=this.cfg.machine.name+' · REFERENCE-GROUNDED';
-  this.root.userData.referenceBuilder='V123_RESEARCH_GROUNDED_BUILDER';
+  this.root.userData.referenceBuilder='V136_RESEARCH_GROUNDED_BUILDER';
   this.root.userData.engineeringDimensions=false;
   this.root.userData.referenceBoundary=this.cfg.profile?.unknowns||[];
-  this.root.userData.researchVersion='V123';
-  this.root.userData.researchSourceCount=V123_SOURCE_STATS.total;
-  this.root.userData.newReviewedSources=V123_SOURCE_STATS.newReviewed;
+  this.root.userData.researchVersion='V136';
+  this.root.userData.researchSourceCount=V136_SOURCE_STATS.total;
+  this.root.userData.newReviewedSources=V136_SOURCE_STATS.newReviewed;this.root.userData.uniqueResearchUrls=V136_SOURCE_STATS.uniqueUrls;
   this.enrichV121();
   for(const n of this.nodes){
    if(!n.userData.rest)n.userData.rest=n.position.clone();
