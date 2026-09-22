@@ -124,3 +124,53 @@ test('V132 generic AHUs never invent an outdoor condenser while SANSIN keeps the
  assert.ok(roles.has('sansin-outdoor-fan-guard-reference'));
  sansin.dispose();
 });
+
+test('V133 compressor twins expose detailed package flow and distribution piping references',()=>{
+ const ids=['BMJ-MCH-0029','BMJ-MCH-0030','BMJ-MCH-0031','BMJ-MCH-0032','BMJ-MCH-0033','BMJ-MCH-0034','BMJ-MCH-0035'];
+ for(const id of ids){
+  const template=createMachineTemplate(id),roles=new Set(),nodes=new Set();
+  template.root.traverse(o=>{if(o.userData?.mechanismRole)roles.add(o.userData.mechanismRole);if(o.userData?.nodeId)nodes.add(o.userData.nodeId);});
+  assert.equal(template.root.userData.plantCompressedAirRouteVerified,false,id);
+  assert.equal(template.root.userData.airReceiverInstalledVerified,false,id);
+  assert.equal(template.root.userData.airDryerInstalledVerified,false,id);
+  assert.equal(template.root.userData.ringMainInstalledVerified,false,id);
+  for(const node of ['compressor-air-distribution','compressor-discharge-piping','compressor-air-receiver-boundary','compressor-air-treatment-boundary','compressor-ring-main-reference'])assert.ok(nodes.has(node),id+' missing '+node);
+  for(const role of ['compressor-flexible-discharge-connector-reference','compressor-discharge-check-valve-reference','compressor-discharge-isolation-valve-reference','compressed-air-receiver-reference','compressed-air-dryer-option-boundary','compressed-air-ring-main-reference','compressed-air-service-drop-reference','compressed-air-drip-leg-reference'])assert.ok(roles.has(role),id+' missing '+role);
+  const taxonomy=universalTaxonomy(id);assert.ok(taxonomy.some(n=>n.level===2&&n.name==='Compressed-Air Discharge / Distribution'),id+' missing distribution taxonomy');
+  const sim=createMachineSimulation(id,template.root,template),started=sim.start();
+  assert.equal(started.compressedAirParticleCount,26,id);
+  assert.equal(started.distributionAirParticleCount,18,id);
+  assert.equal(started.oilFlowParticleCount,10,id);
+  assert.equal(started.condensateParticleCount,6,id);
+  assert.equal(started.airflowParticleCount,44,id);
+  sim.update(0);sim.update(120);const state=sim.state();
+  assert.equal(state.compressorIntakeActive,true,id);
+  assert.equal(state.compressorCompressionActive,true,id);
+  assert.equal(state.compressorSeparationActive,true,id);
+  assert.equal(state.compressorAftercoolingActive,true,id);
+  assert.equal(state.compressorOilCircuitActive,true,id);
+  assert.equal(state.compressorCondensateDrainActive,true,id);
+  assert.equal(state.compressorDistributionActive,true,id);
+  assert.ok(state.compressorPressureNormalizedPct>=85&&state.compressorPressureNormalizedPct<=95,id);
+  assert.equal(state.plantCompressedAirRouteVerified,false,id);
+  sim.dispose();template.dispose();
+ }
+});
+
+test('V133 compressor brand details remain evidence-bounded and source-specific',()=>{
+ const atlas=createMachineTemplate('BMJ-MCH-0029'),aroles=new Set();atlas.root.traverse(o=>{if(o.userData?.mechanismRole)aroles.add(o.userData.mechanismRole);});
+ assert.ok(aroles.has('atlas-airend-non-return-valve-reference'));assert.ok(aroles.has('atlas-separator-scavenge-line-reference'));assert.ok(aroles.has('atlas-oil-stop-valve-reference'));
+ atlas.dispose();
+ const kaeser=createMachineTemplate('BMJ-MCH-0031'),kroles=new Set();kaeser.root.traverse(o=>{if(o.userData?.mechanismRole)kroles.add(o.userData.mechanismRole);});
+ assert.ok(kroles.has('kaeser-etm-temperature-management-reference'));assert.ok(kroles.has('kaeser-eco-drain-reference'));assert.ok(kroles.has('kaeser-package-air-outlet-reference'));
+ kaeser.dispose();
+ const swan=createMachineTemplate('BMJ-MCH-0033'),sroles=new Set();swan.root.traverse(o=>{if(o.userData?.mechanismRole)sroles.add(o.userData.mechanismRole);});
+ assert.ok(sroles.has('swan-cyclonic-preseparator-family-reference'));assert.ok(sroles.has('swan-separator-element-family-reference'));assert.ok(sroles.has('swan-package-air-outlet-reference'));
+ swan.dispose();
+ const atlasUrls=universalTechnicalSources('BMJ-MCH-0029').map(s=>s.url).join(' ');
+ const kaeserUrls=universalTechnicalSources('BMJ-MCH-0031').map(s=>s.url).join(' ');
+ const swanUrls=universalTechnicalSources('BMJ-MCH-0033').map(s=>s.url).join(' ');
+ assert.match(atlasUrls,/atlascopco\.com/);assert.match(atlasUrls,/compressed-air-distribution/);
+ assert.match(kaeserUrls,/kaeser\.com/);assert.match(kaeserUrls,/37776/);
+ assert.match(swanUrls,/swan-aircompressor\.com/);
+});
