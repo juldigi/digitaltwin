@@ -506,3 +506,61 @@ test('V140 FZ1200 service morphology and taxonomy expose close-family drive hydr
   t.dispose();
  }
 });
+
+
+test('V141 inspection and inkjet twins expose detailed drive trigger sensor and reject service morphology',()=>{
+ const cases=[
+  ['BMJ-MCH-0019',['diana55-transport-drive','diana55-transport-trigger'],['Suction-belt drive / encoder','Inspection trigger / blank presence sensing','Capture → process → decision → reject permissive chain']],
+  ['BMJ-MCH-0020',['shark650-transfer-drive'],['Transfer drive / encoder reference','Program-controlled lighting / light-column shielding reference','Capture → processing → decision → reject permissive chain']],
+  ['BMJ-MCH-0024',['ly300-transport-trigger'],['Print trigger / position confirmation','Negative-pressure pump / gauge / ready sensing / filter','Inspection decision → reject permit chain']]
+ ];
+ for(const [id,nodes,terms] of cases){
+  const t=createMachineTemplate(id);
+  for(const n of nodes)assert.ok(t.findNode(n),id+' missing '+n);
+  const names=t.taxonomy.map(x=>x.name).join(' | ');
+  for(const term of terms)assert.ok(names.includes(term),id+' missing taxonomy '+term);
+  assert.equal(t.root.userData.researchVersion,'V141',id);
+  assert.ok(t.root.userData.uniqueResearchUrls>=217,id+' research URL count regressed');
+  t.dispose();
+ }
+});
+
+test('V141 Diana Eye capture processing decision and reject chain remains causally safe',()=>{
+ const id='BMJ-MCH-0019',t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t);sim.start();
+ for(const f of [.08,.22,.38,.54,.70,.86]){
+  sim.elapsed=7.8*f;sim.lastNow=0;sim.update(16);const st=sim.state();
+  assert.equal(st.interlockSafe,true,id+' interlock at '+f);
+  if(st.imageProcessingActive)assert.equal(st.captureComplete,true,id+' processing before capture');
+  if(st.demoRejectActive){assert.equal(st.rejectPermit,true,id);assert.equal(st.decisionReady,true,id);}
+ }
+ assert.equal(sim.state().installedRejectActuationVerified,false);
+ sim.dispose();t.dispose();
+});
+
+test('V141 SHARK N650 tracks transfer vacuum capture decision and good-bad return without decoding P3N1',()=>{
+ const id='BMJ-MCH-0020',t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t);sim.start();
+ for(const f of [.08,.24,.40,.58,.74,.90]){
+  sim.elapsed=7.2*f;sim.lastNow=0;sim.update(16);const st=sim.state();
+  assert.equal(st.interlockSafe,true,id+' interlock at '+f);
+  if(st.processingActive)assert.equal(st.captureComplete,true,id+' processing before capture');
+  if(st.demoRejectActive){assert.equal(st.rejectPermit,true,id);assert.equal(st.decisionReady,true,id);}
+  assert.equal(st.negativePitchActive,false,id);
+  assert.equal(st.suffixDecoded,false,id);
+ }
+ const st=sim.state();assert.equal(st.negativePitchCapabilityReference,true);assert.equal(st.installedFeederModeVerified,false);assert.equal(st.installedRejectTypeVerified,false);
+ sim.dispose();t.dispose();
+});
+
+test('V141 LY300 enforces positioning print cure inspection decision before routing',()=>{
+ const id='BMJ-MCH-0024',t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t);sim.start();
+ for(const f of [.08,.24,.36,.50,.62,.70,.84,.94]){
+  sim.elapsed=6.8*f;sim.lastNow=0;sim.update(16);const st=sim.state();
+  assert.equal(st.interlockSafe,true,id+' interlock at '+f);
+  if(st.printingActive){assert.equal(st.printPermit,true,id);assert.equal(st.negativePressureReady,true,id);}
+  if(st.uvActive){assert.equal(st.uvPermit,true,id);assert.equal(st.printComplete,true,id);}
+  if(st.cameraActive)assert.equal(st.cureComplete,true,id);
+  if(st.demoRejectActive){assert.equal(st.rejectPermit,true,id);assert.equal(st.decisionReady,true,id);}
+ }
+ const st=sim.state();assert.equal(st.installedPrintheadCountVerified,false);
+ sim.dispose();t.dispose();
+});
