@@ -10,22 +10,22 @@ const html=fs.readFileSync(new URL('../frontend/index.html',import.meta.url),'ut
 const css=fs.readFileSync(new URL('../frontend/app-shell-v79.css',import.meta.url),'utf8');
 const sw=fs.readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 
-test('V161 retains the foundation boundary while restoring evidence-backed factory context',()=>{
- assert.match(scope,/release:'V161'/);
+test('V162 retains the foundation boundary while restoring evidence-backed factory context',()=>{
+ assert.match(scope,/release:'V162'/);
  assert.match(scope,/expansionMode:'EVIDENCE_GATED_CONTEXT'/);
  assert.match(scope,/showUtilitySystems:true/);
  assert.match(scope,/exposePlaceholderTechnicalMetadata:false/);
  assert.match(scope,/indexUtilitySystemsInSearch:true/);
 });
 
-test('Phase-1 navigation does not present utility systems as an active product area',()=>{
- assert.match(html,/id="nav-systems" class="phase-future-ui"[^>]*aria-hidden="true"[^>]*tabindex="-1"[^>]*hidden/);
- assert.match(html,/data-mobile-nav="system"[^>]*aria-hidden="true"[^>]*tabindex="-1"[^>]*hidden/);
+test('factory navigation presents evidence-bounded utility systems as an active product area',()=>{
+ assert.match(html,/id="nav-systems" data-section="system"/);
+ assert.match(html,/data-mobile-nav="system" aria-label="Sistem utilitas"/);
  assert.match(shell,/const PHASE1_FOUNDATION=FOUNDATION_SCOPE\.expansionMode==='LAYOUT_PLACEHOLDERS_ONLY'/);
  assert.match(shell,/if\(!PHASE1_FOUNDATION\)openSystemLayers\(\)/);
  assert.match(shell,/const systemSurface=PHASE1_FOUNDATION\?'':/);
  assert.match(shell,/Lapisan Pabrik/);
- assert.match(css,/\.mobile-nav\{grid-template-columns:repeat\(4,minmax\(0,1fr\)\)\}/);
+ assert.match(css,/\.mobile-nav\{grid-template-columns:repeat\(5,minmax\(0,1fr\)\)\}/);
 });
 
 test('placeholder assets expose spatial context but not inventory technical metadata in Phase-1',()=>{
@@ -69,11 +69,11 @@ test('reference realism is retained in source but hidden from the default Phase-
 });
 
 test('offline cache prioritizes foundation and OFFSET 5 instead of preloading expansion machines',()=>{
- assert.match(sw,/factory-digital-twin-v161-factory-first-systems-20260922/);
+ assert.match(sw,/factory-digital-twin-v162-factory-first-systems-20260922/);
  for(const required of ['src/offset5.js','src/simulation.js','src/data/taxonomy-offset5.js','src/factory-building.js','src/data/dwg-fidelity.js'])assert.match(sw,new RegExp(required.replaceAll('/','\\/')));
  for(const excluded of ['src/offset10.js','src/apm2.js','src/sheeting.js','src/universal-machine.js','src/machine-runtime.js'])assert.doesNotMatch(sw,new RegExp(excluded.replaceAll('/','\\/')));
- assert.match(html,/app-shell-v79\.css\?v=161/);
- assert.match(html,/src\/app\.js\?v=161/);
- assert.match(html,/src\/app-shell-v79\.js\?v=161/);
- assert.match(shell,/v161-factory-first-systems/);
+ assert.match(html,/app-shell-v79\.css\?v=162/);
+ assert.match(html,/src\/app\.js\?v=162/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=162/);
+ assert.match(shell,/v162-factory-first-systems/);
 });

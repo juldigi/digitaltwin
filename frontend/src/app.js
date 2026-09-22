@@ -848,7 +848,7 @@ try{
   if(initialPlaceholder){focusFoundationPlaceholder(initialPlaceholder,{historyMode:'none',openDialog:false});toast('Aset ditampilkan sebagai placeholder tata letak. Detail 3D teknis fase fondasi tersedia untuk OFFSET 5.');}
   else if(deepNode&&TAXONOMY_BY_ID.has(deepNode)){setView('machine');selectTaxonomy(deepNode,{revealPanel:true});showPanel();renderPanel('structure');}
   else showHome();
- }
+ }else showHome();
  const boot=$('#boot');if(boot)boot.hidden=true;$('#engine-status').textContent=engine?'Pabrik 3D siap':'Denah tersedia · penampil 3D belum siap';
 }catch(e){
  const boot=$('#boot');if(boot){boot.hidden=false;boot.innerHTML='<strong>Denah pabrik belum dapat dimuat</strong><p>Data CAD tersimpan tidak berhasil dibuka. Tidak ada geometri pengganti yang dibuat.</p><button id="boot-retry" class="primary">Muat Ulang</button>';on('#boot-retry',()=>location.reload());}

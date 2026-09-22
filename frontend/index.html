@@ -10,7 +10,7 @@
 <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
 <link rel="stylesheet" href="./style.css">
 <link rel="stylesheet" href="./runtime-fallback.css">
-<link rel="stylesheet" href="./app-shell-v79.css?v=161">
+<link rel="stylesheet" href="./app-shell-v79.css?v=162">
 <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/addons/"}}</script>
 </head>
 <body class="panel-hidden ui-simple">
@@ -40,7 +40,7 @@
     <div class="rail-title">DIGITAL TWIN</div>
     <button id="nav-machine" class="active" data-section="factory" title="Pabrik"><span aria-hidden="true"></span><small>Pabrik</small></button>
     <button id="nav-assets" data-section="asset" title="Aset"><span aria-hidden="true"></span><small>Aset</small></button>
-    <button id="nav-systems" class="phase-future-ui" data-section="system" title="Sistem utilitas · fase ekspansi" aria-hidden="true" tabindex="-1" hidden><span aria-hidden="true"></span><small>Sistem</small></button>
+    <button id="nav-systems" data-section="system" title="Sistem utilitas"><span aria-hidden="true"></span><small>Sistem</small></button>
     <button id="nav-simulation-mode" data-section="simulation" title="Simulasi proses"><span aria-hidden="true"></span><small>Simulasi</small></button>
     <button id="nav-sources" data-section="reference" title="Foto, dokumen, manual, drawing, dan evidence"><span aria-hidden="true"></span><small>Referensi</small></button>
     <button id="nav-layout" class="legacy-nav-entry" title="Compatibility hook denah" aria-hidden="true" tabindex="-1"><span></span><small>Denah</small></button>
@@ -209,7 +209,7 @@
 <nav class="mobile-nav" aria-label="Navigasi utama mobile" hidden>
   <button type="button" data-mobile-nav="factory" class="active" aria-label="Pabrik"><span aria-hidden="true"></span><small>Pabrik</small></button>
   <button type="button" data-mobile-nav="asset" aria-label="Aset"><span aria-hidden="true"></span><small>Aset</small></button>
-  <button type="button" class="phase-future-ui" data-mobile-nav="system" aria-label="Sistem · fase ekspansi" aria-hidden="true" tabindex="-1" hidden><span aria-hidden="true"></span><small>Sistem</small></button>
+  <button type="button" data-mobile-nav="system" aria-label="Sistem utilitas"><span aria-hidden="true"></span><small>Sistem</small></button>
   <button type="button" data-mobile-nav="simulation" aria-label="Simulasi"><span aria-hidden="true"></span><small>Simulasi</small></button>
   <button type="button" data-mobile-nav="more" aria-label="Lainnya" aria-expanded="false"><span aria-hidden="true"></span><small>Lainnya</small></button>
 </nav>
@@ -220,10 +220,10 @@
 
 <dialog id="modal" aria-labelledby="modal-title" aria-modal="true"><div class="modal-head"><h2 id="modal-title"></h2><button id="modal-close" class="icon-btn" aria-label="Tutup dialog"></button></div><div id="modal-body"></div></dialog>
 <div id="toast" role="status" aria-live="polite" hidden></div>
-<script type="module" src="./src/app.js?v=161"></script>
-<script type="module" src="./src/ui-v5.js?v=161"></script>
+<script type="module" src="./src/app.js?v=162"></script>
+<script type="module" src="./src/ui-v5.js?v=162"></script>
 <script type="module" src="./src/experience-v37.js?v=81"></script>
-<script type="module" src="./src/app-shell-v79.js?v=161"></script>
+<script type="module" src="./src/app-shell-v79.js?v=162"></script>
 <script>setTimeout(()=>{const b=document.getElementById('boot');if(b&&!b.hidden){b.innerHTML='<strong>Tampilan 3D belum berhasil dimuat</strong><p>Coba muat ulang halaman atau gunakan perangkat lain.</p>'; }},15000);</script>
 </body>
 </html>

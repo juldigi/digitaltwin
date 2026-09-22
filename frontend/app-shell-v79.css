@@ -373,5 +373,5 @@ aside#detail-panel{overscroll-behavior:contain}
 
 /* V156 Phase-1 foundation surface */
 .phase-future-ui[hidden]{display:none!important}
-@media(max-width:767px){.mobile-nav{grid-template-columns:repeat(4,minmax(0,1fr))}}
-@media(max-height:560px) and (orientation:landscape){.mobile-nav{grid-template-columns:1fr;grid-template-rows:repeat(4,minmax(0,1fr))}}
+@media(max-width:767px){.mobile-nav{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media(max-height:560px) and (orientation:landscape){.mobile-nav{grid-template-columns:1fr;grid-template-rows:repeat(5,minmax(0,1fr))}}

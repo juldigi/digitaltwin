@@ -8,7 +8,7 @@ const html=fs.readFileSync(new URL('../frontend/index.html',import.meta.url),'ut
 const shell=fs.readFileSync(new URL('../frontend/src/app-shell-v79.js',import.meta.url),'utf8');
 const sw=fs.readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 
-test('V161 restores factory-first startup even when WebGL falls back',()=>{
+test('V162 restores factory-first startup even when WebGL falls back',()=>{
  const start=app.indexOf('function showHome(){');
  const end=app.indexOf('function connectionDialog',start);
  const home=app.slice(start,end);
@@ -19,17 +19,19 @@ test('V161 restores factory-first startup even when WebGL falls back',()=>{
  assert.match(home,/inspectorState:\{open:false,tab:'overview'\}/);
 });
 
-test('V161 restores evidence-bounded Systems navigation without unlocking unverified machine 3D',()=>{
+test('V162 restores evidence-bounded Systems navigation without unlocking unverified machine 3D',()=>{
  assert.match(scope,/expansionMode:'EVIDENCE_GATED_CONTEXT'/);
  assert.match(scope,/showUtilitySystems:true/);
  assert.match(scope,/indexUtilitySystemsInSearch:true/);
  assert.match(scope,/export function canOpenTechnical3D\(value\)\{\s*return isFoundationPrimary\(value\)/);
 });
 
-test('V161 cache and shell identifiers are coherent',()=>{
- assert.match(html,/app-shell-v79\.css\?v=161/);
- assert.match(html,/src\/app\.js\?v=161/);
- assert.match(html,/src\/app-shell-v79\.js\?v=161/);
- assert.match(shell,/v161-factory-first-systems/);
- assert.match(sw,/factory-digital-twin-v161-factory-first-systems-20260922/);
+test('V162 exposes Systems in both navigation surfaces and keeps identifiers coherent',()=>{
+ assert.match(html,/id="nav-systems" data-section="system"/);
+ assert.match(html,/data-mobile-nav="system" aria-label="Sistem utilitas"/);
+ assert.match(html,/app-shell-v79\.css\?v=162/);
+ assert.match(html,/src\/app\.js\?v=162/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=162/);
+ assert.match(shell,/v162-factory-first-systems/);
+ assert.match(sw,/factory-digital-twin-v162-factory-first-systems-20260922/);
 });
