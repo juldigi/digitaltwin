@@ -468,26 +468,27 @@ test('V139 CTP CTF service roles and taxonomy expose drive feedback and interloc
 test('V140 FZ1200 clamp lift turn-lock airing jogging lower release sequence is interlocked',()=>{
  for(const id of ['BMJ-MCH-0007','BMJ-MCH-0008','BMJ-MCH-0022']){
   const t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t);sim.start();
-  sim.elapsed=14*.12;sim.update((sim.lastNow??0)+16);let st=sim.state();
+  const at=f=>{sim.elapsed=14*f;sim.lastNow=0;sim.update(16);return sim.state();};
+  let st=at(.12);
   assert.equal(st.clampCommand,true,id);assert.equal(st.clampConfirmed,false,id);assert.equal(st.turnPermitted,false,id);assert.equal(st.airingActive,false,id);
 
-  sim.elapsed=14*.30;sim.update((sim.lastNow??0)+16);st=sim.state();
+  st=at(.30);
   assert.equal(st.clampConfirmed,true,id);assert.equal(st.liftClearance,true,id);assert.equal(st.turnPermitted,true,id);assert.equal(st.turnLockConfirmed,false,id);assert.equal(st.airingActive,false,id);
 
-  sim.elapsed=14*.50;sim.update((sim.lastNow??0)+16);st=sim.state();
+  st=at(.50);
   assert.equal(st.turnComplete,true,id);assert.equal(st.turnLockCommand,true,id);assert.equal(st.turnLockConfirmed,false,id);assert.equal(st.airingActive,false,id);
 
-  sim.elapsed=14*.58;sim.update((sim.lastNow??0)+16);st=sim.state();
+  st=at(.58);
   assert.equal(st.turnLockConfirmed,true,id);assert.equal(st.airPermitted,true,id);assert.equal(st.airPressureReady,true,id);assert.equal(st.airingActive,true,id);
 
-  sim.elapsed=14*.66;sim.update((sim.lastNow??0)+16);st=sim.state();
+  st=at(.66);
   assert.equal(st.joggingActive,true,id);assert.equal(st.interlockSafe,true,id);
   assert.ok(sim.paperLayers.some((p,i)=>Math.abs(p.position.y-sim.rest.paperLayerPosition[i].y)>0.001),id+' pile layers should separate during airing');
 
-  sim.elapsed=14*.88;sim.update((sim.lastNow??0)+16);st=sim.state();
+  st=at(.88);
   assert.equal(st.airingActive,false,id);assert.equal(st.joggingActive,false,id);assert.equal(st.alignmentComplete,true,id);assert.equal(st.turnLockConfirmed,false,id);assert.equal(st.loweringActive,true,id);
 
-  sim.elapsed=14*.98;sim.update((sim.lastNow??0)+16);st=sim.state();
+  st=at(.98);
   assert.equal(st.releasePermit,true,id);assert.equal(st.unloadReady,true,id);assert.equal(st.interlockSafe,true,id);
   sim.dispose();t.dispose();
  }
