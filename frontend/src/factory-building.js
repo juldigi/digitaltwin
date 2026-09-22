@@ -52,7 +52,7 @@ export function buildActualFactory(layout,fleet){
   const texture=new T.CanvasTexture(c);texture.colorSpace=T.SRGBColorSpace;const s=new T.Sprite(new T.SpriteMaterial({map:texture,depthTest:false}));s.position.set(x,y,z);s.scale.set(width,width*80/512,1);parent.add(s);return s;
  };
  const data=layout.actual,b=layers.building;
- const buildingDetailStats={floorControlJoints:0,serviceClearanceMarkings:0,columnBasePlates:0,columnAnchorBolts:0,columnPedestals:0,columnStiffeners:0,wallPanelJoints:0,wallGirts:0,wallBaseFlashings:0,primaryRoofFrames:0,eaveHaunches:0,eaveStruts:0,apexSplices:0,roofPurlins:0,purlinAntiSag:0,flyBracing:0,roofBracing:0,roofGutters:0,roofDownpipes:0,downpipeShoes:0,linearLights:0,doorPersonnel:0,doorWide:0,doorProtection:0,dockSafetyElements:0,pressRoomProtection:0,ipalFrameBraces:0,ipalGuardrails:0,officeWorkstations:0,officeMonitors:0,officeTaskChairs:0,officeStorageUnits:0,officePlanningBoards:0,officePrintStations:0,qcInspectionFixtures:0,sparepartRackBays:0,sparepartBins:0,sparepartRackGuards:0,warehousePalletLoads:0,warehouseReelCradles:0,warehouseAisleMarkings:0,warehouseSafetyElements:0};
+ const buildingDetailStats={floorControlJoints:0,serviceClearanceMarkings:0,columnBasePlates:0,columnAnchorBolts:0,columnPedestals:0,columnStiffeners:0,wallPanelJoints:0,wallGirts:0,wallBaseFlashings:0,primaryRoofFrames:0,eaveHaunches:0,eaveStruts:0,apexSplices:0,roofPurlins:0,purlinAntiSag:0,flyBracing:0,roofBracing:0,roofGutters:0,roofDownpipes:0,downpipeShoes:0,linearLights:0,doorPersonnel:0,doorWide:0,doorProtection:0,dockSafetyElements:0,pressRoomProtection:0,ipalFrameBraces:0,ipalGuardrails:0,officeWorkstations:0,officeMonitors:0,officeTaskChairs:0,officeStorageUnits:0,officePlanningBoards:0,officePrintStations:0,qcInspectionFixtures:0,sparepartRackBays:0,sparepartBins:0,sparepartRackGuards:0,warehousePalletLoads:0,warehouseReelCradles:0,warehouseAisleMarkings:0,warehouseSafetyElements:0,finishedGoodsPalletLoads:0,finishedGoodsStagingZones:0};
  const detail=(o,semantic,accuracy='INDUSTRIAL_REALISM_REFERENCE_NOT_AS_BUILT')=>{if(o)o.userData={...o.userData,semantic,accuracy,researchVersion:'V144'};return o;};
  // The outline follows the source production hall and attached office/service wings.
  const outline=[[-4,2],[6,2],[6,6],[96,6],[96,90],[90,96],[73,96],[73,103],[23,103],[23,96],[6,96],[6,55],[-5,55],[-5,11],[-4,11]];
@@ -260,6 +260,30 @@ export function buildActualFactory(layout,fleet){
  for(const [x,y] of [[82.7,72.6],[94.3,72.6],[82.7,87.4],[94.3,87.4]]){const guard=box(b,x,.46,-y,.20,.92,.20,0xe0b436);detail(guard,'RMS_RACK_OR_ZONE_GUARD_REFERENCE');buildingDetailStats.warehouseSafetyElements++;}
  const envPanel=box(b,93.5,1.72,-71.8,.62,.42,.08,0x506771);detail(envPanel,'RMS_TEMPERATURE_HUMIDITY_MONITOR_REFERENCE');envPanel.userData.industryReference={paperboardRH:[50,55],paperboardTemperatureC:[20,23],source:'STORA_ENSO_PAPERBOARD_GUIDE',plantSetpoint:false};buildingDetailStats.warehouseSafetyElements++;
  label('RMS',88.5,3.8,-81,5);
+
+ // Finished-goods areas are populated only when an FG label exists in the source layout.
+ // The stacks are packaging-dispatch references, not an inventory snapshot.
+ const finishedGoodsLoad=(x,y,tag)=>{
+  const pallet=fixture(x,y,1.18,.12,.96,0x967953,tag+'_PALLET',false,.06);if(!pallet)return false;
+  for(let level=0;level<3;level++)for(const dx of [-.27,.27]){
+   fixture(x+dx,y,.50,.25,.84,level%2?0xc8b18e:0xd5bf9c,tag+'_CARTON_CASE',true,.23+level*.26);
+  }
+  fixture(x,y,.045,.82,.98,0x607b8a,tag+'_VERTICAL_STRAP',true,.48);
+  fixture(x,y,1.20,.035,.98,0x607b8a,tag+'_TOP_STRAP',true,.88);
+  buildingDetailStats.finishedGoodsPalletLoads++;return true;
+ };
+ const fgLabels=data.labels.filter(l=>/\bFG\s*[-.]?\s*[123]\b|FINISH(?:ED)?\s*GOODS/i.test(l.text));
+ for(const l of fgLabels){
+  label(l.text,l.x,3.35,-l.y,Math.min(6.5,3.2+l.text.length*.12),'#526772');
+  let placed=0;for(const [dx,dy] of [[-.72,-.58],[.72,-.58],[-.72,.58],[.72,.58]])if(finishedGoodsLoad(l.x+dx,l.y+dy,'FG_DISPATCH'))placed++;
+  if(placed){
+   floorMark(l.x,l.y-1.30,3.05,.055,'FG_STAGING_AISLE_MARKING');
+   floorMark(l.x,l.y+1.30,3.05,.055,'FG_STAGING_AISLE_MARKING');
+   floorMark(l.x-1.55,l.y,.055,2.65,'FG_STAGING_SIDE_MARKING');
+   floorMark(l.x+1.55,l.y,.055,2.65,'FG_STAGING_SIDE_MARKING');
+   buildingDetailStats.finishedGoodsStagingZones++;
+  }
+ }
  // IPAL is an outdoor process yard: concrete slab + open steel frame + roof, with no enclosing walls.
  const ipal=new T.Group();ipal.name='IPAL_OPEN_AIR_WATER_TREATMENT';b.add(ipal);
  box(ipal,46.4,.08,-110.9,26.4,.16,14.1,0xaeb7b5).userData={semantic:'IPAL_CONCRETE_SLAB'};
@@ -321,10 +345,10 @@ export function buildActualFactory(layout,fleet){
  root.userData={baselineId:layout.baselineId,buildingDetailPass:'V144_PACKAGING_INTERIORS_AND_WAREHOUSE_REALISM',researchVersion:'V144',researchSourceCount:V144_SOURCE_STATS.total,uniqueResearchUrls:V144_SOURCE_STATS.uniqueUrls,buildingDetailStats,utilityRouting,
   architecturalEvidenceBoundary:{
    sourceGrounded:['PLANT_OUTLINE','DXF_WALL_SEGMENTS','DXF_COLUMN_POSITIONS','SOURCE_DOORS_AND_CURTAINS','MACHINE_PLACEMENTS','USER_APPROX_ROOF_4_5_TO_7M'],
-   realismReferences:['CONCRETE_CONTROL_JOINT_GRID','SERVICE_CLEARANCE_FLOOR_MARKING','COLUMN_PEDESTALS_BASE_PLATES_ANCHORS_STIFFENERS','WALL_GIRTS_BASE_FLASHING','PANEL_OR_CONTROL_JOINT_RHYTHM','PORTAL_HAUNCH_EAVE_STRUT_APEX_SPLICE','ROOF_PURLIN_ANTI_SAG_FLY_BRACING','LINEAR_LIGHTING','GUTTER_DOWNPIPE_SHOE_SPACING','PERSONNEL_DOOR_HARDWARE','WIDE_DOOR_HARDWARE','PRESS_ROOM_KICK_RAIL_AND_CORNER_PROTECTION','DOCK_LEVELLER_STAIR_CANOPY_PROTECTION','IPAL_SERVICE_HARDWARE','OFFICE_ERGONOMIC_WORKSTATIONS_AND_ADMIN_STORAGE','PPIC_PLANNING_BOARD_AND_PRINT_STATION','QC_INSPECTION_BENCH_AND_SAMPLE_STORAGE','SPAREPART_RACK_BINS_GUARDS_AND_PICKING_AISLE','RMS_WRAPPED_PAPERBOARD_PALLETS_REEL_CRADLES_AISLE_MARKINGS_AND_ENVIRONMENT_MONITOR'],
+   realismReferences:['CONCRETE_CONTROL_JOINT_GRID','SERVICE_CLEARANCE_FLOOR_MARKING','COLUMN_PEDESTALS_BASE_PLATES_ANCHORS_STIFFENERS','WALL_GIRTS_BASE_FLASHING','PANEL_OR_CONTROL_JOINT_RHYTHM','PORTAL_HAUNCH_EAVE_STRUT_APEX_SPLICE','ROOF_PURLIN_ANTI_SAG_FLY_BRACING','LINEAR_LIGHTING','GUTTER_DOWNPIPE_SHOE_SPACING','PERSONNEL_DOOR_HARDWARE','WIDE_DOOR_HARDWARE','PRESS_ROOM_KICK_RAIL_AND_CORNER_PROTECTION','DOCK_LEVELLER_STAIR_CANOPY_PROTECTION','IPAL_SERVICE_HARDWARE','OFFICE_ERGONOMIC_WORKSTATIONS_AND_ADMIN_STORAGE','PPIC_PLANNING_BOARD_AND_PRINT_STATION','QC_INSPECTION_BENCH_AND_SAMPLE_STORAGE','SPAREPART_RACK_BINS_GUARDS_AND_PICKING_AISLE','RMS_WRAPPED_PAPERBOARD_PALLETS_REEL_CRADLES_AISLE_MARKINGS_AND_ENVIRONMENT_MONITOR','SOURCE_LABELLED_FG_CARTON_PALLET_STAGING'],
    notAsBuilt:true,utilityMEPActualRoutingAdded:false,reason:'Architectural realism references improve physical readability but do not replace field photos, structural drawings or MEP routing drawings.'
   },
-  assumptions:{...data.assumptions,roofEaves:4.5,roofRidge:7,roofHeightEvidence:'USER_APPROXIMATE_MEASUREMENT',machineServiceClearance:MACHINE_SERVICE_CLEARANCE,offsetRoomClearance:1.85,wallTreatment:'SOURCE_SEGMENTS_CLIPPED_TO_SERVICE_ENVELOPE',portalTreatment:'SOURCE_PORTALS_SHIFTED_ONLY_WHEN_CLEARANCE_CONFLICTS',roomContents:'FUNCTION_SPECIFIC_PACKAGING_INTERIOR_REFERENCE_NOT_AS_BUILT_INVENTORY',warehouseReference:'PAPERBOARD_WRAPPED_PALLETS_PLUS_REEL_CRADLES_WITH_CLEAR_AISLES_AND_GUARDS_NOT_AS_BUILT',architecturalRealism:'V144_PACKAGING_INTERIOR_REFERENCE_NOT_AS_BUILT',utilityRoutingBoundary:'COMPRESSED_AIR_AHU_PIPE_AHU_DUCT_REMAIN_TEMPLATE_ONLY_UNTIL_ROUTING_DRAWING',rmsEnvironmentIndustryReference:'STORA_ENSO_50_55_RH_20_23C_NOT_PLANT_SETPOINT',ipalTreatment:'OUTDOOR_OPEN_FRAME_FUNCTIONAL_RECONSTRUCTION'},
+  assumptions:{...data.assumptions,roofEaves:4.5,roofRidge:7,roofHeightEvidence:'USER_APPROXIMATE_MEASUREMENT',machineServiceClearance:MACHINE_SERVICE_CLEARANCE,offsetRoomClearance:1.85,wallTreatment:'SOURCE_SEGMENTS_CLIPPED_TO_SERVICE_ENVELOPE',portalTreatment:'SOURCE_PORTALS_SHIFTED_ONLY_WHEN_CLEARANCE_CONFLICTS',roomContents:'FUNCTION_SPECIFIC_PACKAGING_INTERIOR_REFERENCE_NOT_AS_BUILT_INVENTORY',warehouseReference:'PAPERBOARD_WRAPPED_PALLETS_PLUS_REEL_CRADLES_WITH_CLEAR_AISLES_AND_GUARDS_NOT_AS_BUILT',finishedGoodsReference:'ONLY_SOURCE_LABELLED_FG_AREAS_GET_CARTON_PALLET_STAGING_NOT_INVENTORY_SNAPSHOT',architecturalRealism:'V144_PACKAGING_INTERIOR_REFERENCE_NOT_AS_BUILT',utilityRoutingBoundary:'COMPRESSED_AIR_AHU_PIPE_AHU_DUCT_REMAIN_TEMPLATE_ONLY_UNTIL_ROUTING_DRAWING',rmsEnvironmentIndustryReference:'STORA_ENSO_50_55_RH_20_23C_NOT_PLANT_SETPOINT',ipalTreatment:'OUTDOOR_OPEN_FRAME_FUNCTIONAL_RECONSTRUCTION'},
   offsetRooms:pressRooms.map(r=>({...r,centerError:Math.hypot((r.minX+r.maxX)/2-r.centerX,(r.minY+r.maxY)/2-r.centerY)})),ipal:{zone:ipalZone,enclosingWalls:0,removedSourceWallSegments:ipalRemovedWalls.length,openSides:true,processFlow:['EQUALIZATION','AERATION','CLARIFICATION','FILTRATION','TRANSFER'],equipment:ipalEquipment,structuralReference:{xBracing:buildingDetailStats.ipalFrameBraces,guardrailElements:buildingDetailStats.ipalGuardrails}},
   nonMachineCollisionAudit:{placedFixtures:fixtureBoxes.length,skippedFixtures:skippedFixtures.length,accidentalFixtureOverlaps:0},omittedCollisionWalls:0,trimmedCollisionWalls:omitted.length,adjustedPortals:adjustedPortals.map(p=>({semantic:p.evidence,x:p.x,y:p.y,sourceX:p.sourceX,sourceY:p.sourceY})),legacyWalls:data.legacyWalls.length};
  return {root,layers,assets,machineBoxes,utilityRouting};
