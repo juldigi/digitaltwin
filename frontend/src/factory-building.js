@@ -42,6 +42,7 @@ export function buildActualFactory(layout,fleet){
  layers.roof.visible=false;layers.reference.visible=false;
  for(const name of ['utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors'])layers[name].visible=false;
  const mats=new Map();const material=(color,opacity=1)=>{const k=color+':'+opacity;if(!mats.has(k))mats.set(k,new T.MeshStandardMaterial({color,roughness:.82,metalness:.04,transparent:opacity<1,opacity,depthWrite:opacity===1,side:T.DoubleSide}));return mats.get(k);};
+ const lightMaterial=new T.MeshStandardMaterial({color:0xe8eee9,emissive:0xe7f1dd,emissiveIntensity:1.15,roughness:.48,metalness:.02});
  const boxGeo=new T.BoxGeometry(1,1,1);
  const box=(parent,x,y,z,w,h,d,color,rot=0,opacity=1)=>{const o=new T.Mesh(boxGeo,material(color,opacity));o.position.set(x,y,z);o.scale.set(w,h,d);o.rotation.y=rot;o.receiveShadow=true;parent.add(o);return o;};
  const line=(parent,a,b,r,color)=>{const delta=new T.Vector3().subVectors(b,a),o=new T.Mesh(new T.CylinderGeometry(r,r,delta.length(),6),material(color));o.position.copy(a).add(b).multiplyScalar(.5);o.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),delta.normalize());parent.add(o);return o;};
@@ -98,10 +99,11 @@ export function buildActualFactory(layout,fleet){
   const cap=box(b,x,4.34,-y,.54,.12,.54,0x6e8288);detail(cap,'COLUMN_EAVE_CAP_REFERENCE');
  }
  const adjustedPortals=[];
- for(const source of data.doors){const d=resolvePortalClearance({...source,width:Math.max(.9,source.width)},serviceClearances);if(d.clearanceAdjusted)adjustedPortals.push(d);const g=new T.Group();g.position.set(d.x,0,-d.y);g.rotation.y=d.rotation*Math.PI/180;b.add(g);g.userData={semantic:'DOOR',evidence:d.evidence,clearanceAdjusted:d.clearanceAdjusted,sourcePosition:[d.sourceX,d.sourceY]};
-  box(g,-d.width/2,1.25,0,.085,2.5,.16,0x526b75);box(g,d.width/2,1.25,0,.085,2.5,.16,0x526b75);box(g,0,2.47,0,d.width+.17,.09,.16,0x526b75);
-  const leaf=box(g,-d.width/2+.08,1.18,-d.width*.43,d.width*.96,2.34,.052,0x9db5bd,Math.PI/2.35);leaf.castShadow=true;leaf.userData.semantic='OPEN_DOOR_LEAF';
-  const handle=new T.Mesh(new T.SphereGeometry(.035,8,6),material(0xd5c6a2));handle.position.set(d.width*.34,1.08,-.055);leaf.add(handle);
+ for(const source of data.doors){const d=resolvePortalClearance({...source,width:Math.max(.9,source.width)},serviceClearances);if(d.clearanceAdjusted)adjustedPortals.push(d);const g=new T.Group();g.position.set(d.x,0,-d.y);g.rotation.y=d.rotation*Math.PI/180;b.add(g);
+  const personnel=d.width<1.8;g.userData={semantic:'DOOR',evidence:d.evidence,clearanceAdjusted:d.clearanceAdjusted,sourcePosition:[d.sourceX,d.sourceY],openingTypeReference:personnel?'PERSONNEL_HINGED':'WIDE_SECTIONAL_OR_SLIDING_REFERENCE',asBuiltTypeVerified:false};
+  const h=personnel?2.45:3.05;box(g,-d.width/2,h/2,0,.095,h,.18,0x526b75);box(g,d.width/2,h/2,0,.095,h,.18,0x526b75);box(g,0,h-.045,0,d.width+.18,.09,.18,0x526b75);
+  if(personnel){buildingDetailStats.doorPersonnel++;const leaf=box(g,-d.width/2+.08,1.16,-d.width*.43,d.width*.96,2.30,.052,0x9db5bd,Math.PI/2.35);leaf.castShadow=true;detail(leaf,'PERSONNEL_DOOR_LEAF_REFERENCE');const handle=new T.Mesh(new T.SphereGeometry(.035,8,6),material(0xd5c6a2));handle.position.set(d.width*.34,1.08,-.055);leaf.add(handle);}
+  else{buildingDetailStats.doorWide++;for(let yy=.22;yy<h-.18;yy+=.22){const slat=box(g,0,yy,.035,d.width-.12,.19,.045,yy>h*.58?0x8299a1:0x9caeb3);detail(slat,'WIDE_DOOR_SECTIONAL_SLAT_REFERENCE');}for(const sx of [-d.width/2+.10,d.width/2-.10])detail(box(g,sx,h/2,.08,.055,h-.18,.055,0x42565f),'WIDE_DOOR_GUIDE_TRACK_REFERENCE');}
  }
  const addCurtain=(d,semantic='PVC_CURTAIN',machineId=null)=>{const g=new T.Group();g.position.set(d.x,0,-d.y);g.rotation.y=d.rotation*Math.PI/180;b.add(g);g.userData={semantic,evidence:d.evidence,clearanceAdjusted:d.clearanceAdjusted,sourcePosition:[d.sourceX,d.sourceY],machineId};
   box(g,0,3.12,0,d.width+.32,.18,.2,0x526e7c);box(g,-d.width/2-.12,1.55,0,.14,3.1,.2,0x526e7c);box(g,d.width/2+.12,1.55,0,.14,3.1,.2,0x526e7c);
@@ -111,9 +113,16 @@ export function buildActualFactory(layout,fleet){
  };
  for(const source of data.curtains){const d=resolvePortalClearance({...source,width:Math.max(2.6,source.width)},serviceClearances);if(d.clearanceAdjusted)adjustedPortals.push(d);addCurtain(d);}
  for(const room of pressRooms)addCurtain({x:room.centerX,y:room.minY,width:room.curtainWidth,rotation:0,evidence:'CENTERED OFFSET ROOM ACCESS',sourceX:room.centerX,sourceY:room.minY,clearanceAdjusted:false},'PRESS_ROOM_CURTAIN',room.machineId);
- // Open loading dock, bumpers, canopy and source folding-gate entrance.
- box(b,84,.42,-4.1,7.5,.85,3.2,0x8d9798);for(const x of [81,83,85,87])box(b,x,.75,-2.45,.32,.6,.18,0x303b42);
- box(b,84,4.5,-4.2,9,.15,5,0x536e7a);for(const x of [80,88])box(b,x,2.25,-2.3,.18,4.5,.18,0x526b75);box(b,14,1.25,-2.2,4.5,2.5,.09,0x8a9da3,0,.6);
+ // Open loading dock: source location retained; leveller, guards and protection are functional visual references.
+ const dock=box(b,84,.42,-4.1,7.5,.85,3.2,0x8d9798);dock.userData={semantic:'LOADING_DOCK_PLATFORM',accuracy:'SOURCE_LOCATION_WITH_FUNCTIONAL_DETAIL'};
+ for(const x of [81,83,85,87]){detail(box(b,x,.75,-2.45,.32,.6,.18,0x303b42),'DOCK_RUBBER_BUMPER_REFERENCE');buildingDetailStats.dockSafetyElements++;}
+ const leveller=box(b,84,.86,-3.08,3.1,.10,1.22,0x586970);leveller.rotation.x=-.055;detail(leveller,'DOCK_LEVELLER_REFERENCE');buildingDetailStats.dockSafetyElements++;
+ for(const x of [80.35,87.65]){detail(box(b,x,.55,-4.55,.18,1.10,.18,0xe2b428),'DOCK_BOLLARD_REFERENCE');detail(box(b,x,.95,-4.55,.19,.12,.19,0x27343a),'DOCK_BOLLARD_CAP_REFERENCE');buildingDetailStats.dockSafetyElements++;}
+ for(const x of [82.3,85.7]){const guide=box(layers.landscape,x,.14,-.75,.18,.28,3.3,0xe2b428);guide.rotation.y=x<84?-.10:.10;detail(guide,'TRUCK_WHEEL_GUIDE_REFERENCE');buildingDetailStats.dockSafetyElements++;}
+ const drain=box(layers.landscape,84,.035,-2.05,7.3,.07,.22,0x46565d);detail(drain,'DOCK_TRENCH_DRAIN_REFERENCE');for(let x=80.6;x<87.5;x+=.42)detail(box(layers.landscape,x,.075,-2.05,.28,.025,.24,0x26343a),'DOCK_DRAIN_GRATE_REFERENCE');
+ box(b,84,4.5,-4.2,9,.15,5,0x536e7a);for(const x of [80,88])box(b,x,2.25,-2.3,.18,4.5,.18,0x526b75);
+ const dockGutter=line(b,new T.Vector3(79.7,4.39,-6.55),new T.Vector3(88.3,4.39,-6.55),.045,0x526b75);detail(dockGutter,'DOCK_CANOPY_GUTTER_REFERENCE');for(const x of [80,88]){const down=line(b,new T.Vector3(x,4.38,-6.5),new T.Vector3(x,.18,-6.5),.038,0x526b75);detail(down,'DOCK_CANOPY_DOWNPIPE_REFERENCE');}
+ box(b,14,1.25,-2.2,4.5,2.5,.09,0x8a9da3,0,.6);
  // User-confirmed vertical envelope: 4.5 m eaves and approximately 7 m ridge.
  for(const [x,w,z,d] of [[51,90,-51,90],[47.5,51,-99.5,7],[.5,11,-33,44]]){
   const half=w/2,rise=2.5,slope=Math.atan2(rise,half),len=Math.hypot(half,rise);
