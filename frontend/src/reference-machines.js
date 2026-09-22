@@ -730,10 +730,10 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   const doorW=(L-.10)/3;
   for(let i=0;i<3;i++){
    const x=-L/2+.05+doorW/2+i*doorW,door=this.cover(this.box(cab,[doorW-.025,H-.16,.045],[x,.80,-D/2],'body',.015));this.tag(door,'compressor-service-door-reference','BRAND_FAMILY_VISUAL_REFERENCE');door.userData.serviceDoorIndex=i+1;
-   const handle=this.box(cab,[.025,.20,.025],[x+doorW*.34,.83,-D/2-.035],'dark',.004);this.tag(handle,'compressor-service-door-handle-reference','BRAND_FAMILY_VISUAL_REFERENCE');
+   const handle=this.cover(this.box(cab,[.025,.20,.025],[x+doorW*.34,.83,-D/2-.035],'dark',.004));this.tag(handle,'compressor-service-door-handle-reference','BRAND_FAMILY_VISUAL_REFERENCE');
   }
-  for(let y=.42;y<=1.20;y+=.10){const louvre=this.box(cab,[.025,.035,.46],[-L/2-.034,y,.25],'dark',.002);this.tag(louvre,'compressor-cooling-air-inlet-louvre-reference','BRAND_FAMILY_VISUAL_REFERENCE');}
-  for(let x=-L*.24;x<=L*.24;x+=.10){const slot=this.box(cab,[.045,.025,.50],[x,H+.15,.22],'dark',.002);this.tag(slot,'compressor-cooling-air-exhaust-grille-reference','BRAND_FAMILY_VISUAL_REFERENCE');}
+  for(let y=.42;y<=1.20;y+=.10){const louvre=this.cover(this.box(cab,[.025,.035,.46],[-L/2-.034,y,.25],'dark',.002));this.tag(louvre,'compressor-cooling-air-inlet-louvre-reference','BRAND_FAMILY_VISUAL_REFERENCE');}
+  for(let x=-L*.24;x<=L*.24;x+=.10){const slot=this.cover(this.box(cab,[.045,.025,.50],[x,H+.15,.22],'dark',.002));this.tag(slot,'compressor-cooling-air-exhaust-grille-reference','BRAND_FAMILY_VISUAL_REFERENCE');}
   this.root.userData.unifiedCompressorCabinet=true;this.root.userData.exteriorVisualReference='BRAND_FAMILY_CABINET__MODEL_SPECIFIC_PANEL_LAYOUT_UNVERIFIED';
  }
  enrichCompressedAirDistribution(){
