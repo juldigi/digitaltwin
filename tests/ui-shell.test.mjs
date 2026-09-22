@@ -80,7 +80,8 @@ test('all static buttons are actionable and none is permanently disabled',()=>{
     tab:(m[1].match(/\bdata-tab="([^"]+)"/)||[])[1]||null,
     workbench:(m[1].match(/\bdata-workbench="([^"]+)"/)||[])[1]||null,
     partBack:/\bdata-part-label-back\b/.test(m[1]),
-    mobile:(m[1].match(/\bdata-mobile-nav="([^"]+)"/)||[])[1]||null
+    mobile:(m[1].match(/\bdata-mobile-nav="([^"]+)"/)||[])[1]||null,
+    breadcrumb:/\bdata-breadcrumb-factory\b/.test(m[1])
   }));
   assert.equal(buttons.filter(b=>/\bdisabled\b/.test(b.attrs)).length,0,'a visible static button is disabled');
   for(const b of buttons){
@@ -90,6 +91,7 @@ test('all static buttons are actionable and none is permanently disabled',()=>{
     else if(b.workbench)assert.match(ui,/data-workbench|dataset\.workbench/);
     else if(b.partBack)assert.match(engine,/data-part-label-back/);
     else if(b.mobile)assert.ok(mobileStableUi.includes('data-mobile-nav'),`mobile nav ${b.mobile} has no handler`);
+    else if(b.breadcrumb)assert.match(app,/data-breadcrumb-factory/);
     else assert.fail('button without id or delegated data attribute');
   }
 });
@@ -151,7 +153,7 @@ test('v42 opens removable exterior covers while retaining frame and interior geo
   assert.match(app,/engine\.setLow\(false\)/);
   assert.match(app,/template\.setExteriorOpen\(true\)/);
   assert.match(app,/Buka Semua Cover/);
-  assert.match(app,/Tutup Exterior/);
+  assert.match(app,/Tutup Interior|Tutup Semua Cover/);
   assert.match(app,/Interior \+ frame\/support/);
   assert.match(app,/document\.querySelectorAll\('\[data-exterior-area\]'\)\.forEach/);
   assert.match(engine,/fitObjects\(objects=\[\]/);
@@ -302,7 +304,7 @@ test('v54 keeps APM2 as a dedicated 3D machine with process-specific UI and no i
   assert.match(app,/\['offset10','apm2','sheeting'\]\.includes\(requested\)/);
   assert.match(app,/IS_APM2=MACHINE_KEY==='apm2'/);
   assert.match(app,/ACTIVE_ROOT=IS_OFFSET10\?'O10':IS_APM2\?'APM2':IS_SHEETING\?'SH':IS_GENERIC\?GENERIC_ROOT:'O5'/);
-  assert.match(app,/machine\.machineId==='BMJ-MCH-0010'\?'apm2'/);
+  assert.match(app,/normalizeMachineKey\(machine\.machineId\)/);
   assert.match(app,/switchActiveMachine\(route\)/);
   assert.match(engine,/switchMachine\(key\)/);
   assert.match(app,/Simulasi Proses APM 2/);
@@ -329,7 +331,7 @@ test('v54 keeps APM2 as a dedicated 3D machine with process-specific UI and no i
 
 test('v57 routes Sheeting Lexus as a dedicated right-to-left twin',()=>{
   assert.match(app,/IS_SHEETING=MACHINE_KEY==='sheeting'/);
-  assert.match(app,/machine\.machineId==='BMJ-MCH-0002'\?'sheeting'/);
+  assert.match(app,/normalizeMachineKey\(machine\.machineId\)/);
   assert.match(app,/SHEETING LEXUS/);
   assert.match(app,/RIGHT → LEFT/);
   assert.match(app,/Simulasi Proses Sheeting/);
