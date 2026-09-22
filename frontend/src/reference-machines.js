@@ -1682,8 +1682,9 @@ export class ReferenceProcessSimulation{
   const p=this.active?(this.elapsed%this.cycle)/this.cycle:0;
   let idx=0,loading=false,clamped=false,exposure=false,unloading=false;
   if(p<.20){idx=0;loading=true;}
-  else if(p<.34){idx=1;loading=true;clamped=p>.27;}
-  else if(p<.78){idx=2;clamped=true;exposure=true;}
+  else if(p<.27){idx=1;loading=true;}
+  else if(p<.34){idx=2;loading=true;clamped=true;}
+  else if(p<.78){idx=3;clamped=true;exposure=true;}
   else {idx=4;unloading=true;}
   return {p,idx,loading,clamped,exposure,unloading,laserTraverse:exposure};
  }
@@ -1938,7 +1939,7 @@ export class ReferenceProcessSimulation{
   const right=new THREE.Mesh(flapGeo,paper);right.position.z=.11;right.name='FGM2-RIGHT-FLAP';rightPivot.add(right);
   const glueStrip=new THREE.Mesh(glueGeo,glueMat);glueStrip.position.set(.02,.018,.31);glueStrip.visible=false;glueStrip.name='FGM2-ADHESIVE-ZONE-VISUAL';g.add(glueStrip);
   this.folderBlank=g;
-  this.folder={leftPivot,rightPivot,glueStrip,cartonBlankGeometryIsSchematic:true,installedCrashLockVerified:false,installedFourSixCornerVerified:false,glueApplicatorTypeVerified:false,foldingActive:false,prebreakActive:false,alignmentActive:false,glueZoneActive:false,finalFoldActive:false,compressionActive:false,deliveryActive:false,zonePositions:[-5.20,-3.45,-1.75,0,1.75,3.55,5.20]};
+  this.folder={leftPivot,rightPivot,glueStrip,cartonBlankGeometryIsSchematic:true,installedCrashLockVerified:false,installedFourSixCornerVerified:false,glueApplicatorTypeVerified:false,foldingActive:false,prebreakActive:false,alignmentActive:false,glueZoneActive:false,finalFoldActive:false,compressionActive:false,deliveryActive:false,zonePositions:[-5.20,-3.45,-1.75,0,1.75,3.55,5.00,5.45]};
  }
  folderStatus(){
   const p=this.active?(this.elapsed%this.cycle)/this.cycle:0;
