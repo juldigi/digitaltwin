@@ -4,43 +4,30 @@ import {FactoryEngine} from './engine.js';
 import {initialState,validateLayout,validatePosition,worldToCad} from './model.js';
 import {OFFSET5_TAXONOMY,TAXONOMY_BY_ID as OFFSET5_BY_ID,taxonomyChildren as offset5Children,taxonomyStats as offset5Stats} from './data/taxonomy-offset5.js';
 import {PHOTO_REGISTRY as OFFSET5_PHOTOS,TECHNICAL_SOURCES as OFFSET5_SOURCES,photoStats as offset5PhotoStats,ORIENTATION as OFFSET5_ORIENTATION} from './data/sources-offset5.js';
-import {OFFSET10_TAXONOMY,OFFSET10_TAXONOMY_BY_ID,offset10TaxonomyChildren,offset10TaxonomyStats} from './data/taxonomy-offset10.js';
-import {OFFSET10_PHOTO_REGISTRY,OFFSET10_TECHNICAL_SOURCES,offset10PhotoStats,OFFSET10_ORIENTATION} from './data/sources-offset10.js';
 import {confidenceLabel} from './data/confidence.js';
 import {loadBundledPlantLayout,drawPlantPlan} from './data/plant-layout-data.js';
 import {PRINTING_SIMULATION_STAGES as OFFSET5_SIM_STAGES,INK_SIMULATION_SEQUENCE as OFFSET5_INK_SEQUENCE} from './simulation.js';
-import {OFFSET10_SIMULATION_STAGES,OFFSET10_INK_SEQUENCE} from './simulation-offset10.js';
-import {APM2_TAXONOMY,APM2_TAXONOMY_BY_ID,apm2TaxonomyChildren,apm2TaxonomyStats} from './data/taxonomy-apm2.js';
-import {APM2_PHOTO_REGISTRY,APM2_TECHNICAL_SOURCES,apm2PhotoStats,APM2_ORIENTATION} from './data/sources-apm2.js';
-import {APM2_SIMULATION_STAGES,APM2_PROCESS_STEPS} from './simulation-apm2.js';
-import {SHEETING_TAXONOMY,SHEETING_TAXONOMY_BY_ID,sheetingTaxonomyChildren,sheetingTaxonomyStats} from './data/taxonomy-sheeting.js';
-import {SHEETING_PHOTO_REGISTRY,SHEETING_TECHNICAL_SOURCES,sheetingPhotoStats,SHEETING_ORIENTATION} from './data/sources-sheeting.js';
-import {SHEETING_SIMULATION_STAGES,SHEETING_PROCESS_STEPS} from './simulation-sheeting.js';
-import {MACHINE_REGISTRY,MACHINE_REGISTRY_BY_ID,MACHINE_REGISTRY_STATS,searchMachines} from './data/machine-registry.js';
-import {universalMachineConfig,universalTaxonomy,universalTechnicalSources} from './universal-machine.js';
-import {normalizeMachineKey} from './machine-runtime.js';
+import {MACHINE_REGISTRY,MACHINE_REGISTRY_BY_ID,MACHINE_REGISTRY_STATS} from './data/machine-registry.js';
 import {FOUNDATION_SCOPE,foundationAssetPolicy,scopedRegistryHas3D,canOpenTechnical3D,isFoundationPrimary} from './data/foundation-scope.js';
 import {assetTruth,connectionTruth,layoutTruth,positionVerification,truthStatus} from './data/truth-status.js';
 import {buildDwgFidelityLedger} from './data/dwg-fidelity.js';
-let REQUESTED_MACHINE,GENERIC_CONFIG,MACHINE_KEY,IS_OFFSET10,IS_APM2,IS_SHEETING,IS_GENERIC,IS_VERIFIED_REGISTRY_SIM,GENERIC_TAXONOMY,GENERIC_ROOT,ACTIVE_ROOT,ACTIVE_TAXONOMY,TAXONOMY_BY_ID,taxonomyChildren,taxonomyStats,PHOTO_REGISTRY,GENERIC_SOURCES,TECHNICAL_SOURCES,photoStats,ORIENTATION,PRINTING_SIMULATION_STAGES,INK_SIMULATION_SEQUENCE;
+const LEGACY_MACHINE_ROUTE=Object.freeze({
+ 'BMJ-MCH-0002':'sheeting',
+ 'BMJ-MCH-0003':'offset5',
+ 'BMJ-MCH-0009':'offset10',
+ 'BMJ-MCH-0010':'apm2'
+});
+const normalizeMachineKey=key=>LEGACY_MACHINE_ROUTE[key]||key||FOUNDATION_SCOPE.primaryRoute;
+let REQUESTED_MACHINE,GENERIC_CONFIG=null,MACHINE_KEY=FOUNDATION_SCOPE.primaryRoute,IS_OFFSET10=false,IS_APM2=false,IS_SHEETING=false,IS_GENERIC=false,IS_VERIFIED_REGISTRY_SIM=false,GENERIC_TAXONOMY=[],GENERIC_ROOT=null,ACTIVE_ROOT='O5',ACTIVE_TAXONOMY=OFFSET5_TAXONOMY,TAXONOMY_BY_ID=OFFSET5_BY_ID,taxonomyChildren=offset5Children,taxonomyStats=offset5Stats,PHOTO_REGISTRY=OFFSET5_PHOTOS,GENERIC_SOURCES=[],TECHNICAL_SOURCES=OFFSET5_SOURCES,photoStats=offset5PhotoStats,ORIENTATION=OFFSET5_ORIENTATION,PRINTING_SIMULATION_STAGES=OFFSET5_SIM_STAGES,INK_SIMULATION_SEQUENCE=OFFSET5_INK_SEQUENCE;
 function configureActiveMachine(requested){
- REQUESTED_MACHINE=requested;requested=normalizeMachineKey(requested);
- GENERIC_CONFIG=universalMachineConfig(requested);
- MACHINE_KEY=['offset10','apm2','sheeting'].includes(requested)||GENERIC_CONFIG?requested:'offset5';
- IS_OFFSET10=MACHINE_KEY==='offset10';IS_APM2=MACHINE_KEY==='apm2';IS_SHEETING=MACHINE_KEY==='sheeting';IS_GENERIC=!!GENERIC_CONFIG;IS_VERIFIED_REGISTRY_SIM=IS_GENERIC&&['VERIFIED_PROCESS_MODEL','FAMILY_PROCESS_MODEL'].includes(GENERIC_CONFIG.evidence.simulation);
- GENERIC_TAXONOMY=IS_GENERIC?universalTaxonomy(MACHINE_KEY):[];GENERIC_ROOT=GENERIC_TAXONOMY[0]?.id;
- ACTIVE_ROOT=IS_OFFSET10?'O10':IS_APM2?'APM2':IS_SHEETING?'SH':IS_GENERIC?GENERIC_ROOT:'O5';
- ACTIVE_TAXONOMY=IS_OFFSET10?OFFSET10_TAXONOMY:IS_APM2?APM2_TAXONOMY:IS_SHEETING?SHEETING_TAXONOMY:IS_GENERIC?GENERIC_TAXONOMY:OFFSET5_TAXONOMY;
- TAXONOMY_BY_ID=IS_OFFSET10?OFFSET10_TAXONOMY_BY_ID:IS_APM2?APM2_TAXONOMY_BY_ID:IS_SHEETING?SHEETING_TAXONOMY_BY_ID:IS_GENERIC?new Map(GENERIC_TAXONOMY.map(n=>[n.id,n])):OFFSET5_BY_ID;
- taxonomyChildren=IS_OFFSET10?offset10TaxonomyChildren:IS_APM2?apm2TaxonomyChildren:IS_SHEETING?sheetingTaxonomyChildren:IS_GENERIC?(id=>GENERIC_TAXONOMY.filter(n=>n.parentId===id)):offset5Children;
- taxonomyStats=IS_OFFSET10?offset10TaxonomyStats:IS_APM2?apm2TaxonomyStats:IS_SHEETING?sheetingTaxonomyStats:IS_GENERIC?(()=>({total:GENERIC_TAXONOMY.length,byLevel:Object.fromEntries([1,2,3,4,5,6].map(l=>[l,GENERIC_TAXONOMY.filter(n=>n.level===l).length]))})):offset5Stats;
- PHOTO_REGISTRY=IS_OFFSET10?OFFSET10_PHOTO_REGISTRY:IS_APM2?APM2_PHOTO_REGISTRY:IS_SHEETING?SHEETING_PHOTO_REGISTRY:IS_GENERIC?[]:OFFSET5_PHOTOS;
- GENERIC_SOURCES=IS_GENERIC?[{id:'BMJ-MACHINE-DATABASE',title:'Database Mesin Packaging Offset BMJ',publisher:'PT Bukit Muria Jaya',type:'USER_PROVIDED',confidence:'VERIFIED'},...universalTechnicalSources(MACHINE_KEY)]:[];
- TECHNICAL_SOURCES=IS_OFFSET10?OFFSET10_TECHNICAL_SOURCES:IS_APM2?APM2_TECHNICAL_SOURCES:IS_SHEETING?SHEETING_TECHNICAL_SOURCES:IS_GENERIC?GENERIC_SOURCES:OFFSET5_SOURCES;
- photoStats=IS_OFFSET10?offset10PhotoStats:IS_APM2?apm2PhotoStats:IS_SHEETING?sheetingPhotoStats:IS_GENERIC?(()=>({unique:0,total:0})):offset5PhotoStats;
- ORIENTATION=IS_OFFSET10?OFFSET10_ORIENTATION:IS_APM2?APM2_ORIENTATION:IS_SHEETING?SHEETING_ORIENTATION:IS_GENERIC?{feedDirection:'Mengikuti alur proses keluarga',operatorSide:'Belum terverifikasi',driveSide:'Belum terverifikasi'}:OFFSET5_ORIENTATION;
- PRINTING_SIMULATION_STAGES=IS_OFFSET10?OFFSET10_SIMULATION_STAGES:IS_APM2?APM2_SIMULATION_STAGES:IS_SHEETING?SHEETING_SIMULATION_STAGES:IS_GENERIC?(IS_VERIFIED_REGISTRY_SIM?(GENERIC_CONFIG.profile?.process?.length?GENERIC_CONFIG.profile.process:GENERIC_TAXONOMY.filter(n=>n.level===2).map(n=>n.name)):GENERIC_CONFIG.modules):OFFSET5_SIM_STAGES;
- INK_SIMULATION_SEQUENCE=IS_OFFSET10?OFFSET10_INK_SEQUENCE:IS_APM2?APM2_PROCESS_STEPS:IS_SHEETING?SHEETING_PROCESS_STEPS:IS_GENERIC?(IS_VERIFIED_REGISTRY_SIM?PRINTING_SIMULATION_STAGES:GENERIC_CONFIG.modules.map(x=>`${x} process`)):OFFSET5_INK_SEQUENCE;
+ REQUESTED_MACHINE=requested;
+ MACHINE_KEY=FOUNDATION_SCOPE.primaryRoute;
+ IS_OFFSET10=false;IS_APM2=false;IS_SHEETING=false;IS_GENERIC=false;IS_VERIFIED_REGISTRY_SIM=false;
+ GENERIC_CONFIG=null;GENERIC_TAXONOMY=[];GENERIC_ROOT=null;GENERIC_SOURCES=[];
+ ACTIVE_ROOT='O5';ACTIVE_TAXONOMY=OFFSET5_TAXONOMY;TAXONOMY_BY_ID=OFFSET5_BY_ID;
+ taxonomyChildren=offset5Children;taxonomyStats=offset5Stats;PHOTO_REGISTRY=OFFSET5_PHOTOS;
+ TECHNICAL_SOURCES=OFFSET5_SOURCES;photoStats=offset5PhotoStats;ORIENTATION=OFFSET5_ORIENTATION;
+ PRINTING_SIMULATION_STAGES=OFFSET5_SIM_STAGES;INK_SIMULATION_SEQUENCE=OFFSET5_INK_SEQUENCE;
 }
 const INITIAL_URL_STATE=new URLSearchParams(location.search);
 const INITIAL_REQUESTED_ASSET=INITIAL_URL_STATE.get('machine')||INITIAL_URL_STATE.get('asset');
@@ -666,28 +653,13 @@ function machineRoute(machine){
  return machine?.machineId==='BMJ-MCH-0009'?'offset10':machine?.machineId==='BMJ-MCH-0010'?'apm2':machine?.machineId==='BMJ-MCH-0002'?'sheeting':machine?.machineId==='BMJ-MCH-0003'?'offset5':machine?.machineId||'offset5';
 }
 function searchableTaxonomy(route){
- const key=normalizeMachineKey(route);
- if(key==='offset5')return OFFSET5_TAXONOMY;
- if(key==='offset10')return OFFSET10_TAXONOMY;
- if(key==='apm2')return APM2_TAXONOMY;
- if(key==='sheeting')return SHEETING_TAXONOMY;
- try{return universalTaxonomy(key)||[];}catch{return [];}
+ return canOpenTechnical3D(route)?OFFSET5_TAXONOMY:[];
 }
 function searchableSources(route){
- const key=normalizeMachineKey(route);
- if(key==='offset5')return OFFSET5_SOURCES;
- if(key==='offset10')return OFFSET10_TECHNICAL_SOURCES;
- if(key==='apm2')return APM2_TECHNICAL_SOURCES;
- if(key==='sheeting')return SHEETING_TECHNICAL_SOURCES;
- try{return universalTechnicalSources(key)||[];}catch{return [];}
+ return canOpenTechnical3D(route)?OFFSET5_SOURCES:[];
 }
 function searchablePhotos(route){
- const key=normalizeMachineKey(route);
- if(key==='offset5')return OFFSET5_PHOTOS;
- if(key==='offset10')return OFFSET10_PHOTO_REGISTRY;
- if(key==='apm2')return APM2_PHOTO_REGISTRY;
- if(key==='sheeting')return SHEETING_PHOTO_REGISTRY;
- return [];
+ return canOpenTechnical3D(route)?OFFSET5_PHOTOS:[];
 }
 const normalizeSearchText=value=>String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 let UNIVERSAL_SEARCH_INDEX=null;
