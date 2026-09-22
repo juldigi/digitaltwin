@@ -42,8 +42,9 @@ test('mobile navigation and drawer have one state owner',()=>{
 test('premium generated splash is bounded and cannot get stuck',()=>{
   assert.match(css,/splash-industrial-v79\.webp/);
   assert.match(css,/\.app-splash\.is-done/);
-  assert.match(js,/sessionStorage\.getItem\('bmj-splash-seen'\)/);
-  assert.match(js,/setTimeout\(finishSplash,5000\)/);
+  assert.match(js,/addEventListener\('bmj:factoryready',finishSplash/);
+  assert.match(js,/addEventListener\('bmj:factoryerror',finishSplash/);
+  assert.match(js,/setTimeout\(\(\)=>\{if\(!splash/);
   assert.match(sw,/assets\/splash-industrial-v79\.webp/);
 });
 
