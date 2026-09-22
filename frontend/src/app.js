@@ -529,7 +529,7 @@ function setView(view){
   title.textContent=view==='factory'?'Informasi denah':'Catatan tampilan';
   note.textContent=view==='factory'?'Posisi mesin ditampilkan mengikuti denah yang tersedia. Beberapa tinggi bangunan masih berupa perkiraan visual.':(IS_OFFSET10?'Offset 10 direkonstruksi dari dokumen proyek BMJ dan referensi resmi Heidelberg; foto aktual mesin belum tersedia.':IS_APM2?'APM 2 memakai identitas database BMJ dan referensi legacy BOBST SP 102; suffix mesin dan foto aktual belum tersedia.':IS_SHEETING?'Sheeting mempertahankan baseline visual yang sudah dikoreksi: input reel di kanan, web bergerak kanan ke kiri, lalu cutter, delivery/layboy dan output stack di kiri.':'Model dibuat dengan mengacu pada foto aktual dan dokumen mesin yang tersedia.');
  }
- renderPanel();redrawPlantPlan();emitDomainState({activeSection:'factory',viewMode:'3d'});
+ renderPanel();redrawPlantPlan();emitDomainState({activeSection:'factory'});
 }
 function showHome(){
  qStaticFallbackClear();engine?.clearFactorySelection();setView('factory');engine?.fit(engine.factory,'iso');

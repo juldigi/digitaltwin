@@ -30,7 +30,7 @@ test('V162 exposes Systems in both navigation surfaces and keeps identifiers coh
  assert.match(html,/id="nav-systems" data-section="system"/);
  assert.match(html,/data-mobile-nav="system" aria-label="Sistem utilitas"/);
  assert.match(html,/app-shell-v79\.css\?v=162/);
- assert.match(html,/src\/app\.js\?v=166/);
+ assert.match(html,/src\/app\.js\?v=167/);
  assert.match(html,/src\/app-shell-v79\.js\?v=162/);
  assert.match(shell,/v162-factory-first-systems/);
  assert.match(sw,/factory-digital-twin-v162-factory-first-systems-20260922/);
@@ -43,4 +43,5 @@ test('asset navigation opens an empty search instead of serializing the click ev
  assert.match(app,/function closeModal\(\)\{const dialog=\$\('#modal'\);if\(dialog\?\.open\)dialog\.close\(\);\}/);
  assert.match(app,/focusFoundationPlaceholder\(machine,\{historyMode:'push',openDialog:false\}\);machineDetailDialog\(machine\)/);
  assert.match(app,/const primaryData=primary\?pair\('Machine ID'/);
+ assert.doesNotMatch(app,/emitDomainState\(\{activeSection:'factory',viewMode:'3d'\}\)/);
 });
