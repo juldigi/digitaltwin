@@ -133,7 +133,8 @@ const FAMILY_SOURCES={
   ['SWAN TMV variable-speed screw compressor family','https://swan-aircompressor.com/en/products/screw/variable-speed-screw'],
   ['SWAN Screw Compressor Series catalogue','https://www.swan-aircompressor.com/en/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBa1VNIiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--00fd60abbc79a7b9a28569af7dedf6aca949ded0/Screw%20Compressor%20Series.pdf?disposition=preview'],
   ['Atlas Copco compressed-air distribution / ring-main guidance','https://www.atlascopco.com/en-us/compressors/wiki/compressed-air-articles/compressed-air-distribution'],
-  ['KAESER Compressed Air Engineering Guide / distribution design','https://us.kaeser.com/download.ashx?id=tcm%3A46-37776']
+  ['KAESER Compressed Air Engineering Guide / distribution design','https://us.kaeser.com/download.ashx?id=tcm%3A46-37776'],
+  ['Atlas Copco oil-water separator / condensate treatment reference','https://www.atlascopco.com/en-us/compressors/wiki/compressed-air-articles/what-is-oil-water-separator']
  ],
  ahu:[
   ['Eurovent AHU Guidebook','https://www.eurovent.me/wp-content/uploads/2021-eurovent-ahu-guidebook-second-edition-en-web.pdf'],
@@ -143,9 +144,9 @@ const FAMILY_SOURCES={
 const REFERENCE_SOURCES_BY_NO=new Map([
  [4,FAMILY_SOURCES.gravure],[17,FAMILY_SOURCES.folder],[21,FAMILY_SOURCES.blanker],[23,FAMILY_SOURCES.collator],
  [25,FAMILY_SOURCES.ctp],[26,FAMILY_SOURCES.ctp],[27,FAMILY_SOURCES.imagesetter],[28,FAMILY_SOURCES.zund],
- [29,[FAMILY_SOURCES.compressor[0],FAMILY_SOURCES.compressor[1],FAMILY_SOURCES.compressor[8]]],[30,[FAMILY_SOURCES.compressor[0],FAMILY_SOURCES.compressor[1],FAMILY_SOURCES.compressor[8]]],[35,[FAMILY_SOURCES.compressor[0],FAMILY_SOURCES.compressor[1],FAMILY_SOURCES.compressor[8]]],
- [31,[FAMILY_SOURCES.compressor[2],FAMILY_SOURCES.compressor[3],FAMILY_SOURCES.compressor[4],FAMILY_SOURCES.compressor[9]]],[32,[FAMILY_SOURCES.compressor[2],FAMILY_SOURCES.compressor[3],FAMILY_SOURCES.compressor[4],FAMILY_SOURCES.compressor[9]]],[34,[FAMILY_SOURCES.compressor[2],FAMILY_SOURCES.compressor[3],FAMILY_SOURCES.compressor[4],FAMILY_SOURCES.compressor[9]]],
- [33,[FAMILY_SOURCES.compressor[5],FAMILY_SOURCES.compressor[6],FAMILY_SOURCES.compressor[7]]],
+ [29,[FAMILY_SOURCES.compressor[0],FAMILY_SOURCES.compressor[1],FAMILY_SOURCES.compressor[8],FAMILY_SOURCES.compressor[10]]],[30,[FAMILY_SOURCES.compressor[0],FAMILY_SOURCES.compressor[1],FAMILY_SOURCES.compressor[8],FAMILY_SOURCES.compressor[10]]],[35,[FAMILY_SOURCES.compressor[0],FAMILY_SOURCES.compressor[1],FAMILY_SOURCES.compressor[8],FAMILY_SOURCES.compressor[10]]],
+ [31,[FAMILY_SOURCES.compressor[2],FAMILY_SOURCES.compressor[3],FAMILY_SOURCES.compressor[4],FAMILY_SOURCES.compressor[9],FAMILY_SOURCES.compressor[10]]],[32,[FAMILY_SOURCES.compressor[2],FAMILY_SOURCES.compressor[3],FAMILY_SOURCES.compressor[4],FAMILY_SOURCES.compressor[9],FAMILY_SOURCES.compressor[10]]],[34,[FAMILY_SOURCES.compressor[2],FAMILY_SOURCES.compressor[3],FAMILY_SOURCES.compressor[4],FAMILY_SOURCES.compressor[9],FAMILY_SOURCES.compressor[10]]],
+ [33,[FAMILY_SOURCES.compressor[5],FAMILY_SOURCES.compressor[6],FAMILY_SOURCES.compressor[7],FAMILY_SOURCES.compressor[10]]],
  [40,[['PT Sansin Indonesia / NES central cooling family','https://www.nesacsentral.web.id/']]],
  [36,FAMILY_SOURCES.ahu],[37,FAMILY_SOURCES.ahu],[38,FAMILY_SOURCES.ahu],[39,FAMILY_SOURCES.ahu],[41,FAMILY_SOURCES.ahu]
 ]);
