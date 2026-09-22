@@ -346,3 +346,11 @@ aside#detail-panel{overscroll-behavior:contain}
 .system-info-grid dt{color:var(--muted);font-weight:750;background:#f2f7fb}
 .system-info-grid dd{color:var(--ink);overflow-wrap:anywhere}
 @media(max-width:390px){.system-info-grid{grid-template-columns:1fr}.system-info-grid dt{border-bottom:0;padding-bottom:3px}.system-info-grid dd{padding-top:3px}}
+
+
+/* V154 source/confidence truth layer */
+.reference-truth-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:8px 0 4px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:#f8fbfe;font-size:9px;line-height:1.35}
+.reference-truth-row span{color:var(--muted);font-weight:700}
+.reference-truth-row strong{color:var(--ink);font-size:9px;letter-spacing:.03em;text-align:right}
+.statusbar span{white-space:nowrap}
+@media(max-width:767px){.statusbar{overflow-x:auto;overscroll-behavior-x:contain}.statusbar span{flex:0 0 auto}.reference-truth-row{align-items:flex-start}}
