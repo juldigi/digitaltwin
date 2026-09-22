@@ -8,13 +8,13 @@ const app=fs.readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf
 const css=fs.readFileSync(new URL('../frontend/app-shell-v79.css',import.meta.url),'utf8');
 const sw=fs.readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 
-test('V153 release cache keys move beyond V149/V151 sources',()=>{
-  assert.match(html,/app-shell-v79\.css\?v=153/);
-  assert.match(html,/src\/app\.js\?v=153/);
-  assert.match(html,/src\/ui-v5\.js\?v=153/);
-  assert.match(html,/src\/app-shell-v79\.js\?v=153/);
+test('V154 release cache keys move beyond V149/V151 sources',()=>{
+  assert.match(html,/app-shell-v79\.css\?v=154/);
+  assert.match(html,/src\/app\.js\?v=154/);
+  assert.match(html,/src\/ui-v5\.js\?v=154/);
+  assert.match(html,/src\/app-shell-v79\.js\?v=154/);
   assert.doesNotMatch(html,/\?v=149/);
-  assert.match(sw,/factory-digital-twin-v153-foundation-scope-20260922/);
+  assert.match(sw,/factory-digital-twin-v154-truth-layer-20260922/);
 });
 
 test('custom major overlays expose dialog semantics focus restoration and keyboard containment',()=>{
@@ -56,7 +56,7 @@ test('user-facing system workspace no longer exposes implementation jargon',()=>
 test('technical diagnostics live inside Settings System Information and focus is visibly accessible',()=>{
   assert.match(app,/Informasi Sistem/);
   assert.match(app,/Diagnostik teknis ditempatkan di sini agar tampilan utama tetap sederhana/);
-  assert.match(app,/pair\('Versi aplikasi','V153'\)/);
+  assert.match(app,/pair\('Versi aplikasi','V154'\)/);
   assert.match(css,/:focus-visible/);
   assert.match(css,/prefers-reduced-motion/);
   assert.match(css,/prefers-contrast:more/);
