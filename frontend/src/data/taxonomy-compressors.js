@@ -8,9 +8,9 @@ const ASSET=Object.freeze({
  'BMJ-MCH-0035':{no:35,brand:'ATLAS',label:'COMPRESSOR ATLAS COPCO NO.9'}
 });
 const SRC=Object.freeze({
- ATLAS:Object.freeze(['BMJ-MACHINE-DATABASE','V123-ATLAS-MANUALS','V123-ATLAS-GA26','V123-ATLAS-GA11-30']),
- KAESER:Object.freeze(['BMJ-MACHINE-DATABASE','V123-KAESER-DIRECT','V123-KAESER-BELT','V123-KAESER-FLOW']),
- SWAN:Object.freeze(['BMJ-MACHINE-DATABASE','V123-SWAN-TSAD','V123-SWAN-TMV','V123-SWAN-CATALOG'])
+ ATLAS:Object.freeze(['BMJ-MACHINE-DATABASE','V123-ATLAS-MANUALS','V123-ATLAS-GA26','V123-ATLAS-GA11-30','V133-COMPRESSED-AIR-RING-MAIN']),
+ KAESER:Object.freeze(['BMJ-MACHINE-DATABASE','V123-KAESER-DIRECT','V123-KAESER-BELT','V123-KAESER-FLOW','V133-COMPRESSED-AIR-RING-MAIN']),
+ SWAN:Object.freeze(['BMJ-MACHINE-DATABASE','V123-SWAN-TSAD','V123-SWAN-TMV','V123-SWAN-CATALOG','V133-COMPRESSED-AIR-RING-MAIN'])
 });
 const UNITS=Object.freeze([
  'Air Intake / Filter','Electric Drive Motor','Rotary Screw Airend','Oil / Fluid Separator Vessel','Oil / Air Circuit','Aftercooler / Fan','Controller / Electrical Cabinet','Compressed-Air Discharge / Distribution'
