@@ -95,6 +95,7 @@ const splash=q('.app-splash');
 const finishSplash=()=>{if(!splash||splash.classList.contains('is-done'))return;splash.classList.add('is-done');sessionStorage.setItem('bmj-splash-seen','1');setTimeout(()=>splash.remove(),600)};
 addEventListener('bmj:factoryready',finishSplash,{once:true});
 addEventListener('bmj:factoryerror',finishSplash,{once:true});
+if(document.documentElement.dataset.factoryReady==='true'||document.documentElement.dataset.factoryError==='true')queueMicrotask(finishSplash);
 setTimeout(()=>{if(!splash||splash.classList.contains('is-done'))return;const copy=q('.splash-content p',splash);if(copy)copy.textContent='Factory membutuhkan waktu lebih lama dari biasanya. Status pemuatan akan ditampilkan setelah splash ditutup.';finishSplash();},15000);
 
 const SECTION_BUTTONS={factory:'nav-machine',asset:'nav-assets',system:'nav-systems',simulation:'nav-simulation-mode',reference:'nav-sources'};
