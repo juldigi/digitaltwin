@@ -54,7 +54,7 @@ test('service-worker shell cache references only deployable frontend files',()=>
 });
 
 test('service-worker cache version advances with the centralized runtime release',()=>{
- assert.match(sw,/factory-digital-twin-v155-dwg-fidelity-20260922/);
+ assert.match(sw,/factory-digital-twin-v156-phase3-interaction-20260922/);
 });
 
 
