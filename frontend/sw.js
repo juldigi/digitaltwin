@@ -1,20 +1,20 @@
-const VERSION='factory-digital-twin-v155-dwg-fidelity-20260922';
-const SHELL=['./','./index.html','./config.json','./assets/favicon.svg',
-  './assets/splash-industrial-v79.webp',
-  './app-shell-v79.css',
-  './src/app-shell-v79.js','./src/state/app-state.js','./style.css','./ui-v5.css','./responsive-v5.css','./experience-v37.css','./ui-premium-v73.css','./ui-corporate-v74.css','./reference-v76.css','./mobile-stable-v78.css','./src/model.js','./src/engine.js','./src/simulation.js','./src/offset5.js','./src/offset10.js','./src/simulation-offset10.js','./src/apm2.js','./src/simulation-apm2.js','./src/sheeting.js','./src/simulation-sheeting.js','./src/app.js','./src/ui-v5.js','./src/reference-v76.js','./src/mobile-stable-v78.js','./src/experience-v37.js','./src/data/dimensions-offset5.js','./src/data/dimensions-offset10.js','./src/data/dimensions-apm2.js','./src/data/confidence.js','./src/data/sources-offset5.js','./src/data/sources-offset10.js','./src/data/sources-apm2.js','./src/data/sources-sheeting.js','./src/data/taxonomy-offset5.js','./src/data/taxonomy-offset10.js','./src/data/taxonomy-apm2.js','./src/data/taxonomy-sheeting.js','./src/data/plant-layout-data.js','./src/data/machine-registry.js','./src/data/plant-layout-deep.js','./vendor/three/addons/utils/BufferGeometryUtils.js','./vendor/three/addons/geometries/RoundedBoxGeometry.js','./vendor/three/build/three.module.js','./vendor/three/build/three.core.js','./vendor/three/addons/controls/OrbitControls.js','./vendor/three/addons/controls/TransformControls.js'];
-SHELL.push('./src/data/foundation-scope.js','./src/data/truth-status.js','./src/data/dwg-fidelity.js','./src/universal-machine.js','./src/data/mechanical-profiles.js','./src/data/taxonomy-offset7.js','./src/data/taxonomy-qf100cs.js','./src/data/taxonomy-compressors.js','./src/data/taxonomy-collator.js','./src/data/taxonomy-suprasetter.js','./src/data/taxonomy-imagesetter.js','./src/data/taxonomy-zund.js','./src/data/taxonomy-ahu.js','./src/data/taxonomy-fgm2.js','./src/polar115.js','./src/simulation-polar115.js','./src/data/dimensions-polar115.js','./src/data/taxonomy-polar115.js','./src/data/sources-polar115.js','./src/offset8.js','./src/simulation-offset8.js','./src/data/dimensions-offset8.js','./src/data/taxonomy-offset8.js','./src/data/sources-offset8.js','./src/offset9.js','./src/simulation-offset9.js','./src/data/dimensions-offset9.js','./src/data/taxonomy-offset9.js','./src/data/sources-offset9.js','./src/mk920.js','./src/simulation-mk920.js','./src/data/dimensions-mk920.js','./src/data/taxonomy-mk920.js','./src/data/sources-mk920.js');
-SHELL.push(
- './src/machine-runtime.js','./src/reference-machines.js','./src/data/research-v121.js','./src/data/research-v122.js','./src/data/research-v123.js','./src/data/research-v136.js','./src/data/research-v137.js','./src/data/research-v138.js','./src/data/research-v139.js','./src/data/research-v140.js','./src/data/research-v141.js','./src/data/research-v142.js','./src/data/research-v143.js','./src/data/research-v144.js','./src/data/research-v145.js','./src/data/research-v146.js','./src/data/research-v147.js',
- './src/mk1060.js','./src/simulation-mk1060.js','./src/data/dimensions-mk1060.js','./src/data/taxonomy-mk1060.js','./src/data/sources-mk1060.js',
- './src/promatrix106.js','./src/simulation-promatrix106.js','./src/data/dimensions-promatrix106.js','./src/data/taxonomy-promatrix106.js','./src/data/sources-promatrix106.js',
- './src/media100.js','./src/simulation-media100.js','./src/data/dimensions-media100.js','./src/data/taxonomy-media100.js','./src/data/sources-media100.js',
- './src/diana-eye55.js','./src/simulation-diana-eye55.js','./src/data/dimensions-diana-eye55.js','./src/data/taxonomy-diana-eye55.js','./src/data/sources-diana-eye55.js',
- './src/shark-n650.js','./src/simulation-shark-n650.js','./src/data/dimensions-shark-n650.js','./src/data/taxonomy-shark-n650.js','./src/data/sources-shark-n650.js',
- './src/fz1200.js','./src/simulation-fz1200.js','./src/data/dimensions-fz1200.js','./src/data/taxonomy-fz1200.js','./src/data/sources-fz1200.js',
- './src/upg-ly300.js','./src/simulation-upg-ly300.js','./src/data/dimensions-upg-ly300.js','./src/data/taxonomy-upg-ly300.js','./src/data/sources-upg-ly300.js'
-);
-SHELL.push('./src/factory-building.js','./src/utility-routing.js','./src/data/compressed-air-routes.js','./src/data/ahu-pipe-routes.js','./src/data/ahu-duct-routes.js','./src/data/plant-actual.js','./src/data/plant-actual-data.js','./src/data/factory-fleet-data.js',...Array.from({length:9},(_,i)=>`./src/data/factory-fleet-chunk-${i}.js`));
+const VERSION='factory-digital-twin-v156-phase1-foundation-20260922';
+const SHELL=[
+ './','./index.html','./config.json','./assets/favicon.svg','./assets/splash-industrial-v79.webp',
+ './style.css','./runtime-fallback.css','./app-shell-v79.css','./ui-v5.css','./responsive-v5.css','./experience-v37.css',
+ './src/app.js','./src/app-shell-v79.js','./src/ui-v5.js','./src/experience-v37.js','./src/state/app-state.js',
+ './src/model.js','./src/engine.js','./src/offset5.js','./src/simulation.js',
+ './src/data/foundation-scope.js','./src/data/truth-status.js','./src/data/dwg-fidelity.js',
+ './src/data/dimensions-offset5.js','./src/data/confidence.js','./src/data/sources-offset5.js','./src/data/taxonomy-offset5.js',
+ './src/data/plant-layout-data.js','./src/data/plant-layout-deep.js','./src/data/plant-actual.js','./src/data/plant-actual-data.js',
+ './src/data/machine-registry.js','./src/factory-building.js','./src/utility-routing.js',
+ './src/data/compressed-air-routes.js','./src/data/ahu-pipe-routes.js','./src/data/ahu-duct-routes.js',
+ './src/data/factory-fleet-data.js',
+ ...Array.from({length:9},(_,i)=>`./src/data/factory-fleet-chunk-${i}.js`),
+ './vendor/three/build/three.module.js','./vendor/three/build/three.core.js',
+ './vendor/three/addons/controls/OrbitControls.js','./vendor/three/addons/controls/TransformControls.js',
+ './vendor/three/addons/utils/BufferGeometryUtils.js','./vendor/three/addons/geometries/RoundedBoxGeometry.js'
+];
 self.addEventListener('install',event=>event.waitUntil(caches.open(VERSION).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==VERSION&&(k.startsWith('offset5-')||k.startsWith('factory-digital-twin-'))).map(k=>caches.delete(k)))),self.clients.claim()])));
 self.addEventListener('fetch',event=>{const u=new URL(event.request.url);if(event.request.method!=='GET'||u.origin!==self.location.origin||u.pathname.includes('/api/'))return;event.respondWith(fetch(event.request,{cache:'no-store'}).then(response=>{if(response.ok){const copy=response.clone();event.waitUntil(caches.open(VERSION).then(c=>c.put(event.request,copy)));}return response;}).catch(()=>caches.match(event.request).then(cached=>cached||new Response('Offline: berkas belum tersimpan.',{status:503}))));});
