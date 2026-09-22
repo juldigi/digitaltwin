@@ -11,7 +11,7 @@ const css=fs.readFileSync(new URL('../frontend/app-shell-v79.css',import.meta.ur
 const sw=fs.readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 
 test('V156 marks the master-prompt foundation as a strict presentation scope',()=>{
- assert.match(scope,/release:'V156'/);
+ assert.match(scope,/release:'V157'/);
  assert.match(scope,/expansionMode:'LAYOUT_PLACEHOLDERS_ONLY'/);
  assert.match(scope,/showUtilitySystems:false/);
  assert.match(scope,/exposePlaceholderTechnicalMetadata:false/);
@@ -66,11 +66,11 @@ test('reference realism is retained in source but hidden from the default Phase-
 });
 
 test('offline cache prioritizes foundation and OFFSET 5 instead of preloading expansion machines',()=>{
- assert.match(sw,/factory-digital-twin-v156-phase1-foundation-20260922/);
+ assert.match(sw,/factory-digital-twin-v157-foundation-runtime-20260922/);
  for(const required of ['src/offset5.js','src/simulation.js','src/data/taxonomy-offset5.js','src/factory-building.js','src/data/dwg-fidelity.js'])assert.match(sw,new RegExp(required.replaceAll('/','\\/')));
  for(const excluded of ['src/offset10.js','src/apm2.js','src/sheeting.js','src/universal-machine.js','src/machine-runtime.js'])assert.doesNotMatch(sw,new RegExp(excluded.replaceAll('/','\\/')));
- assert.match(html,/app-shell-v79\.css\?v=156/);
- assert.match(html,/src\/app\.js\?v=156/);
- assert.match(html,/src\/app-shell-v79\.js\?v=156/);
- assert.match(shell,/v156-phase1-foundation/);
+ assert.match(html,/app-shell-v79\.css\?v=157/);
+ assert.match(html,/src\/app\.js\?v=157/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=157/);
+ assert.match(shell,/v157-foundation-runtime/);
 });

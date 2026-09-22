@@ -3,7 +3,7 @@
 // exposed as a full technical 3D asset. Other registered assets remain searchable
 // and selectable as spatial/layout placeholders until the expansion phase is unlocked.
 export const FOUNDATION_SCOPE=Object.freeze({
-  release:'V156',
+  release:'V157',
   phase:'DWG_FACTORY_FOUNDATION',
   primaryMachineId:'BMJ-MCH-0003',
   primaryRoute:'offset5',

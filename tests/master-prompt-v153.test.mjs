@@ -20,7 +20,7 @@ test('master-prompt foundation scope exposes exactly OFFSET 5 as the primary tec
 test('runtime cannot open detailed technical 3D for non-primary assets',()=>{
   assert.match(engine,/if\(!canOpenTechnical3D\(requested\)\)/);
   assert.match(engine,/placeholder tata letak/);
-  assert.match(engine,/this\.machineKey=canOpenTechnical3D\(requested\)\?requested:FOUNDATION_SCOPE\.primaryRoute/);
+  assert.match(engine,/this\.machineKey=FOUNDATION_SCOPE\.primaryRoute/);
   assert.doesNotMatch(engine,/universalMachineConfig/);
   assert.match(app,/if\(!canOpenTechnical3D\(route\)\)/);
   assert.match(app,/focusFoundationPlaceholder/);
@@ -51,9 +51,9 @@ test('factory-first boot stays covered until CAD layout is loaded and failures a
 });
 
 test('V153 cache includes the foundation policy and current cache-busted controller',()=>{
-  assert.match(html,/app-shell-v79\.css\?v=156/);
-  assert.match(html,/src\/app\.js\?v=156/);
-  assert.match(html,/src\/app-shell-v79\.js\?v=156/);
-  assert.match(sw,/factory-digital-twin-v156-phase1-foundation-20260922/);
+  assert.match(html,/app-shell-v79\.css\?v=157/);
+  assert.match(html,/src\/app\.js\?v=157/);
+  assert.match(html,/src\/app-shell-v79\.js\?v=157/);
+  assert.match(sw,/factory-digital-twin-v157-foundation-runtime-20260922/);
   assert.match(sw,/src\/data\/foundation-scope\.js/);
 });
