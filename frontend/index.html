@@ -36,15 +36,20 @@
 
 <main class="twin-shell">
   <nav class="rail" aria-label="Navigasi utama">
-    <div class="rail-title">MENU UTAMA</div>
-    <button id="nav-machine" class="active" title="Home · seluruh pabrik"><span>◈</span><small>Home</small></button>
-    <button id="nav-layout" title="Denah pabrik"><span>▱</span><small>Denah</small></button>
-    <button id="nav-assets" title="Daftar mesin"><span>▦</span><small>Mesin</small></button>
-    <button id="nav-components" title="Struktur mesin"><span>⌘</span><small>Struktur</small></button>
-    <button id="nav-exterior" title="Buka exterior untuk melihat interior"><span>▰</span><small>Exterior</small></button>
-    <button id="nav-sources" title="Dokumen dan foto referensi"><span>▤</span><small>Referensi</small></button>
-    <button id="nav-view-panels" title="Atur panel tampilan"><span>▣</span><small>Panel</small></button>
-    <div class="rail-bottom"><button id="nav-help" title="Panduan"><span>?</span><small>Panduan</small></button></div>
+    <div class="rail-title">DIGITAL TWIN</div>
+    <button id="nav-machine" class="active" data-section="factory" title="Pabrik"><span aria-hidden="true"></span><small>Pabrik</small></button>
+    <button id="nav-assets" data-section="asset" title="Aset"><span aria-hidden="true"></span><small>Aset</small></button>
+    <button id="nav-systems" data-section="system" title="Sistem utilitas"><span aria-hidden="true"></span><small>Sistem</small></button>
+    <button id="nav-simulation-mode" data-section="simulation" title="Simulasi proses"><span aria-hidden="true"></span><small>Simulasi</small></button>
+    <button id="nav-sources" data-section="reference" title="Foto, dokumen, manual, drawing, dan evidence"><span aria-hidden="true"></span><small>Referensi</small></button>
+    <button id="nav-layout" class="legacy-nav-entry" title="Compatibility hook denah" aria-hidden="true" tabindex="-1"><span></span><small>Denah</small></button>
+    <button id="nav-components" class="legacy-nav-entry" title="Compatibility hook struktur" aria-hidden="true" tabindex="-1"><span></span><small>Struktur</small></button>
+    <button id="nav-exterior" class="legacy-nav-entry" title="Compatibility hook interior" aria-hidden="true" tabindex="-1"><span></span><small>Interior</small></button>
+    <button id="nav-view-panels" class="legacy-nav-entry" title="Compatibility hook panel" aria-hidden="true" tabindex="-1"><span></span><small>Panel</small></button>
+    <div class="rail-bottom">
+      <button id="nav-help" data-section="help" title="Bantuan"><span aria-hidden="true"></span><small>Bantuan</small></button>
+      <button id="nav-settings" data-section="settings" title="Pengaturan"><span aria-hidden="true"></span><small>Pengaturan</small></button>
+    </div>
   </nav>
 
   <div class="center-stack">
@@ -90,12 +95,12 @@
         <div class="view-switch" role="group" aria-label="Kontrol tampilan">
           <button data-camera="iso" class="active">3D <span>Isometrik</span></button>
           <button data-camera="top">ATAS <span>Tampak Atas</span></button>
-          <button data-camera="fit">FOKUS <span>Pusatkan</span></button>
-          <button id="tool-pan">GESER <span>Pan</span></button>
-          <button id="tool-explode">URAI <span>Pisahkan</span></button>
-          <button id="tool-isolate">SOLO <span>Isolasi</span></button>
-          <button id="tool-simulation">SIMULASI <span>Printing Test</span></button>
-          <button data-camera="reset">RESET <span>Awal</span></button>
+          <button data-camera="fit">PUSATKAN <span>Pilihan</span></button>
+          <button id="tool-pan" class="legacy-tool-entry" aria-hidden="true" tabindex="-1">GESER <span>Pan</span></button>
+          <button id="tool-explode">URAI <span>Komponen</span></button>
+          <button id="tool-isolate">ISOLASI <span>Pilihan</span></button>
+          <button id="tool-simulation" class="legacy-tool-entry" aria-hidden="true" tabindex="-1">SIMULASI <span>Proses</span></button>
+          <button data-camera="reset">BERANDA <span>Tampilan awal</span></button>
         </div>
         <div class="scene-options">
           <button id="labels" class="icon-btn active" title="Label" aria-label="Tampilkan atau sembunyikan label">Aa</button>
@@ -187,23 +192,23 @@
   </div>
 
   <aside id="detail-panel" aria-label="Detail mesin">
-    <div class="panel-top"><span class="eyebrow">DETAIL MESIN</span><button id="close-panel" class="icon-btn" aria-label="Tutup detail mesin">×</button></div>
+    <div class="panel-top"><span class="eyebrow">KONTEKS TERPILIH</span><button id="close-panel" class="icon-btn" aria-label="Tutup detail"></button></div>
     <div class="asset-preview"><span class="preview-lines"></span></div>
     <div class="asset-heading"><div class="asset-icon">05</div><div><h2>OFFSET 5</h2><p>Heidelberg Speedmaster · CD 102-8+L</p></div><span class="chip">REFERENSI</span></div>
     <div class="confidence-panel"><h4>SUMBER INFORMASI</h4><div class="confidence-row"><span class="confidence-dot green"></span><span>Identitas mesin</span><b>Tersedia</b></div><div class="confidence-row"><span class="confidence-dot blue"></span><span>Foto mesin</span><b>Tersedia</b></div><div class="confidence-row"><span class="confidence-dot yellow"></span><span>Ukuran detail</span><b>Belum lengkap</b></div></div>
-    <div class="inspector-actions"><button id="asset-focus-shortcut">⌖ FOKUS</button><button id="asset-explore-shortcut">◉ STRUKTUR</button><button id="asset-exterior-shortcut">▰ BUKA EXTERIOR</button><button id="asset-docs-shortcut">▤ REFERENSI</button><button id="asset-components-shortcut">▦ KOMPONEN</button></div>
-    <div class="tabs" role="tablist"><button role="tab" aria-selected="true" data-tab="overview">Info Mesin</button><button role="tab" aria-selected="false" data-tab="structure">Struktur</button><button role="tab" aria-selected="false" data-tab="simulation">Simulasi</button><button role="tab" aria-selected="false" data-tab="exterior">Buka Exterior</button><button role="tab" aria-selected="false" data-tab="sources">Referensi</button></div>
+    <div class="inspector-actions" aria-hidden="true"></div>
+    <div class="tabs" role="tablist"><button role="tab" aria-selected="true" data-tab="overview">Ringkasan</button><button role="tab" aria-selected="false" data-tab="structure">Struktur</button><button role="tab" aria-selected="false" data-tab="simulation">Simulasi</button><button role="tab" aria-selected="false" data-tab="exterior">Buka Interior</button><button role="tab" aria-selected="false" data-tab="sources">Referensi</button></div>
     <div id="panel-content" class="panel-content"></div>
-    <div class="panel-footer"><button id="focus-machine" class="primary">⌖ Fokus Mesin</button><button id="edit-position" class="secondary">Atur Posisi</button></div>
+    <div class="panel-footer"><button id="focus-machine" class="primary">Pusatkan di 3D</button><button id="edit-position" class="secondary">Atur Posisi</button></div>
   </aside>
 </main>
 
 <nav class="mobile-nav" aria-label="Navigasi utama mobile" hidden>
-  <button type="button" data-mobile-nav="machine" class="active" aria-label="Tampilan 3D"><span>◈</span><small>3D</small></button>
-  <button type="button" data-mobile-nav="layout" aria-label="Denah pabrik"><span>▱</span><small>Denah</small></button>
-  <button type="button" data-mobile-nav="assets" aria-label="Daftar mesin"><span>▦</span><small>Mesin</small></button>
-  <button type="button" data-mobile-nav="components" aria-label="Struktur mesin"><span>⌘</span><small>Bagian</small></button>
-  <button type="button" data-mobile-nav="menu" aria-label="Menu lainnya" aria-expanded="false"><span>•••</span><small>Menu</small></button>
+  <button type="button" data-mobile-nav="factory" class="active" aria-label="Pabrik"><span aria-hidden="true"></span><small>Pabrik</small></button>
+  <button type="button" data-mobile-nav="asset" aria-label="Aset"><span aria-hidden="true"></span><small>Aset</small></button>
+  <button type="button" data-mobile-nav="system" aria-label="Sistem"><span aria-hidden="true"></span><small>Sistem</small></button>
+  <button type="button" data-mobile-nav="simulation" aria-label="Simulasi"><span aria-hidden="true"></span><small>Simulasi</small></button>
+  <button type="button" data-mobile-nav="more" aria-label="Lainnya" aria-expanded="false"><span aria-hidden="true"></span><small>Lainnya</small></button>
 </nav>
 
 <button id="ui-backdrop" class="ui-backdrop" aria-label="Tutup panel terbuka" tabindex="-1"></button>
@@ -215,7 +220,7 @@
 <script type="module" src="./src/app.js?v=147.1"></script>
 <script type="module" src="./src/ui-v5.js?v=119"></script>
 <script type="module" src="./src/experience-v37.js?v=81"></script>
-<script type="module" src="./src/app-shell-v79.js?v=119"></script>
+<script type="module" src="./src/app-shell-v79.js?v=149"></script>
 <script>setTimeout(()=>{const b=document.getElementById('boot');if(b&&!b.hidden){b.innerHTML='<strong>Tampilan 3D belum berhasil dimuat</strong><p>Coba muat ulang halaman atau gunakan perangkat lain.</p>'; }},15000);</script>
 </body>
 </html>
