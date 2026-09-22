@@ -560,7 +560,7 @@ function buildUniversalSearchIndex(){
  for(const machine of MACHINE_REGISTRY){
   const route=machineRoute(machine);
   if(machine.area)areas.add(machine.area);
-  items.push({type:'machine',group:'MESIN',title:machine.name,subtitle:[machine.area,machine.sapCode,machine.model].filter(Boolean).join(' · '),route,machineId:machine.machineId,keywords:[machine.name,machine.machineId,machine.sapCode,machine.functionalLocation,machine.model,machine.serial,machine.area].filter(Boolean).join(' ')});
+  items.push({type:'machine',group:'MESIN',title:machine.name,subtitle:[machine.area,machine.sapCode,machine.model].filter(Boolean).join(' · '),route,machineId:machine.machineId,has3D:Boolean(machine.has3D),keywords:[machine.name,machine.machineId,machine.sapCode,machine.functionalLocation,machine.model,machine.serial,machine.area].filter(Boolean).join(' ')});
   if(!machine.has3D)continue;
   const taxonomy=searchableTaxonomy(route),byId=new Map(taxonomy.map(node=>[node.id,node]));
   const pathFor=node=>{const path=[];let cursor=node,guard=0;while(cursor&&guard++<8){path.unshift(cursor.name||cursor.id);cursor=cursor.parentId?byId.get(cursor.parentId):null;}return path.join(' / ')};
@@ -609,7 +609,8 @@ addEventListener('bmj:searchselect',async event=>{
  const item=event.detail?.item;if(!item)return;
  try{
   if(item.type==='system'){dispatchEvent(new CustomEvent('bmj:systemsearchselect',{detail:{system:item.system}}));return;}
-  if(item.type==='area'){assetDialog(item.title);return;}
+  if(item.type==='area'){emitDomainState({selectedArea:item.title,activeSection:'asset'});assetDialog(item.title);return;}
+  if(item.type==='machine'&&!item.has3D){const record=MACHINE_REGISTRY_BY_ID.get(item.machineId);emitDomainState({selectedAsset:item.machineId,selectedNode:null,activeSection:'asset'});if(record)machineDetailDialog(record);return;}
   if(item.route&&normalizeMachineKey(item.route)!==MACHINE_KEY)await switchActiveMachine(item.route);
   setView('machine');
   if(item.type==='component'){
