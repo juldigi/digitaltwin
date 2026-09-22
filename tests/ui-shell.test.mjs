@@ -307,14 +307,14 @@ test('v54 retains the APM2 expansion implementation without exposing it as a Pha
   assert.match(app,/MACHINE_KEY=FOUNDATION_SCOPE\.primaryRoute/);
   assert.match(app,/IS_OFFSET10=false,IS_APM2=false,IS_SHEETING=false/);
   assert.doesNotMatch(app,/from '\.\/data\/taxonomy-apm2\.js'/);
-  assert.match(app,/normalizeMachineKey\(route\)/);
+  assert.match(app,/LEGACY_MACHINE_ROUTE/);
   assert.match(app,/if\(!isFoundationPrimary\(machine\)\)/);
   assert.match(engine,/if\(!canOpenTechnical3D\(requested\)\)/);
   assert.match(engine,/switchMachine\(key\)/);
   assert.match(app,/Simulasi Proses APM 2/);
   assert.match(app,/register dan SideLay/);
   assert.match(app,/suffix E\/SE\/CER\/BMA tidak tersedia/);
-  assert.match(app,/normalizeMachineKey\(route\)/);
+  assert.match(app,/LEGACY_MACHINE_ROUTE/);
   assert.match(runtime,/APM2MachineTemplate/);
   assert.match(runtime,/APM2ProcessSimulation/);
   assert.match(runtime,/if\(k==='apm2'\)return new APM2MachineTemplate\(\)/);
@@ -336,7 +336,7 @@ test('v54 retains the APM2 expansion implementation without exposing it as a Pha
 test('v57 routes Sheeting Lexus as a dedicated right-to-left twin',()=>{
   assert.match(app,/IS_OFFSET10=false,IS_APM2=false,IS_SHEETING=false/);
   assert.doesNotMatch(app,/from '\.\/data\/taxonomy-sheeting\.js'/);
-  assert.match(app,/normalizeMachineKey\(route\)/);
+  assert.match(app,/LEGACY_MACHINE_ROUTE/);
   assert.match(app,/SHEETING LEXUS/);
   assert.match(app,/RIGHT → LEFT/);
   assert.match(app,/Simulasi Proses Sheeting/);
