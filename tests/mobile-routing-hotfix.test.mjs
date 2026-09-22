@@ -5,8 +5,8 @@ const app=fs.readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf
 const html=fs.readFileSync(new URL('../frontend/index.html',import.meta.url),'utf8');
 
 test('mobile factory detail binds every routing action through the collection selector',()=>{
- assert.match(app,/\$\$\('\[data-routing-focus\]'\)\.forEach/);
- assert.doesNotMatch(app,/(?<!\$)\$\('\[data-routing-focus\]'\)\.forEach/);
+ assert.doesNotMatch(app,/data-routing-focus/);
+ assert.match(app,/Scope fase fondasi/);
 });
 
 test('user toast never exposes raw JavaScript exception text',()=>{
@@ -16,5 +16,5 @@ test('user toast never exposes raw JavaScript exception text',()=>{
 });
 
 test('HTML requests the cache-busted fixed controller',()=>{
- assert.match(html,/src\/app\.js\?v=155/);
+ assert.match(html,/src\/app\.js\?v=156/);
 });

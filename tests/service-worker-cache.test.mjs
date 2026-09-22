@@ -14,54 +14,25 @@ function cacheSourceExists(path){
  return existsSync(resolve(frontend,path));
 }
 
-test('service-worker shell cache references only deployable frontend files',()=>{
+test('service-worker Phase-1 shell cache references only deployable frontend files',()=>{
  const paths=[...sw.matchAll(/['"]\.\/([^'"]+)['"]/g)].map(m=>m[1]);
- assert.ok(paths.includes('src/machine-runtime.js'));
- assert.ok(paths.includes('src/reference-machines.js'));
- assert.ok(paths.includes('src/utility-routing.js'));
- assert.ok(paths.includes('src/data/compressed-air-routes.js'));
- assert.ok(paths.includes('src/data/ahu-pipe-routes.js'));
- assert.ok(paths.includes('src/data/ahu-duct-routes.js'));
- assert.ok(paths.includes('src/data/research-v121.js'));
- assert.ok(paths.includes('src/data/research-v122.js'));
- assert.ok(paths.includes('src/data/research-v123.js'));
- assert.ok(paths.includes('src/data/research-v136.js'));
- assert.ok(paths.includes('src/data/research-v137.js'));
- assert.ok(paths.includes('src/data/research-v138.js'));
- assert.ok(paths.includes('src/data/research-v139.js'));
- assert.ok(paths.includes('src/data/research-v140.js'));
- assert.ok(paths.includes('src/data/research-v141.js'));
- assert.ok(paths.includes('src/data/research-v142.js'));
- assert.ok(paths.includes('src/data/research-v143.js'));
- assert.ok(paths.includes('src/data/research-v144.js'));
- assert.ok(paths.includes('src/data/research-v145.js'));
- assert.ok(paths.includes('src/data/research-v146.js'));
- assert.ok(paths.includes('src/data/research-v147.js'));
- assert.ok(paths.includes('src/data/taxonomy-offset7.js'));
- assert.ok(paths.includes('src/data/taxonomy-qf100cs.js'));
- assert.ok(paths.includes('src/data/taxonomy-compressors.js'));
- assert.ok(paths.includes('src/data/taxonomy-collator.js'));
- assert.ok(paths.includes('src/data/taxonomy-suprasetter.js'));
- assert.ok(paths.includes('src/data/taxonomy-imagesetter.js'));
- assert.ok(paths.includes('src/data/taxonomy-zund.js'));
- assert.ok(paths.includes('src/data/taxonomy-ahu.js'));
- assert.ok(paths.includes('src/data/taxonomy-fgm2.js'));
- assert.ok(paths.includes('src/upg-ly300.js'));
- assert.ok(paths.includes('src/diana-eye55.js'));
- assert.ok(paths.includes('src/state/app-state.js'));
+ for(const required of [
+  'src/app.js','src/app-shell-v79.js','src/state/app-state.js','src/engine.js','src/offset5.js','src/simulation.js',
+  'src/data/foundation-scope.js','src/data/truth-status.js','src/data/dwg-fidelity.js','src/data/taxonomy-offset5.js',
+  'src/factory-building.js','src/utility-routing.js','src/data/plant-actual.js','src/data/factory-fleet-data.js'
+ ])assert.ok(paths.includes(required),required+' missing from Phase-1 offline shell');
  assert.equal(new Set(paths).size,paths.length,'service-worker shell cache should not contain duplicate asset paths');
  for(const path of paths)assert.ok(cacheSourceExists(path),path+' is listed in sw.js but is neither a frontend source nor a build-generated Three.js asset');
 });
 
-test('service-worker cache version advances with the centralized runtime release',()=>{
- assert.match(sw,/factory-digital-twin-v155-dwg-fidelity-20260922/);
+test('service-worker cache version advances with the Phase-1 foundation release',()=>{
+ assert.match(sw,/factory-digital-twin-v156-phase1-foundation-20260922/);
 });
 
-
-
-test('machine-runtime dependencies are all present in the service-worker shell cache',()=>{
- const runtime=readFileSync(resolve(frontend,'src/machine-runtime.js'),'utf8');
- const imports=[...runtime.matchAll(/from\s+['"]\.\/([^'"]+)['"]/g)].map(m=>'src/'+m[1]);
- const cached=new Set([...sw.matchAll(/['"]\.\/([^'"]+)['"]/g)].map(m=>m[1]));
- for(const dependency of imports)assert.ok(cached.has(dependency),'machine-runtime dependency missing from service-worker cache: '+dependency);
+test('service-worker does not pre-cache technical expansion machine modules',()=>{
+ for(const excluded of [
+  'src/machine-runtime.js','src/reference-machines.js','src/offset10.js','src/apm2.js','src/sheeting.js',
+  'src/offset8.js','src/offset9.js','src/mk920.js','src/mk1060.js','src/promatrix106.js',
+  'src/data/taxonomy-compressors.js','src/data/taxonomy-ahu.js','src/data/research-v147.js'
+ ])assert.ok(!sw.includes("'./"+excluded+"'"),excluded+' must remain out of Phase-1 offline precache');
 });

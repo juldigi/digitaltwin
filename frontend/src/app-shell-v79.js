@@ -1,6 +1,8 @@
 import{getState,setState,setActiveSection,setViewMode,setLayer,setSimulation,setInspector,openOverlay,closeOverlay,hydrateUrl,subscribe}from'./state/app-state.js';
+import{FOUNDATION_SCOPE}from'./data/foundation-scope.js';
 
 const q=(s,r=document)=>r.querySelector(s);
+const PHASE1_FOUNDATION=FOUNDATION_SCOPE.expansionMode==='LAYOUT_PLACEHOLDERS_ONLY';
 const qa=(s,r=document)=>[...r.querySelectorAll(s)];
 const FOCUSABLE='button:not([disabled]):not([tabindex="-1"]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),summary,[tabindex]:not([tabindex="-1"])';
 const overlayReturnFocus=new Map();
@@ -100,7 +102,7 @@ function markSection(section){
  qa('[data-mobile-nav]').forEach(el=>{const active=el.dataset.mobileNav===section;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current')});
 }
 function closeDrawer(){document.body.classList.remove('nav-open');q('#ui-menu-toggle')?.setAttribute('aria-expanded','false');restoreOverlayFocus('navigation','#ui-menu-toggle')}
-function closeLayerManager(){const panel=q('#layer-manager');if(panel)panel.hidden=true;if(getState().overlay==='layers')closeOverlay();restoreOverlayFocus('layers','#nav-systems')}
+function closeLayerManager(){const panel=q('#layer-manager');if(panel)panel.hidden=true;if(getState().overlay==='layers')closeOverlay();restoreOverlayFocus('layers',PHASE1_FOUNDATION?'#nav-machine':'#nav-systems')}
 function closeInspector(){document.body.classList.add('panel-hidden');document.body.classList.remove('mobile-panel-open');setInspector(false)}
 function beforeMajorOverlay(name){
  const current=getState().overlay;
@@ -117,7 +119,7 @@ function beforeMajorOverlay(name){
 }
 function openSystemLayers(){
  beforeMajorOverlay('layers');rememberOverlayFocus('layers');ensureLayerManager();
- const panel=q('#layer-manager');panel.hidden=false;openOverlay('layers');setActiveSection('system');markSection('system');syncLayerControls();focusOverlay(panel,'[data-layer-close]');
+ const panel=q('#layer-manager');panel.hidden=false;openOverlay('layers');setActiveSection(PHASE1_FOUNDATION?'factory':'system');markSection(PHASE1_FOUNDATION?'factory':'system');syncLayerControls();focusOverlay(panel,'[data-layer-close]');
 }
 function enterSimulation(){
  beforeMajorOverlay('inspector');setActiveSection('simulation');markSection('simulation');
@@ -192,10 +194,10 @@ globalSearch?.addEventListener('input',event=>{if(getState().overlay!=='search')
 globalSearch?.addEventListener('keydown',event=>{if(event.key==='ArrowDown'||event.key==='Enter'){event.preventDefault();openSearch(globalSearch.value)}});
 q('#mobile-search-toggle')?.addEventListener('click',()=>openSearch(''));
 addEventListener('bmj:searchresults',event=>renderSearchResults(event.detail));
-addEventListener('bmj:systemsearchselect',event=>{const system=event.detail?.system||null;setState({selectedSystem:system},{url:false});openSystemLayers();if(['hvac','compressedAir','routing'].includes(system))q(`[data-system-focus="${system}"]`)?.click()});
+addEventListener('bmj:systemsearchselect',event=>{if(PHASE1_FOUNDATION)return;const system=event.detail?.system||null;setState({selectedSystem:system},{url:false});openSystemLayers();if(['hvac','compressedAir','routing'].includes(system))q(`[data-system-focus="${system}"]`)?.click()});
 q('#nav-machine')?.addEventListener('click',()=>{setActiveSection('factory');document.body.classList.remove('workspace-2d');setViewMode('3d');markSection('factory');closeLayerManager()});
 q('#nav-assets')?.addEventListener('click',()=>{beforeMajorOverlay('modal');setActiveSection('asset');markSection('asset');openOverlay('modal')});
-q('#nav-systems')?.addEventListener('click',openSystemLayers);
+q('#nav-systems')?.addEventListener('click',()=>{if(!PHASE1_FOUNDATION)openSystemLayers()});
 q('#nav-simulation-mode')?.addEventListener('click',enterSimulation);
 q('#nav-sources')?.addEventListener('click',()=>{beforeMajorOverlay('inspector');setActiveSection('reference');markSection('reference');setInspector(true,'sources');openOverlay('inspector')});
 q('#nav-help')?.addEventListener('click',()=>{beforeMajorOverlay('modal');openOverlay('modal')});
@@ -225,7 +227,11 @@ qa('[data-mobile-nav]').forEach(button=>button.addEventListener('click',event=>{
 q('#mode-2d')?.addEventListener('click',()=>{document.body.classList.add('workspace-2d');setViewMode('2d');setActiveSection('factory');markSection('factory');requestAnimationFrame(()=>dispatchEvent(new Event('resize')))});
 q('#mode-3d')?.addEventListener('click',()=>{document.body.classList.remove('workspace-2d');setViewMode('3d');setActiveSection('factory');markSection('factory');requestAnimationFrame(()=>dispatchEvent(new Event('resize')))});
 
-const GROUPS=[
+const GROUPS=PHASE1_FOUNDATION?[
+ ['Bangunan',[['building','Bangunan & ruang'],['roof','Atap']]],
+ ['Posisi aset',[['machines','Placeholder aset'],['labels','Label'],['unidentified','Area belum teridentifikasi']]],
+ ['Sumber',[['reference','Garis denah sumber']]]
+]:[
  ['Bangunan',[['building','Dinding & ruangan'],['roof','Atap'],['landscape','Area luar']]],
  ['Produksi',[['machines','Mesin'],['labels','Label'],['unidentified','Area belum teridentifikasi']]],
  ['Utilitas',[['compressedAir','Pipa compressed air'],['ahuPiping','Pipa AHU'],['ducting','Ducting AHU'],['utilityAnchors','Titik koneksi referensi']]],
@@ -234,24 +240,24 @@ const GROUPS=[
 function ensureLayerManager(){
  if(q('#layer-manager'))return;
  const panel=document.createElement('section');panel.id='layer-manager';panel.className='canonical-layer-manager';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-labelledby','layer-manager-title');panel.setAttribute('tabindex','-1');
- panel.innerHTML=`<header><div><small>SISTEM & TAMPILAN</small><h3 id="layer-manager-title">Sistem & Lapisan</h3></div><button type="button" data-layer-close class="icon-btn" aria-label="Tutup">${icon('close')}</button></header>
- <div class="canonical-system-grid">
+ const systemSurface=PHASE1_FOUNDATION?'':`<div class="canonical-system-grid">
   <button type="button" data-system-focus="hvac"><strong>HVAC</strong><small>Pipa AHU + ducting</small><span>Lihat jalur & peralatan</span></button>
   <button type="button" data-system-focus="compressedAir"><strong>Udara Bertekanan</strong><small>Pipa distribusi udara</small><span>Lihat jalur & peralatan</span></button>
   <button type="button" data-system-focus="routing"><strong>Jalur Utilitas</strong><small>Semua jalur yang tersedia</small><span>Lihat seluruh jalur</span></button>
   <button type="button" data-system-focus="water" class="system-unavailable"><strong>Air / IPAL</strong><small>Peralatan tersedia · jalur belum tersedia</small><span>Lihat batas data</span></button>
   <button type="button" data-system-focus="electrical" class="system-unavailable"><strong>Kelistrikan</strong><small>Jalur terpisah belum tersedia</small><span>Lihat batas data</span></button>
- </div>
- <section id="system-context" class="canonical-system-context" aria-live="polite"><p>Pilih sistem untuk melihat jalur, peralatan terkait, status data, dan batas verifikasi.</p></section>
+ </div><section id="system-context" class="canonical-system-context" aria-live="polite"><p>Pilih sistem untuk melihat jalur, peralatan terkait, status data, dan batas verifikasi.</p></section>`;
+ panel.innerHTML=`<header><div><small>${PHASE1_FOUNDATION?'FASE FONDASI':'SISTEM & TAMPILAN'}</small><h3 id="layer-manager-title">${PHASE1_FOUNDATION?'Lapisan Pabrik':'Sistem & Lapisan'}</h3></div><button type="button" data-layer-close class="icon-btn" aria-label="Tutup">${icon('close')}</button></header>
+ ${systemSurface}
  ${GROUPS.map(([title,items])=>`<div class="canonical-layer-group"><h4>${title}</h4>${items.map(([key,label])=>`<label><span>${label}</span><input type="checkbox" data-canonical-layer="${key}"></label>`).join('')}</div>`).join('')}
- <div class="canonical-layer-group unavailable"><h4>Batas data</h4><p>Jalur yang belum memiliki drawing atau verifikasi lapangan tetap ditandai belum tersedia. Aplikasi tidak membuat jalur as-built secara otomatis.</p></div>`;
+ <div class="canonical-layer-group unavailable"><h4>Batas fase</h4><p>${PHASE1_FOUNDATION?'Sistem utilitas dan detail teknis aset selain OFFSET 5 disimpan untuk fase ekspansi, tetapi tidak diaktifkan pada deliverable fondasi.':'Jalur yang belum memiliki drawing atau verifikasi lapangan tetap ditandai belum tersedia. Aplikasi tidak membuat jalur as-built secara otomatis.'}</p></div>`;
  q('.workspace')?.append(panel);
  q('[data-layer-close]',panel)?.addEventListener('click',closeLayerManager);
  qa('[data-canonical-layer]',panel).forEach(input=>input.addEventListener('change',()=>{
   const key=input.dataset.canonicalLayer,visible=input.checked;setLayer(key,visible);
   dispatchEvent(new CustomEvent('bmj:layerchange',{detail:{key,visible}}));
  }));
- qa('[data-system-focus]',panel).forEach(button=>button.addEventListener('click',()=>{
+ if(!PHASE1_FOUNDATION)qa('[data-system-focus]',panel).forEach(button=>button.addEventListener('click',()=>{
   const system=button.dataset.systemFocus,keys=system==='hvac'?['ahuPiping','ducting']:system==='compressedAir'?['compressedAir']:system==='routing'?['compressedAir','ahuPiping','ducting','utilityAnchors']:[];
   document.body.classList.remove('workspace-2d');setViewMode('3d');setState({selectedSystem:system,activeSection:'system'},{url:false});
   qa('[data-system-focus]',panel).forEach(item=>item.classList.toggle('active',item===button));
@@ -364,4 +370,4 @@ const relabel=()=>{
  const connection=q('#connection');if(connection)connection.textContent=navigator.onLine?'Data tersedia':'Offline';
 };
 relabel();const hydratedState=hydrateUrl();if(hydratedState.viewMode==='2d')q('#mode-2d')?.click();subscribe(state=>{markSection(state.activeSection);syncLayerControls()});
-document.documentElement.dataset.uiArchitecture='v155-master-prompt';
+document.documentElement.dataset.uiArchitecture='v156-phase1-foundation';

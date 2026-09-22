@@ -9,12 +9,13 @@ const worker=fs.readFileSync(new URL('../.github/workflows/worker.yml',import.me
 const pages=fs.readFileSync(new URL('../.github/workflows/pages.yml',import.meta.url),'utf8');
 
 test('Asset Browser exposes the master-prompt search and filter dimensions',()=>{
- for(const id of ['asset-search','asset-area','asset-type','asset-brand','asset-data-status','asset-results'])assert.match(app,new RegExp(id));
+ for(const id of ['asset-search','asset-area','asset-results'])assert.match(app,new RegExp(id));
+ assert.doesNotMatch(app,/id="asset-(?:type|brand|data-status)"/);
  assert.match(app,/function registryBrand\(machine\)/);
  assert.match(app,/function registryType\(machine\)/);
  assert.match(app,/function registryDataStatus\(machine\)/);
- assert.match(app,/Status data/);
- assert.match(app,/Machine ID|machineId/);
+ assert.doesNotMatch(app,/<span>Status data<\/span>/);
+ assert.match(app,/ID posisi|machineId/);
  assert.match(css,/\.asset-filter-grid/);
  assert.match(css,/\.asset-browser-row/);
  assert.match(css,/\.asset-thumbnail/);
@@ -79,7 +80,7 @@ test('References are categorized and prioritized from the active asset taxonomy 
 
 test('Asset Browser has explicit Mesin Peralatan Komponen categories without inventing a second component database',()=>{
  for(const key of ['machine','equipment','component'])assert.match(app,new RegExp('data-asset-category="'+key+'"'));
- for(const label of ['Mesin','Peralatan','Komponen'])assert.match(app,new RegExp('>'+label+'<'));
+ for(const label of ['Mesin','Peralatan','Komponen OFFSET 5'])assert.match(app,new RegExp('>'+label+'<'));
  assert.match(app,/ACTIVE_TAXONOMY\.filter/);
  assert.match(app,/data-component-id/);
  assert.match(app,/selectTaxonomy\(button\.dataset\.componentId/);

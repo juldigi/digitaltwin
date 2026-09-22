@@ -43,7 +43,7 @@ test('V142 realism does not turn prepared MEP scaffolds into invented as-built r
  assert.equal(utilityRouting.actualRoutingApplied,false);
  assert.ok(utilityRouting.systems.length>=3);
  assert.ok(utilityRouting.systems.every(s=>s.actualRouteVerified===false));
- assert.match(root.userData.assumptions.utilityRoutingBoundary,/TEMPLATE_ONLY/);
+ assert.match(root.userData.assumptions.utilityRoutingBoundary,/UTILITY_MODELS_RETAINED_FOR_EXPANSION_BUT_HIDDEN_IN_PHASE1_UI/);
 });
 
 test('V142 IPAL remains open-sided while receiving only structural/service reference detail',async()=>{

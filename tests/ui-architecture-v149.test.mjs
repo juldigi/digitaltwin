@@ -102,7 +102,8 @@ test('V149 inspector exposes five canonical tabs and keeps interior as an inspec
 
 test('V149 universal search covers machines areas components systems documents and photos',()=>{
  for(const token of ['universalSearchResults','searchableTaxonomy','searchableSources','searchablePhotos','bmj:searchrequest','bmj:searchselect'])assert.match(app,new RegExp(token));
- for(const group of ["'MESIN'","'KOMPONEN'","'AREA'","'SISTEM'","'DOKUMEN'","'FOTO'"])assert.match(app,new RegExp(group));
+ for(const group of ["'MESIN'","'KOMPONEN'","'AREA'","'DOKUMEN'","'FOTO'"])assert.match(app,new RegExp(group));
+ assert.doesNotMatch(app,/group:'SISTEM'/);
  assert.match(shell,/universal-search-panel/);
  assert.match(shell,/bmj:searchresults/);
  assert.match(shell,/mobile-search-toggle/);

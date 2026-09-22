@@ -369,3 +369,9 @@ aside#detail-panel{overscroll-behavior:contain}
 .dwg-unimplemented-row span{font-size:8px;color:var(--muted);text-align:right}
 .dwg-unimplemented-row small{grid-column:1/-1;color:var(--muted);font-size:8px;line-height:1.45}
 @media(max-width:560px){.dwg-fidelity-ledger>summary{align-items:flex-start}.dwg-unimplemented-row{grid-template-columns:1fr}.dwg-unimplemented-row span{text-align:left}.dwg-unimplemented-row small{grid-column:auto}}
+
+
+/* V156 Phase-1 foundation surface */
+.phase-future-ui[hidden]{display:none!important}
+@media(max-width:767px){.mobile-nav{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-height:560px) and (orientation:landscape){.mobile-nav{grid-template-columns:1fr;grid-template-rows:repeat(4,minmax(0,1fr))}}
