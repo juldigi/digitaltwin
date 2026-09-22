@@ -28,13 +28,13 @@ export class UpgLy300ProcessSimulation{
   group.visible=false;group.userData.demoOnly=true;this.root.add(group);
   return {group,code,index,phase,lap:-1,printed:false,cured:false,inspected:false,result:null,inspectionLap:-1};
  }
- resetFlags(){this.pagingActive=false;this.positioningActive=false;this.printingActive=false;this.uvActive=false;this.cameraActive=false;this.processingActive=false;this.rejectTrackingActive=false;this.demoRejectActive=false;this.acceptRoutingActive=false;this.demoRejectOnly=true;}
+ resetFlags(){this.pagingActive=false;this.materialPresent=false;this.doubleSheetClear=true;this.positioningActive=false;this.encoderSync=false;this.printTrigger=false;this.negativePressureReady=false;this.printPermit=false;this.printingActive=false;this.printComplete=false;this.uvPowerReady=false;this.uvPermit=false;this.uvActive=false;this.cureComplete=false;this.cameraTrigger=false;this.cameraActive=false;this.processingActive=false;this.inspectionComplete=false;this.decisionReady=false;this.rejectPermit=false;this.rejectConfirmed=false;this.collectionDetected=false;this.interlockSafe=true;this.rejectTrackingActive=false;this.demoRejectActive=false;this.acceptRoutingActive=false;this.demoRejectOnly=true;}
  state(){
   const p=this.active?(this.elapsed/6.8)%1:0,index=Math.min(UPG_LY300_SIMULATION_STAGES.length-1,Math.floor(p*UPG_LY300_SIMULATION_STAGES.length));
   return {available:true,blocked:false,active:this.active,running:this.running,paused:this.paused,speed:this.speed,stage:UPG_LY300_SIMULATION_STAGES[index],completed:this.completed,rejectedDemo:this.rejected,progress:p,
    printedDemoCount:this.printedDemoCount,curedDemoCount:this.curedDemoCount,inspectedDemoCount:this.inspectedDemoCount,sheetsVisible:this.items.filter(i=>i.group.visible).length,pileSheetsVisible:this.goodStack.filter(p=>p.visible).length,rejectSheetsVisible:this.badStack.filter(p=>p.visible).length,
    rotorCount:this.rotors.length,mechanismCount:this.rotors.length+this.uvLamps.length+this.inspectionLights.length+1,pathVisible:this.pathVisible,inkFlowVisible:this.printVisible,inkFlowCount:this.items.filter(i=>i.code.visible).length,uvLampCount:this.uvLamps.length,
-   pagingActive:this.pagingActive,positioningActive:this.positioningActive,printingActive:this.printingActive,uvActive:this.uvActive,cameraActive:this.cameraActive,processingActive:this.processingActive,rejectTrackingActive:this.rejectTrackingActive,demoRejectActive:this.demoRejectActive,acceptRoutingActive:this.acceptRoutingActive,
+   pagingActive:this.pagingActive,materialPresent:this.materialPresent,doubleSheetClear:this.doubleSheetClear,positioningActive:this.positioningActive,encoderSync:this.encoderSync,printTrigger:this.printTrigger,negativePressureReady:this.negativePressureReady,printPermit:this.printPermit,printingActive:this.printingActive,printComplete:this.printComplete,uvPowerReady:this.uvPowerReady,uvPermit:this.uvPermit,uvActive:this.uvActive,cureComplete:this.cureComplete,cameraTrigger:this.cameraTrigger,cameraActive:this.cameraActive,processingActive:this.processingActive,inspectionComplete:this.inspectionComplete,decisionReady:this.decisionReady,rejectPermit:this.rejectPermit,rejectConfirmed:this.rejectConfirmed,collectionDetected:this.collectionDetected,interlockSafe:this.interlockSafe,rejectTrackingActive:this.rejectTrackingActive,demoRejectActive:this.demoRejectActive,acceptRoutingActive:this.acceptRoutingActive,
    demoRejectOnly:true,installedPrintheadCountVerified:false,trackedResults:{pass:this.items.filter(i=>i.result==='PASS_DEMO').length,reject:this.items.filter(i=>i.result==='REJECT_DEMO').length,pending:this.items.filter(i=>!i.result).length}};
  }
  start(){this.active=true;this.running=true;this.paused=false;this.completed=0;this.rejected=0;this.printedDemoCount=0;this.curedDemoCount=0;this.inspectedDemoCount=0;this.elapsed=0;this.lastNow=null;for(const i of this.items){i.lap=-1;i.printed=i.cured=i.inspected=false;i.result=null;i.inspectionLap=-1;}this.resetMechanisms();this.onUpdate?.(this.state());return this.state();}
@@ -43,25 +43,31 @@ export class UpgLy300ProcessSimulation{
  setSpeed(v){this.speed=Math.max(.25,Math.min(4,Number(v)||1));return this.state();}
  setPathVisible(v){this.pathVisible=!!v;this.pathLine.visible=this.pathVisible;return this.state();}
  setInkFlowVisible(v){this.printVisible=!!v;for(const i of this.items)i.code.visible=this.printVisible&&i.printed;return this.state();}
- spin(r,dt,rate){const q=new THREE.Quaternion().setFromAxisAngle(Y_AXIS,(r.userData.spinDirection||1)*rate*dt);r.quaternion.multiply(q).normalize();}
+ spin(r,dt,rate){const axis=r.userData.rotorAxis==='x'?new THREE.Vector3(1,0,0):r.userData.rotorAxis==='z'?new THREE.Vector3(0,0,1):Y_AXIS,q=new THREE.Quaternion().setFromAxisAngle(axis,(r.userData.spinDirection||1)*rate*dt);r.quaternion.multiply(q).normalize();}
  updateRotors(dt){for(const r of this.rotors){const role=String(r.userData.mechanismRole||'');const rate=role==='pager-wheel'?6.4:role==='belt-pulley'?5.8:role==='servo'?6.0:role==='encoder'?7.0:4.6;this.spin(r,dt,rate);}}
  updateLights(uvOn,inspectOn){for(const l of this.uvLamps){l.material.emissive?.setHex(uvOn?0xaabfff:0x1b2230);l.material.emissiveIntensity=uvOn?2.5:.12;}for(const l of this.inspectionLights){l.material.emissive?.setHex(inspectOn?0xdff8ff:0x20272b);l.material.emissiveIntensity=inspectOn?2.1:.15;}}
  assignResult(item,lap){const seq=lap*this.items.length+item.index;item.result=(seq%6===0)?'REJECT_DEMO':'PASS_DEMO';item.inspected=true;item.inspectionLap=lap;this.inspectedDemoCount++;}
  outputPrevious(item){if(item.result==='REJECT_DEMO'){this.rejected++;const m=this.badStack[(this.rejected-1)%this.badStack.length];m.visible=true;m.position.set(1.62,.35+((this.rejected-1)%this.badStack.length)*.014,.34);}else if(item.result==='PASS_DEMO'){this.completed++;const m=this.goodStack[(this.completed-1)%this.goodStack.length];m.visible=true;m.position.set(1.98,.36+((this.completed-1)%this.goodStack.length)*.014,0);}}
  resetItemCycle(item){item.printed=false;item.cured=false;item.inspected=false;item.result=null;item.inspectionLap=-1;item.code.visible=false;}
  updateItems(){
-  let paging=false,positioning=false,printing=false,uv=false,camera=false,processing=false,rejectTracked=false,rejectAtGate=false,acceptRoute=false;const base=this.elapsed/6.8;
+  let paging=false,material=false,positioning=false,encoder=false,printTrig=false,printing=false,printed=false,uv=false,cured=false,camera=false,processing=false,inspected=false,decision=false,rejectTracked=false,rejectAtGate=false,rejectConfirmed=false,acceptRoute=false,collection=false;const base=this.elapsed/6.8;
   for(const item of this.items){
    const raw=base+item.phase,lap=Math.floor(raw),t=((raw%1)+1)%1;if(lap>item.lap){if(item.lap>=0)this.outputPrevious(item);item.lap=lap;this.resetItemCycle(item);}
    item.group.visible=this.active;item.group.position.copy(this.curve.getPointAt(Math.min(.999,t)));
-   if(t<.18)paging=true;if(t>=.18&&t<.30)positioning=true;
+   if(t<.18){paging=true;material=true;}
+   if(t>=.18&&t<.30){positioning=true;material=true;encoder=true;}
+   const printPermit=t>=.30&&t<.45&&material===true&&encoder===true;
+   if(t>=.28&&t<.34)printTrig=true;
    if(t>=.30&&t<.45){printing=true;if(!item.printed){item.printed=true;this.printedDemoCount++;}item.code.visible=this.printVisible;}
+   if(item.printed)printed=true;
    if(t>=.45&&t<.57&&item.printed){uv=true;if(!item.cured){item.cured=true;this.curedDemoCount++;}}
+   if(item.cured)cured=true;
    if(t>=.57&&t<.70&&item.cured){camera=true;processing=true;if(!item.inspected||item.inspectionLap!==lap)this.assignResult(item,lap);}
-   if(t>=.76&&item.result){const q=clamp((t-.76)/.15);if(item.result==='REJECT_DEMO'){item.group.position.z=THREE.MathUtils.lerp(0,.34,q);rejectTracked=true;if(t>=.80&&t<.91)rejectAtGate=true;}else acceptRoute=true;}
+   if(item.inspected){inspected=true;decision=true;}
+   if(t>=.76&&item.result){const q=clamp((t-.76)/.15);if(item.result==='REJECT_DEMO'){item.group.position.z=THREE.MathUtils.lerp(0,.34,q);rejectTracked=true;if(t>=.80&&t<.91)rejectAtGate=true;if(t>=.88)rejectConfirmed=true;}else{acceptRoute=true;if(t>=.92)collection=true;}}
   }
-  this.pagingActive=paging;this.positioningActive=positioning;this.printingActive=printing;this.uvActive=uv;this.cameraActive=camera;this.processingActive=processing;this.rejectTrackingActive=rejectTracked;this.demoRejectActive=rejectAtGate;this.acceptRoutingActive=acceptRoute;
-  this.updateLights(uv,camera);if(this.reject)this.reject.rotation.z=this.rejectRest+(rejectAtGate?.72:0);
+  this.pagingActive=paging;this.materialPresent=material;this.doubleSheetClear=true;this.positioningActive=positioning;this.encoderSync=encoder;this.printTrigger=printTrig;this.negativePressureReady=this.active;this.printPermit=printing&&this.negativePressureReady;this.printingActive=printing&&this.printPermit;this.printComplete=printed;this.uvPowerReady=this.active;this.uvPermit=uv&&printed&&this.uvPowerReady;this.uvActive=uv&&this.uvPermit;this.cureComplete=cured;this.cameraTrigger=camera&&cured;this.cameraActive=camera&&cured;this.processingActive=processing&&cured;this.inspectionComplete=inspected;this.decisionReady=decision;this.rejectPermit=rejectAtGate&&decision;this.rejectConfirmed=rejectConfirmed;this.collectionDetected=collection;this.rejectTrackingActive=rejectTracked;this.demoRejectActive=this.rejectPermit;this.acceptRoutingActive=acceptRoute;this.interlockSafe=(!this.printingActive||this.printPermit)&&(!this.uvActive||this.uvPermit)&&(!this.cameraActive||this.cureComplete)&&(!this.demoRejectActive||this.rejectPermit);
+  this.updateLights(this.uvActive,this.cameraActive);if(this.reject)this.reject.rotation.z=this.rejectRest+(this.rejectPermit?.72:0);
  }
  update(now){if(!this.active||!this.running){this.lastNow=now;return;}if(this.lastNow===null){this.lastNow=now;return;}const dt=Math.min(.12,Math.max(0,(now-this.lastNow)/1000))*this.speed;this.lastNow=now;this.elapsed+=dt;this.updateRotors(dt);this.updateItems();this.onUpdate?.(this.state());}
  resetMechanisms(){if(this.reject)this.reject.rotation.z=this.rejectRest;this.rotors.forEach((r,i)=>r.quaternion.copy(this.rotorRest[i]));this.updateLights(false,false);for(const item of this.items){item.group.visible=false;item.code.visible=false;}this.resetFlags();}
