@@ -37,6 +37,10 @@ const rowsFor=(machineId)=>{
   u=unit('OUT','Discharge / Control','universal-module-7','Supply discharge and controller/sensor boundary.');
   chain(u,'PLENUM','Discharge Plenum','Supply Plenum Block','Discharge Service Group','Supply Plenum / Duct Interface','ahu-discharge-plenum','Duct connection dimensions and airflow direction are unverified.');
   chain(u,'CTRL','AHU Control / Sensors','Control Block','Control & Sensor Group','Controller / Temperature / Pressure Reference','ahu-controller','Control system and sensor package are unverified.');
+  u=unit('DUCT','Supply / Return Air Distribution','ahu-air-distribution','Functional duct network extends the AHU discharge to branch/diffuser references and returns air to the inlet boundary. Plant routing is not as-built because AHU coordinates and duct drawings are not verified.');
+  chain(u,'SUPPLY','Supply Duct Network','Supply Duct Block','Supply Distribution Group','Flexible Connector / Trunk / Branch / Diffuser Reference','ahu-supply-duct','Unit-level functional routing reference only; installed dimensions, route, balancing devices and diffuser count are unverified.','AIR_DISTRIBUTION_FUNCTIONAL_REFERENCE');
+  chain(u,'RETURN','Return-Air Duct Network','Return Duct Block','Return Distribution Group','Return Grille / Trunk / Mixing Interface Reference','ahu-return-duct','Return/mixing arrangement is configuration-specific and remains an explicit boundary.','CONFIGURATION_BOUNDARY');
+  chain(u,'OA','Outdoor-Air Intake Termination','Outdoor Intake Block','Weather Intake Group','Weather Hood / Louvre / Screen Reference','ahu-outdoor-intake','Outdoor-air termination is a functional reference; no outdoor condensing unit is inferred for generic AHU 3/4/5/6/8.','EUROVENT_OUTDOOR_AIR_REFERENCE');
  }else{
   let u=unit('INLET','Indoor Return / Inlet Section','universal-module-1','Return/outdoor air inlet of NES/YZKJ family; exact site duct routing unknown.');
   chain(u,'DAMPER','Return / Outdoor Air Damper','Inlet Damper Block','Air Inlet Service Group','Damper / Return-Air Interface','sansin-inlet-damper','Brand-family airflow inlet reference.');
@@ -59,6 +63,10 @@ const rowsFor=(machineId)=>{
   u=unit('CTRL','Control / Electrical','universal-module-7','Controller and electrical package.');
   chain(u,'HMI','Operator Controller','Control HMI Block','Control Service Group','Controller / Display Reference','sansin-controller','Exact controller generation and BMS interface unverified.');
   chain(u,'ELEC','Electrical Cabinet','Electrical Cabinet Block','Electrical Service Group','Electrical / Protection Package','sansin-electrical','Functional electrical enclosure reference.');
+  u=unit('DUCT','Indoor Air Distribution / Outdoor Interface','sansin-air-distribution','Family-reference duct network connects the indoor supply/return path while the outdoor heat-rejection module remains physically distinct. Exact BMJ duct routing and indoor/outdoor spacing are unverified.');
+  chain(u,'SUPPLY','Conditioned-Air Supply Duct','Supply Duct Block','Indoor Distribution Group','Flexible Connector / Trunk / Branch / Diffuser Reference','sansin-supply-duct','Family-reference supply-air distribution only; installed trunk size, branch count and diffuser count are unverified.','AIR_DISTRIBUTION_FUNCTIONAL_REFERENCE');
+  chain(u,'RETURN','Return / Outdoor-Air Duct','Return Duct Block','Return-Air Distribution Group','Return Trunk / Drop / Inlet Interface Reference','sansin-return-duct','Return/outdoor-air topology remains installation-specific.','CONFIGURATION_BOUNDARY');
+  chain(u,'OUTAIR','Outdoor Heat-Rejection Air Interface','Outdoor Airflow Block','Condenser Airflow Group','Fan Guard / Vertical Heat-Rejection Airflow Reference','sansin-outdoor-interface','The YZKJ family supports a distinct outdoor heat-rejection module; installed fan count and spacing remain unverified.','SANSIN_NES_YZKJ_FAMILY_REFERENCE');
  }
  return rows;
 };
