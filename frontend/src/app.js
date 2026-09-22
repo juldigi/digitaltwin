@@ -677,7 +677,7 @@ async function openAssetContext(machine){
  if(!machine)return;const route=machineRoute(machine);
  if(route!==MACHINE_KEY)await switchActiveMachine(route,{historyMode:'push'});
  else{closeModal();setView('machine');showPanel();renderPanel('overview');engine?.fit(engine.machine);}
- emitDomainState({selectedAsset:normalizeMachineKey(route),selectedNode:null,activeReference:null,activeSection:'asset'});
+ emitDomainState({selectedAsset:normalizeMachineKey(route),selectedArea:machine.area||null,selectedNode:null,activeReference:null,activeSection:'asset'});
  showPanel();renderPanel('overview');
 }
 function assetDialog(initialQuery=''){
@@ -732,6 +732,8 @@ window.addEventListener('bmj:systemfocus',event=>{
   actualRoutingApplied:routing?.actualRoutingApplied===true,
   networks:networks.map(item=>({system:item.system,status:item.status,nodeCount:item.nodeCount,segmentCount:item.segmentCount,equipmentAnchorCount:item.equipmentAnchorCount,actualRouteVerified:item.actualRouteVerified===true})),
   equipment:equipment.map(m=>({machineId:m.machineId,name:m.name,model:m.model,sapCode:m.sapCode,area:m.area})),
+  consumerText:system==='compressedAir'?'Service-point consumer belum dipetakan ke machine ID aktual karena drawing distribusi compressed air belum tersedia.':system==='hvac'?'Supply/return branch tersedia sebagai functional routing reference; ruang dan terminal consumer aktual belum dipetakan.':system==='routing'?'Consumer aktual mengikuti masing-masing sistem dan tetap menunggu routing drawing terverifikasi.':'Consumer network belum tersedia sebagai data terpisah.',
+  sourceText:system==='compressedAir'?'Database mesin BMJ + compressed-air routing scaffold':system==='hvac'?'Database AHU BMJ + AHU piping/ducting routing scaffold':system==='routing'?'Utility routing scaffold + database equipment BMJ':'Model bangunan BMJ; network routing terpisah belum tersedia',
   boundary:system==='water'?'IPAL equipment tersedia pada model bangunan, tetapi routing water/process piping terpisah belum dipetakan sebagai network terverifikasi.':system==='electrical'?'Electrical tetap mengikuti model bangunan; single-line diagram, cable tray, panel feeder, dan routing kabel aktual belum tersedia.':'Routing yang tampil adalah scaffold/template sampai drawing as-built atau verifikasi lapangan diterapkan.'
  }}));
 });
