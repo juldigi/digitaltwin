@@ -121,7 +121,7 @@ test('conditional controls explain requirements rather than failing silently',()
 });
 
 test('service worker refreshes the redesigned shell',()=>{
-  assert.match(sw,/factory-digital-twin-v124-actual-plant-20260921/);
+  assert.match(sw,/factory-digital-twin-v125-home-offset-direction-20260922/);
   assert.match(sw,/src\/universal-machine\.js/);
   assert.match(app,/template\.ghost\(true,part\)/,'object selection must automatically ghost all non-selected geometry');
   for(const asset of ['app-shell-v79.css','src/app-shell-v79.js','assets/splash-industrial-v79.webp','src/ui-v5.js','src/app.js','src/simulation.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
@@ -404,4 +404,11 @@ test('runtime binds every workbench button and provides a visual fallback withou
   assert.match(app,/PU2 \/ FoilStar/);
   assert.match(app,/'CU2','Y2','PU14','CUF'/);
   assert.match(app,/Final CU → X3 Delivery/);
+});
+
+test('startup routes splash directly to Home factory overview',()=>{
+  assert.match(html,/id="nav-machine"[^>]*>[\s\S]*?<small>Home<\/small>/);
+  assert.match(mobileStableUi,/machine:\['home','Home','nav-machine'\]/);
+  assert.match(app,/if\(engine\)showHome\(\)/);
+  assert.match(app,/function showHome\(\)[\s\S]*setView\('factory'\)/);
 });

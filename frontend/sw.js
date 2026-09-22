@@ -1,4 +1,4 @@
-const VERSION='factory-digital-twin-v124-actual-plant-20260921';
+const VERSION='factory-digital-twin-v125-home-offset-direction-20260922';
 const SHELL=['./','./index.html','./config.json','./assets/favicon.svg',
   './assets/splash-industrial-v79.webp',
   './app-shell-v79.css',
