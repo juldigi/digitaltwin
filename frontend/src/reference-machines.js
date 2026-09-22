@@ -860,6 +860,26 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.root.userData.sansinBoundary='Brand SANSIN is verified by BMJ; YZKJ family architecture is a reference, not an exact 45N/90N installation claim.';
   this.root.userData.airTreatmentSequence=['FILTER','HONEYCOMB_WET_CURTAIN_PRECOOL','LOW_TEMPERATURE_FIN_EVAPORATOR','SUPPLY_FAN'];
   this.root.userData.outdoorCircuitBoundary='REFRIGERATION_AND_EVAPORATIVE_CONDENSER_FAMILY_REFERENCE';
+  this.root.userData.airDistributionVisualization='SANSIN_INDOOR_SUPPLY_RETURN_DUCT_FAMILY_REFERENCE';
+  this.root.userData.plantDuctRouteVerified=false;
+  this.root.userData.indoorOutdoorArrangementVerified=false;
+
+  const site=this.group(this.root,'sansin-air-distribution','SANSIN Indoor / Outdoor Air Distribution Reference',[0,0,0],[0,.14,0]);
+  site.userData.installedRouteVerified=false;site.userData.familyReference=true;
+  const indoorBase=this.box(site,[3.55,.11,1.78],[-.68,.12,-.25],'dark',.018);this.tag(indoorBase,'sansin-indoor-unit-base-reference','SANSIN_NES_FAMILY');
+  const outdoorBase=this.box(site,[1.42,.13,1.68],[1.45,.13,.55],'dark',.018);this.tag(outdoorBase,'sansin-outdoor-unit-pad-reference','SANSIN_NES_FAMILY');outdoorBase.userData.installedPadVerified=false;
+  const supplyDuct=this.group(site,'sansin-supply-duct','SANSIN Conditioned-Air Supply Duct',[0,0,0],[.14,.08,0]);
+  const flex=this.box(supplyDuct,[.42,1.18,1.28],[.76,1.10,-.25],'dark',.015);this.tag(flex,'sansin-supply-flexible-connector-reference','SANSIN_NES_FAMILY');
+  for(const x of [.64,.75,.86])this.tag(this.box(supplyDuct,[.022,1.22,1.32],[x,1.10,-.25],'steel',.002),'sansin-supply-flex-rib-reference','FUNCTIONAL_REFERENCE');
+  const trunk=this.box(supplyDuct,[2.85,.44,.70],[2.30,1.68,-.25],'steel',.012);this.tag(trunk,'sansin-supply-duct-trunk-reference','AIR_DISTRIBUTION_FUNCTIONAL_REFERENCE');trunk.userData.installedRouteVerified=false;
+  const branch=this.box(supplyDuct,[.56,.38,2.15],[3.46,1.68,-.25],'steel',.010);this.tag(branch,'sansin-supply-branch-reference','AIR_DISTRIBUTION_FUNCTIONAL_REFERENCE');
+  for(const z of [-1.00,.50]){const diffuser=this.box(supplyDuct,[.70,.055,.70],[3.55,1.28,z],'body',.006);this.tag(diffuser,'sansin-supply-diffuser-reference','AIR_DISTRIBUTION_FUNCTIONAL_REFERENCE');diffuser.userData.installedCountVerified=false;}
+  const returnDuct=this.group(site,'sansin-return-duct','SANSIN Return / Outdoor-Air Duct Reference',[0,0,0],[-.12,.08,.08]);returnDuct.userData.installedRouteVerified=false;
+  const ret=this.box(returnDuct,[5.65,.38,.50],[.55,2.25,1.52],'steel',.010);this.tag(ret,'sansin-return-duct-trunk-reference','CONFIGURATION_BOUNDARY');
+  const retDrop=this.box(returnDuct,[.46,1.12,.50],[-2.18,1.70,1.52],'steel',.010);this.tag(retDrop,'sansin-return-drop-reference','CONFIGURATION_BOUNDARY');
+  const retLink=this.box(returnDuct,[.46,.48,1.72],[-2.18,1.12,.66],'steel',.010);this.tag(retLink,'sansin-return-inlet-interface-reference','CONFIGURATION_BOUNDARY');
+  const outdoorInterface=this.group(site,'sansin-outdoor-interface','Outdoor Heat-Rejection Air Interface',[0,0,0],[.10,.08,.10]);
+  const guard=this.cyl(outdoorInterface,.38,.055,[1.45,1.48,.55],'steel','y');this.tag(guard,'sansin-outdoor-fan-guard-reference','SANSIN_NES_FAMILY');guard.userData.installedFanCountVerified=false;
 
   if(inlet){
    const damper=this.findNode('sansin-inlet-damper');
@@ -896,6 +916,8 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    if(ref){for(const z of [-.30,.30]){const line=this.cyl(ref,.018,.84,[0,.76,z],'blue','y');this.tag(line,'sansin-refrigerant-line-reference','NES_YZKJ_FAMILY');line.userData.familyRefrigerant='R410A';line.userData.installedChargeVerified=false;}this.tag(this.box(ref,[.24,.16,.20],[.18,.55,.28],'accent',.012),'sansin-refrigerant-valve-manifold-reference','FUNCTIONAL_REFERENCE');}
    const water=this.findNode('sansin-water-circuit');
    if(water){this.tag(this.box(water,[.42,.28,.46],[-.15,.40,-.28],'accent',.018),'sansin-water-tank-reference','NES_YZKJ_FAMILY');this.tag(this.cyl(water,.075,.18,[.18,.46,-.28],'dark','x'),'sansin-water-pump-reference','NES_YZKJ_FAMILY');this.tag(this.cyl(water,.055,.22,[.30,.65,-.28],'filter','y'),'sansin-water-filter-reference','NES_YZKJ_FAMILY');for(const z of [-.34,.34])this.tag(this.cyl(water,.014,.72,[-.02,.82,z],'blue','y'),'sansin-water-recirculation-line','NES_YZKJ_FAMILY');}
+   const inter=this.group(circuit,'sansin-indoor-outdoor-interconnect','Indoor / Outdoor Refrigerant Interconnect',[0,0,0],[.10,.06,.10]);inter.userData.installedRoutingVerified=false;
+   for(const z of [-.18,.18]){const horizontal=this.cyl(inter,.018,1.72,[.10,.88,z-.75],'blue','x');this.tag(horizontal,'sansin-refrigerant-interconnect-reference','NES_YZKJ_FAMILY');horizontal.userData.familyRefrigerant='R410A';horizontal.userData.installedChargeVerified=false;const riser=this.cyl(inter,.018,.78,[.96,.88,z-.38],'blue','z');this.tag(riser,'sansin-refrigerant-riser-reference','NES_YZKJ_FAMILY');}
   }
   if(ctl){
    const hmi=this.findNode('sansin-controller');
@@ -915,6 +937,30 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.root.userData.coilTypeVerified=false;
   this.root.userData.fanTypeVerified=false;
   this.root.userData.visualizedSectionOrder='CANONICAL_FUNCTIONAL_REFERENCE_ONLY';
+  this.root.userData.airDistributionVisualization='SUPPLY_RETURN_DUCT_FUNCTIONAL_REFERENCE';
+  this.root.userData.plantDuctRouteVerified=false;
+  this.root.userData.outdoorCondensingUnitAssumed=false;
+  this.root.userData.outdoorInterfaceBoundary='OUTDOOR_AIR_INTAKE_TERMINATION_ONLY__NO_CONDENSER_ASSUMED';
+
+  // Unit-level ducting is intentionally a functional reference because plant routing and AHU placement are not yet verified.
+  const airDist=this.group(this.root,'ahu-air-distribution','Supply / Return Ducting Reference',[0,0,0],[0,.14,0]);
+  airDist.userData.installedRouteVerified=false;airDist.userData.visualizationOnly=true;
+  const supplyDuct=this.group(airDist,'ahu-supply-duct','Supply Duct / Diffuser Reference',[0,0,0],[.16,.08,0]);
+  const flex=this.box(supplyDuct,[.46,1.24,1.34],[3.58,1.04,0],'dark',.015);this.tag(flex,'ahu-flexible-supply-connector-reference','EUROVENT_FUNCTIONAL_REFERENCE');flex.userData.installedGeometryVerified=false;
+  for(const x of [3.42,3.54,3.66,3.78]){const rib=this.box(supplyDuct,[.025,1.28,1.38],[x,1.04,0],'steel',.003);this.tag(rib,'ahu-flexible-connector-rib-reference','FUNCTIONAL_REFERENCE');}
+  const trunk=this.box(supplyDuct,[2.95,.46,.74],[4.98,1.68,0],'steel',.012);this.tag(trunk,'ahu-supply-duct-trunk-reference','AIR_DISTRIBUTION_FUNCTIONAL_REFERENCE');trunk.userData.installedRouteVerified=false;
+  const branch=this.box(supplyDuct,[.62,.40,2.25],[6.18,1.68,0],'steel',.010);this.tag(branch,'ahu-supply-branch-reference','AIR_DISTRIBUTION_FUNCTIONAL_REFERENCE');branch.userData.installedRouteVerified=false;
+  for(const z of [-.86,.86]){const neck=this.box(supplyDuct,[.52,.38,.42],[6.32,1.45,z],'steel',.008);this.tag(neck,'ahu-supply-drop-reference','AIR_DISTRIBUTION_FUNCTIONAL_REFERENCE');const diffuser=this.box(supplyDuct,[.72,.055,.72],[6.36,1.23,z],'body',.006);this.tag(diffuser,'ahu-ceiling-diffuser-reference','AIR_DISTRIBUTION_FUNCTIONAL_REFERENCE');diffuser.userData.installedCountVerified=false;}
+  const returnDuct=this.group(airDist,'ahu-return-duct','Return-Air Duct Reference',[0,0,0],[-.12,.08,.08]);returnDuct.userData.installedConfigurationVerified=false;
+  const returnTrunk=this.box(returnDuct,[8.55,.38,.52],[.72,2.28,1.28],'steel',.010);this.tag(returnTrunk,'ahu-return-duct-trunk-reference','CONFIGURATION_BOUNDARY');returnTrunk.userData.installedRouteVerified=false;
+  const returnDrop=this.box(returnDuct,[.48,1.18,.52],[-3.48,1.70,1.28],'steel',.010);this.tag(returnDrop,'ahu-return-drop-reference','CONFIGURATION_BOUNDARY');
+  const returnLink=this.box(returnDuct,[.48,.52,1.32],[-3.48,1.10,.66],'steel',.010);this.tag(returnLink,'ahu-return-mixing-interface-reference','CONFIGURATION_BOUNDARY');
+  for(const z of [-.84,.84]){const grille=this.box(returnDuct,[.08,.70,.54],[4.78,1.82,z],'body',.006);this.tag(grille,'ahu-return-grille-reference','CONFIGURATION_BOUNDARY');grille.userData.installedCountVerified=false;}
+  const outdoorIntake=this.group(airDist,'ahu-outdoor-intake','Outdoor-Air Intake Termination',[0,0,0],[-.12,.08,0]);outdoorIntake.userData.installedTerminationVerified=false;
+  const hood=this.box(outdoorIntake,[.68,1.32,1.46],[-3.76,1.06,0],'body',.018);this.tag(hood,'ahu-weather-hood-boundary','EUROVENT_OUTDOOR_AIR_REFERENCE');hood.userData.optionReference=true;
+  for(let y=.58;y<=1.50;y+=.18){const louvre=this.box(outdoorIntake,[.055,.055,1.28],[-4.12,y,0],'steel',.003);louvre.rotation.z=-.20;this.tag(louvre,'ahu-outdoor-air-louvre-reference','EUROVENT_OUTDOOR_AIR_REFERENCE');}
+  const bird=this.box(outdoorIntake,[.025,1.12,1.24],[-4.17,1.05,0],'filter',.002);this.tag(bird,'ahu-intake-screen-reference','FUNCTIONAL_REFERENCE');
+  for(const x of [-3.15,-1.95,-.75,.75,1.95,3.15])for(const z of [-.72,.72]){const mount=this.box(airDist,[.16,.10,.16],[x,.13,z],'dark',.008);this.tag(mount,'ahu-vibration-isolator-reference','INSTALLATION_FUNCTION_REFERENCE');}
 
   if(intake){
    const damper=this.findNode('ahu-inlet-damper');
@@ -1376,7 +1422,7 @@ export class ReferenceProcessSimulation{
   this.family=template.cfg.family;
   this.stages=template.cfg.profile?.process||template.cfg.modules;if(this.family==='ctp')this.stages=this.stages.filter((_,i)=>i!==4);this.cycle=Math.max(8,this.stages.length*1.35);
   this.motions=this.blocked?[]:template.activeMeshes.filter(m=>m.userData.motion&&!m.userData.referencePlaceholder&&m.userData.simulationEnabled!==false).map(mesh=>({mesh,motion:mesh.userData.motion,position:mesh.position.clone(),quaternion:mesh.quaternion.clone()}));
- this.pathVisible=false;this.inkFlowVisible=false;this.processPiece=null;this.processMaterial=null;this.processGeometry=null;this.blanker=null;this.collator=null;this.collatorSheets=[];this.collatorSheetGeometry=null;this.collatorSheetMaterial=null;this.imagesetter=null;this.imagesetterMedia=null;this.imagesetterMediaGeometry=null;this.imagesetterMediaMaterial=null;this.zund=null;this.zundMaterial=null;this.zundMaterialGeometry=null;this.zundMaterialMaterial=null;this.ahu=null;this.ahuParticles=[];this.ahuParticleGeometry=null;this.ahuParticleMaterial=null;this.folder=null;this.folderBlank=null;this.folderGeometries=[];this.folderMaterials=[];if(!this.blocked)this.buildProcessPiece();if(!this.blocked&&this.family==='blanker')this.bindBlanker();if(!this.blocked&&this.family==='collator')this.bindCollator();if(!this.blocked&&this.family==='imagesetter')this.bindImagesetter();if(!this.blocked&&this.family==='zund')this.bindZund();if(!this.blocked&&this.family==='ahu')this.bindAHU();if(!this.blocked&&this.family==='folder')this.bindFolder();
+ this.pathVisible=false;this.inkFlowVisible=false;this.processPiece=null;this.processMaterial=null;this.processGeometry=null;this.blanker=null;this.collator=null;this.collatorSheets=[];this.collatorSheetGeometry=null;this.collatorSheetMaterial=null;this.imagesetter=null;this.imagesetterMedia=null;this.imagesetterMediaGeometry=null;this.imagesetterMediaMaterial=null;this.zund=null;this.zundMaterial=null;this.zundMaterialGeometry=null;this.zundMaterialMaterial=null;this.ahu=null;this.ahuParticles=[];this.ahuParticleGeometry=null;this.ahuParticleMaterial=null;this.ahuReturnParticleMaterial=null;this.ahuOutdoorParticleMaterial=null;this.folder=null;this.folderBlank=null;this.folderGeometries=[];this.folderMaterials=[];if(!this.blocked)this.buildProcessPiece();if(!this.blocked&&this.family==='blanker')this.bindBlanker();if(!this.blocked&&this.family==='collator')this.bindCollator();if(!this.blocked&&this.family==='imagesetter')this.bindImagesetter();if(!this.blocked&&this.family==='zund')this.bindZund();if(!this.blocked&&this.family==='ahu')this.bindAHU();if(!this.blocked&&this.family==='folder')this.bindFolder();
  }
  buildProcessPiece(){
   const family=this.family;if(['compressor','ahu','collator','imagesetter','zund','folder'].includes(family))return;
@@ -1550,18 +1596,26 @@ export class ReferenceProcessSimulation{
    sectionOrderVerified:sansin?false:(this.template.root.userData.sectionOrderVerified===true),
    exactModelVerified:sansin?this.template.root.userData.exactSansinModelVerified===true:this.template.root.userData.exactAhuModelVerified===true,
    flowStart:sansin?-2.05:-3.42,
-   flowEnd:sansin?.62:3.42,
+   flowEnd:sansin?.72:3.48,
+   supplyAirActive:false,
+   returnAirReferenceActive:false,
+   outdoorHeatRejectionActive:false,
    evaporativePrecoolActive:false,
    dxEvaporatorActive:false,
    genericCoilActive:false
   };
   this.ahuParticleGeometry=new THREE.SphereGeometry(.028,10,8);
-  this.ahuParticleMaterial=new THREE.MeshStandardMaterial({color:0x73a9b5,roughness:.42,metalness:0,transparent:true,opacity:.78});
-  for(let i=0;i<12;i++){
-   const mesh=new THREE.Mesh(this.ahuParticleGeometry,this.ahuParticleMaterial);
-   mesh.name='AHU-AIRFLOW-PARTICLE-'+(i+1);mesh.visible=false;mesh.userData.airflowReference=true;this.root.add(mesh);
-   this.ahuParticles.push({mesh,phase:i/12,z:-.62+(i%4)*.41,y:.72+(i%3)*.22});
-  }
+  this.ahuParticleMaterial=new THREE.MeshStandardMaterial({color:0x73a9b5,roughness:.42,metalness:0,transparent:true,opacity:.82});
+  this.ahuReturnParticleMaterial=new THREE.MeshStandardMaterial({color:0xb18a6a,roughness:.50,metalness:0,transparent:true,opacity:.62});
+  this.ahuOutdoorParticleMaterial=new THREE.MeshStandardMaterial({color:0x8aa7ad,roughness:.44,metalness:0,transparent:true,opacity:.68});
+  const particle=(kind,i,count,material)=>{
+   const mesh=new THREE.Mesh(this.ahuParticleGeometry,material);mesh.name='AHU-'+kind.toUpperCase()+'-AIR-PARTICLE-'+(i+1);mesh.visible=false;
+   mesh.userData={airflowReference:true,airflowKind:kind,installedRouteVerified:false};this.root.add(mesh);
+   this.ahuParticles.push({mesh,kind,phase:i/count,branch:i%2?-1:1,lane:(i%3)-1});
+  };
+  for(let i=0;i<18;i++)particle('supply',i,18,this.ahuParticleMaterial);
+  for(let i=0;i<10;i++)particle('return',i,10,this.ahuReturnParticleMaterial);
+  if(sansin)for(let i=0;i<8;i++)particle('outdoor',i,8,this.ahuOutdoorParticleMaterial);
  }
  ahuStatus(){
   const p=this.active?(this.elapsed%this.cycle)/this.cycle:0,idx=Math.min(this.stages.length-1,Math.floor(p*this.stages.length));
@@ -1569,17 +1623,43 @@ export class ReferenceProcessSimulation{
  }
  updateAHU(){
   if(!this.ahu)return;
-  const a=this.ahu,s=this.ahuStatus();
+  const a=this.ahu,s=this.ahuStatus(),lerp=THREE.MathUtils.lerp,smooth=v=>{v=THREE.MathUtils.clamp(v,0,1);return v*v*(3-2*v);};
   for(const item of this.ahuParticles){
-   const q=(s.p+item.phase)%1,x=THREE.MathUtils.lerp(a.flowStart,a.flowEnd,q);
-   item.mesh.position.set(x,item.y,item.z);item.mesh.visible=this.active;
+   const q=(s.p+item.phase)%1,m=item.mesh,lane=item.lane*.16;
+   if(item.kind==='supply'){
+    if(!a.sansin){
+     if(q<.58){const t=smooth(q/.58);m.position.set(lerp(a.flowStart,a.flowEnd,t),.94+lane*.22,lane);}
+     else if(q<.80){const t=smooth((q-.58)/.22);m.position.set(lerp(a.flowEnd,5.38,t),lerp(.98,1.68,t),lane);}
+     else {const t=smooth((q-.80)/.20);m.position.set(lerp(5.38,6.34,t),lerp(1.68,1.25,t),lerp(lane,item.branch*.86,t));}
+    }else{
+     if(q<.62){const t=smooth(q/.62);m.position.set(lerp(a.flowStart,a.flowEnd,t),1.02+lane*.20,-.25+lane);}
+     else if(q<.82){const t=smooth((q-.62)/.20);m.position.set(lerp(a.flowEnd,3.42,t),lerp(1.08,1.68,t),-.25+lane);}
+     else {const t=smooth((q-.82)/.18);m.position.set(lerp(3.42,3.56,t),lerp(1.68,1.28,t),lerp(-.25,item.branch>0?.50:-1.00,t));}
+    }
+   }else if(item.kind==='return'){
+    if(!a.sansin){
+     if(q<.24){const t=smooth(q/.24);m.position.set(lerp(4.80,5.05,t),lerp(1.82,2.28,t),lerp(item.branch*.84,1.28,t));}
+     else if(q<.82){const t=smooth((q-.24)/.58);m.position.set(lerp(5.05,-3.48,t),2.28,1.28+lane*.22);}
+     else {const t=smooth((q-.82)/.18);m.position.set(-3.48,lerp(2.28,1.08,t),lerp(1.28,.18,t));}
+    }else{
+     if(q<.28){const t=smooth(q/.28);m.position.set(lerp(3.35,3.10,t),lerp(1.72,2.25,t),lerp(item.branch>.0?.50:-1.00,1.52,t));}
+     else if(q<.82){const t=smooth((q-.28)/.54);m.position.set(lerp(3.10,-2.18,t),2.25,1.52+lane*.18);}
+     else {const t=smooth((q-.82)/.18);m.position.set(-2.18,lerp(2.25,1.10,t),lerp(1.52,-.15,t));}
+    }
+   }else{
+    const t=smooth(q);m.position.set(1.45+Math.sin(q*Math.PI*2+item.phase*4)*.16,lerp(.38,1.78,t),.55+Math.cos(q*Math.PI*2+item.phase*4)*.16);
+   }
+   m.visible=this.active;
   }
+  a.supplyAirActive=this.active;
+  a.returnAirReferenceActive=this.active;
+  a.outdoorHeatRejectionActive=a.sansin&&this.active&&s.p>=.08&&s.p<.94;
   if(a.sansin){
-   a.evaporativePrecoolActive=s.p>=.22&&s.p<.52;
-   a.dxEvaporatorActive=s.p>=.34&&s.p<.64;
+   a.evaporativePrecoolActive=s.p>=.18&&s.p<.50;
+   a.dxEvaporatorActive=s.p>=.32&&s.p<.68;
    a.genericCoilActive=false;
   }else{
-   a.genericCoilActive=s.p>=.26&&s.p<.58;
+   a.genericCoilActive=s.p>=.24&&s.p<.60;
    a.evaporativePrecoolActive=false;a.dxEvaporatorActive=false;
   }
  }
@@ -1630,13 +1710,13 @@ export class ReferenceProcessSimulation{
   const progress=this.active?(this.elapsed%this.cycle)/this.cycle:0,blankerState=this.family==='blanker'?this.blankerStatus():null,collatorState=this.family==='collator'?this.collatorStatus():null,imagesetterState=this.family==='imagesetter'?this.imagesetterStatus():null,zundState=this.family==='zund'?this.zundStatus():null,ahuState=this.family==='ahu'?this.ahuStatus():null,folderState=this.family==='folder'?this.folderStatus():null,idx=blankerState?.idx??collatorState?.idx??imagesetterState?.idx??zundState?.idx??ahuState?.idx??folderState?.idx??this.stageIndex();
   return {available:!this.blocked,blocked:this.blocked,blockedReason:this.blockedReason,referenceModel:true,evidenceGrade:this.template.cfg.evidence.grade,geometryStatus:this.template.cfg.evidence.geometry,
    active:this.active,running:this.running,paused:this.paused,speed:this.speed,stage:this.blocked?'Simulasi belum tervalidasi':(this.stages[idx]||'Reference process'),completed:this.completed,progress,
-   sheetsVisible:this.family==='collator'?this.collatorSheets.filter(s=>s.mesh.visible).length:this.family==='imagesetter'?(this.imagesetterMedia?.visible?1:0):this.family==='folder'?(this.folderBlank?.visible?1:0):(this.processPiece?.visible?1:0),pileSheetsVisible:0,airflowParticleCount:this.family==='ahu'?this.ahuParticles.filter(p=>p.mesh.visible).length:0,rotorCount:this.motions.filter(x=>x.motion.type==='spin').length,
+   sheetsVisible:this.family==='collator'?this.collatorSheets.filter(s=>s.mesh.visible).length:this.family==='imagesetter'?(this.imagesetterMedia?.visible?1:0):this.family==='folder'?(this.folderBlank?.visible?1:0):(this.processPiece?.visible?1:0),pileSheetsVisible:0,airflowParticleCount:this.family==='ahu'?this.ahuParticles.filter(p=>p.mesh.visible).length:0,supplyAirflowParticleCount:this.family==='ahu'?this.ahuParticles.filter(p=>p.kind==='supply'&&p.mesh.visible).length:0,returnAirflowParticleCount:this.family==='ahu'?this.ahuParticles.filter(p=>p.kind==='return'&&p.mesh.visible).length:0,outdoorAirflowParticleCount:this.family==='ahu'?this.ahuParticles.filter(p=>p.kind==='outdoor'&&p.mesh.visible).length:0,rotorCount:this.motions.filter(x=>x.motion.type==='spin').length,
    oscillatorCount:this.motions.filter(x=>x.motion.type!=='spin').length,mechanismCount:this.family==='blanker'?this.template.activeMeshes.length:this.family==='zund'?2:this.motions.length,inkFlowCount:0,uvLampCount:0,uvActive:false,pathVisible:false,inkFlowVisible:false,
    platformIndexing:blankerState?.indexing??false,blankingHeadPressing:blankerState?.pressing??false,mechanicalInterlockSafe:blankerState?.interlockSafe??true,
    modeledBinCount:collatorState?.modeledBinCount??null,installedBinCountVerified:collatorState?.installedBinCountVerified??null,activeBinFeeds:this.collator?.activeFeedCount??0,completedSheetsInSet:this.collator?.completedSheetsInSet??0,
    exposureActive:imagesetterState?.exposure??false,cuttingActive:imagesetterState?.cutting??false,punchInstalledVerified:this.imagesetter?.punch?.userData.installedOptionVerified===true,processorInstalledVerified:this.imagesetter?.processor?.userData.installedOptionVerified===true,exactScreenModelVerified:this.family==='imagesetter'?this.template.root.userData.exactScreenModelVerified:null,
    vacuumHoldActive:zundState?.vacuumHold??false,zundAxisMotionActive:zundState?.axisMotion??false,installedToolPackageVerified:this.family==='zund'?(this.zund?.installedToolPackageVerified??false):null,toolActionEnabled:this.family==='zund'?(this.zund?.installedToolPackageVerified===true):null,registrationCameraInstalledVerified:this.family==='zund'?(this.zund?.installedIccVerified??false):null,toolInitializationInstalledVerified:this.family==='zund'?(this.zund?.installedItiVerified??false):null,
-   ahuSectionOrderVerified:this.family==='ahu'?(this.ahu?.sectionOrderVerified??false):null,ahuExactModelVerified:this.family==='ahu'?(this.ahu?.exactModelVerified??false):null,evaporativePrecoolActive:this.family==='ahu'?(this.ahu?.evaporativePrecoolActive??false):false,dxEvaporatorActive:this.family==='ahu'?(this.ahu?.dxEvaporatorActive??false):false,genericCoilConditioningActive:this.family==='ahu'?(this.ahu?.genericCoilActive??false):false,
+   ahuSectionOrderVerified:this.family==='ahu'?(this.ahu?.sectionOrderVerified??false):null,ahuExactModelVerified:this.family==='ahu'?(this.ahu?.exactModelVerified??false):null,supplyAirActive:this.family==='ahu'?(this.ahu?.supplyAirActive??false):false,returnAirReferenceActive:this.family==='ahu'?(this.ahu?.returnAirReferenceActive??false):false,outdoorHeatRejectionActive:this.family==='ahu'?(this.ahu?.outdoorHeatRejectionActive??false):false,plantDuctRouteVerified:this.family==='ahu'?(this.template.root.userData.plantDuctRouteVerified===true):null,evaporativePrecoolActive:this.family==='ahu'?(this.ahu?.evaporativePrecoolActive??false):false,dxEvaporatorActive:this.family==='ahu'?(this.ahu?.dxEvaporatorActive??false):false,genericCoilConditioningActive:this.family==='ahu'?(this.ahu?.genericCoilActive??false):false,
    cartonBlankGeometryIsSchematic:this.family==='folder'?(this.folder?.cartonBlankGeometryIsSchematic??true):null,foldingActive:folderState?.folding??false,glueZoneActive:folderState?.gluing??false,compressionActive:folderState?.compressing??false,crashLockInstalledVerified:this.family==='folder'?(this.folder?.installedCrashLockVerified??false):null,fourSixCornerInstalledVerified:this.family==='folder'?(this.folder?.installedFourSixCornerVerified??false):null,glueApplicatorTypeVerified:this.family==='folder'?(this.folder?.glueApplicatorTypeVerified??false):null,
    simulationBoundary:this.family==='blanker'?'QF_LQF_1080_FAMILY_PROCESS_ONLY':this.family==='collator'?'MULTI_VENDOR_SUCTION_COLLATOR_PROCESS_ONLY__TEN_BIN_REFERENCE_NOT_INSTALLATION_CLAIM':this.family==='ctp'?'SUPRASETTER_COMMON_PROCESS_ONLY__PUNCH_LOADER_DEBRIS_TEMP_OPTIONS_NOT_SIMULATED':this.family==='imagesetter'?'SCREEN_FTR_KATANA_COMMON_PROCESS_ONLY__PUNCH_PROCESSOR_MODEL_OPTIONS_NOT_INFERRED':this.family==='zund'?'ZUND_XY_PLATFORM_MOTION_ONLY__INSTALLED_TOOL_CAMERA_INIT_PACKAGE_NOT_INFERRED':this.family==='ahu'?(this.ahu?.sansin?'SANSIN_NES_YZKJ_INDOOR_AIR_PATH_FAMILY_REFERENCE__MODEL_CAPACITY_UNVERIFIED':'EUROVENT_CANONICAL_AHU_AIR_PATH_REFERENCE__SECTION_ORDER_DIRECTION_UNVERIFIED'):this.family==='folder'?'FGM2_MULTI_VENDOR_COMMON_FOLD_GLUE_PROCESS_ONLY__BOX_STYLE_GLUE_HARDWARE_OPTIONS_NOT_INFERRED':null,referenceBoundary:this.template.cfg.profile?.unknowns||[]};
  }
@@ -1646,7 +1726,7 @@ export class ReferenceProcessSimulation{
  setSpeed(v){this.speed=Math.max(.25,Math.min(3,Number(v)||1));return this.state();}
  setPathVisible(){this.pathVisible=false;return this.state();}
  setInkFlowVisible(){this.inkFlowVisible=false;return this.state();}
- resetMotion(){for(const item of this.motions){item.mesh.position.copy(item.position);item.mesh.quaternion.copy(item.quaternion);}if(this.blanker){if(this.blanker.platform)this.blanker.platform.position.copy(this.blanker.platformRest);if(this.blanker.ram)this.blanker.ram.position.copy(this.blanker.ramRest);}if(this.processPiece){if(this.family==='blanker'&&this.processPiece.userData.blankerRest)this.processPiece.position.copy(this.processPiece.userData.blankerRest);else this.processPiece.position.x=this.processPiece.userData.startX;this.processPiece.visible=this.active;}for(const s of this.collatorSheets){s.mesh.position.copy(s.start);s.mesh.visible=this.active;}if(this.collator){this.collator.activeFeedCount=0;this.collator.completedSheetsInSet=0;}if(this.imagesetterMedia){this.imagesetterMedia.position.set(-.82,.68,0);this.imagesetterMedia.visible=this.active;}if(this.imagesetter){this.imagesetter.exposureActive=false;this.imagesetter.cuttingActive=false;if(this.imagesetter.laser?.material?.emissive){this.imagesetter.laser.material.emissive.setHex(0);this.imagesetter.laser.material.emissiveIntensity=0;}}if(this.zund){if(this.zund.beam)this.zund.beam.position.copy(this.zund.beamRest);if(this.zund.carriage)this.zund.carriage.position.copy(this.zund.carriageRest);this.zund.vacuumHoldActive=false;}if(this.zundMaterial){this.zundMaterial.position.set(0,.69,0);this.zundMaterial.visible=this.active;}for(const p of this.ahuParticles)p.mesh.visible=this.active;if(this.ahu){this.ahu.evaporativePrecoolActive=false;this.ahu.dxEvaporatorActive=false;this.ahu.genericCoilActive=false;}if(this.folderBlank){this.folderBlank.position.set(-5.20,.82,0);this.folderBlank.visible=this.active;}if(this.folder){this.folder.leftPivot.rotation.x=0;this.folder.rightPivot.rotation.x=0;this.folder.glueStrip.visible=false;this.folder.foldingActive=false;this.folder.glueZoneActive=false;this.folder.compressionActive=false;}}
+ resetMotion(){for(const item of this.motions){item.mesh.position.copy(item.position);item.mesh.quaternion.copy(item.quaternion);}if(this.blanker){if(this.blanker.platform)this.blanker.platform.position.copy(this.blanker.platformRest);if(this.blanker.ram)this.blanker.ram.position.copy(this.blanker.ramRest);}if(this.processPiece){if(this.family==='blanker'&&this.processPiece.userData.blankerRest)this.processPiece.position.copy(this.processPiece.userData.blankerRest);else this.processPiece.position.x=this.processPiece.userData.startX;this.processPiece.visible=this.active;}for(const s of this.collatorSheets){s.mesh.position.copy(s.start);s.mesh.visible=this.active;}if(this.collator){this.collator.activeFeedCount=0;this.collator.completedSheetsInSet=0;}if(this.imagesetterMedia){this.imagesetterMedia.position.set(-.82,.68,0);this.imagesetterMedia.visible=this.active;}if(this.imagesetter){this.imagesetter.exposureActive=false;this.imagesetter.cuttingActive=false;if(this.imagesetter.laser?.material?.emissive){this.imagesetter.laser.material.emissive.setHex(0);this.imagesetter.laser.material.emissiveIntensity=0;}}if(this.zund){if(this.zund.beam)this.zund.beam.position.copy(this.zund.beamRest);if(this.zund.carriage)this.zund.carriage.position.copy(this.zund.carriageRest);this.zund.vacuumHoldActive=false;}if(this.zundMaterial){this.zundMaterial.position.set(0,.69,0);this.zundMaterial.visible=this.active;}for(const p of this.ahuParticles)p.mesh.visible=this.active;if(this.ahu){this.ahu.supplyAirActive=this.active;this.ahu.returnAirReferenceActive=this.active;this.ahu.outdoorHeatRejectionActive=false;this.ahu.evaporativePrecoolActive=false;this.ahu.dxEvaporatorActive=false;this.ahu.genericCoilActive=false;}if(this.folderBlank){this.folderBlank.position.set(-5.20,.82,0);this.folderBlank.visible=this.active;}if(this.folder){this.folder.leftPivot.rotation.x=0;this.folder.rightPivot.rotation.x=0;this.folder.glueStrip.visible=false;this.folder.foldingActive=false;this.folder.glueZoneActive=false;this.folder.compressionActive=false;}}
  update(now){
   if(!this.active||!this.running){this.lastNow=now;return;}
   if(this.lastNow===null){this.lastNow=now;return;}
@@ -1670,5 +1750,5 @@ export class ReferenceProcessSimulation{
   this.completed=Math.floor(this.elapsed/this.cycle);this.onUpdate?.(this.state());
  }
  stop(){this.active=false;this.running=false;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;this.resetMotion();if(this.processPiece)this.processPiece.visible=false;for(const s of this.collatorSheets)s.mesh.visible=false;if(this.imagesetterMedia)this.imagesetterMedia.visible=false;if(this.zundMaterial)this.zundMaterial.visible=false;for(const p of this.ahuParticles)p.mesh.visible=false;if(this.folderBlank)this.folderBlank.visible=false;this.onUpdate?.(this.state());return this.state();}
- dispose(){this.stop();this.processPiece?.removeFromParent();this.processGeometry?.dispose();this.processMaterial?.dispose();for(const s of this.collatorSheets)s.mesh.removeFromParent();this.collatorSheetGeometry?.dispose();this.collatorSheetMaterial?.dispose();this.imagesetterMedia?.removeFromParent();this.imagesetterMediaGeometry?.dispose();this.imagesetterMediaMaterial?.dispose();this.zundMaterial?.removeFromParent();this.zundMaterialGeometry?.dispose();this.zundMaterialMaterial?.dispose();for(const p of this.ahuParticles)p.mesh.removeFromParent();this.ahuParticleGeometry?.dispose();this.ahuParticleMaterial?.dispose();this.folderBlank?.removeFromParent();for(const g of this.folderGeometries)g.dispose();for(const m of this.folderMaterials)m.dispose();}
+ dispose(){this.stop();this.processPiece?.removeFromParent();this.processGeometry?.dispose();this.processMaterial?.dispose();for(const s of this.collatorSheets)s.mesh.removeFromParent();this.collatorSheetGeometry?.dispose();this.collatorSheetMaterial?.dispose();this.imagesetterMedia?.removeFromParent();this.imagesetterMediaGeometry?.dispose();this.imagesetterMediaMaterial?.dispose();this.zundMaterial?.removeFromParent();this.zundMaterialGeometry?.dispose();this.zundMaterialMaterial?.dispose();for(const p of this.ahuParticles)p.mesh.removeFromParent();this.ahuParticleGeometry?.dispose();this.ahuParticleMaterial?.dispose();this.ahuReturnParticleMaterial?.dispose();this.ahuOutdoorParticleMaterial?.dispose();this.folderBlank?.removeFromParent();for(const g of this.folderGeometries)g.dispose();for(const m of this.folderMaterials)m.dispose();}
 }
