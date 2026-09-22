@@ -866,8 +866,8 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
 
   const site=this.group(this.root,'sansin-air-distribution','SANSIN Indoor / Outdoor Air Distribution Reference',[0,0,0],[0,.14,0]);
   site.userData.installedRouteVerified=false;site.userData.familyReference=true;
-  const indoorBase=this.box(site,[3.55,.11,1.78],[-.68,.12,-.25],'dark',.018);this.tag(indoorBase,'sansin-indoor-unit-base-reference','SANSIN_NES_FAMILY');
-  const outdoorBase=this.box(site,[1.42,.13,1.68],[1.45,.13,.55],'dark',.018);this.tag(outdoorBase,'sansin-outdoor-unit-pad-reference','SANSIN_NES_FAMILY');outdoorBase.userData.installedPadVerified=false;
+  const indoorBase=this.box(site,[3.00,.11,1.78],[-.68,.12,-.25],'dark',.018);this.tag(indoorBase,'sansin-indoor-unit-base-reference','SANSIN_NES_FAMILY');indoorBase.userData.engineeringDimensions=false;
+  const outdoorBase=this.box(site,[1.42,.13,1.68],[1.45,.13,1.45],'dark',.018);this.tag(outdoorBase,'sansin-outdoor-unit-pad-reference','SANSIN_NES_FAMILY');outdoorBase.userData.installedPadVerified=false;outdoorBase.userData.engineeringDimensions=false;
   const supplyDuct=this.group(site,'sansin-supply-duct','SANSIN Conditioned-Air Supply Duct',[0,0,0],[.14,.08,0]);
   const flex=this.box(supplyDuct,[.42,1.18,1.28],[.76,1.10,-.25],'dark',.015);this.tag(flex,'sansin-supply-flexible-connector-reference','SANSIN_NES_FAMILY');
   for(const x of [.64,.75,.86])this.tag(this.box(supplyDuct,[.022,1.22,1.32],[x,1.10,-.25],'steel',.002),'sansin-supply-flex-rib-reference','FUNCTIONAL_REFERENCE');
@@ -879,7 +879,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   const retDrop=this.box(returnDuct,[.46,1.12,.50],[-2.18,1.70,1.52],'steel',.010);this.tag(retDrop,'sansin-return-drop-reference','CONFIGURATION_BOUNDARY');
   const retLink=this.box(returnDuct,[.46,.48,1.72],[-2.18,1.12,.66],'steel',.010);this.tag(retLink,'sansin-return-inlet-interface-reference','CONFIGURATION_BOUNDARY');
   const outdoorInterface=this.group(site,'sansin-outdoor-interface','Outdoor Heat-Rejection Air Interface',[0,0,0],[.10,.08,.10]);
-  const guard=this.cyl(outdoorInterface,.38,.055,[1.45,1.48,.55],'steel','y');this.tag(guard,'sansin-outdoor-fan-guard-reference','SANSIN_NES_FAMILY');guard.userData.installedFanCountVerified=false;
+  const guard=this.cyl(outdoorInterface,.38,.055,[1.45,1.48,1.45],'steel','y');this.tag(guard,'sansin-outdoor-fan-guard-reference','SANSIN_NES_FAMILY');guard.userData.installedFanCountVerified=false;
 
   if(inlet){
    const damper=this.findNode('sansin-inlet-damper');
@@ -917,7 +917,11 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    const water=this.findNode('sansin-water-circuit');
    if(water){this.tag(this.box(water,[.42,.28,.46],[-.15,.40,-.28],'accent',.018),'sansin-water-tank-reference','NES_YZKJ_FAMILY');this.tag(this.cyl(water,.075,.18,[.18,.46,-.28],'dark','x'),'sansin-water-pump-reference','NES_YZKJ_FAMILY');this.tag(this.cyl(water,.055,.22,[.30,.65,-.28],'filter','y'),'sansin-water-filter-reference','NES_YZKJ_FAMILY');for(const z of [-.34,.34])this.tag(this.cyl(water,.014,.72,[-.02,.82,z],'blue','y'),'sansin-water-recirculation-line','NES_YZKJ_FAMILY');}
    const inter=this.group(circuit,'sansin-indoor-outdoor-interconnect','Indoor / Outdoor Refrigerant Interconnect',[0,0,0],[.10,.06,.10]);inter.userData.installedRoutingVerified=false;
-   for(const z of [-.18,.18]){const horizontal=this.cyl(inter,.018,1.72,[.10,.88,z-.75],'blue','x');this.tag(horizontal,'sansin-refrigerant-interconnect-reference','NES_YZKJ_FAMILY');horizontal.userData.familyRefrigerant='R410A';horizontal.userData.installedChargeVerified=false;const riser=this.cyl(inter,.018,.78,[.96,.88,z-.38],'blue','z');this.tag(riser,'sansin-refrigerant-riser-reference','NES_YZKJ_FAMILY');}
+   for(const offset of [-.08,.08]){
+    const runX=this.cyl(inter,.018,1.58,[.50,.82,.42+offset],'blue','x');this.tag(runX,'sansin-refrigerant-interconnect-reference','NES_YZKJ_FAMILY');runX.userData.familyRefrigerant='R410A';runX.userData.installedChargeVerified=false;
+    const runZ=this.cyl(inter,.018,1.02,[1.29,.82,.93+offset],'blue','z');this.tag(runZ,'sansin-refrigerant-riser-reference','NES_YZKJ_FAMILY');runZ.userData.installedRoutingVerified=false;
+    const outdoorDrop=this.cyl(inter,.018,.55,[1.29,.55,1.44+offset],'blue','y');this.tag(outdoorDrop,'sansin-outdoor-refrigerant-drop-reference','NES_YZKJ_FAMILY');outdoorDrop.userData.installedRoutingVerified=false;
+   }
   }
   if(ctl){
    const hmi=this.findNode('sansin-controller');
@@ -1390,7 +1394,10 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  buildSansinCooling(){
   this.palette.body=0xe3e6e3;this.palette.dark=0x273034;this.palette.accent=0x437563;this.palette.blue=0x497e9d;this.palette.filter=0xc7b783;
   this.base(5.0,2.50);
-  const pos=[[-1.72,0,-.25],[-1.05,0,-.25],[-.38,0,-.25],[.34,0,-.25],[1.45,0,.55],[.72,0,.86],[1.72,0,-.62]];
+  const legacyBase=this.findNode('universal-base');if(legacyBase){legacyBase.userData.referencePlaceholder=true;legacyBase.userData.hiddenForIndoorOutdoorSeparation=true;for(const child of legacyBase.children)if(child.isMesh)child.visible=false;}
+  // Functional family layout only: the indoor train and outdoor heat-rejection package are separated
+  // so their envelopes do not intersect. Site spacing/orientation remains unverified.
+  const pos=[[-1.72,0,-.25],[-1.05,0,-.25],[-.38,0,-.25],[.34,0,-.25],[1.45,0,1.45],[.55,0,1.55],[1.72,0,-.62]];
   for(let i=1;i<=7;i++){
    const {g,a}=this.mod(i,pos[i-1],[Math.sign(pos[i-1][0]||1)*.38,.20,0]);
    if(i<=4)this.shell(g,[.66,2.02,1.50],[0,1.10,0]);
@@ -1653,7 +1660,7 @@ export class ReferenceProcessSimulation{
      else {const t=smooth((q-.82)/.18);m.position.set(-2.18,lerp(2.25,1.10,t),lerp(1.52,-.15,t));}
     }
    }else{
-    const t=smooth(q);m.position.set(1.45+Math.sin(q*Math.PI*2+item.phase*4)*.16,lerp(.38,1.78,t),.55+Math.cos(q*Math.PI*2+item.phase*4)*.16);
+    const t=smooth(q);m.position.set(1.45+Math.sin(q*Math.PI*2+item.phase*4)*.16,lerp(.38,1.78,t),1.45+Math.cos(q*Math.PI*2+item.phase*4)*.16);
    }
    m.visible=this.active;
   }
