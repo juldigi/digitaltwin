@@ -216,7 +216,8 @@ bodyObserver.observe(document.body,{attributes:true,attributeFilter:['class']});
 
 addEventListener('bmj:domainstate',event=>{
  const detail=event.detail||{};
- setState(detail,{url:false});
+ const carriesDeepLink=Object.prototype.hasOwnProperty.call(detail,'selectedAsset')||Object.prototype.hasOwnProperty.call(detail,'selectedNode')||Object.prototype.hasOwnProperty.call(detail,'viewMode');
+ setState(detail,{url:carriesDeepLink});
 });
 const syncViewport=()=>{document.documentElement.style.setProperty('--app-vh',`${window.visualViewport?.height||innerHeight}px`);const w=innerWidth;setTimeout(()=>window.BMJAppState?.setState({deviceMode:w<768?'mobile':w<=1180?'tablet':'desktop'},{url:false}),0)};
 syncViewport();addEventListener('resize',syncViewport,{passive:true});window.visualViewport?.addEventListener('resize',syncViewport,{passive:true});
@@ -240,5 +241,5 @@ const relabel=()=>{
  const search=q('#global-search');if(search)search.placeholder='Cari mesin, area, komponen, sistem, atau dokumen…';
  const connection=q('#connection');if(connection)connection.textContent=navigator.onLine?'Data tersedia':'Offline';
 };
-relabel();hydrateUrl();subscribe(state=>{markSection(state.activeSection);syncLayerControls()});
+relabel();const hydratedState=hydrateUrl();if(hydratedState.viewMode==='2d')q('#mode-2d')?.click();subscribe(state=>{markSection(state.activeSection);syncLayerControls()});
 document.documentElement.dataset.uiArchitecture='v149-safe-shell';
