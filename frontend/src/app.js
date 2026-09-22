@@ -48,7 +48,7 @@ configureActiveMachine(canOpenTechnical3D(INITIAL_REQUESTED_ASSET)?INITIAL_REQUE
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'Belum tersedia').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const number=n=>Number.isFinite(n)?n.toLocaleString('id-ID',{maximumFractionDigits:4}):'Belum tersedia';
-let state,engine,activeTab='overview',apiBase='',token='',role=null,editing=false,explode=0,selectedPart=null,selectedTaxonomyId=ACTIVE_ROOT,exteriorMode=false,exteriorPreviousLow=null,exteriorFocusKey=null,simulationState,simulationOwnsExterior=false,referenceCategoryFilter='all',toastTimer,bundledLayout=null,cachedDataActive=false;
+let state,engine,activeTab='overview',apiBase='',token='',role=null,editing=false,explode=0,selectedPart=null,selectedTaxonomyId=ACTIVE_ROOT,exteriorMode=false,exteriorPreviousLow=null,exteriorFocusKey=null,simulationState,simulationOwnsExterior=false,referenceCategoryFilter='all',toastTimer,bundledLayout=null,cachedDataActive=false,factoryAssetContextId=null;
 function applyActiveMachineState(){
  state=structuredClone(initialState);referenceCategoryFilter='all';
  simulationState={active:false,running:false,paused:false,speed:1,stage:'Feeder',completed:0,progress:0,sheetsVisible:0,pileSheetsVisible:0,rotorCount:0,oscillatorCount:0,mechanismCount:0,inkFlowCount:0,uvLampCount:0,uvActive:false,pathVisible:IS_SHEETING?false:true,inkFlowVisible:true};
