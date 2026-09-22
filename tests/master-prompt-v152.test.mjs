@@ -9,12 +9,12 @@ const css=fs.readFileSync(new URL('../frontend/app-shell-v79.css',import.meta.ur
 const sw=fs.readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 
 test('V155 release cache keys move beyond V149/V151 sources',()=>{
-  assert.match(html,/app-shell-v79\.css\?v=158/);
-  assert.match(html,/src\/app\.js\?v=158/);
-  assert.match(html,/src\/ui-v5\.js\?v=158/);
-  assert.match(html,/src\/app-shell-v79\.js\?v=158/);
+  assert.match(html,/app-shell-v79\.css\?v=159/);
+  assert.match(html,/src\/app\.js\?v=159/);
+  assert.match(html,/src\/ui-v5\.js\?v=159/);
+  assert.match(html,/src\/app-shell-v79\.js\?v=159/);
   assert.doesNotMatch(html,/\?v=149/);
-  assert.match(sw,/factory-digital-twin-v158-phase3-interaction-20260922/);
+  assert.match(sw,/factory-digital-twin-v159-status-truth-map-editor-20260922/);
 });
 
 test('custom major overlays expose dialog semantics focus restoration and keyboard containment',()=>{
@@ -56,7 +56,7 @@ test('user-facing system workspace no longer exposes implementation jargon',()=>
 test('technical diagnostics live inside Settings System Information and focus is visibly accessible',()=>{
   assert.match(app,/Informasi Sistem/);
   assert.match(app,/Diagnostik teknis ditempatkan di sini agar tampilan utama tetap sederhana/);
-  assert.match(app,/pair\('Versi aplikasi','V158'\)/);
+  assert.match(app,/pair\('Versi aplikasi','V159'\)/);
   assert.match(css,/:focus-visible/);
   assert.match(css,/prefers-reduced-motion/);
   assert.match(css,/prefers-contrast:more/);
