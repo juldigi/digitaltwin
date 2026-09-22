@@ -20,7 +20,7 @@ test('master-prompt foundation scope exposes exactly OFFSET 5 as the primary tec
 test('runtime cannot open detailed technical 3D for non-primary assets',()=>{
   assert.match(engine,/if\(!canOpenTechnical3D\(requested\)\)/);
   assert.match(engine,/placeholder tata letak/);
-  assert.match(engine,/this\.machineKey=canOpenTechnical3D\(requested\)\?requested:FOUNDATION_SCOPE\.primaryRoute/);
+  assert.match(engine,/this\.machineKey=FOUNDATION_SCOPE\.primaryRoute/);
   assert.doesNotMatch(engine,/universalMachineConfig/);
   assert.match(app,/if\(!canOpenTechnical3D\(route\)\)/);
   assert.match(app,/focusFoundationPlaceholder/);
