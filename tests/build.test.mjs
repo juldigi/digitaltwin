@@ -7,7 +7,7 @@ import {execFileSync} from 'node:child_process';
 test('production HTML resolves the complete local module graph at a GitHub Pages subpath',()=>{
   execFileSync(process.execPath,['scripts/build.mjs']);
   const root=resolve('dist'), html=readFileSync(resolve(root,'index.html'),'utf8');
-  assert.match(html,/<script type="module" src="\.\/src\/app\.js\?v=157"><\/script>/);
+  assert.match(html,/<script type="module" src="\.\/src\/app\.js\?v=158"><\/script>/);
   const seen=new Set();
   function visit(file){
     assert.ok(existsSync(file),`Missing production module: ${file}`);
@@ -28,6 +28,8 @@ test('production HTML resolves the complete local module graph at a GitHub Pages
   assert.ok(seen.has(resolve(root,'src/offset5.js')));
   assert.ok(seen.has(resolve(root,'src/simulation.js')));
   assert.ok(seen.has(resolve(root,'src/app-shell-v79.js')));
+  assert.ok(seen.has(resolve(root,'src/data/foundation-assets.js')));
+  assert.ok(!seen.has(resolve(root,'src/data/machine-registry.js')),'full technical machine registry must stay out of Phase-1 startup graph');
   for(const excluded of [
     'src/machine-runtime.js','src/universal-machine.js','src/offset10.js','src/simulation-offset10.js',
     'src/apm2.js','src/simulation-apm2.js','src/sheeting.js','src/simulation-sheeting.js',
