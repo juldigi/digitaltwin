@@ -104,6 +104,18 @@ function markSection(section){
 function closeDrawer(){document.body.classList.remove('nav-open');q('#ui-menu-toggle')?.setAttribute('aria-expanded','false');restoreOverlayFocus('navigation','#ui-menu-toggle')}
 function closeLayerManager(){const panel=q('#layer-manager');if(panel)panel.hidden=true;if(getState().overlay==='layers')closeOverlay();restoreOverlayFocus('layers',PHASE1_FOUNDATION?'#nav-machine':'#nav-systems')}
 function closeInspector(){document.body.classList.add('panel-hidden');document.body.classList.remove('mobile-panel-open');setInspector(false)}
+function toggleInspector(){
+ if(document.body.classList.contains('panel-hidden')){
+  beforeMajorOverlay('inspector');
+  document.body.classList.remove('panel-hidden');
+  if(matchMedia('(max-width:767px)').matches)document.body.classList.add('mobile-panel-open');
+  setInspector(true);openOverlay('inspector');
+ }else{
+  closeInspector();
+  if(getState().overlay==='inspector')closeOverlay();
+ }
+}
+q('#panel-toggle')?.addEventListener('click',toggleInspector);
 function beforeMajorOverlay(name){
  const current=getState().overlay;
  if(current&&current!==name){

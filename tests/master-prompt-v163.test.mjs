@@ -32,5 +32,5 @@ test('V163 keeps the foundation-status bridge and mobile utility behavior',()=>{
 
 test('V163 cache identifiers force the controller cleanup onto existing devices',()=>{
  assert.match(html,/src\/ui-v5\.js\?v=163/);
- assert.match(sw,/factory-digital-twin-v163-single-controller-20260923/);
+ assert.match(sw,/factory-digital-twin-v164-controls-20260923/);
 });

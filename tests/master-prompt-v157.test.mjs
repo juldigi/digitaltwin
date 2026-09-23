@@ -47,9 +47,9 @@ test('V162 release identifiers keep technical 3D foundation-only while restoring
  assert.match(scope,/release:'V162'/);
  assert.match(html,/app-shell-v79\.css\?v=162/);
  assert.match(html,/src\/app\.js\?v=167/);
- assert.match(html,/src\/app-shell-v79\.js\?v=162/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=164/);
  assert.match(shell,/v162-factory-first-systems/);
- assert.match(sw,/factory-digital-twin-v162-factory-first-systems-20260922/);
+ assert.match(sw,/factory-digital-twin-v164-controls-20260923/);
 });
 
 test('offline shell also stays free from expansion runtime modules',()=>{
