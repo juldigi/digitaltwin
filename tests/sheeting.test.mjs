@@ -179,19 +179,24 @@ test('V195 simulation routes the web through low entry roll then alternating ele
  assert.ok(sim.drawRollContactPoints.length>=25);
  assert.equal(sim.state().transportMode,'V195_LOW_ENTRY_PLUS_ALTERNATING_ROLLER_WRAP_TO_MULTI_LEVEL_BELT_STACK');
 
- const checkRoll=spec=>{
-  let min=Infinity;
-  for(const p of sim.preCutCurve.getPoints(700))min=Math.min(min,Math.hypot(p.x-spec.center[0],p.y-spec.center[1]));
-  assert.ok(min>=spec.radius*.76,spec.id+' web path cuts deeply through roller');
-  assert.ok(min<=spec.radius+.075,spec.id+' web path misses roller contact surface');
- };
  assert.equal(sim.lowEntryContactPoints.length,15);
  const low=SHEETING_ACTUAL_LAYOUT.lowEntryRoll;
  for(const p of sim.lowEntryContactPoints){
   const d=Math.hypot(p.x-low.center[0],p.y-low.center[1]);
   assert.ok(Math.abs(d-(low.radius+.018))<1e-9,'low-entry wrap must stay on contact radius');
  }
- for(const spec of SHEETING_ACTUAL_LAYOUT.feedRollers)checkRoll(spec);
+ assert.equal(sim.guideRollContactPoints.size,7);
+ for(const spec of SHEETING_ACTUAL_LAYOUT.feedRollers){
+  const pts=sim.guideRollContactPoints.get(spec.id);
+  assert.equal(pts.length,11,spec.id+' contact arc');
+  for(const p of pts){
+   const d=Math.hypot(p.x-spec.center[0],p.y-spec.center[1]);
+   assert.ok(Math.abs(d-(spec.radius+.016))<1e-9,spec.id+' explicit wrap must remain on roller surface');
+  }
+  let min=Infinity;
+  for(const p of sim.preCutCurve.getPoints(1400))min=Math.min(min,Math.hypot(p.x-spec.center[0],p.y-spec.center[1]));
+  assert.ok(min>=spec.radius*.88,spec.id+' spline still penetrates roller core');
+ }
 
  const drawD=sim.preCutCurve.getPoints(900).map(p=>Math.hypot(p.x-SHEETING_ACTUAL_LAYOUT.drawRoll.center[0],p.y-SHEETING_ACTUAL_LAYOUT.drawRoll.center[1]));
  assert.ok(Math.abs(Math.min(...drawD)-sim.webContactRadius)<.040);
