@@ -8,7 +8,7 @@ const html=read('../frontend/index.html');
 const sw=read('../frontend/sw.js');
 
 test('WebGL failure falls back to the actual 2D plant drawing with honest guidance',()=>{
- const start=app.indexOf('function showHome(){');
+ const start=app.indexOf("function showHome({historyMode='none'}={}){");
  const end=app.indexOf('function connectionDialog',start);
  assert.ok(start>=0&&end>start);
  const home=app.slice(start,end);
