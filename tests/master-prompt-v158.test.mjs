@@ -27,7 +27,7 @@ test('selected factory asset is the canonical camera target for fit top and isom
 test('scene click and factory selector share one persistent asset context',()=>{
  assert.match(app,/function selectFactoryAssetContext\(machine/);
  assert.match(app,/engine\.onFactorySelect=id=>/);
- assert.match(app,/selectFactoryAssetContext\(m,\{historyMode:'none',openDialog:false,focus:true\}\)/);
+ assert.match(app,/selectFactoryAssetContext\(m,\{historyMode:'push',openDialog:false,focus:true\}\)/);
  assert.match(app,/factory-asset-focus/);
 });
 
@@ -51,7 +51,7 @@ test('OFFSET 5 contextual detail exposes source detail confidence and verified-p
 });
 
 test('returning to factory overview clears selection and restores whole-factory focus',()=>{
- assert.match(app,/function showHome\(\)[\s\S]*clearFactorySelection\(\)[\s\S]*fit\(engine\.factory,'iso'\)/);
+ assert.match(app,/function showHome\(\{historyMode='none'\}=\{\}\)[\s\S]*clearFactorySelection\(\)[\s\S]*fit\(engine\.factory,'iso'\)/);
  assert.match(app,/factory-overview[\s\S]*clearFactorySelection\(\)[\s\S]*fit\(engine\.factory,'iso'\)/);
  assert.match(app,/selectedAsset:null/);
 });
@@ -64,7 +64,7 @@ test('V158 keeps the V157 foundation-only startup graph while advancing interact
  assert.match(html,/app-shell-v79\.css\?v=168/);
  assert.match(html,/src\/app\.js\?v=171/);
  assert.match(html,/src\/app-shell-v79\.js\?v=171/);
- assert.match(app,/pair\('Versi aplikasi','V162'\)/);
+ assert.match(app,/pair\('Versi aplikasi','V171'\)/);
  assert.match(shell,/v162-factory-first-systems/);
  assert.match(sw,/factory-digital-twin-v171-history-deeplink-20260923/);
  for(const excluded of ['machine-runtime.js','universal-machine.js','offset10.js','apm2.js','sheeting.js'])assert.ok(!sw.includes(excluded),excluded+' must not be pre-cached');
