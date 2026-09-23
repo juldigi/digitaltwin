@@ -36,7 +36,7 @@ test('placeholder assets expose spatial context but not inventory technical meta
  assert.match(detail,/pair\('Dasar posisi',positionStatusLabel\(policy\.positionStatus\)\)/);
  assert.match(detail,/pair\('Status detail','Belum dibuka pada fase fondasi'\)/);
  assert.match(detail,/primary\?primaryData:placeholderData/);
- assert.match(detail,/Metadata teknis inventori tidak ditampilkan pada fase fondasi/);
+ assert.match(detail,/Model 3D belum tersedia untuk aset ini/);
 });
 
 test('universal search keeps placeholder indexing spatial and removes utility-system discovery',()=>{
@@ -50,9 +50,9 @@ test('universal search keeps placeholder indexing spatial and removes utility-sy
 
 test('factory Phase-1 inspector excludes routing controls while retaining explicit expansion boundary',()=>{
  const panel=app.slice(app.indexOf('function renderFactoryPanel(){'),app.indexOf('function renderPanel(tab=activeTab){'));
- assert.match(panel,/Fondasi pabrik/);
+ assert.match(panel,/Denah pabrik/);
  assert.match(panel,/Scope berbasis bukti/);
- assert.match(panel,/Detail teknis penuh hanya dibuka untuk OFFSET 5/);
+ assert.match(panel,/Model 3D mengikuti aset yang dipilih/);
  assert.doesNotMatch(panel,/data-routing-focus/);
  assert.doesNotMatch(panel,/utility_compressed_air/);
  assert.doesNotMatch(panel,/utility_ahu_piping/);
@@ -69,11 +69,11 @@ test('reference realism is retained in source but hidden from the default Phase-
 });
 
 test('offline cache prioritizes foundation and OFFSET 5 instead of preloading expansion machines',()=>{
- assert.match(sw,/factory-digital-twin-v179-factory-context-reset-20260923/);
+ assert.match(sw,/factory-digital-twin-v181-selected-machine-routing-20260923/);
  for(const required of ['src/offset5.js','src/simulation.js','src/data/taxonomy-offset5.js','src/factory-building.js','src/data/dwg-fidelity.js'])assert.match(sw,new RegExp(required.replaceAll('/','\\/')));
  for(const excluded of ['src/offset10.js','src/apm2.js','src/sheeting.js','src/universal-machine.js','src/machine-runtime.js'])assert.doesNotMatch(sw,new RegExp(excluded.replaceAll('/','\\/')));
  assert.match(html,/app-shell-v79\.css\?v=168/);
- assert.match(html,/src\/app\.js\?v=179/);
- assert.match(html,/src\/app-shell-v79\.js\?v=178/);
+ assert.match(html,/src\/app\.js\?v=181/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=181/);
  assert.match(shell,/v162-factory-first-systems/);
 });

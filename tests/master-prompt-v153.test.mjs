@@ -9,35 +9,34 @@ const building=fs.readFileSync(new URL('../frontend/src/factory-building.js',imp
 const html=fs.readFileSync(new URL('../frontend/index.html',import.meta.url),'utf8');
 const sw=fs.readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 
-test('master-prompt foundation scope exposes exactly OFFSET 5 as the primary technical asset',()=>{
-  assert.match(scope,/primaryMachineId:'BMJ-MCH-0003'/);
-  assert.match(scope,/primaryRoute:'offset5'/);
-  assert.match(scope,/primaryAssetName:'OFFSET 5'/);
-  assert.match(scope,/expansionMode:'EVIDENCE_GATED_CONTEXT'/);
-  assert.match(scope,/showUtilitySystems:true/);
-  assert.match(scope,/return Boolean\(machine\?\.has3D\)&&isFoundationPrimary\(machine\)/);
+test('technical 3D availability follows registry data for each asset',async()=>{
+  const {canOpenTechnical3D,scopedRegistryHas3D}=await import('../frontend/src/data/foundation-scope.js');
+  const {MACHINE_REGISTRY_BY_ID}=await import('../frontend/src/data/machine-registry.js');
+  for(const id of ['BMJ-MCH-0002','BMJ-MCH-0003','BMJ-MCH-0005','BMJ-MCH-0009','BMJ-MCH-0010']){
+    const record=MACHINE_REGISTRY_BY_ID.get(id);
+    assert.equal(canOpenTechnical3D(record),record.has3D);
+    assert.equal(scopedRegistryHas3D(record),record.has3D);
+  }
+  assert.equal(canOpenTechnical3D('unknown-machine'),false);
 });
 
-test('runtime cannot open detailed technical 3D for non-primary assets',()=>{
-  assert.match(engine,/if\(!canOpenTechnical3D\(requested\)\)/);
-  assert.match(engine,/placeholder tata letak/);
-  assert.match(engine,/this\.machineKey=FOUNDATION_SCOPE\.primaryRoute/);
-  assert.doesNotMatch(engine,/universalMachineConfig/);
-  assert.match(app,/if\(!canOpenTechnical3D\(route\)\)/);
-  assert.match(app,/focusFoundationPlaceholder/);
+test('engine creates the selected machine and simulation without another renderer',()=>{
+  assert.match(engine,/async switchMachine\(key\)/);
+  assert.match(engine,/import\('\.\/machine-runtime\.js'\)/);
+  assert.match(engine,/this\.machineKey=requested/);
+  assert.match(app,/await engine\.switchMachine\(MACHINE_KEY\)/);
+  assert.match(app,/selectedAsset:assetId/);
 });
 
-test('asset discovery keeps the full registry but technical structure expansion is limited to the primary asset',()=>{
+test('asset discovery uses registry-backed 3D availability',()=>{
   assert.match(app,/has3D:scopedRegistryHas3D\(machine\)/);
   assert.match(app,/if\(!scopedRegistryHas3D\(machine\)\)continue/);
-  assert.match(app,/Placeholder tata letak/);
-  assert.match(app,/aset 3D teknis/);
-  assert.match(app,/primary\?'Aset utama':'Placeholder'/);
+  assert.match(app,/switchActiveMachine\(machineRoute\(machine\)\)/);
 });
 
 test('factory meshes carry explicit foundation-scope truth metadata',()=>{
-  assert.match(building,/foundationScope=isFoundationPrimary\(p\.machineId\)\?'PRIMARY_TECHNICAL_ASSET':'LAYOUT_PLACEHOLDER'/);
-  assert.match(building,/technical3DEnabled:foundationScope==='PRIMARY_TECHNICAL_ASSET'/);
+  assert.match(building,/foundationScope=canOpenTechnical3D\(p\.machineId\)\?'TECHNICAL_ASSET':'LAYOUT_PLACEHOLDER'/);
+  assert.match(building,/technical3DEnabled:foundationScope==='TECHNICAL_ASSET'/);
   assert.match(building,/mesh\.userData=\{machineId:p\.machineId,foundationScope\}/);
 });
 
@@ -53,8 +52,8 @@ test('factory-first boot stays covered until CAD layout is loaded and failures a
 
 test('V153 cache includes the foundation policy and current cache-busted controller',()=>{
   assert.match(html,/app-shell-v79\.css\?v=168/);
-  assert.match(html,/src\/app\.js\?v=179/);
-  assert.match(html,/src\/app-shell-v79\.js\?v=178/);
-  assert.match(sw,/factory-digital-twin-v179-factory-context-reset-20260923/);
+  assert.match(html,/src\/app\.js\?v=181/);
+  assert.match(html,/src\/app-shell-v79\.js\?v=181/);
+  assert.match(sw,/factory-digital-twin-v181-selected-machine-routing-20260923/);
   assert.match(sw,/src\/data\/foundation-scope\.js/);
 });

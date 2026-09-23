@@ -252,17 +252,22 @@ export class FactoryEngine {
   clearFactory(){this.clearFactorySelection();this.actualFactory=null;this.factory.traverse(o=>{o.geometry?.dispose();if(Array.isArray(o.material))o.material.forEach(m=>{m.map?.dispose();m.dispose();});else{o.material?.map?.dispose();o.material?.dispose();}});this.factory.clear();}
   edit(on){if(on&&this.view==='factory'&&this.layout){this.machine.visible=true;this.gizmo.attach(this.machine);}else this.gizmo.detach();}
   setLow(on){this.low=on;this.renderer.setPixelRatio(on?1:Math.min(devicePixelRatio,1.7));this.renderer.shadowMap.enabled=!on;this.template.setLow(on);this.resize();}
-  switchMachine(key){
+  async switchMachine(key){
     const requested=normalizeFoundationMachineKey(key);
-    if(!canOpenTechnical3D(requested)){this.onError?.('Aset ini masih berupa placeholder tata letak. Detail 3D teknis saat ini hanya dibuka untuk OFFSET 5.');return false;}
-    if(this.machineKey===FOUNDATION_SCOPE.primaryRoute)return true;
+    if(!canOpenTechnical3D(requested)){this.onError?.('Model 3D untuk aset ini belum tersedia.');return false;}
+    if(this.machineKey===requested)return true;
+    const {createMachineTemplate,createMachineSimulation}=await import('./machine-runtime.js');
+    const nextTemplate=createMachineTemplate(requested);
+    let nextSimulation;
+    try{nextSimulation=createMachineSimulation(requested,nextTemplate.root,nextTemplate);}
+    catch(error){nextTemplate.dispose?.();throw error;}
     this.gizmo.detach();this.clearPartLabels();this.simulation?.dispose();this.template?.dispose();if(this.machine)this.scene.remove(this.machine);
-    this.machineKey=FOUNDATION_SCOPE.primaryRoute;
-    this.template=new OffsetMachineTemplate();
+    this.machineKey=requested;
+    this.template=nextTemplate;
     this.machine=this.template.root;this.scene.add(this.machine);
-    this.simulation=new PrintingSimulation(this.machine,this.template);
+    this.simulation=nextSimulation;
+    const label=this.renderer.domElement;label.setAttribute('aria-label',`Model 3D ${this.machine.name||requested}. Gunakan tombol sudut pandang untuk navigasi.`);
     this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);this.isolated=false;this.view='machine';this.machine.visible=true;this.factory.visible=false;this.template.setLow(this.low);this.fit(this.machine);this.resize();return true;
   }
   dispose(){cancelAnimationFrame(this.frame);this.clearPartLabels();this.clearFactorySelection();this.resizeObserver.disconnect();this.controls.dispose();this.gizmo.dispose();this.simulation?.dispose();this.template.dispose();this.clearFactory();this.studio.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});this.renderer.dispose();}
 }
-

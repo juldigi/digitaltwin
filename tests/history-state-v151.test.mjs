@@ -12,7 +12,7 @@ test('V171 browser history restores home factory asset and machine component wit
   assert.match(app,/sceneMode=params\.get\('scene'\)==='machine'\|\|Boolean\(node\)\|\|Boolean\(legacyMachine\)\?'machine':'factory'/);
   assert.match(app,/if\(!route\)\{[\s\S]*showHome\(\{historyMode:'none'\}\)/);
   assert.match(app,/selectFactoryAssetContext\(record,\{historyMode:'none',openDialog:false,focus:true\}\);machineDetailDialog\(record\)/);
-  assert.match(app,/await switchActiveMachine\(FOUNDATION_SCOPE\.primaryRoute,\{historyMode:'none'\}\)/);
+  assert.match(app,/await switchActiveMachine\(machineRoute\(record\),\{historyMode:'none'\}\)/);
   assert.match(app,/const restoredNode=node&&TAXONOMY_BY_ID\.has\(node\)\?node:null/);
   assert.match(app,/bmj:historyrestore/);
   const restoreBody=app.slice(app.indexOf('async function restoreHistoryContext'),app.indexOf("addEventListener('popstate'"));

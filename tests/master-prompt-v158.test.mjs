@@ -44,9 +44,9 @@ test('Phase-1 placeholders stay spatial-only while exposing honest implementatio
 test('OFFSET 5 contextual detail exposes source detail confidence and verified-position semantics',()=>{
  const detail=app.slice(app.indexOf('function machineDetailDialog(machine){'),app.indexOf('async function switchActiveMachine',app.indexOf('function machineDetailDialog(machine){')));
  assert.match(detail,/assetTruth\(state\?\.asset,\{placement,sourceCount:TECHNICAL_SOURCES\.length\}\)/);
- assert.match(detail,/pair\('3D source',truth\.source3D\)/);
- assert.match(detail,/pair\('3D detail',truth\.detail3D\)/);
- assert.match(detail,/pair\('Data confidence',truth\.dataConfidence\)/);
+ assert.match(detail,/pair\('3D source',truth\?\.source3D\|\|machine\.source\)/);
+ assert.match(detail,/pair\('3D detail',truth\?\.detail3D\|\|'Model berbasis referensi'\)/);
+ assert.match(detail,/pair\('Data confidence',truth\?\.dataConfidence\|\|'Sesuai sumber tersedia'\)/);
  assert.match(detail,/pair\('Posisi',truth\.position\)/);
 });
 
@@ -56,16 +56,10 @@ test('returning to factory overview clears selection and restores whole-factory 
  assert.match(app,/selectedAsset:null/);
 });
 
-test('V158 keeps the V157 foundation-only startup graph while advancing interaction code',()=>{
- for(const forbidden of ["from './machine-runtime.js'","from './offset10.js'","from './apm2.js'","from './sheeting.js'","from './universal-machine.js'"]){
-  assert.ok(!app.includes(forbidden),forbidden+' must remain absent from app startup graph');
-  assert.ok(!engine.includes(forbidden),forbidden+' must remain absent from engine startup graph');
- }
- assert.match(html,/app-shell-v79\.css\?v=168/);
- assert.match(html,/src\/app\.js\?v=179/);
- assert.match(html,/src\/app-shell-v79\.js\?v=178/);
- assert.match(app,/pair\('Versi aplikasi','V171'\)/);
- assert.match(shell,/v162-factory-first-systems/);
- assert.match(sw,/factory-digital-twin-v179-factory-context-reset-20260923/);
- for(const excluded of ['machine-runtime.js','universal-machine.js','offset10.js','apm2.js','sheeting.js'])assert.ok(!sw.includes(excluded),excluded+' must not be pre-cached');
+test('other models are loaded on demand while the factory shell remains available',()=>{
+ assert.match(engine,/await import\('\.\/machine-runtime\.js'\)/);
+ assert.doesNotMatch(engine,/from '\.\/machine-runtime\.js'/);
+ assert.match(app,/pair\('Versi aplikasi','V181'\)/);
+ assert.match(html,/src\/app\.js\?v=181/);
+ assert.match(sw,/factory-digital-twin-v181-selected-machine-routing-20260923/);
 });

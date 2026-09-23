@@ -129,7 +129,7 @@ test('conditional controls explain requirements rather than failing silently',()
 });
 
 test('service worker refreshes the redesigned shell',()=>{
-  assert.match(sw,/factory-digital-twin-v179-factory-context-reset-20260923/);
+  assert.match(sw,/factory-digital-twin-v181-selected-machine-routing-20260923/);
   assert.doesNotMatch(sw,/src\/universal-machine\.js/);
   assert.match(app,/template\.ghost\(true,part\)/,'object selection must automatically ghost all non-selected geometry');
   for(const asset of ['app-shell-v79.css','src/app-shell-v79.js','assets/splash-industrial-v79.webp','src/ui-v5.js','src/app.js','src/simulation.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
@@ -251,14 +251,14 @@ test('v48 removes the odd PU8 step, uses structural UV supports and accumulates 
   assert.match(app,/gripper melepaskan sheet tepat di atas main pile/);
 });
 
-test('v156 keeps the normalized plant registry as spatial context while exposing one technical asset',()=>{
+test('asset browser exposes every registry machine with its own model status',()=>{
   assert.match(html,/id="machine-count">41/);
   assert.match(app,/MACHINE_REGISTRY/);
   assert.match(app,/foundationAssetMatches\(/);
   assert.match(app,/data-machine-id/);
-  assert.match(app,/FASE FONDASI/);
-  assert.match(app,/1 aset teknis/);
-  assert.match(app,/Placeholder/);
+  assert.match(app,/ASET PABRIK/);
+  assert.match(app,/MACHINE_REGISTRY_STATS\.modeled3D/);
+  assert.match(app,/Lihat model/);
   assert.doesNotMatch(app,/id="asset-data-status"/);
   assert.match(sw,/src\/data\/machine-registry\.js/);
 });
@@ -303,12 +303,12 @@ test('v53 retains the document-grounded CX104 expansion asset while foundation r
   for(const asset of ['src/offset10.js','src/simulation-offset10.js','src/data/dimensions-offset10.js','src/data/sources-offset10.js','src/data/taxonomy-offset10.js'])assert.doesNotMatch(sw,new RegExp(asset.replaceAll('/','\\/')));
 });
 
-test('v54 retains the APM2 expansion implementation without exposing it as a Phase-1 technical asset',()=>{
+test('v54 routes APM2 to its dedicated model and evidence-bounded simulation',()=>{
   assert.match(app,/MACHINE_KEY=FOUNDATION_SCOPE\.primaryRoute/);
   assert.match(app,/IS_OFFSET10=false,IS_APM2=false,IS_SHEETING=false/);
-  assert.doesNotMatch(app,/from '\.\/data\/taxonomy-apm2\.js'/);
+  assert.match(app,/from '\.\/data\/taxonomy-apm2\.js'/);
   assert.match(app,/LEGACY_MACHINE_ROUTE/);
-  assert.match(app,/if\(!isFoundationPrimary\(machine\)\)/);
+  assert.match(app,/if\(!canOpenTechnical3D\(machine\)\)/);
   assert.match(engine,/if\(!canOpenTechnical3D\(requested\)\)/);
   assert.match(engine,/switchMachine\(key\)/);
   assert.match(app,/Simulasi Proses APM 2/);
@@ -333,9 +333,9 @@ test('v54 retains the APM2 expansion implementation without exposing it as a Pha
   for(const asset of ['src/apm2.js','src/simulation-apm2.js','src/data/dimensions-apm2.js','src/data/sources-apm2.js','src/data/taxonomy-apm2.js'])assert.doesNotMatch(sw,new RegExp(asset.replaceAll('/','\\/')));
 });
 
-test('v57 routes Sheeting Lexus as a dedicated right-to-left twin',()=>{
+test('v57 opens Sheeting Lexus as a dedicated right-to-left twin',()=>{
   assert.match(app,/IS_OFFSET10=false,IS_APM2=false,IS_SHEETING=false/);
-  assert.doesNotMatch(app,/from '\.\/data\/taxonomy-sheeting\.js'/);
+  assert.match(app,/from '\.\/data\/taxonomy-sheeting\.js'/);
   assert.match(app,/LEGACY_MACHINE_ROUTE/);
   assert.match(app,/SHEETING LEXUS/);
   assert.match(app,/RIGHT → LEFT/);

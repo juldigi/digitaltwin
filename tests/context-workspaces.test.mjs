@@ -25,7 +25,7 @@ test('Asset selection updates one digital-twin context without page reload',()=>
  assert.match(app,/async function openAssetContext\(machine\)/);
  assert.match(app,/await switchActiveMachine\(route,\{historyMode:'push'\}\)/);
  assert.match(app,/selectedArea:machine\.area/);
- assert.match(app,/selectedAsset:route/);
+ assert.match(app,/selectedAsset:machine\.machineId/);
  assert.match(app,/focusFoundationPlaceholder\(machine,\{historyMode:'push',openDialog:false\}\);machineDetailDialog\(machine\)/);
  assert.match(app,/showPanel\(\);renderPanel\('overview'\)/);
  const assetContext=app.slice(app.indexOf('async function openAssetContext'),app.indexOf('function assetDialog'));
@@ -80,7 +80,8 @@ test('References are categorized and prioritized from the active asset taxonomy 
 
 test('Asset Browser has explicit Mesin Peralatan Komponen categories without inventing a second component database',()=>{
  for(const key of ['machine','equipment','component'])assert.match(app,new RegExp('data-asset-category="'+key+'"'));
- for(const label of ['Mesin','Peralatan','Komponen OFFSET 5'])assert.match(app,new RegExp('>'+label+'<'));
+ for(const label of ['Mesin','Peralatan'])assert.match(app,new RegExp('>'+label+'<'));
+ assert.match(app,/Komponen \$\{esc\(activeMachine\?\.name/);
  assert.match(app,/ACTIVE_TAXONOMY\.filter/);
  assert.match(app,/data-component-id/);
  assert.match(app,/selectTaxonomy\(button\.dataset\.componentId/);

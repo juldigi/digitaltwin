@@ -9,28 +9,19 @@ const html=fs.readFileSync(new URL('../frontend/index.html',import.meta.url),'ut
 const shell=fs.readFileSync(new URL('../frontend/src/app-shell-v79.js',import.meta.url),'utf8');
 const sw=fs.readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 
-test('V157 production app controller has no static imports for technical expansion machines',()=>{
- for(const specifier of [
-  './data/taxonomy-offset10.js','./data/sources-offset10.js','./simulation-offset10.js',
-  './data/taxonomy-apm2.js','./data/sources-apm2.js','./simulation-apm2.js',
-  './data/taxonomy-sheeting.js','./data/sources-sheeting.js','./simulation-sheeting.js',
-  './universal-machine.js','./machine-runtime.js'
- ])assert.ok(!app.includes("from '"+specifier+"'"),specifier+' must not be statically imported by Phase-1 app');
- assert.match(app,/ACTIVE_TAXONOMY=OFFSET5_TAXONOMY/);
- assert.match(app,/TAXONOMY_BY_ID=OFFSET5_BY_ID/);
- assert.match(app,/TECHNICAL_SOURCES=OFFSET5_SOURCES/);
- assert.match(app,/PRINTING_SIMULATION_STAGES=OFFSET5_SIM_STAGES/);
+test('asset controller selects the requested machine taxonomy and sources',()=>{
+ assert.match(app,/ACTIVE_TAXONOMY=IS_OFFSET10\?OFFSET10_TAXONOMY/);
+ assert.match(app,/IS_APM2\?APM2_TAXONOMY/);
+ assert.match(app,/IS_SHEETING\?SHEETING_TAXONOMY/);
+ assert.match(app,/IS_GENERIC\?GENERIC_TAXONOMY/);
+ assert.match(app,/TECHNICAL_SOURCES=IS_OFFSET10\?OFFSET10_TECHNICAL_SOURCES/);
 });
 
-test('V157 3D engine instantiates OFFSET 5 directly without machine-runtime or expansion exports',()=>{
- assert.match(engine,/import \{OffsetMachineTemplate\} from '\.\/offset5\.js'/);
- assert.match(engine,/import \{PrintingSimulation\} from '\.\/simulation\.js'/);
- assert.doesNotMatch(engine,/from '\.\/machine-runtime\.js'/);
- assert.doesNotMatch(engine,/from '\.\/offset10\.js'/);
- assert.doesNotMatch(engine,/from '\.\/apm2\.js'/);
- assert.doesNotMatch(engine,/from '\.\/sheeting\.js'/);
+test('engine loads other machine models only on selection',()=>{
  assert.match(engine,/this\.template=new OffsetMachineTemplate\(\)/);
- assert.match(engine,/this\.simulation=new PrintingSimulation\(this\.machine,this\.template\)/);
+ assert.match(engine,/async switchMachine\(key\)/);
+ assert.match(engine,/await import\('\.\/machine-runtime\.js'\)/);
+ assert.doesNotMatch(engine,/from '\.\/machine-runtime\.js'/);
 });
 
 test('placeholder route compatibility remains lightweight and cannot unlock technical runtime',()=>{
@@ -46,10 +37,10 @@ test('placeholder route compatibility remains lightweight and cannot unlock tech
 test('V162 release identifiers keep technical 3D foundation-only while restoring factory context',()=>{
  assert.match(scope,/release:'V162'/);
  assert.match(html,/app-shell-v79\.css\?v=168/);
- assert.match(html,/src\/app\.js\?v=179/);
- assert.match(html,/src\/app-shell-v79\.js\?v=178/);
+ assert.match(html,/src\/app\.js\?v=181/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=181/);
  assert.match(shell,/v162-factory-first-systems/);
- assert.match(sw,/factory-digital-twin-v179-factory-context-reset-20260923/);
+ assert.match(sw,/factory-digital-twin-v181-selected-machine-routing-20260923/);
 });
 
 test('offline shell also stays free from expansion runtime modules',()=>{
