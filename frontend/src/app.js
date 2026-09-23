@@ -523,8 +523,8 @@ function setView(view){
  const l=activeLayout();
  if(view==='factory'&&!l){layoutDialog();return;}
  if(view==='factory'&&engine?.isPrintingSimulationActive()){engine.stopPrintingSimulation();simulationState=engine.getPrintingSimulationState();simulationOwnsExterior=false;}if(view==='factory'&&exteriorMode)exitExteriorMode();editing=false;if(engine)engine.onTransform=null;explode=0;selectedPart=null;engine?.setView(view,state);
- $$('.rail>button').forEach(b=>b.classList.remove('active'));
- $('#nav-machine')?.classList.add('active');
+ $('.rail>button').forEach(b=>b.classList.remove('active'));
+ $(view==='factory'?'#nav-machine':'#nav-assets')?.classList.add('active');
  const machineName=IS_OFFSET10?'OFFSET 10':IS_APM2?'APM 2':IS_SHEETING?'SHEETING LEXUS':IS_GENERIC?GENERIC_CONFIG.machine.name:'OFFSET 5';
  const machineSubtitle=IS_OFFSET10?'Heidelberg Speedmaster · CX 104 · Full UV + FoilStar':IS_APM2?'BOBST · SP 102 · 1994 · Automatic Flatbed Die Cutter':IS_SHEETING?'LEXUS · HSM-CTM7 · SBM-2 · RIGHT → LEFT':IS_GENERIC?(GENERIC_CONFIG.label+' · '+(GENERIC_CONFIG.machine.model||'Model belum tersedia')):'OFU-1 · Heidelberg Speedmaster · CD 102-8+L';
  $('#view-kicker').textContent=view==='factory'?'PABRIK · 3D':'TAMPILAN MESIN 3D';
