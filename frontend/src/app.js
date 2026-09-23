@@ -147,7 +147,13 @@ function signalAppReady(status='ready'){
 }
 function showPanel(){document.body.classList.remove('panel-hidden');if(matchMedia('(max-width:767px)').matches)document.body.classList.add('mobile-panel-open');emitDomainState({inspectorState:{open:true,tab:activeTab}});}
 const activeLayout=()=>selectPlantLayout(state.layout,bundledLayout);
-function redrawPlantPlan(){if(bundledLayout)drawPlantPlan($('#dwg-canvas'),bundledLayout);}
+function redrawPlantPlan(selectedAsset=window.BMJAppState?.getState?.().selectedAsset||null){
+ if(!bundledLayout)return;
+ const selectedMachineId=selectedAsset?(machineRecordForRoute(selectedAsset)?.machineId||selectedAsset):null;
+ drawPlantPlan($('#dwg-canvas'),bundledLayout,{selectedAsset:selectedMachineId});
+ const context=$('[data-workbench-card="dwg"]>header small'),machine=selectedMachineId?MACHINE_REGISTRY_BY_ID.get(selectedMachineId):null;
+ if(context)context.textContent=machine?'Pilihan aktif · '+machine.name:'Sumber layout aktual';
+}
 function pair(label,value){return `<dt>${esc(label)}</dt><dd${value==null?' class="unknown"':''}>${esc(value)}</dd>`;}
 const exteriorAreas=()=>IS_APM2?[
  {key:'feeder',name:'Feeder / Sheet Separation',ids:['apm2-feeder']},
@@ -951,5 +957,5 @@ window.addEventListener('bmj:systemassetselect',async event=>{const machine=MACH
 on('#fullscreen',async()=>{if(!document.fullscreenEnabled){toast('Layar penuh tidak didukung browser ini.');return;}if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();});
 window.addEventListener('offline',()=>{updateConnectionTruth();toast(cachedDataActive?'Koneksi terputus. Aplikasi menggunakan data tersimpan di perangkat.':'Koneksi terputus. Aplikasi tetap tersedia dalam mode lokal.');});window.addEventListener('online',()=>{updateConnectionTruth();if(role)request('/api/state').then(acceptState).then(()=>{cachedDataActive=false;updateConnectionTruth();toast('Data berhasil diperbarui.');}).catch(e=>toast(e.message,true));});
 try{const config=await fetch('./config.json').then(r=>r.json());apiBase=localStorage.getItem('offset5-api-base')||config.apiBase||'';if(cacheEnabled&&apiBase){const cached=await cache.get(apiBase);if(cached?.state){state=cached.state;cachedDataActive=true;engine?.loadLayout(activeLayout());renderStatus();renderPanel();updateConnectionTruth();toast('CACHED DATA · '+new Date(cached.savedAt).toLocaleString('id-ID'));}}else updateConnectionTruth();}catch(e){updateConnectionTruth();toast('Data tersimpan tidak dapat dibaca. Mode lokal tetap tersedia.',true);}
-window.addEventListener('resize',redrawPlantPlan,{passive:true});$('#ui-workbench-toggle')?.addEventListener('click',()=>setTimeout(redrawPlantPlan,80));$$('[data-workbench="dwg"]').forEach(b=>b.addEventListener('click',()=>setTimeout(redrawPlantPlan,40)));if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+window.addEventListener('resize',()=>redrawPlantPlan(),{passive:true});window.addEventListener('bmj:statechange',event=>{if(document.body.classList.contains('workspace-2d'))redrawPlantPlan(event.detail?.selectedAsset||null);});$('#ui-workbench-toggle')?.addEventListener('click',()=>setTimeout(()=>redrawPlantPlan(),80));$('[data-workbench="dwg"]').forEach(b=>b.addEventListener('click',()=>setTimeout(()=>redrawPlantPlan(),40)));if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 window.addEventListener('pagehide',()=>{token='';});
