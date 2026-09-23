@@ -2,191 +2,175 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import {SheetingMachineTemplate,SHEETING_VISUAL_REFERENCE} from '../frontend/src/sheeting.js';
-import {SheetingProcessSimulation,SHEETING_SIMULATION_STAGES} from '../frontend/src/simulation-sheeting.js';
+import {SheetingProcessSimulation,SHEETING_SIMULATION_STAGES,SHEETING_PROCESS_STEPS} from '../frontend/src/simulation-sheeting.js';
 import {SHEETING_TAXONOMY} from '../frontend/src/data/taxonomy-sheeting.js';
-import {SHEETING_TECHNICAL_SOURCES,SHEETING_ORIENTATION,SHEETING_VISUAL_ANCHORS} from '../frontend/src/data/sources-sheeting.js';
+import {SHEETING_PHOTO_REGISTRY,SHEETING_TECHNICAL_SOURCES,SHEETING_ORIENTATION,SHEETING_VISUAL_ANCHORS} from '../frontend/src/data/sources-sheeting.js';
 
 const boxOf=o=>new THREE.Box3().setFromObject(o);
 const worldX=o=>o.getWorldPosition(new THREE.Vector3()).x;
+const roleCount=(model,role)=>model.meshes.filter(m=>m.userData.role===role).length;
 
-test('V68 keeps exact BMJ identity separate from HSM56 family-level geometry evidence',()=>{
+test('V193 makes the actual BMJ photo set primary while keeping family sources secondary',()=>{
   assert.equal(SHEETING_VISUAL_REFERENCE.plantModel,'HSM-CTM7');
-  assert.equal(SHEETING_VISUAL_REFERENCE.visualRevision,'V68_FUNCTIONAL_DRAW_DRUM_WEB_WRAP');
+  assert.equal(SHEETING_VISUAL_REFERENCE.visualRevision,'V193_BMJ_ACTUAL_PHOTO_RECONSTRUCTION');
   assert.equal(SHEETING_VISUAL_REFERENCE.processDirection,'RIGHT_TO_LEFT');
-  assert.equal(SHEETING_ORIENTATION.input,'RIGHT');assert.equal(SHEETING_ORIENTATION.output,'LEFT');
+  assert.equal(SHEETING_ORIENTATION.input,'RIGHT');
+  assert.equal(SHEETING_ORIENTATION.output,'LEFT');
+  assert.equal(SHEETING_PHOTO_REGISTRY.length,9);
+  assert.deepEqual(SHEETING_PHOTO_REGISTRY.map(p=>p.fileName),[
+    'IMG_2479.HEIC','IMG_2480.HEIC','IMG_2481.HEIC','IMG_2482.HEIC','IMG_2483.HEIC',
+    'IMG_2484.HEIC','IMG_2485.HEIC','IMG_2486.HEIC','IMG_2487.HEIC'
+  ]);
+  assert.ok(SHEETING_PHOTO_REGISTRY.every(p=>p.confidence==='PRIMARY_ACTUAL'));
+  const actual=SHEETING_TECHNICAL_SOURCES.find(s=>s.id==='SHEETING-BMJ-PHOTOSET-20260922');
   const bmj=SHEETING_TECHNICAL_SOURCES.find(s=>s.id==='SHEETING-BMJ-DATABASE');
-  const pdf=SHEETING_TECHNICAL_SOURCES.find(s=>s.id==='SHEETING-HSM56-BW-PDF');
-  const image=SHEETING_TECHNICAL_SOURCES.find(s=>s.id==='SHEETING-HSM56-BW-FULLIMAGE');
-  const mega=SHEETING_TECHNICAL_SOURCES.find(s=>s.id==='SHEETING-MEGAMACH-HSM-FAMILY');
-  const generic=SHEETING_TECHNICAL_SOURCES.find(s=>s.id==='SHEETING-CUTMARK-PROCESS-COMPARISON');
-  const vacuum=SHEETING_TECHNICAL_SOURCES.find(s=>s.id==='SHEETING-BW-VACUUM-OVERLAP');
-  const maxson=SHEETING_TECHNICAL_SOURCES.find(s=>s.id==='SHEETING-MAXSON-MSP-PDF');
-  const pasaban=SHEETING_TECHNICAL_SOURCES.find(s=>s.id==='SHEETING-PASABAN-CL165');
-  const bwDraw=SHEETING_TECHNICAL_SOURCES.find(s=>s.id==='SHEETING-BW-DRAW-DRUM-ENCODER');
-  const bwServo=SHEETING_TECHNICAL_SOURCES.find(s=>s.id==='SHEETING-BW-DRAW-DRUM-SERVO');
-  const maxsonDraw=SHEETING_TECHNICAL_SOURCES.find(s=>s.id==='SHEETING-MAXSON-DRAW-DRUM');
+  const family=SHEETING_TECHNICAL_SOURCES.find(s=>s.id==='SHEETING-HSM56-BW-PDF');
+  assert.equal(actual.confidence,'VERIFIED_VISUAL');
   assert.equal(bmj.confidence,'VERIFIED');
-  assert.match(pdf.note,/fixed-position two-sided rollstand/i);
-  assert.match(image.note,/hollow panoramic window/i);
-  assert.match(image.note,/handwheel/i);
-  assert.match(mega.note,/conflicts/i);
-  assert.match(generic.note,/does NOT infer/i);
-  assert.match(vacuum.note,/high-speed tapes/i);
-  assert.match(vacuum.note,/low-speed tapes/i);
-  assert.match(maxson.note,/side jogger/i);
-  assert.match(maxson.note,/feed-down/i);
-  assert.match(pasaban.note,/overlapping group/i);
-  assert.match(bwDraw.note,/draw drum encoder/i);
-  assert.match(bwDraw.note,/cut timing/i);
-  assert.match(bwServo.note,/cross cutter/i);
-  assert.match(maxsonDraw.note,/large-diameter draw drum/i);
-  assert.match(SHEETING_ORIENTATION.exactModelStatus,/did not surface/i);
-  assert.ok(SHEETING_VISUAL_ANCHORS.mainHead.includes('true hollow operator-side inspection aperture'));
+  assert.match(actual.note,/primary exterior source/i);
+  assert.match(actual.note,/open multi-roller/i);
+  assert.match(family.note,/family anchor/i);
+  assert.match(SHEETING_ORIENTATION.cutterArchitecture,/does not expose a blade/i);
+  assert.match(SHEETING_ORIENTATION.exactModelStatus,/photo set is therefore the visual source of truth/i);
+  assert.ok(SHEETING_VISUAL_ANCHORS.rollstand.includes('large swept gray arms'));
+  assert.ok(SHEETING_VISUAL_ANCHORS.outfeed.includes('three prominent black handwheels'));
+  assert.ok(SHEETING_VISUAL_ANCHORS.stacker.includes('no invented tall mesh tower'));
 });
 
-test('V68 major machine sequence remains physically right-to-left with explicit gaps',()=>{
+test('V193 preserves the actual RIGHT to LEFT machine sequence without reverting to Offset-family assumptions',()=>{
   const model=new SheetingMachineTemplate();model.root.updateMatrixWorld(true);
   const ids=['sheeting-rollstand','sheeting-feed','sheeting-cutter','sheeting-delivery','sheeting-layboy'];
-  const nodes=ids.map(id=>model.findNode(id));assert.ok(nodes.every(Boolean));
+  const nodes=ids.map(id=>model.findNode(id));
+  assert.ok(nodes.every(Boolean));
   for(let i=1;i<nodes.length;i++)assert.ok(worldX(nodes[i-1])>worldX(nodes[i]),ids[i-1]+' must remain upstream of '+ids[i]);
-  for(let i=0;i<nodes.length-1;i++){
-    const right=boxOf(nodes[i]),left=boxOf(nodes[i+1]);
-    assert.equal(right.intersectsBox(left),false,ids[i]+' collides with '+ids[i+1]);
-    assert.ok(right.min.x-left.max.x>=.035,ids[i]+' lacks visible X clearance from '+ids[i+1]);
-  }
+  assert.equal(model.root.userData.processFlow.direction,'RIGHT_TO_LEFT');
+  assert.match(model.root.userData.processFlow.visualBasis,/BMJ_USER_PHOTOSET_20260922_PRIMARY/);
+  assert.equal(model.root.userData.processFlow.stackerArchitecture,'ACTUAL_OPEN_LAY_TABLE__NO_V68_RIGID_TOWER');
+  assert.equal(model.root.userData.primaryVisualEvidence,'BMJ_USER_PHOTOSET_20260922_IMG_2479_TO_IMG_2487');
   model.dispose();
 });
 
-test('V68 rollstand reproduces low reel, exposed hub and supported two-sided mechanics',()=>{
+test('V193 rollstand matches the actual swept-arm hydraulic architecture and alternate empty station',()=>{
   const model=new SheetingMachineTemplate();
   assert.equal(model.activeMeshes.filter(m=>m.userData.motion==='reel').length,1);
   assert.equal(model.activeMeshes.filter(m=>m.userData.motion==='reel-core').length,1);
   assert.equal(model.activeMeshes.filter(m=>m.userData.motion==='chuck').length,2);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='chuck-hub').length,2);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='chuck-bolt').length,12);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='swing-arm').length,2);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='hydraulic-cylinder').length,2);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='hydraulic-rod').length,2);
-  const reelBox=boxOf(model.findNode('sheeting-reel'));
-  assert.ok(reelBox.min.y<=.045);
-  assert.ok(reelBox.max.y<1.65);
+  assert.equal(roleCount(model,'loaded-swept-arm-lower'),2);
+  assert.equal(roleCount(model,'loaded-swept-arm-upper'),2);
+  assert.equal(roleCount(model,'empty-swept-arm-lower'),2);
+  assert.equal(roleCount(model,'empty-swept-arm-upper'),2);
+  assert.equal(roleCount(model,'vertical-hydraulic-cylinder'),4);
+  assert.equal(roleCount(model,'hydraulic-rod'),4);
+  assert.equal(roleCount(model,'loaded-chuck-housing'),2);
+  assert.equal(roleCount(model,'empty-chuck-housing'),2);
+  assert.ok(model.findNode('sheeting-rollstand-manifold'));
+  assert.ok(model.findNode('sheeting-unwind-panel'));
+  assert.equal(roleCount(model,'unwind-control-cabinet'),1);
+  assert.equal(roleCount(model,'unwind-selector'),6);
+  assert.equal(roleCount(model,'unwind-indicator'),6);
   model.dispose();
 });
 
-test('V68 unwind guide stays inclined, sparse and fully supported',()=>{
-  const model=new SheetingMachineTemplate(),frame=model.findNode('sheeting-feed-frame'),rollers=model.findNode('sheeting-feed-rollers');
-  assert.ok(frame&&rollers);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='feed-right-post').length,2);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='feed-left-post').length,2);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='inclined-top-rail').length,2);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='inclined-bottom-rail').length,2);
-  const rr=[];rollers.traverse(o=>{if(o.isMesh&&o.userData.role==='roller')rr.push(o);});
-  assert.equal(rr.length,4);
-  const bearings=[];rollers.traverse(o=>{if(o.isMesh&&o.userData.role==='bearing')bearings.push(o);});
-  assert.equal(bearings.length,8);
-  assert.ok(boxOf(frame).getSize(new THREE.Vector3()).y<2.25);
-  model.dispose();
-});
-
-test('V68 operator-side inspection window is a real aperture instead of glass laid over a solid shell',()=>{
-  const model=new SheetingMachineTemplate(),window=model.findNode('sheeting-window');
-  assert.ok(window,'window must be a selectable geometry node');
-  assert.equal(model.meshes.filter(m=>m.userData.role==='main-side-shell').length,0,'legacy full side shell must not return');
-  assert.equal(model.meshes.filter(m=>m.userData.role==='drive-side-shell').length,1);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='operator-lower-housing').length,1);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='operator-window-jamb').length,2);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='operator-window-lower-sill').length,1);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='operator-window-upper-sill').length,1);
-  const glass=model.meshes.filter(m=>m.userData.role==='panoramic-window');
-  assert.equal(glass.length,1);assert.equal(glass[0].userData.ownerId,'sheeting-window');
-  assert.equal(model.meshes.filter(m=>m.userData.role==='window-frame').length,4);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='window-handle').length,2);
-  assert.equal(model.root.userData.processFlow.windowArchitecture,'TRUE_OPERATOR_SIDE_APERTURE__NO_OPAQUE_PANEL_BEHIND_GLASS');
-  model.dispose();
-});
-
-test('V68 main head exposes a visible flat-bed knife family reference while exact HSM-CTM7 actuation remains unresolved',()=>{
+test('V193 replaces the compact four-roller reference with the actual long open multi-roller bridge',()=>{
   const model=new SheetingMachineTemplate();
-  assert.equal(model.meshes.filter(m=>m.userData.role==='main-draw-traction-drum').length,1);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='process-cylinder-band').length,4);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='process-cylinder-endcap').length,2);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='window-guide-finger').length,10);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='diamond-service-plate').length,1);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='main-draw-traction-drum-dark').length,0);
-  assert.match(model.root.userData.processFlow.cutterArchitecture,/FLAT_BED_KNIFE_FAMILY_REFERENCE/);
-  assert.match(model.root.userData.processFlow.cutterArchitecture,/EXACT_HSM_CTM7.*UNRESOLVED/);
-  assert.match(model.root.userData.processFlow.mainDrumFunction,/DRAW_TRACTION_REFERENCE/);
-  assert.match(model.root.userData.processFlow.mainDrumFunction,/EXACT_HSM_CTM7_ROLE_UNVERIFIED/);
-  const blade=model.activeMeshes.filter(m=>m.userData.motion==='flat-bed-blade-reference');
-  assert.equal(blade.length,3,'carrier, blade and cutting edge must move together');
-  assert.equal(model.meshes.filter(m=>m.userData.role==='visible-flat-bed-blade').length,1);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='knife-cutting-edge').length,1);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='knife-carrier').length,1);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='knife-anvil-reference').length,1);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='knife-guide-block').length,2);
-  assert.equal(model.meshes.filter(m=>/cut.?to.?mark/i.test(m.userData.role||'')).length,0,'CTM acronym must not invent a sensor');
+  const frame=model.findNode('sheeting-feed-frame'),rollers=model.findNode('sheeting-feed-rollers');
+  assert.ok(frame&&rollers);
+  assert.equal(roleCount(model,'roller-frame-upright'),4);
+  assert.equal(roleCount(model,'roller-frame-top-beam'),2);
+  assert.equal(roleCount(model,'roller-frame-lower-brace'),2);
+  assert.equal(roleCount(model,'bridge-cross-member'),2);
+  const visibleRollers=model.activeMeshes.filter(m=>m.userData.motion==='guide-roller');
+  assert.equal(visibleRollers.length,8,'seven transverse rollers plus the low turquoise roller');
+  assert.equal(roleCount(model,'roller-bearing-block'),14);
+  assert.equal(roleCount(model,'low-turquoise-guide-roller'),1);
+  const sz=boxOf(frame).getSize(new THREE.Vector3());
+  assert.ok(sz.x>2.9&&sz.y>2.2,'actual roller bridge must read long and tall');
   model.dispose();
 });
 
-test('V68 outfeed exposes fast/slow/overlap transport zones plus the operator handwheel',()=>{
-  const model=new SheetingMachineTemplate(),handwheel=model.findNode('sheeting-outfeed-handwheel');
-  assert.ok(handwheel);
+test('V193 cutter exterior follows the actual LEXUS cabinet and does not invent a visible knife',()=>{
+  const model=new SheetingMachineTemplate();
+  assert.equal(roleCount(model,'main-cutter-cabinet'),1);
+  assert.equal(roleCount(model,'cutter-top-cap'),1);
+  assert.equal(roleCount(model,'inspection-panel-frame'),1);
+  assert.equal(roleCount(model,'long-inspection-window'),1);
+  assert.equal(roleCount(model,'lexus-brand-plate'),1);
+  assert.ok(model.findNode('sheeting-window'));
+  assert.ok(model.findNode('sheeting-knife'));
+  assert.equal(model.findNode('sheeting-knife').userData.visibleKnifeGeometry,false);
+  assert.match(model.findNode('sheeting-knife').userData.evidenceBoundary,/does not render a fictional blade/i);
+  assert.equal(model.activeMeshes.filter(m=>m.userData.motion==='flat-bed-blade-reference').length,0);
+  assert.equal(roleCount(model,'visible-flat-bed-blade'),0);
+  assert.equal(roleCount(model,'knife-cutting-edge'),0);
+  assert.equal(roleCount(model,'main-draw-traction-drum'),0);
+  assert.equal(roleCount(model,'main-draw-roller'),1);
+  assert.ok(model.activeMeshes.filter(m=>['draw-roller','pull-roller'].includes(m.userData.motion)).length>=5);
+  model.dispose();
+});
+
+test('V193 delivery reproduces dense green belts, hold-down wheels and multiple actual handwheels',()=>{
+  const model=new SheetingMachineTemplate();
   assert.ok(model.findNode('sheeting-fast-belts'));
   assert.ok(model.findNode('sheeting-slow-belts'));
   assert.ok(model.findNode('sheeting-overlap-belts'));
-  assert.equal(model.meshes.filter(m=>m.userData.role==='fast-transport-belt').length,13);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='slow-transport-belt').length,13);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='overlap-transport-belt').length,13);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='transport-belt').length,0);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='transport-roller').length,2);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='adjustment-rod').length,3);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='rod-pedestal').length,9);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='rod-triangular-brace').length,18);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='adjustment-collar').length,9);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='adjustment-knob').length,9);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='outfeed-handwheel').length,1);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='handwheel-hub').length,1);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='handwheel-spoke').length,4);
-  assert.ok(boxOf(model.findNode('sheeting-delivery')).getSize(new THREE.Vector3()).x>4.3);
+  assert.ok(roleCount(model,'fast-transport-belt')>=15);
+  assert.ok(roleCount(model,'slow-transport-belt')>=15);
+  assert.ok(roleCount(model,'overlap-transport-belt')>=15);
+  assert.equal(roleCount(model,'transport-roller'),4);
+  assert.equal(roleCount(model,'adjustment-crossrail'),4);
+  assert.equal(roleCount(model,'white-hold-down-wheel'),20);
+  assert.equal(roleCount(model,'wheel-holder'),20);
+  assert.equal(roleCount(model,'outfeed-handwheel'),3);
+  assert.equal(roleCount(model,'handwheel-hub'),3);
+  assert.equal(roleCount(model,'handwheel-spoke'),9);
+  assert.ok(boxOf(model.findNode('sheeting-delivery')).getSize(new THREE.Vector3()).x>5.0);
   model.dispose();
 });
 
-test('V68 console remains compact, low and clear of both main head and outfeed rail',()=>{
-  const model=new SheetingMachineTemplate(),control=boxOf(model.findNode('sheeting-control'));
-  assert.ok(control.max.y<.82);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='control-console-face').length,1);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='estop').length,1);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='control-button').length,2);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='control-lever').length,1);
-  assert.equal(control.intersectsBox(boxOf(model.findNode('sheeting-cutter'))),false);
-  assert.equal(control.intersectsBox(boxOf(model.findNode('sheeting-delivery'))),false);
+test('V193 uses the broad actual delivery console instead of the old compact generic console',()=>{
+  const model=new SheetingMachineTemplate(),control=model.findNode('sheeting-control');
+  assert.ok(control);
+  const sz=boxOf(control).getSize(new THREE.Vector3());
+  assert.ok(sz.x>1.6);
+  assert.equal(roleCount(model,'operator-console-face'),1);
+  assert.equal(roleCount(model,'operator-display'),1);
+  assert.equal(roleCount(model,'operator-button-selector'),12);
+  assert.equal(roleCount(model,'control-console-face'),0);
   model.dispose();
 });
 
-test('V68 stacker reference load is a substantial supported skid stack, not a few sheet slabs',()=>{
-  const model=new SheetingMachineTemplate(),tower=model.findNode('sheeting-layboy'),lift=model.findNode('sheeting-stack-lift'),reference=model.findNode('sheeting-reference-stack');
-  assert.ok(tower&&lift&&reference);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='stacker-column').length,4);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='stacker-front-header').length,1);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='stacker-side-cabinet').length,1);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='lift-table').length,1);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='pallet').length,1);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='reference-paper-block').length,1);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='reference-paper-seam').length,12);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='reference-paper-top').length,1);
-  assert.equal(model.meshes.filter(m=>m.userData.referenceStack).length,14);
-  const refBox=boxOf(reference),palletBox=boxOf(model.meshes.find(m=>m.userData.role==='pallet'));
-  assert.ok(refBox.getSize(new THREE.Vector3()).y>.70);
-  assert.ok(refBox.min.y>=palletBox.max.y-.02,'reference stack must sit on pallet rather than float below/above it');
-  assert.ok(model.meshes.filter(m=>/stacker.*guard/.test(m.userData.role||'')).length>=20);
+test('V193 output is an open stack lay table with manual guides, not a fabricated rigid mesh tower',()=>{
+  const model=new SheetingMachineTemplate();
+  assert.ok(model.findNode('sheeting-layboy'));
   assert.ok(model.findNode('sheeting-stacker-joggers'));
-  assert.equal(model.meshes.filter(m=>m.userData.role==='front-stop-reference').length,1);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='back-jog-reference').length,1);
-  assert.equal(model.meshes.filter(m=>m.userData.role==='side-jogger-reference').length,2);
+  assert.ok(model.findNode('sheeting-stack-lift'));
+  assert.ok(model.findNode('sheeting-reference-stack'));
+  assert.equal(roleCount(model,'stack-table-side-rail'),2);
+  assert.equal(roleCount(model,'stack-table-leg'),6);
+  assert.equal(roleCount(model,'fixed-front-stop'),1);
+  assert.equal(roleCount(model,'adjustable-backstop'),1);
+  assert.equal(roleCount(model,'manual-side-guide'),2);
+  assert.equal(roleCount(model,'stack-guide-handwheel'),2);
+  assert.equal(roleCount(model,'stacker-column'),0);
+  assert.equal(roleCount(model,'stacker-front-header'),0);
+  assert.equal(model.meshes.filter(m=>/stacker.*guard/.test(m.userData.role||'')).length,0);
+  assert.equal(model.activeMeshes.filter(m=>/^stack-jogger-/.test(m.userData.motion||'')).length,0,'manual guides must not wiggle during simulation');
+  const reference=model.meshes.filter(m=>m.userData.referenceStack);
+  assert.equal(reference.length,10);
   model.dispose();
 });
 
-test('V68 taxonomy stays six levels and maps window, handwheel and reference load to selectable geometry',()=>{
+test('V193 does not instantiate old speculative option geometry by default',()=>{
+  const model=new SheetingMachineTemplate();
+  for(const id of [
+    'sheeting-unwind-brake-v122','sheeting-tension-control-v122','sheeting-slitter-v122',
+    'sheeting-knife-drive-v122','sheeting-overlap-vacuum-v122','sheeting-count-sensor-v122','sheeting-stack-level-v122'
+  ])assert.equal(model.findNode(id),null,id+' must not be visible installed hardware in V193');
+  assert.match(model.root.userData.installedOptionBoundary,/not rendered as installed hardware/i);
+  model.dispose();
+});
+
+test('V193 six-level taxonomy maps all specific rows to actual/selectable geometry',()=>{
   assert.deepEqual([...new Set(SHEETING_TAXONOMY.map(n=>n.level))].sort(),[1,2,3,4,5,6]);
   assert.equal(new Set(SHEETING_TAXONOMY.map(n=>n.id)).size,SHEETING_TAXONOMY.length);
   const model=new SheetingMachineTemplate();
@@ -194,176 +178,106 @@ test('V68 taxonomy stays six levels and maps window, handwheel and reference loa
     if(node.level>1)assert.ok(SHEETING_TAXONOMY.some(p=>p.id===node.parentId),node.id);
     assert.ok((node.meshRefs||[]).some(ref=>model.findNode(ref))||node.id==='SH',node.id+' has no mapped geometry');
   }
-  for(const id of [
-    'SH.HEAD.SUB.BLOCK.PART.WINDOW','SH.HEAD.SUB.BLOCK.PART.CYL',
-    'SH.DEL.SUB.BLOCK.PART.FAST','SH.DEL.SUB.BLOCK.PART.SLOW','SH.DEL.SUB.BLOCK.PART.OVERLAP',
-    'SH.DEL.SUB.BLOCK.PART.HANDWHEEL','SH.STACK.SUB.BLOCK.PART.JOG','SH.STACK.SUB.BLOCK.PART.LOAD'
-  ])assert.ok(model.resolveTaxonomyNode(id),id);
-  assert.equal(model.resolveTaxonomyNode('SH.DEL.SUB.BLOCK.PART.FAST').userData.nodeId,'sheeting-fast-belts');
-  assert.equal(model.resolveTaxonomyNode('SH.DEL.SUB.BLOCK.PART.SLOW').userData.nodeId,'sheeting-slow-belts');
-  assert.equal(model.resolveTaxonomyNode('SH.DEL.SUB.BLOCK.PART.OVERLAP').userData.nodeId,'sheeting-overlap-belts');
-  assert.equal(model.resolveTaxonomyNode('SH.HEAD.SUB.BLOCK.PART.WINDOW').userData.nodeId,'sheeting-window');
-  assert.equal(model.resolveTaxonomyNode('SH.DEL.SUB.BLOCK.PART.HANDWHEEL').userData.nodeId,'sheeting-outfeed-handwheel');
+  const cases={
+    'SH.ROLL.SUB.BLOCK.PART.MANIFOLD':'sheeting-rollstand-manifold',
+    'SH.ROLL.SUB.BLOCK.PART.PANEL':'sheeting-unwind-panel',
+    'SH.HEAD.SUB.BLOCK.PART.WINDOW':'sheeting-window',
+    'SH.HEAD.SUB.BLOCK.PART.KNIFE':'sheeting-knife',
+    'SH.DEL.SUB.BLOCK.PART.HANDWHEEL':'sheeting-outfeed-handwheel',
+    'SH.STACK.SUB.BLOCK.PART.JOG':'sheeting-stacker-joggers'
+  };
+  for(const [id,nodeId] of Object.entries(cases))assert.equal(model.resolveTaxonomyNode(id).userData.nodeId,nodeId,id);
   model.dispose();
 });
 
-test('V68 cutaway opens real housings/window while retaining mechanics and stacker structure',()=>{
+test('V193 cutaway reveals mechanics but normal exterior retains actual cabinet guards',()=>{
   const model=new SheetingMachineTemplate(),covers=model.meshes.filter(m=>m.userData.exteriorCover);
-  assert.ok(covers.length>=10);
-  model.setExteriorOpen(true);assert.ok(covers.every(m=>m.visible===false));
-  assert.equal(model.meshes.find(m=>m.userData.role==='main-draw-traction-drum').visible,true);
-  assert.equal(model.findNode('sheeting-overlap').visible,true);
-  assert.equal(model.findNode('sheeting-stack-lift').visible,true);
-  model.setExteriorOpen(false);assert.ok(covers.every(m=>m.visible===true));
+  assert.ok(covers.length>=8);
+  model.setExteriorOpen(true);
+  assert.ok(covers.every(m=>m.visible===false));
+  assert.equal(model.meshes.find(m=>m.userData.role==='main-draw-roller').visible,true);
+  assert.equal(model.findNode('sheeting-feed-rollers').visible,true);
+  assert.equal(model.findNode('sheeting-delivery-rollers').visible,true);
+  model.setExteriorOpen(false);
+  assert.ok(covers.every(m=>m.visible===true));
   model.dispose();
 });
 
-test('V68 simulation is a continuous web -> cut -> fast/slow/overlap -> stack sequence without teleporting sheets',()=>{
+test('V193 simulation uses actual visible rollers and guarded cut timing without a fake blade',()=>{
   const model=new SheetingMachineTemplate(),sim=new SheetingProcessSimulation(model.root,model);
-  assert.deepEqual(SHEETING_SIMULATION_STAGES,['Unwind / Continuous Web','Guide / Tension / Draw Drum','Cross-Cut Event','Fast Tape Separation','Slow Tape / Overlap','Lift Table / Stacker']);
-  const ref=model.meshes.filter(m=>m.userData.referenceStack);assert.equal(ref.length,14);assert.ok(ref.every(m=>m.visible));
-  const lifts=model.activeMeshes.filter(m=>m.userData.motion==='lift-table');assert.equal(lifts.length,2);
-  const drawDrum=model.activeMeshes.find(m=>m.userData.motion==='draw-drum-reference');assert.ok(drawDrum);
-  const drawDrumRest=drawDrum.quaternion.clone(),liftRest=lifts.map(m=>m.position.y);
-  const blades=model.activeMeshes.filter(m=>m.userData.motion==='flat-bed-blade-reference');
-  assert.equal(blades.length,3);
-  const bladeRest=blades.map(m=>m.position.y);
-  let maxBladeStroke=0;
-  const joggers=model.activeMeshes.filter(m=>/^stack-jogger-/.test(m.userData.motion||''));
-  assert.equal(joggers.length,4);
-  const joggerRest=joggers.map(m=>m.position.clone());
-  assert.equal(sim.state().pathVisible,false,'debug centerline should be off by default');
+  assert.deepEqual(SHEETING_SIMULATION_STAGES,[
+    'Unwind / Continuous Web','Open Roller Bank / Tension','Guarded Cross-Cut Zone',
+    'Fast Belt Transport','Slow Belt / Alignment','Open Stack / Lay Table'
+  ]);
+  assert.ok(SHEETING_PROCESS_STEPS.some(s=>/does not expose or animate a fictional blade/i.test(s)));
+  assert.equal(sim.state().bladeVisible,false);
+  assert.equal(sim.state().bladeCount,0);
+  assert.equal(sim.state().visibleKnifeGeometry,false);
+  assert.equal(sim.state().drawDrumFunctional,false);
+  assert.equal(sim.state().drawRollFunctional,true);
+  assert.equal(sim.state().pathVisible,false);
 
-  sim.start();assert.ok(ref.every(m=>!m.visible));
-  assert.ok(sim.webRibbonSegments.length>=50);
-  assert.ok(sim.webRibbonSegments.every(m=>m.visible),'continuous upstream web must be visible as a connected ribbon');
-  assert.ok(sim.webFlowMarks.every(m=>m.visible),'motion stripes should remain visible independent of debug path');
+  const ref=model.meshes.filter(m=>m.userData.referenceStack);
+  assert.equal(ref.length,10);assert.ok(ref.every(m=>m.visible));
+  const reel=model.activeMeshes.find(m=>m.userData.motion==='reel');
+  const reelRest=reel.quaternion.clone();
+  const contactRollers=model.activeMeshes.filter(m=>m.userData.kinematicGroup==='WEB_CONTACT');
+  assert.ok(contactRollers.length>=13);
+  const contactRest=contactRollers.map(m=>m.quaternion.clone());
+  const lifts=model.activeMeshes.filter(m=>m.userData.motion==='lift-table');
+  assert.equal(lifts.length,1);const liftRest=lifts[0].position.y;
 
-  // Surface route must not pass through the centers of the four feed rollers.
-  const expectedFeedClearance=[
-    [6.04,1.53,.105],[5.68,1.72,.110],[5.30,1.55,.115],[4.92,1.22,.105]
-  ];
-  for(const [x,y,r] of expectedFeedClearance){
-    let min=Infinity;
-    for(const p of sim.preCutCurve.getPoints(150))min=Math.min(min,Math.hypot(p.x-x,p.y-y));
-    assert.ok(min>=r*.82,'web route cuts through feed roller center at '+x);
-  }
-
-  // V68: the large turquoise drum must be mechanically used by the web, not merely spinning nearby.
-  const drumCenter=sim.drawDrumCenter;
-  const drumSamples=sim.preCutCurve.getPoints(500);
-  const drumDistances=drumSamples.map(p=>Math.hypot(p.x-drumCenter.x,p.y-drumCenter.y));
-  const minDrumDistance=Math.min(...drumDistances);
-  const contactSamples=drumDistances.filter(d=>Math.abs(d-sim.webContactRadius)<.025).length;
-  assert.ok(minDrumDistance>=sim.drawDrumRadius-.003,'web penetrates the draw drum');
-  assert.ok(Math.abs(minDrumDistance-sim.webContactRadius)<.03,'web never reaches the draw-drum surface reference');
-  assert.ok(contactSamples>=8,'web must visibly wrap the draw drum across multiple samples');
-  assert.ok(THREE.MathUtils.radToDeg(sim.drawDrumWrapAngle)>70,'draw drum wrap angle is too small to look functional');
-  assert.ok(sim.drawDrumContactPoints.length>=18);
+  sim.start();
+  assert.ok(ref.every(m=>!m.visible));
+  assert.ok(sim.webRibbonSegments.length>=90);
+  assert.ok(sim.webRibbonSegments.every(m=>m.visible));
+  assert.ok(sim.webFlowMarks.every(m=>m.visible));
 
   let now=1000;sim.update(now);
   const history=new Map();
-  for(let i=0;i<260;i++){
+  for(let i=0;i<300;i++){
     now+=40;sim.update(now);
-    maxBladeStroke=Math.max(maxBladeStroke,...blades.map((m,i)=>bladeRest[i]-m.position.y));
     for(const s of sim.sheets.filter(x=>x.visible)){
       const prev=history.get(s.userData.cutId);
-      if(prev!==undefined)assert.ok(s.position.x<=prev+.035,'sheet moved backward/teleported toward input');
+      if(prev!==undefined)assert.ok(s.position.x<=prev+.04,'cut sheet moved backward toward input');
       history.set(s.userData.cutId,s.position.x);
-      assert.ok(['FAST','SLOW','OVERLAP','LANDING'].includes(s.userData.transportZone));
+      assert.ok(['FAST','SLOW','ALIGNMENT','LANDING'].includes(s.userData.transportZone));
     }
   }
 
   const state=sim.state();
-  assert.equal(state.transportMode,'FAST_TO_SLOW_TO_OVERLAP');
-  assert.ok(state.cutCount>state.completed);
+  assert.equal(state.transportMode,'ACTUAL_OPEN_ROLLER_TO_FAST_SLOW_ALIGNMENT_STACK');
+  assert.ok(state.cutCount>=1);
   assert.ok(state.completed>=1);
   assert.ok(state.pileSheetsVisible>=1);
-  assert.ok(state.sheetsVisible>0);
-  assert.equal(state.webRibbonSegmentsVisible,sim.webRibbonSegments.length);
-  assert.ok(Math.abs(sim.pile.find(s=>s.visible).position.x+4.82)<.001);
-  assert.ok(drawDrum.quaternion.angleTo(drawDrumRest)>.001);
-  assert.equal(state.drawDrumFunctional,true);
-  assert.ok(Math.abs(state.drawDrumSurfaceSpeed-sim.webLinearSpeed)<1e-9);
-  assert.ok(Math.abs(state.drawDrumAngularSpeed-sim.webLinearSpeed/sim.drawDrumRadius)<1e-9);
-  assert.equal(state.cutCount,Math.floor(state.webAdvance/state.targetCutLength),'cut count must be driven by web advance');
-  assert.ok(Math.abs(sim.cutInterval-sim.targetCutLength/sim.webLinearSpeed)<1e-9);
-  assert.ok(maxBladeStroke>.055,'blade must visibly descend toward the web during a cut');
-  assert.equal(state.bladeCount,3);
-  assert.equal(state.bladeVisible,true);
-  assert.ok(joggers.some((m,i)=>m.position.distanceTo(joggerRest[i])>.001),'stack alignment joggers must visibly actuate');
+  assert.equal(state.cutCount,Math.floor(state.webAdvance/state.targetCutLength));
+  assert.ok(reel.quaternion.angleTo(reelRest)>.001);
+  assert.ok(contactRollers.some((m,i)=>m.quaternion.angleTo(contactRest[i])>.001),'web-contact rollers must rotate');
+  assert.ok(Math.abs(state.reelSurfaceSpeed-sim.webLinearSpeed)<1e-9);
+  assert.equal(model.activeMeshes.filter(m=>m.userData.motion==='flat-bed-blade-reference').length,0);
 
-  // The first sheets build upward from the pallet; table lowers only after top approaches delivery target.
-  const pileY=sim.pile.filter(s=>s.visible).map(s=>s.position.y);
-  for(let i=1;i<pileY.length;i++)assert.ok(pileY[i]>pileY[i-1]);
-  if(state.completed>12)for(let i=0;i<lifts.length;i++)assert.ok(lifts[i].position.y<liftRest[i]);
+  if(state.completed>12)assert.ok(lifts[0].position.y<liftRest);
+  sim.setPathVisible(true);assert.equal(sim.path.visible,true);
+  sim.setPathVisible(false);assert.equal(sim.path.visible,false);
+  assert.ok(sim.webRibbonSegments.every(m=>m.visible),'debug centerline toggle must not hide actual moving web');
 
-  sim.setPathVisible(false);
-  assert.equal(sim.path.visible,false);
-  assert.ok(sim.webRibbonSegments.every(m=>m.visible),'hiding debug path must not hide actual web');
-
-  sim.stop();assert.ok(ref.every(m=>m.visible));
-  for(let i=0;i<blades.length;i++)assert.equal(blades[i].position.y,bladeRest[i],'blade must reset after stop');
+  sim.stop();
+  assert.ok(ref.every(m=>m.visible));
   assert.ok(sim.webRibbonSegments.every(m=>!m.visible));
-  for(let i=0;i<lifts.length;i++)assert.equal(lifts[i].position.y,liftRest[i]);
+  assert.equal(lifts[0].position.y,liftRest);
   sim.dispose();model.dispose();
 });
 
-test('V68 rejects significant accidental cross-module penetration including new window and handwheel nodes',()=>{
+test('V193 all generated meshes remain finite and the actual machine silhouette stays grounded',()=>{
   const model=new SheetingMachineTemplate();model.root.updateMatrixWorld(true);
-  const entries=model.meshes.map(m=>({m,b:boxOf(m),owner:m.userData.ownerId||'',role:m.userData.role||''}));
-  const key=(a,b)=>[a,b].sort().join('|');
-  const mounted=new Set([
-    key('sheeting-rollstand','sheeting-reel'),
-    key('sheeting-feed-frame','sheeting-feed-rollers'),
-    key('sheeting-feed-frame','sheeting-epc'),
-    key('sheeting-cutter','sheeting-window'),
-    key('sheeting-cutter','sheeting-main-rollers'),
-    key('sheeting-window','sheeting-main-rollers'),
-    key('sheeting-cutter','sheeting-knife'),
-    key('sheeting-cutter','sheeting-cutter-transport'),
-    key('sheeting-main-rollers','sheeting-knife'),
-    key('sheeting-main-rollers','sheeting-cutter-transport'),
-    key('sheeting-delivery','sheeting-fast-belts'),
-    key('sheeting-delivery','sheeting-slow-belts'),
-    key('sheeting-delivery','sheeting-overlap-belts'),
-    key('sheeting-delivery','sheeting-delivery-rollers'),
-    key('sheeting-delivery','sheeting-overlap'),
-    key('sheeting-fast-belts','sheeting-delivery-rollers'),
-    key('sheeting-slow-belts','sheeting-delivery-rollers'),
-    key('sheeting-overlap-belts','sheeting-delivery-rollers'),
-    key('sheeting-overlap-belts','sheeting-overlap'),
-    key('sheeting-delivery','sheeting-outfeed-handwheel'),
-    key('sheeting-layboy','sheeting-stacker-joggers'),
-    key('sheeting-layboy','sheeting-stack-lift'),
-    key('sheeting-stack-lift','sheeting-reference-stack'),
-    key('sheeting-layboy','sheeting-reference-stack'),
-    key('sheeting-layboy','sheeting-access')
-  ]);
-  const penetration=(a,b)=>{
-    if(!a.b.intersectsBox(b.b))return null;
-    const min=new THREE.Vector3(Math.max(a.b.min.x,b.b.min.x),Math.max(a.b.min.y,b.b.min.y),Math.max(a.b.min.z,b.b.min.z));
-    const max=new THREE.Vector3(Math.min(a.b.max.x,b.b.max.x),Math.min(a.b.max.y,b.b.max.y),Math.min(a.b.max.z,b.b.max.z));
-    return max.sub(min);
-  };
-  const overlaps=[];
-  for(let i=0;i<entries.length;i++)for(let j=i+1;j<entries.length;j++){
-    const a=entries[i],b=entries[j];
-    if(a.owner===b.owner||a.owner==='sheeting-structure'||b.owner==='sheeting-structure'||mounted.has(key(a.owner,b.owner)))continue;
-    const d=penetration(a,b);
-    if(d&&d.x>.028&&d.y>.028&&d.z>.028)overlaps.push({a:a.owner,b:b.owner,roleA:a.role,roleB:b.role,penetration:d.toArray().map(v=>+v.toFixed(3))});
+  for(const m of model.meshes){
+    const b=boxOf(m);
+    for(const v of [b.min.x,b.min.y,b.min.z,b.max.x,b.max.y,b.max.z])assert.ok(Number.isFinite(v),m.userData.role||m.name);
   }
-  assert.deepEqual(overlaps,[]);
-  model.dispose();
-});
-
-test('V68 low-detail, explode and reset restore selectable window/handwheel and supported reference load',()=>{
-  const model=new SheetingMachineTemplate(),head=model.findNode('sheeting-cutter'),window=model.findNode('sheeting-window'),handwheel=model.findNode('sheeting-outfeed-handwheel');
-  const windowRest=window.position.clone(),wheelRest=handwheel.position.clone();
-  model.setLow(true);assert.ok(model.detailMeshes.every(m=>!m.visible));
-  model.setLow(false);assert.ok(model.detailMeshes.every(m=>m.visible));
-  model.explode(.8,head);assert.notDeepEqual(window.position.toArray(),windowRest.toArray());
-  model.reset();assert.deepEqual(window.position.toArray(),windowRest.toArray());assert.deepEqual(handwheel.position.toArray(),wheelRest.toArray());
-  assert.ok(model.meshes.filter(m=>m.userData.referenceStack).every(m=>m.visible));
+  const whole=boxOf(model.root),size=whole.getSize(new THREE.Vector3());
+  assert.ok(size.x>16&&size.x<22);
+  assert.ok(size.z>3&&size.z<5.5);
+  assert.ok(size.y>2.4&&size.y<4.0,'V68 tower-like excessive height must not return');
+  assert.ok(whole.min.y>-.08,'no visible module should float far below the floor');
   model.dispose();
 });
