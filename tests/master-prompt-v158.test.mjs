@@ -59,7 +59,7 @@ test('returning to factory overview clears selection and restores whole-factory 
 test('other models are loaded on demand while the factory shell remains available',()=>{
  assert.match(engine,/await import\('\.\/machine-runtime\.js'\)/);
  assert.doesNotMatch(engine,/from '\.\/machine-runtime\.js'/);
- assert.match(app,/pair\('Versi aplikasi','V188'\)/);
- assert.match(html,/src\/app\.js\?v=188/);
- assert.match(sw,/factory-digital-twin-v188-machine-switch-transaction-hardening-20260923/);
+ assert.match(app,/pair\('Versi aplikasi','V189'\)/);
+ assert.match(html,/src\/app\.js\?v=189/);
+ assert.match(sw,/factory-digital-twin-v189-simulation-lifecycle-parity-20260923/);
 });
