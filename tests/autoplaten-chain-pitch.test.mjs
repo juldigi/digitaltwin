@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import * as THREE from 'three';
 import {MK920MachineTemplate} from '../frontend/src/mk920.js';
 import {MK920StampingSimulation} from '../frontend/src/simulation-mk920.js';
 import {MK1060MachineTemplate} from '../frontend/src/mk1060.js';
@@ -30,4 +31,18 @@ for(const [label,Model,Simulation,args] of [
  assert.equal(sim.state().wastePiecesVisible||0,0);
  assert.equal(sim.state().tieSheetsVisible||0,0);
  sim.dispose();model.dispose();
+});
+
+for(const [label,Model,feederId,internalIds] of [
+ ['MK 920',MK920MachineTemplate,'mk920-feeder',['mk920-feeder-pile','mk920-feeder-head']],
+ ['MK 1060',MK1060MachineTemplate,'mk1060-feeder',['mk1060-feeder-pile','mk1060-feeder-head']],
+ ['Promatrix 106',Promatrix106MachineTemplate,'pm106-feeder',['pm106-feeder-pile','pm106-feeder-head']]
+])test(`${label}: feeder shell clears the pile and suction head`,()=>{
+ const model=new Model(),feeder=model.findNode(feederId),covers=[];
+ feeder.traverse(o=>{if(o.isMesh&&o.userData.exteriorCover)covers.push(new THREE.Box3().setFromObject(o));});
+ assert.ok(covers.length>=6,'feeder retains a supported exterior frame');
+ for(const id of internalIds){const box=new THREE.Box3().setFromObject(model.findNode(id));
+  assert.ok(covers.every(cover=>!cover.intersectsBox(box)),`${id} intersects the exterior cover`);
+ }
+ model.dispose();
 });
