@@ -17,7 +17,7 @@ export class APM2MachineTemplate{
       machineEnvelope:APM2_DIMENSIONS,
       dimensionAudit:apm2DimensionAudit(),
       sources:APM2_TECHNICAL_SOURCES,
-      bmjAssetId:'BMJ-MCH-0010',geometryStatus:'LEGACY_SP102_FAMILY_PROCESS_REFERENCE__SUFFIX_UNCONFIRMED',engineeringDimensions:false
+      bmjAssetId:'BMJ-MCH-0010',geometryStatus:'SP102_EII_ENVELOPE_AND_COMPONENT_GROUNDED__1994_SUFFIX_UNCONFIRMED',engineeringDimensions:false
     };
     this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.exteriorOpen=false;this.ghosted=false;
     this.palette={
@@ -76,9 +76,9 @@ export class APM2MachineTemplate{
     this.box(base,[5.82,.22,1.84],[0,.11,0],'dark',.035);
     for(const x of [-2.55,-1.55,-.55,.55,1.55,2.55])for(const z of [-.82,.82])this.box(base,[.16,.28,.16],[x,.28,z],'steel',.018);
     const platform=this.group(this.root,'apm2-platform','Operator Service Platform',[0,0,0],[0,-.1,-.65],['APM2-SP102-E-VISUAL']);
-    this.box(platform,[4.95,.08,.50],[.20,.31,-1.30],'steel',.018);
-    for(const x of [-2.15,-.45,1.25,2.45])this.cylinder(platform,.021,.72,[x,.68,-1.53],'steel','y');
-    this.cylinder(platform,.020,4.65,[.15,1.02,-1.53],'steel','x');
+    this.box(platform,[4.95,.08,1.18],[.20,.31,-1.59],'steel',.018);
+    for(const x of [-2.15,-.45,1.25,2.45])this.cylinder(platform,.021,.72,[x,.68,-2.01],'steel','y');
+    this.cylinder(platform,.020,4.65,[.15,1.02,-2.01],'steel','x');
   }
   buildFeeder(){
     const g=this.group(this.root,'apm2-feeder','Pile Feeder / Sheet Separation',[D.feederCenterX,0,0],[-.9,.1,0],['APM2-SP102-1994','APM2-SP102-E-VISUAL']);
