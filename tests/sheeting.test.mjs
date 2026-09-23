@@ -53,7 +53,7 @@ test('V197 corrects the unwind to one reel supported by one left/right arm pair'
 
   assert.equal(m.activeMeshes.filter(x=>x.userData.motion==='reel').length,1);
   assert.match(m.root.userData.processFlow.unwindArchitecture,/ONE_LOADED_REEL/);
-  assert.doesNotMatch(m.root.userData.processFlow.unwindArchitecture,/SECOND_STATION/);
+  assert.match(m.root.userData.processFlow.unwindArchitecture,/NO_LONGITUDINAL_SECOND_STATION/);
   m.dispose();
 });
 
