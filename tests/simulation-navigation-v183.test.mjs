@@ -27,5 +27,7 @@ test('navigation opens selected machine before simulation and closes other overl
  assert.match(app,/const opened=await switchActiveMachine\(machineRoute\(record\)\)/);
  assert.match(app,/if\(opened\)dispatchEvent\(new CustomEvent\('bmj:simulationcontextready'/);
  assert.match(shell,/nav-machine'\)\?\.addEventListener\('click',\(\)=>\{beforeMajorOverlay\('factory'\)/);
- assert.match(css,/\.layer-open \.twin-shell\{z-index:89\}/);
+ assert.doesNotMatch(css,/\.layer-open \.twin-shell\{z-index:89\}/);
+ assert.match(css,/\.canonical-layer-manager\{position:fixed;z-index:90/);
+ assert.match(shell,/document\.body\.append\(panel\)/);
 });
