@@ -30,7 +30,7 @@ export class SheetingProcessSimulation{
     this.active=false;this.running=false;this.speed=1;this.elapsed=0;this.lastNow=null;
     this.completed=0;this.cutCount=0;this.pathVisible=false;this.inkFlowVisible=false;this.onUpdate=null;
 
-    // V196 uses normalized process speeds, not an engineering calibration of BMJ line speed.
+    // V197 uses normalized process speeds, not an engineering calibration of BMJ line speed.
     // Ratios are chosen to reproduce the documented sheeter behavior:
     // web metering -> faster take-away gap -> slower overlap/shingling -> slow stack entry.
     this.webLinearSpeed=1.42;
@@ -316,8 +316,9 @@ export class SheetingProcessSimulation{
   }
 
   state(){
-    const phase=this.currentCutPhase(),window=Math.min(.06/this.cutInterval,.12);
-    const cuttingNow=this.active&&(phase<window||phase>1-window);
+    const phase=this.currentCutPhase();
+    const timeSinceLatestCut=this.cutCount>0?this.elapsed-this.cutCount*this.cutInterval:Infinity;
+    const cuttingNow=this.active&&timeSinceLatestCut>=0&&timeSinceLatestCut<this.cutEdgeDuration;
     const leadingSheet=this.sheets.find(s=>s.visible);
     const leadZone=leadingSheet?.userData.transportZone||null;
     let stageIndex=0;
