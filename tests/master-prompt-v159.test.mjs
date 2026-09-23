@@ -56,7 +56,7 @@ test('V159 search promise matches strict Phase-1 scope and cache identifiers are
  assert.doesNotMatch(shell,/Cari mesin, area, komponen, sistem, atau dokumen/);
  assert.match(html,/app-shell-v79\.css\?v=162/);
  assert.match(html,/src\/app\.js\?v=167/);
- assert.match(html,/src\/ui-v5\.js\?v=162/);
+ assert.match(html,/src\/ui-v5\.js\?v=163/);
  assert.match(html,/src\/app-shell-v79\.js\?v=162/);
  assert.match(shell,/v162-factory-first-systems/);
  assert.match(sw,/factory-digital-twin-v162-factory-first-systems-20260922/);
