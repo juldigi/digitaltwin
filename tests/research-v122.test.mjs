@@ -60,15 +60,16 @@ test('V122 POLAR 115 exposes backgauge sledge clamp pressure knife drive safety 
  m.dispose();
 });
 
-test('V196 Sheeting keeps speculative V122 modules out while adding family-grounded guarded cutter mechanics',()=>{
+test('V197 Sheeting keeps speculative V122 modules and unverified cutter mechanics out',()=>{
  const m=new SheetingMachineTemplate();
- assert.equal(m.root.userData.researchVersion,'V196');assert.ok(m.root.userData.researchSourceCount>=160);
- requireRoles(m,['loaded-paper-reel','vertical-hydraulic-cylinder','web-carrier-longitudinal-beam','web-carrier-hanger-bracket','low-entry-guide-roll','loop-frame-upright','main-cutter-cabinet','long-inspection-window','large-black-draw-roll','stationary-bed-knife','fly-knife-revolver','fly-knife-blade','cutter-takeaway-pinch-roll','white-hold-down-wheel','operator-console-face','stack-guide-handwheel','stack-rack-tooth','stack-ruler-tick']);
+ assert.equal(m.root.userData.researchVersion,'V197');assert.ok(m.root.userData.researchSourceCount>=160);
+ requireRoles(m,['loaded-paper-reel','single-reel-arm-inner','single-reel-arm-outer','single-rollstand-hydraulic-cylinder','web-carrier-longitudinal-beam','web-carrier-hanger-bracket','low-entry-guide-roll','loop-frame-upright','main-cutter-cabinet','long-inspection-window','large-black-draw-roll','draw-section-side-cheek','white-hold-down-wheel','operator-console-face','stack-guide-handwheel','stack-rack-tooth','stack-ruler-tick','stack-white-guide-panel']);
  for(const id of ['sheeting-slitter-v122','sheeting-knife-drive-v122','sheeting-overlap-vacuum-v122','sheeting-stack-level-v122'])assert.equal(m.findNode(id),null,id);
  const knife=m.findNode('sheeting-knife');
- assert.equal(knife.userData.visibleKnifeGeometry,'CUTAWAY_ONLY_FAMILY_REFERENCE');
- assert.match(knife.userData.evidenceBoundary,/stationary-bed-knife \+ rotary fly-knife/i);
- assert.match(m.root.userData.installedOptionBoundary,/HSM56\/Maxson evidence|guarded stationary-bed\/fly-knife/i);
+ assert.equal(knife.userData.visibleKnifeGeometry,false);
+ assert.match(knife.userData.evidenceBoundary,/does not establish the exact BMJ|does not invent internal blade geometry/i);
+ assert.match(m.root.userData.installedOptionBoundary,/removes the incorrect longitudinal second reel station|retires the generic Maxson fly-knife/i);
+ for(const role of ['stationary-bed-knife','fly-knife-revolver','fly-knife-blade','cutter-takeaway-pinch-roll'])assert.equal(roleUnion(m.root).has(role),false,role);
  m.dispose();
 });
 

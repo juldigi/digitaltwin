@@ -14,12 +14,12 @@ export const SHEETING_VISUAL_REFERENCE=Object.freeze({
   evidence:'BMJ database + user-confirmed RIGHT_TO_LEFT + 9 user-provided actual BMJ machine photographs (22 Sep 2026) as primary exterior evidence + Lexus HSM family sources only for unresolved process/specification corroboration',
   dimensions:'BMJ_ACTUAL_PHOTO_ANCHORED_RECONSTRUCTION_NOT_ENGINEERING',
   visualFamily:'BMJ_ACTUAL_OPEN_TWO_SIDED_ROLLSTAND_MULTIROLLER_BRIDGE_LEXUS_CUTTER_CABINET_OPEN_BELT_TABLE_STACK_TABLE',
-  visualRevision:'V196_BMJ_TRUE_WEB_CUT_DELIVERY_KINEMATICS'
+  visualRevision:'V197_BMJ_MATERIAL_STATE_AND_GEOMETRY_TRUTH'
 });
 
 
 export const SHEETING_ACTUAL_LAYOUT=Object.freeze({
-  revision:'V196',
+  revision:'V197',
   direction:'RIGHT_TO_LEFT',
   operatorZ:-1.62,
   webWidth:2.24,
@@ -49,7 +49,7 @@ export class SheetingMachineTemplate{
       assetId:'BMJ-MCH-0002',machine:'SHEETING LEXUS',model:'HSM-CTM7',
       referenceFamily:'BMJ HSM-CTM7 actual photo set · Lexus HSM family process corroboration',
       processDirection:'RIGHT_TO_LEFT',confidence:'IDENTITY_VERIFIED__GEOMETRY_FAMILY_PHOTO_ANCHORED',
-      visualRevision:'V196_BMJ_TRUE_WEB_CUT_DELIVERY_KINEMATICS'
+      visualRevision:'V197_BMJ_MATERIAL_STATE_AND_GEOMETRY_TRUTH'
     };
     this.nodes=[];this.parts=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.activeMeshes=[];this.detailMeshes=[];
     this.taxonomy=SHEETING_TAXONOMY;this.taxonomyById=SHEETING_TAXONOMY_BY_ID;this.exteriorOpen=false;this.ghosted=false;
@@ -58,7 +58,7 @@ export class SheetingMachineTemplate{
       dark:0x293236,steel:0x939b9b,chrome:0xcbd1d0,paper:0xe8dfcb,stackPaper:0xc9ae83,
       glass:0x78b6bb,black:0x20272a,blue:0x2f67a1,red:0xc93434,green:0x4c9b4f,bronze:0xb08b55
     };
-    this.buildActualV194();this.refineActualV195();this.refineActualV196();this.enrichActualV196();
+    this.buildActualV194();this.refineActualV195();this.refineActualV196();this.refineActualV197();this.enrichActualV197();
     for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}
     this.root.updateMatrixWorld(true);
   }
@@ -736,6 +736,119 @@ export class SheetingMachineTemplate{
       'stationary bed knife and rotary fly knife added cutaway-only',
       'cutter take-away pinch reference added cutaway-only',
       'normal exterior still hides all undocumented cutter internals'
+    ];
+  }
+
+
+  refineActualV197(){
+    const photo='BMJ-SHEETING-PHOTOSET-20260922';
+    const L=SHEETING_ACTUAL_LAYOUT;
+
+    // PHOTO CORRECTION — IMG_2479/2480 show one reel supported by a left/right arm pair.
+    // V194/V195 interpreted the second longitudinal arm set as a separate parked/standby station;
+    // that produced a visibly wrong double-station silhouette. Remove it and rebuild one true arm pair.
+    for(const role of [
+      'loaded-reel-arm-inner','loaded-reel-arm-outer','loaded-chuck-housing',
+      'parked-reel-arm-inner','parked-reel-arm-outer','parked-chuck-housing',
+      'standby-reel-arm-inner','standby-reel-arm-outer','standby-chuck-housing',
+      'rollstand-main-pivot','vertical-hydraulic-cylinder','hydraulic-piston-rod'
+    ])this.retireRoleGeometry(role);
+
+    const rollstand=this.findNode('sheeting-rollstand');
+    if(rollstand){
+      const [rx,ry]=L.reel.loadedCenter;
+      for(const side of [-1,1]){
+        const z=side*1.47,pivotX=rx-.58,pivotY=.34;
+        this.cyl(rollstand,.18,.23,[pivotX,pivotY,z],'body','z',{detail:true,role:'single-rollstand-main-pivot',sourceAnchor:photo});
+        this.beamXY(rollstand,[pivotX,pivotY],[rx-.30,.60],z,.27,.30,'light',{role:'single-reel-arm-inner',sourceAnchor:photo});
+        this.beamXY(rollstand,[rx-.30,.60],[rx,ry],z,.25,.30,'light',{role:'single-reel-arm-outer',sourceAnchor:photo});
+        this.cyl(rollstand,.205,.17,[rx,ry,z],'body','z',{detail:true,role:'single-reel-chuck-housing',sourceAnchor:photo});
+        this.box(rollstand,[.17,.82,.18],[rx-.40,.47,side*1.60],'blue',.022,{detail:true,role:'single-rollstand-hydraulic-cylinder',sourceAnchor:photo});
+        this.cyl(rollstand,.036,.34,[rx-.40,1.02,side*1.60],'chrome','y',{detail:true,role:'single-rollstand-hydraulic-rod',sourceAnchor:photo});
+        this.tube(rollstand,[
+          [rx-.44,.86,z],
+          [rx-.58,.78,z],
+          [rx-.62,.50,z],
+          [pivotX,.42,z]
+        ],.014,'black',{detail:true,role:'rollstand-arm-hydraulic-hose',sourceAnchor:photo});
+      }
+    }
+
+    // Remove the speculative Maxson-style internal cutter. HSM56 confirms only "Flat Bed Knife";
+    // BMJ photos do not reveal the exact mechanism. No invented revolver/fly-knife remains even in cutaway.
+    this.retireNodeGeometry('sheeting-flatbed-cutter-family');
+    this.retireNodeGeometry('sheeting-cut-takeaway-pinch');
+    const knife=this.findNode('sheeting-knife');
+    if(knife){
+      knife.name='Guarded Cross-Cut Zone · Internal Mechanism Unresolved';
+      knife.userData.visibleKnifeGeometry=false;
+      knife.userData.confidence='VERIFIED_PROCESS_LOCATION__INTERNAL_MECHANISM_UNRESOLVED';
+      knife.userData.evidenceBoundary='BMJ IMG_2486/2487 keep the cross-cutter fully enclosed. HSM56 family material confirms Flat Bed Knife wording, but does not establish the exact BMJ blade carrier, revolver, stroke, helix or drive. V197 therefore models the material cut event without inventing internal blade geometry.';
+    }
+
+    // IMG_2487: the draw section is dominated by one broad black roll, a lower polished roll,
+    // a white web band, green wheel holders and two angled drive heads. Add the missing side plates
+    // and roller guard geometry so the assembly reads like the actual machine instead of floating rollers.
+    const process=this.findNode('sheeting-main-rollers');
+    if(process&&!this.meshes.some(m=>m.userData.role==='draw-section-side-cheek')){
+      for(const side of [-1,1]){
+        const z=side*1.44;
+        this.box(process,[.82,.92,.13],[3.34,1.22,z],'body',.018,{detail:true,role:'draw-section-side-cheek',sourceAnchor:photo});
+        this.box(process,[.42,.18,.16],[3.18,1.72,z],'light',.010,{detail:true,role:'draw-section-top-bearing-carrier',sourceAnchor:photo});
+      }
+      this.box(process,[.20,.16,2.88],[3.86,.84,0],'light',.010,{detail:true,role:'draw-section-front-cross-tie',sourceAnchor:photo});
+    }
+
+    // IMG_2482/2483: delivery has dense belt lanes, fixed crossbars and ring/hold-down wheels.
+    // Add true long side datum rails and crossbar supports; wheels are not floating over a generic bed.
+    const delivery=this.findNode('sheeting-delivery');
+    if(delivery&&!this.meshes.some(m=>m.userData.role==='delivery-upper-datum-rail')){
+      for(const z of [-1.49,1.49]){
+        this.box(delivery,[5.42,.11,.10],[-1.50,1.24,z],'light',.006,{detail:true,role:'delivery-upper-datum-rail',sourceAnchor:photo});
+      }
+      for(const x of [.82,-.30,-1.42,-2.58,-3.70]){
+        this.box(delivery,[.10,.34,.12],[x,1.07,-1.49],'body',.006,{detail:true,role:'delivery-crossbar-support',sourceAnchor:photo});
+        this.box(delivery,[.10,.34,.12],[x,1.07,1.49],'body',.006,{detail:true,role:'delivery-crossbar-support',sourceAnchor:photo});
+      }
+    }
+
+    // IMG_2484: two white movable pile-guide plates with green triangular carriages and threaded posts.
+    // These are visually dominant and were still too abstract in V196.
+    const joggers=this.findNode('sheeting-stacker-joggers');
+    if(joggers&&!this.meshes.some(m=>m.userData.role==='stack-white-guide-panel')){
+      for(const [x,z] of [[-5.18,-.74],[-6.28,.72]]){
+        this.box(joggers,[.18,.80,.74],[x,1.13,z],'white',.010,{detail:true,role:'stack-white-guide-panel',sourceAnchor:photo});
+        this.box(joggers,[.34,.36,.24],[x,1.43,z],'body',.012,{detail:true,role:'stack-green-guide-head',sourceAnchor:photo});
+        this.cyl(joggers,.050,.16,[x,1.24,z],'dark','z',{detail:true,role:'stack-guide-contact-roller',sourceAnchor:photo});
+        this.cyl(joggers,.032,.54,[x,1.63,z],'chrome','y',{detail:true,role:'stack-guide-vertical-screw',sourceAnchor:photo});
+        this.sphere(joggers,.055,[x,1.94,z],'black',{detail:true,role:'stack-guide-screw-cap',sourceAnchor:photo});
+      }
+    }
+
+    this.root.userData.processFlow={
+      ...this.root.userData.processFlow,
+      process:'RIGHT → LEFT · single-reel hydraulic rollstand → deep threaded web path → black draw roll → guarded cross-cut event → high-speed removal → low-speed shingling → guided stack entry',
+      unwindArchitecture:'ONE_LOADED_REEL__LEFT_RIGHT_ARM_PAIR__TWO_SIDE_HYDRAULIC_SUPPORTS__NO_LONGITUDINAL_SECOND_STATION',
+      cutterArchitecture:'HSM56_FLAT_BED_KNIFE_WORDING_ONLY__BMJ_INTERNAL_MECHANISM_NOT_VISIBLE__NO_SPECULATIVE_FLY_KNIFE_GEOMETRY',
+      deliveryKinematics:'CONTINUOUS_WEB__FORMING_ATTACHED_SHEET__MATERIAL_SEPARATION_AT_MEASURED_LENGTH__FAST_GAP__SLOW_SHINGLE__PILE_SETTLE',
+      geometryBoundary:'BMJ_PHOTOS_PRIMARY__NO_HIDDEN_MECHANISM_IS_HARD_MODELED_WITHOUT_MODEL_SPECIFIC_EVIDENCE'
+    };
+  }
+
+  enrichActualV197(){
+    this.root.userData.researchVersion='V197';
+    this.root.userData.researchSourceCount=V122_SOURCE_STATS.total;
+    this.root.userData.detailPass='V197_MATERIAL_STATE_CUT_AND_SINGLE_REEL_GEOMETRY_CORRECTION';
+    this.root.userData.installedOptionBoundary='BMJ photos remain primary for exposed hardware. V197 removes the incorrect longitudinal second reel station and retires the generic Maxson fly-knife/revolver geometry. Cutter internals remain unresolved while material-state cutting, high-speed gap and low-speed overlap stay process-grounded.';
+    this.root.userData.primaryVisualEvidence='BMJ_USER_PHOTOSET_20260922_IMG_2479_TO_IMG_2487';
+    this.root.userData.familyEvidenceRole='HSM56_FLAT_BED_KNIFE_WORDING__UNICO_DRAW_CUTTER_TAPE_COORDINATION__GENERIC_DELIVERY_BEHAVIOR';
+    this.root.userData.geometryCorrections=[
+      'one real reel with left/right arm pair instead of false longitudinal second station',
+      'two side hydraulic supports and routed hoses rebuilt',
+      'speculative rotary fly-knife and take-away pinch geometry removed',
+      'draw section side cheeks and cross tie added from IMG_2487',
+      'delivery upper datum rails and crossbar supports added from IMG_2482/2483',
+      'white stack guide panels green heads contact rollers and vertical screws added from IMG_2484'
     ];
   }
 
