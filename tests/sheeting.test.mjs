@@ -39,7 +39,7 @@ test('V195 removes the fabricated unwind-to-feed bridge and grounds both assembl
  assert.equal(roleCount(m,'feed-upper-longitudinal-rail'),2);
  assert.equal(roleCount(m,'feed-upper-entry-brace'),2);
  assert.equal(roleCount(m,'feed-upper-end-cross-tie'),1);
- assert.match(m.root.userData.processFlow.geometryBoundary,/ambiguous arm set/i);
+ assert.match(m.root.userData.processFlow.geometryBoundary,/AMBIGUOUS_ARM_SET/i);
  assert.match(m.root.userData.processFlow.unwindArchitecture,/NO_FABRICATED_FEED_FRAME_BRIDGE/);
  const gap=boxOf(m.findNode('sheeting-unwind-bridge')).min.x-boxOf(m.findNode('sheeting-feed-frame')).max.x;
  assert.ok(gap>.02,'rollstand upper structure must preserve a visible service gap from the feed frame');
@@ -185,7 +185,12 @@ test('V195 simulation routes the web through low entry roll then alternating ele
   assert.ok(min>=spec.radius*.76,spec.id+' web path cuts deeply through roller');
   assert.ok(min<=spec.radius+.075,spec.id+' web path misses roller contact surface');
  };
- checkRoll(SHEETING_ACTUAL_LAYOUT.lowEntryRoll);
+ assert.equal(sim.lowEntryContactPoints.length,15);
+ const low=SHEETING_ACTUAL_LAYOUT.lowEntryRoll;
+ for(const p of sim.lowEntryContactPoints){
+  const d=Math.hypot(p.x-low.center[0],p.y-low.center[1]);
+  assert.ok(Math.abs(d-(low.radius+.018))<1e-9,'low-entry wrap must stay on contact radius');
+ }
  for(const spec of SHEETING_ACTUAL_LAYOUT.feedRollers)checkRoll(spec);
 
  const drawD=sim.preCutCurve.getPoints(900).map(p=>Math.hypot(p.x-SHEETING_ACTUAL_LAYOUT.drawRoll.center[0],p.y-SHEETING_ACTUAL_LAYOUT.drawRoll.center[1]));
