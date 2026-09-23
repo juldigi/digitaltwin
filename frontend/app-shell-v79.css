@@ -426,3 +426,14 @@ button:disabled,[aria-disabled="true"]{opacity:.52;cursor:not-allowed}
 @media(max-width:390px){
  .brand-copy small{display:none!important}
 }
+
+
+/* V167 interaction-state polish */
+.ui-backdrop{z-index:88}
+@media(max-width:767px){
+ .scene-heading #panel-toggle{width:44px;height:44px;min-width:44px;min-height:44px}
+ #toast{bottom:calc(80px + env(safe-area-inset-bottom))}
+}
+@media(max-width:767px) and (max-height:560px) and (orientation:landscape){
+ #toast{bottom:max(10px,env(safe-area-inset-bottom));max-width:calc(100vw - 96px)}
+}
