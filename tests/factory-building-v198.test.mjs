@@ -33,7 +33,11 @@ test('V198 completes room-by-room operational realism without moving any machine
  assert.equal(stats.productionSupportStations,stats.productionWipPallets);
  assert.equal(stats.productionSupportStations,stats.productionWasteBins);
  assert.equal(meta.roomAccessAudit.length,stats.roomAccessAudited);
- assert.ok(meta.roomAccessAudit.every(r=>['SOURCE_DOOR','FUNCTIONAL_REFERENCE_DOOR'].includes(r.access)));
+ assert.ok(Array.isArray(meta.roomProgramAudit)&&meta.roomProgramAudit.length>0);
+ assert.ok(meta.roomProgramAudit.every(r=>r.program!=='UNRESOLVED'),JSON.stringify(meta.roomProgramAudit.filter(r=>r.program==='UNRESOLVED')));
+ assert.ok(meta.roomProgramAudit.every(r=>r.status==='POPULATED_FUNCTIONAL_REFERENCE'));
+ assert.ok(meta.roomProgramAudit.every(r=>['CERAMIC','OFFICE_VINYL','SEALED_CONCRETE'].includes(r.floorFinish)));
+ assert.ok(meta.roomProgramAudit.every(r=>['SOURCE_DOOR','FUNCTIONAL_REFERENCE_DOOR'].includes(r.access)),JSON.stringify(meta.roomProgramAudit.filter(r=>!['SOURCE_DOOR','FUNCTIONAL_REFERENCE_DOOR'].includes(r.access))));
  assert.equal(meta.wallDeduplication.input-meta.wallDeduplication.renderedSourceWalls,meta.wallDeduplication.duplicatesRemoved);
  assert.ok(stats.sourceDoorWallOpenings>=(layout.actual.doors?.length||0));
 
