@@ -255,7 +255,7 @@ function simulationLocksStructure(){
   if(engine?.isPrintingSimulationActive()){toast(IS_APM2?'Hentikan simulasi proses APM 2 sebelum memilih, mengurai, atau mengisolasi komponen.':IS_VERIFIED_REGISTRY_SIM?'Hentikan simulasi proses sebelum memilih, mengurai, atau mengisolasi komponen.':'Hentikan Simulasi Proses sebelum memilih, mengurai, atau mengisolasi komponen.');return true;}
  return false;
 }
-function choosePart(part){if(!part||!engine||simulationLocksStructure())return;engine.template.reset();engine.isolated=false;explode=0;selectedPart=part;engine.template.highlight(part);engine.template.ghost(true,part);engine.setPartLabels(part,selectedTaxonomyId);engine.fit(part);const meta=taxonomyForPart(part);emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:meta?.id||part.userData?.nodeId||selectedTaxonomyId,inspectorState:{open:true,tab:'structure'}});}
+function choosePart(part){if(!part||!engine||simulationLocksStructure())return;engine.template.reset();engine.isolated=false;explode=0;selectedPart=part;engine.template.highlight(part);engine.template.ghost(true,part);engine.setPartLabels(part,selectedTaxonomyId);engine.fit(part);const meta=taxonomyForPart(part);emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:meta?.id||part.userData?.nodeId||selectedTaxonomyId,selectedSystem:null,activeReference:null,sceneMode:'machine',inspectorState:{open:true,tab:'structure'}});}
 function taxonomyForPart(part){const id=part?.userData?.nodeId;if(!id)return null;return ACTIVE_TAXONOMY.filter(n=>(n.meshRefs||[]).includes(id)).sort((a,b)=>Math.abs(a.level-5)-Math.abs(b.level-5))[0]||null;}
 function taxonomyPath(id=selectedTaxonomyId){
  const path=[];let meta=TAXONOMY_BY_ID.get(id)||TAXONOMY_BY_ID.get(ACTIVE_ROOT),guard=0;
@@ -303,7 +303,7 @@ function renderReferencePanel(){
  }).join('');
  $('#panel-content').innerHTML=`<h3>Referensi</h3><div class="card accent reference-context-summary"><h4>Konteks: ${esc(contextLabel)}</h4><p>${esc(intro)}</p><span class="tag">${priorityCount?priorityCount+' sumber diprioritaskan':'Sumber mesin aktif'}</span><span class="tag">${all.length} total referensi</span></div><div class="reference-filter-strip">${filters.map(([key,label])=>`<button type="button" data-reference-filter="${key}" class="${referenceCategoryFilter===key?'active':''}">${label}<small>${counts[key]||0}</small></button>`).join('')}</div><div class="context-reference-list">${cards||'<p class="empty">Tidak ada referensi pada kategori ini.</p>'}</div><div class="card"><h4>Arah mesin</h4><p>${esc(flow)} · sisi operator ${esc(op)} · sisi penggerak ${esc(ds)}</p></div><p class="subtle">Prioritas hanya diberikan bila istilah pada struktur terpilih benar-benar ditemukan pada keterangan sumber. Sumber lain tetap tersedia sebagai konteks mesin dan tidak dianggap sebagai bukti langsung komponen.</p>`;
  $$('[data-reference-filter]').forEach(button=>button.onclick=()=>{referenceCategoryFilter=button.dataset.referenceFilter;renderReferencePanel();});
- const activateReferenceCard=card=>{emitDomainState({activeReference:card.dataset.referenceCard,activeSection:'reference'});$$('[data-reference-card]').forEach(x=>{const active=x===card;x.classList.toggle('is-active',active);x.setAttribute('aria-pressed',String(active));});};
+ const activateReferenceCard=card=>{emitDomainState({activeReference:card.dataset.referenceCard,selectedSystem:null,activeSection:'reference'});$('[data-reference-card]').forEach(x=>{const active=x===card;x.classList.toggle('is-active',active);x.setAttribute('aria-pressed',String(active));});};
  $$('[data-reference-card]').forEach(card=>{
   card.onclick=event=>{if(event.target.closest('a'))return;activateReferenceCard(card)};
   card.onkeydown=event=>{if(event.target.closest('a'))return;if(event.key==='Enter'||event.key===' '){event.preventDefault();activateReferenceCard(card)}};
@@ -336,7 +336,7 @@ function taxonomyAtLevel(level){
 function selectTaxonomy(id,{revealPanel=false}={}){
  if(simulationLocksStructure())return;const meta=TAXONOMY_BY_ID.get(id);if(!meta)return;
  selectedTaxonomyId=meta.id;const part=engine?.template.resolveTaxonomyNode(meta.id);
- if(part)choosePart(part);else{selectedPart=null;engine?.template.reset();engine?.clearPartLabels();emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:meta.id,inspectorState:{open:true,tab:'structure'}});}
+ if(part)choosePart(part);else{selectedPart=null;engine?.template.reset();engine?.clearPartLabels();emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:meta.id,selectedSystem:null,activeReference:null,sceneMode:'machine',inspectorState:{open:true,tab:'structure'}});}
  if(revealPanel&&!matchMedia('(max-width:767px)').matches)showPanel();renderPanel('structure');
 }
 function taxonomyTree(parentId=ACTIVE_ROOT){
@@ -362,6 +362,11 @@ function renderFactoryPanel(){
 }
 function renderPanel(tab=activeTab){
  if(editing&&engine){engine.edit(false);engine.onTransform=null;engine.applyPlacement(state);editing=false;}
+ const previousTab=activeTab;
+ if(previousTab==='simulation'&&tab!=='simulation'&&simulationState?.running&&engine?.isPrintingSimulationActive?.()){
+  simulationState=engine.pausePrintingSimulation();updateSimulationPanel(simulationState);toast('Simulasi dijeda saat Anda berpindah dari tab Simulasi.');
+ }
+ if(tab!=='sources'&&window.BMJAppState?.getState?.().activeReference)emitDomainState({activeReference:null});
  activeTab=tab;renderContextBreadcrumb();
  if(engine?.view==='factory'&&renderFactoryPanel())return;
  $$('[data-tab]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===tab)));
