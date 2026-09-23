@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import vm from 'node:vm';
 
 const css=fs.readFileSync(new URL('../frontend/app-shell-v79.css',import.meta.url),'utf8');
 const js=fs.readFileSync(new URL('../frontend/src/app-shell-v79.js',import.meta.url),'utf8');
@@ -44,9 +45,28 @@ test('premium generated splash is bounded and cannot get stuck',()=>{
   assert.match(css,/\.app-splash\.is-done/);
   assert.match(js,/sessionStorage\.getItem\('bmj-splash-seen'\)/);
   assert.match(js,/if\(!documentLoaded\|\|!appReadyStatus\)return/);
-  assert.match(js,/dataset\.appReady='timeout';finishSplash\(\)\}\},12000\)/);
+  assert.match(js,/if\(!appReadyStatus\)document\.documentElement\.dataset\.appReady='timeout';finishSplash\(\)\},12000\)/);
   assert.doesNotMatch(js,/setTimeout\(finishSplash,5000\)/);
   assert.match(sw,/assets\/splash-industrial-v79\.webp/);
+});
+
+test('splash recovery is independent of module execution and document load',()=>{
+  const script=html.match(/<script id="splash-recovery">([\s\S]*?)<\/script>/)?.[1];
+  assert.ok(script,'recovery must be classic inline script before modules');
+  assert.ok(html.indexOf('id="splash-recovery"')<html.indexOf('src="./src/app.js'));
+  assert.match(script,/splash\.remove\(\)/);
+  assert.match(script,/if\(!document\.documentElement\.dataset\.appReady\)/);
+  assert.match(script,/12500/);
+  for(const ready of [false,true]){
+    let removed=false,scheduled=0;
+    const boot={hidden:true,innerHTML:'',querySelector:()=>({onclick:null})};
+    const splash={classList:{contains:()=>false},remove:()=>{removed=true}};
+    const document={documentElement:{dataset:ready?{appReady:'ready'}:{}},querySelector:()=>splash,getElementById:()=>boot};
+    vm.runInNewContext(script,{document,window:{setTimeout:(fn,ms)=>{scheduled=ms;fn()}},location:{reload(){}}});
+    assert.equal(scheduled,12500);assert.equal(removed,true);
+    assert.equal(boot.hidden,ready);
+    if(!ready)assert.match(boot.innerHTML,/Aplikasi belum berhasil dimuat/);
+  }
 });
 
 test('icons use one accessible vector family without emoji runtime controls',()=>{

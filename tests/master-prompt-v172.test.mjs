@@ -28,7 +28,7 @@ test('V172 splash waits for both document load and restored app readiness',()=>{
 test('V172 readiness survives module-order races and has a bounded fail-safe',()=>{
  assert.match(shell,/appReadyStatus=document\.documentElement\.dataset\.appReady\|\|null/);
  assert.match(shell,/if\(appReadyStatus\)maybeFinishSplash\(\)/);
- assert.match(shell,/setTimeout\(\(\)=>\{if\(!appReadyStatus\)\{document\.documentElement\.dataset\.appReady='timeout';finishSplash\(\)\}\},12000\)/);
+ assert.match(shell,/setTimeout\(\(\)=>\{if\(splash\?\.classList\.contains\('is-done'\)\)return;if\(!appReadyStatus\)document\.documentElement\.dataset\.appReady='timeout';finishSplash\(\)\},12000\)/);
 });
 
 test('V172 runtime files and service worker are cache-busted',()=>{

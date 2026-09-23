@@ -94,7 +94,7 @@ const maybeFinishSplash=()=>{if(!documentLoaded||!appReadyStatus)return;clearTim
 if(documentLoaded)maybeFinishSplash();else addEventListener('load',()=>{documentLoaded=true;maybeFinishSplash()},{once:true});
 addEventListener('bmj:appready',event=>{appReadyStatus=event.detail?.status||document.documentElement.dataset.appReady||'ready';maybeFinishSplash()});
 if(appReadyStatus)maybeFinishSplash();
-setTimeout(()=>{if(!appReadyStatus){document.documentElement.dataset.appReady='timeout';finishSplash()}},12000);
+setTimeout(()=>{if(splash?.classList.contains('is-done'))return;if(!appReadyStatus)document.documentElement.dataset.appReady='timeout';finishSplash()},12000);
 
 const SECTION_BUTTONS={factory:'nav-machine',asset:'nav-assets',system:'nav-systems',simulation:'nav-simulation-mode',reference:'nav-sources'};
 function markSection(section){
