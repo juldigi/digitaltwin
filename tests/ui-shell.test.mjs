@@ -129,7 +129,7 @@ test('conditional controls explain requirements rather than failing silently',()
 });
 
 test('service worker refreshes the redesigned shell',()=>{
-  assert.match(sw,/factory-digital-twin-v183-simulation-system-navigation-20260923/);
+  assert.match(sw,/factory-digital-twin-v184-simulation-overlay-hardening-20260923/);
   assert.doesNotMatch(sw,/src\/universal-machine\.js/);
   assert.match(app,/template\.ghost\(true,part\)/,'object selection must automatically ghost all non-selected geometry');
   for(const asset of ['app-shell-v79.css','src/app-shell-v79.js','assets/splash-industrial-v79.webp','src/ui-v5.js','src/app.js','src/simulation.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
@@ -149,7 +149,7 @@ test('v42 opens removable exterior covers while retaining frame and interior geo
   assert.match(html,/data-tab="exterior"/);
   assert.doesNotMatch(html,/id="asset-exterior-shortcut"/);
   assert.match(app,/data-tab|dataset\.tab/);
-  assert.match(app,/function enableExteriorOpen\(\)/);
+  assert.match(app,/function enableExteriorOpen\(\{forceDetail=true\}=\{\}\)/);
   assert.match(app,/engine\.setLow\(false\)/);
   assert.match(app,/template\.setExteriorOpen\(true\)/);
   assert.match(app,/Buka Semua Cover/);
@@ -264,7 +264,7 @@ test('asset browser exposes every registry machine with its own model status',()
 });
 
 test('v52 Offset 10 simulation uses the same full-interior cutaway workflow as Offset 5',()=>{
-  assert.match(app,/function startPrintingSimulation\(\)[\s\S]*enableExteriorOpen\(\)/);
+  assert.match(app,/function startPrintingSimulation\(\)[\s\S]*enableExteriorOpen\(\{forceDetail:false\}\)/);
   assert.match(offset10,/frame-side-housing/);
   assert.match(offset10,/frame-structure/);
   assert.match(offset10,/interiorCutawayVisible/);
