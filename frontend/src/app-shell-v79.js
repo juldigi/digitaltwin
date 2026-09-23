@@ -12,8 +12,7 @@ function rememberOverlayFocus(name){
 }
 function restoreOverlayFocus(name,fallback){
  const saved=overlayReturnFocus.get(name);overlayReturnFocus.delete(name);
- if(!saved)return;
- const target=saved.isConnected?saved:q(fallback);
+ const target=saved?.isConnected?saved:(fallback?q(fallback):null);
  if(target instanceof HTMLElement)requestAnimationFrame(()=>target.focus({preventScroll:true}));
 }
 function overlayFocusable(root){return root?qa(FOCUSABLE,root).filter(el=>!el.hidden&&el.getClientRects().length>0):[]}
@@ -103,14 +102,18 @@ function markSection(section){
 }
 function closeDrawer(){document.body.classList.remove('nav-open');q('#ui-menu-toggle')?.setAttribute('aria-expanded','false');restoreOverlayFocus('navigation','#ui-menu-toggle')}
 function closeLayerManager(){const panel=q('#layer-manager');if(panel)panel.hidden=true;if(getState().overlay==='layers')closeOverlay();restoreOverlayFocus('layers',PHASE1_FOUNDATION?'#nav-machine':'#nav-systems')}
-function closeInspector(){document.body.classList.add('panel-hidden');document.body.classList.remove('mobile-panel-open');setInspector(false)}
+function closeInspector({restoreFocus=true}={}){document.body.classList.add('panel-hidden');document.body.classList.remove('mobile-panel-open');setInspector(false);if(restoreFocus)restoreOverlayFocus('inspector','#panel-toggle')}
+function openInspector(tab=getState().inspectorState.tab){
+ beforeMajorOverlay('inspector');rememberOverlayFocus('inspector');
+ document.body.classList.remove('panel-hidden');
+ const mobile=matchMedia('(max-width:767px)').matches;
+ if(mobile)document.body.classList.add('mobile-panel-open');
+ setInspector(true,tab);openOverlay('inspector');
+ if(mobile)focusOverlay(q('#detail-panel'),'#close-panel');
+}
 function toggleInspector(){
- if(document.body.classList.contains('panel-hidden')){
-  beforeMajorOverlay('inspector');
-  document.body.classList.remove('panel-hidden');
-  if(matchMedia('(max-width:767px)').matches)document.body.classList.add('mobile-panel-open');
-  setInspector(true);openOverlay('inspector');
- }else{
+ if(document.body.classList.contains('panel-hidden'))openInspector();
+ else{
   closeInspector();
   if(getState().overlay==='inspector')closeOverlay();
  }
@@ -122,11 +125,11 @@ function beforeMajorOverlay(name){
   if(current==='search')closeSearch();
   else if(current==='layers')closeLayerManager();
   else if(current==='navigation')closeDrawer();
-  else if(current==='inspector')closeInspector();
+  else if(current==='inspector')closeInspector({restoreFocus:false});
   else if(current==='modal'&&q('#modal')?.open)q('#modal-close')?.click();
   if(getState().overlay===current)closeOverlay();
  }
- if(name!=='inspector'&&!document.body.classList.contains('panel-hidden'))closeInspector();
+ if(name!=='inspector'&&!document.body.classList.contains('panel-hidden'))closeInspector({restoreFocus:false});
  if(name!=='navigation')closeDrawer();
 }
 function openSystemLayers(){
@@ -139,10 +142,10 @@ function enterSimulation(){
   const hint=q('#scene-hint');if(hint)hint.textContent='Simulasi 3D memerlukan WebGL. Denah 2D tetap tersedia di perangkat ini.';
   return;
  }
- beforeMajorOverlay('inspector');setActiveSection('simulation');markSection('simulation');
+ setActiveSection('simulation');markSection('simulation');
  document.body.classList.remove('workspace-2d');setViewMode('3d');
  q('#tool-simulation')?.click();
- setInspector(true,'simulation');openOverlay('inspector');
+ openInspector('simulation');
  requestAnimationFrame(syncSimulationTransport);
 }
 
@@ -220,7 +223,7 @@ q('#nav-machine')?.addEventListener('click',()=>{setActiveSection('factory');doc
 q('#nav-assets')?.addEventListener('click',()=>{beforeMajorOverlay('modal');setActiveSection('asset');markSection('asset');openOverlay('modal')});
 q('#nav-systems')?.addEventListener('click',()=>{if(!PHASE1_FOUNDATION)openSystemLayers()});
 q('#nav-simulation-mode')?.addEventListener('click',enterSimulation);
-q('#nav-sources')?.addEventListener('click',()=>{beforeMajorOverlay('inspector');setActiveSection('reference');markSection('reference');setInspector(true,'sources');openOverlay('inspector')});
+q('#nav-sources')?.addEventListener('click',()=>{setActiveSection('reference');markSection('reference');openInspector('sources')});
 q('#nav-help')?.addEventListener('click',()=>{beforeMajorOverlay('modal');openOverlay('modal')});
 q('#nav-settings')?.addEventListener('click',()=>{beforeMajorOverlay('modal');q('#settings')?.click();openOverlay('modal')});
 
@@ -241,7 +244,7 @@ const MOBILE_TARGET={factory:'nav-machine',asset:'nav-assets',system:'nav-system
 qa('[data-mobile-nav]').forEach(button=>button.addEventListener('click',event=>{
  if(!matchMedia('(max-width:767px)').matches)return;
  const key=button.dataset.mobileNav;
- if(key==='more'){event.preventDefault();const open=!document.body.classList.contains('nav-open');if(open)beforeMajorOverlay('navigation');document.body.classList.toggle('nav-open',open);menu?.setAttribute('aria-expanded',String(open));if(open)openOverlay('navigation');else closeOverlay();return}
+ if(key==='more'){event.preventDefault();const open=!document.body.classList.contains('nav-open');if(open){beforeMajorOverlay('navigation');rememberOverlayFocus('navigation');document.body.classList.add('nav-open');menu?.setAttribute('aria-expanded','true');openOverlay('navigation');focusOverlay(q('.rail'),'.rail button:not([hidden])')}else{closeDrawer();if(getState().overlay==='navigation')closeOverlay()}return}
  const target=MOBILE_TARGET[key];if(target)q('#'+target)?.click();
 }));
 
@@ -321,7 +324,9 @@ function syncSimulationTransport(){
  const progressStyle=q('#sim-progress-bar')?.style?.width||'0%';const progress=Math.max(0,Math.min(100,parseFloat(progressStyle)||0));
  const active=status==='RUNNING'||status==='PAUSED',playing=status==='RUNNING';
  setSimulation({active,playing,stage,progress});
- bar.hidden=section!=='simulation';
+ const transportOpen=section==='simulation';
+ bar.hidden=!transportOpen;
+ document.body.classList.toggle('simulation-transport-open',transportOpen);
  q('[data-transport-stage]',bar).textContent=stage;
  q('[data-transport-progress]',bar).value=progress;
  const play=q('[data-transport-play]',bar);play.textContent=playing?'Jeda':active?'Lanjutkan':'Mulai';
@@ -331,6 +336,7 @@ ensureLayerManager();ensureSimulationTransport();
 
 const panelContent=q('#panel-content');if(panelContent)new MutationObserver(()=>requestAnimationFrame(syncSimulationTransport)).observe(panelContent,{childList:true,subtree:true});
 q('[data-tab="simulation"]')?.addEventListener('click',()=>{setActiveSection('simulation');markSection('simulation');requestAnimationFrame(syncSimulationTransport)});
+q('#close-panel')?.addEventListener('click',()=>{setInspector(false);if(getState().overlay==='inspector')closeOverlay();restoreOverlayFocus('inspector','#panel-toggle')});
 const modalElement=q('#modal');if(modalElement)new MutationObserver(()=>{if(modalElement.open){beforeMajorOverlay('modal');openOverlay('modal')}else if(getState().overlay==='modal')closeOverlay()}).observe(modalElement,{attributes:true,attributeFilter:['open']});
 const bodyObserver=new MutationObserver(()=>{
  const open=!document.body.classList.contains('panel-hidden');setInspector(open);
@@ -395,5 +401,5 @@ const relabel=()=>{
  const search=q('#global-search');if(search)search.placeholder='Cari OFFSET 5, komponen, area, atau dokumen…';
  const connection=q('#connection');if(connection)connection.textContent=navigator.onLine?'Data tersedia':'Offline';
 };
-relabel();const hydratedState=hydrateUrl();if(hydratedState.viewMode==='2d')q('#mode-2d')?.click();subscribe(state=>{markSection(state.activeSection);syncLayerControls()});
+relabel();const hydratedState=hydrateUrl();if(hydratedState.viewMode==='2d')q('#mode-2d')?.click();let lastSyncedSection=getState().activeSection;subscribe(state=>{markSection(state.activeSection);syncLayerControls();if(state.activeSection!==lastSyncedSection){lastSyncedSection=state.activeSection;requestAnimationFrame(syncSimulationTransport)}});
 document.documentElement.dataset.uiArchitecture='v162-factory-first-systems';
