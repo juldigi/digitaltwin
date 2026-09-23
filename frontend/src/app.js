@@ -27,12 +27,14 @@ const LEGACY_MACHINE_ROUTE=Object.freeze({
  'BMJ-MCH-0009':'offset10',
  'BMJ-MCH-0010':'apm2'
 });
-const normalizeMachineKey=key=>LEGACY_MACHINE_ROUTE[key]||key||FOUNDATION_SCOPE.primaryRoute;
+const normalizeMachineKey=key=>{const raw=String(key??'').trim();return raw?(LEGACY_MACHINE_ROUTE[raw]||raw):null;};
 let REQUESTED_MACHINE,GENERIC_CONFIG=null,MACHINE_KEY=FOUNDATION_SCOPE.primaryRoute,IS_OFFSET10=false,IS_APM2=false,IS_SHEETING=false,IS_GENERIC=false,IS_VERIFIED_REGISTRY_SIM=false,GENERIC_TAXONOMY=[],GENERIC_ROOT=null,ACTIVE_ROOT='O5',ACTIVE_TAXONOMY=OFFSET5_TAXONOMY,TAXONOMY_BY_ID=OFFSET5_BY_ID,taxonomyChildren=offset5Children,taxonomyStats=offset5Stats,PHOTO_REGISTRY=OFFSET5_PHOTOS,GENERIC_SOURCES=[],TECHNICAL_SOURCES=OFFSET5_SOURCES,photoStats=offset5PhotoStats,ORIENTATION=OFFSET5_ORIENTATION,PRINTING_SIMULATION_STAGES=OFFSET5_SIM_STAGES,INK_SIMULATION_SEQUENCE=OFFSET5_INK_SEQUENCE;
 function configureActiveMachine(requested){
  REQUESTED_MACHINE=requested;requested=normalizeMachineKey(requested);
+ if(!requested)throw new Error('Aset mesin harus dipilih sebelum membuka model 3D.');
  GENERIC_CONFIG=universalMachineConfig(requested);
- MACHINE_KEY=['offset10','apm2','sheeting'].includes(requested)||GENERIC_CONFIG?requested:'offset5';
+ if(!['offset5','offset10','apm2','sheeting'].includes(requested)&&!GENERIC_CONFIG)throw new Error(`Model 3D tidak terdaftar untuk ${requested}`);
+ MACHINE_KEY=requested;
  IS_OFFSET10=MACHINE_KEY==='offset10';IS_APM2=MACHINE_KEY==='apm2';IS_SHEETING=MACHINE_KEY==='sheeting';IS_GENERIC=!!GENERIC_CONFIG;IS_VERIFIED_REGISTRY_SIM=IS_GENERIC&&['VERIFIED_PROCESS_MODEL','FAMILY_PROCESS_MODEL'].includes(GENERIC_CONFIG.evidence.simulation);
  GENERIC_TAXONOMY=IS_GENERIC?universalTaxonomy(MACHINE_KEY):[];GENERIC_ROOT=GENERIC_TAXONOMY[0]?.id;
  ACTIVE_ROOT=IS_OFFSET10?'O10':IS_APM2?'APM2':IS_SHEETING?'SH':IS_GENERIC?GENERIC_ROOT:'O5';
@@ -739,7 +741,7 @@ async function switchActiveMachine(route,{historyMode='push'}={}){
   if(record){focusFoundationPlaceholder(record,{historyMode,openDialog:true});return false;}
   toast('Aset belum memiliki konteks tata letak yang dapat dibuka.',true);return false;
  }
- const normalizedRoute=normalizeMachineKey(route||FOUNDATION_SCOPE.primaryRoute),record=machineRecordForRoute(normalizedRoute),assetId=record?.machineId||normalizedRoute,assetName=record?.name||normalizedRoute,threeMode=$('#mode-3d'),targetView=threeMode?.disabled?'2d':'3d';
+ const normalizedRoute=normalizeMachineKey(route);if(!normalizedRoute){assetDialog();return false;}const record=machineRecordForRoute(normalizedRoute),assetId=record?.machineId||normalizedRoute,assetName=record?.name||normalizedRoute,threeMode=$('#mode-3d'),targetView=threeMode?.disabled?'2d':'3d';
  if(targetView==='2d'){if(record){selectFactoryAssetContext(record,{historyMode,openDialog:true});return false;}toast('Model 3D belum tersedia di perangkat ini.',true);return false;}
  if(historyMode==='push')pushContextHistory({asset:assetId,node:null,scene:'machine',view:targetView,camera:'iso'});
  if(historyMode==='push'&&targetView==='3d')threeMode?.click();
@@ -799,7 +801,7 @@ async function restoreHistoryContext(){
 }
 addEventListener('popstate',()=>{restoreHistoryContext().catch(error=>toast('Riwayat tampilan gagal dipulihkan: '+error.message,true));});
 function machineRoute(machine){
- return machine?.machineId==='BMJ-MCH-0009'?'offset10':machine?.machineId==='BMJ-MCH-0010'?'apm2':machine?.machineId==='BMJ-MCH-0002'?'sheeting':machine?.machineId==='BMJ-MCH-0003'?'offset5':machine?.machineId||'offset5';
+ return machine?.machineId==='BMJ-MCH-0009'?'offset10':machine?.machineId==='BMJ-MCH-0010'?'apm2':machine?.machineId==='BMJ-MCH-0002'?'sheeting':machine?.machineId==='BMJ-MCH-0003'?'offset5':machine?.machineId||null;
 }
 function searchableTaxonomy(route){
  return isFoundationPrimary(route)?OFFSET5_TAXONOMY:normalizeMachineKey(route)===MACHINE_KEY?ACTIVE_TAXONOMY:[];
@@ -944,7 +946,7 @@ function settingsDialog(){
  const connectionStatus=connectionTruth({online:navigator.onLine,cached:cachedDataActive,connected:Boolean(role)});
  const serviceWorkerStatus=!('serviceWorker'in navigator)?'Tidak didukung':navigator.serviceWorker.controller?'Aktif':'Menunggu aktivasi';
  const selectedNode=appState.selectedNode||'Tidak ada komponen terpilih';
- modal('Pengaturan',`<div class="settings-section"><h3>Tampilan 3D</h3><label class="check"><input id="low-mode" type="checkbox" ${engine?.low?'checked':''} ${exteriorMode?'disabled':''}> Optimasi untuk perangkat dengan performa terbatas</label>${exteriorMode?'<p class="subtle">Optimasi sementara dinonaktifkan saat interior terbuka agar detail tetap terlihat.</p>':''}<label class="check"><input id="label-mode" type="checkbox" ${engine?.labels?'checked':''}> Tampilkan nama mesin dan area</label></div><div class="settings-section"><h3>Data di perangkat</h3><p class="subtle">${cacheEnabled?'Salinan data lokal aktif agar aplikasi lebih cepat dibuka kembali.':'Salinan data lokal tidak aktif.'}</p><button id="clear-cache" class="secondary">Bersihkan Data Tersimpan</button></div><details class="settings-section system-information"><summary>Informasi Sistem</summary><p>Diagnostik teknis ditempatkan di sini agar tampilan utama tetap sederhana.</p><dl class="system-info-grid">${pair('Versi aplikasi','V185')+pair('Cakupan model',MACHINE_REGISTRY_STATS.modeled3D+' aset 3D · sumber berbeda per mesin')}${pair('Perangkat',device)}${pair('Mode tampilan',appState.viewMode==='2d'?'2D':'3D')}${pair('Aset aktif',appState.selectedAsset||'Belum memilih aset')}${pair('Komponen terpilih',selectedNode)}${pair('Koneksi data',connectionStatus)}${pair('Penyimpanan lokal',cacheEnabled?'Aktif':'Tidak aktif')}${pair('Aplikasi offline',serviceWorkerStatus)}${pair('Status tampilan 3D',engine?'Siap':'Cadangan / belum siap')}</dl></details>`);
+ modal('Pengaturan',`<div class="settings-section"><h3>Tampilan 3D</h3><label class="check"><input id="low-mode" type="checkbox" ${engine?.low?'checked':''} ${exteriorMode?'disabled':''}> Optimasi untuk perangkat dengan performa terbatas</label>${exteriorMode?'<p class="subtle">Optimasi sementara dinonaktifkan saat interior terbuka agar detail tetap terlihat.</p>':''}<label class="check"><input id="label-mode" type="checkbox" ${engine?.labels?'checked':''}> Tampilkan nama mesin dan area</label></div><div class="settings-section"><h3>Data di perangkat</h3><p class="subtle">${cacheEnabled?'Salinan data lokal aktif agar aplikasi lebih cepat dibuka kembali.':'Salinan data lokal tidak aktif.'}</p><button id="clear-cache" class="secondary">Bersihkan Data Tersimpan</button></div><details class="settings-section system-information"><summary>Informasi Sistem</summary><p>Diagnostik teknis ditempatkan di sini agar tampilan utama tetap sederhana.</p><dl class="system-info-grid">${pair('Versi aplikasi','V186')+pair('Cakupan model',MACHINE_REGISTRY_STATS.modeled3D+' aset 3D · sumber berbeda per mesin')}${pair('Perangkat',device)}${pair('Mode tampilan',appState.viewMode==='2d'?'2D':'3D')}${pair('Aset aktif',appState.selectedAsset||'Belum memilih aset')}${pair('Komponen terpilih',selectedNode)}${pair('Koneksi data',connectionStatus)}${pair('Penyimpanan lokal',cacheEnabled?'Aktif':'Tidak aktif')}${pair('Aplikasi offline',serviceWorkerStatus)}${pair('Status tampilan 3D',engine?'Siap':'Cadangan / belum siap')}</dl></details>`);
  $('#low-mode').onchange=e=>{engine?.setLow(e.target.checked);localStorage.setItem('offset5-low',e.target.checked?'1':'0');};
  $('#label-mode').onchange=e=>{if(engine)engine.labels=e.target.checked;$('#labels').classList.toggle('active',e.target.checked);emitDomainState({visibleLayers:{labels:e.target.checked}});};
  on('#clear-cache',async()=>{await cache.clear();toast('Data tersimpan di perangkat sudah dibersihkan.');});

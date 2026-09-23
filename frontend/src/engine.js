@@ -9,7 +9,7 @@ import {OffsetMachineTemplate} from './offset5.js';
 import {PrintingSimulation} from './simulation.js';
 import {FOUNDATION_SCOPE,canOpenTechnical3D} from './data/foundation-scope.js';
 export {OffsetMachineTemplate};
-const normalizeFoundationMachineKey=key=>key==='BMJ-MCH-0003'||key==='offset5'||!key?FOUNDATION_SCOPE.primaryRoute:String(key);
+const normalizeFoundationMachineKey=key=>{const raw=String(key??'').trim();return raw==='BMJ-MCH-0003'?'offset5':raw||null;};
 
 export class FactoryEngine {
   constructor(container,onSelect){
@@ -254,6 +254,7 @@ export class FactoryEngine {
   setLow(on){this.low=on;this.renderer.setPixelRatio(on?1:Math.min(devicePixelRatio,1.7));this.renderer.shadowMap.enabled=!on;this.template.setLow(on);this.resize();}
   async switchMachine(key){
     const requested=normalizeFoundationMachineKey(key);
+    if(!requested){this.onError?.('Pilih aset sebelum membuka model 3D.');return false;}
     if(!canOpenTechnical3D(requested)){this.onError?.('Model 3D untuk aset ini belum tersedia.');return false;}
     if(this.machineKey===requested)return true;
     const {createMachineTemplate,createMachineSimulation}=await import('./machine-runtime.js');

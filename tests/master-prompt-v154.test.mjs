@@ -70,10 +70,10 @@ test('production UI exposes source confidence and explicit truth statuses',()=>{
 });
 
 test('V154 cache and shell identifiers include the truth layer',()=>{
-  assert.match(html,/app-shell-v79\.css\?v=185/);
-  assert.match(html,/src\/app\.js\?v=185/);
-  assert.match(html,/src\/app-shell-v79\.js\?v=185/);
+  assert.match(html,/app-shell-v79\.css\?v=186/);
+  assert.match(html,/src\/app\.js\?v=186/);
+  assert.match(html,/src\/app-shell-v79\.js\?v=186/);
   assert.match(shell,/uiArchitecture='v162-factory-first-systems'/);
-  assert.match(sw,/factory-digital-twin-v185-navigation-simulation-hardening-20260923/);
+  assert.match(sw,/factory-digital-twin-v186-asset-neutral-routing-20260923/);
   assert.match(sw,/src\/data\/truth-status\.js/);
 });
