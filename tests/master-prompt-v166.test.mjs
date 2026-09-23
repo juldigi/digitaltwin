@@ -30,7 +30,7 @@ test('V166 modal and canonical overlays block accidental background interaction'
   assert.match(css,/body\.search-open \.ui-backdrop,[\s\S]*body\.layer-open \.ui-backdrop\{display:block\}/);
   assert.match(shell,/document\.body\.classList\.add\('layer-open'\)/);
   assert.match(shell,/document\.body\.classList\.remove\('layer-open'\)/);
-  assert.match(css,/\.canonical-layer-manager\{z-index:90\}/);
+  assert.match(css,/\.canonical-layer-manager\{position:fixed;z-index:90/);
   assert.match(css,/dialog#modal\[open\]\{display:flex;flex-direction:column\}/);
   assert.match(css,/#modal-body\{min-height:0;overflow:auto;overscroll-behavior:contain\}/);
 });
