@@ -45,11 +45,11 @@ test('placeholder route compatibility remains lightweight and cannot unlock tech
 
 test('V162 release identifiers keep technical 3D foundation-only while restoring factory context',()=>{
  assert.match(scope,/release:'V162'/);
- assert.match(html,/app-shell-v79\.css\?v=167/);
- assert.match(html,/src\/app\.js\?v=165/);
+ assert.match(html,/app-shell-v79\.css\?v=168/);
+ assert.match(html,/src\/app\.js\?v=168/);
  assert.match(html,/src\/app-shell-v79\.js\?v=167/);
  assert.match(shell,/v162-factory-first-systems/);
- assert.match(sw,/factory-digital-twin-v167-interaction-state-20260923/);
+ assert.match(sw,/factory-digital-twin-v168-reading-flow-20260923/);
 });
 
 test('offline shell also stays free from expansion runtime modules',()=>{
