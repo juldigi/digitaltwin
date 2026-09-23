@@ -9,6 +9,11 @@ import {SHEETING_PHOTO_REGISTRY,SHEETING_TECHNICAL_SOURCES,sheetingPhotoStats,SH
 const boxOf=o=>new THREE.Box3().setFromObject(o);
 const roleCount=(m,r)=>m.meshes.filter(x=>x.userData.role===r).length;
 const roleMeshes=(m,r)=>m.meshes.filter(x=>x.userData.role===r);
+const advance=(sim,now,seconds,step=.04)=>{
+  let left=seconds;
+  while(left>1e-9){const dt=Math.min(step,left);now+=dt*1000;sim.update(now);left-=dt;}
+  return now;
+};
 
 test('V196 keeps BMJ photos primary and uses family sources only for guarded cutter/delivery kinematics',()=>{
   assert.equal(SHEETING_VISUAL_REFERENCE.plantModel,'HSM-CTM7');
@@ -27,7 +32,7 @@ test('V196 keeps BMJ photos primary and uses family sources only for guarded cut
   const msp=SHEETING_TECHNICAL_SOURCES.find(s=>s.id==='SHEETING-MAXSON-MSP-PDF');
   const pinch=SHEETING_TECHNICAL_SOURCES.find(s=>s.id==='SHEETING-MAXSON-TAKEAWAY-PINCH');
   const overlap=SHEETING_TECHNICAL_SOURCES.find(s=>s.id==='SHEETING-MAXSON-OVERLAP-ROLL');
-  assert.match(hsm.note,/Flat Bed Knife/i);
+  assert.match(hsm.note,/flat[- ]bed knife/i);
   assert.match(msp.note,/stationary bed knife/i);
   assert.match(pinch.note,/still attached|continuous web|taut/i);
   assert.match(overlap.note,/slow-speed tapes|shingling/i);
@@ -119,19 +124,19 @@ test('V196 simulation keeps a continuous attached leader until the actual cut in
 
   // Halfway to first cut: no detached sheet yet; downstream leader is half a cut length.
   const half=sim.cutInterval*.5;
-  now+=half*1000;sim.update(now);
+  now=advance(sim,now,half);
   assert.equal(sim.cutCount,0);
   assert.equal(sim.sheets.filter(x=>x.visible).length,0);
   assert.ok(Math.abs(sim.pendingLeaderLength-sim.targetCutLength*.5)<.03);
   assert.ok(sim.pendingLeaderSegments.some(x=>x.visible));
 
   // Just before first cut the attached leader approaches one full sheet length.
-  now+=(sim.cutInterval*.49)*1000;sim.update(now);
+  now=advance(sim,now,sim.cutInterval*.49);
   assert.equal(sim.cutCount,0);
   assert.ok(sim.pendingLeaderLength>sim.targetCutLength*.96);
 
   // Cross the cut event: leader resets and sheet 1 becomes detached.
-  now+=(sim.cutInterval*.02)*1000;sim.update(now);
+  now=advance(sim,now,sim.cutInterval*.02);
   assert.equal(sim.cutCount,1);
   assert.ok(sim.pendingLeaderLength<sim.targetCutLength*.05);
   const sheet=sim.sheets.find(x=>x.visible&&x.userData.cutId===1);
@@ -159,7 +164,7 @@ test('V196 high-speed take-away creates a real gap from the next attached web',(
   let now=1000;sim.update(now);
 
   // Move to 0.45 s after first cut.
-  now+=(sim.cutInterval+.45)*1000;sim.update(now);
+  now=advance(sim,now,sim.cutInterval+.45);
   const sheet=sim.sheets.find(x=>x.visible&&x.userData.cutId===1);
   assert.ok(sheet);
   const age=sim.elapsed-sim.cutInterval;
@@ -196,15 +201,15 @@ test('V196 fly-knife revolver is web-length phase locked and only one cut occurs
   sim.start();
   let now=1000;sim.update(now);
 
-  now+=(sim.cutInterval*.25)*1000;sim.update(now);
+  now=advance(sim,now,sim.cutInterval*.25);
   const q25=rotor.quaternion.clone();
   assert.ok(q25.angleTo(rest)>.2);
 
-  now+=(sim.cutInterval*.25)*1000;sim.update(now);
+  now=advance(sim,now,sim.cutInterval*.25);
   const q50=rotor.quaternion.clone();
   assert.ok(q50.angleTo(q25)>.2);
 
-  now+=(sim.cutInterval*.50)*1000;sim.update(now);
+  now=advance(sim,now,sim.cutInterval*.50);
   assert.equal(sim.cutCount,1);
   assert.ok(rotor.quaternion.angleTo(rest)<.08,'one revolution should return cutter to cut orientation at next cut');
   assert.ok(sim.state().bladeCount===2);
