@@ -419,10 +419,11 @@ test('runtime binds every workbench button and provides a visual fallback withou
   assert.match(app,/Final CU → X3 Delivery/);
 });
 
-test('startup routes splash directly to the Pabrik factory overview',()=>{
+test('startup resolves the requested deep-link before revealing the workspace',()=>{
   assert.match(html,/id="nav-machine"[^>]*>[\s\S]*?<small>Pabrik<\/small>/);
   assert.match(mobileStableUi,/factory:'nav-machine'/);
-  assert.match(app,/else showHome\(\)/);
+  assert.match(app,/await restoreHistoryContext\(\)/);
   assert.match(app,/Menyiapkan denah pabrik/);
-  assert.match(app,/function showHome\(\)[\s\S]*setView\('factory'\)/);
+  assert.match(app,/function showHome\(\{historyMode='none'\}=\{\}\)[\s\S]*setView\('factory'\)/);
+  assert.match(app,/if\(!route\)\{[\s\S]*showHome\(\{historyMode:'none'\}\)/);
 });
