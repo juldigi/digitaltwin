@@ -37,7 +37,7 @@ export const LEGACY_MACHINE_ROUTE=Object.freeze({
  'BMJ-MCH-0009':'offset10',
  'BMJ-MCH-0010':'apm2'
 });
-export const normalizeMachineKey=key=>LEGACY_MACHINE_ROUTE[key]||key||'offset5';
+export const normalizeMachineKey=key=>{const raw=String(key??'').trim();return raw?(LEGACY_MACHINE_ROUTE[raw]||raw):null;};
 
 export const DEDICATED_MACHINE_KEYS=Object.freeze([
  'offset5','sheeting','offset10','apm2',
@@ -46,10 +46,11 @@ export const DEDICATED_MACHINE_KEYS=Object.freeze([
  'BMJ-MCH-0016','BMJ-MCH-0018','BMJ-MCH-0019','BMJ-MCH-0020','BMJ-MCH-0022','BMJ-MCH-0024'
 ]);
 const DEDICATED_SET=new Set(DEDICATED_MACHINE_KEYS);
-export const isDedicatedMachineKey=key=>DEDICATED_SET.has(normalizeMachineKey(key));
+export const isDedicatedMachineKey=key=>{const normalized=normalizeMachineKey(key);return Boolean(normalized&&DEDICATED_SET.has(normalized));};
 
 export function createMachineTemplate(key){
  const k=normalizeMachineKey(key);
+ if(!k)throw new Error('Machine key is required');
  if(k==='offset5')return new OffsetMachineTemplate();
  if(k==='sheeting')return new SheetingMachineTemplate();
  if(k==='offset10')return new Offset10MachineTemplate();
@@ -67,11 +68,12 @@ export function createMachineTemplate(key){
  if(k==='BMJ-MCH-0024')return new UpgLy300MachineTemplate();
  if(isReferenceMachineKey(k))return new ReferenceMachineTemplate(k);
  if(universalMachineConfig(k))return new UniversalMachineTemplate(k);
- return new OffsetMachineTemplate();
+ throw new Error(`No 3D template registered for ${k}`);
 }
 
 export function createMachineSimulation(key,machine,template){
  const k=normalizeMachineKey(key);
+ if(!k)throw new Error('Machine key is required');
  if(k==='offset5')return new PrintingSimulation(machine,template);
  if(k==='sheeting')return new SheetingProcessSimulation(machine,template);
  if(k==='offset10')return new Offset10PrintingSimulation(machine,template);
@@ -89,5 +91,5 @@ export function createMachineSimulation(key,machine,template){
  if(k==='BMJ-MCH-0024')return new UpgLy300ProcessSimulation(machine,template);
  if(isReferenceMachineKey(k))return new ReferenceProcessSimulation(machine,template);
  if(universalMachineConfig(k))return new UniversalProcessSimulation(machine,template);
- return new PrintingSimulation(machine,template);
+ throw new Error(`No simulation registered for ${k}`);
 }
