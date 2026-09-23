@@ -358,7 +358,7 @@ function renderFactoryPanel(){
  const canonicalFactoryLayer={roof:'roof',building:'building',machines:'machines',labels:'labels',unidentified:'unidentified',reference:'reference'};
  $$('[data-factory-layer]').forEach(input=>input.onchange=()=>{const key=input.dataset.factoryLayer,visible=input.checked;engine.setFactoryLayer(key,visible);const canonical=canonicalFactoryLayer[key];if(canonical)emitDomainState({visibleLayers:{[canonical]:visible}});});
  $('#factory-asset-focus').onchange=e=>{if(e.target.value){const p=layout.placements.find(p=>p.machineId===e.target.value),m=MACHINE_REGISTRY_BY_ID.get(e.target.value);engine.setFactoryLayer(p.status==='UNIDENTIFIED'?'unidentified':'machines',true);if(m)selectFactoryAssetContext(m,{historyMode:'none',openDialog:true,focus:true});else engine.focusFactoryAsset(e.target.value);}};
- $('#factory-overview').onclick=()=>{engine.clearFactorySelection();engine.fit(engine.factory,'iso');$('#geometry-caption').textContent='Pabrik · Seluruh Area';$('#scene-hint').textContent='Klik aset untuk memilih · seret untuk memutar · zoom dengan cubit/scroll';emitDomainState({selectedAsset:null,selectedArea:null,activeSection:'factory',cameraPreset:'iso'});};$('#factory-unknown').onclick=()=>{engine.clearFactorySelection();engine.setFactoryLayer('unidentified',true);engine.fit(layers.unidentified);};return true;
+ $('#factory-overview').onclick=()=>{engine.clearFactorySelection();engine.fit(engine.factory,'iso');$('#geometry-caption').textContent='Pabrik · Seluruh Area';$('#scene-hint').textContent='Klik aset untuk memilih · seret untuk memutar · zoom dengan cubit/scroll';emitDomainState({selectedAsset:null,selectedArea:null,selectedNode:null,selectedSystem:null,activeReference:null,activeSection:'factory',cameraPreset:'iso',inspectionMode:{explode:false,isolate:false,section:false,interior:false}});};$('#factory-unknown').onclick=()=>{engine.clearFactorySelection();engine.setFactoryLayer('unidentified',true);engine.fit(layers.unidentified);};return true;
 }
 function renderPanel(tab=activeTab){
  if(editing&&engine){engine.edit(false);engine.onTransform=null;engine.applyPlacement(state);editing=false;}
@@ -522,7 +522,7 @@ async function acceptState(next){state=next;engine?.loadLayout(activeLayout());i
 function setView(view){
  const l=activeLayout();
  if(view==='factory'&&!l){layoutDialog();return;}
- if(view==='factory'&&engine?.isPrintingSimulationActive()){engine.stopPrintingSimulation();simulationState=engine.getPrintingSimulationState();simulationOwnsExterior=false;updateSimulationPanel(simulationState);}if(view==='factory'&&exteriorMode)exitExteriorMode();editing=false;if(engine)engine.onTransform=null;explode=0;selectedPart=null;engine?.setView(view,state);
+ if(view==='factory'&&engine?.isPrintingSimulationActive()){engine.stopPrintingSimulation();simulationState=engine.getPrintingSimulationState();simulationOwnsExterior=false;updateSimulationPanel(simulationState);}if(view==='factory'&&exteriorMode)exitExteriorMode();if(view==='factory')activeTab='overview';editing=false;if(engine)engine.onTransform=null;explode=0;selectedPart=null;engine?.setView(view,state);
  $$('.rail>button').forEach(b=>b.classList.remove('active'));
  $('#nav-machine')?.classList.add('active');
  const machineName=IS_OFFSET10?'OFFSET 10':IS_APM2?'APM 2':IS_SHEETING?'SHEETING LEXUS':IS_GENERIC?GENERIC_CONFIG.machine.name:'OFFSET 5';
