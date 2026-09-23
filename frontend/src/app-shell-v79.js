@@ -103,26 +103,28 @@ function markSection(section){
 }
 function closeDrawer(){document.body.classList.remove('nav-open');q('#ui-menu-toggle')?.setAttribute('aria-expanded','false');restoreOverlayFocus('navigation','#ui-menu-toggle')}
 function closeLayerManager(){const panel=q('#layer-manager');if(panel)panel.hidden=true;if(getState().overlay==='layers')closeOverlay();restoreOverlayFocus('layers',PHASE1_FOUNDATION?'#nav-machine':'#nav-systems')}
-function closeInspector(){document.body.classList.add('panel-hidden');document.body.classList.remove('mobile-panel-open');setInspector(false)}
+function closeInspector(restoreFocus=true){document.body.classList.add('panel-hidden');document.body.classList.remove('mobile-panel-open');setInspector(false);if(restoreFocus)restoreOverlayFocus('inspector','#panel-toggle')}
 function toggleInspector(){
  if(document.body.classList.contains('panel-hidden')){
-  beforeMajorOverlay('inspector');
+  beforeMajorOverlay('inspector');rememberOverlayFocus('inspector');
   document.body.classList.remove('panel-hidden');
   if(matchMedia('(max-width:767px)').matches)document.body.classList.add('mobile-panel-open');
   setInspector(true);openOverlay('inspector');
+  if(matchMedia('(max-width:767px)').matches)focusOverlay(q('#detail-panel'),'#close-panel');
  }else{
   closeInspector();
   if(getState().overlay==='inspector')closeOverlay();
  }
 }
 q('#panel-toggle')?.addEventListener('click',toggleInspector);
+q('#close-panel')?.addEventListener('click',()=>{closeInspector();if(getState().overlay==='inspector')closeOverlay()});
 function beforeMajorOverlay(name){
  const current=getState().overlay;
  if(current&&current!==name){
   if(current==='search')closeSearch();
   else if(current==='layers')closeLayerManager();
   else if(current==='navigation')closeDrawer();
-  else if(current==='inspector')closeInspector();
+  else if(current==='inspector')closeInspector(false);
   else if(current==='modal'&&q('#modal')?.open)q('#modal-close')?.click();
   if(getState().overlay===current)closeOverlay();
  }
@@ -139,10 +141,11 @@ function enterSimulation(){
   const hint=q('#scene-hint');if(hint)hint.textContent='Simulasi 3D memerlukan WebGL. Denah 2D tetap tersedia di perangkat ini.';
   return;
  }
- beforeMajorOverlay('inspector');setActiveSection('simulation');markSection('simulation');
+ beforeMajorOverlay('inspector');rememberOverlayFocus('inspector');setActiveSection('simulation');markSection('simulation');
  document.body.classList.remove('workspace-2d');setViewMode('3d');
  q('#tool-simulation')?.click();
  setInspector(true,'simulation');openOverlay('inspector');
+ if(matchMedia('(max-width:767px)').matches)focusOverlay(q('#detail-panel'),'#close-panel');
  requestAnimationFrame(syncSimulationTransport);
 }
 
@@ -220,7 +223,7 @@ q('#nav-machine')?.addEventListener('click',()=>{setActiveSection('factory');doc
 q('#nav-assets')?.addEventListener('click',()=>{beforeMajorOverlay('modal');setActiveSection('asset');markSection('asset');openOverlay('modal')});
 q('#nav-systems')?.addEventListener('click',()=>{if(!PHASE1_FOUNDATION)openSystemLayers()});
 q('#nav-simulation-mode')?.addEventListener('click',enterSimulation);
-q('#nav-sources')?.addEventListener('click',()=>{beforeMajorOverlay('inspector');setActiveSection('reference');markSection('reference');setInspector(true,'sources');openOverlay('inspector')});
+q('#nav-sources')?.addEventListener('click',()=>{beforeMajorOverlay('inspector');rememberOverlayFocus('inspector');setActiveSection('reference');markSection('reference');setInspector(true,'sources');openOverlay('inspector');if(matchMedia('(max-width:767px)').matches)focusOverlay(q('#detail-panel'),'#close-panel')});
 q('#nav-help')?.addEventListener('click',()=>{beforeMajorOverlay('modal');openOverlay('modal')});
 q('#nav-settings')?.addEventListener('click',()=>{beforeMajorOverlay('modal');q('#settings')?.click();openOverlay('modal')});
 
@@ -241,7 +244,7 @@ const MOBILE_TARGET={factory:'nav-machine',asset:'nav-assets',system:'nav-system
 qa('[data-mobile-nav]').forEach(button=>button.addEventListener('click',event=>{
  if(!matchMedia('(max-width:767px)').matches)return;
  const key=button.dataset.mobileNav;
- if(key==='more'){event.preventDefault();const open=!document.body.classList.contains('nav-open');if(open)beforeMajorOverlay('navigation');document.body.classList.toggle('nav-open',open);menu?.setAttribute('aria-expanded',String(open));if(open)openOverlay('navigation');else closeOverlay();return}
+ if(key==='more'){event.preventDefault();const open=!document.body.classList.contains('nav-open');if(open){beforeMajorOverlay('navigation');rememberOverlayFocus('navigation')}document.body.classList.toggle('nav-open',open);menu?.setAttribute('aria-expanded',String(open));if(open){openOverlay('navigation');focusOverlay(q('.rail'),'.rail button:not([hidden])')}else{closeOverlay();restoreOverlayFocus('navigation','#ui-menu-toggle')}return}
  const target=MOBILE_TARGET[key];if(target)q('#'+target)?.click();
 }));
 
@@ -348,7 +351,7 @@ addEventListener('bmj:historyrestore',event=>{
  setState({selectedAsset:detail.selectedAsset||null,selectedNode:detail.selectedNode||null,viewMode},{url:false});
  if(viewMode==='2d')q('#mode-2d')?.click();else q('#mode-3d')?.click();
 });
-const syncViewport=()=>{document.documentElement.style.setProperty('--app-vh',`${window.visualViewport?.height||innerHeight}px`);const w=innerWidth;setTimeout(()=>window.BMJAppState?.setState({deviceMode:w<768?'mobile':w<=1180?'tablet':'desktop'},{url:false}),0)};
+const syncViewport=()=>{document.documentElement.style.setProperty('--app-vh',`${window.visualViewport?.height||innerHeight}px`);const w=innerWidth;if(w>=768&&getState().overlay==='navigation'){closeDrawer();closeOverlay()}if(w>=768)document.body.classList.remove('mobile-panel-open');setTimeout(()=>window.BMJAppState?.setState({deviceMode:w<768?'mobile':w<=1180?'tablet':'desktop'},{url:false}),0)};
 syncViewport();addEventListener('resize',syncViewport,{passive:true});window.visualViewport?.addEventListener('resize',syncViewport,{passive:true});
 
 function syncInspectorTabs(){
@@ -374,7 +377,7 @@ syncInspectorTabs();
 document.addEventListener('keydown',event=>{
  if(event.key==='Tab'){
   const overlay=getState().overlay;
-  const root=overlay==='search'?q('#universal-search-panel'):overlay==='layers'?q('#layer-manager'):overlay==='navigation'?q('.rail'):overlay==='modal'?q('#modal'):overlay==='inspector'&&matchMedia('(max-width:767px)').matches?q('#detail-panel'):null;
+  const root=overlay==='search'?q('#universal-search-panel'):overlay==='layers'?q('#layer-manager'):overlay==='navigation'?q('.rail'):overlay==='modal'?q('#modal'):null;
   if(root&&trapOverlayFocus(event,root))return;
  }
  if(event.key!=='Escape')return;
@@ -395,5 +398,13 @@ const relabel=()=>{
  const search=q('#global-search');if(search)search.placeholder='Cari OFFSET 5, komponen, area, atau dokumen…';
  const connection=q('#connection');if(connection)connection.textContent=navigator.onLine?'Data tersedia':'Offline';
 };
-relabel();const hydratedState=hydrateUrl();if(hydratedState.viewMode==='2d')q('#mode-2d')?.click();subscribe(state=>{markSection(state.activeSection);syncLayerControls()});
+function syncAccessibleControls(state){
+ const panelToggle=q('#panel-toggle');if(panelToggle)panelToggle.setAttribute('aria-expanded',String(Boolean(state.inspectorState?.open)));
+ const mode2d=q('#mode-2d'),mode3d=q('#mode-3d');if(mode2d)mode2d.setAttribute('aria-pressed',String(state.viewMode==='2d'));if(mode3d)mode3d.setAttribute('aria-pressed',String(state.viewMode==='3d'));
+ document.body.dataset.overlay=state.overlay||'';
+ const backdrop=q('#ui-backdrop');if(backdrop)backdrop.setAttribute('aria-hidden',String(!['search','layers','navigation'].includes(state.overlay)));
+}
+function syncPressedTools(){for(const id of ['tool-explode','tool-isolate','tool-interior','labels']){const el=q('#'+id);if(el)el.setAttribute('aria-pressed',String(el.classList.contains('active')))}}
+const pressedTools=qa('#tool-explode,#tool-isolate,#tool-interior,#labels');if(pressedTools.length){const pressedObserver=new MutationObserver(syncPressedTools);pressedTools.forEach(el=>pressedObserver.observe(el,{attributes:true,attributeFilter:['class']}));syncPressedTools()}
+relabel();const hydratedState=hydrateUrl();if(hydratedState.viewMode==='2d')q('#mode-2d')?.click();subscribe(state=>{markSection(state.activeSection);syncLayerControls();syncAccessibleControls(state)});
 document.documentElement.dataset.uiArchitecture='v162-factory-first-systems';
