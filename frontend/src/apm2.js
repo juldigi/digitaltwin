@@ -176,7 +176,7 @@ export class APM2MachineTemplate{
     this.box(frame,[1.10,.22,1.82],[0,.36,0],'dark',.022);
 
     const housing=this.group(g,'apm2-platen-housing','Platen Exterior Housing',[0,0,0],[0,.22,-.35],['APM2-SP102-E-VISUAL']);
-    this.cover(this.box(housing,[1.16,1.28,.10],[0,1.35,-.94],'cream',.03));
+    this.cover(this.box(housing,[1.16,.58,.10],[0,1.00,-.94],'cream',.018));this.cover(this.box(housing,[1.16,.32,.10],[0,1.83,-.94],'cream',.018));this.cover(this.box(housing,[.45,.38,.10],[-.355,1.48,-.94],'cream',.012));this.cover(this.box(housing,[.21,.38,.10],[.475,1.48,-.94],'cream',.012));
     this.cover(this.box(housing,[1.16,1.28,.10],[0,1.35,.84],'cream',.03));
     this.cover(this.box(housing,[1.16,.28,1.86],[0,2.02,0],'cream',.035));
     this.cover(this.box(housing,[1.12,.17,.18],[0,.66,-1.00],'green',.02));
