@@ -46,6 +46,8 @@ test('V166 mobile information surfaces keep practical touch and reading sizes',(
   assert.match(css,/\.asset-browser-copy small,\.asset-browser-copy span\{font-size:10px/);
   assert.match(css,/\.context-reference-card p,\.context-reference-card>a\{font-size:10px\}/);
   assert.match(css,/\.system-boundary p\{font-size:10px\}/);
+  assert.match(css,/button:disabled,\[aria-disabled="true"\]\{opacity:\.52;cursor:not-allowed\}/);
+  assert.match(css,/\.universal-search-field input,[\s\S]*?\.asset-filter-grid input,\.asset-filter-grid select\{min-height:44px;font-size:16px\}/);
 });
 
 test('V166 primary visible navigation and viewport controls remain wired',()=>{
