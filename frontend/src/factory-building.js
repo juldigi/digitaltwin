@@ -13,12 +13,11 @@ export function machineClearanceBoxes(fleet,clearance=MACHINE_SERVICE_CLEARANCE)
 const OFFSET_ROOM_IDS=new Set(['BMJ-MCH-0003','BMJ-MCH-0004','BMJ-MCH-0005','BMJ-MCH-0006','BMJ-MCH-0009']);
 const SOURCE_ROOM_WORDS=/Workshop|Maintenance|Adm Room|Supervisor|Meeting|Office|QC Sample|R\.PDS|R\.Sample|R\.INCOMING|WH Spareparts|Mushola|Loading Dock|CTF|CTP|Toilet|R\.BROKE|R\.FPS|Electric room|PPIC|Pantry|Kitchen|Refreshment|Locker|Loker|Changing|Change Room|Janitor|Cleaning/i;
 export function dedupeWallSegments(walls,tolerance=.06){
- const q=v=>Math.round(Number(v||0)/tolerance),seen=new Set(),unique=[];let removed=0;
+ const unique=[];let removed=0;
+ const close=(a,b)=>Math.hypot(Number(a?.[0]||0)-Number(b?.[0]||0),Number(a?.[1]||0)-Number(b?.[1]||0))<=tolerance;
  for(const w of walls||[]){
-  const a=w.a||[0,0],b=w.b||[0,0],p1=[q(a[0]),q(a[1])],p2=[q(b[0]),q(b[1])];
-  const ordered=(p1[0]<p2[0]||(p1[0]===p2[0]&&p1[1]<=p2[1]))?[p1,p2]:[p2,p1];
-  const key=ordered[0].join(',')+'|'+ordered[1].join(',')+'|'+q(w.width||.12);
-  if(seen.has(key)){removed++;continue;}seen.add(key);unique.push(w);
+  const dup=unique.some(u=>Math.abs(Number(u.width||.12)-Number(w.width||.12))<=tolerance&&((close(u.a,w.a)&&close(u.b,w.b))||(close(u.a,w.b)&&close(u.b,w.a))));
+  if(dup){removed++;continue;}unique.push(w);
  }
  return {walls:unique,removed};
 }
@@ -678,7 +677,7 @@ export function buildActualFactory(layout,fleet){
   const s=String(semantic||'');
   if(/FIRE_EXTINGUISHER|EMERGENCY_LUMINAIRE|CONVEX_MIRROR|BARRIER_RAIL|BARRIER_POST|TRAFFIC_CUE|UTILITY_|IPAL_.*REFERENCE/i.test(s))return false;
   if(/KEYBOARD_KEY|DUAL_CASTER|PEDESTAL_CASTER|DRAWER_PULL|HANDLE_REFERENCE|NUMBER_PLATE|VENT_REFERENCE|DIFFUSER_SLOT|RETURN_GRILLE_SLOT|ANCHOR_BOLT|PANEL_OR_CONTROL_JOINT/i.test(s))return false;
-  return /^(ADMIN|OFFICE|PPIC|PDS|QC|INCOMING|CTF|CTP|PREPRESS|DISPATCH|TOILET|PANTRY|LOCKER|PRAYER|MUSHOLA|ELECTRICAL|SPAREPART|WORKSHOP|MAINTENANCE|MEETING|SUPERVISOR|JANITOR|BROKE|RMS|WRAPPED_PAPERBOARD|FG_DISPATCH|ROOM_FLOOR|PRODUCTION_WIP|PRODUCTION_WASTE|WAREHOUSE_FORK_WHEEL_SCUFF|FLOOR_CONTROL_JOINT|FLOOR_SERVICE_CLEARANCE|PRESS_ROOM_SKIRTING|PRESS_ROOM_KICK_RAIL|WALL_BASE_PLINTH)/i.test(s);
+  return /^(ADMIN|OFFICE|PPIC|PDS|QC|INCOMING|CTF|CTP|PREPRESS|DISPATCH|TOILET|PANTRY|LOCKER|PRAYER|MUSHOLA|ELECTRICAL|SPAREPART|WORKSHOP|WORKBENCH|TOOL_BOARD|MAINTENANCE|MEETING|SUPERVISOR|JANITOR|BROKE|RMS|WRAPPED_PAPERBOARD|FG_DISPATCH|ROOM_FLOOR|PRODUCTION_WIP|PRODUCTION_WASTE|WAREHOUSE_FORK_WHEEL_SCUFF|FLOOR_CONTROL_JOINT|FLOOR_SERVICE_CLEARANCE|PRESS_ROOM_SKIRTING|PRESS_ROOM_KICK_RAIL|WALL_BASE_PLINTH)/i.test(s);
  };
  let hiddenReferenceRealism=0,visibleFunctionalReferences=0;root.traverse(o=>{const accuracy=String(o.userData?.accuracy||''),isReference=o.userData?.evidenceLayer==='REFERENCE_REALISM'||accuracy.includes('REFERENCE_NOT_AS_BUILT');if(isReference){const show=!!o.userData?.functionalReferenceVisible||functionalVisibleSemantic(o.userData?.semantic);o.visible=show;o.userData={...o.userData,evidenceLayer:'REFERENCE_REALISM',visualizationMode:show?'FUNCTIONAL_REFERENCE_VISIBLE':'REFERENCE_HIDDEN_BY_DEFAULT'};if(show)visibleFunctionalReferences++;else hiddenReferenceRealism++;}});
  buildingDetailStats.visibleFunctionalReferences=visibleFunctionalReferences;
