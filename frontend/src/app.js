@@ -140,6 +140,11 @@ function renderStaticMachineFallback(error){
 function modal(title,html){$('#modal-title').textContent=title;$('#modal-body').innerHTML=html;if(!$('#modal').open)$('#modal').showModal();}
 function closeModal(){const dialog=$('#modal');if(dialog?.open)dialog.close();}
 function emitDomainState(detail){window.dispatchEvent(new CustomEvent('bmj:domainstate',{detail}));}
+function signalAppReady(status='ready'){
+ const normalized=status==='error'?'error':'ready';
+ document.documentElement.dataset.appReady=normalized;
+ window.dispatchEvent(new CustomEvent('bmj:appready',{detail:{status:normalized}}));
+}
 function showPanel(){document.body.classList.remove('panel-hidden');if(matchMedia('(max-width:767px)').matches)document.body.classList.add('mobile-panel-open');emitDomainState({inspectorState:{open:true,tab:activeTab}});}
 const activeLayout=()=>selectPlantLayout(state.layout,bundledLayout);
 function redrawPlantPlan(){if(bundledLayout)drawPlantPlan($('#dwg-canvas'),bundledLayout);}
@@ -901,9 +906,10 @@ try{
  renderStatus();redrawPlantPlan();
  await restoreHistoryContext();
  const boot=$('#boot');if(boot)boot.hidden=true;$('#engine-status').textContent=engine?'Pabrik 3D siap':'Denah tersedia · penampil 3D belum siap';
+ signalAppReady('ready');
 }catch(e){
  const boot=$('#boot');if(boot){boot.hidden=false;boot.innerHTML='<strong>Denah pabrik belum dapat dimuat</strong><p>Data CAD tersimpan tidak berhasil dibuka. Tidak ada geometri pengganti yang dibuat.</p><button id="boot-retry" class="primary">Muat Ulang</button>';on('#boot-retry',()=>location.reload());}
- $('#engine-status').textContent='Denah belum tersedia';toast('Denah pabrik gagal dimuat: '+e.message,true);
+ $('#engine-status').textContent='Denah belum tersedia';toast('Denah pabrik gagal dimuat: '+e.message,true);signalAppReady('error');
 }
 function scrollInspectorToTabStart(){
  const panel=$('#detail-panel'),content=$('#panel-content'),top=$('.panel-top'),tabs=$('.tabs');if(!panel||!content||!tabs)return;
