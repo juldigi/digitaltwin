@@ -1,4 +1,4 @@
-const VERSION='factory-digital-twin-v173-navigation-mode-consistency-20260923';
+const VERSION='factory-digital-twin-v174-navigation-selector-hotfix-20260923';
 const SHELL=[
  './','./index.html','./config.json','./assets/favicon.svg','./assets/splash-industrial-v79.webp',
  './style.css','./runtime-fallback.css','./app-shell-v79.css','./ui-v5.css','./responsive-v5.css','./experience-v37.css',
