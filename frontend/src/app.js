@@ -748,7 +748,7 @@ function universalSearchResults(query){
   const title=normalizeSearchText(item.title),subtitle=normalizeSearchText(item.subtitle);
   let score=title===q?100:title.startsWith(q)?80:title.includes(q)?60:subtitle.includes(q)?35:20;
   if(item.type==='component'&&title.includes(q))score+=12;
-  if(item.type==='machine')score+=8;
+  if(item.type==='machine')score+=70;
   return {...item,score,_search:undefined};
  }).filter(Boolean).sort((a,b)=>b.score-a.score||a.group.localeCompare(b.group,'id')||a.title.localeCompare(b.title,'id')).slice(0,48);
 }
