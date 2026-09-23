@@ -250,7 +250,7 @@ qa('[data-mobile-nav]').forEach(button=>button.addEventListener('click',event=>{
 }));
 
 q('#mode-2d')?.addEventListener('click',()=>{document.body.classList.add('workspace-2d');setViewMode('2d');setActiveSection('factory');markSection('factory');requestAnimationFrame(()=>dispatchEvent(new Event('resize')))});
-q('#mode-3d')?.addEventListener('click',()=>{document.body.classList.remove('workspace-2d');setViewMode('3d');setActiveSection('factory');markSection('factory');requestAnimationFrame(()=>dispatchEvent(new Event('resize')))});
+q('#mode-3d')?.addEventListener('click',()=>{document.body.classList.remove('workspace-2d');setViewMode('3d');const section=getState().sceneMode==='machine'?'asset':'factory';setActiveSection(section);markSection(section);requestAnimationFrame(()=>dispatchEvent(new Event('resize')))});
 
 const GROUPS=PHASE1_FOUNDATION?[
  ['Bangunan',[['building','Bangunan & ruang'],['roof','Atap']]],
@@ -355,8 +355,8 @@ addEventListener('bmj:domainstate',event=>{
  setState(detail,{url:carriesDeepLink});
 });
 addEventListener('bmj:historyrestore',event=>{
- const detail=event.detail||{},viewMode=detail.viewMode==='2d'?'2d':'3d',sceneMode=detail.sceneMode==='machine'?'machine':'factory',cameraPreset=detail.cameraPreset==='top'?'top':'iso';
- setState({selectedAsset:detail.selectedAsset||null,selectedNode:detail.selectedNode||null,sceneMode,viewMode,cameraPreset},{url:false});
+ const detail=event.detail||{},viewMode=detail.viewMode==='2d'?'2d':'3d',sceneMode=detail.sceneMode==='machine'?'machine':'factory',cameraPreset=detail.cameraPreset==='top'?'top':'iso',activeSection=viewMode==='3d'&&sceneMode==='machine'?'asset':'factory';
+ setState({selectedAsset:detail.selectedAsset||null,selectedNode:detail.selectedNode||null,sceneMode,viewMode,cameraPreset,activeSection},{url:false});markSection(activeSection);
  if(viewMode==='2d')q('#mode-2d')?.click();else q('#mode-3d')?.click();
 });
 const syncViewport=()=>{document.documentElement.style.setProperty('--app-vh',`${window.visualViewport?.height||innerHeight}px`);const w=innerWidth;if(w>=768&&getState().overlay==='navigation'){closeDrawer();closeOverlay()}if(w>=768)document.body.classList.remove('mobile-panel-open');setTimeout(()=>window.BMJAppState?.setState({deviceMode:w<768?'mobile':w<=1180?'tablet':'desktop'},{url:false}),0)};
