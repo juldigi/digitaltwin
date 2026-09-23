@@ -41,6 +41,8 @@ test('V195 removes the fabricated unwind-to-feed bridge and grounds both assembl
  assert.equal(roleCount(m,'feed-upper-end-cross-tie'),1);
  assert.match(m.root.userData.processFlow.geometryBoundary,/ambiguous arm set/i);
  assert.match(m.root.userData.processFlow.unwindArchitecture,/NO_FABRICATED_FEED_FRAME_BRIDGE/);
+ const gap=boxOf(m.findNode('sheeting-unwind-bridge')).min.x-boxOf(m.findNode('sheeting-feed-frame')).max.x;
+ assert.ok(gap>.02,'rollstand upper structure must preserve a visible service gap from the feed frame');
  m.dispose();
 });
 
