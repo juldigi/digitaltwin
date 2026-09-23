@@ -501,11 +501,11 @@ export class SheetingMachineTemplate{
       bridge.name='Rollstand Upper Support / Parked Arm Structure';
       bridge.userData.confidence='VERIFIED_VISUAL__NO_FEED_FRAME_CONNECTION_CLAIM';
       for(const z of [-1.40,1.40]){
-        this.box(bridge,[2.05,.20,.22],[7.42,2.17,z],'light',.010,{role:'rollstand-upper-longitudinal-member',sourceAnchor:photo});
-        this.beamXY(bridge,[6.46,1.90],[6.58,2.17],z,.18,.22,'body',{role:'rollstand-upper-diagonal-brace',sourceAnchor:photo});
-        this.beamXY(bridge,[8.18,1.86],[8.08,2.17],z,.18,.22,'body',{role:'rollstand-upper-end-brace',sourceAnchor:photo});
+        this.box(bridge,[1.90,.20,.22],[7.55,2.17,z],'light',.010,{role:'rollstand-upper-longitudinal-member',sourceAnchor:photo});
+        this.beamXY(bridge,[6.70,1.90],[6.84,2.17],z,.18,.22,'body',{role:'rollstand-upper-diagonal-brace',sourceAnchor:photo});
+        this.beamXY(bridge,[8.30,1.86],[8.18,2.17],z,.18,.22,'body',{role:'rollstand-upper-end-brace',sourceAnchor:photo});
       }
-      for(const x of [6.58,7.45,8.26])this.box(bridge,[.14,.16,2.92],[x,2.17,0],'steel',.008,{detail:true,role:'rollstand-upper-cross-tie',sourceAnchor:photo});
+      for(const x of [6.86,7.55,8.22])this.box(bridge,[.14,.16,2.92],[x,2.17,0],'steel',.008,{detail:true,role:'rollstand-upper-cross-tie',sourceAnchor:photo});
     }
 
     // The feed frame receives its own top rails; they end before the rollstand service gap.
