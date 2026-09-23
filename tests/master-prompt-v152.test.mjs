@@ -10,11 +10,11 @@ const sw=fs.readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 
 test('V155 release cache keys move beyond V149/V151 sources',()=>{
   assert.match(html,/app-shell-v79\.css\?v=168/);
-  assert.match(html,/src\/app\.js\?v=171/);
+  assert.match(html,/src\/app\.js\?v=172/);
   assert.match(html,/src\/ui-v5\.js\?v=167/);
-  assert.match(html,/src\/app-shell-v79\.js\?v=171/);
+  assert.match(html,/src\/app-shell-v79\.js\?v=172/);
   assert.doesNotMatch(html,/\?v=149/);
-  assert.match(sw,/factory-digital-twin-v171-history-deeplink-20260923/);
+  assert.match(sw,/factory-digital-twin-v172-deterministic-boot-20260923/);
 });
 
 test('custom major overlays expose dialog semantics focus restoration and keyboard containment',()=>{

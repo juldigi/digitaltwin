@@ -30,10 +30,10 @@ test('V162 exposes Systems in both navigation surfaces and keeps identifiers coh
  assert.match(html,/id="nav-systems" data-section="system"/);
  assert.match(html,/data-mobile-nav="system" aria-label="Sistem utilitas"/);
  assert.match(html,/app-shell-v79\.css\?v=168/);
- assert.match(html,/src\/app\.js\?v=171/);
- assert.match(html,/src\/app-shell-v79\.js\?v=171/);
+ assert.match(html,/src\/app\.js\?v=172/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=172/);
  assert.match(shell,/v162-factory-first-systems/);
- assert.match(sw,/factory-digital-twin-v171-history-deeplink-20260923/);
+ assert.match(sw,/factory-digital-twin-v172-deterministic-boot-20260923/);
 });
 
 test('asset navigation opens an empty search instead of serializing the click event',()=>{
