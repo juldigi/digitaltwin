@@ -805,15 +805,15 @@ addEventListener('bmj:searchselect',async event=>{
  try{
   if(item.type==='area'){emitDomainState({selectedArea:item.title,activeSection:'asset'});assetDialog(item.title);return;}
   if(item.type==='machine'&&!item.has3D){const record=MACHINE_REGISTRY_BY_ID.get(item.machineId);if(record)await openAssetContext(record);return;}
-  if(item.route&&normalizeMachineKey(item.route)!==MACHINE_KEY)await switchActiveMachine(item.route);
-  setView('machine');
+  if(item.route)await switchActiveMachine(item.route,{historyMode:'push'});
+  else setView('machine');
   if(item.type==='component'){
    selectTaxonomy(item.nodeId,{revealPanel:true});showPanel();renderPanel('structure');
-   emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:item.nodeId,activeSection:'asset'});
+   emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:item.nodeId,activeSection:'asset',sceneMode:'machine'});
   }else if(item.type==='reference'){
-   showPanel();renderPanel('sources');emitDomainState({selectedAsset:MACHINE_KEY,activeReference:item.referenceId,activeSection:'reference'});
+   showPanel();renderPanel('sources');emitDomainState({selectedAsset:MACHINE_KEY,activeReference:item.referenceId,activeSection:'reference',sceneMode:'machine'});
   }else{
-   showPanel();renderPanel('overview');emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:null,activeSection:'asset'});
+   showPanel();renderPanel('overview');emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:null,activeSection:'asset',sceneMode:'machine'});
   }
  }catch(error){toast('Hasil pencarian tidak dapat dibuka: '+error.message,true);}
 });
@@ -839,10 +839,8 @@ async function openAssetContext(machine){
  if(!machine)return;
  if(!isFoundationPrimary(machine)){focusFoundationPlaceholder(machine,{historyMode:'push',openDialog:false});machineDetailDialog(machine);return;}
  const route=FOUNDATION_SCOPE.primaryRoute;
- if(route!==MACHINE_KEY)await switchActiveMachine(route,{historyMode:'push'});
- else{closeModal();setView('machine');showPanel();renderPanel('overview');engine?.fit(engine.machine);}
- emitDomainState({selectedAsset:route,selectedArea:machine.area||null,selectedNode:null,activeReference:null,activeSection:'asset'});
- showPanel();renderPanel('overview');
+ await switchActiveMachine(route,{historyMode:'push'});
+ emitDomainState({selectedAsset:route,selectedArea:machine.area||null,selectedNode:null,activeReference:null,activeSection:'asset',sceneMode:'machine',cameraPreset:'iso'});
 }
 function foundationAssetMatches(machine,query){
  const q=normalizeSearchText(query).trim();if(!q)return true;
@@ -884,7 +882,7 @@ function settingsDialog(){
  const connectionStatus=connectionTruth({online:navigator.onLine,cached:cachedDataActive,connected:Boolean(role)});
  const serviceWorkerStatus=!('serviceWorker'in navigator)?'Tidak didukung':navigator.serviceWorker.controller?'Aktif':'Menunggu aktivasi';
  const selectedNode=appState.selectedNode||'Tidak ada komponen terpilih';
- modal('Pengaturan',`<div class="settings-section"><h3>Tampilan 3D</h3><label class="check"><input id="low-mode" type="checkbox" ${engine?.low?'checked':''} ${exteriorMode?'disabled':''}> Optimasi untuk perangkat dengan performa terbatas</label>${exteriorMode?'<p class="subtle">Optimasi sementara dinonaktifkan saat interior terbuka agar detail tetap terlihat.</p>':''}<label class="check"><input id="label-mode" type="checkbox" ${engine?.labels?'checked':''}> Tampilkan nama mesin dan area</label></div><div class="settings-section"><h3>Data di perangkat</h3><p class="subtle">${cacheEnabled?'Salinan data lokal aktif agar aplikasi lebih cepat dibuka kembali.':'Salinan data lokal tidak aktif.'}</p><button id="clear-cache" class="secondary">Bersihkan Data Tersimpan</button></div><details class="settings-section system-information"><summary>Informasi Sistem</summary><p>Diagnostik teknis ditempatkan di sini agar tampilan utama tetap sederhana.</p><dl class="system-info-grid">${pair('Versi aplikasi','V162')+pair('Mode fondasi','OFFSET 5 detail · aset lain placeholder · sistem berbasis bukti')}${pair('Perangkat',device)}${pair('Mode tampilan',appState.viewMode==='2d'?'2D':'3D')}${pair('Aset aktif',appState.selectedAsset||MACHINE_KEY)}${pair('Komponen terpilih',selectedNode)}${pair('Koneksi data',connectionStatus)}${pair('Penyimpanan lokal',cacheEnabled?'Aktif':'Tidak aktif')}${pair('Aplikasi offline',serviceWorkerStatus)}${pair('Status tampilan 3D',engine?'Siap':'Cadangan / belum siap')}</dl></details>`);
+ modal('Pengaturan',`<div class="settings-section"><h3>Tampilan 3D</h3><label class="check"><input id="low-mode" type="checkbox" ${engine?.low?'checked':''} ${exteriorMode?'disabled':''}> Optimasi untuk perangkat dengan performa terbatas</label>${exteriorMode?'<p class="subtle">Optimasi sementara dinonaktifkan saat interior terbuka agar detail tetap terlihat.</p>':''}<label class="check"><input id="label-mode" type="checkbox" ${engine?.labels?'checked':''}> Tampilkan nama mesin dan area</label></div><div class="settings-section"><h3>Data di perangkat</h3><p class="subtle">${cacheEnabled?'Salinan data lokal aktif agar aplikasi lebih cepat dibuka kembali.':'Salinan data lokal tidak aktif.'}</p><button id="clear-cache" class="secondary">Bersihkan Data Tersimpan</button></div><details class="settings-section system-information"><summary>Informasi Sistem</summary><p>Diagnostik teknis ditempatkan di sini agar tampilan utama tetap sederhana.</p><dl class="system-info-grid">${pair('Versi aplikasi','V171')+pair('Mode fondasi','OFFSET 5 detail · aset lain placeholder · sistem berbasis bukti')}${pair('Perangkat',device)}${pair('Mode tampilan',appState.viewMode==='2d'?'2D':'3D')}${pair('Aset aktif',appState.selectedAsset||MACHINE_KEY)}${pair('Komponen terpilih',selectedNode)}${pair('Koneksi data',connectionStatus)}${pair('Penyimpanan lokal',cacheEnabled?'Aktif':'Tidak aktif')}${pair('Aplikasi offline',serviceWorkerStatus)}${pair('Status tampilan 3D',engine?'Siap':'Cadangan / belum siap')}</dl></details>`);
  $('#low-mode').onchange=e=>{engine?.setLow(e.target.checked);localStorage.setItem('offset5-low',e.target.checked?'1':'0');};
  $('#label-mode').onchange=e=>{if(engine)engine.labels=e.target.checked;$('#labels').classList.toggle('active',e.target.checked);emitDomainState({visibleLayers:{labels:e.target.checked}});};
  on('#clear-cache',async()=>{await cache.clear();toast('Data tersimpan di perangkat sudah dibersihkan.');});
@@ -898,14 +896,9 @@ renderPanel();renderStatus();const taxCount=$('#taxonomy-count');if(taxCount)tax
 try{engine=new FactoryEngine($('#viewport'),part=>{const meta=taxonomyForPart(part);if(meta)selectedTaxonomyId=meta.id;choosePart(part);showPanel();renderPanel('structure');});engine.onTaxonomySelect=id=>selectTaxonomy(id,{revealPanel:false});engine.onSimulationUpdate=next=>{simulationState=next;updateSimulationPanel(next);};simulationState=engine.getPrintingSimulationState();engine.onReset=()=>{explode=0;selectedPart=null;selectedTaxonomyId=ACTIVE_ROOT;renderPanel();};engine.onError=message=>toast(message,true);$('#engine-status').textContent='Menyiapkan denah pabrik';try{engine.setLow(localStorage.getItem('offset5-low')==='1'||matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse) and (max-width:1024px)').matches);}catch{}}catch(e){renderStaticMachineFallback(e);$('#engine-status').textContent='Tampilan 3D belum tersedia';}
 try{
  bundledLayout=await loadBundledPlantLayout();bundledLayout.fleet=await loadFactoryFleet();engine?.loadLayout(activeLayout());
- if(engine)engine.onFactorySelect=id=>{const m=MACHINE_REGISTRY.find(m=>m.machineId===id);if(m){selectFactoryAssetContext(m,{historyMode:'none',openDialog:false,focus:true});machineDetailDialog(m);}};
+ if(engine)engine.onFactorySelect=id=>{const m=MACHINE_REGISTRY.find(m=>m.machineId===id);if(m){selectFactoryAssetContext(m,{historyMode:'push',openDialog:false,focus:true});machineDetailDialog(m);}};
  renderStatus();redrawPlantPlan();
- const deepNode=INITIAL_URL_STATE.get('node'),initialPlaceholder=INITIAL_REQUESTED_ASSET&&!canOpenTechnical3D(INITIAL_REQUESTED_ASSET)?machineRecordForRoute(INITIAL_REQUESTED_ASSET):null;
- if(engine){
-  if(initialPlaceholder){focusFoundationPlaceholder(initialPlaceholder,{historyMode:'none',openDialog:false});toast('Aset ditampilkan sebagai placeholder tata letak. Detail 3D teknis fase fondasi tersedia untuk OFFSET 5.');}
-  else if(deepNode&&TAXONOMY_BY_ID.has(deepNode)){setView('machine');selectTaxonomy(deepNode,{revealPanel:true});showPanel();renderPanel('structure');}
-  else showHome();
- }else showHome();
+ await restoreHistoryContext();
  const boot=$('#boot');if(boot)boot.hidden=true;$('#engine-status').textContent=engine?'Pabrik 3D siap':'Denah tersedia · penampil 3D belum siap';
 }catch(e){
  const boot=$('#boot');if(boot){boot.hidden=false;boot.innerHTML='<strong>Denah pabrik belum dapat dimuat</strong><p>Data CAD tersimpan tidak berhasil dibuka. Tidak ada geometri pengganti yang dibuat.</p><button id="boot-retry" class="primary">Muat Ulang</button>';on('#boot-retry',()=>location.reload());}
@@ -916,7 +909,7 @@ function scrollInspectorToTabStart(){
  requestAnimationFrame(()=>{const sticky=(top?.offsetHeight||0)+(tabs?.offsetHeight||0);panel.scrollTo({top:Math.max(0,content.offsetTop-sticky),behavior:'auto'});});
 }
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{if(editing){engine.edit(false);engine.applyPlacement(state);engine.onTransform=null;editing=false;}renderPanel(b.dataset.tab);scrollInspectorToTabStart();});
-on('#modal-close',closeModal);on('#connect',connectionDialog);on('#nav-machine',()=>activeLayout()?showHome():layoutDialog());on('#nav-layout',()=>activeLayout()?setView('factory'):layoutDialog());on('#notice-details',layoutDialog);on('#nav-assets',()=>assetDialog());on('#nav-sources',()=>{showPanel();renderPanel('sources');});on('#nav-help',helpDialog);on('#settings',settingsDialog);on('#close-panel',()=>document.body.classList.add('panel-hidden'));on('#focus-machine',()=>{if(!engine?.machine.visible)setView('machine');engine?.fit(engine.machine);});on('#edit-position',editorPanel);
+on('#modal-close',closeModal);on('#connect',connectionDialog);on('#nav-machine',()=>activeLayout()?showHome({historyMode:'push'}):layoutDialog());on('#nav-layout',()=>activeLayout()?setView('factory'):layoutDialog());on('#notice-details',layoutDialog);on('#nav-assets',()=>assetDialog());on('#nav-sources',()=>{showPanel();renderPanel('sources');});on('#nav-help',helpDialog);on('#settings',settingsDialog);on('#close-panel',()=>document.body.classList.add('panel-hidden'));on('#focus-machine',()=>{if(!engine?.machine.visible)setView('machine');engine?.fit(engine.machine);});on('#edit-position',editorPanel);
 $$('[data-camera]').forEach(b=>b.onclick=()=>{if(!engine)return;const mode=b.dataset.camera,isFactory=engine.view==='factory',target=isFactory?engine.currentFactoryTarget():(selectedPart||engine.machine);if(mode==='reset'){if(isFactory){engine.clearFactorySelection();engine.fit(engine.factory,'iso');$('#geometry-caption').textContent='Pabrik · Seluruh Area';$('#scene-hint').textContent='Klik aset untuk memilih · seret untuk memutar · zoom dengan cubit/scroll';emitDomainState({selectedAsset:null,selectedArea:null,activeSection:'factory'});}else{explode=0;selectedPart=null;engine.isolated=false;engine.template.reset();engine.clearPartLabels();$('#tool-explode')?.classList.remove('active');$('#tool-isolate')?.classList.remove('active');emitDomainState({inspectionMode:{explode:false,isolate:false,section:false},selectedNode:null});renderPanel();engine.fit(engine.machine,'iso');}$$('[data-camera]').forEach(c=>c.classList.toggle('active',c.dataset.camera==='iso'));emitDomainState({cameraPreset:'iso'});return;}if(mode==='fit'){engine.fit(target,'iso');emitDomainState({cameraPreset:'iso'});return;}const preset=mode==='top'?'top':'iso';engine.fit(target,preset);$$('[data-camera]').forEach(c=>c.classList.toggle('active',c.dataset.camera===mode));emitDomainState({cameraPreset:preset});});
 on('#tool-pan',()=>{if(!engine)return;engine.controls.enablePan=!engine.controls.enablePan;$('#tool-pan').classList.toggle('active',engine.controls.enablePan);toast(engine.controls.enablePan?'Mode pan aktif · gunakan dua jari / klik kanan':'Mode pan nonaktif');});
 on('#tool-explode',()=>{if(simulationLocksStructure())return;showPanel();selectedTaxonomyId=selectedTaxonomyId||ACTIVE_ROOT;renderPanel('structure');explode=explode>.01?0:.65;engine?.template.explode(explode,selectedPart);$('#tool-explode')?.classList.toggle('active',explode>0);emitDomainState({inspectionMode:{explode:explode>0}});renderPanel('structure');});
