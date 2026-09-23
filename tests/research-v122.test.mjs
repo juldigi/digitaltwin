@@ -60,15 +60,15 @@ test('V122 POLAR 115 exposes backgauge sledge clamp pressure knife drive safety 
  m.dispose();
 });
 
-test('V195 Sheeting keeps speculative V122 option geometry out and narrows unsupported connection claims',()=>{
+test('V196 Sheeting keeps speculative V122 modules out while adding family-grounded guarded cutter mechanics',()=>{
  const m=new SheetingMachineTemplate();
- assert.equal(m.root.userData.researchVersion,'V195');assert.ok(m.root.userData.researchSourceCount>=160);
- requireRoles(m,['loaded-paper-reel','vertical-hydraulic-cylinder','rollstand-upper-longitudinal-member','feed-upper-longitudinal-rail','low-entry-guide-roll','main-cutter-cabinet','long-inspection-window','large-black-draw-roll','white-hold-down-wheel','operator-console-face','stack-guide-handwheel','stack-rack-tooth','stack-ruler-tick']);
+ assert.equal(m.root.userData.researchVersion,'V196');assert.ok(m.root.userData.researchSourceCount>=160);
+ requireRoles(m,['loaded-paper-reel','vertical-hydraulic-cylinder','web-carrier-longitudinal-beam','web-carrier-hanger-bracket','low-entry-guide-roll','loop-frame-upright','main-cutter-cabinet','long-inspection-window','large-black-draw-roll','stationary-bed-knife','fly-knife-revolver','fly-knife-blade','cutter-takeaway-pinch-roll','white-hold-down-wheel','operator-console-face','stack-guide-handwheel','stack-rack-tooth','stack-ruler-tick']);
  for(const id of ['sheeting-slitter-v122','sheeting-knife-drive-v122','sheeting-overlap-vacuum-v122','sheeting-stack-level-v122'])assert.equal(m.findNode(id),null,id);
  const knife=m.findNode('sheeting-knife');
- assert.equal(knife.userData.visibleKnifeGeometry,false);
- assert.match(knife.userData.evidenceBoundary,/fully guarded inside the LEXUS enclosure/i);
- assert.match(m.root.userData.installedOptionBoundary,/removes the unsupported rigid unwind-to-feed bridge claim|does not expose undocumented cutter internals/i);
+ assert.equal(knife.userData.visibleKnifeGeometry,'CUTAWAY_ONLY_FAMILY_REFERENCE');
+ assert.match(knife.userData.evidenceBoundary,/stationary-bed-knife \+ rotary fly-knife/i);
+ assert.match(m.root.userData.installedOptionBoundary,/HSM56\/Maxson evidence|guarded stationary-bed\/fly-knife/i);
  m.dispose();
 });
 
