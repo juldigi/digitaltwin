@@ -11,7 +11,14 @@ const branches={
  DRIVE:[['MOTOR','Main motor','mk920-drive-motor'],['FLYWHEEL','Flywheel and clutch','mk920-drive-flywheel'],['CONTROL','Operator console and safety circuit','mk920-drive-control']],
  ACCESS:[['FRAME','Monobloc side frames','mk920-access-frame'],['GUARD','Interlocked guarding','mk920-access-guard'],['PLATFORM','Operator platform','mk920-access-platform']]
 };
-for(const [branch,systems] of Object.entries(branches))for(const [sid,name,ref] of systems){const l3=`MK920.${branch}.${sid}`;add(l3,name,3,`MK920.${branch}`,[ref],'system',sid==='PULL');for(const [i,component,part] of [[1,'Drive-side assembly','Bearing / seal / fastener set'],[2,'Operator-side adjustment','Adjustment / sensor set'],[3,'Working element','Contact / wear element']]){const l4=`${l3}.A${i}`;add(l4,component,4,l3,[ref]);const l5=`${l4}.C`;add(l5,`${name} component ${i}`,5,l4,[ref],'component');add(`${l5}.P`,part,6,l5,[ref],'part');}}
+const exteriorDetails={
+ 'FOIL.UNWIND':[['Removable foil carrier rail','Frame mounting bracket'],['Reel spindle supports','Bearing block and retainer'],['Foil reel and shaft','Core locking collar']],
+ 'FOIL.WASTE':[['Spent foil carrier rail','Frame mounting bracket'],['Rewind spindle supports','Bearing block and retainer'],['Spent foil winding shaft','Core locking collar']],
+ 'ACCESS.FRAME':[['Upper structural beam','Frame joint'],['Vertical support posts','Post base anchor'],['Lower side rail','Frame base connection']],
+ 'ACCESS.GUARD':[['Lower guard kickplate','Panel fastener'],['Glazed inspection aperture','Window seal'],['Guard stiles and header','Interlocked panel joint']],
+ 'DELIVERY.PILE':[['Pile support table','Pile deck'],['Lift guidance','Guide rail'],['Pile height control','Height sensing reference']]
+};
+for(const [branch,systems] of Object.entries(branches))for(const [sid,name,ref] of systems){const l3=`MK920.${branch}.${sid}`;add(l3,name,3,`MK920.${branch}`,[ref],'system',sid==='PULL');const components=exteriorDetails[`${branch}.${sid}`]||[['Drive-side assembly','Bearing / seal / fastener set'],['Operator-side adjustment','Adjustment / sensor set'],['Working element','Contact / wear element']];for(const [index,[component,part]] of components.entries()){const i=index+1,l4=`${l3}.A${i}`;add(l4,component,4,l3,[ref]);const l5=`${l4}.C`;add(l5,`${component} component`,5,l4,[ref],'component');add(`${l5}.P`,part,6,l5,[ref],'part');}}
 return Object.freeze(rows);};
 export const MK920_TAXONOMY=buildRows('BMJ-MCH-0011');
 export const MK920_TAXONOMY_APM6=buildRows('BMJ-MCH-0012');

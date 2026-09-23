@@ -71,3 +71,21 @@ test('APM-7 delivery cover leaves the product conveyor visible',()=>{
  assert.ok(covers.every(c=>!c.intersectsBox(productBox)));
  model.dispose();
 });
+
+test('APM-5/6 foil reels and rewind have carriers tied into the upper frame',()=>{
+ const model=new MK920MachineTemplate(),unwind=model.findNode('mk920-foil-unwind'),waste=model.findNode('mk920-foil-waste');
+ const carrier=[];for(const node of [unwind,waste])node.traverse(o=>{if(o.isMesh&&o.userData.foilCarrier)carrier.push(o);});
+ assert.ok(carrier.length>=15);
+ const frame=new THREE.Box3().setFromObject(model.findNode('mk920-access-frame'));
+ assert.ok(carrier.some(o=>new THREE.Box3().setFromObject(o).intersectsBox(frame)));
+ for(const z of [-.78,0,.78])for(const node of [unwind,waste]){
+  const supports=carrier.filter(o=>o.parent===node&&Math.abs(o.position.z-z)<.25&&o.position.y>2.60);
+  assert.ok(supports.length>=2,`${node.name} reel ${z} needs paired shaft supports`);
+ }
+ assert.equal(model.resolveTaxonomyNode('MK920.FOIL.UNWIND'),unwind);
+ assert.equal(model.resolveTaxonomyNode('MK920.FOIL.WASTE'),waste);
+ for(const [id,label] of [['MK920.FOIL.UNWIND.A1','Removable foil carrier rail'],['MK920.FOIL.WASTE.A2','Rewind spindle supports'],['MK920.ACCESS.GUARD.A2','Glazed inspection aperture']]){
+  assert.equal(model.taxonomyById.get(id)?.name,label);
+ }
+ model.dispose();
+});
