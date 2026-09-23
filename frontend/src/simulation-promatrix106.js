@@ -33,7 +33,7 @@ export class Promatrix106ProcessSimulation{
   this.root=root;this.template=template;this.active=false;this.running=false;this.paused=false;this.speed=1;this.completed=0;this.elapsed=0;this.lastNow=null;this.onUpdate=null;
   this.rotors=[];this.suckers=[];this.gripperBars=[];this.sheets=[];this.productStack=[];this.waste=[];this.tieSheets=[];
   this.cutPlate=template.findNode('pm106-cut-plate');this.stripTop=template.findNode('pm106-strip-top');this.stripMiddle=template.findNode('pm106-strip-middle');this.stripBottom=template.findNode('pm106-strip-bottom');
-  this.blankTop=template.findNode('pm106-blank-top');this.blankBottom=template.findNode('pm106-blank-bottom');this.rake=template.findNode('pm106-delivery-rake');this.feederHead=template.findNode('pm106-feeder-head');
+  this.blankTop=template.findNode('pm106-blank-top');this.blankBottom=template.findNode('pm106-blank-bottom');this.rake=template.findNode('pm106-delivery-rake');this.feederHead=template.findNode('pm106-feeder-head');this.deliveryPallet=template.findNode('pm106-delivery-pallet');
   this.rest={cut:this.cutPlate?.position.clone(),st:this.stripTop?.position.clone(),sm:this.stripMiddle?.position.clone(),sb:this.stripBottom?.position.clone(),bt:this.blankTop?.position.clone(),bb:this.blankBottom?.position.clone(),rake:this.rake?.position.clone(),head:this.feederHead?.position.clone()};
   root.traverse(o=>{if(o.isMesh&&o.userData.rotor)this.rotors.push(o);if(o.isMesh&&o.userData.reciprocator)this.suckers.push(o);if(o.userData.gripperBar)this.gripperBars.push(o);});
   this.rotorRest=this.rotors.map(r=>r.quaternion.clone());this.suckerRest=this.suckers.map(s=>s.position.clone());this.barRest=this.gripperBars.map(b=>b.position.clone());
@@ -48,8 +48,9 @@ export class Promatrix106ProcessSimulation{
    const waste=new THREE.Mesh(new THREE.BoxGeometry(.98,.012,.07),new THREE.MeshStandardMaterial({color:0xb69b73,roughness:.9}));waste.visible=false;root.add(waste);this.waste.push(waste);
    const tie=new THREE.Mesh(new THREE.BoxGeometry(.96,.004,.66),new THREE.MeshStandardMaterial({color:0xe8edf0,roughness:.75,transparent:true,opacity:.88}));tie.visible=false;tie.userData.demoTieSheet=true;root.add(tie);this.tieSheets.push(tie);
   }
-  this.pathVisible=false;this.inkFlowVisible=false;this.resetStateFlags();
+  this.deliveryAnchor=new THREE.Vector3(3.96,.79,0);this.refreshDeliveryAnchor();this.pathVisible=false;this.inkFlowVisible=false;this.resetStateFlags();
  }
+ refreshDeliveryAnchor(){if(!this.deliveryPallet)return;this.root.updateMatrixWorld(true);this.deliveryPallet.updateWorldMatrix(true,true);const box=new THREE.Box3().setFromObject(this.deliveryPallet);if(box.isEmpty())return;const p=new THREE.Vector3((box.min.x+box.max.x)/2,box.max.y,(box.min.z+box.max.z)/2);this.root.worldToLocal(p);this.deliveryAnchor.copy(p);}
  resetStateFlags(){this.transportIndexing=false;this.transportStopped=false;this.feederSuctionActive=false;this.cuttingActive=false;this.pressureDwell=false;this.strippingActive=false;this.blankingActive=false;this.deliveryRakeActive=false;this.tieSheetActive=false;}
  state(){
   const p=this.active?(this.elapsed%10.8)/10.8:0,index=Math.min(PROMATRIX106_SIMULATION_STAGES.length-1,Math.floor(p*PROMATRIX106_SIMULATION_STAGES.length));
@@ -60,7 +61,7 @@ export class Promatrix106ProcessSimulation{
    strippingActive:this.strippingActive,blankingActive:this.blankingActive,deliveryRakeActive:this.deliveryRakeActive,tieSheetActive:this.tieSheetActive,tieSheetDemoOnly:true,tieSheetsVisible:this.tieSheets.filter(t=>t.visible).length,
    interlocks:{cutRequiresRegisteredStop:this.cuttingActive?!this.transportIndexing:true,strippingRequiresRegisteredStop:this.strippingActive?!this.transportIndexing:true,blankingRequiresRegisteredStop:this.blankingActive?!this.transportIndexing:true}};
  }
- start(){this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;for(const s of this.sheets)s.lap=-1;this.resetMechanisms();this.onUpdate?.(this.state());return this.state();}
+ start(){this.refreshDeliveryAnchor();this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;for(const s of this.sheets)s.lap=-1;this.resetMechanisms();this.onUpdate?.(this.state());return this.state();}
  pause(){this.running=false;this.paused=this.active;this.onUpdate?.(this.state());return this.state();}
  resume(){if(this.active){this.running=true;this.paused=false;this.lastNow=null;}this.onUpdate?.(this.state());return this.state();}
  setSpeed(v){this.speed=Math.max(.25,Math.min(4,Number(v)||1));return this.state();}
@@ -81,8 +82,8 @@ export class Promatrix106ProcessSimulation{
  updateGrippers(globalTransport){for(const bar of this.gripperBars){const q=gripperLoopPosition(globalTransport+(bar.userData.barPhase||0));bar.position.set(q.x,q.y,0);}}
  updateRake(p){const delivery=p>.93||p<.08;this.deliveryRakeActive=delivery;if(this.rake&&this.rest.rake){this.rake.position.copy(this.rest.rake);if(delivery){const local=p>.93?(p-.93)/.07:p/.08;this.rake.position.x+=.22*Math.sin(Math.PI*Math.min(1,local));}}return delivery;}
  outputSheet(){
-  this.completed++;const idx=(this.completed-1)%this.productStack.length,p=this.productStack[idx],w=this.waste[idx];p.visible=true;p.position.set(3.83,.48+idx*.007,-.22);w.visible=true;w.position.set(3.35,.60+idx*.003,.58);
-  if(this.completed%6===0){const tie=this.tieSheets[idx];tie.visible=true;tie.position.set(3.83,.485+idx*.007,0);this.tieSheetActive=true;}
+  this.completed++;const idx=(this.completed-1)%this.productStack.length,p=this.productStack[idx],w=this.waste[idx];p.visible=true;p.position.set(this.deliveryAnchor.x,this.deliveryAnchor.y+idx*.007,this.deliveryAnchor.z);w.visible=true;w.position.set(this.deliveryAnchor.x-.46,this.deliveryAnchor.y+.12+idx*.003,this.deliveryAnchor.z+.58);
+  if(this.completed%6===0){const tie=this.tieSheets[idx];tie.visible=true;tie.position.set(this.deliveryAnchor.x,this.deliveryAnchor.y+.005+idx*.007,this.deliveryAnchor.z);this.tieSheetActive=true;}
  }
  updateSheets(cycleIndex,transport){
   const global=cycleIndex+transport;
