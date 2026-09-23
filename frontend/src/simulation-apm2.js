@@ -61,6 +61,8 @@ export class APM2ProcessSimulation{
   this.rest={head:this.feederHead?.position.clone(),side:this.sideLay?.position.clone(),platen:this.platen?.position.clone(),upper:this.stripUpper?.position.clone(),lower:this.stripLower?.position.clone()};
   machine.traverse(o=>{if(o.isMesh&&o.userData.driveRotor)this.rotors.push(o);if(o.userData.gripperBar)this.gripperBars.push(o);});
   this.rotorRest=this.rotors.map(r=>r.quaternion.clone());this.barRest=this.gripperBars.map(b=>b.position.clone());
+  this.updateGripperBars(0,0);
+  this.barRest=this.gripperBars.map(b=>b.position.clone());
   this.pileAnchor=new THREE.Vector3(2.36,1.16,0);this.maxPileSheets=28;this.pileThickness=.004;
   this.buildPath();this.buildSheets();this.buildPileSheets();this.refreshPile();this.resetFlags();
  }
@@ -90,7 +92,7 @@ export class APM2ProcessSimulation{
    interlocks:{platenRequiresStoppedTransport:this.platenClosed?!this.transportIndexing:true,strippingRequiresStoppedTransport:this.strippingActive?!this.transportIndexing:true}
   };
  }
- spin(r,dt,rate){const axis=r.userData.mechanismRole==='main-shaft'||r.userData.mechanismRole==='feed-roller'||r.userData.mechanismRole==='chain-sprocket'?Y_AXIS:new THREE.Vector3(1,0,0);const q=new THREE.Quaternion().setFromAxisAngle(axis,rate*dt);r.quaternion.multiply(q).normalize();}
+ spin(r,dt,rate){const role=r.userData.mechanismRole;const axis=role==='main-shaft'?Y_AXIS:role==='feed-roller'||role==='chain-sprocket'?new THREE.Vector3(0,0,1):new THREE.Vector3(1,0,0);const q=new THREE.Quaternion().setFromAxisAngle(axis,rate*dt);r.quaternion.premultiply(q).normalize();}
  updateRotors(dt,p,indexing,platenMotion){
   for(const r of this.rotors){const role=String(r.userData.mechanismRole||'');let move=false,rate=4;
    if(role==='main-motor'||role==='flywheel'||role==='main-shaft'||role==='drive-gear'){move=true;rate=5.2;}
@@ -110,7 +112,7 @@ export class APM2ProcessSimulation{
   if(this.stripUpper&&this.rest.upper){this.stripUpper.position.copy(this.rest.upper);this.stripUpper.position.y-=.055*stripStroke;}
   if(this.stripLower&&this.rest.lower){this.stripLower.position.copy(this.rest.lower);this.stripLower.position.y+=.035*stripStroke;}
  }
- updateGripperBars(cycleIndex,indexFraction){const globalPitch=(cycleIndex+indexFraction)/14;for(const bar of this.gripperBars){const q=gripperLoopPosition(globalPitch+(bar.userData.barPhase||0)),child=bar.children[0];bar.position.set(q.x-(child?.position.x||0),q.y-(child?.position.y||0),0);}}
+ updateGripperBars(cycleIndex,indexFraction){const globalPitch=(cycleIndex+indexFraction)/14;for(const bar of this.gripperBars){const q=gripperLoopPosition(globalPitch+(bar.userData.barPhase||0));bar.position.set(q.x,q.y,0);}}
  updateSheets(cycleIndex,indexFraction,p){
   const global=(cycleIndex+indexFraction)/4;
   for(const s of this.sheets){const raw=global+s.phase,t=((raw%1)+1)%1,lap=Math.floor(raw),pos=this.curve.getPointAt(Math.min(.999,t));s.mesh.visible=this.active;s.mesh.position.copy(pos);s.mesh.position.y+=.015;s.mesh.rotation.set(0,0,0);

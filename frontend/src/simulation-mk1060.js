@@ -36,7 +36,7 @@ export class MK1060ProcessSimulation{
   this.blankUpper=template.findNode('mk1060-blank-upper');this.blankLower=template.findNode('mk1060-blank-lower');this.feederHead=template.findNode('mk1060-feeder-head');
   this.restY={lower:this.lower?.position.y||0,su:this.stripUpper?.position.y||0,sl:this.stripLower?.position.y||0,bu:this.blankUpper?.position.y||0,bl:this.blankLower?.position.y||0};
   root.traverse(o=>{if(o.isMesh&&o.userData.rotor)this.rotors.push(o);if(o.isMesh&&o.userData.reciprocator)this.suckers.push(o);if(o.userData.gripperBar)this.gripperBars.push(o);});
-  this.rotorRest=this.rotors.map(r=>r.quaternion.clone());this.suckerRest=this.suckers.map(s=>s.position.clone());this.barRest=this.gripperBars.map(b=>b.position.clone());this.headRest=this.feederHead?.position.clone()||null;
+  this.rotorRest=this.rotors.map(r=>r.quaternion.clone());this.suckerRest=this.suckers.map(s=>s.position.clone());this.updateGrippers(0);this.barRest=this.gripperBars.map(b=>b.position.clone());this.headRest=this.feederHead?.position.clone()||null;
   this.points=[[-3.26,1.34,0],[-2.35,1.15,0],[-1.55,1.17,0],[-.75,1.48,0],[.65,1.46,0],[1.75,1.46,0],[2.62,.84,0],[3.08,.78,0]].map(p=>new THREE.Vector3(...p));
   this.curve=new THREE.CatmullRomCurve3(this.points,false,'centripetal');
   const pathGeo=new THREE.BufferGeometry().setFromPoints(this.curve.getPoints(180)),pathMat=new THREE.LineDashedMaterial({color:0x528a9d,dashSize:.065,gapSize:.045,transparent:true,opacity:.55});
@@ -56,7 +56,7 @@ export class MK1060ProcessSimulation{
    strippingActive:this.strippingActive,blankingActive:this.blankingActive,wasteConveyorActive:this.wasteConveyorActive,
    interlocks:{platenDwellRequiresStoppedTransport:this.platenClosed?!this.transportIndexing:true,strippingRequiresStoppedTransport:this.strippingActive?!this.transportIndexing:true,blankingRequiresStoppedTransport:this.blankingActive?!this.transportIndexing:true}};
  }
- start(){this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;for(const s of this.sheets)s.lap=-1;this.resetMechanisms();this.onUpdate?.(this.state());return this.state();}
+ start(){this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;for(const s of this.sheets){s.lap=-1;s.mesh.visible=false;}for(const p of this.blankStack)p.visible=false;for(const w of this.wastePieces)w.visible=false;this.resetMechanisms();this.onUpdate?.(this.state());return this.state();}
  pause(){this.running=false;this.paused=this.active;this.onUpdate?.(this.state());return this.state();}
  resume(){if(this.active){this.running=true;this.paused=false;this.lastNow=null;}this.onUpdate?.(this.state());return this.state();}
  setSpeed(v){this.speed=Math.max(.25,Math.min(4,Number(v)||1));return this.state();}
@@ -80,7 +80,7 @@ export class MK1060ProcessSimulation{
   this.suckers.forEach((s,i)=>{s.position.copy(this.suckerRest[i]);if(active)s.position.y-=.018*Math.sin(Math.PI*local);});
  }
  updateGrippers(globalTransport){
-  for(const bar of this.gripperBars){const q=gripperLoopPosition(globalTransport+(bar.userData.barPhase||0));bar.position.set(q.x,q.y,0);}
+  for(const bar of this.gripperBars){const q=gripperLoopPosition(globalTransport/this.gripperBars.length+(bar.userData.barPhase||0));bar.position.set(q.x,q.y,0);}
  }
  updateSheets(cycleIndex,transport){
   const global=cycleIndex+transport;

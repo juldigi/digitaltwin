@@ -161,10 +161,11 @@ export class APM2MachineTemplate{
     for(const z of [-.72,.72]){const a=this.torus(drive,.18,.026,[2.31,1.285,z],'steel',[Math.PI/2,0,0]);a.userData.driveRotor=true;a.userData.mechanismRole='chain-sprocket';const b=this.torus(ret,.18,.026,[-1.95,1.285,z],'steel',[Math.PI/2,0,0]);b.userData.driveRotor=true;b.userData.mechanismRole='chain-sprocket';}
     const bars=this.group(g,'apm2-gripper-bars','14 Gripper Bars',[0,0,0],[0,.15,0],['APM2-SP102-PARTS']);
     for(let i=0;i<14;i++){
-      const t=i/14,x=-1.75+t*4.02,y=i<7?1.57:1.00;
       const id='apm2-gripper-bar-'+(i+1),bar=this.group(bars,id,'Gripper Bar '+(i+1),[0,0,0],[0,.08,0]);bar.userData.gripperBar=true;bar.userData.barPhase=i/14;bar.userData.familyCountReference=14;
-      const shaft=this.cylinder(bar,.022,1.46,[x,y,0],'steel','z');shaft.userData.gripperShaft=true;shaft.userData.gripperIndex=i+1;
-      for(const z of [-.48,-.16,.16,.48]){this.box(bar,[.09,.025,.05],[x,y-.035,z],'graphite',.004).userData.gripperFinger=true;}
+      // Bar geometry lives in bar-local coordinates. The simulation positions the
+      // entire bar on the chain loop; absolute child coordinates displaced it twice.
+      const shaft=this.cylinder(bar,.022,1.46,[0,0,0],'steel','z');shaft.userData.gripperShaft=true;shaft.userData.gripperIndex=i+1;
+      for(const z of [-.48,-.16,.16,.48]){this.box(bar,[.09,.025,.05],[0,-.035,z],'graphite',.004).userData.gripperFinger=true;}
     }
   }
   buildPlaten(){

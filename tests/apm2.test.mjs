@@ -82,3 +82,15 @@ test('APM2 fourteen gripper bars advance only one chain pitch per machine cycle'
  advance(10.75);assert.ok(b.position.distanceTo(afterIndex)>.01,'next cycle failed to advance the next chain pitch');
  sim.dispose();machine.dispose();
 });
+
+test('APM2 gripper bars stay on the twin chain rails at rest and during indexing',()=>{
+ const machine=new APM2MachineTemplate(),sim=new APM2ProcessSimulation(machine.root,machine);
+ const verify=()=>{for(const bar of sim.gripperBars){
+  const shaft=bar.children.find(c=>c.userData.gripperShaft);
+  assert.ok(shaft,'bar must contain a shaft');
+  assert.ok(Math.abs(shaft.position.x)<.001&&Math.abs(shaft.position.y)<.001,'shaft stays bar-local');
+  assert.ok(bar.position.x>=-1.951&&bar.position.x<=2.311,'bar stays within chain ends');
+  assert.ok(bar.position.y>=.999&&bar.position.y<=1.571,'bar stays between chain runs');
+ }};
+ verify();sim.start();sim.update(1000);sim.update(3300);verify();sim.stop();verify();sim.dispose();machine.dispose();
+});
