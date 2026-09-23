@@ -390,12 +390,18 @@ dialog#modal[open]{display:flex;flex-direction:column}
  .topbar .brand-copy{min-width:0;max-width:100%!important;overflow:hidden!important}
  .brand-copy strong{display:block;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
  .header-actions{flex:0 0 auto;min-width:max-content}
- .header-actions .icon-btn{width:44px;height:44px;min-height:44px}
+ .header-actions .icon-btn,.panel-top .icon-btn,.modal-head .icon-btn,.canonical-layer-manager .icon-btn,.universal-search-field .icon-btn{width:44px;height:44px;min-height:44px}
+ .viewport-mode-switch button{height:44px;min-height:44px}
+ .mobile-nav button small{font-size:10px}
  .tabs button,.asset-category-tabs button,.reference-filter-strip button,.system-context-actions button,.context-breadcrumb button{min-height:44px}
  .tabs button{font-size:11px}
  .asset-category-tabs button,.reference-filter-strip button,.system-context-actions button{font-size:10px}
+ .context-breadcrumb button{font-size:10px}
+ .evidence-status summary span,.evidence-status summary strong{font-size:10px}
+ .stage-strip button span{font-size:10px}.stage-strip button small{font-size:9px}
  .asset-browser-copy strong{font-size:12px}
  .asset-browser-copy small,.asset-browser-copy span{font-size:10px;line-height:1.35}
+ .asset-data-badge{font-size:9px}
  .reference-kind,.context-reference-card header em{font-size:9px}
  .context-reference-card h4{font-size:11px}
  .context-reference-card p,.context-reference-card>a{font-size:10px}
@@ -406,6 +412,9 @@ dialog#modal[open]{display:flex;flex-direction:column}
  .system-network-row small,.system-network-row em,.system-equipment-list button small,.system-equipment-list button em{font-size:9px}
  .system-boundary strong,.system-boundary small{font-size:9px}
  .system-boundary p{font-size:10px}
+ .help-grid h3,.settings-section h3{font-size:12px}
+ .help-grid p,.settings-section p{font-size:11px}
+ .universal-search-result small{font-size:10px}
 }
 @media(max-width:390px){
  .brand-copy small{display:none!important}
