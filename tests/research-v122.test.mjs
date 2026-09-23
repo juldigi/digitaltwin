@@ -68,7 +68,7 @@ test('V194 Sheeting keeps speculative V122 option geometry out and deepens actua
  const knife=m.findNode('sheeting-knife');
  assert.equal(knife.userData.visibleKnifeGeometry,false);
  assert.match(knife.userData.evidenceBoundary,/fully guarded inside the LEXUS enclosure/i);
- assert.match(m.root.userData.installedOptionBoundary,/not rendered as installed hardware/i);
+ assert.match(m.root.userData.installedOptionBoundary,/removes family geometry|does not expose undocumented cutter internals/i);
  m.dispose();
 });
 
