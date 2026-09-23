@@ -47,7 +47,7 @@ test('OFFSET 5 contextual detail exposes source detail confidence and verified-p
  assert.match(detail,/pair\('3D source',truth\?\.source3D\|\|machine\.source\)/);
  assert.match(detail,/pair\('3D detail',truth\?\.detail3D\|\|'Model berbasis referensi'\)/);
  assert.match(detail,/pair\('Data confidence',truth\?\.dataConfidence\|\|'Sesuai sumber tersedia'\)/);
- assert.match(detail,/pair\('Posisi',truth\.position\)/);
+ assert.match(detail,/pair\('Posisi',truth\?\.position\|\|positionVerification\(placement\)\)/);
 });
 
 test('returning to factory overview clears selection and restores whole-factory focus',()=>{
@@ -59,7 +59,7 @@ test('returning to factory overview clears selection and restores whole-factory 
 test('other models are loaded on demand while the factory shell remains available',()=>{
  assert.match(engine,/await import\('\.\/machine-runtime\.js'\)/);
  assert.doesNotMatch(engine,/from '\.\/machine-runtime\.js'/);
- assert.match(app,/pair\('Versi aplikasi','V181'\)/);
- assert.match(html,/src\/app\.js\?v=181/);
- assert.match(sw,/factory-digital-twin-v181-selected-machine-routing-20260923/);
+ assert.match(app,/pair\('Versi aplikasi','V182'\)/);
+ assert.match(html,/src\/app\.js\?v=182/);
+ assert.match(sw,/factory-digital-twin-v182-machine-detail-fallback-20260923/);
 });
