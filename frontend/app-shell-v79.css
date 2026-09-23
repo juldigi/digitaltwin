@@ -375,3 +375,38 @@ aside#detail-panel{overscroll-behavior:contain}
 .phase-future-ui[hidden]{display:none!important}
 @media(max-width:767px){.mobile-nav{grid-template-columns:repeat(5,minmax(0,1fr))}}
 @media(max-height:560px) and (orientation:landscape){.mobile-nav{grid-template-columns:1fr;grid-template-rows:repeat(5,minmax(0,1fr))}}
+
+
+/* V166 usability audit: touch comfort, collision-free overlays, narrow-screen identity */
+body.search-open .ui-backdrop,
+body.layer-open .ui-backdrop{display:block}
+.canonical-layer-manager{z-index:90}
+.simulation-transport-open .scene-bottom{visibility:hidden;pointer-events:none}
+dialog#modal[open]{display:flex;flex-direction:column}
+#modal-body{min-height:0;overflow:auto;overscroll-behavior:contain}
+
+@media(max-width:767px){
+ .topbar .brand{min-width:0;overflow:hidden!important}
+ .topbar .brand-copy{min-width:0;max-width:100%!important;overflow:hidden!important}
+ .brand-copy strong{display:block;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .header-actions{flex:0 0 auto;min-width:max-content}
+ .header-actions .icon-btn{width:44px;height:44px;min-height:44px}
+ .tabs button,.asset-category-tabs button,.reference-filter-strip button,.system-context-actions button,.context-breadcrumb button{min-height:44px}
+ .tabs button{font-size:11px}
+ .asset-category-tabs button,.reference-filter-strip button,.system-context-actions button{font-size:10px}
+ .asset-browser-copy strong{font-size:12px}
+ .asset-browser-copy small,.asset-browser-copy span{font-size:10px;line-height:1.35}
+ .reference-kind,.context-reference-card header em{font-size:9px}
+ .context-reference-card h4{font-size:11px}
+ .context-reference-card p,.context-reference-card>a{font-size:10px}
+ .context-reference-card>small{font-size:9px}
+ .canonical-system-context>p{font-size:11px}
+ .canonical-system-context h5{font-size:9px}
+ .system-network-row strong,.system-equipment-list button strong{font-size:10px}
+ .system-network-row small,.system-network-row em,.system-equipment-list button small,.system-equipment-list button em{font-size:9px}
+ .system-boundary strong,.system-boundary small{font-size:9px}
+ .system-boundary p{font-size:10px}
+}
+@media(max-width:390px){
+ .brand-copy small{display:none!important}
+}
