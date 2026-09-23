@@ -68,7 +68,7 @@ export function setInspection(key,value){
   return setState({inspectionMode:next},{url:false});
 }
 export function setSimulation(patch={}){
-  return setState({simulationState:patch,activeSection:patch.active===false&&state.activeSection==='simulation'?'factory':state.activeSection},{url:false});
+  return setState({simulationState:patch},{url:false});
 }
 export function setInspector(open,tab=state.inspectorState.tab){
   return setState({inspectorState:{open:Boolean(open),tab}},{url:false});
