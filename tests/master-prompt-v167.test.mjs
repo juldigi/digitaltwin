@@ -46,5 +46,5 @@ test('V167 interaction assets are cache-busted',()=>{
  assert.match(html,/app-shell-v79\.css\?v=168/);
  assert.match(html,/src\/ui-v5\.js\?v=167/);
  assert.match(html,/src\/app-shell-v79\.js\?v=167/);
- assert.match(sw,/factory-digital-twin-v168-reading-flow-20260923/);
+ assert.match(sw,/factory-digital-twin-v169-reference-card-selector-20260923/);
 });

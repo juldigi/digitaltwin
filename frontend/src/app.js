@@ -303,8 +303,8 @@ function renderReferencePanel(){
  }).join('');
  $('#panel-content').innerHTML=`<h3>Referensi</h3><div class="card accent reference-context-summary"><h4>Konteks: ${esc(contextLabel)}</h4><p>${esc(intro)}</p><span class="tag">${priorityCount?priorityCount+' sumber diprioritaskan':'Sumber mesin aktif'}</span><span class="tag">${all.length} total referensi</span></div><div class="reference-filter-strip">${filters.map(([key,label])=>`<button type="button" data-reference-filter="${key}" class="${referenceCategoryFilter===key?'active':''}">${label}<small>${counts[key]||0}</small></button>`).join('')}</div><div class="context-reference-list">${cards||'<p class="empty">Tidak ada referensi pada kategori ini.</p>'}</div><div class="card"><h4>Arah mesin</h4><p>${esc(flow)} · sisi operator ${esc(op)} · sisi penggerak ${esc(ds)}</p></div><p class="subtle">Prioritas hanya diberikan bila istilah pada struktur terpilih benar-benar ditemukan pada keterangan sumber. Sumber lain tetap tersedia sebagai konteks mesin dan tidak dianggap sebagai bukti langsung komponen.</p>`;
  $$('[data-reference-filter]').forEach(button=>button.onclick=()=>{referenceCategoryFilter=button.dataset.referenceFilter;renderReferencePanel();});
- const activateReferenceCard=card=>{emitDomainState({activeReference:card.dataset.referenceCard,activeSection:'reference'});$('[data-reference-card]').forEach(x=>{const active=x===card;x.classList.toggle('is-active',active);x.setAttribute('aria-pressed',String(active));});};
- $('[data-reference-card]').forEach(card=>{
+ const activateReferenceCard=card=>{emitDomainState({activeReference:card.dataset.referenceCard,activeSection:'reference'});$$('[data-reference-card]').forEach(x=>{const active=x===card;x.classList.toggle('is-active',active);x.setAttribute('aria-pressed',String(active));});};
+ $$('[data-reference-card]').forEach(card=>{
   card.onclick=event=>{if(event.target.closest('a'))return;activateReferenceCard(card)};
   card.onkeydown=event=>{if(event.target.closest('a'))return;if(event.key==='Enter'||event.key===' '){event.preventDefault();activateReferenceCard(card)}};
  });
