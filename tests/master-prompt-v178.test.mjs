@@ -34,7 +34,7 @@ test('V178 a visible Simulation tab returns to Overview when entering 2D',()=>{
 });
 
 test('V178 app shell and service worker are cache-busted',()=>{
-  assert.match(html,/src\/app\.js\?v=183/);
-  assert.match(html,/src\/app-shell-v79\.js\?v=183/);
-  assert.match(sw,/factory-digital-twin-v183-simulation-system-navigation-20260923/);
+  assert.match(html,/src\/app\.js\?v=184/);
+  assert.match(html,/src\/app-shell-v79\.js\?v=184/);
+  assert.match(sw,/factory-digital-twin-v184-simulation-overlay-hardening-20260923/);
 });
