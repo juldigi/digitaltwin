@@ -23,6 +23,6 @@ test('V174 one state subscriber synchronizes view controls after click or histor
 });
 
 test('V174 shell and service worker are cache-busted',()=>{
- assert.match(html,/src\/app-shell-v79\.js\?v=178/);
- assert.match(sw,/factory-digital-twin-v179-factory-context-reset-20260923/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=181/);
+ assert.match(sw,/factory-digital-twin-v181-selected-machine-routing-20260923/);
 });

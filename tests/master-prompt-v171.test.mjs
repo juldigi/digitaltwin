@@ -28,7 +28,7 @@ test('V171 factory selection and technical model navigation create distinct brow
  assert.match(app,/function pushContextHistory\(/);
  assert.match(app,/history\.pushState\(snapshot,'',url\)/);
  assert.match(app,/selectFactoryAssetContext\(machine,\{historyMode='none'[\s\S]*historyMode==='push'[\s\S]*scene:'factory'/);
- assert.match(app,/async function switchActiveMachine[\s\S]*historyMode==='push'\)pushContextHistory\(\{asset:FOUNDATION_SCOPE\.primaryRoute,node:null,scene:'machine'/);
+ assert.match(app,/async function switchActiveMachine[\s\S]*historyMode==='push'\)pushContextHistory\(\{asset:assetId,node:null,scene:'machine'/);
  assert.doesNotMatch(app,/if\(normalizedRoute===MACHINE_KEY\)\{closeModal\(\);setView\('machine'\);return true;\}/);
 });
 
@@ -62,7 +62,7 @@ test('V171 in-place navigation never reloads the page to switch machine context'
 });
 
 test('V171 runtime files and service worker are cache-busted',()=>{
- assert.match(html,/src\/app\.js\?v=179/);
- assert.match(html,/src\/app-shell-v79\.js\?v=178/);
- assert.match(sw,/factory-digital-twin-v179-factory-context-reset-20260923/);
+ assert.match(html,/src\/app\.js\?v=181/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=181/);
+ assert.match(sw,/factory-digital-twin-v181-selected-machine-routing-20260923/);
 });

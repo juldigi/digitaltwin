@@ -23,17 +23,17 @@ test('V162 restores evidence-bounded Systems navigation without unlocking unveri
  assert.match(scope,/expansionMode:'EVIDENCE_GATED_CONTEXT'/);
  assert.match(scope,/showUtilitySystems:true/);
  assert.match(scope,/indexUtilitySystemsInSearch:true/);
- assert.match(scope,/export function canOpenTechnical3D\(value\)\{\s*return isFoundationPrimary\(value\)/);
+ assert.match(scope,/export function canOpenTechnical3D\(value\)\{\s*const id=foundationMachineId\(value\);[\s\S]*MACHINE_REGISTRY_BY_ID\.get\(id\)\?\.has3D/);
 });
 
 test('V162 exposes Systems in both navigation surfaces and keeps identifiers coherent',()=>{
  assert.match(html,/id="nav-systems" data-section="system"/);
  assert.match(html,/data-mobile-nav="system" aria-label="Sistem utilitas"/);
  assert.match(html,/app-shell-v79\.css\?v=168/);
- assert.match(html,/src\/app\.js\?v=179/);
- assert.match(html,/src\/app-shell-v79\.js\?v=178/);
+ assert.match(html,/src\/app\.js\?v=181/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=181/);
  assert.match(shell,/v162-factory-first-systems/);
- assert.match(sw,/factory-digital-twin-v179-factory-context-reset-20260923/);
+ assert.match(sw,/factory-digital-twin-v181-selected-machine-routing-20260923/);
 });
 
 test('asset navigation opens an empty search instead of serializing the click event',()=>{

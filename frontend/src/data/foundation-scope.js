@@ -1,7 +1,6 @@
-// Master-prompt foundation scope.
-// Phase-1 keeps the complete CAD-derived factory context, but only OFFSET 5 is
-// exposed as a full technical 3D asset. Other registered assets remain searchable
-// and selectable as spatial/layout placeholders until the expansion phase is unlocked.
+// Keep the CAD-derived factory context and expose registry-backed 3D models.
+// Their evidence limits remain attached to each machine record and model.
+import {MACHINE_REGISTRY_BY_ID} from './machine-registry.js';
 export const FOUNDATION_SCOPE=Object.freeze({
   release:'V162',
   phase:'DWG_FACTORY_FOUNDATION',
@@ -33,11 +32,12 @@ export function isFoundationPrimary(value){
 }
 
 export function canOpenTechnical3D(value){
-  return isFoundationPrimary(value);
+  const id=foundationMachineId(value);
+  return Boolean(MACHINE_REGISTRY_BY_ID.get(id)?.has3D);
 }
 
 export function scopedRegistryHas3D(machine){
-  return Boolean(machine?.has3D)&&isFoundationPrimary(machine);
+  return Boolean(machine?.has3D);
 }
 
 export function foundationPositionStatus(placement){
@@ -52,14 +52,14 @@ export function foundationPositionStatus(placement){
 }
 
 export function foundationAssetPolicy(machine,placement=null){
-  const primary=isFoundationPrimary(machine);
+  const primary=canOpenTechnical3D(machine);
   return Object.freeze({
     machineId:foundationMachineId(machine),
-    mode:primary?'PRIMARY_TECHNICAL_ASSET':'LAYOUT_PLACEHOLDER',
+    mode:primary?'TECHNICAL_ASSET':'LAYOUT_PLACEHOLDER',
     canOpenTechnical3D:primary,
     canUseSimulation:primary,
     canBrowseComponents:primary,
     positionStatus:foundationPositionStatus(placement),
-    detailStatus:primary?'TECHNICAL_3D_ENABLED':'TECHNICAL_3D_LOCKED_UNTIL_EXPANSION'
+    detailStatus:primary?'TECHNICAL_3D_ENABLED':'TECHNICAL_3D_UNAVAILABLE'
   });
 }

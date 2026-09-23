@@ -7,15 +7,15 @@ const css=fs.readFileSync(new URL('../frontend/app-shell-v79.css',import.meta.ur
 
 test('V150 removes internal routing jargon from user-facing factory copy',()=>{
   for(const oldCopy of ['Routing scaffold siap dipasang','Future anchors','Preview pipa compressor','Preview pipa AHU','Preview ducting AHU','AHU & ducting plant','Compressed air & piping plant'])assert.equal(app.includes(oldCopy),false,oldCopy);
-  for(const copy of ['Fondasi pabrik','Scope berbasis bukti','Detail teknis penuh hanya dibuka untuk OFFSET 5','Posisi belum teridentifikasi'])assert.equal(app.includes(copy),true,copy);
+  for(const copy of ['Denah pabrik','Scope berbasis bukti','Model 3D mengikuti aset yang dipilih','Posisi belum teridentifikasi'])assert.equal(app.includes(copy),true,copy);
   for(const hiddenExpansionCopy of ['Jalur utilitas siap dilengkapi','Lihat pipa compressor','Lihat pipa AHU','Lihat ducting AHU'])assert.equal(app.includes(hiddenExpansionCopy),false,hiddenExpansionCopy);
 });
 
 test('V150 asset and reference copy is human-first without changing technical source data',()=>{
-  assert.equal(app.includes('<small>FASE FONDASI</small>'),true);
+  assert.equal(app.includes('<small>ASET PABRIK</small>'),true);
   assert.equal(app.includes('<small>ASSET BROWSER</small>'),false);
   assert.equal(app.includes('<span>Merek</span>'),false);
-  assert.equal(app.includes('komponen OFFSET 5 ditampilkan'),true);
+  assert.equal(app.includes("nodes.length+' komponen '+activeMachine.name+' ditampilkan'"),true);
   assert.equal(app.includes('Gambar / Denah'),true);
   assert.equal(app.includes('Bukti / Sumber'),true);
   assert.equal(app.includes('sisi operator'),true);

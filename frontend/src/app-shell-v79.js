@@ -1,5 +1,5 @@
 import{getState,setState,setActiveSection,setViewMode,setLayer,setSimulation,setInspector,openOverlay,closeOverlay,hydrateUrl,subscribe}from'./state/app-state.js';
-import{FOUNDATION_SCOPE}from'./data/foundation-scope.js';
+import{FOUNDATION_SCOPE,canOpenTechnical3D}from'./data/foundation-scope.js';
 
 const q=(s,r=document)=>r.querySelector(s);
 const PHASE1_FOUNDATION=FOUNDATION_SCOPE.expansionMode==='LAYOUT_PLACEHOLDERS_ONLY';
@@ -143,6 +143,11 @@ function openSystemLayers(){
  const panel=q('#layer-manager');panel.hidden=false;document.body.classList.add('layer-open');openOverlay('layers');setActiveSection(PHASE1_FOUNDATION?'factory':'system');markSection(PHASE1_FOUNDATION?'factory':'system');syncLayerControls();focusOverlay(panel,'[data-layer-close]');
 }
 function enterSimulation(){
+ const context=getState();
+ if(context.sceneMode!=='machine'||!canOpenTechnical3D(context.selectedAsset)){
+  dispatchEvent(new CustomEvent('bmj:machinecontextrequest',{detail:{selectedAsset:context.selectedAsset,action:'Simulasi'}}));
+  return;
+ }
  if(q('#mode-3d')?.disabled){
   q('#mode-2d')?.click();
   const hint=q('#scene-hint');if(hint)hint.textContent='Simulasi 3D memerlukan WebGL. Denah 2D tetap tersedia di perangkat ini.';
