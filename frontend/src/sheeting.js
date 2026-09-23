@@ -14,7 +14,30 @@ export const SHEETING_VISUAL_REFERENCE=Object.freeze({
   evidence:'BMJ database + user-confirmed RIGHT_TO_LEFT + 9 user-provided actual BMJ machine photographs (22 Sep 2026) as primary exterior evidence + Lexus HSM family sources only for unresolved process/specification corroboration',
   dimensions:'BMJ_ACTUAL_PHOTO_ANCHORED_RECONSTRUCTION_NOT_ENGINEERING',
   visualFamily:'BMJ_ACTUAL_OPEN_TWO_SIDED_ROLLSTAND_MULTIROLLER_BRIDGE_LEXUS_CUTTER_CABINET_OPEN_BELT_TABLE_STACK_TABLE',
-  visualRevision:'V193_BMJ_ACTUAL_PHOTO_RECONSTRUCTION'
+  visualRevision:'V194_BMJ_PHOTO_GEOMETRY_DEEP_PASS'
+});
+
+
+export const SHEETING_ACTUAL_LAYOUT=Object.freeze({
+  revision:'V194',
+  direction:'RIGHT_TO_LEFT',
+  operatorZ:-1.62,
+  webWidth:2.24,
+  reel:Object.freeze({loadedCenter:Object.freeze([8.12,1.02,0]),standbyCenter:Object.freeze([6.68,.96,0]),radius:.82,span:2.70}),
+  feedRollers:Object.freeze([
+    Object.freeze({id:'G1',center:Object.freeze([7.18,1.48,0]),radius:.10,contact:'TOP',rotationSign:-1}),
+    Object.freeze({id:'G2',center:Object.freeze([6.60,1.82,0]),radius:.105,contact:'BOTTOM',rotationSign:1}),
+    Object.freeze({id:'G3',center:Object.freeze([6.02,1.42,0]),radius:.10,contact:'TOP',rotationSign:-1}),
+    Object.freeze({id:'G4',center:Object.freeze([5.44,1.94,0]),radius:.105,contact:'BOTTOM',rotationSign:1}),
+    Object.freeze({id:'G5',center:Object.freeze([4.86,1.47,0]),radius:.105,contact:'TOP',rotationSign:-1}),
+    Object.freeze({id:'G6',center:Object.freeze([4.32,1.82,0]),radius:.10,contact:'BOTTOM',rotationSign:1}),
+    Object.freeze({id:'G7',center:Object.freeze([3.93,1.27,0]),radius:.105,contact:'TOP',rotationSign:-1})
+  ]),
+  drawRoll:Object.freeze({center:Object.freeze([3.53,1.25,0]),radius:.29,rotationSign:-1,wrapStartDeg:34,wrapEndDeg:194}),
+  lowerEntryRoll:Object.freeze({center:Object.freeze([3.52,.76,0]),radius:.12,rotationSign:1}),
+  cutPoint:Object.freeze([1.42,.88,0]),
+  delivery:Object.freeze({startX:1.18,endX:-4.18,surfaceY:.88}),
+  stack:Object.freeze({startX:-4.10,endX:-7.26,centerX:-5.72,surfaceY:.76})
 });
 
 export class SheetingMachineTemplate{
@@ -25,7 +48,7 @@ export class SheetingMachineTemplate{
       assetId:'BMJ-MCH-0002',machine:'SHEETING LEXUS',model:'HSM-CTM7',
       referenceFamily:'BMJ HSM-CTM7 actual photo set · Lexus HSM family process corroboration',
       processDirection:'RIGHT_TO_LEFT',confidence:'IDENTITY_VERIFIED__GEOMETRY_FAMILY_PHOTO_ANCHORED',
-      visualRevision:'V193_BMJ_ACTUAL_PHOTO_RECONSTRUCTION'
+      visualRevision:'V194_BMJ_PHOTO_GEOMETRY_DEEP_PASS'
     };
     this.nodes=[];this.parts=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.activeMeshes=[];this.detailMeshes=[];
     this.taxonomy=SHEETING_TAXONOMY;this.taxonomyById=SHEETING_TAXONOMY_BY_ID;this.exteriorOpen=false;this.ghosted=false;
@@ -34,7 +57,7 @@ export class SheetingMachineTemplate{
       dark:0x293236,steel:0x939b9b,chrome:0xcbd1d0,paper:0xe8dfcb,stackPaper:0xc9ae83,
       glass:0x78b6bb,black:0x20272a,blue:0x2f67a1,red:0xc93434,green:0x4c9b4f,bronze:0xb08b55
     };
-    this.buildActualV193();this.enrichActualV193();
+    this.buildActualV194();this.enrichActualV194();
     for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}
     this.root.updateMatrixWorld(true);
   }
@@ -90,6 +113,368 @@ export class SheetingMachineTemplate{
       }
     }
     return m;
+  }
+
+
+  tube(g,points,r=.018,kind='black',opts={}){
+    const pts=points.map(p=>new THREE.Vector3(...p));
+    const key='tube:'+points.map(p=>p.map(v=>Number(v).toFixed(3)).join(',')).join('|')+':'+r;
+    return this.mesh(g,()=>new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts,false,'centripetal',.25),Math.max(12,pts.length*6),r,8,false),key,kind,[0,0,0],null,opts);
+  }
+  handwheel(g,x,y,z,r=.20,sourceAnchor=null,role='handwheel'){
+    this.torus(g,r,.026,[x,y,z],'black',{detail:true,role,sourceAnchor});
+    this.cyl(g,.040,.11,[x,y,z+.028],'dark','z',{detail:true,role:role+'-hub',sourceAnchor});
+    for(let i=0;i<3;i++){
+      const a=i*Math.PI*2/3;
+      this.box(g,[r*1.56,.030,.026],[x+Math.cos(a)*r*.26,y+Math.sin(a)*r*.26,z],'dark',.002,{detail:true,role:role+'-spoke',sourceAnchor},[0,0,a]);
+    }
+  }
+
+
+  buildActualV194(){
+    const photo='BMJ-SHEETING-PHOTOSET-20260922';
+    const L=SHEETING_ACTUAL_LAYOUT;
+
+    // The actual machine is not a set of isolated boxes. The unwind, overhead beams and
+    // roller bridge form one continuous mechanical frame visible in IMG_2479/2480/2485.
+    const structure=this.group(this.root,'sheeting-structure','Integrated Grounded Main Frame',[0,0,0],[0,-.18,0],'VERIFIED_VISUAL');
+    for(const z of [-1.48,1.48])this.box(structure,[16.55,.14,.16],[.45,.07,z],'dark',.014,{role:'main-floor-rail',sourceAnchor:photo});
+    for(const x of [-7.0,-6.1,-5.2,-4.3,-3.4,-2.5,-1.6,-.7,.2,1.1,2.0,2.9,3.8,4.7,5.6,6.5,7.4,8.3]){
+      this.box(structure,[.11,.12,2.92],[x,.06,0],'steel',.008,{detail:true,role:'floor-cross-member',sourceAnchor:photo});
+      for(const z of [-1.51,1.51])this.box(structure,[.18,.06,.20],[x,.03,z],'dark',.006,{detail:true,role:'floor-anchor-foot',sourceAnchor:photo});
+    }
+
+    const rollstand=this.group(this.root,'sheeting-rollstand','Integrated Two-Station Fixed Rollstand',[0,0,0],[.66,.26,0],'VERIFIED_VISUAL');
+    const reel=this.group(rollstand,'sheeting-reel','Loaded Reel / Expanding Chuck Station',[0,0,0],[.22,.16,0],'VERIFIED_VISUAL');
+    const [rx,ry,rz]=L.reel.loadedCenter, reelR=L.reel.radius;
+    const reelBody=this.cyl(reel,reelR,L.reel.span,[rx,ry,rz],'paper','z',{active:true,motion:'reel',role:'loaded-paper-reel',sourceAnchor:photo});
+    reelBody.userData.kinematicGroup='UNWIND_REEL';reelBody.userData.referenceWebContactRadius=reelR;
+    const reelCore=this.cyl(reel,.115,L.reel.span+.24,[rx,ry,rz],'dark','z',{active:true,motion:'reel-core',detail:true,role:'reel-core',sourceAnchor:photo});
+    reelCore.userData.kinematicGroup='UNWIND_REEL';reelCore.userData.referenceWebContactRadius=reelR;
+    for(const side of [-1,1]){
+      const z=side*(L.reel.span/2+.10);
+      const chuck=this.cyl(reel,.205,.17,[rx,ry,z],'body','z',{active:true,motion:'chuck',role:'loaded-expanding-chuck',sourceAnchor:photo});
+      chuck.userData.kinematicGroup='UNWIND_REEL';chuck.userData.referenceWebContactRadius=reelR;
+      this.cyl(reel,.072,.21,[rx,ry,z+side*.075],'dark','z',{detail:true,role:'chuck-center',sourceAnchor:photo});
+      for(let i=0;i<6;i++){
+        const a=i*Math.PI/3;
+        this.cyl(reel,.015,.030,[rx+Math.cos(a)*.125,ry+Math.sin(a)*.125,z+side*.09],'dark','z',{detail:true,role:'chuck-face-bolt',sourceAnchor:photo});
+      }
+    }
+
+    // Two longitudinal reel stations share the same grounded stand. The second station is empty
+    // in the photo set and is represented by its opposed chuck arms only.
+    const stationSpecs=[
+      {x:L.reel.loadedCenter[0],y:L.reel.loadedCenter[1],label:'loaded'},
+      {x:L.reel.standbyCenter[0],y:L.reel.standbyCenter[1],label:'standby'}
+    ];
+    for(const st of stationSpecs)for(const side of [-1,1]){
+      const z=side*1.47,pivotX=st.x-.50,pivotY=.34;
+      this.cyl(rollstand,.18,.23,[pivotX,pivotY,z],'body','z',{detail:true,role:'rollstand-main-pivot',sourceAnchor:photo});
+      this.beamXY(rollstand,[pivotX,pivotY],[st.x-.28,.58],z,.27,.30,'light',{role:st.label+'-reel-arm-inner',sourceAnchor:photo});
+      this.beamXY(rollstand,[st.x-.28,.58],[st.x,st.y],z,.25,.30,'light',{role:st.label+'-reel-arm-outer',sourceAnchor:photo});
+      this.cyl(rollstand,.205,.17,[st.x,st.y,z],'body','z',{detail:true,role:st.label+'-chuck-housing',sourceAnchor:photo});
+      this.box(rollstand,[.17,.83,.18],[st.x-.38,.47,side*1.60],'blue',.022,{detail:true,role:'vertical-hydraulic-cylinder',sourceAnchor:photo});
+      this.cyl(rollstand,.036,.34,[st.x-.38,1.03,side*1.60],'chrome','y',{detail:true,role:'hydraulic-piston-rod',sourceAnchor:photo});
+    }
+    for(const side of [-1,1]){
+      this.box(rollstand,[3.25,.16,.30],[7.36,.10,side*1.49],'light',.016,{role:'rollstand-common-base',sourceAnchor:photo});
+      this.box(rollstand,[.26,.52,.28],[7.35,.30,side*1.49],'body',.020,{role:'rollstand-center-pedestal',sourceAnchor:photo});
+    }
+
+    // Central valve manifold visible in IMG_2485: tall body, dense top valve blocks and many hoses.
+    const manifold=this.group(rollstand,'sheeting-rollstand-manifold','Hydraulic Valve Manifold / Hose Tower',[0,0,0],[.10,.10,0],'VERIFIED_VISUAL');
+    this.box(manifold,[.78,1.22,.44],[7.34,1.03,.05],'body',.018,{cover:true,role:'hydraulic-manifold-cabinet',sourceAnchor:photo});
+    for(let row=0;row<3;row++)for(let col=0;col<5;col++){
+      const x=7.08+col*.13,y=1.73+row*.13;
+      this.box(manifold,[.105,.105,.18],[x,y,-.02],'dark',.008,{detail:true,role:'hydraulic-valve-block',sourceAnchor:photo});
+      this.cyl(manifold,.020,.05,[x,y,-.13],'chrome','z',{detail:true,role:'hydraulic-valve-fitting',sourceAnchor:photo});
+    }
+    const hoseStarts=[[7.10,1.70,-.04],[7.24,1.70,-.04],[7.38,1.70,-.04],[7.52,1.70,-.04],[7.66,1.70,-.04]];
+    const hoseEnds=[[8.02,.98,-1.60],[7.60,.96,1.60],[6.82,.96,-1.60],[6.34,.94,1.60],[7.18,.55,-1.48]];
+    hoseStarts.forEach((s,i)=>this.tube(manifold,[s,[s[0],1.35,(i-2)*.07],[7.35,.78,(i-2)*.12],hoseEnds[i]],.018,'black',{detail:true,role:'hydraulic-hose',sourceAnchor:photo}));
+
+    // Actual front control pedestal: six pressure gauges across the upper face and blue regulators below.
+    const unwindPanel=this.group(rollstand,'sheeting-unwind-panel','Unwind Pressure / Regulator Pedestal',[0,0,0],[.10,.12,-.18],'VERIFIED_VISUAL');
+    this.box(unwindPanel,[.74,1.38,.42],[7.54,.75,-1.78],'body',.026,{cover:true,role:'unwind-pressure-cabinet',sourceAnchor:photo});
+    for(let i=0;i<6;i++){
+      const x=7.27+i*.11;
+      this.cyl(unwindPanel,.052,.026,[x,1.16,-2.005],'steel','z',{detail:true,role:'unwind-pressure-gauge-bezel',sourceAnchor:photo});
+      this.cyl(unwindPanel,.041,.028,[x,1.16,-2.025],'white','z',{detail:true,role:'unwind-pressure-gauge-face',sourceAnchor:photo});
+      this.cyl(unwindPanel,.036,.050,[x, .91,-2.035],'blue','z',{detail:true,role:'unwind-blue-regulator',sourceAnchor:photo});
+      this.box(unwindPanel,[.055,.018,.025],[x,.91,-2.067],'dark',.002,{detail:true,role:'unwind-regulator-handle',sourceAnchor:photo},[0,0,(i%2?-.45:.45)]);
+    }
+    this.cyl(unwindPanel,.035,.035,[7.30,.57,-2.03],'red','z',{detail:true,role:'unwind-stop-button',sourceAnchor:photo});
+    this.cyl(unwindPanel,.035,.035,[7.47,.57,-2.03],'green','z',{detail:true,role:'unwind-start-button',sourceAnchor:photo});
+
+    // Long overhead bridge ties the unwind to the open roller section; this is one of the strongest
+    // silhouette cues missing from V193.
+    const bridge=this.group(rollstand,'sheeting-unwind-bridge','Long Overhead Unwind / Roller Bridge',[0,0,0],[.16,.18,0],'VERIFIED_VISUAL');
+    for(const z of [-1.38,1.38]){
+      this.box(bridge,[5.15,.20,.22],[5.92,2.28,z],'light',.010,{role:'overhead-longitudinal-beam',sourceAnchor:photo});
+      for(const x of [7.76,6.62,5.42,4.28])this.box(bridge,[.16,.58,.20],[x,1.98,z],'body',.012,{role:'overhead-green-link',sourceAnchor:photo},[0,0,(x===7.76?.16:x===4.28?-.12:0)]);
+    }
+    for(const x of [4.20,5.45,6.70,7.90])this.box(bridge,[.14,.16,2.92],[x,2.27,0],'steel',.008,{detail:true,role:'overhead-cross-tie',sourceAnchor:photo});
+
+    const feed=this.group(this.root,'sheeting-feed','Integrated Open Multi-Roller Web Section',[0,0,0],[.45,.34,0],'VERIFIED_VISUAL');
+    const feedFrame=this.group(feed,'sheeting-feed-frame','Open Two-Sided Roller Frame',[0,0,0],[.12,.10,0],'VERIFIED_VISUAL');
+    for(const z of [-1.40,1.40]){
+      for(const x of [3.82,5.00,6.18])this.box(feedFrame,[.18,2.06,.20],[x,1.08,z],'light',.014,{role:'roller-frame-upright',sourceAnchor:photo});
+      this.box(feedFrame,[2.54,.16,.20],[5.00,.14,z],'steel',.010,{role:'roller-frame-lower-rail',sourceAnchor:photo});
+      this.beamXY(feedFrame,[3.82,.36],[6.18,.62],z,.14,.20,'light',{role:'roller-frame-diagonal-base',sourceAnchor:photo});
+    }
+    for(const x of [3.82,5.00,6.18])this.box(feedFrame,[.16,.16,2.94],[x,2.05,0],'steel',.008,{role:'roller-frame-cross-member',sourceAnchor:photo});
+
+    const feedRollers=this.group(feed,'sheeting-feed-rollers','Photo-Matched Guide / Tension Roller Bank',[0,0,0],[.06,.10,0],'VERIFIED_VISUAL');
+    for(const spec of L.feedRollers){
+      const [x,y]=spec.center;
+      const rr=this.cyl(feedRollers,spec.radius,2.70,[x,y,0],'chrome','z',{active:true,motion:'guide-roller',role:'guide-tension-roller',sourceAnchor:photo});
+      rr.userData.kinematicGroup='WEB_CONTACT';rr.userData.rotationSign=spec.rotationSign;rr.userData.webContactSide=spec.contact;rr.userData.layoutId=spec.id;
+      for(const side of [-1,1]){
+        this.box(feedRollers,[.18,.20,.13],[x,y,side*1.41],'bodyDark',.010,{detail:true,role:'roller-bearing-block',sourceAnchor:photo});
+        this.cyl(feedRollers,.035,.055,[x,y,side*1.49],'dark','z',{detail:true,role:'roller-shaft-end',sourceAnchor:photo});
+      }
+    }
+
+    // Small operator digital instruments on the near roller-frame upright.
+    const feedMeters=this.group(feed,'sheeting-feed-meters','Feed Digital Meter Pair',[0,0,0],[.05,.06,-.12],'VERIFIED_VISUAL');
+    for(const [i,y] of [1.32,1.02].entries()){
+      this.box(feedMeters,[.25,.25,.07],[3.86,y,-1.53],'light',.008,{detail:true,role:'feed-meter-case',sourceAnchor:photo});
+      this.box(feedMeters,[.15,.09,.025],[3.86,y+.035,-1.575],'dark',.004,{detail:true,role:'feed-meter-display',sourceAnchor:photo});
+      this.cyl(feedMeters,.018,.020,[3.92,y-.065,-1.58],i?'red':'green','z',{detail:true,role:'feed-meter-button',sourceAnchor:photo});
+    }
+
+    // Freestanding gray electrical cabinet visible beside the roller bridge.
+    const electrical=this.group(feed,'sheeting-electrical-cabinet','Feed / Drive Electrical Cabinet',[0,0,0],[.08,.08,.16],'VERIFIED_VISUAL');
+    this.box(electrical,[.76,1.48,.52],[4.18,.76,1.80],'light',.018,{cover:true,role:'electrical-cabinet-body',sourceAnchor:photo});
+    this.box(electrical,[.64,.55,.025],[4.18,.93,1.535],'steel',.006,{cover:true,detail:true,role:'electrical-cabinet-door',sourceAnchor:photo});
+    for(const y of [.46,1.16])this.box(electrical,[.34,.025,.028],[4.18,y,1.52],'dark',.003,{detail:true,role:'electrical-vent',sourceAnchor:photo});
+
+    const epc=this.group(feed,'sheeting-epc','Web Alignment / Edge Guide Reference',[0,0,0],[.05,.08,0],'PROCESS_FAMILY_REFERENCE');
+    this.box(epc,[.62,.09,2.30],[4.02,.94,0],'steel',.006,{detail:true,role:'edge-guide-crossbar',sourceAnchor:photo});
+    for(const side of [-1,1])this.box(epc,[.11,.26,.12],[4.02,.83,side*.96],'bodyDark',.008,{detail:true,role:'edge-guide-head',sourceAnchor:photo});
+
+    // Main LEXUS cutter is asymmetric: a large enclosed cabinet plus a projecting intake roll guard.
+    const head=this.group(this.root,'sheeting-cutter','LEXUS Enclosed Cutter / Main Drive',[0,0,0],[0,.50,0],'VERIFIED_VISUAL');
+    this.box(head,[2.58,2.46,3.02],[2.18,1.24,0],'body',.034,{cover:true,role:'main-cutter-cabinet',sourceAnchor:photo});
+    this.box(head,[2.42,.20,3.08],[2.18,2.49,0],'bodyDark',.018,{cover:true,role:'cutter-top-cap',sourceAnchor:photo});
+    this.box(head,[1.90,1.86,.030],[2.10,1.18,1.525],'bodyDark',.008,{cover:true,role:'drive-side-main-access-door',sourceAnchor:photo});
+    this.cyl(head,.055,.025,[2.85,1.24,1.555],'dark','z',{detail:true,role:'main-access-door-handle',sourceAnchor:photo});
+    this.box(head,[.92,1.22,.36],[3.50,1.12,-1.49],'body',.024,{cover:true,role:'intake-projecting-guard',sourceAnchor:photo});
+    this.box(head,[.42,.32,.025],[3.58,.82,-1.69],'white',.004,{cover:true,detail:true,role:'bend-warning-plate',sourceAnchor:photo});
+    this.cyl(head,.050,.035,[3.64,1.26,-1.69],'red','z',{detail:true,role:'intake-emergency-stop',sourceAnchor:photo});
+
+    const window=this.group(head,'sheeting-window','LEXUS Silver Inspection Panel / Window',[0,0,0],[0,.12,-.18],'VERIFIED_VISUAL');
+    this.box(window,[1.82,.60,.060],[2.08,1.74,-1.555],'light',.008,{cover:true,role:'inspection-panel-frame',sourceAnchor:photo});
+    this.box(window,[1.56,.32,.028],[2.08,1.75,-1.592],'glass',.004,{cover:true,role:'long-inspection-window',sourceAnchor:photo});
+    const brand=this.box(window,[.52,.20,.030],[2.28,1.73,-1.625],'white',.003,{cover:true,detail:true,role:'lexus-brand-plate',sourceAnchor:photo});
+    brand.userData.label='LEXUS';
+    for(const x of [1.25,2.91])for(const y of [1.49,1.99])this.cyl(window,.018,.020,[x,y,-1.625],'dark','z',{detail:true,role:'inspection-panel-bolt',sourceAnchor:photo});
+
+    // Dominant exterior transport roll visible in IMG_2487, plus lower polished roll.
+    const process=this.group(head,'sheeting-main-rollers','Exterior Draw / Nip Roll Assembly',[0,0,0],[0,.20,0],'VERIFIED_VISUAL');
+    const [dx,dy]=L.drawRoll.center;
+    const draw=this.cyl(process,L.drawRoll.radius,2.58,[dx,dy,0],'black','z',{active:true,motion:'draw-roller',role:'large-black-draw-roll',sourceAnchor:photo});
+    draw.userData.kinematicGroup='WEB_CONTACT';draw.userData.rotationSign=L.drawRoll.rotationSign;draw.userData.webContactSide='WRAP';
+    const [lx,ly]=L.lowerEntryRoll.center;
+    const lower=this.cyl(process,L.lowerEntryRoll.radius,2.62,[lx,ly,0],'chrome','z',{active:true,motion:'pull-roller',role:'lower-polished-entry-roll',sourceAnchor:photo});
+    lower.userData.kinematicGroup='WEB_CONTACT';lower.userData.rotationSign=L.lowerEntryRoll.rotationSign;lower.userData.webContactSide='BOTTOM';
+    for(const side of [-1,1]){
+      this.cyl(process,.205,.080,[dx,dy,side*1.34],'body','z',{detail:true,role:'draw-roll-end-housing',sourceAnchor:photo});
+      this.box(process,[.22,.24,.13],[lx,ly,side*1.38],'bodyDark',.010,{detail:true,role:'lower-roll-bearing-block',sourceAnchor:photo});
+    }
+
+    // Row of small top snubber/guide wheels and its transverse shaft.
+    const snubbers=this.group(head,'sheeting-snubber-wheels','Top Snubber / Guide Wheel Bank',[0,0,0],[0,.12,0],'VERIFIED_VISUAL');
+    this.cyl(snubbers,.030,2.32,[3.30,1.66,0],'chrome','z',{detail:true,role:'snubber-wheel-shaft',sourceAnchor:photo});
+    for(let i=0;i<9;i++){
+      const z=-1.02+i*.255;
+      const w=this.cyl(snubbers,.078,.045,[3.30,1.66,z],'white','z',{active:true,motion:'snubber-wheel',detail:true,role:'snubber-wheel',sourceAnchor:photo});
+      w.userData.kinematicGroup='WEB_CONTACT';w.userData.rotationSign=-1;w.userData.surfaceRadius=.078;
+      this.box(snubbers,[.11,.20,.08],[3.30,1.78,z],'body',.006,{detail:true,role:'snubber-wheel-holder',sourceAnchor:photo});
+    }
+
+    // Two angled drive/motor units above the draw roll, photo-visible and asymmetric.
+    const topDrive=this.group(head,'sheeting-top-drive','Top Roll Drive / Motor Pair',[0,0,0],[.12,.14,0],'VERIFIED_VISUAL');
+    for(const z of [-.78,.72]){
+      this.box(topDrive,[.38,.28,.28],[3.13,1.98,z],'steel',.025,{detail:true,role:'top-drive-motor',sourceAnchor:photo},[0,0,z<0?.34:-.34]);
+      this.box(topDrive,[.42,.18,.20],[3.33,1.82,z],'body',.012,{detail:true,role:'top-drive-bracket',sourceAnchor:photo},[0,0,z<0?.34:-.34]);
+      this.cyl(topDrive,.055,.16,[3.20,1.86,z],'dark','x',{detail:true,role:'top-drive-shaft',sourceAnchor:photo});
+    }
+
+    // External pressure/regulator panel on the cabinet side (IMG_2481).
+    const pneu=this.group(head,'sheeting-cutter-pneumatic-panel','Cutter Pneumatic Pressure Panel',[0,0,0],[.12,.12,-.18],'VERIFIED_VISUAL');
+    this.box(pneu,[.92,.83,.10],[1.12,1.13,-1.60],'body',.014,{cover:true,role:'cutter-pressure-panel-body',sourceAnchor:photo});
+    for(let i=0;i<4;i++){
+      const x=.84+(i%2)*.34,y=1.39-Math.floor(i/2)*.31;
+      this.cyl(pneu,.065,.025,[x,y,-1.665],'steel','z',{detail:true,role:'cutter-pressure-gauge-bezel',sourceAnchor:photo});
+      this.cyl(pneu,.052,.027,[x,y,-1.682],'white','z',{detail:true,role:'cutter-pressure-gauge-face',sourceAnchor:photo});
+      this.cyl(pneu,.047,.050,[x,y-.14,-1.685],'blue','z',{detail:true,role:'cutter-blue-regulator',sourceAnchor:photo});
+    }
+    this.cyl(pneu,.030,.030,[1.42,.89,-1.68],'red','z',{detail:true,role:'cutter-panel-stop',sourceAnchor:photo});
+    this.box(pneu,[.24,.025,.028],[1.18,.78,-1.69],'dark',.002,{detail:true,role:'cutter-panel-lever',sourceAnchor:photo},[0,0,.45]);
+
+    // Top length/display enclosure and green support post.
+    const display=this.group(head,'sheeting-length-display','Top Sheet-Length / Status Display',[0,0,0],[0,.16,0],'VERIFIED_VISUAL');
+    this.box(display,[.10,.82,.10],[1.76,2.82,.28],'body',.008,{detail:true,role:'display-support-post',sourceAnchor:photo});
+    this.box(display,[1.06,.34,.34],[2.10,3.02,.28],'light',.012,{cover:true,role:'top-display-enclosure',sourceAnchor:photo});
+    this.box(display,[.18,.20,.030],[1.64,3.04,.095],'dark',.004,{detail:true,role:'top-digital-display',sourceAnchor:photo});
+
+    const knife=this.group(head,'sheeting-knife','Internal Cross-Cut Zone · Guarded',[0,0,0],[0,.18,0],'VERIFIED_VISUAL__INTERNAL_MECHANISM_UNRESOLVED');
+    knife.userData.visibleKnifeGeometry=false;
+    knife.userData.evidenceBoundary='The user-provided BMJ photos show the cutter fully guarded inside the LEXUS enclosure. V194 models the verified exterior transport hardware but intentionally does not invent blade shape, stroke or actuation.';
+    const transport=this.group(head,'sheeting-cutter-transport','Guarded Cut / Exit Bed',[0,0,0],[0,.10,0],'VERIFIED_VISUAL');
+    this.box(transport,[2.08,.09,2.52],[2.00,.69,0],'steel',.010,{role:'guarded-cutter-bed',sourceAnchor:photo});
+    for(const z of [-1.02,-.76,-.50,-.24,.02,.28,.54,.80,1.06])this.box(transport,[2.00,.020,.042],[2.00,.745,z],'black',.002,{detail:true,role:'guarded-bed-strip',sourceAnchor:photo});
+
+    // Photo-visible trim extraction accessory. It is visually present but remains isolated from
+    // the core process claims because the exact connection is not documented.
+    const extraction=this.group(head,'sheeting-trim-extraction','Trim / Dust Extraction Bag Accessory',[0,0,0],[.12,.12,.24],'PHOTO_VISIBLE_ACCESSORY');
+    this.mesh(extraction,()=>new THREE.CylinderGeometry(.24,.36,.88,18),'trim-bag-v194','light',[1.05,.62,1.78],null,{detail:true,role:'trim-extraction-bag',sourceAnchor:photo});
+    this.cyl(extraction,.075,.52,[1.18,1.16,1.70],'steel','y',{detail:true,role:'trim-extraction-duct',sourceAnchor:photo});
+
+    // Delivery is an open multi-level mechanism, not a flat slab.
+    const delivery=this.group(this.root,'sheeting-delivery','Open Multi-Level Belt / Alignment Delivery',[0,0,0],[-.58,.34,0],'VERIFIED_VISUAL');
+    for(const z of [-1.44,1.44]){
+      this.box(delivery,[5.42,.22,.18],[-1.50,.55,z],'light',.014,{role:'delivery-side-frame',sourceAnchor:photo});
+      for(const x of [1.05,.15,-.75,-1.65,-2.55,-3.45,-4.05])this.box(delivery,[.11,.54,.12],[x,.27,z],'steel',.007,{role:'delivery-leg',sourceAnchor:photo});
+    }
+    for(const x of [1.12,.25,-.62,-1.48,-2.35,-3.22,-4.10])this.box(delivery,[.10,.10,2.78],[x,.46,0],'steel',.006,{detail:true,role:'delivery-cross-member',sourceAnchor:photo});
+
+    const fastBelts=this.group(delivery,'sheeting-fast-belts','Upstream Green Belt Field',[0,0,0],[0,.05,0],'VERIFIED_VISUAL');
+    const slowBelts=this.group(delivery,'sheeting-slow-belts','Middle Green Belt Field',[0,0,0],[0,.05,0],'VERIFIED_VISUAL');
+    const overlapBelts=this.group(delivery,'sheeting-overlap-belts','Downstream Alignment Belt Field',[0,0,0],[0,.05,0],'VERIFIED_VISUAL');
+    const beltZ=[];for(let z=-1.20;z<=1.201;z+=.145)beltZ.push(+z.toFixed(3));
+    for(const z of beltZ){
+      this.box(fastBelts,[1.62,.020,.050],[.39,.835,z],'body',.001,{detail:true,role:'fast-transport-belt',sourceAnchor:photo});
+      this.box(slowBelts,[1.70,.020,.050],[-1.27,.835,z],'body',.001,{detail:true,role:'slow-transport-belt',sourceAnchor:photo});
+      this.box(overlapBelts,[2.06,.020,.050],[-3.15,.835,z],'body',.001,{detail:true,role:'overlap-transport-belt',sourceAnchor:photo});
+    }
+
+    const deliveryRollers=this.group(delivery,'sheeting-delivery-rollers','Transverse Delivery Shaft / Roller Set',[0,0,0],[0,.07,0],'VERIFIED_VISUAL');
+    const delSpec=[
+      [1.05,.105,'FAST',-1],[.30,.075,'FAST',-1],[-.55,.075,'SLOW',-1],[-1.42,.072,'SLOW',-1],[-2.35,.080,'OVERLAP',-1],[-3.30,.095,'OVERLAP',-1],[-4.02,.105,'OVERLAP',-1]
+    ];
+    for(const [x,r,zone,sign] of delSpec){
+      const rr=this.cyl(deliveryRollers,r,2.68,[x,.89,0],'chrome','z',{active:true,motion:'delivery-roller',role:'transport-roller',sourceAnchor:photo});
+      rr.userData.kinematicGroup='CUT_SHEET_TRANSPORT';rr.userData.transportZone=zone;rr.userData.rotationSign=sign;
+      for(const side of [-1,1])this.box(deliveryRollers,[.16,.18,.12],[x,.89,side*1.40],'bodyDark',.009,{detail:true,role:'delivery-bearing-block',sourceAnchor:photo});
+    }
+
+    const overlap=this.group(delivery,'sheeting-overlap','Cross-Shaft / Snubber / Alignment Assemblies',[0,0,0],[0,.12,0],'VERIFIED_VISUAL');
+    const wheelRows=[[.55,'FAST'],[-.55,'SLOW'],[-1.58,'SLOW']];
+    for(const [x,zone] of wheelRows){
+      this.cyl(overlap,.030,2.76,[x,1.02,0],'chrome','z',{detail:true,role:'hold-down-cross-shaft',sourceAnchor:photo});
+      for(let i=0;i<6;i++){
+        const z=-1.02+i*.40;
+        const w=this.cyl(overlap,.090,.050,[x,.98,z],'white','z',{active:true,motion:'hold-down-wheel',detail:true,role:'white-hold-down-wheel',sourceAnchor:photo});
+        w.userData.kinematicGroup='CUT_SHEET_TRANSPORT';w.userData.transportZone=zone;w.userData.rotationSign=-1;w.userData.surfaceRadius=.09;
+        this.box(overlap,[.11,.18,.09],[x,1.10,z],'bodyDark',.006,{detail:true,role:'hold-down-wheel-holder',sourceAnchor:photo});
+      }
+    }
+    for(const x of [.98,-.08,-2.12,-3.62]){
+      this.cyl(overlap,.026,2.82,[x,1.18,0],'chrome','z',{detail:true,role:'adjustment-crossrail',sourceAnchor:photo});
+      for(const z of [-.92,0,.92])this.cyl(overlap,.030,.10,[x,1.18,z],'dark','z',{detail:true,role:'crossrail-clamp',sourceAnchor:photo});
+    }
+    // Two photo-visible checker plate bridges/covers span the machine width.
+    for(const x of [.02,-2.22])this.box(delivery,[.28,.055,2.82],[x,1.05,0],'steel',.004,{detail:true,role:'diamond-plate-cross-cover',sourceAnchor:photo});
+
+    const handwheel=this.group(delivery,'sheeting-outfeed-handwheel','Delivery Adjustment Handwheels',[0,0,0],[0,.08,-.12],'VERIFIED_VISUAL');
+    this.handwheel(handwheel,-.05,.72,-1.58,.19,photo,'delivery-handwheel');
+    this.handwheel(handwheel,-3.84,1.18,-1.58,.18,photo,'delivery-handwheel');
+
+    // Actual broad wedge console with an HMI and many discrete switches.
+    const control=this.group(this.root,'sheeting-control','BMJ Delivery Operator Console',[0,0,0],[.18,.24,-.26],'VERIFIED_VISUAL');
+    this.box(control,[1.92,.58,.54],[-.72,.36,-1.91],'light',.020,{cover:true,role:'operator-console-base',sourceAnchor:photo});
+    this.box(control,[1.82,.075,.48],[-.72,.68,-2.00],'steel',.006,{cover:true,role:'operator-console-face',sourceAnchor:photo},[-.40,0,0]);
+    this.box(control,[1.95,.055,.28],[-.72,.30,-2.17],'steel',.004,{detail:true,role:'operator-console-stainless-lip',sourceAnchor:photo});
+    this.box(control,[.36,.038,.24],[-.45,.72,-2.24],'dark',.003,{detail:true,role:'operator-hmi-display',sourceAnchor:photo},[-.40,0,0]);
+    const controlKinds=['green','black','black','red','black','green','black','black','green','black','red','black','black','green','black','black','red','black'];
+    controlKinds.forEach((kind,i)=>{
+      const row=Math.floor(i/9),col=i%9;
+      this.cyl(control,.027,.028,[-1.44+col*.18,.74-row*.16,-2.245],kind,'z',{detail:true,role:'operator-button-selector',sourceAnchor:photo});
+    });
+
+    // Output stack/lay table: long side rails with rack teeth, two large handwheels, sliding
+    // guide carriages, blue pallet blocks and a stack light. These details dominate IMG_2484.
+    const layboy=this.group(this.root,'sheeting-layboy','Rack-Adjusted Open Stack / Lay Table',[0,0,0],[-.44,.28,0],'VERIFIED_VISUAL');
+    const sx=L.stack.centerX, stackLen=L.stack.endX-L.stack.startX;
+    for(const z of [-1.44,1.44]){
+      this.box(layboy,[Math.abs(stackLen),.22,.18],[sx,.72,z],'light',.012,{role:'stack-side-rail',sourceAnchor:photo});
+      for(const x of [L.stack.startX+.15,sx,L.stack.endX-.15])this.box(layboy,[.12,.72,.12],[x,.36,z],'steel',.007,{role:'stack-frame-leg',sourceAnchor:photo});
+    }
+    for(const x of [L.stack.startX,L.stack.endX])this.box(layboy,[.14,.18,2.92],[x,1.08,0],'light',.010,{role:'stack-end-crossbeam',sourceAnchor:photo});
+    for(const z of [-1.57,1.57]){
+      this.box(layboy,[2.92,.10,.08],[sx,1.00,z],'bronze',.003,{detail:true,role:'stack-rack-bar',sourceAnchor:photo});
+      for(let i=0;i<34;i++){
+        const x=L.stack.startX+.18+i*(Math.abs(stackLen)-.36)/33;
+        this.box(layboy,[.045,.050,.045],[x,1.055,z],'dark',.001,{detail:true,role:'stack-rack-tooth',sourceAnchor:photo});
+      }
+    }
+    const joggers=this.group(layboy,'sheeting-stacker-joggers','Manual Rack-Adjusted Stack Guides',[0,0,0],[0,.06,0],'VERIFIED_VISUAL');
+    for(const x of [-5.18,-6.28]){
+      this.box(joggers,[.34,.46,.20],[x,1.08,-1.48],'body',.010,{detail:true,role:'stack-guide-carriage',sourceAnchor:photo});
+      this.handwheel(joggers,x,1.12,-1.68,.23,photo,'stack-guide-handwheel');
+      this.box(joggers,[.12,.82,2.06],[x,1.18,0],'light',.008,{detail:true,role:'stack-guide-plate',sourceAnchor:photo});
+    }
+    this.box(joggers,[.12,.74,2.20],[L.stack.endX+.12,1.10,0],'light',.008,{detail:true,role:'fixed-output-backstop',sourceAnchor:photo});
+    for(const side of [-1,1])this.box(joggers,[2.34,.46,.060],[sx,.92,side*1.06],'light',.006,{detail:true,role:'manual-side-guide',sourceAnchor:photo});
+
+    const lift=this.group(layboy,'sheeting-stack-lift','Flat Plate Lift / Pallet Support',[0,0,0],[0,.10,0],'FAMILY_PROCESS_REFERENCE__PHOTO_POSITION_ANCHORED');
+    this.box(lift,[2.36,.12,2.42],[sx,.60,0],'steel',.008,{active:true,motion:'lift-table',role:'lift-table',sourceAnchor:photo});
+    for(const x of [sx-.70,sx+.70])for(const z of [-.78,.78])this.box(lift,[.34,.10,.28],[x,.52,z],'blue',.004,{active:true,motion:'lift-table',detail:true,role:'blue-pallet-block',sourceAnchor:photo});
+    const refStack=this.group(lift,'sheeting-reference-stack','Captured Paper Stack',[0,0,0],[0,.06,0],'VERIFIED_VISUAL');
+    this.box(refStack,[1.94,.44,2.08],[sx,.88,0],'stackPaper',.006,{role:'reference-paper-block',sourceAnchor:photo,referenceStack:true});
+    for(let i=0;i<9;i++)this.box(refStack,[1.96,.010,2.10],[sx,.68+i*.045,0],'paper',.001,{detail:true,role:'reference-paper-seam',sourceAnchor:photo,referenceStack:true});
+    this.box(refStack,[1.96,.022,2.10],[sx,1.105,0],'paper',.002,{detail:true,role:'reference-paper-top',sourceAnchor:photo,referenceStack:true});
+
+    const stackLight=this.group(layboy,'sheeting-stack-light','Stacker Signal Tower',[0,0,0],[0,.12,.14],'VERIFIED_VISUAL');
+    this.box(stackLight,[.07,1.22,.07],[L.stack.endX+.08,1.56,1.52],'dark',.004,{detail:true,role:'stack-light-pole',sourceAnchor:photo});
+    for(const [i,kind] of ['green','bronze','red'].entries())this.cyl(stackLight,.065,.13,[L.stack.endX+.08,2.18+i*.13,1.52],kind,'y',{detail:true,role:'stack-light-segment',sourceAnchor:photo});
+
+    // Continuous operator-side diamond-plate catwalk and railing from cutter through delivery.
+    const access=this.group(this.root,'sheeting-access','Continuous Operator Catwalk / Steps',[0,0,0],[0,.20,.24],'VERIFIED_VISUAL');
+    this.box(access,[7.15,.11,.78],[-.35,.47,-1.98],'steel',.008,{detail:true,role:'diamond-plate-catwalk',sourceAnchor:photo});
+    for(let i=0;i<3;i++)this.box(access,[.76,.11,.74],[3.54-i*.22,.11+i*.13,-1.98],'steel',.006,{detail:true,role:'access-step',sourceAnchor:photo});
+    for(const x of [-3.50,-2.30,-1.10,.10,1.30,2.50]){
+      this.box(access,[.07,1.00,.07],[x,1.00,-2.37],'body',.006,{detail:true,role:'catwalk-railing-post',sourceAnchor:photo});
+    }
+    this.box(access,[6.25,.065,.065],[-.50,1.49,-2.37],'light',.004,{detail:true,role:'catwalk-top-rail',sourceAnchor:photo});
+    this.box(access,[6.25,.055,.055],[-.50,1.05,-2.37],'light',.004,{detail:true,role:'catwalk-mid-rail',sourceAnchor:photo});
+
+    this.root.userData.processFlow={
+      input:'RIGHT · loaded reel on a fixed two-station/two-sided hydraulic rollstand integrated into the long roller bridge',
+      process:'RIGHT → LEFT · reel → alternating open guide/tension rollers → large black exterior draw roll at LEXUS cutter entry → guarded internal cross-cut → open multi-level green belt delivery → rack-adjusted open stack table',
+      output:'LEFT · rack-and-handwheel-adjusted open stack/lay table with flat plate lift support',
+      idleWebGeometry:'REFERENCE_STACK_VISIBLE__MOVING_WEB_ONLY_DURING_SIMULATION',
+      direction:'RIGHT_TO_LEFT',
+      visualBasis:'BMJ_IMG_2479_TO_2487_PRIMARY__MODULE_PROPORTIONS_AND_ASYMMETRY_REBUILT_V194',
+      cutterArchitecture:'GUARDED_INTERNAL_CUTTER__NO_VISIBLE_BLADE__EXTERIOR_DRAW_ROLL_SNUBBER_WHEELS_AND_PNEUMATIC_PANEL_PHOTO_VERIFIED',
+      mainTransportFunction:'PHOTO_VERIFIED_ALTERNATING_ROLLER_BANK__LARGE_BLACK_DRAW_ROLL__OPEN_DELIVERY_SHAFTS',
+      windowArchitecture:'ACTUAL_SILVER_LEXUS_INSPECTION_PANEL_WITH_NARROW_WINDOW',
+      unwindArchitecture:'INTEGRATED_TWO_STATION_FIXED_ROLLSTAND__OVERHEAD_BEAMS__VERTICAL_HYDRAULICS__CENTRAL_VALVE_MANIFOLD',
+      stackerArchitecture:'RACK_ADJUSTED_OPEN_LAY_TABLE__TWO_LARGE_HANDWHEELS__BLUE_PALLET_BLOCKS__SIGNAL_TOWER',
+      operatorAccess:'CONTINUOUS_DIAMOND_PLATE_CATWALK_AND_RAILING',
+      exactModelSearch:'HSM_CTM7_PUBLIC_ENGINEERING_DRAWING_NOT_FOUND__ACTUAL_BMJ_PHOTOS_ARE_VISUAL_SOURCE_OF_TRUTH'
+    };
+  }
+
+  enrichActualV194(){
+    this.root.userData.researchVersion='V194';
+    this.root.userData.researchSourceCount=V122_SOURCE_STATS.total;
+    this.root.userData.detailPass='V194_PHOTO_GEOMETRY_DEEP_PASS';
+    this.root.userData.installedOptionBoundary='Actual BMJ photos control visible hardware. V194 removes family geometry that conflicts with IMG_2479–IMG_2487 and does not expose undocumented cutter internals.';
+    this.root.userData.primaryVisualEvidence='BMJ_USER_PHOTOSET_20260922_IMG_2479_TO_IMG_2487';
+    this.root.userData.familyEvidenceRole='HIDDEN_PROCESS_AND_SPEC_CORROBORATION_ONLY';
+    this.root.userData.geometryCorrections=[
+      'unwind and roller bridge physically integrated',
+      'actual pressure gauges and blue regulators',
+      'large black draw roll and snubber wheel bank',
+      'asymmetric cutter guards and pneumatic panel',
+      'multi-level belt/shaft delivery',
+      'rack-and-pinion stack guide with two large handwheels',
+      'continuous operator catwalk'
+    ];
   }
 
   buildActualV193(){

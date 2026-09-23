@@ -60,15 +60,15 @@ test('V122 POLAR 115 exposes backgauge sledge clamp pressure knife drive safety 
  m.dispose();
 });
 
-test('V193 Sheeting supersedes speculative V122 option geometry with actual BMJ photo evidence',()=>{
+test('V194 Sheeting keeps speculative V122 option geometry out and deepens actual BMJ photo evidence',()=>{
  const m=new SheetingMachineTemplate();
- assert.equal(m.root.userData.researchVersion,'V193');assert.ok(m.root.userData.researchSourceCount>=160);
- requireRoles(m,['loaded-paper-reel','vertical-hydraulic-cylinder','roller-frame-upright','main-cutter-cabinet','long-inspection-window','main-draw-roller','white-hold-down-wheel','operator-console-face','stack-guide-handwheel']);
+ assert.equal(m.root.userData.researchVersion,'V194');assert.ok(m.root.userData.researchSourceCount>=160);
+ requireRoles(m,['loaded-paper-reel','vertical-hydraulic-cylinder','overhead-longitudinal-beam','roller-frame-upright','main-cutter-cabinet','long-inspection-window','large-black-draw-roll','white-hold-down-wheel','operator-console-face','stack-guide-handwheel','stack-rack-tooth']);
  for(const id of ['sheeting-slitter-v122','sheeting-knife-drive-v122','sheeting-overlap-vacuum-v122','sheeting-stack-level-v122'])assert.equal(m.findNode(id),null,id);
  const knife=m.findNode('sheeting-knife');
  assert.equal(knife.userData.visibleKnifeGeometry,false);
- assert.match(knife.userData.evidenceBoundary,/photos show the cutter behind/i);
- assert.match(m.root.userData.installedOptionBoundary,/not rendered as installed hardware/i);
+ assert.match(knife.userData.evidenceBoundary,/fully guarded inside the LEXUS enclosure/i);
+ assert.match(m.root.userData.installedOptionBoundary,/removes family geometry|does not expose undocumented cutter internals/i);
  m.dispose();
 });
 
