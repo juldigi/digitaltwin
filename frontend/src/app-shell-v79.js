@@ -101,7 +101,7 @@ function markSection(section){
  }
  qa('[data-mobile-nav]').forEach(el=>{const active=el.dataset.mobileNav===section;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current')});
 }
-function closeDrawer(){document.body.classList.remove('nav-open');q('#ui-menu-toggle')?.setAttribute('aria-expanded','false');restoreOverlayFocus('navigation','#ui-menu-toggle')}
+function closeDrawer(){document.body.classList.remove('nav-open');q('#ui-menu-toggle')?.setAttribute('aria-expanded','false');q('[data-mobile-nav="more"]')?.setAttribute('aria-expanded','false');restoreOverlayFocus('navigation','#ui-menu-toggle')}
 function closeLayerManager(){const panel=q('#layer-manager');if(panel)panel.hidden=true;if(getState().overlay==='layers')closeOverlay();restoreOverlayFocus('layers',PHASE1_FOUNDATION?'#nav-machine':'#nav-systems')}
 function closeInspector(restoreFocus=true){document.body.classList.add('panel-hidden');document.body.classList.remove('mobile-panel-open');setInspector(false);if(restoreFocus)restoreOverlayFocus('inspector','#panel-toggle')}
 function toggleInspector(){
@@ -244,7 +244,7 @@ const MOBILE_TARGET={factory:'nav-machine',asset:'nav-assets',system:'nav-system
 qa('[data-mobile-nav]').forEach(button=>button.addEventListener('click',event=>{
  if(!matchMedia('(max-width:767px)').matches)return;
  const key=button.dataset.mobileNav;
- if(key==='more'){event.preventDefault();const open=!document.body.classList.contains('nav-open');if(open){beforeMajorOverlay('navigation');rememberOverlayFocus('navigation')}document.body.classList.toggle('nav-open',open);menu?.setAttribute('aria-expanded',String(open));if(open){openOverlay('navigation');focusOverlay(q('.rail'),'.rail button:not([hidden])')}else{closeOverlay();restoreOverlayFocus('navigation','#ui-menu-toggle')}return}
+ if(key==='more'){event.preventDefault();const open=!document.body.classList.contains('nav-open');if(open){beforeMajorOverlay('navigation');rememberOverlayFocus('navigation')}document.body.classList.toggle('nav-open',open);menu?.setAttribute('aria-expanded',String(open));button.setAttribute('aria-expanded',String(open));if(open){openOverlay('navigation');focusOverlay(q('.rail'),'.rail button:not([hidden])')}else{closeOverlay();restoreOverlayFocus('navigation','#ui-menu-toggle')}return}
  const target=MOBILE_TARGET[key];if(target)q('#'+target)?.click();
 }));
 
