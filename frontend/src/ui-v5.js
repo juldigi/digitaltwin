@@ -32,6 +32,8 @@ function closeTransientPanels(){
 function setLegendActive(id){$$('.asset-legend button').forEach(b=>b.classList.toggle('active',b.id===id));}
 
 function bindShell(){
+  // V163: navigation, view mode, theme, and inspector state are owned exclusively by app-shell-v79.js.
+  // This compatibility layer now keeps only non-canonical utility surfaces and feedback.
   // V119: app-shell-v79.js owns the nav-open toggle. Keep this listener side-effect-only
   // so one tap cannot toggle the mobile drawer twice and cancel itself.
   $('#ui-menu-toggle')?.addEventListener('click',()=>{
@@ -43,15 +45,6 @@ function bindShell(){
     if(!$('#panel-launcher-menu')?.hidden&&!e.target.closest('#panel-launcher-menu')&&!e.target.closest('#panel-launcher'))toggleLauncher(false);
   });
 
-  $('#mode-2d')?.addEventListener('click',()=>{$('#nav-layout')?.click();$('#mode-2d')?.classList.add('active');$('#mode-3d')?.classList.remove('active');});
-  $('#mode-3d')?.addEventListener('click',()=>{$('#nav-machine')?.click();$('#mode-3d')?.classList.add('active');$('#mode-2d')?.classList.remove('active');});
-  $('#nav-layout')?.addEventListener('click',()=>{$('#mode-2d')?.classList.add('active');$('#mode-3d')?.classList.remove('active');document.body.classList.remove('nav-open');});
-  $('#nav-machine')?.addEventListener('click',()=>{$('#mode-3d')?.classList.add('active');$('#mode-2d')?.classList.remove('active');document.body.classList.remove('nav-open');});
-  $('#nav-components')?.addEventListener('click',()=>{showDetail('structure');document.body.classList.remove('nav-open');});
-  $('#nav-exterior')?.addEventListener('click',()=>{showDetail('exterior');document.body.classList.remove('nav-open');});
-  $('#nav-view-panels')?.addEventListener('click',()=>{window.dispatchEvent(new CustomEvent('bmj:foundationstatusrequest'));document.body.classList.remove('nav-open');});
-
-  $('#ui-theme-toggle')?.addEventListener('click',()=>document.body.classList.toggle('light-mode'));
   $('#panel-launcher')?.addEventListener('click',e=>{e.stopPropagation();window.dispatchEvent(new CustomEvent('bmj:foundationstatusrequest'));});
   $('#panel-launcher-close')?.addEventListener('click',()=>toggleLauncher(false));
 
@@ -66,9 +59,6 @@ function bindShell(){
 
   $('#ui-workbench-toggle')?.addEventListener('click',()=>{document.body.classList.remove('nav-open','mobile-panel-open');document.body.classList.toggle('ui-workbench-open');});
   $('#ui-close-workbench')?.addEventListener('click',()=>document.body.classList.remove('ui-workbench-open'));
-  $('#ui-asset-panel')?.addEventListener('click',()=>showDetail());
-  $('#panel-toggle')?.addEventListener('click',()=>{if(document.body.classList.contains('panel-hidden'))showDetail();else hideDetail();});
-  $('#close-panel')?.addEventListener('click',hideDetail);
 
   $('#legend-all')?.addEventListener('click',()=>{setLegendActive('legend-all');document.body.classList.remove('clean-view');setFloatVisible('.floating-filter',true);setFloatVisible('.keyplan-mini',true);setFloatVisible('#scene-notice',true);uiNotice('Semua informasi tampilan ditampilkan.');});
   $('#legend-machine')?.addEventListener('click',()=>{setLegendActive('legend-machine');document.body.classList.remove('clean-view');setFloatVisible('.floating-filter',false);setFloatVisible('.keyplan-mini',false);setFloatVisible('#scene-notice',false);hideDetail();$('#focus-machine')?.click();uiNotice('Fokus pada mesin.');});
