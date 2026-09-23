@@ -101,7 +101,7 @@ function markSection(section){
  qa('[data-mobile-nav]').forEach(el=>{const active=el.dataset.mobileNav===section;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current')});
 }
 function closeDrawer(){document.body.classList.remove('nav-open');q('#ui-menu-toggle')?.setAttribute('aria-expanded','false');restoreOverlayFocus('navigation','#ui-menu-toggle')}
-function closeLayerManager(){const panel=q('#layer-manager');if(panel)panel.hidden=true;if(getState().overlay==='layers')closeOverlay();restoreOverlayFocus('layers',PHASE1_FOUNDATION?'#nav-machine':'#nav-systems')}
+function closeLayerManager(){const panel=q('#layer-manager');if(panel)panel.hidden=true;document.body.classList.remove('layer-open');if(getState().overlay==='layers')closeOverlay();restoreOverlayFocus('layers',PHASE1_FOUNDATION?'#nav-machine':'#nav-systems')}
 function closeInspector({restoreFocus=true}={}){document.body.classList.add('panel-hidden');document.body.classList.remove('mobile-panel-open');setInspector(false);if(restoreFocus)restoreOverlayFocus('inspector','#panel-toggle')}
 function openInspector(tab=getState().inspectorState.tab){
  beforeMajorOverlay('inspector');rememberOverlayFocus('inspector');
@@ -134,7 +134,7 @@ function beforeMajorOverlay(name){
 }
 function openSystemLayers(){
  beforeMajorOverlay('layers');rememberOverlayFocus('layers');ensureLayerManager();
- const panel=q('#layer-manager');panel.hidden=false;openOverlay('layers');setActiveSection(PHASE1_FOUNDATION?'factory':'system');markSection(PHASE1_FOUNDATION?'factory':'system');syncLayerControls();focusOverlay(panel,'[data-layer-close]');
+ const panel=q('#layer-manager');panel.hidden=false;document.body.classList.add('layer-open');openOverlay('layers');setActiveSection(PHASE1_FOUNDATION?'factory':'system');markSection(PHASE1_FOUNDATION?'factory':'system');syncLayerControls();focusOverlay(panel,'[data-layer-close]');
 }
 function enterSimulation(){
  if(q('#mode-3d')?.disabled){
