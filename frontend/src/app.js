@@ -52,7 +52,7 @@ function configureActiveMachine(requested){
 }
 const INITIAL_URL_STATE=new URLSearchParams(location.search);
 const INITIAL_REQUESTED_ASSET=INITIAL_URL_STATE.get('machine')||INITIAL_URL_STATE.get('asset');
-configureActiveMachine(canOpenTechnical3D(INITIAL_REQUESTED_ASSET)?INITIAL_REQUESTED_ASSET:FOUNDATION_SCOPE.primaryRoute);
+configureActiveMachine(INITIAL_REQUESTED_ASSET&&canOpenTechnical3D(INITIAL_REQUESTED_ASSET)?INITIAL_REQUESTED_ASSET:FOUNDATION_SCOPE.primaryRoute);
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'Belum tersedia').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const number=n=>Number.isFinite(n)?n.toLocaleString('id-ID',{maximumFractionDigits:4}):'Belum tersedia';

@@ -78,6 +78,11 @@ test('large factory fleet loads after the first usable app state',()=>{
   assert.doesNotMatch(factory,/^import \{FACTORY_FLEET_GZIP\}/m);
 });
 
+test('opening the root URL without an asset does not abort the app module',()=>{
+  const app=fs.readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
+  assert.match(app,/configureActiveMachine\(INITIAL_REQUESTED_ASSET&&canOpenTechnical3D\(INITIAL_REQUESTED_ASSET\)\?INITIAL_REQUESTED_ASSET:FOUNDATION_SCOPE\.primaryRoute\)/);
+});
+
 test('icons use one accessible vector family without emoji runtime controls',()=>{
   assert.match(js,/<symbol id="i-factory"/);
   assert.match(js,/<symbol id="i-settings"/);
