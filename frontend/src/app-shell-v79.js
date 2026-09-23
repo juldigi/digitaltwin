@@ -147,7 +147,7 @@ function enterSimulation(){
 }
 
 const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-let searchResults=[],searchActiveIndex=-1,searchTimer=0;
+let searchResults=[],searchActiveIndex=-1,searchTimer=0,suppressSearchFocus=false;
 function ensureSearchPalette(){
  let panel=q('#universal-search-panel');if(panel)return panel;
  panel=document.createElement('section');panel.id='universal-search-panel';panel.className='universal-search-panel';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-labelledby','universal-search-title');panel.setAttribute('tabindex','-1');
@@ -171,7 +171,10 @@ function closeSearch(){
  if(input){input.setAttribute('aria-expanded','false');input.removeAttribute('aria-activedescendant')}
  document.body.classList.remove('search-open');
  if(getState().overlay==='search')closeOverlay();
- searchActiveIndex=-1;restoreOverlayFocus('search','#global-search');
+ searchActiveIndex=-1;
+ suppressSearchFocus=true;
+ restoreOverlayFocus('search','#global-search');
+ requestAnimationFrame(()=>{suppressSearchFocus=false});
 }
 function requestUniversalSearch(query){
  clearTimeout(searchTimer);
@@ -206,7 +209,7 @@ function chooseSearchResult(index){
  closeSearch();dispatchEvent(new CustomEvent('bmj:searchselect',{detail:{item}}));
 }
 const globalSearch=q('#global-search');
-globalSearch?.addEventListener('focus',()=>openSearch(globalSearch.value));
+globalSearch?.addEventListener('focus',()=>{if(!suppressSearchFocus)openSearch(globalSearch.value)});
 globalSearch?.addEventListener('input',event=>{if(getState().overlay!=='search')openSearch(event.currentTarget.value);else requestUniversalSearch(event.currentTarget.value)});
 globalSearch?.addEventListener('keydown',event=>{if(event.key==='ArrowDown'||event.key==='Enter'){event.preventDefault();openSearch(globalSearch.value)}});
 q('#mobile-search-toggle')?.addEventListener('click',()=>openSearch(''));
@@ -265,6 +268,7 @@ function ensureLayerManager(){
   <button type="button" data-system-focus="electrical" class="system-unavailable"><strong>Kelistrikan</strong><small>Jalur terpisah belum tersedia</small><span>Lihat batas data</span></button>
  </div><section id="system-context" class="canonical-system-context" aria-live="polite"><p>Pilih sistem untuk melihat jalur, peralatan terkait, status data, dan batas verifikasi.</p></section>`;
  panel.innerHTML=`<header><div><small>${PHASE1_FOUNDATION?'FASE FONDASI':'SISTEM & TAMPILAN'}</small><h3 id="layer-manager-title">${PHASE1_FOUNDATION?'Lapisan Pabrik':'Sistem & Lapisan'}</h3></div><button type="button" data-layer-close class="icon-btn" aria-label="Tutup">${icon('close')}</button></header>
+ <p id="layer-unavailable-note" role="status" hidden>Layer dan fokus jalur 3D memerlukan WebGL. Denah 2D tetap tersedia.</p>
  ${systemSurface}
  ${GROUPS.map(([title,items])=>`<div class="canonical-layer-group"><h4>${title}</h4>${items.map(([key,label])=>`<label><span>${label}</span><input type="checkbox" data-canonical-layer="${key}"></label>`).join('')}</div>`).join('')}
  <div class="canonical-layer-group unavailable"><h4>Batas fase</h4><p>${PHASE1_FOUNDATION?'Sistem utilitas dan detail teknis aset selain OFFSET 5 disimpan untuk fase ekspansi, tetapi tidak diaktifkan pada deliverable fondasi.':'Jalur yang belum memiliki drawing atau verifikasi lapangan tetap ditandai belum tersedia. Aplikasi tidak membuat jalur as-built secara otomatis.'}</p></div>`;
@@ -275,6 +279,7 @@ function ensureLayerManager(){
   dispatchEvent(new CustomEvent('bmj:layerchange',{detail:{key,visible}}));
  }));
  if(!PHASE1_FOUNDATION)qa('[data-system-focus]',panel).forEach(button=>button.addEventListener('click',()=>{
+  if(q('#mode-3d')?.disabled)return;
   const system=button.dataset.systemFocus,keys=system==='hvac'?['ahuPiping','ducting']:system==='compressedAir'?['compressedAir']:system==='routing'?['compressedAir','ahuPiping','ducting','utilityAnchors']:[];
   document.body.classList.remove('workspace-2d');setViewMode('3d');setState({selectedSystem:system,activeSection:'system'},{url:false});
   qa('[data-system-focus]',panel).forEach(item=>item.classList.toggle('active',item===button));
@@ -283,7 +288,10 @@ function ensureLayerManager(){
  }));
 }
 function syncLayerControls(){
- const state=getState();qa('[data-canonical-layer]').forEach(input=>{input.checked=Boolean(state.visibleLayers[input.dataset.canonicalLayer])});
+ const state=getState(),unavailable=Boolean(q('#mode-3d')?.disabled);
+ const note=q('#layer-unavailable-note');if(note)note.hidden=!unavailable;
+ qa('[data-canonical-layer]').forEach(input=>{input.checked=Boolean(state.visibleLayers[input.dataset.canonicalLayer]);input.disabled=unavailable;input.title=unavailable?'Layer 3D memerlukan WebGL':''});
+ qa('[data-system-focus]').forEach(button=>{button.disabled=unavailable;button.title=unavailable?'Fokus jalur 3D memerlukan WebGL':''});
 }
 function renderSystemContext(detail={}){
  const host=q('#system-context');if(!host)return;
