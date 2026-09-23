@@ -43,8 +43,8 @@ test('V167 overlay and toast layers avoid mobile navigation collisions',()=>{
 });
 
 test('V167 interaction assets are cache-busted',()=>{
- assert.match(html,/app-shell-v79\.css\?v=184/);
+ assert.match(html,/app-shell-v79\.css\?v=185/);
  assert.match(html,/src\/ui-v5\.js\?v=167/);
- assert.match(html,/src\/app-shell-v79\.js\?v=184/);
- assert.match(sw,/factory-digital-twin-v184-simulation-overlay-hardening-20260923/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=185/);
+ assert.match(sw,/factory-digital-twin-v185-navigation-simulation-hardening-20260923/);
 });
