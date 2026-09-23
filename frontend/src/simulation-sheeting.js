@@ -73,7 +73,18 @@ export class SheetingProcessSimulation{
       const p=new THREE.Vector3(lc.x+Math.cos(a)*lowR,lc.y+Math.sin(a)*lowR,0);
       this.lowEntryContactPoints.push(p);pre.push(p);
     }
-    for(const spec of this.layout.feedRollers)pre.push(this.surfacePoint(spec));
+    this.guideRollContactPoints=new Map();
+    for(const spec of this.layout.feedRollers){
+      const cc=new THREE.Vector3(...spec.center),rr=spec.radius+.016;
+      const top=spec.contact==='TOP',a0=THREE.MathUtils.degToRad(top?28:-28),a1=THREE.MathUtils.degToRad(top?152:-152);
+      const pts=[];
+      for(let i=0;i<=10;i++){
+        const a=THREE.MathUtils.lerp(a0,a1,i/10);
+        const p=new THREE.Vector3(cc.x+Math.cos(a)*rr,cc.y+Math.sin(a)*rr,0);
+        pts.push(p);pre.push(p);
+      }
+      this.guideRollContactPoints.set(spec.id,pts);
+    }
 
     const draw=this.layout.drawRoll;
     const dc=new THREE.Vector3(...draw.center),contactR=draw.radius+.018;
@@ -161,7 +172,7 @@ export class SheetingProcessSimulation{
       cutPulseVisible:false,bladeVisible:false,bladeCount:0,bladeStroke:0,visibleKnifeGeometry:false,cutterMechanismEvidence:'GUARDED_INTERNAL_UNRESOLVED',
       webAdvance:this.webAdvance,targetCutLength:this.targetCutLength,
       drawRollFunctional:true,drawRollSurfaceSpeed:this.webLinearSpeed,drawRollAngularSpeed:this.webLinearSpeed/this.drawRollRadius,
-      drawRollWrapDegrees:THREE.MathUtils.radToDeg(this.drawRollWrapAngle),drawRollContactPointCount:this.drawRollContactPoints.length,lowEntryWrapPointCount:this.lowEntryContactPoints.length,
+      drawRollWrapDegrees:THREE.MathUtils.radToDeg(this.drawRollWrapAngle),drawRollContactPointCount:this.drawRollContactPoints.length,lowEntryWrapPointCount:this.lowEntryContactPoints.length,guideRollWrapPointCount:[...this.guideRollContactPoints.values()].reduce((n,a)=>n+a.length,0),
       reelFunctional:true,reelReferenceRadius:this.reelReferenceRadius,reelAngularSpeed:this.reelAngularSpeed,reelSurfaceSpeed:this.reelAngularSpeed*this.reelReferenceRadius,
       cutReleaseDelay:this.cutReleaseDelay,fastTapeLinearSpeed:this.fastCurve.getLength()/this.fastDuration,
       slowTapeLinearSpeed:this.slowCurve.getLength()/this.slowDuration,overlapTapeLinearSpeed:this.overlapCurve.getLength()/this.overlapDuration,
