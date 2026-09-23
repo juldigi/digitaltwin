@@ -254,7 +254,12 @@ qa('[data-mobile-nav]').forEach(button=>button.addEventListener('click',event=>{
  const target=MOBILE_TARGET[key];if(target)q('#'+target)?.click();
 }));
 
-q('#mode-2d')?.addEventListener('click',()=>{document.body.classList.add('workspace-2d');setViewMode('2d');setActiveSection('factory');markSection('factory');requestAnimationFrame(()=>dispatchEvent(new Event('resize')))});
+q('#mode-2d')?.addEventListener('click',()=>{
+ const current=getState(),simulationTab=current.inspectorState?.tab==='simulation';
+ if(current.simulationState?.active||simulationTab)dispatchEvent(new CustomEvent('bmj:simulationstoprequest'));
+ if(current.inspectorState?.open&&simulationTab)q('[data-tab="overview"]')?.click();
+ document.body.classList.add('workspace-2d');setViewMode('2d');setActiveSection('factory');markSection('factory');requestAnimationFrame(()=>dispatchEvent(new Event('resize')));
+});
 q('#mode-3d')?.addEventListener('click',()=>{document.body.classList.remove('workspace-2d');setViewMode('3d');const section=getState().sceneMode==='machine'?'asset':'factory';setActiveSection(section);markSection(section);requestAnimationFrame(()=>dispatchEvent(new Event('resize')))});
 
 const GROUPS=PHASE1_FOUNDATION?[
