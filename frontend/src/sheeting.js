@@ -699,9 +699,9 @@ export class SheetingMachineTemplate{
       bed.userData.knifeType='STATIONARY_BED_KNIFE';
       const revolver=this.cyl(cut,.235,2.38,[L.cutPoint[0]+.235,L.cutPoint[1]+.095,0],'dark','z',{active:true,motion:'fly-knife-revolver',detail:true,role:'fly-knife-revolver',sourceAnchor:'HSM56_FLAT_BED_KNIFE__MAXSON_STATIONARY_BED_KNIFE',cutawayOnly:true});
       revolver.userData.kinematicGroup='CUTTER_SYNC';revolver.userData.cutsPerRevolution=1;revolver.userData.cutPhaseOffset=0;
-      const blade=this.box(revolver,[.055,.10,2.30],[-.232,0,0],'steel',.002,{detail:true,role:'fly-knife-blade',sourceAnchor:'MAXSON_TANGENTIAL_REVOLVER_BLADE',cutawayOnly:true},[0,.018,0]);
+      const blade=this.box(revolver,[.055,2.30,.10],[-.232,0,0],'steel',.002,{detail:true,role:'fly-knife-blade',sourceAnchor:'MAXSON_TANGENTIAL_REVOLVER_BLADE',cutawayOnly:true},[0,.018,0]);
       blade.userData.knifeType='ROTARY_FLY_KNIFE';
-      this.box(revolver,[.028,.030,2.32],[-.258,-.045,0],'chrome',.001,{detail:true,role:'fly-knife-cutting-edge',sourceAnchor:'MAXSON_TANGENTIAL_REVOLVER_BLADE',cutawayOnly:true},[0,.018,0]);
+      this.box(revolver,[.028,2.32,.030],[-.258,0,-.045],'chrome',.001,{detail:true,role:'fly-knife-cutting-edge',sourceAnchor:'MAXSON_TANGENTIAL_REVOLVER_BLADE',cutawayOnly:true},[0,.018,0]);
       for(const side of [-1,1])this.cyl(cut,.075,.12,[L.cutPoint[0]+.235,L.cutPoint[1]+.095,side*1.24],'bodyDark','z',{detail:true,role:'fly-knife-revolver-bearing',sourceAnchor:'MAXSON_STATIONARY_BED_KNIFE',cutawayOnly:true});
 
       // Take-away pinch references keep the web taut through the shear and bridge to high-speed tapes.
