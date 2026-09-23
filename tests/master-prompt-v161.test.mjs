@@ -31,9 +31,9 @@ test('V162 exposes Systems in both navigation surfaces and keeps identifiers coh
  assert.match(html,/data-mobile-nav="system" aria-label="Sistem utilitas"/);
  assert.match(html,/app-shell-v79\.css\?v=168/);
  assert.match(html,/src\/app\.js\?v=176/);
- assert.match(html,/src\/app-shell-v79\.js\?v=174/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=177/);
  assert.match(shell,/v162-factory-first-systems/);
- assert.match(sw,/factory-digital-twin-v176-runtime-selector-safety-20260923/);
+ assert.match(sw,/factory-digital-twin-v177-view-mode-context-copy-20260923/);
 });
 
 test('asset navigation opens an empty search instead of serializing the click event',()=>{
