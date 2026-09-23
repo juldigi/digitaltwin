@@ -26,6 +26,6 @@ test('theme click changes DOM, aria state and saved preference from the same res
 
 test('changed controllers have fresh page and service worker cache identifiers',()=>{
  assert.match(html,/src\/experience-v37\.js\?v=164/);
- assert.match(html,/src\/app-shell-v79\.js\?v=164/);
- assert.match(sw,/factory-digital-twin-v165-webgl-fallback-20260923/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=167/);
+ assert.match(sw,/factory-digital-twin-v167-interaction-state-20260923/);
 });
