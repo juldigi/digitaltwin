@@ -39,10 +39,12 @@ export class FactoryEngine {
     this.renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();this.onError?.('Konteks grafis terputus. Muat ulang halaman untuk memulihkan penampil.');});
   }
   resize(){const w=this.container.clientWidth,h=this.container.clientHeight;if(!w||!h)return;this.renderer.setSize(w,h);this.camera.aspect=w/h;this.camera.updateProjectionMatrix();}
+  framingProfile(object=this.machine){const portrait=this.container.clientWidth<=767&&this.container.clientHeight>this.container.clientWidth;const machine=object===this.machine&&this.view==='machine';return {portrait,machine,padding:portrait&&machine?1.06:1.18,targetLift:portrait&&machine?-.08:0};}
   fit(object=this.machine,mode='iso',animate=true){
     object.updateWorldMatrix(true,true);const box=new THREE.Box3().setFromObject(object);if(box.isEmpty())return;
-    const c=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3());
-    const radius=Math.max(size.length()*.5,.5),v=this.camera.fov*Math.PI/360,h=Math.atan(Math.tan(v)*this.camera.aspect),distance=radius/Math.sin(Math.min(v,h))*1.18;
+    const c=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3()),profile=this.framingProfile(object);
+    c.y+=size.y*profile.targetLift;
+    const radius=Math.max(size.length()*.5,.5),v=this.camera.fov*Math.PI/360,h=Math.atan(Math.tan(v)*this.camera.aspect),distance=radius/Math.sin(Math.min(v,h))*profile.padding;
     // Verified operator-side view: near delivery (+X), walkway side (-Z).
     const direction=mode==='top'?new THREE.Vector3(0,1,.0001):new THREE.Vector3(.85,.7,-1.25).normalize();
     const end=c.clone().addScaledVector(direction,distance);
@@ -53,7 +55,7 @@ export class FactoryEngine {
     const list=(objects||[]).filter(Boolean),box=new THREE.Box3();
     for(const object of list){object.updateWorldMatrix(true,true);const partBox=new THREE.Box3().setFromObject(object);if(!partBox.isEmpty())box.union(partBox);}
     if(box.isEmpty())return;
-    const center=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3()),radius=Math.max(size.length()*.5,.5),v=this.camera.fov*Math.PI/360,h=Math.atan(Math.tan(v)*this.camera.aspect),distance=radius/Math.sin(Math.min(v,h))*1.18;
+    const center=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3()),profile=this.framingProfile(list.length===1?list[0]:null);center.y+=size.y*profile.targetLift;const radius=Math.max(size.length()*.5,.5),v=this.camera.fov*Math.PI/360,h=Math.atan(Math.tan(v)*this.camera.aspect),distance=radius/Math.sin(Math.min(v,h))*profile.padding;
     const direction=mode==='top'?new THREE.Vector3(0,1,.0001):new THREE.Vector3(.85,.7,-1.25).normalize(),end=center.clone().addScaledVector(direction,distance);
     if(!animate||matchMedia('(prefers-reduced-motion: reduce)').matches){this.controls.target.copy(center);this.camera.position.copy(end);this.controls.update();return;}
     this.transition={start:performance.now(),from:this.camera.position.clone(),to:end,fromTarget:this.controls.target.clone(),target:center};

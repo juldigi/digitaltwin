@@ -8,8 +8,8 @@ const html=fs.readFileSync(new URL('../frontend/index.html',import.meta.url),'ut
 const sw=fs.readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 
 test('V158 loads one unified adaptive shell after the stable base styles',()=>{
-  assert.match(html,/style\.css[\s\S]*runtime-fallback\.css[\s\S]*app-shell-v79\.css\?v=191/);
-  assert.match(html,/app\.js\?v=191[\s\S]*ui-v5\.js\?v=167[\s\S]*experience-v37\.js\?v=164[\s\S]*app-shell-v79\.js\?v=191/);
+  assert.match(html,/style\.css[\s\S]*runtime-fallback\.css[\s\S]*app-shell-v79\.css\?v=192/);
+  assert.match(html,/app\.js\?v=192[\s\S]*ui-v5\.js\?v=167[\s\S]*experience-v37\.js\?v=164[\s\S]*app-shell-v79\.js\?v=192/);
   for(const stale of ['ui-premium-v73.css','ui-corporate-v74.css','reference-v76.css','mobile-stable-v78.css','reference-v76.js','mobile-stable-v78.js'])assert.doesNotMatch(html,new RegExp(stale.replaceAll('.','\\.')));
 });
 
@@ -57,7 +57,7 @@ test('icons use one accessible vector family without emoji runtime controls',()=
 });
 
 test('service worker owns the current OEM-deep-detail shell assets',()=>{
- assert.match(sw,/factory-digital-twin-v191-mobile-viewport-composition-20260923/);
+ assert.match(sw,/factory-digital-twin-v192-mobile-camera-framing-20260923/);
   assert.match(sw,/app-shell-v79\.css/);
   assert.match(sw,/src\/app-shell-v79\.js/);
   assert.match(sw,/assets\/splash-industrial-v79\.webp/);
