@@ -31,12 +31,12 @@
     <button id="ui-theme-toggle" class="icon-btn" aria-label="Ganti tema" title="Ganti tema"></button>
     <button id="settings" class="icon-btn" aria-label="Pengaturan" title="Pengaturan"></button>
     <span class="user-profile"><i aria-hidden="true">U</i><span><b>Pengguna</b><small>Akses aplikasi</small></span></span>
-    <button id="ui-menu-toggle" class="icon-btn ui-menu-toggle" aria-label="Buka navigasi" aria-expanded="false"></button>
+    <button id="ui-menu-toggle" class="icon-btn ui-menu-toggle" aria-label="Buka navigasi" aria-expanded="false" aria-controls="main-navigation"></button>
   </div>
 </header>
 
 <main class="twin-shell">
-  <nav class="rail" aria-label="Navigasi utama">
+  <nav id="main-navigation" class="rail" aria-label="Navigasi utama">
     <div class="rail-title">DIGITAL TWIN</div>
     <button id="nav-machine" class="active" data-section="factory" title="Pabrik"><span aria-hidden="true"></span><small>Pabrik</small></button>
     <button id="nav-assets" data-section="asset" title="Aset"><span aria-hidden="true"></span><small>Aset</small></button>
@@ -62,7 +62,7 @@
           <p id="view-subtitle">Heidelberg Speedmaster · CD 102-8+L</p>
           <div class="scene-context-line"><span>Packaging Offset</span><span>Area Produksi</span><span>Tampilan Interaktif</span></div>
         </div>
-        <button id="panel-toggle" class="icon-btn" aria-label="Buka detail mesin">☷</button>
+        <button id="panel-toggle" class="icon-btn" aria-label="Buka detail mesin" aria-expanded="false" aria-controls="detail-panel">☷</button>
       </div>
 
       <div id="viewport"><div id="boot" class="boot"><strong>Menyiapkan tampilan 3D…</strong><p>Memuat mesin dan informasi yang tersedia.</p></div><div id="part-label-layer" class="part-label-layer" aria-live="polite" aria-label="Label komponen terpilih"><svg aria-hidden="true"></svg><div class="part-label-items"></div><div class="part-label-nav" hidden><button type="button" data-part-label-back>← Naik</button><span data-part-label-stage></span></div></div></div>
@@ -82,7 +82,7 @@
         <section><h4>STATUS</h4><label><i class="dot normal"></i><span>Tersedia</span><b>1</b></label><label><i class="dot warning"></i><span>Perlu Data</span><b>—</b></label></section>
       </aside>
 
-      <div class="viewport-mode-switch" role="group" aria-label="Mode tampilan"><button id="mode-2d">2D</button><button id="mode-3d" class="active">3D</button></div>
+      <div class="viewport-mode-switch" role="group" aria-label="Mode tampilan"><button id="mode-2d" aria-pressed="false">2D</button><button id="mode-3d" class="active" aria-pressed="true">3D</button></div>
       <div class="viewport-zoom" role="group" aria-label="Kontrol zoom"><button id="zoom-plus" aria-label="Perbesar">+</button><button id="zoom-fit" aria-label="Fokus">⌖</button><button id="zoom-minus" aria-label="Perkecil">−</button></div>
 
       <div class="notice floating-window" id="scene-notice" hidden>
@@ -98,14 +98,14 @@
           <button data-camera="top">ATAS <span>Tampak Atas</span></button>
           <button data-camera="fit">PUSATKAN <span>Pilihan</span></button>
           <button id="tool-pan" class="legacy-tool-entry" aria-hidden="true" tabindex="-1">GESER <span>Pan</span></button>
-          <button id="tool-explode">URAI <span>Komponen</span></button>
-          <button id="tool-isolate">ISOLASI <span>Pilihan</span></button>
-          <button id="tool-interior">Buka Interior <span>Potongan mesin</span></button>
+          <button id="tool-explode" aria-pressed="false">URAI <span>Komponen</span></button>
+          <button id="tool-isolate" aria-pressed="false">ISOLASI <span>Pilihan</span></button>
+          <button id="tool-interior" aria-pressed="false">Buka Interior <span>Potongan mesin</span></button>
           <button id="tool-simulation" class="legacy-tool-entry" aria-hidden="true" tabindex="-1">SIMULASI <span>Proses</span></button>
           <button data-camera="reset">BERANDA <span>Tampilan awal</span></button>
         </div>
         <div class="scene-options">
-          <button id="labels" class="icon-btn active" title="Label" aria-label="Tampilkan atau sembunyikan label">Aa</button>
+          <button id="labels" class="icon-btn active" title="Label" aria-label="Tampilkan atau sembunyikan label" aria-pressed="true">Aa</button>
           <button id="panel-launcher" class="icon-btn" title="Status fondasi" aria-label="Buka status fondasi">i</button>
           <button id="fullscreen" class="icon-btn" title="Layar penuh" aria-label="Layar penuh">⛶</button>
         </div>
@@ -211,7 +211,7 @@
   <button type="button" data-mobile-nav="asset" aria-label="Aset"><span aria-hidden="true"></span><small>Aset</small></button>
   <button type="button" data-mobile-nav="system" aria-label="Sistem utilitas"><span aria-hidden="true"></span><small>Sistem</small></button>
   <button type="button" data-mobile-nav="simulation" aria-label="Simulasi"><span aria-hidden="true"></span><small>Simulasi</small></button>
-  <button type="button" data-mobile-nav="more" aria-label="Lainnya" aria-expanded="false"><span aria-hidden="true"></span><small>Lainnya</small></button>
+  <button type="button" data-mobile-nav="more" aria-label="Lainnya" aria-expanded="false" aria-controls="main-navigation"><span aria-hidden="true"></span><small>Lainnya</small></button>
 </nav>
 
 <button id="ui-backdrop" class="ui-backdrop" aria-label="Tutup panel terbuka" tabindex="-1"></button>
