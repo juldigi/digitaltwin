@@ -9,12 +9,12 @@ const css=fs.readFileSync(new URL('../frontend/app-shell-v79.css',import.meta.ur
 const sw=fs.readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 
 test('V155 release cache keys move beyond V149/V151 sources',()=>{
-  assert.match(html,/app-shell-v79\.css\?v=168/);
-  assert.match(html,/src\/app\.js\?v=182/);
+  assert.match(html,/app-shell-v79\.css\?v=183/);
+  assert.match(html,/src\/app\.js\?v=183/);
   assert.match(html,/src\/ui-v5\.js\?v=167/);
-  assert.match(html,/src\/app-shell-v79\.js\?v=182/);
+  assert.match(html,/src\/app-shell-v79\.js\?v=183/);
   assert.doesNotMatch(html,/\?v=149/);
-  assert.match(sw,/factory-digital-twin-v182-machine-detail-fallback-20260923/);
+  assert.match(sw,/factory-digital-twin-v183-simulation-system-navigation-20260923/);
 });
 
 test('custom major overlays expose dialog semantics focus restoration and keyboard containment',()=>{
@@ -56,7 +56,7 @@ test('user-facing system workspace no longer exposes implementation jargon',()=>
 test('technical diagnostics live inside Settings System Information and focus is visibly accessible',()=>{
   assert.match(app,/Informasi Sistem/);
   assert.match(app,/Diagnostik teknis ditempatkan di sini agar tampilan utama tetap sederhana/);
-  assert.match(app,/pair\('Versi aplikasi','V182'\)/);
+  assert.match(app,/pair\('Versi aplikasi','V183'\)/);
   assert.match(css,/:focus-visible/);
   assert.match(css,/prefers-reduced-motion/);
   assert.match(css,/prefers-contrast:more/);

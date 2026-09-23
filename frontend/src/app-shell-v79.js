@@ -143,22 +143,22 @@ function openSystemLayers(){
  const panel=q('#layer-manager');panel.hidden=false;document.body.classList.add('layer-open');openOverlay('layers');setActiveSection(PHASE1_FOUNDATION?'factory':'system');markSection(PHASE1_FOUNDATION?'factory':'system');syncLayerControls();focusOverlay(panel,'[data-layer-close]');
 }
 function enterSimulation(){
+ beforeMajorOverlay('inspector');
  const context=getState();
  if(context.sceneMode!=='machine'||!canOpenTechnical3D(context.selectedAsset)){
-  dispatchEvent(new CustomEvent('bmj:machinecontextrequest',{detail:{selectedAsset:context.selectedAsset,action:'Simulasi'}}));
-  return;
- }
- if(q('#mode-3d')?.disabled){
-  q('#mode-2d')?.click();
-  const hint=q('#scene-hint');if(hint)hint.textContent='Simulasi 3D memerlukan WebGL. Denah 2D tetap tersedia di perangkat ini.';
+  dispatchEvent(new CustomEvent('bmj:simulateselectedmachine',{detail:{selectedAsset:context.selectedAsset}}));
   return;
  }
  setActiveSection('simulation');markSection('simulation');
- document.body.classList.remove('workspace-2d');setViewMode('3d');
+ if(!q('#mode-3d')?.disabled){document.body.classList.remove('workspace-2d');setViewMode('3d')}
  q('#tool-simulation')?.click();
  openInspector('simulation');
  requestAnimationFrame(syncSimulationTransport);
 }
+addEventListener('bmj:simulationcontextready',event=>{
+ if(event.detail?.available===false){setActiveSection('simulation');markSection('simulation');openInspector('simulation');requestAnimationFrame(syncSimulationTransport);return}
+ enterSimulation();
+});
 
 const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 let searchResults=[],searchActiveIndex=-1,searchTimer=0,suppressSearchFocus=false;
@@ -230,7 +230,7 @@ globalSearch?.addEventListener('keydown',event=>{if(event.key==='ArrowDown'||eve
 q('#mobile-search-toggle')?.addEventListener('click',()=>openSearch(''));
 addEventListener('bmj:searchresults',event=>renderSearchResults(event.detail));
 addEventListener('bmj:systemsearchselect',event=>{if(PHASE1_FOUNDATION)return;const system=event.detail?.system||null;setState({selectedSystem:system},{url:false});openSystemLayers();if(['hvac','compressedAir','routing'].includes(system))q(`[data-system-focus="${system}"]`)?.click()});
-q('#nav-machine')?.addEventListener('click',()=>{setActiveSection('factory');markSection('factory');closeLayerManager()});
+q('#nav-machine')?.addEventListener('click',()=>{beforeMajorOverlay('factory');setActiveSection('factory');markSection('factory')});
 q('#nav-assets')?.addEventListener('click',()=>{beforeMajorOverlay('modal');setActiveSection('asset');markSection('asset');openOverlay('modal')});
 q('#nav-systems')?.addEventListener('click',()=>{if(!PHASE1_FOUNDATION)openSystemLayers()});
 q('#nav-simulation-mode')?.addEventListener('click',enterSimulation);
@@ -249,7 +249,7 @@ q('#ui-backdrop')?.addEventListener('click',()=>{
  else if(overlay==='modal'&&q('#modal')?.open)q('#modal-close')?.click();
  else closeOverlay();
 });
-qa('.rail button').forEach(b=>b.addEventListener('click',()=>{if(innerWidth<768&&b.id!=='nav-systems')closeDrawer()}));
+qa('.rail button').forEach(b=>b.addEventListener('click',()=>{if(innerWidth<768)closeDrawer()}));
 
 const MOBILE_TARGET={factory:'nav-machine',asset:'nav-assets',system:'nav-systems',simulation:'nav-simulation-mode'};
 qa('[data-mobile-nav]').forEach(button=>button.addEventListener('click',event=>{
@@ -340,7 +340,7 @@ function syncSimulationTransport(){
  const progressStyle=q('#sim-progress-bar')?.style?.width||'0%';const progress=Math.max(0,Math.min(100,parseFloat(progressStyle)||0));
  const active=status==='RUNNING'||status==='PAUSED',playing=status==='RUNNING';
  setSimulation({active,playing,stage,progress});
- const transportOpen=section==='simulation';
+ const transportOpen=section==='simulation'&&Boolean(q('#sim-start'));
  bar.hidden=!transportOpen;
  document.body.classList.toggle('simulation-transport-open',transportOpen);
  q('[data-transport-stage]',bar).textContent=stage;

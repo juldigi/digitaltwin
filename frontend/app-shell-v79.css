@@ -380,6 +380,7 @@ aside#detail-panel{overscroll-behavior:contain}
 /* V166 usability audit: touch comfort, collision-free overlays, narrow-screen identity */
 body.search-open .ui-backdrop,
 body.layer-open .ui-backdrop{display:block}
+.layer-open .twin-shell{z-index:89}
 .canonical-layer-manager{z-index:90}
 .simulation-transport-open .scene-bottom{visibility:hidden;pointer-events:none}
 dialog#modal[open]{display:flex;flex-direction:column}
