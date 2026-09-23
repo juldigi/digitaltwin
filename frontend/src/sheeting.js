@@ -14,16 +14,17 @@ export const SHEETING_VISUAL_REFERENCE=Object.freeze({
   evidence:'BMJ database + user-confirmed RIGHT_TO_LEFT + 9 user-provided actual BMJ machine photographs (22 Sep 2026) as primary exterior evidence + Lexus HSM family sources only for unresolved process/specification corroboration',
   dimensions:'BMJ_ACTUAL_PHOTO_ANCHORED_RECONSTRUCTION_NOT_ENGINEERING',
   visualFamily:'BMJ_ACTUAL_OPEN_TWO_SIDED_ROLLSTAND_MULTIROLLER_BRIDGE_LEXUS_CUTTER_CABINET_OPEN_BELT_TABLE_STACK_TABLE',
-  visualRevision:'V194_BMJ_PHOTO_GEOMETRY_DEEP_PASS'
+  visualRevision:'V195_BMJ_PHOTO_TRUTH_CORRECTION'
 });
 
 
 export const SHEETING_ACTUAL_LAYOUT=Object.freeze({
-  revision:'V194',
+  revision:'V195',
   direction:'RIGHT_TO_LEFT',
   operatorZ:-1.62,
   webWidth:2.24,
   reel:Object.freeze({loadedCenter:Object.freeze([8.12,1.02,0]),standbyCenter:Object.freeze([6.68,.96,0]),radius:.82,span:2.70}),
+  lowEntryRoll:Object.freeze({id:'LOW',center:Object.freeze([6.78,.68,0]),radius:.145,contact:'BOTTOM',rotationSign:1}),
   feedRollers:Object.freeze([
     Object.freeze({id:'G1',center:Object.freeze([7.18,1.48,0]),radius:.10,contact:'TOP',rotationSign:-1}),
     Object.freeze({id:'G2',center:Object.freeze([6.60,1.82,0]),radius:.105,contact:'BOTTOM',rotationSign:1}),
@@ -48,7 +49,7 @@ export class SheetingMachineTemplate{
       assetId:'BMJ-MCH-0002',machine:'SHEETING LEXUS',model:'HSM-CTM7',
       referenceFamily:'BMJ HSM-CTM7 actual photo set · Lexus HSM family process corroboration',
       processDirection:'RIGHT_TO_LEFT',confidence:'IDENTITY_VERIFIED__GEOMETRY_FAMILY_PHOTO_ANCHORED',
-      visualRevision:'V194_BMJ_PHOTO_GEOMETRY_DEEP_PASS'
+      visualRevision:'V195_BMJ_PHOTO_TRUTH_CORRECTION'
     };
     this.nodes=[];this.parts=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.activeMeshes=[];this.detailMeshes=[];
     this.taxonomy=SHEETING_TAXONOMY;this.taxonomyById=SHEETING_TAXONOMY_BY_ID;this.exteriorOpen=false;this.ghosted=false;
@@ -57,7 +58,7 @@ export class SheetingMachineTemplate{
       dark:0x293236,steel:0x939b9b,chrome:0xcbd1d0,paper:0xe8dfcb,stackPaper:0xc9ae83,
       glass:0x78b6bb,black:0x20272a,blue:0x2f67a1,red:0xc93434,green:0x4c9b4f,bronze:0xb08b55
     };
-    this.buildActualV194();this.enrichActualV194();
+    this.buildActualV194();this.refineActualV195();this.enrichActualV195();
     for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}
     this.root.updateMatrixWorld(true);
   }
@@ -474,6 +475,165 @@ export class SheetingMachineTemplate{
       'multi-level belt/shaft delivery',
       'rack-and-pinion stack guide with two large handwheels',
       'continuous operator catwalk'
+    ];
+  }
+
+
+  retireNodeGeometry(id){
+    const node=this.findNode(id);if(!node)return null;
+    const doomed=new Set();node.traverse(o=>{if(o?.isMesh)doomed.add(o);});
+    this.meshes=this.meshes.filter(m=>!doomed.has(m));
+    this.activeMeshes=this.activeMeshes.filter(m=>!doomed.has(m));
+    this.detailMeshes=this.detailMeshes.filter(m=>!doomed.has(m));
+    while(node.children.length)node.remove(node.children[0]);
+    return node;
+  }
+
+  refineActualV195(){
+    const photo='BMJ-SHEETING-PHOTOSET-20260922';
+    const L=SHEETING_ACTUAL_LAYOUT;
+
+    // V195 correction: IMG_2485/2479 and the BW HSM56 fixed-position rollstand reference
+    // do NOT justify a fabricated rigid bridge physically tying the unwind to the feed frame.
+    // Keep the visible long upper members local to each assembly and preserve an open service gap.
+    const bridge=this.retireNodeGeometry('sheeting-unwind-bridge');
+    if(bridge){
+      bridge.name='Rollstand Upper Support / Parked Arm Structure';
+      bridge.userData.confidence='VERIFIED_VISUAL__NO_FEED_FRAME_CONNECTION_CLAIM';
+      for(const z of [-1.40,1.40]){
+        this.box(bridge,[2.58,.20,.22],[7.25,2.17,z],'light',.010,{role:'rollstand-upper-longitudinal-member',sourceAnchor:photo});
+        this.beamXY(bridge,[6.16,1.90],[6.56,2.17],z,.18,.22,'body',{role:'rollstand-upper-diagonal-brace',sourceAnchor:photo});
+        this.beamXY(bridge,[7.88,1.86],[7.72,2.17],z,.18,.22,'body',{role:'rollstand-upper-end-brace',sourceAnchor:photo});
+      }
+      for(const x of [6.55,7.34,8.10])this.box(bridge,[.14,.16,2.92],[x,2.17,0],'steel',.008,{detail:true,role:'rollstand-upper-cross-tie',sourceAnchor:photo});
+    }
+
+    // The feed frame receives its own top rails; they end before the rollstand service gap.
+    const feedFrame=this.findNode('sheeting-feed-frame');
+    if(feedFrame){
+      for(const z of [-1.40,1.40]){
+        this.box(feedFrame,[2.62,.17,.20],[5.02,2.12,z],'light',.010,{role:'feed-upper-longitudinal-rail',sourceAnchor:photo});
+        this.beamXY(feedFrame,[3.82,1.92],[4.16,2.12],z,.14,.20,'body',{role:'feed-upper-entry-brace',sourceAnchor:photo});
+      }
+      this.box(feedFrame,[.14,.16,2.94],[6.30,2.11,0],'steel',.008,{detail:true,role:'feed-upper-end-cross-tie',sourceAnchor:photo});
+    }
+
+    // Photo-visible low turquoise guide roller between reel and elevated guide bank.
+    const feedRollers=this.findNode('sheeting-feed-rollers');
+    if(feedRollers&&!this.meshes.some(m=>m.userData.role==='low-entry-guide-roll')){
+      const spec=L.lowEntryRoll,[x,y]=spec.center;
+      const low=this.cyl(feedRollers,spec.radius,2.72,[x,y,0],'body','z',{active:true,motion:'guide-roller',role:'low-entry-guide-roll',sourceAnchor:photo});
+      low.userData.kinematicGroup='WEB_CONTACT';low.userData.rotationSign=spec.rotationSign;low.userData.webContactSide=spec.contact;low.userData.layoutId=spec.id;
+      for(const side of [-1,1]){
+        this.box(feedRollers,[.20,.23,.14],[x,y,side*1.43],'bodyDark',.010,{detail:true,role:'low-entry-roll-bearing',sourceAnchor:photo});
+        this.cyl(feedRollers,.038,.055,[x,y,side*1.51],'dark','z',{detail:true,role:'low-entry-roll-shaft-end',sourceAnchor:photo});
+      }
+    }
+
+    // Re-label the second photo-visible arm set conservatively. It is visible, but the photo set
+    // does not prove an independently loadable second unwind station.
+    for(const m of this.meshes){
+      const role=m.userData.role||'';
+      if(role.startsWith('standby-')){
+        m.userData.role=role.replace('standby-','parked-');
+        m.userData.confidence='PHOTO_VISIBLE_ARM_SET__FUNCTIONAL_STATION_UNRESOLVED';
+      }
+    }
+
+    // Add the front turquoise operator/control pedestal actually visible beside the loaded roll.
+    const rollstand=this.findNode('sheeting-rollstand');
+    if(rollstand&&!this.findNode('sheeting-rollstand-front-controls')){
+      const p=this.group(rollstand,'sheeting-rollstand-front-controls','Rollstand Front Control Pedestal',[0,0,0],[.10,.12,-.18],'VERIFIED_VISUAL');
+      this.box(p,[.58,1.48,.40],[8.72,.79,-1.64],'body',.024,{cover:true,role:'rollstand-front-control-cabinet',sourceAnchor:photo});
+      for(let row=0;row<2;row++)for(let col=0;col<4;col++){
+        const x=8.54+col*.12,y=1.12-row*.20;
+        this.cyl(p,.036,.028,[x,y,-1.855],col===0&&row===1?'red':col===1&&row===1?'green':'black','z',{detail:true,role:'rollstand-front-control-button',sourceAnchor:photo});
+      }
+      this.box(p,[.36,.11,.025],[8.72,.54,-1.865],'light',.002,{detail:true,role:'rollstand-front-control-label-plate',sourceAnchor:photo});
+    }
+
+    // Cutter exterior refinements from IMG_2486/2487: cabinet seams/hinges and machine-name plate.
+    const head=this.findNode('sheeting-cutter');
+    if(head&&!this.findNode('sheeting-cutter-service-detail')){
+      const d=this.group(head,'sheeting-cutter-service-detail','Cutter Door / Safety / Nameplate Details',[0,0,0],[.08,.08,-.12],'VERIFIED_VISUAL');
+      for(const y of [.64,1.32,2.02])this.box(d,[.015,.44,.055],[.90,y,1.545],'dark',.002,{detail:true,role:'cutter-door-hinge',sourceAnchor:photo});
+      this.box(d,[.78,.24,.030],[1.62,2.16,-1.585],'bodyDark',.004,{cover:true,detail:true,role:'machine-name-plate',sourceAnchor:photo});
+      const plaque=this.box(d,[.66,.14,.018],[1.62,2.16,-1.607],'light',.002,{cover:true,detail:true,role:'machine-name-plaque-face',sourceAnchor:photo});
+      plaque.userData.label='MESIN SHEETING';
+      this.cyl(d,.040,.028,[3.32,1.18,-1.70],'red','z',{detail:true,role:'cutter-side-emergency-stop',sourceAnchor:photo});
+      this.box(d,[.46,.28,.024],[3.16,.88,-1.695],'white',.003,{detail:true,role:'cutter-warning-placard',sourceAnchor:photo});
+    }
+
+    // The large draw roll is not a featureless black cylinder: the actual photo shows a dark
+    // working surface bounded by lighter end bands/covered web region.
+    const draw=this.meshes.find(m=>m.userData.role==='large-black-draw-roll');
+    const process=this.findNode('sheeting-main-rollers');
+    if(draw&&process&&!this.meshes.some(m=>m.userData.role==='draw-roll-end-band')){
+      for(const z of [-1.10,1.10])this.torus(process,L.drawRoll.radius+.004,.032,[L.drawRoll.center[0],L.drawRoll.center[1],z],'light',{detail:true,role:'draw-roll-end-band',sourceAnchor:photo});
+      for(const z of [-.66,-.22,.22,.66])this.torus(process,L.drawRoll.radius+.005,.010,[L.drawRoll.center[0],L.drawRoll.center[1],z],'steel',{detail:true,role:'draw-roll-service-band',sourceAnchor:photo});
+    }
+
+    // Delivery wheel supports are green pivot arms in the actual photos, not floating white discs.
+    const overlap=this.findNode('sheeting-overlap');
+    if(overlap&&!this.meshes.some(m=>m.userData.role==='hold-down-pivot-arm')){
+      for(const x of [.55,-.55,-1.58])for(let i=0;i<6;i++){
+        const z=-1.02+i*.40;
+        this.beamYZ(overlap,[z,1.08],[z,.99],x-.08,.055,.080,'body',{detail:true,role:'hold-down-pivot-arm',sourceAnchor:photo});
+        this.cyl(overlap,.027,.10,[x-.08,1.09,z],'dark','z',{detail:true,role:'hold-down-pivot-pin',sourceAnchor:photo});
+      }
+    }
+
+    // Stacker V195: scale/ruler, vertical screw posts, spring returns and end control block
+    // are visible in IMG_2484 and remove the generic bare-frame appearance.
+    const joggers=this.findNode('sheeting-stacker-joggers');
+    const layboy=this.findNode('sheeting-layboy');
+    if(joggers&&layboy&&!this.meshes.some(m=>m.userData.role==='stack-ruler-tick')){
+      for(let i=0;i<46;i++){
+        const x=L.stack.startX+.18+i*(Math.abs(L.stack.endX-L.stack.startX)-.36)/45;
+        const major=i%5===0;
+        this.box(joggers,[.012,major?.055:.035,.018],[x,1.135,-1.685],'dark',.001,{detail:true,role:'stack-ruler-tick',sourceAnchor:photo});
+      }
+      for(const x of [-5.18,-6.28]){
+        this.cyl(joggers,.032,.62,[x,1.42,-1.50],'chrome','y',{detail:true,role:'stack-guide-threaded-post',sourceAnchor:photo});
+        this.cyl(joggers,.055,.06,[x,1.75,-1.50],'steel','y',{detail:true,role:'stack-guide-post-cap',sourceAnchor:photo});
+      }
+      for(const [x,z] of [[-7.05,-1.58],[-4.32,1.58]]){
+        for(let i=0;i<10;i++)this.torus(joggers,.050,.010,[x,.70+i*.055,z],'black',{detail:true,role:'stack-return-spring-loop',sourceAnchor:photo});
+      }
+      const end=this.group(layboy,'sheeting-stack-end-controls','Stacker End Control Block',[0,0,0],[.08,.10,-.12],'VERIFIED_VISUAL');
+      this.box(end,[.20,.42,.18],[L.stack.endX+.18,1.02,-1.54],'body',.008,{detail:true,role:'stack-end-control-box',sourceAnchor:photo});
+      this.cyl(end,.028,.030,[L.stack.endX+.18,1.11,-1.645],'red','z',{detail:true,role:'stack-end-stop-button',sourceAnchor:photo});
+      this.cyl(end,.028,.030,[L.stack.endX+.18,.98,-1.645],'green','z',{detail:true,role:'stack-end-start-button',sourceAnchor:photo});
+      this.box(end,[.08,.18,.030],[L.stack.endX+.18,.82,-1.645],'white',.002,{detail:true,role:'stack-end-warning-label',sourceAnchor:photo});
+    }
+
+    this.root.userData.processFlow={
+      ...this.root.userData.processFlow,
+      input:'RIGHT · photo-visible fixed-position hydraulic rollstand assembly, physically distinct from the downstream feed frame',
+      process:'RIGHT → LEFT · loaded reel → low entry guide roll → elevated alternating guide/tension rollers → black exterior draw roll → guarded LEXUS cross-cut → open multi-level green belt delivery → rack-adjusted stack table',
+      unwindArchitecture:'FIXED_POSITION_ROLLSTAND_ASSEMBLY__PHOTO_VISIBLE_SECOND_ARM_SET_FUNCTION_UNRESOLVED__NO_FABRICATED_FEED_FRAME_BRIDGE',
+      feedArchitecture:'SEPARATE_OPEN_FEED_FRAME__LOW_ENTRY_ROLL__SEVEN_ELEVATED_GUIDE_TENSION_ROLLERS',
+      stackerArchitecture:'RACK_ADJUSTED_OPEN_STACK_TABLE__RULER_SCALE__THREADED_GUIDE_POSTS__SPRING_RETURNS__END_CONTROLS',
+      geometryBoundary:'ONLY_PHOTO_VISIBLE_CONNECTIONS_ARE_HARD_MODELED__AMBIGUOUS_ARM_SET_IS_NOT_CLAIMED_AS_SECOND_LOAD_STATION'
+    };
+  }
+
+  enrichActualV195(){
+    this.root.userData.researchVersion='V195';
+    this.root.userData.researchSourceCount=V122_SOURCE_STATS.total;
+    this.root.userData.detailPass='V195_PHOTO_TRUTH_CONNECTION_AND_SERVICE_DETAIL_CORRECTION';
+    this.root.userData.installedOptionBoundary='Actual BMJ photos remain primary. V195 removes the unsupported rigid unwind-to-feed bridge claim, keeps the second visible arm set functionally unresolved, and adds only photo-visible service/detail hardware.';
+    this.root.userData.primaryVisualEvidence='BMJ_USER_PHOTOSET_20260922_IMG_2479_TO_IMG_2487';
+    this.root.userData.familyEvidenceRole='FIXED_POSITION_ROLLSTAND_AND_HIDDEN_PROCESS_CORROBORATION_ONLY';
+    this.root.userData.geometryCorrections=[
+      'rollstand and feed frame no longer asserted as one rigid assembly',
+      'low entry guide roll added before elevated roller bank',
+      'parked/second arm set no longer called an independently loadable station',
+      'front rollstand control pedestal added',
+      'cutter service hinges nameplate warning details added',
+      'draw roll service/end bands added',
+      'delivery hold-down pivot arms grounded',
+      'stack ruler threaded posts spring returns and end controls added'
     ];
   }
 
