@@ -88,8 +88,13 @@ qa('[data-mobile-tool]',mobileContextTools).forEach(button=>button.addEventListe
 
 const splash=q('.app-splash');
 const firstVisit=!sessionStorage.getItem('bmj-splash-seen');
+let documentLoaded=document.readyState==='complete',appReadyStatus=document.documentElement.dataset.appReady||null,splashFinishTimer=0;
 const finishSplash=()=>{if(!splash||splash.classList.contains('is-done'))return;splash.classList.add('is-done');sessionStorage.setItem('bmj-splash-seen','1');setTimeout(()=>splash.remove(),600)};
-addEventListener('load',()=>setTimeout(finishSplash,firstVisit?1250:180),{once:true});setTimeout(finishSplash,5000);
+const maybeFinishSplash=()=>{if(!documentLoaded||!appReadyStatus)return;clearTimeout(splashFinishTimer);splashFinishTimer=setTimeout(finishSplash,firstVisit?900:100)};
+if(documentLoaded)maybeFinishSplash();else addEventListener('load',()=>{documentLoaded=true;maybeFinishSplash()},{once:true});
+addEventListener('bmj:appready',event=>{appReadyStatus=event.detail?.status||document.documentElement.dataset.appReady||'ready';maybeFinishSplash()});
+if(appReadyStatus)maybeFinishSplash();
+setTimeout(()=>{if(!appReadyStatus){document.documentElement.dataset.appReady='timeout';finishSplash()}},12000);
 
 const SECTION_BUTTONS={factory:'nav-machine',asset:'nav-assets',system:'nav-systems',simulation:'nav-simulation-mode',reference:'nav-sources'};
 function markSection(section){
