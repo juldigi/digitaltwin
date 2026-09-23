@@ -501,11 +501,11 @@ export class SheetingMachineTemplate{
       bridge.name='Rollstand Upper Support / Parked Arm Structure';
       bridge.userData.confidence='VERIFIED_VISUAL__NO_FEED_FRAME_CONNECTION_CLAIM';
       for(const z of [-1.40,1.40]){
-        this.box(bridge,[2.58,.20,.22],[7.25,2.17,z],'light',.010,{role:'rollstand-upper-longitudinal-member',sourceAnchor:photo});
-        this.beamXY(bridge,[6.16,1.90],[6.56,2.17],z,.18,.22,'body',{role:'rollstand-upper-diagonal-brace',sourceAnchor:photo});
-        this.beamXY(bridge,[7.88,1.86],[7.72,2.17],z,.18,.22,'body',{role:'rollstand-upper-end-brace',sourceAnchor:photo});
+        this.box(bridge,[2.05,.20,.22],[7.42,2.17,z],'light',.010,{role:'rollstand-upper-longitudinal-member',sourceAnchor:photo});
+        this.beamXY(bridge,[6.46,1.90],[6.58,2.17],z,.18,.22,'body',{role:'rollstand-upper-diagonal-brace',sourceAnchor:photo});
+        this.beamXY(bridge,[8.18,1.86],[8.08,2.17],z,.18,.22,'body',{role:'rollstand-upper-end-brace',sourceAnchor:photo});
       }
-      for(const x of [6.55,7.34,8.10])this.box(bridge,[.14,.16,2.92],[x,2.17,0],'steel',.008,{detail:true,role:'rollstand-upper-cross-tie',sourceAnchor:photo});
+      for(const x of [6.58,7.45,8.26])this.box(bridge,[.14,.16,2.92],[x,2.17,0],'steel',.008,{detail:true,role:'rollstand-upper-cross-tie',sourceAnchor:photo});
     }
 
     // The feed frame receives its own top rails; they end before the rollstand service gap.
@@ -614,7 +614,7 @@ export class SheetingMachineTemplate{
       unwindArchitecture:'FIXED_POSITION_ROLLSTAND_ASSEMBLY__PHOTO_VISIBLE_SECOND_ARM_SET_FUNCTION_UNRESOLVED__NO_FABRICATED_FEED_FRAME_BRIDGE',
       feedArchitecture:'SEPARATE_OPEN_FEED_FRAME__LOW_ENTRY_ROLL__SEVEN_ELEVATED_GUIDE_TENSION_ROLLERS',
       stackerArchitecture:'RACK_ADJUSTED_OPEN_STACK_TABLE__RULER_SCALE__THREADED_GUIDE_POSTS__SPRING_RETURNS__END_CONTROLS',
-      geometryBoundary:'ONLY_PHOTO_VISIBLE_CONNECTIONS_ARE_HARD_MODELED__AMBIGUOUS_ARM_SET_IS_NOT_CLAIMED_AS_SECOND_LOAD_STATION'
+      geometryBoundary:'ONLY_PHOTO_VISIBLE_CONNECTIONS_ARE_HARD_MODELED__AMBIGUOUS_ARM_SET_IS_NOT_CLAIMED_AS_SECOND_LOAD_STATION__ROLLSTAND_FEED_SERVICE_GAP_PRESERVED'
     };
   }
 
