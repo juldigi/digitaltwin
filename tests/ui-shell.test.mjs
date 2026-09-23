@@ -346,8 +346,8 @@ test('v57 opens Sheeting Lexus as a dedicated right-to-left twin',()=>{
   assert.match(sheeting,/processDirection:'RIGHT_TO_LEFT'/);
   assert.match(sheeting,/sheeting-rollstand/);
   assert.match(sheeting,/sheeting-cutter/);
-  assert.match(sheeting,/sheeting-layboy/);
-  assert.match(simulationSheeting,/Rack-Adjusted Stack Table/);
+  assert.match(sheeting,/sheeting-layboy/);\n  assert.match(sheeting,/sheeting-flatbed-cutter-family/);\n  assert.match(sheeting,/web-carrier-longitudinal-beam/);
+  assert.match(simulationSheeting,/Stack Entry \/ Pile/);
   assert.match(taxonomySheeting,/SHEETING LEXUS · HSM-CTM7/);
   assert.match(sourcesSheeting,/HSM 56/);
   assert.match(sourcesSheeting,/USER_CONFIRMED_REFERENCE/);
