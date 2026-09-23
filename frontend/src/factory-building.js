@@ -515,7 +515,6 @@ export function buildActualFactory(layout,fleet){
   const cat=roomFloorCategory(l.text),pad=box(b,l.x,.006,-l.y,2.60,.012,2.35,roomFloorColor(cat),0,.94);
   pad.userData={semantic:'ROOM_FLOOR_'+cat+'_REFERENCE',roomLabel:l.text,accuracy:'FUNCTIONAL_ROOM_FINISH_REFERENCE_NOT_AS_BUILT',researchVersion:'V198',functionalReferenceVisible:true};buildingDetailStats.roomFloorFinishes++;
  }
-}
 
  // RMS: material storage reads as a packaging warehouse rather than generic barrels.
  // Exact inventory, rack type and aisle engineering still require field photos / warehouse drawings.
