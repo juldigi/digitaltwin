@@ -14,7 +14,7 @@ test('V173 Factory navigation preserves the current 2D or 3D view mode',()=>{
  assert.notEqual(start,-1);
  const handler=shell.slice(start,shell.indexOf('\n',start));
  assert.match(handler,/navigateSection\('factory'\)/);
- assert.match(handler,/markSection\('factory'\)/);
+ assert.match(shell,/function navigateSection\(section,[\s\S]*setActiveSection\(section\);markSection\(section\)/);
  assert.doesNotMatch(handler,/setViewMode\('3d'\)/);
  assert.doesNotMatch(handler,/workspace-2d/);
 });
