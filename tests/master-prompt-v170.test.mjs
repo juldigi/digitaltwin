@@ -24,8 +24,8 @@ test('V170 leaving Simulation through another inspector tab hides simulation sec
 
 test('V170 mobile More represents Reference without turning transient modals into sections',()=>{
  assert.match(shell,/const mobileSection=section==='reference'\?'more':section/);
- assert.match(shell,/q\('#nav-help'\)\?\.addEventListener\('click',\(\)=>\{beforeMajorOverlay\('modal'\);openOverlay\('modal'\)\}\)/);
- assert.match(shell,/q\('#nav-settings'\)\?\.addEventListener\('click',\(\)=>\{beforeMajorOverlay\('modal'\);q\('#settings'\)\?\.click\(\);openOverlay\('modal'\)\}\)/);
+ assert.match(shell,/q\('#nav-help'\)\?\.addEventListener\('click',\(\)=>\{stopSimulationForNavigation\('help'\);beforeMajorOverlay\('modal'\);openOverlay\('modal'\)\}\)/);
+ assert.match(shell,/q\('#nav-settings'\)\?\.addEventListener\('click',\(\)=>\{stopSimulationForNavigation\('settings'\);beforeMajorOverlay\('modal'\);q\('#settings'\)\?\.click\(\);openOverlay\('modal'\)\}\)/);
  assert.doesNotMatch(shell,/setActiveSection\('help'\)/);
  assert.doesNotMatch(shell,/setActiveSection\('settings'\)/);
 });
