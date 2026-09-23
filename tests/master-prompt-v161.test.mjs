@@ -9,7 +9,7 @@ const shell=fs.readFileSync(new URL('../frontend/src/app-shell-v79.js',import.me
 const sw=fs.readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 
 test('V162 restores factory-first startup even when WebGL falls back',()=>{
- const start=app.indexOf('function showHome(){');
+ const start=app.indexOf("function showHome({historyMode='none'}={}){");
  const end=app.indexOf('function connectionDialog',start);
  const home=app.slice(start,end);
  assert.match(home,/qStaticFallbackClear\(\)/);
