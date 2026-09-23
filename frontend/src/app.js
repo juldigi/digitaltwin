@@ -631,17 +631,40 @@ function machineRecordForRoute(route){
  const key=String(route||'').trim(),normalized=normalizeMachineKey(key);
  return MACHINE_REGISTRY_BY_ID.get(key)||MACHINE_REGISTRY.find(machine=>normalizeMachineKey(machineRoute(machine))===normalized)||null;
 }
+function currentViewMode(){return window.BMJAppState?.getState?.().viewMode==='2d'?'2d':'3d';}
+function pushContextHistory({asset=null,node=null,scene='factory',view=currentViewMode(),camera='iso'}={}){
+ const url=new URL(location.href);url.searchParams.delete('machine');
+ if(asset)url.searchParams.set('asset',asset);else url.searchParams.delete('asset');
+ if(node)url.searchParams.set('node',node);else url.searchParams.delete('node');
+ if(scene==='machine')url.searchParams.set('scene','machine');else if(asset)url.searchParams.set('scene','factory');else url.searchParams.delete('scene');
+ url.searchParams.set('view',view==='2d'?'2d':'3d');
+ if(camera==='top')url.searchParams.set('camera','top');else url.searchParams.delete('camera');
+ const next=url.pathname+url.search+url.hash,current=location.pathname+location.search+location.hash;
+ const snapshot={asset:asset||null,node:node||null,scene:scene==='machine'?'machine':'factory',view:view==='2d'?'2d':'3d',camera:camera==='top'?'top':'iso'};
+ if(next===current){history.replaceState(snapshot,'',url);return false;}
+ history.pushState(snapshot,'',url);return true;
+}
+function resetMachineInspectionContext(){
+ if(engine?.isPrintingSimulationActive?.()){engine.stopPrintingSimulation();simulationState=engine.getPrintingSimulationState?.()||simulationState;}
+ if(exteriorMode)exitExteriorMode();
+ if(engine){engine.template?.reset?.();engine.clearPartLabels?.();engine.isolated=false;}
+ selectedPart=null;selectedTaxonomyId=ACTIVE_ROOT;explode=0;exteriorFocusKey=null;simulationOwnsExterior=false;activeTab='overview';
+ $('#tool-explode')?.classList.remove('active');$('#tool-isolate')?.classList.remove('active');$('#tool-interior')?.classList.remove('active');$('#tool-simulation')?.classList.remove('active');
+}
+function applyRestoredCamera(preset='iso'){
+ if(!engine)return;const mode=preset==='top'?'top':'iso',target=engine.view==='factory'?(engine.currentFactoryTarget?.()||engine.factory):(selectedPart||engine.machine);
+ if(target)engine.fit(target,mode);
+ $('[data-camera]').forEach(button=>button.classList.toggle('active',button.dataset.camera===mode));
+}
 function selectFactoryAssetContext(machine,{historyMode='none',openDialog=false,focus=true}={}){
  if(!machine)return false;
+ if(historyMode==='push')pushContextHistory({asset:machine.machineId,node:null,scene:'factory',view:'3d',camera:'iso'});
  if(engine?.view!=='factory')setView('factory');
  if(focus)engine?.focusFactoryAsset(machine.machineId);else engine?.selectFactoryAsset(machine.machineId);
  const policy=foundationAssetPolicy(machine,placementForMachine(machine.machineId));
  $('#geometry-caption').textContent='Pabrik · '+machine.name;
  $('#scene-hint').textContent=policy.canOpenTechnical3D?'Aset teknis utama dipilih · buka detail untuk masuk ke model OFFSET 5':'Placeholder tata letak dipilih · detail teknis tetap dikunci pada fase fondasi';
- emitDomainState({selectedAsset:machine.machineId,selectedArea:machine.area||null,selectedNode:null,activeReference:null,activeSection:'asset'});
- if(historyMode==='push'){
-  const url=new URL(location.href);url.searchParams.delete('machine');url.searchParams.set('asset',machine.machineId);url.searchParams.delete('node');url.searchParams.set('view','3d');history.pushState({asset:machine.machineId},'',url);
- }
+ emitDomainState({selectedAsset:machine.machineId,selectedArea:machine.area||null,selectedNode:null,activeReference:null,activeSection:'asset',sceneMode:'factory',cameraPreset:'iso'});
  if(openDialog)machineDetailDialog(machine);
  return true;
 }
@@ -657,11 +680,11 @@ function machineDetailDialog(machine){
  const placeholderData=pair('ID posisi',machine.machineId)+pair('Area',machine.area)+pair('3D source','NOT_IMPLEMENTED · LAYOUT PLACEHOLDER')+pair('3D detail','NOT_IMPLEMENTED')+pair('Posisi',positionVerification(placement))+pair('Dasar posisi',positionStatusLabel(policy.positionStatus))+pair('Status detail','Belum dibuka pada fase fondasi');
  closeModal();showPanel();activeTab='overview';
  $('#panel-content').innerHTML=`<h3>${esc(machine.name)}</h3><div class="card accent"><h4>${esc(status)}</h4><p>${esc(copy)}</p></div><dl class="data-list">${primary?primaryData:placeholderData}</dl>${primary&&machine.note?`<div class="card"><h4>Catatan sumber</h4><p>${esc(machine.note)}</p></div>`:''}<div class="actions"><button id="${primary?'open-machine-3d':'focus-layout-asset'}" class="primary">${primary?'Buka Model 3D':'Pusatkan di Pabrik'}</button><button id="factory-inspector-back" class="secondary">Kembali ke Pabrik</button></div>`;
- emitDomainState({selectedAsset:machine.machineId,selectedArea:machine.area||null,selectedNode:null,activeReference:null,activeSection:'asset',inspectorState:{open:true,tab:'overview'}});
+ emitDomainState({selectedAsset:machine.machineId,selectedArea:machine.area||null,selectedNode:null,activeReference:null,activeSection:'asset',sceneMode:'factory',cameraPreset:'iso',inspectorState:{open:true,tab:'overview'}});
  renderContextBreadcrumb();
  if(primary)on('#open-machine-3d',()=>switchActiveMachine(FOUNDATION_SCOPE.primaryRoute));
  else on('#focus-layout-asset',()=>selectFactoryAssetContext(machine,{historyMode:'none',openDialog:false,focus:true}));
- on('#factory-inspector-back',()=>{engine?.clearFactorySelection();engine?.fit(engine.factory,'iso');emitDomainState({selectedAsset:null,selectedArea:null,activeSection:'factory'});renderPanel('overview');});
+ on('#factory-inspector-back',()=>showHome({historyMode:'push'}));
  return true;
 }
 async function switchActiveMachine(route,{historyMode='push'}={}){
@@ -671,18 +694,22 @@ async function switchActiveMachine(route,{historyMode='push'}={}){
   toast('Aset belum memiliki konteks tata letak yang dapat dibuka.',true);return false;
  }
  const normalizedRoute=normalizeMachineKey(route||FOUNDATION_SCOPE.primaryRoute);
- if(normalizedRoute===MACHINE_KEY){closeModal();setView('machine');return true;}
- closeModal();document.body.classList.add('scene-switching');
+ if(historyMode==='push')pushContextHistory({asset:FOUNDATION_SCOPE.primaryRoute,node:null,scene:'machine',view:'3d',camera:'iso'});
+ closeModal();resetMachineInspectionContext();
+ if(normalizedRoute===MACHINE_KEY){
+  setView('machine');showPanel();renderPanel('overview');engine?.fit(engine.machine,'iso');$('#engine-status').textContent='OFFSET 5 · model 3D siap';
+  emitDomainState({selectedAsset:FOUNDATION_SCOPE.primaryRoute,selectedNode:null,activeReference:null,activeSection:'asset',sceneMode:'machine',cameraPreset:'iso',inspectorState:{open:true,tab:'overview'}});return true;
+ }
+ document.body.classList.add('scene-switching');
  const boot=$('#boot');if(boot){boot.hidden=false;boot.innerHTML='<strong>Menyiapkan OFFSET 5…</strong><p>Memuat model 3D teknis dan struktur terverifikasi.</p>';}
  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
  try{
-  configureActiveMachine(normalizedRoute);applyActiveMachineState();selectedPart=null;selectedTaxonomyId=ACTIVE_ROOT;explode=0;exteriorMode=false;simulationOwnsExterior=false;
-  if(historyMode==='push'){const url=new URL(location.href);url.searchParams.set('machine',FOUNDATION_SCOPE.primaryRoute);url.searchParams.set('asset',FOUNDATION_SCOPE.primaryRoute);url.searchParams.delete('node');history.pushState({machine:FOUNDATION_SCOPE.primaryRoute},'',url);}
+  configureActiveMachine(normalizedRoute);applyActiveMachineState();selectedTaxonomyId=ACTIVE_ROOT;
   applyMachineShell();
   if(engine){engine.switchMachine(MACHINE_KEY);engine.onTaxonomySelect=id=>selectTaxonomy(id,{revealPanel:false});engine.onSimulationUpdate=next=>{simulationState=next;updateSimulationPanel(next);};engine.onReset=()=>{explode=0;selectedPart=null;selectedTaxonomyId=ACTIVE_ROOT;renderPanel();};engine.onError=message=>toast(message,true);if(bundledLayout)engine.loadLayout(bundledLayout);engine.setView('machine',state);}
   else{qStaticFallbackClear();renderStaticMachineFallback(new Error('3D renderer unavailable'));}
   const taxCount=$('#taxonomy-count');if(taxCount)taxCount.textContent=taxonomyStats().total.toLocaleString('id-ID');
-  renderStatus();redrawPlantPlan();showPanel();renderPanel('overview');engine?.fit(engine.machine);$('#engine-status').textContent='OFFSET 5 · model 3D siap';emitDomainState({selectedAsset:FOUNDATION_SCOPE.primaryRoute,selectedNode:null,activeReference:null,activeSection:'asset'});return true;
+  renderStatus();redrawPlantPlan();showPanel();renderPanel('overview');engine?.fit(engine.machine,'iso');$('#engine-status').textContent='OFFSET 5 · model 3D siap';emitDomainState({selectedAsset:FOUNDATION_SCOPE.primaryRoute,selectedNode:null,activeReference:null,activeSection:'asset',sceneMode:'machine',cameraPreset:'iso',inspectorState:{open:true,tab:'overview'}});return true;
  }catch(error){toast('Model OFFSET 5 gagal dimuat: '+error.message,true);return false;}
  finally{if(boot)boot.hidden=true;document.body.classList.remove('scene-switching');}
 }
