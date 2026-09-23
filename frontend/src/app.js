@@ -715,19 +715,27 @@ async function switchActiveMachine(route,{historyMode='push'}={}){
 }
 function qStaticFallbackClear(){const viewport=$('#viewport');viewport?.querySelectorAll('.static-machine-fallback').forEach(node=>node.remove());}
 async function restoreHistoryContext(){
- const params=new URLSearchParams(location.search),route=params.get('machine')||params.get('asset')||FOUNDATION_SCOPE.primaryRoute,node=params.get('node'),viewMode=params.get('view')==='2d'?'2d':'3d';
- if(!canOpenTechnical3D(route)){
-  const record=machineRecordForRoute(route);
-  if(record){focusFoundationPlaceholder(record,{historyMode:'none',openDialog:false});dispatchEvent(new CustomEvent('bmj:historyrestore',{detail:{selectedAsset:record.machineId,selectedNode:null,viewMode}}));return;}
+ const params=new URLSearchParams(location.search),legacyMachine=params.get('machine'),route=legacyMachine||params.get('asset')||null,node=params.get('node'),viewMode=params.get('view')==='2d'?'2d':'3d',cameraPreset=params.get('camera')==='top'?'top':'iso';
+ const sceneMode=params.get('scene')==='machine'||Boolean(node)||Boolean(legacyMachine)?'machine':'factory';
+ if(!route){
+  showHome({historyMode:'none'});applyRestoredCamera(cameraPreset);
+  dispatchEvent(new CustomEvent('bmj:historyrestore',{detail:{selectedAsset:null,selectedNode:null,sceneMode:'factory',viewMode,cameraPreset}}));return;
+ }
+ const record=machineRecordForRoute(route);
+ if(!record){
+  showHome({historyMode:'none'});toast('Aset pada tautan ini tidak ditemukan. Pabrik ditampilkan sebagai gantinya.',true);
+  dispatchEvent(new CustomEvent('bmj:historyrestore',{detail:{selectedAsset:null,selectedNode:null,sceneMode:'factory',viewMode,cameraPreset:'iso'}}));return;
+ }
+ if(sceneMode==='factory'||!canOpenTechnical3D(route)){
+  selectFactoryAssetContext(record,{historyMode:'none',openDialog:false,focus:true});machineDetailDialog(record);applyRestoredCamera(cameraPreset);
+  dispatchEvent(new CustomEvent('bmj:historyrestore',{detail:{selectedAsset:record.machineId,selectedNode:null,sceneMode:'factory',viewMode,cameraPreset}}));return;
  }
  await switchActiveMachine(FOUNDATION_SCOPE.primaryRoute,{historyMode:'none'});
- if(node&&TAXONOMY_BY_ID.has(node)){
-  setView('machine');selectTaxonomy(node,{revealPanel:true});showPanel();renderPanel('structure');
- }else{
-  selectedTaxonomyId=ACTIVE_ROOT;selectedPart=null;engine?.clearPartLabels();
-  emitDomainState({selectedAsset:FOUNDATION_SCOPE.primaryRoute,selectedNode:null});
- }
- dispatchEvent(new CustomEvent('bmj:historyrestore',{detail:{selectedAsset:FOUNDATION_SCOPE.primaryRoute,selectedNode:node&&TAXONOMY_BY_ID.has(node)?node:null,viewMode}}));
+ const restoredNode=node&&TAXONOMY_BY_ID.has(node)?node:null;
+ if(restoredNode){setView('machine');selectTaxonomy(restoredNode,{revealPanel:true});showPanel();renderPanel('structure');}
+ else{selectedTaxonomyId=ACTIVE_ROOT;selectedPart=null;engine?.clearPartLabels?.();showPanel();renderPanel('overview');}
+ applyRestoredCamera(cameraPreset);
+ dispatchEvent(new CustomEvent('bmj:historyrestore',{detail:{selectedAsset:FOUNDATION_SCOPE.primaryRoute,selectedNode:restoredNode,sceneMode:'machine',viewMode,cameraPreset}}));
 }
 addEventListener('popstate',()=>{restoreHistoryContext().catch(error=>toast('Riwayat tampilan gagal dipulihkan: '+error.message,true));});
 function machineRoute(machine){
