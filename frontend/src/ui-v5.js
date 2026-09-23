@@ -41,7 +41,8 @@ function bindShell(){
     toggleLauncher(false);
   });
   document.addEventListener('click',e=>{
-    if(document.body.classList.contains('nav-open')&&!e.target.closest('.rail')&&!e.target.closest('#ui-menu-toggle'))document.body.classList.remove('nav-open');
+    // Navigation drawer close/state is canonical in app-shell-v79.js so aria-expanded,
+    // overlay focus, Escape handling, and backdrop state can never drift apart.
     if(!$('#panel-launcher-menu')?.hidden&&!e.target.closest('#panel-launcher-menu')&&!e.target.closest('#panel-launcher'))toggleLauncher(false);
   });
 
