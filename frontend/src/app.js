@@ -533,9 +533,10 @@ function setView(view){
   title.textContent=view==='factory'?'Informasi denah':'Catatan tampilan';
   note.textContent=view==='factory'?'Posisi mesin ditampilkan mengikuti denah yang tersedia. Beberapa tinggi bangunan masih berupa perkiraan visual.':(IS_OFFSET10?'Offset 10 direkonstruksi dari dokumen proyek BMJ dan referensi resmi Heidelberg; foto aktual mesin belum tersedia.':IS_APM2?'APM 2 memakai identitas database BMJ dan referensi legacy BOBST SP 102; suffix mesin dan foto aktual belum tersedia.':IS_SHEETING?'Sheeting mempertahankan baseline visual yang sudah dikoreksi: input reel di kanan, web bergerak kanan ke kiri, lalu cutter, delivery/layboy dan output stack di kiri.':'Model dibuat dengan mengacu pada foto aktual dan dokumen mesin yang tersedia.');
  }
- renderPanel();redrawPlantPlan();emitDomainState({activeSection:'factory'});
+ renderPanel();redrawPlantPlan();emitDomainState({activeSection:view==='factory'?'factory':'asset',sceneMode:view==='factory'?'factory':'machine'});
 }
-function showHome(){
+function showHome({historyMode='none'}={}){
+ if(historyMode==='push')pushContextHistory({asset:null,node:null,scene:'factory',view:window.BMJAppState?.getState?.().viewMode||'3d',camera:'iso'});
  qStaticFallbackClear();engine?.clearFactorySelection();setView('factory');engine?.fit(engine.factory,'iso');
  document.title='Packaging Offset Factory Digital Twin';
  document.body.classList.add('panel-hidden');document.body.classList.remove('mobile-panel-open');
@@ -546,7 +547,8 @@ function showHome(){
  $('#view-subtitle').textContent='Bangunan, area, mesin, dan utilitas dalam satu konteks';
  $('#geometry-caption').textContent='Pabrik · Seluruh Area';
  $('#scene-hint').textContent='Klik aset untuk memilih · seret untuk memutar · zoom dengan cubit/scroll';
- emitDomainState({selectedAsset:null,selectedArea:null,selectedNode:null,activeReference:null,activeSection:'factory',cameraPreset:'iso',inspectorState:{open:false,tab:'overview'}});
+ selectedTaxonomyId=ACTIVE_ROOT;selectedPart=null;activeTab='overview';engine?.template?.reset?.();engine?.clearPartLabels?.();if(engine)engine.isolated=false;
+ emitDomainState({selectedAsset:null,selectedArea:null,selectedNode:null,selectedSystem:null,activeReference:null,activeSection:'factory',sceneMode:'factory',cameraPreset:'iso',inspectorState:{open:false,tab:'overview'}});
  if(!engine){
   // No WebGL: show the actual CAD-backed 2D drawing instead of an empty 3D viewport.
   document.body.classList.add('workspace-2d');
