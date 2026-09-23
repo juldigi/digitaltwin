@@ -71,7 +71,7 @@ test('V198 makes core room furniture, RMS paper and production support visible w
   [/Pantry|Kitchen|Refreshment/i,/^PANTRY_BASE_CABINET$/],
   [/Locker|Loker|Changing|Change Room/i,/^LOCKER_DOOR_REFERENCE$/],
   [/WH Spareparts/i,/^SPAREPART_RACK_UPRIGHT$/],
-  [/Workshop/i,/^WORKSHOP_WORKBENCH_/],
+  [/Workshop/i,/^(WORKBENCH_TOP|WORKSHOP_BENCH_VISE_BODY)$/],
   [/CTF|CTP/i,/^(CTF_PREPRESS|CTP_PREPRESS)_/]
  ];
  for(const [labelRe,semanticRe] of conditional){
