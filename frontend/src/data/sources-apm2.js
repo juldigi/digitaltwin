@@ -43,6 +43,20 @@ export const APM2_TECHNICAL_SOURCES=Object.freeze([
     supports:['legacy SP 102 exterior proportions','feeder opening','die-cutting housing','operator controls','stripping section']
   },
   {
+    id:'APM2-SP102-EII-SFS',
+    title:'BOBST SP 102 E II 720×1020 technical sheet',
+    publisher:'SF Services',
+    url:'https://www.sfservices.com/wp-content/uploads/2023/05/1996-Bobst-SP-102-EII.pdf',
+    supports:['approximate envelope 5780×4070×2200 mm including access width','15000 kg reference weight','250 t force','7500 sheets/h','feeder 1400 mm / 1100 mm non-stop','delivery 1100 mm','9–17 mm gripper margin']
+  },
+  {
+    id:'APM2-SP102-EII-PARTS',
+    title:'BOBST SP 102 E II compatible parts catalogue',
+    publisher:'MV Parts',
+    url:'https://www.mvparts.eu/machinetypes/SP102EII/',
+    supports:['1040×720 cutting plates','lower stripping frame','stripping pins','movable gripper and gripper-bar end fittings','front lay','side-lay guide','infeed rollers','delivery curtain']
+  },
+  {
     id:'APM2-SP102-CHAIN14',
     title:'Bobst SP 102 gripper-bar chain set · 14 pcs',
     publisher:'Conway Machine',
