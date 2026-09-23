@@ -12,7 +12,7 @@ export const SHEETING_SIMULATION_STAGES=Object.freeze([
 
 export const SHEETING_PROCESS_STEPS=Object.freeze([
   'The loaded RIGHT-side reel rotates on the actual two-station hydraulic rollstand while the alternate station remains mechanically idle',
-  'The continuous web snakes across the photo-matched open roller bank; rollers contacted from opposite sides rotate in opposite directions according to the web path',
+  'The continuous web leaves the reel through the photo-visible low entry guide roll, then snakes across the elevated open roller bank; rollers contacted from opposite sides rotate in opposite directions according to the web path',
   'The web wraps the large black exterior draw roll visible at the LEXUS cutter entry, then enters the guarded cabinet. Cut timing is derived from accumulated web travel; no undocumented blade is rendered',
   'A separated sheet exits onto the upstream green belt field and gains spacing on the fast delivery section',
   'The sheet transfers through the slower multi-level belt/shaft alignment section beneath the photo-visible hold-down wheels and crossrails',
@@ -25,7 +25,7 @@ const clamp01=v=>Math.max(0,Math.min(1,v));
 export class SheetingProcessSimulation{
   constructor(machine,template){
     this.machine=machine;this.template=template;this.layout=SHEETING_ACTUAL_LAYOUT;
-    this.group=new THREE.Group();this.group.name='SHEETING-PROCESS-SIMULATION-V194';machine.add(this.group);
+    this.group=new THREE.Group();this.group.name='SHEETING-PROCESS-SIMULATION-V195';machine.add(this.group);
     this.active=false;this.running=false;this.speed=1;this.elapsed=0;this.lastNow=null;
     this.completed=0;this.cutCount=0;this.pathVisible=false;this.inkFlowVisible=false;this.onUpdate=null;
 
@@ -65,7 +65,8 @@ export class SheetingProcessSimulation{
 
   buildPaths(){
     const reel=this.layout.reel;
-    const pre=[new THREE.Vector3(reel.loadedCenter[0]-.12,reel.loadedCenter[1]+reel.radius+.025,0)];
+    const pre=[new THREE.Vector3(reel.loadedCenter[0]-.46,reel.loadedCenter[1]+reel.radius*.72,0)];
+    pre.push(this.surfacePoint(this.layout.lowEntryRoll));
     for(const spec of this.layout.feedRollers)pre.push(this.surfacePoint(spec));
 
     const draw=this.layout.drawRoll;
@@ -150,7 +151,7 @@ export class SheetingProcessSimulation{
       webRibbonSegmentsVisible:this.webRibbonSegments.filter(s=>s.visible).length,pileSheetsVisible:this.pile.filter(s=>s.visible).length,
       rotorCount:this.template.activeMeshes.filter(m=>/reel|chuck|roller|wheel/.test(m.userData.motion||'')).length,
       oscillatorCount:0,mechanismCount:this.template.activeMeshes.length,inkFlowCount:0,uvLampCount:0,uvActive:false,
-      pathVisible:this.pathVisible,inkFlowVisible:false,transportMode:'PHOTO_MATCHED_ROLLER_WRAP_TO_MULTI_LEVEL_BELT_STACK',
+      pathVisible:this.pathVisible,inkFlowVisible:false,transportMode:'V195_LOW_ENTRY_PLUS_ALTERNATING_ROLLER_WRAP_TO_MULTI_LEVEL_BELT_STACK',
       cutPulseVisible:false,bladeVisible:false,bladeCount:0,bladeStroke:0,visibleKnifeGeometry:false,cutterMechanismEvidence:'GUARDED_INTERNAL_UNRESOLVED',
       webAdvance:this.webAdvance,targetCutLength:this.targetCutLength,
       drawRollFunctional:true,drawRollSurfaceSpeed:this.webLinearSpeed,drawRollAngularSpeed:this.webLinearSpeed/this.drawRollRadius,
