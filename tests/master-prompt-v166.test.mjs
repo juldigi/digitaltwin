@@ -16,7 +16,7 @@ test('V166 narrow mobile header cannot collide with header actions',()=>{
   assert.match(css,/\.topbar \.brand-copy\{min-width:0;max-width:100%!important;overflow:hidden!important\}/);
   assert.match(css,/\.brand-copy strong\{[^}]*overflow:hidden;[^}]*text-overflow:ellipsis;[^}]*white-space:nowrap/);
   assert.match(css,/@media\(max-width:390px\)\{\s*\.brand-copy small\{display:none!important\}/);
-  assert.match(css,/\.header-actions \.icon-btn\{width:44px;height:44px;min-height:44px\}/);
+  assert.match(css,/\.header-actions \.icon-btn,[^\n]*\{width:44px;height:44px;min-height:44px\}/);
 });
 
 test('V166 inspector and mobile More restore a predictable focus path',()=>{
