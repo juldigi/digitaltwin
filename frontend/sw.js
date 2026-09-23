@@ -1,4 +1,4 @@
-const VERSION='factory-digital-twin-v190-mobile-overlay-taxonomy-hardening-20260923';
+const VERSION='factory-digital-twin-v191-mobile-viewport-composition-20260923';
 const SHELL=[
  './','./index.html','./config.json','./assets/favicon.svg','./assets/splash-industrial-v79.webp',
  './style.css','./runtime-fallback.css','./app-shell-v79.css','./ui-v5.css','./responsive-v5.css','./experience-v37.css',
