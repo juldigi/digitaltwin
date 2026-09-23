@@ -4,29 +4,28 @@ import {SHEETING_ACTUAL_LAYOUT} from './sheeting.js';
 export const SHEETING_SIMULATION_STAGES=Object.freeze([
   'Unwind / Web Tension',
   'Draw Roll / Sheet-Length Feed',
-  'Stationary Bed Knife Cross-Cut',
-  'High-Speed Take-Away / Gap',
+  'Guarded Cross-Cut / Material Separation',
+  'Take-Away Acceleration / Gap',
   'Slow-Speed Overlap / Shingling',
   'Stack Entry / Pile'
 ]);
 
 export const SHEETING_PROCESS_STEPS=Object.freeze([
-  'The continuous web unwinds from the loaded RIGHT-side reel and remains one continuous strip while it travels through the low entry roll, deep alternating guide loops and the photo-visible black draw roll',
-  'The draw roll meters sheet length continuously. The portion downstream of the knife is still attached to the web and grows from zero to one full cut length before each cross-cut',
-  'HSM 56 family literature identifies a Flat Bed Knife. In V196 the guarded cutter is represented, only in cutaway, by a stationary bed knife and a rotary fly-knife/revolver; the fly knife is phase-locked to the measured web length and crosses the bed knife once per sheet',
-  'At the cut instant the downstream strip does not appear magically at the knife: it already occupies one full sheet length downstream, with its trailing edge exactly at the cut point. Once detached, high-speed take-away belts accelerate it away from the still-attached next web, opening a real gap',
-  'The detached sheet is then decelerated onto the slow-speed delivery. Because slow-tape pitch is shorter than sheet length, successive sheets overlap naturally into a shingled stream rather than moving as equally spaced rigid cards',
-  'The overlapped sheets approach the rack-adjusted lay table at reduced speed and settle onto the pile. Manual guides and handwheels stay fixed; only the lift support compensates for pile height'
+  'The continuous web unwinds from the single loaded RIGHT-side reel and remains one continuous strip through the low entry roll, alternating guide loops and the photo-visible black draw roll',
+  'The draw roll meters material at line speed. Downstream of the guarded cut point, the next sheet grows continuously while its trailing edge is still physically connected to the web',
+  'At exactly one measured cut length, the guarded cross-cut separates the material. V197 does not animate a guessed blade carrier: the BMJ cutter is enclosed and the exact HSM-CTM7 internal knife mechanism is not visible in the actual photographs',
+  'At separation, the completed sheet already occupies one full sheet length downstream with its trailing edge at the cut point. It initially has line velocity, then the take-away section accelerates it smoothly above web speed to open a real gap from the next attached sheet',
+  'The sheet is then decelerated onto the slower delivery belts. The resulting pitch becomes shorter than sheet length, so successive sheets form a controlled shingled stream instead of equally spaced cards',
+  'The shingled stream slows again at stack entry; each sheet settles against the guide region and onto the pile while the lift support compensates for pile height'
 ]);
 
 const LOCAL_Y=new THREE.Vector3(0,1,0);
-const TAU=Math.PI*2;
 const clamp01=v=>Math.max(0,Math.min(1,v));
 
 export class SheetingProcessSimulation{
   constructor(machine,template){
     this.machine=machine;this.template=template;this.layout=SHEETING_ACTUAL_LAYOUT;
-    this.group=new THREE.Group();this.group.name='SHEETING-PROCESS-SIMULATION-V196';machine.add(this.group);
+    this.group=new THREE.Group();this.group.name='SHEETING-PROCESS-SIMULATION-V197';machine.add(this.group);
 
     this.active=false;this.running=false;this.speed=1;this.elapsed=0;this.lastNow=null;
     this.completed=0;this.cutCount=0;this.pathVisible=false;this.inkFlowVisible=false;this.onUpdate=null;
@@ -40,9 +39,11 @@ export class SheetingProcessSimulation{
     this.fastTapeSpeed=1.92;
     this.slowTapeSpeed=.82;
     this.stackApproachSpeed=.44;
+    this.takeawayAccelTime=.18;
     this.fastToSlowDecelTime=.22;
     this.slowToStackDecelTime=.32;
-    this.stackSettleDuration=.24;
+    this.stackSettleDuration=.28;
+    this.cutEdgeDuration=.055;
     this.webAdvance=0;
 
     this.reelReferenceRadius=this.layout.reel.radius;
@@ -54,7 +55,7 @@ export class SheetingProcessSimulation{
     this.stackX=this.layout.stack.centerX;
     this.palletTopY=.66;this.targetStackTopY=.80;this.maxLiftDrop=.38;
 
-    this.sheets=[];this.pile=[];this.webFlowMarks=[];this.webRibbonSegments=[];this.pendingLeaderSegments=[];
+    this.sheets=[];this.pile=[];this.webFlowMarks=[];this.webRibbonSegments=[];this.pendingLeaderSegments=[];this.lastCutIndex=0;
     this.sheetMaterial=new THREE.MeshStandardMaterial({color:0xf2eddf,roughness:.76,metalness:0,side:THREE.DoubleSide});
     this.webMaterial=new THREE.MeshStandardMaterial({color:0xe7e1d3,roughness:.72,metalness:0,side:THREE.DoubleSide});
     this.flowMaterial=new THREE.MeshStandardMaterial({color:0xbcae91,roughness:.62,metalness:0,transparent:true,opacity:.72});
@@ -64,6 +65,7 @@ export class SheetingProcessSimulation{
     this.buildPaths();
     this.buildContinuousWeb();
     this.buildPendingLeader();
+    this.buildCutEdge();
     this.buildFlowMarkers();
     this.buildSheets();
     this.buildPile();
@@ -156,7 +158,12 @@ export class SheetingProcessSimulation{
     this.stackApproachStartS=Math.max(this.overlapZoneEndS,this.outputLength-1.28);
     this.stackSettleS=Math.max(this.sheetCenterStartS,this.outputLength-.10);
 
-    this.fastRunDistance=Math.max(0,this.fastZoneEndS-this.sheetCenterStartS);
+    // A freshly cut sheet has web velocity at the instant of separation.
+    // It is then accelerated by the take-away section rather than teleporting immediately to fast-tape speed.
+    this.takeawayAccelA=(this.fastTapeSpeed-this.webLinearSpeed)/this.takeawayAccelTime;
+    this.takeawayAccelDistance=this.webLinearSpeed*this.takeawayAccelTime+.5*this.takeawayAccelA*this.takeawayAccelTime*this.takeawayAccelTime;
+    this.afterTakeawayAccelS=this.sheetCenterStartS+this.takeawayAccelDistance;
+    this.fastRunDistance=Math.max(0,this.fastZoneEndS-this.afterTakeawayAccelS);
     this.fastRunTime=this.fastRunDistance/this.fastTapeSpeed;
 
     this.fastToSlowDecelA=(this.fastTapeSpeed-this.slowTapeSpeed)/this.fastToSlowDecelTime;
@@ -173,7 +180,7 @@ export class SheetingProcessSimulation{
     this.stackRunDistance=Math.max(0,this.stackSettleS-this.afterStackDecelS);
     this.stackRunTime=this.stackRunDistance/this.stackApproachSpeed;
 
-    this.motionTime=this.fastRunTime+this.fastToSlowDecelTime+this.slowRunTime+this.slowToStackDecelTime+this.stackRunTime;
+    this.motionTime=this.takeawayAccelTime+this.fastRunTime+this.fastToSlowDecelTime+this.slowRunTime+this.slowToStackDecelTime+this.stackRunTime;
     this.sheetTotalAge=this.motionTime+this.stackSettleDuration;
 
     this.slowPitch=this.slowTapeSpeed*this.cutInterval;
@@ -205,6 +212,16 @@ export class SheetingProcessSimulation{
       m.castShadow=false;m.receiveShadow=true;this.group.add(m);this.pendingLeaderSegments.push(m);
     }
     this.pendingLeaderLength=0;
+  }
+
+  buildCutEdge(){
+    this.cutEdgeMaterial=new THREE.MeshStandardMaterial({color:0x9f927b,roughness:.90,metalness:0,side:THREE.DoubleSide});
+    this.cutEdgeGeometry=new THREE.BoxGeometry(.018,.018,this.webWidth*1.01);
+    this.cutEdge=new THREE.Mesh(this.cutEdgeGeometry,this.cutEdgeMaterial);
+    this.cutEdge.name='Fresh paper cut edge';this.cutEdge.visible=false;
+    this.cutEdge.position.set(this.cutX-.006,this.cutY+.010,0);
+    this.cutEdge.userData={materialCutEdge:true,notABlade:true};
+    this.group.add(this.cutEdge);
   }
 
   buildFlowMarkers(){
@@ -242,7 +259,12 @@ export class SheetingProcessSimulation{
 
   transportDistanceForAge(age){
     if(age<=0)return this.sheetCenterStartS;
-    if(age<=this.fastRunTime)return this.sheetCenterStartS+this.fastTapeSpeed*age;
+    if(age<=this.takeawayAccelTime){
+      return this.sheetCenterStartS+this.webLinearSpeed*age+.5*this.takeawayAccelA*age*age;
+    }
+
+    age-=this.takeawayAccelTime;
+    if(age<=this.fastRunTime)return this.afterTakeawayAccelS+this.fastTapeSpeed*age;
 
     age-=this.fastRunTime;
     if(age<=this.fastToSlowDecelTime){
@@ -264,7 +286,7 @@ export class SheetingProcessSimulation{
 
   zoneAtDistance(s,age){
     if(age>=this.motionTime)return 'LANDING';
-    if(s<this.fastZoneEndS)return 'FAST_GAP';
+    if(s<this.fastZoneEndS)return 'TAKEAWAY_GAP';
     if(s<this.slowZoneEndS)return 'SLOW_TRANSFER';
     if(s<this.overlapZoneEndS)return 'OVERLAP_SHINGLE';
     return 'STACK_APPROACH';
@@ -301,7 +323,7 @@ export class SheetingProcessSimulation{
     let stageIndex=0;
     if(!this.cutCount)stageIndex=phase<.55?0:1;
     else if(cuttingNow)stageIndex=2;
-    else if(leadZone==='FAST_GAP')stageIndex=3;
+    else if(leadZone==='TAKEAWAY_GAP')stageIndex=3;
     else if(leadZone==='SLOW_TRANSFER'||leadZone==='OVERLAP_SHINGLE')stageIndex=4;
     else if(leadZone==='STACK_APPROACH'||leadZone==='LANDING')stageIndex=5;
     else stageIndex=1;
@@ -317,13 +339,11 @@ export class SheetingProcessSimulation{
       rotorCount:this.template.activeMeshes.filter(m=>/reel|chuck|roller|wheel|revolver/.test(m.userData.motion||'')).length,
       oscillatorCount:0,mechanismCount:this.template.activeMeshes.length,inkFlowCount:0,uvLampCount:0,uvActive:false,
       pathVisible:this.pathVisible,inkFlowVisible:false,
-      transportMode:'ATTACHED_WEB__BED_KNIFE_CUT__FAST_GAP__SLOW_SHINGLE__STACK_SETTLE',
-      cutterMode:'STATIONARY_BED_KNIFE_PLUS_ROTARY_FLY_KNIFE_FAMILY_REFERENCE',
-      cuttingNow,cutPhase:phase,
-      bladeVisible:!!this.template.exteriorOpen&&this.template.meshes.some(m=>m.userData.role==='fly-knife-blade'&&m.visible),
-      bladeCount:this.template.meshes.filter(m=>['stationary-bed-knife','fly-knife-blade'].includes(m.userData.role)).length,
-      visibleKnifeGeometry:'CUTAWAY_ONLY_FAMILY_REFERENCE',
-      cutterMechanismEvidence:'HSM56_FLAT_BED_KNIFE__MAXSON_STATIONARY_BED_KNIFE_ROTARY_REVOLVER',
+      transportMode:'CONTINUOUS_WEB__FORMING_SHEET__GUARDED_CUT__SMOOTH_TAKEAWAY_ACCEL__SLOW_SHINGLE__STACK_SETTLE',
+      cutterMode:'GUARDED_CROSS_CUT__INTERNAL_MECHANISM_UNRESOLVED',
+      cuttingNow,cutPhase:phase,cutEdgeVisible:!!this.cutEdge?.visible,
+      bladeVisible:false,bladeCount:0,visibleKnifeGeometry:false,
+      cutterMechanismEvidence:'BMJ_CUTTER_ENCLOSED__HSM56_FLAT_BED_KNIFE_WORDING_ONLY__EXACT_INTERNAL_MECHANISM_UNRESOLVED',
       webAdvance:this.webAdvance,targetCutLength:this.targetCutLength,
       drawRollFunctional:true,drawRollSurfaceSpeed:this.webLinearSpeed,drawRollAngularSpeed:this.webLinearSpeed/this.drawRollRadius,
       drawRollWrapDegrees:THREE.MathUtils.radToDeg(this.drawRollWrapAngle),
@@ -332,7 +352,7 @@ export class SheetingProcessSimulation{
       guideRollWrapPointCount:[...this.guideRollContactPoints.values()].reduce((n,a)=>n+a.length,0),
       reelFunctional:true,reelReferenceRadius:this.reelReferenceRadius,reelAngularSpeed:this.reelAngularSpeed,
       reelSurfaceSpeed:this.reelAngularSpeed*this.reelReferenceRadius,
-      fastTapeLinearSpeed:this.fastTapeSpeed,slowTapeLinearSpeed:this.slowTapeSpeed,stackApproachLinearSpeed:this.stackApproachSpeed,
+      detachmentLinearSpeed:this.webLinearSpeed,takeawayAccelTime:this.takeawayAccelTime,fastTapeLinearSpeed:this.fastTapeSpeed,slowTapeLinearSpeed:this.slowTapeSpeed,stackApproachLinearSpeed:this.stackApproachSpeed,
       nominalFastGap:this.nominalFastGap,nominalSlowPitch:this.slowPitch,nominalOverlap:this.nominalOverlap,
       detachedSheetStartsWithTrailingEdgeAtCutPoint:true,
       manualStackGuidesStatic:true
@@ -349,9 +369,9 @@ export class SheetingProcessSimulation{
   pause(){if(this.active){this.running=false;this.lastNow=null;this.onUpdate?.(this.state());}return this.state();}
   resume(){if(this.active){this.running=true;this.lastNow=null;this.onUpdate?.(this.state());}return this.state();}
   stop(){
-    this.active=false;this.running=false;this.elapsed=0;this.webAdvance=0;this.completed=0;this.cutCount=0;this.lastNow=null;this.pendingLeaderLength=0;
+    this.active=false;this.running=false;this.elapsed=0;this.webAdvance=0;this.completed=0;this.cutCount=0;this.lastCutIndex=0;this.lastNow=null;this.pendingLeaderLength=0;
     this.sheets.forEach(s=>s.visible=false);this.webFlowMarks.forEach(s=>s.visible=false);this.webRibbonSegments.forEach(s=>s.visible=false);
-    this.pendingLeaderSegments.forEach(s=>s.visible=false);this.pile.forEach(s=>s.visible=false);
+    this.pendingLeaderSegments.forEach(s=>s.visible=false);this.pile.forEach(s=>s.visible=false);if(this.cutEdge)this.cutEdge.visible=false;
     this.restoreMechanisms();this.setReferenceStackVisible(true);this.onUpdate?.(this.state());return this.state();
   }
   setSpeed(v){this.speed=Math.max(.35,Math.min(2,+v||1));this.onUpdate?.(this.state());return this.state();}
@@ -373,7 +393,7 @@ export class SheetingProcessSimulation{
   }
 
   updateMechanisms(){
-    const {liftDrop}=this.currentPileMetrics(),cutPhase=this.currentCutPhase();
+    const {liftDrop}=this.currentPileMetrics();
     for(const m of this.template.activeMeshes){
       const motion=m.userData.motion||'',sign=Number.isFinite(m.userData.rotationSign)?m.userData.rotationSign:1;
       if(m.userData.kinematicGroup==='UNWIND_REEL'){
@@ -387,12 +407,6 @@ export class SheetingProcessSimulation{
         if(m.userData.transportZone==='FAST')linear=this.fastTapeSpeed;
         else if(m.userData.transportZone==='OVERLAP')linear=this.slowTapeSpeed;
         this.spinFromRest(m,sign*this.elapsed*(linear/r));
-      }else if(m.userData.kinematicGroup==='CUTTER_TAKEAWAY'){
-        const r=Math.max(.001,m.userData.surfaceRadius||.055);
-        this.spinFromRest(m,sign*this.elapsed*(this.webLinearSpeed/r));
-      }else if(m.userData.kinematicGroup==='CUTTER_SYNC'){
-        // One revolver turn per cut. At phase 0 the tangential blade is aligned with the bed knife.
-        this.spinFromRest(m,-TAU*cutPhase+(m.userData.cutPhaseOffset||0));
       }
       if(motion==='lift-table')m.position.y=m.userData.restPosition.y-liftDrop;
     }
@@ -421,18 +435,25 @@ export class SheetingProcessSimulation{
   }
 
   updateSheets(){
+    const previousCutCount=this.cutCount;
     this.cutCount=Math.floor(this.webAdvance/this.targetCutLength);
     this.completed=Math.max(0,Math.floor((this.elapsed-this.sheetTotalAge)/this.cutInterval));
     const pile=this.currentPileMetrics();
+
+    // Show the freshly separated paper edge for a few frames. This is material evidence,
+    // not an invented knife animation; the physical blade remains hidden inside the enclosure.
+    const timeSinceLatestCut=this.cutCount>0?this.elapsed-this.cutCount*this.cutInterval:Infinity;
+    if(this.cutEdge)this.cutEdge.visible=this.active&&timeSinceLatestCut>=0&&timeSinceLatestCut<this.cutEdgeDuration;
+    if(this.cutCount!==previousCutCount)this.lastCutIndex=this.cutCount;
 
     for(const [slot,s] of this.sheets.entries()){
       const cutId=this.cutCount-slot;
       if(cutId<=0){s.visible=false;continue;}
       const birth=cutId*this.cutInterval,age=this.elapsed-birth,pose=this.sheetPoseForAge(age,pile.top);
       if(!pose){s.visible=false;continue;}
-      s.visible=this.active;s.userData.cutId=cutId;s.userData.transportZone=pose.zone;
+      s.visible=this.active;s.userData.cutId=cutId;s.userData.transportZone=pose.zone;s.userData.detachedAtWebSpeed=true;
       s.position.copy(pose.p);
-      if(pose.zone==='SLOW_TRANSFER'||pose.zone==='OVERLAP_SHINGLE')s.position.y+=(slot%5)*.0012;
+      if(pose.zone==='SLOW_TRANSFER'||pose.zone==='OVERLAP_SHINGLE')s.position.y+=(Math.max(0,7-slot))*.0010;
       s.rotation.set(0,0,pose.angle);
     }
 
@@ -452,9 +473,9 @@ export class SheetingProcessSimulation{
 
   dispose(){
     this.stop();
-    this.sheetGeometry.dispose();this.pileGeometry.dispose();this.webFlowGeometry.dispose();this.pendingLeaderGeometry.dispose();
+    this.sheetGeometry.dispose();this.pileGeometry.dispose();this.webFlowGeometry.dispose();this.pendingLeaderGeometry.dispose();this.cutEdgeGeometry?.dispose();
     for(const m of this.webRibbonSegments)m.geometry.dispose();
-    this.sheetMaterial.dispose();this.webMaterial.dispose();this.flowMaterial.dispose();
+    this.sheetMaterial.dispose();this.webMaterial.dispose();this.flowMaterial.dispose();this.cutEdgeMaterial?.dispose();
     this.path.geometry.dispose();this.pathMaterial.dispose();this.group.removeFromParent();
   }
 }
