@@ -24,7 +24,7 @@ export const SHEETING_ACTUAL_LAYOUT=Object.freeze({
   operatorZ:-1.62,
   webWidth:2.24,
   reel:Object.freeze({loadedCenter:Object.freeze([8.12,1.02,0]),standbyCenter:Object.freeze([6.68,.96,0]),radius:.82,span:2.70}),
-  lowEntryRoll:Object.freeze({id:'LOW',center:Object.freeze([6.78,.68,0]),radius:.145,contact:'BOTTOM',rotationSign:1}),
+  lowEntryRoll:Object.freeze({id:'LOW',center:Object.freeze([7.34,.38,0]),radius:.145,contact:'BOTTOM',rotationSign:1}),
   feedRollers:Object.freeze([
     Object.freeze({id:'G1',center:Object.freeze([7.18,1.48,0]),radius:.10,contact:'TOP',rotationSign:-1}),
     Object.freeze({id:'G2',center:Object.freeze([6.60,1.82,0]),radius:.105,contact:'BOTTOM',rotationSign:1}),
