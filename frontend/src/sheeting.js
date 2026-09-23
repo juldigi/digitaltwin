@@ -14,25 +14,25 @@ export const SHEETING_VISUAL_REFERENCE=Object.freeze({
   evidence:'BMJ database + user-confirmed RIGHT_TO_LEFT + 9 user-provided actual BMJ machine photographs (22 Sep 2026) as primary exterior evidence + Lexus HSM family sources only for unresolved process/specification corroboration',
   dimensions:'BMJ_ACTUAL_PHOTO_ANCHORED_RECONSTRUCTION_NOT_ENGINEERING',
   visualFamily:'BMJ_ACTUAL_OPEN_TWO_SIDED_ROLLSTAND_MULTIROLLER_BRIDGE_LEXUS_CUTTER_CABINET_OPEN_BELT_TABLE_STACK_TABLE',
-  visualRevision:'V195_BMJ_PHOTO_TRUTH_CORRECTION'
+  visualRevision:'V196_BMJ_TRUE_WEB_CUT_DELIVERY_KINEMATICS'
 });
 
 
 export const SHEETING_ACTUAL_LAYOUT=Object.freeze({
-  revision:'V195',
+  revision:'V196',
   direction:'RIGHT_TO_LEFT',
   operatorZ:-1.62,
   webWidth:2.24,
   reel:Object.freeze({loadedCenter:Object.freeze([8.12,1.02,0]),standbyCenter:Object.freeze([6.68,.96,0]),radius:.82,span:2.70}),
-  lowEntryRoll:Object.freeze({id:'LOW',center:Object.freeze([7.34,.38,0]),radius:.145,contact:'BOTTOM',rotationSign:1}),
+  lowEntryRoll:Object.freeze({id:'LOW',center:Object.freeze([7.58,.48,0]),radius:.145,contact:'BOTTOM',rotationSign:1}),
   feedRollers:Object.freeze([
-    Object.freeze({id:'G1',center:Object.freeze([7.18,1.48,0]),radius:.10,contact:'TOP',rotationSign:-1}),
-    Object.freeze({id:'G2',center:Object.freeze([6.60,1.82,0]),radius:.105,contact:'BOTTOM',rotationSign:1}),
-    Object.freeze({id:'G3',center:Object.freeze([6.02,1.42,0]),radius:.10,contact:'TOP',rotationSign:-1}),
-    Object.freeze({id:'G4',center:Object.freeze([5.44,1.94,0]),radius:.105,contact:'BOTTOM',rotationSign:1}),
-    Object.freeze({id:'G5',center:Object.freeze([4.86,1.47,0]),radius:.105,contact:'TOP',rotationSign:-1}),
-    Object.freeze({id:'G6',center:Object.freeze([4.32,1.82,0]),radius:.10,contact:'BOTTOM',rotationSign:1}),
-    Object.freeze({id:'G7',center:Object.freeze([3.93,1.27,0]),radius:.105,contact:'TOP',rotationSign:-1})
+    Object.freeze({id:'G1',center:Object.freeze([7.45,1.55,0]),radius:.10,contact:'TOP',rotationSign:-1}),
+    Object.freeze({id:'G2',center:Object.freeze([6.88,.78,0]),radius:.105,contact:'BOTTOM',rotationSign:1}),
+    Object.freeze({id:'G3',center:Object.freeze([6.34,1.76,0]),radius:.10,contact:'TOP',rotationSign:-1}),
+    Object.freeze({id:'G4',center:Object.freeze([5.78,.82,0]),radius:.105,contact:'BOTTOM',rotationSign:1}),
+    Object.freeze({id:'G5',center:Object.freeze([5.20,1.62,0]),radius:.105,contact:'TOP',rotationSign:-1}),
+    Object.freeze({id:'G6',center:Object.freeze([4.62,.92,0]),radius:.10,contact:'BOTTOM',rotationSign:1}),
+    Object.freeze({id:'G7',center:Object.freeze([4.08,1.44,0]),radius:.105,contact:'TOP',rotationSign:-1})
   ]),
   drawRoll:Object.freeze({center:Object.freeze([3.53,1.25,0]),radius:.29,rotationSign:-1,wrapStartDeg:34,wrapEndDeg:194}),
   lowerEntryRoll:Object.freeze({center:Object.freeze([3.52,.76,0]),radius:.12,rotationSign:1}),
@@ -49,7 +49,7 @@ export class SheetingMachineTemplate{
       assetId:'BMJ-MCH-0002',machine:'SHEETING LEXUS',model:'HSM-CTM7',
       referenceFamily:'BMJ HSM-CTM7 actual photo set · Lexus HSM family process corroboration',
       processDirection:'RIGHT_TO_LEFT',confidence:'IDENTITY_VERIFIED__GEOMETRY_FAMILY_PHOTO_ANCHORED',
-      visualRevision:'V195_BMJ_PHOTO_TRUTH_CORRECTION'
+      visualRevision:'V196_BMJ_TRUE_WEB_CUT_DELIVERY_KINEMATICS'
     };
     this.nodes=[];this.parts=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.activeMeshes=[];this.detailMeshes=[];
     this.taxonomy=SHEETING_TAXONOMY;this.taxonomyById=SHEETING_TAXONOMY_BY_ID;this.exteriorOpen=false;this.ghosted=false;
@@ -58,7 +58,7 @@ export class SheetingMachineTemplate{
       dark:0x293236,steel:0x939b9b,chrome:0xcbd1d0,paper:0xe8dfcb,stackPaper:0xc9ae83,
       glass:0x78b6bb,black:0x20272a,blue:0x2f67a1,red:0xc93434,green:0x4c9b4f,bronze:0xb08b55
     };
-    this.buildActualV194();this.refineActualV195();this.enrichActualV195();
+    this.buildActualV194();this.refineActualV195();this.refineActualV196();this.enrichActualV196();
     for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}
     this.root.updateMatrixWorld(true);
   }
@@ -80,10 +80,11 @@ export class SheetingMachineTemplate{
     }
     return this.materials.get(key);
   }
-  mesh(g,geo,key,kind,pos=[0,0,0],rot=null,{cover=false,detail=false,active=false,motion=null,role=null,sourceAnchor=null,referenceStack=false}={}){
+  mesh(g,geo,key,kind,pos=[0,0,0],rot=null,{cover=false,detail=false,active=false,motion=null,role=null,sourceAnchor=null,referenceStack=false,cutawayOnly=false}={}){
     if(!this.geometries.has(key))this.geometries.set(key,geo());
     const m=new THREE.Mesh(this.geometries.get(key),this.material(kind,g));m.position.set(...pos);if(rot)m.rotation.set(...rot);m.castShadow=kind!=='glass';m.receiveShadow=true;
-    m.userData={ownerId:g.userData.nodeId,exteriorCover:cover,detail,motion,role,sourceAnchor,referenceStack,restPosition:m.position.clone(),restRotation:m.rotation.clone()};
+    m.userData={ownerId:g.userData.nodeId,exteriorCover:cover,detail,motion,role,sourceAnchor,referenceStack,cutawayOnly,restPosition:m.position.clone(),restRotation:m.rotation.clone()};
+    if(cutawayOnly)m.visible=false;
     if(detail)this.detailMeshes.push(m);if(active){m.userData.activeElement=true;this.activeMeshes.push(m);}
     g.add(m);this.meshes.push(m);return m;
   }
@@ -479,6 +480,16 @@ export class SheetingMachineTemplate{
   }
 
 
+  retireRoleGeometry(role){
+    const doomed=this.meshes.filter(m=>m.userData.role===role);
+    for(const m of doomed)m.removeFromParent();
+    const set=new Set(doomed);
+    this.meshes=this.meshes.filter(m=>!set.has(m));
+    this.activeMeshes=this.activeMeshes.filter(m=>!set.has(m));
+    this.detailMeshes=this.detailMeshes.filter(m=>!set.has(m));
+    return doomed.length;
+  }
+
   retireNodeGeometry(id){
     const node=this.findNode(id);if(!node)return null;
     const doomed=new Set();node.traverse(o=>{if(o?.isMesh)doomed.add(o);});
@@ -634,6 +645,97 @@ export class SheetingMachineTemplate{
       'draw roll service/end bands added',
       'delivery hold-down pivot arms grounded',
       'stack ruler threaded posts spring returns and end controls added'
+    ];
+  }
+
+
+  refineActualV196(){
+    const photo='BMJ-SHEETING-PHOTOSET-20260922';
+    const L=SHEETING_ACTUAL_LAYOUT;
+
+    // IMG_2479/2480 show a long web-carrier structure spanning above the unwind/feed loop.
+    // It is modeled as its own assembly: not a fabricated rollstand bridge, and not hidden inside the feed frame.
+    for(const role of [
+      'rollstand-upper-longitudinal-member','rollstand-upper-diagonal-brace','rollstand-upper-end-brace','rollstand-upper-cross-tie',
+      'feed-upper-longitudinal-rail','feed-upper-entry-brace','feed-upper-end-cross-tie'
+    ])this.retireRoleGeometry(role);
+
+    const oldBridge=this.findNode('sheeting-unwind-bridge');
+    if(oldBridge){
+      oldBridge.name='Web Carrier / Upper Infeed Structure';
+      oldBridge.userData.confidence='VERIFIED_VISUAL';
+      const carrier=oldBridge;
+      for(const z of [-1.38,1.38]){
+        this.box(carrier,[4.92,.20,.22],[6.15,2.18,z],'light',.010,{role:'web-carrier-longitudinal-beam',sourceAnchor:photo});
+        this.beamXY(carrier,[3.90,1.78],[4.15,2.18],z,.17,.22,'body',{role:'web-carrier-cutter-end-brace',sourceAnchor:photo});
+        this.beamXY(carrier,[8.34,1.82],[8.18,2.18],z,.17,.22,'body',{role:'web-carrier-unwind-end-brace',sourceAnchor:photo});
+      }
+      for(const x of [4.05,5.22,6.38,7.50,8.23])this.box(carrier,[.15,.16,2.88],[x,2.18,0],'steel',.008,{detail:true,role:'web-carrier-cross-tie',sourceAnchor:photo});
+      for(const [x,y] of [[7.46,1.77],[6.34,1.96],[5.20,1.82],[4.10,1.66]]){
+        for(const z of [-1.39,1.39])this.beamXY(carrier,[x+.16,2.12],[x,y],z,.13,.18,'body',{detail:true,role:'web-carrier-hanger-bracket',sourceAnchor:photo});
+      }
+    }
+
+    // Replace the V195 feed-frame roof with the open rectangular/stacked-roller support seen in IMG_2480.
+    const frame=this.findNode('sheeting-feed-frame');
+    if(frame){
+      for(const x of [4.00,5.12,6.25,7.40])for(const z of [-1.42,1.42]){
+        this.box(frame,[.16,1.68,.18],[x,1.03,z],'light',.010,{detail:true,role:'loop-frame-upright',sourceAnchor:photo});
+      }
+      for(const y of [.34,1.10,1.92])for(const z of [-1.42,1.42]){
+        this.box(frame,[3.55,.13,.16],[5.72,y,z],'steel',.008,{detail:true,role:'loop-frame-longitudinal-rail',sourceAnchor:photo});
+      }
+    }
+
+    // Family-grounded stationary-bed-knife / rotary-fly-knife internals.
+    // HSM56 literature says "Flat Bed Knife"; Maxson documents the standard stationary-bed-knife
+    // arrangement as a rotary revolver blade passing a fixed bed knife. These parts remain CUTAWAY ONLY.
+    const knife=this.findNode('sheeting-knife');
+    if(knife&&!this.findNode('sheeting-flatbed-cutter-family')){
+      knife.userData.visibleKnifeGeometry='CUTAWAY_ONLY_FAMILY_REFERENCE';
+      knife.userData.evidenceBoundary='BMJ photos keep the cross-cutter enclosed. HSM56 family literature verifies a Flat Bed Knife; the internal stationary-bed-knife + rotary fly-knife representation is family-grounded and only shown in cutaway.';
+      const cut=this.group(knife,'sheeting-flatbed-cutter-family','Stationary Bed Knife / Rotary Fly Knife Family Mechanism',[0,0,0],[0,.12,0],'PROCESS_FAMILY_REFERENCE__CUTAWAY_ONLY');
+      const bed=this.box(cut,[.055,.10,2.36],[L.cutPoint[0]-.015,L.cutPoint[1]-.045,0],'steel',.002,{detail:true,role:'stationary-bed-knife',sourceAnchor:'HSM56_FLAT_BED_KNIFE__MAXSON_STATIONARY_BED_KNIFE',cutawayOnly:true},[0,.018,0]);
+      bed.userData.knifeType='STATIONARY_BED_KNIFE';
+      const revolver=this.cyl(cut,.235,2.38,[L.cutPoint[0]+.235,L.cutPoint[1]+.095,0],'dark','z',{active:true,motion:'fly-knife-revolver',detail:true,role:'fly-knife-revolver',sourceAnchor:'HSM56_FLAT_BED_KNIFE__MAXSON_STATIONARY_BED_KNIFE',cutawayOnly:true});
+      revolver.userData.kinematicGroup='CUTTER_SYNC';revolver.userData.cutsPerRevolution=1;revolver.userData.cutPhaseOffset=0;
+      const blade=this.box(revolver,[.055,2.30,.10],[-.232,0,0],'steel',.002,{detail:true,role:'fly-knife-blade',sourceAnchor:'MAXSON_TANGENTIAL_REVOLVER_BLADE',cutawayOnly:true},[0,.018,0]);
+      blade.userData.knifeType='ROTARY_FLY_KNIFE';
+      this.box(revolver,[.028,2.32,.030],[-.258,0,-.045],'chrome',.001,{detail:true,role:'fly-knife-cutting-edge',sourceAnchor:'MAXSON_TANGENTIAL_REVOLVER_BLADE',cutawayOnly:true},[0,.018,0]);
+      for(const side of [-1,1])this.cyl(cut,.075,.12,[L.cutPoint[0]+.235,L.cutPoint[1]+.095,side*1.24],'bodyDark','z',{detail:true,role:'fly-knife-revolver-bearing',sourceAnchor:'MAXSON_STATIONARY_BED_KNIFE',cutawayOnly:true});
+
+      // Take-away pinch references keep the web taut through the shear and bridge to high-speed tapes.
+      const pinch=this.group(knife,'sheeting-cut-takeaway-pinch','Cutter Take-Away Pinch Reference',[0,0,0],[0,.10,0],'PROCESS_FAMILY_REFERENCE__CUTAWAY_ONLY');
+      for(const [y,sign] of [[L.cutPoint[1]+.075,-1],[L.cutPoint[1]-.075,1]]){
+        const r=this.cyl(pinch,.055,2.30,[L.cutPoint[0]-.22,y,0],'chrome','z',{active:true,motion:'cutter-takeaway-pinch',detail:true,role:'cutter-takeaway-pinch-roll',sourceAnchor:'MAXSON_TAPE_TAKEAWAY_PINCH',cutawayOnly:true});
+        r.userData.kinematicGroup='CUTTER_TAKEAWAY';r.userData.rotationSign=sign;
+      }
+    }
+
+    this.root.userData.processFlow={
+      ...this.root.userData.processFlow,
+      process:'RIGHT → LEFT · reel → deep web-carrier loops → draw roll → guarded stationary-bed/fly-knife family cross-cut → high-speed take-away gap → slow-speed overlap/shingling → rack stacker',
+      feedArchitecture:'PHOTO_VISIBLE_LONG_WEB_CARRIER__DEEP_ALTERNATING_LOOP_ROLLS__OPEN_RECTANGULAR_SUPPORT_FRAME',
+      cutterArchitecture:'HSM56_FLAT_BED_KNIFE_FAMILY__STATIONARY_BED_KNIFE_PLUS_ROTARY_FLY_KNIFE_CUTAWAY_ONLY__BMJ_EXACT_INTERNAL_GEOMETRY_UNRESOLVED',
+      deliveryKinematics:'ATTACHED_LEADER_AT_WEB_SPEED__DETACHED_SHEET_HIGH_SPEED_GAP__DECEL_TO_SLOW_TAPE__SHINGLED_OVERLAP__STACK_SETTLE',
+      geometryBoundary:'BMJ_PHOTOS_PRIMARY_EXTERIOR__HSM56_MAXSON_ONLY_FOR_GUARDED_CUTTER_AND_DELIVERY_PROCESS'
+    };
+  }
+
+  enrichActualV196(){
+    this.root.userData.researchVersion='V196';
+    this.root.userData.researchSourceCount=V122_SOURCE_STATS.total;
+    this.root.userData.detailPass='V196_TRUE_WEB_CUT_GAP_OVERLAP_STACK_KINEMATICS';
+    this.root.userData.installedOptionBoundary='BMJ photos remain primary for all exposed hardware. V196 adds a photo-visible overhead web carrier and uses HSM56/Maxson evidence only for guarded stationary-bed/fly-knife mechanics and high-speed-to-slow-speed delivery behavior.';
+    this.root.userData.primaryVisualEvidence='BMJ_USER_PHOTOSET_20260922_IMG_2479_TO_IMG_2487';
+    this.root.userData.familyEvidenceRole='GUARDED_FLAT_BED_KNIFE__TAKEAWAY_GAP__OVERLAP_KINEMATICS';
+    this.root.userData.geometryCorrections=[
+      'long photo-visible web carrier restored as independent assembly',
+      'infeed roller loop made deeper to match actual threaded web',
+      'open rectangular loop-frame uprights and rails added',
+      'stationary bed knife and rotary fly knife added cutaway-only',
+      'cutter take-away pinch reference added cutaway-only',
+      'normal exterior still hides all undocumented cutter internals'
     ];
   }
 
@@ -1197,8 +1299,8 @@ export class SheetingMachineTemplate{
   ghost(on,except=null){this.ghosted=on;for(const m of this.meshes){const fade=on&&(!except||!this.contains(except,m));m.material.transparent=fade||m.userData.exteriorCover||m.material.transparent;m.material.opacity=fade?.14:(m.material.color?.getHex()===this.palette.glass?.26:1);m.material.depthWrite=!fade;}}
   isolate(p,on=true){for(const n of this.nodes)n.visible=!on||!p||this.contains(p,n)||this.contains(n,p);}
   showOnly(ps=[],on=true){for(const n of this.nodes)n.visible=!on||!ps.length||ps.some(p=>n===p||this.contains(n,p));}
-  setExteriorOpen(on=true){this.exteriorOpen=!!on;for(const m of this.meshes)if(m.userData.exteriorCover)m.visible=!on;this.root.userData.interiorCutawayVisible=on;}
+  setExteriorOpen(on=true){this.exteriorOpen=!!on;for(const m of this.meshes){if(m.userData.exteriorCover)m.visible=!on;if(m.userData.cutawayOnly)m.visible=!!on;}this.root.userData.interiorCutawayVisible=on;}
   setLow(on){for(const m of this.detailMeshes)m.visible=!on;}
-  reset(){const open=this.exteriorOpen;this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const n of this.nodes)n.quaternion.copy(n.userData.restQuaternion);for(const m of this.meshes){m.position.copy(m.userData.restPosition);m.rotation.copy(m.userData.restRotation);m.visible=true;}if(open)this.setExteriorOpen(true);}
+  reset(){const open=this.exteriorOpen;this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const n of this.nodes)n.quaternion.copy(n.userData.restQuaternion);for(const m of this.meshes){m.position.copy(m.userData.restPosition);m.rotation.copy(m.userData.restRotation);m.visible=true;}this.setExteriorOpen(open);}
   dispose(){this.geometries.forEach(g=>g.dispose());this.materials.forEach(m=>m.dispose());}
 }
