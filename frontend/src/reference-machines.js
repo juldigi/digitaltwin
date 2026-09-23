@@ -2070,8 +2070,10 @@ export class ReferenceProcessSimulation{
   else if(s.p>=.75)angle=1.28;
   this.folder.leftPivot.rotation.x=angle;this.folder.rightPivot.rotation.x=-angle;
   this.folder.glueStrip.visible=this.active&&s.p>=.46;
-  this.folderBlank.position.y=s.compressing?THREE.MathUtils.lerp(.82,.775,smooth((s.p-.75)/.16)):.82;
-  this.folderBlank.scale.y=s.compressing?THREE.MathUtils.lerp(1,.72,smooth((s.p-.75)/.16)):1;
+  // Pressure is applied by the opposed conveyor belts. The board itself does
+  // not shrink or sink into the machine when it enters the compression zone.
+  this.folderBlank.position.y=.82;
+  this.folderBlank.scale.y=1;
   f.foldingActive=s.folding;f.prebreakActive=s.prebreak;f.alignmentActive=s.alignment;f.glueZoneActive=s.gluing;f.finalFoldActive=s.finalFold;f.compressionActive=s.compressing;f.deliveryActive=s.delivery;f.beltContactActive=this.active;f.materialContactZone=s.idx;
   f.feederDriveActive=s.p<.29;f.foldDriveActive=s.p>=.14&&s.p<.75;f.compressionDriveActive=s.p>=.75&&s.p<.91;f.deliveryDriveActive=s.p>=.91;
   const driveOn={feeder:f.feederDriveActive,fold:f.foldDriveActive,compression:f.compressionDriveActive,delivery:f.deliveryDriveActive};

@@ -36,13 +36,13 @@ test('MEDIA100 folding is carton-position based rather than globally synchronize
  const model=new Media100MachineTemplate(),sim=new Media100ProcessSimulation(model.root,model);sim.start();sim.update(1000);sim.update(1200);
  const leftAngles=sim.cartons.map(c=>Number(c.left.rotation.x.toFixed(4))),frontAngles=sim.cartons.map(c=>Number(c.front.rotation.z.toFixed(4)));
  assert.ok(new Set(leftAngles).size>=4,leftAngles.join(','));assert.ok(new Set(frontAngles).size>=3,frontAngles.join(','));
- for(const c of sim.cartons){const stage=c.lastStage;assert.equal(c.glue.visible,stage==='GLUE');if(stage==='PRESS')assert.ok(c.group.scale.z<1);}
+ for(const c of sim.cartons){const stage=c.lastStage;assert.equal(c.glue.visible,['GLUE','FINAL','PRESS','DELIVERY'].includes(stage));assert.equal(c.group.scale.z,1);}
  sim.dispose();model.dispose();
 });
 
-test('MEDIA100 glue appears only in the glue zone and can be hidden independently',()=>{
+test('MEDIA100 glue stays on the blank after application and can be hidden independently',()=>{
  const model=new Media100MachineTemplate(),sim=new Media100ProcessSimulation(model.root,model);sim.start();sim.update(1000);sim.update(1200);
- assert.ok(sim.cartons.some(c=>c.glue.visible));assert.equal(sim.cartons.every(c=>!c.glue.visible||c.lastStage==='GLUE'),true);
+ assert.ok(sim.cartons.some(c=>c.glue.visible));assert.equal(sim.cartons.every(c=>!c.glue.visible||['GLUE','FINAL','PRESS','DELIVERY'].includes(c.lastStage)),true);
  sim.setInkFlowVisible(false);sim.update(1220);assert.equal(sim.cartons.every(c=>!c.glue.visible),true);sim.dispose();model.dispose();
 });
 
@@ -50,6 +50,18 @@ test('MEDIA100 delivers cartons at the exit level and pause/resume does not jump
  const model=new Media100MachineTemplate(),sim=new Media100ProcessSimulation(model.root,model);sim.start();let now=1000;for(let i=0;i<520;i++){now+=20;sim.update(now);}assert.ok(sim.completed>0);assert.ok(sim.exitStack.some(p=>p.visible));assert.ok(sim.exitStack.filter(p=>p.visible).every(p=>p.position.y>=.83));
  const t=sim.elapsed;sim.pause();sim.update(20000);sim.resume();sim.update(30000);assert.equal(sim.elapsed,t);sim.update(30020);assert.ok(sim.elapsed-t<.03);
  sim.stop();assert.equal(sim.exitStack.every(p=>!p.visible),true);sim.dispose();model.dispose();
+});
+
+test('MEDIA100 carton panels hinge at score lines and compression acts on belts',()=>{
+ const model=new Media100MachineTemplate(),sim=new Media100ProcessSimulation(model.root,model),carton=sim.cartons[0];
+ assert.equal(carton.left.position.z,-.21);assert.equal(carton.right.position.z,.21);
+ assert.equal(carton.front.position.x,.31);assert.equal(carton.rear.position.x,-.31);
+ const upper=model.findNode('media100-press-upper'),rest=upper.position.y;
+ sim.start();sim.update(1000);sim.update(1200);
+ assert.ok(upper.position.y<rest,'upper belt carriage must descend onto cartons');
+ assert.ok(sim.cartons.every(c=>c.group.scale.equals(new THREE.Vector3(1,1,1))));
+ sim.exitStack[0].visible=true;sim.start();assert.equal(sim.exitStack[0].visible,false);
+ sim.stop();assert.equal(upper.position.y,rest);sim.dispose();model.dispose();
 });
 
 test('MEDIA100 taxonomy is a complete six-level mapped tree for FGM1 and FGM3',()=>{
