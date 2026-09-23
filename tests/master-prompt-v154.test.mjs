@@ -71,9 +71,9 @@ test('production UI exposes source confidence and explicit truth statuses',()=>{
 
 test('V154 cache and shell identifiers include the truth layer',()=>{
   assert.match(html,/app-shell-v79\.css\?v=168/);
-  assert.match(html,/src\/app\.js\?v=171/);
-  assert.match(html,/src\/app-shell-v79\.js\?v=171/);
+  assert.match(html,/src\/app\.js\?v=172/);
+  assert.match(html,/src\/app-shell-v79\.js\?v=172/);
   assert.match(shell,/uiArchitecture='v162-factory-first-systems'/);
-  assert.match(sw,/factory-digital-twin-v171-history-deeplink-20260923/);
+  assert.match(sw,/factory-digital-twin-v172-context-state-hygiene-20260923/);
   assert.match(sw,/src\/data\/truth-status\.js/);
 });
