@@ -658,7 +658,7 @@ function applyRestoredCamera(preset='iso'){
 }
 function selectFactoryAssetContext(machine,{historyMode='none',openDialog=false,focus=true}={}){
  if(!machine)return false;
- if(historyMode==='push')pushContextHistory({asset:machine.machineId,node:null,scene:'factory',view:'3d',camera:'iso'});
+ if(historyMode==='push')pushContextHistory({asset:machine.machineId,node:null,scene:'factory',view:currentViewMode(),camera:'iso'});
  if(engine?.view!=='factory')setView('factory');
  if(focus)engine?.focusFactoryAsset(machine.machineId);else engine?.selectFactoryAsset(machine.machineId);
  const policy=foundationAssetPolicy(machine,placementForMachine(machine.machineId));
@@ -693,8 +693,9 @@ async function switchActiveMachine(route,{historyMode='push'}={}){
   if(record){focusFoundationPlaceholder(record,{historyMode,openDialog:true});return false;}
   toast('Aset belum memiliki konteks tata letak yang dapat dibuka.',true);return false;
  }
- const normalizedRoute=normalizeMachineKey(route||FOUNDATION_SCOPE.primaryRoute);
- if(historyMode==='push')pushContextHistory({asset:FOUNDATION_SCOPE.primaryRoute,node:null,scene:'machine',view:'3d',camera:'iso'});
+ const normalizedRoute=normalizeMachineKey(route||FOUNDATION_SCOPE.primaryRoute),threeMode=$('#mode-3d'),targetView=threeMode?.disabled?'2d':'3d';
+ if(historyMode==='push')pushContextHistory({asset:FOUNDATION_SCOPE.primaryRoute,node:null,scene:'machine',view:targetView,camera:'iso'});
+ if(historyMode==='push'&&targetView==='3d')threeMode?.click();
  closeModal();resetMachineInspectionContext();
  if(normalizedRoute===MACHINE_KEY){
   setView('machine');showPanel();renderPanel('overview');engine?.fit(engine.machine,'iso');$('#engine-status').textContent='OFFSET 5 · model 3D siap';
