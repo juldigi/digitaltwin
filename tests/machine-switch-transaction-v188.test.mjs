@@ -1,0 +1,25 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
+const engine=readFileSync(new URL('../frontend/src/engine.js',import.meta.url),'utf8');
+const index=readFileSync(new URL('../frontend/index.html',import.meta.url),'utf8');
+const sw=readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
+
+test('machine switch stops any active simulation before replacing the runtime',()=>{
+ assert.match(engine,/if\(this\.simulation\?\.active\)this\.simulation\.stop\(\)/);
+ assert.match(app,/if\(engine\?\.isPrintingSimulationActive\?\.\(\)\|\|simulationState\?\.active\)stopPrintingSimulation\(\{restoreExterior:true\}\)/);
+});
+test('failed switch rolls the engine and domain context back to the previous machine',()=>{
+ assert.match(app,/previousAsset=window\.BMJAppState\?\.getState\?\.\(\)\.selectedAsset/);
+ assert.match(app,/if\(engine\?\.machineKey!==previousRoute\)\{try\{await engine\.switchMachine\(previousRoute\);\}catch\{\}\}/);
+ assert.match(app,/selectedAsset:previousAsset\|\|null/);
+ assert.match(app,/simulationState:\{active:false,playing:false,stage:null,progress:0\}/);
+});
+test('V188 runtime identifiers are coherent',()=>{
+ assert.match(index,/app-shell-v79\.css\?v=188/);
+ assert.match(index,/src\/app\.js\?v=188/);
+ assert.match(index,/src\/app-shell-v79\.js\?v=188/);
+ assert.match(sw,/factory-digital-twin-v188-machine-switch-transaction-hardening-20260923/);
+ assert.match(app,/pair\('Versi aplikasi','V188'\)/);
+});
