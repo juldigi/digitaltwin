@@ -45,6 +45,6 @@ test('V167 overlay and toast layers avoid mobile navigation collisions',()=>{
 test('V167 interaction assets are cache-busted',()=>{
  assert.match(html,/app-shell-v79\.css\?v=168/);
  assert.match(html,/src\/ui-v5\.js\?v=167/);
- assert.match(html,/src\/app-shell-v79\.js\?v=171/);
- assert.match(sw,/factory-digital-twin-v171-history-deeplink-20260923/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=172/);
+ assert.match(sw,/factory-digital-twin-v172-deterministic-boot-20260923/);
 });
