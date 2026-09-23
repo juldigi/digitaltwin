@@ -40,18 +40,28 @@ export function plantDisplayPoint(x,y,layout){
   const t=layout.displayTransform,r=(t.rotation||0)*Math.PI/180,dx=(x-t.originX)*t.scale,dy=(y-t.originY)*t.scale;
   return {x:dx*Math.cos(r)-dy*Math.sin(r),z:(t.flipY?-1:1)*(dx*Math.sin(r)+dy*Math.cos(r))};
 }
-export function drawPlantPlan(canvas,layout){
+export function drawPlantPlan(canvas,layout,{selectedAsset=null}={}){
   if(!canvas||!layout)return;
   const ctx=canvas.getContext?.('2d');if(!ctx)return;
   const rect=canvas.getBoundingClientRect(),dpr=Math.min(globalThis.devicePixelRatio||1,2),w=Math.max(1,Math.round(rect.width*dpr)),h=Math.max(1,Math.round(rect.height*dpr));
   if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
   ctx.setTransform?.(dpr,0,0,dpr,0,0);ctx.clearRect?.(0,0,rect.width,rect.height);
-  const b=layout.bounds,pad=8,sx=(rect.width-pad*2)/(b.maxX-b.minX),sy=(rect.height-pad*2)/(b.maxY-b.minY),s=Math.min(sx,sy),ox=pad+(rect.width-pad*2-(b.maxX-b.minX)*s)/2,oy=pad+(rect.height-pad*2-(b.maxY-b.minY)*s)/2;
+  const b=layout.bounds,pad=10,sx=(rect.width-pad*2)/(b.maxX-b.minX),sy=(rect.height-pad*2)/(b.maxY-b.minY),s=Math.min(sx,sy),ox=pad+(rect.width-pad*2-(b.maxX-b.minX)*s)/2,oy=pad+(rect.height-pad*2-(b.maxY-b.minY)*s)/2;
   const pt=(x,y)=>[ox+(x-b.minX)*s,rect.height-(oy+(y-b.minY)*s)];
   const colors={CAD_REFERENCE:'#315363',WALL:'#91aab5',COLUMN:'#5f8fa5',WINDOW:'#5aa6c8',SECURITY:'#a58d58'};
   for(const batch of layout.referenceBatches){const arr=batch.points;ctx.beginPath();ctx.strokeStyle=colors[batch.semantic]||'#456577';ctx.lineWidth=batch.semantic==='WALL'?1.1:.55;ctx.globalAlpha=batch.semantic==='CAD_REFERENCE'?.48:.9;for(let i=0;i<arr.length;i+=4){const a=pt(arr[i],arr[i+1]),c=pt(arr[i+2],arr[i+3]);ctx.moveTo(a[0],a[1]);ctx.lineTo(c[0],c[1]);}ctx.stroke();}
-  if(layout.placements){ctx.globalAlpha=1;ctx.fillStyle='#147d89';for(const m of layout.placements){if(m.status==='UNIDENTIFIED')continue;const p=pt(m.x,m.y);ctx.fillRect(p[0]-2,p[1]-2,4,4);}}
-  ctx.globalAlpha=1;ctx.font='6px system-ui';ctx.fillStyle='#8fb2c2';for(const l of layout.identifiedLabels){const p=pt(l.x,l.y);ctx.fillText(l.text.slice(0,28),p[0]+2,p[1]-2);}
+  const sourceLabelSize=Math.max(8,Math.min(10.5,rect.width/95));
+  ctx.globalAlpha=1;ctx.font=`${sourceLabelSize}px system-ui`;ctx.fillStyle='#67899a';for(const l of layout.identifiedLabels){const p=pt(l.x,l.y);ctx.fillText(l.text.slice(0,28),p[0]+3,p[1]-3);}
+  if(layout.placements){
+    for(const m of layout.placements){
+      if(m.status==='UNIDENTIFIED')continue;
+      const p=pt(m.x,m.y),selected=m.machineId===selectedAsset,size=selected?10:6;
+      ctx.globalAlpha=1;ctx.fillStyle=selected?'#0b70df':'#147d89';ctx.fillRect?.(p[0]-size/2,p[1]-size/2,size,size);
+      if(!selected)continue;
+      ctx.beginPath();ctx.arc?.(p[0],p[1],9,0,Math.PI*2);ctx.strokeStyle='#0b70df';ctx.lineWidth=2;ctx.stroke();
+      const label=String(m.label||m.machineId||'Aset terpilih').slice(0,32);ctx.font='700 11px system-ui';ctx.lineWidth=3;ctx.strokeStyle='rgba(255,255,255,.96)';ctx.strokeText?.(label,p[0]+12,p[1]-8);ctx.fillStyle='#0b4f9f';ctx.fillText(label,p[0]+12,p[1]-8);
+    }
+  }
 }
 
 
