@@ -143,7 +143,7 @@ function enterSimulation(){
   const hint=q('#scene-hint');if(hint)hint.textContent='Simulasi 3D memerlukan WebGL. Denah 2D tetap tersedia di perangkat ini.';
   return;
  }
- setActiveSection('simulation');markSection('simulation');
+ setState({selectedSystem:null,activeReference:null},{url:false});setActiveSection('simulation');markSection('simulation');
  document.body.classList.remove('workspace-2d');setViewMode('3d');
  q('#tool-simulation')?.click();
  openInspector('simulation');
@@ -221,10 +221,10 @@ q('#mobile-search-toggle')?.addEventListener('click',()=>openSearch(''));
 addEventListener('bmj:searchresults',event=>renderSearchResults(event.detail));
 addEventListener('bmj:systemsearchselect',event=>{if(PHASE1_FOUNDATION)return;const system=event.detail?.system||null;setState({selectedSystem:system},{url:false});openSystemLayers();if(['hvac','compressedAir','routing'].includes(system))q(`[data-system-focus="${system}"]`)?.click()});
 q('#nav-machine')?.addEventListener('click',()=>{setActiveSection('factory');document.body.classList.remove('workspace-2d');setViewMode('3d');markSection('factory');closeLayerManager()});
-q('#nav-assets')?.addEventListener('click',()=>{beforeMajorOverlay('modal');setActiveSection('asset');markSection('asset');openOverlay('modal')});
+q('#nav-assets')?.addEventListener('click',()=>{beforeMajorOverlay('modal');setState({selectedSystem:null,activeReference:null},{url:false});setActiveSection('asset');markSection('asset');openOverlay('modal')});
 q('#nav-systems')?.addEventListener('click',()=>{if(!PHASE1_FOUNDATION)openSystemLayers()});
 q('#nav-simulation-mode')?.addEventListener('click',enterSimulation);
-q('#nav-sources')?.addEventListener('click',()=>{setActiveSection('reference');markSection('reference');openInspector('sources')});
+q('#nav-sources')?.addEventListener('click',()=>{setState({selectedSystem:null},{url:false});setActiveSection('reference');markSection('reference');openInspector('sources')});
 q('#nav-help')?.addEventListener('click',()=>{beforeMajorOverlay('modal');openOverlay('modal')});
 q('#nav-settings')?.addEventListener('click',()=>{beforeMajorOverlay('modal');q('#settings')?.click();openOverlay('modal')});
 
