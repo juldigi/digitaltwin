@@ -43,7 +43,9 @@ test('premium generated splash is bounded and cannot get stuck',()=>{
   assert.match(css,/splash-industrial-v79\.webp/);
   assert.match(css,/\.app-splash\.is-done/);
   assert.match(js,/sessionStorage\.getItem\('bmj-splash-seen'\)/);
-  assert.match(js,/setTimeout\(finishSplash,5000\)/);
+  assert.match(js,/if\(!documentLoaded\|\|!appReadyStatus\)return/);
+  assert.match(js,/dataset\.appReady='timeout';finishSplash\(\)\}\},12000\)/);
+  assert.doesNotMatch(js,/setTimeout\(finishSplash,5000\)/);
   assert.match(sw,/assets\/splash-industrial-v79\.webp/);
 });
 
