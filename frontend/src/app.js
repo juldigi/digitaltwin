@@ -253,7 +253,7 @@ function updateSimulationPanel(next=simulationState){
  if(uvIndicator)uvIndicator.classList.toggle('active',!!simulationState.uvActive);
  if(bar)bar.style.width=progress+'%';
  if(start)start.textContent=active?(running?'Running':'Lanjutkan'):(IS_APM2?'Mulai Simulasi Proses':IS_SHEETING?'Mulai Simulasi Sheeting':IS_VERIFIED_REGISTRY_SIM?'Mulai Simulasi Proses':'Mulai Simulasi Proses');
- if(pause)pause.textContent=running?'Pause':'Lanjut';
+ if(pause){pause.textContent=running?'Pause':'Lanjut';pause.disabled=!active;pause.setAttribute('aria-disabled',active?'false':'true');}
  document.querySelectorAll('[data-sim-speed]').forEach(b=>b.classList.toggle('active',Math.abs(+b.dataset.simSpeed-(simulationState.speed||1))<.01));
  document.querySelectorAll('[data-sim-stage]').forEach(b=>b.classList.toggle('active',b.dataset.simStage===(simulationState.stage||'')));
  $('#tool-simulation')?.classList.toggle('active',active);
@@ -263,6 +263,8 @@ function startPrintingSimulation(){
  if(!engine){toast('Simulasi 3D memerlukan WebGL di perangkat ini.',true);return;}
  if(!ensureMachineInspectionContext('Simulasi'))return;
  if(!engine.isPrintingSimulationActive()){
+  const readiness=engine.getPrintingSimulationState?.()||simulationState;
+  if(readiness?.blocked||readiness?.available===false){toast(readiness?.blockedReason||'Simulasi proses untuk aset ini belum tersedia.',true);updateSimulationPanel(readiness);return;}
   simulationOwnsExterior=!exteriorMode;
   enableExteriorOpen({forceDetail:false});
   engine.template.ghost(false);engine.isolated=false;engine.clearPartLabels();selectedPart=null;selectedTaxonomyId=ACTIVE_ROOT;explode=0;
@@ -272,7 +274,7 @@ function startPrintingSimulation(){
  updateSimulationPanel(simulationState);renderPanel('simulation');
 }
 function pausePrintingSimulation(){
- if(!engine?.isPrintingSimulationActive()){startPrintingSimulation();return;}
+ if(!engine?.isPrintingSimulationActive())return;
  simulationState=simulationState.running?engine.pausePrintingSimulation():engine.resumePrintingSimulation();
  updateSimulationPanel(simulationState);
 }
@@ -946,7 +948,7 @@ function settingsDialog(){
  const connectionStatus=connectionTruth({online:navigator.onLine,cached:cachedDataActive,connected:Boolean(role)});
  const serviceWorkerStatus=!('serviceWorker'in navigator)?'Tidak didukung':navigator.serviceWorker.controller?'Aktif':'Menunggu aktivasi';
  const selectedNode=appState.selectedNode||'Tidak ada komponen terpilih';
- modal('Pengaturan',`<div class="settings-section"><h3>Tampilan 3D</h3><label class="check"><input id="low-mode" type="checkbox" ${engine?.low?'checked':''} ${exteriorMode?'disabled':''}> Optimasi untuk perangkat dengan performa terbatas</label>${exteriorMode?'<p class="subtle">Optimasi sementara dinonaktifkan saat interior terbuka agar detail tetap terlihat.</p>':''}<label class="check"><input id="label-mode" type="checkbox" ${engine?.labels?'checked':''}> Tampilkan nama mesin dan area</label></div><div class="settings-section"><h3>Data di perangkat</h3><p class="subtle">${cacheEnabled?'Salinan data lokal aktif agar aplikasi lebih cepat dibuka kembali.':'Salinan data lokal tidak aktif.'}</p><button id="clear-cache" class="secondary">Bersihkan Data Tersimpan</button></div><details class="settings-section system-information"><summary>Informasi Sistem</summary><p>Diagnostik teknis ditempatkan di sini agar tampilan utama tetap sederhana.</p><dl class="system-info-grid">${pair('Versi aplikasi','V186')+pair('Cakupan model',MACHINE_REGISTRY_STATS.modeled3D+' aset 3D · sumber berbeda per mesin')}${pair('Perangkat',device)}${pair('Mode tampilan',appState.viewMode==='2d'?'2D':'3D')}${pair('Aset aktif',appState.selectedAsset||'Belum memilih aset')}${pair('Komponen terpilih',selectedNode)}${pair('Koneksi data',connectionStatus)}${pair('Penyimpanan lokal',cacheEnabled?'Aktif':'Tidak aktif')}${pair('Aplikasi offline',serviceWorkerStatus)}${pair('Status tampilan 3D',engine?'Siap':'Cadangan / belum siap')}</dl></details>`);
+ modal('Pengaturan',`<div class="settings-section"><h3>Tampilan 3D</h3><label class="check"><input id="low-mode" type="checkbox" ${engine?.low?'checked':''} ${exteriorMode?'disabled':''}> Optimasi untuk perangkat dengan performa terbatas</label>${exteriorMode?'<p class="subtle">Optimasi sementara dinonaktifkan saat interior terbuka agar detail tetap terlihat.</p>':''}<label class="check"><input id="label-mode" type="checkbox" ${engine?.labels?'checked':''}> Tampilkan nama mesin dan area</label></div><div class="settings-section"><h3>Data di perangkat</h3><p class="subtle">${cacheEnabled?'Salinan data lokal aktif agar aplikasi lebih cepat dibuka kembali.':'Salinan data lokal tidak aktif.'}</p><button id="clear-cache" class="secondary">Bersihkan Data Tersimpan</button></div><details class="settings-section system-information"><summary>Informasi Sistem</summary><p>Diagnostik teknis ditempatkan di sini agar tampilan utama tetap sederhana.</p><dl class="system-info-grid">${pair('Versi aplikasi','V187')+pair('Cakupan model',MACHINE_REGISTRY_STATS.modeled3D+' aset 3D · sumber berbeda per mesin')}${pair('Perangkat',device)}${pair('Mode tampilan',appState.viewMode==='2d'?'2D':'3D')}${pair('Aset aktif',appState.selectedAsset||'Belum memilih aset')}${pair('Komponen terpilih',selectedNode)}${pair('Koneksi data',connectionStatus)}${pair('Penyimpanan lokal',cacheEnabled?'Aktif':'Tidak aktif')}${pair('Aplikasi offline',serviceWorkerStatus)}${pair('Status tampilan 3D',engine?'Siap':'Cadangan / belum siap')}</dl></details>`);
  $('#low-mode').onchange=e=>{engine?.setLow(e.target.checked);localStorage.setItem('offset5-low',e.target.checked?'1':'0');};
  $('#label-mode').onchange=e=>{if(engine)engine.labels=e.target.checked;$('#labels').classList.toggle('active',e.target.checked);emitDomainState({visibleLayers:{labels:e.target.checked}});};
  on('#clear-cache',async()=>{await cache.clear();toast('Data tersimpan di perangkat sudah dibersihkan.');});

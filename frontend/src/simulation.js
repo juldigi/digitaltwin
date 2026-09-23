@@ -416,7 +416,7 @@ export class PrintingSimulation{
   state(){
     const visible=this.sheets.filter(s=>s.mesh.visible),leading=visible.sort((a,b)=>b.userData.progress-a.userData.progress)[0],p=leading?.userData.leadPosition||this.points[0];
     return {
-      active:this.active,running:this.running,paused:this.active&&!this.running,speed:this.speed,stage:stageForX(p.x),completed:this.completed,pathLength:this.pathLength,
+      available:true,blocked:false,active:this.active,running:this.running,paused:this.active&&!this.running,speed:this.speed,stage:stageForX(p.x),completed:this.completed,pathLength:this.pathLength,
       pathVisible:this.pathVisible,inkFlowVisible:this.inkFlowVisible,progress:leading?.userData.progress||0,sheetsVisible:visible.length,
       rotorCount:this.rotors.length,oscillatorCount:this.oscillators.length+this.levers.length+this.gripperMotions.length+this.joggerMotions.length,
       mechanismCount:this.rotors.length+this.oscillators.length+this.levers.length+this.gripperMotions.length+this.joggerMotions.length,
