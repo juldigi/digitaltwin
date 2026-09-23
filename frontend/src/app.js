@@ -654,7 +654,7 @@ function resetMachineInspectionContext(){
 function applyRestoredCamera(preset='iso'){
  if(!engine)return;const mode=preset==='top'?'top':'iso',target=engine.view==='factory'?(engine.currentFactoryTarget?.()||engine.factory):(selectedPart||engine.machine);
  if(target)engine.fit(target,mode);
- $('[data-camera]').forEach(button=>button.classList.toggle('active',button.dataset.camera===mode));
+ $$('[data-camera]').forEach(button=>button.classList.toggle('active',button.dataset.camera===mode));
 }
 function selectFactoryAssetContext(machine,{historyMode='none',openDialog=false,focus=true}={}){
  if(!machine)return false;
