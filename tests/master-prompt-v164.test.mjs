@@ -11,8 +11,8 @@ const sw=read('../frontend/sw.js');
 
 test('detail toggle has exactly one canonical event owner and preserves overlay state',()=>{
  assert.match(shell,/q\('#panel-toggle'\)\?\.addEventListener\('click',toggleInspector\)/);
- assert.match(shell,/function toggleInspector\(\)[\s\S]*?beforeMajorOverlay\('inspector'\)/);
- assert.match(shell,/function toggleInspector\(\)[\s\S]*?setInspector\(true\);openOverlay\('inspector'\)/);
+ assert.match(shell,/function openInspector\([\s\S]*?beforeMajorOverlay\('inspector'\)[\s\S]*?setInspector\(true,tab\);openOverlay\('inspector'\)/);
+ assert.match(shell,/function toggleInspector\(\)[\s\S]*?openInspector\(\)/);
  assert.match(shell,/function toggleInspector\(\)[\s\S]*?closeInspector\(\)/);
  assert.doesNotMatch(ui,/\$\('#panel-toggle'\)\?\.addEventListener/);
 });
