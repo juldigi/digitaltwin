@@ -22,7 +22,7 @@ test('factory navigation presents evidence-bounded utility systems as an active 
  assert.match(html,/id="nav-systems" data-section="system"/);
  assert.match(html,/data-mobile-nav="system" aria-label="Sistem utilitas"/);
  assert.match(shell,/const PHASE1_FOUNDATION=FOUNDATION_SCOPE\.expansionMode==='LAYOUT_PLACEHOLDERS_ONLY'/);
- assert.match(shell,/if\(!PHASE1_FOUNDATION\)openSystemLayers\(\)/);
+ assert.match(shell,/if\(!PHASE1_FOUNDATION\)\{stopSimulationForNavigation\('system'\);openSystemLayers\(\)\}/);
  assert.match(shell,/const systemSurface=PHASE1_FOUNDATION\?'':/);
  assert.match(shell,/Lapisan Pabrik/);
  assert.match(css,/\.mobile-nav\{grid-template-columns:repeat\(5,minmax\(0,1fr\)\)\}/);
