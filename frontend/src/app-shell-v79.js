@@ -125,6 +125,21 @@ function toggleInspector(){
  }
 }
 q('#panel-toggle')?.addEventListener('click',toggleInspector);
+function stopSimulationForNavigation(targetSection){
+ const state=getState();
+ if(targetSection==='simulation'||(!state.simulationState?.active&&!state.simulationState?.playing))return;
+ dispatchEvent(new CustomEvent('bmj:simulationstoprequest'));
+ setSimulation({active:false,playing:false,stage:null,progress:0});
+ document.body.classList.remove('simulation-transport-open');
+ const bar=q('#simulation-transport');if(bar)bar.hidden=true;
+}
+function navigateSection(section,{inspectorTab=null}={}){
+ stopSimulationForNavigation(section);
+ beforeMajorOverlay(inspectorTab?'inspector':section);
+ setActiveSection(section);markSection(section);
+ if(inspectorTab)openInspector(inspectorTab);
+ requestAnimationFrame(syncSimulationTransport);
+}
 function beforeMajorOverlay(name){
  const current=getState().overlay;
  if(current&&current!==name){
@@ -230,13 +245,13 @@ globalSearch?.addEventListener('keydown',event=>{if(event.key==='ArrowDown'||eve
 q('#mobile-search-toggle')?.addEventListener('click',()=>openSearch(''));
 addEventListener('bmj:searchresults',event=>renderSearchResults(event.detail));
 addEventListener('bmj:systemsearchselect',event=>{if(PHASE1_FOUNDATION)return;const system=event.detail?.system||null;setState({selectedSystem:system},{url:false});openSystemLayers();if(['hvac','compressedAir','routing'].includes(system))q(`[data-system-focus="${system}"]`)?.click()});
-q('#nav-machine')?.addEventListener('click',()=>{beforeMajorOverlay('factory');setActiveSection('factory');markSection('factory')});
-q('#nav-assets')?.addEventListener('click',()=>{beforeMajorOverlay('modal');setActiveSection('asset');markSection('asset');openOverlay('modal')});
-q('#nav-systems')?.addEventListener('click',()=>{if(!PHASE1_FOUNDATION)openSystemLayers()});
+q('#nav-machine')?.addEventListener('click',()=>navigateSection('factory'));
+q('#nav-assets')?.addEventListener('click',()=>{stopSimulationForNavigation('asset');beforeMajorOverlay('modal');setActiveSection('asset');markSection('asset');openOverlay('modal')});
+q('#nav-systems')?.addEventListener('click',()=>{if(!PHASE1_FOUNDATION){stopSimulationForNavigation('system');openSystemLayers()}});
 q('#nav-simulation-mode')?.addEventListener('click',enterSimulation);
-q('#nav-sources')?.addEventListener('click',()=>{setActiveSection('reference');markSection('reference');openInspector('sources')});
-q('#nav-help')?.addEventListener('click',()=>{beforeMajorOverlay('modal');openOverlay('modal')});
-q('#nav-settings')?.addEventListener('click',()=>{beforeMajorOverlay('modal');q('#settings')?.click();openOverlay('modal')});
+q('#nav-sources')?.addEventListener('click',()=>navigateSection('reference',{inspectorTab:'sources'}));
+q('#nav-help')?.addEventListener('click',()=>{stopSimulationForNavigation('help');beforeMajorOverlay('modal');openOverlay('modal')});
+q('#nav-settings')?.addEventListener('click',()=>{stopSimulationForNavigation('settings');beforeMajorOverlay('modal');q('#settings')?.click();openOverlay('modal')});
 
 const menu=q('#ui-menu-toggle');
 menu?.addEventListener('click',()=>{const open=!document.body.classList.contains('nav-open');if(open){beforeMajorOverlay('navigation');rememberOverlayFocus('navigation')}document.body.classList.toggle('nav-open',open);menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Tutup navigasi':'Buka navigasi');if(open){openOverlay('navigation');focusOverlay(q('.rail'),'.rail button:not([hidden])')}else{closeOverlay();restoreOverlayFocus('navigation','#ui-menu-toggle')}});
@@ -265,7 +280,7 @@ q('#mode-2d')?.addEventListener('click',()=>{
  if(current.inspectorState?.open&&simulationTab)q('[data-tab="overview"]')?.click();
  document.body.classList.add('workspace-2d');setViewMode('2d');setActiveSection('factory');markSection('factory');requestAnimationFrame(()=>dispatchEvent(new Event('resize')));
 });
-q('#mode-3d')?.addEventListener('click',()=>{document.body.classList.remove('workspace-2d');setViewMode('3d');const section=getState().sceneMode==='machine'?'asset':'factory';setActiveSection(section);markSection(section);requestAnimationFrame(()=>dispatchEvent(new Event('resize')))});
+q('#mode-3d')?.addEventListener('click',()=>{document.body.classList.remove('workspace-2d');setViewMode('3d');const section=getState().sceneMode==='machine'?'asset':'factory';stopSimulationForNavigation(section);setActiveSection(section);markSection(section);requestAnimationFrame(()=>{dispatchEvent(new Event('resize'));syncSimulationTransport()})});
 
 const GROUPS=PHASE1_FOUNDATION?[
  ['Bangunan',[['building','Bangunan & ruang'],['roof','Atap']]],
