@@ -717,8 +717,9 @@ function buildUniversalSearchIndex(){
   const route=machineRoute(machine),primary=isFoundationPrimary(machine);
   if(machine.area)areas.add(machine.area);
   const subtitle=primary?[machine.area,machine.sapCode,machine.model].filter(Boolean).join(' · '):[machine.area,'Placeholder tata letak'].filter(Boolean).join(' · ');
-  const keywords=primary?[machine.name,machine.machineId,machine.sapCode,machine.functionalLocation,machine.model,machine.serial,machine.area]:[machine.name,machine.machineId,machine.area];
-  items.push({type:'machine',group:'MESIN',title:machine.name,subtitle,route,machineId:machine.machineId,has3D:scopedRegistryHas3D(machine),keywords:keywords.filter(Boolean).join(' ')});
+  const aliases=primary?['OFFSET 5','OFU-1']:[];
+  const keywords=primary?[machine.name,machine.machineId,machine.sapCode,machine.functionalLocation,machine.model,machine.serial,machine.area,...aliases]:[machine.name,machine.machineId,machine.area];
+  items.push({type:'machine',group:'MESIN',title:machine.name,subtitle,route,machineId:machine.machineId,has3D:scopedRegistryHas3D(machine),aliases,keywords:keywords.filter(Boolean).join(' ')});
   if(!scopedRegistryHas3D(machine))continue;
   const taxonomy=searchableTaxonomy(route),byId=new Map(taxonomy.map(node=>[node.id,node]));
   const pathFor=node=>{const path=[];let cursor=node,guard=0;while(cursor&&guard++<8){path.unshift(cursor.name||cursor.id);cursor=cursor.parentId?byId.get(cursor.parentId):null;}return path.join(' / ')};
@@ -746,9 +747,10 @@ function universalSearchResults(query){
  return buildUniversalSearchIndex().map(item=>{
   if(!words.every(word=>item._search.includes(word)))return null;
   const title=normalizeSearchText(item.title),subtitle=normalizeSearchText(item.subtitle);
-  let score=title===q?100:title.startsWith(q)?80:title.includes(q)?60:subtitle.includes(q)?35:20;
+  const exactAlias=item.type==='machine'&&item.aliases?.some(alias=>normalizeSearchText(alias)===q);
+  let score=exactAlias?180:title===q?100:title.startsWith(q)?80:title.includes(q)?60:subtitle.includes(q)?35:20;
   if(item.type==='component'&&title.includes(q))score+=12;
-  if(item.type==='machine')score+=70;
+  if(item.type==='machine')score+=25;
   return {...item,score,_search:undefined};
  }).filter(Boolean).sort((a,b)=>b.score-a.score||a.group.localeCompare(b.group,'id')||a.title.localeCompare(b.title,'id')).slice(0,48);
 }
