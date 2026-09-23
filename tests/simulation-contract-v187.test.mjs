@@ -26,9 +26,9 @@ test('pause control cannot accidentally start a READY simulation',()=>{
 });
 
 test('V187 active runtime cache identifiers are coherent',()=>{
- assert.match(index,/app-shell-v79\.css\?v=188/);
- assert.match(index,/src\/app\.js\?v=188/);
- assert.match(index,/src\/app-shell-v79\.js\?v=188/);
- assert.match(sw,/factory-digital-twin-v188-machine-switch-transaction-hardening-20260923/);
- assert.match(app,/pair\('Versi aplikasi','V188'\)/);
+ assert.match(index,/app-shell-v79\.css\?v=189/);
+ assert.match(index,/src\/app\.js\?v=189/);
+ assert.match(index,/src\/app-shell-v79\.js\?v=189/);
+ assert.match(sw,/factory-digital-twin-v189-simulation-lifecycle-parity-20260923/);
+ assert.match(app,/pair\('Versi aplikasi','V189'\)/);
 });

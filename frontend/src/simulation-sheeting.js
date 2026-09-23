@@ -271,8 +271,8 @@ export class SheetingProcessSimulation{
     for(const m of this.webFlowMarks)m.visible=true;
     this.onUpdate?.(this.state());return this.state();
   }
-  pause(){this.running=false;return this.state();}
-  resume(){this.running=true;this.lastNow=null;return this.state();}
+  pause(){if(this.active){this.running=false;this.lastNow=null;this.onUpdate?.(this.state());}return this.state();}
+  resume(){if(this.active){this.running=true;this.lastNow=null;this.onUpdate?.(this.state());}return this.state();}
   stop(){
     this.active=false;this.running=false;this.elapsed=0;this.webAdvance=0;this.completed=0;this.cutCount=0;this.lastNow=null;
     for(const s of this.sheets)s.visible=false;
@@ -283,8 +283,8 @@ export class SheetingProcessSimulation{
     this.restoreMechanisms();this.setReferenceStackVisible(true);
     this.onUpdate?.(this.state());return this.state();
   }
-  setSpeed(v){this.speed=Math.max(.35,Math.min(2,+v||1));return this.state();}
-  setPathVisible(v){this.pathVisible=!!v;this.path.visible=this.pathVisible;return this.state();}
+  setSpeed(v){this.speed=Math.max(.35,Math.min(2,+v||1));this.onUpdate?.(this.state());return this.state();}
+  setPathVisible(v){this.pathVisible=!!v;this.path.visible=this.pathVisible;this.onUpdate?.(this.state());return this.state();}
   setInkFlowVisible(){return this.state();}
 
   restoreMechanisms(){
