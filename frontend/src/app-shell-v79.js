@@ -417,6 +417,25 @@ function syncAccessibleControls(state){
  if(mode2d){mode2d.setAttribute('aria-pressed',String(is2d));mode2d.classList.toggle('active',is2d)}
  if(mode3d){mode3d.setAttribute('aria-pressed',String(!is2d));mode3d.classList.toggle('active',!is2d)}
 }
+function syncViewModeText(el,next2d,is2d){
+ if(!el)return;
+ if(is2d){
+  const last2d=el.dataset.viewMode2dText||'';
+  if(el.dataset.viewModeCopy!=='2d'||el.textContent!==last2d)el.dataset.viewMode3dText=el.textContent;
+  el.dataset.viewMode2dText=next2d;el.dataset.viewModeCopy='2d';if(el.textContent!==next2d)el.textContent=next2d;return;
+ }
+ if(el.dataset.viewModeCopy==='2d'){
+  if(Object.prototype.hasOwnProperty.call(el.dataset,'viewMode3dText'))el.textContent=el.dataset.viewMode3dText;
+  delete el.dataset.viewMode2dText;delete el.dataset.viewMode3dText;delete el.dataset.viewModeCopy;
+ }
+}
+function syncViewModeContext(state){
+ const is2d=state.viewMode==='2d',hasAsset=Boolean(state.selectedAsset);
+ syncViewModeText(q('#view-kicker'),'DENAH PABRIK · 2D',is2d);
+ syncViewModeText(q('#view-subtitle'),hasAsset?'Aset terpilih ditandai pada denah pabrik':'Posisi mesin, area produksi, dan konteks pabrik',is2d);
+ syncViewModeText(q('#geometry-caption'),hasAsset?'Denah 2D · Aset terpilih':'Denah 2D · Seluruh Area',is2d);
+ syncViewModeText(q('#scene-hint'),hasAsset?'Aset terpilih ditandai pada denah · pilih aset lain melalui menu Aset':'Pilih aset melalui menu Aset atau denah 2D.',is2d);
+}
 function syncPressedTools(){
  for(const id of ['tool-explode','tool-isolate','tool-interior','labels']){
   const el=q('#'+id);if(el)el.setAttribute('aria-pressed',String(el.classList.contains('active')));
@@ -424,5 +443,5 @@ function syncPressedTools(){
 }
 const pressedTools=qa('#tool-explode,#tool-isolate,#tool-interior,#labels');
 if(pressedTools.length){const pressedObserver=new MutationObserver(syncPressedTools);pressedTools.forEach(el=>pressedObserver.observe(el,{attributes:true,attributeFilter:['class']}));syncPressedTools()}
-relabel();const hydratedState=hydrateUrl();if(hydratedState.viewMode==='2d')q('#mode-2d')?.click();let lastSyncedSection=getState().activeSection;subscribe(state=>{markSection(state.activeSection);syncLayerControls();syncAccessibleControls(state);if(state.activeSection!==lastSyncedSection){lastSyncedSection=state.activeSection;requestAnimationFrame(syncSimulationTransport)}});
+relabel();const hydratedState=hydrateUrl();if(hydratedState.viewMode==='2d')q('#mode-2d')?.click();let lastSyncedSection=getState().activeSection;subscribe(state=>{markSection(state.activeSection);syncLayerControls();syncAccessibleControls(state);syncViewModeContext(state);if(state.activeSection!==lastSyncedSection){lastSyncedSection=state.activeSection;requestAnimationFrame(syncSimulationTransport)}});
 document.documentElement.dataset.uiArchitecture='v162-factory-first-systems';
