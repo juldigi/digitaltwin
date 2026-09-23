@@ -38,7 +38,7 @@ test('V173 dedicated mode buttons remain the only controls that intentionally ch
 });
 
 test('V173 runtime files and service worker are cache-busted',()=>{
- assert.match(html,/src\/app\.js\?v=173/);
+ assert.match(html,/src\/app\.js\?v=175/);
  assert.match(html,/src\/app-shell-v79\.js\?v=174/);
- assert.match(sw,/factory-digital-twin-v174-view-mode-visual-sync-20260923/);
+ assert.match(sw,/factory-digital-twin-v175-2d-selection-legibility-20260923/);
 });
