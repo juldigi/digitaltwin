@@ -4,6 +4,7 @@ const DEFAULT_STATE={
   selectedAsset:null,
   selectedNode:null,
   selectedSystem:null,
+  sceneMode:'factory',
   viewMode:'3d',
   cameraPreset:'iso',
   visibleLayers:{
@@ -85,11 +86,16 @@ export function closeOverlay(){
 }
 export function hydrateUrl(){
   const params=new URLSearchParams(location.search);
+  const selectedAsset=params.get('asset')||params.get('machine')||null;
+  const selectedNode=params.get('node')||null;
+  const sceneParam=params.get('scene');
   state={
     ...state,
-    selectedAsset:params.get('asset')||state.selectedAsset,
-    selectedNode:params.get('node')||state.selectedNode,
-    viewMode:params.get('view')||state.viewMode
+    selectedAsset,
+    selectedNode,
+    sceneMode:sceneParam==='machine'||Boolean(selectedNode)?'machine':'factory',
+    viewMode:params.get('view')==='2d'?'2d':'3d',
+    cameraPreset:params.get('camera')==='top'?'top':'iso'
   };
   queueNotify();
   return getState();
@@ -97,10 +103,15 @@ export function hydrateUrl(){
 
 function syncUrl(){
   const params=new URLSearchParams(location.search);
+  params.delete('machine');
   const map={asset:state.selectedAsset,node:state.selectedNode,view:state.viewMode};
   for(const [key,value] of Object.entries(map)){
     if(value)params.set(key,value);else params.delete(key);
   }
+  if(state.sceneMode==='machine')params.set('scene','machine');
+  else if(state.selectedAsset)params.set('scene','factory');
+  else params.delete('scene');
+  if(state.cameraPreset&&state.cameraPreset!=='iso')params.set('camera',state.cameraPreset);else params.delete('camera');
   const query=params.toString();
   history.replaceState(history.state,'',location.pathname+(query?'?'+query:'')+location.hash);
 }
