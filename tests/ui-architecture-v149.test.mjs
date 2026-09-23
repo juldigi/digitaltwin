@@ -155,7 +155,7 @@ test('V149 one-major-overlay policy explicitly closes the current major surface 
  assert.match(shell,/if\(current==='search'\)closeSearch\(\)/);
  assert.match(shell,/else if\(current==='layers'\)closeLayerManager\(\)/);
  assert.match(shell,/else if\(current==='navigation'\)closeDrawer\(\)/);
- assert.match(shell,/else if\(current==='inspector'\)closeInspector\(\)/);
+ assert.match(shell,/else if\(current==='inspector'\)closeInspector\((?:\{restoreFocus:false\})?\)/);
  assert.match(shell,/current==='modal'/);
 });
 
