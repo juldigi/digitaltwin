@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const css=readFileSync(new URL('../frontend/app-shell-v79.css',import.meta.url),'utf8');
+const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
+const index=readFileSync(new URL('../frontend/index.html',import.meta.url),'utf8');
+const sw=readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
+test('portrait viewport keeps controls in separate stable bands',()=>{assert.match(css,/@media\(max-width:767px\) and \(orientation:portrait\)/);assert.match(css,/--mobile-scene-controls:70px/);assert.match(css,/\.viewport-mode-switch\{right:8px;bottom:calc\(var\(--mobile-scene-controls\) \+ 8px\)/);assert.match(css,/\.scene-bottom\{left:8px;right:8px;bottom:8px;min-height:58px/);});
+test('inspector owns mobile workspace while open',()=>{assert.match(css,/body:not\(\.panel-hidden\) \.mobile-nav\{visibility:hidden;pointer-events:none\}/);assert.match(css,/body:not\(\.panel-hidden\) \.scene-bottom,body:not\(\.panel-hidden\) \.viewport-mode-switch\{visibility:hidden;pointer-events:none\}/);});
+test('portrait overlays avoid expensive blur',()=>{assert.match(css,/\.scene-heading>div\{[^}]*backdrop-filter:none/);assert.match(css,/\.mobile-nav\{[^}]*backdrop-filter:none/);});
+test('V191 release identifiers are coherent',()=>{assert.match(index,/app-shell-v79\.css\?v=191/);assert.match(index,/src\/app\.js\?v=191/);assert.match(sw,/factory-digital-twin-v191-mobile-viewport-composition-20260923/);assert.match(app,/pair\('Versi aplikasi','V191'\)/);});

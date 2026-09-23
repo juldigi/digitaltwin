@@ -518,3 +518,26 @@ aside#detail-panel{--panel-sticky-top:68px;scroll-padding-top:calc(var(--panel-s
  .taxonomy-copy small{font-size:9px}
  .tax-level{font-size:8px}
 }
+
+/* V191 mobile viewport composition */
+@media(max-width:767px) and (orientation:portrait){
+ :root{--mobile-scene-head:92px;--mobile-scene-controls:70px}
+ .workspace{padding-top:0}
+ #viewport{inset:0!important}
+ .scene-heading{top:8px;align-items:flex-start}
+ .scene-heading>div{max-width:calc(100% - 52px);padding:9px 11px;background:rgba(255,255,255,.94);backdrop-filter:none;-webkit-backdrop-filter:none}
+ .scene-heading h1{font-size:clamp(15px,4.35vw,18px);line-height:1.12;letter-spacing:-.025em}
+ .scene-heading p{margin-top:3px;font-size:9px;line-height:1.25}
+ .scene-heading #panel-toggle{width:44px;height:44px}
+ .viewport-mode-switch{right:8px;bottom:calc(var(--mobile-scene-controls) + 8px);padding:3px;background:rgba(255,255,255,.96);backdrop-filter:none;-webkit-backdrop-filter:none}
+ .scene-bottom{left:8px;right:8px;bottom:8px;min-height:58px;padding:5px;background:rgba(255,255,255,.96);backdrop-filter:none;-webkit-backdrop-filter:none}
+ .view-switch button{height:48px;min-height:48px}
+ .mobile-nav{background:rgba(255,255,255,.98);backdrop-filter:none;-webkit-backdrop-filter:none}
+ body:not(.panel-hidden) .mobile-nav{visibility:hidden;pointer-events:none}
+ body:not(.panel-hidden) .scene-bottom,body:not(.panel-hidden) .viewport-mode-switch{visibility:hidden;pointer-events:none}
+}
+@media(max-width:390px) and (orientation:portrait){
+ .scene-heading h1{font-size:15px}
+ .scene-heading p{font-size:8px}
+ .scene-bottom{left:6px;right:6px}
+}
