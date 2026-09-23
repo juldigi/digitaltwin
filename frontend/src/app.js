@@ -545,7 +545,8 @@ function showHome(){
  emitDomainState({selectedAsset:null,selectedArea:null,selectedNode:null,activeReference:null,activeSection:'factory',cameraPreset:'iso',inspectorState:{open:false,tab:'overview'}});
  if(!engine){
   // No WebGL: show the actual CAD-backed 2D drawing instead of an empty 3D viewport.
-  document.body.classList.add('workspace-2d','webgl-unavailable');
+  document.body.classList.add('workspace-2d');
+  document.body.classList.add('webgl-unavailable');
   $('#mode-2d')?.classList.add('active');
   const three=$('#mode-3d');
   if(three){three.classList.remove('active');three.disabled=true;three.title='3D belum tersedia di perangkat ini';}
