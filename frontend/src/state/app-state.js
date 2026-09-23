@@ -53,7 +53,10 @@ export function selectContext(patch={}){
   const next={};
   for(const key of allowed)if(Object.prototype.hasOwnProperty.call(patch,key))next[key]=patch[key];
   if(Object.prototype.hasOwnProperty.call(patch,'selectedAsset')||Object.prototype.hasOwnProperty.call(patch,'selectedNode')||Object.prototype.hasOwnProperty.call(patch,'selectedSystem')){
-    next.inspectorState={...state.inspectorState,open:Boolean(patch.selectedAsset||patch.selectedNode||patch.selectedSystem||state.selectedAsset||state.selectedNode||state.selectedSystem)};
+    const selectedAsset=Object.prototype.hasOwnProperty.call(next,'selectedAsset')?next.selectedAsset:state.selectedAsset;
+    const selectedNode=Object.prototype.hasOwnProperty.call(next,'selectedNode')?next.selectedNode:state.selectedNode;
+    const selectedSystem=Object.prototype.hasOwnProperty.call(next,'selectedSystem')?next.selectedSystem:state.selectedSystem;
+    next.inspectorState={...state.inspectorState,open:Boolean(selectedAsset||selectedNode||selectedSystem)};
   }
   return setState(next);
 }
