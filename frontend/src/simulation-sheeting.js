@@ -66,7 +66,13 @@ export class SheetingProcessSimulation{
   buildPaths(){
     const reel=this.layout.reel;
     const pre=[new THREE.Vector3(reel.loadedCenter[0]-.46,reel.loadedCenter[1]+reel.radius*.72,0)];
-    pre.push(this.surfacePoint(this.layout.lowEntryRoll));
+    const low=this.layout.lowEntryRoll,lc=new THREE.Vector3(...low.center),lowR=low.radius+.018;
+    this.lowEntryContactPoints=[];
+    for(let i=0;i<=14;i++){
+      const a=THREE.MathUtils.lerp(THREE.MathUtils.degToRad(-28),THREE.MathUtils.degToRad(-152),i/14);
+      const p=new THREE.Vector3(lc.x+Math.cos(a)*lowR,lc.y+Math.sin(a)*lowR,0);
+      this.lowEntryContactPoints.push(p);pre.push(p);
+    }
     for(const spec of this.layout.feedRollers)pre.push(this.surfacePoint(spec));
 
     const draw=this.layout.drawRoll;
@@ -155,7 +161,7 @@ export class SheetingProcessSimulation{
       cutPulseVisible:false,bladeVisible:false,bladeCount:0,bladeStroke:0,visibleKnifeGeometry:false,cutterMechanismEvidence:'GUARDED_INTERNAL_UNRESOLVED',
       webAdvance:this.webAdvance,targetCutLength:this.targetCutLength,
       drawRollFunctional:true,drawRollSurfaceSpeed:this.webLinearSpeed,drawRollAngularSpeed:this.webLinearSpeed/this.drawRollRadius,
-      drawRollWrapDegrees:THREE.MathUtils.radToDeg(this.drawRollWrapAngle),drawRollContactPointCount:this.drawRollContactPoints.length,
+      drawRollWrapDegrees:THREE.MathUtils.radToDeg(this.drawRollWrapAngle),drawRollContactPointCount:this.drawRollContactPoints.length,lowEntryWrapPointCount:this.lowEntryContactPoints.length,
       reelFunctional:true,reelReferenceRadius:this.reelReferenceRadius,reelAngularSpeed:this.reelAngularSpeed,reelSurfaceSpeed:this.reelAngularSpeed*this.reelReferenceRadius,
       cutReleaseDelay:this.cutReleaseDelay,fastTapeLinearSpeed:this.fastCurve.getLength()/this.fastDuration,
       slowTapeLinearSpeed:this.slowCurve.getLength()/this.slowDuration,overlapTapeLinearSpeed:this.overlapCurve.getLength()/this.overlapDuration,
