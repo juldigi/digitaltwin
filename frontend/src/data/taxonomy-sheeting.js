@@ -1,40 +1,84 @@
-const SOURCE_REFS=Object.freeze(['SHEETING-BMJ-DATABASE','SHEETING-HSM56-BW-PDF','SHEETING-HSM56-BW-FULLIMAGE','SHEETING-BW-HSM56-PRODUCT-PAGE','SHEETING-MEGAMACH-HSM-FAMILY','SHEETING-LEXUS-INDONESIA','SHEETING-PASABAN-PROCESS-MAP','SHEETING-PASABAN-CL165','SHEETING-PASABAN-CX165','SHEETING-PASABAN-KB','SHEETING-UNICO-SHEETER-CONTROL','SHEETING-BW-VACUUM-OVERLAP','SHEETING-BW-STACKER-TOP-TAPES','SHEETING-MAXSON-MSP-PDF','SHEETING-MAXSON-LAYBOY','SHEETING-MAXSON-STACKER-SEQUENCE','SHEETING-CASEPAPER-STACKER-AIR','SHEETING-CUTMARK-PROCESS-COMPARISON','SHEETING-HSM66-INDONESIA-TRADE','SHEETING-HSM56-NEAR-SERIAL','SHEETING-GREATWALL-SYNCHRO-VISUAL','SHEETING-RECOVERED-REFERENCE']);
-const add=(nodes,id,parentId,level,levelName,name,meshRefs=[],description='',confidence='FAMILY_REFERENCE')=>nodes.push(Object.freeze({id,parentId,level,levelName,name,machineZone:name,meshRefs,sourceRefs:SOURCE_REFS,confidence,verified:confidence==='VERIFIED',explodeVector:[level===2?.65:.15,level<4?.16:.08,0],explodeDistance:level===2?.85:level===3?.52:level===4?.32:level===5?.20:.12,focusCamera:null,description,maintenanceTag:null}));
+const SOURCE_REFS=Object.freeze([
+  'SHEETING-BMJ-PHOTOSET-20260922','SHEETING-BMJ-DATABASE','SHEETING-RECOVERED-REFERENCE',
+  'SHEETING-HSM56-BW-PDF','SHEETING-BW-HSM56-PRODUCT-PAGE','SHEETING-UNICO-SHEETER-CONTROL',
+  'SHEETING-PASABAN-PROCESS-MAP','SHEETING-MAXSON-MSP-PDF'
+]);
+const add=(nodes,id,parentId,level,levelName,name,meshRefs=[],description='',confidence='VERIFIED_VISUAL')=>nodes.push(Object.freeze({
+  id,parentId,level,levelName,name,machineZone:name,meshRefs,sourceRefs:SOURCE_REFS,confidence,
+  verified:['VERIFIED','VERIFIED_VISUAL'].includes(confidence),
+  explodeVector:[level===2?.65:.15,level<4?.16:.08,0],
+  explodeDistance:level===2?.85:level===3?.52:level===4?.32:level===5?.20:.12,
+  focusCamera:null,description,maintenanceTag:null
+}));
+
 const nodes=[];
-add(nodes,'SH',null,1,'Mesin','SHEETING LEXUS · HSM-CTM7',['MACHINE-SHEETING'],'Identitas BMJ verified. V68 memakai anchor visual komponen dari brochure/foto resmi HSM 56 2014 dan mempertahankan RIGHT→LEFT dari konfirmasi pengguna. Exact internal HSM-CTM7 tidak dinaikkan menjadi verified tanpa foto/drawing spesifik.','VERIFIED');
+add(nodes,'SH',null,1,'Mesin','SHEETING LEXUS · HSM-CTM7',['MACHINE-SHEETING'],
+  'Identitas BMJ verified. V193 memakai foto aktual BMJ IMG_2479–IMG_2487 sebagai sumber primer untuk exterior/placement. RIGHT→LEFT tetap mengikuti konfirmasi pengguna. Sumber HSM family hanya mengisi hubungan proses yang tidak terlihat di balik guard.','VERIFIED');
+
 const chains=[
- ['ROLL','Unwind / Rollstand','sheeting-rollstand','Low fixed-position rollstand','Reel / chuck hub / swing-hydraulic support','sheeting-reel','Single low reel with exposed opposed hub and supported side arms'],
- ['FEED','Web Guide / Tension / EPC','sheeting-feed','Inclined two-sided guide frame','Four guide/tension rollers + compact EPC reference','sheeting-feed-rollers','Inclined supported roller path from reel toward main head'],
- ['HEAD','Main Head / Cross-Cut Zone','sheeting-cutter','Windowed gray/teal head','Hollow inspection window + dominant banded process cylinder + unresolved cut zone','sheeting-main-rollers','True aperture exposes the photo-anchored banded process cylinder without an opaque panel behind the glass'],
- ['DEL','Outfeed / Adjustment','sheeting-delivery','Long tape/belt outfeed','Belts / entry-exit rollers / transverse adjustment assemblies','sheeting-overlap','Longitudinal belt field with sparse transverse rods, supports, collars, knobs and operator handwheel'],
- ['STACK','Lift-Table Stacker','sheeting-layboy','Rigid open-front stacker tower','Lift rails / flat table / pallet / supported skid load','sheeting-stack-lift','Flat lift table and pallet within rigid guarded tower'],
- ['CTRL','Operator Controls','sheeting-control','Integrated low console','Sloped control face / pushbuttons / lever','sheeting-control','Compact low operator console beside outfeed/main head'],
- ['ACCESS','Access / Structure','sheeting-access','Grounded stacker side steps','Steps / landing / main chassis','sheeting-structure','Localized grounded access plus continuous structural chassis']
+  ['ROLL','Unwind / Rollstand','sheeting-rollstand','Two-Sided Fixed Rollstand','Swept arms / chuck positions / hydraulic actuators','sheeting-reel','Loaded reel, opposed chuck and alternate empty station captured in BMJ photos'],
+  ['FEED','Web Guide / Tension','sheeting-feed','Open Multi-Roller Bridge','Long frame / roller bank / edge-guide reference','sheeting-feed-rollers','Actual open roller bridge replaces the old compact inclined four-roller reference'],
+  ['HEAD','Main Cutter / Drive','sheeting-cutter','Enclosed LEXUS Cutter Cabinet','Inspection window / nip roller train / guarded cut zone','sheeting-main-rollers','Actual large turquoise cabinet with long LEXUS inspection window and exposed entry/nip rollers'],
+  ['DEL','Delivery / Alignment','sheeting-delivery','Open Green-Belt Table','Belt field / polished shafts / crossrails / hold-down wheels','sheeting-overlap','Actual open delivery table with dense green belts and adjustable hardware'],
+  ['STACK','Stack / Lay Table','sheeting-layboy','Open Adjustable Stack Table','Manual guides / stack surface / paper pile','sheeting-stack-lift','Actual open output table; V68 tall mesh tower is removed'],
+  ['CTRL','Operator Controls','sheeting-control','Broad Sloped Console','Display / selectors / pushbuttons','sheeting-control','Actual delivery-side physical console captured in BMJ photos'],
+  ['ACCESS','Access / Structure','sheeting-access','Catwalk / Steps','Diamond plate / stairs / chassis','sheeting-structure','Actual operator access and grounded open chassis']
 ];
+
 for(const [key,l2,mesh,l3,l4,l5name,l6] of chains){
- const a='SH.'+key;add(nodes,a,'SH',2,'Unit Utama',l2,[mesh]);
- const b=a+'.SUB';add(nodes,b,a,3,'Sub',l3,[mesh]);
- const c=b+'.BLOCK';add(nodes,c,b,4,'Block',l4,[mesh]);
- const d=c+'.PART';const specific=l5name.startsWith('sheeting-')?l5name:mesh;add(nodes,d,c,5,'Part',l5name.replace(/^sheeting-/,'').replaceAll('-',' '),[specific]);
- add(nodes,d+'.SPEC',d,6,'Spesifik Part',l6,[specific]);
+  const a='SH.'+key;add(nodes,a,'SH',2,'Unit Utama',l2,[mesh]);
+  const b=a+'.SUB';add(nodes,b,a,3,'Sub',l3,[mesh]);
+  const c=b+'.BLOCK';add(nodes,c,b,4,'Block',l4,[mesh]);
+  const d=c+'.PART';const specific=l5name.startsWith('sheeting-')?l5name:mesh;
+  add(nodes,d,c,5,'Part',l5name.replace(/^sheeting-/,'').replaceAll('-',' '),[specific]);
+  add(nodes,d+'.SPEC',d,6,'Spesifik Part',l6,[specific]);
 }
-add(nodes,'SH.ROLL.SUB.BLOCK.PART.HUB','SH.ROLL.SUB.BLOCK.PART',6,'Spesifik Part','Chuck Hub / Bolt Circle',['sheeting-reel'],'Exposed turquoise hub face, center and bolt circle are derived from the BW rollstand inset.');
-add(nodes,'SH.FEED.SUB.BLOCK.PART.FRAME','SH.FEED.SUB.BLOCK.PART',6,'Spesifik Part','Inclined Guide Frame',['sheeting-feed-frame'],'Two-sided inclined rails replace the earlier generic tall tower.');
-add(nodes,'SH.FEED.SUB.BLOCK.PART.EPC','SH.FEED.SUB.BLOCK.PART',6,'Spesifik Part','Compact EPC Edge Sensor',['sheeting-epc'],'Process-function reference only; exact HSM-CTM7 sensor shape/position remains reconstructed.');
-add(nodes,'SH.HEAD.SUB.BLOCK.PART.WINDOW','SH.HEAD.SUB.BLOCK.PART',6,'Spesifik Part','Panoramic Window Assembly',['sheeting-window'],'V68 makes this a selectable true aperture: glass, frame and handles have no opaque side slab directly behind them.');
-add(nodes,'SH.HEAD.SUB.BLOCK.PART.CYL','SH.HEAD.SUB.BLOCK.PART',6,'Spesifik Part','Main Draw / Traction Drum · Family Reference',['sheeting-main-rollers'],'The dominant turquoise banded cylinder is directly photo-anchored. V68 gives it a draw/traction function as a process-family reference: the simulated web visibly wraps its surface, drum surface travel follows web advance, and target web advance controls cut timing. Exact HSM-CTM7 OEM naming/drive architecture remains unverified.');
-add(nodes,'SH.HEAD.SUB.BLOCK.PART.KNIFE','SH.HEAD.SUB.BLOCK.PART',6,'Spesifik Part','Flat-Bed Knife · Family Reference',['sheeting-knife'],'BW HSM 56 primary brochure explicitly states Flat Bed Knife. V68 renders a visible reciprocating blade/carrier/anvil family reference synchronized with the cut event; exact HSM-CTM7 stroke and actuation remain unresolved.');
-add(nodes,'SH.HEAD.SUB.BLOCK.PART.BED','SH.HEAD.SUB.BLOCK.PART',6,'Spesifik Part','Integrated Bed / Service Plate',['sheeting-cutter-transport'],'Lower belt bed and metal service plate are derived from the official BW main photo.');
-add(nodes,'SH.DEL.SUB.BLOCK.PART.ROLLERS','SH.DEL.SUB.BLOCK.PART',6,'Spesifik Part','Outfeed Entry / Exit Rollers',['sheeting-delivery-rollers'],'Only the two main transverse transport rollers are modeled as rotating outfeed rollers.');
-add(nodes,'SH.DEL.SUB.BLOCK.PART.ADJ','SH.DEL.SUB.BLOCK.PART',6,'Spesifik Part','Adjustment Rod / Bracket / Collar / Knob',['sheeting-overlap'],'Three dominant transverse assemblies with photo-visible supports, collars and knobs.');
-add(nodes,'SH.DEL.SUB.BLOCK.PART.FAST','SH.DEL.SUB.BLOCK.PART',6,'Spesifik Part','Fast Tape Separation Zone',['sheeting-fast-belts'],'V68 process-zone geometry; exact Lexus drive ratios are not claimed.');
-add(nodes,'SH.DEL.SUB.BLOCK.PART.SLOW','SH.DEL.SUB.BLOCK.PART',6,'Spesifik Part','Slow Tape Transfer Zone',['sheeting-slow-belts'],'V68 process-zone geometry based on generic folio-sheeter transport architecture.');
-add(nodes,'SH.DEL.SUB.BLOCK.PART.OVERLAP','SH.DEL.SUB.BLOCK.PART',6,'Spesifik Part','Overlap Tape Zone',['sheeting-overlap-belts'],'V68 process-zone geometry used to make downstream sheet overlap coherent.');
-add(nodes,'SH.DEL.SUB.BLOCK.PART.HANDWHEEL','SH.DEL.SUB.BLOCK.PART',6,'Spesifik Part','Operator Outfeed Handwheel',['sheeting-outfeed-handwheel'],'Prominent operator-side adjustment handwheel derived from the official BW main/outfeed image.');
-add(nodes,'SH.STACK.SUB.BLOCK.PART.LIFT','SH.STACK.SUB.BLOCK.PART',6,'Spesifik Part','Flat Lift Table / Blue Pallet',['sheeting-stack-lift'],'Flat lift table is family-spec supported; blue pallet and tower arrangement are photo anchored.');
-add(nodes,'SH.STACK.SUB.BLOCK.PART.JOG','SH.STACK.SUB.BLOCK.PART',6,'Spesifik Part','Stack Alignment / Jogger Reference',['sheeting-stacker-joggers'],'V68 process-reference geometry adds front/back stop and side jogger motion so sheets square into the pile. These are generic folio-sheeter functions, not claimed as exact HSM-CTM7 hardware.');
-add(nodes,'SH.STACK.SUB.BLOCK.PART.LOAD','SH.STACK.SUB.BLOCK.PART',6,'Spesifik Part','Reference Skid Paper Load',['sheeting-reference-stack'],'A substantial supported reference stack replaces the earlier unrealistically thin six-sheet-looking pile and is hidden automatically during live process simulation.');
+
+add(nodes,'SH.ROLL.SUB.BLOCK.PART.HUB','SH.ROLL.SUB.BLOCK.PART',6,'Spesifik Part','Loaded Chuck / Core Assembly',['sheeting-reel'],
+  'Loaded paper reel and turquoise opposed chuck geometry are directly anchored to IMG_2479/2480/2485.');
+add(nodes,'SH.ROLL.SUB.BLOCK.PART.MANIFOLD','SH.ROLL.SUB.BLOCK.PART',6,'Spesifik Part','Hydraulic Hose / Valve Manifold',['sheeting-rollstand-manifold'],
+  'Tall hose/manifold cluster beside the unwind arms is visible in the actual BMJ photo set.');
+add(nodes,'SH.ROLL.SUB.BLOCK.PART.PANEL','SH.ROLL.SUB.BLOCK.PART',6,'Spesifik Part','Unwind Control Pedestal',['sheeting-unwind-panel'],
+  'Narrow turquoise pedestal with multiple round controls is photo anchored.');
+
+add(nodes,'SH.FEED.SUB.BLOCK.PART.FRAME','SH.FEED.SUB.BLOCK.PART',6,'Spesifik Part','Long Open Roller Frame',['sheeting-feed-frame'],
+  'Two-sided long open structure with tall posts/top beams follows the actual BMJ machine.');
+add(nodes,'SH.FEED.SUB.BLOCK.PART.EPC','SH.FEED.SUB.BLOCK.PART',6,'Spesifik Part','Edge Guide Reference',['sheeting-epc'],
+  'Position is photo/process anchored; exact sensor internals remain unresolved.','PROCESS_FAMILY_REFERENCE');
+
+add(nodes,'SH.HEAD.SUB.BLOCK.PART.WINDOW','SH.HEAD.SUB.BLOCK.PART',6,'Spesifik Part','LEXUS Long Inspection Window',['sheeting-window'],
+  'Long silver inspection-panel frame, transparent viewing strip and LEXUS plate follow IMG_2486/2487.');
+add(nodes,'SH.HEAD.SUB.BLOCK.PART.CYL','SH.HEAD.SUB.BLOCK.PART',6,'Spesifik Part','Infeed / Draw / Nip Roller Train',['sheeting-main-rollers'],
+  'Only photo-visible rollers around the guarded cutter cabinet are rendered and animated as web-contact surfaces.');
+add(nodes,'SH.HEAD.SUB.BLOCK.PART.KNIFE','SH.HEAD.SUB.BLOCK.PART',6,'Spesifik Part','Guarded Internal Cross-Cut Zone',['sheeting-knife'],
+  'No blade mesh is shown in V193: actual BMJ photos do not expose blade type, stroke or actuation.','VERIFIED_VISUAL__INTERNAL_MECHANISM_UNRESOLVED');
+add(nodes,'SH.HEAD.SUB.BLOCK.PART.BED','SH.HEAD.SUB.BLOCK.PART',6,'Spesifik Part','Cutter Entry / Exit Apron',['sheeting-cutter-transport'],
+  'Low guarded transport/apron geometry around the main cutter body.');
+
+add(nodes,'SH.DEL.SUB.BLOCK.PART.ROLLERS','SH.DEL.SUB.BLOCK.PART',6,'Spesifik Part','Delivery Roller / Shaft Set',['sheeting-delivery-rollers'],
+  'Multiple polished transverse shafts/rollers are visible across the delivery table.');
+add(nodes,'SH.DEL.SUB.BLOCK.PART.ADJ','SH.DEL.SUB.BLOCK.PART',6,'Spesifik Part','Crossrail / Hold-Down Wheel Assemblies',['sheeting-overlap'],
+  'Photo-visible adjustable crossrails, white wheels and holders.');
+add(nodes,'SH.DEL.SUB.BLOCK.PART.FAST','SH.DEL.SUB.BLOCK.PART',6,'Spesifik Part','Upstream Green Belt Zone',['sheeting-fast-belts'],
+  'Geometry is photo anchored; the fast-zone timing remains a folio-sheeter process relationship rather than an OEM ratio claim.');
+add(nodes,'SH.DEL.SUB.BLOCK.PART.SLOW','SH.DEL.SUB.BLOCK.PART',6,'Spesifik Part','Mid Delivery Belt Zone',['sheeting-slow-belts'],
+  'Dense green longitudinal belt field follows the BMJ photos; relative speed is simulation-only process normalization.');
+add(nodes,'SH.DEL.SUB.BLOCK.PART.OVERLAP','SH.DEL.SUB.BLOCK.PART',6,'Spesifik Part','Downstream Alignment Belt Zone',['sheeting-overlap-belts'],
+  'Downstream belt field and open alignment layout follow the actual machine.');
+add(nodes,'SH.DEL.SUB.BLOCK.PART.HANDWHEEL','SH.DEL.SUB.BLOCK.PART',6,'Spesifik Part','Delivery Adjustment Handwheels',['sheeting-outfeed-handwheel'],
+  'V193 renders three prominent black handwheels rather than one generic reference wheel.');
+
+add(nodes,'SH.STACK.SUB.BLOCK.PART.LIFT','SH.STACK.SUB.BLOCK.PART',6,'Spesifik Part','Flat Stack Surface / Lift Reference',['sheeting-stack-lift'],
+  'Open stack-table position is photo anchored; lift behavior remains supported by Lexus HSM family specification.','FAMILY_PROCESS_REFERENCE__PHOTO_POSITION_ANCHORED');
+add(nodes,'SH.STACK.SUB.BLOCK.PART.JOG','SH.STACK.SUB.BLOCK.PART',6,'Spesifik Part','Manual Guide / Backstop Assemblies',['sheeting-stacker-joggers'],
+  'Actual guide rails/backstop and large black adjustment wheels are modeled as manual hardware; they are not artificially oscillated.');
+add(nodes,'SH.STACK.SUB.BLOCK.PART.LOAD','SH.STACK.SUB.BLOCK.PART',6,'Spesifik Part','Captured Paper Pile',['sheeting-reference-stack'],
+  'Reference pile is photo anchored and is hidden when live process simulation starts.');
+
 export const SHEETING_TAXONOMY=Object.freeze(nodes);
 export const SHEETING_TAXONOMY_BY_ID=new Map(SHEETING_TAXONOMY.map(n=>[n.id,n]));
 export const sheetingTaxonomyChildren=id=>SHEETING_TAXONOMY.filter(n=>n.parentId===id);
-export const sheetingTaxonomyStats=()=>({total:SHEETING_TAXONOMY.length,byLevel:Object.fromEntries([1,2,3,4,5,6].map(level=>[level,SHEETING_TAXONOMY.filter(n=>n.level===level).length]))});
+export const sheetingTaxonomyStats=()=>({
+  total:SHEETING_TAXONOMY.length,
+  byLevel:Object.fromEntries([1,2,3,4,5,6].map(level=>[level,SHEETING_TAXONOMY.filter(n=>n.level===level).length]))
+});
