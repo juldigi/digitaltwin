@@ -262,6 +262,7 @@ function stopPrintingSimulation({restoreExterior=true}={}){
  simulationOwnsExterior=false;updateSimulationPanel(simulationState);
  if(activeTab==='simulation')renderPanel('simulation');
 }
+window.addEventListener('bmj:simulationstoprequest',()=>{if(engine?.isPrintingSimulationActive?.()||simulationState?.active)stopPrintingSimulation({restoreExterior:true});});
 function simulationLocksStructure(){
   if(engine?.isPrintingSimulationActive()){toast(IS_APM2?'Hentikan simulasi proses APM 2 sebelum memilih, mengurai, atau mengisolasi komponen.':IS_VERIFIED_REGISTRY_SIM?'Hentikan simulasi proses sebelum memilih, mengurai, atau mengisolasi komponen.':'Hentikan Simulasi Proses sebelum memilih, mengurai, atau mengisolasi komponen.');return true;}
  return false;
