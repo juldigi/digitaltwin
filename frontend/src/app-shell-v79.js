@@ -413,9 +413,9 @@ const relabel=()=>{
 };
 function syncAccessibleControls(state){
  const panelToggle=q('#panel-toggle');if(panelToggle){const open=Boolean(state.inspectorState?.open);panelToggle.setAttribute('aria-expanded',String(open));panelToggle.setAttribute('aria-label',open?'Tutup detail mesin':'Buka detail mesin')}
- const mode2d=q('#mode-2d'),mode3d=q('#mode-3d');
- if(mode2d)mode2d.setAttribute('aria-pressed',String(state.viewMode==='2d'));
- if(mode3d)mode3d.setAttribute('aria-pressed',String(state.viewMode==='3d'));
+ const mode2d=q('#mode-2d'),mode3d=q('#mode-3d'),is2d=state.viewMode==='2d';
+ if(mode2d){mode2d.setAttribute('aria-pressed',String(is2d));mode2d.classList.toggle('active',is2d)}
+ if(mode3d){mode3d.setAttribute('aria-pressed',String(!is2d));mode3d.classList.toggle('active',!is2d)}
 }
 function syncPressedTools(){
  for(const id of ['tool-explode','tool-isolate','tool-interior','labels']){
