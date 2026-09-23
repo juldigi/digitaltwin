@@ -292,7 +292,7 @@ function ensureLayerManager(){
  ${systemSurface}
  ${GROUPS.map(([title,items])=>`<div class="canonical-layer-group"><h4>${title}</h4>${items.map(([key,label])=>`<label><span>${label}</span><input type="checkbox" data-canonical-layer="${key}"></label>`).join('')}</div>`).join('')}
  <div class="canonical-layer-group unavailable"><h4>Batas fase</h4><p>${PHASE1_FOUNDATION?'Sistem utilitas dan detail teknis aset selain OFFSET 5 disimpan untuk fase ekspansi, tetapi tidak diaktifkan pada deliverable fondasi.':'Jalur yang belum memiliki drawing atau verifikasi lapangan tetap ditandai belum tersedia. Aplikasi tidak membuat jalur as-built secara otomatis.'}</p></div>`;
- q('.center-stack')?.append(panel);
+ document.body.append(panel);
  q('[data-layer-close]',panel)?.addEventListener('click',closeLayerManager);
  qa('[data-canonical-layer]',panel).forEach(input=>input.addEventListener('change',()=>{
   const key=input.dataset.canonicalLayer,visible=input.checked;setLayer(key,visible);
