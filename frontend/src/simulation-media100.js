@@ -67,7 +67,7 @@ export class Media100ProcessSimulation{
   c.group.scale.set(1,1,1);
   const lap=Math.floor(raw);if(lap>c.lap){if(c.lap>=0)this.outputCarton();c.lap=lap;}
  }
- outputCarton(){this.completed++;const idx=(this.completed-1)%this.exitStack.length,p=this.exitStack[idx];p.visible=true;p.position.set(5.30,.83+(idx*.028),0);}
+ outputCarton(){this.completed++;const idx=(this.completed-1)%this.exitStack.length,p=this.exitStack[idx];p.visible=true;const lane=idx%3,layer=Math.floor(idx/3);p.position.set(5.30,.83+layer*.028,(lane-1)*.34);}
  update(now){
   if(!this.active||!this.running){this.lastNow=now;return;}if(this.lastNow===null){this.lastNow=now;return;}
   const dt=Math.min(.12,Math.max(0,(now-this.lastNow)/1000))*this.speed;this.lastNow=now;this.elapsed+=dt;this.updateRotors(dt);

@@ -21,6 +21,12 @@ test('both MEDIA100 BMJ assets instantiate the family process train without clai
   assert.equal(model.findNode('media100-form-servo').userData.installedCornerServoPackageVerified,false);assert.equal(model.findNode('media100-glue-upper').userData.installedGlueHeadCountVerified,false);assert.equal(model.findNode('media100-final-kicker').userData.installedKickerVerified,false);assert.equal(model.findNode('media100-drive-control').userData.installedControlGenerationVerified,false);model.dispose();}
 });
 
+test('unverified MEDIA100 conversion hardware stays out of the installed silhouette',()=>{
+ const model=new Media100MachineTemplate();for(const id of ['media100-form-servo','media100-final-kicker'])model.findNode(id).traverse(o=>{if(o.isMesh){assert.equal(o.visible,false,id);assert.equal(o.userData.capabilityOnly,true,id);}});
+ const upper=model.findNode('media100-glue-upper'),heads=upper.children.filter(o=>o.userData.glueHeadPosition);assert.equal(heads.length,3);assert.ok(heads.every(o=>!o.visible&&o.userData.capabilityOnly));
+ model.reset();assert.ok(heads.every(o=>!o.visible));model.dispose();
+});
+
 test('MEDIA100 rotor whitelist excludes static crossbars servo housings pressure cylinders and buttons',()=>{
  const model=new Media100MachineTemplate(),sim=new Media100ProcessSimulation(model.root,model),allowed=/^(feeder-pulley|glue-disc|glue-pump|trombone-pulley|exit-roller|main-motor|line-drive|line-shaft)$/;
  assert.equal(sim.rotors.length,26);assert.equal(sim.rotors.some(r=>!allowed.test(r.userData.mechanismRole||'')),false);
@@ -49,6 +55,7 @@ test('MEDIA100 glue stays on the blank after application and can be hidden indep
 test('MEDIA100 delivers cartons at the exit level and pause/resume does not jump time',()=>{
  const model=new Media100MachineTemplate(),sim=new Media100ProcessSimulation(model.root,model);sim.start();let now=1000;for(let i=0;i<520;i++){now+=20;sim.update(now);}assert.ok(sim.completed>0);assert.ok(sim.exitStack.some(p=>p.visible));assert.ok(sim.exitStack.filter(p=>p.visible).every(p=>p.position.y>=.83));
  const t=sim.elapsed;sim.pause();sim.update(20000);sim.resume();sim.update(30000);assert.equal(sim.elapsed,t);sim.update(30020);assert.ok(sim.elapsed-t<.03);
+ assert.ok(sim.exitStack.filter(p=>p.visible).every(p=>p.position.y<=1.04),'completed cartons should stay in compact delivery lanes');
  sim.stop();assert.equal(sim.exitStack.every(p=>!p.visible),true);sim.dispose();model.dispose();
 });
 
