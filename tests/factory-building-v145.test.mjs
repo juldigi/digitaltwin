@@ -8,8 +8,8 @@ test('V145 micro-realism adds office ceiling, HVAC and warehouse traffic referen
  const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
  const built=buildActualFactory(layout,fleet),meta=built.root.userData,stats=meta.buildingDetailStats;
  assert.equal(meta.baselineId,'BMJ-250804-RED-20260921');
- assert.equal(meta.researchVersion,'V147');
- assert.equal(meta.buildingDetailPass,'V147_IPAL_PROCESS_COMPLETION_AND_CACHE_LOCK');
+ assert.equal(meta.researchVersion,'V198');
+ assert.equal(meta.buildingDetailPass,'V198_ROOM_BY_ROOM_OPERATIONAL_REALISM_AND_PORTAL_CLEANUP');
  assert.equal(meta.architecturalEvidenceBoundary.notAsBuilt,true);
  assert.match(meta.assumptions.microRealism,/NOT_AS_BUILT/);
  assert.match(meta.assumptions.safetyReference,/NOT_CODE_COMPLIANCE/);

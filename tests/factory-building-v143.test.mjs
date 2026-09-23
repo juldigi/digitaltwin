@@ -7,8 +7,8 @@ test('V143 structural baseline survives V145 micro-realism pass',async()=>{
  const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
  const built=buildActualFactory(layout,fleet),meta=built.root.userData,stats=meta.buildingDetailStats;
  assert.equal(meta.baselineId,'BMJ-250804-RED-20260921');
- assert.equal(meta.researchVersion,'V147');
- assert.equal(meta.buildingDetailPass,'V147_IPAL_PROCESS_COMPLETION_AND_CACHE_LOCK');
+ assert.equal(meta.researchVersion,'V198');
+ assert.equal(meta.buildingDetailPass,'V198_ROOM_BY_ROOM_OPERATIONAL_REALISM_AND_PORTAL_CLEANUP');
  assert.equal(meta.assumptions.roofEaves,4.5);
  assert.equal(meta.assumptions.roofRidge,7);
  assert.equal(meta.ipal.enclosingWalls,0);

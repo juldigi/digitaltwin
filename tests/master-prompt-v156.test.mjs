@@ -59,12 +59,13 @@ test('factory Phase-1 inspector excludes routing controls while retaining explic
  assert.doesNotMatch(panel,/utility_ahu_ducting/);
 });
 
-test('reference realism is retained in source but hidden from the default Phase-1 scene',()=>{
+test('V198 shows source-room functional realism while keeping safety and utility references bounded',()=>{
  assert.match(building,/layers\.landscape\.visible=false/);
  assert.match(building,/evidenceLayer:'REFERENCE_REALISM'/);
- assert.match(building,/o\.visible=false/);
- assert.match(building,/hiddenReferenceRealism/);
- assert.match(building,/V156_REFERENCE_REALISM_RETAINED_BUT_HIDDEN_BY_DEFAULT/);
+ assert.match(building,/functionalVisibleSemantic/);
+ assert.match(building,/visibleFunctionalReferences/);
+ assert.match(building,/REFERENCE_HIDDEN_BY_DEFAULT/);
+ assert.match(building,/V198_SOURCE_ROOM_FUNCTIONS_VISIBLE_AS_FUNCTIONAL_REFERENCE__SAFETY_AND_UNVERIFIED_MEP_REMAIN_HIDDEN/);
  assert.match(building,/UTILITY_MODELS_RETAINED_FOR_EXPANSION_BUT_HIDDEN_IN_PHASE1_UI/);
 });
 
