@@ -225,7 +225,7 @@ export class SheetingProcessSimulation{
     else stageIndex=5;
 
     return {
-      active:this.active,running:this.running,paused:this.active&&!this.running,speed:this.speed,
+      available:true,blocked:false,active:this.active,running:this.running,paused:this.active&&!this.running,speed:this.speed,
       stage:SHEETING_SIMULATION_STAGES[stageIndex],completed:this.completed,cutCount:this.cutCount,
       progress:(this.elapsed/this.processCycle)%1,
       sheetsVisible:this.sheets.filter(s=>s.visible).length,
