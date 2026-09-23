@@ -594,6 +594,7 @@ test('V123 R9 FGM-2 is a neutral folder-gluer process twin and does not inherit 
  assert.equal(m.root.userData.localSupplierFamilyEvidence.installationProof,false);
  assert.equal(m.root.userData.localSupplierFamilyEvidence.modelProof,false);
  assert.equal(m.root.userData.geometryStatus,'MULTI_VENDOR_FOLDER_GLUER_PROCESS_REFERENCE__NOT_MEDIA100_IDENTITY');
+ assert.match(m.root.userData.referenceMorphology,/MEDIA_100_II_NEIGHBOR_FAMILY_LAYOUT_ANALOGY__OEM_UNVERIFIED/);
  assert.equal(m.root.userData.fgm2Capabilities.crashLock,'UNVERIFIED');
  assert.equal(m.root.userData.fgm2Capabilities.fourSixCorner,'UNVERIFIED');
  assert.equal(m.root.userData.fgm2Capabilities.glueApplicatorType,'UNVERIFIED');
@@ -612,7 +613,9 @@ test('V123 R9 FGM-2 is a neutral folder-gluer process twin and does not inherit 
 
  for(const id of ['fgm2-lockbottom-boundary','fgm2-corner-boundary','fgm2-glue-applicator-boundary','fgm2-glue-detection-boundary','fgm2-counter-boundary','fgm2-downstream-boundary']){
   const node=m.findNode(id);assert.ok(node,id);assert.equal(node.userData.installedOptionVerified,false,id);assert.equal(node.userData.simulationEnabled,false,id);
+  node.traverse(o=>{if(o.isMesh){assert.equal(o.visible,false,id);assert.equal(o.userData.capabilityOnly,true,id);}});
  }
+ const frame=[];m.root.traverse(o=>{if(o.userData?.visualRole==='FGM2_OPEN_FRAME_UPRIGHT_REFERENCE')frame.push(o);});assert.equal(frame.length,28);
  assert.equal(m.findNode('fgm2-feed-separator').userData.feederTechnologyVerified,false);
  assert.equal(m.findNode('fgm2-pressure-reference').userData.actuationTypeVerified,false);
  assert.equal(m.findNode('fgm2-control').userData.controllerBrandVerified,false);

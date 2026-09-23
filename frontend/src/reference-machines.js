@@ -309,6 +309,11 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    tagOption(downstream,'No packer/bundler is recorded as part of FGM-2 in the BMJ registry.');
    if(downstream){const env=this.box(downstream,[.54,.32,1.02],[.42,.58,0],'glass',.014);env.userData.optionReference=true;this.tag(env,'downstream-packing-interface-boundary','OPTION_BOUNDARY');}
   }
+  // Retain selectable taxonomy nodes, but keep hypothetical hardware out of the
+  // installed-machine silhouette, including after isolation/reset operations.
+  for(const id of ['fgm2-lockbottom-boundary','fgm2-corner-boundary','fgm2-glue-applicator-boundary','fgm2-glue-detection-boundary','fgm2-counter-boundary','fgm2-downstream-boundary']){
+   this.findNode(id)?.traverse(o=>{if(o.isMesh){o.visible=false;o.userData.capabilityOnly=true;}});
+  }
  }
  enrichBlanker(){
   const xy=this.activeGroup(2),head=this.activeGroup(3),tool=this.activeGroup(4),sep=this.activeGroup(5),out=this.activeGroup(6),ctl=this.activeGroup(7);
@@ -1262,6 +1267,15 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
     for(const x of [-w*.43,w*.43])this.cover(this.box(g,[.07,.70,.07],[x,.67,z],'steel',.010));
    }
    this.cover(this.box(g,[w,.07,1.56],[0,.34,0],'dark',.012));
+   // A continuous, open-sided conveyor chassis. Covers stay below the board
+   // path; narrow uprights and longitudinal rails do not cross the work zone.
+   for(const z of [-.83,.83]){
+    const sill=this.cover(this.box(g,[w,.30,.065],[0,.48,z],'body',.012));sill.userData.visualRole='FGM2_LOW_SIDE_GUARD_REFERENCE';
+    const top=this.cover(this.box(g,[w,.045,.055],[0,1.27,z],'steel',.006));top.userData.visualRole='FGM2_ADJUSTMENT_RAIL_REFERENCE';
+   }
+   for(const x of [-w*.46,w*.46])for(const z of [-.83,.83]){
+    const upright=this.cover(this.box(g,[.045,.48,.045],[x,1.04,z],'steel',.006));upright.userData.visualRole='FGM2_OPEN_FRAME_UPRIGHT_REFERENCE';
+   }
 
    if(i===1){
     this.group(a,'fgm2-feed-table','Blank stack / feeder table',[0,0,0],[0,.10,.10]);
@@ -1294,7 +1308,8 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.root.userData.geometryStatus='MULTI_VENDOR_FOLDER_GLUER_PROCESS_REFERENCE__NOT_MEDIA100_IDENTITY';
   this.root.userData.exactFolderGluerOemVerified=false;
   this.root.userData.exactFolderGluerModelVerified=false;
-  this.root.userData.referenceNote='FGM-2 has no OEM/model/serial in the BMJ registry. The former nearest-MEDIA-100-II morphology is removed. This geometry visualizes only common folder-gluer process functions; crash-lock, 4/6-corner, glue-applicator type, glue detection, counter/kicker and downstream packing are explicit unverified boundaries.';
+  this.root.userData.referenceMorphology='BOBST_MEDIA_100_II_NEIGHBOR_FAMILY_LAYOUT_ANALOGY__OEM_UNVERIFIED';
+  this.root.userData.referenceNote='FGM-2 has no OEM/model/serial in the BMJ registry. FGM-1 and FGM-3 MEDIA 100 II provide a nearby family layout analogy for the long, open folder-gluer chassis, not identity proof. Common process zones are modeled; optional crash-lock, 4/6-corner, applicator type, detection, kicker and packer geometry is hidden because installation is unverified.';
  }
  buildBlanker(){
   this.palette.body=0xf2f1ed;this.palette.dark=0x34393b;this.palette.accent=0x4b7782;this.palette.orange=0xc56d38;this.palette.blue=0x477b9a;
