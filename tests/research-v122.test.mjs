@@ -60,17 +60,15 @@ test('V122 POLAR 115 exposes backgauge sledge clamp pressure knife drive safety 
  m.dispose();
 });
 
-test('V122 Sheeting keeps HSM-CTM7 exact boundary while adding tension slitter knife overlap and stacker references',()=>{
+test('V193 Sheeting supersedes speculative V122 option geometry with actual BMJ photo evidence',()=>{
  const m=new SheetingMachineTemplate();
- assert.equal(m.root.userData.researchVersion,'V122');assert.ok(m.root.userData.researchSourceCount>=160);
- requireRoles(m,['unwind-brake-disc','rollstand-load-cell-reference','web-tension-load-cell-reference','epc-actuator-reference','upper-slitter-knife-reference','knife-linear-guide-bearing','overlap-vacuum-box-reference','sheet-count-sensor-reference','stack-height-sensor-reference','lift-drive-sprocket-reference']);
- const slitter=m.findNode('sheeting-slitter-v122'),knife=m.findNode('sheeting-knife'),knifeDrive=m.findNode('sheeting-knife-drive-v122');
- assert.equal(slitter.userData.installedOptionUnknown,true);
- assert.match(slitter.userData.evidenceBoundary,/no public evidence confirms/i);
- assert.match(knife.userData.v122Boundary,/exact HSM-CTM7/i);
- assert.equal(knifeDrive.userData.installedActuationUnknown,true);
- assert.ok(knifeDrive.userData.serviceDetails.includes('knife drive motor'));
- assert.match(knifeDrive.userData.evidenceBoundary,/metadata rather than speculative/i);
+ assert.equal(m.root.userData.researchVersion,'V193');assert.ok(m.root.userData.researchSourceCount>=160);
+ requireRoles(m,['loaded-paper-reel','vertical-hydraulic-cylinder','roller-frame-upright','main-cutter-cabinet','long-inspection-window','main-draw-roller','white-hold-down-wheel','operator-console-face','stack-guide-handwheel']);
+ for(const id of ['sheeting-slitter-v122','sheeting-knife-drive-v122','sheeting-overlap-vacuum-v122','sheeting-stack-level-v122'])assert.equal(m.findNode(id),null,id);
+ const knife=m.findNode('sheeting-knife');
+ assert.equal(knife.userData.visibleKnifeGeometry,false);
+ assert.match(knife.userData.evidenceBoundary,/photos show the cutter behind/i);
+ assert.match(m.root.userData.installedOptionBoundary,/not rendered as installed hardware/i);
  m.dispose();
 });
 

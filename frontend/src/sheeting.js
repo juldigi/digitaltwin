@@ -6,15 +6,15 @@ import {V122_SOURCE_STATS} from './data/research-v122.js';
 export const SHEETING_VISUAL_REFERENCE=Object.freeze({
   machineId:'BMJ-MCH-0002',
   plantModel:'HSM-CTM7',
-  referenceFamily:'LEXUS HSM family · HSM 56 2014 BW visual anchors',
+  referenceFamily:'BMJ HSM-CTM7 actual photo set · Lexus HSM family process corroboration',
   year:2014,
   processDirection:'RIGHT_TO_LEFT',
   inputSide:'RIGHT',
   outputSide:'LEFT',
-  evidence:'BMJ database + user-confirmed RIGHT_TO_LEFT + BW Papersystems 2014 HSM 56 brochure/page/full-resolution machine photo + historical Lexus/HSM family listing + Indonesian Lexus process reference',
-  dimensions:'PHOTO_ANCHORED_RECONSTRUCTION_NOT_ENGINEERING',
-  visualFamily:'HSM56_LOW_REEL_INCLINED_WEB_GUIDE_HOLLOW_WINDOW_HEAD_BANDED_PROCESS_CYLINDER_BELT_OUTFEED_TOWER_STACKER',
-  visualRevision:'V68_FUNCTIONAL_DRAW_DRUM_WEB_WRAP'
+  evidence:'BMJ database + user-confirmed RIGHT_TO_LEFT + 9 user-provided actual BMJ machine photographs (22 Sep 2026) as primary exterior evidence + Lexus HSM family sources only for unresolved process/specification corroboration',
+  dimensions:'BMJ_ACTUAL_PHOTO_ANCHORED_RECONSTRUCTION_NOT_ENGINEERING',
+  visualFamily:'BMJ_ACTUAL_OPEN_TWO_SIDED_ROLLSTAND_MULTIROLLER_BRIDGE_LEXUS_CUTTER_CABINET_OPEN_BELT_TABLE_STACK_TABLE',
+  visualRevision:'V193_BMJ_ACTUAL_PHOTO_RECONSTRUCTION'
 });
 
 export class SheetingMachineTemplate{
@@ -23,9 +23,9 @@ export class SheetingMachineTemplate{
     this.root.name='MACHINE-SHEETING';
     this.root.userData={
       assetId:'BMJ-MCH-0002',machine:'SHEETING LEXUS',model:'HSM-CTM7',
-      referenceFamily:'LEXUS HSM family · HSM 56 2014 BW visual anchors',
+      referenceFamily:'BMJ HSM-CTM7 actual photo set · Lexus HSM family process corroboration',
       processDirection:'RIGHT_TO_LEFT',confidence:'IDENTITY_VERIFIED__GEOMETRY_FAMILY_PHOTO_ANCHORED',
-      visualRevision:'V68_FUNCTIONAL_DRAW_DRUM_WEB_WRAP'
+      visualRevision:'V193_BMJ_ACTUAL_PHOTO_RECONSTRUCTION'
     };
     this.nodes=[];this.parts=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.activeMeshes=[];this.detailMeshes=[];
     this.taxonomy=SHEETING_TAXONOMY;this.taxonomyById=SHEETING_TAXONOMY_BY_ID;this.exteriorOpen=false;this.ghosted=false;
@@ -34,7 +34,7 @@ export class SheetingMachineTemplate{
       dark:0x293236,steel:0x939b9b,chrome:0xcbd1d0,paper:0xe8dfcb,stackPaper:0xc9ae83,
       glass:0x78b6bb,black:0x20272a,blue:0x2f67a1,red:0xc93434,green:0x4c9b4f,bronze:0xb08b55
     };
-    this.build();this.enrichV122();
+    this.buildActualV193();this.enrichActualV193();
     for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}
     this.root.updateMatrixWorld(true);
   }
@@ -91,6 +91,246 @@ export class SheetingMachineTemplate{
     }
     return m;
   }
+
+  buildActualV193(){
+    // V193 exterior truth hierarchy:
+    // 1) user-provided BMJ HSM-CTM7 photos (22 Sep 2026) are PRIMARY for visible geometry;
+    // 2) BMJ database/user-confirmed RIGHT->LEFT fixes identity and process orientation;
+    // 3) HSM 56/OEM-family material is only used for process relationships hidden by guards.
+    // No visible flat-bed blade, slitter bank, vacuum box or rigid tower is invented when it is absent from the BMJ photos.
+
+    const photo='BMJ-SHEETING-PHOTOSET-20260922';
+    const structure=this.group(this.root,'sheeting-structure','Grounded Open Main Chassis',[0,0,0],[0,-.18,0],'VERIFIED_VISUAL');
+    for(const z of [-1.55,1.55])this.box(structure,[17.8,.15,.16],[.15,.075,z],'dark',.018,{role:'main-rail',sourceAnchor:photo});
+    for(const x of [-7.8,-6.7,-5.6,-4.5,-3.4,-2.3,-1.2,-.1,1.0,2.1,3.2,4.3,5.4,6.5,7.6,8.5]){
+      this.box(structure,[.12,.13,3.08],[x,.065,0],'steel',.010,{detail:true,role:'cross-member',sourceAnchor:photo});
+      for(const z of [-1.57,1.57])this.box(structure,[.20,.07,.22],[x,.035,z],'dark',.008,{detail:true,role:'floor-foot',sourceAnchor:photo});
+    }
+
+    // RIGHT / input. Actual BMJ photos show a two-sided fixed stand with large swept arms:
+    // one captured loaded station plus a second empty chuck position, vertical hydraulic actuators and a hose manifold.
+    const rollstand=this.group(this.root,'sheeting-rollstand','BMJ Two-Sided Rollstand',[7.15,0,0],[.66,.30,0],'VERIFIED_VISUAL');
+    const reel=this.group(rollstand,'sheeting-reel','Loaded Paper Reel / Expanding Chucks',[0,0,0],[.22,.16,0],'VERIFIED_VISUAL');
+    const reelX=.58,reelY=.88,reelR=.82;
+    const reelBody=this.cyl(reel,reelR,2.62,[reelX,reelY,0],'paper','z',{active:true,motion:'reel',role:'loaded-paper-reel',sourceAnchor:photo});
+    reelBody.userData.kinematicGroup='UNWIND_REEL';reelBody.userData.referenceWebContactRadius=reelR;
+    const reelCore=this.cyl(reel,.115,2.86,[reelX,reelY,0],'dark','z',{active:true,motion:'reel-core',detail:true,role:'reel-core',sourceAnchor:photo});
+    reelCore.userData.kinematicGroup='UNWIND_REEL';reelCore.userData.referenceWebContactRadius=reelR;
+    for(const side of [-1,1]){
+      const z=side*1.45;
+      const chuck=this.cyl(reel,.205,.18,[reelX,reelY,z],'body','z',{active:true,motion:'chuck',role:'loaded-chuck',sourceAnchor:photo});
+      chuck.userData.kinematicGroup='UNWIND_REEL';chuck.userData.referenceWebContactRadius=reelR;
+      this.cyl(reel,.075,.21,[reelX,reelY,z+side*.08],'dark','z',{detail:true,role:'chuck-center',sourceAnchor:photo});
+    }
+    const armPairs=[
+      {x:.58,y:.88,label:'loaded'},
+      {x:-1.00,y:.88,label:'empty'}
+    ];
+    for(const st of armPairs)for(const side of [-1,1]){
+      const z=side*1.47;
+      // Swept fabricated arm: lower pivot -> elbow -> chuck end.
+      this.beamXY(rollstand,[-.12,.34],[st.x-.36,.57],z,.26,.28,'light',{role:st.label+'-swept-arm-lower',sourceAnchor:photo});
+      this.beamXY(rollstand,[st.x-.36,.57],[st.x,st.y],z,.24,.28,'light',{role:st.label+'-swept-arm-upper',sourceAnchor:photo});
+      this.cyl(rollstand,.20,.18,[st.x,st.y,z],'body','z',{detail:true,role:st.label+'-chuck-housing',sourceAnchor:photo});
+      this.cyl(rollstand,.17,.25,[-.12,.34,z],'body','z',{detail:true,role:'rollstand-pivot',sourceAnchor:photo});
+      // Blue vertical actuator clearly visible in the actual stand.
+      this.box(rollstand,[.16,.78,.16],[st.x-.42,.42,side*1.57],'blue',.028,{detail:true,role:'vertical-hydraulic-cylinder',sourceAnchor:photo});
+      this.cyl(rollstand,.035,.35,[st.x-.42,.96,side*1.57],'chrome','y',{detail:true,role:'hydraulic-rod',sourceAnchor:photo});
+    }
+    for(const side of [-1,1]){
+      this.box(rollstand,[2.90,.16,.34],[-.20,.10,side*1.48],'light',.018,{role:'rollstand-side-base',sourceAnchor:photo});
+      this.box(rollstand,[.30,.54,.30],[-.10,.31,side*1.48],'body',.022,{role:'pivot-pedestal',sourceAnchor:photo});
+    }
+    const manifold=this.group(rollstand,'sheeting-rollstand-manifold','Hydraulic Hose / Valve Manifold',[-.30,0,0],[.10,.10,0],'VERIFIED_VISUAL');
+    this.box(manifold,[.72,.70,.40],[-.10,1.48,0],'body',.025,{cover:true,role:'hydraulic-manifold-box',sourceAnchor:photo});
+    for(let i=0;i<8;i++)this.cyl(manifold,.042,.10,[-.38+i*.11,1.88,0],'dark','y',{detail:true,role:'hose-port',sourceAnchor:photo});
+    for(let i=0;i<6;i++)this.torus(manifold,.10,.015,[-.28+i*.11,1.64,0],'black',{detail:true,role:'hose-loop',sourceAnchor:photo});
+
+    // Tall narrow unwind control pedestal in the BMJ photos.
+    const unwindPanel=this.group(rollstand,'sheeting-unwind-panel','Unwind Pneumatic / Hydraulic Control Pedestal',[-.48,0,-1.82],[.10,.12,-.18],'VERIFIED_VISUAL');
+    this.box(unwindPanel,[.58,1.36,.36],[0,.73,0],'body',.030,{cover:true,role:'unwind-control-cabinet',sourceAnchor:photo});
+    for(let i=0;i<6;i++){
+      this.cyl(unwindPanel,.045,.025,[-.18+(i%2)*.22,1.08-Math.floor(i/2)*.22,-.20],i<2?'dark':'black','z',{detail:true,role:'unwind-selector',sourceAnchor:photo});
+      this.cyl(unwindPanel,.028,.026,[-.18+(i%2)*.22,1.08-Math.floor(i/2)*.22,-.23],i%3===0?'red':'green','z',{detail:true,role:'unwind-indicator',sourceAnchor:photo});
+    }
+
+    // Actual open multi-roller bridge. This replaces V68's compact four-roller inclined frame.
+    const feed=this.group(this.root,'sheeting-feed','Open Multi-Roller Web Guide Bridge',[4.95,0,0],[.45,.36,0],'VERIFIED_VISUAL');
+    const feedFrame=this.group(feed,'sheeting-feed-frame','Long Open Two-Sided Roller Frame',[0,0,0],[.12,.10,0],'VERIFIED_VISUAL');
+    for(const z of [-1.43,1.43]){
+      for(const x of [-1.42,1.42])this.box(feedFrame,[.19,2.36,.20],[x,1.18,z],'light',.018,{role:'roller-frame-upright',sourceAnchor:photo});
+      this.box(feedFrame,[3.05,.20,.22],[0,2.31,z],'light',.016,{role:'roller-frame-top-beam',sourceAnchor:photo});
+      this.beamXY(feedFrame,[-1.42,.45],[1.42,1.08],z,.16,.20,'light',{role:'roller-frame-lower-brace',sourceAnchor:photo});
+    }
+    this.box(feedFrame,[.20,.18,3.00],[-1.42,2.28,0],'body',.014,{role:'bridge-cross-member',sourceAnchor:photo});
+    this.box(feedFrame,[.20,.18,3.00],[1.42,2.28,0],'body',.014,{role:'bridge-cross-member',sourceAnchor:photo});
+
+    const feedRollers=this.group(feed,'sheeting-feed-rollers','Actual Open Guide / Tension Roller Bank',[0,0,0],[.06,.10,0],'VERIFIED_VISUAL');
+    const rollerSpec=[
+      [1.30,1.55,.095],[.92,2.02,.105],[.48,1.73,.095],[.06,1.38,.105],
+      [-.38,1.96,.095],[-.82,1.53,.110],[-1.18,1.10,.105]
+    ];
+    for(const [x,y,r] of rollerSpec){
+      const rr=this.roller(feedRollers,x,y,r,{span:2.62,kind:'chrome',motion:'guide-roller',bearings:false,sourceAnchor:photo});
+      rr.userData.kinematicGroup='WEB_CONTACT';
+      for(const side of [-1,1])this.box(feedRollers,[.19,.21,.13],[x,y,side*1.38],'bodyDark',.012,{detail:true,role:'roller-bearing-block',sourceAnchor:photo});
+    }
+    // Visible low turquoise roller at floor level.
+    const lowRoll=this.cyl(feedRollers,.145,2.66,[-.55,.42,0],'body','z',{active:true,motion:'guide-roller',role:'low-turquoise-guide-roller',sourceAnchor:photo});
+    lowRoll.userData.kinematicGroup='WEB_CONTACT';
+
+    const epc=this.group(feed,'sheeting-epc','Edge Guide Sensor / Web Alignment Reference',[-.92,0,0],[.05,.08,0],'PROCESS_FAMILY_REFERENCE');
+    this.box(epc,[.72,.10,2.34],[0,.88,0],'steel',.008,{detail:true,role:'edge-guide-crossbar',sourceAnchor:photo});
+    for(const side of [-1,1])this.box(epc,[.12,.28,.12],[0,.77,side*.92],'bodyDark',.009,{detail:true,role:'edge-guide-head',sourceAnchor:photo});
+
+    // Enclosed LEXUS cutter/main-drive body exactly follows the BMJ exterior: large teal cabinet,
+    // long silver viewing panel/window and exposed entry nip/roller train. Internal knife geometry is intentionally hidden.
+    const head=this.group(this.root,'sheeting-cutter','LEXUS Enclosed Main Cutter / Drive Cabinet',[2.05,0,0],[0,.52,0],'VERIFIED_VISUAL');
+    this.box(head,[2.45,2.40,3.02],[0,1.22,0],'body',.045,{cover:true,role:'main-cutter-cabinet',sourceAnchor:photo});
+    this.box(head,[2.20,.25,3.10],[-.06,2.47,0],'bodyDark',.030,{cover:true,role:'cutter-top-cap',sourceAnchor:photo});
+    this.box(head,[.62,1.52,.20],[1.45,1.08,-1.48],'body',.030,{cover:true,role:'input-side-guard-box',sourceAnchor:photo});
+    this.box(head,[.60,1.34,.20],[-1.42,1.00,-1.48],'body',.030,{cover:true,role:'output-side-guard-box',sourceAnchor:photo});
+
+    const window=this.group(head,'sheeting-window','LEXUS Long Inspection Window / Brand Panel',[0,0,0],[0,.12,-.18],'VERIFIED_VISUAL');
+    this.box(window,[1.72,.62,.055],[-.10,1.69,-1.545],'light',.012,{cover:true,role:'inspection-panel-frame',sourceAnchor:photo});
+    this.box(window,[1.48,.39,.025],[-.10,1.70,-1.585],'glass',.006,{cover:true,role:'long-inspection-window',sourceAnchor:photo});
+    const brand=this.box(window,[.58,.22,.030],[.24,1.69,-1.625],'white',.005,{cover:true,detail:true,role:'lexus-brand-plate',sourceAnchor:photo});
+    brand.userData.label='LEXUS';
+
+    const process=this.group(head,'sheeting-main-rollers','Main Infeed / Draw / Nip Roller Train',[0,0,0],[0,.20,0],'VERIFIED_VISUAL');
+    const headRolls=[
+      [1.42,1.18,.17,'input-nip-roller'],
+      [1.06,.88,.13,'lower-input-roller'],
+      [.66,1.35,.16,'main-draw-roller'],
+      [.15,.90,.12,'cutter-transfer-roller'],
+      [-.92,.88,.11,'cutter-exit-roller']
+    ];
+    for(const [x,y,r,role] of headRolls){
+      const rr=this.cyl(process,r,2.58,[x,y,0],role==='main-draw-roller'?'dark':'chrome','z',{active:true,motion:role==='main-draw-roller'?'draw-roller':'pull-roller',role,sourceAnchor:photo});
+      rr.userData.kinematicGroup='WEB_CONTACT';
+      for(const side of [-1,1])this.box(process,[.20,.22,.13],[x,y,side*1.36],'bodyDark',.014,{detail:true,role:'head-bearing-block',sourceAnchor:photo});
+    }
+
+    // Taxonomy keeps a selectable cut-zone node, but there is deliberately no visible blade mesh.
+    const knife=this.group(head,'sheeting-knife','Internal Cross-Cut Zone · Guarded',[0,0,0],[0,.18,0],'VERIFIED_VISUAL__INTERNAL_MECHANISM_UNRESOLVED');
+    knife.userData.visibleKnifeGeometry=false;
+    knife.userData.evidenceBoundary='Actual BMJ photos show the cutter behind the LEXUS enclosure. Blade type/stroke is not exposed, therefore V193 does not render a fictional blade.';
+    const transport=this.group(head,'sheeting-cutter-transport','Cutter Entry / Exit Apron',[0,0,0],[0,.10,0],'VERIFIED_VISUAL');
+    this.box(transport,[2.32,.10,2.65],[-.05,.66,0],'steel',.012,{role:'cutter-apron',sourceAnchor:photo});
+    for(const z of [-1.06,-.79,-.52,-.25,.02,.29,.56,.83,1.10])this.box(transport,[2.18,.022,.048],[-.05,.725,z],'black',.002,{detail:true,role:'cutter-apron-strip',sourceAnchor:photo});
+
+    // Long open delivery table from actual photos: green belt field, polished shafts/rollers,
+    // white hold-down wheels, multiple black handwheels and adjustable crossrails.
+    const delivery=this.group(this.root,'sheeting-delivery','Open Belt Delivery / Alignment Table',[-1.05,0,0],[-.58,.36,0],'VERIFIED_VISUAL');
+    for(const z of [-1.42,1.42]){
+      this.box(delivery,[5.15,.22,.18],[0,.52,z],'light',.018,{role:'delivery-side-rail',sourceAnchor:photo});
+      for(const x of [-2.35,-1.30,-.25,.80,1.85,2.35])this.box(delivery,[.12,.52,.12],[x,.25,z],'steel',.008,{role:'delivery-leg',sourceAnchor:photo});
+    }
+    this.box(delivery,[5.02,.08,2.68],[0,.76,0],'steel',.010,{role:'open-delivery-bed',sourceAnchor:photo});
+
+    const fastBelts=this.group(delivery,'sheeting-fast-belts','Upstream Green Belt Zone',[0,0,0],[0,.05,0],'VERIFIED_VISUAL');
+    const slowBelts=this.group(delivery,'sheeting-slow-belts','Mid Delivery Belt Zone',[0,0,0],[0,.05,0],'VERIFIED_VISUAL');
+    const overlapBelts=this.group(delivery,'sheeting-overlap-belts','Downstream Alignment Belt Zone',[0,0,0],[0,.05,0],'VERIFIED_VISUAL');
+    const beltZ=[];for(let z=-1.20;z<=1.201;z+=.16)beltZ.push(+z.toFixed(2));
+    for(const z of beltZ){
+      this.box(fastBelts,[1.60,.022,.052],[1.65,.815,z],'body',.002,{detail:true,role:'fast-transport-belt',sourceAnchor:photo});
+      this.box(slowBelts,[1.45,.022,.052],[.12,.815,z],'body',.002,{detail:true,role:'slow-transport-belt',sourceAnchor:photo});
+      this.box(overlapBelts,[1.80,.022,.052],[-1.58,.815,z],'body',.002,{detail:true,role:'overlap-transport-belt',sourceAnchor:photo});
+    }
+
+    const deliveryRollers=this.group(delivery,'sheeting-delivery-rollers','Delivery Roller / Shaft Set',[0,0,0],[0,.07,0],'VERIFIED_VISUAL');
+    for(const [x,r,zone] of [[2.34,.10,'FAST'],[1.05,.075,'FAST'],[-.55,.075,'SLOW'],[-2.18,.10,'OVERLAP']]){
+      const rr=this.cyl(deliveryRollers,r,2.66,[x,.86,0],'chrome','z',{active:true,motion:'delivery-roller',role:'transport-roller',sourceAnchor:photo});
+      rr.userData.kinematicGroup='CUT_SHEET_TRANSPORT';rr.userData.transportZone=zone;
+    }
+
+    const overlap=this.group(delivery,'sheeting-overlap','Crossrail / Hold-Down Wheel Assemblies',[0,0,0],[0,.12,0],'VERIFIED_VISUAL');
+    const railX=[1.55,.55,-.55,-1.60];
+    for(const [i,x] of railX.entries()){
+      this.cyl(overlap,.032,2.80,[x,1.04,0],'chrome','z',{detail:true,role:'adjustment-crossrail',sourceAnchor:photo});
+      for(const z of [-.92,-.46,0,.46,.92]){
+        this.cyl(overlap,.095,.045,[x,1.00,z],'white','z',{detail:true,role:'white-hold-down-wheel',sourceAnchor:photo});
+        this.box(overlap,[.12,.20,.10],[x,1.13,z],'bodyDark',.006,{detail:true,role:'wheel-holder',sourceAnchor:photo});
+      }
+    }
+    const handwheel=this.group(delivery,'sheeting-outfeed-handwheel','Actual Delivery Adjustment Handwheels',[0,0,-1.57],[0,.08,-.12],'VERIFIED_VISUAL');
+    for(const [x,y,r] of [[1.55,.72,.17],[-.15,.73,.18],[-1.70,.76,.19]]){
+      this.torus(handwheel,r,.025,[x,y,0],'black',{detail:true,role:'outfeed-handwheel',sourceAnchor:photo});
+      this.cyl(handwheel,.035,.10,[x,y,.02],'dark','z',{detail:true,role:'handwheel-hub',sourceAnchor:photo});
+      for(let i=0;i<3;i++){
+        const a=i*Math.PI*2/3;
+        this.box(handwheel,[r*1.55,.026,.022],[x+Math.cos(a)*r*.30,y+Math.sin(a)*r*.30,0],'dark',.002,{detail:true,role:'handwheel-spoke',sourceAnchor:photo},[0,0,a]);
+      }
+    }
+
+    // Broad sloped operator console captured at the delivery side.
+    const control=this.group(this.root,'sheeting-control','BMJ Delivery Operator Console',[-.35,0,-1.88],[.18,.24,-.26],'VERIFIED_VISUAL');
+    this.box(control,[1.78,.62,.52],[0,.35,0],'light',.030,{cover:true,role:'operator-console-base',sourceAnchor:photo});
+    this.box(control,[1.66,.08,.46],[0,.69,-.08],'steel',.010,{cover:true,role:'operator-console-face',sourceAnchor:photo},[-.42,0,0]);
+    this.box(control,[.32,.035,.24],[.18,.735,-.28],'dark',.004,{detail:true,role:'operator-display',sourceAnchor:photo},[-.42,0,0]);
+    const buttonKinds=['green','black','red','black','green','black','black','red','green','black','black','green'];
+    buttonKinds.forEach((kind,i)=>{
+      const row=Math.floor(i/6),col=i%6;
+      this.cyl(control,.032,.030,[-.62+col*.22,.76-row*.16,-.295],kind,'z',{detail:true,role:'operator-button-selector',sourceAnchor:photo});
+    });
+
+    // LEFT/output: actual open stack/lay table, adjustable rails and pile. No invented tall mesh tower.
+    const layboy=this.group(this.root,'sheeting-layboy','Open Stack / Lay Table',[-4.90,0,0],[-.44,.30,0],'VERIFIED_VISUAL');
+    for(const z of [-1.42,1.42]){
+      this.box(layboy,[2.55,.22,.18],[0,.50,z],'light',.016,{role:'stack-table-side-rail',sourceAnchor:photo});
+      for(const x of [-1.05,0,1.05])this.box(layboy,[.12,.50,.12],[x,.25,z],'steel',.008,{role:'stack-table-leg',sourceAnchor:photo});
+    }
+    this.box(layboy,[2.44,.10,2.62],[0,.61,0],'steel',.010,{role:'stack-table-deck',sourceAnchor:photo});
+    const joggers=this.group(layboy,'sheeting-stacker-joggers','Manual Stack Guide / Backstop Assemblies',[0,0,0],[0,.06,0],'VERIFIED_VISUAL');
+    this.box(joggers,[.10,.74,2.25],[-1.00,.98,0],'light',.010,{detail:true,role:'fixed-front-stop',sourceAnchor:photo});
+    this.box(joggers,[.10,.62,2.18],[1.00,.91,0],'light',.010,{detail:true,role:'adjustable-backstop',sourceAnchor:photo});
+    for(const side of [-1,1])this.box(joggers,[1.70,.54,.065],[0,.88,side*1.08],'light',.008,{detail:true,role:'manual-side-guide',sourceAnchor:photo});
+    for(const [x,z] of [[-.72,-1.54],[.72,-1.54]]){
+      this.torus(joggers,.18,.026,[x,1.10,z],'black',{detail:true,role:'stack-guide-handwheel',sourceAnchor:photo});
+      this.cyl(joggers,.035,.10,[x,1.10,z+.03],'dark','z',{detail:true,role:'stack-guide-handwheel-hub',sourceAnchor:photo});
+    }
+
+    const lift=this.group(layboy,'sheeting-stack-lift','Flat Plate Lift / Stack Surface',[0,0,0],[0,.10,0],'FAMILY_PROCESS_REFERENCE__PHOTO_POSITION_ANCHORED');
+    for(const z of [-1.16,1.16])this.box(lift,[2.16,.10,.10],[0,.47,z],'dark',.008,{detail:true,role:'lift-support-rail',sourceAnchor:photo});
+    this.box(lift,[2.12,.12,2.36],[0,.59,0],'steel',.010,{active:true,motion:'lift-table',role:'lift-table',sourceAnchor:photo});
+    const refStack=this.group(lift,'sheeting-reference-stack','Captured Reference Paper Pile',[0,0,0],[0,.06,0],'VERIFIED_VISUAL');
+    this.box(refStack,[1.80,.38,2.10],[0,.84,0],'stackPaper',.008,{role:'reference-paper-block',sourceAnchor:photo,referenceStack:true});
+    for(let i=0;i<8;i++)this.box(refStack,[1.82,.010,2.12],[0,.66+i*.047,0],'paper',.001,{detail:true,role:'reference-paper-seam',sourceAnchor:photo,referenceStack:true});
+    this.box(refStack,[1.82,.024,2.12],[0,1.04,0],'paper',.002,{detail:true,role:'reference-paper-top',sourceAnchor:photo,referenceStack:true});
+
+    // Actual catwalk/steps beside the cutter and delivery.
+    const access=this.group(this.root,'sheeting-access','Operator Catwalk / Tread Steps',[1.05,0,1.82],[0,.20,.24],'VERIFIED_VISUAL');
+    this.box(access,[3.20,.13,.78],[-.25,.48,0],'steel',.012,{detail:true,role:'diamond-plate-catwalk',sourceAnchor:photo});
+    for(let i=0;i<3;i++)this.box(access,[.72,.11,.72],[1.72-i*.18,.10+i*.13,0],'steel',.008,{detail:true,role:'access-step',sourceAnchor:photo});
+    for(const x of [-1.70,1.10])this.box(access,[.08,1.05,.08],[x,1.00,.34],'body',.008,{detail:true,role:'catwalk-post',sourceAnchor:photo});
+    this.box(access,[2.88,.07,.07],[-.30,1.52,.34],'body',.006,{detail:true,role:'catwalk-handrail',sourceAnchor:photo});
+
+    this.root.userData.processFlow={
+      input:'RIGHT · two-sided fixed rollstand captured in BMJ photos; one loaded reel and one empty chuck station are modeled',
+      process:'RIGHT → LEFT · loaded reel → open multi-roller guide/tension bridge → guarded LEXUS cutter/main-drive cabinet → open green-belt delivery/alignment table → open stack/lay table',
+      output:'LEFT · open adjustable stack/lay table with captured paper pile',
+      idleWebGeometry:'REFERENCE_STACK_VISIBLE__MOVING_WEB_ONLY_DURING_SIMULATION',
+      direction:'RIGHT_TO_LEFT',
+      visualBasis:'BMJ_USER_PHOTOSET_20260922_PRIMARY__HSM_FAMILY_PROCESS_ONLY_WHERE_INTERNALS_ARE_GUARDED',
+      cutterArchitecture:'INTERNAL_GUARDED__ACTUAL_BMJ_PHOTOS_DO_NOT_EXPOSE_BLADE_TYPE_OR_STROKE__NO_VISIBLE_BLADE_IN_V193',
+      mainTransportFunction:'ACTUAL_OPEN_ROLLER_BANK_AND_NIP_ROLLS__WEB_PATH_PHOTO_ANCHORED',
+      windowArchitecture:'ACTUAL_LONG_LEXUS_INSPECTION_WINDOW_IN_ENCLOSED_CABINET',
+      unwindArchitecture:'ACTUAL_TWO_SIDED_FIXED_STAND__SWEPT_ARMS__VERTICAL_HYDRAULIC_ACTUATORS__ONE_CAPTURED_LOADED_STATION',
+      exactModelSearch:'HSM_CTM7_EXACT_PUBLIC_OEM_DRAWING_NOT_FOUND__ACTUAL_BMJ_PHOTOS_OVERRIDE_FAMILY_SILHOUETTE',
+      transportZones:'PHOTO_ANCHORED_OPEN_BELT_FIELD__PROCESS_TIMING_FAST_SLOW_ALIGNMENT_REMAINS_FAMILY_REFERENCE',
+      stackerArchitecture:'ACTUAL_OPEN_LAY_TABLE__NO_V68_RIGID_TOWER'
+    };
+  }
+
+  enrichActualV193(){
+    this.root.userData.researchVersion='V193';
+    this.root.userData.researchSourceCount=V122_SOURCE_STATS.total;
+    this.root.userData.detailPass='V193_BMJ_ACTUAL_PHOTO_GEOMETRY_FIRST';
+    this.root.userData.installedOptionBoundary='Visible geometry follows the 22 Sep 2026 BMJ photo set. Unseen cutter internals, slitter/vacuum options and automated jogger actuation are not rendered as installed hardware.';
+    this.root.userData.primaryVisualEvidence='BMJ_USER_PHOTOSET_20260922_IMG_2479_TO_IMG_2487';
+    this.root.userData.familyEvidenceRole='PROCESS_AND_SPEC_CORROBORATION_ONLY';
+  }
+
   build(){
     // V68 keeps the photo-anchored HSM56 silhouette and makes the dominant turquoise drum functional in the simulated web path.
     // Exact HSM-CTM7 internal cutting mechanism is still unresolved where public sources conflict.
