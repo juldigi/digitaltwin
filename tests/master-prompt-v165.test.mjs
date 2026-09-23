@@ -22,6 +22,6 @@ test('WebGL failure falls back to the actual 2D plant drawing with honest guidan
 });
 
 test('new app controller is cache-busted on existing devices',()=>{
- assert.match(html,/src\/app\.js\?v=171/);
- assert.match(sw,/factory-digital-twin-v171-history-deeplink-20260923/);
+ assert.match(html,/src\/app\.js\?v=172/);
+ assert.match(sw,/factory-digital-twin-v172-context-state-hygiene-20260923/);
 });
