@@ -967,12 +967,18 @@ function helpDialog(){
 renderPanel();renderStatus();const taxCount=$('#taxonomy-count');if(taxCount)taxCount.textContent=taxonomyStats().total.toLocaleString('id-ID');if(matchMedia('(max-width:800px)').matches)document.body.classList.add('panel-hidden');
 try{engine=new FactoryEngine($('#viewport'),part=>{const meta=taxonomyForPart(part);if(meta)selectedTaxonomyId=meta.id;choosePart(part);showPanel();renderPanel('structure');});engine.onTaxonomySelect=id=>selectTaxonomy(id,{revealPanel:false});engine.onSimulationUpdate=next=>{simulationState=next;updateSimulationPanel(next);};simulationState=engine.getPrintingSimulationState();engine.onReset=()=>{explode=0;selectedPart=null;selectedTaxonomyId=ACTIVE_ROOT;renderPanel();};engine.onError=message=>toast(message,true);$('#engine-status').textContent='Menyiapkan denah pabrik';try{engine.setLow(localStorage.getItem('offset5-low')==='1'||matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse) and (max-width:1024px)').matches);}catch{}}catch(e){renderStaticMachineFallback(e);$('#engine-status').textContent='Tampilan 3D belum tersedia';}
 try{
- bundledLayout=await loadBundledPlantLayout();bundledLayout.fleet=await loadFactoryFleet();engine?.loadLayout(activeLayout());
+ bundledLayout=await loadBundledPlantLayout();engine?.loadLayout(activeLayout());
  if(engine)engine.onFactorySelect=id=>{const m=MACHINE_REGISTRY.find(m=>m.machineId===id);if(m){selectFactoryAssetContext(m,{historyMode:'push',openDialog:false,focus:true});machineDetailDialog(m);}};
  renderStatus();redrawPlantPlan();
  await restoreHistoryContext();
- const boot=$('#boot');if(boot)boot.hidden=true;$('#engine-status').textContent=engine?'Pabrik 3D siap':'Denah tersedia · penampil 3D belum siap';
+ const boot=$('#boot');if(boot)boot.hidden=true;$('#engine-status').textContent=engine?'Denah siap · detail 3D dimuat':'Denah tersedia · penampil 3D belum siap';
  signalAppReady('ready');
+ // The complete fleet is a large compressed payload. Keep initial navigation
+ // usable even when decoding or constructing the detailed factory fails.
+ setTimeout(async()=>{
+  try{const fleet=await loadFactoryFleet();bundledLayout.fleet=fleet;engine?.loadLayout(activeLayout());$('#engine-status').textContent=engine?'Pabrik 3D siap':'Denah tersedia · penampil 3D belum siap';}
+  catch(error){console.error('[Digital Twin factory detail]',error);delete bundledLayout.fleet;try{engine?.loadLayout(activeLayout());}catch{}document.body.classList.add('workspace-2d');$('#engine-status').textContent='Denah siap · detail 3D belum tersedia';toast('Detail 3D pabrik gagal dimuat. Denah 2D tetap tersedia.',true);}
+ },1600);
 }catch(e){
  const boot=$('#boot');if(boot){boot.hidden=false;boot.innerHTML='<strong>Denah pabrik belum dapat dimuat</strong><p>Data CAD tersimpan tidak berhasil dibuka. Tidak ada geometri pengganti yang dibuat.</p><button id="boot-retry" class="primary">Muat Ulang</button>';on('#boot-retry',()=>location.reload());}
  $('#engine-status').textContent='Denah belum tersedia';toast('Denah pabrik gagal dimuat: '+e.message,true);signalAppReady('error');

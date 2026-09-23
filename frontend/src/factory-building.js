@@ -1,12 +1,11 @@
 import * as T from 'three';
-import {FACTORY_FLEET_GZIP} from './data/factory-fleet-data.js';
 import {decodePlantData} from './data/plant-actual.js';
 import {buildUtilityRoutingScaffold} from './utility-routing.js';
 import {V147_SOURCE_STATS} from './data/research-v147.js';
 import {canOpenTechnical3D} from './data/foundation-scope.js';
 import {dwgObjectSourceMetadata} from './data/dwg-fidelity.js';
-let fleetCache;
-export async function loadFactoryFleet(){return fleetCache||(fleetCache=await decodePlantData(FACTORY_FLEET_GZIP));}
+let fleetPromise;
+export function loadFactoryFleet(){return fleetPromise||(fleetPromise=import('./data/factory-fleet-data.js').then(({FACTORY_FLEET_GZIP})=>decodePlantData(FACTORY_FLEET_GZIP)).catch(error=>{fleetPromise=null;throw error;}));}
 export const MACHINE_SERVICE_CLEARANCE=1.2;
 export function machineClearanceBoxes(fleet,clearance=MACHINE_SERVICE_CLEARANCE){
  return fleet.filter(f=>f.placement.status!=='UNIDENTIFIED').map(f=>{const p=f.placement,r=p.rotation*Math.PI/180,c=Math.abs(Math.cos(r)),s=Math.abs(Math.sin(r)),w=f.size[0]*c+f.size[2]*s,d=f.size[0]*s+f.size[2]*c;return {machineId:p.machineId,label:p.label,minX:p.x-w/2-clearance,maxX:p.x+w/2+clearance,minY:p.y-d/2-clearance,maxY:p.y+d/2+clearance};});

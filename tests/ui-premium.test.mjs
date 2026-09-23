@@ -69,6 +69,15 @@ test('splash recovery is independent of module execution and document load',()=>
   }
 });
 
+test('large factory fleet loads after the first usable app state',()=>{
+  const app=fs.readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
+  const factory=fs.readFileSync(new URL('../frontend/src/factory-building.js',import.meta.url),'utf8');
+  const startup=app.slice(app.indexOf('bundledLayout=await loadBundledPlantLayout()'),app.indexOf('function scrollInspectorToTabStart'));
+  assert.ok(startup.indexOf("signalAppReady('ready')")<startup.indexOf('loadFactoryFleet()'));
+  assert.match(factory,/import\('\.\/data\/factory-fleet-data\.js'\)/);
+  assert.doesNotMatch(factory,/^import \{FACTORY_FLEET_GZIP\}/m);
+});
+
 test('icons use one accessible vector family without emoji runtime controls',()=>{
   assert.match(js,/<symbol id="i-factory"/);
   assert.match(js,/<symbol id="i-settings"/);
