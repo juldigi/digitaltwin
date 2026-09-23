@@ -15,7 +15,7 @@ function observeShellState(){
 function persistTheme(){
  const toggle=$('#ui-theme-toggle');let saved='';try{saved=localStorage.getItem('offset5-theme')||'';}catch{}
  if(saved==='light')document.body.classList.add('light-mode');toggle?.setAttribute('aria-pressed',String(document.body.classList.contains('light-mode')));
- toggle?.addEventListener('click',()=>{const light=document.body.classList.contains('light-mode');toggle.setAttribute('aria-pressed',String(light));try{localStorage.setItem('offset5-theme',light?'light':'dark');}catch{}});
+ toggle?.addEventListener('click',()=>{const light=document.body.classList.toggle('light-mode');toggle.setAttribute('aria-pressed',String(light));try{localStorage.setItem('offset5-theme',light?'light':'dark');}catch{}});
 }
 function improveControlFeedback(){
  for(const id of ['labels','tool-pan','tool-explode','tool-isolate']){const control=$(`#${id}`);if(!control)continue;control.setAttribute('aria-pressed',String(control.classList.contains('active')));control.addEventListener('click',()=>requestAnimationFrame(()=>control.setAttribute('aria-pressed',String(control.classList.contains('active')))));}
