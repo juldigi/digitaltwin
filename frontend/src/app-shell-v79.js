@@ -134,6 +134,11 @@ function openSystemLayers(){
  const panel=q('#layer-manager');panel.hidden=false;openOverlay('layers');setActiveSection(PHASE1_FOUNDATION?'factory':'system');markSection(PHASE1_FOUNDATION?'factory':'system');syncLayerControls();focusOverlay(panel,'[data-layer-close]');
 }
 function enterSimulation(){
+ if(q('#mode-3d')?.disabled){
+  q('#mode-2d')?.click();
+  const hint=q('#scene-hint');if(hint)hint.textContent='Simulasi 3D memerlukan WebGL. Denah 2D tetap tersedia di perangkat ini.';
+  return;
+ }
  beforeMajorOverlay('inspector');setActiveSection('simulation');markSection('simulation');
  document.body.classList.remove('workspace-2d');setViewMode('3d');
  q('#tool-simulation')?.click();
