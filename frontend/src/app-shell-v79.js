@@ -100,7 +100,7 @@ function markSection(section){
  }
  qa('[data-mobile-nav]').forEach(el=>{const active=el.dataset.mobileNav===section;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current')});
 }
-function closeDrawer(){document.body.classList.remove('nav-open');q('#ui-menu-toggle')?.setAttribute('aria-expanded','false');q('[data-mobile-nav="more"]')?.setAttribute('aria-expanded','false');restoreOverlayFocus('navigation','#ui-menu-toggle')}
+function closeDrawer(){document.body.classList.remove('nav-open');const menuButton=q('#ui-menu-toggle');menuButton?.setAttribute('aria-expanded','false');menuButton?.setAttribute('aria-label','Buka navigasi');q('[data-mobile-nav="more"]')?.setAttribute('aria-expanded','false');restoreOverlayFocus('navigation','#ui-menu-toggle')}
 function closeLayerManager(){const panel=q('#layer-manager');if(panel)panel.hidden=true;document.body.classList.remove('layer-open');if(getState().overlay==='layers')closeOverlay();restoreOverlayFocus('layers',PHASE1_FOUNDATION?'#nav-machine':'#nav-systems')}
 function closeInspector({restoreFocus=true}={}){document.body.classList.add('panel-hidden');document.body.classList.remove('mobile-panel-open');setInspector(false);if(restoreFocus)restoreOverlayFocus('inspector','#panel-toggle')}
 function openInspector(tab=getState().inspectorState.tab){
@@ -228,7 +228,7 @@ q('#nav-help')?.addEventListener('click',()=>{beforeMajorOverlay('modal');openOv
 q('#nav-settings')?.addEventListener('click',()=>{beforeMajorOverlay('modal');q('#settings')?.click();openOverlay('modal')});
 
 const menu=q('#ui-menu-toggle');
-menu?.addEventListener('click',()=>{const open=!document.body.classList.contains('nav-open');if(open){beforeMajorOverlay('navigation');rememberOverlayFocus('navigation')}document.body.classList.toggle('nav-open',open);menu.setAttribute('aria-expanded',String(open));if(open){openOverlay('navigation');focusOverlay(q('.rail'),'.rail button:not([hidden])')}else{closeOverlay();restoreOverlayFocus('navigation','#ui-menu-toggle')}});
+menu?.addEventListener('click',()=>{const open=!document.body.classList.contains('nav-open');if(open){beforeMajorOverlay('navigation');rememberOverlayFocus('navigation')}document.body.classList.toggle('nav-open',open);menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Tutup navigasi':'Buka navigasi');if(open){openOverlay('navigation');focusOverlay(q('.rail'),'.rail button:not([hidden])')}else{closeOverlay();restoreOverlayFocus('navigation','#ui-menu-toggle')}});
 q('#ui-backdrop')?.addEventListener('click',()=>{
  const overlay=getState().overlay;
  if(overlay==='search')closeSearch();
@@ -244,7 +244,7 @@ const MOBILE_TARGET={factory:'nav-machine',asset:'nav-assets',system:'nav-system
 qa('[data-mobile-nav]').forEach(button=>button.addEventListener('click',event=>{
  if(!matchMedia('(max-width:767px)').matches)return;
  const key=button.dataset.mobileNav;
- if(key==='more'){event.preventDefault();const open=!document.body.classList.contains('nav-open');if(open){beforeMajorOverlay('navigation');rememberOverlayFocus('navigation');document.body.classList.add('nav-open');menu?.setAttribute('aria-expanded','true');button.setAttribute('aria-expanded','true');openOverlay('navigation');focusOverlay(q('.rail'),'.rail button:not([hidden])')}else{closeDrawer();if(getState().overlay==='navigation')closeOverlay()}return}
+ if(key==='more'){event.preventDefault();const open=!document.body.classList.contains('nav-open');if(open){beforeMajorOverlay('navigation');rememberOverlayFocus('navigation');document.body.classList.add('nav-open');menu?.setAttribute('aria-expanded','true');button.setAttribute('aria-expanded','true');menu?.setAttribute('aria-label','Tutup navigasi');openOverlay('navigation');focusOverlay(q('.rail'),'.rail button:not([hidden])')}else{closeDrawer();if(getState().overlay==='navigation')closeOverlay()}return}
  const target=MOBILE_TARGET[key];if(target)q('#'+target)?.click();
 }));
 
@@ -402,7 +402,7 @@ const relabel=()=>{
  const connection=q('#connection');if(connection)connection.textContent=navigator.onLine?'Data tersedia':'Offline';
 };
 function syncAccessibleControls(state){
- const panelToggle=q('#panel-toggle');if(panelToggle)panelToggle.setAttribute('aria-expanded',String(Boolean(state.inspectorState?.open)));
+ const panelToggle=q('#panel-toggle');if(panelToggle){const open=Boolean(state.inspectorState?.open);panelToggle.setAttribute('aria-expanded',String(open));panelToggle.setAttribute('aria-label',open?'Tutup detail mesin':'Buka detail mesin')}
  const mode2d=q('#mode-2d'),mode3d=q('#mode-3d');
  if(mode2d)mode2d.setAttribute('aria-pressed',String(state.viewMode==='2d'));
  if(mode3d)mode3d.setAttribute('aria-pressed',String(state.viewMode==='3d'));
