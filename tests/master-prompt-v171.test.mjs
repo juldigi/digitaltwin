@@ -49,6 +49,12 @@ test('V171 restore preserves simple camera preset and resets stale inspection st
  assert.match(shell,/getState\(\)\.sceneMode==='machine'\?'asset':'factory'/);
 });
 
+test('V171 view-mode transitions preserve factory mode and enter technical 3D canonically',()=>{
+ assert.match(app,/scene:'factory',view:currentViewMode\(\),camera:'iso'/);
+ assert.match(app,/threeMode=\$\('#mode-3d'\),targetView=threeMode\?\.disabled\?'2d':'3d'/);
+ assert.match(app,/historyMode==='push'&&targetView==='3d'\)threeMode\?\.click\(\)/);
+});
+
 test('V171 in-place navigation never reloads the page to switch machine context',()=>{
  const switchBody=app.slice(app.indexOf('async function switchActiveMachine'),app.indexOf('function qStaticFallbackClear'));
  assert.match(switchBody,/engine\.switchMachine\(MACHINE_KEY\)/);
