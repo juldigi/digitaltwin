@@ -1,4 +1,5 @@
 import {buildActualFactory} from './factory-building.js';
+import {buildFactoryOverview} from './factory-overview.js';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
@@ -149,7 +150,7 @@ export class FactoryEngine {
     else if(l.machineAnchor&&this.machineKey==='offset5'){const anchor=l.machineAnchor,p=cadToWorld(anchor.x,anchor.y,l.transform);this.machine.position.set(p.x,anchor.z*(l.transform.scale??1),p.z);this.machine.rotation.y=-(anchor.rotation+l.transform.rotation)*Math.PI/180;this.machine.visible=true;}
   }
   loadLayout(l){if(l===this.layout&&this.factory.children.length)return;this.clearFactory();this.layout=l;if(!l)return;
-    if(l.baselineId&&l.fleet){this.actualFactory=buildActualFactory(l,l.fleet);this.factory.add(this.actualFactory.root);this.layoutStats={total:l.source.entityCount,rendered:l.actual.walls.length,unimplemented:0};return;}
+    if(l.baselineId&&(l.fleet||(this.low&&l.fleetOverview))){this.actualFactory=this.low&&l.fleetOverview?buildFactoryOverview(l,l.fleetOverview):buildActualFactory(l,l.fleet);this.factory.add(this.actualFactory.root);this.layoutStats={total:l.source.entityCount,rendered:l.actual.walls.length,unimplemented:0};return;}
     if(Array.isArray(l.referenceBatches)){
       this.layoutStats={total:l.source?.entityCount??l.referenceBatches.length,rendered:0,unimplemented:l.source?.entityCount??0};
       const profile=l.layout3D;
