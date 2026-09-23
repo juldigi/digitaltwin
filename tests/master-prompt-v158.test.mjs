@@ -63,9 +63,9 @@ test('V158 keeps the V157 foundation-only startup graph while advancing interact
  }
  assert.match(html,/app-shell-v79\.css\?v=168/);
  assert.match(html,/src\/app\.js\?v=173/);
- assert.match(html,/src\/app-shell-v79\.js\?v=173/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=174/);
  assert.match(app,/pair\('Versi aplikasi','V171'\)/);
  assert.match(shell,/v162-factory-first-systems/);
- assert.match(sw,/factory-digital-twin-v173-navigation-mode-consistency-20260923/);
+ assert.match(sw,/factory-digital-twin-v174-view-mode-visual-sync-20260923/);
  for(const excluded of ['machine-runtime.js','universal-machine.js','offset10.js','apm2.js','sheeting.js'])assert.ok(!sw.includes(excluded),excluded+' must not be pre-cached');
 });
