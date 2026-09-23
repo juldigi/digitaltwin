@@ -10,7 +10,7 @@
 <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
 <link rel="stylesheet" href="./style.css">
 <link rel="stylesheet" href="./runtime-fallback.css">
-<link rel="stylesheet" href="./app-shell-v79.css?v=167">
+<link rel="stylesheet" href="./app-shell-v79.css?v=168">
 <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/addons/"}}</script>
 </head>
 <body class="panel-hidden ui-simple">
@@ -201,7 +201,7 @@
     <details class="evidence-status"><summary><span>Sumber informasi</span><strong id="evidence-summary">Memeriksa sumber…</strong></summary><div id="evidence-detail" class="evidence-detail"></div></details>
     <div class="inspector-actions" aria-hidden="true"></div>
     <div class="tabs" role="tablist" aria-label="Bagian detail"><button role="tab" aria-selected="true" aria-controls="panel-content" tabindex="0" data-tab="overview">Ringkasan</button><button role="tab" aria-selected="false" aria-controls="panel-content" tabindex="-1" data-tab="structure">Struktur</button><button role="tab" aria-selected="false" aria-controls="panel-content" tabindex="-1" data-tab="simulation">Simulasi</button><button role="tab" aria-selected="false" aria-controls="panel-content" tabindex="-1" data-tab="data">Data</button><button role="tab" aria-selected="false" aria-controls="panel-content" tabindex="-1" data-tab="sources">Referensi</button><button role="tab" class="legacy-inspector-tab" aria-selected="false" data-tab="exterior" aria-hidden="true" tabindex="-1">Interior</button></div>
-    <div id="panel-content" class="panel-content" role="tabpanel"></div>
+    <div id="panel-content" class="panel-content" role="tabpanel"><div class="ui-panel-state ui-panel-state-loading" role="status"><span class="ui-state-spinner" aria-hidden="true"></span><strong>Menyiapkan detail…</strong><small>Memuat konteks, struktur, dan referensi yang tersedia.</small></div></div>
     <div class="panel-footer"><button id="focus-machine" class="primary">Pusatkan di 3D</button><button id="edit-position" class="secondary">Atur Posisi</button></div>
   </aside>
 </main>
@@ -220,7 +220,7 @@
 
 <dialog id="modal" aria-labelledby="modal-title" aria-modal="true"><div class="modal-head"><h2 id="modal-title"></h2><button id="modal-close" class="icon-btn" aria-label="Tutup dialog"></button></div><div id="modal-body"></div></dialog>
 <div id="toast" role="status" aria-live="polite" hidden></div>
-<script type="module" src="./src/app.js?v=165"></script>
+<script type="module" src="./src/app.js?v=168"></script>
 <script type="module" src="./src/ui-v5.js?v=167"></script>
 <script type="module" src="./src/experience-v37.js?v=164"></script>
 <script type="module" src="./src/app-shell-v79.js?v=167"></script>
