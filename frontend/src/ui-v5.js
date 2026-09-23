@@ -41,7 +41,9 @@ function bindShell(){
     toggleLauncher(false);
   });
   document.addEventListener('click',e=>{
-    if(document.body.classList.contains('nav-open')&&!e.target.closest('.rail')&&!e.target.closest('#ui-menu-toggle'))document.body.classList.remove('nav-open');
+    // app-shell-v79.js is the single owner of navigation close/open state.
+    // Keeping nav-open mutations out of this compatibility layer prevents
+    // aria-expanded, focus restoration, and overlay state from drifting.
     if(!$('#panel-launcher-menu')?.hidden&&!e.target.closest('#panel-launcher-menu')&&!e.target.closest('#panel-launcher'))toggleLauncher(false);
   });
 
