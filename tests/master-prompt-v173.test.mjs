@@ -13,8 +13,8 @@ test('V173 Factory navigation preserves the current 2D or 3D view mode',()=>{
  const start=shell.indexOf(marker);
  assert.notEqual(start,-1);
  const handler=shell.slice(start,shell.indexOf('\n',start));
- assert.match(handler,/setActiveSection\('factory'\)/);
- assert.match(handler,/markSection\('factory'\)/);
+ assert.match(handler,/navigateSection\('factory'\)/);
+ assert.match(shell,/function navigateSection\(section,[\s\S]*setActiveSection\(section\);markSection\(section\)/);
  assert.doesNotMatch(handler,/setViewMode\('3d'\)/);
  assert.doesNotMatch(handler,/workspace-2d/);
 });
@@ -38,7 +38,7 @@ test('V173 dedicated mode buttons remain the only controls that intentionally ch
 });
 
 test('V173 runtime files and service worker are cache-busted',()=>{
- assert.match(html,/src\/app\.js\?v=184/);
- assert.match(html,/src\/app-shell-v79\.js\?v=184/);
- assert.match(sw,/factory-digital-twin-v184-simulation-overlay-hardening-20260923/);
+ assert.match(html,/src\/app\.js\?v=185/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=185/);
+ assert.match(sw,/factory-digital-twin-v185-navigation-simulation-hardening-20260923/);
 });

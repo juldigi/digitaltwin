@@ -22,7 +22,7 @@ test('factory navigation presents evidence-bounded utility systems as an active 
  assert.match(html,/id="nav-systems" data-section="system"/);
  assert.match(html,/data-mobile-nav="system" aria-label="Sistem utilitas"/);
  assert.match(shell,/const PHASE1_FOUNDATION=FOUNDATION_SCOPE\.expansionMode==='LAYOUT_PLACEHOLDERS_ONLY'/);
- assert.match(shell,/if\(!PHASE1_FOUNDATION\)openSystemLayers\(\)/);
+ assert.match(shell,/if\(!PHASE1_FOUNDATION\)\{stopSimulationForNavigation\('system'\);openSystemLayers\(\)\}/);
  assert.match(shell,/const systemSurface=PHASE1_FOUNDATION\?'':/);
  assert.match(shell,/Lapisan Pabrik/);
  assert.match(css,/\.mobile-nav\{grid-template-columns:repeat\(5,minmax\(0,1fr\)\)\}/);
@@ -69,11 +69,11 @@ test('reference realism is retained in source but hidden from the default Phase-
 });
 
 test('offline cache prioritizes foundation and OFFSET 5 instead of preloading expansion machines',()=>{
- assert.match(sw,/factory-digital-twin-v184-simulation-overlay-hardening-20260923/);
+ assert.match(sw,/factory-digital-twin-v185-navigation-simulation-hardening-20260923/);
  for(const required of ['src/offset5.js','src/simulation.js','src/data/taxonomy-offset5.js','src/factory-building.js','src/data/dwg-fidelity.js'])assert.match(sw,new RegExp(required.replaceAll('/','\\/')));
  for(const excluded of ['src/offset10.js','src/apm2.js','src/sheeting.js','src/universal-machine.js','src/machine-runtime.js'])assert.doesNotMatch(sw,new RegExp(excluded.replaceAll('/','\\/')));
- assert.match(html,/app-shell-v79\.css\?v=184/);
- assert.match(html,/src\/app\.js\?v=184/);
- assert.match(html,/src\/app-shell-v79\.js\?v=184/);
+ assert.match(html,/app-shell-v79\.css\?v=185/);
+ assert.match(html,/src\/app\.js\?v=185/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=185/);
  assert.match(shell,/v162-factory-first-systems/);
 });
