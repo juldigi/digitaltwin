@@ -2,7 +2,7 @@
 // Legacy SP 102 dimensions/performance are family references because the workbook does not
 // specify an E/SE/CER/BMA suffix. They must not be presented as serial-specific OEM values.
 export const APM2_DIMENSIONS=Object.freeze({
-  source:'BMJ_MACHINE_DATABASE + LEGACY_BOBST_SP102_FAMILY_REFERENCES',
+  source:'BMJ_MACHINE_DATABASE + BOBST_SP102EII_PROCESS_AND_ENVELOPE_REFERENCES',
   units:'m',
   verified:Object.freeze({
     assetCode:'APM-2',
@@ -19,10 +19,10 @@ export const APM2_DIMENSIONS=Object.freeze({
     maxCuttingForceT:250,
     minSheetWidth:.400,
     minSheetLength:.350,
-    bodyLengthRange:[5.75,6.00],
+    bodyLengthRange:[5.75,5.82],
     bodyHeightRange:[2.15,2.20],
-    bodyWidthWithoutPlatformRange:[2.00,2.72],
-    referenceWeightKg:18700,
+    bodyWidthWithOperatorAccessReference:4.07,
+    referenceWeightKg:15000,
     gripperBarChainSetReference:14,
     intermittentStationTransportFamilyReference:true,
     suffix:'UNCONFIRMED'
@@ -32,7 +32,7 @@ export const APM2_DIMENSIONS=Object.freeze({
     bodyLength:5.82,
     bodyWidth:2.06,
     bodyHeight:2.18,
-    serviceWidth:2.72,
+    serviceWidth:4.07,
     feederCenterX:-2.12,
     registerCenterX:-1.18,
     platenCenterX:-.20,
@@ -64,6 +64,7 @@ export function apm2DimensionAudit(){
     bodyEnvelope:[d.bodyLength,d.bodyWidth,d.bodyHeight],
     familyLengthRange:r.bodyLengthRange,
     familyHeightRange:r.bodyHeightRange,
+    familyWidthWithOperatorAccessReference:r.bodyWidthWithOperatorAccessReference,
     variantSuffix:r.suffix,
     maxSheet:[APM2_DIMENSIONS.verified.maxSheetWidth,APM2_DIMENSIONS.verified.maxSheetLength]
   });
