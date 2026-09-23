@@ -44,7 +44,7 @@ test('factory meshes carry explicit foundation-scope truth metadata',()=>{
 test('factory-first boot stays covered until CAD layout is loaded and failures are explicit',()=>{
   assert.match(app,/Menyiapkan denah pabrik/);
   assert.match(app,/bundledLayout=await loadBundledPlantLayout\(\)/);
-  assert.match(app,/else showHome\(\)/);
+  assert.match(app,/await restoreHistoryContext\(\);/);
   assert.match(app,/boot\.hidden=true/);
   assert.match(app,/Denah pabrik belum dapat dimuat/);
   assert.match(app,/Tidak ada geometri pengganti yang dibuat/);
