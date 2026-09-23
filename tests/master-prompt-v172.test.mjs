@@ -32,7 +32,7 @@ test('V172 readiness survives module-order races and has a bounded fail-safe',()
 });
 
 test('V172 runtime files and service worker are cache-busted',()=>{
- assert.match(html,/src\/app\.js\?v=190/);
- assert.match(html,/src\/app-shell-v79\.js\?v=190/);
- assert.match(sw,/factory-digital-twin-v190-mobile-overlay-taxonomy-hardening-20260923/);
+ assert.match(html,/src\/app\.js\?v=191/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=191/);
+ assert.match(sw,/factory-digital-twin-v191-mobile-viewport-composition-20260923/);
 });
