@@ -9,7 +9,7 @@ const shell=fs.readFileSync(new URL('../frontend/src/app-shell-v79.js',import.me
 const sw=fs.readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 
 test('V162 restores factory-first startup even when WebGL falls back',()=>{
- const start=app.indexOf('function showHome(){');
+ const start=app.indexOf("function showHome({historyMode='none'}={}){");
  const end=app.indexOf('function connectionDialog',start);
  const home=app.slice(start,end);
  assert.match(home,/qStaticFallbackClear\(\)/);
@@ -30,10 +30,10 @@ test('V162 exposes Systems in both navigation surfaces and keeps identifiers coh
  assert.match(html,/id="nav-systems" data-section="system"/);
  assert.match(html,/data-mobile-nav="system" aria-label="Sistem utilitas"/);
  assert.match(html,/app-shell-v79\.css\?v=168/);
- assert.match(html,/src\/app\.js\?v=169/);
- assert.match(html,/src\/app-shell-v79\.js\?v=170/);
+ assert.match(html,/src\/app\.js\?v=171/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=171/);
  assert.match(shell,/v162-factory-first-systems/);
- assert.match(sw,/factory-digital-twin-v169-reference-card-selector-20260923/);
+ assert.match(sw,/factory-digital-twin-v171-history-deeplink-20260923/);
 });
 
 test('asset navigation opens an empty search instead of serializing the click event',()=>{

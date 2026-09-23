@@ -129,7 +129,7 @@ test('conditional controls explain requirements rather than failing silently',()
 });
 
 test('service worker refreshes the redesigned shell',()=>{
-  assert.match(sw,/factory-digital-twin-v169-reference-card-selector-20260923/);
+  assert.match(sw,/factory-digital-twin-v171-history-deeplink-20260923/);
   assert.doesNotMatch(sw,/src\/universal-machine\.js/);
   assert.match(app,/template\.ghost\(true,part\)/,'object selection must automatically ghost all non-selected geometry');
   for(const asset of ['app-shell-v79.css','src/app-shell-v79.js','assets/splash-industrial-v79.webp','src/ui-v5.js','src/app.js','src/simulation.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
@@ -419,10 +419,11 @@ test('runtime binds every workbench button and provides a visual fallback withou
   assert.match(app,/Final CU → X3 Delivery/);
 });
 
-test('startup routes splash directly to the Pabrik factory overview',()=>{
+test('startup resolves the requested deep-link before revealing the workspace',()=>{
   assert.match(html,/id="nav-machine"[^>]*>[\s\S]*?<small>Pabrik<\/small>/);
   assert.match(mobileStableUi,/factory:'nav-machine'/);
-  assert.match(app,/else showHome\(\)/);
+  assert.match(app,/await restoreHistoryContext\(\)/);
   assert.match(app,/Menyiapkan denah pabrik/);
-  assert.match(app,/function showHome\(\)[\s\S]*setView\('factory'\)/);
+  assert.match(app,/function showHome\(\{historyMode='none'\}=\{\}\)[\s\S]*setView\('factory'\)/);
+  assert.match(app,/if\(!route\)\{[\s\S]*showHome\(\{historyMode:'none'\}\)/);
 });

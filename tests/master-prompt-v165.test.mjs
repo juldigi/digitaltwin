@@ -8,7 +8,7 @@ const html=read('../frontend/index.html');
 const sw=read('../frontend/sw.js');
 
 test('WebGL failure falls back to the actual 2D plant drawing with honest guidance',()=>{
- const start=app.indexOf('function showHome(){');
+ const start=app.indexOf("function showHome({historyMode='none'}={}){");
  const end=app.indexOf('function connectionDialog',start);
  assert.ok(start>=0&&end>start);
  const home=app.slice(start,end);
@@ -22,6 +22,6 @@ test('WebGL failure falls back to the actual 2D plant drawing with honest guidan
 });
 
 test('new app controller is cache-busted on existing devices',()=>{
- assert.match(html,/src\/app\.js\?v=169/);
- assert.match(sw,/factory-digital-twin-v169-reference-card-selector-20260923/);
+ assert.match(html,/src\/app\.js\?v=171/);
+ assert.match(sw,/factory-digital-twin-v171-history-deeplink-20260923/);
 });

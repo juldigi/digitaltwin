@@ -44,7 +44,7 @@ test('factory meshes carry explicit foundation-scope truth metadata',()=>{
 test('factory-first boot stays covered until CAD layout is loaded and failures are explicit',()=>{
   assert.match(app,/Menyiapkan denah pabrik/);
   assert.match(app,/bundledLayout=await loadBundledPlantLayout\(\)/);
-  assert.match(app,/else showHome\(\)/);
+  assert.match(app,/await restoreHistoryContext\(\);/);
   assert.match(app,/boot\.hidden=true/);
   assert.match(app,/Denah pabrik belum dapat dimuat/);
   assert.match(app,/Tidak ada geometri pengganti yang dibuat/);
@@ -53,8 +53,8 @@ test('factory-first boot stays covered until CAD layout is loaded and failures a
 
 test('V153 cache includes the foundation policy and current cache-busted controller',()=>{
   assert.match(html,/app-shell-v79\.css\?v=168/);
-  assert.match(html,/src\/app\.js\?v=169/);
-  assert.match(html,/src\/app-shell-v79\.js\?v=170/);
-  assert.match(sw,/factory-digital-twin-v169-reference-card-selector-20260923/);
+  assert.match(html,/src\/app\.js\?v=171/);
+  assert.match(html,/src\/app-shell-v79\.js\?v=171/);
+  assert.match(sw,/factory-digital-twin-v171-history-deeplink-20260923/);
   assert.match(sw,/src\/data\/foundation-scope\.js/);
 });
