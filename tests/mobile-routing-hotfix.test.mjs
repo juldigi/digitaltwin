@@ -16,5 +16,5 @@ test('user toast never exposes raw JavaScript exception text',()=>{
 });
 
 test('HTML requests the cache-busted fixed controller',()=>{
- assert.match(html,/src\/app\.js\?v=184/);
+ assert.match(html,/src\/app\.js\?v=185/);
 });
