@@ -384,6 +384,7 @@ body.layer-open .ui-backdrop{display:block}
 .simulation-transport-open .scene-bottom{visibility:hidden;pointer-events:none}
 dialog#modal[open]{display:flex;flex-direction:column}
 #modal-body{min-height:0;overflow:auto;overscroll-behavior:contain}
+button:disabled,[aria-disabled="true"]{opacity:.52;cursor:not-allowed}
 
 @media(max-width:767px){
  .topbar .brand{min-width:0;overflow:hidden!important}
@@ -415,6 +416,12 @@ dialog#modal[open]{display:flex;flex-direction:column}
  .help-grid h3,.settings-section h3{font-size:12px}
  .help-grid p,.settings-section p{font-size:11px}
  .universal-search-result small{font-size:10px}
+ .universal-search-field input,
+ #modal-body input:not([type="checkbox"]):not([type="radio"]),
+ #modal-body select,#modal-body textarea,
+ .panel-content input:not([type="checkbox"]):not([type="radio"]),
+ .panel-content select,.panel-content textarea,
+ .asset-filter-grid input,.asset-filter-grid select{min-height:44px;font-size:16px}
 }
 @media(max-width:390px){
  .brand-copy small{display:none!important}
