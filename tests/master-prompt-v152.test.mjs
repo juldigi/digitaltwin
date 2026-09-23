@@ -12,7 +12,7 @@ test('V155 release cache keys move beyond V149/V151 sources',()=>{
   assert.match(html,/app-shell-v79\.css\?v=168/);
   assert.match(html,/src\/app\.js\?v=169/);
   assert.match(html,/src\/ui-v5\.js\?v=167/);
-  assert.match(html,/src\/app-shell-v79\.js\?v=167/);
+  assert.match(html,/src\/app-shell-v79\.js\?v=170/);
   assert.doesNotMatch(html,/\?v=149/);
   assert.match(sw,/factory-digital-twin-v169-reference-card-selector-20260923/);
 });

@@ -98,7 +98,8 @@ function markSection(section){
   el?.classList.toggle('active',active);
   if(el)el.setAttribute('aria-current',active?'page':'false');
  }
- qa('[data-mobile-nav]').forEach(el=>{const active=el.dataset.mobileNav===section;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current')});
+ const mobileSection=section==='reference'?'more':section;
+ qa('[data-mobile-nav]').forEach(el=>{const active=el.dataset.mobileNav===mobileSection;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current')});
 }
 function closeDrawer(){document.body.classList.remove('nav-open');const menuButton=q('#ui-menu-toggle');menuButton?.setAttribute('aria-expanded','false');menuButton?.setAttribute('aria-label','Buka navigasi');q('[data-mobile-nav="more"]')?.setAttribute('aria-expanded','false');restoreOverlayFocus('navigation','#ui-menu-toggle')}
 function closeLayerManager(){const panel=q('#layer-manager');if(panel)panel.hidden=true;document.body.classList.remove('layer-open');if(getState().overlay==='layers')closeOverlay();restoreOverlayFocus('layers',PHASE1_FOUNDATION?'#nav-machine':'#nav-systems')}
@@ -335,7 +336,11 @@ function syncSimulationTransport(){
 ensureLayerManager();ensureSimulationTransport();
 
 const panelContent=q('#panel-content');if(panelContent)new MutationObserver(()=>requestAnimationFrame(syncSimulationTransport)).observe(panelContent,{childList:true,subtree:true});
-q('[data-tab="simulation"]')?.addEventListener('click',()=>{setActiveSection('simulation');markSection('simulation');requestAnimationFrame(syncSimulationTransport)});
+const INSPECTOR_TAB_SECTION={overview:'asset',structure:'asset',data:'asset',exterior:'asset',simulation:'simulation',sources:'reference'};
+qa('#detail-panel [role="tab"]').forEach(tab=>tab.addEventListener('click',()=>{
+ const tabKey=tab.dataset.tab||'overview',section=INSPECTOR_TAB_SECTION[tabKey]||'asset';
+ setInspector(true,tabKey);setActiveSection(section);markSection(section);requestAnimationFrame(syncSimulationTransport);
+}));
 q('#close-panel')?.addEventListener('click',()=>{setInspector(false);if(getState().overlay==='inspector')closeOverlay();restoreOverlayFocus('inspector','#panel-toggle')});
 const modalElement=q('#modal');if(modalElement)new MutationObserver(()=>{if(modalElement.open){beforeMajorOverlay('modal');openOverlay('modal')}else if(getState().overlay==='modal')closeOverlay()}).observe(modalElement,{attributes:true,attributeFilter:['open']});
 const bodyObserver=new MutationObserver(()=>{

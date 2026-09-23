@@ -47,7 +47,7 @@ test('V162 release identifiers keep technical 3D foundation-only while restoring
  assert.match(scope,/release:'V162'/);
  assert.match(html,/app-shell-v79\.css\?v=168/);
  assert.match(html,/src\/app\.js\?v=169/);
- assert.match(html,/src\/app-shell-v79\.js\?v=167/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=170/);
  assert.match(shell,/v162-factory-first-systems/);
  assert.match(sw,/factory-digital-twin-v169-reference-card-selector-20260923/);
 });

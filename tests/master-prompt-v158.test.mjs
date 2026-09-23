@@ -63,7 +63,7 @@ test('V158 keeps the V157 foundation-only startup graph while advancing interact
  }
  assert.match(html,/app-shell-v79\.css\?v=168/);
  assert.match(html,/src\/app\.js\?v=169/);
- assert.match(html,/src\/app-shell-v79\.js\?v=167/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=170/);
  assert.match(app,/pair\('Versi aplikasi','V162'\)/);
  assert.match(shell,/v162-factory-first-systems/);
  assert.match(sw,/factory-digital-twin-v169-reference-card-selector-20260923/);

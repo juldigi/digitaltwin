@@ -74,6 +74,6 @@ test('offline cache prioritizes foundation and OFFSET 5 instead of preloading ex
  for(const excluded of ['src/offset10.js','src/apm2.js','src/sheeting.js','src/universal-machine.js','src/machine-runtime.js'])assert.doesNotMatch(sw,new RegExp(excluded.replaceAll('/','\\/')));
  assert.match(html,/app-shell-v79\.css\?v=168/);
  assert.match(html,/src\/app\.js\?v=169/);
- assert.match(html,/src\/app-shell-v79\.js\?v=167/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=170/);
  assert.match(shell,/v162-factory-first-systems/);
 });
