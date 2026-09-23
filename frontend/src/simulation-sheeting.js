@@ -2,20 +2,20 @@ import * as THREE from 'three';
 
 export const SHEETING_SIMULATION_STAGES=Object.freeze([
   'Unwind / Continuous Web',
-  'Guide / Tension / Draw Drum',
-  'Cross-Cut Event',
-  'Fast Tape Separation',
-  'Slow Tape / Overlap',
-  'Lift Table / Stacker'
+  'Open Roller Bank / Tension',
+  'Guarded Cross-Cut Zone',
+  'Fast Belt Transport',
+  'Slow Belt / Alignment',
+  'Open Stack / Lay Table'
 ]);
 
 export const SHEETING_PROCESS_STEPS=Object.freeze([
-  'Continuous web peels from the RIGHT-side reel and remains unbroken through the guide/tension section',
-  'The web follows the guide/tension path, then visibly wraps the large main draw/traction drum; drum surface travel is synchronized 1:1 with visual web advance',
-  'After the draw drum advances one target sheet length, the visible flat-bed knife family-reference descends and the sheet is released at blade contact while the upstream web remains continuous',
-  'The new sheet accelerates across the fast-tape zone so a visible gap opens behind it',
-  'The sheet transfers to the slower tape/overlap zone; reduced downstream spacing visually produces overlap before stacking',
-  'The sheet enters the stacker, settles on the pallet/pile, and the lift table lowers only as pile height approaches delivery level'
+  'The active RIGHT-side reel turns while a continuous web peels from the captured two-sided BMJ rollstand',
+  'The web travels through the actual open multi-roller bridge; visible guide and nip rollers rotate from web surface speed rather than decorative fixed RPM values',
+  'The web enters the enclosed LEXUS cutter cabinet. A cut event is timed from accumulated web travel, but V193 does not expose or animate a fictional blade because the BMJ photos do not reveal the internal cutter mechanism',
+  'The separated sheet leaves the cabinet onto the upstream green belt field and opens a controlled gap behind the next sheet',
+  'The sheet transfers through the slower open delivery/alignment table with the photo-visible shafts, crossrails, hold-down wheels and manual handwheels',
+  'The sheet lands on the open stack/lay table; the flat plate lift reference lowers only as the modeled pile approaches the delivery height'
 ]);
 
 const LOCAL_Y=new THREE.Vector3(0,1,0);
@@ -24,55 +24,49 @@ const clamp01=v=>Math.max(0,Math.min(1,v));
 export class SheetingProcessSimulation{
   constructor(machine,template){
     this.machine=machine;this.template=template;
-    this.group=new THREE.Group();this.group.name='SHEETING-PROCESS-SIMULATION-V68';machine.add(this.group);
+    this.group=new THREE.Group();this.group.name='SHEETING-PROCESS-SIMULATION-V193';machine.add(this.group);
 
     this.active=false;this.running=false;this.speed=1;this.elapsed=0;this.lastNow=null;
     this.completed=0;this.cutCount=0;this.pathVisible=false;this.inkFlowVisible=false;this.onUpdate=null;
 
-    // Normalized visual process values. They represent process relationships, not engineering speed calibration.
-    this.webLinearSpeed=1.58;
+    // These are normalized visual process values, not engineering calibration.
+    this.webLinearSpeed=1.46;
     this.targetCutLength=1.54;
     this.cutInterval=this.targetCutLength/this.webLinearSpeed;
     this.webAdvance=0;
-    this.drawDrumRadius=.425;
-    this.webContactRadius=.445;
-    this.drawDrumCenter=new THREE.Vector2(2.77,1.64);
-    this.drawDrumWrapStart=THREE.MathUtils.degToRad(20.3);
-    this.drawDrumWrapEnd=THREE.MathUtils.degToRad(-63.4);
-    this.drawDrumWrapAngle=Math.abs(this.drawDrumWrapStart-this.drawDrumWrapEnd);
-    this.bladeStrokeWindow=.15;
-    this.bladeContactDelay=this.bladeStrokeWindow/2;
-    this.bladeStrokeDistance=.075;
-    this.fastDuration=.92;
-    this.slowDuration=1.02;
-    this.overlapDuration=.86;
-    this.reelReferenceRadius=.78;
-    this.reelAngularSpeed=this.webLinearSpeed/this.reelReferenceRadius;
-    this.landingDuration=.62;
+    this.cutReleaseDelay=.07;
+    this.fastDuration=.86;
+    this.slowDuration=.98;
+    this.overlapDuration=.88;
+    this.landingDuration=.70;
     this.sheetTravel=this.fastDuration+this.slowDuration+this.overlapDuration+this.landingDuration;
     this.processCycle=this.cutInterval*6;
 
-    this.webWidth=2.02;
+    this.reelReferenceRadius=.82;
+    this.reelAngularSpeed=this.webLinearSpeed/this.reelReferenceRadius;
+    this.webWidth=2.04;
     this.webThickness=.010;
     this.sheetLength=this.targetCutLength;
-    this.sheetWidth=2.04;
+    this.sheetWidth=2.06;
     this.sheetThickness=.012;
     this.pileSheetThickness=.012;
-    this.stackX=-4.82;
-    this.palletTopY=.585;
-    this.targetStackTopY=.72;
-    this.maxLiftDrop=.42;
+
+    this.cutX=1.25;
+    this.cutY=.88;
+    this.stackX=-4.90;
+    this.palletTopY=.65;
+    this.targetStackTopY=.79;
+    this.maxLiftDrop=.38;
 
     this.sheets=[];this.pile=[];this.webFlowMarks=[];this.webRibbonSegments=[];
-
     this.sheetMaterial=new THREE.MeshStandardMaterial({color:0xf2eddf,roughness:.76,metalness:0,side:THREE.DoubleSide});
     this.webMaterial=new THREE.MeshStandardMaterial({color:0xe7e1d3,roughness:.72,metalness:0,side:THREE.DoubleSide});
     this.flowMaterial=new THREE.MeshStandardMaterial({color:0xbcae91,roughness:.62,metalness:0,transparent:true,opacity:.82});
     this.pathMaterial=new THREE.LineBasicMaterial({color:0x2d7771,transparent:true,opacity:.30});
-    this.cutMaterial=new THREE.MeshStandardMaterial({color:0xd8f0eb,emissive:0x2fa78f,emissiveIntensity:.55,transparent:true,opacity:.76});
+    this.cutMaterial=new THREE.MeshStandardMaterial({color:0xd8f0eb,emissive:0x2fa78f,emissiveIntensity:.45,transparent:true,opacity:.58});
 
     this.referenceStackMeshes=this.template.meshes.filter(m=>m.userData.referenceStack);
-    this.bladeMeshes=this.template.activeMeshes.filter(m=>m.userData.motion==='flat-bed-blade-reference');
+    this.bladeMeshes=[];
 
     this.buildPaths();
     this.buildContinuousWeb();
@@ -83,112 +77,102 @@ export class SheetingProcessSimulation{
   }
 
   buildPaths(){
-    // Surface-clearing route. V68 makes the large turquoise drum functional:
-    // the web approaches tangentially, follows a sampled contact arc, then leaves tangentially toward the blade.
+    // Photo-anchored centerline through the BMJ open roller bank and guarded LEXUS head.
+    // Points intentionally alternate above/below roller surfaces to make the web visibly use the roller train.
     const pre=[
-      new THREE.Vector3(7.18,1.61,0), // reel top
-      new THREE.Vector3(6.42,1.62,0),
-      new THREE.Vector3(6.04,1.65,0), // over guide roller 1
-      new THREE.Vector3(5.68,1.84,0), // over guide roller 2
-      new THREE.Vector3(5.30,1.42,0), // under tension roller
-      new THREE.Vector3(4.92,1.34,0), // over exit guide
-      new THREE.Vector3(4.25,1.18,0),
-      new THREE.Vector3(3.51,.90,0)   // under head infeed roller
+      new THREE.Vector3(7.73,1.70,0),
+      new THREE.Vector3(6.72,1.68,0),
+      new THREE.Vector3(6.25,1.66,0),
+      new THREE.Vector3(5.87,2.14,0),
+      new THREE.Vector3(5.43,1.60,0),
+      new THREE.Vector3(5.01,1.51,0),
+      new THREE.Vector3(4.57,2.08,0),
+      new THREE.Vector3(4.13,1.40,0),
+      new THREE.Vector3(3.77,1.22,0),
+      new THREE.Vector3(3.47,1.36,0),
+      new THREE.Vector3(3.11,.73,0),
+      new THREE.Vector3(2.71,1.18,0),
+      new THREE.Vector3(2.20,.76,0),
+      new THREE.Vector3(this.cutX,this.cutY,0)
     ];
-    const drumArc=[];
-    const arcSegments=18;
-    for(let i=0;i<=arcSegments;i++){
-      const a=THREE.MathUtils.lerp(this.drawDrumWrapStart,this.drawDrumWrapEnd,i/arcSegments);
-      drumArc.push(new THREE.Vector3(
-        this.drawDrumCenter.x+Math.cos(a)*this.webContactRadius,
-        this.drawDrumCenter.y+Math.sin(a)*this.webContactRadius,
-        0
-      ));
-    }
-    this.drawDrumContactPoints=drumArc.map(p=>p.clone());
-    pre.push(...drumArc,new THREE.Vector3(2.23,.88,0)); // blade/anvil contact line
-    this.preCutCurve=new THREE.CatmullRomCurve3(pre,false,'centripetal',.05);
+    this.preCutCurve=new THREE.CatmullRomCurve3(pre,false,'centripetal',.03);
 
     const fast=[
-      new THREE.Vector3(2.23,.88,0),
-      new THREE.Vector3(1.73,.80,0),  // below/through head transfer gap, not roller center
-      new THREE.Vector3(1.24,.84,0),
-      new THREE.Vector3(.73,.89,0),   // delivery entry roller surface
-      new THREE.Vector3(.18,.84,0),
-      new THREE.Vector3(-.45,.84,0)
+      new THREE.Vector3(this.cutX,this.cutY,0),
+      new THREE.Vector3(.96,.85,0),
+      new THREE.Vector3(.58,.84,0),
+      new THREE.Vector3(.18,.83,0),
+      new THREE.Vector3(-.20,.82,0)
     ];
     const slow=[
-      new THREE.Vector3(-.45,.84,0),
-      new THREE.Vector3(-.90,.83,0),
-      new THREE.Vector3(-1.42,.83,0),
-      new THREE.Vector3(-1.95,.83,0)
+      new THREE.Vector3(-.20,.82,0),
+      new THREE.Vector3(-.64,.82,0),
+      new THREE.Vector3(-1.08,.82,0),
+      new THREE.Vector3(-1.56,.81,0),
+      new THREE.Vector3(-1.78,.81,0)
     ];
     const overlap=[
-      new THREE.Vector3(-1.95,.83,0),
-      new THREE.Vector3(-2.45,.82,0),
-      new THREE.Vector3(-2.95,.82,0),
-      new THREE.Vector3(-3.45,.81,0),
-      new THREE.Vector3(-3.78,.80,0)
+      new THREE.Vector3(-1.78,.81,0),
+      new THREE.Vector3(-2.20,.80,0),
+      new THREE.Vector3(-2.65,.80,0),
+      new THREE.Vector3(-3.10,.79,0),
+      new THREE.Vector3(-3.55,.78,0)
     ];
     const landing=[
-      new THREE.Vector3(-3.78,.80,0),
-      new THREE.Vector3(-4.05,.79,0),
-      new THREE.Vector3(-4.28,.76,0),
-      new THREE.Vector3(-4.55,.71,0),
+      new THREE.Vector3(-3.55,.78,0),
+      new THREE.Vector3(-3.90,.77,0),
+      new THREE.Vector3(-4.22,.75,0),
+      new THREE.Vector3(-4.55,.72,0),
       new THREE.Vector3(this.stackX,this.targetStackTopY,0)
     ];
 
-    this.fastCurve=new THREE.CatmullRomCurve3(fast,false,'centripetal',.05);
-    this.slowCurve=new THREE.CatmullRomCurve3(slow,false,'centripetal',.05);
-    this.overlapCurve=new THREE.CatmullRomCurve3(overlap,false,'centripetal',.05);
-    this.landingCurve=new THREE.CatmullRomCurve3(landing,false,'centripetal',.05);
+    this.fastCurve=new THREE.CatmullRomCurve3(fast,false,'centripetal',.03);
+    this.slowCurve=new THREE.CatmullRomCurve3(slow,false,'centripetal',.03);
+    this.overlapCurve=new THREE.CatmullRomCurve3(overlap,false,'centripetal',.03);
+    this.landingCurve=new THREE.CatmullRomCurve3(landing,false,'centripetal',.03);
 
     const debugPts=[
-      ...this.preCutCurve.getPoints(72),
+      ...this.preCutCurve.getPoints(88),
       ...this.fastCurve.getPoints(24).slice(1),
-      ...this.slowCurve.getPoints(18).slice(1),
-      ...this.overlapCurve.getPoints(26).slice(1),
+      ...this.slowCurve.getPoints(20).slice(1),
+      ...this.overlapCurve.getPoints(24).slice(1),
       ...this.landingCurve.getPoints(20).slice(1)
     ];
     const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints(debugPts),this.pathMaterial);
-    line.name='Sheeting V68 process centerline reference';
-    line.visible=this.pathVisible;
+    line.name='Sheeting V193 BMJ process centerline';line.visible=this.pathVisible;
     this.group.add(line);this.path=line;
   }
 
   makeRibbonSegment(a,b,index){
     const mid=a.clone().add(b).multiplyScalar(.5);
     const d=b.clone().sub(a),len=Math.max(.02,Math.hypot(d.x,d.y));
-    const mesh=new THREE.Mesh(new THREE.BoxGeometry(len+.015,this.webThickness,this.webWidth),this.webMaterial);
-    mesh.position.copy(mid);
-    mesh.rotation.z=Math.atan2(d.y,d.x);
-    mesh.name='Continuous web ribbon '+index;
-    mesh.userData={webRibbon:true};
-    mesh.castShadow=false;mesh.receiveShadow=true;
-    this.group.add(mesh);this.webRibbonSegments.push(mesh);
+    const mesh=new THREE.Mesh(new THREE.BoxGeometry(len+.012,this.webThickness,this.webWidth),this.webMaterial);
+    mesh.position.copy(mid);mesh.rotation.z=Math.atan2(d.y,d.x);
+    mesh.name='Continuous web ribbon '+index;mesh.userData={webRibbon:true};
+    mesh.castShadow=false;mesh.receiveShadow=true;this.group.add(mesh);this.webRibbonSegments.push(mesh);
   }
 
   buildContinuousWeb(){
-    const pts=this.preCutCurve.getPoints(84);
+    const pts=this.preCutCurve.getPoints(96);
     for(let i=0;i<pts.length-1;i++)this.makeRibbonSegment(pts[i],pts[i+1],i);
     for(const m of this.webRibbonSegments)m.visible=false;
   }
 
   buildFlowMarkers(){
-    const geo=new THREE.BoxGeometry(.055,.016,this.webWidth*1.01);this.webFlowGeometry=geo;
-    for(let i=0;i<7;i++){
-      const mark=new THREE.Mesh(geo,this.flowMaterial);
+    this.webFlowGeometry=new THREE.BoxGeometry(.055,.016,this.webWidth*1.01);
+    for(let i=0;i<8;i++){
+      const mark=new THREE.Mesh(this.webFlowGeometry,this.flowMaterial);
       mark.visible=false;mark.name='Web travel stripe';mark.userData.webMarker=true;
       this.group.add(mark);this.webFlowMarks.push(mark);
     }
   }
 
   buildCutIndicator(){
-    const geo=new THREE.BoxGeometry(.055,.055,this.sheetWidth*1.03);this.cutIndicatorGeometry=geo;
-    this.cutIndicator=new THREE.Mesh(geo,this.cutMaterial);
-    this.cutIndicator.position.set(2.23,.91,0);
-    this.cutIndicator.name='Cross-cut event indicator';
-    this.cutIndicator.visible=false;
+    // Diagnostic event marker lives inside the guarded cabinet. It only becomes visible when cutaway is open.
+    this.cutIndicatorGeometry=new THREE.BoxGeometry(.045,.045,this.sheetWidth*1.02);
+    this.cutIndicator=new THREE.Mesh(this.cutIndicatorGeometry,this.cutMaterial);
+    this.cutIndicator.position.set(this.cutX,this.cutY,0);
+    this.cutIndicator.name='Guarded cross-cut event marker';this.cutIndicator.visible=false;
     this.group.add(this.cutIndicator);
   }
 
@@ -196,10 +180,8 @@ export class SheetingProcessSimulation{
     this.sheetGeometry=new THREE.BoxGeometry(this.sheetLength,this.sheetThickness,this.sheetWidth);
     for(let i=0;i<12;i++){
       const mesh=new THREE.Mesh(this.sheetGeometry,this.sheetMaterial);
-      mesh.visible=false;mesh.name='Separated cut sheet';
-      mesh.userData={cutSheet:true,cutId:0};
-      mesh.castShadow=true;mesh.receiveShadow=true;
-      this.group.add(mesh);this.sheets.push(mesh);
+      mesh.visible=false;mesh.name='Separated cut sheet';mesh.userData={cutSheet:true,cutId:0};
+      mesh.castShadow=true;mesh.receiveShadow=true;this.group.add(mesh);this.sheets.push(mesh);
     }
   }
 
@@ -207,10 +189,8 @@ export class SheetingProcessSimulation{
     this.pileGeometry=new THREE.BoxGeometry(this.sheetLength*.985,this.pileSheetThickness,this.sheetWidth*.985);
     for(let i=0;i<48;i++){
       const mesh=new THREE.Mesh(this.pileGeometry,this.sheetMaterial);
-      mesh.visible=false;mesh.name='Finished stacked sheet';
-      mesh.userData={finishedSheet:true};
-      mesh.position.set(this.stackX,this.palletTopY,0);
-      mesh.castShadow=false;mesh.receiveShadow=true;
+      mesh.visible=false;mesh.name='Finished stacked sheet';mesh.userData={finishedSheet:true};
+      mesh.position.set(this.stackX,this.palletTopY,0);mesh.castShadow=false;mesh.receiveShadow=true;
       this.group.add(mesh);this.pile.push(mesh);
     }
   }
@@ -218,12 +198,12 @@ export class SheetingProcessSimulation{
   state(){
     const leadAge=this.cutCount>0?Math.max(0,this.elapsed-this.cutCount*this.cutInterval):0;
     let stageIndex=0;
-    if(this.cutCount===0)stageIndex=this.elapsed<this.cutInterval*.45?0:1;
-    else if(leadAge<.12)stageIndex=2;
+    if(this.cutCount===0)stageIndex=this.elapsed<this.cutInterval*.48?0:1;
+    else if(leadAge<this.cutReleaseDelay+.09)stageIndex=2;
     else if(leadAge<this.fastDuration)stageIndex=3;
     else if(leadAge<this.fastDuration+this.slowDuration+this.overlapDuration)stageIndex=4;
     else stageIndex=5;
-
+    const eventWindow=.14,phaseSinceCut=this.cutCount>0?this.elapsed-this.cutCount*this.cutInterval:Infinity;
     return {
       available:true,blocked:false,active:this.active,running:this.running,paused:this.active&&!this.running,speed:this.speed,
       stage:SHEETING_SIMULATION_STAGES[stageIndex],completed:this.completed,cutCount:this.cutCount,
@@ -232,30 +212,19 @@ export class SheetingProcessSimulation{
       webFlowMarksVisible:this.webFlowMarks.filter(s=>s.visible).length,
       webRibbonSegmentsVisible:this.webRibbonSegments.filter(s=>s.visible).length,
       pileSheetsVisible:this.pile.filter(s=>s.visible).length,
-      rotorCount:this.template.activeMeshes.filter(m=>/reel|chuck|roller|drum/.test(m.userData.motion||'')).length,
-      oscillatorCount:0,
-      mechanismCount:this.template.activeMeshes.length,
-      inkFlowCount:0,uvLampCount:0,uvActive:false,
-      pathVisible:this.pathVisible,inkFlowVisible:false,
-      transportMode:'FAST_TO_SLOW_TO_OVERLAP',
-      cutPulseVisible:this.cutIndicator.visible,
-      bladeVisible:this.bladeMeshes.some(m=>m.visible),
-      bladeCount:this.bladeMeshes.length,
-      bladeStroke:this.bladeMeshes.length?Math.max(0,this.bladeMeshes[0].userData.restPosition.y-this.bladeMeshes[0].position.y):0,
-      webAdvance:this.webAdvance,
-      targetCutLength:this.targetCutLength,
-      drawDrumFunctional:true,
-      drawDrumSurfaceSpeed:this.webLinearSpeed,
-      drawDrumAngularSpeed:this.webLinearSpeed/this.drawDrumRadius,
-      drawDrumWrapDegrees:THREE.MathUtils.radToDeg(this.drawDrumWrapAngle),
-      drawDrumContactPointCount:this.drawDrumContactPoints.length,
-      reelFunctional:true,
-      reelReferenceRadius:this.reelReferenceRadius,
-      reelAngularSpeed:this.reelAngularSpeed,
+      rotorCount:this.template.activeMeshes.filter(m=>/reel|chuck|roller/.test(m.userData.motion||'')).length,
+      oscillatorCount:0,mechanismCount:this.template.activeMeshes.length,
+      inkFlowCount:0,uvLampCount:0,uvActive:false,pathVisible:this.pathVisible,inkFlowVisible:false,
+      transportMode:'ACTUAL_OPEN_ROLLER_TO_FAST_SLOW_ALIGNMENT_STACK',
+      cutPulseVisible:this.active&&phaseSinceCut>=0&&phaseSinceCut<eventWindow,
+      bladeVisible:false,bladeCount:0,bladeStroke:0,visibleKnifeGeometry:false,
+      cutterMechanismEvidence:'GUARDED_INTERNAL_UNRESOLVED',
+      webAdvance:this.webAdvance,targetCutLength:this.targetCutLength,
+      drawDrumFunctional:false,drawDrumSurfaceSpeed:0,drawDrumAngularSpeed:0,drawDrumWrapDegrees:0,drawDrumContactPointCount:0,
+      drawRollFunctional:true,drawRollSurfaceSpeed:this.webLinearSpeed,
+      reelFunctional:true,reelReferenceRadius:this.reelReferenceRadius,reelAngularSpeed:this.reelAngularSpeed,
       reelSurfaceSpeed:this.reelAngularSpeed*this.reelReferenceRadius,
-      bladeContactDelay:this.bladeContactDelay,
-      bladeStrokeWindow:this.bladeStrokeWindow,
-      bladePeakContactAligned:Math.abs(this.bladeContactDelay-this.bladeStrokeWindow/2)<1e-12,
+      cutReleaseDelay:this.cutReleaseDelay,
       fastTapeLinearSpeed:this.fastCurve.getLength()/this.fastDuration,
       slowTapeLinearSpeed:this.slowCurve.getLength()/this.slowDuration,
       overlapTapeLinearSpeed:this.overlapCurve.getLength()/this.overlapDuration
@@ -279,8 +248,7 @@ export class SheetingProcessSimulation{
     for(const s of this.webFlowMarks)s.visible=false;
     for(const s of this.webRibbonSegments)s.visible=false;
     for(const s of this.pile)s.visible=false;
-    this.cutIndicator.visible=false;
-    this.restoreMechanisms();this.setReferenceStackVisible(true);
+    this.cutIndicator.visible=false;this.restoreMechanisms();this.setReferenceStackVisible(true);
     this.onUpdate?.(this.state());return this.state();
   }
   setSpeed(v){this.speed=Math.max(.35,Math.min(2,+v||1));this.onUpdate?.(this.state());return this.state();}
@@ -313,38 +281,22 @@ export class SheetingProcessSimulation{
     const {liftDrop}=this.currentPileMetrics();
     for(const m of this.template.activeMeshes){
       const motion=m.userData.motion||'';
-      if(motion==='draw-drum-reference'){
-        // Surface travel equals web travel: theta = s / r.
-        this.spinFromRest(m,-this.webAdvance/this.drawDrumRadius);
-      }else if(m.userData.kinematicGroup==='UNWIND_REEL'){
-        // Reel body, core and chucks share one angular velocity. The .78 m visible radius is a visual reference, not a live roll-diameter measurement.
+      if(m.userData.kinematicGroup==='UNWIND_REEL'){
         this.spinFromRest(m,-this.elapsed*this.reelAngularSpeed);
       }else if(m.userData.kinematicGroup==='WEB_CONTACT'){
         const radius=Math.max(.001,m.userData.surfaceRadius||.1);
         this.spinFromRest(m,-this.elapsed*(this.webLinearSpeed/radius));
       }else if(m.userData.kinematicGroup==='CUT_SHEET_TRANSPORT'){
         const radius=Math.max(.001,m.userData.surfaceRadius||.082);
-        const linear=m.userData.transportZone==='FAST'?this.fastCurve.getLength()/this.fastDuration:this.overlapCurve.getLength()/this.overlapDuration;
+        let linear=this.slowCurve.getLength()/this.slowDuration;
+        if(m.userData.transportZone==='FAST')linear=this.fastCurve.getLength()/this.fastDuration;
+        else if(m.userData.transportZone==='OVERLAP')linear=this.overlapCurve.getLength()/this.overlapDuration;
         this.spinFromRest(m,-this.elapsed*(linear/radius));
       }else if(/reel|chuck|roller/.test(motion)){
-        // Fallback only for future unclassified visualization surfaces.
         const radius=Math.max(.001,m.userData.surfaceRadius||.1);
         this.spinFromRest(m,-this.elapsed*(this.webLinearSpeed/radius));
       }
-      if(motion==='flat-bed-blade-reference'){
-        const phaseSinceCut=this.cutCount>0?this.elapsed-this.cutCount*this.cutInterval:Infinity;
-        const q=phaseSinceCut>=0&&phaseSinceCut<this.bladeStrokeWindow?phaseSinceCut/this.bladeStrokeWindow:0;
-        const stroke=q>0&&q<1?Math.sin(q*Math.PI)*this.bladeStrokeDistance:0;
-        m.position.y=m.userData.restPosition.y-stroke;
-      }
       if(motion==='lift-table')m.position.y=m.userData.restPosition.y-liftDrop;
-      if(motion==='stack-jogger-x'){
-        m.position.x=m.userData.restPosition.x+Math.sin(this.elapsed*18)*.012;
-      }
-      if(motion==='stack-jogger-z'){
-        const sign=m.userData.restPosition.z>=0?1:-1;
-        m.position.z=m.userData.restPosition.z-sign*(.010+.006*Math.sin(this.elapsed*20));
-      }
     }
   }
 
@@ -356,8 +308,7 @@ export class SheetingProcessSimulation{
       const t=(phase+i/this.webFlowMarks.length)%1;
       const p=this.preCutCurve.getPointAt(t),tangent=this.preCutCurve.getTangentAt(t);
       mark.position.copy(p);mark.position.y+=.016;
-      mark.rotation.set(0,0,Math.atan2(tangent.y,tangent.x));
-      mark.visible=this.active;
+      mark.rotation.set(0,0,Math.atan2(tangent.y,tangent.x));mark.visible=this.active;
     }
   }
 
@@ -369,27 +320,23 @@ export class SheetingProcessSimulation{
   sheetPoseForAge(age,pileTop){
     if(age<0||age>=this.sheetTravel)return null;
     if(age<this.fastDuration){
-      const k=age/this.fastDuration,{p,tan,angle}=this.curvePose(this.fastCurve,k);
+      const {p,tan,angle}=this.curvePose(this.fastCurve,age/this.fastDuration);
       return {p,tan,angle,zone:'FAST'};
     }
     age-=this.fastDuration;
     if(age<this.slowDuration){
-      const k=age/this.slowDuration,{p,tan,angle}=this.curvePose(this.slowCurve,k);
+      const {p,tan,angle}=this.curvePose(this.slowCurve,age/this.slowDuration);
       return {p,tan,angle,zone:'SLOW'};
     }
     age-=this.slowDuration;
     if(age<this.overlapDuration){
       const k=age/this.overlapDuration,{p,tan,angle}=this.curvePose(this.overlapCurve,k);
-      // A tiny vertical offset prevents coplanar z-fighting while preserving the visual shingle effect.
-      p.y+=.008*(1-k);
-      return {p,tan,angle,zone:'OVERLAP'};
+      p.y+=.008*(1-k);return {p,tan,angle,zone:'ALIGNMENT'};
     }
     age-=this.overlapDuration;
     const k=age/this.landingDuration;let {p,tan,angle}=this.curvePose(this.landingCurve,k);
-    // During landing, use a smooth air-cushion-like descent and flatten before the sheet is committed to the pile.
     if(k>.35){
-      const q=clamp01((k-.35)/.65);
-      const smooth=q*q*(3-2*q);
+      const q=clamp01((k-.35)/.65),smooth=q*q*(3-2*q);
       p.y=THREE.MathUtils.lerp(p.y,pileTop+this.pileSheetThickness*.65,smooth);
       angle=THREE.MathUtils.lerp(angle,0,smooth);
     }
@@ -398,15 +345,14 @@ export class SheetingProcessSimulation{
 
   updateSheets(){
     this.cutCount=Math.floor(this.webAdvance/this.targetCutLength);
-    this.completed=Math.max(0,Math.floor((this.elapsed-this.sheetTravel-this.bladeContactDelay)/this.cutInterval));
+    this.completed=Math.max(0,Math.floor((this.elapsed-this.sheetTravel-this.cutReleaseDelay)/this.cutInterval));
     const pileMetrics=this.currentPileMetrics();
 
     for(const [slot,s] of this.sheets.entries()){
       const cutId=this.cutCount-slot;
       if(cutId<=0){s.visible=false;continue;}
-      const birth=cutId*this.cutInterval+this.bladeContactDelay;
-      const age=this.elapsed-birth;
-      const pose=this.sheetPoseForAge(age,pileMetrics.top);
+      const birth=cutId*this.cutInterval+this.cutReleaseDelay;
+      const age=this.elapsed-birth,pose=this.sheetPoseForAge(age,pileMetrics.top);
       if(!pose){s.visible=false;continue;}
       s.visible=this.active;s.userData.cutId=cutId;s.userData.transportZone=pose.zone;
       s.position.copy(pose.p);s.rotation.set(0,0,pose.angle);
@@ -415,19 +361,13 @@ export class SheetingProcessSimulation{
     const {visible,liftDrop}=pileMetrics;
     for(let i=0;i<this.pile.length;i++){
       const sheet=this.pile[i];sheet.visible=i<visible;
-      if(sheet.visible){
-        sheet.position.set(
-          this.stackX,
-          this.palletTopY-liftDrop+(i+.5)*this.pileSheetThickness,
-          0
-        );
-      }
+      if(sheet.visible)sheet.position.set(this.stackX,this.palletTopY-liftDrop+(i+.5)*this.pileSheetThickness,0);
     }
 
     const phaseSinceCut=this.cutCount>0?this.elapsed-this.cutCount*this.cutInterval:Infinity;
-    this.cutIndicator.visible=this.active&&phaseSinceCut>=0&&phaseSinceCut<this.bladeStrokeWindow;
+    this.cutIndicator.visible=!!this.template.exteriorOpen&&this.active&&phaseSinceCut>=0&&phaseSinceCut<.14;
     if(this.cutIndicator.visible){
-      const pulse=1+Math.sin((phaseSinceCut/this.bladeStrokeWindow)*Math.PI)*.28;
+      const pulse=1+Math.sin((phaseSinceCut/.14)*Math.PI)*.22;
       this.cutIndicator.scale.set(pulse,1,pulse);
     }else this.cutIndicator.scale.set(1,1,1);
   }
@@ -437,8 +377,7 @@ export class SheetingProcessSimulation{
     if(this.lastNow==null){this.lastNow=now;return;}
     const dt=Math.min((now-this.lastNow)/1000,.05)*this.speed;
     this.lastNow=now;this.elapsed+=dt;
-    this.updateWeb();this.updateSheets();this.updateMechanisms();
-    this.onUpdate?.(this.state());
+    this.updateWeb();this.updateSheets();this.updateMechanisms();this.onUpdate?.(this.state());
   }
 
   dispose(){
