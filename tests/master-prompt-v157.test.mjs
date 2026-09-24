@@ -40,7 +40,7 @@ test('V162 release identifiers keep technical 3D foundation-only while restoring
  assert.match(html,/src\/app\.js\?v=192/);
  assert.match(html,/src\/app-shell-v79\.js\?v=192/);
  assert.match(shell,/v162-factory-first-systems/);
- assert.match(sw,/factory-digital-twin-v192-mobile-camera-framing-20260923/);
+ assert.match(sw,/factory-digital-twin-v205-ipal-photo-actual-20260924/);
 });
 
 test('offline shell also stays free from expansion runtime modules',()=>{
