@@ -12,7 +12,7 @@ test('V194 data and source status is reachable from Settings without a floating 
  assert.doesNotMatch(html,/id="panel-launcher"/);
  assert.match(app,/id="settings-status"/);
  assert.match(app,/on\('#settings-status',\(\)=>foundationStatusDialog\(\{back:settingsDialog\}\)\)/);
- assert.match(app,/function foundationStatusDialog\(\)/);
+ assert.match(app,/function foundationStatusDialog\(\{back=null\}=\{\}\)/);
  assert.match(app,/layoutTruth\(l\)/);
  assert.match(app,/buildDwgFidelityLedger/);
  assert.match(app,/assetTruth\(state\?\.asset/);
