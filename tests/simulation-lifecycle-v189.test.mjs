@@ -24,5 +24,5 @@ test('V189 release identifiers are coherent',()=>{
  assert.match(index,/src\/app\.js\?v=197/);
  assert.match(index,/src\/app-shell-v79\.js\?v=197/);
  assert.match(sw,/factory-digital-twin-v209-architecture-convergence-20260925/);
- assert.match(app,/pair\('Versi aplikasi','V192'\)/);
+ assert.match(app,/pair\('Versi aplikasi','2026\.09\.25'\)/);
 });
