@@ -21,9 +21,9 @@ test('V167 visible toggles expose canonical expanded and pressed state',()=>{
  assert.match(html,/id="panel-toggle"[^>]+aria-expanded="false"[^>]+aria-controls="detail-panel"/);
  assert.match(html,/id="mode-2d" aria-pressed="false"/);
  assert.match(html,/id="mode-3d" class="active" aria-pressed="true"/);
- assert.match(html,/id="tool-explode" aria-pressed="false"/);
- assert.match(html,/id="tool-isolate" aria-pressed="false"/);
- assert.match(html,/id="tool-interior" aria-pressed="false"/);
+ assert.match(html,/id="tool-explode"[^>]*aria-pressed="false"/);
+ assert.match(html,/id="tool-isolate"[^>]*aria-pressed="false"/);
+ assert.match(html,/id="tool-interior"[^>]*aria-pressed="false"/);
  assert.match(html,/id="labels"[^>]+aria-pressed="true"/);
  assert.match(shell,/function syncAccessibleControls/);
  assert.match(shell,/function syncPressedTools/);
