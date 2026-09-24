@@ -19,14 +19,14 @@ test('service-worker Phase-1 shell cache references only deployable frontend fil
  for(const required of [
   'src/app.js','src/app-shell-v79.js','src/state/app-state.js','src/engine.js','src/offset5.js','src/simulation.js',
   'src/data/foundation-scope.js','src/data/truth-status.js','src/data/dwg-fidelity.js','src/data/taxonomy-offset5.js',
-  'src/factory-building.js','src/utility-routing.js','src/data/plant-actual.js','src/data/factory-fleet-data.js','src/data/ipal-photo-evidence-v205.js'
+  'src/factory-building.js','src/utility-routing.js','src/data/plant-actual.js','src/data/factory-fleet-data.js','src/data/ipal-photo-evidence-v206.js'
  ])assert.ok(paths.includes(required),required+' missing from Phase-1 offline shell');
  assert.equal(new Set(paths).size,paths.length,'service-worker shell cache should not contain duplicate asset paths');
  for(const path of paths)assert.ok(cacheSourceExists(path),path+' is listed in sw.js but is neither a frontend source nor a build-generated Three.js asset');
 });
 
 test('service-worker cache version advances with the Phase-1 foundation release',()=>{
- assert.match(sw,/factory-digital-twin-v207-superadmin-editor-20260924/);
+ assert.match(sw,/factory-digital-twin-v208-editor-ipal-cache-20260924/);
 });
 
 test('service-worker does not pre-cache technical expansion machine modules',()=>{
