@@ -36,17 +36,29 @@ export const IPAL_PHOTO_EVIDENCE_V205=Object.freeze({
   'INTERLOCKING_PAVING_AND_DRAINAGE',
   'VERTICAL_GARDEN',
   'ORNAMENTAL_WATER_CHANNEL',
-  'WEATHERED_INDUSTRIAL_FINISHES'
+  'WEATHERED_INDUSTRIAL_FINISHES',
+  'ADJACENT_OUTDOOR_UTILITY_EQUIPMENT'
  ]),
  relativeLayout:Object.freeze({
-  equalization:{x:36.2,y:107.0,w:5.6,d:4.2,h:1.15,label:'BAK EKUALISASI'},
-  temporaryHolding:{x:41.6,y:108.3,w:3.2,d:2.7,h:.95,label:'BAK PENAMPUNGAN SEMENTARA'},
+  equalization:{x:36.2,y:107.0,w:5.6,d:4.2,h:3.15,label:'BAK EKUALISASI'},
+  temporaryHolding:{x:41.6,y:108.3,w:3.2,d:2.7,h:1.85,label:'BAK PENAMPUNGAN SEMENTARA'},
   anaerobicTank:{x:45.7,y:111.0,r:2.05,h:4.0,label:'TANGKI AN AEROBIK'},
   hopperVessel:{x:41.5,y:114.2,r:1.45,cylinderH:2.3,coneH:1.25},
   chemicalRack:{x:53.2,y:109.7,w:6.1,d:4.2,h:3.6},
   sludgeDrying:{x:36.2,y:114.8,w:5.0,d:2.25,h:1.55},
   operatorRoom:{x:57.2,y:105.8,w:4.4,d:3.25,h:2.85},
   pond:{x:50.1,y:116.6,w:8.0,d:1.0},
-  verticalGarden:{x:34.0,y:117.15,w:8.2,h:2.0}
- })
+  verticalGarden:{x:34.0,y:117.15,w:8.2,h:2.0},
+  adjacentUtility:{x:61.25,y:108.0,w:2.8,d:7.2,h:1.55}
+ }),
+ unresolved:Object.freeze([
+  'ABSOLUTE_EQUIPMENT_DIMENSIONS_AND_ELEVATIONS',
+  'EXACT_PIPE_DIAMETERS_MATERIAL_SPECS_AND_COMPLETE_ROUTING',
+  'COMPLETE_PID_AND_PROCESS_FLOW_DIRECTION',
+  'CHEMICAL_IDENTITIES_CONCENTRATIONS_AND_DOSING_RATES',
+  'TANK_CAPACITIES_INTERNALS_AND_DESIGN_LEVELS',
+  'FUNCTION_OF_EACH_UNLABELLED_METAL_VESSEL',
+  'NORMALIZATION_OF_LITERAL_TANK_LABEL_TANGKI_AN_AEROBIK',
+  'ADJACENT_UTILITY_EQUIPMENT_PROCESS_LINKAGE'
+ ])
 });
