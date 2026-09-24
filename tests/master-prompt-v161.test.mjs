@@ -32,8 +32,8 @@ test('V162 exposes Systems in both navigation surfaces and keeps identifiers coh
  assert.match(html,/app-shell-v79\.css\?v=192/);
  assert.match(html,/src\/app\.js\?v=192/);
  assert.match(html,/src\/app-shell-v79\.js\?v=192/);
- assert.match(shell,/v196-interaction-flow/);
- assert.match(sw,/factory-digital-twin-v207-superadmin-editor-20260924/);
+ assert.match(shell,/v197-architecture-convergence/);
+ assert.match(sw,/factory-digital-twin-v209-architecture-convergence-20260925/);
 });
 
 test('asset navigation opens an empty search instead of serializing the click event',()=>{
