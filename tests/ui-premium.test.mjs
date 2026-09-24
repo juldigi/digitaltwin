@@ -197,7 +197,7 @@ test('V196 camera reset changes only camera framing and never clears semantic se
   const start=app.indexOf("if(mode==='reset')");
   const end=app.indexOf("if(mode==='fit')",start);
   const reset=app.slice(start,end);
-  assert.match(reset,/engine\.fit\(isFactory\?engine\.factory:\(selectedPart\|\|engine\.machine\),'iso'\)/);
+  assert.match(reset,/engine\.fit\(isFactory\?engine\.factory:engine\.machine,'iso'\)/);
   assert.doesNotMatch(reset,/showHome/);
   assert.doesNotMatch(reset,/selectedPart=null/);
   assert.doesNotMatch(reset,/template\.reset/);
