@@ -43,7 +43,7 @@ test('scene editor layout is responsive and leaves canonical navigation reachabl
 
 
 test('scene editor presents a guided three-step human-first workflow',()=>{
- for(const label of ['Pilih yang ingin diubah','Atur objek','Simpan perubahan','Mesin','Dinding','Aksesori & Peralatan','Bangunan & Ruangan','Utilitas','Furniture','Komponen Mesin','Geser ','Bandingkan dengan tampilan asli','Alat lanjutan Superadmin'])assert.match(app,new RegExp(label));
+ for(const label of ['Pilih yang ingin diubah','Atur objek','Simpan perubahan','Mesin','Dinding','Aksesori & Peralatan','Bangunan & Ruangan','Utilitas','Furniture','Bagian Mesin','Geser ','Bandingkan dengan tampilan asli','Alat lanjutan Superadmin'])assert.match(app,new RegExp(label));
  assert.match(app,/class="se-progress"/);
  assert.match(app,/class="se-advanced"/);
  assert.match(app,/class="se-admin-tools"/);
@@ -54,7 +54,8 @@ test('scene editor presents a guided three-step human-first workflow',()=>{
 
 test('scene editor exposes real-world categories and keeps internal identifiers out of normal UI',()=>{
  assert.match(app,/editorCategories=\[/);
- for(const category of ['machines','walls','equipment','building','utilities','furniture','components'])assert.match(app,new RegExp("id:'"+category+"'"));
+ for(const category of ['machines','walls','equipment','building','utilities','furniture'])assert.match(app,new RegExp("id:'"+category+"'"));
+ assert.match(app,/const componentCategory=\{id:'components'/);
  assert.match(app,/data-se-category=/);
  assert.match(app,/selectableEditorObject/);
  assert.match(app,/normalizeEditorSelection/);
@@ -103,7 +104,6 @@ test('machine editor list is registry-driven and whole-unit keyboard movable',()
  assert.match(app,/editorArrowKeys=\['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'\]/);
  assert.match(app,/const step=e\.shiftKey\?\.5:\.1/);
  assert.match(app,/moveSceneObjectInView\(selected,horizontal,vertical,step\)/);
- assert.match(app,/if\(e\.key==='ArrowUp'\)node\.position\.z-=step/);
  assert.match(app,/document\.removeEventListener\('keydown',onEditorKeyDown\)/);
  assert.match(css,/\.se-machine-edit-note/);
 });
@@ -111,4 +111,36 @@ test('machine editor list is registry-driven and whole-unit keyboard movable',()
 test('clicking any visual child of a factory machine normalizes to the machine root asset',()=>{
  assert.match(app,/for\(const \[assetId,root\] of engine\.actualFactory\?\.assets\|\|\[\]\)root\.traverse\(node=>assetIdByNode\.set\(node,'asset:'\+assetId\)\)/);
  assert.match(app,/const assetId=assetIdByNode\.get\(node\);if\(assetId\)return assetId/);
+});
+
+
+test('V197 editor keeps a machine parent context before drilling into components',()=>{
+ assert.match(app,/editorMachineId=null/);
+ assert.match(app,/if\(normalized\?\.startsWith\('asset:'\)\)editorMachineId=normalized\.slice\(6\)/);
+ assert.match(app,/id="se-edit-machine-parts"/);
+ assert.match(app,/await engine\.switchMachine\(machineRoute\(machine\)\)/);
+ assert.match(app,/editorScope='machine';editorCategory='components'/);
+ assert.match(app,/id="se-back-machine"/);
+ assert.match(app,/editorScope='factory';editorCategory='machines'/);
+ assert.doesNotMatch(app,/\{id:'components',label:'Komponen Mesin'/);
+ assert.match(css,/\.se-machine-context/);
+});
+
+test('V197 editor shows the full registry and labels unplaced machines',()=>{
+ assert.match(app,/registryMachineChoices=MACHINE_REGISTRY\.slice\(\)/);
+ assert.match(app,/placed:Boolean\(engine\.actualFactory\?\.assets\?\.has\(machine\.machineId\)\)/);
+ assert.match(app,/belum ditempatkan/);
+ assert.match(app,/Mesin ada di database, belum ditempatkan di scene/);
+});
+
+test('V197 machine keyboard movement is camera-relative and installs one stable listener pair',()=>{
+ const engine=await readFile(new URL('../frontend/src/engine.js',import.meta.url),'utf8');
+ assert.match(engine,/moveSceneObjectInView\(id,horizontal=0,vertical=0,step=\.1\)/);
+ assert.match(engine,/this\.camera\.getWorldDirection\(forward\)/);
+ assert.match(app,/keyboardMoveActive/);
+ assert.match(app,/document\.addEventListener\('keydown',onEditorKeyDown\)/);
+ assert.match(app,/document\.addEventListener\('keyup',onEditorKeyUp\)/);
+ assert.equal((app.match(/document\.addEventListener\('keydown',onEditorKeyDown\)/g)||[]).length,1);
+ assert.equal((app.match(/document\.addEventListener\('keyup',onEditorKeyUp\)/g)||[]).length,1);
+ assert.match(app,/if\(!keyboardMoveActive\)\{snapshot\(\);keyboardMoveActive=true;\}/);
 });
