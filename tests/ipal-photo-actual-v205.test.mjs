@@ -151,3 +151,45 @@ test('V205 hardening fixes the tank safety rail hierarchy and preserves literal 
  assert.ok(IPAL_PHOTO_EVIDENCE_V205.confirmedLabels.includes('TANGKI AN AEROBIK'));
  assert.ok(IPAL_PHOTO_EVIDENCE_V205.confirmedLabels.includes('UNIT (KARUNG) PENGERING LUMPUR'));
 });
+
+
+test('V205 detail pass 2 includes the photo-visible secondary equipment and service microdetails',async()=>{
+ const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
+ const root=buildActualFactory(layout,fleet).root;
+ const expected=[
+  ['IPAL_PHOTO_BLUE_COVERED_SERVICE_BASIN',1],
+  ['IPAL_PHOTO_COVERED_BASIN_YELLOW_ACCESS_HATCH',4],
+  ['IPAL_PHOTO_SECONDARY_CANOPY_GREEN_COLUMN',2],
+  ['IPAL_PHOTO_SECONDARY_CANOPY_LINEAR_LIGHT',1],
+  ['IPAL_PHOTO_LATTICE_COLUMN_CHORD',8],
+  ['IPAL_PHOTO_SECOND_HOPPER_CONE_VESSEL',1],
+  ['IPAL_PHOTO_SECOND_HOPPER_CYLINDER',1],
+  ['IPAL_PHOTO_BLUE_AUXILIARY_VESSEL',2],
+  ['IPAL_PHOTO_LARGE_RED_MIXING_TOWER',1],
+  ['IPAL_PHOTO_SLUDGE_PVC_MANIFOLD',1],
+  ['IPAL_PHOTO_SLUDGE_MANUAL_VALVE_HANDLE',5],
+  ['IPAL_PHOTO_SLUDGE_DRAIN_SUMP_WALL',1],
+  ['IPAL_PHOTO_TANK_EXTERNAL_WHITE_PIPE',2],
+  ['IPAL_PHOTO_POND_REED',20],
+  ['IPAL_PHOTO_MAINTENANCE_STOOL_SEAT',2]
+ ];
+ for(const [semantic,min] of expected)assert.ok(collect(root,new RegExp('^'+semantic+'$')).length>=min,semantic);
+});
+
+test('V205 detail pass 2 keeps newly reconstructed equipment footprints separated at the evidence-layout level',()=>{
+ const r=IPAL_PHOTO_EVIDENCE_V205.relativeLayout;
+ const cb=r.coveredServiceBasin,or=r.operatorRoom;
+ assert.ok(cb.x+cb.w/2<=or.x-or.w/2,'covered basin must not penetrate operator room');
+ assert.ok(cb.y+cb.d/2<=or.y-or.d/2,'covered basin must stop before operator room facade');
+ const h=r.secondHopperVessel,rt=r.largeRedMixingTower;
+ assert.ok(Math.hypot(h.x-rt.x,h.y-rt.y)>h.r+rt.r,'red tower must not overlap second hopper shell');
+ const aux=r.blueAuxiliaryVessels.at(-1),rack=r.chemicalRack;
+ assert.ok(aux.x+aux.r<=rack.x-rack.w/2+.02,'auxiliary vessel must remain outside chemical rack footprint');
+});
+
+test('V205 detail pass 2 keeps the newly observed objects descriptive rather than inventing process identity',()=>{
+ const observed=IPAL_PHOTO_EVIDENCE_V205.observedFeatures;
+ for(const feature of ['BLUE_COVERED_SERVICE_BASIN_WITH_YELLOW_HATCHES','MULTIPLE_HOPPER_BOTTOM_METAL_VESSELS','BLUE_AUXILIARY_VERTICAL_VESSELS','LARGE_RED_MIXING_OR_PROCESS_TOWER','SLUDGE_MANIFOLD_VALVES_FLEXIBLE_HOSE_AND_DRAIN_SUMP','WHITE_EXTERNAL_TANK_NOZZLE_PIPE'])assert.ok(observed.includes(feature),feature);
+ assert.ok(IPAL_PHOTO_EVIDENCE_V205.unresolved.includes('FUNCTION_OF_EACH_UNLABELLED_METAL_VESSEL'));
+ assert.ok(IPAL_PHOTO_EVIDENCE_V205.unresolved.includes('EXACT_PIPE_DIAMETERS_MATERIAL_SPECS_AND_COMPLETE_ROUTING'));
+});
