@@ -8,27 +8,27 @@ const app=read('../frontend/src/app.js');
 const shell=read('../frontend/src/app-shell-v79.js');
 const sw=read('../frontend/sw.js');
 
-test('V172 app readiness is emitted only after scene restoration resolves or fails visibly',()=>{
+test('Stage 6 app readiness writes canonical boot state only after scene restoration',()=>{
  assert.match(app,/function signalAppReady\(status='ready'\)/);
- assert.match(app,/document\.documentElement\.dataset\.appReady=normalized/);
- assert.match(app,/window\.dispatchEvent\(new CustomEvent\('bmj:appready'/);
+ assert.match(app,/setAppBoot\(normalized/);
+ assert.doesNotMatch(app,/bmj:appready/);
  const startup=app.slice(app.indexOf('try{\n bundledLayout='),app.indexOf('function scrollInspectorToTabStart'));
  assert.match(startup,/await restoreHistoryContext\(\);[\s\S]*signalAppReady\('ready'\)/);
  assert.match(startup,/catch\(e\)\{[\s\S]*signalAppReady\('error'\)/);
 });
 
-test('V172 splash waits for both document load and restored app readiness',()=>{
- assert.match(shell,/let documentLoaded=document\.readyState==='complete',appReadyStatus=document\.documentElement\.dataset\.appReady\|\|null/);
- assert.match(shell,/const maybeFinishSplash=\(\)=>\{if\(!documentLoaded\|\|!appReadyStatus\)return/);
- assert.match(shell,/addEventListener\('bmj:appready'/);
- assert.match(shell,/if\(documentLoaded\)maybeFinishSplash\(\);else addEventListener\('load'/);
- assert.doesNotMatch(shell,/addEventListener\('load',\(\)=>setTimeout\(finishSplash/);
+test('Stage 6 splash derives exclusively from bootState and document readiness',()=>{
+ assert.match(shell,/syncSplashFromState=state=>/);
+ assert.match(shell,/bootState\?\.phase\|\|'booting'/);
+ assert.match(shell,/if\(!documentLoaded\|\|!\['ready','error','timeout'\]\.includes\(phase\)\)return/);
+ assert.doesNotMatch(shell,/bmj:appready/);
+ assert.doesNotMatch(html,/splash-recovery/);
 });
 
-test('V172 readiness survives module-order races and has a bounded fail-safe',()=>{
- assert.match(shell,/appReadyStatus=document\.documentElement\.dataset\.appReady\|\|null/);
- assert.match(shell,/if\(appReadyStatus\)maybeFinishSplash\(\)/);
- assert.match(shell,/setTimeout\(\(\)=>\{if\(splash\?\.classList\.contains\('is-done'\)\)return;if\(!appReadyStatus\)document\.documentElement\.dataset\.appReady='timeout';finishSplash\(\)\},12000\)/);
+test('Stage 6 readiness has one bounded fail-safe',()=>{
+ assert.match(shell,/const BOOT_TIMEOUT_MS=12500/);
+ assert.match(shell,/if\(current\.bootState\?\.phase!=='booting'\)return/);
+ assert.match(shell,/bootState:\{phase:'timeout',message:'Aplikasi belum berhasil dimuat'\}/);
 });
 
 test('V172 runtime files and service worker are cache-busted',()=>{
