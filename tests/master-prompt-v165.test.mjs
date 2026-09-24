@@ -16,7 +16,7 @@ test('WebGL failure falls back to the actual 2D plant drawing with honest guidan
  assert.match(home,/document\.body\.classList\.add\('workspace-2d'\)/);
  assert.match(home,/three\.disabled=true/);
  assert.match(home,/Denah 2D tetap dapat digunakan/);
- assert.match(home,/params\.set\('view','2d'\)/);
+ assert.match(home,/buildContextUrl\(\{\.\.\.getAppState\(\),viewMode:'2d'\}\)/);
  assert.match(home,/emitDomainState\(\{viewMode:'2d'\}\)/);
  assert.match(app,/redrawPlantPlan\(\)/);
 });
