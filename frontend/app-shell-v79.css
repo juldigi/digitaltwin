@@ -494,6 +494,9 @@ aside#detail-panel{--panel-sticky-top:68px;scroll-padding-top:calc(var(--panel-s
 }
 @media(prefers-reduced-motion:reduce){.ui-state-spinner{animation:none;border-top-color:#dce9f4;box-shadow:inset 0 0 0 6px #eef5fb}}
 
+/* The full-screen 2D plan must never cover the control used to return to 3D. */
+body.workspace-2d.panel-hidden .viewport-mode-switch{z-index:65!important;visibility:visible;pointer-events:auto}
+
 /* V190 mobile overlay + taxonomy readability hardening */
 .geometry-tree{display:grid;gap:6px;margin-top:10px;min-width:0}
 .geometry-node{min-width:0}
