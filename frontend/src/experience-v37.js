@@ -1,19 +1,18 @@
+import {getState,setPreference,subscribe} from './state/app-state.js';
 const $=selector=>document.querySelector(selector);
 
-const THEME_KEY='bmj-digitaltwin-theme',LEGACY_THEME_KEY='offset5-theme';
-function persistTheme(){
+function applyTheme(state=getState()){
+  const light=state.preferences?.theme==='light';
+  document.body.classList.toggle('light-mode',light);
   const toggle=$('#ui-theme-toggle');
-  let saved='';
-  try{saved=localStorage.getItem(THEME_KEY)||localStorage.getItem(LEGACY_THEME_KEY)||'';if(saved&&localStorage.getItem(THEME_KEY)===null){localStorage.setItem(THEME_KEY,saved);localStorage.removeItem(LEGACY_THEME_KEY);}}catch{}
-  if(saved==='light')document.body.classList.add('light-mode');
-  toggle?.setAttribute('aria-pressed',String(document.body.classList.contains('light-mode')));
-  toggle?.addEventListener('click',()=>{
-    const light=document.body.classList.toggle('light-mode');
-    toggle.setAttribute('aria-pressed',String(light));
-    try{localStorage.setItem(THEME_KEY,light?'light':'dark');localStorage.removeItem(LEGACY_THEME_KEY);}catch{}
-  });
+  toggle?.setAttribute('aria-pressed',String(light));
+  if(toggle)toggle.title=light?'Gunakan tema gelap':'Gunakan tema terang';
 }
-
+function bindTheme(){
+  const toggle=$('#ui-theme-toggle');
+  toggle?.addEventListener('click',()=>setPreference('theme',getState().preferences?.theme==='light'?'dark':'light'));
+  applyTheme(getState());
+}
 function syncFullscreen(){
   const button=$('#fullscreen');
   const update=()=>{
@@ -24,9 +23,9 @@ function syncFullscreen(){
   document.addEventListener('fullscreenchange',update);
   update();
 }
-
 window.addEventListener('DOMContentLoaded',()=>{
-  document.documentElement.dataset.uiVersion='39';
-  persistTheme();
+  document.documentElement.dataset.uiVersion='40';
+  bindTheme();
   syncFullscreen();
+  subscribe(applyTheme);
 });
