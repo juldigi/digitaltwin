@@ -68,21 +68,21 @@ test('V198 makes core room furniture, RMS paper and production support visible w
 
  const labels=layout.actual.labels.map(l=>l.text);
  const conditional=[
-  [/Adm Room/i,/^ADMIN_DESK_WORKTOP$/],
-  [/PPIC/i,/^PPIC_[AB]_DESK_WORKTOP$/],
-  [/QC Sample|R\.Sample|R\.INCOMING/i,/^(QC|INCOMING)_DESK_WORKTOP$/],
-  [/Toilet/i,/^TOILET_FIXTURE$/],
-  [/Pantry|Kitchen|Refreshment/i,/^PANTRY_BASE_CABINET$/],
-  [/Locker|Loker|Changing|Change Room/i,/^LOCKER_DOOR_REFERENCE$/],
-  [/WH Spareparts/i,/^SPAREPART_RACK_UPRIGHT$/],
-  [/Workshop/i,/^(WORKBENCH_TOP|WORKSHOP_BENCH_VISE_BODY)$/],
-  [/CTF|CTP/i,/^(CTF_PREPRESS|CTP_PREPRESS)_/]
+  [/Adm Room/i,/^V202_ADMIN_OFFICE_DESK_WORKTOP$/],
+  [/PPIC/i,/^V202_PPIC_[AB]_DESK_WORKTOP$/],
+  [/QC Sample|R\.Sample|R\.INCOMING/i,/^V202_(QC_SAMPLE|INCOMING_QC)_.*DESK_WORKTOP$/],
+  [/Toilet/i,/^V202_TOILET_FIXTURE$/],
+  [/Pantry|Kitchen|Refreshment/i,/^V202_PANTRY_COUNTER$/],
+  [/Locker|Loker|Changing|Change Room/i,/^V202_LOCKER_(LEFT|RIGHT)_RACK_UPRIGHT$/],
+  [/WH Spareparts/i,/^V202_SPAREPART_(LEFT|RIGHT)_RACK_UPRIGHT$/],
+  [/Workshop/i,/^V202_WORKSHOP_WORKBENCH_TABLE_TOP$/],
+  [/CTF|CTP/i,/^V202_PREPRESS_/]
  ];
  for(const [labelRe,semanticRe] of conditional){
   if(!labels.some(t=>labelRe.test(t)))continue;
   const found=visibleBySemantic(root,semanticRe);
   assert.ok(found.length>0,String(semanticRe)+' missing for source-labelled room');
-  assert.ok(found.some(o=>o.visible),String(semanticRe)+' should be visible in V199');
+  assert.ok(found.some(o=>o.visible),String(semanticRe)+' should be visible in V202');
  }
 
  const safety=visibleBySemantic(root,/FIRE_EXTINGUISHER_REFERENCE|EMERGENCY_LUMINAIRE_REFERENCE|RMS_CONVEX_MIRROR_REFERENCE/);
