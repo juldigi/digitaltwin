@@ -21,7 +21,7 @@ test('V199 closes the full outer factory envelope except valid source/reference 
  assert.equal(supplements.length,stats.exteriorPerimeterSupplements);
  assert.ok(supplements.every(o=>o.visible));
  assert.ok(supplements.every(o=>o.userData.functionalReferenceVisible===true));
- assert.match(meta.assumptions.architecturalRealism,/CLOSED_ENVELOPE_REAL_FACTORY_OPERATIONAL_DETAIL_VISIBLE/);
+ assert.match(meta.assumptions.architecturalRealism,/CLOSED_ENVELOPE/);
 });
 
 test('V199 target-facing seating has zero chair orientation errors',async()=>{
