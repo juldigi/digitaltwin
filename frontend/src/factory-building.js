@@ -1379,10 +1379,10 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   gb(w/2,h/2,0,.20,h,d,0x3d7187,'WALL');
   // Concrete coping and horizontal construction bands visible on the blue facades.
   for(const [ly,depth] of [[h+.03,.12],[h*.42,.07],[h*.68,.07]])gb(0,ly,d/2+.055,w+.10,depth,.11,ly>h?0x4d8193:0x31677b,'FACADE_BAND');
-  // The photos never expose the liquid surface inside either blue basin. V205's bright visible water plane
-  // made the structures read like ornamental pools, so V206 keeps the interior state unresolved/hidden.
-  const internal=gb(0,h-.16,0,w-.38,.022,d-.38,0x263f46,'INTERNAL_TOP_STATE_UNRESOLVED',.08,{visibleState:'HIDDEN_UNVERIFIED_TOP',processVisualization:false});
-  internal.visible=false;
+  // The photos never expose a liquid surface. A dark structural/occlusion deck prevents a false open-pond reading
+  // and, for Bak Ekualisasi, supports the photo-visible elevated chemical rack without claiming internal tank details.
+  const topDeck=gb(0,h-.035,0,w-.30,.070,d-.30,0x315f70,'TOP_DECK_OR_OCCLUSION_REFERENCE',1,{visibleState:'SOLID_VISUAL_OCCLUDER_NO_LIQUID_LEVEL_CLAIM',processVisualization:false,topClosureConfidence:spec.topClosure||'NOT_VISUALLY_VERIFIED'});
+  topDeck.userData.noLiquidSurfaceClaim=true;
   for(const lx of [-w*.28,w*.05,w*.31])gb(lx,h*.43,d/2+.112,.08,h*.55,.018,0x315f70,'WEATHERING_STREAK',.18,{weathering:'PHOTO_VISIBLE_STREAK_REFERENCE'});
   return {group:g,x,z,w,d,h,water:null};
  };
@@ -1493,7 +1493,7 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  const crColumns=[[-cr.w/2,-cr.d/2],[0,-cr.d/2],[cr.w/2,-cr.d/2],[-cr.w/2,cr.d/2],[0,cr.d/2],[cr.w/2,cr.d/2]];
  for(const [dx,dz] of crColumns){
   pbox(cr.x+dx,crBase+.035,crZ+dz,.30,.07,.30,0x8a7441,'IPAL_PHOTO_CHEMICAL_RACK_DECK_BASE_PLATE',0,1,{supportSurface:'EQUALIZATION_TOP_OR_REAR_STRUCTURE_PHOTO_DERIVED'});
-  pbox(cr.x+dx,(crBase+crTopRail-.15)/2,crZ+dz,.11,crTopRail-.15-crBase,.11,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_COLUMN');
+  pbox(cr.x+dx,(crBase+crTopRail-.15)/2,crZ+dz,.11,crTopRail-.15-crBase,.11,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_COLUMN',0,1,{supportSurface:'EQUALIZATION_TOP_OR_REAR_STRUCTURE_PHOTO_DERIVED',elevatedSupport:true});
  }
  for(const deckY of [crLower,crUpper]){
   pbox(cr.x,deckY,crZ,cr.w,.10,cr.d,0x7e8987,'IPAL_PHOTO_CHEMICAL_RACK_GRATING');
@@ -1507,6 +1507,8 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  for(const z of [crZ-cr.d/2,crZ+cr.d/2]){
   pline([cr.x-cr.w/2,crBase+.10,z],[cr.x,crUpper-.15,z],.024,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_DIAGONAL_BRACE');
   pline([cr.x,crUpper-.15,z],[cr.x+cr.w/2,crBase+.10,z],.024,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_DIAGONAL_BRACE');
+  pline([cr.x-cr.w/2,crUpper-.08,z],[cr.x,crBase+.18,z],.022,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_DIAGONAL_BRACE');
+  pline([cr.x,crBase+.18,z],[cr.x+cr.w/2,crUpper-.08,z],.022,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_DIAGONAL_BRACE');
  }
  const redTank=(x,y,z,r=.58,h=1.18,semantic='IPAL_PHOTO_RED_CHEMICAL_TANK')=>{
   const shellH=Math.max(.20,h-.18),shell=new T.Mesh(new T.CylinderGeometry(r*.98,r,shellH,28),photoRed);shell.position.set(x,y+shellH/2,z);ipalPhoto.add(shell);photoTag(shell,semantic,{contents:'UNVERIFIED_FROM_PHOTO',moldedPolyVisual:true});
