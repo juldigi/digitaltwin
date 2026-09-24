@@ -45,7 +45,7 @@ test('V171 restore preserves simple camera preset and resets stale inspection st
  assert.match(state,/cameraPreset:params\.get\('camera'\)==='top'\?'top':'iso'/);
  assert.match(app,/function applyRestoredCamera\(preset='iso'\)/);
  assert.match(app,/function resetMachineInspectionContext\(\)/);
- assert.match(app,/selectedPart=null;selectedTaxonomyId=ACTIVE_ROOT;explode=0;exteriorFocusKey=null;simulationOwnsExterior=false;activeTab='overview'/);
+ assert.match(app,/selectedPart=null;setActiveTaxonomyId\\(ACTIVE_ROOT\\);setExplodeLevel\\(0\\);exteriorFocusKey=null;simulationOwnsExterior=false;setDomainState\\(\\{inspectorState:\\{tab:'overview'\\}\\}\\)/);
  assert.match(shell,/getState\(\)\.sceneMode==='machine'\?'asset':'factory'/);
 });
 
