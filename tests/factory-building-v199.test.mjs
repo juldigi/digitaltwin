@@ -11,8 +11,8 @@ const collect=(root,re)=>{
 test('V199 closes the full outer factory envelope except valid source/reference portals',async()=>{
  const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
  const built=buildActualFactory(layout,fleet),meta=built.root.userData,stats=meta.buildingDetailStats;
- assert.equal(meta.researchVersion,'V201');
- assert.equal(meta.buildingDetailPass,'V201_CONTEXTUAL_MACHINE_SIDE_SUPPORT_AND_ARCHITECTURAL_MICRODETAIL');
+ assert.equal(meta.researchVersion,'V202');
+ assert.equal(meta.buildingDetailPass,'V202_ROOM_ENVELOPE_CLOSURE_AND_DOOR_AWARE_FURNITURE_LAYOUT');
  assert.ok(meta.exteriorEnvelopeAudit.samples>100);
  assert.equal(meta.exteriorEnvelopeAudit.openGapCount,0);
  assert.equal(stats.exteriorOpenGapCount,0);
@@ -35,7 +35,11 @@ test('V199 target-facing seating has zero chair orientation errors',async()=>{
  assert.ok(meta.chairFacingAudit.every(a=>a.errorDeg<=.5));
  assert.ok(meta.chairFacingAudit.every(a=>Number.isFinite(a.targetX)&&Number.isFinite(a.targetY)));
  const chairGroups=collect(built.root,/_CHAIR_ASSEMBLY$/);
- assert.equal(chairGroups.length,stats.chairFacingChecks);
+ const legacy=chairGroups.filter(g=>!String(g.userData?.semantic||'').startsWith('V202_'));
+ const replacement=chairGroups.filter(g=>String(g.userData?.semantic||'').startsWith('V202_'));
+ assert.equal(legacy.length,stats.chairFacingChecks);
+ assert.equal(replacement.length,stats.v202RoomChairs);
+ assert.equal(chairGroups.length,stats.chairFacingChecks+stats.v202RoomChairs);
  assert.ok(chairGroups.every(g=>Array.isArray(g.userData.facingTarget)&&g.userData.facingTarget.length===2));
 });
 

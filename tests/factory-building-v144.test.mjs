@@ -7,8 +7,8 @@ test('V144 packaging-office and warehouse baseline survives V145 without moving 
  const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
  const built=buildActualFactory(layout,fleet),meta=built.root.userData,stats=meta.buildingDetailStats;
  assert.equal(meta.baselineId,'BMJ-250804-RED-20260921');
- assert.equal(meta.researchVersion,'V201');
- assert.equal(meta.buildingDetailPass,'V201_CONTEXTUAL_MACHINE_SIDE_SUPPORT_AND_ARCHITECTURAL_MICRODETAIL');
+ assert.equal(meta.researchVersion,'V202');
+ assert.equal(meta.buildingDetailPass,'V202_ROOM_ENVELOPE_CLOSURE_AND_DOOR_AWARE_FURNITURE_LAYOUT');
  assert.equal(meta.architecturalEvidenceBoundary.notAsBuilt,true);
  assert.match(meta.assumptions.roomContents,/NOT_AS_BUILT/);
  assert.match(meta.assumptions.rmsEnvironmentIndustryReference,/NOT_PLANT_SETPOINT/);

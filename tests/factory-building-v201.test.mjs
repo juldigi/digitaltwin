@@ -11,8 +11,8 @@ const collect=(root,re)=>{
 test('V201 keeps all V200 structural, room, collision and machine-placement invariants',async()=>{
  const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
  const built=buildActualFactory(layout,fleet),meta=built.root.userData,s=meta.buildingDetailStats;
- assert.equal(meta.researchVersion,'V201');
- assert.equal(meta.buildingDetailPass,'V201_CONTEXTUAL_MACHINE_SIDE_SUPPORT_AND_ARCHITECTURAL_MICRODETAIL');
+ assert.equal(meta.researchVersion,'V202');
+ assert.equal(meta.buildingDetailPass,'V202_ROOM_ENVELOPE_CLOSURE_AND_DOOR_AWARE_FURNITURE_LAYOUT');
  assert.equal(meta.exteriorEnvelopeAudit.openGapCount,0);
  assert.equal(s.chairFacingErrors,0);
  assert.equal(s.visitorChairFacingErrors,0);

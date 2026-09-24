@@ -11,8 +11,8 @@ const collect=(root,re)=>{
 test('V200 keeps shell, furniture orientation and machine placement invariants intact',async()=>{
  const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
  const built=buildActualFactory(layout,fleet),meta=built.root.userData,stats=meta.buildingDetailStats;
- assert.equal(meta.researchVersion,'V201');
- assert.equal(meta.buildingDetailPass,'V201_CONTEXTUAL_MACHINE_SIDE_SUPPORT_AND_ARCHITECTURAL_MICRODETAIL');
+ assert.equal(meta.researchVersion,'V202');
+ assert.equal(meta.buildingDetailPass,'V202_ROOM_ENVELOPE_CLOSURE_AND_DOOR_AWARE_FURNITURE_LAYOUT');
  assert.equal(meta.exteriorEnvelopeAudit.openGapCount,0);
  assert.equal(stats.exteriorOpenGapCount,0);
  assert.equal(stats.chairFacingErrors,0);
