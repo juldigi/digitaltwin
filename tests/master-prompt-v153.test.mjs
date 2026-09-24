@@ -54,6 +54,6 @@ test('V153 cache includes the foundation policy and current cache-busted control
   assert.match(html,/app-shell-v79\.css\?v=192/);
   assert.match(html,/src\/app\.js\?v=192/);
   assert.match(html,/src\/app-shell-v79\.js\?v=192/);
-  assert.match(sw,/factory-digital-twin-v192-mobile-camera-framing-20260923/);
+  assert.match(sw,/factory-digital-twin-v205-ipal-photo-actual-20260924/);
   assert.match(sw,/src\/data\/foundation-scope\.js/);
 });
