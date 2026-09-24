@@ -1291,7 +1291,7 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  for(let x=34;x<=59;x+=1.15)pline([x,.116,-117.7],[x,.116,-104.2],.008,0x737b78,'IPAL_PHOTO_PAVING_JOINT',{renderIntent:'SUBTLE'});
  for(let z=-117.2;z<=-104.6;z+=.72)pline([33.45,.116,z],[59.25,.116,z],.007,0x7b827f,'IPAL_PHOTO_PAVING_JOINT',{renderIntent:'SUBTLE'});
  // Photo-visible edge drainage, grated trench sections and small spontaneous vegetation.
- for(const [x,z,w,d] of [[46.4,-117.82,26.2,.30],[59.38,-110.9,.30,13.5]])pbox(x,.075,z,w,.10,d,0x4f5e62,'IPAL_PHOTO_EDGE_DRAIN',{roughness:'WEATHERED'});
+ for(const [x,z,w,d] of [[46.4,-117.82,26.2,.30],[59.38,-110.9,.30,13.5]])pbox(x,.075,z,w,.10,d,0x4f5e62,'IPAL_PHOTO_EDGE_DRAIN',0,1,{surface:'WEATHERED'});
  for(let x=34.0;x<59.0;x+=.92)pbox(x,.132,-117.82,.62,.028,.31,0x39494e,'IPAL_PHOTO_DRAIN_GRATING',0,1,{coreProcess:false});
  for(const [x,z] of [[34.1,-116.9],[41.2,-117.05],[57.8,-116.72],[58.9,-105.0]]){pline([x,.12,z],[x+.035,.28,z+.025],.012,0x4f714a,'IPAL_PHOTO_PAVER_WEED',{coreProcess:false});buildingDetailStats.v205IpalVegetationObjects++;}
 
