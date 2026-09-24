@@ -157,7 +157,7 @@ test('V195 visual hierarchy is state-driven and contextual',()=>{
   assert.match(js,/function syncVisualHierarchy\(state\)/);
   assert.match(js,/body\.dataset\.sceneMode=state\.sceneMode==='machine'\?'machine':'factory'/);
   assert.match(js,/body\.dataset\.hasSelection=String\(hasSelection\)/);
-  assert.match(js,/uiArchitecture='v195-visual-hierarchy'/);
+  assert.match(js,/uiArchitecture='v196-interaction-flow'/);
   assert.match(css,/\/\* V195 visual hierarchy reset/);
   assert.match(css,/body\[data-scene-mode="factory"\] \.inspect-tool\{display:none!important\}/);
   assert.match(css,/body\[data-has-selection="false"\] \.context-tool\{display:none!important\}/);
@@ -175,4 +175,32 @@ test('V195 keeps the canvas visually dominant across desktop and mobile',()=>{
   assert.match(css,/body\[data-scene-mode="factory"\] \.view-switch button\.camera-tool\{flex:1 1 0;min-width:0\}/);
   assert.match(css,/\.context-primary-actions\{display:grid;grid-template-columns:1fr 1fr/);
   assert.match(css,/@media\(max-width:767px\)[\s\S]*\.context-primary-actions\{grid-template-columns:1fr\}/);
+});
+
+
+test('V196 interaction flow preserves semantic hierarchy and explicit parent navigation',()=>{
+  const app=fs.readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
+  assert.match(html,/id="context-back"[^>]+aria-label="Kembali satu tingkat"/);
+  assert.match(js,/uiArchitecture='v196-interaction-flow'/);
+  assert.match(js,/function syncVisualHierarchy\(state\)[\s\S]*context-back/);
+  assert.match(app,/function pushMachineContextHistory\(node=null/);
+  assert.match(app,/function navigateContextParent\(\)/);
+  assert.match(app,/selectTaxonomy\(parent,\{revealPanel:true,historyMode:'push'\}\)/);
+  assert.match(app,/resetTaxonomyRoot\(\{historyMode:'push'\}\)/);
+  assert.match(app,/on\('#context-back',navigateContextParent\)/);
+  assert.match(app,/selectTaxonomy\(item\.nodeId,\{revealPanel:true,historyMode:'push'\}\)/);
+  assert.match(app,/selectTaxonomy\(button\.dataset\.componentId,\{revealPanel:true,historyMode:'push'\}\)/);
+});
+
+test('V196 camera reset changes only camera framing and never clears semantic selection',()=>{
+  const app=fs.readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
+  const start=app.indexOf("if(mode==='reset')");
+  const end=app.indexOf("if(mode==='fit')",start);
+  const reset=app.slice(start,end);
+  assert.match(reset,/engine\.fit\(isFactory\?engine\.factory:\(selectedPart\|\|engine\.machine\),'iso'\)/);
+  assert.doesNotMatch(reset,/showHome/);
+  assert.doesNotMatch(reset,/selectedPart=null/);
+  assert.doesNotMatch(reset,/template\.reset/);
+  assert.doesNotMatch(reset,/selectedNode:null/);
+  assert.doesNotMatch(reset,/engine\.isolated=false/);
 });
