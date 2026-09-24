@@ -1,0 +1,14 @@
+import {V199_SOURCE_LEDGER} from './research-v199.js';
+const s=(id,scope,title,publisher,url,kind='FACILITY_REALISM_REFERENCE',confidence='INDUSTRY_OR_REGULATORY_REFERENCE')=>Object.freeze({id,machineScope:scope,title,publisher,url,kind,confidence,reviewBatch:'V200-2026-09-24'});
+export const V200_NEW_RESEARCH_SOURCES=Object.freeze([
+ s('V200-OSHA-1910-176','WAREHOUSE_RMS_FG_PRODUCTION','29 CFR 1910.176 · safe clearances, marked aisles, stable storage and housekeeping','OSHA','https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.176','MATERIAL_HANDLING_STORAGE_REFERENCE','REGULATORY_STANDARD_REFERENCE'),
+ s('V200-OSHA-1910-22','FACTORY_FLOOR_HOUSEKEEPING','29 CFR 1910.22 · clean, orderly and dry walking-working surfaces with safe access','OSHA','https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.22','HOUSEKEEPING_FLOOR_REFERENCE','REGULATORY_STANDARD_REFERENCE'),
+ s('V200-HSE-WAREHOUSING','WAREHOUSE_RMS_FG','Warehousing · pedestrian/vehicle circulation, storage and workplace transport context','UK Health and Safety Executive','https://www.hse.gov.uk/logistics/warehousing.htm','WAREHOUSE_TRAFFIC_REFERENCE','REGULATORY_GUIDANCE_REFERENCE'),
+ s('V200-HSE-SEPARATION','WAREHOUSE_RMS_FG','Separating pedestrians and vehicles · separate routes and barriers where practicable','UK Health and Safety Executive','https://www.hse.gov.uk/workplacetransport/separating.htm','PEDESTRIAN_VEHICLE_SEPARATION_REFERENCE','REGULATORY_GUIDANCE_REFERENCE'),
+ s('V200-STORA-NATURA-STORAGE','RMS_PAPERBOARD','Natura 2PE board · keep wrapped until acclimatised, store indoors and sheltered; recommended 50–55% RH and 20–23°C','Stora Enso','https://www.storaenso.com/-/media/documents/download-center/documents/product-specifications/paperboard-materials/new-naturaboard-2pe-14-24-en.pdf','PAPERBOARD_STORAGE_ACCLIMATISATION_REFERENCE','MANUFACTURER_REFERENCE'),
+ s('V200-OSHA-MONITOR','OFFICE_ADMIN_PPIC_QC','Computer workstation monitor · directly in front of user, coordinated with desk and chair','OSHA','https://www.osha.gov/etools/computer-workstations/components/monitors','WORKSTATION_ORIENTATION_REFERENCE','REGULATORY_GUIDANCE_REFERENCE'),
+ s('V200-OSHA-DESK','OFFICE_ADMIN_PPIC_QC','Computer workstation desk · adequate surface depth and component placement in primary work zone','OSHA','https://www.osha.gov/etools/computer-workstations/components/desks','WORKSTATION_DESK_REFERENCE','REGULATORY_GUIDANCE_REFERENCE')
+]);
+const seen=new Set();
+export const V200_SOURCE_LEDGER=Object.freeze([...V200_NEW_RESEARCH_SOURCES,...V199_SOURCE_LEDGER].filter(e=>e.url&&!seen.has(e.url)&&(seen.add(e.url),true)));
+export const V200_SOURCE_STATS=Object.freeze({total:V200_SOURCE_LEDGER.length,newReviewed:V200_NEW_RESEARCH_SOURCES.length,uniqueUrls:new Set(V200_SOURCE_LEDGER.map(e=>e.url)).size});
