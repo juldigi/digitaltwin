@@ -507,7 +507,9 @@ aside#detail-panel{--panel-sticky-top:68px;scroll-padding-top:calc(var(--panel-s
 .geometry-node details>summary{min-height:32px;display:flex;align-items:center;color:#74869a;font-size:8px;font-weight:750;cursor:pointer}
 @media(max-width:767px){
  body.nav-open{overflow:hidden}
+ body.nav-open .twin-shell{z-index:auto;overflow:visible}
  body.nav-open .rail{z-index:110}
+ body.nav-open .rail .rail-bottom{grid-column:1/-1;grid-template-columns:repeat(2,minmax(0,1fr))}
  body.nav-open .ui-backdrop{z-index:109;background:rgba(3,15,28,.46);backdrop-filter:none;-webkit-backdrop-filter:none}
  body.nav-open .topbar,body.nav-open .center-stack,body.nav-open .mobile-nav{filter:none!important}
  .rail{background:#fff}
