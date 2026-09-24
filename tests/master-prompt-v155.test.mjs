@@ -86,7 +86,7 @@ test('V155 release cache ships the DWG fidelity module',()=>{
  assert.match(html,/app-shell-v79\.css\?v=211/);
  assert.match(html,/src\/app\.js\?v=211/);
  assert.match(html,/src\/app-shell-v79\.js\?v=211/);
- assert.match(shell,/v198-architecture-convergence/);
+ assert.match(shell,/v211-ui-ssot/);
  assert.match(sw,/factory-digital-twin-v211-ui-ssot-stage6-20260925/);
  assert.match(sw,/src\/data\/dwg-fidelity\.js/);
 });
