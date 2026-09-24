@@ -83,10 +83,10 @@ test('Denah Pabrik exposes an auditable fidelity ledger and NOT_IMPLEMENTED rows
 });
 
 test('V155 release cache ships the DWG fidelity module',()=>{
- assert.match(html,/app-shell-v79\.css\?v=198/);
- assert.match(html,/src\/app\.js\?v=198/);
- assert.match(html,/src\/app-shell-v79\.js\?v=198/);
+ assert.match(html,/app-shell-v79\.css\?v=211/);
+ assert.match(html,/src\/app\.js\?v=211/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=211/);
  assert.match(shell,/v198-architecture-convergence/);
- assert.match(sw,/factory-digital-twin-v210-architecture-convergence-stage5-20260925/);
+ assert.match(sw,/factory-digital-twin-v211-ui-ssot-stage6-20260925/);
  assert.match(sw,/src\/data\/dwg-fidelity\.js/);
 });
