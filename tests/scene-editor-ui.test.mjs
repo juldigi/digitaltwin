@@ -40,3 +40,34 @@ test('scene editor layout is responsive and leaves canonical navigation reachabl
  assert.match(css,/@media\(max-height:560px\) and \(orientation:landscape\)\{[\s\S]*?#scene-editor-panel/);
  assert.match(css,/#scene-editor-panel \.se-nudge\{display:grid/);
 });
+
+
+test('scene editor presents a guided three-step human-first workflow',()=>{
+ for(const label of ['Pilih yang ingin diubah','Atur objek','Simpan perubahan','Bangunan & area','Komponen mesin','Geser sedikit','Bandingkan dengan tampilan asli','Alat lanjutan Superadmin'])assert.match(app,new RegExp(label));
+ assert.match(app,/class="se-progress"/);
+ assert.match(app,/class="se-advanced"/);
+ assert.match(app,/class="se-admin-tools"/);
+ assert.match(css,/\.se-step-title/);
+ assert.match(css,/\.se-selected-card/);
+ assert.match(css,/\.se-save-bar/);
+});
+
+test('scene editor hides technical IDs from the normal object list and keeps them only in advanced details',()=>{
+ assert.match(app,/class="se-technical-id">ID teknis:/);
+ assert.match(app,/map\(\(\[id,name\]\)=>`<option value="\$\{esc\(id\)\}" \$\{id===selected\?'selected':''\}>\$\{esc\(name\)\}<\/option>`/);
+ assert.doesNotMatch(app,/\$\{esc\(name\)\} · \$\{esc\(id\)\}<\/option>/);
+});
+
+test('scene editor uses human-readable units and converts degree input back to radians',()=>{
+ assert.match(app,/Posisi \(meter\)/);
+ assert.match(app,/Rotasi \(derajat\)/);
+ assert.match(app,/data-se-unit="\$\{key==='rotation'\?'deg':'raw'\}"/);
+ assert.match(app,/stored=input\.dataset\.seUnit==='deg'\?value\*Math\.PI\/180:value/);
+ assert.match(app,/Gerak bertahap/);
+});
+
+test('progressive editor controls are safe before any object is selected',()=>{
+ assert.match(app,/querySelector\('#se-snap'\)\?\.addEventListener/);
+ assert.match(app,/querySelector\('#se-focus'\)\?\.addEventListener/);
+ assert.match(app,/querySelector\('#se-isolate'\)\?\.addEventListener/);
+});
