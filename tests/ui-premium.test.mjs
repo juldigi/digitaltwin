@@ -157,7 +157,7 @@ test('V195 visual hierarchy is state-driven and contextual',()=>{
   assert.match(js,/function syncVisualHierarchy\(state\)/);
   assert.match(js,/body\.dataset\.sceneMode=state\.sceneMode==='machine'\?'machine':'factory'/);
   assert.match(js,/body\.dataset\.hasSelection=String\(hasSelection\)/);
-  assert.match(js,/uiArchitecture='v197-architecture-convergence'/);
+  assert.match(js,/uiArchitecture='v198-architecture-convergence'/);
   assert.match(css,/\/\* V195 visual hierarchy reset/);
   assert.match(css,/body\[data-scene-mode="factory"\] \.inspect-tool\{display:none!important\}/);
   assert.match(css,/body\[data-has-selection="false"\] \.context-tool\{display:none!important\}/);
@@ -181,7 +181,7 @@ test('V195 keeps the canvas visually dominant across desktop and mobile',()=>{
 test('V196 interaction flow preserves semantic hierarchy and explicit parent navigation',()=>{
   const app=fs.readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
   assert.match(html,/id="context-back"[^>]+aria-label="Kembali satu tingkat"/);
-  assert.match(js,/uiArchitecture='v197-architecture-convergence'/);
+  assert.match(js,/uiArchitecture='v198-architecture-convergence'/);
   assert.match(js,/function syncVisualHierarchy\(state\)[\s\S]*context-back/);
   assert.match(app,/function pushMachineContextHistory\(node=null/);
   assert.match(app,/function navigateContextParent\(\)/);
@@ -253,7 +253,7 @@ test('V197 navigation uses factory, machine, and system language',()=>{
   assert.match(html,/id="nav-machine"[\s\S]*<small>Pabrik<\/small>/);
   assert.match(html,/id="nav-assets"[\s\S]*<small>Mesin<\/small>/);
   assert.match(html,/data-mobile-nav="asset" aria-label="Mesin"[\s\S]*<small>Mesin<\/small>/);
-  assert.match(js,/uiArchitecture='v197-architecture-convergence'/);
+  assert.match(js,/uiArchitecture='v198-architecture-convergence'/);
   assert.match(js,/setState\(detail,\{url:false\}\)/);
 });
 
