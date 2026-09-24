@@ -956,22 +956,95 @@ function openSceneEditor(){
  const existingPanel=document.querySelector('#scene-editor-panel');if(existingPanel){existingPanel.querySelector('#se-search,button')?.focus();return toast('Editor Scene 3D sudah terbuka.');}
  setView('factory');engine.setSceneEditing(true);
  const baseline=new Map([...engine.sceneObjects].map(([id,node])=>[id,{position:node.position.toArray(),rotation:[node.rotation.x,node.rotation.y,node.rotation.z],scale:node.scale.toArray(),visible:node.visible}]));
- const overrides={...(state.sceneOverrides||{})};let selected=null,undo=[],redo=[],isolated=false,previewOriginal=false,history=[],editorScope='factory';const isolationGuard=createSceneIsolationGuard();
+ const overrides={...(state.sceneOverrides||{})};let selected=null,undo=[],redo=[],isolated=false,previewOriginal=false,history=[],editorCategory='machines',editorScope='factory';const isolationGuard=createSceneIsolationGuard();
  const panel=document.createElement('section');panel.id='scene-editor-panel';panel.setAttribute('aria-label','Editor Scene 3D');panel.tabIndex=-1;document.body.append(panel);
+ const editorCategories=[
+  {id:'machines',label:'Mesin',hint:'Mesin produksi di layout pabrik'},
+  {id:'walls',label:'Dinding',hint:'Dinding dan partisi'},
+  {id:'equipment',label:'Aksesori & Peralatan',hint:'Peralatan pendukung dan aksesori'},
+  {id:'building',label:'Bangunan & Ruangan',hint:'Pintu, lantai, atap, kolom, area'},
+  {id:'utilities',label:'Utilitas',hint:'IPAL, AHU, ducting, pipa dan udara tekan'},
+  {id:'furniture',label:'Furniture',hint:'Meja, kursi, lemari, rak dan trolley'},
+  {id:'components',label:'Komponen Mesin',hint:'Bagian dari mesin yang sedang dibuka'}
+ ];
+ const assetIdByNode=new WeakMap();for(const [assetId,root] of engine.actualFactory?.assets||[])root.traverse(node=>assetIdByNode.set(node,'asset:'+assetId));
+ const technicalSemantic=/^(SELECTION_OVERLAY|CAD_|CENTERLINE_|SOURCE_|SUPERADMIN_ADDED_PRIMITIVE$)/;
+ const cleanEditorWords=value=>String(value||'').replace(/_V\d+/gi,'').replace(/_(REFERENCE|ACTUAL|VISUALIZATION|SUPPLEMENT|FUNCTIONAL|PHOTO|DERIVED|SOURCE|ASSEMBLY|NOT_AS_BUILT|NOT_SURVEYED|PLACEHOLDER)/gi,'').replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
+ const titleWords=value=>cleanEditorWords(value).toLowerCase().replace(/\b\w/g,m=>m.toUpperCase());
+ const editorCategoryFor=(id,node)=>{
+  const sem=String(node?.userData?.semantic||'').toUpperCase();
+  if(id.startsWith('part:')||id.startsWith('machine:'))return 'components';
+  if(id.startsWith('asset:')||sem==='FACTORY_MACHINE'||node?.userData?.machineId&&engine.actualFactory?.assets?.has(node.userData.machineId))return 'machines';
+  if(id.startsWith('wall:')||node?.userData?.editorWall||/(^|_)(WALL|PARTITION)(_|$)/.test(sem))return 'walls';
+  if(/IPAL|AHU|HVAC|DUCT|COMPRESS|PNEUMATIC|PIPE|PIPING|UTILITY|WATER_TREATMENT|AIR_LINE|AIR_HEADER|BLOWER|PUMP|VALVE|DRAIN|MANHOLE/.test(sem))return 'utilities';
+  if(/CHAIR|DESK|TABLE|CABINET|SHELF|RACK|LOCKER|TROLLEY|PALLET|STOOL|WORKBENCH|SOFA|BENCH|MONITOR|PEDESTAL|FURNITURE/.test(sem))return 'furniture';
+  if(/ROOM|DOOR|GATE|FLOOR|ROOF|COLUMN|WINDOW|GLAZ|CANOPY|CEILING|STAIR|PLINTH|LANDSCAPE|GARDEN|PARKING|BUILDING/.test(sem))return 'building';
+  return 'equipment';
+ };
+ const editorLabel=(id,node)=>{
+  const sem=String(node?.userData?.semantic||''),upper=sem.toUpperCase(),category=editorCategoryFor(id,node);
+  if(category==='machines')return node?.name||node?.userData?.machineId||id.replace(/^asset:/,'');
+  if(id.startsWith('wall:')||node?.userData?.editorWall)return node?.userData?.roomLabel?('Dinding '+node.userData.roomLabel):'Dinding pabrik';
+  if(category==='components'){
+   const raw=node?.name||node?.userData?.label||node?.userData?.nodeId||sem;
+   return titleWords(raw.replace(/^node[: ]?/i,'').replace(/^part[: ]?/i,'').replace(/^machine[: ]?/i,''))||'Komponen mesin';
+  }
+  if(node?.userData?.roomLabel&&/DOOR/.test(upper))return 'Pintu '+node.userData.roomLabel;
+  if(node?.userData?.roomLabel&&/ROOM/.test(upper))return 'Ruangan '+node.userData.roomLabel;
+  if(/STRUCTURAL_COLUMN|(^|_)COLUMN(_|$)/.test(upper))return 'Kolom bangunan';
+  if(/ROOF/.test(upper))return 'Atap';
+  if(/FLOOR/.test(upper))return 'Lantai';
+  if(/GATE/.test(upper))return 'Gerbang';
+  if(/CHAIR/.test(upper))return 'Kursi'+(node?.userData?.roomLabel?' '+node.userData.roomLabel:'');
+  if(/DESK/.test(upper))return 'Meja kerja'+(node?.userData?.roomLabel?' '+node.userData.roomLabel:'');
+  if(/TABLE/.test(upper))return 'Meja'+(node?.userData?.roomLabel?' '+node.userData.roomLabel:'');
+  if(/CABINET|LOCKER/.test(upper))return 'Lemari';
+  if(/RACK|SHELF/.test(upper))return 'Rak';
+  if(/TROLLEY/.test(upper))return 'Trolley';
+  if(/PALLET/.test(upper))return 'Pallet';
+  if(/DUCT/.test(upper))return 'Ducting AHU';
+  if(/AHU/.test(upper))return 'Peralatan AHU';
+  if(/COMPRESS|PNEUMATIC|AIR_LINE|AIR_HEADER/.test(upper))return 'Sistem udara tekan';
+  if(/IPAL|WATER_TREATMENT/.test(upper))return 'IPAL · '+(titleWords(sem.replace(/^IPAL_/i,''))||'Peralatan');
+  const fromName=node?.name&&!/^(BMJ|building|roof|machines|labels|landscape|reference|unidentified|utility_)/i.test(node.name)?node.name:'';
+  return titleWords(fromName||sem)||'Peralatan pabrik';
+ };
+ const selectableEditorObject=(id,node)=>{
+  if(!node||technicalSemantic.test(String(node.userData?.semantic||'')))return false;
+  if(id.startsWith('node:')&&node.userData?.editorStableId)return false;
+  if(id.startsWith('node:')&&assetIdByNode.has(node))return false;
+  if(id.startsWith('machine:')&&node.userData?.nodeId&&engine.sceneObjects.has('part:'+engine.machineKey+':'+node.userData.nodeId))return false;
+  if(id.startsWith('machine:')&&!node.userData?.nodeId&&!node.name&&!node.userData?.semantic)return false;
+  if(id.startsWith('node:')&&!node.userData?.semantic&&!node.name)return false;
+  if(node.userData?.supersededByV202||node.userData?.supersededByV206)return false;
+  if(node.visible===false&&!overrides[id])return false;
+  return true;
+ };
+ const normalizeEditorSelection=(id,node)=>{
+  const wallId=engine.sceneWallId(id);if(wallId)return wallId;
+  const assetId=assetIdByNode.get(node);if(assetId)return assetId;
+  if(id.startsWith('machine:')&&node?.userData?.nodeId){const partId='part:'+engine.machineKey+':'+node.userData.nodeId;if(engine.sceneObjects.has(partId))return partId;}
+  return id;
+ };
  const snapshot=()=>{undo.push(JSON.stringify(overrides));if(undo.length>50)undo.shift();redo=[];};
  const isolationBoundary=()=>editorScope==='machine'?engine.machine:engine.factory;const applyIsolation=()=>{if(isolated&&selected)isolationGuard.isolate(engine.sceneObjects.get(selected),isolationBoundary());};const apply=()=>{isolationGuard.restore();if((selected?.startsWith('machine:')||selected?.startsWith('part:'))||Object.keys(overrides).some(id=>id.startsWith('copy:')||id.startsWith('new:'))||[...baseline.keys()].some(id=>id.startsWith('copy:')||id.startsWith('new:'))){engine.applySceneOverrides(overrides);if(selected&&engine.sceneObjects.has(selected)&&!previewOriginal)engine.selectSceneObject(selected);else if(selected&&!engine.sceneObjects.has(selected)){engine.gizmo.detach();if(selected.startsWith('copy:')||selected.startsWith('new:'))selected=null;}}else for(const [id,v] of baseline){const node=engine.sceneObjects.get(id);if(!node)continue;const draft=overrides[id],x=draft?.identity&&draft.identity!==engine.sceneIdentity(id)?v:draft||v;node.position.fromArray(x.position);node.rotation.set(...x.rotation);node.scale.fromArray(x.scale);node.visible=x.visible&&!x.deleted;}engine.sceneOverrides=overrides;applyIsolation();};
  const current=()=>{if(!selected)return;const node=engine.sceneObjects.get(selected);return node&&{position:node.position.toArray(),rotation:[node.rotation.x,node.rotation.y,node.rotation.z],scale:node.scale.toArray(),visible:node.visible,locked:overrides[selected]?.locked||false,deleted:overrides[selected]?.deleted||false,identity:selected.startsWith('copy:')?overrides[selected]?.identity:engine.sceneIdentity(selected),...(selected.startsWith('copy:')?{sourceId:overrides[selected]?.sourceId}:{}),...(selected.startsWith('new:')?{shape:overrides[selected]?.shape}:{})};};
  const update=()=>{const queryBefore=panel.querySelector('#se-search')?.value||'';const v=current(),info=selected?engine.sceneObjectInfo(selected):null,wallId=selected?engine.sceneWallId(selected):null,wallPoints=wallId===selected?engine.sceneWallEndpoints(selected):null;
- const selectedNode=selected?engine.sceneObjects.get(selected):null,selectedName=selectedNode?.name||selectedNode?.userData?.semantic||'Objek 3D',draftCount=Object.keys(overrides).length;
+ const allChoices=[...engine.sceneObjects].filter(([id,node])=>selectableEditorObject(id,node)).map(([id,node])=>({id,node,category:editorCategoryFor(id,node),name:editorLabel(id,node)}));
+ const categoryCounts=Object.fromEntries(editorCategories.map(category=>[category.id,allChoices.filter(item=>item.category===category.id).length]));
+ const choices=allChoices.filter(item=>item.category===editorCategory);
+ const selectedNode=selected?engine.sceneObjects.get(selected):null,selectedName=selectedNode?editorLabel(selected,selectedNode):'Objek 3D',draftCount=Object.keys(overrides).length;
  panel.innerHTML=`<header class="se-header"><div><small>SUPERADMIN</small><strong>Editor Scene 3D</strong><span>Ubah posisi dan tampilan objek tanpa mengubah file sumber.</span></div><button id="se-close" aria-label="Tutup editor">Tutup</button></header>
  <div class="se-progress" aria-label="Alur editor"><span class="${selected?'done':'current'}"><b>1</b>Pilih objek</span><span class="${!selected?'':draftCount?'done':'current'}"><b>2</b>Atur</span><span class="${draftCount?'current':''}"><b>3</b>Simpan</span></div>
  ${engine.staleSceneOverrides?.length?`<div class="se-alert" role="alert"><strong>${engine.staleSceneOverrides.length} perubahan lama dilewati</strong><span>Scene sudah berubah sehingga perubahan tersebut tidak diterapkan agar objek yang salah tidak ikut bergeser.</span></div>`:''}
  <section class="se-step">
   <div class="se-step-title"><b>1</b><div><strong>Pilih yang ingin diubah</strong><span>Pilih langsung di tampilan 3D atau cari dari daftar.</span></div></div>
-  <div class="se-segmented"><button data-se-scope="factory" ${editorScope==='factory'?'class="active"':''}>Bangunan & area</button><button data-se-scope="machine" ${editorScope==='machine'?'class="active"':''}>Komponen mesin</button></div>
-  <input id="se-search" type="search" placeholder="${editorScope==='machine'?'Cari komponen mesin…':'Cari dinding, area, atau aset…'}" autocomplete="off">
-  <select id="se-object" size="5" aria-label="Daftar objek 3D"></select>
-  ${selected?`<div class="se-selected-card"><div><small>TERPILIH</small><strong>${esc(selectedName)}</strong><span>${editorScope==='machine'?'Komponen '+esc(engine.machineKey):'Objek pabrik'}</span></div><button id="se-focus">Lihat dekat</button></div>`:'<div class="se-empty-selection"><strong>Belum ada objek dipilih</strong><span>Klik objek di 3D atau pilih dari daftar di atas.</span></div>'}
+  <div class="se-category-label">Pilih jenis objek</div>
+  <div class="se-category-grid">${editorCategories.map(category=>`<button data-se-category="${category.id}" class="${editorCategory===category.id?'active':''}" ${!categoryCounts[category.id]?'disabled':''}><strong>${category.label}</strong><span>${categoryCounts[category.id]||0}</span></button>`).join('')}</div>
+  <div class="se-category-hint">${esc(editorCategories.find(category=>category.id===editorCategory)?.hint||'')}</div>
+  <input id="se-search" type="search" placeholder="Cari nama ${esc(editorCategories.find(category=>category.id===editorCategory)?.label.toLowerCase()||'objek')}…" autocomplete="off">
+  <select id="se-object" size="6" aria-label="Daftar objek 3D"></select>
+  ${selected?`<div class="se-selected-card"><div><small>TERPILIH</small><strong>${esc(selectedName)}</strong><span>${esc(editorCategories.find(category=>category.id===editorCategory)?.label||'Objek pabrik')}</span></div><button id="se-focus">Lihat dekat</button></div>`:'<div class="se-empty-selection"><strong>Pilih satu objek</strong><span>Pilih kategori di atas, lalu pilih objek dari daftar atau klik langsung pada tampilan 3D.</span></div>'}
  </section>
  <section class="se-step ${selected?'':'is-disabled'}">
   <div class="se-step-title"><b>2</b><div><strong>Atur objek</strong><span>${selected?'Gunakan kontrol sederhana di bawah. Perubahan belum disimpan.':'Pilih objek terlebih dahulu.'}</span></div></div>
@@ -1006,11 +1079,11 @@ function openSceneEditor(){
   <label class="se-file-label">Impor data scene<input id="se-load-file" type="file" accept="application/json,.json"></label>
   <div id="se-history-list" hidden></div>
  </div></details>`;
- const choices=[...engine.sceneObjects].filter(([id,node])=>!(id.startsWith('node:')&&node.userData.editorStableId)&&!(id.startsWith('machine:')&&node.userData.nodeId&&engine.sceneObjects.has('part:'+engine.machineKey+':'+node.userData.nodeId))).filter(([id])=>editorScope==='machine'?(id.startsWith('machine:'+engine.machineKey+':')||id.startsWith('part:'+engine.machineKey+':')):!id.startsWith('machine:')&&!id.startsWith('part:')).map(([id,node])=>{const lineage=[];for(let parent=node.parent;parent&&lineage.length<2;parent=parent.parent)if(parent.name)lineage.unshift(parent.name);return [id,[...lineage,node.name||node.userData?.semantic||'Objek 3D'].join(' / ')];});const fill=()=>{const query=panel.querySelector('#se-search').value.toLowerCase();panel.querySelector('#se-object').innerHTML=choices.filter(([id,name])=>(id+' '+name).toLowerCase().includes(query)).slice(0,300).map(([id,name])=>`<option value="${esc(id)}" ${id===selected?'selected':''}>${esc(name)}</option>`).join('');};panel.querySelector('#se-search').value=queryBefore;fill();panel.querySelector('#se-search').oninput=fill;panel.querySelector('#se-object').onchange=e=>engine.selectSceneObject(e.target.value);panel.querySelector('#se-snap')?.addEventListener('change',e=>{engine.gizmo.setTranslationSnap(e.target.checked?.1:null);engine.gizmo.setRotationSnap(e.target.checked?Math.PI/36:null);});panel.querySelector('#se-focus')?.addEventListener('click',()=>{if(selected)engine.fit(engine.sceneObjects.get(selected));});panel.querySelector('#se-isolate')?.addEventListener('click',()=>{if(!selected)return;isolated=!isolated;apply();update();});
+ const fill=()=>{const query=panel.querySelector('#se-search').value.toLowerCase(),matches=choices.filter(item=>(item.name+' '+item.node?.userData?.roomLabel).toLowerCase().includes(query)).slice(0,300);panel.querySelector('#se-object').innerHTML=matches.length?matches.map(item=>`<option value="${esc(item.id)}" ${item.id===selected?'selected':''}>${esc(item.name)}</option>`).join(''):'<option disabled>Tidak ada objek di kategori ini</option>';};panel.querySelector('#se-search').value=queryBefore;fill();panel.querySelector('#se-search').oninput=fill;panel.querySelector('#se-object').onchange=e=>engine.selectSceneObject(e.target.value);panel.querySelector('#se-snap')?.addEventListener('change',e=>{engine.gizmo.setTranslationSnap(e.target.checked?.1:null);engine.gizmo.setRotationSnap(e.target.checked?Math.PI/36:null);});panel.querySelector('#se-focus')?.addEventListener('click',()=>{if(selected)engine.fit(engine.sceneObjects.get(selected));});panel.querySelector('#se-isolate')?.addEventListener('click',()=>{if(!selected)return;isolated=!isolated;apply();update();});
  panel.querySelectorAll('[data-se-mode]').forEach(b=>b.onclick=()=>{engine.gizmo.setMode(b.dataset.seMode);update();});panel.querySelectorAll('[data-se-key]').forEach(input=>input.onchange=()=>{if(previewOriginal||overrides[selected]?.locked)return;const value=+input.value;if(!Number.isFinite(value)||Math.abs(value)>100000||input.dataset.seKey==='scale'&&value<=0)return toast('Angka tidak valid.',true);snapshot();const v=current(),stored=input.dataset.seUnit==='deg'?value*Math.PI/180:value;v[input.dataset.seKey][+input.dataset.seAxis]=stored;overrides[selected]=v;apply();update();});
  const mutate=fn=>{if(!selected||previewOriginal||overrides[selected]?.locked)return;snapshot();fn();overrides[selected]=current();update();};
  panel.querySelectorAll('[data-se-add]').forEach(button=>button.onclick=()=>{if(previewOriginal)return;snapshot();const id='new:'+crypto.randomUUID(),point=engine.controls.target;overrides[id]={shape:button.dataset.seAdd,position:[point.x,.5,point.z],rotation:[0,0,0],scale:[1,1,1],visible:true,locked:false,deleted:false};selected=id;apply();update();});
- panel.querySelectorAll('[data-se-scope]').forEach(button=>button.onclick=()=>{const next=button.dataset.seScope;if(next===editorScope)return;engine.gizmo.detach();isolationGuard.restore();selected=null;isolated=false;previewOriginal=false;editorScope=next;if(next==='machine'){engine.simulation?.stop?.();setView('machine');}else setView('factory');engine.applySceneOverrides(overrides);engine.setSceneEditing(true);update();});
+ panel.querySelectorAll('[data-se-category]').forEach(button=>button.onclick=()=>{const nextCategory=button.dataset.seCategory;if(nextCategory===editorCategory)return;const nextScope=nextCategory==='components'?'machine':'factory';engine.gizmo.detach();isolationGuard.restore();selected=null;isolated=false;previewOriginal=false;editorCategory=nextCategory;editorScope=nextScope;if(nextScope==='machine'){engine.simulation?.stop?.();setView('machine');}else setView('factory');engine.applySceneOverrides(overrides);engine.setSceneEditing(true);update();});
  panel.querySelector('#se-parent')?.addEventListener('click',()=>{const parent=engine.sceneObjects.get(selected)?.parent,id=parent&&engine.sceneObjectIds?.get(parent);if(id&&engine.sceneObjects.has(id))engine.selectSceneObject(id);});
  panel.querySelector('#se-wall')?.addEventListener('click',()=>{if(wallId)engine.selectSceneObject(wallId);});
  panel.querySelectorAll('[data-wall-point]').forEach(input=>input.onchange=()=>{if(previewOriginal||overrides[selected]?.locked)return;const points=engine.sceneWallEndpoints(selected);if(!points)return;const value=+input.value;if(!Number.isFinite(value)||Math.abs(value)>100000)return toast('Koordinat dinding tidak valid.',true);points[+input.dataset.wallPoint][+input.dataset.wallAxis]=value;snapshot();if(!engine.setSceneWallEndpoints(selected,points)){undo.pop();return toast('Panjang dinding harus minimal 0,28 meter.',true);}overrides[selected]=current();apply();update();});
@@ -1030,7 +1103,7 @@ function openSceneEditor(){
  panel.querySelector('#se-load-file').onchange=async e=>{try{const file=e.target.files?.[0];if(!file)return;if(file.size>1024*1024)throw new Error('Berkas melebihi 1 MB.');const parsed=JSON.parse(await file.text());if(parsed.schemaVersion!==1||!parsed.overrides||typeof parsed.overrides!=='object'||Array.isArray(parsed.overrides))throw new Error('Format override tidak valid.');validateSceneImport(parsed.overrides,{hasObject:id=>engine.sceneObjects.has(id),identityFor:id=>engine.sceneIdentity(id)});snapshot();Object.keys(overrides).forEach(k=>delete overrides[k]);Object.assign(overrides,parsed.overrides);apply();update();}catch(error){toast(error.message,true);}};
  panel.querySelector('#se-history').onclick=async()=>{try{const response=await request('/api/scene/revisions');history=response.revisions||[];const list=panel.querySelector('#se-history-list');list.hidden=false;list.innerHTML='<h4>Revisi sebelumnya</h4>'+history.slice().reverse().map((item,index)=>`<button data-se-revision="${esc(item.id)}">${esc(new Date(item.at).toLocaleString('id-ID'))} · ${item.objects??Object.keys(item.overrides||{}).length} objek · ${esc(item.by||'Superadmin')}</button>`).join('')+'<p>Memulihkan revisi langsung menyimpan perubahan dan membuat revisi cadangan baru.</p>';list.querySelectorAll('[data-se-revision]').forEach(button=>button.onclick=async()=>{try{const next=await request('/api/scene/restore',{method:'PUT',data:{id:button.dataset.seRevision}});isolationGuard.restore();await acceptState(next);Object.keys(overrides).forEach(k=>delete overrides[k]);Object.assign(overrides,next.sceneOverrides||{});apply();update();toast('Revisi berhasil dipulihkan.');}catch(error){toast(error.message,true);}});}catch(e){toast(e.message,true);}};
  if(previewOriginal){panel.querySelectorAll('button').forEach(button=>{if(!['se-preview','se-close','se-focus'].includes(button.id))button.disabled=true;});panel.querySelectorAll('#se-numbers input,#se-load-file').forEach(input=>input.disabled=true);}
- };engine.onSceneSelect=(id)=>{selected=id;if(previewOriginal)engine.gizmo.detach();update();};const onDragStart=()=>{if(selected)snapshot();};const onDragEnd=()=>{if(selected){overrides[selected]=current();update();}};engine.gizmo.addEventListener('mouseDown',onDragStart);engine.gizmo.addEventListener('mouseUp',onDragEnd);engine.onSceneTransform=()=>{if(selected&&!overrides[selected]?.locked)overrides[selected]=current();};update();
+ };engine.onSceneSelect=(id,node)=>{const normalized=normalizeEditorSelection(id,node||engine.sceneObjects.get(id)),target=engine.sceneObjects.get(normalized);selected=normalized;editorCategory=editorCategoryFor(normalized,target);editorScope=editorCategory==='components'?'machine':'factory';if(normalized!==id)engine.selectSceneObject(normalized);if(previewOriginal)engine.gizmo.detach();update();};const onDragStart=()=>{if(selected)snapshot();};const onDragEnd=()=>{if(selected){overrides[selected]=current();update();}};engine.gizmo.addEventListener('mouseDown',onDragStart);engine.gizmo.addEventListener('mouseUp',onDragEnd);engine.onSceneTransform=()=>{if(selected&&!overrides[selected]?.locked)overrides[selected]=current();};update();
 }
 function settingsDialog(){
  const appState=window.BMJAppState?.getState?.()||{},device=matchMedia('(max-width:767px)').matches?'Ponsel':matchMedia('(max-width:1180px)').matches?'Tablet':'Desktop';
