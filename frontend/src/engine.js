@@ -12,13 +12,29 @@ import {FOUNDATION_SCOPE,canOpenTechnical3D} from './data/foundation-scope.js';
 export {OffsetMachineTemplate};
 const normalizeFoundationMachineKey=key=>{const raw=String(key??'').trim();return raw==='BMJ-MCH-0003'?'offset5':raw||null;};
 
+const neutralSimulation=()=>({
+ active:false,onUpdate:null,
+ update(){},start(){return this.state()},pause(){return this.state()},resume(){return this.state()},stop(){return this.state()},
+ setSpeed(){return this.state()},setPathVisible(){return this.state()},setInkFlowVisible(){return this.state()},
+ state(){return{available:false,blocked:true,blockedReason:'Pilih mesin untuk menjalankan simulasi.',active:false,running:false,paused:false,speed:1,stage:null,completed:0,progress:0,sheetsVisible:0,rotorCount:0}},
+ dispose(){}
+});
+const neutralTemplate=()=>{
+ const root=new THREE.Group();root.name='Factory context';root.visible=false;root.userData={semantic:'FACTORY_CONTEXT'};
+ return{
+  root,taxonomy:[],taxonomyById:new Map(),
+  reset(){},resolvePart(){return null},findNode(){return null},resolveTaxonomyNode(){return null},
+  setLow(){},highlight(){},ghost(){},explode(){},isolate(){},dispose(){}
+ };
+};
+
 export class FactoryEngine {
   constructor(container,onSelect){
-    this.container=container;this.onSelect=onSelect;this.onTaxonomySelect=null;this.view='machine';this.layout=null;this.low=false;this.labels=true;this.isolated=false;this.partLabelEntries=[];
-    {const requested=normalizeFoundationMachineKey(new URLSearchParams(location.search).get('machine'));this.requestedMachineKey=requested;this.machineKey=FOUNDATION_SCOPE.primaryRoute;}
+    this.container=container;this.onSelect=onSelect;this.onTaxonomySelect=null;this.view='factory';this.layout=null;this.low=false;this.labels=true;this.isolated=false;this.partLabelEntries=[];
+    {const params=new URLSearchParams(location.search),requested=normalizeFoundationMachineKey(params.get('machine')||params.get('asset'));this.requestedMachineKey=requested;this.machineKey=null;}
     this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'low-power'});
     this.renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));this.renderer.shadowMap.enabled=true;this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.2;
-    container.appendChild(this.renderer.domElement);const ariaMachine=FOUNDATION_SCOPE.primaryAssetName;this.renderer.domElement.setAttribute('aria-label',`Model 3D prosedural ${ariaMachine}. Gunakan tombol sudut pandang untuk navigasi.`);this.renderer.domElement.setAttribute('tabindex','0');
+    container.appendChild(this.renderer.domElement);this.renderer.domElement.setAttribute('aria-label','Digital Twin 3D Pabrik Packaging Offset. Pilih mesin untuk membuka model detail.');this.renderer.domElement.setAttribute('tabindex','0');
     this.scene=new THREE.Scene();this.scene.background=new THREE.Color(0xe8eef2);
     this.camera=new THREE.PerspectiveCamera(38,1,.05,1e7);
     this.controls=new OrbitControls(this.camera,this.renderer.domElement);this.controls.enableDamping=true;this.controls.dampingFactor=.09;this.controls.minDistance=.4;this.controls.maxDistance=1e7;this.controls.maxPolarAngle=Math.PI*.495;
@@ -28,15 +44,15 @@ export class FactoryEngine {
     this.studio=new THREE.Group();this.studio.name='Inspection studio — not factory';
     const floor=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.ShadowMaterial({opacity:.12}));floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;floor.position.y=.01;this.studio.add(floor);
     const grid=new THREE.GridHelper(150,100,0xd4dfe5,0xdce5ea);grid.material.transparent=true;grid.material.opacity=.38;this.studio.add(grid);this.scene.add(this.studio);
-    this.template=new OffsetMachineTemplate();this.machine=this.template.root;this.scene.add(this.machine);
-    this.simulation=new PrintingSimulation(this.machine,this.template);this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);
+    this.template=neutralTemplate();this.machine=this.template.root;this.scene.add(this.machine);
+    this.simulation=neutralSimulation();this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);
     this.factory=new THREE.Group();this.scene.add(this.factory);this.factorySelectionId=null;this.factorySelectionHelper=null;
     this.gizmo=new TransformControls(this.camera,this.renderer.domElement);this.scene.add(this.gizmo.getHelper());this.gizmo.addEventListener('dragging-changed',e=>{this.controls.enabled=!e.value;});this.gizmo.addEventListener('objectChange',()=>{if(!this.sceneEditing&&this.gizmo.mode==='scale')this.machine.scale.setScalar(Math.max(.0001,this.machine.scale.x));this.onTransform?.();this.onSceneTransform?.();});
     this.ray=new THREE.Raycaster();this.down=null;this.renderer.domElement.addEventListener('dblclick',()=>{if(this.sceneEditing)return;this.template.reset();this.clearPartLabels();this.isolated=false;if(this.view==='factory'){this.clearFactorySelection();this.fit(this.factory);}else this.fit(this.machine);this.onReset?.();});
     this.renderer.domElement.addEventListener('pointerdown',e=>this.down=[e.clientX,e.clientY]);
     this.renderer.domElement.addEventListener('pointerup',e=>{if(!this.down||Math.hypot(e.clientX-this.down[0],e.clientY-this.down[1])>5||this.gizmo.dragging||this.simulation?.active)return;const r=this.renderer.domElement.getBoundingClientRect();this.ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),this.camera);if(this.sceneEditing){const hit=this.ray.intersectObject(this.view==='machine'?this.machine:this.factory,true).find(h=>this.isObjectVisible(h.object));if(hit){let node=hit.object;while(node&&!this.sceneObjectIds?.has(node))node=node.parent;if(node)this.selectSceneObject(this.sceneObjectIds.get(node));}return;}if(this.view==='factory'&&this.actualFactory){const hit=this.ray.intersectObjects([...this.actualFactory.assets.values()],true).find(h=>{for(let p=h.object;p;p=p.parent)if(!p.visible)return false;return true;});if(hit)this.onFactorySelect?.(hit.object.userData.machineId);return;}const hit=this.ray.intersectObject(this.machine,true).find(h=>{for(let p=h.object;p;p=p.parent)if(!p.visible)return false;return true;});if(hit&&this.machine.visible){const part=this.template.resolvePart(hit.object);if(part)this.onSelect(part);}});
     this.resizeObserver=new ResizeObserver(()=>this.resize());this.resizeObserver.observe(container);
-    this.last=0;this.render=this.render.bind(this);this.fit(this.machine,'iso',false);this.resize();this.frame=requestAnimationFrame(this.render);
+    this.last=0;this.render=this.render.bind(this);this.studio.visible=false;this.resize();this.frame=requestAnimationFrame(this.render);
     this.renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();this.onError?.('Konteks grafis terputus. Muat ulang halaman untuk memulihkan penampil.');});
   }
   resize(){const w=this.container.clientWidth,h=this.container.clientHeight;if(!w||!h)return;this.renderer.setSize(w,h);this.camera.aspect=w/h;this.camera.updateProjectionMatrix();}
