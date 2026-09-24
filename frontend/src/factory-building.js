@@ -1390,7 +1390,7 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   shadow.userData.baseY=shadow.position.y;buildingDetailStats.v206OpaqueBasins++;
   // Local weathering/streak references keep the concrete from looking freshly painted.
   for(const lx of [-w*.28,w*.05,w*.31])gb(lx,h*.43,d/2+.112,.08,h*.55,.018,0x315f70,'WEATHERING_STREAK',.18,{weathering:'PHOTO_VISIBLE_STREAK_REFERENCE'});
-  return {group:g,x,z,w,d,h,water};
+  return {group:g,x,z,w,d,h,depthShadow:shadow};
  };
  const eq=makeBlueBasin(IPAL_PHOTO_EVIDENCE_V206.relativeLayout.equalization,'IPAL_PHOTO_BAK_EKUALISASI',0x416c72);
  label('BAK EKUALISASI',eq.x,eq.h*.58,eq.z+eq.d/2+.15,3.4,'#173f52',ipalPhoto);
