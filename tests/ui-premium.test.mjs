@@ -244,7 +244,7 @@ test('V197 navigation uses factory, machine, and system language',()=>{
   assert.match(html,/id="nav-assets"[\s\S]*<small>Mesin<\/small>/);
   assert.match(html,/data-mobile-nav="asset" aria-label="Mesin"[\s\S]*<small>Mesin<\/small>/);
   assert.match(js,/uiArchitecture='v211-ui-ssot'/);
-  assert.match(js,/setState\(detail,\{url:false\}\)/);
+  assert.doesNotMatch(js,/bmj:domainstate/);
 });
 
 test('V197 system browsing keeps display layers secondary',()=>{
