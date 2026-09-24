@@ -27,7 +27,7 @@ test('V167 visible toggles expose canonical expanded and pressed state',()=>{
  assert.match(html,/id="labels"[^>]+aria-pressed="true"/);
  assert.match(shell,/function syncAccessibleControls/);
  assert.match(shell,/function syncPressedTools/);
- assert.match(shell,/Tutup detail mesin/);
+ assert.match(shell,/Tutup detail pilihan/);
 });
 
 test('V167 mobile detail remains navigable instead of keyboard-modal',()=>{
