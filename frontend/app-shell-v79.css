@@ -752,3 +752,37 @@ body.workspace-2d.panel-hidden .viewport-mode-switch{z-index:65!important;visibi
   width:min(430px,58vw)!important;height:auto!important;max-height:none!important;border-radius:16px!important
  }
 }
+
+
+/* V194 canonical surfaces — legacy workbench retired. */
+.plant-plan-2d{
+ position:absolute;z-index:9;inset:0;overflow:hidden;background:#eef3f6
+}
+.plant-plan-2d[hidden]{display:none}
+.workspace-2d .plant-plan-2d{display:block!important}
+.workspace-2d #viewport{visibility:hidden;pointer-events:none}
+.plant-plan-2d>header{
+ position:absolute;z-index:3;left:16px;top:16px;display:flex;align-items:baseline;gap:10px;
+ max-width:calc(100% - 32px);padding:10px 12px;border:1px solid var(--line);border-radius:12px;
+ background:rgba(255,255,255,.96);box-shadow:var(--shadow-soft)
+}
+.plant-plan-2d>header strong{font-size:12px;color:var(--ink)}
+.plant-plan-2d>header small{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;color:var(--muted)}
+#dwg-canvas{display:block;width:100%!important;height:100%!important}
+.plant-plan-2d .dwg-warning{
+ position:absolute;z-index:3;left:16px;bottom:16px;max-width:min(620px,calc(100% - 32px));
+ padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.94);
+ color:var(--muted);font-size:9px;line-height:1.4;box-shadow:var(--shadow-soft)
+}
+.workspace-2d .view-switch,.workspace-2d .viewport-zoom,.workspace-2d #labels{display:none!important}
+.workspace-2d .viewport-mode-switch{z-index:40!important;visibility:visible!important;pointer-events:auto!important}
+body.search-open aside#detail-panel,
+body.layer-open aside#detail-panel,
+body.modal-open aside#detail-panel{visibility:hidden!important;pointer-events:none!important}
+@media(max-width:767px){
+ .plant-plan-2d>header{left:10px;top:10px;right:70px;max-width:none}
+ .plant-plan-2d .dwg-warning{left:10px;right:10px;bottom:10px;max-width:none}
+}
+@media(min-width:768px) and (max-width:1180px){
+ aside#detail-panel{max-width:min(420px,46vw)}
+}
