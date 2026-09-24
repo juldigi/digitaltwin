@@ -8,7 +8,7 @@ test('V160 opens factory asset detail in the canonical contextual inspector',()=
  const start=app.indexOf('function machineDetailDialog(machine){');
  const end=app.indexOf('async function switchActiveMachine',start);
  const detail=app.slice(start,end);
- assert.match(detail,/showPanel\(\);activeTab='overview'/);
+ assert.match(detail,/setDomainState\\(\\{inspectorState:\\{tab:'overview'\\}\\}\\);showPanel\\(\\)/);
  assert.match(detail,/inspectorState:\{open:true,tab:'overview'\}/);
  assert.match(detail,/renderContextBreadcrumb\(\)/);
  assert.doesNotMatch(detail,/modal\(machine\.name/);
