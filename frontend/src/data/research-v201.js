@@ -1,0 +1,14 @@
+import {V200_SOURCE_LEDGER} from './research-v200.js';
+const s=(id,scope,title,publisher,url,kind='FACILITY_REALISM_REFERENCE',confidence='INDUSTRY_OR_REGULATORY_REFERENCE')=>Object.freeze({id,machineScope:scope,title,publisher,url,kind,confidence,reviewBatch:'V201-2026-09-24'});
+export const V201_NEW_RESEARCH_SOURCES=Object.freeze([
+ s('V201-EPA-COMMERCIAL-PRINTING','PRINTING_RMS_PREPRESS','Guides to Pollution Prevention · Commercial Printing Industry · material handling, paper conditioning, storage, inventory control and waste segregation','US EPA','https://nepis.epa.gov/Exe/ZyPURL.cgi?Dockey=30004DVX.TXT','PRINTING_MATERIAL_HANDLING_REFERENCE','GOVERNMENT_INDUSTRY_GUIDANCE'),
+ s('V201-HSE-PRINT-SLIPS','PRODUCTION_WAREHOUSE','Printing industry slips/trips · keep walkways clear, designate pallet loading/unloading, bins for strapping/wrapping/paper, designate trolley storage','UK Health and Safety Executive','https://www.hse.gov.uk/printing/slips/index.htm','PRINTING_HOUSEKEEPING_REFERENCE','REGULATORY_GUIDANCE_REFERENCE'),
+ s('V201-HSE-PRINT-COSHH','PRINTING_SUPPORT','COSHH and printers · inks, lacquers, adhesives and cleaning products require controlled handling, ventilation and spill minimisation','UK Health and Safety Executive','https://www.hse.gov.uk/coshh/industry/printing.htm','PRINTING_CONSUMABLES_CONTROL_REFERENCE','REGULATORY_GUIDANCE_REFERENCE'),
+ s('V201-HSE-PRINT-ESSENTIALS','PRINTING_SUPPORT','Printing COSHH essentials · controls for press cleaning, UV/cold-set printing and ink mixing','UK Health and Safety Executive','https://www.hse.gov.uk/coshh/essentials/direct-advice/printing.htm','PRINTING_PROCESS_SUPPORT_REFERENCE','REGULATORY_GUIDANCE_REFERENCE'),
+ s('V201-OSHA-WAREHOUSE','RMS_FG_LOADING','Warehousing hazards/solutions · loading dock controls and material handling context','OSHA','https://www.osha.gov/warehousing/hazards-solutions','LOADING_AND_WAREHOUSE_REFERENCE','REGULATORY_GUIDANCE_REFERENCE'),
+ s('V201-OSHA-DOCKBOARD','LOADING_DOCK','29 CFR 1910.26 · dockboards, vehicle movement controls and handling','OSHA','https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.26','LOADING_DOCK_REFERENCE','REGULATORY_STANDARD_REFERENCE'),
+ s('V201-STORA-PAPERBOARD','RMS_PRINTING','Performa White · moisture-proof wrapping retained until board reaches press-room temperature; indoor sheltered storage','Stora Enso','https://www.storaenso.com/-/media/documents/download-center/documents/product-specifications/paperboard-materials/performa-white-en_n.pdf','PAPERBOARD_CONDITIONING_REFERENCE','MANUFACTURER_REFERENCE')
+]);
+const seen=new Set();
+export const V201_SOURCE_LEDGER=Object.freeze([...V201_NEW_RESEARCH_SOURCES,...V200_SOURCE_LEDGER].filter(e=>e.url&&!seen.has(e.url)&&(seen.add(e.url),true)));
+export const V201_SOURCE_STATS=Object.freeze({total:V201_SOURCE_LEDGER.length,newReviewed:V201_NEW_RESEARCH_SOURCES.length,uniqueUrls:new Set(V201_SOURCE_LEDGER.map(e=>e.url)).size});

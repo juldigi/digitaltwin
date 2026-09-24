@@ -65,7 +65,7 @@ test('V199 keeps functional interiors visible while bounding safety and utility 
  assert.match(building,/functionalVisibleSemantic/);
  assert.match(building,/visibleFunctionalReferences/);
  assert.match(building,/REFERENCE_HIDDEN_BY_DEFAULT/);
- assert.match(building,/V200_CLOSED_ENVELOPE_REAL_FACTORY_OPERATIONAL_DETAIL_VISIBLE__UNVERIFIED_SAFETY_MEP_REMAIN_HIDDEN/);
+ assert.match(building,/V201_CLOSED_ENVELOPE_WITH_CONTEXTUAL_PROCESS_SUPPORT_DOOR_IDENTIFICATION_AND_ROOF_BUILDUP_REFERENCE/);
  assert.match(building,/UTILITY_MODELS_RETAINED_FOR_EXPANSION_BUT_HIDDEN_IN_PHASE1_UI/);
 });
 
