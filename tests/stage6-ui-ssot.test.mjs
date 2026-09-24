@@ -13,8 +13,8 @@ test('Stage 6 canonical state owns all serializable UI context',()=>{
  assert.match(state,/bootState:\{phase:'booting',message:null\}/);
  assert.match(state,/selectedAsset:null/);
  assert.match(state,/selectedNode:null/);
- assert.match(state,/inspectionMode:\{explode:false,explodeLevel:0,isolate:false,section:false,interior:false,labels:true\}/);
- assert.match(state,/simulationState:\{available:false,blocked:false/);
+ assert.match(state,/inspectionMode:\{explode:false,explodeLevel:0,isolate:false,section:false,interior:false,interiorFocus:null,labels:true\}/);
+ assert.match(state,/simulationState:\{available:false,blocked:false[\s\S]*running:false/);
  assert.match(state,/referenceState:\{filter:'all'\}/);
  assert.match(state,/inspectorState:\{open:false,tab:'overview'\}/);
  assert.match(state,/export function setDomainState/);
@@ -28,7 +28,7 @@ test('Stage 6 app writes canonical state directly instead of relaying domain-sta
  assert.doesNotMatch(app,/\bactiveTab\b/);
  assert.doesNotMatch(app,/selectedTaxonomyId/);
  assert.doesNotMatch(app,/referenceCategoryFilter/);
- assert.doesNotMatch(app,/\bexteriorMode\b/);
+ assert.doesNotMatch(app,/\bexteriorMode\b/);\n assert.doesNotMatch(app,/runtimeSimulationSnapshot/);\n assert.doesNotMatch(app,/exteriorFocusKey/);
 });
 
 test('Stage 6 active machine evidence and identity come from registry context',()=>{
@@ -40,13 +40,17 @@ test('Stage 6 active machine evidence and identity come from registry context',(
  assert.doesNotMatch(app,/MACHINE-APM2/);
  assert.match(app,/\[FOUNDATION_SCOPE\.referenceMachineId\]:'offset5'/);
  assert.match(app,/function machineRoute\(machine\)\{return MACHINE_ROUTE_BY_ID\[machine\?\.machineId\]\|\|machine\?\.machineId\|\|null;\}/);
+ assert.match(state,/export function readUrlState/);
+ assert.match(state,/export function buildContextUrl/);
+ assert.match(app,/const restored=readUrlState\(\)/);
+ assert.match(app,/buildContextUrl\(snapshot\)/);
 });
 
 test('Stage 6 simulation transport renders canonical state and sends commands only',()=>{
  const sync=shell.slice(shell.indexOf('function syncSimulationTransport'),shell.indexOf('const INSPECTOR_TAB_SECTION'));
  assert.match(sync,/state\.simulationState\|\|\{\}/);
  assert.match(sync,/sim\.progress/);
- assert.match(sync,/sim\.playing/);
+ assert.match(sync,/sim\.running/);
  assert.doesNotMatch(sync,/#sim-status/);
  assert.doesNotMatch(sync,/#sim-stage/);
  assert.doesNotMatch(sync,/setSimulation\(/);
@@ -84,5 +88,5 @@ test('Stage 6 generic asset header does not present machine family as manufactur
  assert.match(app,/IS_GENERIC\?\(state\?\.asset\?\.manufacturer\|\|'Pabrikan belum terverifikasi'\)/);
  assert.doesNotMatch(app,/IS_GENERIC\?GENERIC_CONFIG\.label:'Belum memilih mesin'/);
  assert.doesNotMatch(app,/stage:MACHINE_KEY\?'Feeder':null/);
- assert.match(app,/runtimeSimulationSnapshot\.stage\|\|'Siap'/);
+ assert.match(app,/simulation\.stage\|\|'Siap'/);
 });
