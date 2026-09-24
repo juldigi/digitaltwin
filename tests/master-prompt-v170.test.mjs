@@ -34,5 +34,5 @@ test('V193 keeps Simulation and Reference contextual under the Asset domain',()=
 });
 
 test('V170 shell controller is cache-busted',()=>{
- assert.match(html,/src\/app-shell-v79\.js\?v=192/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=197/);
 });
