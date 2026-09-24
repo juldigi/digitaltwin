@@ -117,7 +117,7 @@ function applyMachineShell(){
   const warning=$('#dwg-warning');if(warning)warning.textContent='Posisi dan orientasi mesin ini pada plant belum diklaim sampai anchor layout aktual tervalidasi.';
  }
 }
-applyMachineShell();
+if(MACHINE_KEY)applyMachineShell();
 const toast=(message,error=false)=>{clearTimeout(toastTimer);$('#toast').textContent=message;$('#toast').classList.toggle('error',error);$('#toast').hidden=false;toastTimer=setTimeout(()=>$('#toast').hidden=true,error?9000:5000);};
 const safe=fn=>async(...args)=>{try{await fn(...args);}catch(e){console.error('[Digital Twin UI]',e);toast('Tindakan belum dapat dijalankan. Silakan coba kembali.',true);}};
 const on=(id,fn)=>$(id)?.addEventListener('click',safe(fn));
@@ -964,17 +964,17 @@ function openSceneEditor(){
  const existingPanel=document.querySelector('#scene-editor-panel');if(existingPanel){existingPanel.querySelector('#se-search,button')?.focus();return toast('Editor Scene 3D sudah terbuka.');}
  setView('factory');engine.setSceneEditing(true);
  const baseline=new Map([...engine.sceneObjects].map(([id,node])=>[id,{position:node.position.toArray(),rotation:[node.rotation.x,node.rotation.y,node.rotation.z],scale:node.scale.toArray(),visible:node.visible}]));
- const overrides={...(state.sceneOverrides||{})};let selected=null,undo=[],redo=[],isolated=false,previewOriginal=false,history=[],editorCategory='machines',editorScope='factory';const isolationGuard=createSceneIsolationGuard();
+ const overrides={...(state.sceneOverrides||{})};let selected=null,undo=[],redo=[],isolated=false,previewOriginal=false,history=[],editorCategory='machines',editorScope='factory',editorMachineId=null;const isolationGuard=createSceneIsolationGuard();
  const panel=document.createElement('section');panel.id='scene-editor-panel';panel.setAttribute('aria-label','Editor Scene 3D');panel.tabIndex=-1;document.body.append(panel);
  const editorCategories=[
-  {id:'machines',label:'Mesin',hint:'Mesin produksi di layout pabrik'},
+  {id:'machines',label:'Mesin',hint:'Semua mesin dari database BMJ'},
   {id:'walls',label:'Dinding',hint:'Dinding dan partisi'},
   {id:'equipment',label:'Aksesori & Peralatan',hint:'Peralatan pendukung dan aksesori'},
   {id:'building',label:'Bangunan & Ruangan',hint:'Pintu, lantai, atap, kolom, area'},
   {id:'utilities',label:'Utilitas',hint:'IPAL, AHU, ducting, pipa dan udara tekan'},
-  {id:'furniture',label:'Furniture',hint:'Meja, kursi, lemari, rak dan trolley'},
-  {id:'components',label:'Komponen Mesin',hint:'Bagian dari mesin yang sedang dibuka'}
+  {id:'furniture',label:'Furniture',hint:'Meja, kursi, lemari, rak dan trolley'}
  ];
+ const componentCategory={id:'components',label:'Bagian Mesin',hint:'Bagian dari mesin yang dipilih'};
  const assetIdByNode=new WeakMap();for(const [assetId,root] of engine.actualFactory?.assets||[])root.traverse(node=>assetIdByNode.set(node,'asset:'+assetId));
  const technicalSemantic=/^(SELECTION_OVERLAY|CAD_|CENTERLINE_|SOURCE_|SUPERADMIN_ADDED_PRIMITIVE$)/;
  const cleanEditorWords=value=>String(value||'').replace(/_V\d+/gi,'').replace(/_(REFERENCE|ACTUAL|VISUALIZATION|SUPPLEMENT|FUNCTIONAL|PHOTO|DERIVED|SOURCE|ASSEMBLY|NOT_AS_BUILT|NOT_SURVEYED|PLACEHOLDER)/gi,'').replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
@@ -1041,13 +1041,13 @@ function openSceneEditor(){
  const current=()=>{if(!selected)return;const node=engine.sceneObjects.get(selected);return node&&{position:node.position.toArray(),rotation:[node.rotation.x,node.rotation.y,node.rotation.z],scale:node.scale.toArray(),visible:node.visible,locked:overrides[selected]?.locked||false,deleted:overrides[selected]?.deleted||false,identity:selected.startsWith('copy:')?overrides[selected]?.identity:engine.sceneIdentity(selected),...(selected.startsWith('copy:')?{sourceId:overrides[selected]?.sourceId}:{}),...(selected.startsWith('new:')?{shape:overrides[selected]?.shape}:{})};};
  const update=()=>{const queryBefore=panel.querySelector('#se-search')?.value||'';const v=current(),info=selected?engine.sceneObjectInfo(selected):null,wallId=selected?engine.sceneWallId(selected):null,wallPoints=wallId===selected?engine.sceneWallEndpoints(selected):null;
  const sceneChoices=[...engine.sceneObjects].filter(([id,node])=>selectableEditorObject(id,node)&&editorCategoryFor(id,node)!=='machines').map(([id,node])=>({id,node,category:editorCategoryFor(id,node),name:editorLabel(id,node)}));
- const registryMachineChoices=MACHINE_REGISTRY.filter(machine=>engine.actualFactory?.assets?.has(machine.machineId)).sort((a,b)=>(a.no??999)-(b.no??999)).map(machine=>({id:'asset:'+machine.machineId,node:engine.actualFactory.assets.get(machine.machineId),category:'machines',name:machine.name,machine}));
+ const registryMachineChoices=MACHINE_REGISTRY.slice().sort((a,b)=>(a.no??999)-(b.no??999)).map(machine=>({id:'asset:'+machine.machineId,node:engine.actualFactory?.assets?.get(machine.machineId)||null,category:'machines',name:machine.name,machine,placed:Boolean(engine.actualFactory?.assets?.has(machine.machineId))}));
  const rawChoices=[...registryMachineChoices,...sceneChoices];
  const labelTotals=new Map();for(const item of rawChoices){const key=item.category+'|'+item.name;labelTotals.set(key,(labelTotals.get(key)||0)+1);}
  const labelSeen=new Map(),allChoices=rawChoices.map(item=>{const key=item.category+'|'+item.name,total=labelTotals.get(key)||1;if(total<2||item.category==='machines')return item;const number=(labelSeen.get(key)||0)+1;labelSeen.set(key,number);return {...item,name:item.name+' '+number};});
  const categoryCounts=Object.fromEntries(editorCategories.map(category=>[category.id,allChoices.filter(item=>item.category===category.id).length]));
- const choices=allChoices.filter(item=>item.category===editorCategory);
- const selectedNode=selected?engine.sceneObjects.get(selected):null,selectedName=selectedNode?editorLabel(selected,selectedNode):'Objek 3D',selectedMachine=selected?.startsWith('asset:')?MACHINE_REGISTRY_BY_ID.get(selected.slice(6)):null,draftCount=Object.keys(overrides).length;
+ const choices=editorScope==='machine'?sceneChoices.filter(item=>item.category==='components'):allChoices.filter(item=>item.category===editorCategory);
+ const selectedNode=selected?engine.sceneObjects.get(selected):null,selectedMachine=selected?.startsWith('asset:')?MACHINE_REGISTRY_BY_ID.get(selected.slice(6)):editorMachineId?MACHINE_REGISTRY_BY_ID.get(editorMachineId):null,selectedName=selectedNode?editorLabel(selected,selectedNode):selectedMachine?.name||'Objek 3D',draftCount=Object.keys(overrides).length;
  panel.innerHTML=`<header class="se-header"><div><small>SUPERADMIN</small><strong>Editor Scene 3D</strong><span>Ubah posisi dan tampilan objek tanpa mengubah file sumber.</span></div><button id="se-close" aria-label="Tutup editor">Tutup</button></header>
  <div class="se-progress" aria-label="Alur editor"><span class="${selected?'done':'current'}"><b>1</b>Pilih objek</span><span class="${!selected?'':draftCount?'done':'current'}"><b>2</b>Atur</span><span class="${draftCount?'current':''}"><b>3</b>Simpan</span></div>
  ${engine.staleSceneOverrides?.length?`<div class="se-alert" role="alert"><strong>${engine.staleSceneOverrides.length} perubahan lama dilewati</strong><span>Scene sudah berubah sehingga perubahan tersebut tidak diterapkan agar objek yang salah tidak ikut bergeser.</span></div>`:''}
