@@ -81,7 +81,7 @@ test('large factory fleet loads after the first usable app state',()=>{
 
 test('opening the root URL without an asset does not abort the app module',()=>{
   const app=fs.readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
-  assert.match(app,/configureActiveMachine\(INITIAL_REQUESTED_ASSET&&canOpenTechnical3D\(INITIAL_REQUESTED_ASSET\)\?INITIAL_REQUESTED_ASSET:FOUNDATION_SCOPE\.primaryRoute\)/);
+  assert.match(app,/clearActiveMachineDescriptor\(\);/);
 });
 
 test('icons use one accessible vector family without emoji runtime controls',()=>{
@@ -92,7 +92,7 @@ test('icons use one accessible vector family without emoji runtime controls',()=
 });
 
 test('service worker owns the current OEM-deep-detail shell assets',()=>{
- assert.match(sw,/factory-digital-twin-v207-superadmin-editor-20260924/);
+ assert.match(sw,/factory-digital-twin-v209-architecture-convergence-20260925/);
   assert.match(sw,/app-shell-v79\.css/);
   assert.match(sw,/src\/app-shell-v79\.js/);
   assert.match(sw,/assets\/splash-industrial-v79\.webp/);
@@ -148,7 +148,7 @@ test('V193 removes internal machine identifiers from the normal asset browser co
   const app=fs.readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
   assert.match(app,/\[machine\.sapCode,machine\.model\]\.filter\(Boolean\)\.join\(' · '\)/);
   assert.doesNotMatch(app,/<small>\$\{esc\(machine\.machineId\)\}<\/small>/);
-  assert.match(app,/Mode Edit 3D/);
+  assert.match(app,/Edit Pabrik 3D/);
 });
 
 
@@ -157,7 +157,7 @@ test('V195 visual hierarchy is state-driven and contextual',()=>{
   assert.match(js,/function syncVisualHierarchy\(state\)/);
   assert.match(js,/body\.dataset\.sceneMode=state\.sceneMode==='machine'\?'machine':'factory'/);
   assert.match(js,/body\.dataset\.hasSelection=String\(hasSelection\)/);
-  assert.match(js,/uiArchitecture='v196-interaction-flow'/);
+  assert.match(js,/uiArchitecture='v197-architecture-convergence'/);
   assert.match(css,/\/\* V195 visual hierarchy reset/);
   assert.match(css,/body\[data-scene-mode="factory"\] \.inspect-tool\{display:none!important\}/);
   assert.match(css,/body\[data-has-selection="false"\] \.context-tool\{display:none!important\}/);
@@ -181,7 +181,7 @@ test('V195 keeps the canvas visually dominant across desktop and mobile',()=>{
 test('V196 interaction flow preserves semantic hierarchy and explicit parent navigation',()=>{
   const app=fs.readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
   assert.match(html,/id="context-back"[^>]+aria-label="Kembali satu tingkat"/);
-  assert.match(js,/uiArchitecture='v196-interaction-flow'/);
+  assert.match(js,/uiArchitecture='v197-architecture-convergence'/);
   assert.match(js,/function syncVisualHierarchy\(state\)[\s\S]*context-back/);
   assert.match(app,/function pushMachineContextHistory\(node=null/);
   assert.match(app,/function navigateContextParent\(\)/);
