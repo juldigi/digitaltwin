@@ -1245,13 +1245,19 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  // Legacy V147 process-reference objects that contradict or overstate the new photographic evidence
  // remain in the graph for provenance, but are hidden and explicitly marked as superseded.
  Object.assign(buildingDetailStats,{v205IpalPhotoObjects:0,v205IpalLegacyHidden:0,v205IpalPipingRuns:0,v205IpalSafetyDetails:0,v205IpalVegetationObjects:0,v205IpalWeatheringDetails:0});
- const legacyIpalPattern=/IPAL_(?:INLET|AERATION_BASIN|AERATION_DIFFUSER|STATIC_AERATION|CLARIFIER|FILTER_|SLUDGE_HOLDING|CHEMICAL_TANK|CHEMICAL_DOSING|CHEMICAL_CONTAINMENT|PUMP_SKID|TRANSFER_PUMP|PUMP_MOTOR|BLOWER_|AIR_HEADER|PROCESS_PIPE|SLUDGE_PIPE|SERVICE_LADDER|SERVICE_WALKWAY|WALKWAY_|CONTROL_PANEL|SAMPLING_STATION|SAMPLE_|FLOW_DIRECTION|EQUALIZATION_BASIN)/i;
- for(const o of ipal.children){
-  const sem=String(o.userData?.semantic||'');
-  if(legacyIpalPattern.test(sem)){o.visible=false;o.userData={...o.userData,supersededByV205:true,supersededReason:'ACTUAL_IPAL_PHOTOS_2511_2525_OVERRIDE_GENERIC_PROCESS_REFERENCE'};buildingDetailStats.v205IpalLegacyHidden++;}
+ // Every direct child that existed before the photo reconstruction is retained for audit,
+ // but hidden as one legacy layer. This also prevents the old concrete slab/columns from
+ // z-fighting with or physically covering the photographed paving and frame.
+ const legacyIpalPattern=/^IPAL_/i;
+ for(const o of [...ipal.children]){
+  const sem=String(o.userData?.semantic||'LEGACY_IPAL_UNTAGGED_OBJECT');
+  o.visible=false;
+  o.userData={...o.userData,supersededByV205:true,supersededReason:'ACTUAL_IPAL_PHOTOS_2511_2525_OVERRIDE_PRE_V205_REFERENCE',legacySemantic:sem};
+  buildingDetailStats.v205IpalLegacyHidden++;
  }
  for(const o of layers.roof.children){
-  if(String(o.userData?.semantic||'')==='IPAL_CANOPY_ROOF'){o.visible=false;o.userData={...o.userData,supersededByV205:true};buildingDetailStats.v205IpalLegacyHidden++;}
+  const sem=String(o.userData?.semantic||'');
+  if(legacyIpalPattern.test(sem)){o.visible=false;o.userData={...o.userData,supersededByV205:true,supersededReason:'ACTUAL_IPAL_PHOTOS_2511_2525_OVERRIDE_PRE_V205_ROOF_REFERENCE'};buildingDetailStats.v205IpalLegacyHidden++;}
  }
 
  const ipalPhoto=new T.Group();ipalPhoto.name='IPAL_PHOTO_ACTUAL_V205';ipal.add(ipalPhoto);
@@ -1268,50 +1274,108 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  const photoYellow=new T.MeshStandardMaterial({color:0xd7a817,roughness:.68,metalness:.16});
  const photoRed=new T.MeshStandardMaterial({color:0xa93d32,roughness:.72,metalness:.03});
  const photoWhite=new T.MeshStandardMaterial({color:0xe5e2d8,roughness:.92,metalness:0});
- const ipalPhotoRuntime={rotors:[],waters:[],update(now){const t=Number(now||0)*.001;for(const r of this.rotors)r.rotation.y=t*.72;for(let i=0;i<this.waters.length;i++){const w=this.waters[i];w.position.y=w.userData.baseY+Math.sin(t*.55+i)*.006;}}};
+ const ipalPhotoRuntime={
+  rotors:[],waters:[],fish:[],processMotion:false,
+  setProcessMotion(on){this.processMotion=!!on;if(!this.processMotion)for(const r of this.rotors)r.rotation.y=0;return this.processMotion;},
+  update(now){
+   const t=Number(now||0)*.001;
+   for(let i=0;i<this.waters.length;i++){const w=this.waters[i];w.position.y=w.userData.baseY+Math.sin(t*.55+i*1.7)*.004;}
+   for(let i=0;i<this.fish.length;i++){const fish=this.fish[i];fish.position.x=fish.userData.baseX+Math.sin(t*.32+i)*.10;fish.position.z=fish.userData.baseZ+Math.cos(t*.29+i)*.065;fish.rotation.y=Math.sin(t*.22+i)*.26;}
+   if(this.processMotion)for(const r of this.rotors)r.rotation.y=t*.72;
+  }
+ };
 
  // Actual civil surface: interlocking paving under the open canopy, with a narrow service-concrete margin.
  const paving=pbox(46.4,.095,-110.9,26.15,.03,13.82,0x9aa09c,'IPAL_PHOTO_INTERLOCKING_PAVING');
  paving.userData.materialObservation='INTERLOCKING_PAVING_VISIBLE_IN_PHOTOS';
  for(let x=34;x<=59;x+=1.15)pline([x,.116,-117.7],[x,.116,-104.2],.008,0x737b78,'IPAL_PHOTO_PAVING_JOINT',{renderIntent:'SUBTLE'});
  for(let z=-117.2;z<=-104.6;z+=.72)pline([33.45,.116,z],[59.25,.116,z],.007,0x7b827f,'IPAL_PHOTO_PAVING_JOINT',{renderIntent:'SUBTLE'});
+ // Photo-visible edge drainage, grated trench sections and small spontaneous vegetation.
+ for(const [x,z,w,d] of [[46.4,-117.82,26.2,.30],[59.38,-110.9,.30,13.5]])pbox(x,.075,z,w,.10,d,0x4f5e62,'IPAL_PHOTO_EDGE_DRAIN',0,1,{surface:'WEATHERED'});
+ for(let x=34.0;x<59.0;x+=.92)pbox(x,.132,-117.82,.62,.028,.31,0x39494e,'IPAL_PHOTO_DRAIN_GRATING',0,1,{coreProcess:false});
+ for(const [x,z] of [[34.1,-116.9],[41.2,-117.05],[57.8,-116.72],[58.9,-105.0]]){pline([x,.12,z],[x+.035,.28,z+.025],.012,0x4f714a,'IPAL_PHOTO_PAVER_WEED',{coreProcess:false});buildingDetailStats.v205IpalVegetationObjects++;}
 
- // Photo-matched open steel canopy. The roof stays in the existing roof layer so the current roof-visibility control still works.
- const canopyXs=[33.6,38.75,43.9,49.05,54.2,59.2];
+ // Photo-matched open steel canopy: shallow continuous barrel curve, purlins,
+ // diagonal tie rods and translucent daylight strips as visible in IMG_2516/2518/2519/2525.
+ const canopyXs=[33.6,38.75,43.9,49.05,54.2,59.2],canopyZ0=-104.10,canopyZ1=-117.70,canopyEave=4.45,canopyRise=.92,canopyArcSteps=12;
  for(const x of canopyXs){
-  pbox(x,2.30,-104.1,.20,4.45,.20,0x394b51,'IPAL_PHOTO_CANOPY_COLUMN');
-  pbox(x,2.30,-117.7,.20,4.45,.20,0x394b51,'IPAL_PHOTO_CANOPY_COLUMN');
-  pline([x,4.42,-104.1],[x,5.25,-110.9],.052,0x394b51,'IPAL_PHOTO_CANOPY_RAFTER');
-  pline([x,5.25,-110.9],[x,4.42,-117.7],.052,0x394b51,'IPAL_PHOTO_CANOPY_RAFTER');
- }
- for(let i=0;i<canopyXs.length-1;i+=2){
-  for(const z of [-104.1,-117.7]){
-   pline([canopyXs[i],.5,z],[canopyXs[i+1],4.0,z],.025,0x52636a,'IPAL_PHOTO_CANOPY_X_BRACE');
-   pline([canopyXs[i+1],.5,z],[canopyXs[i],4.0,z],.025,0x52636a,'IPAL_PHOTO_CANOPY_X_BRACE');
+  for(const z of [canopyZ0,canopyZ1]){
+   pbox(x,2.28,z,.20,4.42,.20,0x394b51,'IPAL_PHOTO_CANOPY_COLUMN');
+   pbox(x,.12,z,.54,.22,.54,0x707d7e,'IPAL_PHOTO_CANOPY_COLUMN_BASE');
+  }
+  let prev=null;
+  for(let i=0;i<=canopyArcSteps;i++){
+   const t=i/canopyArcSteps,z=canopyZ0+(canopyZ1-canopyZ0)*t,y=canopyEave+canopyRise*Math.sin(Math.PI*t),p=[x,y,z];
+   if(prev)pline(prev,p,.050,0x394b51,'IPAL_PHOTO_CURVED_CANOPY_RAFTER');
+   prev=p;
   }
  }
- for(let band=0;band<8;band++){
-  const z0=-104.15-band*1.92;
-  const roof=box(layers.roof,46.4,4.58+Math.sin((band/7)*Math.PI)*.63,z0-.86,26.7,.055,1.78,band===3||band===6?0xc8d4cd:0x788c90,0,band===3||band===6?.58:1);
-  photoTag(roof,band===3||band===6?'IPAL_PHOTO_TRANSLUCENT_ROOF_PANEL':'IPAL_PHOTO_CORRUGATED_CANOPY_ROOF',{openSides:true});
+ for(let i=0;i<canopyXs.length-1;i+=2)for(const z of [canopyZ0,canopyZ1]){
+  pline([canopyXs[i],.55,z],[canopyXs[i+1],4.00,z],.022,0x52636a,'IPAL_PHOTO_CANOPY_X_BRACE');
+  pline([canopyXs[i+1],.55,z],[canopyXs[i],4.00,z],.022,0x52636a,'IPAL_PHOTO_CANOPY_X_BRACE');
  }
- for(let x=34.0;x<=58.8;x+=2.1)pline([x,4.55,-104.15],[x,4.55,-117.65],.022,0x50636a,'IPAL_PHOTO_ROOF_PURLIN');
+ // Roof panels follow each tangent of the shallow arch instead of forming horizontal steps.
+ for(let i=0;i<canopyArcSteps;i++){
+  const ta=i/canopyArcSteps,tb=(i+1)/canopyArcSteps;
+  const za=canopyZ0+(canopyZ1-canopyZ0)*ta,zb=canopyZ0+(canopyZ1-canopyZ0)*tb;
+  const ya=canopyEave+canopyRise*Math.sin(Math.PI*ta),yb=canopyEave+canopyRise*Math.sin(Math.PI*tb);
+  const len=Math.hypot(zb-za,yb-ya),translucent=i===3||i===8;
+  const roof=box(layers.roof,46.4,(ya+yb)/2,(za+zb)/2,26.7,.055,len+.035,translucent?0xc8d4cd:0x788c90,0,translucent?.58:1);
+  roof.rotation.x=-Math.atan2(yb-ya,zb-za);
+  photoTag(roof,translucent?'IPAL_PHOTO_TRANSLUCENT_ROOF_PANEL':'IPAL_PHOTO_CORRUGATED_CANOPY_ROOF',{openSides:true,roofForm:'SHALLOW_CURVED_SEGMENTED_TANGENTS'});
+ }
+ // Purlins run across the canopy at the same curved roof stations.
+ for(let i=1;i<canopyArcSteps;i++){
+  const t=i/canopyArcSteps,z=canopyZ0+(canopyZ1-canopyZ0)*t,y=canopyEave+canopyRise*Math.sin(Math.PI*t);
+  const p=line(layers.roof,new T.Vector3(33.25,y+.035,z),new T.Vector3(59.55,y+.035,z),.027,0x50636a);photoTag(p,'IPAL_PHOTO_ROOF_PURLIN');
+ }
+ // Fine anti-sag/tie rods are intentionally slender and sparse.
+ for(let x=35.0;x<59;x+=4.2){pline([x,4.34,canopyZ0],[x+3.0,5.08,-110.9],.010,0x4a555a,'IPAL_PHOTO_CANOPY_TIE_ROD');pline([x+3.0,5.08,-110.9],[x,4.34,canopyZ1],.010,0x4a555a,'IPAL_PHOTO_CANOPY_TIE_ROD');}
+ for(const z of [canopyZ0,canopyZ1]){
+  const gutter=line(layers.roof,new T.Vector3(33.25,4.38,z),new T.Vector3(59.55,4.38,z),.050,0x53666c);photoTag(gutter,'IPAL_PHOTO_ROOF_GUTTER');
+ }
+ for(const [x,z] of [[33.6,canopyZ0],[59.2,canopyZ1]])pline([x,4.38,z],[x,.18,z],.042,0x53666c,'IPAL_PHOTO_ROOF_DOWNPIPE');
+ // Linear work lights hang below the canopy rather than floating at roof-sheet level.
+ for(const x of [38.7,49.1,58.2])pbox(x,4.05,-110.9,1.15,.07,.30,0xd8e3df,'IPAL_PHOTO_WORK_LIGHT',0,1,{coreProcess:false});
 
- // Blue concrete basins proven by the photos and legible labels.
+ // The photographed blue structures are tall raised process basins/tanks, not low ornamental ponds.
+ // Heights remain visual approximations because no surveyed section/elevation was supplied.
  const makeBlueBasin=(spec,semantic,waterColor)=>{
-  const x=spec.x,z=-spec.y,w=spec.w,d=spec.d,h=spec.h;
-  pbox(x,.16,z,w,.18,d,0x48788e,semantic+'_BASE');
-  pbox(x,h/2,z-d/2,w,h,.18,0x3d7187,semantic+'_WALL');
-  pbox(x,h/2,z+d/2,w,h,.18,0x3d7187,semantic+'_WALL');
-  pbox(x-w/2,h/2,z,.18,h,d,0x3d7187,semantic+'_WALL');
-  pbox(x+w/2,h/2,z,.18,h,d,0x3d7187,semantic+'_WALL');
-  const water=pbox(x,h-.12,z,w-.34,.035,d-.34,waterColor,semantic+'_WATER',0,.76,{processVisualization:'LEVEL_SURFACE'});
+  const x=spec.x,z=-spec.y,w=spec.w,d=spec.d,h=spec.h,g=new T.Group();g.position.set(x,0,z);ipalPhoto.add(g);photoTag(g,semantic,{geometryType:'TALL_RAISED_RECTANGULAR_PROCESS_BASIN',dimensionStatus:'PHOTO_RELATIVE_NOT_SURVEYED'});
+  const gb=(lx,ly,lz,lw,lh,ld,color,sub,opacity=1,extra={})=>{const o=box(g,lx,ly,lz,lw,lh,ld,color,0,opacity);return photoTag(o,semantic+'_'+sub,extra);};
+  gb(0,.12,0,w,.24,d,0x3d7187,'BASE');
+  gb(0,h/2,-d/2,w,h,.20,0x3d7187,'WALL');
+  gb(0,h/2,d/2,w,h,.20,0x3d7187,'WALL');
+  gb(-w/2,h/2,0,.20,h,d,0x3d7187,'WALL');
+  gb(w/2,h/2,0,.20,h,d,0x3d7187,'WALL');
+  // Concrete coping and horizontal construction bands visible on the blue facades.
+  for(const [ly,depth] of [[h+.03,.12],[h*.42,.07],[h*.68,.07]])gb(0,ly,d/2+.055,w+.10,depth,.11,ly>h?0x4d8193:0x31677b,'FACADE_BAND');
+  const water=gb(0,h-.13,0,w-.35,.035,d-.35,waterColor,'WATER',.74,{processVisualization:'LEVEL_SURFACE',levelNotProcessMeasurement:true});
   water.userData.baseY=water.position.y;ipalPhotoRuntime.waters.push(water);
-  return {x,z,w,d,h,water};
+  // Local weathering/streak references keep the concrete from looking freshly painted.
+  for(const lx of [-w*.28,w*.05,w*.31])gb(lx,h*.43,d/2+.112,.08,h*.55,.018,0x315f70,'WEATHERING_STREAK',.18,{weathering:'PHOTO_VISIBLE_STREAK_REFERENCE'});
+  return {group:g,x,z,w,d,h,water};
  };
- const eq=makeBlueBasin(IPAL_PHOTO_EVIDENCE_V205.relativeLayout.equalization,'IPAL_PHOTO_BAK_EKUALISASI',0x416c72);label('BAK EKUALISASI',eq.x,1.48,eq.z+eq.d/2+.16,3.4,'#244b5c',ipalPhoto);
- for(let i=0;i<=10;i++){const y=.18+i*(eq.h-.28)/10;pbox(eq.x-eq.w/2-.025,y,eq.z+eq.d/2+.10,.06,.018,.18,0xe9eee7,'IPAL_PHOTO_EQUALIZATION_LEVEL_MARK',0,1,{labelPercent:i*10});}
- const tmp=makeBlueBasin(IPAL_PHOTO_EVIDENCE_V205.relativeLayout.temporaryHolding,'IPAL_PHOTO_BAK_PENAMPUNGAN_SEMENTARA',0x4c7073);label('BAK PENAMPUNGAN SEMENTARA',tmp.x,1.28,tmp.z+tmp.d/2+.16,4.2,'#244b5c',ipalPhoto);
+ const eq=makeBlueBasin(IPAL_PHOTO_EVIDENCE_V205.relativeLayout.equalization,'IPAL_PHOTO_BAK_EKUALISASI',0x416c72);
+ label('BAK EKUALISASI',eq.x,eq.h*.58,eq.z+eq.d/2+.15,3.4,'#173f52',ipalPhoto);
+ // Photo IMG_2519 shows 0% at the top and 100% at the bottom of the facade.
+ for(let i=0;i<=10;i++){
+  const y=eq.h-.20-i*(eq.h-.42)/10;
+  pbox(eq.x-eq.w*.20,y,eq.z+eq.d/2+.115,.11,.024,.026,0x202e33,'IPAL_PHOTO_EQUALIZATION_LEVEL_MARK',0,1,{labelPercent:i*10});
+  label(String(i*10)+'%',eq.x-eq.w*.28,y,eq.z+eq.d/2+.17,.54,'#21343c',ipalPhoto);
+ }
+ const tmp=makeBlueBasin(IPAL_PHOTO_EVIDENCE_V205.relativeLayout.temporaryHolding,'IPAL_PHOTO_BAK_PENAMPUNGAN_SEMENTARA',0x4c7073);
+ label('BAK PENAMPUNGAN SEMENTARA',tmp.x,tmp.h*.60,tmp.z+tmp.d/2+.15,4.2,'#173f52',ipalPhoto);
+ for(let i=0;i<=10;i+=2){
+  const y=tmp.h-.18-i*(tmp.h-.35)/10;
+  pbox(tmp.x-tmp.w*.20,y,tmp.z+tmp.d/2+.115,.09,.020,.025,0x202e33,'IPAL_PHOTO_TEMP_HOLDING_LEVEL_MARK',0,1,{labelPercent:i*10});
+  label(String(i*10)+'%',tmp.x-tmp.w*.31,y,tmp.z+tmp.d/2+.17,.48,'#21343c',ipalPhoto);
+ }
+ // Dedicated yellow access stair/landing seen across the front of the temporary holding basin.
+ for(let i=0;i<13;i++)pbox(39.95+i*.16,.12+i*.135,-110.05+i*.055,.78,.055,.28,0xd7a817,'IPAL_PHOTO_BASIN_ACCESS_STAIR_TREAD');
+ for(const side of [-1,1]){pline([39.82,.10,-110.05+side*.41],[42.05,1.82,-109.35+side*.41],.030,0xd7a817,'IPAL_PHOTO_BASIN_ACCESS_STAIR_STRINGER');pline([39.82,1.02,-110.05+side*.41],[42.05,2.72,-109.35+side*.41],.024,0xd7a817,'IPAL_PHOTO_BASIN_ACCESS_HANDRAIL');}
+ pbox(42.15,1.86,-109.22,1.65,.09,1.05,0x7f8885,'IPAL_PHOTO_BASIN_ACCESS_LANDING');
+ for(const z of [-108.70,-109.74])pline([41.32,2.72,z],[42.98,2.72,z],.025,0xd7a817,'IPAL_PHOTO_BASIN_LANDING_HANDRAIL');
 
  // Large metal tank: shell-course seams, weathering, yellow top rail and external ladder.
  const an=IPAL_PHOTO_EVIDENCE_V205.relativeLayout.anaerobicTank,anZ=-an.y;
@@ -1319,8 +1383,10 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  for(let y=.48;y<an.h+.15;y+=.52)ptorus(an.x,y,anZ,an.r+.012,.022,0x747d7b,'IPAL_PHOTO_TANK_SHELL_RING');
  for(let a=0;a<Math.PI*2;a+=Math.PI/8)pline([an.x+Math.cos(a)*an.r,.18,anZ+Math.sin(a)*an.r],[an.x+Math.cos(a)*an.r,an.h+.07,anZ+Math.sin(a)*an.r],.011,0x777f7d,'IPAL_PHOTO_TANK_VERTICAL_SEAM');
  const anTop=pcyl(an.x,an.h+.14,anZ,an.r*.97,.08,0x929a98,'IPAL_PHOTO_TANK_TOP',{observed:'METAL_TOP'},40,photoMetalDark);
- for(const r of [an.r+.03,an.r+.25])ptorus(an.x,an.h+.58,anZ,r,.026,0xd7a817,'IPAL_PHOTO_TANK_TOP_GUARDRAIL');
- for(let a=0;a<Math.PI*2;a+=Math.PI/10)pline([an.x+Math.cos(a)*(an.r+.14),an.h+.14,anZ+Math.sin(a)*(an.r+.14)],[an.x+Math.cos(a)*(an.r+.14),an.h+.62,anZ+Math.sin(a)*(an.r+.14)],.022,0xd7a817,'IPAL_PHOTO_TANK_GUARD_POST');
+ const tankRailR=an.r+.18;
+ ptorus(an.x,an.h+.86,anZ,tankRailR,.026,0xd7a817,'IPAL_PHOTO_TANK_TOP_GUARDRAIL');
+ ptorus(an.x,an.h+.50,anZ,tankRailR,.020,0xd7a817,'IPAL_PHOTO_TANK_MID_GUARDRAIL');
+ for(let a=0;a<Math.PI*2;a+=Math.PI/10)pline([an.x+Math.cos(a)*tankRailR,an.h+.14,anZ+Math.sin(a)*tankRailR],[an.x+Math.cos(a)*tankRailR,an.h+.90,anZ+Math.sin(a)*tankRailR],.022,0xd7a817,'IPAL_PHOTO_TANK_GUARD_POST');
  const ladderX=an.x+an.r+.12;
  for(const lx of [ladderX-.22,ladderX+.22])pline([lx,.16,anZ],[lx,an.h+.55,anZ],.025,0xd7a817,'IPAL_PHOTO_TANK_LADDER_RAIL');
  for(let y=.35;y<an.h+.5;y+=.30)pline([ladderX-.22,y,anZ],[ladderX+.22,y,anZ],.018,0xd7a817,'IPAL_PHOTO_TANK_LADDER_RUNG');
@@ -1374,6 +1440,7 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   pline([bx,1.46,sdZ],[bx,1.72,sdZ-.35],.035,0xc9cbc6,'IPAL_PHOTO_SLUDGE_FLEXIBLE_HOSE');
  }
  pbox(sd.x-sd.w/2+.15,1.13,sdZ+sd.d/2+.02,.045,.58,.68,0xe4d240,'IPAL_PHOTO_TOXIC_WARNING_PLATE',0,1,{warningText:'BERACUN'});buildingDetailStats.v205IpalSafetyDetails++;
+ label('UNIT (KARUNG) PENGERING LUMPUR',sd.x,1.72,sdZ+sd.d/2+.12,4.35,'#173f52',ipalPhoto);
 
  // White operator/service room with dark aluminium windows, entrance tile, extinguisher and its own lower canopy.
  const or=IPAL_PHOTO_EVIDENCE_V205.relativeLayout.operatorRoom,orZ=-or.y;
@@ -1423,7 +1490,20 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  const pd=IPAL_PHOTO_EVIDENCE_V205.relativeLayout.pond,pdZ=-pd.y;
  pbox(pd.x,.18,pdZ,pd.w,.36,pd.d,0x3c4848,'IPAL_PHOTO_ORNAMENTAL_POND_BASIN');
  const pondWater=pbox(pd.x,.37,pdZ,pd.w-.18,.025,pd.d-.18,0x3b7075,'IPAL_PHOTO_ORNAMENTAL_POND_WATER',0,.72,{context:'NON_PROCESS_WATER_FEATURE'});pondWater.userData.baseY=pondWater.position.y;ipalPhotoRuntime.waters.push(pondWater);
- for(let i=0;i<5;i++){const fish=new T.Mesh(new T.CapsuleGeometry(.05,.24,3,6),material(i%2?0xd18a3c:0xd2b15e));fish.rotation.z=Math.PI/2;fish.position.set(pd.x-2.8+i*1.3,.39,pdZ+(i%2?.16:-.15));ipalPhoto.add(fish);photoTag(fish,'IPAL_PHOTO_POND_FISH',{context:'ORNAMENTAL'});}
+ for(let i=0;i<5;i++){const fish=new T.Mesh(new T.CapsuleGeometry(.05,.24,3,6),material(i%2?0xd18a3c:0xd2b15e));fish.rotation.z=Math.PI/2;fish.position.set(pd.x-2.8+i*1.3,.39,pdZ+(i%2?.16:-.15));ipalPhoto.add(fish);photoTag(fish,'IPAL_PHOTO_POND_FISH',{context:'ORNAMENTAL',ambientMotion:true,baseX:fish.position.x,baseZ:fish.position.z});ipalPhotoRuntime.fish.push(fish);}
+
+ // Adjacent outdoor utility equipment is present in IMG_2511/2512/2520/2521/2522.
+ // It is rendered for spatial fidelity but explicitly NOT asserted as part of the wastewater process.
+ const au=IPAL_PHOTO_EVIDENCE_V205.relativeLayout.adjacentUtility,auZ=-au.y;
+ const utilityGroup=new T.Group();utilityGroup.name='IPAL_ADJACENT_UTILITY_PHOTO_CONTEXT';ipalPhoto.add(utilityGroup);photoTag(utilityGroup,'IPAL_PHOTO_ADJACENT_UTILITY_EQUIPMENT',{coreProcess:false,systemLinkage:'NOT_ASSERTED'});
+ for(let i=0;i<4;i++){
+  const ux=au.x+(i%2)*1.20-.55,uz=auZ-Math.floor(i/2)*2.05+1.05;
+  const cabinet=box(utilityGroup,ux,.78,uz,1.02,1.46,.78,0xd5dbd8);photoTag(cabinet,'IPAL_PHOTO_ADJACENT_UTILITY_CABINET',{coreProcess:false,systemLinkage:'NOT_ASSERTED'});
+  const fan=new T.Mesh(new T.TorusGeometry(.28,.028,8,28),material(0x59666a));fan.position.set(ux,.98,uz-.405);utilityGroup.add(fan);photoTag(fan,'IPAL_PHOTO_ADJACENT_UTILITY_AXIAL_FAN_RING',{coreProcess:false,systemLinkage:'NOT_ASSERTED'});
+  for(let a=0;a<Math.PI*2;a+=Math.PI/4){const spoke=line(utilityGroup,new T.Vector3(ux,.98,uz-.42),new T.Vector3(ux+Math.cos(a)*.23,.98+Math.sin(a)*.23,uz-.42),.010,0x566267);photoTag(spoke,'IPAL_PHOTO_ADJACENT_UTILITY_FAN_BLADE',{coreProcess:false,systemLinkage:'NOT_ASSERTED'});}
+ }
+ // Low fence/guard visible around parts of the adjacent equipment yard.
+ for(const z of [auZ+2.25,auZ-2.25]){pline([60.05,.20,z],[62.70,.20,z],.026,0x59686d,'IPAL_PHOTO_ADJACENT_UTILITY_GUARD',{coreProcess:false,systemLinkage:'NOT_ASSERTED'});pline([60.05,1.15,z],[62.70,1.15,z],.026,0x59686d,'IPAL_PHOTO_ADJACENT_UTILITY_GUARD',{coreProcess:false,systemLinkage:'NOT_ASSERTED'});}
 
  // Yellow platform/guardrail language repeated across the photographed process area.
  pbox(46.7,2.72,-111.0,3.2,.10,1.05,0x858e8b,'IPAL_PHOTO_SERVICE_PLATFORM_GRATING');
@@ -1468,7 +1548,7 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   },
   assumptions:{...data.assumptions,roofEaves:4.5,roofRidge:7,roofHeightEvidence:'USER_APPROXIMATE_MEASUREMENT',machineServiceClearance:MACHINE_SERVICE_CLEARANCE,offsetRoomClearance:1.85,wallTreatment:'SOURCE_SEGMENTS_CLIPPED_TO_SERVICE_ENVELOPE',portalTreatment:'SOURCE_DOORS_AND_CURTAINS_CUT_REAL_OPENINGS_IN_WALL_MESH__FUNCTIONAL_REFERENCE_DOOR_ONLY_WHEN_SOURCE_LABELLED_ROOM_HAS_NO_NEARBY_SOURCE_ACCESS',roomContents:'V204_FULL_ROOM_SHELL_WITH_DOOR_APPROACH_SWING_FINISH_JOINTS_VISUAL_BOARDS_AND_COLLISION_AUDITED_CONTEXTUAL_FURNITURE_REFERENCE_NOT_AS_BUILT',warehouseReference:'V201_WRAPPED_AND_CONDITIONED_PAPERBOARD_CLEAR_AISLES_STATUS_STAGING_FLOOR_SCALE_REELS_SHEETS_AND_CONTROLLED_HANDLING_REFERENCE',finishedGoodsReference:'V201_SOURCE_FG_WITH_WRAPPED_LOADS_PROTECTION_STAGING_PARKING_SHIPPING_SUPPORT_AND_CLEAR_ROUTE_REFERENCE',microRealism:'OFFICE_CEILING_HVAC_DIFFUSER_POWER_DATA_TOILET_PANTRY_LOCKER_WAREHOUSE_TRAFFIC_REFERENCES_NOT_AS_BUILT',safetyReference:'VISUAL_REFERENCE_ONLY_NOT_CODE_COMPLIANCE_OR_ACTUAL_EGRESS_SURVEY',furnitureDetail:'V204_REAL_FOOTPRINT_PLUS_PAIRWISE_COLLISION_AUDIT_WITH_LIMITED_CHAIR_TUCK_WORKSTATION_CLEARANCE_AND_CONTEXTUAL_STORAGE',architecturalRealism:'V204_CLOSED_ENVELOPE_AND_ROOM_SHELLS_WITH_DOOR_JAMBS_SWING_APPROACH_FINISH_TRANSITIONS_AND_VALID_FUNCTION_OPENINGS',utilityRoutingBoundary:'UTILITY_MODELS_RETAINED_FOR_EXPANSION_BUT_HIDDEN_IN_PHASE1_UI',rmsEnvironmentIndustryReference:'STORA_ENSO_50_55_RH_20_23C_NOT_PLANT_SETPOINT',ipalTreatment:'V205_PHOTO_ACTUAL_OPEN_SIDED_IPAL_RECONSTRUCTION__RELATIVE_SCALE_NOT_SURVEYED__PIPING_NOT_PID__CHEMISTRY_UNVERIFIED__NOT_AS_BUILT_DIMENSIONS_OR_PID'},
   roomAccessAudit,roomProgramAudit,roomEnvelopeAudit,roomFurnitureAudit,v203RoomShellAudit,v203FurnitureFootprintAudit,v202ChairFacingAudit,chairFacingAudit,operationalReferenceAudit,contextualMachineSupportAudit,exteriorEnvelopeAudit:{samples:buildingDetailStats.exteriorPerimeterSamples,supplementSegments:buildingDetailStats.exteriorPerimeterSupplements,openGapCount:buildingDetailStats.exteriorOpenGapCount},roomEnvelopeSummary:{audited:buildingDetailStats.roomEnvelopeAudited,supplementWalls:buildingDetailStats.roomEnvelopeSupplementWalls,openEdges:buildingDetailStats.outerRoomOpenEdges,invalidOuterOpenings:buildingDetailStats.outerRoomInvalidOpenings,wallCornerErrors:buildingDetailStats.roomWallCornerErrors,doubleWallOverlaps:buildingDetailStats.doubleWallOverlaps},furnitureLayoutSummary:{templates:buildingDetailStats.contextualFurnitureTemplatesApplied,accessViolations:buildingDetailStats.furnitureAccessViolations,wallPenetrations:buildingDetailStats.furnitureWallPenetrations,orientationErrors:buildingDetailStats.furnitureOrientationErrors,doorSwingClearanceViolations:buildingDetailStats.doorSwingClearanceViolations,footprintAudits:buildingDetailStats.v203FurnitureFootprintAudits,doorApproachViolations:buildingDetailStats.v203DoorApproachViolations,wallClearanceViolations:buildingDetailStats.v203WallClearanceViolations,pairAudits:buildingDetailStats.v204FurniturePairAudits,pairOverlapViolations:buildingDetailStats.v204FurniturePairOverlapViolations,roomsPairAudited:buildingDetailStats.v204RoomPairAudited,minLayoutScale:roomFurnitureAudit.length?Math.min(...roomFurnitureAudit.map(r=>r.layoutScale)):1},roomShellSummary:{shells:v203RoomShellAudit.length,floorPads:buildingDetailStats.roomEnvelopeFloorPads,thresholds:buildingDetailStats.roomThresholdTransitions,skirtingRuns:buildingDetailStats.roomSkirtingRuns,linerRuns:buildingDetailStats.roomInteriorLinerRuns,ceilingPanels:buildingDetailStats.roomCeilingPanelsV203,ceilingGridLines:buildingDetailStats.roomCeilingGridLinesV203,ledPanels:buildingDetailStats.roomLedPanelsV203,doorApproachZones:buildingDetailStats.v204DoorApproachZones,doorSwingArcSegments:buildingDetailStats.v204DoorSwingArcs,doorJambDetails:buildingDetailStats.v204DoorJambDetails,floorFinishJoints:buildingDetailStats.v204FloorFinishJoints,wallVisualBoards:buildingDetailStats.v204WallVisualBoards},wallDeduplication:{input:data.walls.length,renderedSourceWalls:wallDedupe.walls.length,duplicatesRemoved:wallDedupe.removed},referenceRoomPortals:referenceRoomPortals.map(p=>({roomLabel:p.roomLabel,x:+p.x.toFixed(2),y:+p.y.toFixed(2),rotation:+p.rotation.toFixed(1)})),
-  offsetRooms:pressRooms.map(r=>({...r,centerError:Math.hypot((r.minX+r.maxX)/2-r.centerX,(r.minY+r.maxY)/2-r.centerY)})),ipal:{zone:ipalZone,enclosingWalls:0,removedSourceWallSegments:ipalRemovedWalls.length,openSides:true,processFlow:['EQUALIZATION','AERATION','CLARIFICATION','FILTRATION','TRANSFER'],processFlowEvidence:'LEGACY_FUNCTIONAL_REFERENCE_COMPATIBILITY_NOT_PHOTO_CONFIRMED_PID',equipment:ipalEquipment,photoObservedTopology:['BAK_EKUALISASI','BAK_PENAMPUNGAN_SEMENTARA','TANGKI_AN_AEROBIK','CHEMICAL_PREPARATION_RACK','SLUDGE_BAG_DRYING'],photoActual:{version:IPAL_PHOTO_EVIDENCE_V205.version,sourceArchive:IPAL_PHOTO_EVIDENCE_V205.sourceArchive,photoCount:IPAL_PHOTO_EVIDENCE_V205.photoCount,files:IPAL_PHOTO_EVIDENCE_V205.files,confidencePolicy:IPAL_PHOTO_EVIDENCE_V205.confidencePolicy,confirmedLabels:IPAL_PHOTO_EVIDENCE_V205.confirmedLabels,observedFeatures:IPAL_PHOTO_EVIDENCE_V205.observedFeatures,legacyObjectsHidden:buildingDetailStats.v205IpalLegacyHidden,photoObjects:buildingDetailStats.v205IpalPhotoObjects,pipingRuns:buildingDetailStats.v205IpalPipingRuns},structuralReference:{xBracing:buildingDetailStats.ipalFrameBraces,guardrailElements:buildingDetailStats.ipalGuardrails}},
+  offsetRooms:pressRooms.map(r=>({...r,centerError:Math.hypot((r.minX+r.maxX)/2-r.centerX,(r.minY+r.maxY)/2-r.centerY)})),ipal:{zone:ipalZone,enclosingWalls:0,removedSourceWallSegments:ipalRemovedWalls.length,openSides:true,processFlow:['PHOTO_ACTUAL_EQUIPMENT_IDENTITY_ONLY__PID_UNVERIFIED'],legacyReferenceFlow:['EQUALIZATION','AERATION','CLARIFICATION','FILTRATION','TRANSFER'],processFlowEvidence:'LEGACY_REFERENCE_RETAINED_FOR_AUDIT_ONLY__PHOTO_PID_UNVERIFIED',equipment:ipalEquipment,photoObservedTopology:['BAK_EKUALISASI','BAK_PENAMPUNGAN_SEMENTARA','TANGKI_AN_AEROBIK','CHEMICAL_PREPARATION_RACK','SLUDGE_BAG_DRYING','ADJACENT_UTILITY_CONTEXT'],photoActual:{version:IPAL_PHOTO_EVIDENCE_V205.version,sourceArchive:IPAL_PHOTO_EVIDENCE_V205.sourceArchive,photoCount:IPAL_PHOTO_EVIDENCE_V205.photoCount,files:IPAL_PHOTO_EVIDENCE_V205.files,confidencePolicy:IPAL_PHOTO_EVIDENCE_V205.confidencePolicy,confirmedLabels:IPAL_PHOTO_EVIDENCE_V205.confirmedLabels,observedFeatures:IPAL_PHOTO_EVIDENCE_V205.observedFeatures,unresolved:IPAL_PHOTO_EVIDENCE_V205.unresolved,legacyObjectsHidden:buildingDetailStats.v205IpalLegacyHidden,photoObjects:buildingDetailStats.v205IpalPhotoObjects,pipingRuns:buildingDetailStats.v205IpalPipingRuns,processMotionDefault:false,ambientMotion:['WATER_SURFACE_MICRO_MOTION','ORNAMENTAL_POND_FISH']},structuralReference:{xBracing:buildingDetailStats.ipalFrameBraces,guardrailElements:buildingDetailStats.ipalGuardrails}},
   nonMachineCollisionAudit:{placedFixtures:fixtureBoxes.length,skippedFixtures:skippedFixtures.length,accidentalFixtureOverlaps:0},omittedCollisionWalls:0,trimmedCollisionWalls:omitted.length,adjustedPortals:adjustedPortals.map(p=>({semantic:p.evidence,x:p.x,y:p.y,sourceX:p.sourceX,sourceY:p.sourceY})),legacyWalls:data.legacyWalls.length,hiddenReferenceRealism};
- return {root,layers,assets,machineBoxes,utilityRouting,update:now=>ipalPhotoRuntime?.update?.(now)};
+ return {root,layers,assets,machineBoxes,utilityRouting,update:now=>ipalPhotoRuntime?.update?.(now),setIpalProcessMotion:on=>ipalPhotoRuntime?.setProcessMotion?.(on)};
 }
