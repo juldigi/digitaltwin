@@ -17,5 +17,5 @@ test('data connection has one user-facing entry inside Settings',()=>{
  assert.doesNotMatch(html,/id="nav-connect"/);
  assert.doesNotMatch(html,/id="connect" class="quiet"/);
  assert.match(app,/id="settings-connect"/);
- assert.match(app,/on\('#settings-connect',connectionDialog\)/);
+ assert.match(app,/on\('#settings-connect',\(\)=>connectionDialog\(\{back:settingsDialog\}\)\)/);
 });
