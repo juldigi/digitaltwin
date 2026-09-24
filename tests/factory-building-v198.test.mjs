@@ -23,8 +23,8 @@ test('V198 deduplicates reversed and near-identical wall segments before renderi
 test('V198 completes room-by-room operational realism without moving any machine',async()=>{
  const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
  const built=buildActualFactory(layout,fleet),meta=built.root.userData,stats=meta.buildingDetailStats;
- assert.equal(meta.researchVersion,'V202');
- assert.equal(meta.buildingDetailPass,'V202_ROOM_ENVELOPE_CLOSURE_AND_DOOR_AWARE_FURNITURE_LAYOUT');
+ assert.equal(meta.researchVersion,'V203');
+ assert.equal(meta.buildingDetailPass,'V203_FULL_ROOM_SHELL_AND_AUDITED_FURNITURE_REALISM');
  assert.ok(stats.roomAccessAudited>0);
  assert.ok(stats.roomFloorFinishes>0);
  assert.ok(stats.visibleFunctionalReferences>0);
@@ -73,7 +73,7 @@ test('V198 makes core room furniture, RMS paper and production support visible w
   [/QC Sample|R\.Sample|R\.INCOMING/i,/^V202_(QC_SAMPLE|INCOMING_QC)_.*DESK_WORKTOP$/],
   [/Toilet/i,/^V202_TOILET_FIXTURE$/],
   [/Pantry|Kitchen|Refreshment/i,/^V202_PANTRY_COUNTER$/],
-  [/Locker|Loker|Changing|Change Room/i,/^V202_LOCKER_(LEFT|RIGHT)_RACK_UPRIGHT$/],
+  [/Locker|Loker|Changing|Change Room/i,/^V202_LOCKER_(LEFT|RIGHT)_LOCKER_(CARCASS|DOOR)$/],
   [/WH Spareparts/i,/^V202_SPAREPART_(LEFT|RIGHT)_RACK_UPRIGHT$/],
   [/Workshop/i,/^V202_WORKSHOP_WORKBENCH_TABLE_TOP$/],
   [/CTF|CTP/i,/^V202_PREPRESS_/]

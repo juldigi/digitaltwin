@@ -12,8 +12,8 @@ const collect=(root,re)=>{
 test('V202 closes every enclosed source-labelled room except valid door/portal openings',async()=>{
  const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
  const built=buildActualFactory(layout,fleet),meta=built.root.userData,s=meta.buildingDetailStats;
- assert.equal(meta.researchVersion,'V202');
- assert.equal(meta.buildingDetailPass,'V202_ROOM_ENVELOPE_CLOSURE_AND_DOOR_AWARE_FURNITURE_LAYOUT');
+ assert.equal(meta.researchVersion,'V203');
+ assert.equal(meta.buildingDetailPass,'V203_FULL_ROOM_SHELL_AND_AUDITED_FURNITURE_REALISM');
  assert.ok(Array.isArray(meta.roomEnvelopeAudit)&&meta.roomEnvelopeAudit.length>0);
  const enclosed=meta.roomEnvelopeAudit.filter(r=>r.enclose);
  assert.ok(enclosed.length>0);
@@ -50,7 +50,7 @@ test('V202 contextual furniture templates replace legacy generic room furniture'
  const built=buildActualFactory(layout,fleet),root=built.root,meta=root.userData,s=meta.buildingDetailStats;
  assert.ok(Array.isArray(meta.roomFurnitureAudit)&&meta.roomFurnitureAudit.length>0);
  assert.equal(meta.roomFurnitureAudit.length,s.contextualFurnitureTemplatesApplied);
- assert.ok(meta.roomFurnitureAudit.every(r=>r.status==='V202_CONTEXTUAL_LAYOUT'));
+ assert.ok(meta.roomFurnitureAudit.every(r=>r.status==='V203_CONTEXTUAL_LAYOUT'));
  assert.ok(meta.roomFurnitureAudit.every(r=>r.objectCount>0),JSON.stringify(meta.roomFurnitureAudit.filter(r=>r.objectCount<=0)));
  assert.equal(meta.furnitureLayoutSummary.accessViolations,0);
  assert.equal(meta.furnitureLayoutSummary.wallPenetrations,0);
