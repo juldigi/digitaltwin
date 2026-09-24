@@ -35,3 +35,10 @@ test('2D plan keeps the 3D switch above its full-screen workbench',async()=>{
  assert.match(css,/\.workspace-2d \.engineering-workbench\{display:block!important/);
  assert.match(shell,/if\(modeSwitch&&centerStack\)centerStack\.append\(modeSwitch\)/);
 });
+
+
+test('Cloudflare workflow uses supported D1 migration syntax',async()=>{
+ const workflow=await readFile(new URL('../.github/workflows/worker.yml',import.meta.url),'utf8');
+ assert.match(workflow,/command:\s*d1 migrations apply DB --remote(?:\r?\n|$)/);
+ assert.doesNotMatch(workflow,/d1 migrations apply DB --remote --yes/);
+});
