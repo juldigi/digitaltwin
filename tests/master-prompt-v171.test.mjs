@@ -62,7 +62,7 @@ test('V171 in-place navigation never reloads the page to switch machine context'
 });
 
 test('V171 runtime files and service worker are cache-busted',()=>{
- assert.match(html,/src\/app\.js\?v=192/);
- assert.match(html,/src\/app-shell-v79\.js\?v=192/);
- assert.match(sw,/factory-digital-twin-v207-superadmin-editor-20260924/);
+ assert.match(html,/src\/app\.js\?v=197/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=197/);
+ assert.match(sw,/factory-digital-twin-v209-architecture-convergence-20260925/);
 });
