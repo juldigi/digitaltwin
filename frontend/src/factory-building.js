@@ -238,10 +238,10 @@ export function buildActualFactory(layout,fleet){
   roomEnvelopeContexts.push({key:l.text+'@'+l.x.toFixed(3)+','+l.y.toFixed(3),label:l.text,x:l.x,y:l.y,program,minX,maxX,minY,maxY,width:maxX-minX,depth:maxY-minY,doorSide,rotation,doorX:door?.x??null,doorY:door?.y??null,doorWidth:door?.width??1,doorDistance:door?.distance??null,enclose,outerRoom:perimeterDistance<=Math.max(tw,td)*.72+1.0});
  }
  const roomEnvelopeSegments=[];
- const roomSupplementCovers=(x,y)=>roomEnvelopeSegments.some(w=>pointSegmentDistance(x,y,w)<=.22);
+ const roomSupplementCovers=(x,y)=>roomEnvelopeSegments.some(w=>pointSegmentDistance(x,y,w)<=.24);
  const roomDoorOpeningContains=(ctx,x,y)=>ctx?.doorX!==null&&ctx?.doorY!==null&&Math.hypot(x-ctx.doorX,y-ctx.doorY)<=Math.max(.58,(ctx.doorWidth||1)/2+.14);
  const roomSideRuns=(a,z,ctx)=>{
-  const dx=z[0]-a[0],dy=z[1]-a[1],len=Math.hypot(dx,dy),steps=Math.max(2,Math.ceil(len/.24)),runs=[];let start=null,end=null;
+  const dx=z[0]-a[0],dy=z[1]-a[1],len=Math.hypot(dx,dy),steps=Math.max(2,Math.ceil(len/.08)),runs=[];let start=null,end=null;
   const flush=()=>{if(start&&end&&Math.hypot(end[0]-start[0],end[1]-start[1])>.16)runs.push({a:start,b:end,width:.12});start=end=null;};
   for(let i=0;i<steps;i++){
    const u0=i/steps,u1=(i+1)/steps,um=(u0+u1)/2,p0=[a[0]+dx*u0,a[1]+dy*u0],p1=[a[0]+dx*u1,a[1]+dy*u1],mx=a[0]+dx*um,my=a[1]+dy*um;
