@@ -12,9 +12,13 @@ const runtimeFiles=[
   '../frontend/src/experience-v37.js'
 ];
 
-test('V176 workbench binding uses the collection selector',()=>{
+test('V194 removes retired workbench bindings from the runtime',()=>{
   const app=read('../frontend/src/app.js');
-  assert.match(app,/\$\$\('\[data-workbench="dwg"\]'\)\.forEach/);
+  const ui=read('../frontend/src/ui-v5.js');
+  assert.doesNotMatch(app,/data-workbench/);
+  assert.doesNotMatch(ui,/workbench/i);
+  assert.match(html,/id="plant-plan-2d"/);
+  assert.match(html,/id="dwg-canvas"/);
 });
 
 test('V176 runtime forbids direct forEach on the single-element selector helper',()=>{
