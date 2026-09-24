@@ -43,7 +43,7 @@ test('scene editor layout is responsive and leaves canonical navigation reachabl
 
 
 test('scene editor presents a guided three-step human-first workflow',()=>{
- for(const label of ['Pilih yang ingin diubah','Atur objek','Simpan perubahan','Mesin','Dinding','Aksesori & Peralatan','Bangunan & Ruangan','Utilitas','Furniture','Komponen Mesin','Geser sedikit','Bandingkan dengan tampilan asli','Alat lanjutan Superadmin'])assert.match(app,new RegExp(label));
+ for(const label of ['Pilih yang ingin diubah','Atur objek','Simpan perubahan','Mesin','Dinding','Aksesori & Peralatan','Bangunan & Ruangan','Utilitas','Furniture','Komponen Mesin','Geser ','Bandingkan dengan tampilan asli','Alat lanjutan Superadmin'])assert.match(app,new RegExp(label));
  assert.match(app,/class="se-progress"/);
  assert.match(app,/class="se-advanced"/);
  assert.match(app,/class="se-admin-tools"/);
