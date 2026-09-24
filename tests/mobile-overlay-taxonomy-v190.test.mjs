@@ -26,6 +26,6 @@ test('drawer transition marker is always cleared',()=>{
 test('V190 release identifiers are coherent',()=>{
  assert.match(index,/app-shell-v79\.css\?v=192/);
  assert.match(index,/src\/app\.js\?v=192/);
- assert.match(sw,/factory-digital-twin-v192-mobile-camera-framing-20260923/);
+ assert.match(sw,/factory-digital-twin-v205-ipal-photo-actual-20260924/);
  assert.match(app,/pair\('Versi aplikasi','V192'\)/);
 });
