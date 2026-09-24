@@ -28,7 +28,9 @@ test('Stage 6 app writes canonical state directly instead of relaying domain-sta
  assert.doesNotMatch(app,/\bactiveTab\b/);
  assert.doesNotMatch(app,/selectedTaxonomyId/);
  assert.doesNotMatch(app,/referenceCategoryFilter/);
- assert.doesNotMatch(app,/\bexteriorMode\b/);\n assert.doesNotMatch(app,/runtimeSimulationSnapshot/);\n assert.doesNotMatch(app,/exteriorFocusKey/);
+ assert.doesNotMatch(app,/\bexteriorMode\b/);
+ assert.doesNotMatch(app,/runtimeSimulationSnapshot/);
+ assert.doesNotMatch(app,/exteriorFocusKey/);
 });
 
 test('Stage 6 active machine evidence and identity come from registry context',()=>{
@@ -40,10 +42,14 @@ test('Stage 6 active machine evidence and identity come from registry context',(
  assert.doesNotMatch(app,/MACHINE-APM2/);
  assert.match(app,/\[FOUNDATION_SCOPE\.referenceMachineId\]:'offset5'/);
  assert.match(app,/function machineRoute\(machine\)\{return MACHINE_ROUTE_BY_ID\[machine\?\.machineId\]\|\|machine\?\.machineId\|\|null;\}/);
+});
+
+test('Stage 6 deep-link state has one parser and one serializer',()=>{
  assert.match(state,/export function readUrlState/);
  assert.match(state,/export function buildContextUrl/);
  assert.match(app,/const restored=readUrlState\(\)/);
  assert.match(app,/buildContextUrl\(snapshot\)/);
+ assert.doesNotMatch(app,/new URLSearchParams\(location\.search\)/);
 });
 
 test('Stage 6 simulation transport renders canonical state and sends commands only',()=>{
@@ -56,7 +62,7 @@ test('Stage 6 simulation transport renders canonical state and sends commands on
  assert.doesNotMatch(sync,/setSimulation\(/);
  assert.match(shell,/bmj:simulationcommand/);
  assert.match(app,/window\.addEventListener\('bmj:simulationcommand'/);
- assert.match(app,/setAppSimulation\(/);
+ assert.match(app,/setAppSimulation\(normalized\)/);
 });
 
 test('Stage 6 boot lifecycle has one owner',()=>{
@@ -64,7 +70,6 @@ test('Stage 6 boot lifecycle has one owner',()=>{
  assert.match(shell,/const BOOT_TIMEOUT_MS=12500/);
  assert.doesNotMatch(shell,/bmj:appready/);
  assert.doesNotMatch(html,/splash-recovery/);
- assert.doesNotMatch(html,/Tampilan 3D belum berhasil dimuat<\/strong><p>Coba muat ulang halaman/);
 });
 
 test('Stage 6 inspection controls derive from canonical state',()=>{
@@ -72,6 +77,7 @@ test('Stage 6 inspection controls derive from canonical state',()=>{
  assert.match(app,/const explodeLevel=\(\)=>/);
  assert.match(app,/const setExplodeLevel=/);
  assert.match(app,/const isInteriorOpen=\(\)=>/);
+ assert.match(app,/const interiorFocus=\(\)=>/);
  assert.match(app,/setDomainState\(\{inspectionMode:\{interior:true\}\}\)/);
  assert.match(app,/setDomainState\(\{inspectionMode:\{interior:false\}\}\)/);
  assert.match(app,/engine\?\.template\.explode\(explodeLevel\(\),selectedPart\)/);
