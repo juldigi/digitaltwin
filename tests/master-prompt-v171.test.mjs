@@ -11,7 +11,7 @@ const sw=read('../frontend/sw.js');
 
 test('V171 URL state distinguishes factory asset selection from machine scene',()=>{
  assert.match(state,/sceneMode:'factory'/);
- assert.match(state,/sceneMode:sceneParam==='machine'\|\|Boolean\(selectedNode\)\?'machine':'factory'/);
+ assert.match(state,/sceneMode:params\.get\('scene'\)==='machine'\|\|Boolean\(selectedNode\)\|\|Boolean\(legacyMachine\)\?'machine':'factory'/);
  assert.match(state,/if\(state\.sceneMode==='machine'\)params\.set\('scene','machine'\)/);
  assert.match(state,/else if\(state\.selectedAsset\)params\.set\('scene','factory'\)/);
  assert.match(state,/params\.delete\('machine'\)/);
