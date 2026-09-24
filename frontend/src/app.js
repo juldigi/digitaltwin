@@ -172,10 +172,12 @@ let modalBackHandler=null;
 function modal(title,html,{back=null}={}){
  modalBackHandler=typeof back==='function'?back:null;
  const backButton=$('#modal-back');if(backButton)backButton.hidden=!modalBackHandler;
- $('#modal-title').textContent=title;$('#modal-body').innerHTML=html;if(!$('#modal').open)$('#modal').showModal();
+ $('#modal-title').textContent=title;$('#modal-body').innerHTML=html;
+ dispatchEvent(new CustomEvent('bmj:modalopenrequest'));
+ if(!$('#modal').open)$('#modal').showModal();
 }
 function goModalBack(){const back=modalBackHandler;if(back){modalBackHandler=null;back();return;}closeModal();}
-function closeModal(){modalBackHandler=null;const backButton=$('#modal-back');if(backButton)backButton.hidden=true;const dialog=$('#modal');if(dialog?.open)dialog.close();}
+function closeModal(){modalBackHandler=null;const backButton=$('#modal-back');if(backButton)backButton.hidden=true;const dialog=$('#modal');if(dialog?.open)dialog.close();dispatchEvent(new CustomEvent('bmj:modalcloserequest'));}
 function emitDomainState(detail){return setDomainState(detail);}
 function signalAppReady(status='ready'){
  const normalized=status==='error'?'error':'ready';
