@@ -15,9 +15,8 @@ const DEFAULT_STATE={
     reference:false,unidentified:true,compressedAir:false,ahuPiping:false,
     ducting:false,utilityAnchors:false
   },
-  inspectionMode:{explode:false,explodeLevel:0,isolate:false,section:false,interior:false,interiorFocus:null},
+  inspectionMode:{explode:false,explodeLevel:0,isolate:false,interior:false,interiorFocus:null},
   simulationState:{available:false,blocked:false,blockedReason:null,active:false,running:false,paused:false,stage:null,speed:1,progress:0,completed:0,sheetsVisible:0,pileSheetsVisible:0},
-  searchState:{open:false,query:''},
   referenceState:{filter:'all'},
   inspectorState:{open:false,tab:'overview'},
   preferences:{theme:'dark',lowDetail:false},
@@ -70,7 +69,7 @@ function normalizePatch(patch={}){
 
 export function setState(patch={},options={}){
   patch=normalizePatch(patch);
-  const nested=['bootState','visibleLayers','inspectionMode','simulationState','searchState','referenceState','inspectorState','preferences'];
+  const nested=['bootState','visibleLayers','inspectionMode','simulationState','referenceState','inspectorState','preferences'];
   const next={...state,...patch};
   for(const key of nested)if(patch[key])next[key]={...state[key],...patch[key]};
   state=next;
@@ -112,8 +111,6 @@ export function setInspection(key,value){
     return setState({inspectionMode:{explodeLevel,explode:explodeLevel>0}},{url:false});
   }
   const next={[key]:Boolean(value)};
-  if(key==='isolate'&&value)next.section=false;
-  if(key==='section'&&value)next.isolate=false;
   if(key==='explode'&&!value)next.explodeLevel=0;
   return setState({inspectionMode:next},{url:false});
 }
@@ -124,11 +121,10 @@ export function setInspector(open,tab=state.inspectorState.tab){return setState(
 export function openOverlay(name){
   return setState({
     overlay:name,
-    searchState:{open:name==='search'},
     inspectorState:{open:name==='inspector'?true:state.inspectorState.open}
   },{url:false});
 }
-export function closeOverlay(){return setState({overlay:null,searchState:{open:false}},{url:false})}
+export function closeOverlay(){return setState({overlay:null},{url:false})}
 export function readUrlState(url=runtimeHref()){
   const parsed=new URL(url,runtimeHref()),params=parsed.searchParams,legacyMachine=params.get('machine');
   const selectedAsset=params.get('asset')||legacyMachine||null,selectedNode=params.get('node')||null;
