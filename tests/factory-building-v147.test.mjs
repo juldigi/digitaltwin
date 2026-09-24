@@ -8,8 +8,8 @@ test('V147 completes IPAL process references without moving machines or enclosin
  const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
  const built=buildActualFactory(layout,fleet),meta=built.root.userData,stats=meta.buildingDetailStats;
  assert.equal(meta.baselineId,'BMJ-250804-RED-20260921');
- assert.equal(meta.researchVersion,'V201');
- assert.equal(meta.buildingDetailPass,'V201_CONTEXTUAL_MACHINE_SIDE_SUPPORT_AND_ARCHITECTURAL_MICRODETAIL');
+ assert.equal(meta.researchVersion,'V202');
+ assert.equal(meta.buildingDetailPass,'V202_ROOM_ENVELOPE_CLOSURE_AND_DOOR_AWARE_FURNITURE_LAYOUT');
  assert.equal(meta.ipal.enclosingWalls,0);assert.equal(meta.ipal.openSides,true);
  for(const key of ['ipalScreens','ipalSumps','ipalLevelInstruments','ipalClarifierWeirs','ipalScumBaffles','ipalFilterInstruments','ipalBackwashLines','ipalPipeSupports','ipalManholes','ipalAerationEffects'])assert.ok(stats[key]>0,key);
  for(const p of layout.placements.filter(p=>p.status!=='UNIDENTIFIED')){const g=built.assets.get(p.machineId);if(!g)continue;assert.equal(g.position.x,p.x,p.machineId+' x');assert.equal(g.position.z,-p.y,p.machineId+' z');assert.equal(g.rotation.y,p.rotation*Math.PI/180,p.machineId+' rotation');}
