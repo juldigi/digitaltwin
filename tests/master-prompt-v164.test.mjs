@@ -22,8 +22,8 @@ test('detail toggle has one canonical owner and inspector is contextual rather t
 test('theme click changes DOM, aria state and saved preference from the same resulting value',()=>{
  assert.match(experience,/const light=document\.body\.classList\.toggle\('light-mode'\)/);
  assert.match(experience,/toggle\.setAttribute\('aria-pressed',String\(light\)\)/);
- assert.match(experience,/localStorage\.setItem\('offset5-theme',light\?'light':'dark'\)/);
- assert.doesNotMatch(ui,/\$\('#ui-theme-toggle'\)\?\.addEventListener/);
+ assert.match(experience,/localStorage\.setItem\(THEME_KEY,light\?'light':'dark'\)/);
+ assert.match(experience,/LEGACY_THEME_KEY='offset5-theme'/);\n assert.doesNotMatch(ui,/\$\('#ui-theme-toggle'\)\?\.addEventListener/);
 });
 
 test('changed controllers have fresh page and service worker cache identifiers',()=>{
