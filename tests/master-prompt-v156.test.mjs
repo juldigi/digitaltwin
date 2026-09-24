@@ -22,7 +22,7 @@ test('factory navigation presents evidence-bounded utility systems as an active 
  assert.match(html,/id="nav-systems" data-section="system"/);
  assert.match(html,/data-mobile-nav="system" aria-label="Sistem utilitas"/);
  assert.match(shell,/const PHASE1_FOUNDATION=FOUNDATION_SCOPE\.expansionMode==='LAYOUT_PLACEHOLDERS_ONLY'/);
- assert.match(shell,/if\(!PHASE1_FOUNDATION\)\{stopSimulationForNavigation\('system'\);openSystemLayers\(\)\}/);
+ assert.match(shell,/if\(!PHASE1_FOUNDATION\)\{stopSimulationForNavigation\('system'\);openSystemBrowser\(\)\}/);
  assert.match(shell,/const systemSurface=PHASE1_FOUNDATION\?'':/);
  assert.match(shell,/SISTEM PABRIK/);
  assert.match(shell,/<summary>Pengaturan tampilan<\/summary>/);
@@ -77,5 +77,5 @@ test('offline cache prioritizes foundation and OFFSET 5 instead of preloading ex
  assert.match(html,/app-shell-v79\.css\?v=198/);
  assert.match(html,/src\/app\.js\?v=198/);
  assert.match(html,/src\/app-shell-v79\.js\?v=198/);
- assert.match(shell,/v197-architecture-convergence/);
+ assert.match(shell,/v198-architecture-convergence/);
 });
