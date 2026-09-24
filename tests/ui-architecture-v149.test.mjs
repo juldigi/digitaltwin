@@ -173,7 +173,7 @@ test('V149 taxonomy linkage uses parent relationships and a clickable contextual
  assert.match(app,/selectedPath\.has\(n\.id\)/);
  assert.doesNotMatch(app,/selectedTaxonomyId\.startsWith\(n\.id\)/);
  assert.match(app,/data-breadcrumb-node/);
- assert.match(app,/selectTaxonomy\(id,\{revealPanel:true\}\)/);
+ assert.match(app,/selectTaxonomy\(id,\{revealPanel:true,historyMode:'push'\}\)/);
  assert.match(css,/\.context-breadcrumb/);
 });
 
