@@ -412,10 +412,10 @@ const modalElement=q('#modal');if(modalElement)new MutationObserver(()=>{if(moda
 const syncViewport=()=>{document.documentElement.style.setProperty('--app-vh',`${window.visualViewport?.height||innerHeight}px`);const w=innerWidth;if(w>=768&&getState().overlay==='navigation'){closeDrawer();closeOverlay()}const next=setState({deviceMode:w<768?'mobile':w<=1180?'tablet':'desktop'},{url:false});applyInspectorDom(next)};
 syncViewport();addEventListener('resize',syncViewport,{passive:true});window.visualViewport?.addEventListener('resize',syncViewport,{passive:true});
 
-function syncInspectorTabs(){
- const tabs=qa('#detail-panel [role="tab"]').filter(tab=>tab.getAttribute('aria-hidden')!=='true');
- const active=tabs.find(tab=>tab.getAttribute('aria-selected')==='true')||tabs[0];
- tabs.forEach(tab=>{tab.setAttribute('aria-controls','panel-content');tab.tabIndex=tab===active?0:-1});
+function syncInspectorTabs(state=getState()){
+ const tabs=qa('#detail-panel [role="tab"]').filter(tab=>tab.getAttribute('aria-hidden')!=='true'),activeKey=state.inspectorState?.tab||'overview';
+ const active=tabs.find(tab=>tab.dataset.tab===activeKey)||tabs[0];
+ tabs.forEach(tab=>{const selected=tab===active;tab.setAttribute('aria-controls','panel-content');tab.setAttribute('aria-selected',String(selected));tab.tabIndex=selected?0:-1});
 }
 const inspectorTablist=q('#detail-panel .tabs');
 inspectorTablist?.addEventListener('keydown',event=>{
@@ -429,8 +429,7 @@ inspectorTablist?.addEventListener('keydown',event=>{
  else return;
  event.preventDefault();tabs[next].focus();tabs[next].click();
 });
-if(inspectorTablist)new MutationObserver(syncInspectorTabs).observe(inspectorTablist,{subtree:true,attributes:true,attributeFilter:['aria-selected']});
-syncInspectorTabs();
+syncInspectorTabs(getState());
 
 document.addEventListener('keydown',event=>{
  if(event.key==='Tab'){
@@ -499,12 +498,14 @@ function syncViewModeContext(state){
  syncViewModeText(q('#geometry-caption'),hasAsset?'Denah 2D · Aset terpilih':'Denah 2D · Seluruh Area',is2d);
  syncViewModeText(q('#scene-hint'),hasAsset?'Aset terpilih ditandai pada denah · pilih aset lain melalui menu Aset':'Pilih aset melalui menu Aset atau denah 2D.',is2d);
 }
-function syncPressedTools(){
- for(const id of ['tool-explode','tool-isolate','tool-interior','labels']){
-  const el=q('#'+id);if(el)el.setAttribute('aria-pressed',String(el.classList.contains('active')));
- }
+function syncPressedTools(state=getState()){
+ const values={
+  'tool-explode':Boolean(state.inspectionMode?.explode),
+  'tool-isolate':Boolean(state.inspectionMode?.isolate),
+  'tool-interior':Boolean(state.inspectionMode?.interior),
+  labels:Boolean(state.visibleLayers?.labels)
+ };
+ for(const [id,active] of Object.entries(values)){const el=q('#'+id);if(el){el.classList.toggle('active',active);el.setAttribute('aria-pressed',String(active));}}
 }
-const pressedTools=qa('#tool-explode,#tool-isolate,#tool-interior,#labels');
-if(pressedTools.length){const pressedObserver=new MutationObserver(syncPressedTools);pressedTools.forEach(el=>pressedObserver.observe(el,{attributes:true,attributeFilter:['class']}));syncPressedTools()}
-relabel();const initialState=getState();applyViewModeDom(initialState);syncSplashFromState(initialState);subscribe(state=>{applyInspectorDom(state);applyViewModeDom(state);markSection(state.activeSection);syncLayerControls();syncAccessibleControls(state);syncVisualHierarchy(state);syncViewModeContext(state);syncSplashFromState(state);syncSimulationTransport(state)});
+relabel();const initialState=getState();applyViewModeDom(initialState);syncSplashFromState(initialState);syncPressedTools(initialState);syncInspectorTabs(initialState);subscribe(state=>{applyInspectorDom(state);applyViewModeDom(state);markSection(state.activeSection);syncLayerControls();syncAccessibleControls(state);syncPressedTools(state);syncInspectorTabs(state);syncVisualHierarchy(state);syncViewModeContext(state);syncSplashFromState(state);syncSimulationTransport(state)});
 document.documentElement.dataset.uiArchitecture='v211-ui-ssot';
