@@ -242,7 +242,7 @@ export function buildActualFactory(layout,fleet){
  const roomDoorOpeningContains=(ctx,x,y)=>ctx?.doorX!==null&&ctx?.doorY!==null&&Math.hypot(x-ctx.doorX,y-ctx.doorY)<=Math.max(.58,(ctx.doorWidth||1)/2+.14);
  const roomSideRuns=(a,z,ctx)=>{
   const dx=z[0]-a[0],dy=z[1]-a[1],len=Math.hypot(dx,dy),steps=Math.max(2,Math.ceil(len/.08)),runs=[];let start=null,end=null;
-  const flush=()=>{if(start&&end&&Math.hypot(end[0]-start[0],end[1]-start[1])>.16)runs.push({a:start,b:end,width:.12});start=end=null;};
+  const flush=()=>{if(start&&end&&Math.hypot(end[0]-start[0],end[1]-start[1])>.035)runs.push({a:start,b:end,width:.12});start=end=null;};
   for(let i=0;i<steps;i++){
    const u0=i/steps,u1=(i+1)/steps,um=(u0+u1)/2,p0=[a[0]+dx*u0,a[1]+dy*u0],p1=[a[0]+dx*u1,a[1]+dy*u1],mx=a[0]+dx*um,my=a[1]+dy*um;
    const covered=sourceWallCovers(mx,my)||supplementCovers(mx,my)||roomSupplementCovers(mx,my),portal=inValidPortal(mx,my)||roomDoorOpeningContains(ctx,mx,my);
@@ -250,7 +250,7 @@ export function buildActualFactory(layout,fleet){
   }flush();return runs;
  };
  const addRoomEnvelopeWall=(seg,ctx)=>{
-  const dx=seg.b[0]-seg.a[0],dy=seg.b[1]-seg.a[1],len=Math.hypot(dx,dy);if(len<.16)return;
+  const dx=seg.b[0]-seg.a[0],dy=seg.b[1]-seg.a[1],len=Math.hypot(dx,dy);if(len<.035)return;
   const r=Math.atan2(dy,dx),x=(seg.a[0]+seg.b[0])/2,z=-(seg.a[1]+seg.b[1])/2,office=/OFFICE|PPIC|PDS|QC|PREPRESS|MEETING/.test(ctx.program),h=office?2.95:3.18;
   const wall=box(b,x,h/2,z,len,h,.12,office?0xe5e6e1:0xe1e2dc,r);wall.castShadow=true;
   wall.userData={semantic:'ROOM_ENVELOPE_SUPPLEMENT_REFERENCE',roomLabel:ctx.label,roomProgram:ctx.program,accuracy:'SOURCE_ROOM_FUNCTION_CLOSURE_REFERENCE_NOT_AS_BUILT_PARTITION_SURVEY',researchVersion:'V202',functionalReferenceVisible:true};
