@@ -386,7 +386,7 @@ const modalElement=q('#modal');if(modalElement)new MutationObserver(()=>{if(moda
 addEventListener('bmj:domainstate',event=>{
  const detail=event.detail||{};
  const carriesDeepLink=Object.prototype.hasOwnProperty.call(detail,'selectedAsset')||Object.prototype.hasOwnProperty.call(detail,'selectedNode')||Object.prototype.hasOwnProperty.call(detail,'viewMode')||Object.prototype.hasOwnProperty.call(detail,'sceneMode')||Object.prototype.hasOwnProperty.call(detail,'cameraPreset');
- setState(detail,{url:carriesDeepLink});
+ setState(detail,{url:false});
 });
 addEventListener('bmj:historyrestore',event=>{
  const detail=event.detail||{},viewMode=detail.viewMode==='2d'?'2d':'3d',sceneMode=detail.sceneMode==='machine'?'machine':'factory',cameraPreset=detail.cameraPreset==='top'?'top':'iso',activeSection=viewMode==='3d'&&sceneMode==='machine'?'asset':'factory';
@@ -490,4 +490,4 @@ function syncPressedTools(){
 const pressedTools=qa('#tool-explode,#tool-isolate,#tool-interior,#labels');
 if(pressedTools.length){const pressedObserver=new MutationObserver(syncPressedTools);pressedTools.forEach(el=>pressedObserver.observe(el,{attributes:true,attributeFilter:['class']}));syncPressedTools()}
 relabel();const hydratedState=hydrateUrl();applyViewModeDom(hydratedState);if(hydratedState.viewMode==='2d')q('#mode-2d')?.click();let lastSyncedSection=getState().activeSection;subscribe(state=>{applyInspectorDom(state);applyViewModeDom(state);markSection(state.activeSection);syncLayerControls();syncAccessibleControls(state);syncVisualHierarchy(state);syncViewModeContext(state);if(state.activeSection!==lastSyncedSection){lastSyncedSection=state.activeSection;requestAnimationFrame(syncSimulationTransport)}});
-document.documentElement.dataset.uiArchitecture='v196-interaction-flow';
+document.documentElement.dataset.uiArchitecture='v197-architecture-convergence';
