@@ -1088,3 +1088,18 @@ body[data-scene-mode="machine"] .context-back:not([hidden]){background:#edf6ff;c
 }
 
 .context-primary-actions.single-action{grid-template-columns:1fr}
+
+.modal-head{gap:8px}
+.modal-head h2{flex:1;min-width:0}
+.modal-back{
+ display:inline-flex;align-items:center;gap:5px;min-height:36px;padding:0 8px;border:0;border-radius:9px;
+ background:#f3f7fa;color:#496174;font-size:9px;font-weight:800
+}
+.modal-back:hover{background:#eaf3fb;color:#1269bd}
+.modal-back svg{width:16px;height:16px}
+.modal-back[hidden]{display:none!important}
+@media(max-width:767px){
+ .modal-back{min-height:38px}
+ .modal-back b{display:none}
+ .modal-back svg{width:19px;height:19px}
+}
