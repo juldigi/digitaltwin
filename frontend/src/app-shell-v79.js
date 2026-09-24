@@ -150,7 +150,7 @@ function applyViewModeDom(state=getState()){
 }
 function stopSimulationForNavigation(targetSection){
  const state=getState();
- if(targetSection==='simulation'||(!state.simulationState?.active&&!state.simulationState?.playing))return;
+ if(targetSection==='simulation'||(!state.simulationState?.active&&!state.simulationState?.running))return;
  dispatchEvent(new CustomEvent('bmj:simulationstoprequest'));
  setSimulation({active:false,playing:false,stage:null,progress:0});
  document.body.classList.remove('simulation-transport-open');
@@ -389,13 +389,13 @@ function ensureSimulationTransport(){
 }
 function syncSimulationTransport(state=getState()){
  const bar=ensureSimulationTransport(),section=state.activeSection,sim=state.simulationState||{};
- const progress=Math.max(0,Math.min(100,Number(sim.progress)||0)),stage=sim.stage||'Siap';
+ const progress=Math.max(0,Math.min(100,(Number(sim.progress)||0)*100)),stage=sim.stage||'Siap';
  const transportOpen=section==='simulation'&&state.inspectorState?.tab==='simulation'&&Boolean(state.selectedAsset)&&sim.available!==false&&!sim.blocked;
  bar.hidden=!transportOpen;
  document.body.classList.toggle('simulation-transport-open',transportOpen);
  q('[data-transport-stage]',bar).textContent=stage;
  q('[data-transport-progress]',bar).value=progress;
- const play=q('[data-transport-play]',bar);play.textContent=sim.playing?'Jeda':sim.active?'Lanjutkan':'Mulai';
+ const play=q('[data-transport-play]',bar);play.textContent=sim.running?'Jeda':sim.active?'Lanjutkan':'Mulai';
  q('[data-transport-stop]',bar).disabled=!sim.active;
  const speed=String(sim.speed||1),speedSelect=q('[data-transport-speed]',bar);if([...speedSelect.options].some(option=>option.value===speed))speedSelect.value=speed;
 }
@@ -507,4 +507,4 @@ function syncPressedTools(){
 const pressedTools=qa('#tool-explode,#tool-isolate,#tool-interior,#labels');
 if(pressedTools.length){const pressedObserver=new MutationObserver(syncPressedTools);pressedTools.forEach(el=>pressedObserver.observe(el,{attributes:true,attributeFilter:['class']}));syncPressedTools()}
 relabel();const initialState=getState();applyViewModeDom(initialState);syncSplashFromState(initialState);subscribe(state=>{applyInspectorDom(state);applyViewModeDom(state);markSection(state.activeSection);syncLayerControls();syncAccessibleControls(state);syncVisualHierarchy(state);syncViewModeContext(state);syncSplashFromState(state);syncSimulationTransport(state)});
-document.documentElement.dataset.uiArchitecture='v198-architecture-convergence';
+document.documentElement.dataset.uiArchitecture='v211-ui-ssot';
