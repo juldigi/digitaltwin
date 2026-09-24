@@ -587,6 +587,14 @@ body.workspace-2d.panel-hidden .viewport-mode-switch{z-index:65!important;visibi
 #scene-editor-panel .se-step-title>div{display:grid;gap:1px}
 #scene-editor-panel .se-step-title strong{font-size:13px}
 #scene-editor-panel .se-step-title span{font-size:10px;color:#71818c}
+#scene-editor-panel .se-category-label{margin:2px 0 7px;color:#647783;font-size:10px;font-weight:800}
+#scene-editor-panel .se-category-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-bottom:7px}
+#scene-editor-panel .se-category-grid button{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:46px;padding:7px 9px;text-align:left}
+#scene-editor-panel .se-category-grid button strong{font-size:10px;line-height:1.15}
+#scene-editor-panel .se-category-grid button span{display:grid;place-items:center;flex:0 0 24px;min-width:24px;height:24px;border-radius:999px;background:#edf2f5;color:#637581;font-size:9px;font-weight:850}
+#scene-editor-panel .se-category-grid button.active span{background:rgba(255,255,255,.2);color:#fff}
+#scene-editor-panel .se-category-grid button:disabled{opacity:.32}
+#scene-editor-panel .se-category-hint{min-height:16px;margin:0 0 7px;color:#71818c;font-size:9px}
 #scene-editor-panel .se-segmented,#scene-editor-panel .se-primary-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-bottom:9px;padding:4px;border-radius:11px;background:#eef3f6}
 #scene-editor-panel .se-primary-tools{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:2px}
 #scene-editor-panel .se-segmented button,#scene-editor-panel .se-primary-tools button{min-height:38px;border-color:transparent;background:transparent}
@@ -658,6 +666,7 @@ body.workspace-2d.panel-hidden .viewport-mode-switch{z-index:65!important;visibi
  #scene-editor-panel .se-progress span{justify-content:center;padding:6px 4px;font-size:9px}
  #scene-editor-panel .se-progress b{width:20px;height:20px;flex-basis:20px}
  #scene-editor-panel .se-step{padding:11px}
+ #scene-editor-panel .se-category-grid button{min-height:48px}
  #scene-editor-panel .se-selected-card{align-items:stretch}
  #scene-editor-panel .se-selected-card button{flex:0 0 auto}
  #scene-editor-panel .se-primary-tools button{min-height:42px;font-size:10px}
@@ -668,6 +677,8 @@ body.workspace-2d.panel-hidden .viewport-mode-switch{z-index:65!important;visibi
 }
 @media(max-width:390px){
  #scene-editor-panel .se-progress span{gap:3px;font-size:8px}
+ #scene-editor-panel .se-category-grid{grid-template-columns:1fr 1fr}
+ #scene-editor-panel .se-category-grid button{padding:6px 7px}
  #scene-editor-panel .se-selected-card{display:grid}
  #scene-editor-panel .se-selected-card button{width:100%}
  #scene-editor-panel .se-quick-row{grid-template-columns:1fr}
