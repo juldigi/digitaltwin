@@ -150,3 +150,29 @@ test('V193 removes internal machine identifiers from the normal asset browser co
   assert.doesNotMatch(app,/<small>\$\{esc\(machine\.machineId\)\}<\/small>/);
   assert.match(app,/Mode Edit 3D/);
 });
+
+
+test('V195 visual hierarchy is state-driven and contextual',()=>{
+  const app=fs.readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
+  assert.match(js,/function syncVisualHierarchy\(state\)/);
+  assert.match(js,/body\.dataset\.sceneMode=state\.sceneMode==='machine'\?'machine':'factory'/);
+  assert.match(js,/body\.dataset\.hasSelection=String\(hasSelection\)/);
+  assert.match(js,/uiArchitecture='v195-visual-hierarchy'/);
+  assert.match(css,/\/\* V195 visual hierarchy reset/);
+  assert.match(css,/body\[data-scene-mode="factory"\] \.inspect-tool\{display:none!important\}/);
+  assert.match(css,/body\[data-has-selection="false"\] \.context-tool\{display:none!important\}/);
+  assert.match(html,/class="inspect-tool"/);
+  assert.match(html,/class="camera-tool context-tool"/);
+  assert.doesNotMatch(css,/view-switch button:nth-child\([^)]*\)[^{]*\{display:none\}/);
+  assert.match(app,/class="technical-details"/);
+  assert.match(app,/<summary>Informasi teknis<\/summary>/);
+});
+
+test('V195 keeps the canvas visually dominant across desktop and mobile',()=>{
+  assert.match(css,/\.asset-preview\{display:none!important\}/);
+  assert.match(css,/--v195-panel:360px/);
+  assert.match(css,/height:min\(54dvh,590px\)!important/);
+  assert.match(css,/body\[data-scene-mode="factory"\] \.view-switch button\.camera-tool\{flex:1 1 0;min-width:0\}/);
+  assert.match(css,/\.context-primary-actions\{display:grid;grid-template-columns:1fr 1fr/);
+  assert.match(css,/@media\(max-width:767px\)[\s\S]*\.context-primary-actions\{grid-template-columns:1fr\}/);
+});
