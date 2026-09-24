@@ -41,33 +41,23 @@ test('mobile navigation and drawer have one state owner',()=>{
   assert.match(js,/aria-expanded/);
 });
 
-test('premium generated splash is bounded and cannot get stuck',()=>{
+test('premium generated splash is bounded by canonical boot state',()=>{
   assert.match(css,/splash-industrial-v79\.webp/);
   assert.match(css,/\.app-splash\.is-done/);
   assert.match(js,/sessionStorage\.getItem\('bmj-splash-seen'\)/);
-  assert.match(js,/if\(!documentLoaded\|\|!appReadyStatus\)return/);
-  assert.match(js,/if\(!appReadyStatus\)document\.documentElement\.dataset\.appReady='timeout';finishSplash\(\)\},12000\)/);
-  assert.doesNotMatch(js,/setTimeout\(finishSplash,5000\)/);
+  assert.match(js,/syncSplashFromState=state=>/);
+  assert.match(js,/state\?\.bootState\?\.phase\|\|'booting'/);
+  assert.match(js,/const BOOT_TIMEOUT_MS=12500/);
+  assert.match(js,/bootState:\{phase:'timeout',message:'Aplikasi belum berhasil dimuat'\}/);
+  assert.doesNotMatch(js,/bmj:appready/);
   assert.match(sw,/assets\/splash-industrial-v79\.webp/);
 });
 
-test('splash recovery is independent of module execution and document load',()=>{
-  const script=html.match(/<script id="splash-recovery">([\s\S]*?)<\/script>/)?.[1];
-  assert.ok(script,'recovery must be classic inline script before modules');
-  assert.ok(html.indexOf('id="splash-recovery"')<html.indexOf('src="./src/app.js'));
-  assert.match(script,/splash\.remove\(\)/);
-  assert.match(script,/if\(!document\.documentElement\.dataset\.appReady\)/);
-  assert.match(script,/12500/);
-  for(const ready of [false,true]){
-    let removed=false,scheduled=0;
-    const boot={hidden:true,innerHTML:'',querySelector:()=>({onclick:null})};
-    const splash={classList:{contains:()=>false},remove:()=>{removed=true}};
-    const document={documentElement:{dataset:ready?{appReady:'ready'}:{}},querySelector:()=>splash,getElementById:()=>boot};
-    vm.runInNewContext(script,{document,window:{setTimeout:(fn,ms)=>{scheduled=ms;fn()}},location:{reload(){}}});
-    assert.equal(scheduled,12500);assert.equal(removed,true);
-    assert.equal(boot.hidden,ready);
-    if(!ready)assert.match(boot.innerHTML,/Aplikasi belum berhasil dimuat/);
-  }
+test('boot recovery has one owner instead of competing inline timers',()=>{
+  assert.doesNotMatch(html,/id="splash-recovery"/);
+  assert.doesNotMatch(html,/setTimeout\(\(\)=>\{const b=document\.getElementById\('boot'\)/);
+  assert.match(js,/showBootFailure=/);
+  assert.match(js,/id="boot-retry"/);
 });
 
 test('large factory fleet loads after the first usable app state',()=>{
