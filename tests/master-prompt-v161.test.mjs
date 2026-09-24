@@ -32,12 +32,12 @@ test('V162 exposes Systems in both navigation surfaces and keeps identifiers coh
  assert.match(html,/app-shell-v79\.css\?v=192/);
  assert.match(html,/src\/app\.js\?v=192/);
  assert.match(html,/src\/app-shell-v79\.js\?v=192/);
- assert.match(shell,/v162-factory-first-systems/);
+ assert.match(shell,/v193-three-domain-contextual/);
  assert.match(sw,/factory-digital-twin-v207-superadmin-editor-20260924/);
 });
 
 test('asset navigation opens an empty search instead of serializing the click event',()=>{
- assert.match(app,/on\('#nav-assets',\(\)=>assetDialog\(\)\)/);
+ assert.match(app,/on\('#nav-assets',\(\)=>\{emitDomainState\(\{activeSection:'asset'\}\);assetDialog\(\);\}\)/);
  assert.doesNotMatch(app,/on\('#nav-assets',assetDialog\)/);
  assert.match(app,/if\(machine\)\{closeModal\(\);if\(simulationIntent\)[\s\S]*await openAssetContext\(machine\);\}/);
  assert.match(app,/function closeModal\(\)\{const dialog=\$\('#modal'\);if\(dialog\?\.open\)dialog\.close\(\);\}/);
