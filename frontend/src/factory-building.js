@@ -1701,18 +1701,30 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  pcyl(42.85,.30,-114.55,.18,.58,0xaaa295,'IPAL_PHOTO_MAINTENANCE_BUCKET',{coreProcess:false},18);
  pline([43.18,.08,-114.60],[43.52,1.15,-114.28],.025,0x98714a,'IPAL_PHOTO_BROOM_HANDLE',{coreProcess:false});
 
- // Adjacent outdoor utility equipment is present in IMG_2511/2512/2520/2521/2522.
- // It is rendered for spatial fidelity but explicitly NOT asserted as part of the wastewater process.
+ // Adjacent outdoor HVAC/cooling equipment from IMG_2520/2522. It is spatial context, NOT core IPAL process.
  const au=IPAL_PHOTO_EVIDENCE_V206.relativeLayout.adjacentUtility,auZ=-au.y;
  const utilityGroup=new T.Group();utilityGroup.name='IPAL_ADJACENT_UTILITY_PHOTO_CONTEXT';ipalPhoto.add(utilityGroup);photoTag(utilityGroup,'IPAL_PHOTO_ADJACENT_UTILITY_EQUIPMENT',{coreProcess:false,systemLinkage:'NOT_ASSERTED'});
- for(let i=0;i<4;i++){
-  const ux=au.x+(i%2)*1.20-.55,uz=auZ-Math.floor(i/2)*2.05+1.05;
-  const cabinet=box(utilityGroup,ux,.78,uz,1.02,1.46,.78,0xd5dbd8);photoTag(cabinet,'IPAL_PHOTO_ADJACENT_UTILITY_CABINET',{coreProcess:false,systemLinkage:'NOT_ASSERTED'});
-  const fan=new T.Mesh(new T.TorusGeometry(.28,.028,8,28),material(0x59666a));fan.position.set(ux,.98,uz-.405);utilityGroup.add(fan);photoTag(fan,'IPAL_PHOTO_ADJACENT_UTILITY_AXIAL_FAN_RING',{coreProcess:false,systemLinkage:'NOT_ASSERTED'});
-  for(let a=0;a<Math.PI*2;a+=Math.PI/4){const spoke=line(utilityGroup,new T.Vector3(ux,.98,uz-.42),new T.Vector3(ux+Math.cos(a)*.23,.98+Math.sin(a)*.23,uz-.42),.010,0x566267);photoTag(spoke,'IPAL_PHOTO_ADJACENT_UTILITY_FAN_BLADE',{coreProcess:false,systemLinkage:'NOT_ASSERTED'});}
+ // Three white condenser/heat-exchanger banks align against the service-building wall.
+ for(let i=0;i<3;i++){
+  const ux=au.x-.35+i*1.08,uz=auZ-1.95;
+  const cabinet=box(utilityGroup,ux,.76,uz,.96,1.38,.72,0xd9dedb);photoTag(cabinet,'IPAL_PHOTO_ADJACENT_WHITE_CONDENSER_BANK',{coreProcess:false,systemLinkage:'NOT_ASSERTED'});
+  const grille=box(utilityGroup,ux,.78,uz-.372,.80,1.02,.025,0x737f80);photoTag(grille,'IPAL_PHOTO_ADJACENT_CONDENSER_GRILLE',{coreProcess:false,systemLinkage:'NOT_ASSERTED'});
+  for(let gx=-.30;gx<=.30;gx+=.12)pline([ux+gx,.28,uz-.389],[ux+gx,1.25,uz-.389],.007,0x49575b,'IPAL_PHOTO_ADJACENT_CONDENSER_GRILLE_BAR',{coreProcess:false,systemLinkage:'NOT_ASSERTED'});
  }
- // Low fence/guard visible around parts of the adjacent equipment yard.
- for(const z of [auZ+2.25,auZ-2.25]){pline([60.05,.20,z],[62.70,.20,z],.026,0x59686d,'IPAL_PHOTO_ADJACENT_UTILITY_GUARD',{coreProcess:false,systemLinkage:'NOT_ASSERTED'});pline([60.05,1.15,z],[62.70,1.15,z],.026,0x59686d,'IPAL_PHOTO_ADJACENT_UTILITY_GUARD',{coreProcess:false,systemLinkage:'NOT_ASSERTED'});}
+ // Large dark cooling-tower / heat-rejection unit with top axial fan, clearly visible in IMG_2520/2522.
+ const ct=new T.Group();ct.position.set(au.x-1.55,0,auZ+1.55);utilityGroup.add(ct);photoTag(ct,'IPAL_PHOTO_ADJACENT_BLACK_COOLING_TOWER',{coreProcess:false,systemLinkage:'NOT_ASSERTED',equipmentFamily:'COOLING_OR_HEAT_REJECTION_VISUAL_ONLY'});
+ const ctBox=(x,y,z,w,h,d,color,sem,rot=0)=>{const o=box(ct,x,y,z,w,h,d,color,rot);photoTag(o,sem,{coreProcess:false,systemLinkage:'NOT_ASSERTED'});return o;};
+ ctBox(0,.10,0,1.95,.20,1.62,0x5b6060,'IPAL_PHOTO_COOLING_TOWER_BASE');
+ ctBox(-.70,.82,0,.52,1.35,1.52,0x333b3d,'IPAL_PHOTO_COOLING_TOWER_LOUVER_PANEL',-.13);
+ ctBox(.70,.82,0,.52,1.35,1.52,0x333b3d,'IPAL_PHOTO_COOLING_TOWER_LOUVER_PANEL',.13);
+ ctBox(0,1.47,0,1.68,.18,1.44,0x626967,'IPAL_PHOTO_COOLING_TOWER_TOP_DECK');
+ const fanRing=new T.Mesh(new T.TorusGeometry(.58,.040,8,36),material(0x333b3d));fanRing.position.set(0,1.59,0);fanRing.rotation.x=Math.PI/2;ct.add(fanRing);photoTag(fanRing,'IPAL_PHOTO_COOLING_TOWER_TOP_FAN_RING',{coreProcess:false,systemLinkage:'NOT_ASSERTED'});
+ for(let a=0;a<Math.PI*2;a+=Math.PI/6){const blade=line(ct,new T.Vector3(0,1.60,0),new T.Vector3(Math.cos(a)*.50,1.60,Math.sin(a)*.50),.018,0x3e4749);photoTag(blade,'IPAL_PHOTO_COOLING_TOWER_TOP_FAN_BLADE',{coreProcess:false,systemLinkage:'NOT_ASSERTED'});}
+ // Stainless/grey utility skid between the cooling tower and condenser banks is kept descriptive only.
+ const skid=box(utilityGroup,au.x-.15,.72,auZ+.10,1.45,1.25,1.00,0x929a97);photoTag(skid,'IPAL_PHOTO_ADJACENT_STAINLESS_UTILITY_SKID',{coreProcess:false,systemLinkage:'NOT_ASSERTED',function:'UNRESOLVED_FROM_PHOTO'});
+ const skidTop=pcyl(au.x-.15,1.48,auZ+.10,.38,.28,0xa7aaa5,'IPAL_PHOTO_ADJACENT_STAINLESS_UTILITY_TOP',{coreProcess:false,systemLinkage:'NOT_ASSERTED',function:'UNRESOLVED_FROM_PHOTO'},20,photoMetal);
+ // Low guard/fence visible around parts of the adjacent equipment yard.
+ for(const z of [auZ+2.25,auZ-2.25]){pline([au.x-1.3,.20,z],[au.x+1.4,.20,z],.026,0x59686d,'IPAL_PHOTO_ADJACENT_UTILITY_GUARD',{coreProcess:false,systemLinkage:'NOT_ASSERTED'});pline([au.x-1.3,1.15,z],[au.x+1.4,1.15,z],.026,0x59686d,'IPAL_PHOTO_ADJACENT_UTILITY_GUARD',{coreProcess:false,systemLinkage:'NOT_ASSERTED'});}
 
  // Yellow platform/guardrail language repeated across the photographed process area.
  pbox(46.7,2.72,-111.0,3.2,.10,1.05,0x858e8b,'IPAL_PHOTO_SERVICE_PLATFORM_GRATING');
