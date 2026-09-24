@@ -10,7 +10,7 @@ const ui=fs.readFileSync(new URL('../frontend/src/ui-v5.js',import.meta.url),'ut
 const css=fs.readFileSync(new URL('../frontend/app-shell-v79.css',import.meta.url),'utf8');
 
 test('V194 primary navigation exposes only the three product domains plus contextual help/settings',()=>{
- for(const [id,label] of [['nav-machine','Pabrik'],['nav-assets','Aset'],['nav-systems','Sistem'],['nav-help','Bantuan']]){
+ for(const [id,label] of [['nav-machine','Pabrik'],['nav-assets','Mesin'],['nav-systems','Sistem'],['nav-help','Bantuan']]){
   assert.match(html,new RegExp(`id="${id}"[\\s\\S]*?<small>${label}<\\/small>`));
  }
  assert.match(html,/id="settings"/);
