@@ -40,8 +40,8 @@ test('V150 settings expose only real controls and keep label state synchronized'
   assert.match(app,/Optimasi untuk perangkat dengan performa terbatas/);
   assert.match(app,/Tampilkan nama mesin dan area/);
   assert.match(app,/engine\?\.setLow/);
-  assert.match(app,/engine\.labels=e\.target\.checked/);
-  assert.match(app,/visibleLayers:\{labels:e\.target\.checked\}/);
+  assert.match(app,/const labels=Boolean\(e\.target\.checked\);setDomainState\(\{visibleLayers:\{labels\}\}\);if\(engine\)engine\.labels=labels/);
+  assert.match(app,/visibleLayers:\{labels\}/);
   assert.match(app,/cache\.clear\(\)/);
 });
 
