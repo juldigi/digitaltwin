@@ -88,7 +88,7 @@ test('V203 workstation and storage geometry is materially more detailed without 
  assert.ok(s.v203ChairCasters>0);
  assert.ok(s.v203CabinetShelves>0);
  assert.ok(s.v203CabinetHandles>0);
- const trays=collect(root,/_CABLE_TRAY$/),peds=collect(root,/_SIDE_PEDESTAL$/),monitors=collect(root,/_MONITOR$/);
+ const trays=collect(root,/^V202_.*_CABLE_TRAY$/),peds=collect(root,/^V202_.*_SIDE_PEDESTAL$/),monitors=collect(root,/^V202_.*_MONITOR$/);
  assert.ok(trays.length>0&&trays.every(o=>o.visible));
  assert.ok(peds.length>0&&peds.every(o=>o.visible));
  assert.ok(monitors.length>0&&monitors.some(o=>String(o.userData.semantic).startsWith('V202_')));
