@@ -14,7 +14,7 @@ test('V155 release cache keys move beyond V149/V151 sources',()=>{
   assert.match(html,/src\/ui-v5\.js\?v=167/);
   assert.match(html,/src\/app-shell-v79\.js\?v=192/);
   assert.doesNotMatch(html,/\?v=149/);
-  assert.match(sw,/factory-digital-twin-v192-mobile-camera-framing-20260923/);
+  assert.match(sw,/factory-digital-twin-v205-ipal-photo-actual-20260924/);
 });
 
 test('custom major overlays expose dialog semantics focus restoration and keyboard containment',()=>{
