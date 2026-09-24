@@ -20,7 +20,8 @@ test('application routing preserves the selected machine instead of silently sub
  assert.match(app,/if\(!requested\)\{clearActiveMachineDescriptor\(\);return false;\}/);
  assert.match(app,/MACHINE_KEY=requested/);
  assert.match(app,/if\(!normalizedRoute\)\{assetDialog\(\);return false;\}/);
- assert.match(app,/MACHINE_KEY=null/);\n assert.doesNotMatch(app,/MACHINE_KEY=FOUNDATION_SCOPE\.primaryRoute/);
+ assert.match(app,/MACHINE_KEY=null/);
+ assert.doesNotMatch(app,/MACHINE_KEY=FOUNDATION_SCOPE\.primaryRoute/);
 });
 
 test('engine rejects an empty switch request',()=>{
