@@ -29,7 +29,7 @@ test('placeholder route compatibility remains lightweight and cannot unlock tech
  assert.match(app,/'BMJ-MCH-0003':'offset5'/);
  assert.match(app,/'BMJ-MCH-0009':'offset10'/);
  assert.match(app,/'BMJ-MCH-0010':'apm2'/);
- assert.match(app,/MACHINE_KEY=FOUNDATION_SCOPE\.primaryRoute/);
+ assert.match(app,/MACHINE_KEY=null/);
  assert.match(app,/if\(!canOpenTechnical3D\(route\)\)/);
  assert.match(engine,/if\(!canOpenTechnical3D\(requested\)\)/);
 });
@@ -39,8 +39,8 @@ test('V162 release identifiers keep technical 3D foundation-only while restoring
  assert.match(html,/app-shell-v79\.css\?v=192/);
  assert.match(html,/src\/app\.js\?v=192/);
  assert.match(html,/src\/app-shell-v79\.js\?v=192/);
- assert.match(shell,/v196-interaction-flow/);
- assert.match(sw,/factory-digital-twin-v207-superadmin-editor-20260924/);
+ assert.match(shell,/v197-architecture-convergence/);
+ assert.match(sw,/factory-digital-twin-v209-architecture-convergence-20260925/);
 });
 
 test('offline shell also stays free from expansion runtime modules',()=>{
