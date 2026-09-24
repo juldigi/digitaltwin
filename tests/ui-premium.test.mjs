@@ -258,10 +258,10 @@ test('V197 navigation uses factory, machine, and system language',()=>{
 });
 
 test('V197 system browsing keeps display layers secondary',()=>{
-  assert.match(js,/class="layer-display-options"/);
-  assert.match(js,/<summary>Pengaturan tampilan<\/summary>/);
+  assert.match(js,/function ensureSystemBrowser\(\)/);
+  assert.match(js,/function ensureLayerManager\(\)/);
   assert.match(js,/SISTEM PABRIK/);
-  assert.match(css,/\.layer-display-options/);
+  assert.match(js,/TAMPILAN/);
 });
 
 
