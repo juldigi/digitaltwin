@@ -15,8 +15,8 @@ const DEFAULT_STATE={
     reference:false,unidentified:true,compressedAir:false,ahuPiping:false,
     ducting:false,utilityAnchors:false
   },
-  inspectionMode:{explode:false,explodeLevel:0,isolate:false,section:false,interior:false,labels:true},
-  simulationState:{available:false,blocked:false,blockedReason:null,active:false,playing:false,paused:false,stage:null,speed:1,progress:0},
+  inspectionMode:{explode:false,explodeLevel:0,isolate:false,section:false,interior:false,interiorFocus:null,labels:true},
+  simulationState:{available:false,blocked:false,blockedReason:null,active:false,running:false,paused:false,stage:null,speed:1,progress:0,completed:0,sheetsVisible:0,pileSheetsVisible:0},
   searchState:{open:false,query:''},
   referenceState:{filter:'all'},
   inspectorState:{open:false,tab:'overview'},
@@ -54,7 +54,7 @@ function normalizePatch(patch={}){
   }
   if(next.simulationState?.progress!==undefined){
     const progress=Number(next.simulationState.progress);
-    next.simulationState={...next.simulationState,progress:Number.isFinite(progress)?Math.max(0,Math.min(100,progress)):state.simulationState.progress};
+    next.simulationState={...next.simulationState,progress:Number.isFinite(progress)?Math.max(0,Math.min(1,progress)):state.simulationState.progress};
   }
   return next;
 }
@@ -119,34 +119,38 @@ export function openOverlay(name){
   },{url:false});
 }
 export function closeOverlay(){return setState({overlay:null,searchState:{open:false}},{url:false})}
-export function hydrateUrl(){
-  const params=new URLSearchParams(location.search);
-  const selectedAsset=params.get('asset')||params.get('machine')||null;
-  const selectedNode=params.get('node')||null;
-  const sceneParam=params.get('scene');
-  state={
-    ...state,
+export function readUrlState(url=location.href){
+  const parsed=new URL(url,location.href),params=parsed.searchParams,legacyMachine=params.get('machine');
+  const selectedAsset=params.get('asset')||legacyMachine||null,selectedNode=params.get('node')||null;
+  return {
     selectedAsset,
     selectedNode,
-    sceneMode:sceneParam==='machine'||Boolean(selectedNode)?'machine':'factory',
+    sceneMode:params.get('scene')==='machine'||Boolean(selectedNode)||Boolean(legacyMachine)?'machine':'factory',
     viewMode:params.get('view')==='2d'?'2d':'3d',
     cameraPreset:params.get('camera')==='top'?'top':'iso'
   };
+}
+export function buildContextUrl(context=state,base=location.href){
+  const url=new URL(base,location.href),params=url.searchParams;
+  const selectedAsset=context.selectedAsset??context.asset??null,selectedNode=context.selectedNode??context.node??null;
+  const sceneMode=context.sceneMode??context.scene??'factory',viewMode=context.viewMode??context.view??'3d',cameraPreset=context.cameraPreset??context.camera??'iso';
+  params.delete('machine');
+  if(selectedAsset)params.set('asset',selectedAsset);else params.delete('asset');
+  if(selectedNode)params.set('node',selectedNode);else params.delete('node');
+  if(sceneMode==='machine')params.set('scene','machine');else if(selectedAsset)params.set('scene','factory');else params.delete('scene');
+  params.set('view',viewMode==='2d'?'2d':'3d');
+  if(cameraPreset==='top')params.set('camera','top');else params.delete('camera');
+  return url;
+}
+export function hydrateUrl(){
+  state={...state,...readUrlState()};
   queueNotify();
   return getState();
 }
 
 function syncUrl(){
-  const params=new URLSearchParams(location.search);
-  params.delete('machine');
-  const map={asset:state.selectedAsset,node:state.selectedNode,view:state.viewMode};
-  for(const [key,value] of Object.entries(map)){if(value)params.set(key,value);else params.delete(key);}
-  if(state.sceneMode==='machine')params.set('scene','machine');
-  else if(state.selectedAsset)params.set('scene','factory');
-  else params.delete('scene');
-  if(state.cameraPreset&&state.cameraPreset!=='iso')params.set('camera',state.cameraPreset);else params.delete('camera');
-  const query=params.toString();
-  history.replaceState(history.state,'',location.pathname+(query?'?'+query:'')+location.hash);
+  const url=buildContextUrl(state);
+  history.replaceState(history.state,'',url.pathname+url.search+url.hash);
 }
 
 function queueNotify(){
@@ -160,5 +164,5 @@ function queueNotify(){
   });
 }
 
-window.BMJAppState={getState,setState,setDomainState,setBoot,setActiveSection,setViewMode,selectContext,setLayer,setInspection,setSimulation,setReferenceFilter,setInspector,openOverlay,closeOverlay,subscribe};
+window.BMJAppState={getState,setState,setDomainState,setBoot,setActiveSection,setViewMode,selectContext,setLayer,setInspection,setSimulation,setReferenceFilter,setInspector,openOverlay,closeOverlay,readUrlState,buildContextUrl,subscribe};
 document.documentElement.dataset.build=APP_BUILD;
