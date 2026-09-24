@@ -15,7 +15,7 @@ const DEFAULT_STATE={
     reference:false,unidentified:true,compressedAir:false,ahuPiping:false,
     ducting:false,utilityAnchors:false
   },
-  inspectionMode:{explode:false,explodeLevel:0,isolate:false,section:false,interior:false,interiorFocus:null,labels:true},
+  inspectionMode:{explode:false,explodeLevel:0,isolate:false,section:false,interior:false,interiorFocus:null},
   simulationState:{available:false,blocked:false,blockedReason:null,active:false,running:false,paused:false,stage:null,speed:1,progress:0,completed:0,sheetsVisible:0,pileSheetsVisible:0},
   searchState:{open:false,query:''},
   referenceState:{filter:'all'},
