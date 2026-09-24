@@ -92,3 +92,23 @@ test('factory editor normalizes clicks to stable walls and machine assets',()=>{
  assert.match(app,/const assetId=assetIdByNode\.get\(node\);if\(assetId\)return assetId/);
  assert.match(app,/editorCategory=editorCategoryFor\(normalized,target\)/);
 });
+
+
+test('machine editor list is registry-driven and whole-unit keyboard movable',()=>{
+ assert.match(app,/registryMachineChoices=MACHINE_REGISTRY\.filter\(machine=>engine\.actualFactory\?\.assets\?\.has\(machine\.machineId\)\)/);
+ assert.match(app,/name:machine\.name/);
+ assert.match(app,/if\(category==='machines'\)\{const machineId=id\.replace\(\/\^asset:\/,'\'\)\|\|node\?\.userData\?\.machineId,record=MACHINE_REGISTRY_BY_ID\.get\(machineId\);return record\?\.name/);
+ assert.match(app,/Seluruh mesin aktif sebagai satu unit/);
+ assert.match(app,/document\.addEventListener\('keydown',onEditorKeyDown\)/);
+ assert.match(app,/\['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'\]/);
+ assert.match(app,/const step=e\.shiftKey\?\.5:\.1/);
+ assert.match(app,/if\(e\.key==='ArrowLeft'\)node\.position\.x-=step/);
+ assert.match(app,/if\(e\.key==='ArrowUp'\)node\.position\.z-=step/);
+ assert.match(app,/document\.removeEventListener\('keydown',onEditorKeyDown\)/);
+ assert.match(css,/\.se-machine-edit-note/);
+});
+
+test('clicking any visual child of a factory machine normalizes to the machine root asset',()=>{
+ assert.match(app,/for\(const \[assetId,root\] of engine\.actualFactory\?\.assets\|\|\[\]\)root\.traverse\(node=>assetIdByNode\.set\(node,'asset:'\+assetId\)\)/);
+ assert.match(app,/const assetId=assetIdByNode\.get\(node\);if\(assetId\)return assetId/);
+});
