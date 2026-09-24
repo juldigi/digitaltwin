@@ -204,3 +204,27 @@ test('V196 camera reset changes only camera framing and never clears semantic se
   assert.doesNotMatch(reset,/selectedNode:null/);
   assert.doesNotMatch(reset,/engine\.isolated=false/);
 });
+
+
+test('V196 modal subflows return to their parent instead of stacking surfaces',()=>{
+  const app=fs.readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
+  assert.match(html,/id="modal-back"[^>]+aria-label="Kembali ke dialog sebelumnya"/);
+  assert.match(app,/let modalBackHandler=null/);
+  assert.match(app,/function modal\(title,html,\{back=null\}=\{\}\)/);
+  assert.match(app,/function goModalBack\(\)/);
+  assert.match(app,/on\('#modal-back',goModalBack\)/);
+  assert.match(app,/foundationStatusDialog\(\{back:settingsDialog\}\)/);
+  assert.match(app,/connectionDialog\(\{back:settingsDialog\}\)/);
+  assert.match(app,/\{back:settingsDialog\}\);\$\('#change-password-form'\)/);
+  assert.match(app,/\{back:\(\)=>connectionDialog\(\{back\}\)\}/);
+});
+
+test('V196 close and back have distinct semantics',()=>{
+  const app=fs.readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
+  assert.match(app,/function closeModal\(\)\{modalBackHandler=null/);
+  assert.match(app,/function navigateContextParent\(\)/);
+  assert.doesNotMatch(app,/factory-inspector-back/);
+  assert.match(css,/\/\* V196 interaction flow/);
+  assert.match(css,/\.context-back/);
+  assert.match(css,/\.modal-back/);
+});
