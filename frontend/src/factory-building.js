@@ -226,6 +226,14 @@ export function buildActualFactory(layout,fleet){
   if(maxX-minX>6.4){minX=l.x-Math.min(3.2,tw/2);maxX=l.x+Math.min(3.2,tw/2);}
   if(maxY-minY>5.2){minY=l.y-Math.min(2.6,td/2);maxY=l.y+Math.min(2.6,td/2);}
   const door=nearestRoomDoor(l),doorSide=doorSideFor(l,door),rotation=roomRotationForDoorSide(doorSide),enclose=program!=='DISPATCH_LOADING';
+  // Snap the inferred room edge to the actual/reference access so the door is a real opening in the room wall, not a decoration beside it.
+  if(door&&door.distance<=5.0){
+   if(doorSide==='N'){minY=Math.min(l.y-.78,door.y);minX=Math.min(minX,door.x-.62);maxX=Math.max(maxX,door.x+.62);}
+   if(doorSide==='S'){maxY=Math.max(l.y+.78,door.y);minX=Math.min(minX,door.x-.62);maxX=Math.max(maxX,door.x+.62);}
+   if(doorSide==='W'){minX=Math.min(l.x-.82,door.x);minY=Math.min(minY,door.y-.62);maxY=Math.max(maxY,door.y+.62);}
+   if(doorSide==='E'){maxX=Math.max(l.x+.82,door.x);minY=Math.min(minY,door.y-.62);maxY=Math.max(maxY,door.y+.62);}
+  }
+  minX=Math.max(-4.85,minX);maxX=Math.min(95.85,maxX);minY=Math.max(2.15,minY);maxY=Math.min(102.85,maxY);
   const perimeterDistance=Math.min(...outline.map((a,i)=>pointSegmentDistance(l.x,l.y,{a,b:outline[(i+1)%outline.length]})));
   roomEnvelopeContexts.push({key:l.text+'@'+l.x.toFixed(3)+','+l.y.toFixed(3),label:l.text,x:l.x,y:l.y,program,minX,maxX,minY,maxY,width:maxX-minX,depth:maxY-minY,doorSide,rotation,doorX:door?.x??null,doorY:door?.y??null,doorDistance:door?.distance??null,enclose,outerRoom:perimeterDistance<=Math.max(tw,td)*.72+1.0});
  }
