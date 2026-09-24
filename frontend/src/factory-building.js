@@ -1271,7 +1271,7 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  const ipalPhotoRuntime={rotors:[],waters:[],update(now){const t=Number(now||0)*.001;for(const r of this.rotors)r.rotation.y=t*.72;for(let i=0;i<this.waters.length;i++){const w=this.waters[i];w.position.y=w.userData.baseY+Math.sin(t*.55+i)*.006;}}};
 
  // Actual civil surface: interlocking paving under the open canopy, with a narrow service-concrete margin.
- const paving=pbox(46.4,.095,-110.9,26.15,.03,13.82,0x9aa09c,'IPAL_PHOTO_INTERLOCKING_PAVING',{},{});
+ const paving=pbox(46.4,.095,-110.9,26.15,.03,13.82,0x9aa09c,'IPAL_PHOTO_INTERLOCKING_PAVING');
  paving.userData.materialObservation='INTERLOCKING_PAVING_VISIBLE_IN_PHOTOS';
  for(let x=34;x<=59;x+=1.15)pline([x,.116,-117.7],[x,.116,-104.2],.008,0x737b78,'IPAL_PHOTO_PAVING_JOINT',{renderIntent:'SUBTLE'});
  for(let z=-117.2;z<=-104.6;z+=.72)pline([33.45,.116,z],[59.25,.116,z],.007,0x7b827f,'IPAL_PHOTO_PAVING_JOINT',{renderIntent:'SUBTLE'});
@@ -1309,13 +1309,13 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   water.userData.baseY=water.position.y;ipalPhotoRuntime.waters.push(water);
   return {x,z,w,d,h,water};
  };
- const eq=makeBlueBasin(IPAL_PHOTO_EVIDENCE_V205.relativeLayout.equalization,'IPAL_PHOTO_BAK_EKUALISASI',0x416c72);
- for(let i=0;i<=10;i++){const y=.18+i*(eq.h-.28)/10;pbox(eq.x-eq.w/2-.025,y,eq.z+eq.d/2+.10,.06,.018,.18,0xe9eee7,'IPAL_PHOTO_EQUALIZATION_LEVEL_MARK',{},{labelPercent:i*10});}
- const tmp=makeBlueBasin(IPAL_PHOTO_EVIDENCE_V205.relativeLayout.temporaryHolding,'IPAL_PHOTO_BAK_PENAMPUNGAN_SEMENTARA',0x4c7073);
+ const eq=makeBlueBasin(IPAL_PHOTO_EVIDENCE_V205.relativeLayout.equalization,'IPAL_PHOTO_BAK_EKUALISASI',0x416c72);label('BAK EKUALISASI',eq.x,1.48,eq.z+eq.d/2+.16,3.4,'#244b5c',ipalPhoto);
+ for(let i=0;i<=10;i++){const y=.18+i*(eq.h-.28)/10;pbox(eq.x-eq.w/2-.025,y,eq.z+eq.d/2+.10,.06,.018,.18,0xe9eee7,'IPAL_PHOTO_EQUALIZATION_LEVEL_MARK',0,1,{labelPercent:i*10});}
+ const tmp=makeBlueBasin(IPAL_PHOTO_EVIDENCE_V205.relativeLayout.temporaryHolding,'IPAL_PHOTO_BAK_PENAMPUNGAN_SEMENTARA',0x4c7073);label('BAK PENAMPUNGAN SEMENTARA',tmp.x,1.28,tmp.z+tmp.d/2+.16,4.2,'#244b5c',ipalPhoto);
 
  // Large metal tank: shell-course seams, weathering, yellow top rail and external ladder.
  const an=IPAL_PHOTO_EVIDENCE_V205.relativeLayout.anaerobicTank,anZ=-an.y;
- const anTank=pcyl(an.x,an.h/2+.12,anZ,an.r,an.h,0xa5aaa7,'IPAL_PHOTO_TANGKI_AN_AEROBIK',{observedLabel:an.label},40,photoMetal);
+ const anTank=pcyl(an.x,an.h/2+.12,anZ,an.r,an.h,0xa5aaa7,'IPAL_PHOTO_TANGKI_AN_AEROBIK',{observedLabel:an.label},40,photoMetal);label('TANGKI AN AEROBIK',an.x,2.6,anZ-an.r-.10,4.0,'#244b5c',ipalPhoto);
  for(let y=.48;y<an.h+.15;y+=.52)ptorus(an.x,y,anZ,an.r+.012,.022,0x747d7b,'IPAL_PHOTO_TANK_SHELL_RING');
  for(let a=0;a<Math.PI*2;a+=Math.PI/8)pline([an.x+Math.cos(a)*an.r,.18,anZ+Math.sin(a)*an.r],[an.x+Math.cos(a)*an.r,an.h+.07,anZ+Math.sin(a)*an.r],.011,0x777f7d,'IPAL_PHOTO_TANK_VERTICAL_SEAM');
  const anTop=pcyl(an.x,an.h+.14,anZ,an.r*.97,.08,0x929a98,'IPAL_PHOTO_TANK_TOP',{observed:'METAL_TOP'},40,photoMetalDark);
@@ -1324,7 +1324,7 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  const ladderX=an.x+an.r+.12;
  for(const lx of [ladderX-.22,ladderX+.22])pline([lx,.16,anZ],[lx,an.h+.55,anZ],.025,0xd7a817,'IPAL_PHOTO_TANK_LADDER_RAIL');
  for(let y=.35;y<an.h+.5;y+=.30)pline([ladderX-.22,y,anZ],[ladderX+.22,y,anZ],.018,0xd7a817,'IPAL_PHOTO_TANK_LADDER_RUNG');
- pbox(an.x+an.r+.02,2.15,anZ-.03,.055,.62,.78,0xe4d240,'IPAL_PHOTO_CONFINED_SPACE_WARNING_PLATE',{},{},{warningText:'BAHAYA! RUANG TERBATAS DILARANG MASUK'});buildingDetailStats.v205IpalSafetyDetails++;
+ pbox(an.x+an.r+.02,2.15,anZ-.03,.055,.62,.78,0xe4d240,'IPAL_PHOTO_CONFINED_SPACE_WARNING_PLATE',0,1,{warningText:'BAHAYA! RUANG TERBATAS DILARANG MASUK'});buildingDetailStats.v205IpalSafetyDetails++;
  // Water-stain and aged shell bands keep the vessel from reading as a showroom-new cylinder.
  for(const [y,h,op] of [[.82,.22,.13],[2.58,.16,.10],[3.34,.11,.09]]){const stain=pcyl(an.x,y,anZ,an.r+.018,h,0x6d7775,'IPAL_PHOTO_TANK_WEATHERING',{weathering:'WATER_STAIN_BAND'},40,new T.MeshStandardMaterial({color:0x6d7775,roughness:.83,metalness:.18,transparent:true,opacity:op}));buildingDetailStats.v205IpalWeatheringDetails++;}
 
@@ -1373,7 +1373,7 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   const bag=new T.Mesh(new T.CylinderGeometry(.28,.38,.82,16,1,false),photoWhite);bag.position.set(bx,1.02,sdZ);bag.scale.z=.72;ipalPhoto.add(bag);photoTag(bag,'IPAL_PHOTO_SLUDGE_DEWATERING_BAG',{observed:'HANGING_FILTER_BAG'});
   pline([bx,1.46,sdZ],[bx,1.72,sdZ-.35],.035,0xc9cbc6,'IPAL_PHOTO_SLUDGE_FLEXIBLE_HOSE');
  }
- pbox(sd.x-sd.w/2+.15,1.13,sdZ+sd.d/2+.02,.045,.58,.68,0xe4d240,'IPAL_PHOTO_TOXIC_WARNING_PLATE',{},{},{warningText:'BERACUN'});buildingDetailStats.v205IpalSafetyDetails++;
+ pbox(sd.x-sd.w/2+.15,1.13,sdZ+sd.d/2+.02,.045,.58,.68,0xe4d240,'IPAL_PHOTO_TOXIC_WARNING_PLATE',0,1,{warningText:'BERACUN'});buildingDetailStats.v205IpalSafetyDetails++;
 
  // White operator/service room with dark aluminium windows, entrance tile, extinguisher and its own lower canopy.
  const or=IPAL_PHOTO_EVIDENCE_V205.relativeLayout.operatorRoom,orZ=-or.y;
