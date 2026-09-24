@@ -277,7 +277,7 @@ q('#nav-systems')?.addEventListener('click',()=>{if(!PHASE1_FOUNDATION){stopSimu
 q('#nav-view')?.addEventListener('click',openLayerManager);
 
 const menu=q('#ui-menu-toggle');
-menu?.addEventListener('click',()=>{const open=!document.body.classList.contains('nav-open');document.body.classList.add('drawer-transitioning');if(open){beforeMajorOverlay('navigation');rememberOverlayFocus('navigation')}document.body.classList.toggle('nav-open',open);requestAnimationFrame(()=>document.body.classList.remove('drawer-transitioning'));menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Tutup navigasi':'Buka navigasi');if(open){openOverlay('navigation');focusOverlay(q('.rail'),'.rail button:not([hidden])')}else{closeOverlay();restoreOverlayFocus('navigation','#ui-menu-toggle')}});
+menu?.addEventListener('click',()=>{const open=getState().overlay!=='navigation';document.body.classList.add('drawer-transitioning');if(open){beforeMajorOverlay('navigation');rememberOverlayFocus('navigation')}document.body.classList.toggle('nav-open',open);requestAnimationFrame(()=>document.body.classList.remove('drawer-transitioning'));menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Tutup navigasi':'Buka navigasi');if(open){openOverlay('navigation');focusOverlay(q('.rail'),'.rail button:not([hidden])')}else{closeOverlay();restoreOverlayFocus('navigation','#ui-menu-toggle')}});
 q('#ui-backdrop')?.addEventListener('click',()=>{
  const overlay=getState().overlay;
  if(overlay==='search')closeSearch();
@@ -293,7 +293,7 @@ const MOBILE_TARGET={factory:'nav-machine',asset:'nav-assets',system:'nav-system
 qa('[data-mobile-nav]').forEach(button=>button.addEventListener('click',event=>{
  if(!matchMedia('(max-width:767px)').matches)return;
  const key=button.dataset.mobileNav;
- if(key==='more'){event.preventDefault();const open=!document.body.classList.contains('nav-open');if(open){beforeMajorOverlay('navigation');rememberOverlayFocus('navigation');document.body.classList.add('nav-open');menu?.setAttribute('aria-expanded','true');button.setAttribute('aria-expanded','true');menu?.setAttribute('aria-label','Tutup navigasi');openOverlay('navigation');focusOverlay(q('.rail'),'.rail button:not([hidden])')}else{closeDrawer();if(getState().overlay==='navigation')closeOverlay()}return}
+ if(key==='more'){event.preventDefault();const open=getState().overlay!=='navigation';if(open){beforeMajorOverlay('navigation');rememberOverlayFocus('navigation');document.body.classList.add('nav-open');menu?.setAttribute('aria-expanded','true');button.setAttribute('aria-expanded','true');menu?.setAttribute('aria-label','Tutup navigasi');openOverlay('navigation');focusOverlay(q('.rail'),'.rail button:not([hidden])')}else{closeDrawer();if(getState().overlay==='navigation')closeOverlay()}return}
  const target=MOBILE_TARGET[key];if(target)q('#'+target)?.click();
 }));
 
@@ -408,7 +408,10 @@ qa('#detail-panel [role="tab"]').forEach(tab=>tab.addEventListener('click',()=>{
  setInspector(true,tabKey);setActiveSection(section);markSection(section);requestAnimationFrame(syncSimulationTransport);
 }));
 q('#close-panel')?.addEventListener('click',()=>closeInspector());
-const modalElement=q('#modal');if(modalElement)new MutationObserver(()=>{if(modalElement.open){beforeMajorOverlay('modal');openOverlay('modal')}else if(getState().overlay==='modal')closeOverlay()}).observe(modalElement,{attributes:true,attributeFilter:['open']});
+const modalElement=q('#modal');
+addEventListener('bmj:modalopenrequest',()=>{beforeMajorOverlay('modal');openOverlay('modal')});
+addEventListener('bmj:modalcloserequest',()=>{if(getState().overlay==='modal')closeOverlay()});
+modalElement?.addEventListener('cancel',event=>{event.preventDefault();q('#modal-close')?.click()});
 const syncViewport=()=>{document.documentElement.style.setProperty('--app-vh',`${window.visualViewport?.height||innerHeight}px`);const w=innerWidth;if(w>=768&&getState().overlay==='navigation'){closeDrawer();closeOverlay()}const next=setState({deviceMode:w<768?'mobile':w<=1180?'tablet':'desktop'},{url:false});applyInspectorDom(next)};
 syncViewport();addEventListener('resize',syncViewport,{passive:true});window.visualViewport?.addEventListener('resize',syncViewport,{passive:true});
 
