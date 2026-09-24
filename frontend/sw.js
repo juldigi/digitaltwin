@@ -1,4 +1,4 @@
-const VERSION='factory-digital-twin-v207-superadmin-editor-20260924';
+const VERSION='factory-digital-twin-v209-architecture-convergence-20260925';
 const SHELL=[
  './','./index.html','./config.json','./assets/favicon.svg','./assets/splash-industrial-v79.webp',
  './style.css','./runtime-fallback.css','./app-shell-v79.css','./ui-v5.css','./responsive-v5.css','./experience-v37.css',
