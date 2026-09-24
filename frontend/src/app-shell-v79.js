@@ -59,7 +59,7 @@ const symbols=`<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
 document.body.insertAdjacentHTML('afterbegin',symbols);
 
 const iconMap={
- 'nav-machine':'factory','nav-assets':'machine','nav-systems':'system','nav-help':'help','ui-menu-toggle':'menu','settings':'settings',
+ 'nav-machine':'factory','nav-assets':'machine','nav-systems':'system','nav-view':'layers','nav-help':'help','ui-menu-toggle':'menu','settings':'settings',
  'close-panel':'close','modal-close':'close','ui-theme-toggle':'theme','global-search-icon':'search','mobile-search-toggle':'search','layer-manager-button':'layers',
  'panel-toggle':'panel','zoom-plus':'zoom-in','zoom-fit':'focus','zoom-minus':'zoom-out','labels':'label','fullscreen':'fullscreen'
 };
@@ -161,6 +161,7 @@ function beforeMajorOverlay(name){
  const current=getState().overlay;
  if(current&&current!==name){
   if(current==='search')closeSearch();
+  else if(current==='systems')closeSystemBrowser();
   else if(current==='layers')closeLayerManager();
   else if(current==='navigation')closeDrawer();
    else if(current==='modal'&&q('#modal')?.open)q('#modal-close')?.click();
@@ -169,9 +170,14 @@ function beforeMajorOverlay(name){
  if(name!=='inspector'&&getState().inspectorState?.open)closeInspector({restoreFocus:false});
  if(name!=='navigation')closeDrawer();
 }
-function openSystemLayers(){
+function openSystemBrowser(){
+ beforeMajorOverlay('systems');rememberOverlayFocus('systems');ensureSystemBrowser();
+ const panel=q('#system-browser');panel.hidden=false;document.body.classList.add('system-open');openOverlay('systems');setActiveSection(PHASE1_FOUNDATION?'factory':'system');markSection(PHASE1_FOUNDATION?'factory':'system');syncLayerControls();focusOverlay(panel,'[data-system-close]');
+}
+function openSystemLayers(){openSystemBrowser()}
+function openLayerManager(){
  beforeMajorOverlay('layers');rememberOverlayFocus('layers');ensureLayerManager();
- const panel=q('#layer-manager');panel.hidden=false;document.body.classList.add('layer-open');openOverlay('layers');setActiveSection(PHASE1_FOUNDATION?'factory':'system');markSection(PHASE1_FOUNDATION?'factory':'system');syncLayerControls();focusOverlay(panel,'[data-layer-close]');
+ const panel=q('#layer-manager');panel.hidden=false;document.body.classList.add('layer-open');openOverlay('layers');syncLayerControls();focusOverlay(panel,'[data-layer-close]');
 }
 function enterSimulation(){
  beforeMajorOverlay('inspector');
@@ -261,13 +267,15 @@ globalSearch?.addEventListener('keydown',event=>{if(event.key==='ArrowDown'||eve
 q('#mobile-search-toggle')?.addEventListener('click',()=>openSearch(''));
 addEventListener('bmj:searchresults',event=>renderSearchResults(event.detail));
 addEventListener('bmj:systemsearchselect',event=>{if(PHASE1_FOUNDATION)return;const system=event.detail?.system||null;setState({selectedSystem:system},{url:false});openSystemLayers();if(['hvac','compressedAir','routing'].includes(system))q(`[data-system-focus="${system}"]`)?.click()});
-q('#nav-systems')?.addEventListener('click',()=>{if(!PHASE1_FOUNDATION){stopSimulationForNavigation('system');openSystemLayers()}});
+q('#nav-systems')?.addEventListener('click',()=>{if(!PHASE1_FOUNDATION){stopSimulationForNavigation('system');openSystemBrowser()}});
+q('#nav-view')?.addEventListener('click',openLayerManager);
 
 const menu=q('#ui-menu-toggle');
 menu?.addEventListener('click',()=>{const open=!document.body.classList.contains('nav-open');document.body.classList.add('drawer-transitioning');if(open){beforeMajorOverlay('navigation');rememberOverlayFocus('navigation')}document.body.classList.toggle('nav-open',open);requestAnimationFrame(()=>document.body.classList.remove('drawer-transitioning'));menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Tutup navigasi':'Buka navigasi');if(open){openOverlay('navigation');focusOverlay(q('.rail'),'.rail button:not([hidden])')}else{closeOverlay();restoreOverlayFocus('navigation','#ui-menu-toggle')}});
 q('#ui-backdrop')?.addEventListener('click',()=>{
  const overlay=getState().overlay;
  if(overlay==='search')closeSearch();
+ else if(overlay==='systems')closeSystemBrowser();
  else if(overlay==='layers')closeLayerManager();
  else if(overlay==='navigation')closeDrawer();
  else if(overlay==='modal'&&q('#modal')?.open)q('#modal-close')?.click();
@@ -301,29 +309,18 @@ const GROUPS=PHASE1_FOUNDATION?[
  ['Utilitas',[['compressedAir','Pipa compressed air'],['ahuPiping','Pipa AHU'],['ducting','Ducting AHU'],['utilityAnchors','Titik koneksi referensi']]],
  ['Informasi',[['reference','Garis denah sumber']]]
 ];
-function ensureLayerManager(){
- if(q('#layer-manager'))return;
- const panel=document.createElement('section');panel.id='layer-manager';panel.className='canonical-layer-manager';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-labelledby','layer-manager-title');panel.setAttribute('tabindex','-1');
- const systemSurface=PHASE1_FOUNDATION?'':`<div class="canonical-system-grid">
+function systemSurfaceMarkup(){
+ return PHASE1_FOUNDATION?'':`<div class="canonical-system-grid">
   <button type="button" data-system-focus="hvac"><strong>HVAC</strong><small>Pipa AHU + ducting</small><span>Lihat jalur & peralatan</span></button>
   <button type="button" data-system-focus="compressedAir"><strong>Udara Bertekanan</strong><small>Pipa distribusi udara</small><span>Lihat jalur & peralatan</span></button>
   <button type="button" data-system-focus="routing"><strong>Jalur Utilitas</strong><small>Semua jalur yang tersedia</small><span>Lihat seluruh jalur</span></button>
   <button type="button" data-system-focus="water" class="system-unavailable"><strong>Air / IPAL</strong><small>Peralatan tersedia · jalur belum tersedia</small><span>Lihat batas data</span></button>
   <button type="button" data-system-focus="electrical" class="system-unavailable"><strong>Kelistrikan</strong><small>Jalur terpisah belum tersedia</small><span>Lihat batas data</span></button>
  </div><section id="system-context" class="canonical-system-context" aria-live="polite"><p>Pilih sistem untuk melihat jalur, peralatan terkait, status data, dan batas verifikasi.</p></section>`;
- const layerControls=GROUPS.map(([title,items])=>`<div class="canonical-layer-group"><h4>${title}</h4>${items.map(([key,label])=>`<label><span>${label}</span><input type="checkbox" data-canonical-layer="${key}"></label>`).join('')}</div>`).join('');
- panel.innerHTML=`<header><div><small>${PHASE1_FOUNDATION?'TAMPILAN PABRIK':'SISTEM PABRIK'}</small><h3 id="layer-manager-title">${PHASE1_FOUNDATION?'Pengaturan Tampilan':'Sistem'}</h3></div><button type="button" data-layer-close class="icon-btn" aria-label="Tutup">${icon('close')}</button></header>
- <p id="layer-unavailable-note" role="status" hidden>Fitur 3D memerlukan WebGL. Denah 2D tetap tersedia.</p>
- ${systemSurface}
- ${PHASE1_FOUNDATION?layerControls:`<details class="layer-display-options"><summary>Pengaturan tampilan</summary><div>${layerControls}</div></details>`}
- <div class="canonical-layer-group unavailable"><h4>Batas data</h4><p>${PHASE1_FOUNDATION?'Sistem utilitas yang belum tersedia tetap disembunyikan sampai datanya siap.':'Jalur yang belum memiliki gambar atau verifikasi lapangan tetap ditandai belum tersedia. Aplikasi tidak membuat jalur aktual secara otomatis.'}</p></div>`;
- document.body.append(panel);
- q('[data-layer-close]',panel)?.addEventListener('click',closeLayerManager);
- qa('[data-canonical-layer]',panel).forEach(input=>input.addEventListener('change',()=>{
-  const key=input.dataset.canonicalLayer,visible=input.checked;setLayer(key,visible);
-  dispatchEvent(new CustomEvent('bmj:layerchange',{detail:{key,visible}}));
- }));
- if(!PHASE1_FOUNDATION)qa('[data-system-focus]',panel).forEach(button=>button.addEventListener('click',()=>{
+}
+function bindSystemFocus(panel){
+ if(PHASE1_FOUNDATION)return;
+ qa('[data-system-focus]',panel).forEach(button=>button.addEventListener('click',()=>{
   if(q('#mode-3d')?.disabled)return;
   const system=button.dataset.systemFocus,keys=system==='hvac'?['ahuPiping','ducting']:system==='compressedAir'?['compressedAir']:system==='routing'?['compressedAir','ahuPiping','ducting','utilityAnchors']:[];
   document.body.classList.remove('workspace-2d');setViewMode('3d');setState({selectedSystem:system,activeSection:'system'},{url:false});
@@ -332,9 +329,34 @@ function ensureLayerManager(){
   syncLayerControls();markSection('system');dispatchEvent(new CustomEvent('bmj:systemfocus',{detail:{system}}));
  }));
 }
+function ensureSystemBrowser(){
+ if(q('#system-browser'))return;
+ const panel=document.createElement('section');panel.id='system-browser';panel.className='canonical-layer-manager canonical-system-browser';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-labelledby','system-browser-title');panel.setAttribute('tabindex','-1');
+ panel.innerHTML=`<header><div><small>SISTEM PABRIK</small><h3 id="system-browser-title">Sistem</h3></div><button type="button" data-system-close class="icon-btn" aria-label="Tutup">${icon('close')}</button></header>
+ <p id="system-unavailable-note" role="status" hidden>Fitur sistem 3D memerlukan WebGL. Denah 2D tetap tersedia.</p>
+ ${systemSurfaceMarkup()}
+ <div class="canonical-layer-group unavailable"><h4>Batas data</h4><p>Jalur yang belum memiliki gambar atau verifikasi lapangan tetap ditandai belum tersedia. Aplikasi tidak membuat jalur aktual secara otomatis.</p></div>`;
+ document.body.append(panel);q('[data-system-close]',panel)?.addEventListener('click',closeSystemBrowser);bindSystemFocus(panel);
+}
+function closeSystemBrowser(){const panel=q('#system-browser');if(panel)panel.hidden=true;document.body.classList.remove('system-open');if(getState().overlay==='systems')closeOverlay();restoreOverlayFocus('systems','#nav-systems')}
+function ensureLayerManager(){
+ if(q('#layer-manager'))return;
+ const panel=document.createElement('section');panel.id='layer-manager';panel.className='canonical-layer-manager';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-labelledby','layer-manager-title');panel.setAttribute('tabindex','-1');
+ const layerControls=GROUPS.map(([title,items])=>`<div class="canonical-layer-group"><h4>${title}</h4>${items.map(([key,label])=>`<label><span>${label}</span><input type="checkbox" data-canonical-layer="${key}"></label>`).join('')}</div>`).join('');
+ panel.innerHTML=`<header><div><small>TAMPILAN</small><h3 id="layer-manager-title">Pengaturan Tampilan</h3></div><button type="button" data-layer-close class="icon-btn" aria-label="Tutup">${icon('close')}</button></header>
+ <p id="layer-unavailable-note" role="status" hidden>Layer 3D memerlukan WebGL. Denah 2D tetap tersedia.</p>
+ ${layerControls}
+ <div class="canonical-layer-group unavailable"><h4>Tentang tampilan</h4><p>Pengaturan ini hanya mengubah apa yang terlihat di layar. Data sumber dan posisi objek tidak berubah.</p></div>`;
+ document.body.append(panel);
+ q('[data-layer-close]',panel)?.addEventListener('click',closeLayerManager);
+ qa('[data-canonical-layer]',panel).forEach(input=>input.addEventListener('change',()=>{
+  const key=input.dataset.canonicalLayer,visible=input.checked;setLayer(key,visible);
+  dispatchEvent(new CustomEvent('bmj:layerchange',{detail:{key,visible}}));
+ }));
+}
 function syncLayerControls(){
  const state=getState(),unavailable=Boolean(q('#mode-3d')?.disabled);
- const note=q('#layer-unavailable-note');if(note)note.hidden=!unavailable;
+ const note=q('#layer-unavailable-note');if(note)note.hidden=!unavailable;const systemNote=q('#system-unavailable-note');if(systemNote)systemNote.hidden=!unavailable;
  qa('[data-canonical-layer]').forEach(input=>{input.checked=Boolean(state.visibleLayers[input.dataset.canonicalLayer]);input.disabled=unavailable;input.title=unavailable?'Layer 3D memerlukan WebGL':''});
  qa('[data-system-focus]').forEach(button=>{button.disabled=unavailable;button.title=unavailable?'Fokus jalur 3D memerlukan WebGL':''});
 }
@@ -420,12 +442,13 @@ syncInspectorTabs();
 document.addEventListener('keydown',event=>{
  if(event.key==='Tab'){
   const overlay=getState().overlay;
-  const root=overlay==='search'?q('#universal-search-panel'):overlay==='layers'?q('#layer-manager'):overlay==='navigation'?q('.rail'):overlay==='modal'?q('#modal'):null;
+  const root=overlay==='search'?q('#universal-search-panel'):overlay==='systems'?q('#system-browser'):overlay==='layers'?q('#layer-manager'):overlay==='navigation'?q('.rail'):overlay==='modal'?q('#modal'):null;
   if(root&&trapOverlayFocus(event,root))return;
  }
  if(event.key!=='Escape')return;
  const overlay=getState().overlay;
  if(overlay==='search'){closeSearch();return}
+ if(overlay==='systems'){closeSystemBrowser();return}
  if(overlay==='layers'){closeLayerManager();return}
  if(overlay==='navigation'){closeDrawer();closeOverlay();return}
  if(overlay==='modal'&&q('#modal')?.open){q('#modal-close')?.click();closeOverlay();return}
