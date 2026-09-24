@@ -131,7 +131,7 @@ test('conditional controls explain requirements rather than failing silently',()
   assert.match(app,/Edit Pabrik 3D/);
 });
 test('service worker refreshes the redesigned shell',()=>{
-  assert.match(sw,/factory-digital-twin-v210-architecture-convergence-stage5-20260925/);
+  assert.match(sw,/factory-digital-twin-v211-ui-ssot-stage6-20260925/);
   assert.doesNotMatch(sw,/src\/universal-machine\.js/);
   assert.match(app,/template\.ghost\(true,part\)/,'object selection must automatically ghost all non-selected geometry');
   for(const asset of ['app-shell-v79.css','src/app-shell-v79.js','assets/splash-industrial-v79.webp','src/ui-v5.js','src/app.js','src/simulation.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
@@ -274,7 +274,7 @@ test('v52 Offset 10 simulation uses the same full-interior cutaway workflow as O
 test('v53 retains the document-grounded CX104 expansion asset while foundation runtime keeps it gated',()=>{
   assert.match(app,/MACHINE_KEY/);
   assert.match(app,/ACTIVE_ROOT/);
-  assert.match(app,/selectedTaxonomyId=selectedTaxonomyId\|\|ACTIVE_ROOT/);
+  assert.match(app,/const activeTaxonomyId=\(\)=>\{const node=getAppState\(\)\.selectedNode;return node&&TAXONOMY_BY_ID\.has\(node\)\?node:ACTIVE_ROOT;\}/);
   assert.match(app,/if\(!canOpenTechnical3D\(route\)\)/);
   assert.match(app,/focusFoundationPlaceholder\(record/);
   assert.match(app,/history\.pushState/);
@@ -306,14 +306,14 @@ test('v54 routes APM2 to its dedicated model and evidence-bounded simulation',()
   assert.match(app,/MACHINE_KEY=null/);
   assert.match(app,/IS_OFFSET10=false,IS_APM2=false,IS_SHEETING=false/);
   assert.match(app,/from '\.\/data\/taxonomy-apm2\.js'/);
-  assert.match(app,/LEGACY_MACHINE_ROUTE/);
+  assert.match(app,/MACHINE_ROUTE_BY_ID/);
   assert.match(app,/if\(!canOpenTechnical3D\(machine\)\)/);
   assert.match(engine,/if\(!canOpenTechnical3D\(requested\)\)/);
   assert.match(engine,/switchMachine\(key\)/);
   assert.match(app,/Simulasi Proses APM 2/);
   assert.match(app,/register dan SideLay/);
   assert.match(app,/suffix E\/SE\/CER\/BMA tidak tersedia/);
-  assert.match(app,/LEGACY_MACHINE_ROUTE/);
+  assert.match(app,/MACHINE_ROUTE_BY_ID/);
   assert.match(runtime,/APM2MachineTemplate/);
   assert.match(runtime,/APM2ProcessSimulation/);
   assert.match(runtime,/if\(k==='apm2'\)return new APM2MachineTemplate\(\)/);
@@ -335,7 +335,7 @@ test('v54 routes APM2 to its dedicated model and evidence-bounded simulation',()
 test('v57 opens Sheeting Lexus as a dedicated right-to-left twin',()=>{
   assert.match(app,/IS_OFFSET10=false,IS_APM2=false,IS_SHEETING=false/);
   assert.match(app,/from '\.\/data\/taxonomy-sheeting\.js'/);
-  assert.match(app,/LEGACY_MACHINE_ROUTE/);
+  assert.match(app,/MACHINE_ROUTE_BY_ID/);
   assert.match(app,/SHEETING LEXUS/);
   assert.match(app,/RIGHT → LEFT/);
   assert.match(app,/Simulasi Proses Sheeting/);
@@ -364,7 +364,7 @@ test('selected assemblies expose camera-tracked component labels with leader lin
   assert.match(engine,/setPartLabels\(part,taxonomyId=null\)/);
   assert.match(engine,/updatePartLabels\(\)/);
   assert.match(engine,/createElementNS\('http:\/\/www\.w3\.org\/2000\/svg','line'\)/);
-  assert.match(app,/engine\.setPartLabels\(part,selectedTaxonomyId\)/);
+  assert.match(app,/engine\.setPartLabels\(part,activeTaxonomyId\(\)\)/);
   assert.match(app,/engine\.clearPartLabels\(\)/);
 });
 
