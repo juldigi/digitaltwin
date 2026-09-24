@@ -26,3 +26,28 @@ test('only Superadmin writes validated scene changes; revisions restore the prio
 });
 
 test('Superadmin password change invalidates prior sessions and initial password',async()=>{const env=environment();let login=await worker.fetch(req('superadmin/login',{method:'POST',data:{password:'superadmin123'}}),env);const token=(await login.json()).token;assert.equal((await worker.fetch(req('superadmin/password',{token,method:'POST',data:{currentPassword:'wrong',newPassword:'replacement-strong-password'}}),env)).status,403);assert.equal((await worker.fetch(req('superadmin/password',{token,method:'POST',data:{currentPassword:'superadmin123',newPassword:'replacement-strong-password'}}),env)).status,200);assert.equal((await worker.fetch(req('session',{token}),env)).status,401);assert.equal((await worker.fetch(req('superadmin/login',{method:'POST',data:{password:'superadmin123'}}),env)).status,401);login=await worker.fetch(req('superadmin/login',{method:'POST',data:{password:'replacement-strong-password'}}),env);assert.equal(login.status,200);env.close();});
+
+
+test('Superadmin legacy generation-zero password hash migrates under the 100k runtime cap',async()=>{
+ const env=environment();
+ let login=await worker.fetch(req('superadmin/login',{method:'POST',data:{password:'superadmin123'}}),env);
+ assert.equal(login.status,200,await login.clone().text());
+ await env.DB.prepare('UPDATE superadmin_auth SET salt=?,password_hash=?,generation=0 WHERE id=1').bind('legacy-salt','a'.repeat(64)).run();
+ login=await worker.fetch(req('superadmin/login',{method:'POST',data:{password:'superadmin123'}}),env);
+ assert.equal(login.status,200,await login.clone().text());
+ const row=await env.DB.prepare('SELECT password_hash,generation FROM superadmin_auth WHERE id=1').first();
+ assert.equal(row.generation,0);
+ assert.match(row.password_hash,/^pbkdf2-sha256:100000:[a-f0-9]{64}$/);
+ env.close();
+});
+
+test('Superadmin changed-password legacy hashes fail safely instead of requesting unsupported PBKDF2 work',async()=>{
+ const env=environment();
+ let login=await worker.fetch(req('superadmin/login',{method:'POST',data:{password:'superadmin123'}}),env);
+ assert.equal(login.status,200);
+ await env.DB.prepare('UPDATE superadmin_auth SET salt=?,password_hash=?,generation=2 WHERE id=1').bind('legacy-custom-salt','b'.repeat(64)).run();
+ login=await worker.fetch(req('superadmin/login',{method:'POST',data:{password:'any-password'}}),env);
+ assert.equal(login.status,409);
+ assert.match((await login.json()).error,/PBKDF2 lama|PBKDF2 legacy/);
+ env.close();
+});
