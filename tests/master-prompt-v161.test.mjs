@@ -33,7 +33,7 @@ test('V162 exposes Systems in both navigation surfaces and keeps identifiers coh
  assert.match(html,/src\/app\.js\?v=192/);
  assert.match(html,/src\/app-shell-v79\.js\?v=192/);
  assert.match(shell,/v162-factory-first-systems/);
- assert.match(sw,/factory-digital-twin-v192-mobile-camera-framing-20260923/);
+ assert.match(sw,/factory-digital-twin-v205-ipal-photo-actual-20260924/);
 });
 
 test('asset navigation opens an empty search instead of serializing the click event',()=>{
