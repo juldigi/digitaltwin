@@ -697,3 +697,58 @@ body.workspace-2d.panel-hidden .viewport-mode-switch{z-index:65!important;visibi
  }
  #scene-editor-panel .se-header span{display:none}
 }
+
+
+/* V193 UX architecture reset — three global domains + contextual inspector. */
+.secondary-inspector-tab[hidden]{display:none!important}
+#main-navigation>.legacy-nav-entry{display:none!important}
+@media(max-width:767px){
+ .mobile-nav{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+ body:not(.panel-hidden) .mobile-nav{visibility:visible!important;pointer-events:auto!important}
+ body.nav-open .rail>[data-section="factory"],
+ body.nav-open .rail>[data-section="asset"],
+ body.nav-open .rail>[data-section="system"]{display:none!important}
+ body.nav-open .rail .rail-bottom{grid-template-columns:1fr!important}
+ aside#detail-panel{
+  position:fixed!important;
+  z-index:83!important;
+  top:auto!important;
+  left:max(8px,env(safe-area-inset-left))!important;
+  right:max(8px,env(safe-area-inset-right))!important;
+  bottom:calc(72px + env(safe-area-inset-bottom))!important;
+  width:auto!important;
+  max-width:none!important;
+  height:min(58dvh,620px)!important;
+  max-height:calc(100dvh - var(--header-h) - 92px - env(safe-area-inset-bottom))!important;
+  border:1px solid var(--line)!important;
+  border-radius:20px 20px 16px 16px!important;
+  box-shadow:0 -14px 48px rgba(3,20,37,.18)!important;
+  overflow-y:auto!important;
+  background:#fff!important;
+  transform:translateY(0)!important;
+  transition:transform .22s ease,opacity .18s ease!important;
+ }
+ aside#detail-panel:before{
+  content:"";position:sticky;z-index:7;top:6px;display:block;width:42px;height:4px;margin:6px auto -2px;
+  border-radius:999px;background:#c8d4dc
+ }
+ .panel-hidden aside#detail-panel{
+  visibility:hidden!important;pointer-events:none!important;opacity:0!important;
+  transform:translateY(calc(100% + 96px))!important
+ }
+ body:not(.panel-hidden) .scene-heading{visibility:visible!important;pointer-events:none!important}
+ body:not(.panel-hidden) .scene-heading #panel-toggle{pointer-events:auto!important}
+ body:not(.panel-hidden) #viewport{height:100%!important}
+ body:not(.panel-hidden) .scene-bottom,
+ body:not(.panel-hidden) .viewport-mode-switch{visibility:hidden!important;pointer-events:none!important}
+ .panel-top{padding-top:16px!important}
+ .tabs{position:sticky!important;top:48px!important;z-index:6!important;background:#fff!important}
+ .panel-footer{position:sticky!important;bottom:0!important;background:#fff!important}
+}
+@media(max-height:560px) and (orientation:landscape){
+ .mobile-nav{grid-template-columns:1fr!important;grid-template-rows:repeat(4,minmax(0,1fr))!important}
+ aside#detail-panel{
+  top:calc(var(--header-h) + 6px)!important;right:76px!important;bottom:8px!important;left:auto!important;
+  width:min(430px,58vw)!important;height:auto!important;max-height:none!important;border-radius:16px!important
+ }
+}
