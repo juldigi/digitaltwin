@@ -883,6 +883,7 @@ export function buildActualFactory(layout,fleet){
   g.userData={semantic:'V203_ROOM_SHELL_GROUP',roomKey:ctx.key,roomLabel:l.text,roomProgram:ctx.program,accuracy:'INTERIOR_FINISH_AND_SHELL_REFERENCE_NOT_AS_BUILT',researchVersion:'V203',functionalReferenceVisible:true};
   const add=(x,y,z,bw,bh,bd,color,semantic,opacity=1)=>{const o=box(g,x,y,z,bw,bh,bd,color,0,opacity);o.userData={semantic,roomKey:ctx.key,roomLabel:l.text,accuracy:'INTERIOR_FINISH_AND_SHELL_REFERENCE_NOT_AS_BUILT',researchVersion:'V203',functionalReferenceVisible:true};return o;};
   const cat=roomFinishForProgram(ctx.program),floor=add(0,.008,0,w-.08,.016,d-.08,roomFinishColor(cat),'ROOM_FLOOR_'+cat+'_REFERENCE',.96);floor.receiveShadow=true;buildingDetailStats.roomFloorFinishes++;buildingDetailStats.roomEnvelopeFloorPads++;
+  if(!ctx.enclose){v203RoomShellAudit.push({key:ctx.key,label:l.text,program:ctx.program,localWidth:+w.toFixed(2),localDepth:+d.toFixed(2),finish:cat,doorHalf:0,ceiling:false,status:'V203_OPEN_FUNCTION_ZONE_NO_ROOM_LINER'});return g;}
   const h=/OFFICE|PPIC|PDS|QC|INCOMING|PREPRESS|MEETING/.test(ctx.program)?2.92:3.08,doorHalf=Math.max(.48,Math.min(.78,(ctx.doorWidth||1)/2+.10)),liner=0xf0eee8;
   add(0,h/2,-d/2+.026,w-.08,h,.028,liner,'V203_ROOM_INTERIOR_LINER_WORK_WALL');buildingDetailStats.roomInteriorLinerRuns++;
   for(const sx of [-w/2+.026,w/2-.026]){add(sx,h/2,0,.028,h,d-.08,liner,'V203_ROOM_INTERIOR_LINER_SIDE_WALL');buildingDetailStats.roomInteriorLinerRuns++;}
