@@ -377,6 +377,7 @@ const panelContent=q('#panel-content');if(panelContent)new MutationObserver(()=>
 const INSPECTOR_TAB_SECTION={overview:'asset',structure:'asset',data:'asset',exterior:'asset',simulation:'simulation',sources:'reference'};
 qa('#detail-panel [role="tab"]').forEach(tab=>tab.addEventListener('click',()=>{
  const tabKey=tab.dataset.tab||'overview',section=INSPECTOR_TAB_SECTION[tabKey]||'asset';
+ if(section!=='simulation')stopSimulationForNavigation(section);
  setInspector(true,tabKey);setActiveSection(section);markSection(section);requestAnimationFrame(syncSimulationTransport);
 }));
 q('#close-panel')?.addEventListener('click',()=>closeInspector());
