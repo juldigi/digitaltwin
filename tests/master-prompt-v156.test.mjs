@@ -77,5 +77,5 @@ test('offline cache prioritizes foundation and OFFSET 5 instead of preloading ex
  assert.match(html,/app-shell-v79\.css\?v=211/);
  assert.match(html,/src\/app\.js\?v=211/);
  assert.match(html,/src\/app-shell-v79\.js\?v=211/);
- assert.match(shell,/v198-architecture-convergence/);
+ assert.match(shell,/v211-ui-ssot/);
 });
