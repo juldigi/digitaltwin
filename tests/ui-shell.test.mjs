@@ -48,7 +48,7 @@ test('geometry baseline remains unchanged while the user interface is rebuilt',(
 });
 
 test('canonical shell uses clear user-facing navigation',()=>{
-  for(const label of ['Pabrik','Aset','Sistem','Bantuan'])assert.match(html,new RegExp(label));
+  for(const label of ['Pabrik','Mesin','Sistem','Bantuan'])assert.match(html,new RegExp(label));
   assert.match(html,/aria-label="Pengaturan"/);
   assert.match(html,/data-tab="simulation"/);
   assert.match(html,/data-tab="sources"/);
@@ -128,10 +128,10 @@ test('visible shell avoids deployment and prototype terminology',()=>{
 test('conditional controls explain requirements rather than failing silently',()=>{
   assert.match(app,/Pengaturan denah memerlukan izin pengaturan/);
   assert.match(app,/Pilih bagian mesin terlebih dahulu/);
-  assert.match(app,/Mode Edit 3D/);
+  assert.match(app,/Edit Pabrik 3D/);
 });
 test('service worker refreshes the redesigned shell',()=>{
-  assert.match(sw,/factory-digital-twin-v207-superadmin-editor-20260924/);
+  assert.match(sw,/factory-digital-twin-v209-architecture-convergence-20260925/);
   assert.doesNotMatch(sw,/src\/universal-machine\.js/);
   assert.match(app,/template\.ghost\(true,part\)/,'object selection must automatically ghost all non-selected geometry');
   for(const asset of ['app-shell-v79.css','src/app-shell-v79.js','assets/splash-industrial-v79.webp','src/ui-v5.js','src/app.js','src/simulation.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
@@ -255,7 +255,7 @@ test('asset browser exposes every registry machine with its own model status',()
   assert.match(app,/MACHINE_REGISTRY/);
   assert.match(app,/foundationAssetMatches\(/);
   assert.match(app,/data-machine-id/);
-  assert.match(app,/ASET PABRIK/);
+  assert.match(app,/MESIN & PERALATAN/);
   assert.match(app,/MACHINE_REGISTRY_STATS\.modeled3D/);
   assert.match(app,/asset-data-badge/);
   assert.doesNotMatch(app,/id="asset-data-status"/);
@@ -303,7 +303,7 @@ test('v53 retains the document-grounded CX104 expansion asset while foundation r
 });
 
 test('v54 routes APM2 to its dedicated model and evidence-bounded simulation',()=>{
-  assert.match(app,/MACHINE_KEY=FOUNDATION_SCOPE\.primaryRoute/);
+  assert.match(app,/MACHINE_KEY=null/);
   assert.match(app,/IS_OFFSET10=false,IS_APM2=false,IS_SHEETING=false/);
   assert.match(app,/from '\.\/data\/taxonomy-apm2\.js'/);
   assert.match(app,/LEGACY_MACHINE_ROUTE/);
