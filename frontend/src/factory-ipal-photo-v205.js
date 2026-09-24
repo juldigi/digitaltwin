@@ -22,6 +22,7 @@ function stair(parent,start,end,steps=12,width=.72,color=0xd4aa20){const a=new T
 function register(equipment,semantic,bounds,confidence='PHOTO_VERIFIED_OBJECT_RELATIVE_POSITION'){equipment.push({semantic,...bounds,confidence,evidenceVersion:IPAL_PHOTO_EVIDENCE_V205.version});}
 
 export function upgradeIpalFromPhotoEvidence({ipal,roofLayer,label,buildingDetailStats,ipalEquipment}){
+ matCache.clear();
  const legacy=[...ipal.children];for(const o of legacy){o.visible=false;o.userData={...o.userData,supersededByPhotoActualV205:true,visualizationMode:'LEGACY_REFERENCE_SUPERSEDED_BY_PHOTO_ACTUAL'};}
  roofLayer?.traverse?.(o=>{if(/^IPAL_/i.test(String(o.userData?.semantic||''))){o.visible=false;o.userData={...o.userData,supersededByPhotoActualV205:true};}});
  ipalEquipment.length=0;
@@ -102,8 +103,8 @@ export function upgradeIpalFromPhotoEvidence({ipal,roofLayer,label,buildingDetai
  const hx=49.7,hz=-112.1,hr=1.48,frameTop=1.55,bodyH=2.65;
  const hopper=new T.Group();g.add(hopper);tag(hopper,'IPAL_PHOTO_CONE_BOTTOM_PROCESS_VESSEL',{sourcePhotos:['IMG_2515','IMG_2517','IMG_2525'],processFunction:'UNVERIFIED_FROM_PHOTOS'});
  add(cyl(hopper,hx,frameTop+bodyH/2,hz,hr,bodyH,0xaab4b1,'IPAL_PHOTO_HOPPER_VESSEL_CYLINDER',{roughness:.40,metalness:.60,segments:36,heightSegments:4,openEnded:true}));
- const cone=new T.Mesh(new T.ConeGeometry(hr,1.55,36,1,true),mat(0xaab4b1,.40,.60));cone.position.set(hx,frameTop+.775,hz);cone.rotation.z=Math.PI;hopper.add(cone);add(tag(cone,'IPAL_PHOTO_HOPPER_VESSEL_CONE_BOTTOM'));
- add(rod(hopper,new T.Vector3(hx,.08,hz),new T.Vector3(hx,frameTop-.03,hz),.09,0x69787b,'IPAL_PHOTO_HOPPER_BOTTOM_OUTLET'));
+ const cone=new T.Mesh(new T.ConeGeometry(hr,1.55,36,1,true),mat(0xaab4b1,.40,.60));cone.position.set(hx,.775,hz);cone.rotation.z=Math.PI;hopper.add(cone);add(tag(cone,'IPAL_PHOTO_HOPPER_VESSEL_CONE_BOTTOM'));
+ add(rod(hopper,new T.Vector3(hx,.05,hz),new T.Vector3(hx,.48,hz),.09,0x69787b,'IPAL_PHOTO_HOPPER_BOTTOM_OUTLET'));
  for(const [dx,dz] of [[-1.65,-1.05],[1.65,-1.05],[-1.65,1.05],[1.65,1.05]]){add(rod(hopper,new T.Vector3(hx+dx,.05,hz+dz),new T.Vector3(hx+dx,4.42,hz+dz),.055,0xd4aa20,'IPAL_PHOTO_HOPPER_SUPPORT_LEG'));}
  for(const zoff of [-1.05,1.05]){add(rod(hopper,new T.Vector3(hx-1.65,.18,hz+zoff),new T.Vector3(hx+1.65,2.10,hz+zoff),.025,0xd4aa20,'IPAL_PHOTO_HOPPER_FRAME_X_BRACE'));add(rod(hopper,new T.Vector3(hx+1.65,.18,hz+zoff),new T.Vector3(hx-1.65,2.10,hz+zoff),.025,0xd4aa20,'IPAL_PHOTO_HOPPER_FRAME_X_BRACE'));}
  add(tag(meshBox(hopper,hx,4.35,hz,3.45,.10,2.3,0x66777b,{roughness:.58,metalness:.42}),'IPAL_PHOTO_HOPPER_TOP_PLATFORM'));
@@ -160,7 +161,7 @@ export function upgradeIpalFromPhotoEvidence({ipal,roofLayer,label,buildingDetai
  const pond=new T.Group();g.add(pond);tag(pond,'IPAL_PHOTO_ORNAMENTAL_POND',{sourcePhotos:['IMG_2523'],coreProcess:false});
  const px=53.7,pz=-116.45,pw=8.7,pd=1.25;add(tag(meshBox(pond,px,.18,pz,pw,.34,pd,0x343f3e,{roughness:.88}),'IPAL_PHOTO_POND_CASING'));
  const pondWater=add(tag(meshBox(pond,px,.365,pz,pw-.24,.035,pd-.20,0x476d67,{roughness:.16,opacity:.73}),'IPAL_PHOTO_POND_WATER'));pondWater.userData.baseY=pondWater.position.y;pondWater.userData.ambientWater=true;
- const fish=[];for(let i=0;i<6;i++){const f=new T.Mesh(new T.SphereGeometry(.09,8,5),mat(i%2?0xdf8d38:0xb8a46b,.62,.02));f.scale.set(1.8,.55,.65);f.position.set(px-pw*.35+i*1.15,.405,pz+(i%2?.18:-.16));tag(f,'IPAL_PHOTO_POND_FISH',{coreProcess:false,ambientMotion:true,fishIndex:i});pond.add(f);fish.push(f);stats.landscapeElements++;}
+ const fish=[];for(let i=0;i<6;i++){const f=new T.Mesh(new T.SphereGeometry(.09,8,5),mat(i%2?0xdf8d38:0xb8a46b,.62,.02));f.scale.set(1.8,.55,.65);f.position.set(px-pw*.35+i*1.15,.405,pz+(i%2?.18:-.16));tag(f,'IPAL_PHOTO_POND_FISH',{coreProcess:false,ambientMotion:true,fishIndex:i,baseX:f.position.x,baseZ:f.position.z});pond.add(f);fish.push(f);stats.landscapeElements++;}
  for(let i=0;i<9;i++){const x=px-pw*.4+i*.95;add(rod(pond,new T.Vector3(x,.39,pz+.35),new T.Vector3(x+(i%2?.05:-.04),.82+(i%3)*.08,pz+.32),.018,0x4c7655,'IPAL_PHOTO_AQUATIC_PLANT_STEM',{coreProcess:false}));add(sphere(pond,x,.76+(i%3)*.08,pz+.32,.10,0x4f7a51,'IPAL_PHOTO_AQUATIC_PLANT_FOLIAGE',{segments:7,rows:5,meta:{coreProcess:false}}));stats.landscapeElements+=2;}
 
  // Adjacent utility equipment is kept visually separate from the core wastewater process.
@@ -173,7 +174,7 @@ export function upgradeIpalFromPhotoEvidence({ipal,roofLayer,label,buildingDetai
 
  const animatedWater=[];g.traverse(o=>{if(o.userData?.ambientWater)animatedWater.push(o);});
  let processMotion=false;
- const update=now=>{const t=(Number(now)||0)*.001;for(let i=0;i<animatedWater.length;i++){const o=animatedWater[i],base=o.userData.baseY??o.position.y;o.position.y=base+Math.sin(t*.55+i*1.7)*.004;}for(let i=0;i<fish.length;i++){const f=fish[i];f.position.x+=Math.sin(t*.38+i)*.0008;f.position.z+=Math.cos(t*.31+i)*.0005;f.rotation.y=Math.sin(t*.22+i)*.24;}if(processMotion)for(const s of agitatorShafts)s.rotation.y=t*.85;};
+ const update=now=>{const t=(Number(now)||0)*.001;for(let i=0;i<animatedWater.length;i++){const o=animatedWater[i],base=o.userData.baseY??o.position.y;o.position.y=base+Math.sin(t*.55+i*1.7)*.004;}for(let i=0;i<fish.length;i++){const f=fish[i];f.position.x=f.userData.baseX+Math.sin(t*.38+i)*.12;f.position.z=f.userData.baseZ+Math.cos(t*.31+i)*.08;f.rotation.y=Math.sin(t*.22+i)*.24;}if(processMotion)for(const s of agitatorShafts)s.rotation.y=t*.85;};
  const setProcessMotion=on=>{processMotion=!!on;g.userData.processMotion=processMotion;return processMotion;};
  let objectCount=0;g.traverse(o=>{if(o!==g)objectCount++;});stats.objects=objectCount;
  Object.assign(buildingDetailStats,{ipalPhotoActualObjects:stats.objects,ipalPhotoCanopyMembers:stats.canopyMembers,ipalPhotoPipeSegments:stats.pipeSegments,ipalPhotoSafetyElements:stats.safetyElements,ipalPhotoLandscapeElements:stats.landscapeElements,ipalPhotoVerifiedLabels:stats.verifiedLabels,ipalLegacyChildrenSuperseded:stats.legacyChildrenSuperseded});
