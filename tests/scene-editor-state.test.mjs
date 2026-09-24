@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {sceneIdentity,validateSceneOverrides,validateSceneImport} from '../frontend/src/scene-editor-state.js';
+import {sceneIdentity,validateSceneOverrides,validateSceneImport,createSceneIsolationGuard} from '../frontend/src/scene-editor-state.js';
 import {FactoryEngine} from '../frontend/src/engine.js';
 import * as THREE from 'three';
 import {buildActualFactory,loadFactoryFleet} from '../frontend/src/factory-building.js';
@@ -102,4 +102,32 @@ test('source wall endpoint editing carries the entire finish assembly',async()=>
  assert.equal(FactoryEngine.prototype.setSceneWallEndpoints.call(engine,id,[[before[0][0]+1,before[0][1]],[before[1][0]+2,before[1][1]]]),true);
  const after=FactoryEngine.prototype.sceneWallEndpoints.call(engine,id);assert.ok(Math.abs(after[0][0]-(before[0][0]+1))<1e-5);assert.ok(Math.abs(after[1][0]-(before[1][0]+2))<1e-5);
  child.updateWorldMatrix(true,false);assert.ok(child.getWorldPosition(new THREE.Vector3()).distanceTo(childBefore)>.1);
+});
+
+
+test('scene isolation is reversible and stays inside its editor scope',()=>{
+ const scene=new THREE.Group(),factory=new THREE.Group(),machine=new THREE.Group(),part=new THREE.Group(),otherPart=new THREE.Group(),hiddenPart=new THREE.Group();
+ hiddenPart.visible=false;machine.add(part,otherPart,hiddenPart);scene.add(factory,machine);
+ const guard=createSceneIsolationGuard();
+ assert.equal(guard.isolate(part,machine),2);
+ assert.equal(otherPart.visible,false);
+ assert.equal(hiddenPart.visible,false);
+ assert.equal(factory.visible,true);
+ assert.equal(guard.size,2);
+ assert.equal(guard.restore(),2);
+ assert.equal(otherPart.visible,true);
+ assert.equal(hiddenPart.visible,false);
+ assert.equal(factory.visible,true);
+ assert.equal(guard.size,0);
+});
+
+test('scene isolation refuses to leak outside a mismatched scope',()=>{
+ const scene=new THREE.Group(),factory=new THREE.Group(),machine=new THREE.Group(),part=new THREE.Group(),factorySibling=new THREE.Group();
+ machine.add(part);factory.add(factorySibling);scene.add(factory,machine);
+ const guard=createSceneIsolationGuard();
+ assert.equal(guard.isolate(part,factory),0);
+ assert.equal(factory.visible,true);
+ assert.equal(machine.visible,true);
+ assert.equal(factorySibling.visible,true);
+ assert.equal(guard.size,0);
 });
