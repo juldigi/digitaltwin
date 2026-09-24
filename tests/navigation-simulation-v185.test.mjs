@@ -10,7 +10,7 @@ const sw=readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 test('leaving simulation through major navigation stops the process and clears transport state',()=>{
  assert.match(shell,/function stopSimulationForNavigation\(targetSection\)/);
  assert.match(shell,/dispatchEvent\(new CustomEvent\('bmj:simulationstoprequest'\)\)/);
- assert.match(shell,/setSimulation\(\{active:false,playing:false,stage:null,progress:0\}\)/);
+ assert.match(shell,/setSimulation\(\{active:false,running:false,stage:null,progress:0\}\)/);
  assert.match(shell,/document\.body\.classList\.remove\('simulation-transport-open'\)/);
 });
 
