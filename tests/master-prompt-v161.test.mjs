@@ -41,7 +41,7 @@ test('asset navigation opens an empty search instead of serializing the click ev
  assert.doesNotMatch(app,/on\('#nav-assets',assetDialog\)/);
  assert.match(app,/const stopSimulationBeforeNavigation=.*bmj:simulationstoprequest/);
  assert.match(app,/if\(machine\)\{closeModal\(\);if\(simulationIntent\)[\s\S]*await openAssetContext\(machine\);\}/);
- assert.match(app,/function closeModal\(\)\{modalBackHandler=null;[\s\S]*dialog\?\.open\)dialog\.close\(\);\}/);
+ assert.match(app,/function closeModal\(\)\{modalBackHandler=null;[\s\S]*dialog\?\.open\)dialog\.close\(\);dispatchEvent\(new CustomEvent\('bmj:modalcloserequest'\)\);\}/);
  assert.match(app,/focusFoundationPlaceholder\(machine,\{historyMode:'push',openDialog:false\}\);machineDetailDialog\(machine\)/);
  assert.match(app,/const primaryData=primary\?pair\('Machine ID'/);
  assert.doesNotMatch(app,/emitDomainState\(\{activeSection:'factory',viewMode:'3d'\}\)/);
