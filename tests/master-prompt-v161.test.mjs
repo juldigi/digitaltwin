@@ -32,7 +32,7 @@ test('V162 exposes Systems in both navigation surfaces and keeps identifiers coh
  assert.match(html,/app-shell-v79\.css\?v=211/);
  assert.match(html,/src\/app\.js\?v=211/);
  assert.match(html,/src\/app-shell-v79\.js\?v=211/);
- assert.match(shell,/v198-architecture-convergence/);
+ assert.match(shell,/v211-ui-ssot/);
  assert.match(sw,/factory-digital-twin-v211-ui-ssot-stage6-20260925/);
 });
 
