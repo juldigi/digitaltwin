@@ -36,9 +36,9 @@ test('placeholder route compatibility remains lightweight and cannot unlock tech
 
 test('V162 release identifiers keep technical 3D foundation-only while restoring factory context',()=>{
  assert.match(scope,/release:'V162'/);
- assert.match(html,/app-shell-v79\.css\?v=192/);
- assert.match(html,/src\/app\.js\?v=192/);
- assert.match(html,/src\/app-shell-v79\.js\?v=192/);
+ assert.match(html,/app-shell-v79\.css\?v=197/);
+ assert.match(html,/src\/app\.js\?v=197/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=197/);
  assert.match(shell,/v197-architecture-convergence/);
  assert.match(sw,/factory-digital-twin-v209-architecture-convergence-20260925/);
 });
