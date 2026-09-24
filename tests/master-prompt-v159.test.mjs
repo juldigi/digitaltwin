@@ -29,10 +29,10 @@ test('OFFSET 5 overview carries all mandatory master-prompt truth fields',()=>{
  assert.match(app,/primaryTruth\.healthScore/);
 });
 
-test('V194 retires the duplicate classic position editor in favor of Mode Edit 3D',()=>{
+test('V194 retires the duplicate classic position editor in favor of Edit Pabrik 3D',()=>{
  assert.doesNotMatch(html,/id="edit-position"/);
  assert.doesNotMatch(app,/function editorPanel\(\)/);
- assert.match(app,/Mode Edit 3D/);
+ assert.match(app,/Edit Pabrik 3D/);
  assert.match(app,/openSceneEditor\(\)/);
  assert.match(app,/Posisi \(meter\)/);
  assert.match(app,/Rotasi \(derajat\)/);
@@ -53,6 +53,6 @@ test('V159 search promise matches strict Phase-1 scope and cache identifiers are
  assert.match(html,/src\/app\.js\?v=192/);
  assert.match(html,/src\/ui-v5\.js\?v=167/);
  assert.match(html,/src\/app-shell-v79\.js\?v=192/);
- assert.match(shell,/v196-interaction-flow/);
- assert.match(sw,/factory-digital-twin-v207-superadmin-editor-20260924/);
+ assert.match(shell,/v197-architecture-convergence/);
+ assert.match(sw,/factory-digital-twin-v209-architecture-convergence-20260925/);
 });
