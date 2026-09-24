@@ -135,6 +135,12 @@ function toggleInspector(){
  else openInspector();
 }
 q('#panel-toggle')?.addEventListener('click',toggleInspector);
+function applyViewModeDom(state=getState()){
+ const is2d=state.viewMode==='2d',plan=q('#plant-plan-2d'),viewport=q('#viewport');
+ document.body.classList.toggle('workspace-2d',is2d);
+ if(plan)plan.hidden=!is2d;
+ if(viewport)viewport.setAttribute('aria-hidden',String(is2d));
+}
 function stopSimulationForNavigation(targetSection){
  const state=getState();
  if(targetSection==='simulation'||(!state.simulationState?.active&&!state.simulationState?.playing))return;
@@ -280,9 +286,9 @@ q('#mode-2d')?.addEventListener('click',()=>{
  const current=getState(),simulationTab=current.inspectorState?.tab==='simulation';
  if(current.simulationState?.active||simulationTab)dispatchEvent(new CustomEvent('bmj:simulationstoprequest'));
  if(current.inspectorState?.open&&simulationTab)q('[data-tab="overview"]')?.click();
- document.body.classList.add('workspace-2d');setViewMode('2d');setActiveSection('factory');markSection('factory');requestAnimationFrame(()=>dispatchEvent(new Event('resize')));
+ const next=setViewMode('2d');applyViewModeDom(next);setActiveSection('factory');markSection('factory');requestAnimationFrame(()=>dispatchEvent(new Event('resize')));
 });
-q('#mode-3d')?.addEventListener('click',()=>{document.body.classList.remove('workspace-2d');setViewMode('3d');const section=getState().sceneMode==='machine'?'asset':'factory';stopSimulationForNavigation(section);setActiveSection(section);markSection(section);requestAnimationFrame(()=>{dispatchEvent(new Event('resize'));syncSimulationTransport()})});
+q('#mode-3d')?.addEventListener('click',()=>{const next=setViewMode('3d');applyViewModeDom(next);const section=getState().sceneMode==='machine'?'asset':'factory';stopSimulationForNavigation(section);setActiveSection(section);markSection(section);requestAnimationFrame(()=>{dispatchEvent(new Event('resize'));syncSimulationTransport()})});
 
 const GROUPS=PHASE1_FOUNDATION?[
  ['Bangunan',[['building','Bangunan & ruang'],['roof','Atap']]],
@@ -463,5 +469,5 @@ function syncPressedTools(){
 }
 const pressedTools=qa('#tool-explode,#tool-isolate,#tool-interior,#labels');
 if(pressedTools.length){const pressedObserver=new MutationObserver(syncPressedTools);pressedTools.forEach(el=>pressedObserver.observe(el,{attributes:true,attributeFilter:['class']}));syncPressedTools()}
-relabel();const hydratedState=hydrateUrl();if(hydratedState.viewMode==='2d')q('#mode-2d')?.click();let lastSyncedSection=getState().activeSection;subscribe(state=>{applyInspectorDom(state);markSection(state.activeSection);syncLayerControls();syncAccessibleControls(state);syncViewModeContext(state);if(state.activeSection!==lastSyncedSection){lastSyncedSection=state.activeSection;requestAnimationFrame(syncSimulationTransport)}});
+relabel();const hydratedState=hydrateUrl();applyViewModeDom(hydratedState);if(hydratedState.viewMode==='2d')q('#mode-2d')?.click();let lastSyncedSection=getState().activeSection;subscribe(state=>{applyInspectorDom(state);applyViewModeDom(state);markSection(state.activeSection);syncLayerControls();syncAccessibleControls(state);syncViewModeContext(state);if(state.activeSection!==lastSyncedSection){lastSyncedSection=state.activeSection;requestAnimationFrame(syncSimulationTransport)}});
 document.documentElement.dataset.uiArchitecture='v194-state-owned-contextual';
