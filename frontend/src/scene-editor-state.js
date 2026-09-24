@@ -38,3 +38,29 @@ export function validateSceneImport(changes,{hasObject,identityFor}){
   }
   return changes;
 }
+
+
+export function createSceneIsolationGuard(){
+  const saved=new Map();
+  const restore=()=>{
+    for(const [node,visible] of saved)if(node)node.visible=visible;
+    const count=saved.size;saved.clear();return count;
+  };
+  const isolate=(selected,boundary)=>{
+    restore();
+    if(!selected||!boundary)return 0;
+    let node=selected;
+    while(node?.parent&&node!==boundary){
+      for(const sibling of node.parent.children){
+        if(sibling===node)continue;
+        if(!saved.has(sibling))saved.set(sibling,sibling.visible);
+        sibling.visible=false;
+      }
+      node=node.parent;
+    }
+    // Refuse to climb outside the requested editor scope.
+    if(node!==boundary){restore();return 0;}
+    return saved.size;
+  };
+  return {isolate,restore,get size(){return saved.size;}};
+}
