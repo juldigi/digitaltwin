@@ -41,7 +41,7 @@ test('V168 has explicit initial loading and consistent empty/error treatment',()
 });
 
 test('V168 reading assets are cache-busted',()=>{
- assert.match(html,/app-shell-v79\.css\?v=198/);
- assert.match(html,/src\/app\.js\?v=198/);
- assert.match(sw,/factory-digital-twin-v210-architecture-convergence-stage5-20260925/);
+ assert.match(html,/app-shell-v79\.css\?v=211/);
+ assert.match(html,/src\/app\.js\?v=211/);
+ assert.match(sw,/factory-digital-twin-v211-ui-ssot-stage6-20260925/);
 });
