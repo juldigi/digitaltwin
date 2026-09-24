@@ -8,15 +8,16 @@ const app=read('../frontend/src/app.js');
 const shell=read('../frontend/src/app-shell-v79.js');
 const sw=read('../frontend/sw.js');
 
-test('V173 Factory navigation preserves the current 2D or 3D view mode',()=>{
- const marker="q('#nav-machine')?.addEventListener('click'";
- const start=shell.indexOf(marker);
+test('V193 Factory navigation preserves view mode while business navigation is owned by app.js',()=>{
+ const marker="on('#nav-machine',()=>";
+ const start=app.indexOf(marker);
  assert.notEqual(start,-1);
- const handler=shell.slice(start,shell.indexOf('\n',start));
- assert.match(handler,/navigateSection\('factory'\)/);
- assert.match(shell,/function navigateSection\(section,[\s\S]*setActiveSection\(section\);markSection\(section\)/);
+ const handler=app.slice(start,app.indexOf(';on(',start));
+ assert.match(handler,/showHome\(\{historyMode:'push'\}\)/);
  assert.doesNotMatch(handler,/setViewMode\('3d'\)/);
  assert.doesNotMatch(handler,/workspace-2d/);
+ assert.doesNotMatch(shell,/q\('#nav-machine'\)\?\.addEventListener\('click'/);
+ assert.match(shell,/function markSection\(section\)/);
 });
 
 test('V173 Home history snapshot keeps the active view mode',()=>{
