@@ -122,3 +122,30 @@ test('V81 prevents sidebar and toolbar overlap across constrained screens',()=>{
   assert.match(css,/html:fullscreen \.statusbar\{display:none\}/);
   assert.match(css,/\.rail\{width:100%;height:100%;min-height:0;overflow-y:auto/);
 });
+
+
+test('V193 uses three global domains and keeps simulation/reference contextual to the selected asset',()=>{
+  const app=fs.readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
+  assert.match(html,/id="nav-machine"[\s\S]*id="nav-assets"[\s\S]*id="nav-systems"/);
+  assert.doesNotMatch(html,/id="nav-simulation-mode"/);
+  assert.doesNotMatch(html,/id="nav-sources"/);
+  assert.match(js,/const SECTION_BUTTONS=\{factory:'nav-machine',asset:'nav-assets',system:'nav-systems'\}/);
+  assert.match(js,/return section==='simulation'\|\|section==='reference'\?'asset':section/);
+  assert.match(html,/data-tab="simulation"/);
+  assert.match(html,/data-tab="sources"/);
+  assert.match(app,/emitDomainState\(\{activeSection:'asset'\}\);assetDialog\(\)/);
+});
+
+test('V193 mobile inspector is a bottom sheet that preserves the 3D context and bottom navigation',()=>{
+  assert.match(css,/\/\* V193 UX architecture reset/);
+  assert.match(css,/aside#detail-panel\{[\s\S]*?position:fixed!important[\s\S]*?bottom:calc\(72px \+ env\(safe-area-inset-bottom\)\)!important[\s\S]*?height:min\(58dvh,620px\)!important/);
+  assert.match(css,/body:not\(\.panel-hidden\) \.mobile-nav\{visibility:visible!important;pointer-events:auto!important\}/);
+  assert.match(css,/\.panel-hidden aside#detail-panel\{[\s\S]*?translateY/);
+});
+
+test('V193 removes internal machine identifiers from the normal asset browser copy',()=>{
+  const app=fs.readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
+  assert.match(app,/\[machine\.sapCode,machine\.model\]\.filter\(Boolean\)\.join\(' · '\)/);
+  assert.doesNotMatch(app,/<small>\$\{esc\(machine\.machineId\)\}<\/small>/);
+  assert.match(app,/Mode Edit 3D/);
+});
