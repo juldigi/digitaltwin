@@ -808,16 +808,7 @@ export function buildActualFactory(layout,fleet){
  let activeRoomFootprintContext=null;
  const rectOverlap=(a,z)=>Math.min(a.maxX,z.maxX)-Math.max(a.minX,z.minX)>.01&&Math.min(a.maxZ,z.maxZ)-Math.max(a.minZ,z.minZ)>.01;
  const registerLocalFootprint=(kind,x,z,w,d)=>{
-  const q={kind,x:+x.toFixed(3),z:+z.toFixed(3),w:+w.toFixed(3),d:+d.toFixed(3),minX:x-w/2,maxX:x+w/2,minZ:z-d/2,maxZ:z+d/2};
-  const a=activeRoomFootprintContext;
-  if(a){
-   const wallViolation=q.minX<-a.w/2-.015||q.maxX>a.w/2+.015||q.minZ<-a.d/2-.015||q.maxZ>a.d/2+.015;
-   const approachHalf=Math.max(.40,Math.min(.66,(a.doorWidth||1)/2+.10)),doorZone={minX:-approachHalf,maxX:approachHalf,minZ:a.d/2-1.02,maxZ:a.d/2+.02};
-   const doorViolation=kind!=='ROOM_CLEAR_AISLE'&&rectOverlap(q,doorZone);
-   q.roomKey=a.roomKey;q.wallViolation=wallViolation;q.doorApproachViolation=doorViolation;
-   if(wallViolation)buildingDetailStats.v203WallClearanceViolations++;
-   if(doorViolation)buildingDetailStats.v203DoorApproachViolations++;
-  }
+  const q={kind,x:+x.toFixed(3),z:+z.toFixed(3),w:+w.toFixed(3),d:+d.toFixed(3),minX:x-w/2,maxX:x+w/2,minZ:z-d/2,maxZ:z+d/2,roomKey:activeRoomFootprintContext?.roomKey||null};
   v203FurnitureFootprintAudit.push(q);buildingDetailStats.v203FurnitureFootprintAudits++;return q;
  };
  const roomLocalSize=ctx=>ctx.doorSide==='E'||ctx.doorSide==='W'?{w:ctx.depth,d:ctx.width}:{w:ctx.width,d:ctx.depth};
@@ -832,7 +823,7 @@ export function buildActualFactory(layout,fleet){
  const rl=(g,a,z,r,color,semantic)=>{const o=line(g,a,z,r,color);o.userData={semantic:'V202_'+semantic,accuracy:'ROOM_FUNCTION_LAYOUT_REFERENCE_NOT_AS_BUILT',researchVersion:'V203',functionalReferenceVisible:true};buildingDetailStats.v202RoomFurnitureObjects++;return o;};
  const v202ChairFacingAudit=[];
  const localChair=(g,x,z,tx,tz,tag,task=true)=>{
-  registerLocalFootprint(tag+'_CHAIR',x,z,task?.60:.54,task?.64:.56);
+  registerLocalFootprint(tag+'_CHAIR',x,z,task ? .60 : .54,task ? .64 : .56);
   const cg=new T.Group();cg.position.set(x,0,z);const dx=tx-x,dz=tz-z,theta=Math.atan2(dx,dz);cg.rotation.y=theta;g.add(cg);cg.userData={semantic:'V202_'+tag+'_CHAIR_ASSEMBLY',facingTarget:[tx,tz],accuracy:'ERGONOMIC_ROOM_LAYOUT_REFERENCE_NOT_AS_BUILT',researchVersion:'V203',functionalReferenceVisible:true};
   rb(cg,0,.47,0,.48,.08,.46,0x607984,tag+'_CHAIR_SEAT');
   rb(cg,0,.75,-.22,.46,.50,.06,0x526a75,tag+'_CHAIR_BACK');
@@ -875,8 +866,41 @@ export function buildActualFactory(layout,fleet){
  const localClearAisle=(g,w,d)=>{
   const aisle=rb(g,0,.004,d/2-.43,Math.max(.7,w-.30),.008,.72,0x91a6a3,'ROOM_CLEAR_AISLE_REFERENCE',.13);aisle.userData.doorClearance=true;
  };
+ const roomFinishForProgram=program=>/ADMIN|SUPERVISOR|PPIC|PDS|QC|INCOMING|PREPRESS|MEETING/.test(program)?'OFFICE_VINYL':/TOILET|PANTRY|LOCKER|PRAYER/.test(program)?'CERAMIC':'SEALED_CONCRETE';
+ const roomFinishColor=cat=>cat==='CERAMIC'?0xc9c8bf:cat==='OFFICE_VINYL'?0xbac4c4:0xadb4b2;
+ const buildV203RoomShell=(l,ctx)=>{
+  const local=roomLocalSize(ctx),w=Math.max(2.35,local.w-.06),d=Math.max(2.20,local.d-.06),cx=(ctx.minX+ctx.maxX)/2,cy=(ctx.minY+ctx.maxY)/2,g=new T.Group();
+  g.position.set(cx,0,-cy);g.rotation.y=ctx.rotation;g.name='V203_ROOM_SHELL_'+ctx.program+'_'+l.text;b.add(g);
+  g.userData={semantic:'V203_ROOM_SHELL_GROUP',roomKey:ctx.key,roomLabel:l.text,roomProgram:ctx.program,accuracy:'INTERIOR_FINISH_AND_SHELL_REFERENCE_NOT_AS_BUILT',researchVersion:'V203',functionalReferenceVisible:true};
+  const add=(x,y,z,bw,bh,bd,color,semantic,opacity=1)=>{const o=box(g,x,y,z,bw,bh,bd,color,0,opacity);o.userData={semantic,roomKey:ctx.key,roomLabel:l.text,accuracy:'INTERIOR_FINISH_AND_SHELL_REFERENCE_NOT_AS_BUILT',researchVersion:'V203',functionalReferenceVisible:true};return o;};
+  const cat=roomFinishForProgram(ctx.program),floor=add(0,.008,0,w-.08,.016,d-.08,roomFinishColor(cat),'ROOM_FLOOR_'+cat+'_REFERENCE',.96);floor.receiveShadow=true;buildingDetailStats.roomFloorFinishes++;buildingDetailStats.roomEnvelopeFloorPads++;
+  const h=/OFFICE|PPIC|PDS|QC|INCOMING|PREPRESS|MEETING/.test(ctx.program)?2.92:3.08,doorHalf=Math.max(.48,Math.min(.78,(ctx.doorWidth||1)/2+.10)),liner=0xf0eee8;
+  add(0,h/2,-d/2+.026,w-.08,h,.028,liner,'V203_ROOM_INTERIOR_LINER_WORK_WALL');buildingDetailStats.roomInteriorLinerRuns++;
+  for(const sx of [-w/2+.026,w/2-.026]){add(sx,h/2,0,.028,h,d-.08,liner,'V203_ROOM_INTERIOR_LINER_SIDE_WALL');buildingDetailStats.roomInteriorLinerRuns++;}
+  const sideSeg=Math.max(0,(w-2*doorHalf)/2-.04);if(sideSeg>.08){for(const sx of [-(doorHalf+sideSeg/2),doorHalf+sideSeg/2]){add(sx,h/2,d/2-.026,sideSeg,h,.028,liner,'V203_ROOM_INTERIOR_LINER_DOOR_WALL');buildingDetailStats.roomInteriorLinerRuns++;}}
+  add(0,.012,d/2-.018,Math.min(w-.18,doorHalf*2),.024,.10,0x7a8888,'V203_ROOM_THRESHOLD_TRANSITION_REFERENCE');buildingDetailStats.roomThresholdTransitions++;
+  add(0,.065,-d/2+.045,w-.12,.11,.055,0x65787d,'V203_ROOM_SKIRTING_WORK_WALL');buildingDetailStats.roomSkirtingRuns++;
+  for(const sx of [-w/2+.045,w/2-.045]){add(sx,.065,0,.055,.11,d-.12,0x65787d,'V203_ROOM_SKIRTING_SIDE_WALL');buildingDetailStats.roomSkirtingRuns++;}
+  if(sideSeg>.08){for(const sx of [-(doorHalf+sideSeg/2),doorHalf+sideSeg/2]){add(sx,.065,d/2-.045,sideSeg,.11,.055,0x65787d,'V203_ROOM_SKIRTING_DOOR_WALL');buildingDetailStats.roomSkirtingRuns++;}}
+  const ceilingPrograms=/ADMIN|SUPERVISOR|PPIC|PDS|QC|INCOMING|PREPRESS|MEETING|PANTRY|LOCKER|TOILET|PRAYER/;
+  if(ceilingPrograms.test(ctx.program)){
+   const cy2=Math.min(2.84,h-.08);add(0,cy2,0,w-.12,.022,d-.12,0xe8e9e3,'V203_ROOM_SUSPENDED_CEILING_REFERENCE',.13);buildingDetailStats.roomCeilingPanelsV203++;
+   const gxStep=Math.max(.62,w/5),gzStep=Math.max(.62,d/5);
+   for(let x=-w/2+gxStep;x<w/2-.25;x+=gxStep){add(x,cy2-.012,0,.012,.018,d-.14,0xc1c7c4,'V203_ROOM_CEILING_GRID_RUNNER');buildingDetailStats.roomCeilingGridLinesV203++;}
+   for(let z=-d/2+gzStep;z<d/2-.25;z+=gzStep){add(0,cy2-.012,z,w-.14,.018,.012,0xc1c7c4,'V203_ROOM_CEILING_GRID_RUNNER');buildingDetailStats.roomCeilingGridLinesV203++;}
+   for(const x of w>3.5?[-w*.20,w*.20]:[0]){const led=add(x,cy2-.025,-d*.08,.54,.022,.54,0xf0f1e8,'V203_ROOM_LED_PANEL_REFERENCE',.50);led.userData.accuracy='LIGHTING_DENSITY_REFERENCE_NOT_AS_BUILT_MEP';buildingDetailStats.roomLedPanelsV203++;}
+  }
+  if(/ADMIN|SUPERVISOR|PPIC|PDS|QC|INCOMING|PREPRESS/.test(ctx.program)){
+   const px=(stableCode(ctx.key)%2?1:-1)*Math.min(.68,w*.24),plate=add(px,.36,-d/2+.048,.24,.16,.022,0xe5e6df,'V203_WORKSTATION_POWER_DATA_PLATE_REFERENCE');plate.userData.accuracy='ERGONOMIC_WORKSTATION_SERVICE_REFERENCE_NOT_AS_BUILT_MEP';buildingDetailStats.roomWallServiceReferences++;
+  }
+  v203RoomShellAudit.push({key:ctx.key,label:l.text,program:ctx.program,localWidth:+w.toFixed(2),localDepth:+d.toFixed(2),finish:cat,doorHalf:+doorHalf.toFixed(2),ceiling:ceilingPrograms.test(ctx.program),status:'V203_SHELL_COMPLETE'});
+  return g;
+ };
  const buildV202Room=(l,ctx)=>{
-  const g=roomGroupFor(l,ctx),w=Math.max(2.5,ctx.width-.24),d=Math.max(2.35,ctx.depth-.24),workZ=-d/2+.48,doorLimit=d/2-.82;let objectsBefore=buildingDetailStats.v202RoomFurnitureObjects;
+  buildV203RoomShell(l,ctx);
+  const g=roomGroupFor(l,ctx),local=roomLocalSize(ctx),w=Math.max(2.5,local.w-.24),d=Math.max(2.35,local.d-.24),workZ=-d/2+.48,doorLimit=d/2-.82,mirror=stableCode(ctx.key)%2?1:-1;let objectsBefore=buildingDetailStats.v202RoomFurnitureObjects;
+  activeRoomFootprintContext={roomKey:ctx.key,w,d,doorWidth:ctx.doorWidth||1,mirror};
+  const fpStart=v203FurnitureFootprintAudit.length;
   localClearAisle(g,w,d);
   const sideX=w/2-.30;
   switch(ctx.program){
