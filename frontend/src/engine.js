@@ -353,6 +353,13 @@ export class FactoryEngine {
   }
   edit(on){if(on&&this.view==='factory'&&this.layout){this.machine.visible=true;this.gizmo.attach(this.machine);}else this.gizmo.detach();}
   setLow(on){this.low=on;this.renderer.setPixelRatio(on?1:Math.min(devicePixelRatio,1.7));this.renderer.shadowMap.enabled=!on;this.template.setLow(on);this.resize();}
+  clearMachineContext(){
+    if(this.simulation?.active)this.simulation.stop();
+    this.gizmo.detach();this.clearPartLabels();this.simulation?.dispose();this.template?.dispose();if(this.machine)this.scene.remove(this.machine);
+    this.machineKey=null;this.template=neutralTemplate();this.machine=this.template.root;this.scene.add(this.machine);this.simulation=neutralSimulation();this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);
+    this.machine.visible=false;this.isolated=false;this.view='factory';this.studio.visible=false;this.factory.visible=true;this.renderer.domElement.setAttribute('aria-label','Digital Twin 3D Pabrik Packaging Offset. Pilih mesin untuk membuka model detail.');
+    this.applySceneOverrides(this.sceneOverrides||{});if(this.factory?.children?.length)this.fit(this.factory,'iso');this.resize();return true;
+  }
   async switchMachine(key){
     const requested=normalizeFoundationMachineKey(key);
     if(!requested){this.onError?.('Pilih aset sebelum membuka model 3D.');return false;}
