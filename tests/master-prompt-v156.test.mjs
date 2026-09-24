@@ -25,7 +25,7 @@ test('factory navigation presents evidence-bounded utility systems as an active 
  assert.match(shell,/if\(!PHASE1_FOUNDATION\)\{stopSimulationForNavigation\('system'\);openSystemLayers\(\)\}/);
  assert.match(shell,/const systemSurface=PHASE1_FOUNDATION\?'':/);
  assert.match(shell,/Lapisan Pabrik/);
- assert.match(css,/\\.mobile-nav\\{grid-template-columns:repeat\\(4,minmax\\(0,1fr\\)\\)!important\\}/);
+ assert.match(css,/\.mobile-nav\{grid-template-columns:repeat\(4,minmax\(0,1fr\)\)!important\}/);
 });
 
 test('placeholder assets expose spatial context but not inventory technical metadata in Phase-1',()=>{
