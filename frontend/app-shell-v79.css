@@ -547,14 +547,45 @@ body.workspace-2d.panel-hidden .viewport-mode-switch{z-index:65!important;visibi
  .scene-bottom{left:6px;right:6px}
 }
 
-/* Superadmin editor: keep the 3D scene reachable on a touch screen. */
-#scene-editor-panel{box-sizing:border-box;overscroll-behavior:contain;touch-action:pan-y}
+/* Superadmin editor: keep the 3D scene reachable without covering canonical navigation. */
+#scene-editor-panel{
+ position:fixed;z-index:78;top:calc(var(--header-h,64px) + 12px);right:12px;bottom:12px;
+ width:min(390px,calc(100vw - 24px));overflow:auto;box-sizing:border-box;overscroll-behavior:contain;touch-action:pan-y;
+ padding:16px;border:1px solid var(--line,#cbd8e0);border-radius:16px;background:rgba(248,251,253,.98);color:#182b36;
+ box-shadow:0 18px 54px rgba(2,16,31,.22);font:14px/1.4 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+#scene-editor-panel>header{position:sticky;top:-16px;z-index:3;margin:-16px -16px 12px;padding:14px 16px 10px;border-bottom:1px solid #d8e3ea;background:rgba(248,251,253,.96);backdrop-filter:blur(12px)}
+#scene-editor-panel>header strong{font-size:15px;letter-spacing:-.01em}
 #scene-editor-panel button,#scene-editor-panel select,#scene-editor-panel input[type=file]{min-height:40px}
+#scene-editor-panel button{border:1px solid #c7d5de;border-radius:9px;background:#fff;color:#203746;font-weight:700}
+#scene-editor-panel button:hover{background:#edf6ff;border-color:#a9c9e8}
+#scene-editor-panel button.active,#scene-editor-panel button.primary{border-color:#1677ff;background:#1677ff;color:#fff}
+#scene-editor-panel button:disabled,#scene-editor-panel input:disabled{opacity:.48;cursor:not-allowed}
+#scene-editor-panel input[type=search],#scene-editor-panel select,#scene-editor-panel input[type=number]{border:1px solid #b7c7d0;border-radius:8px;background:#fff;color:#18303d}
+#scene-editor-panel input[type=search]{width:100%;min-height:42px;padding:0 11px}
 #scene-editor-panel fieldset{border:1px solid #cbd8e0;border-radius:9px;margin:9px 0;padding:10px}
 #scene-editor-panel fieldset label{display:inline-flex;align-items:center;gap:5px;margin:3px 6px 3px 0}
-#scene-editor-panel input[type=number]{max-width:85px;min-height:38px}
-#scene-editor-panel #se-object{min-height:120px;border:1px solid #b7c7d0;border-radius:8px}
+#scene-editor-panel input[type=number]{max-width:85px;min-height:38px;padding:0 7px}
+#scene-editor-panel #se-object{min-height:120px;padding:5px}
 #scene-editor-panel #se-history-list button{display:block;width:100%;margin:6px 0;text-align:left}
 #scene-editor-panel .se-nudge{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-top:10px}
 #scene-editor-panel .se-nudge button{min-width:0;padding:5px 2px}
-@media(max-width:767px){#scene-editor-panel{top:auto!important;left:0!important;right:0!important;bottom:0!important;width:100%!important;height:54dvh!important;max-height:75dvh;min-height:280px;border-radius:18px 18px 0 0!important;padding-bottom:calc(12px + env(safe-area-inset-bottom))!important}#scene-editor-panel .se-nudge button{min-height:44px}}
+#scene-editor-panel:focus-visible,#scene-editor-panel button:focus-visible,#scene-editor-panel input:focus-visible,#scene-editor-panel select:focus-visible{outline:2px solid #1677ff;outline-offset:2px}
+
+@media(max-width:767px){
+ #scene-editor-panel{
+  top:auto;left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));
+  bottom:calc(72px + env(safe-area-inset-bottom));width:auto;height:min(54dvh,560px);
+  max-height:calc(100dvh - var(--header-h,58px) - 88px - env(safe-area-inset-bottom));min-height:280px;
+  border-radius:18px;padding:14px;
+ }
+ #scene-editor-panel>header{top:-14px;margin:-14px -14px 10px;padding:12px 14px 9px}
+ #scene-editor-panel .se-nudge{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #scene-editor-panel .se-nudge button{min-height:44px}
+}
+@media(max-height:560px) and (orientation:landscape){
+ #scene-editor-panel{
+  top:calc(var(--header-h,50px) + 6px);left:auto;right:max(72px,calc(64px + env(safe-area-inset-right)));bottom:8px;
+  width:min(430px,58vw);height:auto;max-height:none;min-height:0;border-radius:14px;
+ }
+}
