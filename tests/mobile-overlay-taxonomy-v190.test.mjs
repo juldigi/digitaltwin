@@ -24,8 +24,8 @@ test('drawer transition marker is always cleared',()=>{
  assert.match(shell,/closeDrawer\(\)\{document\.body\.classList\.remove\('nav-open'\);document\.body\.classList\.remove\('drawer-transitioning'\)/);
 });
 test('V190 release identifiers are coherent',()=>{
- assert.match(index,/app-shell-v79\.css\?v=198/);
- assert.match(index,/src\/app\.js\?v=198/);
- assert.match(sw,/factory-digital-twin-v210-architecture-convergence-stage5-20260925/);
+ assert.match(index,/app-shell-v79\.css\?v=211/);
+ assert.match(index,/src\/app\.js\?v=211/);
+ assert.match(sw,/factory-digital-twin-v211-ui-ssot-stage6-20260925/);
  assert.match(app,/pair\('Versi aplikasi','2026\.09\.25'\)/);
 });
