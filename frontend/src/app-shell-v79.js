@@ -152,7 +152,7 @@ function stopSimulationForNavigation(targetSection){
  const state=getState();
  if(targetSection==='simulation'||(!state.simulationState?.active&&!state.simulationState?.running))return;
  dispatchEvent(new CustomEvent('bmj:simulationstoprequest'));
- setSimulation({active:false,playing:false,stage:null,progress:0});
+ setSimulation({active:false,running:false,stage:null,progress:0});
  document.body.classList.remove('simulation-transport-open');
  const bar=q('#simulation-transport');if(bar)bar.hidden=true;
 }
