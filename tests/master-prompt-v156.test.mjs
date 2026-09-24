@@ -65,7 +65,7 @@ test('V199 keeps functional interiors visible while bounding safety and utility 
  assert.match(building,/functionalVisibleSemantic/);
  assert.match(building,/visibleFunctionalReferences/);
  assert.match(building,/REFERENCE_HIDDEN_BY_DEFAULT/);
- assert.match(building,/V202_CLOSED_ENVELOPE_BUILDING_AND_SOURCE_LABELLED_ROOMS_EXCEPT_VALID_DOORS_GATES_CURTAINS_AND_LOADING_FUNCTION_OPENINGS/);
+ assert.match(building,/V203_CLOSED_ENVELOPE_AND_CLOSED_ROOM_SHELLS_WITH_FULL_INTERIOR_FINISH_LINERS_EXCEPT_VALID_DOORS_GATES_CURTAINS_AND_LOADING_OPENINGS/);
  assert.match(building,/UTILITY_MODELS_RETAINED_FOR_EXPANSION_BUT_HIDDEN_IN_PHASE1_UI/);
 });
 
