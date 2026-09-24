@@ -270,7 +270,8 @@ function simulationLocksStructure(){
   if(engine?.isPrintingSimulationActive()){toast(IS_APM2?'Hentikan simulasi proses APM 2 sebelum memilih, mengurai, atau mengisolasi komponen.':IS_VERIFIED_REGISTRY_SIM?'Hentikan simulasi proses sebelum memilih, mengurai, atau mengisolasi komponen.':'Hentikan Simulasi Proses sebelum memilih, mengurai, atau mengisolasi komponen.');return true;}
  return false;
 }
-function choosePart(part){if(!part||!engine||simulationLocksStructure())return;engine.template.reset();engine.isolated=false;explode=0;selectedPart=part;engine.template.highlight(part);engine.template.ghost(true,part);engine.setPartLabels(part,selectedTaxonomyId);engine.fit(part);const meta=taxonomyForPart(part);emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:meta?.id||part.userData?.nodeId||selectedTaxonomyId,inspectorState:{open:true,tab:'structure'}});}
+function activeMachineAssetId(){return machineRecordForRoute(MACHINE_KEY)?.machineId||window.BMJAppState?.getState?.().selectedAsset||MACHINE_KEY;}
+function choosePart(part){if(!part||!engine||simulationLocksStructure())return;engine.template.reset();engine.isolated=false;explode=0;selectedPart=part;engine.template.highlight(part);engine.template.ghost(true,part);engine.setPartLabels(part,selectedTaxonomyId);engine.fit(part);const meta=taxonomyForPart(part);emitDomainState({selectedAsset:activeMachineAssetId(),selectedNode:meta?.id||part.userData?.nodeId||selectedTaxonomyId,inspectorState:{open:true,tab:'structure'}});}
 function taxonomyForPart(part){const id=part?.userData?.nodeId;if(!id)return null;return ACTIVE_TAXONOMY.filter(n=>(n.meshRefs||[]).includes(id)).sort((a,b)=>Math.abs(a.level-5)-Math.abs(b.level-5))[0]||null;}
 function taxonomyPath(id=selectedTaxonomyId){
  const path=[];let meta=TAXONOMY_BY_ID.get(id)||TAXONOMY_BY_ID.get(ACTIVE_ROOT),guard=0;
@@ -324,23 +325,36 @@ function renderReferencePanel(){
   card.onkeydown=event=>{if(event.target.closest('a'))return;if(event.key==='Enter'||event.key===' '){event.preventDefault();activateReferenceCard(card)}};
  });
 }
-function resetTaxonomyRoot(){
+function pushMachineContextHistory(node=null,{replace=false}={}){
+ const appState=window.BMJAppState?.getState?.()||{},asset=activeMachineAssetId(),camera=appState.cameraPreset==='top'?'top':'iso';
+ const args={asset,node:node&&node!==ACTIVE_ROOT?node:null,scene:'machine',view:currentViewMode(),camera};
+ if(replace){
+  const url=new URL(location.href);url.searchParams.delete('machine');url.searchParams.set('asset',asset);url.searchParams.set('scene','machine');url.searchParams.set('view',args.view);
+  if(args.node)url.searchParams.set('node',args.node);else url.searchParams.delete('node');
+  if(camera==='top')url.searchParams.set('camera','top');else url.searchParams.delete('camera');
+  history.replaceState(args,'',url);return false;
+ }
+ return pushContextHistory(args);
+}
+function resetTaxonomyRoot({historyMode='none'}={}){
  selectedTaxonomyId=ACTIVE_ROOT;selectedPart=null;explode=0;
  if(engine){engine.template.reset();engine.clearPartLabels();engine.isolated=false;engine.fit(engine.machine);}
  $('#tool-explode')?.classList.remove('active');$('#tool-isolate')?.classList.remove('active');
- emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:ACTIVE_ROOT,inspectionMode:{explode:false,isolate:false}});
- renderPanel(activeTab);
+ emitDomainState({selectedAsset:activeMachineAssetId(),selectedNode:null,inspectionMode:{explode:false,isolate:false},inspectorState:{open:true,tab:'overview'}});
+ if(historyMode==='push')pushMachineContextHistory(null);
+ renderPanel('overview');
 }
 function renderContextBreadcrumb(){
  const host=$('#context-breadcrumb');if(!host)return;
  if(engine?.view==='factory'){
-  host.innerHTML='<button type="button" data-breadcrumb-factory aria-current="page">Pabrik</button>';
+  const selected=window.BMJAppState?.getState?.().selectedAsset,record=machineRecordForRoute(selected);
+  host.innerHTML=record?'<button type="button" data-breadcrumb-factory>Pabrik</button><span aria-hidden="true">/</span><button type="button" aria-current="page">'+esc(record.name)+'</button>':'<button type="button" data-breadcrumb-factory aria-current="page">Pabrik</button>';
  }else{
   const path=taxonomyPath();
   host.innerHTML='<button type="button" data-breadcrumb-factory>Pabrik</button>'+path.map((node,index)=>`<span aria-hidden="true">/</span><button type="button" data-breadcrumb-node="${esc(node.id)}" ${index===path.length-1?'aria-current="page"':''}>${esc(node.name)}</button>`).join('');
  }
- host.querySelector('[data-breadcrumb-factory]')?.addEventListener('click',()=>{showHome();renderContextBreadcrumb();});
- host.querySelectorAll('[data-breadcrumb-node]').forEach(button=>button.addEventListener('click',()=>{const id=button.dataset.breadcrumbNode;if(id===ACTIVE_ROOT)resetTaxonomyRoot();else selectTaxonomy(id,{revealPanel:true});}));
+ host.querySelector('[data-breadcrumb-factory]')?.addEventListener('click',()=>{showHome({historyMode:'push'});renderContextBreadcrumb();});
+ host.querySelectorAll('[data-breadcrumb-node]').forEach(button=>button.addEventListener('click',()=>{const id=button.dataset.breadcrumbNode;if(id===ACTIVE_ROOT)resetTaxonomyRoot({historyMode:'push'});else selectTaxonomy(id,{revealPanel:true,historyMode:'push'});}));
 }
 function taxonomyAtLevel(level){
  const target=Math.max(1,Math.min(6,Number(level)||1));let meta=TAXONOMY_BY_ID.get(selectedTaxonomyId)||TAXONOMY_BY_ID.get(ACTIVE_ROOT);
@@ -348,11 +362,27 @@ function taxonomyAtLevel(level){
  while(meta&&meta.level<target){const children=taxonomyChildren(meta.id);if(!children.length)return null;meta=children.find(n=>(n.meshRefs||[]).length)||children[0];}
  return meta?.level===target?meta:null;
 }
-function selectTaxonomy(id,{revealPanel=false}={}){
+function selectTaxonomy(id,{revealPanel=false,historyMode='none'}={}){
  if(simulationLocksStructure())return;const meta=TAXONOMY_BY_ID.get(id);if(!meta)return;
  selectedTaxonomyId=meta.id;const part=engine?.template.resolveTaxonomyNode(meta.id);
- if(part)choosePart(part);else{selectedPart=null;engine?.template.reset();engine?.clearPartLabels();emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:meta.id,inspectorState:{open:true,tab:'structure'}});}
- if(revealPanel&&!matchMedia('(max-width:767px)').matches)showPanel();renderPanel('structure');
+ if(part)choosePart(part);else{selectedPart=null;engine?.template.reset();engine?.clearPartLabels();emitDomainState({selectedAsset:activeMachineAssetId(),selectedNode:meta.id,inspectorState:{open:true,tab:'structure'}});}
+ if(historyMode==='push')pushMachineContextHistory(meta.id);
+ if(revealPanel)showPanel();
+ renderPanel('structure');
+}
+function navigateContextParent(){
+ const appState=window.BMJAppState?.getState?.()||{},node=appState.selectedNode&&appState.selectedNode!==ACTIVE_ROOT?appState.selectedNode:null;
+ if(appState.sceneMode==='machine'){
+  if(node){
+   const meta=TAXONOMY_BY_ID.get(node),parent=meta?.parentId;
+   if(parent&&parent!==ACTIVE_ROOT){selectTaxonomy(parent,{revealPanel:true,historyMode:'push'});return;}
+   resetTaxonomyRoot({historyMode:'push'});showPanel();return;
+  }
+  const record=machineRecordForRoute(appState.selectedAsset||MACHINE_KEY);
+  if(record){selectFactoryAssetContext(record,{historyMode:'push',openDialog:true,focus:true});return;}
+ }
+ if(appState.selectedAsset){showHome({historyMode:'push'});return;}
+ window.BMJAppState?.setInspector?.(false,'overview');emitDomainState({inspectorState:{open:false,tab:'overview'}});
 }
 function taxonomyTree(parentId=ACTIVE_ROOT){
  const children=taxonomyChildren(parentId),selectedPath=new Set(taxonomyPath().map(node=>node.id));
@@ -684,7 +714,7 @@ function machineDetailDialog(machine){
  renderContextBreadcrumb();
  if(modelAvailable)on('#open-machine-3d',()=>switchActiveMachine(machineRoute(machine)));
  else on('#focus-layout-asset',()=>selectFactoryAssetContext(machine,{historyMode:'none',openDialog:false,focus:true}));
- on('#factory-inspector-back',()=>showHome({historyMode:'push'}));
+ on('#factory-inspector-back',navigateContextParent);
  return true;
 }
 window.addEventListener('bmj:machinecontextrequest',event=>{
@@ -723,7 +753,7 @@ async function switchActiveMachine(route,{historyMode='push'}={}){
  try{
   configureActiveMachine(normalizedRoute);applyActiveMachineState();UNIVERSAL_SEARCH_INDEX=null;selectedTaxonomyId=ACTIVE_ROOT;
   applyMachineShell();
-  if(engine){if(!await engine.switchMachine(MACHINE_KEY))throw new Error('Model belum dapat dibuka');engine.onTaxonomySelect=id=>selectTaxonomy(id,{revealPanel:false});engine.onSimulationUpdate=next=>{simulationState=next;updateSimulationPanel(next);};engine.onReset=()=>{explode=0;selectedPart=null;selectedTaxonomyId=ACTIVE_ROOT;renderPanel();};engine.onError=message=>toast(message,true);engine.setView('machine',state);}
+  if(engine){if(!await engine.switchMachine(MACHINE_KEY))throw new Error('Model belum dapat dibuka');engine.onTaxonomySelect=id=>selectTaxonomy(id,{revealPanel:true,historyMode:'push'});engine.onSimulationUpdate=next=>{simulationState=next;updateSimulationPanel(next);};engine.onReset=()=>{explode=0;selectedPart=null;selectedTaxonomyId=ACTIVE_ROOT;renderPanel();};engine.onError=message=>toast(message,true);engine.setView('machine',state);}
   else{qStaticFallbackClear();renderStaticMachineFallback(new Error('3D renderer unavailable'));}
   const taxCount=$('#taxonomy-count');if(taxCount)taxCount.textContent=taxonomyStats().total.toLocaleString('id-ID');
   renderStatus();redrawPlantPlan();showPanel();renderPanel('overview');engine?.fit(engine.machine,'iso');$('#engine-status').textContent=assetName+' · model 3D siap';emitDomainState({selectedAsset:assetId,selectedNode:null,activeReference:null,activeSection:'asset',sceneMode:'machine',cameraPreset:'iso',inspectorState:{open:true,tab:'overview'}});return true;
@@ -764,7 +794,7 @@ async function restoreHistoryContext(){
  }
  await switchActiveMachine(machineRoute(record),{historyMode:'none'});
  const restoredNode=node&&TAXONOMY_BY_ID.has(node)?node:null;
- if(restoredNode){setView('machine');selectTaxonomy(restoredNode,{revealPanel:true});showPanel();renderPanel('structure');}
+ if(restoredNode){setView('machine');selectTaxonomy(restoredNode,{revealPanel:true,historyMode:'none'});}
  else{selectedTaxonomyId=ACTIVE_ROOT;selectedPart=null;engine?.clearPartLabels?.();showPanel();renderPanel('overview');}
  applyRestoredCamera(cameraPreset);
  dispatchEvent(new CustomEvent('bmj:historyrestore',{detail:{selectedAsset:record.machineId,selectedNode:restoredNode,sceneMode:'machine',viewMode,cameraPreset}}));
@@ -840,7 +870,7 @@ addEventListener('bmj:searchselect',async event=>{
   if(item.route)await switchActiveMachine(item.route,{historyMode:'push'});
   else setView('machine');
   if(item.type==='component'){
-   selectTaxonomy(item.nodeId,{revealPanel:true});showPanel();renderPanel('structure');
+   selectTaxonomy(item.nodeId,{revealPanel:true,historyMode:'push'});
    emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:item.nodeId,activeSection:'asset',sceneMode:'machine'});
   }else if(item.type==='reference'){
    showPanel();renderPanel('sources');emitDomainState({selectedAsset:MACHINE_KEY,activeReference:item.referenceId,activeSection:'reference',sceneMode:'machine'});
@@ -891,7 +921,7 @@ function assetDialog(initialQuery='',{intent='browse'}={}){
   const raw=String(query||'').trim().toLowerCase(),nodes=ACTIVE_TAXONOMY.filter(node=>node.id!==ACTIVE_ROOT&&(!raw||[node.name,node.description,node.id,node.levelName].some(v=>String(v||'').toLowerCase().includes(raw)))).slice(0,100);
   $('#asset-result-summary').textContent=nodes.length+' komponen '+activeMachine.name+' ditampilkan';
   $('#asset-results').innerHTML=nodes.length?nodes.map(node=>`<button type="button" data-component-id="${esc(node.id)}" class="asset-browser-row component-row"><span class="asset-thumbnail"><b>L${node.level}</b><small>${esc(node.levelName||'Struktur')}</small></span><span class="asset-browser-copy"><strong>${esc(node.name)}</strong><small>${esc(activeMachine.name)}</small><span>${esc(node.description||'Komponen mesin')}</span></span><em class="asset-data-badge">${engine?.template.resolveTaxonomyNode(node.id)?'Tersedia':'Referensi'}</em></button>`).join(''):'<p class="empty">Tidak ada komponen yang sesuai.</p>';
-  $$('[data-component-id]').forEach(button=>button.onclick=()=>{closeModal();switchActiveMachine(componentRoute,{historyMode:'push'}).then(opened=>{if(!opened)return;setView('machine');selectTaxonomy(button.dataset.componentId,{revealPanel:true});showPanel();renderPanel('structure');emitDomainState({selectedAsset:activeMachine.machineId,selectedNode:button.dataset.componentId,activeSection:'asset'});});});
+  $$('[data-component-id]').forEach(button=>button.onclick=()=>{closeModal();switchActiveMachine(componentRoute,{historyMode:'push'}).then(opened=>{if(!opened)return;setView('machine');selectTaxonomy(button.dataset.componentId,{revealPanel:true,historyMode:'push'});emitDomainState({selectedAsset:activeMachine.machineId,selectedNode:button.dataset.componentId,activeSection:'asset'});});});
  };
  const render=()=>{
   const query=$('#asset-search').value,area=$('#asset-area').value;
@@ -1102,7 +1132,7 @@ function helpDialog(){
   modal('Bantuan',`<div class="help-intro"><small>PANDUAN KONTEKSTUAL · ${device.toUpperCase()}</small><h3>${esc(contextHelp)}</h3></div><div class="help-grid"><section><h3>Gerakkan tampilan</h3><p>Seret untuk memutar. Cubit atau scroll untuk memperbesar dan memperkecil. Gunakan Pusatkan untuk kembali ke objek yang sedang dipilih.</p></section><section><h3>Lihat bagian mesin</h3><p>Buka tab Struktur, lalu pilih tingkat Mesin → Unit Utama → Sub → Block → Part → Spesifik Part. Bagian yang dipilih akan ditandai dan dipusatkan.</p></section><section><h3>Buka Interior</h3><p>Gunakan Buka Interior untuk menyembunyikan cover luar sementara. Frame, support, dan posisi komponen tidak diubah.</p></section><section><h3>Jalankan simulasi</h3><p>Simulasi tersedia pada aset yang memiliki model proses terverifikasi atau referensi proses keluarga yang memadai. Jika bukti belum cukup, aplikasi menampilkan status diblokir beserta alasannya dan tidak menjalankan gerakan palsu.</p></section><section><h3>Gunakan 2D dan 3D</h3><p>Pindah tampilan dari tombol 2D / 3D. Mesin atau komponen yang dipilih tetap menjadi konteks aktif.</p></section><section><h3>Cari apa pun</h3><p>Gunakan kolom pencarian untuk menemukan OFFSET 5, komponen, sumber, area, atau posisi aset pada denah.</p></section></div><div class="card"><h3>Kejujuran data</h3><p>Informasi yang belum memiliki dasar sumber tetap ditandai belum tersedia atau belum terverifikasi. Aplikasi tidak mengisi status, ukuran, atau konfigurasi dengan tebakan.</p><p class="subtle">Informasi teknis aplikasi tersedia di Pengaturan → Informasi Sistem.</p></div>`);
 }
 renderPanel();renderStatus();const taxCount=$('#taxonomy-count');if(taxCount)taxCount.textContent=taxonomyStats().total.toLocaleString('id-ID');
-try{engine=new FactoryEngine($('#viewport'),part=>{const meta=taxonomyForPart(part);if(meta)selectedTaxonomyId=meta.id;choosePart(part);showPanel();renderPanel('structure');});engine.onTaxonomySelect=id=>selectTaxonomy(id,{revealPanel:false});engine.onSimulationUpdate=next=>{simulationState=next;updateSimulationPanel(next);};simulationState=engine.getPrintingSimulationState();engine.onReset=()=>{explode=0;selectedPart=null;selectedTaxonomyId=ACTIVE_ROOT;renderPanel();};engine.onError=message=>toast(message,true);$('#engine-status').textContent='Menyiapkan denah pabrik';try{engine.setLow(localStorage.getItem('offset5-low')==='1'||matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse) and (max-width:1024px)').matches);}catch{}}catch(e){renderStaticMachineFallback(e);$('#engine-status').textContent='Tampilan 3D belum tersedia';}
+try{engine=new FactoryEngine($('#viewport'),part=>{const meta=taxonomyForPart(part);if(meta)selectTaxonomy(meta.id,{revealPanel:true,historyMode:'push'});});engine.onTaxonomySelect=id=>selectTaxonomy(id,{revealPanel:true,historyMode:'push'});engine.onSimulationUpdate=next=>{simulationState=next;updateSimulationPanel(next);};simulationState=engine.getPrintingSimulationState();engine.onReset=()=>{explode=0;selectedPart=null;selectedTaxonomyId=ACTIVE_ROOT;renderPanel();};engine.onError=message=>toast(message,true);$('#engine-status').textContent='Menyiapkan denah pabrik';try{engine.setLow(localStorage.getItem('offset5-low')==='1'||matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse) and (max-width:1024px)').matches);}catch{}}catch(e){renderStaticMachineFallback(e);$('#engine-status').textContent='Tampilan 3D belum tersedia';}
 try{
  bundledLayout=await loadBundledPlantLayout();engine?.loadLayout(activeLayout());engine?.applySceneOverrides(state?.sceneOverrides||{});
  if(engine)engine.onFactorySelect=id=>{const m=MACHINE_REGISTRY.find(m=>m.machineId===id);if(m){selectFactoryAssetContext(m,{historyMode:'push',openDialog:false,focus:true});machineDetailDialog(m);}};
@@ -1125,8 +1155,8 @@ function scrollInspectorToTabStart(){
  requestAnimationFrame(()=>{const sticky=(top?.offsetHeight||0)+(tabs?.offsetHeight||0);panel.scrollTo({top:Math.max(0,content.offsetTop-sticky),behavior:'auto'});});
 }
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{if(editing){engine.edit(false);engine.applyPlacement(state);engine.onTransform=null;editing=false;}renderPanel(b.dataset.tab);scrollInspectorToTabStart();});
-on('#modal-close',closeModal);on('#connect',connectionDialog);on('#nav-machine',()=>{stopSimulationBeforeNavigation();return activeLayout()?showHome({historyMode:'push'}):layoutDialog();});on('#nav-assets',()=>{stopSimulationBeforeNavigation();emitDomainState({activeSection:'asset'});assetDialog();});on('#nav-help',()=>{stopSimulationBeforeNavigation();helpDialog();});on('#settings',()=>{stopSimulationBeforeNavigation();settingsDialog();});on('#focus-machine',()=>{if(!engine)return;if(engine.view==='factory'){const selected=window.BMJAppState?.getState?.().selectedAsset,record=machineRecordForRoute(selected);if(record)engine.focusFactoryAsset(record.machineId);else engine.fit(engine.factory,'iso');return;}engine.fit(selectedPart||engine.machine,'iso');});
-$$('[data-camera]').forEach(b=>b.onclick=()=>{if(!engine)return;const mode=b.dataset.camera,isFactory=engine.view==='factory',target=isFactory?engine.currentFactoryTarget():(selectedPart||engine.machine);if(mode==='reset'){if(isFactory){showHome({historyMode:'push'});}else{explode=0;selectedPart=null;engine.isolated=false;engine.template.reset();engine.clearPartLabels();$('#tool-explode')?.classList.remove('active');$('#tool-isolate')?.classList.remove('active');emitDomainState({inspectionMode:{explode:false,isolate:false,section:false},selectedNode:null});renderPanel();engine.fit(engine.machine,'iso');}$$('[data-camera]').forEach(c=>c.classList.toggle('active',c.dataset.camera==='iso'));emitDomainState({cameraPreset:'iso'});return;}if(mode==='fit'){engine.fit(target,'iso');emitDomainState({cameraPreset:'iso'});return;}const preset=mode==='top'?'top':'iso';engine.fit(target,preset);$$('[data-camera]').forEach(c=>c.classList.toggle('active',c.dataset.camera===mode));emitDomainState({cameraPreset:preset});});
+on('#modal-close',closeModal);on('#context-back',navigateContextParent);on('#connect',connectionDialog);on('#nav-machine',()=>{stopSimulationBeforeNavigation();return activeLayout()?showHome({historyMode:'push'}):layoutDialog();});on('#nav-assets',()=>{stopSimulationBeforeNavigation();emitDomainState({activeSection:'asset'});assetDialog();});on('#nav-help',()=>{stopSimulationBeforeNavigation();helpDialog();});on('#settings',()=>{stopSimulationBeforeNavigation();settingsDialog();});on('#focus-machine',()=>{if(!engine)return;if(engine.view==='factory'){const selected=window.BMJAppState?.getState?.().selectedAsset,record=machineRecordForRoute(selected);if(record)engine.focusFactoryAsset(record.machineId);else engine.fit(engine.factory,'iso');return;}engine.fit(selectedPart||engine.machine,'iso');});
+$$('[data-camera]').forEach(b=>b.onclick=()=>{if(!engine)return;const mode=b.dataset.camera,isFactory=engine.view==='factory',target=isFactory?engine.currentFactoryTarget():(selectedPart||engine.machine);if(mode==='reset'){engine.fit(isFactory?engine.factory:(selectedPart||engine.machine),'iso');$('[data-camera]').forEach(c=>c.classList.toggle('active',c.dataset.camera==='iso'));emitDomainState({cameraPreset:'iso'});return;}if(mode==='fit'){engine.fit(target,'iso');emitDomainState({cameraPreset:'iso'});return;}const preset=mode==='top'?'top':'iso';engine.fit(target,preset);$$('[data-camera]').forEach(c=>c.classList.toggle('active',c.dataset.camera===mode));emitDomainState({cameraPreset:preset});});
 on('#tool-explode',()=>{if(!ensureMachineInspectionContext('Urai')||simulationLocksStructure())return;showPanel();selectedTaxonomyId=selectedTaxonomyId||ACTIVE_ROOT;renderPanel('structure');explode=explode>.01?0:.65;engine?.template.explode(explode,selectedPart);$('#tool-explode')?.classList.toggle('active',explode>0);emitDomainState({inspectionMode:{explode:explode>0}});renderPanel('structure');});
 on('#tool-isolate',()=>{if(!ensureMachineInspectionContext('Isolasi')||simulationLocksStructure())return;if(!engine||!selectedPart){showPanel();renderPanel('structure');toast('Pilih bagian mesin terlebih dahulu.',true);return;}engine.isolated=!engine.isolated;engine.template.isolate(selectedPart,engine.isolated);$('#tool-isolate').classList.toggle('active',engine.isolated);emitDomainState({inspectionMode:{isolate:engine.isolated}});});
 on('#labels',()=>{if(engine){engine.labels=!engine.labels;$('#labels').classList.toggle('active',engine.labels);emitDomainState({visibleLayers:{labels:engine.labels}});}});
