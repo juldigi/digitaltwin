@@ -21,7 +21,8 @@ test('detail toggle has one canonical owner and inspector is contextual rather t
 
 test('theme click changes DOM, aria state and saved preference from the same resulting value',()=>{
  assert.match(experience,/const light=state\.preferences\?\.theme==='light'/);
- assert.match(experience,/document\.body\.classList\.toggle\('light-mode',light\)/);\n assert.match(experience,/toggle\?\.setAttribute\('aria-pressed',String\(light\)\)/);
+ assert.match(experience,/document\.body\.classList\.toggle\('light-mode',light\)/); 
+ assert.match(experience,/toggle\?\.setAttribute\('aria-pressed',String\(light\)\)/);
  assert.match(experience,/setPreference\('theme'/);
  assert.match(experience,/subscribe\(applyTheme\)/);
  assert.doesNotMatch(ui,/\$\('#ui-theme-toggle'\)\?\.addEventListener/);
