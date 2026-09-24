@@ -27,7 +27,7 @@ test('engine loads other machine models only on selection',()=>{
 
 test('placeholder route compatibility remains lightweight and cannot unlock technical runtime',()=>{
  assert.match(app,/'BMJ-MCH-0002':'sheeting'/);
- assert.match(app,/'BMJ-MCH-0003':'offset5'/);
+ assert.match(app,/\[FOUNDATION_SCOPE\.referenceMachineId\]:'offset5'/);
  assert.match(app,/'BMJ-MCH-0009':'offset10'/);
  assert.match(app,/'BMJ-MCH-0010':'apm2'/);
  assert.match(app,/MACHINE_KEY=null/);
@@ -40,7 +40,7 @@ test('V162 release identifiers keep technical 3D foundation-only while restoring
  assert.match(html,/app-shell-v79\.css\?v=211/);
  assert.match(html,/src\/app\.js\?v=211/);
  assert.match(html,/src\/app-shell-v79\.js\?v=211/);
- assert.match(shell,/v198-architecture-convergence/);
+ assert.match(shell,/v211-ui-ssot/);
  assert.match(sw,/factory-digital-twin-v211-ui-ssot-stage6-20260925/);
 });
 
