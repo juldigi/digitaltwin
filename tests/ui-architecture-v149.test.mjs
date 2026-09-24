@@ -125,8 +125,8 @@ test('V149 Systems is a real network context without invented Water or Electrica
 
 test('V149 inspection and legacy factory layer actions synchronize into centralized state',()=>{
  assert.match(app,/inspectionMode:\{explode:level>0,explodeLevel:level\}/);
- assert.match(app,/inspectionMode:\{isolate:engine\.isolated\}/);
- assert.match(app,/inspectionMode:\{interior:isInteriorOpen\(\)\}/);
+ assert.match(app,/setDomainState\(\{inspectionMode:\{isolate:isolated\}\}\)/);
+ assert.match(app,/setDomainState\(\{inspectionMode:\{interior:true\}\}\)/);\n assert.match(app,/setDomainState\(\{inspectionMode:\{interior:false\}\}\)/);
  assert.match(app,/canonicalFactoryLayer=/);
  assert.match(app,/visibleLayers:\{\[canonical\]:visible\}/);
  assert.match(app,/cameraPreset:/);
