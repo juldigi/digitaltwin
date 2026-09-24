@@ -80,48 +80,27 @@ function applyMachineShell(){
  const maker=IS_OFFSET10||(!IS_APM2&&!IS_SHEETING&&!IS_GENERIC)?'Heidelberg':IS_APM2?'BOBST':IS_SHEETING?'LEXUS':GENERIC_CONFIG.label;
  const model=IS_OFFSET10?'CX104-2+LY-8+LY-1+L UV + FoilStar':IS_APM2?'SP 102 · 1994':IS_SHEETING?'HSM-CTM7 · 2014':IS_GENERIC?(GENERIC_CONFIG.machine.model||'Model belum terverifikasi'):'CD 102-8+L';
  document.title='Packaging Offset Factory Digital Twin · '+name;
- const title=$('#view-title'),sub=$('#view-subtitle'),label=$('#machine-label strong'),detail=$('#label-detail'),caption=$('#geometry-caption');
- if(title)title.textContent=name;if(sub)sub.textContent=maker+' · '+model;if(label)label.textContent=name;if(detail)detail.textContent=model;if(caption)caption.textContent='Model '+name;
+ const title=$('#view-title'),sub=$('#view-subtitle'),caption=$('#geometry-caption');
+ if(title)title.textContent=name;if(sub)sub.textContent=maker+' · '+model;if(caption)caption.textContent='Model '+name;
  const heading=$('.asset-heading h2'),headingSub=$('.asset-heading p');if(heading)heading.textContent=name;if(headingSub)headingSub.textContent=maker+' · '+model;updateEvidenceStatus();
- const quick=$('.telemetry-strip section:first-child');
- if(quick&&IS_OFFSET10)quick.innerHTML='<h4>INFORMASI CEPAT</h4><span>Mesin <b>OFFSET 10</b></span><span>Konfigurasi <b>Full UV + FoilStar</b></span><span>Model <b>CX 104</b></span>';
- if(quick&&IS_APM2)quick.innerHTML='<h4>INFORMASI CEPAT</h4><span>Mesin <b>APM 2</b></span><span>Model <b>SP 102</b></span><span>Tahun <b>1994</b></span>';
- if(quick&&IS_SHEETING)quick.innerHTML='<h4>INFORMASI CEPAT</h4><span>Mesin <b>SHEETING LEXUS</b></span><span>Kode <b>SBM-2</b></span><span>Alur <b>Kanan → Kiri</b></span>';
- const simCaption=$('#tool-simulation span');if(simCaption)simCaption.textContent=IS_APM2?'Proses Autoplaten':IS_SHEETING?'Proses Sheeting':IS_GENERIC?(IS_VERIFIED_REGISTRY_SIM?'Simulasi Proses':'Belum Tervalidasi'):'Simulasi Proses';
  if(IS_OFFSET10){
   const mark=$('.brandmark');if(mark)mark.innerHTML='F<span>10</span>';
   const icon=$('.asset-icon');if(icon)icon.textContent='10';
   const kpi=$('.top-kpis>div:nth-child(2)');if(kpi)kpi.innerHTML='<small>REFERENSI TEKNIS</small><b>'+TECHNICAL_SOURCES.length+'</b><span>Terverifikasi</span>';
-  const hierarchy=$('[data-workbench-card="hierarchy"] .asset-tree');if(hierarchy)hierarchy.innerHTML='<details open><summary>Pabrik <span class="tax-level">L0</span></summary><details open><summary>Area Produksi</summary><details open><summary><span class="active-node">OFFSET 10</span> <span class="tax-level">L1 · Mesin</span></summary><div>Preset Plus Feeder · 11 Printing Units · FoilStar Gen.3 · 3 Coating Units · 2 Y UV Units · X3 Delivery</div></details></details></details>';
-  const hsmall=$('[data-workbench-card="hierarchy"] header small');if(hsmall)hsmall.textContent='Offset 10';
-  const qsmall=$('[data-workbench-card="quick"] header small');if(qsmall)qsmall.textContent='OFFSET 10';
-  const qgrid=$('[data-workbench-card="quick"] .quick-grid');if(qgrid)qgrid.innerHTML='<dt>Model</dt><dd>CX 104</dd><dt>Konfigurasi</dt><dd>2+LY-8+LY-1+L UV + FoilStar</dd><dt>Kecepatan maks.</dt><dd>15.000 sheets/jam</dd><dt>Sheet maks.</dt><dd>720 × 1.040 mm</dd><dt>Elevasi</dt><dd>564 mm</dd><dt>Printing Unit</dt><dd>11</dd><dt>Coating Unit</dt><dd>3</dd><dt>UV</dt><dd>6 interdeck + 3 EOP</dd><dt>Delivery</dt><dd>X3</dd>';
   const warning=$('#dwg-warning');if(warning)warning.textContent='Model Offset 10 memakai layout mesin final Heidelberg. Posisi plant tidak mengambil anchor OFU-1/Offset 5.';
  }else if(IS_APM2){
   const mark=$('.brandmark');if(mark)mark.innerHTML='A<span>2</span>';
   const icon=$('.asset-icon');if(icon)icon.textContent='A2';
   const kpi=$('.top-kpis>div:nth-child(2)');if(kpi)kpi.innerHTML='<small>REFERENSI TEKNIS</small><b>'+TECHNICAL_SOURCES.length+'</b><span>Database + family</span>';
-  const hierarchy=$('[data-workbench-card="hierarchy"] .asset-tree');if(hierarchy)hierarchy.innerHTML='<details open><summary>Pabrik <span class="tax-level">L0</span></summary><details open><summary>Offset Converting</summary><details open><summary><span class="active-node">APM 2</span> <span class="tax-level">L1 · Mesin</span></summary><div>Feeder · Register / SideLay · Gripper Chain · Platen · Stripping · Delivery</div></details></details></details>';
-  const hsmall=$('[data-workbench-card="hierarchy"] header small');if(hsmall)hsmall.textContent='APM 2';
-  const qsmall=$('[data-workbench-card="quick"] header small');if(qsmall)qsmall.textContent='APM-2';
-  const qgrid=$('[data-workbench-card="quick"] .quick-grid');if(qgrid)qgrid.innerHTML='<dt>Model</dt><dd>SP 102</dd><dt>Serial</dt><dd>57115506</dd><dt>Tahun</dt><dd>1994</dd><dt>Sheet maks.</dt><dd>1.020 × 720 mm</dd><dt>Kecepatan family ref.</dt><dd>7.500 sheets/jam</dd><dt>Tekanan family ref.</dt><dd>250 ton</dd><dt>Suffix</dt><dd>Belum terkonfirmasi</dd><dt>SAP Code</dt><dd>APM-2</dd>';
   const warning=$('#dwg-warning');if(warning)warning.textContent='Posisi APM 2 pada plant belum diklaim sampai anchor layout aktualnya tervalidasi.';
  }else if(IS_SHEETING){
   const mark=$('.brandmark');if(mark)mark.innerHTML='S<span>2</span>';
   const icon=$('.asset-icon');if(icon)icon.textContent='S2';
   const kpi=$('.top-kpis>div:nth-child(2)');if(kpi)kpi.innerHTML='<small>REFERENSI TEKNIS</small><b>'+TECHNICAL_SOURCES.length+'</b><span>Database + family</span>';
-  const hierarchy=$('[data-workbench-card="hierarchy"] .asset-tree');if(hierarchy)hierarchy.innerHTML='<details open><summary>Pabrik <span class="tax-level">L0</span></summary><details open><summary>Offset Printing</summary><details open><summary><span class="active-node">SHEETING LEXUS</span> <span class="tax-level">L1 · Mesin</span></summary><div>Single-Reel Hydraulic Rollstand · Overhead Web Carrier / Deep Roller Loop · Guarded LEXUS Cross-Cut · Smooth Gap / Slow Overlap · Rack Stacker</div></details></details></details>';
-  const hsmall=$('[data-workbench-card="hierarchy"] header small');if(hsmall)hsmall.textContent='SBM-2';
-  const qsmall=$('[data-workbench-card="quick"] header small');if(qsmall)qsmall.textContent='SBM-2';
-  const qgrid=$('[data-workbench-card="quick"] .quick-grid');if(qgrid)qgrid.innerHTML='<dt>Model plant</dt><dd>HSM-CTM7</dd><dt>Serial</dt><dd>00982</dd><dt>Tahun</dt><dd>2014</dd><dt>SAP Code</dt><dd>SBM-2</dd><dt>Referensi visual</dt><dd>9 foto aktual BMJ IMG_2479–IMG_2487</dd><dt>HSM 56 pembanding</dt><dd>Process/spec only · 300 m/min · 600 gsm</dd><dt>Mekanisme cutter internal</dt><dd>Flat Bed Knife family wording · mekanisme internal exact belum terlihat / tidak direka</dd><dt>Alur aktual</dt><dd>RIGHT → LEFT</dd>';
   const warning=$('#dwg-warning');if(warning)warning.textContent='Sheeting V197 memakai foto aktual BMJ sebagai visual source of truth. Rollstand dikoreksi menjadi satu reel dengan pasangan arm kiri/kanan. Simulasi memakai material state: web kontinu → sheet terbentuk → guarded cross-cut → sheet lepas pada web speed → akselerasi gap → slow overlap/shingle → stack. Pisau internal tidak direka karena tidak terlihat pada unit BMJ.';
  }else if(IS_GENERIC){
   const m=GENERIC_CONFIG.machine,mark=$('.brandmark');if(mark)mark.innerHTML=String(m.no).padStart(2,'0');
   const icon=$('.asset-icon');if(icon)icon.textContent=String(m.no).padStart(2,'0');
-  const hierarchy=$('[data-workbench-card="hierarchy"] .asset-tree');if(hierarchy)hierarchy.innerHTML=`<details open><summary>Pabrik <span class="tax-level">L0</span></summary><details open><summary>${esc(m.area)}</summary><details open><summary><span class="active-node">${esc(m.name)}</span> <span class="tax-level">L1 · Mesin</span></summary><div>${GENERIC_CONFIG.modules.map(esc).join(' · ')}</div></details></details></details>`;
-  const hsmall=$('[data-workbench-card="hierarchy"] header small');if(hsmall)hsmall.textContent=m.sapCode||m.machineId;
-  const qsmall=$('[data-workbench-card="quick"] header small');if(qsmall)qsmall.textContent=m.sapCode||m.machineId;
-  const qgrid=$('[data-workbench-card="quick"] .quick-grid');if(qgrid)qgrid.innerHTML=`<dt>Model</dt><dd>${esc(m.model||'Belum tersedia')}</dd><dt>Serial</dt><dd>${esc(m.serial||'Belum tersedia')}</dd><dt>Tahun</dt><dd>${esc(m.year||'Belum tersedia')}</dd><dt>Area</dt><dd>${esc(m.area)}</dd><dt>Status geometry</dt><dd>${esc(GENERIC_CONFIG.evidence.geometry)}</dd><dt>Status simulasi</dt><dd>${IS_VERIFIED_REGISTRY_SIM?'TERSEDIA · reference process':'DIBLOKIR · belum tervalidasi'}</dd><dt>Catatan bukti</dt><dd>${esc(GENERIC_CONFIG.evidence.reason)}</dd>`;
   const warning=$('#dwg-warning');if(warning)warning.textContent='Posisi dan orientasi mesin ini pada plant belum diklaim sampai anchor layout aktual tervalidasi.';
  }
 }
@@ -173,7 +152,7 @@ function redrawPlantPlan(selectedAsset=window.BMJAppState?.getState?.().selected
  if(!bundledLayout)return;
  const selectedMachineId=selectedAsset?(machineRecordForRoute(selectedAsset)?.machineId||selectedAsset):null;
  drawPlantPlan($('#dwg-canvas'),bundledLayout,{selectedAsset:selectedMachineId});
- const context=$('[data-workbench-card="dwg"]>header small'),machine=selectedMachineId?MACHINE_REGISTRY_BY_ID.get(selectedMachineId):null;
+ const context=$('#dwg-context'),machine=selectedMachineId?MACHINE_REGISTRY_BY_ID.get(selectedMachineId):null;
  if(context)context.textContent=machine?'Pilihan aktif · '+machine.name:'Sumber layout aktual';
 }
 function pair(label,value){return `<dt>${esc(label)}</dt><dd${value==null?' class="unknown"':''}>${esc(value)}</dd>`;}
@@ -530,9 +509,6 @@ function renderStatus(){
  $('#layout-status').textContent=l?`DWG · ${truth.planGeometry}`:'DWG · UNKNOWN';
  $('#scale-status').textContent=`Skala · ${truth.scale}`;
  $('#lod-status').textContent=engine?.view==='factory'?`Elevasi · ${truth.elevation}`:`3D · ${assetStatus.source3D}`;
- $('#edit-position').disabled=false;
- $('#edit-position').setAttribute('aria-disabled',String((role!=='admin'&&role!=='superadmin')||!state.layout));
- $('#edit-position').title=(role!=='admin'&&role!=='superadmin')?'Atur posisi tersedia untuk pengguna dengan izin pengaturan':!state.layout?'Sambungkan data terlebih dahulu untuk menyimpan posisi':'Atur posisi mesin';
 }
 async function request(path,{method='GET',data,base=apiBase,key=token}={}){
  if(!base)throw new Error('Layanan data belum disambungkan.');
@@ -1149,7 +1125,6 @@ function scrollInspectorToTabStart(){
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{if(editing){engine.edit(false);engine.applyPlacement(state);engine.onTransform=null;editing=false;}renderPanel(b.dataset.tab);scrollInspectorToTabStart();});
 on('#modal-close',closeModal);on('#connect',connectionDialog);on('#nav-machine',()=>activeLayout()?showHome({historyMode:'push'}):layoutDialog());on('#nav-assets',()=>{emitDomainState({activeSection:'asset'});assetDialog();});on('#nav-help',helpDialog);on('#settings',settingsDialog);on('#focus-machine',()=>{if(!engine)return;if(engine.view==='factory'){const selected=window.BMJAppState?.getState?.().selectedAsset,record=machineRecordForRoute(selected);if(record)engine.focusFactoryAsset(record.machineId);else engine.fit(engine.factory,'iso');return;}engine.fit(selectedPart||engine.machine,'iso');});
 $$('[data-camera]').forEach(b=>b.onclick=()=>{if(!engine)return;const mode=b.dataset.camera,isFactory=engine.view==='factory',target=isFactory?engine.currentFactoryTarget():(selectedPart||engine.machine);if(mode==='reset'){if(isFactory){showHome({historyMode:'push'});}else{explode=0;selectedPart=null;engine.isolated=false;engine.template.reset();engine.clearPartLabels();$('#tool-explode')?.classList.remove('active');$('#tool-isolate')?.classList.remove('active');emitDomainState({inspectionMode:{explode:false,isolate:false,section:false},selectedNode:null});renderPanel();engine.fit(engine.machine,'iso');}$$('[data-camera]').forEach(c=>c.classList.toggle('active',c.dataset.camera==='iso'));emitDomainState({cameraPreset:'iso'});return;}if(mode==='fit'){engine.fit(target,'iso');emitDomainState({cameraPreset:'iso'});return;}const preset=mode==='top'?'top':'iso';engine.fit(target,preset);$$('[data-camera]').forEach(c=>c.classList.toggle('active',c.dataset.camera===mode));emitDomainState({cameraPreset:preset});});
-on('#tool-pan',()=>{if(!engine)return;engine.controls.enablePan=!engine.controls.enablePan;$('#tool-pan').classList.toggle('active',engine.controls.enablePan);toast(engine.controls.enablePan?'Mode pan aktif · gunakan dua jari / klik kanan':'Mode pan nonaktif');});
 on('#tool-explode',()=>{if(!ensureMachineInspectionContext('Urai')||simulationLocksStructure())return;showPanel();selectedTaxonomyId=selectedTaxonomyId||ACTIVE_ROOT;renderPanel('structure');explode=explode>.01?0:.65;engine?.template.explode(explode,selectedPart);$('#tool-explode')?.classList.toggle('active',explode>0);emitDomainState({inspectionMode:{explode:explode>0}});renderPanel('structure');});
 on('#tool-isolate',()=>{if(!ensureMachineInspectionContext('Isolasi')||simulationLocksStructure())return;if(!engine||!selectedPart){showPanel();renderPanel('structure');toast('Pilih bagian mesin terlebih dahulu.',true);return;}engine.isolated=!engine.isolated;engine.template.isolate(selectedPart,engine.isolated);$('#tool-isolate').classList.toggle('active',engine.isolated);emitDomainState({inspectionMode:{isolate:engine.isolated}});});
 on('#labels',()=>{if(engine){engine.labels=!engine.labels;$('#labels').classList.toggle('active',engine.labels);emitDomainState({visibleLayers:{labels:engine.labels}});}});
