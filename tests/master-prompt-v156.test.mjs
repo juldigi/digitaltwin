@@ -50,7 +50,7 @@ test('universal search keeps placeholder indexing spatial and removes utility-sy
 });
 
 test('factory Phase-1 inspector excludes routing controls while retaining explicit expansion boundary',()=>{
- const panel=app.slice(app.indexOf('function renderFactoryPanel(){'),app.indexOf('function renderPanel(tab=activeTab){'));
+ const panel=app.slice(app.indexOf('function renderFactoryPanel(){'),app.indexOf('function renderPanel(tab=activeInspectorTab()){'));
  assert.match(panel,/Denah pabrik/);
  assert.match(panel,/Scope berbasis bukti/);
  assert.match(panel,/Model 3D mengikuti aset yang dipilih/);
