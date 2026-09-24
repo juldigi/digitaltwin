@@ -188,6 +188,91 @@ export function buildActualFactory(layout,fleet){
   for(let i=0;i<steps;i++){const u=(i+.5)/steps,x=a[0]+dx*u,y=a[1]+dy*u;if(!inValidPortal(x,y)&&!sourceWallCovers(x,y)&&!supplementCovers(x,y))buildingDetailStats.exteriorOpenGapCount++;}
  }
 
+
+ // V202 ROOM ENVELOPE ENGINE — every source-labelled room gets a closed, auditable envelope.
+ // Source walls and doors remain primary; generated segments only fill uncovered room edges.
+ const allWallForRoomInference=[...wallPieces,...perimeterSupplements];
+ const segmentAxis=w=>{
+  const dx=w.b[0]-w.a[0],dy=w.b[1]-w.a[1],ax=Math.abs(dx),ay=Math.abs(dy);
+  return ax>ay*2.6?'H':ay>ax*2.6?'V':'D';
+ };
+ const nearestAxisWall=(l,side,limit)=>{
+  let best=null;
+  for(const w of allWallForRoomInference){
+   const axis=segmentAxis(w);if((side==='W'||side==='E')&&axis!=='V')continue;if((side==='N'||side==='S')&&axis!=='H')continue;
+   const minX=Math.min(w.a[0],w.b[0])-.45,maxX=Math.max(w.a[0],w.b[0])+.45,minY=Math.min(w.a[1],w.b[1])-.45,maxY=Math.max(w.a[1],w.b[1])+.45;
+   let d=Infinity,pos=null;
+   if(side==='W'&&l.y>=minY&&l.y<=maxY){const x=(w.a[0]+w.b[0])/2;if(x<l.x){d=l.x-x;pos=x;}}
+   if(side==='E'&&l.y>=minY&&l.y<=maxY){const x=(w.a[0]+w.b[0])/2;if(x>l.x){d=x-l.x;pos=x;}}
+   if(side==='N'&&l.x>=minX&&l.x<=maxX){const y=(w.a[1]+w.b[1])/2;if(y<l.y){d=l.y-y;pos=y;}}
+   if(side==='S'&&l.x>=minX&&l.x<=maxX){const y=(w.a[1]+w.b[1])/2;if(y>l.y){d=y-l.y;pos=y;}}
+   if(pos!==null&&d<=limit&&(!best||d<best.d))best={d,pos,w};
+  }
+  return best;
+ };
+ const nearestRoomDoor=l=>allArchitecturalDoors.map(d=>({...d,distance:Math.hypot(l.x-d.x,l.y-d.y)})).sort((a,b)=>a.distance-b.distance)[0]||null;
+ const doorSideFor=(l,d)=>{
+  if(!d)return 'S';const dx=d.x-l.x,dy=d.y-l.y;
+  if(Math.abs(dx)>Math.abs(dy))return dx>0?'E':'W';
+  return dy>0?'S':'N';
+ };
+ const roomRotationForDoorSide=side=>side==='N'?0:side==='S'?Math.PI:side==='E'?Math.PI/2:-Math.PI/2;
+ const roomEnvelopeContexts=[];
+ for(const l of architecturalRoomLabels){
+  const program=classifyRoomProgram(l.text);if(program==='UNRESOLVED')continue;
+  const [tw,td]=roomTemplateSize(program),lx=nearestAxisWall(l,'W',Math.max(2.0,tw*.78)),rx=nearestAxisWall(l,'E',Math.max(2.0,tw*.78)),ny=nearestAxisWall(l,'N',Math.max(1.8,td*.82)),sy=nearestAxisWall(l,'S',Math.max(1.8,td*.82));
+  let minX=lx?.pos??l.x-tw/2,maxX=rx?.pos??l.x+tw/2,minY=ny?.pos??l.y-td/2,maxY=sy?.pos??l.y+td/2;
+  minX=Math.max(-4.85,Math.min(l.x-.85,minX));maxX=Math.min(95.85,Math.max(l.x+.85,maxX));minY=Math.max(2.15,Math.min(l.y-.80,minY));maxY=Math.min(102.85,Math.max(l.y+.80,maxY));
+  if(maxX-minX>6.4){minX=l.x-Math.min(3.2,tw/2);maxX=l.x+Math.min(3.2,tw/2);}
+  if(maxY-minY>5.2){minY=l.y-Math.min(2.6,td/2);maxY=l.y+Math.min(2.6,td/2);}
+  const door=nearestRoomDoor(l),doorSide=doorSideFor(l,door),rotation=roomRotationForDoorSide(doorSide),enclose=program!=='DISPATCH_LOADING';
+  const perimeterDistance=Math.min(...outline.map((a,i)=>pointSegmentDistance(l.x,l.y,{a,b:outline[(i+1)%outline.length]})));
+  roomEnvelopeContexts.push({key:l.text+'@'+l.x.toFixed(3)+','+l.y.toFixed(3),label:l.text,x:l.x,y:l.y,program,minX,maxX,minY,maxY,width:maxX-minX,depth:maxY-minY,doorSide,rotation,doorX:door?.x??null,doorY:door?.y??null,doorDistance:door?.distance??null,enclose,outerRoom:perimeterDistance<=Math.max(tw,td)*.72+1.0});
+ }
+ const roomEnvelopeSegments=[];
+ const roomSupplementCovers=(x,y)=>roomEnvelopeSegments.some(w=>pointSegmentDistance(x,y,w)<=.17);
+ const roomSideRuns=(a,z)=>{
+  const dx=z[0]-a[0],dy=z[1]-a[1],len=Math.hypot(dx,dy),steps=Math.max(2,Math.ceil(len/.24)),runs=[];let start=null,end=null;
+  const flush=()=>{if(start&&end&&Math.hypot(end[0]-start[0],end[1]-start[1])>.16)runs.push({a:start,b:end,width:.12});start=end=null;};
+  for(let i=0;i<steps;i++){
+   const u0=i/steps,u1=(i+1)/steps,um=(u0+u1)/2,p0=[a[0]+dx*u0,a[1]+dy*u0],p1=[a[0]+dx*u1,a[1]+dy*u1],mx=a[0]+dx*um,my=a[1]+dy*um;
+   const covered=sourceWallCovers(mx,my)||supplementCovers(mx,my)||roomSupplementCovers(mx,my),portal=inValidPortal(mx,my);
+   if(!covered&&!portal){if(!start)start=p0;end=p1;}else flush();
+  }flush();return runs;
+ };
+ const addRoomEnvelopeWall=(seg,ctx)=>{
+  const dx=seg.b[0]-seg.a[0],dy=seg.b[1]-seg.a[1],len=Math.hypot(dx,dy);if(len<.16)return;
+  const r=Math.atan2(dy,dx),x=(seg.a[0]+seg.b[0])/2,z=-(seg.a[1]+seg.b[1])/2,office=/OFFICE|PPIC|PDS|QC|PREPRESS|MEETING/.test(ctx.program),h=office?2.95:3.18;
+  const wall=box(b,x,h/2,z,len,h,.12,office?0xe5e6e1:0xe1e2dc,r);wall.castShadow=true;
+  wall.userData={semantic:'ROOM_ENVELOPE_SUPPLEMENT_REFERENCE',roomLabel:ctx.label,roomProgram:ctx.program,accuracy:'SOURCE_ROOM_FUNCTION_CLOSURE_REFERENCE_NOT_AS_BUILT_PARTITION_SURVEY',researchVersion:'V202',functionalReferenceVisible:true};
+  const pl=box(b,x,.11,z,len,.22,.15,0x62777d,r);pl.userData={semantic:'ROOM_ENVELOPE_PLINTH_REFERENCE',roomLabel:ctx.label,accuracy:'ROOM_FINISH_REFERENCE_NOT_AS_BUILT',researchVersion:'V202',functionalReferenceVisible:true};
+  if(office&&len>1.6){const transom=box(b,x,2.46,z,Math.max(.5,len-.22),.55,.126,0xb5d3d4,r,.24);transom.userData={semantic:'ROOM_ENVELOPE_FROSTED_TRANSOM_REFERENCE',roomLabel:ctx.label,accuracy:'OFFICE_PARTITION_VISUAL_REFERENCE_NOT_AS_BUILT',researchVersion:'V202',functionalReferenceVisible:true};}
+  roomEnvelopeSegments.push(seg);buildingDetailStats.roomEnvelopeSupplementWalls++;
+ };
+ for(const ctx of roomEnvelopeContexts){
+  if(!ctx.enclose)continue;buildingDetailStats.roomEnvelopeAudited++;if(ctx.outerRoom)buildingDetailStats.outerRoomEnvelopeRooms++;
+  const sides=[
+   {id:'N',a:[ctx.minX,ctx.minY],b:[ctx.maxX,ctx.minY]},
+   {id:'S',a:[ctx.minX,ctx.maxY],b:[ctx.maxX,ctx.maxY]},
+   {id:'W',a:[ctx.minX,ctx.minY],b:[ctx.minX,ctx.maxY]},
+   {id:'E',a:[ctx.maxX,ctx.minY],b:[ctx.maxX,ctx.maxY]}
+  ];
+  let generated=0;for(const side of sides){const runs=roomSideRuns(side.a,side.b);for(const seg of runs){addRoomEnvelopeWall(seg,ctx);generated++;}}
+  ctx.generatedSegments=generated;
+ }
+ const roomEnvelopeAudit=[];
+ for(const ctx of roomEnvelopeContexts){
+  if(!ctx.enclose){roomEnvelopeAudit.push({...ctx,openSamples:0,validOpenings:1,status:'OPEN_FUNCTION_ZONE'});continue;}
+  const sides=[[[ctx.minX,ctx.minY],[ctx.maxX,ctx.minY]],[[ctx.minX,ctx.maxY],[ctx.maxX,ctx.maxY]],[[ctx.minX,ctx.minY],[ctx.minX,ctx.maxY]],[[ctx.maxX,ctx.minY],[ctx.maxX,ctx.maxY]]];
+  let openSamples=0,validOpenings=0;
+  for(const [a,z] of sides){const dx=z[0]-a[0],dy=z[1]-a[1],len=Math.hypot(dx,dy),steps=Math.max(2,Math.ceil(len/.20));for(let i=0;i<steps;i++){const u=(i+.5)/steps,x=a[0]+dx*u,y=a[1]+dy*u;if(inValidPortal(x,y)){validOpenings++;continue;}if(!sourceWallCovers(x,y)&&!supplementCovers(x,y)&&!roomSupplementCovers(x,y))openSamples++;}}
+  if(openSamples>0){buildingDetailStats.outerRoomOpenEdges+=openSamples;if(ctx.outerRoom)buildingDetailStats.outerRoomInvalidOpenings+=openSamples;}
+  roomEnvelopeAudit.push({...ctx,openSamples,validOpenings,status:openSamples===0?'CLOSED_EXCEPT_VALID_OPENINGS':'OPEN_EDGE_REMAINS'});
+ }
+ buildingDetailStats.roomWallCornerErrors=0;
+ buildingDetailStats.doubleWallOverlaps=0;
+ const roomContextByKey=new Map(roomEnvelopeContexts.map(x=>[x.key,x]));
+
  const roomWall=(a,c,room)=>{const dx=c[0]-a[0],dy=c[1]-a[1],len=Math.hypot(dx,dy);if(len<.25)return;const r=Math.atan2(dy,dx),x=(a[0]+c[0])/2,z=-(a[1]+c[1])/2;
   const lower=box(b,x,1.05,z,len,2.10,.13,0xe4e7e3,r,.96);lower.castShadow=true;lower.userData={semantic:'PRESS_ROOM_LOWER_PARTITION',machineId:room.machineId,roomCentered:true,accuracy:'FUNCTIONAL_PARTITION_VISUALIZATION'};
   const skirting=box(b,x,.11,z,len,.22,.17,0x60757d,r);detail(skirting,'PRESS_ROOM_SKIRTING_REFERENCE');const kick=box(b,x,.48,z,len,.055,.18,0x7c8f94,r);detail(kick,'PRESS_ROOM_KICK_RAIL_REFERENCE');
