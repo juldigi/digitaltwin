@@ -4,9 +4,11 @@ import {MACHINE_REGISTRY_BY_ID} from './machine-registry.js';
 export const FOUNDATION_SCOPE=Object.freeze({
   release:'V162',
   phase:'DWG_FACTORY_FOUNDATION',
-  primaryMachineId:'BMJ-MCH-0003',
-  primaryRoute:'offset5',
-  primaryAssetName:'OFFSET 5',
+  defaultMachineId:null,
+  defaultRoute:null,
+  referenceMachineId:'BMJ-MCH-0003',
+  referenceRoute:'offset5',
+  referenceAssetName:'OFFSET 5',
   expansionMode:'EVIDENCE_GATED_CONTEXT',
   showUtilitySystems:true,
   exposePlaceholderTechnicalMetadata:false,
@@ -23,12 +25,12 @@ const LEGACY_ROUTE_TO_ID=Object.freeze({
 export function foundationMachineId(value){
   if(value&&typeof value==='object')return value.machineId||value.asset_id||value.assetId||null;
   const key=String(value??'').trim();
-  if(!key)return FOUNDATION_SCOPE.primaryMachineId;
+  if(!key)return FOUNDATION_SCOPE.defaultMachineId;
   return LEGACY_ROUTE_TO_ID[key]||key;
 }
 
 export function isFoundationPrimary(value){
-  return foundationMachineId(value)===FOUNDATION_SCOPE.primaryMachineId;
+  return foundationMachineId(value)===FOUNDATION_SCOPE.referenceMachineId;
 }
 
 export function canOpenTechnical3D(value){
