@@ -73,7 +73,7 @@ test('V198 makes core room furniture, RMS paper and production support visible w
   [/QC Sample|R\.Sample|R\.INCOMING/i,/^V202_(QC_SAMPLE|INCOMING_QC)_.*DESK_WORKTOP$/],
   [/Toilet/i,/^V202_TOILET_FIXTURE$/],
   [/Pantry|Kitchen|Refreshment/i,/^V202_PANTRY_COUNTER$/],
-  [/Locker|Loker|Changing|Change Room/i,/^V202_LOCKER_(LEFT|RIGHT)_RACK_UPRIGHT$/],
+  [/Locker|Loker|Changing|Change Room/i,/^V202_LOCKER_(LEFT|RIGHT)_LOCKER_(CARCASS|DOOR)$/],
   [/WH Spareparts/i,/^V202_SPAREPART_(LEFT|RIGHT)_RACK_UPRIGHT$/],
   [/Workshop/i,/^V202_WORKSHOP_WORKBENCH_TABLE_TOP$/],
   [/CTF|CTP/i,/^V202_PREPRESS_/]
