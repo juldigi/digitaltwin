@@ -1560,14 +1560,18 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   redTank(x,.10,z,.48,.68,'IPAL_PHOTO_GROUND_RED_PROCESS_TANK');
  }
 
- // Sludge dewatering bag station exactly as photographed: blue enclosure, hanging white bags, flexible hoses and toxic warning.
+ // Sludge dewatering bag station: open-front U-shaped bay, not a solid blue block.
  const sd=IPAL_PHOTO_EVIDENCE_V206.relativeLayout.sludgeDrying,sdZ=-sd.y;
- pbox(sd.x,.32,sdZ,sd.w,.64,sd.d,0x3f7288,'IPAL_PHOTO_SLUDGE_DRYING_ENCLOSURE');
- pbox(sd.x,.72,sdZ+sd.d/2-.08,sd.w,.82,.16,0x497d91,'IPAL_PHOTO_SLUDGE_DRYING_BACKWALL');
- for(let i=0;i<5;i++){
-  const bx=sd.x-sd.w*.36+i*(sd.w*.18);
-  const bag=new T.Mesh(new T.CylinderGeometry(.28,.38,.82,16,1,false),photoWhite);bag.position.set(bx,1.02,sdZ);bag.scale.z=.72;ipalPhoto.add(bag);photoTag(bag,'IPAL_PHOTO_SLUDGE_DEWATERING_BAG',{observed:'HANGING_FILTER_BAG'});
-  pline([bx,1.46,sdZ],[bx,1.72,sdZ-.35],.035,0xc9cbc6,'IPAL_PHOTO_SLUDGE_FLEXIBLE_HOSE');
+ pbox(sd.x,.10,sdZ,sd.w,.20,sd.d,0x315f76,'IPAL_PHOTO_SLUDGE_DRYING_FLOOR');
+ pbox(sd.x,.74,sdZ-sd.d/2+.08,sd.w,1.28,.16,0x497d91,'IPAL_PHOTO_SLUDGE_DRYING_BACKWALL');
+ pbox(sd.x-sd.w/2+.08,.52,sdZ,.16,.84,sd.d,0x477b90,'IPAL_PHOTO_SLUDGE_DRYING_SIDEWALL');
+ pbox(sd.x+sd.w/2-.08,.52,sdZ,.16,.84,sd.d,0x477b90,'IPAL_PHOTO_SLUDGE_DRYING_SIDEWALL');
+ pbox(sd.x,.18,sdZ+sd.d/2-.06,sd.w,.22,.12,0x3f7288,'IPAL_PHOTO_SLUDGE_DRYING_FRONT_CURB');
+ const bagCount=sd.bagCount||6;
+ for(let i=0;i<bagCount;i++){
+  const bx=sd.x-sd.w*.39+i*(sd.w*.78/(bagCount-1));
+  const bag=new T.Mesh(new T.CylinderGeometry(.25,.36,.84,16,1,false),photoWhite);bag.position.set(bx,1.02,sdZ-.04);bag.scale.z=.70;ipalPhoto.add(bag);photoTag(bag,'IPAL_PHOTO_SLUDGE_DEWATERING_BAG',{observed:'HANGING_FILTER_BAG'});
+  pline([bx,1.46,sdZ-.04],[bx,1.72,sdZ-.34],.033,0xc9cbc6,'IPAL_PHOTO_SLUDGE_FLEXIBLE_HOSE');
  }
  pbox(sd.x-sd.w/2+.15,1.13,sdZ+sd.d/2+.02,.045,.58,.68,0xe4d240,'IPAL_PHOTO_TOXIC_WARNING_PLATE',0,1,{warningText:'BERACUN'});buildingDetailStats.v205IpalSafetyDetails++;
  label('UNIT (KARUNG) PENGERING LUMPUR',sd.x,1.72,sdZ+sd.d/2+.12,4.35,'#173f52',ipalPhoto);
@@ -1575,10 +1579,10 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  pline([sd.x-sd.w*.44,1.82,sdZ-.18],[sd.x+sd.w*.44,1.82,sdZ-.18],.035,0x657275,'IPAL_PHOTO_SLUDGE_BAG_HANGER_RAIL',{function:'SUPPORT_VISIBLE_IN_PHOTO'});
  // White/grey PVC manifold, red-handled valves and corrugated hose visible above the bags.
  pline([sd.x-sd.w*.42,1.52,sdZ-.18],[sd.x+sd.w*.42,1.52,sdZ-.18],.048,0xe3e2d9,'IPAL_PHOTO_SLUDGE_PVC_MANIFOLD',{routingConfidence:'PHOTO_DERIVED_VISUAL_ROUTING_NOT_PID'});
- for(let i=0;i<5;i++){
-  const vx=sd.x-sd.w*.36+i*(sd.w*.18);
-  ptorus(vx,1.62,sdZ-.18,.105,.022,0xa55343,'IPAL_PHOTO_SLUDGE_MANUAL_VALVE_HANDLE',Math.PI/2,{routingConfidence:'PHOTO_DERIVED'});
-  pline([vx,1.50,sdZ-.18],[vx,1.25,sdZ-.02],.029,0xd5d6cf,'IPAL_PHOTO_SLUDGE_BAG_DROP_PIPE',{routingConfidence:'PHOTO_DERIVED_VISUAL_ROUTING_NOT_PID'});
+ for(let i=0;i<bagCount;i++){
+  const vx=sd.x-sd.w*.39+i*(sd.w*.78/(bagCount-1));
+  ptorus(vx,1.62,sdZ-.18,.100,.021,0xa55343,'IPAL_PHOTO_SLUDGE_MANUAL_VALVE_HANDLE',Math.PI/2,{routingConfidence:'PHOTO_DERIVED'});
+  pline([vx,1.50,sdZ-.18],[vx,1.25,sdZ-.02],.027,0xd5d6cf,'IPAL_PHOTO_SLUDGE_BAG_DROP_PIPE',{routingConfidence:'PHOTO_DERIVED_VISUAL_ROUTING_NOT_PID'});
  }
  // Small blue open drain/sump is visible immediately outside the sludge enclosure.
  pbox(sd.x+sd.w/2+.48,.20,sdZ+sd.d/2-.30,.88,.40,.88,0x3d7187,'IPAL_PHOTO_SLUDGE_DRAIN_SUMP_WALL');
@@ -1639,22 +1643,25 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  // Weathering chips/streaks along the photographed blue exterior.
  for(const x of [cb.x-1.8,cb.x-.55,cb.x+.85])pbox(x,.40,cbZ+cb.d/2+.068,.08,.62,.014,0x254f63,'IPAL_PHOTO_COVERED_BASIN_WEATHERING',0,.16,{weathering:'PHOTO_VISIBLE'});
  
- // Photo-visible pump/nozzle/valve and pipe routing. These are geometry/topology observations only — not a P&ID claim.
- const photoPipe=(pts,color=0xd7d8d0,r=.045,semantic='IPAL_PHOTO_PROCESS_PIPE')=>{
-  for(let i=1;i<pts.length;i++){pline(pts[i-1],pts[i],r,color,semantic,{routingConfidence:'PHOTO_DERIVED_VISUAL_ROUTING_NOT_PID'});buildingDetailStats.v205IpalPipingRuns++;}
-  // Add compact unions at internal route changes so pipes do not read as raw intersecting cylinders.
+ // V206: only local pipe segments directly supported by photographs. No inferred unit-to-unit P&ID links.
+ const photoPipe=(pts,color=0xd7d8d0,r=.045,semantic='IPAL_PHOTO_LOCAL_VISIBLE_PIPE')=>{
+  for(let i=1;i<pts.length;i++){pline(pts[i-1],pts[i],r,color,semantic,{routingConfidence:'LOCAL_PHOTO_VISIBLE_SEGMENT_ONLY_NOT_PID',flowDirection:'UNRESOLVED'});buildingDetailStats.v205IpalPipingRuns++;}
   for(let i=1;i<pts.length-1;i++)ppipeUnion(...pts[i],'y',Math.max(r*1.65,.065),0x6c7779,semantic+'_UNION');
  };
  const photoValve=(x,y,z)=>{ptorus(x,y,z,.13,.026,0xc38c24,'IPAL_PHOTO_MANUAL_VALVE_WHEEL',0,{routingConfidence:'PHOTO_DERIVED'});pline([x,y-.16,z],[x,y+.16,z],.025,0x626d70,'IPAL_PHOTO_VALVE_STEM');};
- photoPipe([[eq.x+eq.w/2,.72,eq.z],[40.15,.72,eq.z],[40.15,1.02,tmp.z]],0xd5d6cf,.055);
- photoValve(40.15,1.10,eq.z);
- photoPipe([[tmp.x+tmp.w/2,.76,tmp.z],[an.x-an.r-.10,.76,tmp.z],[an.x-an.r-.10,1.12,anZ]],0xbfc5c1,.052);
- photoPipe([[hv.x+hv.r,.92,hz],[48.5,.92,hz],[48.5,1.15,crZ]],0xc9ceca,.045);
- photoPipe([[cr.x-2.0,1.72,crZ-1.05],[48.8,1.72,crZ-1.05],[48.8,1.02,anZ+1.3]],0xe0ddd1,.025,'IPAL_PHOTO_CHEMICAL_DOSING_PIPE');
+ // White pipe visibly crosses the equalization facade; connectivity beyond the photographed ends is intentionally omitted.
+ photoPipe([[eq.x-eq.w*.42,.82,eq.z+eq.d/2+.13],[eq.x+eq.w*.38,.82,eq.z+eq.d/2+.13]],0xe0ddd1,.050,'IPAL_PHOTO_EQUALIZATION_FACADE_PIPE');
+ photoValve(eq.x+eq.w*.18,.93,eq.z+eq.d/2+.13);
+ // Short local drop adjacent to the temporary holding basin.
+ photoPipe([[tmp.x+tmp.w/2+.12,.38,tmp.z-.45],[tmp.x+tmp.w/2+.12,1.18,tmp.z-.45],[tmp.x+tmp.w/2-.10,1.18,tmp.z-.45]],0xd2d4ce,.042,'IPAL_PHOTO_TEMP_HOLDING_LOCAL_PIPE');
+ // Hopper outlet and chemical-rack manifold are represented only as local stubs.
+ photoPipe([[hv.x,.26,hz],[hv.x,.52,hz],[hv.x+.55,.52,hz]],0xbfc5c1,.045,'IPAL_PHOTO_HOPPER_LOCAL_OUTLET');
+ photoPipe([[cr.x-cr.w*.38,1.58,crZ-cr.d*.34],[cr.x+cr.w*.34,1.58,crZ-cr.d*.34]],0xe0ddd1,.025,'IPAL_PHOTO_CHEMICAL_LOCAL_MANIFOLD');
+ // Anaerobic top nozzle remains local; its destination is not asserted.
  photoPipe([[an.x,4.08,anZ],[an.x,4.58,anZ],[an.x+1.15,4.58,anZ]],0x777f7d,.060,'IPAL_PHOTO_TANK_TOP_NOZZLE_PIPE');
- for(const [x,z] of [[40.15,eq.z],[48.5,hz],[50.1,crZ-1.05]]){
-  pline([x,.12,z],[x,.65,z],.022,0x59686c,'IPAL_PHOTO_PIPE_SUPPORT_POST');
-  pline([x-.16,.65,z],[x+.16,.65,z],.018,0x59686c,'IPAL_PHOTO_PIPE_SUPPORT_CROSSBAR');
+ for(const [x,z] of [[eq.x+eq.w*.18,eq.z+eq.d/2+.13],[hv.x+.30,hz],[cr.x,crZ-cr.d*.34]]){
+  pline([x,.12,z],[x,.62,z],.022,0x59686c,'IPAL_PHOTO_PIPE_SUPPORT_POST');
+  pline([x-.16,.62,z],[x+.16,.62,z],.018,0x59686c,'IPAL_PHOTO_PIPE_SUPPORT_CROSSBAR');
  }
  // Pump assemblies sit on concrete pads; pipe meets a nozzle/union rather than disappearing into the pump body.
  for(const [x,z] of [[48.7,-113.1],[56.2,-112.9]]){
