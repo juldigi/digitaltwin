@@ -1571,39 +1571,45 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   pcyl(x,y,z,.045,.13,0xbfc3bd,'IPAL_PHOTO_SLUDGE_CORRUGATED_HOSE_SEGMENT',{flexible:true},10);
  }
 
- // White operator/service room with dark aluminium windows, entrance tile, extinguisher and its own lower canopy.
+ // White operator/service room: IMG_2514 shows the long facade as windows only,
+ // while IMG_2524 shows the personnel door on the perpendicular walkway facade.
  const or=IPAL_PHOTO_EVIDENCE_V206.relativeLayout.operatorRoom,orZ=-or.y;
- pbox(or.x,or.h/2,orZ-or.d/2,or.w,or.h,.16,0xe4e4de,'IPAL_PHOTO_OPERATOR_ROOM_WALL');
- pbox(or.x-or.w/2,or.h/2,orZ,.16,or.h,or.d,0xe4e4de,'IPAL_PHOTO_OPERATOR_ROOM_WALL');
- pbox(or.x+or.w/2,or.h/2,orZ,.16,or.h,or.d,0xe4e4de,'IPAL_PHOTO_OPERATOR_ROOM_WALL');
- // front wall segments leave a real door opening rather than painting a door on a closed wall.
- pbox(or.x-1.45,or.h/2,orZ+or.d/2,1.45,or.h,.16,0xe4e4de,'IPAL_PHOTO_OPERATOR_ROOM_FRONT_WALL');
- pbox(or.x+1.35,or.h/2,orZ+or.d/2,1.70,or.h,.16,0xe4e4de,'IPAL_PHOTO_OPERATOR_ROOM_FRONT_WALL');
- pbox(or.x-.35,2.32,orZ+or.d/2,.92,.88,.05,0x252f33,'IPAL_PHOTO_OPERATOR_ROOM_WINDOW');
- pbox(or.x+1.15,2.32,orZ+or.d/2,.92,.88,.05,0x252f33,'IPAL_PHOTO_OPERATOR_ROOM_WINDOW');
- pbox(or.x-.48,1.05,orZ+or.d/2+.04,.92,2.08,.06,0x59666a,'IPAL_PHOTO_OPERATOR_ROOM_DOOR');
- pbox(or.x-.48,.05,orZ+or.d/2+1.05,1.25,.08,2.05,0xc7c1b5,'IPAL_PHOTO_OPERATOR_ENTRANCE_TILE');
- // Secondary canopy is older/weathered, translucent-corrugated and structurally separate from the main steel canopy.
- const secCenterZ=orZ+or.d/2+.88,secW=or.w+2.1,secD=2.75;
- for(let i=0;i<7;i++){
-  const x=or.x-secW/2+(i+.5)*secW/7;
-  pbox(x,3.12,secCenterZ,secW/7+.02,.055,secD,i%3===0?0xc8c9a8:0xaeb3a5,'IPAL_PHOTO_SECONDARY_CANOPY_CORRUGATED_PANEL',0,i%3===0?.64:.86,{weathering:'AGED_TRANSLUCENT_OR_CORRUGATED_PANEL'});
+ pbox(or.x,or.h/2,orZ-or.d/2,or.w,or.h,.16,0xe4e4de,'IPAL_PHOTO_OPERATOR_ROOM_REAR_WALL');
+ pbox(or.x+or.w/2,or.h/2,orZ,.16,or.h,or.d,0xe4e4de,'IPAL_PHOTO_OPERATOR_ROOM_EAST_WALL');
+ pbox(or.x,or.h/2,orZ+or.d/2,or.w,or.h,.16,0xe4e4de,'IPAL_PHOTO_OPERATOR_ROOM_FRONT_WALL');
+ for(const dx of [-1.35,0,1.35])pbox(or.x+dx,1.55,orZ+or.d/2+.085,.88,.82,.045,0x252f33,'IPAL_PHOTO_OPERATOR_ROOM_FRONT_WINDOW');
+ const sideDoorZ=orZ+.42,doorSpan=1.02,westX=or.x-or.w/2;
+ const westMin=orZ-or.d/2,westMax=orZ+or.d/2;
+ const segA=(sideDoorZ-doorSpan/2)-westMin,segB=westMax-(sideDoorZ+doorSpan/2);
+ if(segA>.08)pbox(westX,or.h/2,westMin+segA/2,.16,or.h,segA,0xe4e4de,'IPAL_PHOTO_OPERATOR_ROOM_WEST_WALL');
+ if(segB>.08)pbox(westX,or.h/2,sideDoorZ+doorSpan/2+segB/2,.16,or.h,segB,0xe4e4de,'IPAL_PHOTO_OPERATOR_ROOM_WEST_WALL');
+ pbox(westX-.04,1.05,sideDoorZ,.06,2.08,.92,0x59666a,'IPAL_PHOTO_OPERATOR_ROOM_SIDE_DOOR',Math.PI/2);
+ pbox(westX-.085,1.58,orZ-.78,.045,.78,.78,0x252f33,'IPAL_PHOTO_OPERATOR_ROOM_SIDE_WINDOW',Math.PI/2);
+ pbox(westX-.72,.045,sideDoorZ,1.30,.08,2.05,0xc7c1b5,'IPAL_PHOTO_OPERATOR_SIDE_ENTRANCE_TILE');
+ buildingDetailStats.v206OperatorFacadeCorrections++;
+ // Secondary canopy is the narrow weathered side-walkway awning visible in IMG_2514/2524.
+ const secW=2.35,secD=or.d+2.05,secCenterX=westX-secW/2+.02,secCenterZ=orZ;
+ for(let i=0;i<8;i++){
+  const z=secCenterZ-secD/2+(i+.5)*secD/8;
+  const panel=pbox(secCenterX,2.98,z,secW+.04,.055,secD/8+.035,i%3===0?0xc8c9a8:0xaeb3a5,'IPAL_PHOTO_SECONDARY_CANOPY_CORRUGATED_PANEL',0,i%3===0?.64:.86,{weathering:'AGED_TRANSLUCENT_OR_CORRUGATED_PANEL',roofForm:'SIDE_WALKWAY_AWNING'});
+  panel.rotation.z=-.055;
  }
- for(const px of [or.x-secW/2+.38,or.x+secW/2-.38]){
-  pfoot(px,secCenterZ+secD/2-.18,'IPAL_PHOTO_SECONDARY_CANOPY_SUPPORT',0x6d786f);
-  pbox(px,1.56,secCenterZ+secD/2-.18,.11,3.08,.11,0x64866b,'IPAL_PHOTO_SECONDARY_CANOPY_GREEN_COLUMN');
-  pline([px,2.38,secCenterZ+secD/2-.18],[px+(px<or.x?.72:-.72),3.10,secCenterZ+.20],.025,0x777a6c,'IPAL_PHOTO_SECONDARY_CANOPY_KNEE_BRACE');
+ const outerX=secCenterX-secW/2+.16;
+ for(const pz of [secCenterZ-secD/2+.42,secCenterZ+secD/2-.42]){
+  pfoot(outerX,pz,'IPAL_PHOTO_SECONDARY_CANOPY_SUPPORT',0x6d786f);
+  pbox(outerX,1.48,pz,.11,2.96,.11,0x64866b,'IPAL_PHOTO_SECONDARY_CANOPY_GREEN_COLUMN');
+  pline([outerX,2.26,pz],[westX-.06,3.00,pz],.025,0x777a6c,'IPAL_PHOTO_SECONDARY_CANOPY_KNEE_BRACE');
  }
- for(let x=or.x-secW/2+.4;x<=or.x+secW/2-.4;x+=.85)pline([x,3.04,secCenterZ-secD/2],[x,3.04,secCenterZ+secD/2],.022,0x777a6c,'IPAL_PHOTO_SECONDARY_CANOPY_PURLIN');
- pbox(or.x,2.86,secCenterZ,.08,.08,1.25,0xe5e5cf,'IPAL_PHOTO_SECONDARY_CANOPY_LINEAR_LIGHT',0,1,{fixture:'PHOTO_VISIBLE'});
- pline([or.x-secW/2,3.02,secCenterZ+secD/2],[or.x+secW/2,3.02,secCenterZ+secD/2],.035,0x626b64,'IPAL_PHOTO_SECONDARY_CANOPY_GUTTER',{coreProcess:false});
- for(const px of [or.x-secW/2+.10,or.x+secW/2-.10])pline([px,3.02,secCenterZ+secD/2],[px,.12,secCenterZ+secD/2],.030,0x626b64,'IPAL_PHOTO_SECONDARY_CANOPY_DOWNPIPE',{coreProcess:false});
- pcyl(or.x-1.70,.74,orZ+or.d/2+1.72,.11,.52,0xc23b35,'IPAL_PHOTO_FIRE_EXTINGUISHER',{safetyEquipment:'PHOTO_VISIBLE'});buildingDetailStats.v205IpalSafetyDetails++;
+ for(let z=secCenterZ-secD/2+.30;z<=secCenterZ+secD/2-.30;z+=.72)pline([outerX,2.88,z],[westX,3.06,z],.022,0x777a6c,'IPAL_PHOTO_SECONDARY_CANOPY_PURLIN');
+ pbox(secCenterX,2.78,secCenterZ,.08,.08,1.25,0xe5e5cf,'IPAL_PHOTO_SECONDARY_CANOPY_LINEAR_LIGHT',0,1,{fixture:'PHOTO_VISIBLE'});
+ pline([outerX,2.86,secCenterZ-secD/2],[outerX,2.86,secCenterZ+secD/2],.035,0x626b64,'IPAL_PHOTO_SECONDARY_CANOPY_GUTTER',{coreProcess:false});
+ pline([outerX,2.86,secCenterZ+secD/2-.15],[outerX,.12,secCenterZ+secD/2-.15],.030,0x626b64,'IPAL_PHOTO_SECONDARY_CANOPY_DOWNPIPE',{coreProcess:false});
+ pcyl(westX-.34,.74,sideDoorZ-.72,.11,.52,0xc23b35,'IPAL_PHOTO_FIRE_EXTINGUISHER',{safetyEquipment:'PHOTO_VISIBLE'});buildingDetailStats.v205IpalSafetyDetails++;
  // Small exhaust fan, waste bin and wall services make the operator room match IMG_2514/2524.
  const fanRing=new T.Mesh(new T.TorusGeometry(.20,.025,8,24),material(0x3b474a));fanRing.position.set(or.x+or.w/2+.082,2.42,orZ-.72);fanRing.rotation.y=Math.PI/2;ipalPhoto.add(fanRing);photoTag(fanRing,'IPAL_PHOTO_OPERATOR_EXHAUST_FAN_RING',{coreProcess:false});
  for(let a=0;a<Math.PI*2;a+=Math.PI/4)pline([or.x+or.w/2+.10,2.42,orZ-.72],[or.x+or.w/2+.10,2.42+Math.sin(a)*.16,orZ-.72+Math.cos(a)*.16],.010,0x505b5d,'IPAL_PHOTO_OPERATOR_EXHAUST_FAN_BLADE',{coreProcess:false});
- pbox(or.x+1.75,.38,orZ+or.d/2+.62,.42,.76,.42,0x555451,'IPAL_PHOTO_OPERATOR_WASTE_BIN',0,1,{coreProcess:false});
- pline([or.x-1.75,1.86,orZ+or.d/2+.09],[or.x+1.55,1.86,orZ+or.d/2+.09],.018,0x5f6460,'IPAL_PHOTO_OPERATOR_WALL_CONDUIT',{coreProcess:false});
+ pbox(westX-.38,.38,sideDoorZ+.86,.42,.76,.42,0x555451,'IPAL_PHOTO_OPERATOR_WASTE_BIN',0,1,{coreProcess:false});
+ pline([westX-.09,1.86,orZ-or.d*.38],[westX-.09,1.86,orZ+or.d*.38],.018,0x5f6460,'IPAL_PHOTO_OPERATOR_WALL_CONDUIT',{coreProcess:false});
 
  // Large blue covered service/process basin in front of the operator building (IMG_2514).
  // Function is not inferred from the photos; only the geometry and access hatches are asserted.
@@ -1628,18 +1634,23 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   for(let i=1;i<pts.length-1;i++)ppipeUnion(...pts[i],'y',Math.max(r*1.65,.065),0x6c7779,semantic+'_UNION');
  };
  const photoValve=(x,y,z)=>{ptorus(x,y,z,.13,.026,0xc38c24,'IPAL_PHOTO_MANUAL_VALVE_WHEEL',0,{routingConfidence:'PHOTO_DERIVED'});pline([x,y-.16,z],[x,y+.16,z],.025,0x626d70,'IPAL_PHOTO_VALVE_STEM');};
- photoPipe([[eq.x+eq.w/2,.72,eq.z],[40.15,.72,eq.z],[40.15,1.02,tmp.z]],0xd5d6cf,.055);
- photoValve(40.15,1.10,eq.z);
- photoPipe([[tmp.x+tmp.w/2,.76,tmp.z],[an.x-an.r-.10,.76,tmp.z],[an.x-an.r-.10,1.12,anZ]],0xbfc5c1,.052);
- photoPipe([[hv.x+hv.r,.92,hz],[48.5,.92,hz],[48.5,1.15,crZ]],0xc9ceca,.045);
- photoPipe([[cr.x-2.0,1.72,crZ-1.05],[48.8,1.72,crZ-1.05],[48.8,1.02,anZ+1.3]],0xe0ddd1,.025,'IPAL_PHOTO_CHEMICAL_DOSING_PIPE');
- photoPipe([[an.x,4.08,anZ],[an.x,4.58,anZ],[an.x+1.15,4.58,anZ]],0x777f7d,.060,'IPAL_PHOTO_TANK_TOP_NOZZLE_PIPE');
- for(const [x,z] of [[40.15,eq.z],[48.5,hz],[50.1,crZ-1.05]]){
-  pline([x,.12,z],[x,.65,z],.022,0x59686c,'IPAL_PHOTO_PIPE_SUPPORT_POST');
-  pline([x-.16,.65,z],[x+.16,.65,z],.018,0x59686c,'IPAL_PHOTO_PIPE_SUPPORT_CROSSBAR');
+ buildingDetailStats.v206SyntheticCrossUnitPipesHidden+=5;
+ // Equalization facade has a clearly visible local horizontal pipe; no downstream destination is asserted.
+ photoPipe([[eq.x-eq.w*.43,1.58,eq.z+eq.d/2+.14],[eq.x+eq.w*.43,1.58,eq.z+eq.d/2+.14]],0xd5d6cf,.050,'IPAL_PHOTO_EQUALIZATION_FACADE_PIPE');
+ photoValve(eq.x+eq.w*.30,1.70,eq.z+eq.d/2+.14);
+ // Temporary holding basin has a local vertical riser on the tank-side walkway.
+ photoPipe([[tmp.x+tmp.w/2+.14,.18,tmp.z+.18],[tmp.x+tmp.w/2+.14,1.62,tmp.z+.18]],0xd5d6cf,.045,'IPAL_PHOTO_TEMP_HOLDING_LOCAL_RISER');
+ // Chemical rack has a local PVC manifold with drops to the photographed red tanks only.
+ photoPipe([[cr.x-cr.w*.38,1.72,crZ-.78],[cr.x+cr.w*.38,1.72,crZ-.78]],0xe0ddd1,.025,'IPAL_PHOTO_CHEMICAL_LOCAL_MANIFOLD');
+ for(const dx of [-1.55,0,1.55])photoPipe([[cr.x+dx,1.72,crZ-.78],[cr.x+dx,1.44,crZ-.78]],0xe0ddd1,.018,'IPAL_PHOTO_CHEMICAL_LOCAL_DROP');
+ // Tank top pipe remains a short visible nozzle stub; its destination is deliberately unresolved.
+ photoPipe([[an.x,4.08,anZ],[an.x,4.58,anZ],[an.x+.72,4.58,anZ]],0x777f7d,.060,'IPAL_PHOTO_TANK_TOP_LOCAL_NOZZLE');
+ for(const [x,z] of [[eq.x+eq.w*.30,eq.z+eq.d/2+.14],[cr.x,crZ-.78]]){
+  pline([x,.12,z],[x,.62,z],.022,0x59686c,'IPAL_PHOTO_PIPE_SUPPORT_POST');
+  pline([x-.16,.62,z],[x+.16,.62,z],.018,0x59686c,'IPAL_PHOTO_PIPE_SUPPORT_CROSSBAR');
  }
  // Pump assemblies sit on concrete pads; pipe meets a nozzle/union rather than disappearing into the pump body.
- for(const [x,z] of [[48.7,-113.1],[56.2,-112.9]]){
+ for(const [x,z] of [[an.x-an.r-.72,anZ+.92],[cr.x+cr.w/2+.62,crZ+.86]]){
   pbox(x,.16,z,1.25,.20,.72,0x8b9290,'IPAL_PHOTO_PUMP_CONCRETE_PAD');
   const motor=pcyl(x-.28,.48,z,.18,.50,0x56656a,'IPAL_PHOTO_PUMP_MOTOR');motor.rotation.z=Math.PI/2;
   const pump=pcyl(x+.22,.48,z,.20,.34,0x3c7281,'IPAL_PHOTO_TRANSFER_PUMP_BODY');pump.rotation.z=Math.PI/2;
@@ -1688,13 +1699,7 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  // Low fence/guard visible around parts of the adjacent equipment yard.
  for(const z of [auZ+2.25,auZ-2.25]){pline([60.05,.20,z],[62.70,.20,z],.026,0x59686d,'IPAL_PHOTO_ADJACENT_UTILITY_GUARD',{coreProcess:false,systemLinkage:'NOT_ASSERTED'});pline([60.05,1.15,z],[62.70,1.15,z],.026,0x59686d,'IPAL_PHOTO_ADJACENT_UTILITY_GUARD',{coreProcess:false,systemLinkage:'NOT_ASSERTED'});}
 
- // Yellow platform/guardrail language repeated across the photographed process area.
- pbox(46.7,2.72,-111.0,3.2,.10,1.05,0x858e8b,'IPAL_PHOTO_SERVICE_PLATFORM_GRATING');
- for(const z of [-110.48,-111.52])pline([45.10,3.42,z],[48.30,3.42,z],.027,0xd7a817,'IPAL_PHOTO_SERVICE_PLATFORM_HANDRAIL');
- for(const x of [45.1,45.9,46.7,47.5,48.3])for(const z of [-110.48,-111.52])pline([x,2.76,z],[x,3.46,z],.020,0xd7a817,'IPAL_PHOTO_SERVICE_PLATFORM_POST');
- for(let i=0;i<10;i++)pbox(44.55,.22+i*.23,-111.85,.78,.055,.29,0xd7a817,'IPAL_PHOTO_SERVICE_STAIR_TREAD');
- pline([44.12,.18,-112.25],[44.98,2.55,-110.95],.032,0xd7a817,'IPAL_PHOTO_SERVICE_STAIR_STRINGER');
- pline([44.98,.18,-112.25],[45.84,2.55,-110.95],.032,0xd7a817,'IPAL_PHOTO_SERVICE_STAIR_STRINGER');
+ // V206: no free-floating generic service platform; only platforms tied to photographed equipment are rendered.
 
  // Keep the photo-derived topology discoverable without claiming survey dimensions or chemistry/P&ID data.
  ipalPhoto.userData.runtime=ipalPhotoRuntime;
