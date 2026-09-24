@@ -53,6 +53,6 @@ test('V159 search promise matches strict Phase-1 scope and cache identifiers are
  assert.match(html,/src\/app\.js\?v=192/);
  assert.match(html,/src\/ui-v5\.js\?v=167/);
  assert.match(html,/src\/app-shell-v79\.js\?v=192/);
- assert.match(shell,/v194-state-owned-contextual/);
+ assert.match(shell,/v195-visual-hierarchy/);
  assert.match(sw,/factory-digital-twin-v207-superadmin-editor-20260924/);
 });
