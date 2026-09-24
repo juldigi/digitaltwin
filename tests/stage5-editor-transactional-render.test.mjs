@@ -16,7 +16,10 @@ test('Stage 5 scene editor refreshes continuous transforms incrementally',()=>{
 });
 
 test('Stage 5 numeric transform edits avoid full editor rerender',()=>{
-  const numeric=app.match(/panel\.querySelectorAll\('\[data-se-key\]'\)[\s\S]*?\}\);/)?.[0]||'';
+  const marker="panel.querySelectorAll('[data-se-key]').forEach(input=>input.onchange=";
+  const start=app.indexOf(marker);
+  assert.notEqual(start,-1,'numeric transform handler must exist');
+  const numeric=app.slice(start,start+900);
   assert.match(numeric,/refreshEditorTransformUi\(\)/);
   assert.doesNotMatch(numeric,/apply\(\);update\(\)/);
 });
