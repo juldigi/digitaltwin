@@ -14,7 +14,7 @@ test('failed switch rolls the engine and domain context back to the previous mac
  assert.match(app,/previousAsset=getAppState\(\)\.selectedAsset/);
  assert.match(app,/if\(engine\?\.machineKey!==previousRoute\)\{try\{await engine\.switchMachine\(previousRoute\);\}catch\{\}\}/);
  assert.match(app,/selectedAsset:previousAsset\|\|null/);
- assert.match(app,/simulationState:\{active:false,running:false,paused:false,stage:null,progress:0\}/);
+ assert.match(app,/simulationState:\{active:false,running:false,stage:null,progress:0\}/);
 });
 test('V188 runtime identifiers are coherent',()=>{
  assert.match(index,/app-shell-v79\.css\?v=212/);
