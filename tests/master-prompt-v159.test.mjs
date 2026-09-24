@@ -11,7 +11,7 @@ const sw=fs.readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 test('V194 data and source status is reachable from Settings without a floating launcher',()=>{
  assert.doesNotMatch(html,/id="panel-launcher"/);
  assert.match(app,/id="settings-status"/);
- assert.match(app,/on\('#settings-status',foundationStatusDialog\)/);
+ assert.match(app,/on\('#settings-status',\(\)=>foundationStatusDialog\(\{back:settingsDialog\}\)\)/);
  assert.match(app,/function foundationStatusDialog\(\)/);
  assert.match(app,/layoutTruth\(l\)/);
  assert.match(app,/buildDwgFidelityLedger/);
