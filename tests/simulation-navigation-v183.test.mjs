@@ -18,15 +18,17 @@ test('every registered model starts or explicitly blocks its process simulation'
  }
 });
 
-test('navigation opens selected machine before simulation and closes other overlays',()=>{
+test('simulation remains contextual to the selected asset and major surfaces stay mutually exclusive',()=>{
  const shell=readFileSync(new URL('../frontend/src/app-shell-v79.js',import.meta.url),'utf8');
  const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
  const css=readFileSync(new URL('../frontend/app-shell-v79.css',import.meta.url),'utf8');
- assert.match(shell,/function enterSimulation\(\)\{\s*beforeMajorOverlay\('inspector'\)/);
- assert.match(shell,/bmj:simulateselectedmachine/);
- assert.match(app,/const opened=await switchActiveMachine\(machineRoute\(record\)\)/);
- assert.match(app,/if\(opened\)dispatchEvent\(new CustomEvent\('bmj:simulationcontextready'/);
- assert.match(shell,/nav-machine'\)\?\.addEventListener\('click',\(\)=>navigateSection\('factory'\)/);
+ const html=readFileSync(new URL('../frontend/index.html',import.meta.url),'utf8');
+ assert.match(html,/data-tab="simulation"/);
+ assert.doesNotMatch(html,/id="nav-simulation-mode"/);
+ assert.match(shell,/function beforeMajorOverlay\(name\)/);
+ assert.match(shell,/if\(name!=='inspector'&&getState\(\)\.inspectorState\?\.open\)closeInspector/);
+ assert.match(shell,/if\(section!=='simulation'\)stopSimulationForNavigation\(section\)/);
+ assert.match(app,/stopSimulationBeforeNavigation/);
  assert.doesNotMatch(css,/\.layer-open \.twin-shell\{z-index:89\}/);
  assert.match(css,/\.canonical-layer-manager\{position:fixed;z-index:90/);
  assert.match(shell,/document\.body\.append\(panel\)/);
