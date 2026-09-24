@@ -37,22 +37,24 @@ const sourcesSheeting=readFileSync(new URL('../frontend/src/data/sources-sheetin
 const registry=readFileSync(new URL('../frontend/src/data/machine-registry.js',import.meta.url),'utf8');
 const runtime=readFileSync(new URL('../frontend/src/machine-runtime.js',import.meta.url),'utf8');
 
-test('runtime hooks required by the 3D application remain available',()=>{
-  for(const id of ['viewport','detail-panel','panel-content','nav-machine','nav-layout','nav-assets','nav-exterior','nav-sources','nav-help','focus-machine','edit-position','settings','connect','modal','toast','dwg-canvas'])assert.match(html,new RegExp(`id="${id}"`));
+test('runtime hooks required by the canonical 3D application remain available',()=>{
+  for(const id of ['viewport','plant-plan-2d','detail-panel','panel-content','nav-machine','nav-assets','nav-systems','nav-help','focus-machine','settings','modal','toast','dwg-canvas'])assert.match(html,new RegExp(`id="${id}"`));
+  for(const retired of ['nav-layout','nav-exterior','nav-sources','edit-position','panel-launcher','engineering-workbench'])assert.doesNotMatch(html,new RegExp(`id="${retired}"`));
   for(const camera of ['iso','top','fit','reset'])assert.match(html,new RegExp(`data-camera="${camera}"`));
 });
-
 test('geometry baseline remains unchanged while the user interface is rebuilt',()=>{
   assert.equal(PHOTO_RECONSTRUCTION.version,'offset5-photo-pdf-v36');
   assert.equal(PHOTO_RECONSTRUCTION.repeatedHousings,8);
 });
 
-test('test-user shell uses clear user-facing navigation',()=>{
-  for(const label of ['Pabrik','Aset','Sistem','Simulasi','Referensi','Bantuan','Pengaturan'])assert.match(html,new RegExp(label));assert.match(html,/id="taxonomy-count"/);
+test('canonical shell uses clear user-facing navigation',()=>{
+  for(const label of ['Pabrik','Aset','Sistem','Bantuan'])assert.match(html,new RegExp(label));
+  assert.match(html,/aria-label="Pengaturan"/);
+  assert.match(html,/data-tab="simulation"/);
+  assert.match(html,/data-tab="sources"/);
   assert.doesNotMatch(html,/Mode uji/);
   assert.doesNotMatch(html,/Siap diuji/);
 });
-
 test('v128 keeps one supplied BMJ identity in the global header and splash screen',()=>{
   assert.match(html,/<title>Packaging Offset Factory Digital Twin<\/title>/);
   assert.match(html,/class="brand-logo" src="data:image\/jpeg;base64,[A-Za-z0-9+/=]+" alt="Logo BMJ"/);
@@ -68,7 +70,7 @@ test('v128 keeps one supplied BMJ identity in the global header and splash scree
 
 test('v42 has no single-element selector followed by forEach and covers dynamic button handlers',()=>{
   for(const source of [app,ui,experienceJs])assert.doesNotMatch(source,/^\s*\$\([^)]*\)\.forEach/m);
-  for(const id of ['assemble','ghost','isolate','tree-root','exterior-open','exterior-close','disconnect','mapping','view-layout','cancel-position','reset-position','asset-result','clear-cache'])assert.ok(app.includes(id),`dynamic button ${id} has no application reference`);
+  for(const id of ['assemble','ghost','isolate','tree-root','exterior-open','exterior-close','disconnect','mapping','view-layout','asset-result','clear-cache'])assert.ok(app.includes(id),`dynamic button ${id} has no application reference`);
   for(const selector of ['data-taxonomy','data-stage','data-exterior-area'])assert.ok(app.includes(`document.querySelectorAll('[${selector}]')`),`multi-element handler missing for ${selector}`);
 });
 
@@ -96,13 +98,14 @@ test('all static buttons are actionable and none is permanently disabled',()=>{
   }
 });
 
-test('every floating information window can be closed and restored',()=>{
-  for(const id of ['filter-close','keyplan-close','notice-close','close-panel','ui-close-workbench','modal-close','panel-launcher-close'])assert.match(html,new RegExp(`id="${id}"`));
-  for(const id of ['show-filter','show-keyplan','show-notice','show-detail','show-workbench','panel-launcher'])assert.match(html,new RegExp(`id="${id}"`));
-  for(const id of ['filter-close','keyplan-close','notice-close','close-panel','ui-close-workbench','panel-launcher-close','show-filter','show-keyplan','show-notice','show-detail','show-workbench'])assert.match(ui+'\n'+app+'\n'+mobileStableUi,new RegExp(id));
-  assert.match(appShellCss,/\.panel-launcher-menu/);
+test('canonical information surfaces have explicit close controls and no retired floating launcher',()=>{
+  for(const id of ['close-panel','modal-close'])assert.match(html,new RegExp(`id="${id}"`));
+  assert.match(mobileStableUi,/q\('#close-panel'\)\?\.addEventListener\('click',\(\)=>closeInspector\(\)\)/);
+  assert.doesNotMatch(html,/panel-launcher-menu/);
+  assert.doesNotMatch(html,/floating-filter/);
+  assert.doesNotMatch(html,/keyplan-mini/);
+  assert.doesNotMatch(html,/engineering-workbench/);
 });
-
 test('mobile portrait and landscape keep panels inside the viewport',()=>{
   assert.match(html,/interactive-widget=resizes-content/);
   assert.match(html,/id="ui-backdrop"/);
@@ -123,11 +126,10 @@ test('visible shell avoids deployment and prototype terminology',()=>{
 });
 
 test('conditional controls explain requirements rather than failing silently',()=>{
-  assert.match(app,/Atur posisi memerlukan izin pengaturan/);
   assert.match(app,/Pengaturan denah memerlukan izin pengaturan/);
   assert.match(app,/Pilih bagian mesin terlebih dahulu/);
+  assert.match(app,/Mode Edit 3D/);
 });
-
 test('service worker refreshes the redesigned shell',()=>{
   assert.match(sw,/factory-digital-twin-v207-superadmin-editor-20260924/);
   assert.doesNotMatch(sw,/src\/universal-machine\.js/);
@@ -144,11 +146,10 @@ test('v41 keeps every right-sidebar taxonomy item clickable after repeated selec
 });
 
 test('v42 opens removable exterior covers while retaining frame and interior geometry',()=>{
-  assert.match(html,/id="nav-exterior"/);
+  assert.match(html,/id="tool-interior"/);
   assert.match(html,/Buka Interior/);
-  assert.match(html,/data-tab="exterior"/);
-  assert.doesNotMatch(html,/id="asset-exterior-shortcut"/);
-  assert.match(app,/data-tab|dataset\.tab/);
+  assert.doesNotMatch(html,/data-tab="exterior"/);
+  assert.match(app,/renderPanel\('exterior'\)/);
   assert.match(app,/function enableExteriorOpen\(\{forceDetail=true\}=\{\}\)/);
   assert.match(app,/engine\.setLow\(false\)/);
   assert.match(app,/template\.setExteriorOpen\(true\)/);
@@ -163,7 +164,6 @@ test('v42 opens removable exterior covers while retaining frame and interior geo
   assert.match(offset5,/press-'\+i\+'-cover/);
   assert.match(experienceCss,/\.exterior-area-button/);
 });
-
 test('v44 cutaway removes all PU housing, OS/DS guards and inter-PU access while keeping internal supports',()=>{
   const machine=new OffsetMachineTemplate();
   const frame=machine.findNode('press-0-frame');
@@ -192,8 +192,8 @@ test('v44 cutaway removes all PU housing, OS/DS guards and inter-PU access while
   machine.dispose();
 });
 
-test('v45 exposes a safe Printing Test simulation with continuous sheet flow',()=>{
-  assert.match(html,/id="tool-simulation"/);
+test('v45 exposes contextual process simulation with continuous sheet flow',()=>{
+  assert.doesNotMatch(html,/id="tool-simulation"/);
   assert.match(html,/data-tab="simulation"/);
   assert.match(app,/PRINTING_SIMULATION_STAGES/);
   assert.match(app,/Mulai Simulasi Proses/);
@@ -216,7 +216,6 @@ test('v45 exposes a safe Printing Test simulation with continuous sheet flow',()
   assert.match(experienceCss,/\.simulation-flow/);
   assert.match(experienceCss,/\.simulation-progress/);
 });
-
 test('v47 exposes flexible gripper-safe sheet travel, ink drips and live UV curing',()=>{
   assert.match(app,/sim-uv-state/);
   assert.match(app,/sim-uv-indicator/);
@@ -258,7 +257,7 @@ test('asset browser exposes every registry machine with its own model status',()
   assert.match(app,/data-machine-id/);
   assert.match(app,/ASET PABRIK/);
   assert.match(app,/MACHINE_REGISTRY_STATS\.modeled3D/);
-  assert.match(app,/Lihat model/);
+  assert.match(app,/asset-data-badge/);
   assert.doesNotMatch(app,/id="asset-data-status"/);
   assert.match(sw,/src\/data\/machine-registry\.js/);
 });
@@ -389,15 +388,15 @@ test('v40 labels drill through the six-level taxonomy with individually mapped g
   assert.match(experienceCss,/\.part-label\.is-reference/);
 });
 
-test('V149 adaptive shell has one overlay owner and uses the legacy drawing canvas only as the 2D workspace',()=>{
-  assert.match(appShellCss,/V149 canonical production shell/);
-  assert.match(appShellCss,/\.workspace-2d \.engineering-workbench/);
-  assert.match(appShellCss,/\.legacy-nav-entry,\.legacy-tool-entry/);
+test('V194 adaptive shell has one overlay owner and a canonical 2D plan surface',()=>{
+  assert.match(appShellCss,/V194 canonical surfaces/);
+  assert.match(html,/id="plant-plan-2d"/);
+  assert.match(appShellCss,/\.workspace-2d \.plant-plan-2d\{display:block!important\}/);
+  assert.doesNotMatch(html,/legacy-nav-entry/);
+  assert.doesNotMatch(html,/engineering-workbench/);
   assert.doesNotMatch(ui,/document\.addEventListener\('keydown'/);
-  assert.doesNotMatch(ui,/#ui-backdrop'\)\?\.addEventListener/);
   assert.match(mobileStableUi,/document\.addEventListener\('keydown'/);
 });
-
 test('V79 interface keeps the scene primary, readable and secondary panels dismissible',()=>{
   assert.match(html,/<body class="panel-hidden ui-simple">/);
   assert.match(html,/app-shell-v79\.css/);
@@ -413,8 +412,10 @@ test('V79 interface keeps the scene primary, readable and secondary panels dismi
   assert.match(appShellCss,/\.statusbar/);
 });
 
-test('runtime binds every workbench button and provides a visual fallback without WebGL',()=>{
-  assert.match(app,/\$\$\('\[data-workbench="dwg"\]'\)\.forEach/);
+test('runtime uses the canonical 2D surface and provides a visual fallback without WebGL',()=>{
+  assert.doesNotMatch(app,/data-workbench/);
+  assert.match(html,/id="dwg-canvas"/);
+  assert.match(app,/function redrawPlantPlan/);
   assert.match(app,/function renderStaticMachineFallback/);
   assert.match(app,/Tampilan cadangan siap/);
   assert.match(app,/PU1–PU8/);
@@ -422,7 +423,6 @@ test('runtime binds every workbench button and provides a visual fallback withou
   assert.match(app,/'CU2','Y2','PU14','CUF'/);
   assert.match(app,/Final CU → X3 Delivery/);
 });
-
 test('startup resolves the requested deep-link before revealing the workspace',()=>{
   assert.match(html,/id="nav-machine"[^>]*>[\s\S]*?<small>Pabrik<\/small>/);
   assert.match(mobileStableUi,/factory:'nav-machine'/);
