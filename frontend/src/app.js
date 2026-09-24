@@ -29,10 +29,18 @@ const LEGACY_MACHINE_ROUTE=Object.freeze({
  'BMJ-MCH-0010':'apm2'
 });
 const normalizeMachineKey=key=>{const raw=String(key??'').trim();return raw?(LEGACY_MACHINE_ROUTE[raw]||raw):null;};
-let REQUESTED_MACHINE,GENERIC_CONFIG=null,MACHINE_KEY=FOUNDATION_SCOPE.primaryRoute,IS_OFFSET10=false,IS_APM2=false,IS_SHEETING=false,IS_GENERIC=false,IS_VERIFIED_REGISTRY_SIM=false,GENERIC_TAXONOMY=[],GENERIC_ROOT=null,ACTIVE_ROOT='O5',ACTIVE_TAXONOMY=OFFSET5_TAXONOMY,TAXONOMY_BY_ID=OFFSET5_BY_ID,taxonomyChildren=offset5Children,taxonomyStats=offset5Stats,PHOTO_REGISTRY=OFFSET5_PHOTOS,GENERIC_SOURCES=[],TECHNICAL_SOURCES=OFFSET5_SOURCES,photoStats=offset5PhotoStats,ORIENTATION=OFFSET5_ORIENTATION,PRINTING_SIMULATION_STAGES=OFFSET5_SIM_STAGES,INK_SIMULATION_SEQUENCE=OFFSET5_INK_SEQUENCE;
+const emptyTaxonomyStats=()=>({total:0,byLevel:{1:0,2:0,3:0,4:0,5:0,6:0}});
+const emptyPhotoStats=()=>({unique:0,total:0});
+const neutralOrientation=Object.freeze({feedDirection:'Belum memilih mesin',operatorSide:'Belum memilih mesin',driveSide:'Belum memilih mesin'});
+let REQUESTED_MACHINE=null,GENERIC_CONFIG=null,MACHINE_KEY=null,IS_OFFSET10=false,IS_APM2=false,IS_SHEETING=false,IS_GENERIC=false,IS_VERIFIED_REGISTRY_SIM=false,GENERIC_TAXONOMY=[],GENERIC_ROOT=null,ACTIVE_ROOT=null,ACTIVE_TAXONOMY=[],TAXONOMY_BY_ID=new Map(),taxonomyChildren=()=>[],taxonomyStats=emptyTaxonomyStats,PHOTO_REGISTRY=[],GENERIC_SOURCES=[],TECHNICAL_SOURCES=[],photoStats=emptyPhotoStats,ORIENTATION=neutralOrientation,PRINTING_SIMULATION_STAGES=[],INK_SIMULATION_SEQUENCE=[];
+function clearActiveMachineDescriptor(){
+ REQUESTED_MACHINE=null;GENERIC_CONFIG=null;MACHINE_KEY=null;IS_OFFSET10=false;IS_APM2=false;IS_SHEETING=false;IS_GENERIC=false;IS_VERIFIED_REGISTRY_SIM=false;
+ GENERIC_TAXONOMY=[];GENERIC_ROOT=null;ACTIVE_ROOT=null;ACTIVE_TAXONOMY=[];TAXONOMY_BY_ID=new Map();taxonomyChildren=()=>[];taxonomyStats=emptyTaxonomyStats;
+ PHOTO_REGISTRY=[];GENERIC_SOURCES=[];TECHNICAL_SOURCES=[];photoStats=emptyPhotoStats;ORIENTATION=neutralOrientation;PRINTING_SIMULATION_STAGES=[];INK_SIMULATION_SEQUENCE=[];
+}
 function configureActiveMachine(requested){
  REQUESTED_MACHINE=requested;requested=normalizeMachineKey(requested);
- if(!requested)throw new Error('Aset mesin harus dipilih sebelum membuka model 3D.');
+ if(!requested){clearActiveMachineDescriptor();return false;}
  GENERIC_CONFIG=universalMachineConfig(requested);
  if(!['offset5','offset10','apm2','sheeting'].includes(requested)&&!GENERIC_CONFIG)throw new Error(`Model 3D tidak terdaftar untuk ${requested}`);
  MACHINE_KEY=requested;
@@ -50,17 +58,22 @@ function configureActiveMachine(requested){
  ORIENTATION=IS_OFFSET10?OFFSET10_ORIENTATION:IS_APM2?APM2_ORIENTATION:IS_SHEETING?SHEETING_ORIENTATION:IS_GENERIC?{feedDirection:'Mengikuti alur proses keluarga',operatorSide:'Belum terverifikasi',driveSide:'Belum terverifikasi'}:OFFSET5_ORIENTATION;
  PRINTING_SIMULATION_STAGES=IS_OFFSET10?OFFSET10_SIMULATION_STAGES:IS_APM2?APM2_SIMULATION_STAGES:IS_SHEETING?SHEETING_SIMULATION_STAGES:IS_GENERIC?(IS_VERIFIED_REGISTRY_SIM?(GENERIC_CONFIG.profile?.process?.length?GENERIC_CONFIG.profile.process:GENERIC_TAXONOMY.filter(n=>n.level===2).map(n=>n.name)):GENERIC_CONFIG.modules):OFFSET5_SIM_STAGES;
  INK_SIMULATION_SEQUENCE=IS_OFFSET10?OFFSET10_INK_SEQUENCE:IS_APM2?APM2_PROCESS_STEPS:IS_SHEETING?SHEETING_PROCESS_STEPS:IS_GENERIC?(IS_VERIFIED_REGISTRY_SIM?PRINTING_SIMULATION_STAGES:GENERIC_CONFIG.modules.map(x=>`${x} process`)):OFFSET5_INK_SEQUENCE;
+ return true;
 }
 const INITIAL_URL_STATE=new URLSearchParams(location.search);
 const INITIAL_REQUESTED_ASSET=INITIAL_URL_STATE.get('machine')||INITIAL_URL_STATE.get('asset');
-configureActiveMachine(INITIAL_REQUESTED_ASSET&&canOpenTechnical3D(INITIAL_REQUESTED_ASSET)?INITIAL_REQUESTED_ASSET:FOUNDATION_SCOPE.primaryRoute);
+clearActiveMachineDescriptor();
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'Belum tersedia').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const number=n=>Number.isFinite(n)?n.toLocaleString('id-ID',{maximumFractionDigits:4}):'Belum tersedia';
 let state,engine,activeTab='overview',apiBase='',token='',role=null,editing=false,explode=0,selectedPart=null,selectedTaxonomyId=ACTIVE_ROOT,exteriorMode=false,exteriorPreviousLow=null,exteriorFocusKey=null,simulationState,simulationOwnsExterior=false,referenceCategoryFilter='all',toastTimer,bundledLayout=null,cachedDataActive=false;
 function applyActiveMachineState(){
  state=structuredClone(initialState);referenceCategoryFilter='all';
- simulationState={active:false,running:false,paused:false,speed:1,stage:'Feeder',completed:0,progress:0,sheetsVisible:0,pileSheetsVisible:0,rotorCount:0,oscillatorCount:0,mechanismCount:0,inkFlowCount:0,uvLampCount:0,uvActive:false,pathVisible:IS_SHEETING?false:true,inkFlowVisible:true};
+ simulationState={available:Boolean(MACHINE_KEY),active:false,running:false,paused:false,speed:1,stage:MACHINE_KEY?'Feeder':null,completed:0,progress:0,sheetsVisible:0,pileSheetsVisible:0,rotorCount:0,oscillatorCount:0,mechanismCount:0,inkFlowCount:0,uvLampCount:0,uvActive:false,pathVisible:IS_SHEETING?false:Boolean(MACHINE_KEY),inkFlowVisible:Boolean(MACHINE_KEY)};
+ if(!MACHINE_KEY){
+  state.asset={...state.asset,asset_id:null,asset_code:null,codename:null,model:null,description:'Belum memilih mesin',source_description:null,manufacturer:null,specification:null,configuration:null,'3d_status':'BELUM MEMILIH MESIN',data_confidence:null,discovery_status:null,sources:[]};
+  return;
+ }
  if(IS_OFFSET10)state.asset={...state.asset,asset_id:'MACHINE-OFFSET10',asset_code:'OFFSET-10',codename:null,model:'CX104-2+LY-8+LY-1+L UV + FoilStar',description:'OFFSET 10',source_description:'OFFSET - 10 MACHINE',manufacturer:'Heidelberg',specification:'Speedmaster CX 104 · Full UV · FoilStar Gen.3 · X3 delivery',configuration:'CX104-2+LY-8+LY-1+L UV + FoilStar / X3','3d_status':'PROCEDURAL / DOCUMENT-GROUNDED',data_confidence:'HIGH CONFIDENCE',discovery_status:'OFFICIAL_DOCUMENTS_AVAILABLE',sources:OFFSET10_TECHNICAL_SOURCES};
  if(IS_APM2)state.asset={...state.asset,asset_id:'MACHINE-APM2',asset_code:'APM-2',codename:'APM-2',model:'SP 102',description:'AUTOPLATEN - 2 MACHINE',source_description:'BMJ Machine Database',manufacturer:'BOBST',specification:'Automatic flatbed die cutter · SP 102 family · 1994',configuration:'Feeder · Register / SideLay · Gripper Chain · Flatbed Platen · Stripping · Delivery','3d_status':'PROCEDURAL / DATABASE + LEGACY FAMILY REFERENCES',data_confidence:'IDENTITY VERIFIED / VARIANT REFERENCE',discovery_status:'SP102_FAMILY_REFERENCE_AVAILABLE',serial_number:'57115506',functional_location:'PC-PK2-CON-AUT-AUTOPLAT02',year:1994,sources:APM2_TECHNICAL_SOURCES};
  if(IS_SHEETING)state.asset={...state.asset,asset_id:'BMJ-MCH-0002',asset_code:'SBM-2',codename:'SBM-2',model:'HSM-CTM7',description:'SHEETING LEXUS',source_description:'BMJ Machine Database',manufacturer:'LEXUS',specification:'HSM-CTM7 · BMJ actual photo reconstruction · 2014',configuration:'Single-reel hydraulic rollstand → low entry guide → overhead web carrier + deep roller loops → guarded LEXUS cross-cut → smooth take-away gap → slow overlap/shingling → rack stacker','3d_status':'DEDICATED PROCEDURAL / BMJ PHOTO-GROUNDED RECONSTRUCTION',data_confidence:'IDENTITY VERIFIED / ACTUAL PHOTO GEOMETRY / CUTTER INTERNAL UNRESOLVED',discovery_status:'BMJ_ACTUAL_PHOTOSET_PRIMARY__HSM_FAMILY_PROCESS_SECONDARY',serial_number:'00982',functional_location:'PC-PK2-OFS-SHT-SHEETING01',year:2014,sources:SHEETING_TECHNICAL_SOURCES};
