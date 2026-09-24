@@ -69,13 +69,13 @@
 
       <div class="scene-bottom">
         <div class="view-switch" role="group" aria-label="Kontrol tampilan">
-          <button data-camera="iso" class="active">3D <span>Isometrik</span></button>
-          <button data-camera="top">ATAS <span>Tampak Atas</span></button>
-          <button data-camera="fit">FOKUS <span>Pilihan</span></button>
-          <button id="tool-explode" aria-pressed="false">URAI <span>Komponen</span></button>
-          <button id="tool-isolate" aria-pressed="false">TAMPILKAN SENDIRI <span>Pilihan</span></button>
-          <button id="tool-interior" aria-pressed="false">Buka Interior <span>Potongan mesin</span></button>
-          <button data-camera="reset">TAMPILAN AWAL <span>Reset kamera</span></button>
+          <button data-camera="iso" class="active camera-tool">3D <span>Isometrik</span></button>
+          <button data-camera="top" class="camera-tool">ATAS <span>Tampak Atas</span></button>
+          <button data-camera="fit" class="camera-tool context-tool">FOKUS <span>Pilihan</span></button>
+          <button id="tool-explode" class="inspect-tool" aria-pressed="false">URAI <span>Komponen</span></button>
+          <button id="tool-isolate" class="inspect-tool" aria-pressed="false">TAMPILKAN SENDIRI <span>Pilihan</span></button>
+          <button id="tool-interior" class="inspect-tool" aria-pressed="false">Buka Interior <span>Potongan mesin</span></button>
+          <button data-camera="reset" class="camera-tool reset-tool">TAMPILAN AWAL <span>Reset kamera</span></button>
         </div>
         <div class="scene-options">
           <button id="labels" class="icon-btn active" title="Label" aria-label="Tampilkan atau sembunyikan label" aria-pressed="true">Aa</button>
