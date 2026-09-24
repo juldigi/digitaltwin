@@ -23,6 +23,6 @@ test('one canonical subscriber synchronizes view controls after URL restore and 
 });
 
 test('Stage 6 shell and service worker are cache-busted',()=>{
- assert.match(html,/src\/app-shell-v79\.js\?v=211/);
- assert.match(sw,/factory-digital-twin-v211-ui-ssot-stage6-20260925/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=212/);
+ assert.match(sw,/factory-digital-twin-v212-ui-ssot-stage6-20260925/);
 });
