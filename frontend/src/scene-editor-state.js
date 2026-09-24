@@ -26,3 +26,15 @@ export function validateSceneOverrides(changes){
   }
   return changes;
 }
+
+// Generated objects do not exist in the scene until overrides are replayed.
+// Duplicates must be checked against their original source, not their new ID.
+export function validateSceneImport(changes,{hasObject,identityFor}){
+  validateSceneOverrides(changes);
+  for(const [id,value] of Object.entries(changes)){
+    if(id.startsWith('new:'))continue;
+    const source=id.startsWith('copy:')?value.sourceId:id;
+    if(!hasObject(source)||value.identity&&value.identity!==identityFor(source))throw new Error('Berkas berisi objek yang tidak sesuai versi scene saat ini.');
+  }
+  return changes;
+}

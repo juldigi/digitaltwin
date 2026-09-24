@@ -1,12 +1,21 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {sceneIdentity,validateSceneOverrides} from '../frontend/src/scene-editor-state.js';
+import {sceneIdentity,validateSceneOverrides,validateSceneImport} from '../frontend/src/scene-editor-state.js';
 import {FactoryEngine} from '../frontend/src/engine.js';
 import * as THREE from 'three';
 import {buildActualFactory,loadFactoryFleet} from '../frontend/src/factory-building.js';
 import {loadActualPlantLayout} from '../frontend/src/data/plant-actual.js';
 
 const original={position:[1,0,2],rotation:[0,0,0],scale:[1,1,1],visible:false,locked:true,deleted:true,identity:'["Mesh","Tank","IPAL_TANK","A1","IPAL","CylinderGeometry",0]'};
+
+test('scene import accepts generated primitives and valid copies but rejects stale sources',()=>{
+ const generated='new:123e4567-e89b-12d3-a456-426614174000',copy='copy:123e4567-e89b-12d3-a456-426614174001';
+ const imported={[generated]:{shape:'box',position:[0,0,0],rotation:[0,0,0],scale:[1,1,1],visible:true},[copy]:{...original,sourceId:'wall:W1'}};
+ const resolver={hasObject:id=>id==='wall:W1',identityFor:()=>original.identity};
+ assert.equal(validateSceneImport(imported,resolver),imported);
+ assert.throws(()=>validateSceneImport(imported,{...resolver,hasObject:()=>false}),/tidak sesuai/);
+ assert.throws(()=>validateSceneImport(imported,{...resolver,identityFor:()=>''}),/tidak sesuai/);
+});
 
 test('scene overrides preserve reversible delete and lock, with strict bounded transforms',()=>{
  assert.deepEqual(validateSceneOverrides({'node:0.1':original}),{'node:0.1':original});
