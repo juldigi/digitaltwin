@@ -8,12 +8,11 @@ const ui=fs.readFileSync(new URL('../frontend/src/ui-v5.js',import.meta.url),'ut
 const shell=fs.readFileSync(new URL('../frontend/src/app-shell-v79.js',import.meta.url),'utf8');
 const sw=fs.readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 
-test('V159 STATUS control is visible, reachable, and backed by live truth sources',()=>{
- assert.match(html,/id="panel-launcher"[^>]+title="Status fondasi"[^>]+aria-label="Buka status fondasi"/);
- assert.match(ui,/panel-launcher[^\n]+bmj:foundationstatusrequest/);
- assert.doesNotMatch(ui,/panel-launcher[^\n]+toggleLauncher\(\)/);
+test('V194 data and source status is reachable from Settings without a floating launcher',()=>{
+ assert.doesNotMatch(html,/id="panel-launcher"/);
+ assert.match(app,/id="settings-status"/);
+ assert.match(app,/on\('#settings-status',foundationStatusDialog\)/);
  assert.match(app,/function foundationStatusDialog\(\)/);
- assert.match(app,/addEventListener\('bmj:foundationstatusrequest',foundationStatusDialog\)/);
  assert.match(app,/layoutTruth\(l\)/);
  assert.match(app,/buildDwgFidelityLedger/);
  assert.match(app,/assetTruth\(state\?\.asset/);
@@ -30,16 +29,13 @@ test('OFFSET 5 overview carries all mandatory master-prompt truth fields',()=>{
  assert.match(app,/primaryTruth\.healthScore/);
 });
 
-test('Map Editor exposes source provenance and both DWG and Three.js coordinates',()=>{
- assert.match(app,/Status sumber posisi/);
- assert.match(app,/DWG-VERIFIED hanya berasal dari geometri atau anchor sumber/);
- assert.match(app,/Status perubahan manual/);
- assert.match(app,/id="cad-coordinates"/);
- assert.match(app,/id="three-coordinates"/);
- assert.match(app,/DWG: X/);
- assert.match(app,/THREE: X/);
- assert.match(app,/USER-CONFIRMED/);
- assert.match(app,/APPROXIMATE/);
+test('V194 retires the duplicate classic position editor in favor of Mode Edit 3D',()=>{
+ assert.doesNotMatch(html,/id="edit-position"/);
+ assert.doesNotMatch(app,/function editorPanel\(\)/);
+ assert.match(app,/Mode Edit 3D/);
+ assert.match(app,/openSceneEditor\(\)/);
+ assert.match(app,/Posisi \(meter\)/);
+ assert.match(app,/Rotasi \(derajat\)/);
 });
 
 test('V159 preserves V158 camera and selection interaction contract',()=>{
@@ -48,7 +44,7 @@ test('V159 preserves V158 camera and selection interaction contract',()=>{
  assert.match(app,/clearFactorySelection\(\)/);
  assert.match(app,/requestFullscreen\(\)/);
  assert.match(app,/document\.exitFullscreen\(\)/);
- for(const token of ['data-camera="iso"','data-camera="top"','data-camera="fit"','data-camera="reset"','id="fullscreen"','id="global-search"','id="nav-assets"','id="panel-launcher"'])assert.ok(html.includes(token),token+' missing');
+ for(const token of ['data-camera="iso"','data-camera="top"','data-camera="fit"','data-camera="reset"','id="fullscreen"','id="global-search"','id="nav-assets"','id="settings"'])assert.ok(html.includes(token),token+' missing');
 });
 
 test('V159 search promise matches strict Phase-1 scope and cache identifiers are coherent',()=>{
@@ -57,6 +53,6 @@ test('V159 search promise matches strict Phase-1 scope and cache identifiers are
  assert.match(html,/src\/app\.js\?v=192/);
  assert.match(html,/src\/ui-v5\.js\?v=167/);
  assert.match(html,/src\/app-shell-v79\.js\?v=192/);
- assert.match(shell,/v193-three-domain-contextual/);
+ assert.match(shell,/v194-state-owned-contextual/);
  assert.match(sw,/factory-digital-twin-v207-superadmin-editor-20260924/);
 });
