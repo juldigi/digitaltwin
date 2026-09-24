@@ -151,3 +151,103 @@ test('V205 hardening fixes the tank safety rail hierarchy and preserves literal 
  assert.ok(IPAL_PHOTO_EVIDENCE_V205.confirmedLabels.includes('TANGKI AN AEROBIK'));
  assert.ok(IPAL_PHOTO_EVIDENCE_V205.confirmedLabels.includes('UNIT (KARUNG) PENGERING LUMPUR'));
 });
+
+
+test('V205 detail pass 2 includes the photo-visible secondary equipment and service microdetails',async()=>{
+ const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
+ const root=buildActualFactory(layout,fleet).root;
+ const expected=[
+  ['IPAL_PHOTO_BLUE_COVERED_SERVICE_BASIN',1],
+  ['IPAL_PHOTO_COVERED_BASIN_YELLOW_ACCESS_HATCH',4],
+  ['IPAL_PHOTO_SECONDARY_CANOPY_GREEN_COLUMN',2],
+  ['IPAL_PHOTO_SECONDARY_CANOPY_LINEAR_LIGHT',1],
+  ['IPAL_PHOTO_LATTICE_COLUMN_CHORD',8],
+  ['IPAL_PHOTO_SECOND_HOPPER_CONE_VESSEL',1],
+  ['IPAL_PHOTO_SECOND_HOPPER_CYLINDER',1],
+  ['IPAL_PHOTO_BLUE_AUXILIARY_VESSEL',2],
+  ['IPAL_PHOTO_LARGE_RED_MIXING_TOWER',1],
+  ['IPAL_PHOTO_SLUDGE_PVC_MANIFOLD',1],
+  ['IPAL_PHOTO_SLUDGE_MANUAL_VALVE_HANDLE',5],
+  ['IPAL_PHOTO_SLUDGE_DRAIN_SUMP_WALL',1],
+  ['IPAL_PHOTO_TANK_EXTERNAL_WHITE_PIPE',2],
+  ['IPAL_PHOTO_POND_REED',20],
+  ['IPAL_PHOTO_MAINTENANCE_STOOL_SEAT',2]
+ ];
+ for(const [semantic,min] of expected)assert.ok(collect(root,new RegExp('^'+semantic+'$')).length>=min,semantic);
+});
+
+test('V205 detail pass 2 keeps newly reconstructed equipment footprints separated at the evidence-layout level',()=>{
+ const r=IPAL_PHOTO_EVIDENCE_V205.relativeLayout;
+ const cb=r.coveredServiceBasin,or=r.operatorRoom;
+ assert.ok(cb.x+cb.w/2<=or.x-or.w/2,'covered basin must not penetrate operator room');
+ assert.ok(cb.y+cb.d/2<=or.y-or.d/2,'covered basin must stop before operator room facade');
+ const h=r.secondHopperVessel,rt=r.largeRedMixingTower;
+ assert.ok(Math.hypot(h.x-rt.x,h.y-rt.y)>h.r+rt.r,'red tower must not overlap second hopper shell');
+ const aux=r.blueAuxiliaryVessels.at(-1),rack=r.chemicalRack;
+ assert.ok(aux.x+aux.r<=rack.x-rack.w/2+.02,'auxiliary vessel must remain outside chemical rack footprint');
+});
+
+test('V205 detail pass 2 keeps the newly observed objects descriptive rather than inventing process identity',()=>{
+ const observed=IPAL_PHOTO_EVIDENCE_V205.observedFeatures;
+ for(const feature of ['BLUE_COVERED_SERVICE_BASIN_WITH_YELLOW_HATCHES','MULTIPLE_HOPPER_BOTTOM_METAL_VESSELS','BLUE_AUXILIARY_VERTICAL_VESSELS','LARGE_RED_MIXING_OR_PROCESS_TOWER','SLUDGE_MANIFOLD_VALVES_FLEXIBLE_HOSE_AND_DRAIN_SUMP','WHITE_EXTERNAL_TANK_NOZZLE_PIPE'])assert.ok(observed.includes(feature),feature);
+ assert.ok(IPAL_PHOTO_EVIDENCE_V205.unresolved.includes('FUNCTION_OF_EACH_UNLABELLED_METAL_VESSEL'));
+ assert.ok(IPAL_PHOTO_EVIDENCE_V205.unresolved.includes('EXACT_PIPE_DIAMETERS_MATERIAL_SPECS_AND_COMPLETE_ROUTING'));
+});
+
+
+test('V205 photo detail pass 2 includes the secondary actual-equipment groups seen across IMG_2514/2515/2517/2523/2525',async()=>{
+ const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
+ const built=buildActualFactory(layout,fleet),root=built.root;
+ for(const semantic of [
+  'IPAL_PHOTO_BLUE_COVERED_SERVICE_BASIN',
+  'IPAL_PHOTO_COVERED_BASIN_YELLOW_ACCESS_HATCH',
+  'IPAL_PHOTO_SECOND_HOPPER_CONE_VESSEL',
+  'IPAL_PHOTO_SECOND_HOPPER_CYLINDER',
+  'IPAL_PHOTO_BLUE_AUXILIARY_VESSEL',
+  'IPAL_PHOTO_LARGE_RED_MIXING_TOWER',
+  'IPAL_PHOTO_SLUDGE_PVC_MANIFOLD',
+  'IPAL_PHOTO_SLUDGE_DRAIN_SUMP_WALL',
+  'IPAL_PHOTO_TANK_EXTERNAL_WHITE_PIPE',
+  'IPAL_PHOTO_SECONDARY_CANOPY_CORRUGATED_PANEL',
+  'IPAL_PHOTO_SECONDARY_CANOPY_GREEN_COLUMN',
+  'IPAL_PHOTO_OPERATOR_EXHAUST_FAN_RING',
+  'IPAL_PHOTO_POND_REED',
+  'IPAL_PHOTO_MAINTENANCE_STOOL_SEAT'
+ ])assert.ok(collect(root,new RegExp('^'+semantic+'$')).length>0,semantic);
+ assert.ok(IPAL_PHOTO_EVIDENCE_V205.observedFeatures.includes('BLUE_COVERED_SERVICE_BASIN_WITH_YELLOW_HATCHES'));
+ assert.ok(IPAL_PHOTO_EVIDENCE_V205.observedFeatures.includes('MULTIPLE_HOPPER_BOTTOM_METAL_VESSELS'));
+ assert.ok(IPAL_PHOTO_EVIDENCE_V205.observedFeatures.includes('SLUDGE_MANIFOLD_VALVES_FLEXIBLE_HOSE_AND_DRAIN_SUMP'));
+});
+
+test('V205 detail pass 2 grounds process support steel and keeps major reconstructed equipment envelopes non-penetrating',async()=>{
+ const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
+ const built=buildActualFactory(layout,fleet),audit=built.root.userData.ipal.photoActual;
+ assert.ok(audit.supportGroundingAudit.basePlates>=18,'base plates should be modeled on major yellow process supports');
+ assert.ok(audit.supportGroundingAudit.anchorBolts>=72,'anchor bolts should physically attach base plates to the slab');
+ assert.ok(audit.supportGroundingAudit.supportLegs>=18);
+ assert.equal(audit.supportGroundingAudit.belowFloor,0);
+ assert.equal(audit.supportGroundingAudit.floatingLegs,0);
+ assert.deepEqual(audit.equipmentEnvelopeCollisions,[]);
+ assert.ok(audit.equipmentMinGap>=0);
+});
+
+test('V205 detail pass 2 uses efficient batched roof corrugation and real toe-board continuity',async()=>{
+ const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
+ const root=buildActualFactory(layout,fleet).root;
+ const ribs=collect(root,/^IPAL_PHOTO_CANOPY_CORRUGATION_RIBS$/);
+ assert.equal(ribs.length,1,'roof corrugation should be batched into one object');
+ assert.equal(ribs[0].userData.batched,true);
+ assert.equal(ribs[0].userData.drawCallOptimized,true);
+ assert.ok(collect(root,/^IPAL_PHOTO_HOPPER_PLATFORM_TOEBOARD$/).length>=2);
+ assert.ok(collect(root,/^IPAL_PHOTO_CHEMICAL_RACK_TOEBOARD$/).length>=4);
+ assert.ok(collect(root,/^IPAL_PHOTO_RED_TOWER_PLATFORM_TOEBOARD$/).length>=2);
+});
+
+test('V205 detail pass 2 gives photographed process piping visible unions instead of raw cylinder intersections',async()=>{
+ const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
+ const root=buildActualFactory(layout,fleet).root;
+ assert.ok(collect(root,/UNION$/).length>=6);
+ assert.ok(collect(root,/^IPAL_PHOTO_PUMP_DISCHARGE_UNION$/).length>=2);
+ assert.ok(collect(root,/^IPAL_PHOTO_PUMP_TOP_UNION$/).length>=2);
+ assert.ok(collect(root,/^IPAL_PHOTO_TANK_EXTERNAL_WHITE_NOZZLE$/).length>=1);
+});
