@@ -12,8 +12,8 @@ const collect=(root,re)=>{
 test('V203 keeps every enclosed room closed and upgrades each processed room to a full shell',async()=>{
  const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
  const built=buildActualFactory(layout,fleet),root=built.root,meta=root.userData,s=meta.buildingDetailStats;
- assert.equal(meta.researchVersion,'V203');
- assert.equal(meta.buildingDetailPass,'V203_FULL_ROOM_SHELL_AND_AUDITED_FURNITURE_REALISM');
+ assert.equal(meta.researchVersion,'V204');
+ assert.equal(meta.buildingDetailPass,'V204_CIRCULATION_FINISH_AND_FURNITURE_COLLISION_HARDENING');
  assert.equal(meta.exteriorEnvelopeAudit.openGapCount,0);
  assert.equal(meta.roomEnvelopeSummary.openEdges,0);
  assert.equal(meta.roomEnvelopeSummary.invalidOuterOpenings,0);
@@ -76,7 +76,7 @@ test('V203 performs real furniture footprint and door-approach audits instead of
  assert.equal(meta.furnitureLayoutSummary.orientationErrors,0);
  assert.equal(meta.furnitureLayoutSummary.doorSwingClearanceViolations,0);
  assert.ok(meta.furnitureLayoutSummary.minLayoutScale>=.70,'room furniture is being shrunk too aggressively: '+meta.furnitureLayoutSummary.minLayoutScale);
- assert.ok(meta.roomFurnitureAudit.every(r=>r.status==='V203_CONTEXTUAL_LAYOUT'));
+ assert.ok(meta.roomFurnitureAudit.every(r=>r.status==='V204_CONTEXTUAL_LAYOUT'));
  assert.ok(meta.roomFurnitureAudit.every(r=>r.footprints>0));
 });
 

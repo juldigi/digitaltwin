@@ -13,8 +13,8 @@ test('V142 factory architecture keeps measured/user-confirmed envelope while add
  const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
  const {root,layers}=buildActualFactory(layout,fleet);
  assert.equal(root.userData.baselineId,BASELINE_ID);
- assert.equal(root.userData.buildingDetailPass,'V203_FULL_ROOM_SHELL_AND_AUDITED_FURNITURE_REALISM');
- assert.equal(root.userData.researchVersion,'V203');
+ assert.equal(root.userData.buildingDetailPass,'V204_CIRCULATION_FINISH_AND_FURNITURE_COLLISION_HARDENING');
+ assert.equal(root.userData.researchVersion,'V204');
  assert.equal(root.userData.assumptions.roofEaves,4.5);
  assert.equal(root.userData.assumptions.roofRidge,7);
  assert.equal(root.userData.architecturalEvidenceBoundary.notAsBuilt,true);
