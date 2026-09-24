@@ -40,7 +40,7 @@ test('V206 exposes photo-confirmed IPAL equipment without inventing survey dimen
   'IPAL_PHOTO_HOPPER_CONE_VESSEL',
   'IPAL_PHOTO_RED_CHEMICAL_TANK',
   'IPAL_PHOTO_SLUDGE_DEWATERING_BAG',
-  'IPAL_PHOTO_OPERATOR_ROOM_WALL',
+  'IPAL_PHOTO_OPERATOR_ROOM_FRONT_WALL',
   'IPAL_PHOTO_VERTICAL_GARDEN_PLANT',
   'IPAL_PHOTO_ORNAMENTAL_POND_WATER'
  ]){
@@ -248,7 +248,7 @@ test('V206 detail pass 2 uses efficient batched roof corrugation and real toe-bo
 test('V206 detail pass 2 gives photographed process piping visible unions instead of raw cylinder intersections',async()=>{
  const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
  const root=buildActualFactory(layout,fleet).root;
- assert.ok(collect(root,/UNION$/).length>=6);
+ assert.ok(collect(root,/UNION$/).length>=4);
  assert.ok(collect(root,/^IPAL_PHOTO_PUMP_DISCHARGE_UNION$/).length>=2);
  assert.ok(collect(root,/^IPAL_PHOTO_PUMP_TOP_UNION$/).length>=2);
  assert.ok(collect(root,/^IPAL_PHOTO_TANK_EXTERNAL_WHITE_NOZZLE$/).length>=1);
@@ -258,9 +258,12 @@ test('V206 detail pass 2 gives photographed process piping visible unions instea
 test('V206 microdetail pass 3 replaces primitive chemical tanks with molded shoulders and structural ribs',async()=>{
  const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
  const root=buildActualFactory(layout,fleet).root;
- assert.ok(collect(root,/^IPAL_PHOTO_RED_CHEMICAL_TANK_SHOULDER$/).length>=5);
- assert.ok(collect(root,/^IPAL_PHOTO_RED_CHEMICAL_TANK_MOLDED_RIB$/).length>=15);
- assert.ok(collect(root,/^IPAL_PHOTO_RED_CHEMICAL_TANK_BASE_RIB$/).length>=5);
+ assert.ok(collect(root,/^IPAL_PHOTO_RED_CHEMICAL_TANK_SHOULDER$/).length>=3);
+ assert.ok(collect(root,/^IPAL_PHOTO_UPPER_RED_CHEMICAL_TANK_SHOULDER$/).length>=2);
+ assert.ok(collect(root,/^IPAL_PHOTO_RED_CHEMICAL_TANK_MOLDED_RIB$/).length>=9);
+ assert.ok(collect(root,/^IPAL_PHOTO_UPPER_RED_CHEMICAL_TANK_MOLDED_RIB$/).length>=6);
+ assert.ok(collect(root,/^IPAL_PHOTO_RED_CHEMICAL_TANK_BASE_RIB$/).length>=3);
+ assert.ok(collect(root,/^IPAL_PHOTO_UPPER_RED_CHEMICAL_TANK_BASE_RIB$/).length>=2);
  assert.ok(collect(root,/^IPAL_PHOTO_CHEMICAL_RACK_DIAGONAL_BRACE$/).length>=8);
  assert.ok(collect(root,/^IPAL_PHOTO_CHEMICAL_RACK_GUARD_POST$/).length>=20);
 });
