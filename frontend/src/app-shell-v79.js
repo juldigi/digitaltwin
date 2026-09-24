@@ -1,4 +1,4 @@
-import{getState,setState,setActiveSection,setViewMode,setLayer,setSimulation,setInspector,openOverlay,closeOverlay,hydrateUrl,subscribe}from'./state/app-state.js';
+import{getState,setState,setActiveSection,setViewMode,setLayer,setSimulation,setInspector,openOverlay,closeOverlay,subscribe}from'./state/app-state.js';
 import{FOUNDATION_SCOPE,canOpenTechnical3D}from'./data/foundation-scope.js';
 
 const q=(s,r=document)=>r.querySelector(s);
@@ -93,13 +93,19 @@ qa('[data-mobile-tool]',mobileContextTools).forEach(button=>button.addEventListe
 
 const splash=q('.app-splash');
 const firstVisit=!sessionStorage.getItem('bmj-splash-seen');
-let documentLoaded=document.readyState==='complete',appReadyStatus=document.documentElement.dataset.appReady||null,splashFinishTimer=0;
+let documentLoaded=document.readyState==='complete',splashFinishTimer=0;
 const finishSplash=()=>{if(!splash||splash.classList.contains('is-done'))return;splash.classList.add('is-done');sessionStorage.setItem('bmj-splash-seen','1');setTimeout(()=>splash.remove(),600)};
-const maybeFinishSplash=()=>{if(!documentLoaded||!appReadyStatus)return;clearTimeout(splashFinishTimer);splashFinishTimer=setTimeout(finishSplash,firstVisit?900:100)};
-if(documentLoaded)maybeFinishSplash();else addEventListener('load',()=>{documentLoaded=true;maybeFinishSplash()},{once:true});
-addEventListener('bmj:appready',event=>{appReadyStatus=event.detail?.status||document.documentElement.dataset.appReady||'ready';maybeFinishSplash()});
-if(appReadyStatus)maybeFinishSplash();
-setTimeout(()=>{if(splash?.classList.contains('is-done'))return;if(!appReadyStatus)document.documentElement.dataset.appReady='timeout';finishSplash()},12000);
+const showBootFailure=(message='Aplikasi belum berhasil dimuat')=>{const boot=q('#boot');if(!boot)return;boot.hidden=false;boot.innerHTML='<strong>'+escapeBootText(message)+'</strong><p>Periksa koneksi atau muat ulang halaman.</p><button type="button" id="boot-retry">Muat Ulang</button>';q('#boot-retry',boot)?.addEventListener('click',()=>location.reload())};
+const escapeBootText=value=>String(value||'Aplikasi belum berhasil dimuat').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+const syncSplashFromState=state=>{
+ const phase=state?.bootState?.phase||'booting';
+ if(phase==='error'||phase==='timeout')showBootFailure(state?.bootState?.message||'Aplikasi belum berhasil dimuat');
+ if(!documentLoaded||!['ready','error','timeout'].includes(phase))return;
+ clearTimeout(splashFinishTimer);splashFinishTimer=setTimeout(finishSplash,firstVisit&&phase==='ready'?900:100);
+};
+if(!documentLoaded)addEventListener('load',()=>{documentLoaded=true;syncSplashFromState(getState())},{once:true});
+const BOOT_TIMEOUT_MS=12500;
+setTimeout(()=>{const current=getState();if(current.bootState?.phase!=='booting')return;setState({bootState:{phase:'timeout',message:'Aplikasi belum berhasil dimuat'}},{url:false})},BOOT_TIMEOUT_MS);
 
 const SECTION_BUTTONS={factory:'nav-machine',asset:'nav-assets',system:'nav-systems'};
 function primarySectionFor(section){
@@ -376,28 +382,25 @@ function ensureSimulationTransport(){
  bar=document.createElement('section');bar.id='simulation-transport';bar.className='canonical-simulation-transport';bar.hidden=true;bar.setAttribute('aria-label','Kontrol simulasi');
  bar.innerHTML=`<div class="sim-context"><small>SIMULASI PROSES</small><strong data-transport-stage>Siap</strong></div><button type="button" data-transport-play class="primary" aria-label="Mulai atau jeda simulasi">Mulai</button><label>Kecepatan<select data-transport-speed aria-label="Kecepatan simulasi"><option value=".5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select></label><progress max="100" value="0" data-transport-progress aria-label="Progres simulasi"></progress><button type="button" data-transport-stop>Stop</button>`;
  q('.workspace')?.append(bar);
- q('[data-transport-play]',bar).addEventListener('click',()=>{const s=getState().simulationState;const target=s.playing?q('#sim-pause'):s.active?(q('#sim-pause')||q('#sim-start')):q('#sim-start');target?.click();requestAnimationFrame(syncSimulationTransport)});
- q('[data-transport-stop]',bar).addEventListener('click',()=>{q('#sim-stop')?.click();requestAnimationFrame(syncSimulationTransport)});
- q('[data-transport-speed]',bar).addEventListener('change',e=>{q(`[data-sim-speed="${e.target.value}"]`)?.click();requestAnimationFrame(syncSimulationTransport)});
+ q('[data-transport-play]',bar).addEventListener('click',()=>dispatchEvent(new CustomEvent('bmj:simulationcommand',{detail:{action:'toggle'}})));
+ q('[data-transport-stop]',bar).addEventListener('click',()=>dispatchEvent(new CustomEvent('bmj:simulationcommand',{detail:{action:'stop'}})));
+ q('[data-transport-speed]',bar).addEventListener('change',e=>dispatchEvent(new CustomEvent('bmj:simulationcommand',{detail:{action:'speed',value:e.target.value}})));
  return bar;
 }
-function syncSimulationTransport(){
- const bar=ensureSimulationTransport(),section=getState().activeSection;
- const status=q('#sim-status')?.textContent?.trim()||'',stage=q('#sim-stage')?.textContent?.trim()||'Siap';
- const progressStyle=q('#sim-progress-bar')?.style?.width||'0%';const progress=Math.max(0,Math.min(100,parseFloat(progressStyle)||0));
- const active=status==='RUNNING'||status==='PAUSED',playing=status==='RUNNING';
- setSimulation({active,playing,stage,progress});
- const transportOpen=section==='simulation'&&Boolean(q('#sim-start'));
+function syncSimulationTransport(state=getState()){
+ const bar=ensureSimulationTransport(),section=state.activeSection,sim=state.simulationState||{};
+ const progress=Math.max(0,Math.min(100,Number(sim.progress)||0)),stage=sim.stage||'Siap';
+ const transportOpen=section==='simulation'&&state.inspectorState?.tab==='simulation'&&Boolean(state.selectedAsset)&&sim.available!==false&&!sim.blocked;
  bar.hidden=!transportOpen;
  document.body.classList.toggle('simulation-transport-open',transportOpen);
  q('[data-transport-stage]',bar).textContent=stage;
  q('[data-transport-progress]',bar).value=progress;
- const play=q('[data-transport-play]',bar);play.textContent=playing?'Jeda':active?'Lanjutkan':'Mulai';
- const activeSpeed=qa('[data-sim-speed]').find(b=>b.classList.contains('active'))?.dataset.simSpeed;if(activeSpeed)q('[data-transport-speed]',bar).value=activeSpeed;
+ const play=q('[data-transport-play]',bar);play.textContent=sim.playing?'Jeda':sim.active?'Lanjutkan':'Mulai';
+ q('[data-transport-stop]',bar).disabled=!sim.active;
+ const speed=String(sim.speed||1),speedSelect=q('[data-transport-speed]',bar);if([...speedSelect.options].some(option=>option.value===speed))speedSelect.value=speed;
 }
 ensureLayerManager();ensureSimulationTransport();
 
-const panelContent=q('#panel-content');if(panelContent)new MutationObserver(()=>requestAnimationFrame(syncSimulationTransport)).observe(panelContent,{childList:true,subtree:true});
 const INSPECTOR_TAB_SECTION={overview:'asset',structure:'asset',data:'asset',exterior:'asset',simulation:'simulation',sources:'reference'};
 qa('#detail-panel [role="tab"]').forEach(tab=>tab.addEventListener('click',()=>{
  const tabKey=tab.dataset.tab||'overview',section=INSPECTOR_TAB_SECTION[tabKey]||'asset';
@@ -406,16 +409,6 @@ qa('#detail-panel [role="tab"]').forEach(tab=>tab.addEventListener('click',()=>{
 }));
 q('#close-panel')?.addEventListener('click',()=>closeInspector());
 const modalElement=q('#modal');if(modalElement)new MutationObserver(()=>{if(modalElement.open){beforeMajorOverlay('modal');openOverlay('modal')}else if(getState().overlay==='modal')closeOverlay()}).observe(modalElement,{attributes:true,attributeFilter:['open']});
-addEventListener('bmj:domainstate',event=>{
- const detail=event.detail||{};
- const carriesDeepLink=Object.prototype.hasOwnProperty.call(detail,'selectedAsset')||Object.prototype.hasOwnProperty.call(detail,'selectedNode')||Object.prototype.hasOwnProperty.call(detail,'viewMode')||Object.prototype.hasOwnProperty.call(detail,'sceneMode')||Object.prototype.hasOwnProperty.call(detail,'cameraPreset');
- setState(detail,{url:false});
-});
-addEventListener('bmj:historyrestore',event=>{
- const detail=event.detail||{},viewMode=detail.viewMode==='2d'?'2d':'3d',sceneMode=detail.sceneMode==='machine'?'machine':'factory',cameraPreset=detail.cameraPreset==='top'?'top':'iso',activeSection=viewMode==='3d'&&sceneMode==='machine'?'asset':'factory';
- setState({selectedAsset:detail.selectedAsset||null,selectedNode:detail.selectedNode||null,sceneMode,viewMode,cameraPreset,activeSection},{url:false});markSection(activeSection);
- if(viewMode==='2d')q('#mode-2d')?.click();else q('#mode-3d')?.click();
-});
 const syncViewport=()=>{document.documentElement.style.setProperty('--app-vh',`${window.visualViewport?.height||innerHeight}px`);const w=innerWidth;if(w>=768&&getState().overlay==='navigation'){closeDrawer();closeOverlay()}const next=setState({deviceMode:w<768?'mobile':w<=1180?'tablet':'desktop'},{url:false});applyInspectorDom(next)};
 syncViewport();addEventListener('resize',syncViewport,{passive:true});window.visualViewport?.addEventListener('resize',syncViewport,{passive:true});
 
@@ -513,5 +506,5 @@ function syncPressedTools(){
 }
 const pressedTools=qa('#tool-explode,#tool-isolate,#tool-interior,#labels');
 if(pressedTools.length){const pressedObserver=new MutationObserver(syncPressedTools);pressedTools.forEach(el=>pressedObserver.observe(el,{attributes:true,attributeFilter:['class']}));syncPressedTools()}
-relabel();const hydratedState=hydrateUrl();applyViewModeDom(hydratedState);if(hydratedState.viewMode==='2d')q('#mode-2d')?.click();let lastSyncedSection=getState().activeSection;subscribe(state=>{applyInspectorDom(state);applyViewModeDom(state);markSection(state.activeSection);syncLayerControls();syncAccessibleControls(state);syncVisualHierarchy(state);syncViewModeContext(state);if(state.activeSection!==lastSyncedSection){lastSyncedSection=state.activeSection;requestAnimationFrame(syncSimulationTransport)}});
+relabel();const initialState=getState();applyViewModeDom(initialState);syncSplashFromState(initialState);subscribe(state=>{applyInspectorDom(state);applyViewModeDom(state);markSection(state.activeSection);syncLayerControls();syncAccessibleControls(state);syncVisualHierarchy(state);syncViewModeContext(state);syncSplashFromState(state);syncSimulationTransport(state)});
 document.documentElement.dataset.uiArchitecture='v198-architecture-convergence';
