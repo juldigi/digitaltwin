@@ -16,7 +16,7 @@ const DEFAULT_STATE={
     ducting:false,utilityAnchors:false
   },
   inspectionMode:{explode:false,explodeLevel:0,isolate:false,interior:false,interiorFocus:null},
-  simulationState:{available:false,blocked:false,blockedReason:null,active:false,running:false,paused:false,stage:null,speed:1,progress:0,completed:0,sheetsVisible:0,pileSheetsVisible:0},
+  simulationState:{available:false,blocked:false,blockedReason:null,active:false,running:false,stage:null,speed:1,progress:0,completed:0,sheetsVisible:0,pileSheetsVisible:0},
   referenceState:{filter:'all'},
   inspectorState:{open:false,tab:'overview'},
   preferences:{theme:'dark',lowDetail:false},
@@ -55,10 +55,6 @@ function normalizePatch(patch={}){
   if(next.inspectionMode?.explodeLevel!==undefined){
     const level=Number(next.inspectionMode.explodeLevel);
     next.inspectionMode={...next.inspectionMode,explodeLevel:Number.isFinite(level)?Math.max(0,Math.min(1,level)):state.inspectionMode.explodeLevel};
-  }
-  if(next.simulationState&&Object.prototype.hasOwnProperty.call(next.simulationState,'playing')){
-    next.simulationState={...next.simulationState,running:Object.prototype.hasOwnProperty.call(next.simulationState,'running')?Boolean(next.simulationState.running):Boolean(next.simulationState.playing)};
-    delete next.simulationState.playing;
   }
   if(next.simulationState?.progress!==undefined){
     const progress=Number(next.simulationState.progress);
