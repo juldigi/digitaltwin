@@ -24,9 +24,9 @@ export default {async fetch(req,env){
   if(origin&&!sameOrigin&&!allowed.includes(origin))return json({error:'Origin tidak diizinkan.'},403);
   if(req.method==='OPTIONS')return new Response(null,{status:204,headers:{...cors,'Access-Control-Allow-Methods':'GET,PUT,DELETE,OPTIONS','Access-Control-Allow-Headers':'Authorization,Content-Type,If-Match','Access-Control-Max-Age':'600'}});
   try{
-    if(path==='/api/health'&&req.method==='GET')return json({service:'bmj-digitaltwin',ready:!!env.DB&&!!env.ADMIN_TOKEN&&!!env.VIEWER_TOKEN,assets:!!env.ASSETS},200,cors);
+    if(path==='/api/health'&&req.method==='GET')return json({service:'bmj-digitaltwin',ready:!!env.DB&&!!env.ADMIN_TOKEN&&!!env.VIEWER_TOKEN,assets:!!env.ASSETS,sceneEditorReady:!!env.SUPERADMIN_TOKEN&&env.SUPERADMIN_TOKEN!==env.ADMIN_TOKEN&&env.SUPERADMIN_TOKEN!==env.VIEWER_TOKEN},200,cors);
     const token=req.headers.get('Authorization')?.replace(/^Bearer /,'');
-    const superadmin=await same(token,env.SUPERADMIN_TOKEN);
+    const superadmin=env.SUPERADMIN_TOKEN!==env.ADMIN_TOKEN&&env.SUPERADMIN_TOKEN!==env.VIEWER_TOKEN&&await same(token,env.SUPERADMIN_TOKEN);
     const admin=superadmin||await same(token,env.ADMIN_TOKEN),viewer=admin||await same(token,env.VIEWER_TOKEN);
     if(!viewer)return json({error:'Autentikasi diperlukan.'},401,cors);
     if(path==='/api/session'&&req.method==='GET')return json({role:superadmin?'superadmin':admin?'admin':'viewer'},200,cors);
@@ -52,7 +52,7 @@ export default {async fetch(req,env){
         const changes=data?.overrides;
         if(!changes||typeof changes!=='object'||Array.isArray(changes)||Object.keys(changes).length>500)throw new Error('Override scene tidak valid.');
         for(const [id,value] of Object.entries(changes)){
-          if(!/^(asset:[A-Za-z0-9_-]+|node:[A-Za-z0-9_-]+:[0-9.]+)$/.test(id)||id.length>150)throw new Error('ID objek tidak valid.');
+          if(!/^(asset:[A-Za-z0-9_-]+|node:[0-9.]+)$/.test(id)||id.length>150)throw new Error('ID objek tidak valid.');
           if(!value||typeof value!=='object'||Array.isArray(value)||typeof value.visible!=='boolean')throw new Error('Properti objek tidak valid.');
           for(const key of ['position','rotation','scale'])if(!Array.isArray(value[key])||value[key].length!==3||value[key].some(n=>!Number.isFinite(n)||Math.abs(n)>100000))throw new Error('Transform objek tidak valid.');
           if(value.scale.some(n=>n<=0))throw new Error('Skala objek harus positif.');
