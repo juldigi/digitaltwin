@@ -18,7 +18,7 @@ test('asset controller selects the requested machine taxonomy and sources',()=>{
 });
 
 test('engine loads other machine models only on selection',()=>{
- assert.match(engine,/this\.template=new OffsetMachineTemplate\(\)/);
+ assert.match(engine,/this\.template=neutralTemplate\(\)/);\n assert.match(engine,/this\.machineKey=null/);
  assert.match(engine,/async switchMachine\(key\)/);
  assert.match(engine,/await import\('\.\/machine-runtime\.js'\)/);
  assert.doesNotMatch(engine,/from '\.\/machine-runtime\.js'/);
