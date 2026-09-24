@@ -311,11 +311,12 @@ function ensureLayerManager(){
   <button type="button" data-system-focus="water" class="system-unavailable"><strong>Air / IPAL</strong><small>Peralatan tersedia · jalur belum tersedia</small><span>Lihat batas data</span></button>
   <button type="button" data-system-focus="electrical" class="system-unavailable"><strong>Kelistrikan</strong><small>Jalur terpisah belum tersedia</small><span>Lihat batas data</span></button>
  </div><section id="system-context" class="canonical-system-context" aria-live="polite"><p>Pilih sistem untuk melihat jalur, peralatan terkait, status data, dan batas verifikasi.</p></section>`;
- panel.innerHTML=`<header><div><small>${PHASE1_FOUNDATION?'FASE FONDASI':'SISTEM & TAMPILAN'}</small><h3 id="layer-manager-title">${PHASE1_FOUNDATION?'Lapisan Pabrik':'Sistem & Lapisan'}</h3></div><button type="button" data-layer-close class="icon-btn" aria-label="Tutup">${icon('close')}</button></header>
- <p id="layer-unavailable-note" role="status" hidden>Layer dan fokus jalur 3D memerlukan WebGL. Denah 2D tetap tersedia.</p>
+ const layerControls=GROUPS.map(([title,items])=>`<div class="canonical-layer-group"><h4>${title}</h4>${items.map(([key,label])=>`<label><span>${label}</span><input type="checkbox" data-canonical-layer="${key}"></label>`).join('')}</div>`).join('');
+ panel.innerHTML=`<header><div><small>${PHASE1_FOUNDATION?'TAMPILAN PABRIK':'SISTEM PABRIK'}</small><h3 id="layer-manager-title">${PHASE1_FOUNDATION?'Pengaturan Tampilan':'Sistem'}</h3></div><button type="button" data-layer-close class="icon-btn" aria-label="Tutup">${icon('close')}</button></header>
+ <p id="layer-unavailable-note" role="status" hidden>Fitur 3D memerlukan WebGL. Denah 2D tetap tersedia.</p>
  ${systemSurface}
- ${GROUPS.map(([title,items])=>`<div class="canonical-layer-group"><h4>${title}</h4>${items.map(([key,label])=>`<label><span>${label}</span><input type="checkbox" data-canonical-layer="${key}"></label>`).join('')}</div>`).join('')}
- <div class="canonical-layer-group unavailable"><h4>Batas fase</h4><p>${PHASE1_FOUNDATION?'Sistem utilitas dan detail teknis aset selain OFFSET 5 disimpan untuk fase ekspansi, tetapi tidak diaktifkan pada deliverable fondasi.':'Jalur yang belum memiliki drawing atau verifikasi lapangan tetap ditandai belum tersedia. Aplikasi tidak membuat jalur as-built secara otomatis.'}</p></div>`;
+ ${PHASE1_FOUNDATION?layerControls:`<details class="layer-display-options"><summary>Pengaturan tampilan</summary><div>${layerControls}</div></details>`}
+ <div class="canonical-layer-group unavailable"><h4>Batas data</h4><p>${PHASE1_FOUNDATION?'Sistem utilitas yang belum tersedia tetap disembunyikan sampai datanya siap.':'Jalur yang belum memiliki gambar atau verifikasi lapangan tetap ditandai belum tersedia. Aplikasi tidak membuat jalur aktual secara otomatis.'}</p></div>`;
  document.body.append(panel);
  q('[data-layer-close]',panel)?.addEventListener('click',closeLayerManager);
  qa('[data-canonical-layer]',panel).forEach(input=>input.addEventListener('change',()=>{
