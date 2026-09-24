@@ -1420,6 +1420,7 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  for(const lx of [ladderX-.22,ladderX+.22])pline([lx,.16,anZ],[lx,an.h+.55,anZ],.025,0xd7a817,'IPAL_PHOTO_TANK_LADDER_RAIL');
  for(let y=.35;y<an.h+.5;y+=.30)pline([ladderX-.22,y,anZ],[ladderX+.22,y,anZ],.018,0xd7a817,'IPAL_PHOTO_TANK_LADDER_RUNG');
  pbox(an.x+an.r+.02,2.15,anZ-.03,.055,.62,.78,0xe4d240,'IPAL_PHOTO_CONFINED_SPACE_WARNING_PLATE',0,1,{warningText:'BAHAYA! RUANG TERBATAS DILARANG MASUK'});buildingDetailStats.v205IpalSafetyDetails++;
+ label('BAHAYA · RUANG TERBATAS',an.x+an.r+.08,2.18,anZ-.04,2.15,'#7a2d26',ipalPhoto);
  // Water-stain and aged shell bands keep the vessel from reading as a showroom-new cylinder.
  for(const [y,h,op] of [[.82,.22,.13],[2.58,.16,.10],[3.34,.11,.09]]){const stain=pcyl(an.x,y,anZ,an.r+.018,h,0x6d7775,'IPAL_PHOTO_TANK_WEATHERING',{weathering:'WATER_STAIN_BAND'},40,new T.MeshStandardMaterial({color:0x6d7775,roughness:.83,metalness:.18,transparent:true,opacity:op}));buildingDetailStats.v205IpalWeatheringDetails++;}
  ptorus(an.x,.10,anZ,an.r+.07,.055,0xc7a31d,'IPAL_PHOTO_TANK_YELLOW_BASE_RING');
@@ -1443,6 +1444,10 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  pbox(hv.x,2.55,hz,3.15,.10,2.65,0x8f9693,'IPAL_PHOTO_HOPPER_PLATFORM_GRATING');
  for(const z of [hz-1.30,hz+1.30])pbox(hv.x,2.66,z,3.15,.12,.055,0xd7a817,'IPAL_PHOTO_HOPPER_PLATFORM_TOEBOARD');
  for(const side of [-1,1])pline([hv.x-1.55,3.15,hz+side*1.30],[hv.x+1.55,3.15,hz+side*1.30],.026,0xd7a817,'IPAL_PHOTO_HOPPER_PLATFORM_HANDRAIL');
+ for(const side of [-1,1])for(const x of [hv.x-1.55,hv.x-.78,hv.x,hv.x+.78,hv.x+1.55])pline([x,2.66,hz+side*1.30],[x,3.18,hz+side*1.30],.018,0xd7a817,'IPAL_PHOTO_HOPPER_GUARD_POST');
+ pcyl(hv.x,coneBase+hv.coneH+hv.cylinderH+.04,hz,hv.r*.92,.08,0x8e9896,'IPAL_PHOTO_HOPPER_TOP_LID',{function:'UNVERIFIED_FROM_PHOTO'},36,photoMetalDark);
+ pcyl(hv.x+.35,coneBase+hv.coneH+hv.cylinderH+.22,hz-.18,.11,.34,0x697679,'IPAL_PHOTO_HOPPER_TOP_NOZZLE',{function:'UNVERIFIED_FROM_PHOTO'},14,photoMetalDark);
+ ptorus(hv.x+.35,coneBase+hv.coneH+hv.cylinderH+.40,hz-.18,.13,.020,0x727d7e,'IPAL_PHOTO_HOPPER_TOP_NOZZLE_FLANGE',Math.PI/2,{function:'UNVERIFIED_FROM_PHOTO'});
  // A second, smaller hopper-bottom silver vessel is clearly visible deeper in IMG_2517/2523.
  const hv2=IPAL_PHOTO_EVIDENCE_V205.relativeLayout.secondHopperVessel,hz2=-hv2.y,hv2ConeBase=.42;
  const cone2=new T.Mesh(new T.CylinderGeometry(hv2.r,.18,hv2.coneH,28),photoMetal);cone2.position.set(hv2.x,hv2ConeBase+hv2.coneH/2,hz2);ipalPhoto.add(cone2);photoTag(cone2,'IPAL_PHOTO_SECOND_HOPPER_CONE_VESSEL',{function:'UNVERIFIED_FROM_PHOTO'});
@@ -1454,6 +1459,8 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   pbox(hv2.x+dx,1.12,hz2+dz,.11,2.24,.11,0xd7a817,'IPAL_PHOTO_SECOND_HOPPER_SUPPORT_LEG');
   pline([hv2.x+dx,.25,hz2+dz],[hv2.x-dx,1.95,hz2+dz],.023,0xd7a817,'IPAL_PHOTO_SECOND_HOPPER_SUPPORT_BRACE');
  }
+ pcyl(hv2.x,hv2ConeBase+hv2.coneH+hv2.cylinderH+.04,hz2,hv2.r*.91,.07,0x8e9896,'IPAL_PHOTO_SECOND_HOPPER_TOP_LID',{function:'UNVERIFIED_FROM_PHOTO'},32,photoMetalDark);
+ pcyl(hv2.x+.24,hv2ConeBase+hv2.coneH+hv2.cylinderH+.18,hz2-.12,.09,.26,0x697679,'IPAL_PHOTO_SECOND_HOPPER_TOP_NOZZLE',{function:'UNVERIFIED_FROM_PHOTO'},12,photoMetalDark);
 
  // Two-level yellow chemical preparation/dosing rack with observed red polyethylene tanks.
  const cr=IPAL_PHOTO_EVIDENCE_V205.relativeLayout.chemicalRack,crZ=-cr.y;
@@ -1464,11 +1471,24 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  for(const y of [1.35,3.0]){
   pbox(cr.x,y,crZ,cr.w,.10,cr.d,0x7e8987,'IPAL_PHOTO_CHEMICAL_RACK_GRATING');
   for(const dz of [-cr.d/2+.04,cr.d/2-.04])pbox(cr.x,y+.105,crZ+dz,cr.w,.11,.055,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_TOEBOARD');
-  for(const dz of [-cr.d/2,cr.d/2])pline([cr.x-cr.w/2,y+.72,crZ+dz],[cr.x+cr.w/2,y+.72,crZ+dz],.026,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_GUARDRAIL');
+  for(const dz of [-cr.d/2,cr.d/2]){
+   pline([cr.x-cr.w/2,y+.72,crZ+dz],[cr.x+cr.w/2,y+.72,crZ+dz],.026,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_GUARDRAIL');
+   for(const x of [cr.x-cr.w/2,cr.x-cr.w/4,cr.x,cr.x+cr.w/4,cr.x+cr.w/2])pline([x,y+.10,crZ+dz],[x,y+.74,crZ+dz],.018,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_GUARD_POST');
+  }
+ }
+ // Diagonal side bracing prevents the rack from reading as unsupported shelves.
+ for(const z of [crZ-cr.d/2,crZ+cr.d/2]){
+  pline([cr.x-cr.w/2,.22,z],[cr.x,2.85,z],.024,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_DIAGONAL_BRACE');
+  pline([cr.x,2.85,z],[cr.x+cr.w/2,.22,z],.024,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_DIAGONAL_BRACE');
+  pline([cr.x-cr.w/2,2.85,z],[cr.x,.22,z],.024,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_DIAGONAL_BRACE');
+  pline([cr.x,.22,z],[cr.x+cr.w/2,2.85,z],.024,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_DIAGONAL_BRACE');
  }
  const redTank=(x,y,z,r=.58,h=1.18,semantic='IPAL_PHOTO_RED_CHEMICAL_TANK')=>{
-  const shell=new T.Mesh(new T.CylinderGeometry(r,r,h,28),photoRed);shell.position.set(x,y+h/2,z);ipalPhoto.add(shell);photoTag(shell,semantic,{contents:'UNVERIFIED_FROM_PHOTO'});
+  const shellH=Math.max(.20,h-.18),shell=new T.Mesh(new T.CylinderGeometry(r*.98,r,shellH,28),photoRed);shell.position.set(x,y+shellH/2,z);ipalPhoto.add(shell);photoTag(shell,semantic,{contents:'UNVERIFIED_FROM_PHOTO',moldedPolyVisual:true});
+  const shoulder=new T.Mesh(new T.CylinderGeometry(r*.72,r*.98,.18,28),photoRed);shoulder.position.set(x,y+shellH+.09,z);ipalPhoto.add(shoulder);photoTag(shoulder,semantic+'_SHOULDER',{contents:'UNVERIFIED_FROM_PHOTO'});
   const lid=new T.Mesh(new T.CylinderGeometry(r*.48,r*.48,.12,24),photoRed);lid.position.set(x,y+h+.04,z);ipalPhoto.add(lid);photoTag(lid,semantic+'_LID');
+  for(const frac of [.22,.52,.80])ptorus(x,y+Math.min(shellH*.92,h*.82)*frac/.80,z,r+.008,.018,0x87392f,semantic+'_MOLDED_RIB',Math.PI/2,{contents:'UNVERIFIED_FROM_PHOTO'});
+  ptorus(x,y+.08,z,r+.015,.025,0x87392f,semantic+'_BASE_RIB',Math.PI/2,{contents:'UNVERIFIED_FROM_PHOTO'});
   return shell;
  };
  for(const [dx,dz] of [[-2.0,-1.05],[0,-1.05],[2.0,-1.05],[-1.0,1.05],[1.0,1.05]])redTank(cr.x+dx,1.39,crZ+dz,.56,1.12);
@@ -1487,6 +1507,8 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   pcyl(av.x,av.h/2+.12,az,av.r,av.h,0x2879a3,'IPAL_PHOTO_BLUE_AUXILIARY_VESSEL',{function:'UNVERIFIED_FROM_PHOTO'},24,new T.MeshStandardMaterial({color:0x2879a3,roughness:.55,metalness:.16}));
   pcyl(av.x,av.h+.23,az,.12,.28,0x2f6f91,'IPAL_PHOTO_BLUE_AUXILIARY_TOP_NOZZLE',{function:'UNVERIFIED_FROM_PHOTO'},14);
   ptorus(av.x,av.h+.42,az,.16,.024,0x5f7480,'IPAL_PHOTO_BLUE_AUXILIARY_TOP_VALVE_WHEEL',0,{function:'UNVERIFIED_FROM_PHOTO'});
+  ptorus(av.x,.14,az,av.r+.025,.025,0x205e7d,'IPAL_PHOTO_BLUE_AUXILIARY_BASE_RING',Math.PI/2,{function:'UNVERIFIED_FROM_PHOTO'});
+  pcyl(av.x,av.h+.10,az,av.r*.94,.09,0x226b8e,'IPAL_PHOTO_BLUE_AUXILIARY_TOP_CAP',{function:'UNVERIFIED_FROM_PHOTO'},24);
   pline([av.x-av.r-.18,.52,az],[av.x-av.r-.18,1.02,az],.034,0xd7d8d0,'IPAL_PHOTO_AUXILIARY_VESSEL_PIPE',{routingConfidence:'PHOTO_DERIVED_VISUAL_ROUTING_NOT_PID'});
   pline([av.x-av.r-.18,1.02,az],[av.x-av.r+.02,1.02,az],.034,0xd7d8d0,'IPAL_PHOTO_AUXILIARY_VESSEL_PIPE',{routingConfidence:'PHOTO_DERIVED_VISUAL_ROUTING_NOT_PID'});
  }
@@ -1503,6 +1525,11 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  const rtShaft=pcyl(rt.x,rt.platformH+.58,rtZ,.045,.58,0x323d40,'IPAL_PHOTO_RED_TOWER_SHAFT',{simulationCue:'ROTATING_SHAFT'});ipalPhotoRuntime.rotors.push(rtShaft);
  redTank(rt.x,rt.platformH+.62,rtZ,.50,.85,'IPAL_PHOTO_RED_TOWER_UPPER_TANK');
  for(const side of [-1,1])pline([rt.x-1.18,rt.platformH+.78,rtZ+side*.96],[rt.x+1.18,rt.platformH+.78,rtZ+side*.96],.025,0xd7a817,'IPAL_PHOTO_RED_TOWER_GUARDRAIL');
+ for(const side of [-1,1])for(const x of [rt.x-1.18,rt.x-.60,rt.x,rt.x+.60,rt.x+1.18])pline([x,rt.platformH+.10,rtZ+side*.96],[x,rt.platformH+.80,rtZ+side*.96],.018,0xd7a817,'IPAL_PHOTO_RED_TOWER_GUARD_POST');
+ for(const z of [rtZ-.86,rtZ+.86]){
+  pline([rt.x-1.05,.22,z],[rt.x+1.05,rt.platformH-.10,z],.023,0xd7a817,'IPAL_PHOTO_RED_TOWER_DIAGONAL_BRACE');
+  pline([rt.x+1.05,.22,z],[rt.x-1.05,rt.platformH-.10,z],.023,0xd7a817,'IPAL_PHOTO_RED_TOWER_DIAGONAL_BRACE');
+ }
  for(let i=0;i<9;i++)pbox(rt.x+1.55,.18+i*.22,rtZ+.92-i*.17,.70,.05,.25,0xd7a817,'IPAL_PHOTO_RED_TOWER_STAIR_TREAD');
  // Squat red ground tanks at the opposite side of the sludge station.
  for(const [i,x] of [[0,33.75],[1,34.75],[2,35.75]]){
@@ -1521,6 +1548,8 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  }
  pbox(sd.x-sd.w/2+.15,1.13,sdZ+sd.d/2+.02,.045,.58,.68,0xe4d240,'IPAL_PHOTO_TOXIC_WARNING_PLATE',0,1,{warningText:'BERACUN'});buildingDetailStats.v205IpalSafetyDetails++;
  label('UNIT (KARUNG) PENGERING LUMPUR',sd.x,1.72,sdZ+sd.d/2+.12,4.35,'#173f52',ipalPhoto);
+ label('BERACUN',sd.x-sd.w/2+.18,1.16,sdZ+sd.d/2+.08,1.05,'#782d26',ipalPhoto);
+ pline([sd.x-sd.w*.44,1.82,sdZ-.18],[sd.x+sd.w*.44,1.82,sdZ-.18],.035,0x657275,'IPAL_PHOTO_SLUDGE_BAG_HANGER_RAIL',{function:'SUPPORT_VISIBLE_IN_PHOTO'});
  // White/grey PVC manifold, red-handled valves and corrugated hose visible above the bags.
  pline([sd.x-sd.w*.42,1.52,sdZ-.18],[sd.x+sd.w*.42,1.52,sdZ-.18],.048,0xe3e2d9,'IPAL_PHOTO_SLUDGE_PVC_MANIFOLD',{routingConfidence:'PHOTO_DERIVED_VISUAL_ROUTING_NOT_PID'});
  for(let i=0;i<5;i++){
@@ -1556,11 +1585,14 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   pbox(x,3.12,secCenterZ,secW/7+.02,.055,secD,i%3===0?0xc8c9a8:0xaeb3a5,'IPAL_PHOTO_SECONDARY_CANOPY_CORRUGATED_PANEL',0,i%3===0?.64:.86,{weathering:'AGED_TRANSLUCENT_OR_CORRUGATED_PANEL'});
  }
  for(const px of [or.x-secW/2+.38,or.x+secW/2-.38]){
+  pfoot(px,secCenterZ+secD/2-.18,'IPAL_PHOTO_SECONDARY_CANOPY_SUPPORT',0x6d786f);
   pbox(px,1.56,secCenterZ+secD/2-.18,.11,3.08,.11,0x64866b,'IPAL_PHOTO_SECONDARY_CANOPY_GREEN_COLUMN');
   pline([px,2.38,secCenterZ+secD/2-.18],[px+(px<or.x?.72:-.72),3.10,secCenterZ+.20],.025,0x777a6c,'IPAL_PHOTO_SECONDARY_CANOPY_KNEE_BRACE');
  }
  for(let x=or.x-secW/2+.4;x<=or.x+secW/2-.4;x+=.85)pline([x,3.04,secCenterZ-secD/2],[x,3.04,secCenterZ+secD/2],.022,0x777a6c,'IPAL_PHOTO_SECONDARY_CANOPY_PURLIN');
  pbox(or.x,2.86,secCenterZ,.08,.08,1.25,0xe5e5cf,'IPAL_PHOTO_SECONDARY_CANOPY_LINEAR_LIGHT',0,1,{fixture:'PHOTO_VISIBLE'});
+ pline([or.x-secW/2,3.02,secCenterZ+secD/2],[or.x+secW/2,3.02,secCenterZ+secD/2],.035,0x626b64,'IPAL_PHOTO_SECONDARY_CANOPY_GUTTER',{coreProcess:false});
+ for(const px of [or.x-secW/2+.10,or.x+secW/2-.10])pline([px,3.02,secCenterZ+secD/2],[px,.12,secCenterZ+secD/2],.030,0x626b64,'IPAL_PHOTO_SECONDARY_CANOPY_DOWNPIPE',{coreProcess:false});
  pcyl(or.x-1.70,.74,orZ+or.d/2+1.72,.11,.52,0xc23b35,'IPAL_PHOTO_FIRE_EXTINGUISHER',{safetyEquipment:'PHOTO_VISIBLE'});buildingDetailStats.v205IpalSafetyDetails++;
  // Small exhaust fan, waste bin and wall services make the operator room match IMG_2514/2524.
  const fanRing=new T.Mesh(new T.TorusGeometry(.20,.025,8,24),material(0x3b474a));fanRing.position.set(or.x+or.w/2+.082,2.42,orZ-.72);fanRing.rotation.y=Math.PI/2;ipalPhoto.add(fanRing);photoTag(fanRing,'IPAL_PHOTO_OPERATOR_EXHAUST_FAN_RING',{coreProcess:false});
@@ -1578,6 +1610,8 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   const hx=cb.x-cb.w/2+.72+i*1.12;
   pbox(hx,.58,cbZ+cb.d/2+.035,.92,.76,.055,0xc69d26,'IPAL_PHOTO_COVERED_BASIN_YELLOW_ACCESS_HATCH',0,1,{function:'UNVERIFIED_FROM_PHOTO'});
   pline([hx-.32,.86,cbZ+cb.d/2+.075],[hx+.32,.86,cbZ+cb.d/2+.075],.016,0x5d5747,'IPAL_PHOTO_COVERED_BASIN_HATCH_HANDLE',{coreProcess:false});
+  for(const dx of [-.30,.30])pcyl(hx+dx,.58,cbZ+cb.d/2+.075,.022,.12,0x6e5f32,'IPAL_PHOTO_COVERED_BASIN_HATCH_HINGE',{coreProcess:false},8);
+  pbox(hx,.58,cbZ+cb.d/2+.085,.12,.14,.028,0x5f5130,'IPAL_PHOTO_COVERED_BASIN_HATCH_LATCH',0,1,{coreProcess:false});
  }
  // Weathering chips/streaks along the photographed blue exterior.
  for(const x of [cb.x-1.8,cb.x-.55,cb.x+.85])pbox(x,.40,cbZ+cb.d/2+.068,.08,.62,.014,0x254f63,'IPAL_PHOTO_COVERED_BASIN_WEATHERING',0,.16,{weathering:'PHOTO_VISIBLE'});
