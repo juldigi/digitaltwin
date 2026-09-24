@@ -25,7 +25,7 @@ test('factory navigation presents evidence-bounded utility systems as an active 
  assert.match(shell,/if\(!PHASE1_FOUNDATION\)\{stopSimulationForNavigation\('system'\);openSystemBrowser\(\)\}/);
  assert.match(shell,/function systemSurfaceMarkup\(\)/);
  assert.match(shell,/SISTEM PABRIK/);
- assert.match(shell,/<summary>Pengaturan tampilan<\/summary>/);
+ assert.match(shell,/id='layer-manager'|panel\.id='layer-manager'/);
  assert.match(css,/\.mobile-nav\{grid-template-columns:repeat\(4,minmax\(0,1fr\)\)!important\}/);
 });
 
