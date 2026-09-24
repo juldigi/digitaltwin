@@ -71,7 +71,7 @@ for(const [id,name]of Object.entries(iconMap)){
   el.innerHTML=icon(name)+`<small>${label}</small>`;
  }else el.innerHTML=icon(name);
 }
-const mobileIcons={factory:'factory',asset:'machine',system:'system',simulation:'simulation',more:'more'};
+const mobileIcons={factory:'factory',asset:'machine',system:'system',more:'more'};
 qa('[data-mobile-nav]').forEach(el=>{const label=q('small',el)?.textContent||el.getAttribute('aria-label')||'';el.innerHTML=icon(mobileIcons[el.dataset.mobileNav]||'more')+`<small>${label}</small>`});
 const mobileContextTools=document.createElement('section');mobileContextTools.className='mobile-context-tools';mobileContextTools.setAttribute('aria-label','Aksi tampilan dan inspeksi');mobileContextTools.innerHTML=`<small>INSPEKSI & TAMPILAN</small>
 <button type="button" data-mobile-tool="top">${icon('focus')}<span>Tampak Atas</span></button>
@@ -100,15 +100,18 @@ addEventListener('bmj:appready',event=>{appReadyStatus=event.detail?.status||doc
 if(appReadyStatus)maybeFinishSplash();
 setTimeout(()=>{if(splash?.classList.contains('is-done'))return;if(!appReadyStatus)document.documentElement.dataset.appReady='timeout';finishSplash()},12000);
 
-const SECTION_BUTTONS={factory:'nav-machine',asset:'nav-assets',system:'nav-systems',simulation:'nav-simulation-mode',reference:'nav-sources'};
+const SECTION_BUTTONS={factory:'nav-machine',asset:'nav-assets',system:'nav-systems'};
+function primarySectionFor(section){
+ return section==='simulation'||section==='reference'?'asset':section;
+}
 function markSection(section){
+ const primary=primarySectionFor(section);
  for(const [key,id]of Object.entries(SECTION_BUTTONS)){
-  const el=q('#'+id),active=key===section;
+  const el=q('#'+id),active=key===primary;
   el?.classList.toggle('active',active);
-  if(el)el.setAttribute('aria-current',active?'page':'false');
+  if(el){if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current');}
  }
- const mobileSection=section==='reference'?'more':section;
- qa('[data-mobile-nav]').forEach(el=>{const active=el.dataset.mobileNav===mobileSection;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current')});
+ qa('[data-mobile-nav]').forEach(el=>{const active=el.dataset.mobileNav===primary;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current')});
 }
 function closeDrawer(){document.body.classList.remove('nav-open');document.body.classList.remove('drawer-transitioning');const menuButton=q('#ui-menu-toggle');menuButton?.setAttribute('aria-expanded','false');menuButton?.setAttribute('aria-label','Buka navigasi');q('[data-mobile-nav="more"]')?.setAttribute('aria-expanded','false');restoreOverlayFocus('navigation','#ui-menu-toggle')}
 function closeLayerManager(){const panel=q('#layer-manager');if(panel)panel.hidden=true;document.body.classList.remove('layer-open');if(getState().overlay==='layers')closeOverlay();restoreOverlayFocus('layers',PHASE1_FOUNDATION?'#nav-machine':'#nav-systems')}
@@ -249,14 +252,7 @@ globalSearch?.addEventListener('keydown',event=>{if(event.key==='ArrowDown'||eve
 q('#mobile-search-toggle')?.addEventListener('click',()=>openSearch(''));
 addEventListener('bmj:searchresults',event=>renderSearchResults(event.detail));
 addEventListener('bmj:systemsearchselect',event=>{if(PHASE1_FOUNDATION)return;const system=event.detail?.system||null;setState({selectedSystem:system},{url:false});openSystemLayers();if(['hvac','compressedAir','routing'].includes(system))q(`[data-system-focus="${system}"]`)?.click()});
-q('#nav-machine')?.addEventListener('click',()=>navigateSection('factory'));
-q('#nav-assets')?.addEventListener('click',()=>{stopSimulationForNavigation('asset');beforeMajorOverlay('modal');setActiveSection('asset');markSection('asset');openOverlay('modal')});
 q('#nav-systems')?.addEventListener('click',()=>{if(!PHASE1_FOUNDATION){stopSimulationForNavigation('system');openSystemLayers()}});
-q('#nav-simulation-mode')?.addEventListener('click',enterSimulation);
-q('#nav-sources')?.addEventListener('click',()=>navigateSection('reference',{inspectorTab:'sources'}));
-q('#nav-help')?.addEventListener('click',()=>{stopSimulationForNavigation('help');beforeMajorOverlay('modal');openOverlay('modal')});
-q('#nav-settings')?.addEventListener('click',()=>{stopSimulationForNavigation('settings');beforeMajorOverlay('modal');q('#settings')?.click();openOverlay('modal')});
-q('#nav-connect')?.addEventListener('click',()=>{beforeMajorOverlay('modal');q('#connect')?.click();openOverlay('modal')});
 
 const menu=q('#ui-menu-toggle');
 menu?.addEventListener('click',()=>{const open=!document.body.classList.contains('nav-open');document.body.classList.add('drawer-transitioning');if(open){beforeMajorOverlay('navigation');rememberOverlayFocus('navigation')}document.body.classList.toggle('nav-open',open);requestAnimationFrame(()=>document.body.classList.remove('drawer-transitioning'));menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Tutup navigasi':'Buka navigasi');if(open){openOverlay('navigation');focusOverlay(q('.rail'),'.rail button:not([hidden])')}else{closeOverlay();restoreOverlayFocus('navigation','#ui-menu-toggle')}});
@@ -271,7 +267,7 @@ q('#ui-backdrop')?.addEventListener('click',()=>{
 });
 qa('.rail button').forEach(b=>b.addEventListener('click',()=>{if(innerWidth<768)closeDrawer()}));
 
-const MOBILE_TARGET={factory:'nav-machine',asset:'nav-assets',system:'nav-systems',simulation:'nav-simulation-mode'};
+const MOBILE_TARGET={factory:'nav-machine',asset:'nav-assets',system:'nav-systems'};
 qa('[data-mobile-nav]').forEach(button=>button.addEventListener('click',event=>{
  if(!matchMedia('(max-width:767px)').matches)return;
  const key=button.dataset.mobileNav;
@@ -404,7 +400,7 @@ function syncInspectorTabs(){
 }
 const inspectorTablist=q('#detail-panel .tabs');
 inspectorTablist?.addEventListener('keydown',event=>{
- const tabs=qa('[role="tab"]',inspectorTablist).filter(tab=>tab.getAttribute('aria-hidden')!=='true');
+ const tabs=qa('[role="tab"]',inspectorTablist).filter(tab=>!tab.hidden&&tab.getAttribute('aria-hidden')!=='true');
  const current=tabs.indexOf(document.activeElement);if(current<0)return;
  let next=current;
  if(event.key==='ArrowRight')next=(current+1)%tabs.length;
@@ -436,13 +432,13 @@ document.addEventListener('keydown',event=>{
 const relabel=()=>{
  const labels={overview:'Ringkasan',structure:'Struktur',simulation:'Simulasi',exterior:'Buka Interior',sources:'Referensi'};
  qa('[data-tab]').forEach(btn=>{if(labels[btn.dataset.tab])btn.textContent=labels[btn.dataset.tab]});
- const focus=q('#focus-machine');if(focus)focus.textContent='Pusatkan di 3D';
+ const focus=q('#focus-machine');if(focus)focus.textContent='Fokus di 3D';
  const top=q('.panel-top .eyebrow');if(top)top.textContent='KONTEKS TERPILIH';
- const search=q('#global-search');if(search)search.placeholder='Cari OFFSET 5, komponen, area, atau dokumen…';
+ const search=q('#global-search');if(search)search.placeholder='Cari mesin, area, komponen, sistem, atau sumber…';
  const connection=q('#connection');if(connection)connection.textContent=navigator.onLine?'Data tersedia':'Offline';
 };
 function syncAccessibleControls(state){
- const panelToggle=q('#panel-toggle');if(panelToggle){const open=Boolean(state.inspectorState?.open);panelToggle.setAttribute('aria-expanded',String(open));panelToggle.setAttribute('aria-label',open?'Tutup detail mesin':'Buka detail mesin')}
+ const panelToggle=q('#panel-toggle');if(panelToggle){const open=Boolean(state.inspectorState?.open);panelToggle.setAttribute('aria-expanded',String(open));panelToggle.setAttribute('aria-label',open?'Tutup detail pilihan':'Buka detail pilihan')}
  const mode2d=q('#mode-2d'),mode3d=q('#mode-3d'),is2d=state.viewMode==='2d';
  if(mode2d){mode2d.setAttribute('aria-pressed',String(is2d));mode2d.classList.toggle('active',is2d)}
  if(mode3d){mode3d.setAttribute('aria-pressed',String(!is2d));mode3d.classList.toggle('active',!is2d)}
@@ -474,4 +470,4 @@ function syncPressedTools(){
 const pressedTools=qa('#tool-explode,#tool-isolate,#tool-interior,#labels');
 if(pressedTools.length){const pressedObserver=new MutationObserver(syncPressedTools);pressedTools.forEach(el=>pressedObserver.observe(el,{attributes:true,attributeFilter:['class']}));syncPressedTools()}
 relabel();const hydratedState=hydrateUrl();if(hydratedState.viewMode==='2d')q('#mode-2d')?.click();let lastSyncedSection=getState().activeSection;subscribe(state=>{markSection(state.activeSection);syncLayerControls();syncAccessibleControls(state);syncViewModeContext(state);if(state.activeSection!==lastSyncedSection){lastSyncedSection=state.activeSection;requestAnimationFrame(syncSimulationTransport)}});
-document.documentElement.dataset.uiArchitecture='v162-factory-first-systems';
+document.documentElement.dataset.uiArchitecture='v193-three-domain-contextual';
