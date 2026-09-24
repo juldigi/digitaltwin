@@ -800,7 +800,7 @@ export function buildActualFactory(layout,fleet){
 
 
  // V202 FURNITURE LAYOUT ENGINE — supersede generic room furniture with wall/door-aware layouts.
- const legacyRoomFurnitureSemantic=/^(ADMIN_|PPIC_|PDS_|QC_|INCOMING_|CTF_|CTP_|MEETING_|SUPERVISOR_|TOILET_|WASH_BASIN|PANTRY_|LOCKER_|MUSHOLA_|PRAYER_MAT|ELECTRICAL_PANEL|PANEL_INDICATOR|SPAREPART_|WORKBENCH_|TOOL_BOARD|WORKSHOP_|JANITOR_|MAINTENANCE_|BROKE_|FIRE_PUMP_|DISPATCH_)/i;
+ const legacyRoomFurnitureSemantic=/^(ADMIN_|PPIC_|PDS_|QC_|INCOMING_|CTF_|CTP_|MEETING_|SUPERVISOR_|OFFICE_CEILING|TOILET_|WASH_BASIN|PANTRY_|LOCKER_|MUSHOLA_|PRAYER_MAT|ELECTRICAL_PANEL|PANEL_INDICATOR|SPAREPART_|WORKBENCH_|TOOL_BOARD|WORKSHOP_|JANITOR_|MAINTENANCE_|BROKE_|FIRE_PUMP_|DISPATCH_)/i;
  root.traverse(o=>{const s=String(o.userData?.semantic||'');if(legacyRoomFurnitureSemantic.test(s)){o.userData={...o.userData,supersededByV202:true};o.visible=false;}});
  const roomFurnitureAudit=[];
  const v203FurnitureFootprintAudit=[];
@@ -861,7 +861,16 @@ export function buildActualFactory(layout,fleet){
  };
  const localRack=(g,x,z,w,h,d,tag)=>{
   registerLocalFootprint(tag+'_RACK',x,z,w,d);
-  for(const sx of [-w/2,w/2])rb(g,x+sx,h/2,z,.055,h,d,0x5e727a,tag+'_RACK_UPRIGHT');for(const y of [.22,.62,1.02,1.42].filter(v=>v<h-.05))rb(g,x,y,z,w,.035,d,0x8a9999,tag+'_RACK_SHELF');buildingDetailStats.v202RoomCabinets++;
+  for(const sx of [-w/2,w/2])rb(g,x+sx,h/2,z,.055,h,d,0x5e727a,tag+'_RACK_UPRIGHT');
+  for(const y of [.22,.62,1.02,1.42].filter(v=>v<h-.05))rb(g,x,y,z,w,.035,d,0x8a9999,tag+'_RACK_SHELF');
+  buildingDetailStats.v202RoomCabinets++;
+ };
+ const localBlock=(g,x,z,w,h,d,color,tag,y=h/2,track=true)=>{if(track)registerLocalFootprint(tag,x,z,w,d);return rb(g,x,y,z,w,h,d,color,tag);};
+ const localLockerBank=(g,x,z,w,h,d,tag)=>{
+  registerLocalFootprint(tag+'_LOCKER_BANK',x,z,w,d);const cols=Math.max(2,Math.floor(w/.34)),cw=w/cols;
+  rb(g,x,h/2,z,w,h,d,0x71858b,tag+'_LOCKER_CARCASS');
+  for(let i=0;i<cols;i++){const px=x-w/2+cw*(i+.5);rb(g,px,h*.52,z+d/2+.013,cw-.018,h-.12,.024,0x80949a,tag+'_LOCKER_DOOR');rb(g,px+cw*.27,h*.54,z+d/2+.03,.014,.13,.012,0x43545b,tag+'_LOCKER_HANDLE');for(const yy of [h*.72,h*.78])rb(g,px,yy,z+d/2+.032,cw*.42,.012,.01,0x43545b,tag+'_LOCKER_VENT');buildingDetailStats.v203LockerDoors++;}
+  buildingDetailStats.v202RoomCabinets++;
  };
  const localClearAisle=(g,w,d)=>{
   const aisle=rb(g,0,.004,d/2-.43,Math.max(.7,w-.30),.008,.72,0x91a6a3,'ROOM_CLEAR_AISLE_REFERENCE',.13);aisle.userData.doorClearance=true;
@@ -907,46 +916,59 @@ export function buildActualFactory(layout,fleet){
    case 'ADMIN_OFFICE':
    case 'SUPERVISOR_OFFICE':{
     localDesk(g,0,workZ+.28,Math.min(1.55,w-1.0),ctx.program);
-    localCabinet(g,-sideX+.22,-.18,.42,1.40,.34,ctx.program+'_FILES');
-    if(d>3.0){localChair(g,-.48,Math.min(.58,doorLimit-.28),0,workZ+.28,ctx.program+'_VISITOR',false);localChair(g,.48,Math.min(.58,doorLimit-.28),0,workZ+.28,ctx.program+'_VISITOR',false);}
+    localCabinet(g,mirror*(sideX-.22),-.18,.42,1.40,.34,ctx.program+'_FILES');
+    if(d>3.0){const vx=Math.min(.82,w*.28);localChair(g,-vx,Math.min(.42,doorLimit-.48),0,workZ+.28,ctx.program+'_VISITOR',false);localChair(g,vx,Math.min(.42,doorLimit-.48),0,workZ+.28,ctx.program+'_VISITOR',false);}
     rb(g,sideX-.25,1.25,-.22,.46,.62,.12,0x2b3f48,ctx.program+'_DISPLAY');break;
    }
    case 'PPIC_OFFICE':{
     const sep=Math.min(.92,w*.22);localDesk(g,-sep,workZ+.30,1.38,'PPIC_A');localDesk(g,sep,workZ+.30,1.38,'PPIC_B');
-    rb(g,0,1.58,-d/2+.08,Math.min(2.4,w-.45),.74,.05,0xe9e7dc,'PPIC_PLANNING_BOARD');localCabinet(g,-sideX+.20,.10,.40,1.20,.32,'PPIC_FILES');break;
+    rb(g,0,1.58,-d/2+.08,Math.min(2.4,w-.45),.74,.05,0xe9e7dc,'PPIC_PLANNING_BOARD');localCabinet(g,mirror*(sideX-.20),.10,.40,1.20,.32,'PPIC_FILES');break;
    }
    case 'PDS_PREPRESS_OFFICE':{
-    localDesk(g,-.45,workZ+.28,1.35,'PDS');localCabinet(g,sideX-.24,-.10,.42,.95,.46,'PDS_FLAT_FILE');localTable(g,.48,.46,1.25,.62,'PDS_REVIEW');break;
+    localDesk(g,-.45,workZ+.28,1.35,'PDS');localCabinet(g,mirror*(sideX-.24),-.10,.42,.95,.46,'PDS_FLAT_FILE');localTable(g,.48,.46,1.25,.62,'PDS_REVIEW');break;
    }
    case 'QC_SAMPLE':
    case 'INCOMING_QC':{
-    localDesk(g,-.70,workZ+.26,1.15,ctx.program+'_DESK');localTable(g,.45,-.05,1.40,.78,ctx.program+'_INSPECTION');localChair(g,.45,.65,.45,-.05,ctx.program+'_STOOL',false);localCabinet(g,sideX-.22,.28,.42,1.65,.34,ctx.program+'_SAMPLE_STORAGE');break;
+    localDesk(g,-.70,workZ+.26,1.15,ctx.program+'_DESK');localTable(g,.45,-.05,1.40,.78,ctx.program+'_INSPECTION');localChair(g,.45,.65,.45,-.05,ctx.program+'_STOOL',false);localCabinet(g,mirror*(sideX-.22),.28,.42,1.65,.34,ctx.program+'_SAMPLE_STORAGE');break;
    }
    case 'PREPRESS':{
-    localDesk(g,-.70,workZ+.28,1.20,'PREPRESS_OPERATOR');localTable(g,.40,-.06,1.30,.72,'PREPRESS_LIGHT_TABLE');localRack(g,sideX-.18,.10,.34,1.55,.40,'PREPRESS_PLATE_RACK');break;
+    localDesk(g,-.70,workZ+.28,1.20,'PREPRESS_OPERATOR');localTable(g,.40,-.06,1.30,.72,'PREPRESS_LIGHT_TABLE');localRack(g,mirror*(sideX-.18),.10,.34,1.55,.40,'PREPRESS_PLATE_RACK');break;
    }
    case 'DISPATCH_LOADING':{
-    localTable(g,-.50,-.25,1.45,.72,'DISPATCH_PACKING');localDesk(g,.65,workZ+.30,1.05,'DISPATCH_DOC',false);localRack(g,sideX-.18,.20,.34,1.40,.36,'DISPATCH_LABEL_RACK');break;
+    localTable(g,-.50,-.25,1.45,.72,'DISPATCH_PACKING');localDesk(g,.65,workZ+.30,1.05,'DISPATCH_DOC',false);localRack(g,mirror*(sideX-.18),.20,.34,1.40,.36,'DISPATCH_LABEL_RACK');break;
    }
    case 'TOILET':{
-    const stallW=Math.min(.92,w*.31);for(const sx of [-stallW*.58,stallW*.58]){rb(g,sx,.78,workZ+.18,stallW,.05,.86,0xd9e2df,'TOILET_STALL_TOP');rb(g,sx,.32,workZ+.18,.42,.42,.58,0xf0f3f1,'TOILET_FIXTURE');}
-    rb(g,0,.84,.36,1.10,.12,.42,0xcbd5d4,'TOILET_BASIN_COUNTER');rb(g,0,1.38,.16,.84,.48,.035,0xb9d1d3,'TOILET_MIRROR');break;
+    const stallSpan=Math.min(1.90,w-.55),stallDepth=.92;
+    registerLocalFootprint('TOILET_STALL_ZONE',0,workZ+.28,stallSpan,stallDepth);
+    for(const sx of [-stallSpan/2,0,stallSpan/2])rb(g,sx,1.08,workZ+.28,.035,2.05,stallDepth,0xd9e2df,'TOILET_STALL_PARTITION');
+    for(const sx of [-stallSpan*.25,stallSpan*.25]){rb(g,sx,.34,workZ+.26,.40,.42,.58,0xf0f3f1,'TOILET_FIXTURE');rb(g,sx,1.02,workZ+.74,stallSpan*.42,1.90,.035,0xe0e4df,'TOILET_STALL_DOOR');}
+    localBlock(g,0,.34,1.10,.82,.42,0xcbd5d4,'TOILET_BASIN_COUNTER',.84);rb(g,0,1.38,.14,.84,.48,.035,0xb9d1d3,'TOILET_MIRROR');break;
    }
    case 'ELECTRICAL':{
-    const count=Math.max(2,Math.min(4,Math.floor(w/.8)));for(let i=0;i<count;i++){const px=(i-(count-1)/2)*.78;rb(g,px,1.05,workZ+.08,.66,2.05,.32,0x657984,'ELECTRICAL_PANEL');}rb(g,0,.016,.10,Math.min(w-.5,2.8),.02,.76,0x555f62,'ELECTRICAL_INSULATING_MAT');break;
+    const count=Math.max(2,Math.min(4,Math.floor(w/.8)));for(let i=0;i<count;i++){const px=(i-(count-1)/2)*.78;localBlock(g,px,workZ+.08,.66,2.05,.32,0x657984,'ELECTRICAL_PANEL',1.05);}localBlock(g,0,.10,Math.min(w-.5,2.8),.02,.76,0x555f62,'ELECTRICAL_INSULATING_MAT',.016);break;
    }
    case 'SPAREPART_WAREHOUSE':{
-    localRack(g,-sideX+.20,-.15,.36,1.75,d-1.25,'SPAREPART_LEFT');localRack(g,sideX-.20,-.15,.36,1.75,d-1.25,'SPAREPART_RIGHT');rb(g,0,.30,.18,.72,.55,.46,0x6d8189,'SPAREPART_PICKING_TROLLEY');break;
+    localRack(g,-sideX+.20,-.15,.36,1.75,d-1.25,'SPAREPART_LEFT');localRack(g,sideX-.20,-.15,.36,1.75,d-1.25,'SPAREPART_RIGHT');
+    for(const sx of [-sideX+.20,sideX-.20])for(const zz of [-.62,-.12,.38]){rb(g,sx,.46,zz,.28,.22,.30,0x5d8190,'SPAREPART_BIN');buildingDetailStats.v203SparepartBins++;}
+    localBlock(g,0,.18,.72,.55,.46,0x6d8189,'SPAREPART_PICKING_TROLLEY',.30);break;
    }
    case 'WORKSHOP':
    case 'MAINTENANCE':{
-    localTable(g,0,workZ+.20,Math.min(2.25,w-.85),.76,ctx.program+'_WORKBENCH');rb(g,0,1.34,-d/2+.08,Math.min(2.2,w-.55),.78,.06,0x63777f,ctx.program+'_TOOL_BOARD');localChair(g,0,workZ+1.02,0,workZ+.20,ctx.program+'_STOOL',false);localCabinet(g,sideX-.22,.22,.42,1.72,.36,ctx.program+'_TOOL_LOCKER');break;
+    localTable(g,0,workZ+.20,Math.min(2.25,w-.85),.76,ctx.program+'_WORKBENCH');
+    rb(g,0,1.34,-d/2+.08,Math.min(2.2,w-.55),.78,.06,0x63777f,ctx.program+'_TOOL_BOARD');
+    localBlock(g,Math.min(.72,w*.24),workZ-.05,.28,.18,.24,0x596d75,ctx.program+'_BENCH_VISE',.92,false);
+    for(const tx of [-.56,-.28,0,.28,.56]){rl(g,new T.Vector3(tx,1.08,-d/2+.025),new T.Vector3(tx+(tx<0?.08:-.08),1.46,-d/2+.025),.012,0x394950,ctx.program+'_HANGING_TOOL');buildingDetailStats.v203WorkshopToolDetails++;}
+    localChair(g,0,workZ+1.02,0,workZ+.20,ctx.program+'_STOOL',false);localCabinet(g,mirror*(sideX-.22),.22,.42,1.72,.36,ctx.program+'_TOOL_LOCKER');break;
    }
    case 'PANTRY':{
-    rb(g,0,.46,workZ+.10,Math.min(2.3,w-.55),.92,.48,0xa6b0ae,'PANTRY_COUNTER');rb(g,-.52,.91,workZ-.03,.58,.05,.36,0xbac3c0,'PANTRY_SINK');localTable(g,0,.28,1.30,.76,'PANTRY_BREAK');for(const [x,z] of [[-.72,.28],[.72,.28],[0,-.35],[0,.92]])localChair(g,x,z,0,.28,'PANTRY',false);break;
+    localBlock(g,0,workZ+.10,Math.min(2.3,w-.55),.92,.48,0xa6b0ae,'PANTRY_COUNTER',.46);
+    rb(g,-.52,.91,workZ-.03,.58,.05,.36,0xbac3c0,'PANTRY_SINK');
+    for(const x of [-.62,0,.62]){rb(g,x,1.72,-d/2+.16,.54,.58,.28,0xb8c0bc,'PANTRY_UPPER_CABINET');buildingDetailStats.v203PantryDetails++;}
+    localBlock(g,mirror*(sideX-.24),-.12,.42,1.28,.40,0x8c9997,'PANTRY_REFRIGERATOR',.64);localBlock(g,-mirror*(sideX-.24),-.12,.34,1.15,.34,0x7e9095,'PANTRY_WATER_DISPENSER',.58);buildingDetailStats.v203PantryDetails+=2;
+    localTable(g,0,.18,1.30,.76,'PANTRY_BREAK');for(const [x,z] of [[-.78,.18],[.78,.18],[0,-.48]])localChair(g,x,z,0,.18,'PANTRY',false);break;
    }
    case 'LOCKER_CHANGE':{
-    localRack(g,-sideX+.18,-.15,.34,1.85,d-1.25,'LOCKER_LEFT');localRack(g,sideX-.18,-.15,.34,1.85,d-1.25,'LOCKER_RIGHT');rb(g,0,.34,.05,1.25,.42,.36,0x8b765c,'LOCKER_BENCH');break;
+    localLockerBank(g,-sideX+.20,-.15,.38,1.85,d-1.20,'LOCKER_LEFT');localLockerBank(g,sideX-.20,-.15,.38,1.85,d-1.20,'LOCKER_RIGHT');localBlock(g,0,.05,1.25,.42,.36,0x8b765c,'LOCKER_BENCH',.34);break;
    }
    case 'PRAYER_ROOM':{
     localRack(g,-sideX+.18,doorLimit-.20,.34,1.15,.32,'PRAYER_SHOE_RACK');for(let ix=-1;ix<=1;ix++)for(let iz=0;iz<2;iz++)rb(g,ix*.62,.014,workZ+.35+iz*.86,.52,.018,.76,iz%2?0x668c7f:0x759c8e,'PRAYER_MAT');break;
@@ -958,7 +980,7 @@ export function buildActualFactory(layout,fleet){
     for(const x of [-.68,.68])rb(g,x,.40,workZ+.25,1.02,.76,.88,0xad8b60,'BROKE_COLLECTION_BIN');rb(g,0,.34,.45,.86,.62,.54,0x6e8188,'BROKE_TROLLEY');break;
    }
    case 'MEETING':{
-    localTable(g,0,-.05,Math.min(2.5,w-.75),1.00,'MEETING');for(const x of [-.90,-.30,.30,.90]){localChair(g,x,-.82,0,-.05,'MEETING',false);localChair(g,x,.72,0,-.05,'MEETING',false);}rb(g,0,1.58,-d/2+.08,Math.min(2.1,w-.45),.72,.05,0xe9e7dc,'MEETING_PRESENTATION_BOARD');break;
+    localTable(g,0,-.08,Math.min(2.45,w-.78),.96,'MEETING');const mx=Math.min(.92,w*.28);for(const x of [-mx,mx]){localChair(g,x,-.76,0,-.08,'MEETING',false);localChair(g,x,.62,0,-.08,'MEETING',false);}rb(g,0,1.58,-d/2+.08,Math.min(2.1,w-.45),.72,.05,0xe9e7dc,'MEETING_PRESENTATION_BOARD');break;
    }
    case 'JANITOR':{
     localCabinet(g,-.58,workZ+.18,.52,1.55,.36,'JANITOR_CHEMICAL');rb(g,.55,.38,workZ+.18,.72,.52,.56,0xb9c2c0,'JANITOR_MOP_SINK');for(const x of [-.30,0,.30])rl(g,new T.Vector3(x,.10,.25),new T.Vector3(x,1.48,.25),.016,x===0?0x4e7a9b:0x7a6a4e,'JANITOR_TOOL');break;
