@@ -14,12 +14,14 @@ test('leaving simulation through major navigation stops the process and clears t
  assert.match(shell,/document\.body\.classList\.remove\('simulation-transport-open'\)/);
 });
 
-test('desktop navigation uses simulation cleanup before changing major context',()=>{
- assert.match(shell,/#nav-machine'[\s\S]*navigateSection\('factory'\)/);
- assert.match(shell,/#nav-assets'[\s\S]*stopSimulationForNavigation\('asset'\)/);
+test('simplified navigation stops simulation before changing major context',()=>{
+ assert.match(app,/const stopSimulationBeforeNavigation=.*bmj:simulationstoprequest/);
+ assert.match(app,/on\('#nav-machine',[\s\S]*stopSimulationBeforeNavigation\(\)/);
+ assert.match(app,/on\('#nav-assets',[\s\S]*stopSimulationBeforeNavigation\(\)/);
+ assert.match(app,/on\('#nav-help',[\s\S]*stopSimulationBeforeNavigation\(\)/);
+ assert.match(app,/on\('#settings',[\s\S]*stopSimulationBeforeNavigation\(\)/);
  assert.match(shell,/#nav-systems'[\s\S]*stopSimulationForNavigation\('system'\)/);
- assert.match(shell,/#nav-sources'[\s\S]*navigateSection\('reference',\{inspectorTab:'sources'\}\)/);
- assert.match(shell,/#nav-settings'[\s\S]*stopSimulationForNavigation\('settings'\)/);
+ assert.match(shell,/if\(section!=='simulation'\)stopSimulationForNavigation\(section\)/);
 });
 
 test('V185 rotates active runtime identifiers',()=>{
