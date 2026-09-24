@@ -1086,3 +1086,5 @@ body[data-scene-mode="machine"] .context-back:not([hidden]){background:#edf6ff;c
  .context-back b{display:none}
  .context-back svg{width:19px;height:19px}
 }
+
+.context-primary-actions.single-action{grid-template-columns:1fr}
