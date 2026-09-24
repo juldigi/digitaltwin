@@ -228,3 +228,38 @@ test('V196 close and back have distinct semantics',()=>{
   assert.match(css,/\.context-back/);
   assert.match(css,/\.modal-back/);
 });
+
+
+test('V197 starts from a neutral factory context instead of loading OFFSET 5 implicitly',()=>{
+  const app=fs.readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
+  const engine=fs.readFileSync(new URL('../frontend/src/engine.js',import.meta.url),'utf8');
+  const scope=fs.readFileSync(new URL('../frontend/src/data/foundation-scope.js',import.meta.url),'utf8');
+  const sw=fs.readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
+  assert.match(app,/MACHINE_KEY=null/);
+  assert.match(app,/clearActiveMachineDescriptor\(\);/);
+  assert.doesNotMatch(app,/FOUNDATION_SCOPE\.primaryRoute/);
+  assert.match(engine,/this\.machineKey=null/);
+  assert.match(engine,/this\.view='factory'/);
+  assert.match(engine,/neutralTemplate\(\)/);
+  assert.match(engine,/clearMachineContext\(\)/);
+  assert.match(scope,/defaultMachineId:null/);
+  assert.match(scope,/referenceMachineId:'BMJ-MCH-0003'/);
+  assert.match(html,/id="geometry-caption">Pabrik · Seluruh Area</);
+  assert.doesNotMatch(html,/id="geometry-caption">Model Offset 5</);
+  assert.match(sw,/factory-digital-twin-v209-architecture-convergence-20260925/);
+});
+
+test('V197 navigation uses factory, machine, and system language',()=>{
+  assert.match(html,/id="nav-machine"[\s\S]*<small>Pabrik<\/small>/);
+  assert.match(html,/id="nav-assets"[\s\S]*<small>Mesin<\/small>/);
+  assert.match(html,/data-mobile-nav="asset" aria-label="Mesin"[\s\S]*<small>Mesin<\/small>/);
+  assert.match(js,/uiArchitecture='v197-architecture-convergence'/);
+  assert.match(js,/setState\(detail,\{url:false\}\)/);
+});
+
+test('V197 system browsing keeps display layers secondary',()=>{
+  assert.match(js,/class="layer-display-options"/);
+  assert.match(js,/<summary>Pengaturan tampilan<\/summary>/);
+  assert.match(js,/SISTEM PABRIK/);
+  assert.match(css,/\.layer-display-options/);
+});
