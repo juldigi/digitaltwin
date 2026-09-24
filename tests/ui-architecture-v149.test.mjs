@@ -9,18 +9,14 @@ const app=fs.readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf
 const ui=fs.readFileSync(new URL('../frontend/src/ui-v5.js',import.meta.url),'utf8');
 const css=fs.readFileSync(new URL('../frontend/app-shell-v79.css',import.meta.url),'utf8');
 
-test('V149 primary navigation matches the master information architecture',()=>{
- for(const [id,label] of [
-  ['nav-machine','Pabrik'],['nav-assets','Aset'],['nav-systems','Sistem'],
-  ['nav-simulation-mode','Simulasi'],['nav-sources','Referensi'],
-  ['nav-help','Bantuan'],['nav-settings','Pengaturan']
- ]){
+test('V194 primary navigation exposes only the three product domains plus contextual help/settings',()=>{
+ for(const [id,label] of [['nav-machine','Pabrik'],['nav-assets','Aset'],['nav-systems','Sistem'],['nav-help','Bantuan']]){
   assert.match(html,new RegExp(`id="${id}"[\\s\\S]*?<small>${label}<\\/small>`));
  }
- for(const id of ['nav-layout','nav-components','nav-exterior','nav-view-panels']){
-  assert.match(html,new RegExp(`id="${id}"[^>]*class="[^"]*legacy-nav-entry`));
- }
- assert.match(css,/\.legacy-nav-entry,[^{]*\.legacy-tool-entry[^{]*\{display:none!important\}/);
+ assert.match(html,/id="settings"/);
+ for(const retired of ['nav-simulation-mode','nav-sources','nav-layout','nav-components','nav-exterior','nav-view-panels'])assert.doesNotMatch(html,new RegExp(`id="${retired}"`));
+ assert.match(html,/data-tab="simulation"/);
+ assert.match(html,/data-tab="sources"/);
 });
 
 test('V149 state foundation exposes the complete single-state contract',()=>{
@@ -45,15 +41,17 @@ test('one canonical Escape owner closes only the top-most shell context',()=>{
  assert.equal(escapeOwners,1);
  assert.match(shell,/if\(overlay==='layers'\)/);
  assert.match(shell,/if\(overlay==='navigation'\)/);
- assert.match(shell,/if\(overlay==='inspector'\)/);
+ assert.match(shell,/if\(getState\(\)\.inspectorState\?\.open\)closeInspector\(\)/);
  assert.match(shell,/if\(overlay==='modal'/);
 });
 
-test('2D is a workspace mode and does not expose the engineering workbench chrome',()=>{
+test('2D is a first-class workspace surface with no engineering workbench dependency',()=>{
  assert.match(shell,/#mode-2d/);
- assert.match(shell,/workspace-2d/);
- assert.match(css,/\.workspace-2d \.engineering-workbench/);
- assert.match(css,/\.workspace-2d \.engineering-workbench \.wb-tabs[^}]*display:none!important/);
+ assert.match(shell,/function applyViewModeDom\(state=getState\(\)\)/);
+ assert.match(html,/id="plant-plan-2d"/);
+ assert.match(css,/\.workspace-2d \.plant-plan-2d\{display:block!important\}/);
+ assert.doesNotMatch(html,/engineering-workbench/);
+ assert.doesNotMatch(shell,/data-workbench/);
 });
 
 test('canonical layer manager drives real FactoryEngine layers through an adapter',()=>{
@@ -65,21 +63,22 @@ test('canonical layer manager drives real FactoryEngine layers through an adapte
  assert.match(app,/engine\.setFactoryLayer\(layer,Boolean\(visible\)\)/);
 });
 
-test('simulation entry point reuses the existing simulation engine controls',()=>{
- assert.match(shell,/nav-simulation-mode/);
- assert.match(shell,/tool-simulation/);
- assert.match(shell,/sim-start/);
- assert.match(shell,/sim-pause/);
- assert.match(shell,/sim-stop/);
- assert.match(shell,/data-sim-speed/);
+test('simulation is contextual to the selected asset and reuses the existing simulation engine controls',()=>{
+ assert.doesNotMatch(html,/id="nav-simulation-mode"/);
+ assert.match(html,/data-tab="simulation"/);
+ assert.match(shell,/simulation:'simulation'/);
+ assert.match(app,/sim-start/);
+ assert.match(app,/sim-pause/);
+ assert.match(app,/sim-stop/);
+ assert.match(app,/data-sim-speed/);
  assert.match(app,/function startPrintingSimulation/);
  assert.match(app,/function pausePrintingSimulation/);
  assert.match(app,/function stopPrintingSimulation/);
 });
 
-test('mobile navigation is canonical and old global entries are not exposed',()=>{
- for(const key of ['factory','asset','system','simulation','more'])assert.match(html,new RegExp(`data-mobile-nav="${key}"`));
- for(const old of ['machine','layout','assets','components','menu'])assert.doesNotMatch(html,new RegExp(`data-mobile-nav="${old}"`));
+test('mobile navigation is canonical and limited to three domains plus More',()=>{
+ for(const key of ['factory','asset','system','more'])assert.match(html,new RegExp(`data-mobile-nav="${key}"`));
+ for(const old of ['simulation','machine','layout','assets','components','menu'])assert.doesNotMatch(html,new RegExp(`data-mobile-nav="${old}"`));
  assert.match(css,/env\(safe-area-inset-bottom\)/);
  assert.match(css,/orientation:landscape/);
 });
@@ -89,14 +88,14 @@ test('visible product copy removes prototype and test-mode terms',()=>{
  assert.doesNotMatch(html,/Siap diuji/);
  assert.doesNotMatch(html,/Printing Test/);
  assert.match(html,/Buka Interior/);
- assert.match(html,/Pusatkan di 3D/);
+ assert.match(html,/Fokus di 3D/);
 });
 
-test('V149 inspector exposes five canonical tabs and keeps interior as an inspection action',()=>{
+test('V194 inspector exposes contextual tabs and keeps Interior only as a direct inspection action',()=>{
  for(const tab of ['overview','structure','simulation','data','sources'])assert.match(html,new RegExp(`data-tab="${tab}"`));
  assert.match(html,/id="tool-interior"/);
- assert.match(html,/class="legacy-inspector-tab"[^>]*data-tab="exterior"/);
- assert.match(css,/\.legacy-inspector-tab\{display:none!important\}/);
+ assert.doesNotMatch(html,/data-tab="exterior"/);
+ assert.match(app,/renderPanel\('exterior'\)/);
  assert.doesNotMatch(app,/Printing Test/);
 });
 
@@ -155,7 +154,7 @@ test('V149 one-major-overlay policy explicitly closes the current major surface 
  assert.match(shell,/if\(current==='search'\)closeSearch\(\)/);
  assert.match(shell,/else if\(current==='layers'\)closeLayerManager\(\)/);
  assert.match(shell,/else if\(current==='navigation'\)closeDrawer\(\)/);
- assert.match(shell,/else if\(current==='inspector'\)closeInspector\((?:\{restoreFocus:false\})?\)/);
+ assert.match(shell,/if\(name!=='inspector'&&getState\(\)\.inspectorState\?\.open\)closeInspector\(\{restoreFocus:false\}\)/);
  assert.match(shell,/current==='modal'/);
 });
 
