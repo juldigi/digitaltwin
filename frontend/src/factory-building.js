@@ -1460,7 +1460,8 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   pcyl(av.x,av.h/2+.12,az,av.r,av.h,0x2879a3,'IPAL_PHOTO_BLUE_AUXILIARY_VESSEL',{function:'UNVERIFIED_FROM_PHOTO'},24,new T.MeshStandardMaterial({color:0x2879a3,roughness:.55,metalness:.16}));
   pcyl(av.x,av.h+.23,az,.12,.28,0x2f6f91,'IPAL_PHOTO_BLUE_AUXILIARY_TOP_NOZZLE',{function:'UNVERIFIED_FROM_PHOTO'},14);
   ptorus(av.x,av.h+.42,az,.16,.024,0x5f7480,'IPAL_PHOTO_BLUE_AUXILIARY_TOP_VALVE_WHEEL',0,{function:'UNVERIFIED_FROM_PHOTO'});
-  photoPipe([[av.x-av.r-.18,.52,az],[av.x-av.r-.18,1.02,az],[av.x-av.r+.02,1.02,az]],0xd7d8d0,.034,'IPAL_PHOTO_AUXILIARY_VESSEL_PIPE');
+  pline([av.x-av.r-.18,.52,az],[av.x-av.r-.18,1.02,az],.034,0xd7d8d0,'IPAL_PHOTO_AUXILIARY_VESSEL_PIPE',{routingConfidence:'PHOTO_DERIVED_VISUAL_ROUTING_NOT_PID'});
+  pline([av.x-av.r-.18,1.02,az],[av.x-av.r+.02,1.02,az],.034,0xd7d8d0,'IPAL_PHOTO_AUXILIARY_VESSEL_PIPE',{routingConfidence:'PHOTO_DERIVED_VISUAL_ROUTING_NOT_PID'});
  }
  // Separate large red mixing/process tower on a yellow two-level stand, seen at the right of IMG_2515/2525.
  const rt=IPAL_PHOTO_EVIDENCE_V205.relativeLayout.largeRedMixingTower,rtZ=-rt.y;
@@ -1531,7 +1532,7 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  pbox(or.x,2.86,secCenterZ,.08,.08,1.25,0xe5e5cf,'IPAL_PHOTO_SECONDARY_CANOPY_LINEAR_LIGHT',0,1,{fixture:'PHOTO_VISIBLE'});
  pcyl(or.x-1.70,.74,orZ+or.d/2+1.72,.11,.52,0xc23b35,'IPAL_PHOTO_FIRE_EXTINGUISHER',{safetyEquipment:'PHOTO_VISIBLE'});buildingDetailStats.v205IpalSafetyDetails++;
  // Small exhaust fan, waste bin and wall services make the operator room match IMG_2514/2524.
- const fanRing=ptorus(or.x+or.w/2+.082,2.42,orZ-.72,.20,.025,0x3b474a,'IPAL_PHOTO_OPERATOR_EXHAUST_FAN_RING',Math.PI/2,{coreProcess:false});
+ const fanRing=new T.Mesh(new T.TorusGeometry(.20,.025,8,24),material(0x3b474a));fanRing.position.set(or.x+or.w/2+.082,2.42,orZ-.72);fanRing.rotation.y=Math.PI/2;ipalPhoto.add(fanRing);photoTag(fanRing,'IPAL_PHOTO_OPERATOR_EXHAUST_FAN_RING',{coreProcess:false});
  for(let a=0;a<Math.PI*2;a+=Math.PI/4)pline([or.x+or.w/2+.10,2.42,orZ-.72],[or.x+or.w/2+.10,2.42+Math.sin(a)*.16,orZ-.72+Math.cos(a)*.16],.010,0x505b5d,'IPAL_PHOTO_OPERATOR_EXHAUST_FAN_BLADE',{coreProcess:false});
  pbox(or.x+1.75,.38,orZ+or.d/2+.62,.42,.76,.42,0x555451,'IPAL_PHOTO_OPERATOR_WASTE_BIN',0,1,{coreProcess:false});
  pline([or.x-1.75,1.86,orZ+or.d/2+.09],[or.x+1.55,1.86,orZ+or.d/2+.09],.018,0x5f6460,'IPAL_PHOTO_OPERATOR_WALL_CONDUIT',{coreProcess:false});
