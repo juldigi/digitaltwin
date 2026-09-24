@@ -112,7 +112,7 @@
 
 <footer class="statusbar"><span><i></i> <span id="engine-status">Menyiapkan tampilan 3D</span></span><span id="layout-status">Denah tersedia</span><span id="scale-status">Data posisi tersedia</span><span id="lod-status">Model siap</span></footer>
 
-<dialog id="modal" aria-labelledby="modal-title" aria-modal="true"><div class="modal-head"><h2 id="modal-title"></h2><button id="modal-close" class="icon-btn" aria-label="Tutup dialog"></button></div><div id="modal-body"></div></dialog>
+<dialog id="modal" aria-labelledby="modal-title" aria-modal="true"><div class="modal-head"><button id="modal-back" class="modal-back" type="button" aria-label="Kembali ke dialog sebelumnya" hidden><span aria-hidden="true"></span><b>Kembali</b></button><h2 id="modal-title"></h2><button id="modal-close" class="icon-btn" aria-label="Tutup dialog"></button></div><div id="modal-body"></div></dialog>
 <div id="toast" role="status" aria-live="polite" hidden></div>
 <script id="splash-recovery">window.setTimeout(()=>{const splash=document.querySelector('.app-splash');if(!splash||splash.classList.contains('is-done'))return;splash.remove();if(!document.documentElement.dataset.appReady){const boot=document.getElementById('boot');if(boot){boot.hidden=false;boot.innerHTML='<strong>Aplikasi belum berhasil dimuat</strong><p>Periksa koneksi, lalu muat ulang halaman.</p><button type="button" id="boot-retry">Muat Ulang</button>';boot.querySelector('#boot-retry').onclick=()=>location.reload();}}},12500);</script>
 <script type="module" src="./src/app.js?v=192"></script>
