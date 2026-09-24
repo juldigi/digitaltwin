@@ -22,7 +22,7 @@ import {SHEETING_SIMULATION_STAGES,SHEETING_PROCESS_STEPS} from './simulation-sh
 import {universalMachineConfig,universalTaxonomy,universalTechnicalSources} from './universal-machine.js';
 import {assetTruth,connectionTruth,layoutTruth,positionVerification,truthStatus} from './data/truth-status.js';
 import {buildDwgFidelityLedger} from './data/dwg-fidelity.js';
-import {APP_BUILD,getState as getAppState,setDomainState,setSimulation as setAppSimulation,setInspector as setAppInspector,setBoot as setAppBoot} from './state/app-state.js';
+import {APP_BUILD,getState as getAppState,setDomainState,setSimulation as setAppSimulation,setInspector as setAppInspector,setBoot as setAppBoot,readUrlState,buildContextUrl} from './state/app-state.js';
 const MACHINE_ROUTE_BY_ID=Object.freeze({
  'BMJ-MCH-0002':'sheeting',
  [FOUNDATION_SCOPE.referenceMachineId]:'offset5',
@@ -72,13 +72,15 @@ const setActiveTaxonomyId=id=>setDomainState({selectedNode:id&&id!==ACTIVE_ROOT?
 const explodeLevel=()=>Math.max(0,Math.min(1,Number(getAppState().inspectionMode?.explodeLevel)||0));
 const setExplodeLevel=value=>{const level=Math.max(0,Math.min(1,Number(value)||0));setDomainState({inspectionMode:{explode:level>0,explodeLevel:level}});return level;};
 const isInteriorOpen=()=>Boolean(getAppState().inspectionMode?.interior);
+const interiorFocus=()=>getAppState().inspectionMode?.interiorFocus||null;
+const currentSimulationState=()=>getAppState().simulationState||{};
 const referenceFilter=()=>getAppState().referenceState?.filter||'all';
 const setReferenceFilter=filter=>setDomainState({referenceState:{filter:filter||'all'}});
 const readPerformanceMode=()=>{try{const current=localStorage.getItem(PERFORMANCE_MODE_KEY);if(current!==null)return current==='1';const legacy=localStorage.getItem(LEGACY_PERFORMANCE_MODE_KEY);if(legacy!==null){localStorage.setItem(PERFORMANCE_MODE_KEY,legacy);localStorage.removeItem(LEGACY_PERFORMANCE_MODE_KEY);return legacy==='1';}}catch{}return false;};
-let state,engine,apiBase='',token='',role=null,editing=false,selectedPart=null,exteriorPreviousLow=null,exteriorFocusKey=null,runtimeSimulationSnapshot,simulationOwnsExterior=false,toastTimer,bundledLayout=null,cachedDataActive=false;
+let state,engine,apiBase='',token='',role=null,editing=false,selectedPart=null,exteriorPreviousLow=null,simulationOwnsExterior=false,toastTimer,bundledLayout=null,cachedDataActive=false;
 function applyActiveMachineState(){
  state=structuredClone(initialState);setReferenceFilter('all');
- runtimeSimulationSnapshot={available:Boolean(MACHINE_KEY),active:false,running:false,paused:false,speed:1,stage:null,completed:0,progress:0,sheetsVisible:0,pileSheetsVisible:0,rotorCount:0,oscillatorCount:0,mechanismCount:0,inkFlowCount:0,uvLampCount:0,uvActive:false,pathVisible:IS_SHEETING?false:Boolean(MACHINE_KEY),inkFlowVisible:Boolean(MACHINE_KEY)};setAppSimulation({available:Boolean(MACHINE_KEY),blocked:false,blockedReason:null,active:false,playing:false,paused:false,stage:null,speed:1,progress:0});
+ setAppSimulation({available:Boolean(MACHINE_KEY),blocked:false,blockedReason:null,active:false,running:false,paused:false,speed:1,stage:null,completed:0,progress:0,sheetsVisible:0,pileSheetsVisible:0,rotorCount:0,oscillatorCount:0,mechanismCount:0,inkFlowCount:0,uvLampCount:0,uvActive:false,pathVisible:IS_SHEETING?false:Boolean(MACHINE_KEY),inkFlowVisible:Boolean(MACHINE_KEY)});
  if(!MACHINE_KEY){
   state.asset={...state.asset,asset_id:null,asset_code:null,codename:null,model:null,description:'Belum memilih mesin',source_description:null,category:null,subcategory:null,manufacturer:null,specification:null,configuration:null,serial_number:null,functional_location:null,year:null,'3d_status':'BELUM MEMILIH MESIN',data_confidence:null,discovery_status:null,sources:[]};
   return;
@@ -237,72 +239,76 @@ function exitExteriorMode(){
   engine.template.setExteriorOpen(false);engine.template.reset();engine.clearPartLabels();engine.isolated=false;
   if(exteriorPreviousLow!==null)engine.setLow(exteriorPreviousLow);
  }
- setDomainState({inspectionMode:{interior:false}});exteriorPreviousLow=null;exteriorFocusKey=null;
+ setDomainState({inspectionMode:{interior:false}});exteriorPreviousLow=null;setDomainState({inspectionMode:{interiorFocus:null}});
 }
 function showExteriorAll(){
  if(!enableExteriorOpen())return;
- exteriorFocusKey=null;setActiveTaxonomyId(ACTIVE_ROOT);engine.fit(engine.machine);renderPanel('exterior');
+ setDomainState({inspectionMode:{interiorFocus:null}});setActiveTaxonomyId(ACTIVE_ROOT);engine.fit(engine.machine);renderPanel('exterior');
 }
 function focusExteriorArea(key){
  if(!engine)return;
  const area=exteriorAreas().find(item=>item.key===key),parts=exteriorAreaNodes(area);if(!area||!parts.length)return;
  if(!enableExteriorOpen())return;
- exteriorFocusKey=key;engine.fitObjects(parts);renderPanel('exterior');
+ setDomainState({inspectionMode:{interiorFocus:key}});engine.fitObjects(parts);renderPanel('exterior');
 }
 function resetExteriorView(){
  if(!engine)return;exitExteriorMode();engine.fit(engine.machine);selectedPart=null;setActiveTaxonomyId(ACTIVE_ROOT);setExplodeLevel(0);renderPanel('exterior');
 }
-function updateSimulationPanel(next=runtimeSimulationSnapshot){
- runtimeSimulationSnapshot=next||runtimeSimulationSnapshot||{};
- const running=!!runtimeSimulationSnapshot.running,active=!!runtimeSimulationSnapshot.active,progress=Math.round((runtimeSimulationSnapshot.progress||0)*100);
+function commitSimulationState(next=currentSimulationState()){
+ const raw=next||{},active=!!raw.active,running=!!raw.running,progress=Math.max(0,Math.min(1,Number(raw.progress)||0));
+ const normalized={...currentSimulationState(),...raw,available:raw.available!==false&&!raw.blocked,blocked:!!raw.blocked,blockedReason:raw.blockedReason||null,active,running,paused:active&&!running,stage:raw.stage||null,speed:Number(raw.speed)||1,progress};
+ setAppSimulation(normalized);return normalized;
+}
+function updateSimulationPanel(next=currentSimulationState()){
+ const simulation=commitSimulationState(next),running=simulation.running,active=simulation.active,progress=Math.round(simulation.progress*100);
  const status=$('#sim-status'),stage=$('#sim-stage'),count=$('#sim-completed'),visible=$('#sim-visible'),pile=$('#sim-pile'),bar=$('#sim-progress-bar'),pause=$('#sim-pause'),start=$('#sim-start'),uv=$('#sim-uv-state'),uvCount=$('#sim-uv-count'),uvIndicator=$('#sim-uv-indicator');
- if(status)status.textContent=runtimeSimulationSnapshot.blocked?'TIDAK TERSEDIA':running?'RUNNING':active?'PAUSED':'READY';
- if(stage)stage.textContent=runtimeSimulationSnapshot.stage||'Siap';
- if(count)count.textContent=String(runtimeSimulationSnapshot.completed||0);
- if(visible)visible.textContent=String(runtimeSimulationSnapshot.sheetsVisible||0);
- if(pile)pile.textContent=String(runtimeSimulationSnapshot.pileSheetsVisible||0);
- if(uv){uv.textContent=runtimeSimulationSnapshot.uvActive?'AKTIF':'STANDBY';uv.classList.toggle('active',!!runtimeSimulationSnapshot.uvActive);}
- if(uvCount)uvCount.textContent=String(runtimeSimulationSnapshot.uvLampCount||0);
- if(uvIndicator)uvIndicator.classList.toggle('active',!!runtimeSimulationSnapshot.uvActive);
+ if(status)status.textContent=simulation.blocked?'TIDAK TERSEDIA':running?'RUNNING':active?'PAUSED':'READY';
+ if(stage)stage.textContent=simulation.stage||'Siap';
+ if(count)count.textContent=String(simulation.completed||0);
+ if(visible)visible.textContent=String(simulation.sheetsVisible||0);
+ if(pile)pile.textContent=String(simulation.pileSheetsVisible||0);
+ if(uv){uv.textContent=simulation.uvActive?'AKTIF':'STANDBY';uv.classList.toggle('active',!!simulation.uvActive);}
+ if(uvCount)uvCount.textContent=String(simulation.uvLampCount||0);
+ if(uvIndicator)uvIndicator.classList.toggle('active',!!simulation.uvActive);
  if(bar)bar.style.width=progress+'%';
  if(start)start.textContent=active?(running?'Running':'Lanjutkan'):(IS_APM2?'Mulai Simulasi Proses':IS_SHEETING?'Mulai Simulasi Sheeting':'Mulai Simulasi Proses');
  if(pause){pause.textContent=running?'Pause':'Lanjut';pause.disabled=!active;pause.setAttribute('aria-disabled',active?'false':'true');}
- document.querySelectorAll('[data-sim-speed]').forEach(b=>b.classList.toggle('active',Math.abs(+b.dataset.simSpeed-(runtimeSimulationSnapshot.speed||1))<.01));
- document.querySelectorAll('[data-sim-stage]').forEach(b=>b.classList.toggle('active',b.dataset.simStage===(runtimeSimulationSnapshot.stage||'')));
- setAppSimulation({available:runtimeSimulationSnapshot.available!==false&&!runtimeSimulationSnapshot.blocked,blocked:!!runtimeSimulationSnapshot.blocked,blockedReason:runtimeSimulationSnapshot.blockedReason||null,active,playing:running,paused:active&&!running,stage:runtimeSimulationSnapshot.stage||null,speed:runtimeSimulationSnapshot.speed||1,progress});
+ document.querySelectorAll('[data-sim-speed]').forEach(b=>b.classList.toggle('active',Math.abs(+b.dataset.simSpeed-(simulation.speed||1))<.01));
+ document.querySelectorAll('[data-sim-stage]').forEach(b=>b.classList.toggle('active',b.dataset.simStage===(simulation.stage||'')));
+ return simulation;
 }
 function startPrintingSimulation(){
  if(!engine){toast('Simulasi 3D memerlukan WebGL di perangkat ini.',true);return;}
  if(!ensureMachineInspectionContext('Simulasi'))return;
  if(!engine.isPrintingSimulationActive()){
-  const readiness=engine.getPrintingSimulationState?.()||runtimeSimulationSnapshot;
+  const readiness=engine.getPrintingSimulationState?.()||currentSimulationState();
   if(readiness?.blocked||readiness?.available===false){toast(readiness?.blockedReason||'Simulasi proses untuk aset ini belum tersedia.',true);updateSimulationPanel(readiness);return;}
   simulationOwnsExterior=!isInteriorOpen();
   enableExteriorOpen({forceDetail:false});
   engine.template.ghost(false);engine.isolated=false;engine.clearPartLabels();selectedPart=null;setActiveTaxonomyId(ACTIVE_ROOT);setExplodeLevel(0);
-  runtimeSimulationSnapshot=engine.startPrintingSimulation();
+  updateSimulationPanel(engine.startPrintingSimulation());
   engine.fit(engine.machine);
- }else runtimeSimulationSnapshot=engine.resumePrintingSimulation();
- updateSimulationPanel(runtimeSimulationSnapshot);renderPanel('simulation');
+ }else updateSimulationPanel(engine.resumePrintingSimulation());
+ renderPanel('simulation');
 }
 function pausePrintingSimulation(){
  if(!engine?.isPrintingSimulationActive())return;
- runtimeSimulationSnapshot=runtimeSimulationSnapshot.running?engine.pausePrintingSimulation():engine.resumePrintingSimulation();
- updateSimulationPanel(runtimeSimulationSnapshot);
+ const simulation=currentSimulationState();
+ updateSimulationPanel(simulation.running?engine.pausePrintingSimulation():engine.resumePrintingSimulation());
 }
 function stopPrintingSimulation({restoreExterior=true}={}){
  if(!engine)return;
- runtimeSimulationSnapshot=engine.stopPrintingSimulation();
+ const next=engine.stopPrintingSimulation();
  if(restoreExterior&&simulationOwnsExterior)exitExteriorMode();
- simulationOwnsExterior=false;updateSimulationPanel(runtimeSimulationSnapshot);
+ simulationOwnsExterior=false;updateSimulationPanel(next);
  if(activeInspectorTab()==='simulation')renderPanel('simulation');
 }
-window.addEventListener('bmj:simulationstoprequest',()=>{if(engine?.isPrintingSimulationActive?.()||runtimeSimulationSnapshot?.active)stopPrintingSimulation({restoreExterior:true});});
+window.addEventListener('bmj:simulationstoprequest',()=>{if(engine?.isPrintingSimulationActive?.()||currentSimulationState().active)stopPrintingSimulation({restoreExterior:true});});
 window.addEventListener('bmj:simulationcommand',event=>{
  const action=event.detail?.action,value=event.detail?.value;
- if(action==='toggle'){if(engine?.isPrintingSimulationActive?.()||runtimeSimulationSnapshot?.active)pausePrintingSimulation();else startPrintingSimulation();return;}
+ if(action==='toggle'){if(engine?.isPrintingSimulationActive?.()||currentSimulationState().active)pausePrintingSimulation();else startPrintingSimulation();return;}
  if(action==='stop'){stopPrintingSimulation({restoreExterior:true});return;}
- if(action==='speed'){runtimeSimulationSnapshot=engine?.setPrintingSimulationSpeed?.(+value)||runtimeSimulationSnapshot;updateSimulationPanel(runtimeSimulationSnapshot);}
+ if(action==='speed')updateSimulationPanel(engine?.setPrintingSimulationSpeed?.(+value)||currentSimulationState());
 });
 function simulationLocksStructure(){
   if(engine?.isPrintingSimulationActive()){toast(IS_APM2?'Hentikan simulasi proses APM 2 sebelum memilih, mengurai, atau mengisolasi komponen.':IS_VERIFIED_REGISTRY_SIM?'Hentikan simulasi proses sebelum memilih, mengurai, atau mengisolasi komponen.':'Hentikan Simulasi Proses sebelum memilih, mengurai, atau mengisolasi komponen.');return true;}
@@ -366,12 +372,7 @@ function renderReferencePanel(){
 function pushMachineContextHistory(node=null,{replace=false}={}){
  const appState=getAppState()||{},asset=activeMachineAssetId(),camera=appState.cameraPreset==='top'?'top':'iso';
  const args={asset,node:node&&node!==ACTIVE_ROOT?node:null,scene:'machine',view:currentViewMode(),camera};
- if(replace){
-  const url=new URL(location.href);url.searchParams.delete('machine');url.searchParams.set('asset',asset);url.searchParams.set('scene','machine');url.searchParams.set('view',args.view);
-  if(args.node)url.searchParams.set('node',args.node);else url.searchParams.delete('node');
-  if(camera==='top')url.searchParams.set('camera','top');else url.searchParams.delete('camera');
-  history.replaceState(args,'',url);return false;
- }
+ if(replace){history.replaceState(args,'',buildContextUrl(args));return false;}
  return pushContextHistory(args);
 }
 function resetTaxonomyRoot({historyMode='none'}={}){
@@ -492,20 +493,20 @@ function renderPanel(tab=activeInspectorTab()){
   document.querySelectorAll('[data-taxonomy]').forEach(b=>b.onclick=()=>selectTaxonomy(b.dataset.taxonomy));
   document.querySelectorAll('[data-stage]').forEach(b=>b.onclick=()=>{const candidate=taxonomyAtLevel(+b.dataset.stage);if(candidate)selectTaxonomy(candidate.id);});
  }else if(tab==='simulation'){
-  const s=engine?.getPrintingSimulationState?.()||runtimeSimulationSnapshot;runtimeSimulationSnapshot=s;
+  const s=commitSimulationState(engine?.getPrintingSimulationState?.()||currentSimulationState());
   if(!engine){
    $('#panel-content').innerHTML='<h3>Simulasi Proses</h3><div class="card accent"><h4>Simulasi 3D belum tersedia di perangkat ini</h4><p>Penampil 3D memerlukan akselerasi grafis WebGL. Anda tetap dapat melihat data, struktur, dan referensi mesin; jalankan simulasi pada perangkat atau browser yang mendukung WebGL.</p></div>';
   }else if(IS_APM2){
    $('#panel-content').innerHTML=`<h3>Simulasi Proses APM 2</h3><p class="subtle">Simulasi memperlihatkan alur sheet dari pile feeder ke suction head, register dan SideLay, pengambilalihan oleh gripper chain, penekanan pada flatbed die-cutting platen, stripping, lalu pelepasan gripper ke delivery pile. Gerak stroke, phase, tekanan dan timing adalah visualisasi proses—bukan setting servis OEM.</p><div class="card accent simulation-overview"><div class="simulation-status-row"><span id="sim-status" class="simulation-state">${s.running?'RUNNING':s.active?'PAUSED':'READY'}</span><b id="sim-stage">${esc(s.stage||'Pile Feeder')}</b></div><div class="simulation-progress"><span id="sim-progress-bar" style="width:${Math.round((s.progress||0)*100)}%"></span></div><dl class="data-list compact">${pair('Lembar selesai',s.completed||0)+pair('Lembar bergerak',s.sheetsVisible||0)}<dt>Lembar di pile</dt><dd id="sim-pile">${s.pileSheetsVisible||0}</dd>${pair('Mekanisme aktif',s.mechanismCount||0)+pair('Gerak osilasi',s.oscillatorCount||0)+pair('Drive / rotor',s.rotorCount||0)}</dl><div class="actions simulation-actions"><button id="sim-start" class="primary">${s.active?(s.running?'Running':'Lanjutkan'):'Mulai Simulasi Proses'}</button><button id="sim-pause" class="secondary">${s.running?'Pause':'Lanjut'}</button><button id="sim-stop" class="secondary">Stop & Reset</button></div></div><h4>Kecepatan visual</h4><div class="simulation-speed">${[.5,1,1.5,2].map(v=>`<button data-sim-speed="${v}" class="${Math.abs((s.speed||1)-v)<.01?'active':''}">${v}×</button>`).join('')}</div><label class="check"><input id="sim-path" type="checkbox" ${s.pathVisible!==false?'checked':''}> Tampilkan jalur sheet</label><h4>Alur proses</h4><div class="simulation-ink-flow">${APM2_PROCESS_STEPS.map((step,index)=>`<div><span>${index+1}</span><b>${esc(step)}</b></div>`).join('')}</div><div class="simulation-flow">${APM2_SIMULATION_STAGES.map(stage=>`<div data-sim-stage="${esc(stage)}" class="${stage===s.stage?'active':''}"><span></span><b>${esc(stage)}</b></div>`).join('')}</div><div class="card"><h4>Gerak yang divisualisasikan</h4><p>Suction head bergerak naik-turun, feed rollers dan sprocket berputar, SideLay melakukan gerak register lateral, gripper bars membawa sheet, platen melakukan pressure stroke, stripping frame bergerak pada fase berikutnya, lalu sheet berhenti dan menumpuk di delivery. SideLay ditonjolkan karena terdapat histori maintenance BMJ pada area tersebut.</p></div>`;
    on('#sim-start',startPrintingSimulation);on('#sim-pause',pausePrintingSimulation);on('#sim-stop',()=>stopPrintingSimulation({restoreExterior:true}));
-   document.querySelectorAll('[data-sim-speed]').forEach(b=>b.onclick=()=>{runtimeSimulationSnapshot=engine?.setPrintingSimulationSpeed(+b.dataset.simSpeed)||runtimeSimulationSnapshot;updateSimulationPanel(runtimeSimulationSnapshot);});
-   const pathToggle=$('#sim-path');if(pathToggle)pathToggle.onchange=e=>{runtimeSimulationSnapshot=engine?.setPrintingSimulationPathVisible(e.target.checked)||runtimeSimulationSnapshot;updateSimulationPanel(runtimeSimulationSnapshot);};
+   document.querySelectorAll('[data-sim-speed]').forEach(b=>b.onclick=()=>{updateSimulationPanel(engine?.setPrintingSimulationSpeed(+b.dataset.simSpeed)||currentSimulationState());});
+   const pathToggle=$('#sim-path');if(pathToggle)pathToggle.onchange=e=>{updateSimulationPanel(engine?.setPrintingSimulationPathVisible(e.target.checked)||currentSimulationState());};
    updateSimulationPanel(s);
   }else if(IS_SHEETING){
    $('#panel-content').innerHTML=`<h3>Simulasi Proses Sheeting</h3><p class="subtle">V68 memodelkan aliran material sebagai proses kontinu: reel rendah di <b>kanan</b> → guide/tension/EPC → web <b>membelit permukaan Main Draw / Traction Drum</b> → target panjang tercapai → visible blade / cut event → fast tape → slow tape → overlap/shingle → landing → jogger alignment → lift-table stacker di <b>kiri</b>. Jalur debug dimatikan secara default agar tidak menutupi mekanisme. Timing dan rasio kecepatan bersifat visual-process reference, bukan setelan servis OEM.</p><div class="card accent simulation-overview"><div class="simulation-status-row"><span id="sim-status" class="simulation-state">${s.running?'RUNNING':s.active?'PAUSED':'READY'}</span><b id="sim-stage">${esc(s.stage||'Unwind / Continuous Web')}</b></div><div class="simulation-progress"><span id="sim-progress-bar" style="width:${Math.round((s.progress||0)*100)}%"></span></div><dl class="data-list compact"><dt>Lembar selesai</dt><dd id="sim-completed">${s.completed||0}</dd><dt>Lembar bergerak</dt><dd id="sim-visible">${s.sheetsVisible||0}</dd><dt>Lembar di pile</dt><dd id="sim-pile">${s.pileSheetsVisible||0}</dd>${pair('Mekanisme aktif',s.mechanismCount||0)+pair('Roll / drive aktif',s.rotorCount||0)}</dl><div class="actions simulation-actions"><button id="sim-start" class="primary">${s.active?(s.running?'Running':'Lanjutkan'):'Mulai Simulasi Sheeting'}</button><button id="sim-pause" class="secondary">${s.running?'Pause':'Lanjut'}</button><button id="sim-stop" class="secondary">Stop & Reset</button></div></div><h4>Kecepatan visual</h4><div class="simulation-speed">${[.5,1,1.5,2].map(v=>`<button data-sim-speed="${v}" class="${Math.abs((s.speed||1)-v)<.01?'active':''}">${v}×</button>`).join('')}</div><label class="check"><input id="sim-path" type="checkbox" ${s.pathVisible!==false?'checked':''}> Tampilkan garis referensi jalur proses</label><h4>Alur proses</h4><div class="simulation-ink-flow">${SHEETING_PROCESS_STEPS.map((step,index)=>`<div><span>${index+1}</span><b>${esc(step)}</b></div>`).join('')}</div><div class="simulation-flow">${SHEETING_SIMULATION_STAGES.map(stage=>`<div data-sim-stage="${esc(stage)}" class="${stage===s.stage?'active':''}"><span></span><b>${esc(stage)}</b></div>`).join('')}</div><div class="card"><h4>Gerak yang divisualisasikan</h4><p>Paper reel/chuck dan guide/tension roller berputar, lalu web terlihat benar-benar menyentuh dan membelit Main Draw / Traction Drum. Surface speed drum disinkronkan dengan gerak web; setelah web maju satu target panjang sheet, blade turun, cutting edge mencapai web, sheet dilepas, lalu blade naik kembali. Fungsi draw/traction drum adalah process-family reference dari arsitektur sheeter BW/Unico/Maxson, bukan klaim nama OEM exact HSM-CTM7. Setelah cut, sheet masuk fast tape, slow tape, overlap/shingle, landing, jogger alignment dan lift-table stacker.</p></div>`;
    on('#sim-start',startPrintingSimulation);on('#sim-pause',pausePrintingSimulation);on('#sim-stop',()=>stopPrintingSimulation({restoreExterior:true}));
-   document.querySelectorAll('[data-sim-speed]').forEach(b=>b.onclick=()=>{runtimeSimulationSnapshot=engine?.setPrintingSimulationSpeed(+b.dataset.simSpeed)||runtimeSimulationSnapshot;updateSimulationPanel(runtimeSimulationSnapshot);});
-   const pathToggle=$('#sim-path');if(pathToggle)pathToggle.onchange=e=>{runtimeSimulationSnapshot=engine?.setPrintingSimulationPathVisible(e.target.checked)||runtimeSimulationSnapshot;updateSimulationPanel(runtimeSimulationSnapshot);};
+   document.querySelectorAll('[data-sim-speed]').forEach(b=>b.onclick=()=>{updateSimulationPanel(engine?.setPrintingSimulationSpeed(+b.dataset.simSpeed)||currentSimulationState());});
+   const pathToggle=$('#sim-path');if(pathToggle)pathToggle.onchange=e=>{updateSimulationPanel(engine?.setPrintingSimulationPathVisible(e.target.checked)||currentSimulationState());};
    updateSimulationPanel(s);
    }else if(IS_GENERIC&&IS_VERIFIED_REGISTRY_SIM){
     const m=GENERIC_CONFIG.machine,e=GENERIC_CONFIG.evidence,family=GENERIC_CONFIG.family,isAhu=family==='ahu',isCompressor=family==='compressor',isCtp=family==='ctp',isCtf=family==='imagesetter',isZund=family==='zund',isCollator=family==='collator',isBlanker=family==='blanker',isFolder=family==='folder';
@@ -522,19 +523,19 @@ function renderPanel(tab=activeInspectorTab()){
     const processIntro=isAhu?'Simulasi AHU memperlihatkan udara masuk melalui inlet/filter, melewati heat-exchange/cooling stage dan fan, lalu supply/return duct reference. Jalur plant tetap bukan as-built sampai drawing aktual tersedia.':isCompressor?'Simulasi compressor memperlihatkan intake → screw airend → oil-air separation → aftercooler → discharge/treatment → ring-main reference. Oil circuit dan condensate divisualkan terpisah; pressure tetap normalized.':isCtp?'Simulasi Suprasetter mengikuti external-drum CtP dengan interlock berurutan: plate present → register confirmed → drum load position → clamp confirmed → drum encoder sync → exposure permit → thermal-laser imaging → release clamp → unload permit → output confirmation. Loader, punch, debris-removal dan processor tetap option boundary sampai instalasi BMJ terverifikasi.':isCtf?'Simulasi SCREEN mengikuti roll-media capstan architecture dengan feedback chain: media present → supply brake/tension → gravity tension valid → capstan encoder → polygon at speed → exposure permit → laser imaging → exposure complete → cutter permit/home interlock → output detect. Punch dan inline processor tetap option boundary.':isZund?'Simulasi Zünd hanya menjalankan fungsi yang aman untuk family reference: vacuum hold-down dan gerak X-beam/Y-carriage mengikuti toolpath serpentine terkontrol. Aksi potong/crease/router sengaja tidak dijalankan karena tool package aktual BMJ belum teridentifikasi.':isCollator?'Simulasi collator memberi makan sheet secara bertahap per bin menggunakan suction-rotor/air separation reference, melewati feed-integrity sensing, kemudian bergabung ke common gathering transport dan delivery. Jumlah 10 bin tetap reference, bukan klaim unit BMJ.':isBlanker?'Simulasi ABM mengikuti family QF/LQF: stack masuk ke moving platform, X/Y servo mengindeks area ke bawah fixed hydraulic head, platform berhenti sebelum pressure stroke, blank/waste dipisahkan, lalu platform kembali.':isFolder?'Simulasi FGM-2 mengikuti zona umum folder-gluer: singulation → alignment/prebreak → primary fold → adhesive zone → final fold → compression → delivery. Crash-lock, 4/6-corner dan tipe glue applicator tetap tidak diasumsikan.':'Simulasi hanya menggerakkan mekanisme dan alur material yang sudah lolos evidence gate. Timing dan posisi detail bukan setelan produksi atau servis aktual.';
     $('#panel-content').innerHTML=`<h3>Simulasi Proses · ${esc(m.name)}</h3><p class="subtle">${processIntro}</p><div class="card accent simulation-overview"><div class="simulation-status-row"><span id="sim-status" class="simulation-state">${s.running?'RUNNING':s.active?'PAUSED':'READY'}</span><b id="sim-stage">${esc(s.stage||PRINTING_SIMULATION_STAGES[0]||'Proses')}</b></div><div class="simulation-progress"><span id="sim-progress-bar" style="width:${Math.round((s.progress||0)*100)}%"></span></div><dl class="data-list compact"><dt>${isAhu||isCompressor?'Siklus visual':'Output selesai'}</dt><dd id="sim-completed">${s.completed||0}</dd><dt>${isAhu||isCompressor?'Partikel aliran udara':'Material bergerak'}</dt><dd id="sim-visible">${isAhu||isCompressor?(s.airflowParticleCount||0):(s.sheetsVisible||0)}</dd><dt>${isAhu?'Supply / Return':isCompressor?'Internal / Distribusi':'Output di pile / collection'}</dt><dd id="sim-pile">${isAhu?((s.supplyAirflowParticleCount||0)+' / '+(s.returnAirflowParticleCount||0)):isCompressor?((s.compressedAirParticleCount||0)+' / '+(s.distributionAirParticleCount||0)):(s.pileSheetsVisible||0)}</dd>${pair(isAhu?'Mekanisme fan / actuator':isCompressor?'Drive / airend / fan':'Mekanisme terpetakan',s.mechanismCount||0)+numericRows+flagRows}</dl><div class="actions simulation-actions"><button id="sim-start" class="primary">${s.active?(s.running?'Running':'Lanjutkan'):'Mulai Simulasi Proses'}</button><button id="sim-pause" class="secondary">${s.running?'Pause':'Lanjut'}</button><button id="sim-stop" class="secondary">Stop & Reset</button></div></div><h4>Kecepatan visual</h4><div class="simulation-speed">${[.5,1,1.5,2].map(v=>`<button data-sim-speed="${v}" class="${Math.abs((s.speed||1)-v)<.01?'active':''}">${v}×</button>`).join('')}</div><label class="check"><input id="sim-path" type="checkbox" ${s.pathVisible!==false?'checked':''}> ${isCompressor?'Tampilkan piping distribusi reference':isAhu?'Tampilkan ducting reference':'Tampilkan jalur referensi jika tersedia'}</label><h4>${isAhu?'Alur tata udara referensi':isCompressor?'Alur compressed-air reference':isCtp?'Alur external-drum imaging':isCtf?'Alur media & exposure':isZund?'Alur vacuum + XY toolpath':isCollator?'Alur suction & gathering':isBlanker?'Alur blanking X/Y + fixed head':isFolder?'Alur folding & gluing':'Unit proses yang tervalidasi'}</h4><div class="simulation-flow">${genericStages.map(stage=>`<div data-sim-stage="${esc(stage)}" class="${stage===s.stage?'active':''}"><span></span><b>${esc(stage)}</b></div>`).join('')}</div>${isAhu?'<div class="card"><h4>Batas routing duct</h4><p>Model memperlihatkan koneksi AHU → supply trunk → branch → diffuser serta return-air reference loop. Karena AHU 3–8 belum memiliki anchor posisi plant yang tervalidasi, ducting ini adalah functional airflow reference dan belum menjadi jalur as-built pabrik.</p></div>':''}${isCompressor?'<div class="card"><h4>Batas piping distribusi</h4><p>Model memperlihatkan discharge flexible connection, isolation/check valve, receiver boundary, dryer/filter boundary, closed-loop ring-main, service drops dan drip legs. Karena ketujuh compressor belum memiliki anchor posisi plant tervalidasi dan drawing compressed-air piping aktual belum tersedia, geometri ini adalah functional distribution reference—bukan jalur as-built. Receiver, dryer dan filter juga tetap explicit option boundary sampai instalasi aktual dikonfirmasi.</p></div>':''}<div class="card"><h4>Evidence gate</h4><p>${esc(e.reason)}</p><span class="tag">${esc(e.grade)}</span><span class="tag">${esc(e.geometry)}</span></div>`;
     on('#sim-start',startPrintingSimulation);on('#sim-pause',pausePrintingSimulation);on('#sim-stop',()=>stopPrintingSimulation({restoreExterior:true}));
-    document.querySelectorAll('[data-sim-speed]').forEach(b=>b.onclick=()=>{runtimeSimulationSnapshot=engine?.setPrintingSimulationSpeed(+b.dataset.simSpeed)||runtimeSimulationSnapshot;updateSimulationPanel(runtimeSimulationSnapshot);});
-    const pathToggle=$('#sim-path');if(pathToggle)pathToggle.onchange=e=>{runtimeSimulationSnapshot=engine?.setPrintingSimulationPathVisible(e.target.checked)||runtimeSimulationSnapshot;updateSimulationPanel(runtimeSimulationSnapshot);};
+    document.querySelectorAll('[data-sim-speed]').forEach(b=>b.onclick=()=>{updateSimulationPanel(engine?.setPrintingSimulationSpeed(+b.dataset.simSpeed)||currentSimulationState());});
+    const pathToggle=$('#sim-path');if(pathToggle)pathToggle.onchange=e=>{updateSimulationPanel(engine?.setPrintingSimulationPathVisible(e.target.checked)||currentSimulationState());};
     updateSimulationPanel(s);
    }else if(IS_GENERIC){
    const reason=GENERIC_CONFIG.evidence.reason;
    $('#panel-content').innerHTML=`<h3>Simulasi belum tervalidasi</h3><div class="card accent"><h4>Tidak dijalankan untuk mencegah gerakan palsu</h4><p>${esc(reason)}</p><span class="tag">${esc(GENERIC_CONFIG.evidence.grade)}</span><span class="tag">${esc(GENERIC_CONFIG.evidence.geometry)}</span></div><dl class="data-list">${pair('Status simulasi','DIBLOKIR')+pair('Komponen bergerak','0')+pair('Produk fiktif','0')+pair('Syarat aktivasi','Alur material + actuator + interlock + timing + output harus tervalidasi')}</dl><div class="card"><h4>Yang masih dapat diperiksa</h4><p>Model referensi tetap dapat diputar, difokuskan dan dibuka strukturnya, tetapi bukan representasi konfigurasi aktual BMJ sampai foto empat sisi, nameplate, manual, susunan modul dan arah proses tersedia.</p></div>`;
   }else{
-  const s=engine?.getPrintingSimulationState?.()||runtimeSimulationSnapshot;runtimeSimulationSnapshot=s;
+  const s=commitSimulationState(engine?.getPrintingSimulationState?.()||currentSimulationState());
   $('#panel-content').innerHTML=`<h3>Simulasi Proses</h3><p class="subtle">${IS_OFFSET10?'Simulasi membuka exterior otomatis dan memperlihatkan feeder, sheet alignment, seluruh cylinder train, AirTransfer, inking, Alcolor dampening, FoilStar pada PU2, tiga coating unit, UV/drying dan X3 delivery. Jalur mekanis adalah visualisasi proses berbasis dokumen, bukan nilai timing atau setelan servis OEM.':'Simulasi menjalankan sheet travel sekaligus mekanisme utama mesin. Kertas mengikuti permukaan impression/transfer cylinder sebagai lembar fleksibel agar tidak menembus roll. Feeder dan register bergerak, gripper melakukan transfer antar-unit, cylinder/gear/roller berputar, distributor tinta berosilasi, tetesan tinta terlihat dari fountain menuju ductor, dampening bekerja, lalu UV curing, inspection dan delivery menyelesaikan alur. Nilai stroke, phase, intensitas UV dan timing adalah visualisasi proses, bukan setelan servis.'}</p><div class="card accent simulation-overview"><div class="simulation-status-row"><span id="sim-status" class="simulation-state">${s.running?'RUNNING':s.active?'PAUSED':'READY'}</span><b id="sim-stage">${esc(s.stage||'Feeder')}</b></div><div class="simulation-progress"><span id="sim-progress-bar" style="width:${Math.round((s.progress||0)*100)}%"></span></div><dl class="data-list compact">${pair('Lembar selesai',s.completed||0)+pair('Lembar bergerak',s.sheetsVisible||0)}<dt>Lembar di pile</dt><dd id="sim-pile">${s.pileSheetsVisible||0}</dd>${pair('Part mekanis aktif',s.mechanismCount||0)+pair('Gerak osilasi',s.oscillatorCount||0)+pair('Jalur tinta / dampening',s.inkFlowCount||0)+pair('Dynamic sheet brake',s.deliveryBrakeActive?'AKTIF':'STANDBY')}<dt>UV curing</dt><dd id="sim-uv-state" class="${s.uvActive?'active':''}">${s.uvActive?'AKTIF':'STANDBY'}</dd><dt>UV lamp visual</dt><dd><span id="sim-uv-count">${s.uvLampCount||0}</span> cassette</dd>${pair('Kecepatan visual',(s.speed||1)+'×')}</dl><div class="actions simulation-actions"><button id="sim-start" class="primary">${s.active?(s.running?'Running':'Lanjutkan'):'Mulai Simulasi Proses'}</button><button id="sim-pause" class="secondary">${s.running?'Pause':'Lanjut'}</button><button id="sim-stop" class="secondary">Stop & Reset</button></div></div><h4>Kecepatan visual</h4><div class="simulation-speed">${[.5,1,1.5,2].map(v=>`<button data-sim-speed="${v}" class="${Math.abs((s.speed||1)-v)<.01?'active':''}">${v}×</button>`).join('')}</div><label class="check"><input id="sim-path" type="checkbox" ${s.pathVisible!==false?'checked':''}> Tampilkan garis jalur kertas</label><label class="check"><input id="sim-ink-flow" type="checkbox" ${s.inkFlowVisible!==false?'checked':''}> Tampilkan aliran tinta & dampening</label><h4>Sistem tinta</h4><div class="simulation-ink-flow">${INK_SIMULATION_SEQUENCE.map((step,index)=>`<div><span>${index+1}</span><b>${esc(step)}</b></div>`).join('')}</div><p class="subtle">Tetesan memanjang menunjukkan cucuran tinta dari fountain menuju ductor/vibrator; jalur tipis berikutnya menunjukkan transfer film tinta antar-roller. Warna unit pada simulasi hanya pembeda visual, bukan urutan warna job aktual.</p><div class="simulation-uv-card"><span id="sim-uv-indicator" aria-hidden="true"></span><div><b>UV Curing System</b><small>Beam menyala otomatis saat sheet berada di bawah cassette dryer.</small></div></div><h4>Alur proses mesin</h4><div class="simulation-flow">${PRINTING_SIMULATION_STAGES.map(stage=>`<div data-sim-stage="${esc(stage)}" class="${stage===s.stage?'active':''}"><span></span><b>${esc(stage)}</b></div>`).join('')}</div><div class="card"><h4>Gerak yang disimulasikan</h4><p>Feeder, register, cylinder train, gripper/transfer, inking, dampening, coating, UV/dryer dan delivery bergerak bersama. Pada Offset 10, FoilStar PU2 dan tiga coating unit ikut divisualisasikan sesuai konfigurasi dokumen. Aliran tinta divisualkan sebagai cucuran fountain → ductor, lalu film menuju roller/distributor → form rollers → plate → blanket → sheet; dampening divisualkan terpisah dari pan/roller ke plate. UV beam aktif hanya ketika sheet melewati dryer. Saat mencapai delivery, gripper melepaskan sheet tepat di atas main pile dan lembar tetap terlihat menumpuk di atas stack yang sudah ada.</p></div>`;
   on('#sim-start',startPrintingSimulation);on('#sim-pause',pausePrintingSimulation);on('#sim-stop',()=>stopPrintingSimulation({restoreExterior:true}));
-  document.querySelectorAll('[data-sim-speed]').forEach(b=>b.onclick=()=>{runtimeSimulationSnapshot=engine?.setPrintingSimulationSpeed(+b.dataset.simSpeed)||runtimeSimulationSnapshot;updateSimulationPanel(runtimeSimulationSnapshot);});
-  const pathToggle=$('#sim-path');if(pathToggle)pathToggle.onchange=e=>{runtimeSimulationSnapshot=engine?.setPrintingSimulationPathVisible(e.target.checked)||runtimeSimulationSnapshot;updateSimulationPanel(runtimeSimulationSnapshot);};
-  const inkToggle=$('#sim-ink-flow');if(inkToggle)inkToggle.onchange=e=>{runtimeSimulationSnapshot=engine?.setPrintingSimulationInkFlowVisible(e.target.checked)||runtimeSimulationSnapshot;updateSimulationPanel(runtimeSimulationSnapshot);};
+  document.querySelectorAll('[data-sim-speed]').forEach(b=>b.onclick=()=>{updateSimulationPanel(engine?.setPrintingSimulationSpeed(+b.dataset.simSpeed)||currentSimulationState());});
+  const pathToggle=$('#sim-path');if(pathToggle)pathToggle.onchange=e=>{updateSimulationPanel(engine?.setPrintingSimulationPathVisible(e.target.checked)||currentSimulationState());};
+  const inkToggle=$('#sim-ink-flow');if(inkToggle)inkToggle.onchange=e=>{updateSimulationPanel(engine?.setPrintingSimulationInkFlowVisible(e.target.checked)||currentSimulationState());};
   updateSimulationPanel(s);
 
   }
@@ -564,7 +565,7 @@ function renderPanel(tab=activeInspectorTab()){
    ];
    $('#panel-content').innerHTML=`<h3>Data aset</h3><p class="subtle">Nilai yang tidak didukung sumber tidak diubah menjadi angka atau status pasti. UNKNOWN, UNVERIFIED, APPROXIMATE, dan CONFLICTING ditampilkan apa adanya.</p><dl class="data-list">${rows.map(([k,v])=>pair(k,v)).join('')}</dl><div class="card"><h4>Konteks aktif</h4><p>${esc(meta?.name||'Mesin')} · posisi ${esc(truth.position)}</p></div>`;
  }else if(tab==='exterior'){
-  $('#panel-content').innerHTML=`<h3>Buka Interior</h3><p class="subtle">Mode ini membuka cover/panel luar agar <b>seluruh interior mesin terlihat</b>. Rangka utama, frame, support, support bridge, tangga, landing, dan struktur penyangga tetap ditampilkan.</p><div class="card accent exterior-overview"><h4>${isInteriorOpen()?'Interior terbuka · interior terlihat':'Interior tertutup · tampilan normal'}</h4><p>${isInteriorOpen()?'Cover luar sedang disembunyikan dan detail interior dipaksa tampil penuh. Pilih area di bawah hanya untuk memusatkan kamera; area lain tetap tersedia.':'Tekan Buka Semua Cover untuk melihat cylinder, roller, gripper, drive, dampening, inking, transfer, dan detail internal lain yang sudah dimodelkan.'}</p><div class="actions"><button id="exterior-open" class="primary">Buka Semua Cover</button><button id="exterior-close" class="secondary">Tutup Interior</button></div></div><h4>Fokus area saat interior terbuka</h4><div class="exterior-area-list">${exteriorAreas().map(area=>`<button data-exterior-area="${esc(area.key)}" class="exterior-area-button ${exteriorFocusKey===area.key?'active':''}"><span><b>${esc(area.name)}</b><small>Interior + frame/support</small></span><span>Fokus ›</span></button>`).join('')}</div><p class="subtle">Mode ini hanya mengubah visibilitas cover dan level detail. Dimensi, posisi, serta geometri frame/support tidak diubah.</p>`;
+  $('#panel-content').innerHTML=`<h3>Buka Interior</h3><p class="subtle">Mode ini membuka cover/panel luar agar <b>seluruh interior mesin terlihat</b>. Rangka utama, frame, support, support bridge, tangga, landing, dan struktur penyangga tetap ditampilkan.</p><div class="card accent exterior-overview"><h4>${isInteriorOpen()?'Interior terbuka · interior terlihat':'Interior tertutup · tampilan normal'}</h4><p>${isInteriorOpen()?'Cover luar sedang disembunyikan dan detail interior dipaksa tampil penuh. Pilih area di bawah hanya untuk memusatkan kamera; area lain tetap tersedia.':'Tekan Buka Semua Cover untuk melihat cylinder, roller, gripper, drive, dampening, inking, transfer, dan detail internal lain yang sudah dimodelkan.'}</p><div class="actions"><button id="exterior-open" class="primary">Buka Semua Cover</button><button id="exterior-close" class="secondary">Tutup Interior</button></div></div><h4>Fokus area saat interior terbuka</h4><div class="exterior-area-list">${exteriorAreas().map(area=>`<button data-exterior-area="${esc(area.key)}" class="exterior-area-button ${interiorFocus()===area.key?'active':''}"><span><b>${esc(area.name)}</b><small>Interior + frame/support</small></span><span>Fokus ›</span></button>`).join('')}</div><p class="subtle">Mode ini hanya mengubah visibilitas cover dan level detail. Dimensi, posisi, serta geometri frame/support tidak diubah.</p>`;
   on('#exterior-open',showExteriorAll);on('#exterior-close',resetExteriorView);
   document.querySelectorAll('[data-exterior-area]').forEach(b=>b.onclick=()=>focusExteriorArea(b.dataset.exteriorArea));
  }else{
@@ -599,7 +600,7 @@ async function acceptState(next){state=next;engine?.loadLayout(activeLayout());e
 function setView(view){
  const l=activeLayout();
  if(view==='factory'&&!l){layoutDialog();return;}
- if(view==='factory'&&engine?.isPrintingSimulationActive()){engine.stopPrintingSimulation();runtimeSimulationSnapshot=engine.getPrintingSimulationState();simulationOwnsExterior=false;}if(view==='factory'&&isInteriorOpen())exitExteriorMode();editing=false;if(engine)engine.onTransform=null;setExplodeLevel(0);selectedPart=null;engine?.setView(view,state);
+ if(view==='factory'&&engine?.isPrintingSimulationActive()){updateSimulationPanel(engine.stopPrintingSimulation());simulationOwnsExterior=false;}if(view==='factory'&&isInteriorOpen())exitExteriorMode();editing=false;if(engine)engine.onTransform=null;setExplodeLevel(0);selectedPart=null;engine?.setView(view,state);
  $$('.rail>button').forEach(b=>b.classList.remove('active'));
  $(view==='factory'?'#nav-machine':'#nav-assets')?.classList.add('active');
  const machineName=IS_OFFSET10?'OFFSET 10':IS_APM2?'APM 2':IS_SHEETING?'SHEETING LEXUS':IS_GENERIC?GENERIC_CONFIG.machine.name:MACHINE_KEY==='offset5'?'OFFSET 5':'Mesin';
@@ -641,8 +642,7 @@ function showHome({historyMode='none'}={}){
   $('#view-kicker').textContent='DENAH PABRIK · 2D';
   $('#view-subtitle').textContent='Penampil 3D belum tersedia di perangkat ini. Denah 2D tetap dapat digunakan.';
   $('#scene-hint').textContent='Pilih posisi aset melalui menu Aset atau denah 2D.';
-  const params=new URLSearchParams(location.search);params.set('view','2d');
-  history.replaceState(history.state,'',location.pathname+'?'+params.toString()+location.hash);
+  history.replaceState(history.state,'',buildContextUrl({...getAppState(),viewMode:'2d'}));
   emitDomainState({viewMode:'2d'});
  }
 }
@@ -697,22 +697,16 @@ function machineRecordForRoute(route){
 }
 function currentViewMode(){return getAppState().viewMode==='2d'?'2d':'3d';}
 function pushContextHistory({asset=null,node=null,scene='factory',view=currentViewMode(),camera='iso'}={}){
- const url=new URL(location.href);url.searchParams.delete('machine');
- if(asset)url.searchParams.set('asset',asset);else url.searchParams.delete('asset');
- if(node)url.searchParams.set('node',node);else url.searchParams.delete('node');
- if(scene==='machine')url.searchParams.set('scene','machine');else if(asset)url.searchParams.set('scene','factory');else url.searchParams.delete('scene');
- url.searchParams.set('view',view==='2d'?'2d':'3d');
- if(camera==='top')url.searchParams.set('camera','top');else url.searchParams.delete('camera');
- const next=url.pathname+url.search+url.hash,current=location.pathname+location.search+location.hash;
  const snapshot={asset:asset||null,node:node||null,scene:scene==='machine'?'machine':'factory',view:view==='2d'?'2d':'3d',camera:camera==='top'?'top':'iso'};
+ const url=buildContextUrl(snapshot),next=url.pathname+url.search+url.hash,current=location.pathname+location.search+location.hash;
  if(next===current){history.replaceState(snapshot,'',url);return false;}
  history.pushState(snapshot,'',url);return true;
 }
 function resetMachineInspectionContext(){
- if(engine?.isPrintingSimulationActive?.()){engine.stopPrintingSimulation();runtimeSimulationSnapshot=engine.getPrintingSimulationState?.()||runtimeSimulationSnapshot;}
+ if(engine?.isPrintingSimulationActive?.()){updateSimulationPanel(engine.stopPrintingSimulation());}
  if(isInteriorOpen())exitExteriorMode();
  if(engine){engine.template?.reset?.();engine.clearPartLabels?.();engine.isolated=false;}
- selectedPart=null;setActiveTaxonomyId(ACTIVE_ROOT);setExplodeLevel(0);exteriorFocusKey=null;simulationOwnsExterior=false;setDomainState({inspectorState:{tab:'overview'}});
+ selectedPart=null;setActiveTaxonomyId(ACTIVE_ROOT);setExplodeLevel(0);setDomainState({inspectionMode:{interiorFocus:null}});simulationOwnsExterior=false;setDomainState({inspectorState:{tab:'overview'}});
  $('#tool-explode')?.classList.remove('active');$('#tool-isolate')?.classList.remove('active');$('#tool-interior')?.classList.remove('active');
 }
 function applyRestoredCamera(preset='iso'){
@@ -772,7 +766,7 @@ async function switchActiveMachine(route,{historyMode='push'}={}){
   toast('Aset belum memiliki konteks tata letak yang dapat dibuka.',true);return false;
  }
  const normalizedRoute=normalizeMachineKey(route);if(!normalizedRoute){assetDialog();return false;}
- if(engine?.isPrintingSimulationActive?.()||runtimeSimulationSnapshot?.active)stopPrintingSimulation({restoreExterior:true});
+ if(engine?.isPrintingSimulationActive?.()||currentSimulationState().active)stopPrintingSimulation({restoreExterior:true});
  const record=machineRecordForRoute(normalizedRoute),assetId=record?.machineId||normalizedRoute,assetName=record?.name||normalizedRoute,threeMode=$('#mode-3d'),targetView=threeMode?.disabled?'2d':'3d';
  if(targetView==='2d'){if(record){selectFactoryAssetContext(record,{historyMode,openDialog:true});return false;}toast('Model 3D belum tersedia di perangkat ini.',true);return false;}
  if(historyMode==='push')pushContextHistory({asset:assetId,node:null,scene:'machine',view:targetView,camera:'iso'});
@@ -789,7 +783,7 @@ async function switchActiveMachine(route,{historyMode='push'}={}){
  try{
   configureActiveMachine(normalizedRoute);applyActiveMachineState();UNIVERSAL_SEARCH_INDEX=null;setActiveTaxonomyId(ACTIVE_ROOT);
   applyMachineShell();
-  if(engine){if(!await engine.switchMachine(MACHINE_KEY))throw new Error('Model belum dapat dibuka');engine.onTaxonomySelect=id=>selectTaxonomy(id,{revealPanel:true,historyMode:'push'});engine.onSimulationUpdate=next=>{runtimeSimulationSnapshot=next;updateSimulationPanel(next);};engine.onReset=()=>{setExplodeLevel(0);selectedPart=null;setActiveTaxonomyId(ACTIVE_ROOT);renderPanel();};engine.onError=message=>toast(message,true);engine.setView('machine',state);}
+  if(engine){if(!await engine.switchMachine(MACHINE_KEY))throw new Error('Model belum dapat dibuka');engine.onTaxonomySelect=id=>selectTaxonomy(id,{revealPanel:true,historyMode:'push'});engine.onSimulationUpdate=next=>updateSimulationPanel(next);engine.onReset=()=>{setExplodeLevel(0);selectedPart=null;setActiveTaxonomyId(ACTIVE_ROOT);renderPanel();};engine.onError=message=>toast(message,true);engine.setView('machine',state);}
   else{qStaticFallbackClear();renderStaticMachineFallback(new Error('3D renderer unavailable'));}
   const taxCount=$('#taxonomy-count');if(taxCount)taxCount.textContent=taxonomyStats().total.toLocaleString('id-ID');
   renderStatus();redrawPlantPlan();showPanel();renderPanel('overview');engine?.fit(engine.machine,'iso');$('#engine-status').textContent=assetName+' · model 3D siap';emitDomainState({selectedAsset:assetId,selectedNode:null,activeReference:null,activeSection:'asset',sceneMode:'machine',cameraPreset:'iso',inspectorState:{open:true,tab:'overview'}});return true;
@@ -802,7 +796,7 @@ async function switchActiveMachine(route,{historyMode='push'}={}){
   }else{
    clearActiveMachineDescriptor();setActiveTaxonomyId(null);engine?.clearMachineContext?.();showHome({historyMode:'none'});
   }
-  emitDomainState({selectedAsset:previousAsset||null,selectedNode:null,sceneMode:previousAsset?'machine':'factory',simulationState:{active:false,playing:false,stage:null,progress:0}});
+  emitDomainState({selectedAsset:previousAsset||null,selectedNode:null,sceneMode:previousAsset?'machine':'factory',simulationState:{active:false,running:false,paused:false,stage:null,progress:0}});
   toast('Model '+assetName+' gagal dimuat: '+error.message,true);return false;}
  finally{if(boot)boot.hidden=true;document.body.classList.remove('scene-switching');}
 }
@@ -819,8 +813,7 @@ window.addEventListener('bmj:simulateselectedmachine',async event=>{
 });
 function qStaticFallbackClear(){const viewport=$('#viewport');viewport?.querySelectorAll('.static-machine-fallback').forEach(node=>node.remove());}
 async function restoreHistoryContext(){
- const params=new URLSearchParams(location.search),legacyMachine=params.get('machine'),route=legacyMachine||params.get('asset')||null,node=params.get('node'),viewMode=params.get('view')==='2d'?'2d':'3d',cameraPreset=params.get('camera')==='top'?'top':'iso';
- const sceneMode=params.get('scene')==='machine'||Boolean(node)||Boolean(legacyMachine)?'machine':'factory';
+ const restored=readUrlState(),route=restored.selectedAsset,node=restored.selectedNode,viewMode=restored.viewMode,cameraPreset=restored.cameraPreset,sceneMode=restored.sceneMode;
  if(!route){
   showHome({historyMode:'none'});applyRestoredCamera(cameraPreset);
   emitDomainState({selectedAsset:null,selectedNode:null,sceneMode:'factory',viewMode,cameraPreset,activeSection:'factory'});return;
@@ -1185,7 +1178,7 @@ function helpDialog(){
   modal('Bantuan',`<div class="help-intro"><small>PANDUAN KONTEKSTUAL · ${device.toUpperCase()}</small><h3>${esc(contextHelp)}</h3></div><div class="help-grid"><section><h3>Gerakkan tampilan</h3><p>Seret untuk memutar. Cubit atau scroll untuk memperbesar dan memperkecil. Gunakan Fokus untuk kembali ke objek yang sedang dipilih.</p></section><section><h3>Lihat bagian mesin</h3><p>Buka tab Struktur, lalu pilih tingkat Mesin → Unit Utama → Sub → Block → Part → Spesifik Part. Bagian yang dipilih akan ditandai dan dipusatkan.</p></section><section><h3>Buka Interior</h3><p>Gunakan Buka Interior untuk menyembunyikan cover luar sementara. Frame, support, dan posisi komponen tidak diubah.</p></section><section><h3>Jalankan simulasi</h3><p>Simulasi tersedia pada aset yang memiliki model proses terverifikasi atau referensi proses keluarga yang memadai. Jika bukti belum cukup, aplikasi menampilkan status diblokir beserta alasannya dan tidak menjalankan gerakan palsu.</p></section><section><h3>Gunakan 2D dan 3D</h3><p>Pindah tampilan dari tombol 2D / 3D. Mesin atau komponen yang dipilih tetap menjadi konteks aktif.</p></section><section><h3>Cari apa pun</h3><p>Gunakan kolom pencarian untuk menemukan mesin, komponen, sumber, area, atau posisi aset pada denah.</p></section></div><div class="card"><h3>Kejujuran data</h3><p>Informasi yang belum memiliki dasar sumber tetap ditandai belum tersedia atau belum terverifikasi. Aplikasi tidak mengisi status, ukuran, atau konfigurasi dengan tebakan.</p><p class="subtle">Informasi teknis aplikasi tersedia di Pengaturan → Informasi Sistem.</p></div>`);
 }
 renderPanel();renderStatus();const taxCount=$('#taxonomy-count');if(taxCount)taxCount.textContent=taxonomyStats().total.toLocaleString('id-ID');
-try{engine=new FactoryEngine($('#viewport'),part=>{const meta=taxonomyForPart(part);if(meta)selectTaxonomy(meta.id,{revealPanel:true,historyMode:'push'});});engine.onTaxonomySelect=id=>selectTaxonomy(id,{revealPanel:true,historyMode:'push'});engine.onSimulationUpdate=next=>{runtimeSimulationSnapshot=next;updateSimulationPanel(next);};runtimeSimulationSnapshot=engine.getPrintingSimulationState();engine.onReset=()=>{setExplodeLevel(0);selectedPart=null;setActiveTaxonomyId(ACTIVE_ROOT);renderPanel();};engine.onError=message=>toast(message,true);$('#engine-status').textContent='Menyiapkan denah pabrik';try{engine.setLow(readPerformanceMode()||matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse) and (max-width:1024px)').matches);}catch{}}catch(e){renderStaticMachineFallback(e);$('#engine-status').textContent='Tampilan 3D belum tersedia';}
+try{engine=new FactoryEngine($('#viewport'),part=>{const meta=taxonomyForPart(part);if(meta)selectTaxonomy(meta.id,{revealPanel:true,historyMode:'push'});});engine.onTaxonomySelect=id=>selectTaxonomy(id,{revealPanel:true,historyMode:'push'});engine.onSimulationUpdate=next=>updateSimulationPanel(next);updateSimulationPanel(engine.getPrintingSimulationState());engine.onReset=()=>{setExplodeLevel(0);selectedPart=null;setActiveTaxonomyId(ACTIVE_ROOT);renderPanel();};engine.onError=message=>toast(message,true);$('#engine-status').textContent='Menyiapkan denah pabrik';try{engine.setLow(readPerformanceMode()||matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse) and (max-width:1024px)').matches);}catch{}}catch(e){renderStaticMachineFallback(e);$('#engine-status').textContent='Tampilan 3D belum tersedia';}
 try{
  bundledLayout=await loadBundledPlantLayout();engine?.loadLayout(activeLayout());engine?.applySceneOverrides(state?.sceneOverrides||{});
  if(engine)engine.onFactorySelect=id=>{const m=MACHINE_REGISTRY.find(m=>m.machineId===id);if(m){selectFactoryAssetContext(m,{historyMode:'push',openDialog:false,focus:true});machineDetailDialog(m);}};
