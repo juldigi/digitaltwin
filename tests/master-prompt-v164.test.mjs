@@ -9,11 +9,13 @@ const ui=read('../frontend/src/ui-v5.js');
 const html=read('../frontend/index.html');
 const sw=read('../frontend/sw.js');
 
-test('detail toggle has exactly one canonical event owner and preserves overlay state',()=>{
+test('detail toggle has one canonical owner and inspector is contextual rather than modal overlay',()=>{
  assert.match(shell,/q\('#panel-toggle'\)\?\.addEventListener\('click',toggleInspector\)/);
- assert.match(shell,/function openInspector\([\s\S]*?beforeMajorOverlay\('inspector'\)[\s\S]*?setInspector\(true,tab\);openOverlay\('inspector'\)/);
+ assert.match(shell,/function openInspector\([\s\S]*?setInspector\(true,tab\);applyInspectorDom\(next\)/);
+ assert.match(shell,/function closeInspector\([\s\S]*?setInspector\(false\)/);
  assert.match(shell,/function toggleInspector\(\)[\s\S]*?openInspector\(\)/);
  assert.match(shell,/function toggleInspector\(\)[\s\S]*?closeInspector\(\)/);
+ assert.doesNotMatch(shell,/openOverlay\('inspector'\)/);
  assert.doesNotMatch(ui,/\$\('#panel-toggle'\)\?\.addEventListener/);
 });
 
