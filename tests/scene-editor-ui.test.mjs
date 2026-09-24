@@ -133,7 +133,7 @@ test('V197 editor shows the full registry and labels unplaced machines',()=>{
  assert.match(app,/Mesin ada di database, belum ditempatkan di scene/);
 });
 
-test('V197 machine keyboard movement is camera-relative and installs one stable listener pair',()=>{
+test('V197 machine keyboard movement is camera-relative and installs one stable listener pair',async()=>{
  const engine=await readFile(new URL('../frontend/src/engine.js',import.meta.url),'utf8');
  assert.match(engine,/moveSceneObjectInView\(id,horizontal=0,vertical=0,step=\.1\)/);
  assert.match(engine,/this\.camera\.getWorldDirection\(forward\)/);
