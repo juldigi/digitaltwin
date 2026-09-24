@@ -1,9 +1,9 @@
-const VERSION='factory-digital-twin-v192-mobile-camera-framing-20260923';
+const VERSION='factory-digital-twin-v207-superadmin-editor-20260924';
 const SHELL=[
  './','./index.html','./config.json','./assets/favicon.svg','./assets/splash-industrial-v79.webp',
  './style.css','./runtime-fallback.css','./app-shell-v79.css','./ui-v5.css','./responsive-v5.css','./experience-v37.css',
  './src/app.js','./src/app-shell-v79.js','./src/ui-v5.js','./src/experience-v37.js','./src/state/app-state.js',
- './src/model.js','./src/engine.js','./src/offset5.js','./src/simulation.js',
+ './src/model.js','./src/scene-editor-state.js','./src/engine.js','./src/offset5.js','./src/simulation.js',
  './src/data/foundation-scope.js','./src/data/truth-status.js','./src/data/dwg-fidelity.js',
  './src/data/dimensions-offset5.js','./src/data/confidence.js','./src/data/sources-offset5.js','./src/data/taxonomy-offset5.js',
  './src/data/plant-layout-data.js','./src/data/plant-layout-deep.js','./src/data/plant-actual.js','./src/data/plant-actual-data.js',

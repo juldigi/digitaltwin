@@ -1,4 +1,5 @@
 import {buildActualFactory} from './factory-building.js';
+import {sceneIdentity} from './scene-editor-state.js';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
@@ -31,9 +32,9 @@ export class FactoryEngine {
     this.simulation=new PrintingSimulation(this.machine,this.template);this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);
     this.factory=new THREE.Group();this.scene.add(this.factory);this.factorySelectionId=null;this.factorySelectionHelper=null;
     this.gizmo=new TransformControls(this.camera,this.renderer.domElement);this.scene.add(this.gizmo.getHelper());this.gizmo.addEventListener('dragging-changed',e=>{this.controls.enabled=!e.value;});this.gizmo.addEventListener('objectChange',()=>{if(!this.sceneEditing&&this.gizmo.mode==='scale')this.machine.scale.setScalar(Math.max(.0001,this.machine.scale.x));this.onTransform?.();this.onSceneTransform?.();});
-    this.ray=new THREE.Raycaster();this.down=null;this.renderer.domElement.addEventListener('dblclick',()=>{this.template.reset();this.clearPartLabels();this.isolated=false;if(this.view==='factory'){this.clearFactorySelection();this.fit(this.factory);}else this.fit(this.machine);this.onReset?.();});
+    this.ray=new THREE.Raycaster();this.down=null;this.renderer.domElement.addEventListener('dblclick',()=>{if(this.sceneEditing)return;this.template.reset();this.clearPartLabels();this.isolated=false;if(this.view==='factory'){this.clearFactorySelection();this.fit(this.factory);}else this.fit(this.machine);this.onReset?.();});
     this.renderer.domElement.addEventListener('pointerdown',e=>this.down=[e.clientX,e.clientY]);
-    this.renderer.domElement.addEventListener('pointerup',e=>{if(!this.down||Math.hypot(e.clientX-this.down[0],e.clientY-this.down[1])>5||this.gizmo.dragging||this.simulation?.active)return;const r=this.renderer.domElement.getBoundingClientRect();this.ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),this.camera);if(this.sceneEditing){const hit=this.ray.intersectObject(this.factory,true).find(h=>this.isObjectVisible(h.object));if(hit){let node=hit.object;while(node&&!this.sceneObjects?.has(node.userData.editorId))node=node.parent;if(node)this.selectSceneObject(node.userData.editorId);}return;}if(this.view==='factory'&&this.actualFactory){const hit=this.ray.intersectObjects([...this.actualFactory.assets.values()],true).find(h=>{for(let p=h.object;p;p=p.parent)if(!p.visible)return false;return true;});if(hit)this.onFactorySelect?.(hit.object.userData.machineId);return;}const hit=this.ray.intersectObject(this.machine,true).find(h=>{for(let p=h.object;p;p=p.parent)if(!p.visible)return false;return true;});if(hit&&this.machine.visible){const part=this.template.resolvePart(hit.object);if(part)this.onSelect(part);}});
+    this.renderer.domElement.addEventListener('pointerup',e=>{if(!this.down||Math.hypot(e.clientX-this.down[0],e.clientY-this.down[1])>5||this.gizmo.dragging||this.simulation?.active)return;const r=this.renderer.domElement.getBoundingClientRect();this.ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),this.camera);if(this.sceneEditing){const hit=this.ray.intersectObject(this.view==='machine'?this.machine:this.factory,true).find(h=>this.isObjectVisible(h.object));if(hit){let node=hit.object;while(node&&!this.sceneObjectIds?.has(node))node=node.parent;if(node)this.selectSceneObject(this.sceneObjectIds.get(node));}return;}if(this.view==='factory'&&this.actualFactory){const hit=this.ray.intersectObjects([...this.actualFactory.assets.values()],true).find(h=>{for(let p=h.object;p;p=p.parent)if(!p.visible)return false;return true;});if(hit)this.onFactorySelect?.(hit.object.userData.machineId);return;}const hit=this.ray.intersectObject(this.machine,true).find(h=>{for(let p=h.object;p;p=p.parent)if(!p.visible)return false;return true;});if(hit&&this.machine.visible){const part=this.template.resolvePart(hit.object);if(part)this.onSelect(part);}});
     this.resizeObserver=new ResizeObserver(()=>this.resize());this.resizeObserver.observe(container);
     this.last=0;this.render=this.render.bind(this);this.fit(this.machine,'iso',false);this.resize();this.frame=requestAnimationFrame(this.render);
     this.renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();this.onError?.('Konteks grafis terputus. Muat ulang halaman untuk memulihkan penampil.');});
@@ -142,14 +143,14 @@ export class FactoryEngine {
   getPrintingSimulationState(){return this.simulation?.state()||{available:false,blocked:true,blockedReason:'Simulasi belum tersedia untuk aset ini.',active:false,running:false,paused:false,speed:1,stage:null,completed:0,progress:0,sheetsVisible:0,rotorCount:0};}
   isPrintingSimulationActive(){return !!this.simulation?.active;}
   setView(view,state){if(view!=='machine'&&this.simulation?.active)this.simulation.stop();this.view=view;if(!this.sceneEditing)this.gizmo.detach();this.template.reset();this.clearPartLabels();this.isolated=false;this.machine.position.set(0,0,0);this.machine.rotation.set(0,0,0);this.machine.scale.setScalar(1);this.studio.visible=view==='machine';this.factory.visible=view==='factory';if(this.factorySelectionHelper)this.factorySelectionHelper.visible=view==='factory';
-    if(view==='factory')this.applyPlacement(state,this.layout||state.layout);else this.machine.visible=true;
+    if(view==='factory')this.applyPlacement(state,this.layout||state.layout);else{this.machine.visible=true;this.applySceneOverrides(state?.sceneOverrides||this.sceneOverrides||{});}
     this.fit(view==='factory'?(this.currentFactoryTarget()||this.factory):this.machine);
   }
   applyPlacement(state,layout=this.layout||state.layout){const a=state.asset,l=layout;this.machine.visible=false;if(!l)return;if(l.baselineId){return;}
     if(a.layout_x!==null){this.machine.position.set(a.layout_x,a.layout_y,a.layout_z);this.machine.rotation.y=a.rotation*Math.PI/180;this.machine.scale.setScalar(a.scale);this.machine.visible=true;}
     else if(l.machineAnchor&&this.machineKey==='offset5'){const anchor=l.machineAnchor,p=cadToWorld(anchor.x,anchor.y,l.transform);this.machine.position.set(p.x,anchor.z*(l.transform.scale??1),p.z);this.machine.rotation.y=-(anchor.rotation+l.transform.rotation)*Math.PI/180;this.machine.visible=true;}
   }
-  loadLayout(l){if(l===this.layout&&this.factory.children.length&&(!l?.fleet||this.loadedFleet===l.fleet))return;this.clearFactory();this.sceneBase=new WeakMap();this.layout=l;if(!l)return;
+  loadLayout(l){if(l===this.layout&&this.factory.children.length&&(!l?.fleet||this.loadedFleet===l.fleet))return;this.clearFactory();this.sceneBase=new WeakMap();this.appliedSceneIds=new Set();this.layout=l;if(!l)return;
     if(l.baselineId&&l.fleet){this.actualFactory=buildActualFactory(l,l.fleet);this.factory.add(this.actualFactory.root);this.loadedFleet=l.fleet;this.layoutStats={total:l.source.entityCount,rendered:l.actual.walls.length,unimplemented:0};return;}
     if(Array.isArray(l.referenceBatches)){
       this.layoutStats={total:l.source?.entityCount??l.referenceBatches.length,rendered:0,unimplemented:l.source?.entityCount??0};
@@ -254,24 +255,77 @@ export class FactoryEngine {
   focusFactoryAsset(id,mode='iso'){return this.selectFactoryAsset(id,{focus:true,mode});}
   clearFactory(){this.clearFactorySelection();this.actualFactory=null;this.factory.traverse(o=>{o.geometry?.dispose();if(Array.isArray(o.material))o.material.forEach(m=>{m.map?.dispose();m.dispose();});else{o.material?.map?.dispose();o.material?.dispose();}});this.factory.clear();}
   registerSceneObjects(){
-    this.sceneObjects=new Map();
+    this.sceneObjects=new Map();this.sceneObjectIds=new WeakMap();
     const walk=(node,path)=>{
-      if(node.isObject3D){const id='node:'+path;node.userData.editorId=id;this.sceneObjects.set(id,node);if(!this.sceneBase)this.sceneBase=new WeakMap();if(!this.sceneBase.has(node))this.sceneBase.set(node,{position:node.position.toArray(),rotation:[node.rotation.x,node.rotation.y,node.rotation.z],scale:node.scale.toArray(),visible:node.visible});}
+      const generatedId=node.userData.editorCopyRoot||node.userData.editorNewRoot;
+      if(generatedId){this.sceneObjects.set(generatedId,node);node.traverse(child=>this.sceneObjectIds.set(child,generatedId));return;}
+      if(node.isObject3D){const id='node:'+path;this.sceneObjectIds.set(node,id);this.sceneObjects.set(id,node);if(!this.sceneBase)this.sceneBase=new WeakMap();if(!this.sceneBase.has(node))this.sceneBase.set(node,{position:node.position.toArray(),rotation:[node.rotation.x,node.rotation.y,node.rotation.z],scale:node.scale.toArray(),visible:node.visible});}
       node.children.forEach((child,index)=>walk(child,path+'.'+index));
     };
     this.factory.children.forEach((child,index)=>walk(child,String(index)));
-    for(const [id,node] of this.actualFactory?.assets||[]){this.sceneObjects.set('asset:'+id,node);}
+    for(const node of [...this.sceneObjects.values()])if(node.userData.editorStableId){const id=node.userData.editorStableId;if(!this.sceneObjects.has(id)){this.sceneObjects.set(id,node);this.sceneObjectIds.set(node,id);}}
+    for(const [id,node] of this.actualFactory?.assets||[]){this.sceneObjects.set('asset:'+id,node);this.sceneObjectIds.set(node,'asset:'+id);}
+    if(this.machine){const machinePath='machine:'+this.machineKey+':',parts=new Map(),duplicates=new Set();const registerMachine=(node,path)=>{if(node.userData.editorCopyRoot){const generatedId=node.userData.editorCopyRoot;this.sceneObjects.set(generatedId,node);node.traverse(child=>this.sceneObjectIds.set(child,generatedId));return;}const id=machinePath+path;this.sceneObjects.set(id,node);this.sceneObjectIds.set(node,id);if(!this.sceneBase)this.sceneBase=new WeakMap();if(!this.sceneBase.has(node))this.sceneBase.set(node,{position:node.position.toArray(),rotation:[node.rotation.x,node.rotation.y,node.rotation.z],scale:node.scale.toArray(),visible:node.visible});const partId=node.userData?.nodeId;if(typeof partId==='string'&&/^[A-Za-z0-9_.-]+$/.test(partId)){if(parts.has(partId))duplicates.add(partId);else parts.set(partId,node);}node.children.forEach((child,index)=>registerMachine(child,path==='root'?String(index):path+'.'+index));};registerMachine(this.machine,'root');for(const [partId,node] of parts)if(!duplicates.has(partId)){const id='part:'+this.machineKey+':'+partId;this.sceneObjects.set(id,node);this.sceneObjectIds.set(node,id);}}
     return this.sceneObjects;
   }
   setSceneEditing(on){this.sceneEditing=!!on;if(!on){this.gizmo.detach();this.onSceneTransform=null;}else this.registerSceneObjects();}
-  selectSceneObject(id){const node=this.sceneObjects?.get(id);if(!node)return;this.sceneSelectedId=id;this.gizmo.attach(node);this.onSceneSelect?.(id,node);return node;}
+  selectSceneObject(id){const node=this.sceneObjects?.get(id);if(!node)return;this.sceneSelectedId=id;if(this.sceneOverrides?.[id]?.locked)this.gizmo.detach();else this.gizmo.attach(node);this.onSceneSelect?.(id,node);return node;}
+  sceneIdentity(id){return sceneIdentity(this.sceneObjects?.get(id));}
+  sceneWallId(id){let node=this.sceneObjects?.get(id);while(node&&node!==this.factory){if(node.userData.editorWall)return this.sceneObjectIds?.get(node)||null;node=node.parent;}return null;}
+  sceneWallEndpoints(id){const wall=this.sceneObjects?.get(id);if(!wall?.userData.editorWall)return null;wall.updateWorldMatrix(true,false);const half=wall.userData.sourceLength/2;return [-half,half].map(x=>{const point=new THREE.Vector3(x,0,0).applyMatrix4(wall.matrixWorld);return [point.x,point.z];});}
+  setSceneWallEndpoints(id,points){const wall=this.sceneObjects?.get(id);if(!wall?.userData.editorWall)return false;const [a,b]=points,dx=b[0]-a[0],dz=b[1]-a[1],length=Math.hypot(dx,dz);if(length<.28||length>10000)return false;
+    wall.parent.updateWorldMatrix(true,false);const midpoint=new THREE.Vector3((a[0]+b[0])/2,0,(a[1]+b[1])/2),start=new THREE.Vector3(...[a[0],0,a[1]]),end=new THREE.Vector3(...[b[0],0,b[1]]);
+    wall.position.copy(wall.parent.worldToLocal(midpoint));const localDirection=end.sub(start).transformDirection(new THREE.Matrix4().copy(wall.parent.matrixWorld).invert());wall.rotation.y=Math.atan2(-localDirection.z,localDirection.x);wall.scale.x=length/wall.userData.sourceLength;return true;
+  }
+  alignSceneObject(id,targetId,axis){const node=this.sceneObjects?.get(id),target=this.sceneObjects?.get(targetId);if(!node||!target||node===target||!['x','z','xz'].includes(axis))return false;for(let p=node.parent;p;p=p.parent)if(p===target)return false;for(let p=target.parent;p;p=p.parent)if(p===node)return false;
+    node.updateWorldMatrix(true,true);target.updateWorldMatrix(true,true);
+    const center=new THREE.Box3().setFromObject(node).getCenter(new THREE.Vector3()),other=new THREE.Box3().setFromObject(target).getCenter(new THREE.Vector3());
+    if(axis.includes('x'))center.x=other.x;if(axis.includes('z'))center.z=other.z;
+    const old=node.getWorldPosition(new THREE.Vector3()),delta=center.sub(new THREE.Box3().setFromObject(node).getCenter(new THREE.Vector3()));
+    node.parent.updateWorldMatrix(true,false);node.position.copy(node.parent.worldToLocal(old.add(delta)));return true;
+  }
   dropSceneObjectToFloor(id){const node=this.sceneObjects?.get(id);if(!node)return;const box=new THREE.Box3().setFromObject(node);node.position.y-=box.min.y;}
   sceneObjectInfo(id){const node=this.sceneObjects?.get(id);if(!node)return null;node.updateWorldMatrix(true,true);const box=new THREE.Box3().setFromObject(node),size=box.getSize(new THREE.Vector3());const collisions=[];
     if(id.startsWith('asset:')&&!box.isEmpty())for(const [otherId,other] of this.actualFactory?.assets||[]){if('asset:'+otherId===id||!this.isObjectVisible(other))continue;const otherBox=new THREE.Box3().setFromObject(other);if(box.intersectsBox(otherBox)){const overlap=box.clone().intersect(otherBox).getSize(new THREE.Vector3());if(Math.min(overlap.x,overlap.y,overlap.z)>.05)collisions.push(otherId);}}
     return {dimensions:size.toArray(),collisions:collisions.slice(0,8)};
   }
   sceneSnapshot(){const result={};for(const [id,node] of this.sceneObjects||[]){if(id.startsWith('node:')&&[...this.actualFactory?.assets.values()||[]].includes(node))continue;const values={position:node.position.toArray(),rotation:[node.rotation.x,node.rotation.y,node.rotation.z],scale:node.scale.toArray(),visible:node.visible};result[id]=values;}return result;}
-  applySceneOverrides(overrides={}){this.registerSceneObjects();for(const node of new Set(this.sceneObjects.values())){const v=this.sceneBase.get(node);if(!v)continue;node.position.fromArray(v.position);node.rotation.set(...v.rotation);node.scale.fromArray(v.scale);node.visible=v.visible;}for(const [id,v] of Object.entries(overrides)){const node=this.sceneObjects.get(id);if(!node||!v)continue;node.position.fromArray(v.position);node.rotation.set(...v.rotation);node.scale.fromArray(v.scale);node.visible=v.visible;}this.sceneOverrides=overrides;}
+  applySceneOverrides(overrides={}){
+    for(const copy of this.sceneCopies?.values()||[])copy.parent?.remove(copy);
+    for(const created of this.sceneGenerated?.values()||[]){created.parent?.remove(created);created.geometry?.dispose();created.material?.dispose();}
+    this.sceneCopies=new Map();this.registerSceneObjects();this.staleSceneOverrides=[];
+    this.sceneGenerated=new Map();
+    for(const id of this.appliedSceneIds||[]){const node=this.sceneObjects.get(id),v=node&&this.sceneBase.get(node);if(!v)continue;node.position.fromArray(v.position);node.rotation.set(...v.rotation);node.scale.fromArray(v.scale);node.visible=v.visible;}
+    this.appliedSceneIds=new Set();
+    for(const [id,v] of Object.entries(overrides)){
+      if(id.startsWith('copy:'))continue;
+      const node=this.sceneObjects.get(id);if(!node){this.staleSceneOverrides.push(id);continue;}
+      if(v.identity&&v.identity!==sceneIdentity(node)){this.staleSceneOverrides.push(id);continue;}
+      node.position.fromArray(v.position);node.rotation.set(...v.rotation);node.scale.fromArray(v.scale);node.visible=v.visible&&!v.deleted;
+      this.appliedSceneIds.add(id);
+    }
+    for(const [id,v] of Object.entries(overrides))if(id.startsWith('copy:')){
+      const source=this.sceneObjects.get(v.sourceId);
+      if(!source||v.identity&&v.identity!==sceneIdentity(source)){this.staleSceneOverrides.push(id);continue;}
+      let meshCount=0;source.traverse(node=>{if(node.isMesh)meshCount++;});
+      if(meshCount>300){this.staleSceneOverrides.push(id);continue;}
+      const copy=source.clone(true);copy.name='Duplikat '+(source.name||source.userData.semantic||v.sourceId);
+      copy.userData={...copy.userData,editorCopyRoot:id,accuracy:'SUPERADMIN_ADDED_COPY'};
+      copy.traverse(child=>this.sceneObjectIds.set(child,id));source.parent.add(copy);
+      copy.position.fromArray(v.position);copy.rotation.set(...v.rotation);copy.scale.fromArray(v.scale);copy.visible=v.visible&&!v.deleted;
+      this.sceneCopies.set(id,copy);this.sceneObjects.set(id,copy);
+    }
+    for(const [id,v] of Object.entries(overrides))if(id.startsWith('new:')){
+      const geometry=v.shape==='box'?new THREE.BoxGeometry(1,1,1):v.shape==='cylinder'?new THREE.CylinderGeometry(.5,.5,1,24):null;
+      if(!geometry){this.staleSceneOverrides.push(id);continue;}
+      const object=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({color:0x879ba3,roughness:.78,metalness:.16}));
+      object.name=v.shape==='box'?'Kotak tambahan Superadmin':'Silinder tambahan Superadmin';
+      object.userData={semantic:'SUPERADMIN_ADDED_PRIMITIVE',editorNewRoot:id};object.castShadow=true;object.receiveShadow=true;
+      this.factory.add(object);object.position.fromArray(v.position);object.rotation.set(...v.rotation);object.scale.fromArray(v.scale);object.visible=v.visible&&!v.deleted;
+      this.sceneGenerated.set(id,object);this.sceneObjects.set(id,object);this.sceneObjectIds.set(object,id);
+    }
+    this.sceneOverrides=overrides;
+  }
   edit(on){if(on&&this.view==='factory'&&this.layout){this.machine.visible=true;this.gizmo.attach(this.machine);}else this.gizmo.detach();}
   setLow(on){this.low=on;this.renderer.setPixelRatio(on?1:Math.min(devicePixelRatio,1.7));this.renderer.shadowMap.enabled=!on;this.template.setLow(on);this.resize();}
   async switchMachine(key){
@@ -291,7 +345,7 @@ export class FactoryEngine {
     this.machine=this.template.root;this.scene.add(this.machine);
     this.simulation=nextSimulation;
     const label=this.renderer.domElement;label.setAttribute('aria-label',`Model 3D ${this.machine.name||requested}. Gunakan tombol sudut pandang untuk navigasi.`);
-    this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);this.isolated=false;this.view='machine';this.machine.visible=true;this.factory.visible=false;this.template.setLow(this.low);this.fit(this.machine);this.resize();return true;
+    this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);this.isolated=false;this.view='machine';this.machine.visible=true;this.applySceneOverrides(this.sceneOverrides||{});this.factory.visible=false;this.template.setLow(this.low);this.fit(this.machine);this.resize();return true;
   }
   dispose(){cancelAnimationFrame(this.frame);this.clearPartLabels();this.clearFactorySelection();this.resizeObserver.disconnect();this.controls.dispose();this.gizmo.dispose();this.simulation?.dispose();this.template.dispose();this.clearFactory();this.studio.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});this.renderer.dispose();}
 }

@@ -19,6 +19,8 @@ test('only Superadmin writes validated scene changes; revisions restore the prio
  assert.equal((await worker.fetch(req('scene',{token,method:'PUT',data:{overrides:{}}}),env)).status,409);
  const history=await (await worker.fetch(req('scene/revisions',{token}),env)).json();
  assert.equal(history.revisions.length,1);assert.deepEqual(history.revisions[0].overrides,{});
+ assert.equal((await worker.fetch(req('scene/revisions',{token:env.VIEWER_TOKEN}),env)).status,403);
+ assert.equal('sceneRevisions' in await (await worker.fetch(req('state',{token:env.VIEWER_TOKEN}),env)).json(),false);
  response=await worker.fetch(req('scene/restore',{token,method:'PUT',rev:'1',data:{id:history.revisions[0].id}}),env);
  assert.equal(response.status,200);assert.deepEqual((await response.json()).sceneOverrides,{});env.close();
 });

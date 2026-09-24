@@ -33,5 +33,5 @@ test('V176 runtime forbids direct forEach on the single-element selector helper'
 
 test('V176 repaired runtime is cache-busted for already deployed V175 clients',()=>{
   assert.match(html,/src\/app\.js\?v=192/);
-  assert.match(sw,/factory-digital-twin-v192-mobile-camera-framing-20260923/);
+  assert.match(sw,/factory-digital-twin-v207-superadmin-editor-20260924/);
 });

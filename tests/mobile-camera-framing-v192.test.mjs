@@ -8,4 +8,4 @@ const sw=readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 test('machine camera has a portrait-specific framing profile',()=>{assert.match(engine,/framingProfile\(object=this\.machine\)/);assert.match(engine,/padding:portrait&&machine\?1\.06:1\.18/);assert.match(engine,/targetLift:portrait&&machine\?-\.08:0/);});
 test('fit uses profile without changing object geometry',()=>{assert.match(engine,/c\.y\+=size\.y\*profile\.targetLift/);assert.match(engine,/\*profile\.padding/);});
 test('desktop framing keeps historical padding',()=>{assert.match(engine,/1\.06:1\.18/);});
-test('V192 release identifiers are coherent',()=>{assert.match(index,/app-shell-v79\.css\?v=192/);assert.match(index,/src\/app\.js\?v=192/);assert.match(sw,/factory-digital-twin-v192-mobile-camera-framing-20260923/);assert.match(app,/pair\('Versi aplikasi','V192'\)/);});
+test('V192 release identifiers are coherent',()=>{assert.match(index,/app-shell-v79\.css\?v=192/);assert.match(index,/src\/app\.js\?v=192/);assert.match(sw,/factory-digital-twin-v207-superadmin-editor-20260924/);assert.match(app,/pair\('Versi aplikasi','V192'\)/);});

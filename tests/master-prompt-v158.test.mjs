@@ -61,5 +61,5 @@ test('other models are loaded on demand while the factory shell remains availabl
  assert.doesNotMatch(engine,/from '\.\/machine-runtime\.js'/);
  assert.match(app,/pair\('Versi aplikasi','V192'\)/);
  assert.match(html,/src\/app\.js\?v=192/);
- assert.match(sw,/factory-digital-twin-v192-mobile-camera-framing-20260923/);
+ assert.match(sw,/factory-digital-twin-v207-superadmin-editor-20260924/);
 });

@@ -1,4 +1,5 @@
 import {initialState,validateLayout,validatePosition} from '../frontend/src/model.js';
+import {validateSceneOverrides} from '../frontend/src/scene-editor-state.js';
 const MAX_BYTES=4*1024*1024;
 const json=(data,status=200,headers={})=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff',...headers}});
 async function same(a,b){
@@ -33,8 +34,11 @@ export default {async fetch(req,env){
     if(!env.DB)return json({error:'Database D1 belum terhubung.'},503,cors);
     const row=await env.DB.prepare('SELECT data, revision FROM twin_state WHERE id = 1').first();
     let state=row?JSON.parse(row.data):structuredClone(initialState);state.revision=row?.revision??0;
-    if(path==='/api/state'&&req.method==='GET')return json(state,200,cors);
-    if(path==='/api/scene/revisions'&&req.method==='GET')return json({revisions:state.sceneRevisions||[]},200,cors);
+    if(path==='/api/state'&&req.method==='GET'){
+      if(!superadmin){const {sceneRevisions,...publicState}=state;return json(publicState,200,cors);}
+      return json(state,200,cors);
+    }
+    if(path==='/api/scene/revisions'&&req.method==='GET')return superadmin?json({revisions:state.sceneRevisions||[]},200,cors):json({error:'Riwayat scene hanya untuk Superadmin.'},403,cors);
     if(path==='/api/scene'&&req.method==='GET')return json({overrides:state.sceneOverrides||{},revision:state.revision},200,cors);
     if(path.startsWith('/api/scene')&&!superadmin)return json({error:'Hanya Superadmin yang dapat mengubah scene.'},403,cors);
     if(!admin)return json({error:'Hanya administrator yang dapat mengubah data.'},403,cors);
@@ -49,17 +53,9 @@ export default {async fetch(req,env){
         if(!entry)throw new Error('Revisi tidak ditemukan.');
         state.sceneOverrides=entry.overrides;
       }else{
-        const changes=data?.overrides;
-        if(!changes||typeof changes!=='object'||Array.isArray(changes)||Object.keys(changes).length>500)throw new Error('Override scene tidak valid.');
-        for(const [id,value] of Object.entries(changes)){
-          if(!/^(asset:[A-Za-z0-9_-]+|node:[0-9.]+)$/.test(id)||id.length>150)throw new Error('ID objek tidak valid.');
-          if(!value||typeof value!=='object'||Array.isArray(value)||typeof value.visible!=='boolean')throw new Error('Properti objek tidak valid.');
-          for(const key of ['position','rotation','scale'])if(!Array.isArray(value[key])||value[key].length!==3||value[key].some(n=>!Number.isFinite(n)||Math.abs(n)>100000))throw new Error('Transform objek tidak valid.');
-          if(value.scale.some(n=>n<=0))throw new Error('Skala objek harus positif.');
-        }
-        state.sceneOverrides=changes;
+        state.sceneOverrides=validateSceneOverrides(data?.overrides);
       }
-      state.sceneRevisions=[...(state.sceneRevisions||[]),{id:crypto.randomUUID(),at:new Date().toISOString(),overrides:previous}].slice(-10);
+      state.sceneRevisions=[...(state.sceneRevisions||[]),{id:crypto.randomUUID(),at:new Date().toISOString(),by:'Superadmin',objects:Object.keys(previous).length,overrides:previous}].slice(-10);
     }else if(path==='/api/position'){
       if(req.method==='DELETE'){Object.assign(state.asset,{layout_x:null,layout_y:null,layout_z:null,rotation:null,scale:null,positionConfidence:'UNKNOWN'});}
       else{

@@ -541,3 +541,15 @@ aside#detail-panel{--panel-sticky-top:68px;scroll-padding-top:calc(var(--panel-s
  .scene-heading p{font-size:8px}
  .scene-bottom{left:6px;right:6px}
 }
+
+/* Superadmin editor: keep the 3D scene reachable on a touch screen. */
+#scene-editor-panel{box-sizing:border-box;overscroll-behavior:contain;touch-action:pan-y}
+#scene-editor-panel button,#scene-editor-panel select,#scene-editor-panel input[type=file]{min-height:40px}
+#scene-editor-panel fieldset{border:1px solid #cbd8e0;border-radius:9px;margin:9px 0;padding:10px}
+#scene-editor-panel fieldset label{display:inline-flex;align-items:center;gap:5px;margin:3px 6px 3px 0}
+#scene-editor-panel input[type=number]{max-width:85px;min-height:38px}
+#scene-editor-panel #se-object{min-height:120px;border:1px solid #b7c7d0;border-radius:8px}
+#scene-editor-panel #se-history-list button{display:block;width:100%;margin:6px 0;text-align:left}
+#scene-editor-panel .se-nudge{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-top:10px}
+#scene-editor-panel .se-nudge button{min-width:0;padding:5px 2px}
+@media(max-width:767px){#scene-editor-panel{top:auto!important;left:0!important;right:0!important;bottom:0!important;width:100%!important;height:54dvh!important;max-height:75dvh;min-height:280px;border-radius:18px 18px 0 0!important;padding-bottom:calc(12px + env(safe-area-inset-bottom))!important}#scene-editor-panel .se-nudge button{min-height:44px}}

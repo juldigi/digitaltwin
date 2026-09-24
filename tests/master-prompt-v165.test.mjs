@@ -23,5 +23,5 @@ test('WebGL failure falls back to the actual 2D plant drawing with honest guidan
 
 test('new app controller is cache-busted on existing devices',()=>{
  assert.match(html,/src\/app\.js\?v=192/);
- assert.match(sw,/factory-digital-twin-v192-mobile-camera-framing-20260923/);
+ assert.match(sw,/factory-digital-twin-v207-superadmin-editor-20260924/);
 });

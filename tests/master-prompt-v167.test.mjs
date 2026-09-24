@@ -46,5 +46,5 @@ test('V167 interaction assets are cache-busted',()=>{
  assert.match(html,/app-shell-v79\.css\?v=192/);
  assert.match(html,/src\/ui-v5\.js\?v=167/);
  assert.match(html,/src\/app-shell-v79\.js\?v=192/);
- assert.match(sw,/factory-digital-twin-v192-mobile-camera-framing-20260923/);
+ assert.match(sw,/factory-digital-twin-v207-superadmin-editor-20260924/);
 });
