@@ -28,11 +28,14 @@ test('D1 binding failures stop deployment with an actionable error',async()=>{
  }finally{await rm(dir,{recursive:true,force:true});}
 });
 
-test('2D plan keeps the 3D switch above its full-screen workbench',async()=>{
+test('2D plan is a canonical workspace surface with the 3D switch kept reachable',async()=>{
  const css=await readFile(new URL('../frontend/app-shell-v79.css',import.meta.url),'utf8');
  const shell=await readFile(new URL('../frontend/src/app-shell-v79.js',import.meta.url),'utf8');
- assert.match(css,/body\.workspace-2d\.panel-hidden \.viewport-mode-switch\{z-index:65!important;visibility:visible;pointer-events:auto\}/);
- assert.match(css,/\.workspace-2d \.engineering-workbench\{display:block!important/);
+ const html=await readFile(new URL('../frontend/index.html',import.meta.url),'utf8');
+ assert.match(html,/id="plant-plan-2d"/);
+ assert.match(css,/\.workspace-2d \.plant-plan-2d\{display:block!important\}/);
+ assert.match(css,/\.workspace-2d \.viewport-mode-switch\{z-index:40!important;visibility:visible!important;pointer-events:auto!important\}/);
+ assert.match(shell,/function applyViewModeDom\(state=getState\(\)\)/);
  assert.match(shell,/if\(modeSwitch&&centerStack\)centerStack\.append\(modeSwitch\)/);
 });
 
