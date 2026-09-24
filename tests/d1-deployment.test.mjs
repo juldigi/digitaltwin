@@ -30,6 +30,8 @@ test('D1 binding failures stop deployment with an actionable error',async()=>{
 
 test('2D plan keeps the 3D switch above its full-screen workbench',async()=>{
  const css=await readFile(new URL('../frontend/app-shell-v79.css',import.meta.url),'utf8');
+ const shell=await readFile(new URL('../frontend/src/app-shell-v79.js',import.meta.url),'utf8');
  assert.match(css,/body\.workspace-2d\.panel-hidden \.viewport-mode-switch\{z-index:65!important;visibility:visible;pointer-events:auto\}/);
  assert.match(css,/\.workspace-2d \.engineering-workbench\{display:block!important/);
+ assert.match(shell,/if\(modeSwitch&&centerStack\)centerStack\.append\(modeSwitch\)/);
 });

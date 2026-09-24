@@ -2,6 +2,10 @@ import{getState,setState,setActiveSection,setViewMode,setLayer,setSimulation,set
 import{FOUNDATION_SCOPE,canOpenTechnical3D}from'./data/foundation-scope.js';
 
 const q=(s,r=document)=>r.querySelector(s);
+// The 2D plan is a sibling of the 3D workspace. Keep this switch outside the
+// workspace's paint containment so the full-screen plan cannot cover it.
+const modeSwitch=q('.viewport-mode-switch'),centerStack=q('.center-stack');
+if(modeSwitch&&centerStack)centerStack.append(modeSwitch);
 const PHASE1_FOUNDATION=FOUNDATION_SCOPE.expansionMode==='LAYOUT_PLACEHOLDERS_ONLY';
 const qa=(s,r=document)=>[...r.querySelectorAll(s)];
 const FOCUSABLE='button:not([disabled]):not([tabindex="-1"]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),summary,[tabindex]:not([tabindex="-1"])';
