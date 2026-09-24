@@ -59,8 +59,7 @@ const symbols=`<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
 document.body.insertAdjacentHTML('afterbegin',symbols);
 
 const iconMap={
- 'nav-machine':'factory','nav-assets':'machine','nav-systems':'system','nav-simulation-mode':'simulation',
- 'nav-sources':'file','nav-help':'help','nav-settings':'settings','nav-connect':'system','ui-menu-toggle':'menu','settings':'settings',
+ 'nav-machine':'factory','nav-assets':'machine','nav-systems':'system','nav-help':'help','ui-menu-toggle':'menu','settings':'settings',
  'close-panel':'close','modal-close':'close','ui-theme-toggle':'theme','global-search-icon':'search','mobile-search-toggle':'search','layer-manager-button':'layers',
  'panel-toggle':'panel','zoom-plus':'zoom-in','zoom-fit':'focus','zoom-minus':'zoom-out','labels':'label','fullscreen':'fullscreen'
 };
@@ -444,6 +443,18 @@ function syncAccessibleControls(state){
  if(mode2d){mode2d.setAttribute('aria-pressed',String(is2d));mode2d.classList.toggle('active',is2d)}
  if(mode3d){mode3d.setAttribute('aria-pressed',String(!is2d));mode3d.classList.toggle('active',!is2d)}
 }
+function syncVisualHierarchy(state){
+ const body=document.body,primary=primarySectionFor(state.activeSection);
+ const hasSelection=Boolean(state.selectedAsset||state.selectedNode||state.selectedSystem||state.activeReference);
+ body.dataset.sceneMode=state.sceneMode==='machine'?'machine':'factory';
+ body.dataset.primarySection=primary;
+ body.dataset.hasSelection=String(hasSelection);
+ body.classList.toggle('context-selected',hasSelection);
+ const heading=q('.scene-heading');
+ if(heading)heading.classList.toggle('is-contextual',hasSelection||state.sceneMode==='machine');
+ const toolbar=q('.scene-bottom');
+ if(toolbar)toolbar.setAttribute('aria-label',state.sceneMode==='machine'?'Kontrol tampilan dan inspeksi mesin':'Kontrol tampilan pabrik');
+}
 function syncViewModeText(el,next2d,is2d){
  if(!el)return;
  if(is2d){
@@ -470,5 +481,5 @@ function syncPressedTools(){
 }
 const pressedTools=qa('#tool-explode,#tool-isolate,#tool-interior,#labels');
 if(pressedTools.length){const pressedObserver=new MutationObserver(syncPressedTools);pressedTools.forEach(el=>pressedObserver.observe(el,{attributes:true,attributeFilter:['class']}));syncPressedTools()}
-relabel();const hydratedState=hydrateUrl();applyViewModeDom(hydratedState);if(hydratedState.viewMode==='2d')q('#mode-2d')?.click();let lastSyncedSection=getState().activeSection;subscribe(state=>{applyInspectorDom(state);applyViewModeDom(state);markSection(state.activeSection);syncLayerControls();syncAccessibleControls(state);syncViewModeContext(state);if(state.activeSection!==lastSyncedSection){lastSyncedSection=state.activeSection;requestAnimationFrame(syncSimulationTransport)}});
-document.documentElement.dataset.uiArchitecture='v194-state-owned-contextual';
+relabel();const hydratedState=hydrateUrl();applyViewModeDom(hydratedState);if(hydratedState.viewMode==='2d')q('#mode-2d')?.click();let lastSyncedSection=getState().activeSection;subscribe(state=>{applyInspectorDom(state);applyViewModeDom(state);markSection(state.activeSection);syncLayerControls();syncAccessibleControls(state);syncVisualHierarchy(state);syncViewModeContext(state);if(state.activeSection!==lastSyncedSection){lastSyncedSection=state.activeSection;requestAnimationFrame(syncSimulationTransport)}});
+document.documentElement.dataset.uiArchitecture='v195-visual-hierarchy';
