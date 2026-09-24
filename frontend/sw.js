@@ -9,7 +9,7 @@ const SHELL=[
  './src/data/plant-layout-data.js','./src/data/plant-layout-deep.js','./src/data/plant-actual.js','./src/data/plant-actual-data.js',
  './src/data/machine-registry.js','./src/factory-building.js','./src/utility-routing.js',
  './src/data/compressed-air-routes.js','./src/data/ahu-pipe-routes.js','./src/data/ahu-duct-routes.js',
- './src/data/factory-fleet-data.js',
+ './src/data/factory-fleet-data.js','./src/data/ipal-photo-evidence-v205.js',
  ...Array.from({length:9},(_,i)=>`./src/data/factory-fleet-chunk-${i}.js`),
  './vendor/three/build/three.module.js','./vendor/three/build/three.core.js',
  './vendor/three/addons/controls/OrbitControls.js','./vendor/three/addons/controls/TransformControls.js',
