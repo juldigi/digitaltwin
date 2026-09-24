@@ -37,7 +37,15 @@ export const IPAL_PHOTO_EVIDENCE_V205=Object.freeze({
   'VERTICAL_GARDEN',
   'ORNAMENTAL_WATER_CHANNEL',
   'WEATHERED_INDUSTRIAL_FINISHES',
-  'ADJACENT_OUTDOOR_UTILITY_EQUIPMENT'
+  'ADJACENT_OUTDOOR_UTILITY_EQUIPMENT',
+  'BLUE_COVERED_SERVICE_BASIN_WITH_YELLOW_HATCHES',
+  'WEATHERED_SECONDARY_CANOPY_WITH_GREEN_POSTS_AND_LINEAR_LIGHT',
+  'MULTIPLE_HOPPER_BOTTOM_METAL_VESSELS',
+  'BLUE_AUXILIARY_VERTICAL_VESSELS',
+  'LARGE_RED_MIXING_OR_PROCESS_TOWER',
+  'SLUDGE_MANIFOLD_VALVES_FLEXIBLE_HOSE_AND_DRAIN_SUMP',
+  'WHITE_EXTERNAL_TANK_NOZZLE_PIPE',
+  'AQUATIC_PLANTS_AND_SMALL_MAINTENANCE_PROPS'
  ]),
  relativeLayout:Object.freeze({
   equalization:{x:36.2,y:107.0,w:5.6,d:4.2,h:3.15,label:'BAK EKUALISASI'},
@@ -49,7 +57,11 @@ export const IPAL_PHOTO_EVIDENCE_V205=Object.freeze({
   operatorRoom:{x:57.2,y:105.8,w:4.4,d:3.25,h:2.85},
   pond:{x:50.1,y:116.6,w:8.0,d:1.0},
   verticalGarden:{x:34.0,y:117.15,w:8.2,h:2.0},
-  adjacentUtility:{x:61.25,y:108.0,w:2.8,d:7.2,h:1.55}
+  adjacentUtility:{x:61.25,y:108.0,w:2.8,d:7.2,h:1.55},
+  coveredServiceBasin:{x:52.25,y:103.0,w:5.0,d:2.2,h:1.18},
+  secondHopperVessel:{x:57.55,y:113.15,r:1.10,cylinderH:1.85,coneH:1.05},
+  blueAuxiliaryVessels:[{x:48.75,y:113.75,r:.42,h:1.55},{x:49.72,y:113.75,r:.42,h:1.55}],
+  largeRedMixingTower:{x:57.15,y:114.75,r:.78,h:1.85,platformH:2.25}
  }),
  unresolved:Object.freeze([
   'ABSOLUTE_EQUIPMENT_DIMENSIONS_AND_ELEVATIONS',
