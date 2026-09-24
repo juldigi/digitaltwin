@@ -12,7 +12,32 @@ async function passwordHash(password,salt,iterations=PASSWORD_ITERATIONS){
 }
 async function passwordRecord(password,salt){return `${PASSWORD_RECORD_PREFIX}:${PASSWORD_ITERATIONS}:${await passwordHash(password,salt)}`;}
 function parsePasswordRecord(record){
-  const match=new RegExp('^'+PASSWORD_RECORD_PREFIX+':(\\d+):([a-f0-9]{64})
+  const match=new RegExp('^'+PASSWORD_RECORD_PREFIX+':(\\d+):([a-f0-9]{64})$','i').exec(String(record||''));
+  if(match)return {iterations:Number(match[1]),hash:match[2],legacy:false};
+  return /^[a-f0-9]{64}$/i.test(String(record||''))?{iterations:150000,hash:String(record),legacy:true}:null;
+}
+async function verifyPassword(password,account){
+  const record=parsePasswordRecord(account?.password_hash);
+  if(!record)return {ok:false,unsupported:false};
+  if(record.iterations>PASSWORD_ITERATIONS)return {ok:false,unsupported:true};
+  return {ok:await same(await passwordHash(password,account.salt,record.iterations),record.hash),unsupported:false};
+}
+async function authStore(db){
+  await db.prepare('CREATE TABLE IF NOT EXISTS superadmin_auth (id INTEGER PRIMARY KEY CHECK(id = 1), salt TEXT NOT NULL, password_hash TEXT NOT NULL, generation INTEGER NOT NULL DEFAULT 0)').run();
+  await db.prepare('CREATE TABLE IF NOT EXISTS superadmin_sessions (token_hash TEXT PRIMARY KEY, generation INTEGER NOT NULL, expires INTEGER NOT NULL)').run();
+  await db.prepare('CREATE TABLE IF NOT EXISTS superadmin_attempts (client_hash TEXT PRIMARY KEY, count INTEGER NOT NULL, reset_at INTEGER NOT NULL)').run();
+  let account=await db.prepare('SELECT salt,password_hash,generation FROM superadmin_auth WHERE id = 1').first();
+  if(!account){
+    const salt=crypto.randomUUID(),hash=await passwordRecord(DEFAULT_PASSWORD,salt);
+    await db.prepare('INSERT OR IGNORE INTO superadmin_auth(id,salt,password_hash,generation) VALUES(1,?,?,0)').bind(salt,hash).run();
+    account=await db.prepare('SELECT salt,password_hash,generation FROM superadmin_auth WHERE id = 1').first();
+  }else if(account.generation===0&&parsePasswordRecord(account.password_hash)?.legacy){
+    const salt=crypto.randomUUID(),hash=await passwordRecord(DEFAULT_PASSWORD,salt);
+    await db.prepare('UPDATE superadmin_auth SET salt=?,password_hash=? WHERE id=1 AND generation=0').bind(salt,hash).run();
+    account={...account,salt,password_hash:hash};
+  }
+  return account;
+}
 async function sessionRole(db,token){if(!token?.startsWith('sa_'))return false;const row=await db.prepare('SELECT s.expires FROM superadmin_sessions s JOIN superadmin_auth a ON a.generation=s.generation WHERE s.token_hash=?').bind(await digest(token)).first();return !!row&&row.expires>Date.now();}
 const json=(data,status=200,headers={})=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff',...headers}});
 async function same(a,b){
