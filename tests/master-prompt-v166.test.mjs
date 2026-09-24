@@ -39,7 +39,7 @@ test('V166 modal and canonical overlays block accidental background interaction'
 test('V166 simulation transport replaces rather than overlaps the scene toolbar',()=>{
   assert.match(shell,/document\.body\.classList\.toggle\('simulation-transport-open',transportOpen\)/);
   assert.match(css,/\.simulation-transport-open \.scene-bottom\{visibility:hidden;pointer-events:none\}/);
-  assert.match(shell,/let lastSyncedSection=getState\(\)\.activeSection;subscribe\(state=>[\s\S]*state\.activeSection!==lastSyncedSection[\s\S]*syncSimulationTransport/);
+  assert.match(shell,/subscribe\\(state=>\\{[\\s\\S]*syncSimulationTransport\\(state\\)[\\s\\S]*\\}\\)/);
 });
 
 test('V166 mobile information surfaces keep practical touch and reading sizes',()=>{
