@@ -95,14 +95,14 @@ test('factory editor normalizes clicks to stable walls and machine assets',()=>{
 
 
 test('machine editor list is registry-driven and whole-unit keyboard movable',()=>{
- assert.match(app,/registryMachineChoices=MACHINE_REGISTRY\.filter\(machine=>engine\.actualFactory\?\.assets\?\.has\(machine\.machineId\)\)/);
+ assert.match(app,/registryMachineChoices=MACHINE_REGISTRY\.slice\(\)/);
  assert.match(app,/name:machine\.name/);
  assert.match(app,/if\(category==='machines'\)\{const machineId=id\.replace\(\/\^asset:\/,'\'\)\|\|node\?\.userData\?\.machineId,record=MACHINE_REGISTRY_BY_ID\.get\(machineId\);return record\?\.name/);
  assert.match(app,/Seluruh mesin aktif sebagai satu unit/);
  assert.match(app,/document\.addEventListener\('keydown',onEditorKeyDown\)/);
- assert.match(app,/\['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'\]/);
+ assert.match(app,/editorArrowKeys=\['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'\]/);
  assert.match(app,/const step=e\.shiftKey\?\.5:\.1/);
- assert.match(app,/if\(e\.key==='ArrowLeft'\)node\.position\.x-=step/);
+ assert.match(app,/moveSceneObjectInView\(selected,horizontal,vertical,step\)/);
  assert.match(app,/if\(e\.key==='ArrowUp'\)node\.position\.z-=step/);
  assert.match(app,/document\.removeEventListener\('keydown',onEditorKeyDown\)/);
  assert.match(css,/\.se-machine-edit-note/);
