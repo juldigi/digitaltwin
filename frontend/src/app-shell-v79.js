@@ -60,7 +60,7 @@ document.body.insertAdjacentHTML('afterbegin',symbols);
 
 const iconMap={
  'nav-machine':'factory','nav-assets':'machine','nav-systems':'system','nav-help':'help','ui-menu-toggle':'menu','settings':'settings',
- 'context-back':'back','close-panel':'close','modal-close':'close','ui-theme-toggle':'theme','global-search-icon':'search','mobile-search-toggle':'search','layer-manager-button':'layers',
+ 'close-panel':'close','modal-close':'close','ui-theme-toggle':'theme','global-search-icon':'search','mobile-search-toggle':'search','layer-manager-button':'layers',
  'panel-toggle':'panel','zoom-plus':'zoom-in','zoom-fit':'focus','zoom-minus':'zoom-out','labels':'label','fullscreen':'fullscreen'
 };
 for(const [id,name]of Object.entries(iconMap)){
@@ -70,6 +70,7 @@ for(const [id,name]of Object.entries(iconMap)){
   el.innerHTML=icon(name)+`<small>${label}</small>`;
  }else el.innerHTML=icon(name);
 }
+const contextBackIcon=q('#context-back span');if(contextBackIcon)contextBackIcon.innerHTML=icon('back');
 const mobileIcons={factory:'factory',asset:'machine',system:'system',more:'more'};
 qa('[data-mobile-nav]').forEach(el=>{const label=q('small',el)?.textContent||el.getAttribute('aria-label')||'';el.innerHTML=icon(mobileIcons[el.dataset.mobileNav]||'more')+`<small>${label}</small>`});
 const mobileContextTools=document.createElement('section');mobileContextTools.className='mobile-context-tools';mobileContextTools.setAttribute('aria-label','Aksi tampilan dan inspeksi');mobileContextTools.innerHTML=`<small>INSPEKSI & TAMPILAN</small>
