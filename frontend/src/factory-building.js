@@ -1448,37 +1448,44 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  pcyl(hv.x,coneBase+hv.coneH+hv.cylinderH/2,hz,hv.r,hv.cylinderH,0xa3aaa7,'IPAL_PHOTO_HOPPER_CYLINDER',{},36,photoMetal);
  for(const y of [coneBase+hv.coneH+.35,coneBase+hv.coneH+1.10,coneBase+hv.coneH+1.85])ptorus(hv.x,y,hz,hv.r+.015,.021,0x737d7b,'IPAL_PHOTO_HOPPER_SHELL_RING');
  pcyl(hv.x,.28,hz,.15,.42,0x727b7a,'IPAL_PHOTO_HOPPER_DISCHARGE',{},18,photoMetalDark);
+ const hvTopY=coneBase+hv.coneH+hv.cylinderH,hvDeckY=hvTopY-.07,hvOuterW=3.30,hvOuterD=2.72;
  for(const [dx,dz] of [[-1.25,-1.1],[1.25,-1.1],[-1.25,1.1],[1.25,1.1]]){
   pfoot(hv.x+dx,hz+dz,'IPAL_PHOTO_HOPPER_SUPPORT');
-  pbox(hv.x+dx,1.25,hz+dz,.12,2.5,.12,0xd7a817,'IPAL_PHOTO_HOPPER_SUPPORT_LEG');
-  pline([hv.x+dx,.3,hz+dz],[hv.x-dx,2.25,hz+dz],.025,0xd7a817,'IPAL_PHOTO_HOPPER_SUPPORT_BRACE');
+  pbox(hv.x+dx,hvDeckY/2,hz+dz,.12,hvDeckY,.12,0xd7a817,'IPAL_PHOTO_HOPPER_SUPPORT_LEG');
+  pline([hv.x+dx,.30,hz+dz],[hv.x-dx,hvDeckY-.22,hz+dz],.025,0xd7a817,'IPAL_PHOTO_HOPPER_SUPPORT_BRACE');
  }
- pbox(hv.x,2.55,hz,3.15,.10,2.65,0x8f9693,'IPAL_PHOTO_HOPPER_PLATFORM_GRATING');
- for(const z of [hz-1.30,hz+1.30])pbox(hv.x,2.66,z,3.15,.12,.055,0xd7a817,'IPAL_PHOTO_HOPPER_PLATFORM_TOEBOARD');
- for(const side of [-1,1])pline([hv.x-1.55,3.15,hz+side*1.30],[hv.x+1.55,3.15,hz+side*1.30],.026,0xd7a817,'IPAL_PHOTO_HOPPER_PLATFORM_HANDRAIL');
- for(const side of [-1,1])for(const x of [hv.x-1.55,hv.x-.78,hv.x,hv.x+.78,hv.x+1.55])pline([x,2.66,hz+side*1.30],[x,3.18,hz+side*1.30],.018,0xd7a817,'IPAL_PHOTO_HOPPER_GUARD_POST');
- const hvTopY=coneBase+hv.coneH+hv.cylinderH;
+ // Ring-shaped rectangular grating leaves the vessel shell clear while matching the square top guardrail visible in IMG_2517/2525.
+ for(const z of [hz-hvOuterD/2+.18,hz+hvOuterD/2-.18])pbox(hv.x,hvDeckY,z,hvOuterW,.10,.36,0x8f9693,'IPAL_PHOTO_HOPPER_TOP_PLATFORM_GRATING');
+ for(const x of [hv.x-hvOuterW/2+.18,hv.x+hvOuterW/2-.18])pbox(x,hvDeckY,hz,.36,.10,hvOuterD-.72,0x8f9693,'IPAL_PHOTO_HOPPER_TOP_PLATFORM_GRATING');
+ for(const z of [hz-hvOuterD/2,hz+hvOuterD/2]){
+  pbox(hv.x,hvDeckY+.10,z,hvOuterW,.12,.055,0xd7a817,'IPAL_PHOTO_HOPPER_PLATFORM_TOEBOARD');
+  for(const y of [hvDeckY+.43,hvDeckY+.82])pline([hv.x-hvOuterW/2,y,z],[hv.x+hvOuterW/2,y,z],.025,0xd7a817,'IPAL_PHOTO_HOPPER_PLATFORM_HANDRAIL');
+  for(const x of [hv.x-hvOuterW/2,hv.x-.82,hv.x,hv.x+.82,hv.x+hvOuterW/2])pline([x,hvDeckY+.10,z],[x,hvDeckY+.85,z],.018,0xd7a817,'IPAL_PHOTO_HOPPER_GUARD_POST');
+ }
+ for(const x of [hv.x-hvOuterW/2,hv.x+hvOuterW/2])for(const z of [hz-hvOuterD/2,hz,hz+hvOuterD/2])pline([x,hvDeckY+.10,z],[x,hvDeckY+.85,z],.018,0xd7a817,'IPAL_PHOTO_HOPPER_GUARD_POST');
  pcyl(hv.x,hvTopY+.04,hz,hv.r*.92,.08,0x8e9896,'IPAL_PHOTO_HOPPER_TOP_LID',{function:'UNVERIFIED_FROM_PHOTO'},36,photoMetalDark);
  pcyl(hv.x+.35,hvTopY+.22,hz-.18,.11,.34,0x697679,'IPAL_PHOTO_HOPPER_TOP_NOZZLE',{function:'UNVERIFIED_FROM_PHOTO'},14,photoMetalDark);
  ptorus(hv.x+.35,hvTopY+.40,hz-.18,.13,.020,0x727d7e,'IPAL_PHOTO_HOPPER_TOP_NOZZLE_FLANGE',Math.PI/2,{function:'UNVERIFIED_FROM_PHOTO'});
- const hvRailR=hv.r+.16;ptorus(hv.x,hvTopY+.72,hz,hvRailR,.024,0xd7a817,'IPAL_PHOTO_HOPPER_TOP_GUARDRAIL');ptorus(hv.x,hvTopY+.40,hz,hvRailR,.020,0xd7a817,'IPAL_PHOTO_HOPPER_TOP_MIDRAIL');
- for(let a=0;a<Math.PI*2;a+=Math.PI/8)pline([hv.x+Math.cos(a)*hvRailR,hvTopY+.08,hz+Math.sin(a)*hvRailR],[hv.x+Math.cos(a)*hvRailR,hvTopY+.75,hz+Math.sin(a)*hvRailR],.018,0xd7a817,'IPAL_PHOTO_HOPPER_TOP_GUARD_POST');
  // A second, smaller hopper-bottom silver vessel is clearly visible deeper in IMG_2517/2523.
  const hv2=IPAL_PHOTO_EVIDENCE_V206.relativeLayout.secondHopperVessel,hz2=-hv2.y,hv2ConeBase=.42;
  const cone2=new T.Mesh(new T.CylinderGeometry(hv2.r,.18,hv2.coneH,28),photoMetal);cone2.position.set(hv2.x,hv2ConeBase+hv2.coneH/2,hz2);ipalPhoto.add(cone2);photoTag(cone2,'IPAL_PHOTO_SECOND_HOPPER_CONE_VESSEL',{function:'UNVERIFIED_FROM_PHOTO'});
  pcyl(hv2.x,hv2ConeBase+hv2.coneH+hv2.cylinderH/2,hz2,hv2.r,hv2.cylinderH,0xa3aaa7,'IPAL_PHOTO_SECOND_HOPPER_CYLINDER',{function:'UNVERIFIED_FROM_PHOTO'},32,photoMetal);
  for(const y of [hv2ConeBase+hv2.coneH+.42,hv2ConeBase+hv2.coneH+1.18])ptorus(hv2.x,y,hz2,hv2.r+.012,.020,0x737d7b,'IPAL_PHOTO_SECOND_HOPPER_SHELL_RING');
  pcyl(hv2.x,.25,hz2,.13,.36,0x727b7a,'IPAL_PHOTO_SECOND_HOPPER_DISCHARGE',{function:'UNVERIFIED_FROM_PHOTO'},16,photoMetalDark);
+ const hv2TopY=hv2ConeBase+hv2.coneH+hv2.cylinderH,hv2DeckY=hv2TopY-.06,hv2OuterW=2.52,hv2OuterD=2.18;
  for(const [dx,dz] of [[-.95,-.82],[.95,-.82],[-.95,.82],[.95,.82]]){
   pfoot(hv2.x+dx,hz2+dz,'IPAL_PHOTO_SECOND_HOPPER_SUPPORT');
-  pbox(hv2.x+dx,1.12,hz2+dz,.11,2.24,.11,0xd7a817,'IPAL_PHOTO_SECOND_HOPPER_SUPPORT_LEG');
-  pline([hv2.x+dx,.25,hz2+dz],[hv2.x-dx,1.95,hz2+dz],.023,0xd7a817,'IPAL_PHOTO_SECOND_HOPPER_SUPPORT_BRACE');
+  pbox(hv2.x+dx,hv2DeckY/2,hz2+dz,.11,hv2DeckY,.11,0xd7a817,'IPAL_PHOTO_SECOND_HOPPER_SUPPORT_LEG');
+  pline([hv2.x+dx,.25,hz2+dz],[hv2.x-dx,hv2DeckY-.20,hz2+dz],.023,0xd7a817,'IPAL_PHOTO_SECOND_HOPPER_SUPPORT_BRACE');
  }
- const hv2TopY=hv2ConeBase+hv2.coneH+hv2.cylinderH;
+ for(const z of [hz2-hv2OuterD/2+.16,hz2+hv2OuterD/2-.16])pbox(hv2.x,hv2DeckY,z,hv2OuterW,.09,.32,0x8f9693,'IPAL_PHOTO_SECOND_HOPPER_TOP_PLATFORM_GRATING');
+ for(const x of [hv2.x-hv2OuterW/2+.16,hv2.x+hv2OuterW/2-.16])pbox(x,hv2DeckY,hz2,.32,.09,hv2OuterD-.64,0x8f9693,'IPAL_PHOTO_SECOND_HOPPER_TOP_PLATFORM_GRATING');
+ for(const z of [hz2-hv2OuterD/2,hz2+hv2OuterD/2]){
+  for(const y of [hv2DeckY+.38,hv2DeckY+.72])pline([hv2.x-hv2OuterW/2,y,z],[hv2.x+hv2OuterW/2,y,z],.022,0xd7a817,'IPAL_PHOTO_SECOND_HOPPER_PLATFORM_HANDRAIL');
+  for(const x of [hv2.x-hv2OuterW/2,hv2.x,hv2.x+hv2OuterW/2])pline([x,hv2DeckY+.08,z],[x,hv2DeckY+.75,z],.016,0xd7a817,'IPAL_PHOTO_SECOND_HOPPER_GUARD_POST');
+ }
  pcyl(hv2.x,hv2TopY+.04,hz2,hv2.r*.91,.07,0x8e9896,'IPAL_PHOTO_SECOND_HOPPER_TOP_LID',{function:'UNVERIFIED_FROM_PHOTO'},32,photoMetalDark);
  pcyl(hv2.x+.24,hv2TopY+.18,hz2-.12,.09,.26,0x697679,'IPAL_PHOTO_SECOND_HOPPER_TOP_NOZZLE',{function:'UNVERIFIED_FROM_PHOTO'},12,photoMetalDark);
- const hv2RailR=hv2.r+.14;ptorus(hv2.x,hv2TopY+.66,hz2,hv2RailR,.022,0xd7a817,'IPAL_PHOTO_SECOND_HOPPER_TOP_GUARDRAIL');ptorus(hv2.x,hv2TopY+.37,hz2,hv2RailR,.018,0xd7a817,'IPAL_PHOTO_SECOND_HOPPER_TOP_MIDRAIL');
- for(let a=0;a<Math.PI*2;a+=Math.PI/8)pline([hv2.x+Math.cos(a)*hv2RailR,hv2TopY+.07,hz2+Math.sin(a)*hv2RailR],[hv2.x+Math.cos(a)*hv2RailR,hv2TopY+.69,hz2+Math.sin(a)*hv2RailR],.017,0xd7a817,'IPAL_PHOTO_SECOND_HOPPER_TOP_GUARD_POST');
 
  // Two-level yellow chemical preparation/dosing rack with observed red polyethylene tanks.
  const cr=IPAL_PHOTO_EVIDENCE_V206.relativeLayout.chemicalRack,crZ=-cr.y;
