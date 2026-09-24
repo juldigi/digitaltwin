@@ -59,13 +59,13 @@ test('factory Phase-1 inspector excludes routing controls while retaining explic
  assert.doesNotMatch(panel,/utility_ahu_ducting/);
 });
 
-test('V198 shows source-room functional realism while keeping safety and utility references bounded',()=>{
+test('V199 keeps functional interiors visible while bounding safety and utility references',()=>{
  assert.match(building,/layers\.landscape\.visible=false/);
  assert.match(building,/evidenceLayer:'REFERENCE_REALISM'/);
  assert.match(building,/functionalVisibleSemantic/);
  assert.match(building,/visibleFunctionalReferences/);
  assert.match(building,/REFERENCE_HIDDEN_BY_DEFAULT/);
- assert.match(building,/V198_SOURCE_ROOM_FUNCTIONS_VISIBLE_AS_FUNCTIONAL_REFERENCE__SAFETY_AND_UNVERIFIED_MEP_REMAIN_HIDDEN/);
+ assert.match(building,/V199_FULL_OUTER_ENVELOPE_CLOSED_EXCEPT_VALID_PORTALS__FUNCTIONAL_INTERIORS_VISIBLE__UNVERIFIED_SAFETY_MEP_HIDDEN/);
  assert.match(building,/UTILITY_MODELS_RETAINED_FOR_EXPANSION_BUT_HIDDEN_IN_PHASE1_UI/);
 });
 

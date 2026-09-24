@@ -23,8 +23,8 @@ test('V198 deduplicates reversed and near-identical wall segments before renderi
 test('V198 completes room-by-room operational realism without moving any machine',async()=>{
  const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
  const built=buildActualFactory(layout,fleet),meta=built.root.userData,stats=meta.buildingDetailStats;
- assert.equal(meta.researchVersion,'V198');
- assert.equal(meta.buildingDetailPass,'V198_ROOM_BY_ROOM_OPERATIONAL_REALISM_AND_PORTAL_CLEANUP');
+ assert.equal(meta.researchVersion,'V199');
+ assert.equal(meta.buildingDetailPass,'V199_SUPER_REALISTIC_ENVELOPE_FURNITURE_ORIENTATION_AND_PACKAGING_SUPPORT');
  assert.ok(stats.roomAccessAudited>0);
  assert.ok(stats.roomFloorFinishes>0);
  assert.ok(stats.visibleFunctionalReferences>0);
@@ -82,7 +82,7 @@ test('V198 makes core room furniture, RMS paper and production support visible w
   if(!labels.some(t=>labelRe.test(t)))continue;
   const found=visibleBySemantic(root,semanticRe);
   assert.ok(found.length>0,String(semanticRe)+' missing for source-labelled room');
-  assert.ok(found.some(o=>o.visible),String(semanticRe)+' should be visible in V198');
+  assert.ok(found.some(o=>o.visible),String(semanticRe)+' should be visible in V199');
  }
 
  const safety=visibleBySemantic(root,/FIRE_EXTINGUISHER_REFERENCE|EMERGENCY_LUMINAIRE_REFERENCE|RMS_CONVEX_MIRROR_REFERENCE/);
