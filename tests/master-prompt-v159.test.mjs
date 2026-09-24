@@ -49,10 +49,10 @@ test('V159 preserves V158 camera and selection interaction contract',()=>{
 
 test('V159 search promise matches strict Phase-1 scope and cache identifiers are coherent',()=>{
  assert.match(shell,/Cari mesin, area, komponen, sistem, atau sumber/);
-  assert.match(html,/app-shell-v79\.css\?v=198/);
- assert.match(html,/src\/app\.js\?v=198/);
- assert.match(html,/src\/ui-v5\.js\?v=167/);
- assert.match(html,/src\/app-shell-v79\.js\?v=198/);
+  assert.match(html,/app-shell-v79\.css\?v=211/);
+ assert.match(html,/src\/app\.js\?v=211/);
+ assert.match(html,/src\/ui-v5\.js\?v=211/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=211/);
  assert.match(shell,/v198-architecture-convergence/);
- assert.match(sw,/factory-digital-twin-v210-architecture-convergence-stage5-20260925/);
+ assert.match(sw,/factory-digital-twin-v211-ui-ssot-stage6-20260925/);
 });
