@@ -20,7 +20,7 @@ test('V194 primary navigation exposes only the three product domains plus contex
 });
 
 test('V149 state foundation exposes the complete single-state contract',()=>{
- for(const key of ['bootState','activeSection','selectedArea','selectedAsset','selectedNode','selectedSystem','viewMode','cameraPreset','visibleLayers','inspectionMode','simulationState','searchState','referenceState','inspectorState','activeReference','deviceMode']){
+ for(const key of ['bootState','activeSection','selectedArea','selectedAsset','selectedNode','selectedSystem','viewMode','cameraPreset','visibleLayers','inspectionMode','simulationState','searchState','referenceState','inspectorState','preferences','activeReference','deviceMode']){
   assert.match(state,new RegExp(`\\b${key}:`));
  }
  assert.match(state,/window\.BMJAppState=/);
