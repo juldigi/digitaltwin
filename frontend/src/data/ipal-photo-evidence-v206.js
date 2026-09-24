@@ -48,8 +48,8 @@ export const IPAL_PHOTO_EVIDENCE_V206=Object.freeze({
   'ADJACENT_WHITE_CONDENSER_BANKS_AND_BLACK_COOLING_TOWER_NOT_CORE_IPAL'
  ]),
  spatialRules:Object.freeze([
-  'EQUALIZATION_TEMP_HOLDING_CHEMICAL_RACK_ANAEROBIC_AND_HOPPER_FORM_ONE_COMPACT_CENTRAL_PROCESS_CLUSTER',
-  'CHEMICAL_RACK_IS_NOT_A_REMOTE_EAST_SIDE_ISLAND',
+  'EQUALIZATION_TEMP_HOLDING_ELEVATED_CHEMICAL_RACK_ANAEROBIC_AND_HOPPER_FORM_ONE_COMPACT_CENTRAL_PROCESS_CLUSTER',
+  'CHEMICAL_PREPARATION_RACK_IS_ELEVATED_AT_OR_BEHIND_THE_EQUALIZATION_STRUCTURE_NOT_A_REMOTE_GROUND_ISLAND',
   'SLUDGE_DRYING_BAY_SITS_FRONT_LEFT_OF_MAIN_HOPPER_CLUSTER',
   'ANAEROBIC_TANK_SITS_TO_THE_SIDE_OF_EQUALIZATION_AND_CHEMICAL_CLUSTER',
   'RED_MIXING_TOWER_AND_SECOND_HOPPER_OCCUPY_THE_RIGHT_PROCESS_CLUSTER',
@@ -61,8 +61,8 @@ export const IPAL_PHOTO_EVIDENCE_V206=Object.freeze({
   temporaryHolding:{x:40.55,y:109.05,w:2.45,d:2.30,h:1.82,label:'BAK PENAMPUNGAN SEMENTARA',topClosure:'NOT_VISUALLY_VERIFIED'},
   anaerobicTank:{x:48.15,y:109.75,r:2.02,h:4.0,label:'TANGKI AN AEROBIK'},
   hopperVessel:{x:40.95,y:113.75,r:1.42,cylinderH:2.28,coneH:1.22},
-  chemicalRack:{x:43.55,y:109.85,w:4.55,d:3.15,h:3.55},
-  coagulantTank:{x:42.15,y:112.18,r:.42,h:.72,label:'TANGKI KOAGULAN'},
+  chemicalRack:{x:36.85,y:105.85,w:4.65,d:2.35,baseY:3.18,lowerDeckY:3.22,upperDeckY:4.38,topRailY:5.28},
+  coagulantTank:{x:41.05,y:112.45,r:.43,h:.74,label:'TANGKI KOAGULAN',placement:'GROUND_LEVEL_UNDER_MAIN_HOPPER_FRAME'},
   sludgeDrying:{x:36.15,y:114.75,w:4.85,d:2.25,h:1.55,bagCount:6},
   operatorRoom:{x:57.1,y:105.7,w:4.35,d:3.20,h:2.85},
   pond:{x:50.0,y:116.65,w:8.0,d:1.0},
@@ -70,19 +70,18 @@ export const IPAL_PHOTO_EVIDENCE_V206=Object.freeze({
   adjacentUtility:{x:61.35,y:108.0,w:3.3,d:7.4,h:1.75},
   coveredServiceBasin:{x:52.35,y:103.0,w:5.05,d:2.20,h:1.18},
   secondHopperVessel:{x:52.65,y:112.55,r:1.05,cylinderH:1.82,coneH:1.02},
-  blueAuxiliaryVessels:[{x:44.85,y:113.25,r:.42,h:1.55},{x:45.82,y:113.25,r:.42,h:1.55}],
+  blueAuxiliaryVessels:[{x:44.65,y:113.35,r:.42,h:1.55},{x:45.62,y:113.35,r:.42,h:1.55}],
   largeRedMixingTower:{x:49.15,y:114.35,r:.78,h:1.82,platformH:2.22}
  }),
  chemicalRackTankLayout:Object.freeze({
+  // Four tanks are clearly visible across IMG_2517/2519/2525. Occluded additional vessels are not invented.
   lower:Object.freeze([
-   {dx:-1.35,dz:-.60,r:.53,h:1.10},
-   {dx:0,dz:-.52,r:.56,h:1.15},
-   {dx:1.32,dz:-.62,r:.51,h:1.04}
+   {dx:-.86,dz:.18,r:.53,h:1.08},
+   {dx:.82,dz:.12,r:.51,h:1.03}
   ]),
   upper:Object.freeze([
-   {dx:-1.20,dz:-.35,r:.47,h:.94},
-   {dx:.15,dz:-.28,r:.48,h:.96},
-   {dx:1.25,dz:-.40,r:.45,h:.88}
+   {dx:-.84,dz:-.16,r:.46,h:.92},
+   {dx:.77,dz:-.10,r:.45,h:.88}
   ])
  }),
  localVisiblePipePolicy:Object.freeze({
