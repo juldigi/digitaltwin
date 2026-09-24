@@ -27,12 +27,15 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - name: Connect or create Digital Twin D1
+        id: prepare_d1
+        continue-on-error: true
         run: node scripts/prepare-d1.mjs
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_D1_DATABASE_ID: ${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}
       - name: Apply D1 migrations
+        if: steps.prepare_d1.outcome == 'success'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -46,3 +49,8 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: backend
           command: deploy
+      - name: Report D1 permission failure
+        if: steps.prepare_d1.outcome == 'failure'
+        run: |
+          echo 'Worker terdeploy untuk perbaikan UI, tetapi D1 belum terhubung. Berikan D1 Read dan D1 Write pada CLOUDFLARE_API_TOKEN di GitHub Secrets.' >> "$GITHUB_STEP_SUMMARY"
+          exit 1
