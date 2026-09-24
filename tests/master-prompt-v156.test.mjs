@@ -76,5 +76,5 @@ test('offline cache prioritizes foundation and OFFSET 5 instead of preloading ex
  assert.match(html,/app-shell-v79\.css\?v=192/);
  assert.match(html,/src\/app\.js\?v=192/);
  assert.match(html,/src\/app-shell-v79\.js\?v=192/);
- assert.match(shell,/v194-state-owned-contextual/);
+ assert.match(shell,/v195-visual-hierarchy/);
 });
