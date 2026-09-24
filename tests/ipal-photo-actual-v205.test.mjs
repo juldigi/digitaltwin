@@ -251,3 +251,55 @@ test('V205 detail pass 2 gives photographed process piping visible unions instea
  assert.ok(collect(root,/^IPAL_PHOTO_PUMP_TOP_UNION$/).length>=2);
  assert.ok(collect(root,/^IPAL_PHOTO_TANK_EXTERNAL_WHITE_NOZZLE$/).length>=1);
 });
+
+
+test('V205 microdetail pass 3 replaces primitive chemical tanks with molded shoulders and structural ribs',async()=>{
+ const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
+ const root=buildActualFactory(layout,fleet).root;
+ assert.ok(collect(root,/^IPAL_PHOTO_RED_CHEMICAL_TANK_SHOULDER$/).length>=5);
+ assert.ok(collect(root,/^IPAL_PHOTO_RED_CHEMICAL_TANK_MOLDED_RIB$/).length>=15);
+ assert.ok(collect(root,/^IPAL_PHOTO_RED_CHEMICAL_TANK_BASE_RIB$/).length>=5);
+ assert.ok(collect(root,/^IPAL_PHOTO_CHEMICAL_RACK_DIAGONAL_BRACE$/).length>=8);
+ assert.ok(collect(root,/^IPAL_PHOTO_CHEMICAL_RACK_GUARD_POST$/).length>=20);
+});
+
+test('V205 microdetail pass 3 completes hopper tops and access protection instead of leaving open cylinders',async()=>{
+ const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
+ const root=buildActualFactory(layout,fleet).root;
+ for(const semantic of [
+  'IPAL_PHOTO_HOPPER_TOP_LID',
+  'IPAL_PHOTO_HOPPER_TOP_NOZZLE',
+  'IPAL_PHOTO_HOPPER_TOP_NOZZLE_FLANGE',
+  'IPAL_PHOTO_SECOND_HOPPER_TOP_LID',
+  'IPAL_PHOTO_SECOND_HOPPER_TOP_NOZZLE'
+ ])assert.ok(collect(root,new RegExp('^'+semantic+'$')).length>0,semantic);
+ assert.ok(collect(root,/^IPAL_PHOTO_HOPPER_GUARD_POST$/).length>=10);
+});
+
+test('V205 microdetail pass 3 gives the red tower a braced and guarded support frame',async()=>{
+ const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
+ const root=buildActualFactory(layout,fleet).root;
+ assert.ok(collect(root,/^IPAL_PHOTO_RED_TOWER_DIAGONAL_BRACE$/).length>=4);
+ assert.ok(collect(root,/^IPAL_PHOTO_RED_TOWER_GUARD_POST$/).length>=10);
+ assert.ok(collect(root,/^IPAL_PHOTO_RED_TOWER_PLATFORM_TOEBOARD$/).length>=2);
+});
+
+test('V205 microdetail pass 3 completes secondary canopy drainage and photographed access-hatch hardware',async()=>{
+ const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
+ const root=buildActualFactory(layout,fleet).root;
+ assert.ok(collect(root,/^IPAL_PHOTO_SECONDARY_CANOPY_GUTTER$/).length>=1);
+ assert.ok(collect(root,/^IPAL_PHOTO_SECONDARY_CANOPY_DOWNPIPE$/).length>=2);
+ assert.ok(collect(root,/^IPAL_PHOTO_COVERED_BASIN_HATCH_HINGE$/).length>=8);
+ assert.ok(collect(root,/^IPAL_PHOTO_COVERED_BASIN_HATCH_LATCH$/).length>=4);
+ assert.ok(collect(root,/^IPAL_PHOTO_SECONDARY_CANOPY_SUPPORT_BASE_PLATE$/).length>=2);
+});
+
+test('V205 microdetail pass 3 keeps collision and support audits green after adding detail',async()=>{
+ const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
+ const audit=buildActualFactory(layout,fleet).root.userData.ipal.photoActual;
+ assert.deepEqual(audit.equipmentEnvelopeCollisions,[]);
+ assert.equal(audit.supportGroundingAudit.belowFloor,0);
+ assert.equal(audit.supportGroundingAudit.floatingLegs,0);
+ assert.ok(audit.supportGroundingAudit.basePlates>=20);
+ assert.ok(audit.supportGroundingAudit.anchorBolts>=80);
+});
