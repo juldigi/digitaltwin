@@ -84,10 +84,10 @@ test('Stage 6 inspection controls derive from canonical state',()=>{
 });
 
 test('Stage 6 app preferences are product-scoped with one-time legacy migration',()=>{
- assert.match(app,/PERFORMANCE_MODE_KEY='bmj-digitaltwin-low'/);
- assert.match(app,/LEGACY_PERFORMANCE_MODE_KEY='offset5-low'/);
- assert.match(experience,/THEME_KEY='bmj-digitaltwin-theme'/);
- assert.match(experience,/LEGACY_THEME_KEY='offset5-theme'/);
+ assert.match(state,/PREF_KEYS=Object\.freeze\(\{theme:'bmj-digitaltwin-theme',lowDetail:'bmj-digitaltwin-low'\}\)/);
+ assert.match(state,/LEGACY_PREF_KEYS=Object\.freeze\(\{theme:'offset5-theme',lowDetail:'offset5-low'\}\)/);
+ assert.match(state,/export function setPreference/);
+ assert.match(experience,/setPreference\('theme'/);
 });
 
 test('Stage 6 generic asset header does not present machine family as manufacturer',()=>{
