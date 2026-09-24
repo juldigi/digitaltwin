@@ -20,12 +20,12 @@ test('V194 primary navigation exposes only the three product domains plus contex
 });
 
 test('V149 state foundation exposes the complete single-state contract',()=>{
- for(const key of ['activeSection','selectedArea','selectedAsset','selectedNode','selectedSystem','viewMode','cameraPreset','visibleLayers','inspectionMode','simulationState','searchState','inspectorState','activeReference','deviceMode']){
+ for(const key of ['bootState','activeSection','selectedArea','selectedAsset','selectedNode','selectedSystem','viewMode','cameraPreset','visibleLayers','inspectionMode','simulationState','searchState','referenceState','inspectorState','activeReference','deviceMode']){
   assert.match(state,new RegExp(`\\b${key}:`));
  }
  assert.match(state,/window\.BMJAppState=/);
- assert.match(shell,/bmj:domainstate/);
- assert.match(app,/emitDomainState/);
+ assert.doesNotMatch(shell,/bmj:domainstate/);
+ assert.match(app,/function emitDomainState\(detail\)\{return setDomainState\(detail\);\}/);
 });
 
 test('V149 shell does not repeat the destructive V148 DOM replacement pattern',()=>{
@@ -124,9 +124,9 @@ test('V149 Systems is a real network context without invented Water or Electrica
 });
 
 test('V149 inspection and legacy factory layer actions synchronize into centralized state',()=>{
- assert.match(app,/inspectionMode:\{explode:explode>0\}/);
+ assert.match(app,/inspectionMode:\{explode:level>0,explodeLevel:level\}/);
  assert.match(app,/inspectionMode:\{isolate:engine\.isolated\}/);
- assert.match(app,/inspectionMode:\{interior:exteriorMode\}/);
+ assert.match(app,/inspectionMode:\{interior:isInteriorOpen\(\)\}/);
  assert.match(app,/canonicalFactoryLayer=/);
  assert.match(app,/visibleLayers:\{\[canonical\]:visible\}/);
  assert.match(app,/cameraPreset:/);
