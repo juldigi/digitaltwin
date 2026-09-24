@@ -23,8 +23,8 @@ test('V198 deduplicates reversed and near-identical wall segments before renderi
 test('V198 completes room-by-room operational realism without moving any machine',async()=>{
  const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
  const built=buildActualFactory(layout,fleet),meta=built.root.userData,stats=meta.buildingDetailStats;
- assert.equal(meta.researchVersion,'V199');
- assert.equal(meta.buildingDetailPass,'V199_SUPER_REALISTIC_ENVELOPE_FURNITURE_ORIENTATION_AND_PACKAGING_SUPPORT');
+ assert.equal(meta.researchVersion,'V200');
+ assert.equal(meta.buildingDetailPass,'V200_WORLD_REALISM_OPERATIONAL_DETAIL_AND_HOUSEKEEPING');
  assert.ok(stats.roomAccessAudited>0);
  assert.ok(stats.roomFloorFinishes>0);
  assert.ok(stats.visibleFunctionalReferences>0);
