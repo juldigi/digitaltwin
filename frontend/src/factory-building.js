@@ -1369,8 +1369,8 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
 
  // The photographed blue structures are tall raised process basins/tanks, not low ornamental ponds.
  // Heights remain visual approximations because no surveyed section/elevation was supplied.
- const makeBlueBasin=(spec,semantic,waterColor)=>{
-  const x=spec.x,z=-spec.y,w=spec.w,d=spec.d,h=spec.h,g=new T.Group();g.position.set(x,0,z);ipalPhoto.add(g);photoTag(g,semantic,{geometryType:'TALL_RAISED_RECTANGULAR_PROCESS_BASIN',dimensionStatus:'PHOTO_RELATIVE_NOT_SURVEYED'});
+ const makeBlueBasin=(spec,semantic)=>{
+  const x=spec.x,z=-spec.y,w=spec.w,d=spec.d,h=spec.h,g=new T.Group();g.position.set(x,0,z);ipalPhoto.add(g);photoTag(g,semantic,{geometryType:'TALL_RAISED_RECTANGULAR_PROCESS_BASIN',dimensionStatus:'PHOTO_RELATIVE_NOT_SURVEYED',topClosure:spec.topClosure||'NOT_VISUALLY_VERIFIED'});
   const gb=(lx,ly,lz,lw,lh,ld,color,sub,opacity=1,extra={})=>{const o=box(g,lx,ly,lz,lw,lh,ld,color,0,opacity);return photoTag(o,semantic+'_'+sub,extra);};
   gb(0,.12,0,w,.24,d,0x3d7187,'BASE');
   gb(0,h/2,-d/2,w,h,.20,0x3d7187,'WALL');
@@ -1379,13 +1379,14 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   gb(w/2,h/2,0,.20,h,d,0x3d7187,'WALL');
   // Concrete coping and horizontal construction bands visible on the blue facades.
   for(const [ly,depth] of [[h+.03,.12],[h*.42,.07],[h*.68,.07]])gb(0,ly,d/2+.055,w+.10,depth,.11,ly>h?0x4d8193:0x31677b,'FACADE_BAND');
-  const water=gb(0,h-.13,0,w-.35,.035,d-.35,waterColor,'WATER',.74,{processVisualization:'LEVEL_SURFACE',levelNotProcessMeasurement:true});
-  water.userData.baseY=water.position.y;ipalPhotoRuntime.waters.push(water);
-  // Local weathering/streak references keep the concrete from looking freshly painted.
+  // The photos never expose the liquid surface inside either blue basin. V205's bright visible water plane
+  // made the structures read like ornamental pools, so V206 keeps the interior state unresolved/hidden.
+  const internal=gb(0,h-.16,0,w-.38,.022,d-.38,0x263f46,'INTERNAL_TOP_STATE_UNRESOLVED',.08,{visibleState:'HIDDEN_UNVERIFIED_TOP',processVisualization:false});
+  internal.visible=false;
   for(const lx of [-w*.28,w*.05,w*.31])gb(lx,h*.43,d/2+.112,.08,h*.55,.018,0x315f70,'WEATHERING_STREAK',.18,{weathering:'PHOTO_VISIBLE_STREAK_REFERENCE'});
-  return {group:g,x,z,w,d,h,water};
+  return {group:g,x,z,w,d,h,water:null};
  };
- const eq=makeBlueBasin(IPAL_PHOTO_EVIDENCE_V206.relativeLayout.equalization,'IPAL_PHOTO_BAK_EKUALISASI',0x416c72);
+ const eq=makeBlueBasin(IPAL_PHOTO_EVIDENCE_V206.relativeLayout.equalization,'IPAL_PHOTO_BAK_EKUALISASI');
  label('BAK EKUALISASI',eq.x,eq.h*.58,eq.z+eq.d/2+.15,3.4,'#173f52',ipalPhoto);
  // Photo IMG_2519 shows 0% at the top and 100% at the bottom of the facade.
  for(let i=0;i<=10;i++){
@@ -1393,20 +1394,25 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   pbox(eq.x-eq.w*.20,y,eq.z+eq.d/2+.115,.11,.024,.026,0x202e33,'IPAL_PHOTO_EQUALIZATION_LEVEL_MARK',0,1,{labelPercent:i*10});
   label(String(i*10)+'%',eq.x-eq.w*.28,y,eq.z+eq.d/2+.17,.54,'#21343c',ipalPhoto);
  }
- const tmp=makeBlueBasin(IPAL_PHOTO_EVIDENCE_V206.relativeLayout.temporaryHolding,'IPAL_PHOTO_BAK_PENAMPUNGAN_SEMENTARA',0x4c7073);
+ const tmp=makeBlueBasin(IPAL_PHOTO_EVIDENCE_V206.relativeLayout.temporaryHolding,'IPAL_PHOTO_BAK_PENAMPUNGAN_SEMENTARA');
  label('BAK PENAMPUNGAN SEMENTARA',tmp.x,tmp.h*.60,tmp.z+tmp.d/2+.15,4.2,'#173f52',ipalPhoto);
  for(let i=0;i<=10;i+=2){
   const y=tmp.h-.18-i*(tmp.h-.35)/10;
   pbox(tmp.x-tmp.w*.20,y,tmp.z+tmp.d/2+.115,.09,.020,.025,0x202e33,'IPAL_PHOTO_TEMP_HOLDING_LEVEL_MARK',0,1,{labelPercent:i*10});
   label(String(i*10)+'%',tmp.x-tmp.w*.31,y,tmp.z+tmp.d/2+.17,.48,'#21343c',ipalPhoto);
  }
- // Dedicated yellow access stair/landing seen across the front of the temporary holding basin.
- for(let i=0;i<13;i++)pbox(39.95+i*.16,.12+i*.135,-110.05+i*.055,.78,.055,.28,0xd7a817,'IPAL_PHOTO_BASIN_ACCESS_STAIR_TREAD');
- for(const side of [-1,1]){pline([39.82,.10,-110.05+side*.41],[42.05,1.82,-109.35+side*.41],.030,0xd7a817,'IPAL_PHOTO_BASIN_ACCESS_STAIR_STRINGER');pline([39.82,1.02,-110.05+side*.41],[42.05,2.72,-109.35+side*.41],.024,0xd7a817,'IPAL_PHOTO_BASIN_ACCESS_HANDRAIL');}
- pbox(42.15,1.86,-109.22,1.65,.09,1.05,0x7f8885,'IPAL_PHOTO_BASIN_ACCESS_LANDING');
- for(const z of [-108.70,-109.74])pline([41.32,2.72,z],[42.98,2.72,z],.025,0xd7a817,'IPAL_PHOTO_BASIN_LANDING_HANDRAIL');
+ // Dedicated yellow access stair/landing is anchored to the actual temporary-holding location.
+ const tmpStairStartX=tmp.x-1.55,tmpStairStartZ=tmp.z+.92,tmpStairEndX=tmp.x+.05,tmpStairEndZ=tmp.z+.25;
+ for(let i=0;i<12;i++){const t=i/11;pbox(tmpStairStartX+(tmpStairEndX-tmpStairStartX)*t,.12+t*1.62,tmpStairStartZ+(tmpStairEndZ-tmpStairStartZ)*t,.76,.055,.28,0xd7a817,'IPAL_PHOTO_BASIN_ACCESS_STAIR_TREAD');}
+ for(const side of [-1,1]){
+  const zOff=side*.40;
+  pline([tmpStairStartX,.10,tmpStairStartZ+zOff],[tmpStairEndX,1.74,tmpStairEndZ+zOff],.030,0xd7a817,'IPAL_PHOTO_BASIN_ACCESS_STAIR_STRINGER');
+  pline([tmpStairStartX,1.02,tmpStairStartZ+zOff],[tmpStairEndX,2.55,tmpStairEndZ+zOff],.024,0xd7a817,'IPAL_PHOTO_BASIN_ACCESS_HANDRAIL');
+ }
+ pbox(tmp.x+.52,1.80,tmp.z+.10,1.55,.09,.98,0x7f8885,'IPAL_PHOTO_BASIN_ACCESS_LANDING');
+ for(const z of [tmp.z-.39,tmp.z+.59])pline([tmp.x-.25,2.52,z],[tmp.x+1.30,2.52,z],.025,0xd7a817,'IPAL_PHOTO_BASIN_LANDING_HANDRAIL');
 
- // Large metal tank: shell-course seams, weathering, yellow top rail and external ladder.
+ // Large metal tank: shell-course seams, weathering, yellow top rail and photographed side access stair.
  const an=IPAL_PHOTO_EVIDENCE_V206.relativeLayout.anaerobicTank,anZ=-an.y;
  const anTank=pcyl(an.x,an.h/2+.12,anZ,an.r,an.h,0xa5aaa7,'IPAL_PHOTO_TANGKI_AN_AEROBIK',{observedLabel:an.label},40,photoMetal);label('TANGKI AN AEROBIK',an.x,2.6,anZ-an.r-.10,4.0,'#244b5c',ipalPhoto);
  for(let y=.48;y<an.h+.15;y+=.52)ptorus(an.x,y,anZ,an.r+.012,.022,0x747d7b,'IPAL_PHOTO_TANK_SHELL_RING');
@@ -1416,9 +1422,15 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  ptorus(an.x,an.h+.86,anZ,tankRailR,.026,0xd7a817,'IPAL_PHOTO_TANK_TOP_GUARDRAIL');
  ptorus(an.x,an.h+.50,anZ,tankRailR,.020,0xd7a817,'IPAL_PHOTO_TANK_MID_GUARDRAIL');
  for(let a=0;a<Math.PI*2;a+=Math.PI/10)pline([an.x+Math.cos(a)*tankRailR,an.h+.14,anZ+Math.sin(a)*tankRailR],[an.x+Math.cos(a)*tankRailR,an.h+.90,anZ+Math.sin(a)*tankRailR],.022,0xd7a817,'IPAL_PHOTO_TANK_GUARD_POST');
- const ladderX=an.x+an.r+.12;
- for(const lx of [ladderX-.22,ladderX+.22])pline([lx,.16,anZ],[lx,an.h+.55,anZ],.025,0xd7a817,'IPAL_PHOTO_TANK_LADDER_RAIL');
- for(let y=.35;y<an.h+.5;y+=.30)pline([ladderX-.22,y,anZ],[ladderX+.22,y,anZ],.018,0xd7a817,'IPAL_PHOTO_TANK_LADDER_RUNG');
+ const anStairStart=[an.x+an.r+1.10,.12,anZ+.92],anStairEnd=[an.x+an.r+.18,1.62,anZ-.18];
+ for(let i=0;i<10;i++){const t=i/9;pbox(anStairStart[0]+(anStairEnd[0]-anStairStart[0])*t,.13+t*1.49,anStairStart[2]+(anStairEnd[2]-anStairStart[2])*t,.72,.055,.27,0xd7a817,'IPAL_PHOTO_ANAEROBIC_ACCESS_STAIR_TREAD');}
+ for(const side of [-1,1]){
+  const off=side*.38;
+  pline([anStairStart[0],.10,anStairStart[2]+off],[anStairEnd[0],1.65,anStairEnd[2]+off],.030,0xd7a817,'IPAL_PHOTO_ANAEROBIC_ACCESS_STAIR_STRINGER');
+  pline([anStairStart[0],.96,anStairStart[2]+off],[anStairEnd[0],2.48,anStairEnd[2]+off],.024,0xd7a817,'IPAL_PHOTO_ANAEROBIC_ACCESS_HANDRAIL');
+ }
+ pbox(an.x+an.r+.05,1.70,anZ-.18,1.25,.09,.95,0x7f8885,'IPAL_PHOTO_ANAEROBIC_ACCESS_LANDING',0,1,{continuationAboveLanding:'NOT_VISIBLE_ENOUGH_TO_ASSERT'});
+ for(const z of [anZ-.64,anZ+.28])pline([an.x+an.r-.56,2.42,z],[an.x+an.r+.66,2.42,z],.024,0xd7a817,'IPAL_PHOTO_ANAEROBIC_ACCESS_LANDING_RAIL');
  pbox(an.x+an.r+.02,2.15,anZ-.03,.055,.62,.78,0xe4d240,'IPAL_PHOTO_CONFINED_SPACE_WARNING_PLATE',0,1,{warningText:'BAHAYA! RUANG TERBATAS DILARANG MASUK'});buildingDetailStats.v205IpalSafetyDetails++;
  label('BAHAYA · RUANG TERBATAS',an.x+an.r+.08,2.18,anZ-.04,2.15,'#7a2d26',ipalPhoto);
  // Water-stain and aged shell bands keep the vessel from reading as a showroom-new cylinder.
