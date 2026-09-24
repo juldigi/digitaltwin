@@ -17,7 +17,7 @@ test('V174 visible 2D and 3D controls follow canonical viewMode',()=>{
 });
 
 test('V174 one state subscriber synchronizes view controls after click or history restore',()=>{
- assert.match(shell,/subscribe\(state=>\{markSection\(state\.activeSection\);syncLayerControls\(\);syncAccessibleControls\(state\)/);
+ assert.match(shell,/subscribe\(state=>\{applyInspectorDom\(state\);applyViewModeDom\(state\);markSection\(state\.activeSection\);syncLayerControls\(\);syncAccessibleControls\(state\)/);
  assert.match(shell,/addEventListener\('bmj:historyrestore'/);
  assert.match(shell,/setState\(\{selectedAsset:detail\.selectedAsset\|\|null,selectedNode:detail\.selectedNode\|\|null,sceneMode,viewMode,cameraPreset,activeSection\},\{url:false\}\)/);
 });
