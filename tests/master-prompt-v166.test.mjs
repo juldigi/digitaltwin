@@ -52,11 +52,15 @@ test('V166 mobile information surfaces keep practical touch and reading sizes',(
 
 test('V166 primary visible navigation and viewport controls remain wired',()=>{
   for(const id of [
-    'nav-machine','nav-assets','nav-systems','nav-simulation-mode','nav-sources',
-    'nav-help','nav-settings','panel-toggle','mode-2d','mode-3d','tool-explode',
-    'tool-isolate','tool-interior','labels','fullscreen','focus-machine','edit-position'
+    'nav-machine','nav-assets','nav-systems','nav-help','panel-toggle',
+    'mode-2d','mode-3d','tool-explode','tool-isolate','tool-interior',
+    'labels','fullscreen','focus-machine'
   ]){
     assert.match(html,new RegExp('id="'+id+'"'));
     assert.match(runtime,new RegExp('#'+id));
   }
+  assert.doesNotMatch(html,/id="nav-simulation-mode"/);
+  assert.doesNotMatch(html,/id="nav-sources"/);
+  assert.match(html,/data-tab="simulation"/);
+  assert.match(html,/data-tab="sources"/);
 });
