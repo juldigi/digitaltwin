@@ -43,7 +43,7 @@ const symbols=`<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
 <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
 <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.4-2.4 1A8 8 0 0 0 15 6l-.3-2.6h-4L10.4 6A8 8 0 0 0 9 7.1l-2.4-1-2 3.4 2 1.5a7 7 0 0 0 0 2l-2 1.5 2 3.4 2.4-1a8 8 0 0 0 1.4 1.1l.3 2.6h4L15 18a8 8 0 0 0 1.5-1.1l2.4 1 2-3.4-2-1.5a7 7 0 0 0 .1-1z"/></symbol>
 <symbol id="i-layers" viewBox="0 0 24 24"><path d="m4 7 8-4 8 4-8 4Z"/><path d="m4 12 8 4 8-4M4 17l8 4 8-4"/></symbol>
-<symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol><symbol id="i-back" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7M8 12h11"/></symbol>
 <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="19" cy="12" r="1" fill="currentColor"/></symbol>
 <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></symbol>
 <symbol id="i-theme" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9Z"/></symbol>
@@ -60,7 +60,7 @@ document.body.insertAdjacentHTML('afterbegin',symbols);
 
 const iconMap={
  'nav-machine':'factory','nav-assets':'machine','nav-systems':'system','nav-help':'help','ui-menu-toggle':'menu','settings':'settings',
- 'close-panel':'close','modal-close':'close','ui-theme-toggle':'theme','global-search-icon':'search','mobile-search-toggle':'search','layer-manager-button':'layers',
+ 'context-back':'back','close-panel':'close','modal-close':'close','ui-theme-toggle':'theme','global-search-icon':'search','mobile-search-toggle':'search','layer-manager-button':'layers',
  'panel-toggle':'panel','zoom-plus':'zoom-in','zoom-fit':'focus','zoom-minus':'zoom-out','labels':'label','fullscreen':'fullscreen'
 };
 for(const [id,name]of Object.entries(iconMap)){
@@ -454,6 +454,12 @@ function syncVisualHierarchy(state){
  if(heading)heading.classList.toggle('is-contextual',hasSelection||state.sceneMode==='machine');
  const toolbar=q('.scene-bottom');
  if(toolbar)toolbar.setAttribute('aria-label',state.sceneMode==='machine'?'Kontrol tampilan dan inspeksi mesin':'Kontrol tampilan pabrik');
+ const back=q('#context-back');
+ if(back){
+  const canGoParent=Boolean(state.selectedAsset||state.selectedNode||state.sceneMode==='machine');
+  back.hidden=!canGoParent;
+  back.setAttribute('aria-label',state.selectedNode?'Kembali ke tingkat komponen sebelumnya':state.sceneMode==='machine'?'Kembali ke aset di pabrik':'Kembali ke pabrik');
+ }
 }
 function syncViewModeText(el,next2d,is2d){
  if(!el)return;
@@ -482,4 +488,4 @@ function syncPressedTools(){
 const pressedTools=qa('#tool-explode,#tool-isolate,#tool-interior,#labels');
 if(pressedTools.length){const pressedObserver=new MutationObserver(syncPressedTools);pressedTools.forEach(el=>pressedObserver.observe(el,{attributes:true,attributeFilter:['class']}));syncPressedTools()}
 relabel();const hydratedState=hydrateUrl();applyViewModeDom(hydratedState);if(hydratedState.viewMode==='2d')q('#mode-2d')?.click();let lastSyncedSection=getState().activeSection;subscribe(state=>{applyInspectorDom(state);applyViewModeDom(state);markSection(state.activeSection);syncLayerControls();syncAccessibleControls(state);syncVisualHierarchy(state);syncViewModeContext(state);if(state.activeSection!==lastSyncedSection){lastSyncedSection=state.activeSection;requestAnimationFrame(syncSimulationTransport)}});
-document.documentElement.dataset.uiArchitecture='v195-visual-hierarchy';
+document.documentElement.dataset.uiArchitecture='v196-interaction-flow';
