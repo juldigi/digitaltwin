@@ -1487,26 +1487,26 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  pcyl(hv2.x,hv2TopY+.04,hz2,hv2.r*.91,.07,0x8e9896,'IPAL_PHOTO_SECOND_HOPPER_TOP_LID',{function:'UNVERIFIED_FROM_PHOTO'},32,photoMetalDark);
  pcyl(hv2.x+.24,hv2TopY+.18,hz2-.12,.09,.26,0x697679,'IPAL_PHOTO_SECOND_HOPPER_TOP_NOZZLE',{function:'UNVERIFIED_FROM_PHOTO'},12,photoMetalDark);
 
- // Two-level yellow chemical preparation/dosing rack with observed red polyethylene tanks.
- const cr=IPAL_PHOTO_EVIDENCE_V206.relativeLayout.chemicalRack,crZ=-cr.y;
- for(const dx of [-cr.w/2,0,cr.w/2])for(const dz of [-cr.d/2,cr.d/2]){
-  pfoot(cr.x+dx,crZ+dz,'IPAL_PHOTO_CHEMICAL_RACK_SUPPORT');
-  pbox(cr.x+dx,cr.h/2,crZ+dz,.12,cr.h,.12,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_COLUMN');
+ // Elevated yellow chemical preparation rack sits on/behind the Bak Ekualisasi top zone in IMG_2519/2520.
+ // It is intentionally modeled as a vertically separated structure instead of a remote ground-level island.
+ const cr=IPAL_PHOTO_EVIDENCE_V206.relativeLayout.chemicalRack,crZ=-cr.y,crBase=cr.baseY,crLower=cr.lowerDeckY,crUpper=cr.upperDeckY,crTopRail=cr.topRailY;
+ const crColumns=[[-cr.w/2,-cr.d/2],[0,-cr.d/2],[cr.w/2,-cr.d/2],[-cr.w/2,cr.d/2],[0,cr.d/2],[cr.w/2,cr.d/2]];
+ for(const [dx,dz] of crColumns){
+  pbox(cr.x+dx,crBase+.035,crZ+dz,.30,.07,.30,0x8a7441,'IPAL_PHOTO_CHEMICAL_RACK_DECK_BASE_PLATE',0,1,{supportSurface:'EQUALIZATION_TOP_OR_REAR_STRUCTURE_PHOTO_DERIVED'});
+  pbox(cr.x+dx,(crBase+crTopRail-.15)/2,crZ+dz,.11,crTopRail-.15-crBase,.11,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_COLUMN');
  }
- for(const y of [1.35,3.0]){
-  pbox(cr.x,y,crZ,cr.w,.10,cr.d,0x7e8987,'IPAL_PHOTO_CHEMICAL_RACK_GRATING');
-  for(const dz of [-cr.d/2+.04,cr.d/2-.04])pbox(cr.x,y+.105,crZ+dz,cr.w,.11,.055,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_TOEBOARD');
+ for(const deckY of [crLower,crUpper]){
+  pbox(cr.x,deckY,crZ,cr.w,.10,cr.d,0x7e8987,'IPAL_PHOTO_CHEMICAL_RACK_GRATING');
+  for(const dz of [-cr.d/2+.04,cr.d/2-.04])pbox(cr.x,deckY+.105,crZ+dz,cr.w,.11,.055,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_TOEBOARD');
   for(const dz of [-cr.d/2,cr.d/2]){
-   pline([cr.x-cr.w/2,y+.72,crZ+dz],[cr.x+cr.w/2,y+.72,crZ+dz],.026,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_GUARDRAIL');
-   for(const x of [cr.x-cr.w/2,cr.x-cr.w/4,cr.x,cr.x+cr.w/4,cr.x+cr.w/2])pline([x,y+.10,crZ+dz],[x,y+.74,crZ+dz],.018,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_GUARD_POST');
+   pline([cr.x-cr.w/2,deckY+.72,crZ+dz],[cr.x+cr.w/2,deckY+.72,crZ+dz],.026,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_GUARDRAIL');
+   for(const x of [cr.x-cr.w/2,cr.x-cr.w/4,cr.x,cr.x+cr.w/4,cr.x+cr.w/2])pline([x,deckY+.10,crZ+dz],[x,Math.min(deckY+.75,crTopRail),crZ+dz],.018,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_GUARD_POST');
   }
  }
- // Diagonal side bracing prevents the rack from reading as unsupported shelves.
+ // Side braces only span the photographed elevated rack levels; they do not extend to the ground.
  for(const z of [crZ-cr.d/2,crZ+cr.d/2]){
-  pline([cr.x-cr.w/2,.22,z],[cr.x,2.85,z],.024,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_DIAGONAL_BRACE');
-  pline([cr.x,2.85,z],[cr.x+cr.w/2,.22,z],.024,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_DIAGONAL_BRACE');
-  pline([cr.x-cr.w/2,2.85,z],[cr.x,.22,z],.024,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_DIAGONAL_BRACE');
-  pline([cr.x,.22,z],[cr.x+cr.w/2,2.85,z],.024,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_DIAGONAL_BRACE');
+  pline([cr.x-cr.w/2,crBase+.10,z],[cr.x,crUpper-.15,z],.024,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_DIAGONAL_BRACE');
+  pline([cr.x,crUpper-.15,z],[cr.x+cr.w/2,crBase+.10,z],.024,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_DIAGONAL_BRACE');
  }
  const redTank=(x,y,z,r=.58,h=1.18,semantic='IPAL_PHOTO_RED_CHEMICAL_TANK')=>{
   const shellH=Math.max(.20,h-.18),shell=new T.Mesh(new T.CylinderGeometry(r*.98,r,shellH,28),photoRed);shell.position.set(x,y+shellH/2,z);ipalPhoto.add(shell);photoTag(shell,semantic,{contents:'UNVERIFIED_FROM_PHOTO',moldedPolyVisual:true});
@@ -1517,20 +1517,14 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   return shell;
  };
  const rackLayout=IPAL_PHOTO_EVIDENCE_V206.chemicalRackTankLayout;
- for(const t of rackLayout.lower)redTank(cr.x+t.dx,1.39,crZ+t.dz,t.r,t.h,'IPAL_PHOTO_RED_CHEMICAL_TANK');
- for(const t of rackLayout.upper)redTank(cr.x+t.dx,3.04,crZ+t.dz,t.r,t.h,'IPAL_PHOTO_UPPER_RED_CHEMICAL_TANK');
- // Only exposed upper drives are animated; they are not used to infer chemical identity.
- for(const t of rackLayout.upper){
-  const m=pcyl(cr.x+t.dx,4.20,crZ+t.dz,.17,.34,0x4b5a5d,'IPAL_PHOTO_CHEMICAL_MIXER_DRIVE',{function:'MIXER_DRIVE_VISUAL'});
-  const shaft=pcyl(cr.x+t.dx,3.96,crZ+t.dz,.043,.38,0x323d40,'IPAL_PHOTO_CHEMICAL_MIXER_SHAFT',{simulationCue:'ROTATING_SHAFT'});ipalPhotoRuntime.rotors.push(shaft);
- }
+ for(const t of rackLayout.lower)redTank(cr.x+t.dx,crLower+.08,crZ+t.dz,t.r,t.h,'IPAL_PHOTO_RED_CHEMICAL_TANK');
+ for(const t of rackLayout.upper)redTank(cr.x+t.dx,crUpper+.08,crZ+t.dz,t.r,t.h,'IPAL_PHOTO_UPPER_RED_CHEMICAL_TANK');
+ // No mixer animation is added to the rack because the photographs do not prove exposed rotating mixer drives.
  const coag=IPAL_PHOTO_EVIDENCE_V206.relativeLayout.coagulantTank,coagZ=-coag.y;
  redTank(coag.x,.10,coagZ,coag.r,coag.h,'IPAL_PHOTO_TANGKI_KOAGULAN');
  label('TANGKI KOAGULAN',coag.x,.96,coagZ+coag.r+.12,2.45,'#173f52',ipalPhoto);
  const coagObj=ipalPhoto.children.find(o=>o.userData?.semantic==='IPAL_PHOTO_TANGKI_KOAGULAN');if(coagObj)coagObj.userData={...coagObj.userData,contents:'COAGULANT_LITERAL_PHOTO_LABEL',observedLabel:'TANGKI KOAGULAN'};
- // Actual yellow access stairs.
- for(let i=0;i<8;i++){pbox(cr.x+cr.w/2+.55,.20+i*.20,crZ+1.55-i*.18,.82,.055,.28,0xd7a817,'IPAL_PHOTO_CHEMICAL_STAIR_TREAD');}
- for(const side of [-1,1])pline([cr.x+cr.w/2+.15,.20,crZ+1.55+side*.42],[cr.x+cr.w/2+.95,1.82,crZ+.10+side*.42],.032,0xd7a817,'IPAL_PHOTO_CHEMICAL_STAIR_STRINGER');
+ // Access route to the elevated chemical rack is partially occluded in the photo set, so no invented ground stair is rendered.
  // Pair of blue vertical auxiliary vessels with top valves/nozzles visible in IMG_2515/2517/2525.
  for(const av of IPAL_PHOTO_EVIDENCE_V206.relativeLayout.blueAuxiliaryVessels){
   const az=-av.y;
