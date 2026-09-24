@@ -10,7 +10,7 @@ const ui=fs.readFileSync(new URL('../frontend/src/ui-v5.js',import.meta.url),'ut
 const css=fs.readFileSync(new URL('../frontend/app-shell-v79.css',import.meta.url),'utf8');
 
 test('V194 primary navigation exposes only the three product domains plus contextual help/settings',()=>{
- for(const [id,label] of [['nav-machine','Pabrik'],['nav-assets','Mesin'],['nav-systems','Sistem'],['nav-help','Bantuan']]){
+ for(const [id,label] of [['nav-machine','Pabrik'],['nav-assets','Mesin'],['nav-systems','Sistem'],['nav-view','Tampilan'],['nav-help','Bantuan']]){
   assert.match(html,new RegExp(`id="${id}"[\\s\\S]*?<small>${label}<\\/small>`));
  }
  assert.match(html,/id="settings"/);
@@ -190,4 +190,13 @@ test('V149 taxonomy level names are human-first with L1-L6 only as secondary tec
  for(const label of ['Mesin','Unit Utama','Sub','Block','Part','Spesifik Part'])assert.match(app,new RegExp(label));
  assert.match(app,/<small>L\$\{level\}<\/small>/);
  assert.match(css,/\.stage-strip button small/);
+});
+
+
+test('system browser and display layers are distinct canonical surfaces',()=>{
+ assert.match(shell,/function ensureSystemBrowser\(\)/);
+ assert.match(shell,/function ensureLayerManager\(\)/);
+ assert.match(shell,/q\('#nav-systems'\).*openSystemBrowser/);
+ assert.match(shell,/q\('#nav-view'\).*openLayerManager/);
+ assert.match(shell,/overlay==='systems'/);
 });
