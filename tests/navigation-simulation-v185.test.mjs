@@ -29,5 +29,5 @@ test('V185 rotates active runtime identifiers',()=>{
  assert.match(index,/src\/app\.js\?v=212/);
  assert.match(index,/src\/app-shell-v79\.js\?v=212/);
  assert.match(sw,/factory-digital-twin-v212-ui-ssot-stage6-20260925/);
- assert.match(app,/pair\('Versi aplikasi','2026\.09\.25'\)/);
+ assert.match(app,/pair\('Versi aplikasi',APP_BUILD\)/);
 });
