@@ -949,11 +949,11 @@ export function buildActualFactory(layout,fleet){
    }
    case 'QC_SAMPLE':
    case 'INCOMING_QC':{
-    const deskX=-mirror*Math.min(Math.max(.78,w*.26),Math.max(.78,w/2-.62)),inspectZ=Math.min(-.28,workZ+.78),stoolX=-mirror*Math.max(.72,sideX-.03),stoolZ=Math.min(.24,inspectZ+.62);
-    localDesk(g,deskX,workZ+.22,1.15,ctx.program+'_DESK');localTable(g,.18,inspectZ,1.34,.74,ctx.program+'_INSPECTION');
-    for(let i=0;i<4;i++){rb(g,.18+(i-1.5)*.15,.79,inspectZ+(i%2?.08:-.08),.22,.012,.16,i%2?0xe8e2d3:0xd9d3c5,ctx.program+'_SAMPLE_SHEET');buildingDetailStats.v203QcSampleDetails++;}
-    rb(g,.52,.81,inspectZ-.12,.26,.025,.08,0x5a6870,ctx.program+'_INSPECTION_SCALE_REFERENCE');buildingDetailStats.v203QcSampleDetails++;
-    localChair(g,stoolX,stoolZ,.18,inspectZ,ctx.program+'_STOOL',false);localCabinet(g,mirror*(sideX-.22),.18,.42,1.65,.34,ctx.program+'_SAMPLE_STORAGE');break;
+    const deskX=-mirror*Math.min(Math.max(.78,w*.26),Math.max(.78,w/2-.62)),inspectX=mirror*.35,inspectZ=Math.min(-.28,workZ+.78),stoolX=inspectX,stoolZ=inspectZ-.65;
+    localDesk(g,deskX,workZ+.22,1.15,ctx.program+'_DESK');localTable(g,inspectX,inspectZ,1.34,.74,ctx.program+'_INSPECTION');
+    for(let i=0;i<4;i++){rb(g,inspectX+(i-1.5)*.15,.79,inspectZ+(i%2?.08:-.08),.22,.012,.16,i%2?0xe8e2d3:0xd9d3c5,ctx.program+'_SAMPLE_SHEET');buildingDetailStats.v203QcSampleDetails++;}
+    rb(g,inspectX+mirror*.34,.81,inspectZ-.12,.26,.025,.08,0x5a6870,ctx.program+'_INSPECTION_SCALE_REFERENCE');buildingDetailStats.v203QcSampleDetails++;
+    localChair(g,stoolX,stoolZ,inspectX,inspectZ,ctx.program+'_STOOL',false);localCabinet(g,mirror*(sideX-.22),.18,.42,1.65,.34,ctx.program+'_SAMPLE_STORAGE');break;
    }
    case 'PREPRESS':{
     localDesk(g,-.70,workZ+.28,1.20,'PREPRESS_OPERATOR');localTable(g,.40,-.06,1.30,.72,'PREPRESS_LIGHT_TABLE');localRack(g,mirror*(sideX-.18),.10,.34,1.55,.40,'PREPRESS_PLATE_RACK');break;
