@@ -59,5 +59,5 @@ test('V159 search promise matches strict Phase-1 scope and cache identifiers are
  assert.match(html,/src\/ui-v5\.js\?v=167/);
  assert.match(html,/src\/app-shell-v79\.js\?v=192/);
  assert.match(shell,/v162-factory-first-systems/);
- assert.match(sw,/factory-digital-twin-v192-mobile-camera-framing-20260923/);
+ assert.match(sw,/factory-digital-twin-v205-ipal-photo-actual-20260924/);
 });
