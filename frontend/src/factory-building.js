@@ -979,10 +979,10 @@ export function buildActualFactory(layout,fleet){
     localRack(g,-sideX+.18,doorLimit-.20,.34,1.15,.32,'PRAYER_SHOE_RACK');for(let ix=-1;ix<=1;ix++)for(let iz=0;iz<2;iz++)rb(g,ix*.62,.014,workZ+.35+iz*.86,.52,.018,.76,iz%2?0x668c7f:0x759c8e,'PRAYER_MAT');break;
    }
    case 'FIRE_PUMP_ROOM':{
-    rb(g,0,.14,-.15,2.15,.28,1.24,0x586c73,'FIRE_PUMP_SKID');for(const x of [-.58,.58]){const pump=new T.Mesh(new T.CylinderGeometry(.24,.24,.72,16),material(0xb94343));pump.rotation.z=Math.PI/2;pump.position.set(x,.52,-.15);pump.userData={semantic:'V202_FIRE_PUMP_REFERENCE',researchVersion:'V203'};g.add(pump);buildingDetailStats.v202RoomFurnitureObjects++;}break;
+    localBlock(g,0,-.15,2.15,.28,1.24,0x586c73,'FIRE_PUMP_SKID',.14);for(const x of [-.58,.58]){const pump=new T.Mesh(new T.CylinderGeometry(.24,.24,.72,16),material(0xb94343));pump.rotation.z=Math.PI/2;pump.position.set(x,.52,-.15);pump.userData={semantic:'V202_FIRE_PUMP_REFERENCE',researchVersion:'V203'};g.add(pump);buildingDetailStats.v202RoomFurnitureObjects++;}break;
    }
    case 'BROKE_WASTE_ROOM':{
-    for(const x of [-.68,.68])rb(g,x,.40,workZ+.25,1.02,.76,.88,0xad8b60,'BROKE_COLLECTION_BIN');rb(g,0,.34,.45,.86,.62,.54,0x6e8188,'BROKE_TROLLEY');break;
+    for(const x of [-.68,.68])localBlock(g,x,workZ+.25,1.02,.76,.88,0xad8b60,'BROKE_COLLECTION_BIN',.40);localBlock(g,0,.45,.86,.62,.54,0x6e8188,'BROKE_TROLLEY',.34);break;
    }
    case 'MEETING':{
     localTable(g,0,-.08,Math.min(2.45,w-.78),.96,'MEETING');const mx=Math.min(.92,w*.28);for(const x of [-mx,mx]){localChair(g,x,-.76,0,-.08,'MEETING',false);localChair(g,x,.62,0,-.08,'MEETING',false);}rb(g,0,1.58,-d/2+.08,Math.min(2.1,w-.45),.72,.05,0xe9e7dc,'MEETING_PRESENTATION_BOARD');break;
