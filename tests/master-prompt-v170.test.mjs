@@ -22,10 +22,13 @@ test('V170 leaving Simulation through another inspector tab hides simulation sec
  assert.match(shell,/const transportOpen=section==='simulation'/);
 });
 
-test('V170 mobile More represents Reference without turning transient modals into sections',()=>{
- assert.match(shell,/const mobileSection=section==='reference'\?'more':section/);
- assert.match(shell,/q\('#nav-help'\)\?\.addEventListener\('click',\(\)=>\{stopSimulationForNavigation\('help'\);beforeMajorOverlay\('modal'\);openOverlay\('modal'\)\}\)/);
- assert.match(shell,/q\('#nav-settings'\)\?\.addEventListener\('click',\(\)=>\{stopSimulationForNavigation\('settings'\);beforeMajorOverlay\('modal'\);q\('#settings'\)\?\.click\(\);openOverlay\('modal'\)\}\)/);
+test('V193 keeps Simulation and Reference contextual under the Asset domain',()=>{
+ assert.match(shell,/function primarySectionFor\(section\)/);
+ assert.match(shell,/return section==='simulation'\|\|section==='reference'\?'asset':section/);
+ assert.doesNotMatch(html,/id="nav-simulation-mode"/);
+ assert.doesNotMatch(html,/id="nav-sources"/);
+ assert.match(html,/data-tab="simulation"/);
+ assert.match(html,/data-tab="sources"/);
  assert.doesNotMatch(shell,/setActiveSection\('help'\)/);
  assert.doesNotMatch(shell,/setActiveSection\('settings'\)/);
 });
