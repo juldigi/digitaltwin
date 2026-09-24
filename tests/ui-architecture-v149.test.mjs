@@ -134,10 +134,11 @@ test('V149 inspection and legacy factory layer actions synchronize into centrali
 });
 
 test('V149 deep links preserve machine asset node and workspace view without navigation reload',()=>{
- assert.match(state,/const map=\{asset:state\.selectedAsset,node:state\.selectedNode,view:state\.viewMode\}/);
- assert.match(state,/params\.set\(key,value\)/);
- assert.match(app,/node=params\.get\('node'\)/);
- assert.match(app,/legacyMachine=params\.get\('machine'\),route=legacyMachine\|\|params\.get\('asset'\)\|\|null/);
+ assert.match(state,/export function readUrlState/);
+ assert.match(state,/export function buildContextUrl/);
+ assert.match(state,/const selectedAsset=params\.get\('asset'\)\|\|legacyMachine\|\|null/);
+ assert.match(app,/const restored=readUrlState\(\),route=restored\.selectedAsset,node=restored\.selectedNode/);
+ assert.match(app,/const url=buildContextUrl\(snapshot\)/);
  assert.match(app,/history\.pushState/);
  assert.doesNotMatch(app,/location\.(?:href|assign|replace)\s*=/);
 });
