@@ -25,11 +25,12 @@ test('responsive contract covers phone tablet desktop and landscape',()=>{
   assert.match(css,/prefers-contrast:more/);
 });
 
-test('detail is an in-flow desktop inspector and a full mobile page',()=>{
+test('detail is an in-flow desktop inspector and a contextual mobile bottom sheet',()=>{
   assert.match(css,/aside#detail-panel/);
   assert.match(css,/\.panel-hidden aside#detail-panel/);
-  assert.match(css,/@media\(max-width:767px\)[\s\S]*aside#detail-panel\{position:absolute/);
-  assert.match(css,/\.panel-hidden aside#detail-panel\{transform:translateX\(105%\)/);
+  assert.match(css,/@media\(max-width:767px\)[\s\S]*aside#detail-panel\{[\s\S]*position:fixed!important/);
+  assert.match(css,/height:min\(58dvh,620px\)!important/);
+  assert.match(css,/\.panel-hidden aside#detail-panel\{[\s\S]*translateY/);
 });
 
 test('mobile navigation and drawer have one state owner',()=>{
