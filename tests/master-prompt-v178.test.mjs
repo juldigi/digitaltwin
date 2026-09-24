@@ -10,7 +10,7 @@ const sw=read('../frontend/sw.js');
 
 test('V178 app exposes an internal stop request that reaches the actual engine simulation',()=>{
   assert.match(app,/window\.addEventListener\('bmj:simulationstoprequest'/);
-  assert.match(app,/engine\?\.isPrintingSimulationActive\?\.\(\)\|\|runtimeSimulationSnapshot\?\.active/);
+  assert.match(app,/engine\?\.isPrintingSimulationActive\?\.\(\)\|\|currentSimulationState\(\)\.active/);
   assert.match(app,/stopPrintingSimulation\(\{restoreExterior:true\}\)/);
 });
 
