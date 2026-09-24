@@ -16,5 +16,6 @@ test('V160 opens factory asset detail in the canonical contextual inspector',()=
 
 test('V160 factory selector opens the same inspector context instead of a duplicate surface',()=>{
  assert.match(app,/factory-asset-focus'[\s\S]*openDialog:true/);
- assert.match(app,/factory-inspector-back/);
+ assert.match(app,/on\('#context-back',navigateContextParent\)/);
+ assert.doesNotMatch(app,/factory-inspector-back/);
 });
