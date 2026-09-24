@@ -61,7 +61,7 @@ export const IPAL_PHOTO_EVIDENCE_V205=Object.freeze({
   coveredServiceBasin:{x:52.25,y:103.0,w:5.0,d:2.2,h:1.18},
   secondHopperVessel:{x:57.55,y:113.15,r:1.10,cylinderH:1.85,coneH:1.05},
   blueAuxiliaryVessels:[{x:48.75,y:113.75,r:.42,h:1.55},{x:49.72,y:113.75,r:.42,h:1.55}],
-  largeRedMixingTower:{x:58.55,y:115.05,r:.78,h:1.85,platformH:2.25}
+  largeRedMixingTower:{x:58.55,y:115.40,r:.78,h:1.85,platformH:2.25}
  }),
  unresolved:Object.freeze([
   'ABSOLUTE_EQUIPMENT_DIMENSIONS_AND_ELEVATIONS',
