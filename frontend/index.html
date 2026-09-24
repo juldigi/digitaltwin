@@ -10,7 +10,7 @@
 <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
 <link rel="stylesheet" href="./style.css">
 <link rel="stylesheet" href="./runtime-fallback.css">
-<link rel="stylesheet" href="./app-shell-v79.css?v=192">
+<link rel="stylesheet" href="./app-shell-v79.css?v=197">
 <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/addons/"}}</script>
 </head>
 <body class="panel-hidden ui-simple">
@@ -83,7 +83,7 @@
         </div>
       </div>
 
-      <div class="scene-caption"><span id="geometry-caption">Model Offset 5</span><span id="scene-hint">Putar: seret · Zoom: cubit/scroll · Klik komponen untuk melihat detail</span></div>
+      <div class="scene-caption"><span id="geometry-caption">Pabrik · Seluruh Area</span><span id="scene-hint">Putar: seret · Zoom: cubit/scroll · Klik komponen untuk melihat detail</span></div>
 
     </section>
   </div>
@@ -115,10 +115,10 @@
 <dialog id="modal" aria-labelledby="modal-title" aria-modal="true"><div class="modal-head"><button id="modal-back" class="modal-back" type="button" aria-label="Kembali ke dialog sebelumnya" hidden><span aria-hidden="true"></span><b>Kembali</b></button><h2 id="modal-title"></h2><button id="modal-close" class="icon-btn" aria-label="Tutup dialog"></button></div><div id="modal-body"></div></dialog>
 <div id="toast" role="status" aria-live="polite" hidden></div>
 <script id="splash-recovery">window.setTimeout(()=>{const splash=document.querySelector('.app-splash');if(!splash||splash.classList.contains('is-done'))return;splash.remove();if(!document.documentElement.dataset.appReady){const boot=document.getElementById('boot');if(boot){boot.hidden=false;boot.innerHTML='<strong>Aplikasi belum berhasil dimuat</strong><p>Periksa koneksi, lalu muat ulang halaman.</p><button type="button" id="boot-retry">Muat Ulang</button>';boot.querySelector('#boot-retry').onclick=()=>location.reload();}}},12500);</script>
-<script type="module" src="./src/app.js?v=192"></script>
+<script type="module" src="./src/app.js?v=197"></script>
 <script type="module" src="./src/ui-v5.js?v=167"></script>
 <script type="module" src="./src/experience-v37.js?v=164"></script>
-<script type="module" src="./src/app-shell-v79.js?v=192"></script>
+<script type="module" src="./src/app-shell-v79.js?v=197"></script>
 <script>setTimeout(()=>{const b=document.getElementById('boot');if(b&&!b.hidden){b.innerHTML='<strong>Tampilan 3D belum berhasil dimuat</strong><p>Coba muat ulang halaman atau gunakan perangkat lain.</p>'; }},15000);</script>
 </body>
 </html>
