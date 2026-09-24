@@ -1066,3 +1066,23 @@ dialog#modal{
   width:auto;max-height:none;border-radius:16px
  }
 }
+
+
+/* V196 interaction flow — explicit parent navigation, no destructive camera reset. */
+.panel-top{gap:8px}
+.panel-top>.eyebrow{flex:1;min-width:0}
+.context-back{
+ display:inline-flex;align-items:center;gap:5px;min-height:34px;padding:0 8px;border:0;border-radius:9px;
+ background:#f3f7fa;color:#496174;font-size:9px;font-weight:800
+}
+.context-back:hover{background:#eaf3fb;color:#1269bd}
+.context-back svg{width:16px;height:16px;flex:0 0 auto}
+.context-back[hidden]{display:none!important}
+.context-back+b.eyebrow{min-width:0}
+.context-breadcrumb button[aria-current="page"]{cursor:default}
+body[data-scene-mode="machine"] .context-back:not([hidden]){background:#edf6ff;color:#0b70df}
+@media(max-width:767px){
+ .context-back{min-height:38px;padding-inline:8px}
+ .context-back b{display:none}
+ .context-back svg{width:19px;height:19px}
+}
