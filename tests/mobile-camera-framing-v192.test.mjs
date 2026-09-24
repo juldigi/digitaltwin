@@ -8,4 +8,4 @@ const sw=readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 test('machine camera has a portrait-specific framing profile',()=>{assert.match(engine,/framingProfile\(object=this\.machine\)/);assert.match(engine,/padding:portrait&&machine\?1\.06:1\.18/);assert.match(engine,/targetLift:portrait&&machine\?-\.08:0/);});
 test('fit uses profile without changing object geometry',()=>{assert.match(engine,/c\.y\+=size\.y\*profile\.targetLift/);assert.match(engine,/\*profile\.padding/);});
 test('desktop framing keeps historical padding',()=>{assert.match(engine,/1\.06:1\.18/);});
-test('V192 release identifiers are coherent',()=>{assert.match(index,/app-shell-v79\.css\?v=197/);assert.match(index,/src\/app\.js\?v=197/);assert.match(sw,/factory-digital-twin-v209-architecture-convergence-20260925/);assert.match(app,/pair\('Versi aplikasi','2026\.09\.25'\)/);});
+test('V192 release identifiers are coherent',()=>{assert.match(index,/app-shell-v79\.css\?v=198/);assert.match(index,/src\/app\.js\?v=198/);assert.match(sw,/factory-digital-twin-v210-architecture-convergence-stage5-20260925/);assert.match(app,/pair\('Versi aplikasi','2026\.09\.25'\)/);});
