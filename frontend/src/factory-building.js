@@ -1457,9 +1457,12 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  for(const z of [hz-1.30,hz+1.30])pbox(hv.x,2.66,z,3.15,.12,.055,0xd7a817,'IPAL_PHOTO_HOPPER_PLATFORM_TOEBOARD');
  for(const side of [-1,1])pline([hv.x-1.55,3.15,hz+side*1.30],[hv.x+1.55,3.15,hz+side*1.30],.026,0xd7a817,'IPAL_PHOTO_HOPPER_PLATFORM_HANDRAIL');
  for(const side of [-1,1])for(const x of [hv.x-1.55,hv.x-.78,hv.x,hv.x+.78,hv.x+1.55])pline([x,2.66,hz+side*1.30],[x,3.18,hz+side*1.30],.018,0xd7a817,'IPAL_PHOTO_HOPPER_GUARD_POST');
- pcyl(hv.x,coneBase+hv.coneH+hv.cylinderH+.04,hz,hv.r*.92,.08,0x8e9896,'IPAL_PHOTO_HOPPER_TOP_LID',{function:'UNVERIFIED_FROM_PHOTO'},36,photoMetalDark);
- pcyl(hv.x+.35,coneBase+hv.coneH+hv.cylinderH+.22,hz-.18,.11,.34,0x697679,'IPAL_PHOTO_HOPPER_TOP_NOZZLE',{function:'UNVERIFIED_FROM_PHOTO'},14,photoMetalDark);
- ptorus(hv.x+.35,coneBase+hv.coneH+hv.cylinderH+.40,hz-.18,.13,.020,0x727d7e,'IPAL_PHOTO_HOPPER_TOP_NOZZLE_FLANGE',Math.PI/2,{function:'UNVERIFIED_FROM_PHOTO'});
+ const hvTopY=coneBase+hv.coneH+hv.cylinderH;
+ pcyl(hv.x,hvTopY+.04,hz,hv.r*.92,.08,0x8e9896,'IPAL_PHOTO_HOPPER_TOP_LID',{function:'UNVERIFIED_FROM_PHOTO'},36,photoMetalDark);
+ pcyl(hv.x+.35,hvTopY+.22,hz-.18,.11,.34,0x697679,'IPAL_PHOTO_HOPPER_TOP_NOZZLE',{function:'UNVERIFIED_FROM_PHOTO'},14,photoMetalDark);
+ ptorus(hv.x+.35,hvTopY+.40,hz-.18,.13,.020,0x727d7e,'IPAL_PHOTO_HOPPER_TOP_NOZZLE_FLANGE',Math.PI/2,{function:'UNVERIFIED_FROM_PHOTO'});
+ const hvRailR=hv.r+.16;ptorus(hv.x,hvTopY+.72,hz,hvRailR,.024,0xd7a817,'IPAL_PHOTO_HOPPER_TOP_GUARDRAIL');ptorus(hv.x,hvTopY+.40,hz,hvRailR,.020,0xd7a817,'IPAL_PHOTO_HOPPER_TOP_MIDRAIL');
+ for(let a=0;a<Math.PI*2;a+=Math.PI/8)pline([hv.x+Math.cos(a)*hvRailR,hvTopY+.08,hz+Math.sin(a)*hvRailR],[hv.x+Math.cos(a)*hvRailR,hvTopY+.75,hz+Math.sin(a)*hvRailR],.018,0xd7a817,'IPAL_PHOTO_HOPPER_TOP_GUARD_POST');
  // A second, smaller hopper-bottom silver vessel is clearly visible deeper in IMG_2517/2523.
  const hv2=IPAL_PHOTO_EVIDENCE_V206.relativeLayout.secondHopperVessel,hz2=-hv2.y,hv2ConeBase=.42;
  const cone2=new T.Mesh(new T.CylinderGeometry(hv2.r,.18,hv2.coneH,28),photoMetal);cone2.position.set(hv2.x,hv2ConeBase+hv2.coneH/2,hz2);ipalPhoto.add(cone2);photoTag(cone2,'IPAL_PHOTO_SECOND_HOPPER_CONE_VESSEL',{function:'UNVERIFIED_FROM_PHOTO'});
@@ -1471,8 +1474,11 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   pbox(hv2.x+dx,1.12,hz2+dz,.11,2.24,.11,0xd7a817,'IPAL_PHOTO_SECOND_HOPPER_SUPPORT_LEG');
   pline([hv2.x+dx,.25,hz2+dz],[hv2.x-dx,1.95,hz2+dz],.023,0xd7a817,'IPAL_PHOTO_SECOND_HOPPER_SUPPORT_BRACE');
  }
- pcyl(hv2.x,hv2ConeBase+hv2.coneH+hv2.cylinderH+.04,hz2,hv2.r*.91,.07,0x8e9896,'IPAL_PHOTO_SECOND_HOPPER_TOP_LID',{function:'UNVERIFIED_FROM_PHOTO'},32,photoMetalDark);
- pcyl(hv2.x+.24,hv2ConeBase+hv2.coneH+hv2.cylinderH+.18,hz2-.12,.09,.26,0x697679,'IPAL_PHOTO_SECOND_HOPPER_TOP_NOZZLE',{function:'UNVERIFIED_FROM_PHOTO'},12,photoMetalDark);
+ const hv2TopY=hv2ConeBase+hv2.coneH+hv2.cylinderH;
+ pcyl(hv2.x,hv2TopY+.04,hz2,hv2.r*.91,.07,0x8e9896,'IPAL_PHOTO_SECOND_HOPPER_TOP_LID',{function:'UNVERIFIED_FROM_PHOTO'},32,photoMetalDark);
+ pcyl(hv2.x+.24,hv2TopY+.18,hz2-.12,.09,.26,0x697679,'IPAL_PHOTO_SECOND_HOPPER_TOP_NOZZLE',{function:'UNVERIFIED_FROM_PHOTO'},12,photoMetalDark);
+ const hv2RailR=hv2.r+.14;ptorus(hv2.x,hv2TopY+.66,hz2,hv2RailR,.022,0xd7a817,'IPAL_PHOTO_SECOND_HOPPER_TOP_GUARDRAIL');ptorus(hv2.x,hv2TopY+.37,hz2,hv2RailR,.018,0xd7a817,'IPAL_PHOTO_SECOND_HOPPER_TOP_MIDRAIL');
+ for(let a=0;a<Math.PI*2;a+=Math.PI/8)pline([hv2.x+Math.cos(a)*hv2RailR,hv2TopY+.07,hz2+Math.sin(a)*hv2RailR],[hv2.x+Math.cos(a)*hv2RailR,hv2TopY+.69,hz2+Math.sin(a)*hv2RailR],.017,0xd7a817,'IPAL_PHOTO_SECOND_HOPPER_TOP_GUARD_POST');
 
  // Two-level yellow chemical preparation/dosing rack with observed red polyethylene tanks.
  const cr=IPAL_PHOTO_EVIDENCE_V206.relativeLayout.chemicalRack,crZ=-cr.y;
@@ -1503,13 +1509,18 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   ptorus(x,y+.08,z,r+.015,.025,0x87392f,semantic+'_BASE_RIB',Math.PI/2,{contents:'UNVERIFIED_FROM_PHOTO'});
   return shell;
  };
- for(const [dx,dz] of [[-2.0,-1.05],[0,-1.05],[2.0,-1.05],[-1.0,1.05],[1.0,1.05]])redTank(cr.x+dx,1.39,crZ+dz,.56,1.12);
- for(const dx of [-1.65,0,1.65])redTank(cr.x+dx,3.04,crZ-.55,.50,1.0,'IPAL_PHOTO_UPPER_RED_CHEMICAL_TANK');
- // Gear motors / mixer heads observed above selected tanks. Only the exposed coupling rotates in visualization.
- for(const dx of [-1.65,0,1.65]){
-  const m=pcyl(cr.x+dx,4.28,crZ-.55,.18,.38,0x4b5a5d,'IPAL_PHOTO_CHEMICAL_MIXER_DRIVE',{function:'MIXER_DRIVE_VISUAL'});
-  const shaft=pcyl(cr.x+dx,4.02,crZ-.55,.045,.42,0x323d40,'IPAL_PHOTO_CHEMICAL_MIXER_SHAFT',{simulationCue:'ROTATING_SHAFT'});ipalPhotoRuntime.rotors.push(shaft);
+ const rackLayout=IPAL_PHOTO_EVIDENCE_V206.chemicalRackTankLayout;
+ for(const t of rackLayout.lower)redTank(cr.x+t.dx,1.39,crZ+t.dz,t.r,t.h,'IPAL_PHOTO_RED_CHEMICAL_TANK');
+ for(const t of rackLayout.upper)redTank(cr.x+t.dx,3.04,crZ+t.dz,t.r,t.h,'IPAL_PHOTO_UPPER_RED_CHEMICAL_TANK');
+ // Only exposed upper drives are animated; they are not used to infer chemical identity.
+ for(const t of rackLayout.upper){
+  const m=pcyl(cr.x+t.dx,4.20,crZ+t.dz,.17,.34,0x4b5a5d,'IPAL_PHOTO_CHEMICAL_MIXER_DRIVE',{function:'MIXER_DRIVE_VISUAL'});
+  const shaft=pcyl(cr.x+t.dx,3.96,crZ+t.dz,.043,.38,0x323d40,'IPAL_PHOTO_CHEMICAL_MIXER_SHAFT',{simulationCue:'ROTATING_SHAFT'});ipalPhotoRuntime.rotors.push(shaft);
  }
+ const coag=IPAL_PHOTO_EVIDENCE_V206.relativeLayout.coagulantTank,coagZ=-coag.y;
+ redTank(coag.x,.10,coagZ,coag.r,coag.h,'IPAL_PHOTO_TANGKI_KOAGULAN');
+ label('TANGKI KOAGULAN',coag.x,.96,coagZ+coag.r+.12,2.45,'#173f52',ipalPhoto);
+ const coagObj=ipalPhoto.children.find(o=>o.userData?.semantic==='IPAL_PHOTO_TANGKI_KOAGULAN');if(coagObj)coagObj.userData={...coagObj.userData,contents:'COAGULANT_LITERAL_PHOTO_LABEL',observedLabel:'TANGKI KOAGULAN'};
  // Actual yellow access stairs.
  for(let i=0;i<8;i++){pbox(cr.x+cr.w/2+.55,.20+i*.20,crZ+1.55-i*.18,.82,.055,.28,0xd7a817,'IPAL_PHOTO_CHEMICAL_STAIR_TREAD');}
  for(const side of [-1,1])pline([cr.x+cr.w/2+.15,.20,crZ+1.55+side*.42],[cr.x+cr.w/2+.95,1.82,crZ+.10+side*.42],.032,0xd7a817,'IPAL_PHOTO_CHEMICAL_STAIR_STRINGER');
