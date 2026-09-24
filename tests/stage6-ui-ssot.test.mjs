@@ -13,7 +13,7 @@ test('Stage 6 canonical state owns all serializable UI context',()=>{
  assert.match(state,/bootState:\{phase:'booting',message:null\}/);
  assert.match(state,/selectedAsset:null/);
  assert.match(state,/selectedNode:null/);
- assert.match(state,/inspectionMode:\{explode:false,explodeLevel:0,isolate:false,section:false,interior:false,interiorFocus:null\}/);
+ assert.match(state,/inspectionMode:\{explode:false,explodeLevel:0,isolate:false,interior:false,interiorFocus:null\}/);
  assert.match(state,/simulationState:\{available:false,blocked:false[\s\S]*running:false/);
  assert.match(state,/referenceState:\{filter:'all'\}/);
  assert.match(state,/inspectorState:\{open:false,tab:'overview'\}/);
