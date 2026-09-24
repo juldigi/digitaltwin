@@ -62,6 +62,7 @@ export class FactoryEngine {
   }
   render(now){this.frame=requestAnimationFrame(this.render);if(document.hidden||(this.low&&now-this.last<32))return;this.last=now;
     this.simulation?.update(now);
+    if(this.view==='factory')this.actualFactory?.update?.(now);
     if(this.transition){const t=Math.min((now-this.transition.start)/650,1),e=t*t*(3-2*t),a=this.transition;this.camera.position.lerpVectors(a.from,a.to,e);this.controls.target.lerpVectors(a.fromTarget,a.target,e);if(t===1)this.transition=null;}
     this.controls.update();this.renderer.render(this.scene,this.camera);this.updateLabel();this.updatePartLabels();
   }
