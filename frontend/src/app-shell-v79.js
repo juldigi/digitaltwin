@@ -71,6 +71,7 @@ for(const [id,name]of Object.entries(iconMap)){
  }else el.innerHTML=icon(name);
 }
 const contextBackIcon=q('#context-back span');if(contextBackIcon)contextBackIcon.innerHTML=icon('back');
+const modalBackIcon=q('#modal-back span');if(modalBackIcon)modalBackIcon.innerHTML=icon('back');
 const mobileIcons={factory:'factory',asset:'machine',system:'system',more:'more'};
 qa('[data-mobile-nav]').forEach(el=>{const label=q('small',el)?.textContent||el.getAttribute('aria-label')||'';el.innerHTML=icon(mobileIcons[el.dataset.mobileNav]||'more')+`<small>${label}</small>`});
 const mobileContextTools=document.createElement('section');mobileContextTools.className='mobile-context-tools';mobileContextTools.setAttribute('aria-label','Aksi tampilan dan inspeksi');mobileContextTools.innerHTML=`<small>INSPEKSI & TAMPILAN</small>
