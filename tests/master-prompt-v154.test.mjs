@@ -73,7 +73,7 @@ test('V154 cache and shell identifiers include the truth layer',()=>{
   assert.match(html,/app-shell-v79\.css\?v=192/);
   assert.match(html,/src\/app\.js\?v=192/);
   assert.match(html,/src\/app-shell-v79\.js\?v=192/);
-  assert.match(shell,/uiArchitecture='v195-visual-hierarchy'/);
+  assert.match(shell,/uiArchitecture='v196-interaction-flow'/);
   assert.match(sw,/factory-digital-twin-v207-superadmin-editor-20260924/);
   assert.match(sw,/src\/data\/truth-status\.js/);
 });
