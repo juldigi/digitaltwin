@@ -43,7 +43,7 @@ test('scene editor layout is responsive and leaves canonical navigation reachabl
 
 
 test('scene editor presents a guided three-step human-first workflow',()=>{
- for(const label of ['Pilih yang ingin diubah','Atur objek','Simpan perubahan','Bangunan & area','Komponen mesin','Geser sedikit','Bandingkan dengan tampilan asli','Alat lanjutan Superadmin'])assert.match(app,new RegExp(label));
+ for(const label of ['Pilih yang ingin diubah','Atur objek','Simpan perubahan','Mesin','Dinding','Aksesori & Peralatan','Bangunan & Ruangan','Utilitas','Furniture','Komponen Mesin','Geser sedikit','Bandingkan dengan tampilan asli','Alat lanjutan Superadmin'])assert.match(app,new RegExp(label));
  assert.match(app,/class="se-progress"/);
  assert.match(app,/class="se-advanced"/);
  assert.match(app,/class="se-admin-tools"/);
@@ -52,10 +52,18 @@ test('scene editor presents a guided three-step human-first workflow',()=>{
  assert.match(css,/\.se-save-bar/);
 });
 
-test('scene editor hides technical IDs from the normal object list and keeps them only in advanced details',()=>{
- assert.match(app,/class="se-technical-id">ID teknis:/);
- assert.match(app,/map\(\(\[id,name\]\)=>`<option value="\$\{esc\(id\)\}" \$\{id===selected\?'selected':''\}>\$\{esc\(name\)\}<\/option>`/);
+test('scene editor exposes real-world categories and keeps internal identifiers out of normal UI',()=>{
+ assert.match(app,/editorCategories=\[/);
+ for(const category of ['machines','walls','equipment','building','utilities','furniture','components'])assert.match(app,new RegExp("id:'"+category+"'"));
+ assert.match(app,/data-se-category=/);
+ assert.match(app,/selectableEditorObject/);
+ assert.match(app,/normalizeEditorSelection/);
+ assert.match(app,/assetIdByNode/);
+ assert.doesNotMatch(app,/ID teknis:/);
+ assert.doesNotMatch(app,/BMJ · baseline/);
  assert.doesNotMatch(app,/\$\{esc\(name\)\} · \$\{esc\(id\)\}<\/option>/);
+ assert.match(app,/Buat cadangan editor/);
+ assert.match(app,/Pulihkan dari cadangan/);
 });
 
 test('scene editor uses human-readable units and converts degree input back to radians',()=>{
@@ -70,4 +78,17 @@ test('progressive editor controls are safe before any object is selected',()=>{
  assert.match(app,/querySelector\('#se-snap'\)\?\.addEventListener/);
  assert.match(app,/querySelector\('#se-focus'\)\?\.addEventListener/);
  assert.match(app,/querySelector\('#se-isolate'\)\?\.addEventListener/);
+});
+
+
+test('scene editor category cards are styled as primary object selection',()=>{
+ assert.match(css,/\.se-category-grid\{display:grid/);
+ assert.match(css,/\.se-category-grid button/);
+ assert.match(css,/\.se-category-hint/);
+});
+
+test('factory editor normalizes clicks to stable walls and machine assets',()=>{
+ assert.match(app,/const wallId=engine\.sceneWallId\(id\);if\(wallId\)return wallId/);
+ assert.match(app,/const assetId=assetIdByNode\.get\(node\);if\(assetId\)return assetId/);
+ assert.match(app,/editorCategory=editorCategoryFor\(normalized,target\)/);
 });
