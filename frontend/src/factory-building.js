@@ -1269,6 +1269,14 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   const o=new T.Mesh(new T.CylinderGeometry(r,r,h,segments),mat||material(color));o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;ipalPhoto.add(o);return photoTag(o,semantic,extra);
  };
  const ptorus=(x,y,z,r,t,color,semantic,rx=Math.PI/2,extra={})=>{const o=new T.Mesh(new T.TorusGeometry(r,t,8,48),material(color));o.position.set(x,y,z);o.rotation.x=rx;ipalPhoto.add(o);return photoTag(o,semantic,extra);};
+ const pfoot=(x,z,semantic,color=0x6b7474)=>{
+  const plate=pbox(x,.055,z,.34,.08,.34,color,semantic+'_BASE_PLATE',0,1,{supportDetail:'PHOTO_DERIVED_GENERAL_SUPPORT_NOT_SURVEYED'});
+  for(const [dx,dz] of [[-.12,-.12],[.12,-.12],[-.12,.12],[.12,.12]])pcyl(x+dx,.115,z+dz,.018,.12,0x4f585a,semantic+'_ANCHOR_BOLT',{supportDetail:'PHOTO_DERIVED_GENERAL_SUPPORT_NOT_SURVEYED'},8);
+  return plate;
+ };
+ const ppipeUnion=(x,y,z,axis='x',r=.09,color=0x6c7779,semantic='IPAL_PHOTO_PIPE_UNION')=>{
+  const o=new T.Mesh(new T.CylinderGeometry(r,r,.10,16),material(color));o.position.set(x,y,z);if(axis==='x')o.rotation.z=Math.PI/2;else if(axis==='z')o.rotation.x=Math.PI/2;ipalPhoto.add(o);return photoTag(o,semantic,{routingConfidence:'PHOTO_DERIVED_VISUAL_ROUTING_NOT_PID'});
+ };
  const photoMetal=new T.MeshStandardMaterial({color:0xa8ada9,roughness:.43,metalness:.64});
  const photoMetalDark=new T.MeshStandardMaterial({color:0x7e8583,roughness:.52,metalness:.55});
  const photoYellow=new T.MeshStandardMaterial({color:0xd7a817,roughness:.68,metalness:.16});
@@ -1344,6 +1352,18 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   const gutter=line(layers.roof,new T.Vector3(33.25,4.38,z),new T.Vector3(59.55,4.38,z),.050,0x53666c);photoTag(gutter,'IPAL_PHOTO_ROOF_GUTTER');
  }
  for(const [x,z] of [[33.6,canopyZ0],[59.2,canopyZ1]])pline([x,4.38,z],[x,.18,z],.042,0x53666c,'IPAL_PHOTO_ROOF_DOWNPIPE');
+ // Batched corrugation ridges: hundreds of visual ribs in one draw call, preserving mobile performance.
+ const roofRibPositions=[];
+ for(let x=33.45;x<=59.35;x+=.82){
+  let prev=null;
+  for(let i=0;i<=canopyArcSteps;i++){
+   const t=i/canopyArcSteps,z=canopyZ0+(canopyZ1-canopyZ0)*t,y=canopyEave+canopyRise*Math.sin(Math.PI*t)+.050,p=[x,y,z];
+   if(prev)roofRibPositions.push(...prev,...p);
+   prev=p;
+  }
+ }
+ const roofRibGeometry=new T.BufferGeometry();roofRibGeometry.setAttribute('position',new T.Float32BufferAttribute(roofRibPositions,3));
+ const roofRibs=new T.LineSegments(roofRibGeometry,new T.LineBasicMaterial({color:0x687b7e,transparent:true,opacity:.58}));layers.roof.add(roofRibs);photoTag(roofRibs,'IPAL_PHOTO_CANOPY_CORRUGATION_RIBS',{batched:true,drawCallOptimized:true});
  // Linear work lights hang below the canopy rather than floating at roof-sheet level.
  for(const x of [38.7,49.1,58.2])pbox(x,4.05,-110.9,1.15,.07,.30,0xd8e3df,'IPAL_PHOTO_WORK_LIGHT',0,1,{coreProcess:false});
 
@@ -1416,10 +1436,12 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  for(const y of [coneBase+hv.coneH+.35,coneBase+hv.coneH+1.10,coneBase+hv.coneH+1.85])ptorus(hv.x,y,hz,hv.r+.015,.021,0x737d7b,'IPAL_PHOTO_HOPPER_SHELL_RING');
  pcyl(hv.x,.28,hz,.15,.42,0x727b7a,'IPAL_PHOTO_HOPPER_DISCHARGE',{},18,photoMetalDark);
  for(const [dx,dz] of [[-1.25,-1.1],[1.25,-1.1],[-1.25,1.1],[1.25,1.1]]){
+  pfoot(hv.x+dx,hz+dz,'IPAL_PHOTO_HOPPER_SUPPORT');
   pbox(hv.x+dx,1.25,hz+dz,.12,2.5,.12,0xd7a817,'IPAL_PHOTO_HOPPER_SUPPORT_LEG');
   pline([hv.x+dx,.3,hz+dz],[hv.x-dx,2.25,hz+dz],.025,0xd7a817,'IPAL_PHOTO_HOPPER_SUPPORT_BRACE');
  }
  pbox(hv.x,2.55,hz,3.15,.10,2.65,0x8f9693,'IPAL_PHOTO_HOPPER_PLATFORM_GRATING');
+ for(const z of [hz-1.30,hz+1.30])pbox(hv.x,2.66,z,3.15,.12,.055,0xd7a817,'IPAL_PHOTO_HOPPER_PLATFORM_TOEBOARD');
  for(const side of [-1,1])pline([hv.x-1.55,3.15,hz+side*1.30],[hv.x+1.55,3.15,hz+side*1.30],.026,0xd7a817,'IPAL_PHOTO_HOPPER_PLATFORM_HANDRAIL');
  // A second, smaller hopper-bottom silver vessel is clearly visible deeper in IMG_2517/2523.
  const hv2=IPAL_PHOTO_EVIDENCE_V205.relativeLayout.secondHopperVessel,hz2=-hv2.y,hv2ConeBase=.42;
@@ -1428,15 +1450,20 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  for(const y of [hv2ConeBase+hv2.coneH+.42,hv2ConeBase+hv2.coneH+1.18])ptorus(hv2.x,y,hz2,hv2.r+.012,.020,0x737d7b,'IPAL_PHOTO_SECOND_HOPPER_SHELL_RING');
  pcyl(hv2.x,.25,hz2,.13,.36,0x727b7a,'IPAL_PHOTO_SECOND_HOPPER_DISCHARGE',{function:'UNVERIFIED_FROM_PHOTO'},16,photoMetalDark);
  for(const [dx,dz] of [[-.95,-.82],[.95,-.82],[-.95,.82],[.95,.82]]){
+  pfoot(hv2.x+dx,hz2+dz,'IPAL_PHOTO_SECOND_HOPPER_SUPPORT');
   pbox(hv2.x+dx,1.12,hz2+dz,.11,2.24,.11,0xd7a817,'IPAL_PHOTO_SECOND_HOPPER_SUPPORT_LEG');
   pline([hv2.x+dx,.25,hz2+dz],[hv2.x-dx,1.95,hz2+dz],.023,0xd7a817,'IPAL_PHOTO_SECOND_HOPPER_SUPPORT_BRACE');
  }
 
  // Two-level yellow chemical preparation/dosing rack with observed red polyethylene tanks.
  const cr=IPAL_PHOTO_EVIDENCE_V205.relativeLayout.chemicalRack,crZ=-cr.y;
- for(const dx of [-cr.w/2,0,cr.w/2])for(const dz of [-cr.d/2,cr.d/2])pbox(cr.x+dx,cr.h/2,crZ+dz,.12,cr.h,.12,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_COLUMN');
+ for(const dx of [-cr.w/2,0,cr.w/2])for(const dz of [-cr.d/2,cr.d/2]){
+  pfoot(cr.x+dx,crZ+dz,'IPAL_PHOTO_CHEMICAL_RACK_SUPPORT');
+  pbox(cr.x+dx,cr.h/2,crZ+dz,.12,cr.h,.12,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_COLUMN');
+ }
  for(const y of [1.35,3.0]){
   pbox(cr.x,y,crZ,cr.w,.10,cr.d,0x7e8987,'IPAL_PHOTO_CHEMICAL_RACK_GRATING');
+  for(const dz of [-cr.d/2+.04,cr.d/2-.04])pbox(cr.x,y+.105,crZ+dz,cr.w,.11,.055,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_TOEBOARD');
   for(const dz of [-cr.d/2,cr.d/2])pline([cr.x-cr.w/2,y+.72,crZ+dz],[cr.x+cr.w/2,y+.72,crZ+dz],.026,0xd7a817,'IPAL_PHOTO_CHEMICAL_RACK_GUARDRAIL');
  }
  const redTank=(x,y,z,r=.58,h=1.18,semantic='IPAL_PHOTO_RED_CHEMICAL_TANK')=>{
@@ -1465,8 +1492,12 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  }
  // Separate large red mixing/process tower on a yellow two-level stand, seen at the right of IMG_2515/2525.
  const rt=IPAL_PHOTO_EVIDENCE_V205.relativeLayout.largeRedMixingTower,rtZ=-rt.y;
- for(const [dx,dz] of [[-1.05,-.86],[1.05,-.86],[-1.05,.86],[1.05,.86]])pbox(rt.x+dx,rt.platformH/2,rtZ+dz,.11,rt.platformH,.11,0xd7a817,'IPAL_PHOTO_RED_TOWER_SUPPORT_LEG');
+ for(const [dx,dz] of [[-1.05,-.86],[1.05,-.86],[-1.05,.86],[1.05,.86]]){
+  pfoot(rt.x+dx,rtZ+dz,'IPAL_PHOTO_RED_TOWER_SUPPORT');
+  pbox(rt.x+dx,rt.platformH/2,rtZ+dz,.11,rt.platformH,.11,0xd7a817,'IPAL_PHOTO_RED_TOWER_SUPPORT_LEG');
+ }
  pbox(rt.x,rt.platformH,rtZ,2.35,.10,1.92,0x7e8987,'IPAL_PHOTO_RED_TOWER_PLATFORM_GRATING');
+ for(const z of [rtZ-.95,rtZ+.95])pbox(rt.x,rt.platformH+.105,z,2.35,.11,.055,0xd7a817,'IPAL_PHOTO_RED_TOWER_PLATFORM_TOEBOARD');
  redTank(rt.x,.18,rtZ,rt.r,rt.h,'IPAL_PHOTO_LARGE_RED_MIXING_TOWER');
  const rtDrive=pcyl(rt.x,rt.platformH+.26,rtZ,.24,.42,0x46565a,'IPAL_PHOTO_RED_TOWER_DRIVE',{function:'MIXER_DRIVE_VISUAL'},18);rtDrive.rotation.z=Math.PI/2;
  const rtShaft=pcyl(rt.x,rt.platformH+.58,rtZ,.045,.58,0x323d40,'IPAL_PHOTO_RED_TOWER_SHAFT',{simulationCue:'ROTATING_SHAFT'});ipalPhotoRuntime.rotors.push(rtShaft);
@@ -1552,7 +1583,11 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  for(const x of [cb.x-1.8,cb.x-.55,cb.x+.85])pbox(x,.40,cbZ+cb.d/2+.068,.08,.62,.014,0x254f63,'IPAL_PHOTO_COVERED_BASIN_WEATHERING',0,.16,{weathering:'PHOTO_VISIBLE'});
  
  // Photo-visible pump/nozzle/valve and pipe routing. These are geometry/topology observations only — not a P&ID claim.
- const photoPipe=(pts,color=0xd7d8d0,r=.045,semantic='IPAL_PHOTO_PROCESS_PIPE')=>{for(let i=1;i<pts.length;i++){pline(pts[i-1],pts[i],r,color,semantic,{routingConfidence:'PHOTO_DERIVED_VISUAL_ROUTING_NOT_PID'});buildingDetailStats.v205IpalPipingRuns++;}};
+ const photoPipe=(pts,color=0xd7d8d0,r=.045,semantic='IPAL_PHOTO_PROCESS_PIPE')=>{
+  for(let i=1;i<pts.length;i++){pline(pts[i-1],pts[i],r,color,semantic,{routingConfidence:'PHOTO_DERIVED_VISUAL_ROUTING_NOT_PID'});buildingDetailStats.v205IpalPipingRuns++;}
+  // Add compact unions at internal route changes so pipes do not read as raw intersecting cylinders.
+  for(let i=1;i<pts.length-1;i++)ppipeUnion(...pts[i],'y',Math.max(r*1.65,.065),0x6c7779,semantic+'_UNION');
+ };
  const photoValve=(x,y,z)=>{ptorus(x,y,z,.13,.026,0xc38c24,'IPAL_PHOTO_MANUAL_VALVE_WHEEL',0,{routingConfidence:'PHOTO_DERIVED'});pline([x,y-.16,z],[x,y+.16,z],.025,0x626d70,'IPAL_PHOTO_VALVE_STEM');};
  photoPipe([[eq.x+eq.w/2,.72,eq.z],[40.15,.72,eq.z],[40.15,1.02,tmp.z]],0xd5d6cf,.055);
  photoValve(40.15,1.10,eq.z);
@@ -1569,7 +1604,9 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   pbox(x,.16,z,1.25,.20,.72,0x8b9290,'IPAL_PHOTO_PUMP_CONCRETE_PAD');
   const motor=pcyl(x-.28,.48,z,.18,.50,0x56656a,'IPAL_PHOTO_PUMP_MOTOR');motor.rotation.z=Math.PI/2;
   const pump=pcyl(x+.22,.48,z,.20,.34,0x3c7281,'IPAL_PHOTO_TRANSFER_PUMP_BODY');pump.rotation.z=Math.PI/2;
-  pcyl(x+.46,.48,z,.09,.14,0x777f7d,'IPAL_PHOTO_PUMP_FLANGE'); 
+  pcyl(x+.46,.48,z,.09,.14,0x777f7d,'IPAL_PHOTO_PUMP_FLANGE');
+  ppipeUnion(x+.54,.48,z,'x',.115,0x707a7c,'IPAL_PHOTO_PUMP_DISCHARGE_UNION');
+  ppipeUnion(x+.22,.72,z,'y',.105,0x707a7c,'IPAL_PHOTO_PUMP_TOP_UNION'); 
  }
 
  // Long planted wall and ornamental water channel are genuine visual context from the photos.
