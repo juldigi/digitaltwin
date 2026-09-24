@@ -32,7 +32,7 @@ test('V162 exposes Systems in both navigation surfaces and keeps identifiers coh
  assert.match(html,/app-shell-v79\.css\?v=192/);
  assert.match(html,/src\/app\.js\?v=192/);
  assert.match(html,/src\/app-shell-v79\.js\?v=192/);
- assert.match(shell,/v195-visual-hierarchy/);
+ assert.match(shell,/v196-interaction-flow/);
  assert.match(sw,/factory-digital-twin-v207-superadmin-editor-20260924/);
 });
 
@@ -41,7 +41,7 @@ test('asset navigation opens an empty search instead of serializing the click ev
  assert.doesNotMatch(app,/on\('#nav-assets',assetDialog\)/);
  assert.match(app,/const stopSimulationBeforeNavigation=.*bmj:simulationstoprequest/);
  assert.match(app,/if\(machine\)\{closeModal\(\);if\(simulationIntent\)[\s\S]*await openAssetContext\(machine\);\}/);
- assert.match(app,/function closeModal\(\)\{const dialog=\$\('#modal'\);if\(dialog\?\.open\)dialog\.close\(\);\}/);
+ assert.match(app,/function closeModal\(\)\{modalBackHandler=null;[\s\S]*dialog\?\.open\)dialog\.close\(\);\}/);
  assert.match(app,/focusFoundationPlaceholder\(machine,\{historyMode:'push',openDialog:false\}\);machineDetailDialog\(machine\)/);
  assert.match(app,/const primaryData=primary\?pair\('Machine ID'/);
  assert.doesNotMatch(app,/emitDomainState\(\{activeSection:'factory',viewMode:'3d'\}\)/);
