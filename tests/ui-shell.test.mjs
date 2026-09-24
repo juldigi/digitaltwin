@@ -375,7 +375,7 @@ test('v40 labels drill through the six-level taxonomy with individually mapped g
   assert.match(engine,/this\.onTaxonomySelect\?\.\(item\.meta\.id\)/);
   assert.match(engine,/taxonomyNodes\(meta,fallbackPart=null\)/);
   assert.match(app,/function taxonomyAtLevel\(level\)/);
-  assert.match(app,/engine\.onTaxonomySelect=id=>selectTaxonomy\(id,\{revealPanel:false\}\)/);
+  assert.match(app,/engine\.onTaxonomySelect=id=>selectTaxonomy\(id,\{revealPanel:true,historyMode:'push'\}\)/);
   assert.match(taxonomy,/Gripper Bar A/);
   assert.match(taxonomy,/Gripper Bar B/);
   assert.match(taxonomy,/Gripper Shaft & Supports/);
