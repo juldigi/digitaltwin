@@ -301,6 +301,15 @@ export class FactoryEngine {
     node.parent.updateWorldMatrix(true,false);node.position.copy(node.parent.worldToLocal(old.add(delta)));return true;
   }
   dropSceneObjectToFloor(id){const node=this.sceneObjects?.get(id);if(!node)return;const box=new THREE.Box3().setFromObject(node);node.position.y-=box.min.y;}
+  moveSceneObjectInView(id,horizontal=0,vertical=0,step=.1){
+    const node=this.sceneObjects?.get(id);if(!node||(!horizontal&&!vertical))return false;
+    const forward=new THREE.Vector3();this.camera.getWorldDirection(forward);forward.y=0;if(forward.lengthSq()<1e-8)forward.set(0,0,-1);forward.normalize();
+    const right=new THREE.Vector3().crossVectors(forward,new THREE.Vector3(0,1,0)).normalize();
+    const delta=new THREE.Vector3().addScaledVector(right,horizontal*step).addScaledVector(forward,vertical*step);
+    node.updateWorldMatrix(true,false);const world=node.getWorldPosition(new THREE.Vector3()).add(delta);
+    if(node.parent){node.parent.updateWorldMatrix(true,false);node.position.copy(node.parent.worldToLocal(world));}else node.position.copy(world);
+    return true;
+  }
   sceneObjectInfo(id){const node=this.sceneObjects?.get(id);if(!node)return null;node.updateWorldMatrix(true,true);const box=new THREE.Box3().setFromObject(node),size=box.getSize(new THREE.Vector3());const collisions=[];
     if(id.startsWith('asset:')&&!box.isEmpty())for(const [otherId,other] of this.actualFactory?.assets||[]){if('asset:'+otherId===id||!this.isObjectVisible(other))continue;const otherBox=new THREE.Box3().setFromObject(other);if(box.intersectsBox(otherBox)){const overlap=box.clone().intersect(otherBox).getSize(new THREE.Vector3());if(Math.min(overlap.x,overlap.y,overlap.z)>.05)collisions.push(otherId);}}
     return {dimensions:size.toArray(),collisions:collisions.slice(0,8)};
