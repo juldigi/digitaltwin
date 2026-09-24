@@ -26,19 +26,41 @@ export default {async fetch(req,env){
   try{
     if(path==='/api/health'&&req.method==='GET')return json({service:'bmj-digitaltwin',ready:!!env.DB&&!!env.ADMIN_TOKEN&&!!env.VIEWER_TOKEN,assets:!!env.ASSETS},200,cors);
     const token=req.headers.get('Authorization')?.replace(/^Bearer /,'');
-    const admin=await same(token,env.ADMIN_TOKEN),viewer=admin||await same(token,env.VIEWER_TOKEN);
+    const superadmin=await same(token,env.SUPERADMIN_TOKEN);
+    const admin=superadmin||await same(token,env.ADMIN_TOKEN),viewer=admin||await same(token,env.VIEWER_TOKEN);
     if(!viewer)return json({error:'Autentikasi diperlukan.'},401,cors);
-    if(path==='/api/session'&&req.method==='GET')return json({role:admin?'admin':'viewer'},200,cors);
+    if(path==='/api/session'&&req.method==='GET')return json({role:superadmin?'superadmin':admin?'admin':'viewer'},200,cors);
     if(!env.DB)return json({error:'Database D1 belum terhubung.'},503,cors);
     const row=await env.DB.prepare('SELECT data, revision FROM twin_state WHERE id = 1').first();
     let state=row?JSON.parse(row.data):structuredClone(initialState);state.revision=row?.revision??0;
     if(path==='/api/state'&&req.method==='GET')return json(state,200,cors);
+    if(path==='/api/scene/revisions'&&req.method==='GET')return json({revisions:state.sceneRevisions||[]},200,cors);
+    if(path==='/api/scene'&&req.method==='GET')return json({overrides:state.sceneOverrides||{},revision:state.revision},200,cors);
+    if(path.startsWith('/api/scene')&&!superadmin)return json({error:'Hanya Superadmin yang dapat mengubah scene.'},403,cors);
     if(!admin)return json({error:'Hanya administrator yang dapat mengubah data.'},403,cors);
-    if(!['/api/position','/api/layout'].includes(path))return json({error:'Endpoint tidak ditemukan.'},404,cors);
+    if(!['/api/position','/api/layout','/api/scene','/api/scene/restore'].includes(path))return json({error:'Endpoint tidak ditemukan.'},404,cors);
     if(!['PUT','DELETE'].includes(req.method))return json({error:'Metode tidak diizinkan.'},405,cors);
     if(req.headers.get('If-Match')!==String(state.revision))return json({error:'Data berubah. Muat ulang sebelum menyimpan.'},409,cors);
     const data=req.method==='PUT'?await body(req):null;
-    if(path==='/api/position'){
+    if(path==='/api/scene'||path==='/api/scene/restore'){
+      const previous=state.sceneOverrides||{};
+      if(path==='/api/scene/restore'){
+        const entry=(state.sceneRevisions||[]).find(item=>item.id===data?.id);
+        if(!entry)throw new Error('Revisi tidak ditemukan.');
+        state.sceneOverrides=entry.overrides;
+      }else{
+        const changes=data?.overrides;
+        if(!changes||typeof changes!=='object'||Array.isArray(changes)||Object.keys(changes).length>500)throw new Error('Override scene tidak valid.');
+        for(const [id,value] of Object.entries(changes)){
+          if(!/^(asset:[A-Za-z0-9_-]+|node:[A-Za-z0-9_-]+:[0-9.]+)$/.test(id)||id.length>150)throw new Error('ID objek tidak valid.');
+          if(!value||typeof value!=='object'||Array.isArray(value)||typeof value.visible!=='boolean')throw new Error('Properti objek tidak valid.');
+          for(const key of ['position','rotation','scale'])if(!Array.isArray(value[key])||value[key].length!==3||value[key].some(n=>!Number.isFinite(n)||Math.abs(n)>100000))throw new Error('Transform objek tidak valid.');
+          if(value.scale.some(n=>n<=0))throw new Error('Skala objek harus positif.');
+        }
+        state.sceneOverrides=changes;
+      }
+      state.sceneRevisions=[...(state.sceneRevisions||[]),{id:crypto.randomUUID(),at:new Date().toISOString(),overrides:previous}].slice(-10);
+    }else if(path==='/api/position'){
       if(req.method==='DELETE'){Object.assign(state.asset,{layout_x:null,layout_y:null,layout_z:null,rotation:null,scale:null,positionConfidence:'UNKNOWN'});}
       else{
         if(!state.layout)throw new Error('DWG layout harus tersedia sebelum posisi disimpan.');
