@@ -22,7 +22,7 @@ test('V193 Factory navigation preserves view mode while business navigation is o
 
 test('V173 Home history snapshot keeps the active view mode',()=>{
  const body=app.slice(app.indexOf("function showHome"),app.indexOf("function connectionDialog"));
- assert.match(body,/historyMode==='push'\)pushContextHistory\(\{asset:null,node:null,scene:'factory',view:window\.BMJAppState\?\.getState\?\.\(\)\.viewMode\|\|'3d',camera:'iso'\}\)/);
+ assert.match(body,/historyMode==='push'\)pushContextHistory\(\{asset:null,node:null,scene:'factory',view:getAppState\(\)\.viewMode\|\|'3d',camera:'iso'\}\)/);
  assert.match(body,/setView\('factory'\)/);
 });
 
