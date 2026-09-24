@@ -37,6 +37,7 @@ const ENUMS={
 };
 const INSPECTOR_TABS=new Set(['overview','structure','simulation','data','sources','exterior']);
 const BOOT_PHASES=new Set(['booting','ready','error','timeout']);
+const runtimeHref=()=>{if(typeof location!=='undefined'&&location.href)return location.href;const path=typeof location!=='undefined'?(location.pathname||'/'):'/';const search=typeof location!=='undefined'?(location.search||''):'';const hash=typeof location!=='undefined'?(location.hash||''):'';return 'http://localhost'+path+search+hash;};
 let state=clone(DEFAULT_STATE);
 let notifyQueued=false;
 
@@ -51,6 +52,10 @@ function normalizePatch(patch={}){
   if(next.inspectionMode?.explodeLevel!==undefined){
     const level=Number(next.inspectionMode.explodeLevel);
     next.inspectionMode={...next.inspectionMode,explodeLevel:Number.isFinite(level)?Math.max(0,Math.min(1,level)):state.inspectionMode.explodeLevel};
+  }
+  if(next.simulationState&&Object.prototype.hasOwnProperty.call(next.simulationState,'playing')){
+    next.simulationState={...next.simulationState,running:Object.prototype.hasOwnProperty.call(next.simulationState,'running')?Boolean(next.simulationState.running):Boolean(next.simulationState.playing)};
+    delete next.simulationState.playing;
   }
   if(next.simulationState?.progress!==undefined){
     const progress=Number(next.simulationState.progress);
@@ -119,8 +124,8 @@ export function openOverlay(name){
   },{url:false});
 }
 export function closeOverlay(){return setState({overlay:null,searchState:{open:false}},{url:false})}
-export function readUrlState(url=location.href){
-  const parsed=new URL(url,location.href),params=parsed.searchParams,legacyMachine=params.get('machine');
+export function readUrlState(url=runtimeHref()){
+  const parsed=new URL(url,runtimeHref()),params=parsed.searchParams,legacyMachine=params.get('machine');
   const selectedAsset=params.get('asset')||legacyMachine||null,selectedNode=params.get('node')||null;
   return {
     selectedAsset,
@@ -130,8 +135,8 @@ export function readUrlState(url=location.href){
     cameraPreset:params.get('camera')==='top'?'top':'iso'
   };
 }
-export function buildContextUrl(context=state,base=location.href){
-  const url=new URL(base,location.href),params=url.searchParams;
+export function buildContextUrl(context=state,base=runtimeHref()){
+  const url=new URL(base,runtimeHref()),params=url.searchParams;
   const selectedAsset=context.selectedAsset??context.asset??null,selectedNode=context.selectedNode??context.node??null;
   const sceneMode=context.sceneMode??context.scene??'factory',viewMode=context.viewMode??context.view??'3d',cameraPreset=context.cameraPreset??context.camera??'iso';
   params.delete('machine');
@@ -164,5 +169,5 @@ function queueNotify(){
   });
 }
 
-window.BMJAppState={getState,setState,setDomainState,setBoot,setActiveSection,setViewMode,selectContext,setLayer,setInspection,setSimulation,setReferenceFilter,setInspector,openOverlay,closeOverlay,readUrlState,buildContextUrl,subscribe};
-document.documentElement.dataset.build=APP_BUILD;
+if(typeof window!=='undefined')window.BMJAppState={getState,setState,setDomainState,setBoot,setActiveSection,setViewMode,selectContext,setLayer,setInspection,setSimulation,setReferenceFilter,setInspector,openOverlay,closeOverlay,readUrlState,buildContextUrl,subscribe};
+if(typeof document!=='undefined')document.documentElement.dataset.build=APP_BUILD;
