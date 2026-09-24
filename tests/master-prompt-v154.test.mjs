@@ -70,9 +70,9 @@ test('production UI exposes source confidence and explicit truth statuses',()=>{
 });
 
 test('V154 cache and shell identifiers include the truth layer',()=>{
-  assert.match(html,/app-shell-v79\.css\?v=192/);
-  assert.match(html,/src\/app\.js\?v=192/);
-  assert.match(html,/src\/app-shell-v79\.js\?v=192/);
+  assert.match(html,/app-shell-v79\.css\?v=197/);
+  assert.match(html,/src\/app\.js\?v=197/);
+  assert.match(html,/src\/app-shell-v79\.js\?v=197/);
   assert.match(shell,/uiArchitecture='v197-architecture-convergence'/);
   assert.match(sw,/factory-digital-twin-v209-architecture-convergence-20260925/);
   assert.match(sw,/src\/data\/truth-status\.js/);
