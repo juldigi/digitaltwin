@@ -115,21 +115,24 @@ function markSection(section){
 }
 function closeDrawer(){document.body.classList.remove('nav-open');document.body.classList.remove('drawer-transitioning');const menuButton=q('#ui-menu-toggle');menuButton?.setAttribute('aria-expanded','false');menuButton?.setAttribute('aria-label','Buka navigasi');q('[data-mobile-nav="more"]')?.setAttribute('aria-expanded','false');restoreOverlayFocus('navigation','#ui-menu-toggle')}
 function closeLayerManager(){const panel=q('#layer-manager');if(panel)panel.hidden=true;document.body.classList.remove('layer-open');if(getState().overlay==='layers')closeOverlay();restoreOverlayFocus('layers',PHASE1_FOUNDATION?'#nav-machine':'#nav-systems')}
-function closeInspector({restoreFocus=true}={}){document.body.classList.add('panel-hidden');document.body.classList.remove('mobile-panel-open');setInspector(false);if(restoreFocus)restoreOverlayFocus('inspector','#panel-toggle')}
+function applyInspectorDom(state=getState()){
+ const open=Boolean(state.inspectorState?.open),mobile=matchMedia('(max-width:767px)').matches;
+ document.body.classList.toggle('panel-hidden',!open);
+ document.body.classList.toggle('mobile-panel-open',open&&mobile);
+}
+function closeInspector({restoreFocus=true}={}){
+ const next=setInspector(false);
+ applyInspectorDom(next);
+ if(restoreFocus)restoreOverlayFocus('inspector','#panel-toggle');
+}
 function openInspector(tab=getState().inspectorState.tab){
  beforeMajorOverlay('inspector');rememberOverlayFocus('inspector');
- document.body.classList.remove('panel-hidden');
- const mobile=matchMedia('(max-width:767px)').matches;
- if(mobile)document.body.classList.add('mobile-panel-open');
- setInspector(true,tab);openOverlay('inspector');
- if(mobile)focusOverlay(q('#detail-panel'),'#close-panel');
+ const next=setInspector(true,tab);applyInspectorDom(next);
+ if(matchMedia('(max-width:767px)').matches)focusOverlay(q('#detail-panel'),'#close-panel');
 }
 function toggleInspector(){
- if(document.body.classList.contains('panel-hidden'))openInspector();
- else{
-  closeInspector();
-  if(getState().overlay==='inspector')closeOverlay();
- }
+ if(getState().inspectorState?.open)closeInspector();
+ else openInspector();
 }
 q('#panel-toggle')?.addEventListener('click',toggleInspector);
 function stopSimulationForNavigation(targetSection){
@@ -153,11 +156,10 @@ function beforeMajorOverlay(name){
   if(current==='search')closeSearch();
   else if(current==='layers')closeLayerManager();
   else if(current==='navigation')closeDrawer();
-  else if(current==='inspector')closeInspector({restoreFocus:false});
-  else if(current==='modal'&&q('#modal')?.open)q('#modal-close')?.click();
+   else if(current==='modal'&&q('#modal')?.open)q('#modal-close')?.click();
   if(getState().overlay===current)closeOverlay();
  }
- if(name!=='inspector'&&!document.body.classList.contains('panel-hidden'))closeInspector({restoreFocus:false});
+ if(name!=='inspector'&&getState().inspectorState?.open)closeInspector({restoreFocus:false});
  if(name!=='navigation')closeDrawer();
 }
 function openSystemLayers(){
@@ -261,7 +263,6 @@ q('#ui-backdrop')?.addEventListener('click',()=>{
  if(overlay==='search')closeSearch();
  else if(overlay==='layers')closeLayerManager();
  else if(overlay==='navigation')closeDrawer();
- else if(overlay==='inspector')closeInspector();
  else if(overlay==='modal'&&q('#modal')?.open)q('#modal-close')?.click();
  else closeOverlay();
 });
@@ -372,14 +373,8 @@ qa('#detail-panel [role="tab"]').forEach(tab=>tab.addEventListener('click',()=>{
  const tabKey=tab.dataset.tab||'overview',section=INSPECTOR_TAB_SECTION[tabKey]||'asset';
  setInspector(true,tabKey);setActiveSection(section);markSection(section);requestAnimationFrame(syncSimulationTransport);
 }));
-q('#close-panel')?.addEventListener('click',()=>{setInspector(false);if(getState().overlay==='inspector')closeOverlay();restoreOverlayFocus('inspector','#panel-toggle')});
+q('#close-panel')?.addEventListener('click',()=>closeInspector());
 const modalElement=q('#modal');if(modalElement)new MutationObserver(()=>{if(modalElement.open){beforeMajorOverlay('modal');openOverlay('modal')}else if(getState().overlay==='modal')closeOverlay()}).observe(modalElement,{attributes:true,attributeFilter:['open']});
-const bodyObserver=new MutationObserver(()=>{
- const open=!document.body.classList.contains('panel-hidden');setInspector(open);
- if(!open&&getState().overlay==='inspector')closeOverlay();
-});
-bodyObserver.observe(document.body,{attributes:true,attributeFilter:['class']});
-
 addEventListener('bmj:domainstate',event=>{
  const detail=event.detail||{};
  const carriesDeepLink=Object.prototype.hasOwnProperty.call(detail,'selectedAsset')||Object.prototype.hasOwnProperty.call(detail,'selectedNode')||Object.prototype.hasOwnProperty.call(detail,'viewMode')||Object.prototype.hasOwnProperty.call(detail,'sceneMode')||Object.prototype.hasOwnProperty.call(detail,'cameraPreset');
@@ -390,7 +385,7 @@ addEventListener('bmj:historyrestore',event=>{
  setState({selectedAsset:detail.selectedAsset||null,selectedNode:detail.selectedNode||null,sceneMode,viewMode,cameraPreset,activeSection},{url:false});markSection(activeSection);
  if(viewMode==='2d')q('#mode-2d')?.click();else q('#mode-3d')?.click();
 });
-const syncViewport=()=>{document.documentElement.style.setProperty('--app-vh',`${window.visualViewport?.height||innerHeight}px`);const w=innerWidth;if(w>=768&&getState().overlay==='navigation'){closeDrawer();closeOverlay()}if(w>=768)document.body.classList.remove('mobile-panel-open');setTimeout(()=>window.BMJAppState?.setState({deviceMode:w<768?'mobile':w<=1180?'tablet':'desktop'},{url:false}),0)};
+const syncViewport=()=>{document.documentElement.style.setProperty('--app-vh',`${window.visualViewport?.height||innerHeight}px`);const w=innerWidth;if(w>=768&&getState().overlay==='navigation'){closeDrawer();closeOverlay()}const next=setState({deviceMode:w<768?'mobile':w<=1180?'tablet':'desktop'},{url:false});applyInspectorDom(next)};
 syncViewport();addEventListener('resize',syncViewport,{passive:true});window.visualViewport?.addEventListener('resize',syncViewport,{passive:true});
 
 function syncInspectorTabs(){
@@ -424,9 +419,8 @@ document.addEventListener('keydown',event=>{
  if(overlay==='search'){closeSearch();return}
  if(overlay==='layers'){closeLayerManager();return}
  if(overlay==='navigation'){closeDrawer();closeOverlay();return}
- if(overlay==='inspector'){q('#close-panel')?.click();closeOverlay();return}
  if(overlay==='modal'&&q('#modal')?.open){q('#modal-close')?.click();closeOverlay();return}
- if(!document.body.classList.contains('panel-hidden'))q('#close-panel')?.click();
+ if(getState().inspectorState?.open)closeInspector();
 });
 
 const relabel=()=>{
@@ -469,5 +463,5 @@ function syncPressedTools(){
 }
 const pressedTools=qa('#tool-explode,#tool-isolate,#tool-interior,#labels');
 if(pressedTools.length){const pressedObserver=new MutationObserver(syncPressedTools);pressedTools.forEach(el=>pressedObserver.observe(el,{attributes:true,attributeFilter:['class']}));syncPressedTools()}
-relabel();const hydratedState=hydrateUrl();if(hydratedState.viewMode==='2d')q('#mode-2d')?.click();let lastSyncedSection=getState().activeSection;subscribe(state=>{markSection(state.activeSection);syncLayerControls();syncAccessibleControls(state);syncViewModeContext(state);if(state.activeSection!==lastSyncedSection){lastSyncedSection=state.activeSection;requestAnimationFrame(syncSimulationTransport)}});
-document.documentElement.dataset.uiArchitecture='v193-three-domain-contextual';
+relabel();const hydratedState=hydrateUrl();if(hydratedState.viewMode==='2d')q('#mode-2d')?.click();let lastSyncedSection=getState().activeSection;subscribe(state=>{applyInspectorDom(state);markSection(state.activeSection);syncLayerControls();syncAccessibleControls(state);syncViewModeContext(state);if(state.activeSection!==lastSyncedSection){lastSyncedSection=state.activeSection;requestAnimationFrame(syncSimulationTransport)}});
+document.documentElement.dataset.uiArchitecture='v194-state-owned-contextual';
