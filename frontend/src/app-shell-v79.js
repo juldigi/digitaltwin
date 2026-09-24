@@ -514,4 +514,4 @@ function syncPressedTools(){
 const pressedTools=qa('#tool-explode,#tool-isolate,#tool-interior,#labels');
 if(pressedTools.length){const pressedObserver=new MutationObserver(syncPressedTools);pressedTools.forEach(el=>pressedObserver.observe(el,{attributes:true,attributeFilter:['class']}));syncPressedTools()}
 relabel();const hydratedState=hydrateUrl();applyViewModeDom(hydratedState);if(hydratedState.viewMode==='2d')q('#mode-2d')?.click();let lastSyncedSection=getState().activeSection;subscribe(state=>{applyInspectorDom(state);applyViewModeDom(state);markSection(state.activeSection);syncLayerControls();syncAccessibleControls(state);syncVisualHierarchy(state);syncViewModeContext(state);if(state.activeSection!==lastSyncedSection){lastSyncedSection=state.activeSection;requestAnimationFrame(syncSimulationTransport)}});
-document.documentElement.dataset.uiArchitecture='v197-architecture-convergence';
+document.documentElement.dataset.uiArchitecture='v198-architecture-convergence';
