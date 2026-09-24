@@ -98,7 +98,7 @@ test('factory editor normalizes clicks to stable walls and machine assets',()=>{
 test('machine editor list is registry-driven and whole-unit keyboard movable',()=>{
  assert.match(app,/registryMachineChoices=MACHINE_REGISTRY\.slice\(\)/);
  assert.match(app,/name:machine\.name/);
- assert.match(app,/if\(category==='machines'\)\{const machineId=id\.replace\(\/\^asset:\/,'\'\)\|\|node\?\.userData\?\.machineId,record=MACHINE_REGISTRY_BY_ID\.get\(machineId\);return record\?\.name/);
+ assert.match(app,/if\(category==='machines'\)\{const machineId=id\.replace\(\/\^asset:\/,'\'\)\|\|node\?\.userData\?\.machineId,record=MACHINE_REGISTRY_BY_ID\.get\(machineId\);return record\?/);
  assert.match(app,/Seluruh mesin aktif sebagai satu unit/);
  assert.match(app,/document\.addEventListener\('keydown',onEditorKeyDown\)/);
  assert.match(app,/editorArrowKeys=\['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'\]/);
@@ -143,4 +143,14 @@ test('V197 machine keyboard movement is camera-relative and installs one stable 
  assert.equal((app.match(/document\.addEventListener\('keydown',onEditorKeyDown\)/g)||[]).length,1);
  assert.equal((app.match(/document\.addEventListener\('keyup',onEditorKeyUp\)/g)||[]).length,1);
  assert.match(app,/if\(!keyboardMoveActive\)\{snapshot\(\);keyboardMoveActive=true;\}/);
+});
+
+
+test('Stage 5 synchronizes editor machine descriptor and preserves rerender context',()=>{
+ assert.match(app,/configureActiveMachine\(machineRoute\(machine\)\);applyActiveMachineState\(\);selectedTaxonomyId=ACTIVE_ROOT;applyMachineShell\(\);await engine\.switchMachine\(MACHINE_KEY\)/);
+ assert.match(app,/clearActiveMachineDescriptor\(\);applyActiveMachineState\(\);engine\.clearMachineContext\?\.\(\)/);
+ assert.match(app,/scrollBefore=panel\.scrollTop/);
+ assert.match(app,/advancedOpen=panel\.querySelector\('\.se-advanced'\)\?\.open/);
+ assert.match(app,/adminOpen=panel\.querySelector\('\.se-admin-tools'\)\?\.open/);
+ assert.match(app,/id:'uncategorized',label:'Belum dikategorikan'/);
 });
