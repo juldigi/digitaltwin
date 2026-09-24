@@ -35,7 +35,11 @@ test('V199 target-facing seating has zero chair orientation errors',async()=>{
  assert.ok(meta.chairFacingAudit.every(a=>a.errorDeg<=.5));
  assert.ok(meta.chairFacingAudit.every(a=>Number.isFinite(a.targetX)&&Number.isFinite(a.targetY)));
  const chairGroups=collect(built.root,/_CHAIR_ASSEMBLY$/);
- assert.equal(chairGroups.length,stats.chairFacingChecks);
+ const legacy=chairGroups.filter(g=>!String(g.userData?.semantic||'').startsWith('V202_'));
+ const replacement=chairGroups.filter(g=>String(g.userData?.semantic||'').startsWith('V202_'));
+ assert.equal(legacy.length,stats.chairFacingChecks);
+ assert.equal(replacement.length,stats.v202RoomChairs);
+ assert.equal(chairGroups.length,stats.chairFacingChecks+stats.v202RoomChairs);
  assert.ok(chairGroups.every(g=>Array.isArray(g.userData.facingTarget)&&g.userData.facingTarget.length===2));
 });
 
