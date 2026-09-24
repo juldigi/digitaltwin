@@ -118,7 +118,7 @@ test('V197 editor keeps a machine parent context before drilling into components
  assert.match(app,/editorMachineId=null/);
  assert.match(app,/if\(normalized\?\.startsWith\('asset:'\)\)editorMachineId=normalized\.slice\(6\)/);
  assert.match(app,/id="se-edit-machine-parts"/);
- assert.match(app,/configureActiveMachine\(machineRoute\(machine\)\);applyActiveMachineState\(\);selectedTaxonomyId=ACTIVE_ROOT;applyMachineShell\(\);await engine\.switchMachine\(MACHINE_KEY\)/);
+ assert.match(app,/configureActiveMachine\(machineRoute\(machine\)\);applyActiveMachineState\(\);setActiveTaxonomyId\\(ACTIVE_ROOT\\);applyMachineShell\(\);await engine\.switchMachine\(MACHINE_KEY\)/);
  assert.match(app,/editorScope='machine';editorCategory='components'/);
  assert.match(app,/id="se-back-machine"/);
  assert.match(app,/editorScope='factory';editorCategory='machines'/);
@@ -147,7 +147,7 @@ test('V197 machine keyboard movement is camera-relative and installs one stable 
 
 
 test('Stage 5 synchronizes editor machine descriptor and preserves rerender context',()=>{
- assert.match(app,/configureActiveMachine\(machineRoute\(machine\)\);applyActiveMachineState\(\);selectedTaxonomyId=ACTIVE_ROOT;applyMachineShell\(\);await engine\.switchMachine\(MACHINE_KEY\)/);
+ assert.match(app,/configureActiveMachine\(machineRoute\(machine\)\);applyActiveMachineState\(\);setActiveTaxonomyId\\(ACTIVE_ROOT\\);applyMachineShell\(\);await engine\.switchMachine\(MACHINE_KEY\)/);
  assert.match(app,/clearActiveMachineDescriptor\(\);applyActiveMachineState\(\);engine\.clearMachineContext\?\.\(\)/);
  assert.match(app,/scrollBefore=panel\.scrollTop/);
  assert.match(app,/advancedOpen=panel\.querySelector\('\.se-advanced'\)\?\.open/);
