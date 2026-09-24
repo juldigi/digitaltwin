@@ -59,7 +59,7 @@ test('returning to factory overview clears selection and restores whole-factory 
 test('other models are loaded on demand while the factory shell remains available',()=>{
  assert.match(engine,/await import\('\.\/machine-runtime\.js'\)/);
  assert.doesNotMatch(engine,/from '\.\/machine-runtime\.js'/);
- assert.match(app,/pair\('Versi aplikasi','2026\\.09\\.25'\)/);
+ assert.match(app,/pair\('Versi aplikasi','2026\.09\.25'\)/);
  assert.match(html,/src\/app\.js\?v=197/);
  assert.match(sw,/factory-digital-twin-v209-architecture-convergence-20260925/);
 });
