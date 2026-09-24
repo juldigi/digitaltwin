@@ -23,7 +23,7 @@ test('V177 preserves external 3D copy while 2D mode is active and restores it la
 });
 
 test('V177 canonical state subscriber owns both visible mode state and mode-specific copy',()=>{
-  assert.match(shell,/subscribe\(state=>\{applyInspectorDom\(state\);applyViewModeDom\(state\);markSection\(state\.activeSection\);syncLayerControls\(\);syncAccessibleControls\(state\);syncViewModeContext\(state\)/);
+  assert.match(shell,/subscribe\(state=>\{applyInspectorDom\(state\);applyViewModeDom\(state\);markSection\(state\.activeSection\);syncLayerControls\(\);syncAccessibleControls\(state\);syncVisualHierarchy\(state\);syncViewModeContext\(state\)/);
 });
 
 test('V177 shell and service worker are cache-busted',()=>{
