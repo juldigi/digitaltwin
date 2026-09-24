@@ -28,7 +28,7 @@ test('V166 inspector and mobile More restore a predictable focus path',()=>{
 });
 
 test('V166 modal and canonical overlays block accidental background interaction',()=>{
-  assert.match(css,/body\.search-open \.ui-backdrop,[\s\S]*body\.layer-open \.ui-backdrop\{display:block\}/);
+  assert.match(css,/body\.layer-open \.ui-backdrop,body\.system-open \.ui-backdrop\{display:block\}/);
   assert.match(shell,/document\.body\.classList\.add\('layer-open'\)/);
   assert.match(shell,/document\.body\.classList\.remove\('layer-open'\)/);
   assert.match(css,/\.canonical-layer-manager\{position:fixed;z-index:90/);
