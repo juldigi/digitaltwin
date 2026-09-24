@@ -26,7 +26,7 @@ test('service-worker Phase-1 shell cache references only deployable frontend fil
 });
 
 test('service-worker cache version advances with the Phase-1 foundation release',()=>{
- assert.match(sw,/factory-digital-twin-v205-ipal-photo-actual-20260924/);
+ assert.match(sw,/factory-digital-twin-v192-mobile-camera-framing-20260923/);
 });
 
 test('service-worker does not pre-cache technical expansion machine modules',()=>{
