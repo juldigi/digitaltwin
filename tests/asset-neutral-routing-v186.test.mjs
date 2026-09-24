@@ -17,10 +17,10 @@ test('runtime no longer defaults unknown or empty routes to Offset 5',()=>{
 });
 
 test('application routing preserves the selected machine instead of silently substituting Offset 5',()=>{
- assert.match(app,/if\(!requested\)throw new Error\('Aset mesin harus dipilih sebelum membuka model 3D\.'\)/);
+ assert.match(app,/if\(!requested\)\{clearActiveMachineDescriptor\(\);return false;\}/);
  assert.match(app,/MACHINE_KEY=requested/);
  assert.match(app,/if\(!normalizedRoute\)\{assetDialog\(\);return false;\}/);
- assert.match(app,/machine\?\.machineId\|\|null/);
+ assert.match(app,/MACHINE_KEY=null/);\n assert.doesNotMatch(app,/MACHINE_KEY=FOUNDATION_SCOPE\.primaryRoute/);
 });
 
 test('engine rejects an empty switch request',()=>{
@@ -29,9 +29,9 @@ test('engine rejects an empty switch request',()=>{
 });
 
 test('V186 rotates active browser and service-worker identifiers',()=>{
- assert.match(index,/app-shell-v79\.css\?v=192/);
- assert.match(index,/src\/app\.js\?v=192/);
- assert.match(index,/src\/app-shell-v79\.js\?v=192/);
- assert.match(sw,/factory-digital-twin-v207-superadmin-editor-20260924/);
- assert.match(app,/pair\('Versi aplikasi','V192'\)/);
+ assert.match(index,/app-shell-v79\.css\?v=197/);
+ assert.match(index,/src\/app\.js\?v=197/);
+ assert.match(index,/src\/app-shell-v79\.js\?v=197/);
+ assert.match(sw,/factory-digital-twin-v209-architecture-convergence-20260925/);
+ assert.match(app,/pair\('Versi aplikasi','2026\.09\.25'\)/);
 });
