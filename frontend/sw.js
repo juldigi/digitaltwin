@@ -1,4 +1,8 @@
-const VERSION='factory-digital-twin-v214-runtime-stability-20260925';
+const VERSION='factory-digital-twin-v215-runtime-recovery-20260925';
+const RELEASE='215';
+const ENTRYPOINTS=[
+ './app-shell-v79.css','./src/app.js','./src/ui-v5.js','./src/experience-v37.js','./src/app-shell-v79.js'
+];
 const SHELL=[
  './','./index.html','./config.json','./assets/favicon.svg','./assets/splash-industrial-v79.webp',
  './style.css','./runtime-fallback.css','./app-shell-v79.css','./ui-v5.css','./responsive-v5.css','./experience-v37.css',
@@ -14,7 +18,21 @@ const SHELL=[
  './vendor/three/build/three.module.js','./vendor/three/build/three.core.js',
  './vendor/three/addons/controls/OrbitControls.js','./vendor/three/addons/controls/TransformControls.js',
  './vendor/three/addons/utils/BufferGeometryUtils.js','./vendor/three/addons/geometries/RoundedBoxGeometry.js'
+
 ];
-self.addEventListener('install',event=>event.waitUntil(caches.open(VERSION).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting())));
-self.addEventListener('activate',event=>event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==VERSION&&(k.startsWith('offset5-')||k.startsWith('factory-digital-twin-'))).map(k=>caches.delete(k)))),self.clients.claim()])));
-self.addEventListener('fetch',event=>{const u=new URL(event.request.url);if(event.request.method!=='GET'||u.origin!==self.location.origin||u.pathname.includes('/api/'))return;event.respondWith(fetch(event.request,{cache:'no-store'}).then(response=>{if(response.ok){const copy=response.clone();event.waitUntil(caches.open(VERSION).then(c=>c.put(event.request,copy)));}return response;}).catch(()=>caches.match(event.request).then(cached=>cached||new Response('Offline: berkas belum tersimpan.',{status:503}))));});
+const PRECACHE=[...SHELL,...ENTRYPOINTS.map(path=>path+'?v='+RELEASE)];
+const cachedFallback=request=>caches.match(request).then(cached=>cached||caches.match(request,{ignoreSearch:true})).then(cached=>cached||new Response('Offline: berkas belum tersimpan.',{status:503}));
+self.addEventListener('install',event=>event.waitUntil(caches.open(VERSION).then(cache=>cache.addAll(PRECACHE)).then(()=>self.skipWaiting())));
+self.addEventListener('activate',event=>event.waitUntil(Promise.all([
+ caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==VERSION&&(k.startsWith('offset5-')||k.startsWith('factory-digital-twin-'))).map(k=>caches.delete(k)))),
+ self.clients.claim()
+])));
+self.addEventListener('fetch',event=>{
+ const u=new URL(event.request.url);
+ if(event.request.method!=='GET'||u.origin!==self.location.origin||u.pathname.includes('/api/'))return;
+ event.respondWith(fetch(event.request,{cache:'no-store'}).then(response=>{
+   if(response.ok){const copy=response.clone();event.waitUntil(caches.open(VERSION).then(cache=>cache.put(event.request,copy)));return response;}
+   if(response.status>=500)return cachedFallback(event.request);
+   return response;
+ }).catch(()=>cachedFallback(event.request)));
+});
