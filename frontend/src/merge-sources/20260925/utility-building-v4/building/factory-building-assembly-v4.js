@@ -1,0 +1,21 @@
+import {buildingGroup,applyBuildingLod} from './common/building-primitives-v3.js';
+import {solveRoomShellsV3} from './rooms/room-shell-solver-v3.js';
+import {buildBuildingEnvelopeV3,buildRoomEnvelopeWallsV3} from './envelope/building-envelope-v3.js';
+import {buildDoorSetV4} from './envelope/doors-openings-v4.js';
+import {buildRoofSteelSystemV4,BMJ_ROOF_SECTIONS_REFERENCE_V3} from './envelope/roof-steel-system-v4.js';
+import {buildFactoryRoomFurnitureV3} from './rooms/factory-room-furniture-integration-v3.js';
+import {auditBuildingV4} from './audit/building-audit-v4.js';
+export const FACTORY_BUILDING_ASSEMBLY_VERSION_V4='FBA-V4-2026-09-25';
+export const IPAL_OPEN_YARD_REFERENCE_V4=Object.freeze({minX:32.8,maxX:60,minY:103.45,maxY:118.4,reason:'IPAL IS USER-CONFIRMED OPEN-SIDED OUTDOOR PROCESS YARD'});
+function inferBounds(outline=[]){if(!outline.length)return {minX:-Infinity,maxX:Infinity,minY:-Infinity,maxY:Infinity};const xs=outline.map(p=>p[0]),ys=outline.map(p=>p[1]);return {minX:Math.min(...xs),maxX:Math.max(...xs),minY:Math.min(...ys),maxY:Math.max(...ys)};}
+export function buildFactoryBuildingAssemblyV4(layout,fleet=[],options={}){
+ const data=layout?.actual||layout||{},root=buildingGroup('BMJ_FACTORY_BUILDING_V4','FACTORY_BUILDING_ASSEMBLY',{version:FACTORY_BUILDING_ASSEMBLY_VERSION_V4,sourceBaseline:layout?.baseline||layout?.baselineId||null,appModified:false});
+ const layers={envelope:buildingGroup('building','BUILDING_LAYER'),roof:buildingGroup('roof','ROOF_LAYER'),doors:buildingGroup('doors','DOORS_LAYER'),rooms:buildingGroup('rooms','ROOMS_LAYER'),furniture:buildingGroup('furniture','FURNITURE_LAYER'),reference:buildingGroup('reference','REFERENCE_LAYER')};for(const g of Object.values(layers))root.add(g);
+ const bounds=options.outerBounds||inferBounds(data.outline||[]),roomSolution=solveRoomShellsV3(data,{outline:data.outline||[],maxOuter:bounds}),excludedOpenZones=options.excludedOpenZones||[IPAL_OPEN_YARD_REFERENCE_V4];
+ const envelope=buildBuildingEnvelopeV3({...data,doors:roomSolution.doors},{fleet,machineClearance:options.machineClearance??1.2,excludedOpenZones,wallHeight:options.wallHeight??3.5,portalPadding:true,closeExterior:options.closeExterior!==false});layers.envelope.add(envelope);
+ const roomWalls=buildRoomEnvelopeWallsV3(roomSolution);layers.rooms.add(roomWalls);
+ const doors=buildDoorSetV4(roomSolution.doors,data.curtains||[]);layers.doors.add(doors);
+ const roof=buildRoofSteelSystemV4({sections:options.roofSections||BMJ_ROOF_SECTIONS_REFERENCE_V3,eavesHeight:options.eavesHeight??4.5,ridgeHeight:options.ridgeHeight??7,frameSpacing:options.frameSpacing??6,purlinSpacing:options.purlinSpacing??1.55,showRoofPanels:options.showRoofPanels!==false,showDaylightReferences:options.showDaylightReferences===true});layers.roof.add(roof);
+ const furniture=buildFactoryRoomFurnitureV3(roomSolution,{strictFit:options.strictFurnitureFit!==false,minEnvelopeRatio:options.minFurnitureEnvelopeRatio??.92,programAllowlist:options.furniturePrograms||null,lod:options.lod??1});layers.furniture.add(furniture);
+ applyBuildingLod(root,options.lod??1);const audit=auditBuildingV4({root,envelope,roomSolution,furniture,doors,roof});root.userData.layers=layers;root.userData.roomSolution=roomSolution;root.userData.audit=audit;root.userData.summary={sourceWalls:(data.walls||[]).length,doors:roomSolution.doors.length,rooms:roomSolution.rooms.length,generatedRoomWalls:roomSolution.generatedRoomWalls.length,furnitureBuilt:furniture.userData.summary?.built||0,furnitureSkipped:furniture.userData.summary?.skipped||0,auditPass:audit.pass};return {root,layers,roomSolution,envelope,roof,doors,furniture,audit};
+}
