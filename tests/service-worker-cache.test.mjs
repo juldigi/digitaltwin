@@ -26,7 +26,7 @@ test('service-worker Phase-1 shell cache references only deployable frontend fil
 });
 
 test('service-worker cache version advances with the Phase-1 foundation release',()=>{
- assert.match(sw,/factory-digital-twin-v220-camera-director-20260925/);
+ assert.match(sw,/factory-digital-twin-v221-ui-shell-hardening-20260925/);
 });
 
 test('service-worker does not pre-cache technical expansion machine modules',()=>{
@@ -39,7 +39,7 @@ test('service-worker does not pre-cache technical expansion machine modules',()=
 
 
 test('service worker pre-caches cache-busted entrypoints and can fall back across query versions',()=>{
- assert.match(sw,/const RELEASE='220'/);
+ assert.match(sw,/const RELEASE='221'/);
  assert.match(sw,/const ENTRYPOINTS=\[/);
  assert.match(sw,/ENTRYPOINTS\.map\(path=>path\+'\?v='\+RELEASE\)/);
  assert.match(sw,/caches\.match\(request,\{ignoreSearch:true\}\)/);
