@@ -15,7 +15,8 @@ test('V222 derives overlay body classes from app state',()=>{
 });
 
 test('V222 never leaves hidden navigation overlay state after dismissing the drawer',()=>{
- assert.match(shell,/else if\(overlay==='navigation'\)closeDrawer\(\)/);\n assert.match(shell,/if\(overlay==='navigation'\)closeOverlay\(\)/);
+ assert.match(shell,/else if\(overlay==='navigation'\)closeDrawer\(\)/);
+ assert.match(shell,/if\(overlay==='navigation'\)closeOverlay\(\)/);
  assert.match(shell,/const wasNavigation=getState\(\)\.overlay==='navigation';closeDrawer\(\);if\(wasNavigation\)closeOverlay\(\)/);
 });
 
