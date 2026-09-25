@@ -16,7 +16,8 @@ function rememberOverlayFocus(name){
 }
 function restoreOverlayFocus(name,fallback){
  const saved=overlayReturnFocus.get(name);overlayReturnFocus.delete(name);
- const target=saved?.isConnected?saved:(fallback?q(fallback):null);
+ const reusable=saved instanceof HTMLElement&&saved.isConnected&&!saved.closest('[hidden]')&&!saved.closest('dialog:not([open])')&&!saved.matches(':disabled');
+ const target=reusable?saved:(fallback?q(fallback):null);
  if(target instanceof HTMLElement)requestAnimationFrame(()=>target.focus({preventScroll:true}));
 }
 function overlayFocusable(root){return root?qa(FOCUSABLE,root).filter(el=>!el.hidden&&el.getClientRects().length>0):[]}
@@ -188,8 +189,11 @@ function beforeMajorOverlay(name){
  if(name!=='inspector'&&getState().inspectorState?.open)closeInspector({restoreFocus:false});
  if(name!=='navigation')closeDrawer();
 }
+let systemReturnSection=null;
 function openSystemBrowser(){
  beforeMajorOverlay('systems');rememberOverlayFocus('systems');ensureSystemBrowser();
+ const before=getState();
+ systemReturnSection=before.activeSection==='factory'?'factory':before.activeSection==='asset'?'asset':before.sceneMode==='machine'?'asset':'factory';
  const panel=q('#system-browser');panel.hidden=false;document.body.classList.add('system-open');openOverlay('systems');setActiveSection(PHASE1_FOUNDATION?'factory':'system');markSection(PHASE1_FOUNDATION?'factory':'system');syncLayerControls();focusOverlay(panel,'[data-system-close]');
 }
 function openSystemLayers(){openSystemBrowser()}
@@ -288,6 +292,14 @@ addEventListener('bmj:systemsearchselect',event=>{if(PHASE1_FOUNDATION)return;co
 q('#nav-systems')?.addEventListener('click',()=>{if(!PHASE1_FOUNDATION){stopSimulationForNavigation('system');openSystemBrowser()}});
 q('#nav-view')?.addEventListener('click',openLayerManager);
 
+const MAJOR_NAV_TRANSACTION=Object.freeze({'nav-machine':'factory','nav-assets':'asset','nav-help':'modal','settings':'modal'});
+document.addEventListener('click',event=>{
+ const target=event.target instanceof Element?event.target.closest('#nav-machine,#nav-assets,#nav-help,#settings'):null;
+ if(!target)return;
+ const next=MAJOR_NAV_TRANSACTION[target.id];
+ if(next)beforeMajorOverlay(next);
+},true);
+
 const menu=q('#ui-menu-toggle');
 menu?.addEventListener('click',()=>{const open=getState().overlay!=='navigation';document.body.classList.add('drawer-transitioning');if(open){beforeMajorOverlay('navigation');rememberOverlayFocus('navigation')}document.body.classList.toggle('nav-open',open);requestAnimationFrame(()=>document.body.classList.remove('drawer-transitioning'));menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Tutup navigasi':'Buka navigasi');if(open){openOverlay('navigation');focusOverlay(q('.rail'),'.rail button:not([hidden])')}else{closeOverlay();restoreOverlayFocus('navigation','#ui-menu-toggle')}});
 q('#ui-backdrop')?.addEventListener('click',()=>{
@@ -365,7 +377,7 @@ function ensureSystemBrowser(){
  <div class="canonical-layer-group unavailable"><h4>Batas data</h4><p>Jalur yang belum memiliki gambar atau verifikasi lapangan tetap ditandai belum tersedia. Aplikasi tidak membuat jalur aktual secara otomatis.</p></div>`;
  document.body.append(panel);q('[data-system-close]',panel)?.addEventListener('click',closeSystemBrowser);bindSystemFocus(panel);
 }
-function closeSystemBrowser(){const panel=q('#system-browser');if(panel)panel.hidden=true;document.body.classList.remove('system-open');if(getState().overlay==='systems')closeOverlay();restoreOverlayFocus('systems','#nav-systems')}
+function closeSystemBrowser(){const panel=q('#system-browser');if(panel)panel.hidden=true;document.body.classList.remove('system-open');if(getState().overlay==='systems')closeOverlay();const state=getState();if(state.activeSection==='system'){const next=systemReturnSection||(state.sceneMode==='machine'?'asset':'factory');setActiveSection(next);markSection(next)}systemReturnSection=null;restoreOverlayFocus('systems','#nav-systems')}
 function ensureLayerManager(){
  if(q('#layer-manager'))return;
  const panel=document.createElement('section');panel.id='layer-manager';panel.className='canonical-layer-manager';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-labelledby','layer-manager-title');panel.setAttribute('tabindex','-1');
@@ -430,10 +442,10 @@ qa('#detail-panel [role="tab"]').forEach(tab=>tab.addEventListener('click',()=>{
 }));
 q('#close-panel')?.addEventListener('click',()=>closeInspector());
 const modalElement=q('#modal');
-addEventListener('bmj:modalopenrequest',()=>{beforeMajorOverlay('modal');openOverlay('modal')});
-addEventListener('bmj:modalcloserequest',()=>{if(getState().overlay==='modal')closeOverlay()});
+addEventListener('bmj:modalopenrequest',()=>{const firstOpen=getState().overlay!=='modal';beforeMajorOverlay('modal');if(firstOpen)rememberOverlayFocus('modal');openOverlay('modal')});
+addEventListener('bmj:modalcloserequest',()=>{if(getState().overlay==='modal')closeOverlay();restoreOverlayFocus('modal')});
 modalElement?.addEventListener('cancel',event=>{event.preventDefault();q('#modal-close')?.click()});
-modalElement?.addEventListener('close',()=>{if(getState().overlay==='modal')closeOverlay()});
+modalElement?.addEventListener('close',()=>{if(getState().overlay==='modal')closeOverlay();restoreOverlayFocus('modal')});
 const syncViewport=()=>{document.documentElement.style.setProperty('--app-vh',`${window.visualViewport?.height||innerHeight}px`);const w=innerWidth;if(w>=768&&getState().overlay==='navigation'){closeDrawer();closeOverlay()}const next=setState({deviceMode:w<768?'mobile':w<=1180?'tablet':'desktop'},{url:false});applyInspectorDom(next)};
 syncViewport();addEventListener('resize',syncViewport,{passive:true});window.visualViewport?.addEventListener('resize',syncViewport,{passive:true});
 

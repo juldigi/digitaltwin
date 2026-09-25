@@ -22,7 +22,7 @@ test('custom major overlays expose dialog semantics focus restoration and keyboa
   assert.match(shell,/setAttribute\('aria-modal','true'\)/);
   assert.match(shell,/function rememberOverlayFocus/);
   assert.match(shell,/function restoreOverlayFocus/);
-  assert.match(shell,/const target=saved\?\.isConnected\?saved:\(fallback\?q\(fallback\):null\)/);
+  assert.match(shell,/const reusable=saved instanceof HTMLElement&&saved\.isConnected&&!saved\.closest\('\[hidden\]'\)&&!saved\.closest\('dialog:not\(\[open\]\)'\)&&!saved\.matches\(':disabled'\)/);
   assert.match(shell,/function trapOverlayFocus/);
   assert.match(shell,/event\.key==='Tab'/);
   assert.match(shell,/event\.key!=='Escape'/);
