@@ -27,6 +27,7 @@ import {FZ1200ProcessSimulation} from './simulation-fz1200.js';
 import {UpgLy300MachineTemplate} from './upg-ly300.js';
 import {UpgLy300ProcessSimulation} from './simulation-upg-ly300.js';
 import {ReferenceMachineTemplate,ReferenceProcessSimulation,isReferenceMachineKey} from './reference-machines.js';
+import {applyMachinePresentationPolish} from './machine-presentation-polish.js';
 
 export const LEGACY_MACHINE_ROUTE=Object.freeze({
  'BMJ-MCH-0002':'sheeting',
@@ -66,6 +67,11 @@ export function createMachineTemplate(key){
  if(isReferenceMachineKey(k))return new ReferenceMachineTemplate(k);
  if(universalMachineConfig(k))return new UniversalMachineTemplate(k);
  throw new Error(`No 3D template registered for ${k}`);
+}
+
+export function createPolishedMachineTemplate(key){
+ const normalized=normalizeMachineKey(key);
+ return applyMachinePresentationPolish(createMachineTemplate(key),normalized);
 }
 
 export function createMachineSimulation(key,machine,template){
