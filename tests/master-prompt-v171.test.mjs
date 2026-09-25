@@ -36,7 +36,7 @@ test('factory selection and technical model navigation create distinct browser e
 test('first load and browser Back use one deterministic restore path',()=>{
  assert.match(app,/await restoreHistoryContext\(\);/);
  assert.equal((app.match(/addEventListener\('popstate'/g)||[]).length,1);
- assert.match(app,/addEventListener\('popstate',\(\)=>\{restoreHistoryContext\(\)/);
+ assert.match(app,/addEventListener\('popstate',\(\)=>\{dispatchEvent\(new CustomEvent\('bmj:historynavigationrequest'\)\);restoreHistoryContext\(\)/);
  const restoreBody=app.slice(app.indexOf('async function restoreHistoryContext'),app.indexOf("addEventListener('popstate'"));
  assert.doesNotMatch(restoreBody,/location\.(?:reload|assign|replace)\(/);
 });
