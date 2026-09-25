@@ -61,7 +61,7 @@ test('V230 Diana Eye and SHARK N650 carry different inspection-tower exterior id
 });
 
 test('V230 factory/home geometry continues to be regenerated from these same live templates',()=>{
- assert.match(bake,/const t=createMachineTemplate\(place\.machineId\)/);
+ assert.match(bake,/const t=createPolishedMachineTemplate\\(place\\.machineId\\)/);
  assert.match(bake,/t\.setLow\?\.\(true\)/);
  const rebake=build.indexOf('scripts/bake-factory-fleet.mjs');
  const copy=build.indexOf("cpSync('frontend','dist'");
