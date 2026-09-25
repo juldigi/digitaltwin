@@ -1,5 +1,5 @@
-const VERSION='factory-digital-twin-v221-ui-shell-hardening-20260925';
-const RELEASE='221';
+const VERSION='factory-digital-twin-v222-overlay-state-ssot-20260925';
+const RELEASE='222';
 const ENTRYPOINTS=[
  './app-shell-v79.css','./src/app.js','./src/ui-v5.js','./src/experience-v37.js','./src/app-shell-v79.js'
 ];

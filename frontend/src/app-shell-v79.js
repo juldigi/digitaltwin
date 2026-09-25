@@ -120,6 +120,18 @@ function markSection(section){
  }
  qa('[data-mobile-nav]').forEach(el=>{const active=el.dataset.mobileNav===primary;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current')});
 }
+const OVERLAY_BODY_CLASS=Object.freeze({navigation:'nav-open',search:'search-open',layers:'layer-open',systems:'system-open',modal:'modal-open'});
+function syncOverlayDom(state=getState()){
+ const active=state?.overlay??null;
+ for(const [name,className]of Object.entries(OVERLAY_BODY_CLASS))document.body.classList.toggle(className,active===name);
+ const system=q('#system-browser');if(system&&active!=='systems')system.hidden=true;
+ const layers=q('#layer-manager');if(layers&&active!=='layers')layers.hidden=true;
+ const search=q('#universal-search-panel');if(search&&active!=='search')search.hidden=true;
+ if(active!=='navigation'){
+  q('#ui-menu-toggle')?.setAttribute('aria-expanded','false');
+  q('[data-mobile-nav="more"]')?.setAttribute('aria-expanded','false');
+ }
+}
 function closeDrawer(){document.body.classList.remove('nav-open');document.body.classList.remove('drawer-transitioning');const menuButton=q('#ui-menu-toggle');menuButton?.setAttribute('aria-expanded','false');menuButton?.setAttribute('aria-label','Buka navigasi');q('[data-mobile-nav="more"]')?.setAttribute('aria-expanded','false');restoreOverlayFocus('navigation','#ui-menu-toggle')}
 function closeLayerManager(){const panel=q('#layer-manager');if(panel)panel.hidden=true;document.body.classList.remove('layer-open');if(getState().overlay==='layers')closeOverlay();restoreOverlayFocus('layers','#nav-view')}
 function applyInspectorDom(state=getState()){
@@ -286,8 +298,9 @@ q('#ui-backdrop')?.addEventListener('click',()=>{
  else if(overlay==='navigation')closeDrawer();
  else if(overlay==='modal'&&q('#modal')?.open)q('#modal-close')?.click();
  else closeOverlay();
+ if(overlay==='navigation')closeOverlay();
 });
-qa('.rail button').forEach(b=>b.addEventListener('click',()=>{if(innerWidth<768)closeDrawer()}));
+qa('.rail button').forEach(b=>b.addEventListener('click',()=>{if(innerWidth<768){const wasNavigation=getState().overlay==='navigation';closeDrawer();if(wasNavigation)closeOverlay()}}));
 
 qa('[data-mobile-nav]').forEach(button=>button.addEventListener('click',event=>{
  if(!matchMedia('(max-width:767px)').matches)return;
@@ -420,6 +433,7 @@ const modalElement=q('#modal');
 addEventListener('bmj:modalopenrequest',()=>{beforeMajorOverlay('modal');openOverlay('modal')});
 addEventListener('bmj:modalcloserequest',()=>{if(getState().overlay==='modal')closeOverlay()});
 modalElement?.addEventListener('cancel',event=>{event.preventDefault();q('#modal-close')?.click()});
+modalElement?.addEventListener('close',()=>{if(getState().overlay==='modal')closeOverlay()});
 const syncViewport=()=>{document.documentElement.style.setProperty('--app-vh',`${window.visualViewport?.height||innerHeight}px`);const w=innerWidth;if(w>=768&&getState().overlay==='navigation'){closeDrawer();closeOverlay()}const next=setState({deviceMode:w<768?'mobile':w<=1180?'tablet':'desktop'},{url:false});applyInspectorDom(next)};
 syncViewport();addEventListener('resize',syncViewport,{passive:true});window.visualViewport?.addEventListener('resize',syncViewport,{passive:true});
 
@@ -518,5 +532,5 @@ function syncPressedTools(state=getState()){
  };
  for(const [id,active] of Object.entries(values)){const el=q('#'+id);if(el){el.classList.toggle('active',active);el.setAttribute('aria-pressed',String(active));}}
 }
-relabel();const initialState=getState();applyViewModeDom(initialState);syncSplashFromState(initialState);syncPressedTools(initialState);syncInspectorTabs(initialState);subscribe(state=>{applyInspectorDom(state);applyViewModeDom(state);markSection(state.activeSection);syncLayerControls();syncAccessibleControls(state);syncPressedTools(state);syncInspectorTabs(state);syncVisualHierarchy(state);syncViewModeContext(state);syncSplashFromState(state);syncSimulationTransport(state)});
+relabel();const initialState=getState();syncOverlayDom(initialState);applyViewModeDom(initialState);syncSplashFromState(initialState);syncPressedTools(initialState);syncInspectorTabs(initialState);subscribe(state=>{applyInspectorDom(state);applyViewModeDom(state);markSection(state.activeSection);syncLayerControls();syncAccessibleControls(state);syncPressedTools(state);syncInspectorTabs(state);syncVisualHierarchy(state);syncViewModeContext(state);syncSplashFromState(state);syncSimulationTransport(state);syncOverlayDom(state)});
 document.documentElement.dataset.uiArchitecture='v212-ui-ssot';
