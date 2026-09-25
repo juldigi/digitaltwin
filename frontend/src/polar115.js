@@ -144,7 +144,7 @@ export class Polar115MachineTemplate{
 
   // Red optical cut line in the actual BMJ photo, aligned with the simulation cutLineZ=0.
   const cutLine=this.group(safety,'polar-cut-line-photo','Red optical cut-line mark');
-  const redLine=this.box(cutLine,[1.34,.006,.010],[0,.948,-.015],'red',0);redLine.material.emissive?.setHex(0x7a1010);redLine.material.emissiveIntensity=.45;redLine.userData.evidence=photoEvidence;
+  const redLine=this.box(cutLine,[1.34,.006,.010],[0,.948,-.015],'red',0);redLine.material.emissive?.setHex(0x7a1010);redLine.material.emissiveIntensity=.45;redLine.userData.evidence=photoEvidence;redLine.userData.mechanismRole='cut-line-indicator-beam';
  }
  enrichV122(){
   this.root.userData.researchVersion='V123_PHOTO_MATCHED';
