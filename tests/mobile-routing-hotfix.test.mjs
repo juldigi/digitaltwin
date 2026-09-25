@@ -31,6 +31,8 @@ test('mobile 2D/3D switch remains compact without restoring the full-height stri
 test('mobile renderer uses a lightweight factory proxy and disables interactive taxonomy overlays',()=>{
  assert.match(engine,/function buildLowDetailFactory\(layout,fleet\)/);
  assert.match(engine,/this\.actualFactory=this\.low\?buildLowDetailFactory\(l,l\.fleet\):buildActualFactory\(l,l\.fleet\)/);
- assert.match(engine,/this\.low\|\|matchMedia\('\(max-width:767px\)'\)\.matches/);\n assert.match(engine,/antialias:!mobileRender/);\n assert.match(engine,/this\.renderFaulted=true/);
+ assert.match(engine,/matchMedia\('\(max-width:767px\)'\)\.matches/);
+ assert.match(engine,/antialias:!mobileRender/);
+ assert.match(engine,/this\.renderFaulted=true/);
  assert.match(css,/\.part-label-layer\{display:none!important;pointer-events:none!important\}/);
 });
