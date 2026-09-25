@@ -23,7 +23,7 @@ test('HTML requests the cache-busted fixed controller',()=>{
 
 
 test('mobile 2D/3D switch remains compact without restoring the full-height strip',()=>{
- assert.match(css,/V214 emergency mobile stabilization/);
+ assert.match(css,/V215 runtime recovery/);
  assert.match(css,/\.viewport-mode-switch\{[\s\S]{0,320}top:8px!important;right:8px!important;bottom:auto!important/);
  assert.match(css,/max-height:44px!important/);
 });
@@ -31,6 +31,6 @@ test('mobile 2D/3D switch remains compact without restoring the full-height stri
 test('mobile renderer uses a lightweight factory proxy and disables interactive taxonomy overlays',()=>{
  assert.match(engine,/function buildLowDetailFactory\(layout,fleet\)/);
  assert.match(engine,/this\.actualFactory=this\.low\?buildLowDetailFactory\(l,l\.fleet\):buildActualFactory\(l,l\.fleet\)/);
- assert.match(engine,/this\.low\|\|matchMedia\('\(max-width:767px\)'\)\.matches/);
+ assert.match(engine,/this\.low\|\|matchMedia\('\(max-width:767px\)'\)\.matches/);\n assert.match(engine,/antialias:!mobileRender/);\n assert.match(engine,/this\.renderFaulted=true/);
  assert.match(css,/\.part-label-layer\{display:none!important;pointer-events:none!important\}/);
 });
