@@ -129,8 +129,8 @@ export class Polar115MachineTemplate{
    tag(this.cyl(change,.025,.52,[-.82,1.34,-.12],'steel','y'),'knife-change-handle');
    tag(this.box(change,[.20,.12,.12],[-.82,1.08,-.12],'dark',.010),'knife-change-support');
    const rack=this.group(knife,'polar-knife-rack-v122','Drilled accessory bracket (gauge / spare-part storage)',[0,0,0],[0,.10,-.16]);rack.userData.detail=true;
-   const rackPlate=tag(this.box(rack,[.05,.34,.22],[.90,1.10,.10],'body',.02),'accessory-rack-plate','BMJ_INSTALLATION_PHOTOGRAPH');rackPlate.rotation.y=-.5;
-   for(let i=0;i<5;i++){const h=this.cyl(rack,.021,.06,[.92-i*.007,1.24-i*.075,.10+i*.03],'black','x');h.userData.detail=true;h.userData.evidence='BMJ_INSTALLATION_PHOTOGRAPH';}
+   const rackPlate=tag(this.box(rack,[.05,.34,.22],[.90,1.10,.10],'body',.02),'accessory-rack-plate','BMJ-POLAR-PHOTOS-2026-09');rackPlate.rotation.y=-.5;
+   for(let i=0;i<5;i++){const h=this.cyl(rack,.021,.06,[.92-i*.007,1.24-i*.075,.10+i*.03],'black','x');h.userData.detail=true;h.userData.evidence='BMJ-POLAR-PHOTOS-2026-09';}
   }
 
   const safety=this.findNode('polar-safety');if(safety){
