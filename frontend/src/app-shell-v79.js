@@ -16,7 +16,7 @@ function rememberOverlayFocus(name){
 }
 function restoreOverlayFocus(name,fallback){
  const saved=overlayReturnFocus.get(name);overlayReturnFocus.delete(name);
- const reusable=saved instanceof HTMLElement&&saved.isConnected&&!saved.closest('[hidden]')&&!saved.matches(':disabled');
+ const reusable=saved instanceof HTMLElement&&saved.isConnected&&!saved.closest('[hidden]')&&!saved.closest('dialog:not([open])')&&!saved.matches(':disabled');
  const target=reusable?saved:(fallback?q(fallback):null);
  if(target instanceof HTMLElement)requestAnimationFrame(()=>target.focus({preventScroll:true}));
 }
@@ -442,7 +442,7 @@ qa('#detail-panel [role="tab"]').forEach(tab=>tab.addEventListener('click',()=>{
 }));
 q('#close-panel')?.addEventListener('click',()=>closeInspector());
 const modalElement=q('#modal');
-addEventListener('bmj:modalopenrequest',()=>{beforeMajorOverlay('modal');rememberOverlayFocus('modal');openOverlay('modal')});
+addEventListener('bmj:modalopenrequest',()=>{const firstOpen=getState().overlay!=='modal';beforeMajorOverlay('modal');if(firstOpen)rememberOverlayFocus('modal');openOverlay('modal')});
 addEventListener('bmj:modalcloserequest',()=>{if(getState().overlay==='modal')closeOverlay();restoreOverlayFocus('modal')});
 modalElement?.addEventListener('cancel',event=>{event.preventDefault();q('#modal-close')?.click()});
 modalElement?.addEventListener('close',()=>{if(getState().overlay==='modal')closeOverlay();restoreOverlayFocus('modal')});
