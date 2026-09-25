@@ -60,6 +60,6 @@ test('other models are loaded on demand while the factory shell remains availabl
  assert.match(engine,/await import\('\.\/machine-runtime\.js'\)/);
  assert.doesNotMatch(engine,/from '\.\/machine-runtime\.js'/);
  assert.match(app,/pair\('Versi aplikasi',APP_BUILD\)/);
- assert.match(html,/src\/app\.js\?v=220/);
- assert.match(sw,/factory-digital-twin-v220-camera-director-20260925/);
+ assert.match(html,/src\/app\.js\?v=221/);
+ assert.match(sw,/factory-digital-twin-v221-ui-shell-hardening-20260925/);
 });

@@ -7,7 +7,7 @@ const engine=readFileSync(new URL('../frontend/src/engine.js',import.meta.url),'
 
 test('overlay panels render above the dimmer and 2D controls yield to them',()=>{
  assert.match(css,/body\.layer-open \.ui-backdrop,body\.system-open \.ui-backdrop,[\s\S]*?z-index:88!important/);
- assert.match(css,/body\.layer-open \.canonical-layer-manager,body\.system-open \.canonical-layer-manager,[\s\S]*?z-index:120!important/);
+ assert.match(css,/body\.layer-open \.canonical-layer-manager,body\.system-open \.canonical-system-browser,[\s\S]*?z-index:120!important/);
  assert.match(css,/body\.layer-open \.viewport-mode-switch,[\s\S]*?visibility:hidden!important;pointer-events:none!important/);
 });
 

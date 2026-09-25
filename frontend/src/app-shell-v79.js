@@ -121,7 +121,7 @@ function markSection(section){
  qa('[data-mobile-nav]').forEach(el=>{const active=el.dataset.mobileNav===primary;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current')});
 }
 function closeDrawer(){document.body.classList.remove('nav-open');document.body.classList.remove('drawer-transitioning');const menuButton=q('#ui-menu-toggle');menuButton?.setAttribute('aria-expanded','false');menuButton?.setAttribute('aria-label','Buka navigasi');q('[data-mobile-nav="more"]')?.setAttribute('aria-expanded','false');restoreOverlayFocus('navigation','#ui-menu-toggle')}
-function closeLayerManager(){const panel=q('#layer-manager');if(panel)panel.hidden=true;document.body.classList.remove('layer-open');if(getState().overlay==='layers')closeOverlay();restoreOverlayFocus('layers',PHASE1_FOUNDATION?'#nav-machine':'#nav-systems')}
+function closeLayerManager(){const panel=q('#layer-manager');if(panel)panel.hidden=true;document.body.classList.remove('layer-open');if(getState().overlay==='layers')closeOverlay();restoreOverlayFocus('layers','#nav-view')}
 function applyInspectorDom(state=getState()){
  const open=Boolean(state.inspectorState?.open),mobile=matchMedia('(max-width:767px)').matches;
  document.body.classList.toggle('panel-hidden',!open);
