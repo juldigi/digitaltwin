@@ -83,7 +83,7 @@ function applyActiveMachineState(){
  state=structuredClone(initialState);setReferenceFilter('all');
  setAppSimulation({available:Boolean(MACHINE_KEY),blocked:false,blockedReason:null,active:false,running:false,speed:1,stage:null,completed:0,progress:0,sheetsVisible:0,pileSheetsVisible:0,rotorCount:0,oscillatorCount:0,mechanismCount:0,inkFlowCount:0,uvLampCount:0,uvActive:false,pathVisible:IS_SHEETING?false:Boolean(MACHINE_KEY),inkFlowVisible:Boolean(MACHINE_KEY)});
  if(!MACHINE_KEY){
-  state.asset={...state.asset,asset_id:null,asset_code:null,codename:null,model:null,description:'Belum memilih mesin',source_description:null,category:null,subcategory:null,manufacturer:registry.manufacturer||null,specification:null,configuration:null,serial_number:null,functional_location:null,year:null,'3d_status':'BELUM MEMILIH MESIN',data_confidence:null,discovery_status:null,sources:[]};
+  state.asset={...state.asset,asset_id:null,asset_code:null,codename:null,model:null,description:'Belum memilih mesin',source_description:null,category:null,subcategory:null,manufacturer:null,specification:null,configuration:null,serial_number:null,functional_location:null,year:null,'3d_status':'BELUM MEMILIH MESIN',data_confidence:null,discovery_status:null,sources:[]};
   return;
  }
  const registry=machineRecordForRoute(MACHINE_KEY);

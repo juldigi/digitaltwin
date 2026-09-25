@@ -29,11 +29,11 @@ test('V162 restores evidence-bounded Systems navigation without unlocking unveri
 test('V162 exposes Systems in both navigation surfaces and keeps identifiers coherent',()=>{
  assert.match(html,/id="nav-systems" data-section="system"/);
  assert.match(html,/data-mobile-nav="system" aria-label="Sistem utilitas"/);
- assert.match(html,/app-shell-v79\.css\?v=215/);
- assert.match(html,/src\/app\.js\?v=215/);
- assert.match(html,/src\/app-shell-v79\.js\?v=215/);
+ assert.match(html,/app-shell-v79\.css\?v=216/);
+ assert.match(html,/src\/app\.js\?v=216/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=216/);
  assert.match(shell,/v212-ui-ssot/);
- assert.match(sw,/factory-digital-twin-v215-runtime-recovery-20260925/);
+ assert.match(sw,/factory-digital-twin-v216-ui-boot-20260925/);
 });
 
 test('asset navigation opens an empty search instead of serializing the click event',()=>{

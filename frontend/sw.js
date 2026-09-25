@@ -1,5 +1,5 @@
-const VERSION='factory-digital-twin-v215-runtime-recovery-20260925';
-const RELEASE='215';
+const VERSION='factory-digital-twin-v216-ui-boot-20260925';
+const RELEASE='216';
 const ENTRYPOINTS=[
  './app-shell-v79.css','./src/app.js','./src/ui-v5.js','./src/experience-v37.js','./src/app-shell-v79.js'
 ];
