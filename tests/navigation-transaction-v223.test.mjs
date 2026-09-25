@@ -26,7 +26,9 @@ test('V223 system browser returns to a stable factory or asset context when dism
 
 test('V223 focus restoration rejects hidden stale controls and modal lifecycle restores the origin',()=>{
  assert.match(shell,/!saved\.closest\('\[hidden\]'\)/);
- assert.match(shell,/rememberOverlayFocus\('modal'\)/);
+ assert.match(shell,/!saved\.closest\('dialog:not\(\[open\]\)'\)/);
+ assert.match(shell,/const firstOpen=getState\(\)\.overlay!=='modal'/);
+ assert.match(shell,/if\(firstOpen\)rememberOverlayFocus\('modal'\)/);
  assert.match(shell,/restoreOverlayFocus\('modal'\)/);
 });
 
