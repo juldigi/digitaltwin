@@ -31,6 +31,6 @@ test('V194 compatibility UI layer is reduced to viewport shortcuts only',()=>{
 });
 
 test('V163 cache identifiers force the controller cleanup onto existing devices',()=>{
- assert.match(html,/src\/ui-v5\.js\?v=213/);
- assert.match(sw,/factory-digital-twin-v213-mobile-layout-20260925/);
+ assert.match(html,/src\/ui-v5\.js\?v=214/);
+ assert.match(sw,/factory-digital-twin-v214-runtime-stability-20260925/);
 });
