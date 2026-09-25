@@ -21,16 +21,20 @@ export class Polar115MachineTemplate{
  cover(m){m.userData.exteriorCover=true;return m;}active(m,role=''){m.userData.activeElement=true;m.userData.mechanismRole=role;this.activeMeshes.push(m);return m;}
  holes(group,width,depth,y,zCenter,countX,countZ){const grid=this.group(group,'polar-feed-grid-'+group.userData.nodeId,'Air-nozzle grid');for(let ix=0;ix<countX;ix++)for(let iz=0;iz<countZ;iz++){const x=-width*.42+(width*.84)*(ix/Math.max(1,countX-1)),z=zCenter-depth*.38+(depth*.76)*(iz/Math.max(1,countZ-1));const h=this.cyl(grid,.009,.006,[x,y+.064,z],'black','y');h.userData.detail=true;h.userData.airNozzle=true;}return grid;}
  build(){
-  const frame=this.group(this.root,'polar-frame','Machine Frame');
-  this.box(frame,[2.16,.62,1.56],[0,.31,.47],'bodyDark',.05);
-  for(const x of [-.92,.92])this.box(frame,[.15,.56,1.66],[x,.83,.47],'bodyDark',.04);
+  const frame=this.group(this.root,'polar-frame','Base Cabinet');
+  this.box(frame,[2.06,.56,1.24],[0,.28,.66],'dark',.035);
+  for(const x of [-.55,.06,.60])this.box(frame,[.40,.02,.02],[x,.28,1.27],'bodyDark',.006);
 
-  const feed=this.group(this.root,'polar-feed','Air Table & Material Handling',[0,0,0],[0,.16,-.35]);
-  const center=this.group(feed,'polar-feed-center','Center chromed air table');this.box(center,[1.42,.12,.715],[0,.90,-.37],'table',.018);this.holes(center,1.42,.715,.90,-.37,7,5);
-  const left=this.group(feed,'polar-feed-left','Left air side table',[-1.015,0,0]);this.box(left,[.60,.12,.715],[0,.90,-.37],'table',.018);this.holes(left,.60,.715,.90,-.37,4,5);
-  const right=this.group(feed,'polar-feed-right','Right air side table',[1.015,0,0]);this.box(right,[.60,.12,.715],[0,.90,-.37],'table',.018);this.holes(right,.60,.715,.90,-.37,4,5);
-  for(const g of [left,right])for(const x of [-.22,.22])this.box(g,[.055,.76,.055],[x,.46,-.22],'dark',.01);
-  const rearTable=this.group(feed,'polar-feed-rear','Back table');this.box(rearTable,[1.44,.09,1.15],[0,.90,.565],'table',.015);this.holes(rearTable,1.44,1.15,.90,.565,7,7);
+  const feed=this.group(this.root,'polar-feed','Cutting Table & Material Handling',[0,0,0],[0,.16,-.35]);
+  const center=this.group(feed,'polar-feed-center','Main cutting table (dark steel deck)');this.box(center,[1.42,.10,.715],[0,.90,-.37],'dark',.02);
+  const bevel=this.box(center,[.42,.10,.42],[.62,.90,.02],'dark',.02);bevel.rotation.y=-Math.PI/4;bevel.userData.tableBevel=true;
+  const left=this.group(feed,'polar-feed-left','Left removable air-float side table',[-1.015,0,0]);this.box(left,[.60,.06,.715],[0,.90,-.37],'table',.02);this.holes(left,.60,.715,.90,-.37,4,5);
+  const right=this.group(feed,'polar-feed-right','Right removable air-float side table',[1.015,0,0]);this.box(right,[.60,.06,.715],[0,.90,-.37],'table',.02);this.holes(right,.60,.715,.90,-.37,4,5);
+  for(const g of [left,right])for(const x of [-.22,.22])this.box(g,[.03,.42,.03],[x,.68,-.22],'dark',.006);
+  const crank=this.group(right,'polar-feed-right-crank','Side-table height-adjust crank wheel');crank.userData.detail=true;this.cyl(crank,.075,.02,[.28,.64,-.66],'dark','x');this.cyl(crank,.012,.14,[.28,.64,-.66],'steel','x');
+  const wingL=this.group(feed,'polar-feed-wing-left','Folding side wing (left)');const wl=this.box(wingL,[.05,.05,1.02],[-1.42,.72,-.37],'dark',.01);wl.rotation.x=-.25;wl.userData.foldingWing=true;
+  const wingR=this.group(feed,'polar-feed-wing-right','Folding side wing (right)');const wr=this.box(wingR,[.05,.05,1.02],[1.42,.72,-.37],'dark',.01);wr.rotation.x=-.25;wr.userData.foldingWing=true;
+  const rearTable=this.group(feed,'polar-feed-rear','Back table');this.box(rearTable,[1.44,.06,1.15],[0,.90,.565],'dark',.018);this.holes(rearTable,1.44,1.15,.90,.565,7,7);
 
   const gauge=this.group(this.root,'polar-gauge','Backgauge Positioning',[0,0,0],[0,.20,.36]);
   const beam=this.group(gauge,'polar-gauge-beam','Backgauge beam');this.box(beam,[1.20,.14,.13],[0,1.02,.70],'accent',.018);
@@ -55,12 +59,15 @@ export class Polar115MachineTemplate{
   const photo=this.group(safety,'polar-safety-photo','Photoelectric light-barrier arms');
   for(const x of [-.82,.82]){const arm=this.box(photo,[.15,.17,.58],[x,1.03,-.36],'body',.04);arm.rotation.x=.08;for(let i=0;i<6;i++){const led=this.cyl(photo,.009,.012,[x+(x<0?.077:-.077),1.03,-.56+i*.08],'red','x');led.userData.detail=true;led.userData.photoCell=true;}}
   const twohand=this.group(safety,'polar-safety-twohand','Two-hand cut buttons · simultaneous cut release');twohand.userData.simultaneityControlReference=true;twohand.userData.antiRepeatReference=true;for(const x of [-.72,.72]){this.box(twohand,[.18,.08,.14],[x,.91,-.71],'dark',.025);const b=this.cyl(twohand,.035,.022,[x,.96,-.78],'red','z');b.userData.twoHandButton=true;}
-  const estop=this.group(safety,'polar-safety-estop','Emergency stop');this.cyl(estop,.043,.035,[.92,1.32,-.18],'red','z');
+  const estop=this.group(safety,'polar-safety-estop','Emergency-stop pedestal');this.box(estop,[.10,.42,.14],[-.66,1.11,-.18],'body',.02);this.cyl(estop,.043,.035,[-.66,1.32,-.11],'red','z');
   const rear=this.group(safety,'polar-safety-rear','Rear guard reference');this.cover(this.box(rear,[1.50,.50,.045],[0,1.12,1.18],'body',.025));
 
   const control=this.group(this.root,'polar-control','EM-MONITOR Control',[0,0,0],[0,.24,-.20]);
   const panel=this.group(control,'polar-control-panel','Central program / dimension keypad');this.cover(this.box(panel,[1.42,.31,.15],[0,1.36,-.11],'dark',.035));
-  const crt=this.group(control,'polar-control-crt','CRT monitor');this.cover(this.box(crt,[.40,.35,.27],[-.12,1.58,-.02],'dark',.035));this.box(crt,[.30,.22,.012],[-.12,1.60,-.165],'screen',.018,'CRT Monitor');
+  const crt=this.group(control,'polar-control-crt','Program display (small industrial screen)');this.box(crt,[.22,.20,.03],[-.18,1.38,-.185],'black',.012);this.box(crt,[.17,.15,.008],[-.18,1.38,-.202],'screen',.006,'Program Display');
+  const keypad=this.group(control,'polar-control-keypad','Numeric / function keypad');for(let i=0;i<15;i++){const col=i%5,row=Math.floor(i/5);this.box(keypad,[.028,.028,.010],[-.48+col*.038,1.29-row*.038,-.195],col===4?'warning':'body',.003);}
+  const keyswitch=this.group(control,'polar-control-keyswitch','Key-operated mode-select sub-panel');this.cover(this.box(keyswitch,[.22,.34,.16],[.86,1.32,-.10],'body',.03));this.cyl(keyswitch,.032,.03,[.86,1.40,-.185],'black','z');this.cyl(keyswitch,.014,.05,[.80,1.24,-.185],'dark','z');
+  const papers=this.group(control,'polar-control-papers','Laminated instruction sheets taped to console');papers.userData.detail=true;this.box(papers,[.30,.24,.004],[.15,1.40,-.185],'paper',0);this.box(papers,[.16,.16,.004],[-.55,1.40,-.185],'paper',0);
   const memory=this.group(control,'polar-control-memory','Eltromat Memory / program interface');for(let i=0;i<30;i++){const col=i%10,row=Math.floor(i/10);this.box(memory,[.034,.025,.012],[-.50+col*.067,1.39-row*.055,-.195],i%7===0?'warning':'body',.003);}
   const corr=this.group(control,'polar-control-correction','Correction / pressure controls');for(const [x,k] of [[.48,'body'],[.61,'body'],[.76,'warning']])this.cyl(corr,.035,.022,[x,1.38,-.195],k,'z');
   const pressure=this.group(control,'polar-control-pressure','Clamp-pressure control interface');this.cyl(pressure,.060,.035,[.92,1.17,-.14],'dark','z');
@@ -72,11 +79,17 @@ export class Polar115MachineTemplate{
   const duct=this.group(utility,'polar-air-duct','Air-distribution duct reference');this.cyl(duct,.045,.72,[.10,.62,.42],'steel','x');
 
   const housing=this.group(this.root,'polar-housing','Main Housing');
-  this.cover(this.box(housing,[2.14,.72,1.46],[0,.37,.52],'bodyDark',.05));
-  this.cover(this.box(housing,[2.16,.80,.20],[0,1.22,.86],'body',.05));
-  this.cover(this.box(housing,[.20,.78,1.25],[-1.00,1.17,.48],'body',.045));
-  this.cover(this.box(housing,[.20,.78,1.25],[1.00,1.17,.48],'body',.045));
-  const brow=this.cover(this.box(housing,[2.00,.25,.22],[0,1.49,.68],'body',.04));brow.userData.consoleBrow=true;
+  this.cover(this.box(housing,[2.10,1.00,.60],[0,.85,1.00],'bodyDark',.05));
+  this.cover(this.cyl(housing,.30,2.10,[0,1.35,.72],'bodyDark','x'));
+  const consoleFace=this.cover(this.box(housing,[2.06,.42,.10],[0,1.32,.71],'body',.04));consoleFace.userData.consoleBrow=true;
+  const motorEnd=this.group(housing,'polar-housing-motor-end','Belt-drive housing with inspection window',[0,0,0],[.14,.06,0]);
+  this.cover(this.box(motorEnd,[.42,1.00,.58],[1.15,.85,1.02],'bodyDark',.08));
+  const window=this.cyl(motorEnd,.16,.02,[1.16,.90,1.30],'black','z');window.userData.detail=true;window.userData.inspectionWindow=true;
+  this.cover(this.box(housing,[2.00,.55,.55],[0,.28,1.05],'dark',.03));
+  const decal=this.group(housing,'polar-housing-decal','BAHAYA TERJEPIT pinch-point warning decal');decal.userData.detail=true;this.box(decal,[.20,.26,.006],[-.82,1.30,-.16],'red',0,'Pinch-Point Warning');
+  const nameplate=this.group(housing,'polar-housing-nameplate','POLAR rating / serial nameplate');nameplate.userData.detail=true;this.box(nameplate,[.13,.09,.006],[-.95,1.55,.72],'warning',.004,'Rating Plate');
+  const baseDecal=this.group(frame,'polar-frame-decal','High-voltage warning decal on base cabinet door');baseDecal.userData.detail=true;this.box(baseDecal,[.13,.13,.006],[.20,.36,1.27],'warning',0,'High-Voltage Warning');
+  const pedal=this.group(frame,'polar-frame-pedal','Foot pedal (backgauge/clamp release reference)');this.active(this.box(pedal,[.16,.03,.28],[0,.02,1.55],'dark',.01),'foot-pedal');this.cyl(pedal,.018,.28,[0,.14,1.42],'steel','x');
  }
  enrichV122(){
   this.root.userData.researchVersion='V122';
@@ -115,6 +128,9 @@ export class Polar115MachineTemplate{
    const change=this.group(knife,'polar-knife-change-v122','Knife-change handle / carrier support reference',[0,0,0],[0,.12,-.20]);
    tag(this.cyl(change,.025,.52,[-.82,1.34,-.12],'steel','y'),'knife-change-handle');
    tag(this.box(change,[.20,.12,.12],[-.82,1.08,-.12],'dark',.010),'knife-change-support');
+   const rack=this.group(knife,'polar-knife-rack-v122','Drilled accessory bracket (gauge / spare-part storage)',[0,0,0],[0,.10,-.16]);rack.userData.detail=true;
+   const rackPlate=tag(this.box(rack,[.05,.34,.22],[.90,1.10,.10],'body',.02),'accessory-rack-plate','BMJ-POLAR-PHOTOS-2026-09');rackPlate.rotation.y=-.5;
+   for(let i=0;i<5;i++){const h=this.cyl(rack,.021,.06,[.92-i*.007,1.24-i*.075,.10+i*.03],'black','x');h.userData.detail=true;h.userData.evidence='BMJ-POLAR-PHOTOS-2026-09';}
   }
 
   const safety=this.findNode('polar-safety');if(safety){
