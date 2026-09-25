@@ -64,9 +64,13 @@ test('V228 realism packs preserve evidence boundaries instead of inventing insta
  assert.match(o10r,/duplicateProcessHardwareAdded:false/);
 });
 
-test('V228 service worker precaches the live realism runtime',()=>{
+test('V228 keeps detailed realism lazy-loaded while refreshing the shell cache',()=>{
  assert.match(sw,/V228 machine visual parity/);
- for(const path of ['machine-runtime.js','offset5-realism.js','offset8-realism.js','offset10-realism.js'])assert.match(sw,new RegExp(path.replaceAll('.','\\.')));
+ for(const path of ['machine-runtime.js','offset5-realism.js','offset8-realism.js','offset10-realism.js'])assert.doesNotMatch(sw,new RegExp("'\\./src/"+path.replaceAll('.','\\.')+"'"));
  assert.match(sw,/factory-digital-twin-v222-overlay-state-ssot-20260925/);
  assert.match(sw,/const RELEASE='222'/);
+});
+
+test('V228 rebaked fleet keeps headroom inside the existing nine chunk contract',()=>{
+ assert.match(bake,/chunkSize=210000/);
 });
