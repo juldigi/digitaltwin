@@ -14,7 +14,7 @@ export class DianaEye55MachineTemplate{
   if(rotating)m.userData.spinDirection=/^(transport-pulley|delivery-pulley)$/.test(role)?-1:1;
   return m;
  }cover(m){m.userData.exteriorCover=true;return m;}
- build(){this.buildAccess();this.buildFeeder();this.buildTransport();this.buildInspection();this.buildCameras();this.buildLights();this.buildProcessing();this.buildReject();this.buildDelivery();}
+ build(){this.buildAccess();this.buildFeeder();this.buildTransport();this.buildInspection();this.buildCameras();this.buildLights();this.buildProcessing();this.buildReject();this.buildDelivery();this.buildExteriorIdentity();}
  buildAccess(){const g=this.group(this.root,'diana55-access','Frame and guarding');const frame=this.group(g,'diana55-access-frame','Machine base and side frames');this.box(frame,[7.90,.28,1.75],[.05,.20,0],'light',.04);for(let x=-3.65;x<=3.70;x+=.85)for(const z of [-.75,.75])this.box(frame,[.08,.58,.08],[x,.53,z],'steel',.012);const guard=this.group(g,'diana55-access-guard','Inspection guards and panels');for(const z of [-.88,.88]){this.cover(this.box(guard,[2.12,1.86,.08],[-.20,1.47,z],'white',.06));this.cover(this.box(guard,[1.18,1.18,.08],[1.70,1.13,z],'white',.05));}const door=this.group(g,'diana55-access-door','Service-access panels');for(const x of [-.72,.28])this.cover(this.box(door,[.74,.76,.025],[x,1.17,-.935],'light',.025));}
  buildFeeder(){const g=this.group(this.root,'diana55-feeder','Blank feeding and alignment',[-3.40,0,0],[-.68,.16,0]);const stack=this.group(g,'diana55-feed-stack','Blank stack support');this.box(stack,[.82,.08,1.18],[-.36,.38,0],'steel');for(let i=0;i<12;i++)this.box(stack,[.54,.012,.80],[-.44,.47+i*.013,0],'paper',.002);const friction=this.group(g,'diana55-feed-friction','Friction feeder belts');for(const z of [-.45,-.15,.15,.45]){this.box(friction,[1.12,.025,.10],[.20,.78,z],'rubber',.006);this.cyl(friction,.055,.15,[.65,.77,z],'rubber','feed-pulley','z');}const align=this.group(g,'diana55-feed-align','Blank aligning guides');for(const z of [-.58,.58])this.box(align,[1.14,.06,.04],[.30,1.02,z],'steel',.008);const dbl=this.group(g,'diana55-feed-double','Double-sheet sensing zone');for(const z of [-.38,.38])this.box(dbl,[.08,.18,.10],[.66,1.05,z],'blue',.018);}
  buildTransport(){const g=this.group(this.root,'diana55-transport','Suction-belt transport',[-1.95,0,0],[-.30,.16,0]);const belt=this.group(g,'diana55-transport-belt','Suction belt');for(const z of [-.50,-.25,0,.25,.50]){const b=this.box(belt,[2.25,.025,.105],[0,.78,z],'rubber',.006);b.userData.suctionBelt=true;for(const x of [-.95,.95])this.cyl(belt,.055,.15,[x,.77,z],'steel','transport-pulley','z');}
@@ -30,6 +30,22 @@ export class DianaEye55MachineTemplate{
  const air=this.group(g,'diana55-reject-air','Air-nozzle reject reference · installed type unverified');air.userData.rejectReference='air-nozzle';for(const z of [-.36,-.12,.12,.36]){const n=this.cyl(air,.018,.08,[-.14,.91,z],'blue','reject-air-nozzle','x');n.userData.rejectAirNozzle=true;}const valve=this.box(air,[.18,.12,.16],[-.38,.62,.58],'steel',.012);valve.userData.mechanismRole='reject-air-solenoid-manifold-reference';
  const chute=this.group(g,'diana55-reject-chute','Reject collection path');this.box(chute,[1.05,.08,.66],[.35,.55,.58],'steel',.02);this.box(chute,[.72,.40,.66],[.62,.36,.58],'light',.03);const sensor=this.group(g,'diana55-reject-sensor','Reject confirmation sensing');for(const z of [-.42,.42])this.box(sensor,[.08,.16,.10],[-.55,1.08,z],'blue',.015);}
  buildDelivery(){const g=this.group(this.root,'diana55-delivery','Accepted blank delivery',[3.55,0,0],[.72,.16,0]);const belt=this.group(g,'diana55-delivery-belt','Accepted-product belt');for(const z of [-.44,-.15,.15,.44]){this.box(belt,[1.45,.025,.10],[0,.76,z],'rubber',.006);for(const x of [-.62,.62])this.cyl(belt,.055,.14,[x,.75,z],'steel','delivery-pulley','z');}const stack=this.group(g,'diana55-delivery-stack','Delivery stack / buffer interface');this.box(stack,[.72,.08,1.02],[.78,.43,0],'steel');const counter=this.group(g,'diana55-delivery-counter','Output sensing / counter');for(const z of [-.38,.38])this.box(counter,[.08,.16,.10],[.48,1.02,z],'green',.015);}
+ buildExteriorIdentity(){
+  const g=this.group(this.root,'diana55-exterior-v230','Diana Eye 55 exterior silhouette refinement');
+  g.userData.visualRefinement='V230_DIANA_EYE55_OEM_INSPECTION_SILHOUETTE';
+  g.userData.sourceBoundary='HEIDELBERG_MASTERWORK_DIANA_EYE55_OEM__INSTALLED_CAMERA_OPTIONS_BOUNDED';
+  for(const z of [-.90,.90]){
+   this.cover(this.box(g,[3.55,.50,.10],[.05,.55,z],'dark',.035));
+   this.cover(this.box(g,[2.28,.16,.12],[-.12,2.54,z],'white',.030));
+   this.cover(this.box(g,[.14,1.76,.11],[-1.18,1.55,z],'white',.025));
+   this.cover(this.box(g,[.14,1.76,.11],[.88,1.55,z],'white',.025));
+   const aperture=this.box(g,[1.46,.82,.025],[-.15,1.54,z+(z<0?-.055:.055)],'glass',.035);
+   aperture.userData.inspectionAperture=true;
+  }
+  const hood=this.cover(this.box(g,[2.18,.28,1.76],[-.15,2.43,0],'white',.050));hood.userData.cameraHood=true;
+  const feederFascia=this.cover(this.box(g,[1.22,.30,.10],[-3.36,.62,-.88],'light',.025));feederFascia.userData.feederIdentityPanel=true;
+  const outputFascia=this.cover(this.box(g,[1.28,.30,.10],[3.47,.62,-.88],'light',.025));outputFascia.userData.acceptedDeliveryPanel=true;
+ }
  enrichV141(){this.root.userData.researchVersion='V141';this.root.userData.researchSourceCount=V141_SOURCE_STATS.total;this.root.userData.uniqueResearchUrls=V141_SOURCE_STATS.uniqueUrls;this.root.userData.detailPass='V141_DIANA55_TRIGGER_CAPTURE_DECISION_EJECTION';
   const tag=(m,role,evidence='MASTERWORK_DIANA_EYE_55_OEM')=>{if(m){m.userData.mechanismRole=role;m.userData.evidence=evidence;m.userData.detail=true;}return m;};
   const feeder=this.findNode('diana55-feed-friction');if(feeder){

@@ -70,6 +70,7 @@ export class APM2MachineTemplate{
     this.buildDrive();
     this.buildControl();
     this.buildSafety();
+    this.buildExteriorIdentity();
   }
   buildFrameAndPlatform(){
     const base=this.group(this.root,'apm2-base','Machine Base / Support',[0,0,0],[0,-.18,.35],['APM2-SP102-E-VISUAL','APM2-SP102-DIM']);
@@ -273,6 +274,33 @@ export class APM2MachineTemplate{
 
     const nonstop=this.group(g,'apm2-delivery-nonstop','Non-stop Delivery Reference',[0,0,0],[.35,.12,0],['APM2-SP102-1994']);
     for(const z of [-.45,-.15,.15,.45])this.box(nonstop,[.78,.025,.045],[.05,1.16,z],'steel',.004);
+  }
+  buildExteriorIdentity(){
+    const g=this.group(this.root,'apm2-exterior-v230','BOBST SP 102 legacy exterior silhouette refinement',[0,0,0],[0,.20,0],['APM2-SP102-E-VISUAL','APM2-SP102-1994']);
+    g.userData.visualRefinement='V230_SP102_LEGACY_FAMILY_SILHOUETTE';
+    g.userData.sourceBoundary='BOBST_SP102_LEGACY_FAMILY__E_SE_CER_BMA_SUFFIX_UNCONFIRMED';
+    // Legacy SP102 reads as a heavy monobloc platen core flanked by open pile handling.
+    for(const z of [-.92,.92]){
+      this.cover(this.box(g,[3.22,.50,.11],[.10,.56,z],'green',.035));
+      this.cover(this.box(g,[2.82,.14,.12],[.04,2.18,z],'cream',.028));
+      for(const x of [-.92,.02,.94]){
+        this.cover(this.box(g,[.14,1.22,.11],[x-.38,1.48,z],'cream',.022));
+        this.cover(this.box(g,[.14,1.22,.11],[x+.38,1.48,z],'cream',.022));
+      }
+    }
+    for(const x of [-.92,.02,.94])this.cover(this.box(g,[.90,.22,1.74],[x,2.08,0],'cream',.032));
+    // Operator-side legacy green lower fascia and service-door rhythm.
+    for(const x of [-1.15,-.32,.52,1.35]){
+      const fascia=this.cover(this.box(g,[.66,.30,.035],[x,.76,-.995],'green',.020));
+      fascia.userData.legacyServiceFascia=true;
+    }
+    // Preserve feeder/delivery pile visibility: only narrow portal crowns, never a solid cuboid shell.
+    const feederCrown=this.cover(this.box(g,[1.30,.18,1.78],[D.feederCenterX,2.02,0],'cream',.030));
+    feederCrown.userData.openPileEnvelope=true;
+    const deliveryCrown=this.cover(this.box(g,[1.18,.18,1.78],[D.deliveryCenterX,1.96,0],'cream',.030));
+    deliveryCrown.userData.openPileEnvelope=true;
+    const identity=this.cover(this.box(g,[.64,.14,.030],[-.02,1.78,-1.005],'dark',.012));
+    identity.userData.modelFamilyPlate='SP 102';
   }
   buildDrive(){
     const g=this.group(this.root,'apm2-drive','Main Drive / Transmission',[0,0,0],[0,.25,.65],['APM2-SP102-PARTS']);
