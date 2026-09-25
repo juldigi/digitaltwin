@@ -1166,3 +1166,12 @@ body.nav-open .viewport-mode-switch{visibility:hidden!important;pointer-events:n
  .viewport-mode-switch{max-width:96px!important}
  .plant-plan-2d>header{right:112px;max-width:calc(100% - 124px)}
 }
+
+
+/* V222 overlay state SSOT — state.overlay owns shell visibility; native dialog owns modal dimming. */
+body.modal-open .ui-backdrop{display:none!important}
+body.modal-open .mobile-nav{visibility:hidden!important;pointer-events:none!important}
+body.search-open aside#detail-panel,
+body.layer-open aside#detail-panel,
+body.system-open aside#detail-panel,
+body.modal-open aside#detail-panel{visibility:hidden!important;pointer-events:none!important}

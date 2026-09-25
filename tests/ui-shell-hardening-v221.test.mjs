@@ -33,7 +33,7 @@ test('v221 display overlay restores focus to Tampilan',()=>{
 });
 
 test('v221 cache-busted shell is served',()=>{
-  assert.match(html,/app-shell-v79\.css\?v=221/);
-  assert.match(html,/src\/app-shell-v79\.js\?v=221/);
-  assert.match(html,/bmj-sw-v221-reloaded/);
+  assert.match(html,/app-shell-v79\.css\?v=222/);
+  assert.match(html,/src\/app-shell-v79\.js\?v=222/);
+  assert.match(html,/bmj-sw-v222-reloaded/);
 });
