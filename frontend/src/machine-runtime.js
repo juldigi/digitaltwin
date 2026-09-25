@@ -1,7 +1,5 @@
-import {OffsetMachineTemplate} from './offset5.js';
-import {PrintingSimulation} from './simulation.js';
-import {Offset10MachineTemplate} from './offset10.js';
-import {Offset10PrintingSimulation} from './simulation-offset10.js';
+import {Offset5CD102RealismTemplate,Offset5CD102RealismSimulation} from './offset5-realism.js';
+import {Offset10CX104SpecialRealismTemplate,Offset10CX104SpecialRealismSimulation} from './offset10-realism.js';
 import {APM2MachineTemplate} from './apm2.js';
 import {APM2ProcessSimulation} from './simulation-apm2.js';
 import {SheetingMachineTemplate} from './sheeting.js';
@@ -9,8 +7,7 @@ import {SheetingProcessSimulation} from './simulation-sheeting.js';
 import {UniversalMachineTemplate,UniversalProcessSimulation,universalMachineConfig} from './universal-machine.js';
 import {Polar115MachineTemplate} from './polar115.js';
 import {Polar115ProcessSimulation} from './simulation-polar115.js';
-import {Offset8MachineTemplate} from './offset8.js';
-import {Offset8PrintingSimulation} from './simulation-offset8.js';
+import {Offset8CX104RealismTemplate,Offset8CX104RealismSimulation} from './offset8-realism.js';
 import {Offset9MachineTemplate} from './offset9.js';
 import {Offset9PrintingSimulation} from './simulation-offset9.js';
 import {MK920MachineTemplate} from './mk920.js';
@@ -51,12 +48,12 @@ export const isDedicatedMachineKey=key=>{const normalized=normalizeMachineKey(ke
 export function createMachineTemplate(key){
  const k=normalizeMachineKey(key);
  if(!k)throw new Error('Machine key is required');
- if(k==='offset5')return new OffsetMachineTemplate();
+ if(k==='offset5')return new Offset5CD102RealismTemplate();
  if(k==='sheeting')return new SheetingMachineTemplate();
- if(k==='offset10')return new Offset10MachineTemplate();
+ if(k==='offset10')return new Offset10CX104SpecialRealismTemplate();
  if(k==='apm2')return new APM2MachineTemplate();
  if(k==='BMJ-MCH-0001')return new Polar115MachineTemplate();
- if(k==='BMJ-MCH-0005')return new Offset8MachineTemplate();
+ if(k==='BMJ-MCH-0005')return new Offset8CX104RealismTemplate();
  if(k==='BMJ-MCH-0006')return new Offset9MachineTemplate();
  if(['BMJ-MCH-0007','BMJ-MCH-0008','BMJ-MCH-0022'].includes(k))return new FZ1200MachineTemplate(k);
  if(['BMJ-MCH-0011','BMJ-MCH-0012'].includes(k))return new MK920MachineTemplate(k);
@@ -74,12 +71,12 @@ export function createMachineTemplate(key){
 export function createMachineSimulation(key,machine,template){
  const k=normalizeMachineKey(key);
  if(!k)throw new Error('Machine key is required');
- if(k==='offset5')return new PrintingSimulation(machine,template);
+ if(k==='offset5')return new Offset5CD102RealismSimulation(machine,template);
  if(k==='sheeting')return new SheetingProcessSimulation(machine,template);
- if(k==='offset10')return new Offset10PrintingSimulation(machine,template);
+ if(k==='offset10')return new Offset10CX104SpecialRealismSimulation(machine,template);
  if(k==='apm2')return new APM2ProcessSimulation(machine,template);
  if(k==='BMJ-MCH-0001')return new Polar115ProcessSimulation(machine,template);
- if(k==='BMJ-MCH-0005')return new Offset8PrintingSimulation(machine,template);
+ if(k==='BMJ-MCH-0005')return new Offset8CX104RealismSimulation(machine,template);
  if(k==='BMJ-MCH-0006')return new Offset9PrintingSimulation(machine,template);
  if(['BMJ-MCH-0007','BMJ-MCH-0008','BMJ-MCH-0022'].includes(k))return new FZ1200ProcessSimulation(machine,template);
  if(['BMJ-MCH-0011','BMJ-MCH-0012'].includes(k))return new MK920StampingSimulation(machine,template);
