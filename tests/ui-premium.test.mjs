@@ -36,7 +36,7 @@ test('detail is an in-flow desktop inspector and a contextual mobile bottom shee
 test('mobile navigation and drawer have one state owner',()=>{
   assert.match(css,/body\.nav-open \.rail\{transform:none\}/);
   assert.match(css,/\.mobile-nav\{position:fixed/);
-  assert.match(js,/function closeDrawer\(\)/);
+  assert.match(js,/function closeDrawer\(\{restoreFocus=true\}=\{\}\)/);
   assert.match(js,/data-mobile-nav/);
   assert.match(js,/aria-expanded/);
 });
