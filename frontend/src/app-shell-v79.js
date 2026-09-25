@@ -295,9 +295,10 @@ q('#ui-backdrop')?.addEventListener('click',()=>{
  if(overlay==='search')closeSearch();
  else if(overlay==='systems')closeSystemBrowser();
  else if(overlay==='layers')closeLayerManager();
- else if(overlay==='navigation'){closeDrawer();closeOverlay();}
+ else if(overlay==='navigation')closeDrawer();
  else if(overlay==='modal'&&q('#modal')?.open)q('#modal-close')?.click();
  else closeOverlay();
+ if(overlay==='navigation')closeOverlay();
 });
 qa('.rail button').forEach(b=>b.addEventListener('click',()=>{if(innerWidth<768){const wasNavigation=getState().overlay==='navigation';closeDrawer();if(wasNavigation)closeOverlay()}}));
 
@@ -531,5 +532,5 @@ function syncPressedTools(state=getState()){
  };
  for(const [id,active] of Object.entries(values)){const el=q('#'+id);if(el){el.classList.toggle('active',active);el.setAttribute('aria-pressed',String(active));}}
 }
-relabel();const initialState=getState();syncOverlayDom(initialState);applyViewModeDom(initialState);syncSplashFromState(initialState);syncPressedTools(initialState);syncInspectorTabs(initialState);subscribe(state=>{syncOverlayDom(state);applyInspectorDom(state);applyViewModeDom(state);markSection(state.activeSection);syncLayerControls();syncAccessibleControls(state);syncPressedTools(state);syncInspectorTabs(state);syncVisualHierarchy(state);syncViewModeContext(state);syncSplashFromState(state);syncSimulationTransport(state)});
-document.documentElement.dataset.uiArchitecture='v222-overlay-ssot';
+relabel();const initialState=getState();syncOverlayDom(initialState);applyViewModeDom(initialState);syncSplashFromState(initialState);syncPressedTools(initialState);syncInspectorTabs(initialState);subscribe(state=>{applyInspectorDom(state);applyViewModeDom(state);markSection(state.activeSection);syncLayerControls();syncAccessibleControls(state);syncPressedTools(state);syncInspectorTabs(state);syncVisualHierarchy(state);syncViewModeContext(state);syncSplashFromState(state);syncSimulationTransport(state);syncOverlayDom(state)});
+document.documentElement.dataset.uiArchitecture='v212-ui-ssot';
