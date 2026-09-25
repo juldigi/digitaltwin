@@ -10,12 +10,12 @@ import {POLAR115_TECHNICAL_SOURCES,POLAR115_PROCESS} from '../frontend/src/data/
 test('POLAR 115 EM-MON preserves BMJ identity and archive dimensional boundaries',()=>{
  assert.equal(POLAR115_SPEC.assetId,'BMJ-MCH-0001');assert.equal(POLAR115_SPEC.model,'115 EM MON');assert.equal(POLAR115_SPEC.serial,'5831536');assert.equal(POLAR115_SPEC.cuttingWidthM,1.15);
  assert.deepEqual(POLAR115_SPEC.referenceEnvelopeM,[2.65,2.54,1.65]);assert.deepEqual(POLAR115_SPEC.publishedWeightKg,[3200,3500]);assert.deepEqual(POLAR115_SPEC.publishedClampPressureDaN,[150,4500]);
- assert.ok(POLAR115_TECHNICAL_SOURCES.some(s=>s.id==='POLAR-115-SAFETY-MANUAL'));assert.ok(POLAR115_TECHNICAL_SOURCES.some(s=>s.id==='POLAR-EM-EVIDENCE-BOUNDARY'));
+ assert.ok(POLAR115_TECHNICAL_SOURCES.some(s=>s.id==='POLAR-115-SAFETY-MANUAL'));assert.ok(POLAR115_TECHNICAL_SOURCES.some(s=>s.id==='POLAR-EM-EVIDENCE-BOUNDARY'));const photos=POLAR115_TECHNICAL_SOURCES.find(s=>s.id==='BMJ-POLAR-PHOTOS-2026-09');assert.equal(photos?.confidence,'VERIFIED_VISUAL');assert.deepEqual(photos?.photoFiles,['IMG_2488.jpeg','IMG_2490.jpeg']);
 });
 
 test('POLAR geometry uses a vertical knife blade and keeps safety hardware explicit',()=>{
  const m=new Polar115MachineTemplate();
- for(const id of ['polar-feed-center','polar-feed-left','polar-feed-right','polar-gauge','polar-clamp','polar-knife','polar-knife-blade','polar-safety-photo','polar-safety-twohand','polar-control-crt','polar-control-panel','polar-hyd-power','polar-air-blower'])assert.ok(m.findNode(id),id);
+ for(const id of ['polar-feed-center','polar-feed-left','polar-feed-right','polar-gauge','polar-clamp','polar-knife','polar-knife-blade','polar-safety-photo','polar-safety-left-arm','polar-safety-right-arm','polar-safety-twohand','polar-control-crt','polar-control-panel','polar-housing','polar-housing-motor-end','polar-hyd-power','polar-air-blower'])assert.ok(m.findNode(id),id);assert.equal(m.root.userData.mainHousingProfile,'RECTANGULAR_ROUNDED_HEAD__NO_HALF_CYLINDER_ROOF');
  const blade=m.meshes.find(x=>x.userData.knifeBlade);assert.ok(blade);blade.geometry.computeBoundingBox();const size=blade.geometry.boundingBox.getSize(new THREE.Vector3());assert.ok(size.y>size.z*3,'knife should be a vertical thin blade, not a horizontal plate');
  assert.equal(m.findNode('polar-safety-twohand').userData.simultaneityControlReference,true);assert.equal(m.findNode('polar-safety-twohand').userData.antiRepeatReference,true);
  const box=new THREE.Box3().setFromObject(m.root),envelope=box.getSize(new THREE.Vector3());assert.ok(box.min.y>=-0.01);assert.ok(envelope.x>=2.55&&envelope.x<=2.9);assert.ok(envelope.z>=1.7&&envelope.z<=2.8);assert.ok(envelope.y>=1.55&&envelope.y<=1.85);

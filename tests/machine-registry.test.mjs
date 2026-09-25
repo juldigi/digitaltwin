@@ -21,6 +21,8 @@ test('machine master registry preserves the plant area totals',()=>{
 
 test('all database equipment have a confidence-aware 3D route while four flagship twins stay dedicated',()=>{
 
+  const polar=MACHINE_REGISTRY.find(m=>m.machineId==='BMJ-MCH-0001');assert.equal(polar.manufacturer,'POLAR');
+
   const sheeting=MACHINE_REGISTRY.find(m=>m.sapCode==='SBM-2');
   assert.ok(sheeting);
   assert.equal(sheeting.machineId,'BMJ-MCH-0002');
