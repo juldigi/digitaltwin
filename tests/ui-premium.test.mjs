@@ -82,7 +82,7 @@ test('icons use one accessible vector family without emoji runtime controls',()=
 });
 
 test('service worker owns the current OEM-deep-detail shell assets',()=>{
- assert.match(sw,/factory-digital-twin-v212-ui-ssot-stage6-20260925/);
+ assert.match(sw,/factory-digital-twin-v213-mobile-layout-20260925/);
   assert.match(sw,/app-shell-v79\.css/);
   assert.match(sw,/src\/app-shell-v79\.js/);
   assert.match(sw,/assets\/splash-industrial-v79\.webp/);
@@ -236,7 +236,7 @@ test('V197 starts from a neutral factory context instead of loading OFFSET 5 imp
   assert.match(scope,/referenceMachineId:'BMJ-MCH-0003'/);
   assert.match(html,/id="geometry-caption">Pabrik · Seluruh Area</);
   assert.doesNotMatch(html,/id="geometry-caption">Model Offset 5</);
-  assert.match(sw,/factory-digital-twin-v212-ui-ssot-stage6-20260925/);
+  assert.match(sw,/factory-digital-twin-v213-mobile-layout-20260925/);
 });
 
 test('V197 navigation uses factory, machine, and system language',()=>{
