@@ -76,7 +76,7 @@ test('V232 priority machines remain finite and non-degenerate in world space',()
 });
 
 test('V232 shell recache marker changes while public V222 query/cache contract remains stable',()=>{
- assert.match(sw,/V232 priority remaining machine polish/);
+ assert.match(sw,/shell recache without rotating public query identifiers/);
  assert.match(sw,/factory-digital-twin-v222-overlay-state-ssot-20260925/);
  assert.match(sw,/const RELEASE='222'/);
 });
