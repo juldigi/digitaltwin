@@ -30,9 +30,9 @@ test('engine rejects an empty switch request',()=>{
 });
 
 test('V186 rotates active browser and service-worker identifiers',()=>{
- assert.match(index,/app-shell-v79\.css\?v=217/);
- assert.match(index,/src\/app\.js\?v=217/);
- assert.match(index,/src\/app-shell-v79\.js\?v=217/);
- assert.match(sw,/factory-digital-twin-v217-render-foundation-20260925/);
+ assert.match(index,/app-shell-v79\.css\?v=218/);
+ assert.match(index,/src\/app\.js\?v=218/);
+ assert.match(index,/src\/app-shell-v79\.js\?v=218/);
+ assert.match(sw,/factory-digital-twin-v218-mobile-ui-recovery-20260925/);
  assert.match(app,/pair\('Versi aplikasi',APP_BUILD\)/);
 });

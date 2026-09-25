@@ -5,11 +5,11 @@ import {FactoryEngine} from '../frontend/src/engine.js';
 import {loadActualPlantLayout} from '../frontend/src/data/plant-actual.js';
 import {loadFactoryFleet} from '../frontend/src/factory-building.js';
 
-test('factory upgrades the same layout with a mobile proxy in low mode and complete detail on desktop',async()=>{
+test('factory keeps complete detail on normal phones and reserves proxy for severely limited memory',async()=>{
  const layout=await loadActualPlantLayout();
  delete layout.fleet;
 
- const mobile={low:true,factory:new THREE.Group(),clearFactory(){this.factory.clear();this.actualFactory=null;}};
+ const mobile={low:true,capabilities:{memory:2},factory:new THREE.Group(),clearFactory(){this.factory.clear();this.actualFactory=null;}};
  FactoryEngine.prototype.loadLayout.call(mobile,layout);
  assert.ok(mobile.factory.children.length>0);
  assert.equal(mobile.actualFactory,null);
@@ -26,7 +26,7 @@ test('factory upgrades the same layout with a mobile proxy in low mode and compl
  FactoryEngine.prototype.loadLayout.call(mobile,layout);
  assert.equal(mobile.actualFactory.root,mobileRoot,'unchanged mobile proxy must not rebuild on navigation');
 
- const desktop={low:false,factory:new THREE.Group(),clearFactory(){this.factory.clear();this.actualFactory=null;}};
+ const desktop={low:true,capabilities:{memory:4},factory:new THREE.Group(),clearFactory(){this.factory.clear();this.actualFactory=null;}};
  FactoryEngine.prototype.loadLayout.call(desktop,layout);
  assert.equal(desktop.actualFactory.assets.size,layout.fleet.length);
  assert.ok(desktop.actualFactory.root.userData.buildingDetailPass);

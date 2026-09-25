@@ -1146,9 +1146,24 @@ body.nav-open .ui-backdrop,body.modal-open .ui-backdrop,
 body.search-open .ui-backdrop,body.layer-open .ui-backdrop,body.system-open .ui-backdrop{display:block}
 @media(max-width:767px){
  body.nav-open .rail{z-index:112!important;background:#fff!important}
- body.nav-open .ui-backdrop{z-index:109!important;position:fixed!important;inset:0!important}
+body.nav-open .ui-backdrop{z-index:109!important;position:fixed!important;inset:0!important}
  body.nav-open .mobile-nav{z-index:111!important;pointer-events:auto!important}
  .mobile-context-tools>small{color:#75879a!important}
  .mobile-context-tools button{color:#52677b!important}
  .mobile-context-tools button:hover,.mobile-context-tools button:focus-visible{background:#eef6ff!important;color:#0b70df!important}
+}
+
+/* Keep the dimmer behind the view/system panels and prevent the 2D switch
+   from escaping into an open overlay on narrow screens. */
+body.layer-open .ui-backdrop,body.system-open .ui-backdrop,
+body.search-open .ui-backdrop{z-index:88!important}
+body.layer-open .canonical-layer-manager,body.system-open .canonical-layer-manager,
+body.search-open .universal-search-panel{z-index:120!important}
+body.layer-open .viewport-mode-switch,body.system-open .viewport-mode-switch,
+body.search-open .viewport-mode-switch,body.modal-open .viewport-mode-switch,
+body.nav-open .viewport-mode-switch{visibility:hidden!important;pointer-events:none!important}
+@media(max-width:767px) and (orientation:portrait){
+ .scene-heading>div{max-width:calc(100% - 112px)!important;min-width:0}
+ .viewport-mode-switch{max-width:96px!important}
+ .plant-plan-2d>header{right:112px;max-width:calc(100% - 124px)}
 }

@@ -1,5 +1,5 @@
-const VERSION='factory-digital-twin-v217-render-foundation-20260925';
-const RELEASE='217';
+const VERSION='factory-digital-twin-v218-mobile-ui-recovery-20260925';
+const RELEASE='218';
 const ENTRYPOINTS=[
  './app-shell-v79.css','./src/app.js','./src/ui-v5.js','./src/experience-v37.js','./src/app-shell-v79.js'
 ];

@@ -18,7 +18,7 @@ test('user toast never exposes raw JavaScript exception text',()=>{
 });
 
 test('HTML requests the cache-busted fixed controller',()=>{
- assert.match(html,/src\/app\.js\?v=217/);
+ assert.match(html,/src\/app\.js\?v=218/);
 });
 
 
@@ -28,9 +28,9 @@ test('mobile 2D/3D switch remains compact without restoring the full-height stri
  assert.match(css,/max-height:44px!important/);
 });
 
-test('mobile renderer uses a lightweight factory proxy and disables interactive taxonomy overlays',()=>{
+test('mobile renderer preserves the detailed factory except on severely memory-limited devices',()=>{
  assert.match(engine,/function buildLowDetailFactory\(layout,fleet\)/);
- assert.match(engine,/this\.actualFactory=this\.low\?buildLowDetailFactory\(l,l\.fleet\):buildActualFactory\(l,l\.fleet\)/);
+ assert.match(engine,/this\.actualFactory=this\.capabilities\?\.memory<=2\?buildLowDetailFactory\(l,l\.fleet\):buildActualFactory\(l,l\.fleet\)/);
  assert.match(engine,/matchMedia\('\(max-width:767px\)'\)\.matches/);
  assert.match(engine,/antialias:!mobileRender/);
  assert.match(engine,/this\.renderFaulted=true/);
