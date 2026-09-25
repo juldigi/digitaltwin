@@ -25,9 +25,9 @@ test('simplified navigation stops simulation before changing major context',()=>
 });
 
 test('V185 rotates active runtime identifiers',()=>{
- assert.match(index,/app-shell-v79\.css\?v=214/);
- assert.match(index,/src\/app\.js\?v=214/);
- assert.match(index,/src\/app-shell-v79\.js\?v=214/);
- assert.match(sw,/factory-digital-twin-v214-runtime-stability-20260925/);
+ assert.match(index,/app-shell-v79\.css\?v=215/);
+ assert.match(index,/src\/app\.js\?v=215/);
+ assert.match(index,/src\/app-shell-v79\.js\?v=215/);
+ assert.match(sw,/factory-digital-twin-v215-runtime-recovery-20260925/);
  assert.match(app,/pair\('Versi aplikasi',APP_BUILD\)/);
 });
