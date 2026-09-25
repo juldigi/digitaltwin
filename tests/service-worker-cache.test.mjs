@@ -36,3 +36,12 @@ test('service-worker does not pre-cache technical expansion machine modules',()=
   'src/data/taxonomy-compressors.js','src/data/taxonomy-ahu.js','src/data/research-v147.js'
  ])assert.ok(!sw.includes("'./"+excluded+"'"),excluded+' must remain out of Phase-1 offline precache');
 });
+
+
+test('service worker pre-caches cache-busted entrypoints and can fall back across query versions',()=>{
+ assert.match(sw,/const RELEASE='215'/);
+ assert.match(sw,/const ENTRYPOINTS=\[/);
+ assert.match(sw,/ENTRYPOINTS\.map\(path=>path\+'\?v='\+RELEASE\)/);
+ assert.match(sw,/caches\.match\(request,\{ignoreSearch:true\}\)/);
+ assert.match(sw,/response\.status>=500/);
+});
