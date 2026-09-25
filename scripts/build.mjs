@@ -1,3 +1,5 @@
+import {execFileSync} from 'node:child_process';
+execFileSync(process.execPath,['scripts/bake-factory-fleet.mjs'],{stdio:'inherit'});
 import {cpSync,mkdirSync,readFileSync,writeFileSync,rmSync} from 'node:fs';
 rmSync('dist',{recursive:true,force:true});cpSync('frontend','dist',{recursive:true});mkdirSync('dist/vendor/three',{recursive:true});cpSync('node_modules/three/build','dist/vendor/three/build',{recursive:true});cpSync('node_modules/three/examples/jsm','dist/vendor/three/addons',{recursive:true});cpSync('node_modules/three/LICENSE','dist/vendor/three/LICENSE');
 // Keep modules at their original URLs so relative imports resolve identically in development and production.
