@@ -371,9 +371,63 @@ export class UniversalMachineTemplate{
    else{for(const z of [-.34,0,.34])this.active(this.cyl(active,.045,.54,[.88,.76,z],'steel','x'));}
   });
  }
- buildCompressor(total){const g=this.group(this.root,'universal-module-1','Compressor Package',[0,0,0],[.5,.2,0]);this.cover(this.box(g,[3.4,1.75,1.65],[0,1.02,0],'body',.08));const a=this.group(g,'universal-module-1-active','Motor / Compression Element',[0,0,0]);this.active(this.cyl(a,.38,1.1,[-.55,.86,0],'accent','x'));this.active(this.cyl(a,.28,.9,[.55,.86,0],'steel','x'));this.box(a,[.48,1.0,.72],[1.16,1.1,0],'dark',.04);for(let i=1;i<(this.cfg.profile?.architecture||this.cfg.modules).length;i++){const x=-1.4+i*.42,m=this.group(this.root,`universal-module-${i+1}`,(this.cfg.profile?.architecture||this.cfg.modules)[i],[x,0,0],[.3,.2,0]);this.box(m,[.28,.36,.42],[0,.48,.56],'steel',.02);}}
- buildAHU(total){this.cfg.modules.forEach((name,i)=>{const x=(i-(this.cfg.modules.length-1)/2)*1.08,g=this.group(this.root,`universal-module-${i+1}`,name,[x,0,0],[Math.sign(x||1)*.45,.2,0]);this.cover(this.box(g,[1.02,1.72,1.72],[0,1.02,0],'body',.035));const a=this.group(g,`universal-module-${i+1}-active`,name+' Active Element');if(i===4)this.active(this.cyl(a,.52,.18,[0,1.03,0],'accent','z'));else if(i===1)this.box(a,[.12,1.3,1.3],[0,1.03,0],'filter',.01);else this.active(this.cyl(a,.08,1.25,[0,1.02,0],'steel','z'));});}
- buildZund(total){const g=this.group(this.root,'universal-module-1','Vacuum Cutting Table',[0,0,0],[0,.2,0]);this.box(g,[5.8,.35,2.7],[0,.45,0],'dark',.05);this.box(g,[5.55,.06,2.45],[0,.65,0],'body',.01);for(let i=1;i<this.cfg.modules.length;i++){const x=-2.4+(i-1)*.8,m=this.group(this.root,`universal-module-${i+1}`,this.cfg.modules[i],[x,0,0],[.3,.25,0]),a=this.group(m,`universal-module-${i+1}-active`,this.cfg.modules[i]+' Active Element');this.active(this.box(a,[.28,.55,.32],[0,1.0,0],i===2?'orange':'steel',.025));}const rail=this.group(this.root,'zund-gantry','Tool Gantry');this.box(rail,[.18,1.05,2.9],[0,1.05,0],'accent',.025);}
+ buildCompressor(total){
+  const no=this.cfg.machine.no,atlas=[29,30,35].includes(no),kaeser=[31,32,34].includes(no),swan=no===33;
+  this.root.userData.visualRefinement=atlas?'V231_ATLAS_COPCO_GA_G_FAMILY_PACKAGE':kaeser?'V231_KAESER_SIGMA_FAMILY_PACKAGE':swan?'V231_SWAN_TS_AD_TMV_FAMILY_PACKAGE':'V231_ROTARY_SCREW_PACKAGE';
+  this.root.userData.installedIdentityBoundary='EXACT_MODEL_KW_DRIVE_AND_INTEGRATED_DRYER_UNVERIFIED';
+  const modules=this.cfg.profile?.architecture||this.cfg.modules,g=this.group(this.root,'universal-module-1','Compressor Package',[0,0,0],[.5,.2,0]);
+  const shellKind=kaeser?'body':atlas?'body':'blue';
+  this.cover(this.box(g,[total-.10,1.52,1.32],[0,.92,0],shellKind,.07));
+  const front=this.cover(this.box(g,[total*.42,1.18,.035],[-total*.23,.93,-.68],'dark',.025));front.userData.ventilationPanel=true;
+  for(let y=.48;y<1.42;y+=.12)this.box(g,[total*.34,.025,.012],[-total*.23,y,-.705],'black',.001);
+  const accentKind=kaeser?'yellow':atlas?'blue':'body';
+  this.cover(this.box(g,[.10,1.36,.035],[total*.18,.94,-.695],accentKind,.012));
+  const control=this.cover(this.box(g,[.48,.72,.035],[total*.31,1.03,-.70],atlas?'blue':kaeser?'dark':'body',.025));control.userData.controllerFamilyReference=true;
+  this.box(g,[.30,.19,.015],[total*.31,1.14,-.725],'glass',.016);
+  const a=this.group(g,'universal-module-1-active','Motor / Compression Element',[0,0,0]);
+  this.active(this.cyl(a,.30,.78,[-.42,.72,0],'accent','x'));this.active(this.cyl(a,.24,.66,[.36,.72,0],'steel','x'));
+  const separator=this.cyl(a,.22,.78,[.78,.88,.22],'steel','y');separator.userData.separatorVesselReference=true;
+  for(let i=1;i<modules.length;i++){
+   const x=-total*.38+i*(total*.76/Math.max(1,modules.length-1)),m=this.group(this.root,`universal-module-${i+1}`,modules[i],[x,0,0],[.25,.18,0]),active=this.group(m,`universal-module-${i+1}-active`,modules[i]+' Active Element');
+   if(i===4)this.active(this.box(active,[.08,.88,.88],[0,.92,.42],'steel',.010));
+   else if(i===5)this.active(this.cyl(active,.24,.10,[0,1.12,.42],'dark','z'));
+   else this.box(active,[.20,.28,.28],[0,.48,.42],'steel',.018);
+  }
+ }
+ buildAHU(total){
+  const mods=this.cfg.profile?.architecture||this.cfg.modules,n=mods.length,pitch=(total-.10)/n,no=this.cfg.machine.no;
+  this.root.userData.visualRefinement=no===40?'V231_SANSIN_NES_FAMILY_AHU_SECTIONS':'V231_DOUBLE_SKIN_AHU_SECTIONAL_REALISM';
+  this.root.userData.installedIdentityBoundary='EXACT_SECTION_ORDER_FAN_COIL_FILTER_AND_AIRFLOW_DIRECTION_UNVERIFIED';
+  mods.forEach((name,i)=>{
+   const x=-total/2+pitch*(i+.5),g=this.group(this.root,`universal-module-${i+1}`,name,[x,0,0],[Math.sign(x||1)*.40,.2,0]);
+   this.cover(this.box(g,[pitch*.94,1.70,1.70],[0,1.02,0],'body',.025));
+   for(const z of [-.875,.875])this.box(g,[pitch*.86,.035,.020],[0,.24,z],'dark',.003);
+   const seam=this.box(g,[.018,1.54,.022],[pitch*.44,1.02,-.875],'dark',.002);seam.userData.panelSeam=true;
+   const handle=this.box(g,[.025,.20,.025],[pitch*.27,1.02,-.902],'dark',.004);handle.userData.serviceDoorHandle=true;
+   const a=this.group(g,`universal-module-${i+1}-active`,name+' Active Element');
+   const lower=name.toLowerCase();
+   if(/filter/.test(lower)){const f=this.box(a,[.10,1.28,1.30],[0,1.03,0],'filter',.010);f.userData.filterBankReference=true;}
+   else if(/coil|heat|evaporative/.test(lower)){for(const xx of [-.09,0,.09]){const c=this.box(a,[.030,1.18,1.22],[xx,1.03,0],'blue',.004);c.userData.coilReference=true;}this.box(a,[pitch*.55,.05,1.22],[0,.35,0],'steel',.006).userData.condensateDrainPan=true;}
+   else if(/fan|supply/.test(lower)){const fan=this.active(this.cyl(a,.50,.16,[0,1.04,0],'accent','z'));fan.userData.fanWheelReference=true;}
+   else if(/damper|intake|inlet|discharge/.test(lower)){for(let z=-.55;z<=.55;z+=.22){const l=this.box(a,[.05,.10,1.20],[0,1.03,z],'steel',.004);l.rotation.x=.30;l.userData.damperLouver=true;}}
+   else if(/outdoor|compressor/.test(lower)){const c=this.box(a,[pitch*.60,.76,1.10],[0,.86,0],'dark',.025);c.userData.outdoorModuleFamilyBoundary=true;g.userData.installedArrangementVerified=false;}
+   else this.box(a,[pitch*.48,.52,1.05],[0,.92,0],'steel',.020);
+  });
+ }
+ buildZund(total){
+  this.root.userData.visualRefinement='V231_ZUND_G3_S3_MODULAR_FLATBED_SILHOUETTE';
+  this.root.userData.installedIdentityBoundary='EXACT_ZUND_MODEL_TABLE_SIZE_MODULES_AND_TOOLS_UNVERIFIED';
+  const g=this.group(this.root,'universal-module-1','Vacuum Cutting Table',[0,0,0],[0,.2,0]);
+  this.box(g,[total,.34,2.64],[0,.43,0],'dark',.05);this.box(g,[total-.18,.055,2.46],[0,.64,0],'body',.010);
+  for(let x=-total/2+.25;x<total/2-.20;x+=.28)this.box(g,[.012,.008,2.32],[x,.675,0],'steel',0);
+  for(let z=-1.08;z<=1.08;z+=.27)this.box(g,[total-.32,.008,.012],[0,.677,z],'steel',0);
+  const mods=this.cfg.profile?.architecture||this.cfg.modules;
+  for(let i=1;i<mods.length;i++){const x=-total*.38+(i-1)*(total*.72/Math.max(1,mods.length-2)),m=this.group(this.root,`universal-module-${i+1}`,mods[i],[x,0,0],[.3,.25,0]),a=this.group(m,`universal-module-${i+1}-active`,mods[i]+' Active Element');const q=this.active(this.box(a,[.24,.46,.28],[0,.98,0],i===2?'orange':'steel',.022));q.userData.installedToolBoundary=true;}
+  const gantry=this.group(this.root,'zund-gantry','Travelling X beam and tool carriage');
+  for(const z of [-1.34,1.34])this.box(gantry,[.16,.78,.16],[0,1.02,z],'accent',.020);
+  this.box(gantry,[.20,.18,2.84],[0,1.38,0],'accent',.022);
+  const carriage=this.box(gantry,[.42,.42,.34],[0,1.16,0],'dark',.030);carriage.userData.moduleCarrierReference=true;
+ }
  resolvePart(o){for(let p=o;p&&p!==this.root;p=p.parent)if(p.userData.selectable)return p;return null;}findNode(id){return id==='MACHINE-UNIVERSAL'?this.root:this.nodes.find(n=>n.userData.nodeId===id)||null;}
  resolveTaxonomyNode(id){let m=this.taxonomyById.get(id);while(m){for(const r of m.meshRefs||[]){const n=this.findNode(r);if(n)return n;}m=m.parentId?this.taxonomyById.get(m.parentId):null;}return this.root;}
  contains(a,b){for(let p=b;p;p=p.parent)if(p===a)return true;return false;}
