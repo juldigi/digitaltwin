@@ -113,7 +113,7 @@ export class FactoryEngine {
       const children=part.children.filter(child=>child.userData.selectable),fallback=children.length?children:[part];
       for(const node of fallback)candidates.push({nodes:[node],node,meta:null,name:node.name||node.userData.nodeId||'Komponen',selected:node===part,mapped:true,childCount:0});
     }
-    const limit=matchMedia('(max-width:767px)').matches?8:16,selected=candidates.filter(x=>x.selected),others=candidates.filter(x=>!x.selected).slice(0,Math.max(0,limit-selected.length));
+    const mobile=matchMedia('(max-width:767px)').matches,limit=mobile?4:16,selected=candidates.filter(x=>x.selected),others=candidates.filter(x=>!x.selected).slice(0,Math.max(0,limit-selected.length));
     for(const [index,item] of [...selected,...others].entries()){
       const label=document.createElement('button');label.type='button';label.className='part-label'+(item.selected?' is-selected':'')+(!item.mapped?' is-reference':'');label.title=item.name;
       const name=document.createElement('span');name.className='part-label-name';name.textContent=item.name;label.append(name);
@@ -134,17 +134,17 @@ export class FactoryEngine {
   updatePartLabels(){
     const layer=document.getElementById('part-label-layer');if(!layer||!this.partLabelEntries.length){if(layer)layer.hidden=true;return;}
     layer.hidden=!this.labels||!this.machine.visible||this.view!=='machine';if(layer.hidden)return;
-    this.machine.updateWorldMatrix(true,true);const w=this.container.clientWidth,h=this.container.clientHeight,placed=[];
+    this.machine.updateWorldMatrix(true,true);const w=this.container.clientWidth,h=this.container.clientHeight,placed=[],mobile=matchMedia('(max-width:767px)').matches,topSafe=mobile?112:52,bottomSafe=mobile?118:16,horizontalSafe=mobile?76:92;
     for(const entry of this.partLabelEntries){
       const visibleNodes=entry.nodes.filter(node=>node.visible);if(!visibleNodes.length){entry.label.hidden=entry.line.hidden=entry.dot.hidden=true;continue;}
       const box=new THREE.Box3();let hasBox=false;for(const node of visibleNodes){const nodeBox=new THREE.Box3().setFromObject(node);if(!nodeBox.isEmpty()){box.union(nodeBox);hasBox=true;}}
       const world=hasBox?box.getCenter(new THREE.Vector3()):visibleNodes[0].getWorldPosition(new THREE.Vector3()),projected=world.clone().project(this.camera);
       const visible=projected.z>=-1&&projected.z<=1&&Math.abs(projected.x)<=1.08&&Math.abs(projected.y)<=1.08;
       entry.label.hidden=entry.line.hidden=entry.dot.hidden=!visible;if(!visible)continue;
-      const anchorX=(projected.x*.5+.5)*w,anchorY=(-projected.y*.5+.5)*h,ring=Math.floor(entry.index/2),side=entry.index%2===0?-1:1;
-      let labelX=entry.selected?anchorX:anchorX+side*(96+ring*18),labelY=entry.selected?anchorY-44:anchorY-28-ring*25;
-      labelX=Math.max(92,Math.min(w-92,labelX));labelY=Math.max(52,Math.min(h-16,labelY));
-      for(const prior of placed)if(Math.abs(labelX-prior.x)<165&&Math.abs(labelY-prior.y)<34)labelY=Math.min(h-16,prior.y+35);
+      const anchorX=(projected.x*.5+.5)*w,anchorY=(-projected.y*.5+.5)*h,ring=Math.floor(entry.index/2),side=entry.index%2===0?-1:1,sideOffset=mobile?72+ring*12:96+ring*18;
+      let labelX=entry.selected?anchorX:anchorX+side*sideOffset,labelY=entry.selected?anchorY-(mobile?36:44):anchorY-(mobile?24:28)-ring*(mobile?30:25);
+      labelX=Math.max(horizontalSafe,Math.min(w-horizontalSafe,labelX));labelY=Math.max(topSafe,Math.min(h-bottomSafe,labelY));
+      for(const prior of placed)if(Math.abs(labelX-prior.x)<(mobile?142:165)&&Math.abs(labelY-prior.y)<(mobile?38:34))labelY=Math.min(h-bottomSafe,prior.y+(mobile?40:35));
       placed.push({x:labelX,y:labelY});entry.label.style.left=labelX+'px';entry.label.style.top=labelY+'px';
       entry.line.setAttribute('x1',String(labelX));entry.line.setAttribute('y1',String(labelY+3));entry.line.setAttribute('x2',String(anchorX));entry.line.setAttribute('y2',String(anchorY));entry.dot.setAttribute('cx',String(anchorX));entry.dot.setAttribute('cy',String(anchorY));
     }
