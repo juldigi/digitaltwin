@@ -446,8 +446,17 @@ addEventListener('bmj:modalopenrequest',()=>{const firstOpen=getState().overlay!
 addEventListener('bmj:modalcloserequest',()=>{if(getState().overlay==='modal')closeOverlay();restoreOverlayFocus('modal')});
 modalElement?.addEventListener('cancel',event=>{event.preventDefault();q('#modal-close')?.click()});
 modalElement?.addEventListener('close',()=>{if(getState().overlay==='modal')closeOverlay();restoreOverlayFocus('modal')});
-const syncViewport=()=>{document.documentElement.style.setProperty('--app-vh',`${window.visualViewport?.height||innerHeight}px`);const w=innerWidth;if(w>=768&&getState().overlay==='navigation'){closeDrawer();closeOverlay()}const next=setState({deviceMode:w<768?'mobile':w<=1180?'tablet':'desktop'},{url:false});applyInspectorDom(next)};
-syncViewport();addEventListener('resize',syncViewport,{passive:true});window.visualViewport?.addEventListener('resize',syncViewport,{passive:true});
+const syncViewport=()=>{
+ const viewport=window.visualViewport,appHeight=viewport?.height||innerHeight,w=innerWidth,mobile=w<768;
+ const keyboardOpen=mobile&&Boolean(viewport)&&Math.max(0,innerHeight-appHeight)>160;
+ document.documentElement.style.setProperty('--app-vh',`${appHeight}px`);
+ document.body.classList.toggle('keyboard-open',keyboardOpen);
+ const mobileNav=q('.mobile-nav');
+ if(mobileNav){const hidden=!mobile||keyboardOpen;mobileNav.hidden=hidden;mobileNav.setAttribute('aria-hidden',String(hidden))}
+ if(w>=768&&getState().overlay==='navigation'){closeDrawer();closeOverlay()}
+ const next=setState({deviceMode:mobile?'mobile':w<=1180?'tablet':'desktop'},{url:false});applyInspectorDom(next);
+};
+syncViewport();addEventListener('resize',syncViewport,{passive:true});addEventListener('orientationchange',syncViewport,{passive:true});window.visualViewport?.addEventListener('resize',syncViewport,{passive:true});
 
 function syncInspectorTabs(state=getState()){
  const tabs=qa('#detail-panel [role="tab"]').filter(tab=>tab.getAttribute('aria-hidden')!=='true'),activeKey=state.inspectorState?.tab||'overview';
