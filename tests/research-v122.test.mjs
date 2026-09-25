@@ -53,10 +53,10 @@ test('V122 MK1060ER exposes gripper-chain protection platen stripping blanking l
  m.dispose();
 });
 
-test('V122 POLAR 115 exposes backgauge sledge clamp pressure knife drive safety indication and hydraulic manifold detail',()=>{
+test('V123 photo-matched POLAR 115 preserves V122 service detail while replacing the obsolete cut-line approximation',()=>{
  const m=new Polar115MachineTemplate();
- assert.equal(m.root.userData.researchVersion,'V122');assert.ok(m.root.userData.researchSourceCount>=160);
- requireRoles(m,['backgauge-sledge','backgauge-lead-nut','position-encoder-body','clamp-pressure-adjuster','clamp-piston-rod','knife-carrier-guide','knife-drive-clutch','knife-drive-gear','knife-change-handle','cut-line-emitter','hydraulic-pump-motor','hydraulic-solenoid-valve']);
+ assert.equal(m.root.userData.researchVersion,'V123_PHOTO_MATCHED');assert.ok(m.root.userData.researchSourceCount>=160);
+ requireRoles(m,['backgauge-sledge','backgauge-lead-nut','position-encoder-body','clamp-pressure-adjuster','clamp-piston-rod','knife-carrier-guide','knife-drive-clutch','knife-drive-gear','knife-change-handle','cut-line-indicator-beam','hydraulic-pump-motor','hydraulic-solenoid-valve']);
  m.dispose();
 });
 
