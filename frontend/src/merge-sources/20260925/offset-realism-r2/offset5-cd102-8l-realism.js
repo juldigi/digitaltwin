@@ -11,9 +11,9 @@
 // - Simulation hardening removes any accidental cover/service mesh from the moving
 //   rotor/oscillator lists, while leaving the current detailed process simulation intact.
 
-import {OffsetMachineTemplate} from '../../../offset5.js';
-import {PrintingSimulation} from '../../../simulation.js';
-import {OFFSET5_UNIT_CENTERS} from '../../../data/dimensions-offset5.js';
+import {OffsetMachineTemplate} from './offset5.js';
+import {PrintingSimulation} from './simulation.js';
+import {OFFSET5_UNIT_CENTERS} from './data/dimensions-offset5.js';
 
 export const OFFSET5_FINAL_REFINEMENT=Object.freeze({
   id:'OFFSET5_CD102_8L_FINAL_REFINEMENT_R2',
