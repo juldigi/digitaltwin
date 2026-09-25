@@ -103,12 +103,12 @@ for(const [k,n,r,v] of l2)add('APM2.'+k,'APM2',2,'Unit Utama',n,{meshRefs:r,sour
  part(bb,'COLUMNS','Side columns / upper beam',['apm2-platen-frame'],['Operator-side column','Drive-side column','Upper reaction beam','Lower base frame']);
  const tooling=sub('APM2.PLATEN','TOOLING','Die-Cutting Tooling',['apm2-platen-tooling'],['APM2-SP102-1994','APM2-SP102-PARTS']);
  const tb=block(tooling,'CHASE','Chase / plate stack',['apm2-platen-tooling']);
- part(tb,'CHASE','Die-cutting chase',['apm2-cutting-chase'],['Fixed-bottom chase','Chase centering','Chase locking']);
+ part(tb,'CHASE','Die-cutting chase',['apm2-cutting-chase'],['Chase centering','Chase locking']);
  part(tb,'CUTPLATE','Cutting plate',['apm2-cutting-plate'],['1040 × 720 family cutting plate','Thin cutting sheet reference','Makeready protection plate']);
  part(tb,'COMP','Compensation / micrometric system',['apm2-micrometric'],['Compensating plate','Micrometric adjustment screws','Centerline reference']);
- const motion=sub('APM2.PLATEN','MOTION','Moving Platen / Impression Motion',['apm2-moving-platen']);
+ const motion=sub('APM2.PLATEN','MOTION','Platen Press Assembly / Impression Motion',['apm2-moving-platen'],['APM2-SP102-1994'],[0,.18,0],CONFIDENCE.HIGH,'Chase, cutting plate and bed are modeled as one rigid assembly that closes together during the press stroke; which specific plate is fixed vs. moving on this BMJ unit is not photo/manual-verified, so no upper/lower kinematic split is asserted.');
  const mb=block(motion,'PRESS','Platen pressure mechanism',['apm2-moving-platen','apm2-platen-toggle']);
- part(mb,'PLATEN','Moving lower platen',['apm2-moving-platen'],['Platen bed','Pressure face','Platen guide blocks']);
+ part(mb,'PLATEN','Platen bed (rigid with chase/cutting-plate stack)',['apm2-moving-platen'],['Platen bed','Pressure face','Platen guide blocks']);
  part(mb,'TOGGLE','Toggle / eccentric drive',['apm2-platen-toggle'],['Toggle links','Eccentric shaft','Pressure rollers','Main connecting rods']);
  part(mb,'FORCE','Impression / pressure reference',[],['Family reference up to 250 t'],['APM2-SP102-1994'],CONFIDENCE.REFERENCE_ONLY);
 }
