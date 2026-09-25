@@ -1175,3 +1175,34 @@ body.search-open aside#detail-panel,
 body.layer-open aside#detail-panel,
 body.system-open aside#detail-panel,
 body.modal-open aside#detail-panel{visibility:hidden!important;pointer-events:none!important}
+
+
+/* V224 responsive chrome — visualViewport is the mobile layout source of truth. */
+@media(max-width:767px){
+ aside#detail-panel{
+  max-height:calc(var(--app-vh,100dvh) - var(--header-h) - 92px - env(safe-area-inset-bottom))!important;
+ }
+ #scene-editor-panel{
+  max-height:calc(var(--app-vh,100dvh) - var(--header-h,58px) - 84px - env(safe-area-inset-bottom))!important;
+ }
+ body.keyboard-open .mobile-nav{display:none!important;visibility:hidden!important;pointer-events:none!important}
+ body.keyboard-open .scene-bottom,
+ body.keyboard-open .viewport-mode-switch,
+ body.keyboard-open .viewport-zoom{visibility:hidden!important;pointer-events:none!important}
+ body.keyboard-open aside#detail-panel{
+  bottom:8px!important;height:auto!important;
+  max-height:calc(var(--app-vh,100dvh) - var(--header-h) - 16px)!important
+ }
+ body.keyboard-open .universal-search-panel{
+  bottom:auto!important;height:calc(var(--app-vh,100dvh) - var(--header-h))!important;
+  max-height:calc(var(--app-vh,100dvh) - var(--header-h))!important
+ }
+ body.keyboard-open #scene-editor-panel{
+  bottom:8px!important;height:auto!important;min-height:0!important;
+  max-height:calc(var(--app-vh,100dvh) - var(--header-h) - 16px)!important
+ }
+ body.keyboard-open dialog#modal[open]{
+  margin:8px auto auto!important;
+  max-height:calc(var(--app-vh,100dvh) - 16px)!important
+ }
+}
