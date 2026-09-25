@@ -9,13 +9,15 @@ const shell=read('../frontend/src/app-shell-v79.js');
 const sw=read('../frontend/sw.js');
 
 test('V193 Factory navigation preserves view mode while business navigation is owned by app.js',()=>{
- const marker="on('#nav-machine',()=>";
+ const marker="const openFactoryNavigation=()=>";
  const start=app.indexOf(marker);
  assert.notEqual(start,-1);
- const handler=app.slice(start,app.indexOf(';on(',start));
+ const handler=app.slice(start,app.indexOf(";const openAssetNavigation",start));
  assert.match(handler,/showHome\(\{historyMode:'push'\}\)/);
  assert.doesNotMatch(handler,/setViewMode\('3d'\)/);
  assert.doesNotMatch(handler,/workspace-2d/);
+ assert.match(app,/on\('#nav-machine',openFactoryNavigation\)/);
+ assert.match(app,/window\.addEventListener\('bmj:mobilefactoryrequest',safe\(openFactoryNavigation\)\)/);
  assert.doesNotMatch(shell,/q\('#nav-machine'\)\?\.addEventListener\('click'/);
  assert.match(shell,/function markSection\(section\)/);
 });
@@ -39,7 +41,7 @@ test('V173 dedicated mode buttons remain the only controls that intentionally ch
 });
 
 test('V173 runtime files and service worker are cache-busted',()=>{
- assert.match(html,/src\/app\.js\?v=214/);
- assert.match(html,/src\/app-shell-v79\.js\?v=214/);
- assert.match(sw,/factory-digital-twin-v214-runtime-stability-20260925/);
+ assert.match(html,/src\/app\.js\?v=215/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=215/);
+ assert.match(sw,/factory-digital-twin-v215-runtime-recovery-20260925/);
 });

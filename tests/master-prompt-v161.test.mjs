@@ -29,15 +29,17 @@ test('V162 restores evidence-bounded Systems navigation without unlocking unveri
 test('V162 exposes Systems in both navigation surfaces and keeps identifiers coherent',()=>{
  assert.match(html,/id="nav-systems" data-section="system"/);
  assert.match(html,/data-mobile-nav="system" aria-label="Sistem utilitas"/);
- assert.match(html,/app-shell-v79\.css\?v=214/);
- assert.match(html,/src\/app\.js\?v=214/);
- assert.match(html,/src\/app-shell-v79\.js\?v=214/);
+ assert.match(html,/app-shell-v79\.css\?v=215/);
+ assert.match(html,/src\/app\.js\?v=215/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=215/);
  assert.match(shell,/v212-ui-ssot/);
- assert.match(sw,/factory-digital-twin-v214-runtime-stability-20260925/);
+ assert.match(sw,/factory-digital-twin-v215-runtime-recovery-20260925/);
 });
 
 test('asset navigation opens an empty search instead of serializing the click event',()=>{
- assert.match(app,/on\('#nav-assets',\(\)=>\{stopSimulationBeforeNavigation\(\);emitDomainState\(\{activeSection:'asset'\}\);assetDialog\(\);\}\)/);
+ assert.match(app,/const openAssetNavigation=\(\)=>\{stopSimulationBeforeNavigation\(\);emitDomainState\(\{activeSection:'asset'\}\);assetDialog\(\);\}/);
+ assert.match(app,/on\('#nav-assets',openAssetNavigation\)/);
+ assert.match(app,/window\.addEventListener\('bmj:mobileassetrequest',safe\(openAssetNavigation\)\)/);
  assert.doesNotMatch(app,/on\('#nav-assets',assetDialog\)/);
  assert.match(app,/const stopSimulationBeforeNavigation=.*bmj:simulationstoprequest/);
  assert.match(app,/if\(machine\)\{closeModal\(\);if\(simulationIntent\)[\s\S]*await openAssetContext\(machine\);\}/);

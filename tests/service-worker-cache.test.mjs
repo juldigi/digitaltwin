@@ -26,7 +26,7 @@ test('service-worker Phase-1 shell cache references only deployable frontend fil
 });
 
 test('service-worker cache version advances with the Phase-1 foundation release',()=>{
- assert.match(sw,/factory-digital-twin-v214-runtime-stability-20260925/);
+ assert.match(sw,/factory-digital-twin-v215-runtime-recovery-20260925/);
 });
 
 test('service-worker does not pre-cache technical expansion machine modules',()=>{
@@ -35,4 +35,13 @@ test('service-worker does not pre-cache technical expansion machine modules',()=
   'src/offset8.js','src/offset9.js','src/mk920.js','src/mk1060.js','src/promatrix106.js',
   'src/data/taxonomy-compressors.js','src/data/taxonomy-ahu.js','src/data/research-v147.js'
  ])assert.ok(!sw.includes("'./"+excluded+"'"),excluded+' must remain out of Phase-1 offline precache');
+});
+
+
+test('service worker pre-caches cache-busted entrypoints and can fall back across query versions',()=>{
+ assert.match(sw,/const RELEASE='215'/);
+ assert.match(sw,/const ENTRYPOINTS=\[/);
+ assert.match(sw,/ENTRYPOINTS\.map\(path=>path\+'\?v='\+RELEASE\)/);
+ assert.match(sw,/caches\.match\(request,\{ignoreSearch:true\}\)/);
+ assert.match(sw,/response\.status>=500/);
 });

@@ -131,7 +131,7 @@ test('conditional controls explain requirements rather than failing silently',()
   assert.match(app,/Edit Pabrik 3D/);
 });
 test('service worker refreshes the redesigned shell',()=>{
-  assert.match(sw,/factory-digital-twin-v214-runtime-stability-20260925/);
+  assert.match(sw,/factory-digital-twin-v215-runtime-recovery-20260925/);
   assert.doesNotMatch(sw,/src\/universal-machine\.js/);
   assert.match(app,/template\.ghost\(true,part\)/,'object selection must automatically ghost all non-selected geometry');
   for(const asset of ['app-shell-v79.css','src/app-shell-v79.js','assets/splash-industrial-v79.webp','src/ui-v5.js','src/app.js','src/simulation.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));

@@ -75,10 +75,11 @@ function buildLowDetailFactory(layout,fleet){
 
 export class FactoryEngine {
   constructor(container,onSelect){
-    this.container=container;this.onSelect=onSelect;this.onTaxonomySelect=null;this.view='factory';this.layout=null;this.low=false;this.labels=true;this.isolated=false;this.partLabelEntries=[];
+    const mobileRender=matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse)').matches;
+    this.container=container;this.onSelect=onSelect;this.onTaxonomySelect=null;this.view='factory';this.layout=null;this.low=mobileRender;this.mobileRender=mobileRender;this.renderFaulted=false;this.labels=true;this.isolated=false;this.partLabelEntries=[];
     {const params=new URLSearchParams(location.search),requested=normalizeFoundationMachineKey(params.get('machine')||params.get('asset'));this.requestedMachineKey=requested;this.machineKey=null;}
-    this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'low-power'});
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));this.renderer.shadowMap.enabled=true;this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.2;
+    this.renderer=new THREE.WebGLRenderer({antialias:!mobileRender,alpha:false,powerPreference:mobileRender?'low-power':'high-performance',stencil:false,preserveDrawingBuffer:false});
+    this.renderer.setPixelRatio(mobileRender?1:Math.min(devicePixelRatio,1.5));this.renderer.shadowMap.enabled=!mobileRender;this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.2;
     container.appendChild(this.renderer.domElement);this.renderer.domElement.setAttribute('aria-label','Digital Twin 3D Pabrik Packaging Offset. Pilih mesin untuk membuka model detail.');this.renderer.domElement.setAttribute('tabindex','0');
     this.scene=new THREE.Scene();this.scene.background=new THREE.Color(0xe8eef2);
     this.camera=new THREE.PerspectiveCamera(38,1,.05,1e7);
@@ -98,7 +99,8 @@ export class FactoryEngine {
     this.renderer.domElement.addEventListener('pointerup',e=>{if(!this.down||Math.hypot(e.clientX-this.down[0],e.clientY-this.down[1])>5||this.gizmo.dragging||this.simulation?.active)return;const r=this.renderer.domElement.getBoundingClientRect();this.ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),this.camera);if(this.sceneEditing){const hit=this.ray.intersectObject(this.view==='machine'?this.machine:this.factory,true).find(h=>this.isObjectVisible(h.object));if(hit){let node=hit.object;while(node&&!this.sceneObjectIds?.has(node))node=node.parent;if(node)this.selectSceneObject(this.sceneObjectIds.get(node));}return;}if(this.view==='factory'&&this.actualFactory){const hit=this.ray.intersectObjects([...this.actualFactory.assets.values()],true).find(h=>{for(let p=h.object;p;p=p.parent)if(!p.visible)return false;return true;});if(hit)this.onFactorySelect?.(hit.object.userData.machineId);return;}const hit=this.ray.intersectObject(this.machine,true).find(h=>{for(let p=h.object;p;p=p.parent)if(!p.visible)return false;return true;});if(hit&&this.machine.visible){const part=this.template.resolvePart(hit.object);if(part)this.onSelect(part);}});
     this.resizeObserver=new ResizeObserver(()=>this.resize());this.resizeObserver.observe(container);
     this.last=0;this.render=this.render.bind(this);this.studio.visible=false;this.resize();this.frame=requestAnimationFrame(this.render);
-    this.renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();this.onError?.('Konteks grafis terputus. Muat ulang halaman untuk memulihkan penampil.');});
+    this.renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();this.renderFaulted=true;this.onError?.('Konteks grafis terputus. Tampilan dialihkan ke denah 2D agar navigasi tetap dapat digunakan.');});
+    this.renderer.domElement.addEventListener('webglcontextrestored',()=>{this.renderFaulted=false;this.setLow(this.mobileRender||this.low);this.resize();this.onRecovered?.();});
   }
   resize(){const w=this.container.clientWidth,h=this.container.clientHeight;if(!w||!h)return;this.renderer.setSize(w,h);this.camera.aspect=w/h;this.camera.updateProjectionMatrix();}
   framingProfile(object=this.machine){const portrait=this.container.clientWidth<=767&&this.container.clientHeight>this.container.clientWidth;const machine=object===this.machine&&this.view==='machine';return {portrait,machine,padding:portrait&&machine?1.06:1.18,targetLift:portrait&&machine?-.08:0};}
@@ -122,11 +124,13 @@ export class FactoryEngine {
     if(!animate||matchMedia('(prefers-reduced-motion: reduce)').matches){this.controls.target.copy(center);this.camera.position.copy(end);this.controls.update();return;}
     this.transition={start:performance.now(),from:this.camera.position.clone(),to:end,fromTarget:this.controls.target.clone(),target:center};
   }
-  render(now){this.frame=requestAnimationFrame(this.render);if(document.hidden||(this.low&&now-this.last<32))return;this.last=now;
-    this.simulation?.update(now);
-    if(this.view==='factory')this.actualFactory?.update?.(now);
-    if(this.transition){const t=Math.min((now-this.transition.start)/650,1),e=t*t*(3-2*t),a=this.transition;this.camera.position.lerpVectors(a.from,a.to,e);this.controls.target.lerpVectors(a.fromTarget,a.target,e);if(t===1)this.transition=null;}
-    this.controls.update();this.renderer.render(this.scene,this.camera);this.updateLabel();if(!this.low){try{this.updatePartLabels();}catch(error){console.warn('[Digital Twin labels disabled after overlay error]',error);this.clearPartLabels();}}
+  render(now){this.frame=requestAnimationFrame(this.render);if(this.renderFaulted||document.hidden||(this.low&&now-this.last<32))return;this.last=now;
+    try{
+      this.simulation?.update(now);
+      if(this.view==='factory')this.actualFactory?.update?.(now);
+      if(this.transition){const t=Math.min((now-this.transition.start)/650,1),e=t*t*(3-2*t),a=this.transition;this.camera.position.lerpVectors(a.from,a.to,e);this.controls.target.lerpVectors(a.fromTarget,a.target,e);if(t===1)this.transition=null;}
+      this.controls.update();this.renderer.render(this.scene,this.camera);this.updateLabel();if(!this.low){try{this.updatePartLabels();}catch(error){console.warn('[Digital Twin labels disabled after overlay error]',error);this.clearPartLabels();}}
+    }catch(error){this.renderFaulted=true;console.error('[Digital Twin renderer]',error);this.onError?.('Render 3D terhenti. Tampilan dialihkan ke denah 2D agar menu tetap dapat digunakan.');}
   }
   updateLabel(){const el=document.getElementById('machine-label');if(!el)return;el.hidden=!this.labels||!this.machine.visible;if(el.hidden)return;this.machine.updateWorldMatrix(true,true);const p=new THREE.Vector3(0,2.9,0).applyMatrix4(this.machine.matrixWorld);const distance=p.distanceTo(this.camera.position);p.project(this.camera);if(p.z>1||p.z< -1||Math.abs(p.x)>.97||Math.abs(p.y)>.94){el.hidden=true;return;}el.style.left=((p.x*.5+.5)*this.container.clientWidth)+'px';el.style.top=((-p.y*.5+.5)*this.container.clientHeight)+'px';document.getElementById('label-detail').hidden=distance>80;}
   clearPartLabels(){
@@ -397,7 +401,7 @@ export class FactoryEngine {
     this.sceneOverrides=overrides;
   }
   edit(on){if(on&&this.view==='factory'&&this.layout){this.machine.visible=true;this.gizmo.attach(this.machine);}else this.gizmo.detach();}
-  setLow(on){this.low=on;this.renderer.setPixelRatio(on?1:Math.min(devicePixelRatio,1.7));this.renderer.shadowMap.enabled=!on;this.template.setLow(on);this.resize();}
+  setLow(on){this.low=Boolean(on)||this.mobileRender;this.renderer.setPixelRatio(this.low?1:Math.min(devicePixelRatio,1.5));this.renderer.shadowMap.enabled=!this.low;this.template.setLow(this.low);this.resize();}
   clearMachineContext(){
     if(this.simulation?.active)this.simulation.stop();
     this.gizmo.detach();this.clearPartLabels();this.simulation?.dispose();this.template?.dispose();if(this.machine)this.scene.remove(this.machine);
