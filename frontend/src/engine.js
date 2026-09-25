@@ -28,6 +28,51 @@ const neutralTemplate=()=>{
  };
 };
 
+function buildLowDetailFactory(layout,fleet){
+  const root=new THREE.Group();root.name='BMJ · mobile low-detail factory';
+  const layers={};
+  for(const name of ['building','roof','machines','labels','landscape','reference','unidentified','utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors']){
+    layers[name]=new THREE.Group();layers[name].name=name;root.add(layers[name]);
+  }
+  layers.roof.visible=false;layers.labels.visible=false;layers.landscape.visible=false;layers.reference.visible=false;
+  for(const name of ['utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors'])layers[name].visible=false;
+  const assets=new Map(),boxGeo=new THREE.BoxGeometry(1,1,1);
+  const machineMaterial=new THREE.MeshStandardMaterial({color:0xb8c8d2,roughness:.86,metalness:.02});
+  const unidentifiedMaterial=new THREE.MeshStandardMaterial({color:0xc9bea4,roughness:.9,metalness:0});
+  const assetPoints=[];
+  for(const f of fleet||[]){
+    const p=f?.placement||{},size=Array.isArray(f?.size)?f.size:[2,1,2];
+    if(!Number.isFinite(p.x)||!Number.isFinite(p.y))continue;
+    const w=Math.max(.25,Number(size[0])||2),h=Math.max(.35,Number(size[1])||1),d=Math.max(.25,Number(size[2])||2);
+    const g=new THREE.Group();g.name=p.label||p.machineId||'Machine';g.position.set(p.x,0,-p.y);g.rotation.y=(Number(p.rotation)||0)*Math.PI/180;
+    g.userData={machineId:p.machineId,placementStatus:p.status,foundationScope:canOpenTechnical3D(p.machineId)?'TECHNICAL_ASSET':'LAYOUT_PLACEHOLDER',mobileProxy:true};
+    const mesh=new THREE.Mesh(boxGeo,p.status==='UNIDENTIFIED'?unidentifiedMaterial:machineMaterial);mesh.position.y=h/2;mesh.scale.set(w,h,d);mesh.userData={machineId:p.machineId,mobileProxy:true};mesh.receiveShadow=false;mesh.castShadow=false;g.add(mesh);
+    (p.status==='UNIDENTIFIED'?layers.unidentified:layers.machines).add(g);if(p.machineId)assets.set(p.machineId,g);
+    assetPoints.push([p.x-w/2,-p.y-d/2],[p.x+w/2,-p.y+d/2]);
+  }
+  const walls=Array.isArray(layout?.actual?.walls)?layout.actual.walls:[];
+  const wallSpecs=[];
+  for(const wall of walls){
+    const a=wall?.a,b=wall?.b;if(!Array.isArray(a)||!Array.isArray(b))continue;
+    const ax=Number(a[0]),az=-Number(a[1]),bx=Number(b[0]),bz=-Number(b[1]);if(![ax,az,bx,bz].every(Number.isFinite))continue;
+    const dx=bx-ax,dz=bz-az,len=Math.hypot(dx,dz);if(len<.08)continue;
+    wallSpecs.push({x:(ax+bx)/2,z:(az+bz)/2,len,angle:-Math.atan2(dz,dx),width:Math.max(.06,Number(wall.width)||.12)});
+    assetPoints.push([ax,az],[bx,bz]);
+  }
+  if(wallSpecs.length){
+    const wallMat=new THREE.MeshStandardMaterial({color:0x9aadb7,roughness:.92,metalness:0}),instanced=new THREE.InstancedMesh(boxGeo,wallMat,wallSpecs.length),dummy=new THREE.Object3D();
+    wallSpecs.forEach((w,i)=>{dummy.position.set(w.x,2.25,w.z);dummy.rotation.set(0,w.angle,0);dummy.scale.set(w.len,4.5,w.width);dummy.updateMatrix();instanced.setMatrixAt(i,dummy.matrix);});instanced.instanceMatrix.needsUpdate=true;instanced.receiveShadow=false;instanced.castShadow=false;layers.building.add(instanced);
+  }
+  if(assetPoints.length){
+    let minX=Infinity,maxX=-Infinity,minZ=Infinity,maxZ=-Infinity;for(const [x,z] of assetPoints){minX=Math.min(minX,x);maxX=Math.max(maxX,x);minZ=Math.min(minZ,z);maxZ=Math.max(maxZ,z);}
+    const floor=new THREE.Mesh(new THREE.BoxGeometry(Math.max(10,maxX-minX+8),.08,Math.max(10,maxZ-minZ+8)),new THREE.MeshStandardMaterial({color:0xdfe7eb,roughness:.98,metalness:0}));
+    floor.position.set((minX+maxX)/2,-.04,(minZ+maxZ)/2);floor.receiveShadow=false;layers.building.add(floor);
+  }
+  root.userData={baselineId:layout?.baselineId||null,mobileLowDetail:true,renderStatus:'MOBILE_LOW_DETAIL_FACTORY_PROXY'};
+  return {root,layers,assets,update(){},dispose(){}};
+}
+
+
 export class FactoryEngine {
   constructor(container,onSelect){
     this.container=container;this.onSelect=onSelect;this.onTaxonomySelect=null;this.view='factory';this.layout=null;this.low=false;this.labels=true;this.isolated=false;this.partLabelEntries=[];
@@ -81,7 +126,7 @@ export class FactoryEngine {
     this.simulation?.update(now);
     if(this.view==='factory')this.actualFactory?.update?.(now);
     if(this.transition){const t=Math.min((now-this.transition.start)/650,1),e=t*t*(3-2*t),a=this.transition;this.camera.position.lerpVectors(a.from,a.to,e);this.controls.target.lerpVectors(a.fromTarget,a.target,e);if(t===1)this.transition=null;}
-    this.controls.update();this.renderer.render(this.scene,this.camera);this.updateLabel();this.updatePartLabels();
+    this.controls.update();this.renderer.render(this.scene,this.camera);this.updateLabel();if(!this.low){try{this.updatePartLabels();}catch(error){console.warn('[Digital Twin labels disabled after overlay error]',error);this.clearPartLabels();}}
   }
   updateLabel(){const el=document.getElementById('machine-label');if(!el)return;el.hidden=!this.labels||!this.machine.visible;if(el.hidden)return;this.machine.updateWorldMatrix(true,true);const p=new THREE.Vector3(0,2.9,0).applyMatrix4(this.machine.matrixWorld);const distance=p.distanceTo(this.camera.position);p.project(this.camera);if(p.z>1||p.z< -1||Math.abs(p.x)>.97||Math.abs(p.y)>.94){el.hidden=true;return;}el.style.left=((p.x*.5+.5)*this.container.clientWidth)+'px';el.style.top=((-p.y*.5+.5)*this.container.clientHeight)+'px';document.getElementById('label-detail').hidden=distance>80;}
   clearPartLabels(){
@@ -100,7 +145,7 @@ export class FactoryEngine {
     return inherited.length?inherited:(fallbackPart?[fallbackPart]:[]);
   }
   setPartLabels(part,taxonomyId=null){
-    this.clearPartLabels();if(!part||this.view!=='machine')return;
+    this.clearPartLabels();if(!part||this.view!=='machine'||this.low||matchMedia('(max-width:767px)').matches)return;
     const layer=document.getElementById('part-label-layer'),items=layer?.querySelector('.part-label-items'),svg=layer?.querySelector('svg');if(!layer||!items||!svg)return;
     const selectedMeta=taxonomyId?this.template.taxonomyById.get(taxonomyId):null,direct=selectedMeta?this.template.taxonomy.filter(n=>n.parentId===selectedMeta.id):[];
     const candidates=[],addMeta=(meta,selected=false)=>{
@@ -113,7 +158,7 @@ export class FactoryEngine {
       const children=part.children.filter(child=>child.userData.selectable),fallback=children.length?children:[part];
       for(const node of fallback)candidates.push({nodes:[node],node,meta:null,name:node.name||node.userData.nodeId||'Komponen',selected:node===part,mapped:true,childCount:0});
     }
-    const mobile=matchMedia('(max-width:767px)').matches,limit=mobile?4:16,selected=candidates.filter(x=>x.selected),others=candidates.filter(x=>!x.selected).slice(0,Math.max(0,limit-selected.length));
+    const limit=matchMedia('(max-width:767px)').matches?8:16,selected=candidates.filter(x=>x.selected),others=candidates.filter(x=>!x.selected).slice(0,Math.max(0,limit-selected.length));
     for(const [index,item] of [...selected,...others].entries()){
       const label=document.createElement('button');label.type='button';label.className='part-label'+(item.selected?' is-selected':'')+(!item.mapped?' is-reference':'');label.title=item.name;
       const name=document.createElement('span');name.className='part-label-name';name.textContent=item.name;label.append(name);
@@ -134,17 +179,17 @@ export class FactoryEngine {
   updatePartLabels(){
     const layer=document.getElementById('part-label-layer');if(!layer||!this.partLabelEntries.length){if(layer)layer.hidden=true;return;}
     layer.hidden=!this.labels||!this.machine.visible||this.view!=='machine';if(layer.hidden)return;
-    this.machine.updateWorldMatrix(true,true);const w=this.container.clientWidth,h=this.container.clientHeight,placed=[],mobile=matchMedia('(max-width:767px)').matches,topSafe=mobile?112:52,bottomSafe=mobile?118:16,horizontalSafe=mobile?76:92;
+    this.machine.updateWorldMatrix(true,true);const w=this.container.clientWidth,h=this.container.clientHeight,placed=[];
     for(const entry of this.partLabelEntries){
       const visibleNodes=entry.nodes.filter(node=>node.visible);if(!visibleNodes.length){entry.label.hidden=entry.line.hidden=entry.dot.hidden=true;continue;}
       const box=new THREE.Box3();let hasBox=false;for(const node of visibleNodes){const nodeBox=new THREE.Box3().setFromObject(node);if(!nodeBox.isEmpty()){box.union(nodeBox);hasBox=true;}}
       const world=hasBox?box.getCenter(new THREE.Vector3()):visibleNodes[0].getWorldPosition(new THREE.Vector3()),projected=world.clone().project(this.camera);
       const visible=projected.z>=-1&&projected.z<=1&&Math.abs(projected.x)<=1.08&&Math.abs(projected.y)<=1.08;
       entry.label.hidden=entry.line.hidden=entry.dot.hidden=!visible;if(!visible)continue;
-      const anchorX=(projected.x*.5+.5)*w,anchorY=(-projected.y*.5+.5)*h,ring=Math.floor(entry.index/2),side=entry.index%2===0?-1:1,sideOffset=mobile?72+ring*12:96+ring*18;
-      let labelX=entry.selected?anchorX:anchorX+side*sideOffset,labelY=entry.selected?anchorY-(mobile?36:44):anchorY-(mobile?24:28)-ring*(mobile?30:25);
-      labelX=Math.max(horizontalSafe,Math.min(w-horizontalSafe,labelX));labelY=Math.max(topSafe,Math.min(h-bottomSafe,labelY));
-      for(const prior of placed)if(Math.abs(labelX-prior.x)<(mobile?142:165)&&Math.abs(labelY-prior.y)<(mobile?38:34))labelY=Math.min(h-bottomSafe,prior.y+(mobile?40:35));
+      const anchorX=(projected.x*.5+.5)*w,anchorY=(-projected.y*.5+.5)*h,ring=Math.floor(entry.index/2),side=entry.index%2===0?-1:1;
+      let labelX=entry.selected?anchorX:anchorX+side*(96+ring*18),labelY=entry.selected?anchorY-44:anchorY-28-ring*25;
+      labelX=Math.max(92,Math.min(w-92,labelX));labelY=Math.max(52,Math.min(h-16,labelY));
+      for(const prior of placed)if(Math.abs(labelX-prior.x)<165&&Math.abs(labelY-prior.y)<34)labelY=Math.min(h-16,prior.y+35);
       placed.push({x:labelX,y:labelY});entry.label.style.left=labelX+'px';entry.label.style.top=labelY+'px';
       entry.line.setAttribute('x1',String(labelX));entry.line.setAttribute('y1',String(labelY+3));entry.line.setAttribute('x2',String(anchorX));entry.line.setAttribute('y2',String(anchorY));entry.dot.setAttribute('cx',String(anchorX));entry.dot.setAttribute('cy',String(anchorY));
     }
@@ -167,7 +212,7 @@ export class FactoryEngine {
     else if(l.machineAnchor&&this.machineKey==='offset5'){const anchor=l.machineAnchor,p=cadToWorld(anchor.x,anchor.y,l.transform);this.machine.position.set(p.x,anchor.z*(l.transform.scale??1),p.z);this.machine.rotation.y=-(anchor.rotation+l.transform.rotation)*Math.PI/180;this.machine.visible=true;}
   }
   loadLayout(l){if(l===this.layout&&this.factory.children.length&&(!l?.fleet||this.loadedFleet===l.fleet))return;this.clearFactory();this.sceneBase=new WeakMap();this.appliedSceneIds=new Set();this.layout=l;if(!l)return;
-    if(l.baselineId&&l.fleet){this.actualFactory=buildActualFactory(l,l.fleet);this.factory.add(this.actualFactory.root);this.loadedFleet=l.fleet;this.layoutStats={total:l.source.entityCount,rendered:l.actual.walls.length,unimplemented:0};return;}
+    if(l.baselineId&&l.fleet){this.actualFactory=this.low?buildLowDetailFactory(l,l.fleet):buildActualFactory(l,l.fleet);this.factory.add(this.actualFactory.root);this.loadedFleet=l.fleet;this.layoutStats={total:l.source.entityCount,rendered:l.actual.walls.length,unimplemented:0};return;}
     if(Array.isArray(l.referenceBatches)){
       this.layoutStats={total:l.source?.entityCount??l.referenceBatches.length,rendered:0,unimplemented:l.source?.entityCount??0};
       const profile=l.layout3D;

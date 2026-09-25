@@ -9,12 +9,12 @@ const css=fs.readFileSync(new URL('../frontend/app-shell-v79.css',import.meta.ur
 const sw=fs.readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 
 test('V155 release cache keys move beyond V149/V151 sources',()=>{
-  assert.match(html,/app-shell-v79\.css\?v=213/);
-  assert.match(html,/src\/app\.js\?v=213/);
-  assert.match(html,/src\/ui-v5\.js\?v=213/);
-  assert.match(html,/src\/app-shell-v79\.js\?v=213/);
+  assert.match(html,/app-shell-v79\.css\?v=214/);
+  assert.match(html,/src\/app\.js\?v=214/);
+  assert.match(html,/src\/ui-v5\.js\?v=214/);
+  assert.match(html,/src\/app-shell-v79\.js\?v=214/);
   assert.doesNotMatch(html,/\?v=149/);
-  assert.match(sw,/factory-digital-twin-v213-mobile-layout-20260925/);
+  assert.match(sw,/factory-digital-twin-v214-runtime-stability-20260925/);
 });
 
 test('custom major overlays expose dialog semantics focus restoration and keyboard containment',()=>{

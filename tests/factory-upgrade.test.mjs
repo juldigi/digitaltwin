@@ -5,20 +5,31 @@ import {FactoryEngine} from '../frontend/src/engine.js';
 import {loadActualPlantLayout} from '../frontend/src/data/plant-actual.js';
 import {loadFactoryFleet} from '../frontend/src/factory-building.js';
 
-test('factory upgrades the same layout from the initial CAD scene to every complete machine',async()=>{
- const layout=await loadActualPlantLayout(),engine={low:true,factory:new THREE.Group(),clearFactory(){this.factory.clear();this.actualFactory=null;}};
+test('factory upgrades the same layout with a mobile proxy in low mode and complete detail on desktop',async()=>{
+ const layout=await loadActualPlantLayout();
  delete layout.fleet;
- FactoryEngine.prototype.loadLayout.call(engine,layout);
- assert.ok(engine.factory.children.length>0);
- assert.equal(engine.actualFactory,null);
+
+ const mobile={low:true,factory:new THREE.Group(),clearFactory(){this.factory.clear();this.actualFactory=null;}};
+ FactoryEngine.prototype.loadLayout.call(mobile,layout);
+ assert.ok(mobile.factory.children.length>0);
+ assert.equal(mobile.actualFactory,null);
+
  layout.fleet=await loadFactoryFleet();
- FactoryEngine.prototype.loadLayout.call(engine,layout);
- assert.equal(engine.loadedFleet,layout.fleet);
- assert.equal(engine.actualFactory.assets.size,layout.fleet.length);
- assert.ok(engine.actualFactory.root.userData.buildingDetailPass);
- let meshes=0;engine.actualFactory.root.traverse(o=>{if(o.isMesh)meshes++;});
- assert.ok(meshes>6000,'the complete factory should be present even in low GPU mode');
- const root=engine.actualFactory.root;
- FactoryEngine.prototype.loadLayout.call(engine,layout);
- assert.equal(engine.actualFactory.root,root,'unchanged full scenes must not rebuild on navigation');
+ FactoryEngine.prototype.loadLayout.call(mobile,layout);
+ assert.equal(mobile.loadedFleet,layout.fleet);
+ assert.equal(mobile.actualFactory.assets.size,layout.fleet.length);
+ assert.equal(mobile.actualFactory.root.userData.mobileLowDetail,true);
+ assert.equal(mobile.actualFactory.root.userData.renderStatus,'MOBILE_LOW_DETAIL_FACTORY_PROXY');
+ let mobileMeshes=0;mobile.actualFactory.root.traverse(o=>{if(o.isMesh)mobileMeshes++;});
+ assert.ok(mobileMeshes<500,'low-detail mobile factory must stay lightweight');
+ const mobileRoot=mobile.actualFactory.root;
+ FactoryEngine.prototype.loadLayout.call(mobile,layout);
+ assert.equal(mobile.actualFactory.root,mobileRoot,'unchanged mobile proxy must not rebuild on navigation');
+
+ const desktop={low:false,factory:new THREE.Group(),clearFactory(){this.factory.clear();this.actualFactory=null;}};
+ FactoryEngine.prototype.loadLayout.call(desktop,layout);
+ assert.equal(desktop.actualFactory.assets.size,layout.fleet.length);
+ assert.ok(desktop.actualFactory.root.userData.buildingDetailPass);
+ let desktopMeshes=0;desktop.actualFactory.root.traverse(o=>{if(o.isMesh)desktopMeshes++;});
+ assert.ok(desktopMeshes>6000,'desktop/full mode must keep the complete factory');
 });
