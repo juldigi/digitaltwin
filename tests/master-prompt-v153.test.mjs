@@ -51,9 +51,9 @@ test('factory-first boot stays covered until CAD layout is loaded and failures a
 });
 
 test('V153 cache includes the foundation policy and current cache-busted controller',()=>{
-  assert.match(html,/app-shell-v79\.css\?v=218/);
-  assert.match(html,/src\/app\.js\?v=218/);
-  assert.match(html,/src\/app-shell-v79\.js\?v=218/);
-  assert.match(sw,/factory-digital-twin-v218-mobile-ui-recovery-20260925/);
+  assert.match(html,/app-shell-v79\.css\?v=219/);
+  assert.match(html,/src\/app\.js\?v=219/);
+  assert.match(html,/src\/app-shell-v79\.js\?v=219/);
+  assert.match(sw,/factory-digital-twin-v219-cinematic-focus-20260925/);
   assert.match(sw,/src\/data\/foundation-scope\.js/);
 });

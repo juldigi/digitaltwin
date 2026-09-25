@@ -5,6 +5,7 @@ import {OFFSET5_TAXONOMY,TAXONOMY_BY_ID} from './data/taxonomy-offset5.js';
 import {ORIENTATION} from './data/sources-offset5.js';
 import {OFFSET5_DIMENSIONS,OFFSET5_UNIT_CENTERS,offset5DimensionAudit} from './data/dimensions-offset5.js';
 import {V122_SOURCE_STATS} from './data/research-v122.js';
+import {createIndustrialMaterial} from './render/material-library.js';
 
 // Offset 5 reconstruction.
 // The outer longitudinal/lateral envelope and repeated-unit pitch are calibrated from
@@ -50,7 +51,11 @@ export class OffsetMachineTemplate {
   }
   material(kind,owner){
     const key=owner.userData.nodeId+':'+kind;
-    if(!this.materials.has(key))this.materials.set(key,new THREE.MeshStandardMaterial({color:this.palette[kind]??this.palette.graphite,metalness:['silver','steel'].includes(kind)?.65:kind==='paper'?0:.25,roughness:kind==='paper'?.9:kind==='glass'?.18:.46,transparent:kind==='glass',opacity:kind==='glass'?.65:1}));
+    if(!this.materials.has(key)){
+      const surface=['silver','steel'].includes(kind)?'stainlessSteel':kind==='rubber'?'rubber':kind==='glass'?'safetyGlass':'paintedSteel';
+      const properties=kind==='paper'?{metalness:0,roughness:.9}:kind==='glass'?{opacity:.65}:['silver','steel'].includes(kind)?{roughness:.42,metalness:.65}:{metalness:.25,roughness:.46};
+      this.materials.set(key,createIndustrialMaterial(surface,{color:this.palette[kind]??this.palette.graphite,...properties}));
+    }
     return this.materials.get(key);
   }
   mesh(parent,geo,key,kind,pos,rotation){

@@ -4,6 +4,7 @@ export const RENDER_PROFILES=Object.freeze({
  hemat:Object.freeze({pixelRatio:1,shadows:false,shadowSize:512,exposure:1.1,frameInterval:32,cameraMs:500}),
  seimbang:Object.freeze({pixelRatio:1.35,shadows:true,shadowSize:1024,exposure:1.15,frameInterval:16,cameraMs:650}),
  tinggi:Object.freeze({pixelRatio:1.75,shadows:true,shadowSize:1536,exposure:1.17,frameInterval:16,cameraMs:700}),
+ engineering:Object.freeze({pixelRatio:1.5,shadows:true,shadowSize:1024,exposure:1.12,frameInterval:16,cameraMs:520}),
  cinematic:Object.freeze({pixelRatio:2,shadows:true,shadowSize:2048,exposure:1.18,frameInterval:16,cameraMs:850})
 });
 

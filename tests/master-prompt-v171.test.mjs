@@ -62,7 +62,7 @@ test('in-place navigation never reloads the page to switch machine context',()=>
 });
 
 test('Stage 6 runtime files and service worker are cache-busted',()=>{
- assert.match(html,/src\/app\.js\?v=218/);
- assert.match(html,/src\/app-shell-v79\.js\?v=218/);
- assert.match(sw,/factory-digital-twin-v218-mobile-ui-recovery-20260925/);
+ assert.match(html,/src\/app\.js\?v=219/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=219/);
+ assert.match(sw,/factory-digital-twin-v219-cinematic-focus-20260925/);
 });

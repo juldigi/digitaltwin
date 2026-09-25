@@ -11,11 +11,11 @@ const css=read('app-shell-v79.css');
 const engine=read('src/engine.js');
 
 test('V215 service worker bootstraps before application modules and self-heals stale controllers',()=>{
- const bootstrap=html.indexOf('id="sw-bootstrap"'),appModule=html.indexOf('src="./src/app.js?v=218"');
+ const bootstrap=html.indexOf('id="sw-bootstrap"'),appModule=html.indexOf('src="./src/app.js?v=219"');
  assert.ok(bootstrap>0&&bootstrap<appModule);
  assert.match(html,/serviceWorker\.register\('\.\/sw\.js'\)/);
  assert.match(html,/controllerchange/);
- assert.match(html,/bmj-sw-v218-reloaded/);
+ assert.match(html,/bmj-sw-v219-reloaded/);
  assert.doesNotMatch(app,/serviceWorker\.register\('\.\/sw\.js'\)/);
  assert.match(sw,/caches\.match\(request,\{ignoreSearch:true\}\)/);
 });

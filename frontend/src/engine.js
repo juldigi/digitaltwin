@@ -9,6 +9,10 @@ import {RENDER_PROFILES,resolveProfile,configureRenderer} from './render/render-
 import {createIndustrialLighting} from './render/lighting-system.js';
 import {createIndustrialMaterial} from './render/material-library.js';
 import {AdaptiveQuality} from './render/adaptive-quality.js';
+import {EnvironmentSystem} from './render/environment-system.js';
+import {PostProcessing} from './render/post-processing.js';
+import {ShadowManager} from './render/shadow-manager.js';
+import {renderDiagnostics} from './render/render-diagnostics.js';
 
 import {OffsetMachineTemplate} from './offset5.js';
 import {PrintingSimulation} from './simulation.js';
@@ -90,9 +94,12 @@ export class FactoryEngine {
     container.appendChild(this.renderer.domElement);this.renderer.domElement.setAttribute('aria-label','Digital Twin 3D Pabrik Packaging Offset. Pilih mesin untuk membuka model detail.');this.renderer.domElement.setAttribute('tabindex','0');
     this.scene=new THREE.Scene();this.scene.background=new THREE.Color(0xe8eef2);
     this.camera=new THREE.PerspectiveCamera(38,1,.05,1e7);
+    this.environment=new EnvironmentSystem(this.renderer,this.scene);
+    this.postProcessing=new PostProcessing(this.renderer,this.scene,this.camera);
     this.controls=new OrbitControls(this.camera,this.renderer.domElement);this.controls.enableDamping=true;this.controls.dampingFactor=.09;this.controls.minDistance=.4;this.controls.maxDistance=1e7;this.controls.maxPolarAngle=Math.PI*.495;
     this.controls.addEventListener('start',()=>this.transition=null);
     this.lighting=createIndustrialLighting(this.scene);this.key=this.lighting.key;
+    this.shadows=new ShadowManager(this.key);
     configureRenderer(this.renderer,{profile:this.qualityProfile,devicePixelRatio,shadowLight:this.key});
     this.studio=new THREE.Group();this.studio.name='Inspection studio — not factory';
     const floor=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.ShadowMaterial({opacity:.12}));floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;floor.position.y=.01;this.studio.add(floor);
@@ -109,7 +116,7 @@ export class FactoryEngine {
     this.renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();this.renderFaulted=true;this.onError?.('Konteks grafis terputus. Tampilan dialihkan ke denah 2D agar navigasi tetap dapat digunakan.');});
     this.renderer.domElement.addEventListener('webglcontextrestored',()=>{this.renderFaulted=false;this.setQualityProfile(this.requestedQuality);this.resize();this.onRecovered?.();});
   }
-  resize(){const w=this.container.clientWidth,h=this.container.clientHeight;if(!w||!h)return;this.renderer.setSize(w,h);this.camera.aspect=w/h;this.camera.updateProjectionMatrix();}
+  resize(){const w=this.container.clientWidth,h=this.container.clientHeight;if(!w||!h)return;this.renderer.setSize(w,h);this.postProcessing.resize(w,h);this.camera.aspect=w/h;this.camera.updateProjectionMatrix();}
   framingProfile(object=this.machine){const portrait=this.container.clientWidth<=767&&this.container.clientHeight>this.container.clientWidth;const machine=object===this.machine&&this.view==='machine';return {portrait,machine,padding:portrait&&machine?1.06:1.18,targetLift:portrait&&machine?-.08:0};}
   fit(object=this.machine,mode='iso',animate=true){
     object.updateWorldMatrix(true,true);const box=new THREE.Box3().setFromObject(object);if(box.isEmpty())return;
@@ -136,7 +143,7 @@ export class FactoryEngine {
       this.simulation?.update(now);
       if(this.view==='factory')this.actualFactory?.update?.(now);
       if(this.transition){const t=Math.min((now-this.transition.start)/RENDER_PROFILES[this.qualityProfile].cameraMs,1),e=t*t*(3-2*t),a=this.transition;this.camera.position.lerpVectors(a.from,a.to,e);this.controls.target.lerpVectors(a.fromTarget,a.target,e);if(t===1)this.transition=null;}
-      this.controls.update();this.renderer.render(this.scene,this.camera);if(this.requestedQuality==='auto'&&!document.hidden)this.adaptiveQuality.frame(now);this.updateLabel();if(!this.low){try{this.updatePartLabels();}catch(error){console.warn('[Digital Twin labels disabled after overlay error]',error);this.clearPartLabels();}}
+      this.controls.update();if(!this.postProcessing.render())this.renderer.render(this.scene,this.camera);if(this.requestedQuality==='auto'&&!document.hidden)this.adaptiveQuality.frame(now);this.updateLabel();if(!this.low){try{this.updatePartLabels();}catch(error){console.warn('[Digital Twin labels disabled after overlay error]',error);this.clearPartLabels();}}
     }catch(error){this.renderFaulted=true;console.error('[Digital Twin renderer]',error);this.onError?.('Render 3D terhenti. Tampilan dialihkan ke denah 2D agar menu tetap dapat digunakan.');}
   }
   updateLabel(){const el=document.getElementById('machine-label');if(!el)return;el.hidden=!this.labels||!this.machine.visible;if(el.hidden)return;this.machine.updateWorldMatrix(true,true);const p=new THREE.Vector3(0,2.9,0).applyMatrix4(this.machine.matrixWorld);const distance=p.distanceTo(this.camera.position);p.project(this.camera);if(p.z>1||p.z< -1||Math.abs(p.x)>.97||Math.abs(p.y)>.94){el.hidden=true;return;}el.style.left=((p.x*.5+.5)*this.container.clientWidth)+'px';el.style.top=((-p.y*.5+.5)*this.container.clientHeight)+'px';document.getElementById('label-detail').hidden=distance>80;}
@@ -214,7 +221,7 @@ export class FactoryEngine {
   setPrintingSimulationInkFlowVisible(on){return this.simulation?.setInkFlowVisible(on);}
   getPrintingSimulationState(){return this.simulation?.state()||{available:false,blocked:true,blockedReason:'Simulasi belum tersedia untuk aset ini.',active:false,running:false,paused:false,speed:1,stage:null,completed:0,progress:0,sheetsVisible:0,rotorCount:0};}
   isPrintingSimulationActive(){return !!this.simulation?.active;}
-  setView(view,state){if(view!=='machine'&&this.simulation?.active)this.simulation.stop();this.view=view;if(!this.sceneEditing)this.gizmo.detach();this.template.reset();this.clearPartLabels();this.isolated=false;this.machine.position.set(0,0,0);this.machine.rotation.set(0,0,0);this.machine.scale.setScalar(1);this.studio.visible=view==='machine';this.factory.visible=view==='factory';if(this.factorySelectionHelper)this.factorySelectionHelper.visible=view==='factory';
+  setView(view,state){if(view!=='machine'&&this.simulation?.active)this.simulation.stop();this.view=view;this.syncVisualSystems();if(!this.sceneEditing)this.gizmo.detach();this.template.reset();this.clearPartLabels();this.isolated=false;this.machine.position.set(0,0,0);this.machine.rotation.set(0,0,0);this.machine.scale.setScalar(1);this.studio.visible=view==='machine';this.factory.visible=view==='factory';this.shadows[view==='machine'?'focus':'reset'](this.machine);if(this.factorySelectionHelper)this.factorySelectionHelper.visible=view==='factory';
     if(view==='factory')this.applyPlacement(state,this.layout||state.layout);else{this.machine.visible=true;this.applySceneOverrides(state?.sceneOverrides||this.sceneOverrides||{});}
     this.fit(view==='factory'?(this.currentFactoryTarget()||this.factory):this.machine);
   }
@@ -423,14 +430,21 @@ export class FactoryEngine {
     this.qualityProfile=profile;
     this.low=this.qualityProfile==='hemat';
     configureRenderer(this.renderer,{profile:this.qualityProfile,devicePixelRatio,shadowLight:this.key});
+    this.syncVisualSystems();
     this.template.setLow(this.low);this.resize();return this.qualityProfile;
   }
+  syncVisualSystems(){
+    const machineView=this.view==='machine'&&!this.mobileRender;
+    void this.environment.setEnabled(machineView&&['tinggi','cinematic'].includes(this.qualityProfile));
+    void this.postProcessing.setEnabled(machineView&&this.qualityProfile==='cinematic');
+  }
   setLow(on){return this.setQualityProfile(on?'hemat':'auto');}
+  getRenderDiagnostics(){return renderDiagnostics(this.renderer,this.qualityProfile,this.adaptiveQuality);}
   clearMachineContext(){
     if(this.simulation?.active)this.simulation.stop();
     this.gizmo.detach();this.clearPartLabels();this.simulation?.dispose();this.template?.dispose();if(this.machine)this.scene.remove(this.machine);
     this.machineKey=null;this.template=neutralTemplate();this.machine=this.template.root;this.scene.add(this.machine);this.simulation=neutralSimulation();this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);
-    this.machine.visible=false;this.isolated=false;this.view='factory';this.studio.visible=false;this.factory.visible=true;this.renderer.domElement.setAttribute('aria-label','Digital Twin 3D Pabrik Packaging Offset. Pilih mesin untuk membuka model detail.');
+    this.machine.visible=false;this.isolated=false;this.view='factory';this.syncVisualSystems();this.shadows.reset();this.studio.visible=false;this.factory.visible=true;this.renderer.domElement.setAttribute('aria-label','Digital Twin 3D Pabrik Packaging Offset. Pilih mesin untuk membuka model detail.');
     this.applySceneOverrides(this.sceneOverrides||{});if(this.factory?.children?.length)this.fit(this.factory,'iso');this.resize();return true;
   }
   async switchMachine(key){
@@ -450,7 +464,7 @@ export class FactoryEngine {
     this.machine=this.template.root;this.scene.add(this.machine);
     this.simulation=nextSimulation;
     const label=this.renderer.domElement;label.setAttribute('aria-label',`Model 3D ${this.machine.name||requested}. Gunakan tombol sudut pandang untuk navigasi.`);
-    this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);this.isolated=false;this.view='machine';this.machine.visible=true;this.applySceneOverrides(this.sceneOverrides||{});this.factory.visible=false;this.template.setLow(this.low);this.fit(this.machine);this.resize();return true;
+    this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);this.isolated=false;this.view='machine';this.syncVisualSystems();this.machine.visible=true;this.applySceneOverrides(this.sceneOverrides||{});this.factory.visible=false;this.template.setLow(this.low);this.shadows.focus(this.machine);this.fit(this.machine);this.resize();return true;
   }
-  dispose(){cancelAnimationFrame(this.frame);this.clearPartLabels();this.clearFactorySelection();this.resizeObserver.disconnect();this.controls.dispose();this.gizmo.dispose();this.simulation?.dispose();this.template.dispose();this.clearFactory();this.studio.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});this.lighting.dispose();this.renderer.dispose();}
+  dispose(){cancelAnimationFrame(this.frame);this.clearPartLabels();this.clearFactorySelection();this.resizeObserver.disconnect();this.controls.dispose();this.gizmo.dispose();this.simulation?.dispose();this.template.dispose();this.clearFactory();this.studio.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});this.environment.dispose();this.postProcessing.dispose();this.lighting.dispose();this.renderer.dispose();}
 }

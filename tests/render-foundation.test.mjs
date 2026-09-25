@@ -5,6 +5,9 @@ import {RENDER_PROFILES,recommendedProfile,resolveProfile,configureRenderer} fro
 import {createIndustrialLighting} from '../frontend/src/render/lighting-system.js';
 import {createIndustrialMaterial} from '../frontend/src/render/material-library.js';
 import {AdaptiveQuality} from '../frontend/src/render/adaptive-quality.js';
+import {ShadowManager} from '../frontend/src/render/shadow-manager.js';
+import {EnvironmentSystem} from '../frontend/src/render/environment-system.js';
+import {PostProcessing} from '../frontend/src/render/post-processing.js';
 
 test('quality choices use device capabilities and keep one renderer',()=>{
  assert.equal(recommendedProfile({mobile:true,memory:8,cores:8,maxTextureSize:8192}),'hemat');
@@ -38,4 +41,35 @@ test('automatic quality drops only after sustained slow frames',()=>{
  for(let t=12200;t<=25000;t+=100)quality.frame(t);
  assert.equal(drops,1);
  quality.reset();assert.equal(quality.downgraded,false);
+});
+
+test('shadow focus follows the selected machine and resets for the factory',()=>{
+ const scene=new THREE.Scene(),{key,dispose}=createIndustrialLighting(scene);
+ const shadows=new ShadowManager(key),machine=new THREE.Mesh(new THREE.BoxGeometry(12,3,4));
+ machine.position.x=25;scene.add(machine);
+ shadows.focus(machine);
+ assert.ok(key.target.position.x>20);
+ assert.ok(key.shadow.camera.right>=12);
+ shadows.reset();assert.equal(key.target.position.x,0);
+ machine.geometry.dispose();dispose();
+});
+
+test('optional effects stay dormant in factory view and release safely',async()=>{
+ const scene=new THREE.Scene(),environment=new EnvironmentSystem({},scene);
+ await environment.setEnabled(false);assert.equal(scene.environment,null);
+ environment.dispose();
+ const effects=new PostProcessing({},scene,new THREE.PerspectiveCamera());
+ await effects.setEnabled(false);assert.equal(effects.render(),false);
+ effects.dispose();
+});
+
+test('optional Three.js effect dependencies resolve without changing the core renderer',async()=>{
+ const modules=await Promise.all([
+  import('three/addons/environments/RoomEnvironment.js'),
+  import('three/addons/postprocessing/EffectComposer.js'),
+  import('three/addons/postprocessing/RenderPass.js'),
+  import('three/addons/postprocessing/UnrealBloomPass.js'),
+  import('three/addons/postprocessing/OutputPass.js')
+ ]);
+ assert.ok(modules.every(module=>Object.keys(module).length));
 });
