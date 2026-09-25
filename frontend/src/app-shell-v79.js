@@ -156,10 +156,14 @@ function toggleInspector(){
 }
 q('#panel-toggle')?.addEventListener('click',toggleInspector);
 function applyViewModeDom(state=getState()){
- const is2d=state.viewMode==='2d',plan=q('#plant-plan-2d'),viewport=q('#viewport');
+ const is2d=state.viewMode==='2d',plan=q('#plant-plan-2d'),viewport=q('#viewport'),workspace=q('.workspace');
+ const sceneToolbar=q('.scene-bottom'),zoom=q('.viewport-zoom');
  document.body.classList.toggle('workspace-2d',is2d);
- if(plan)plan.hidden=!is2d;
+ if(plan){plan.hidden=!is2d;plan.setAttribute('aria-hidden',String(!is2d))}
  if(viewport)viewport.setAttribute('aria-hidden',String(is2d));
+ if(sceneToolbar)sceneToolbar.setAttribute('aria-hidden',String(is2d));
+ if(zoom)zoom.setAttribute('aria-hidden',String(is2d));
+ if(workspace)workspace.setAttribute('aria-label',is2d?'Denah dua dimensi pabrik':'Tampilan tiga dimensi');
 }
 function stopSimulationForNavigation(targetSection){
  const state=getState();

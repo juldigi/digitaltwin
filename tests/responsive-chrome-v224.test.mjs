@@ -36,7 +36,7 @@ test('V224 mobile panels use the visual viewport height rather than raw dynamic 
 });
 
 test('V224 refreshes the service worker bytes without rotating the public V222 cache contract',()=>{
- assert.match(sw,/V224 responsive chrome hardening/);
+ assert.match(sw,/shell recache without rotating public query identifiers/);
  assert.match(sw,/factory-digital-twin-v222-overlay-state-ssot-20260925/);
  assert.match(sw,/const RELEASE='222'/);
 });
