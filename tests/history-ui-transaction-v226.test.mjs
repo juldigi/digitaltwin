@@ -38,7 +38,7 @@ test('V226 modal history cleanup suppresses focus restoration while closing',()=
 });
 
 test('V226 refreshes shell bytes without rotating V222 public cache identifiers',()=>{
- assert.match(sw,/V226 history UI transaction/);
+ assert.match(sw,/shell recache without rotating public query identifiers/);
  assert.match(sw,/factory-digital-twin-v222-overlay-state-ssot-20260925/);
  assert.match(sw,/const RELEASE='222'/);
 });

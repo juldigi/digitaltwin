@@ -1217,8 +1217,8 @@ try{
  $('#engine-status').textContent='Denah belum tersedia';toast('Denah pabrik gagal dimuat: '+e.message,true);signalAppReady('error');
 }
 function scrollInspectorToTabStart(){
- const panel=$('#detail-panel'),content=$('#panel-content'),top=$('.panel-top'),tabs=$('.tabs');if(!panel||!content||!tabs)return;
- requestAnimationFrame(()=>{const sticky=(top?.offsetHeight||0)+(tabs?.offsetHeight||0);panel.scrollTo({top:Math.max(0,content.offsetTop-sticky),behavior:'auto'});});
+ const content=$('#panel-content');if(!content)return;
+ requestAnimationFrame(()=>content.scrollTo({top:0,behavior:'auto'}));
 }
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{if(editing){engine.edit(false);engine.applyPlacement(state);engine.onTransform=null;editing=false;}renderPanel(b.dataset.tab);scrollInspectorToTabStart();});
 on('#modal-close',closeModal);on('#modal-back',goModalBack);on('#context-back',navigateContextParent);on('#connect',connectionDialog);const openFactoryNavigation=()=>{stopSimulationBeforeNavigation();return activeLayout()?showHome({historyMode:'push'}):layoutDialog();};const openAssetNavigation=()=>{stopSimulationBeforeNavigation();assetDialog();};on('#nav-machine',openFactoryNavigation);on('#nav-assets',openAssetNavigation);window.addEventListener('bmj:mobilefactoryrequest',safe(openFactoryNavigation));window.addEventListener('bmj:mobileassetrequest',safe(openAssetNavigation));on('#nav-help',()=>{stopSimulationBeforeNavigation();helpDialog();});on('#settings',()=>{stopSimulationBeforeNavigation();settingsDialog();});on('#focus-machine',()=>{if(!engine)return;if(engine.view==='factory'){const selected=getAppState().selectedAsset,record=machineRecordForRoute(selected);if(record)engine.focusFactoryAsset(record.machineId);else engine.fit(engine.factory,'iso');return;}engine.fit(selectedPart||engine.machine,'iso');});

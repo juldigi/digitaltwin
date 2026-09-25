@@ -12,7 +12,7 @@ test('V168 keeps inspector tabs visible and resets tab reading position',()=>{
  assert.match(css,/\/\* V168 reading flow, legibility, and state clarity \*\//);
  assert.match(css,/\.tabs\{position:sticky;top:var\(--panel-sticky-top\);z-index:3/);
  assert.match(app,/function scrollInspectorToTabStart\(\)/);
- assert.match(app,/panel\.scrollTo\(\{top:Math\.max\(0,content\.offsetTop-sticky\),behavior:'auto'\}\)/);
+ assert.match(app,/content\.scrollTo\(\{top:0,behavior:'auto'\}\)/);
  assert.match(app,/renderPanel\(b\.dataset\.tab\);scrollInspectorToTabStart\(\)/);
 });
 
