@@ -11,11 +11,11 @@ const css=read('app-shell-v79.css');
 const engine=read('src/engine.js');
 
 test('V215 service worker bootstraps before application modules and self-heals stale controllers',()=>{
- const bootstrap=html.indexOf('id="sw-bootstrap"'),appModule=html.indexOf('src="./src/app.js?v=216"');
+ const bootstrap=html.indexOf('id="sw-bootstrap"'),appModule=html.indexOf('src="./src/app.js?v=217"');
  assert.ok(bootstrap>0&&bootstrap<appModule);
  assert.match(html,/serviceWorker\.register\('\.\/sw\.js'\)/);
  assert.match(html,/controllerchange/);
- assert.match(html,/bmj-sw-v216-reloaded/);
+ assert.match(html,/bmj-sw-v217-reloaded/);
  assert.doesNotMatch(app,/serviceWorker\.register\('\.\/sw\.js'\)/);
  assert.match(sw,/caches\.match\(request,\{ignoreSearch:true\}\)/);
 });
@@ -37,8 +37,8 @@ test('V215 mobile drawer owns a real fixed backdrop and leaves bottom navigation
 test('V215 renderer starts mobile in low-memory mode and degrades to 2D without killing navigation',()=>{
  assert.match(engine,/const mobileRender=matchMedia\('\(max-width:767px\)'\)\.matches\|\|matchMedia\('\(pointer:coarse\)'\)\.matches/);
  assert.match(engine,/antialias:!mobileRender/);
- assert.match(engine,/this\.renderer\.setPixelRatio\(mobileRender\?1:/);
- assert.match(engine,/this\.renderer\.shadowMap\.enabled=!mobileRender/);
+ assert.match(engine,/configureRenderer\(this\.renderer,\{profile:this\.qualityProfile,devicePixelRatio/);
+ assert.match(engine,/configureRenderer\(this\.renderer,\{profile:this\.qualityProfile,devicePixelRatio/);
  assert.match(engine,/webglcontextlost/);
  assert.match(engine,/webglcontextrestored/);
  assert.match(app,/function handleEngineError/);

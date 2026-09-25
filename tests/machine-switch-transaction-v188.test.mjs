@@ -17,9 +17,9 @@ test('failed switch rolls the engine and domain context back to the previous mac
  assert.match(app,/simulationState:\{active:false,running:false,stage:null,progress:0\}/);
 });
 test('V188 runtime identifiers are coherent',()=>{
- assert.match(index,/app-shell-v79\.css\?v=216/);
- assert.match(index,/src\/app\.js\?v=216/);
- assert.match(index,/src\/app-shell-v79\.js\?v=216/);
- assert.match(sw,/factory-digital-twin-v216-ui-boot-20260925/);
+ assert.match(index,/app-shell-v79\.css\?v=217/);
+ assert.match(index,/src\/app\.js\?v=217/);
+ assert.match(index,/src\/app-shell-v79\.js\?v=217/);
+ assert.match(sw,/factory-digital-twin-v217-render-foundation-20260925/);
  assert.match(app,/pair\('Versi aplikasi',APP_BUILD\)/);
 });

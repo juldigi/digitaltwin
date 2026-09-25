@@ -17,7 +17,7 @@ test('simulation asset picker continues directly into the selected machine simul
 
 test('simulation preserves device performance mode instead of forcing full detail',()=>{
  assert.match(app,/function enableExteriorOpen\(\{forceDetail=true\}=\{\}\)/);
- assert.match(app,/if\(forceDetail\)engine\.setLow\(false\)/);
+ assert.match(app,/if\(forceDetail&&!engine\.mobileRender\)engine\.applyQualityProfile/);
  assert.match(app,/enableExteriorOpen\(\{forceDetail:false\}\)/);
 });
 
@@ -28,9 +28,9 @@ test('system overlay is isolated above the backdrop without lifting the whole wo
 });
 
 test('V184 assets rotate browser and service-worker caches',()=>{
- assert.match(index,/app-shell-v79\.css\?v=216/);
- assert.match(index,/src\/app\.js\?v=216/);
- assert.match(index,/src\/app-shell-v79\.js\?v=216/);
- assert.match(sw,/factory-digital-twin-v216-ui-boot-20260925/);
+ assert.match(index,/app-shell-v79\.css\?v=217/);
+ assert.match(index,/src\/app\.js\?v=217/);
+ assert.match(index,/src\/app-shell-v79\.js\?v=217/);
+ assert.match(sw,/factory-digital-twin-v217-render-foundation-20260925/);
  assert.match(app,/pair\('Versi aplikasi',APP_BUILD\)/);
 });

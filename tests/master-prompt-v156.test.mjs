@@ -71,11 +71,11 @@ test('V199 keeps functional interiors visible while bounding safety and utility 
 });
 
 test('offline cache prioritizes foundation and OFFSET 5 instead of preloading expansion machines',()=>{
- assert.match(sw,/factory-digital-twin-v216-ui-boot-20260925/);
+ assert.match(sw,/factory-digital-twin-v217-render-foundation-20260925/);
  for(const required of ['src/offset5.js','src/simulation.js','src/data/taxonomy-offset5.js','src/factory-building.js','src/data/dwg-fidelity.js'])assert.match(sw,new RegExp(required.replaceAll('/','\\/')));
  for(const excluded of ['src/offset10.js','src/apm2.js','src/sheeting.js','src/universal-machine.js','src/machine-runtime.js'])assert.doesNotMatch(sw,new RegExp(excluded.replaceAll('/','\\/')));
- assert.match(html,/app-shell-v79\.css\?v=216/);
- assert.match(html,/src\/app\.js\?v=216/);
- assert.match(html,/src\/app-shell-v79\.js\?v=216/);
+ assert.match(html,/app-shell-v79\.css\?v=217/);
+ assert.match(html,/src\/app\.js\?v=217/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=217/);
  assert.match(shell,/v212-ui-ssot/);
 });
