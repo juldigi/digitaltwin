@@ -11,11 +11,11 @@ test('V222 derives overlay body classes from app state',()=>{
  assert.match(shell,/const OVERLAY_BODY_CLASS=Object\.freeze\(\{navigation:'nav-open',search:'search-open',layers:'layer-open',systems:'system-open',modal:'modal-open'\}\)/);
  assert.match(shell,/function syncOverlayDom\(state=getState\(\)\)/);
  assert.match(shell,/document\.body\.classList\.toggle\(className,active===name\)/);
- assert.match(shell,/subscribe\(state=>\{syncOverlayDom\(state\)/);
+ assert.match(shell,/subscribe\(state=>\{applyInspectorDom\(state\);[\s\S]*syncOverlayDom\(state\)\}\)/);
 });
 
 test('V222 never leaves hidden navigation overlay state after dismissing the drawer',()=>{
- assert.match(shell,/overlay==='navigation'\)\{closeDrawer\(\);closeOverlay\(\);\}/);
+ assert.match(shell,/else if\(overlay==='navigation'\)closeDrawer\(\)/);\n assert.match(shell,/if\(overlay==='navigation'\)closeOverlay\(\)/);
  assert.match(shell,/const wasNavigation=getState\(\)\.overlay==='navigation';closeDrawer\(\);if\(wasNavigation\)closeOverlay\(\)/);
 });
 
