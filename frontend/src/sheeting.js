@@ -55,7 +55,7 @@ export class SheetingMachineTemplate{
     this.taxonomy=SHEETING_TAXONOMY;this.taxonomyById=SHEETING_TAXONOMY_BY_ID;this.exteriorOpen=false;this.ghosted=false;
     this.palette={
       body:0x16a28d,bodyDark:0x08786b,aqua:0x66c9c8,light:0xd7dbd9,white:0xf0f1ec,
-      dark:0x293236,steel:0x939b9b,chrome:0xcbd1d0,paper:0xe8dfcb,stackPaper:0xc9ae83,
+      dark:0x293236,steel:0x939b9b,chrome:0xcbd1d0,paper:0xece6d6,stackPaper:0xf1ece0,
       glass:0x78b6bb,black:0x20272a,blue:0x2f67a1,red:0xc93434,green:0x4c9b4f,bronze:0xb08b55
     };
     this.buildActualV194();this.refineActualV195();this.refineActualV196();this.refineActualV197();this.enrichActualV197();
@@ -387,14 +387,16 @@ export class SheetingMachineTemplate{
 
     // Actual broad wedge console with an HMI and many discrete switches.
     const control=this.group(this.root,'sheeting-control','BMJ Delivery Operator Console',[0,0,0],[.18,.24,-.26],'VERIFIED_VISUAL');
-    this.box(control,[1.92,.58,.54],[-.72,.36,-1.91],'light',.020,{cover:true,role:'operator-console-base',sourceAnchor:photo});
-    this.box(control,[1.82,.075,.48],[-.72,.68,-2.00],'steel',.006,{cover:true,role:'operator-console-face',sourceAnchor:photo},[-.40,0,0]);
-    this.box(control,[1.95,.055,.28],[-.72,.30,-2.17],'steel',.004,{detail:true,role:'operator-console-stainless-lip',sourceAnchor:photo});
-    this.box(control,[.36,.038,.24],[-.45,.72,-2.24],'dark',.003,{detail:true,role:'operator-hmi-display',sourceAnchor:photo},[-.40,0,0]);
+    // Console stands on the diamond-plate catwalk (top surface ~y=.525) and is pulled
+    // toward the machine/front edge, preserving the walking lane beside the outer handrail.
+    this.box(control,[1.92,.58,.54],[-.72,.815,-1.61],'light',.020,{cover:true,role:'operator-console-base',sourceAnchor:photo});
+    this.box(control,[1.82,.075,.48],[-.72,1.135,-1.70],'steel',.006,{cover:true,role:'operator-console-face',sourceAnchor:photo},[-.40,0,0]);
+    this.box(control,[1.95,.055,.28],[-.72,.755,-1.87],'steel',.004,{detail:true,role:'operator-console-stainless-lip',sourceAnchor:photo});
+    this.box(control,[.36,.038,.24],[-.45,1.175,-1.94],'dark',.003,{detail:true,role:'operator-hmi-display',sourceAnchor:photo},[-.40,0,0]);
     const controlKinds=['green','black','black','red','black','green','black','black','green','black','red','black','black','green','black','black','red','black'];
     controlKinds.forEach((kind,i)=>{
       const row=Math.floor(i/9),col=i%9;
-      this.cyl(control,.027,.028,[-1.44+col*.18,.74-row*.16,-2.245],kind,'z',{detail:true,role:'operator-button-selector',sourceAnchor:photo});
+      this.cyl(control,.027,.028,[-1.44+col*.18,1.195-row*.16,-1.945],kind,'z',{detail:true,role:'operator-button-selector',sourceAnchor:photo});
     });
 
     // Output stack/lay table: long side rails with rack teeth, two large handwheels, sliding
