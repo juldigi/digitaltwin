@@ -1,5 +1,5 @@
-const VERSION='factory-digital-twin-v220-camera-director-20260925';
-const RELEASE='220';
+const VERSION='factory-digital-twin-v221-ui-shell-hardening-20260925';
+const RELEASE='221';
 const ENTRYPOINTS=[
  './app-shell-v79.css','./src/app.js','./src/ui-v5.js','./src/experience-v37.js','./src/app-shell-v79.js'
 ];
