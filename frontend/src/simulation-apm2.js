@@ -28,12 +28,20 @@ export const APM2_PROCESS_STEPS=Object.freeze([
  'Repeat the registered one-pitch index; visual timing is deliberately slowed for training'
 ]);
 
+// Sheets are carried by the gripper bars on the upper chain run, which the patent-referenced
+// twin-chain architecture (APM2-BOBST-GRIPPER-PATENT) describes as "successive horizontal
+// intermittent movement through processing stations" — i.e. a level plane, not an undulating
+// path. D.sheetPlaneY (dimensions-apm2.js) is that plane: the gripper shaft rail height (1.57,
+// see gripperLoopPosition's top run) minus the .035 finger reach (buildTransport in apm2.js).
+// Kept as one shared constant so this path and the machine geometry (register table, platen
+// tooling rest gap, etc.) can't independently drift out of alignment.
+const GRIP_PLANE_Y=D.sheetPlaneY;
 function pathPoints(){
  return [
-  new THREE.Vector3(-2.72,1.42,0),new THREE.Vector3(-2.30,1.42,0),new THREE.Vector3(-1.82,1.20,0),
-  new THREE.Vector3(-1.20,1.12,0),new THREE.Vector3(-.72,1.22,0),new THREE.Vector3(-.20,1.35,0),
-  new THREE.Vector3(.45,1.35,0),new THREE.Vector3(.96,1.34,0),new THREE.Vector3(1.55,1.36,0),
-  new THREE.Vector3(2.02,1.32,0),new THREE.Vector3(2.36,1.18,0)
+  new THREE.Vector3(-2.72,GRIP_PLANE_Y,0),new THREE.Vector3(-2.30,GRIP_PLANE_Y,0),new THREE.Vector3(-1.82,GRIP_PLANE_Y,0),
+  new THREE.Vector3(-1.20,GRIP_PLANE_Y,0),new THREE.Vector3(-.72,GRIP_PLANE_Y,0),new THREE.Vector3(-.20,GRIP_PLANE_Y,0),
+  new THREE.Vector3(.45,GRIP_PLANE_Y,0),new THREE.Vector3(.96,GRIP_PLANE_Y,0),new THREE.Vector3(1.55,GRIP_PLANE_Y,0),
+  new THREE.Vector3(2.02,GRIP_PLANE_Y,0),new THREE.Vector3(2.36,GRIP_PLANE_Y,0)
  ];
 }
 function transportProgress(p){
@@ -56,11 +64,11 @@ export class APM2ProcessSimulation{
   this.machine=machine;this.template=template;this.group=new THREE.Group();this.group.name='APM2-INTERMITTENT-CONVERTING-SIMULATION';this.group.visible=false;machine.add(this.group);
   this.points=pathPoints();this.curve=new THREE.CatmullRomCurve3(this.points,false,'centripetal',.5);
   this.active=false;this.running=false;this.paused=false;this.speed=1;this.elapsed=0;this.lastNow=null;this.completed=0;this.onUpdate=null;this.pathVisible=true;this.inkFlowVisible=false;
-  this.cycleSeconds=8.4;this.visualTimeScaledDemo=true;this.sheets=[];this.pileSheets=[];this.rotors=[];this.gripperBars=[];this.materials=[];this.geometries=[];
+  this.cycleSeconds=8.4;this.visualTimeScaledDemo=true;this.sheets=[];this.pileSheets=[];this.rotors=[];this.gripperBars=[];this.platenLinks=[];this.materials=[];this.geometries=[];
   this.feederHead=template.findNode('apm2-feeder-head');this.sideLay=template.findNode('apm2-register-sidelay');this.platen=template.findNode('apm2-moving-platen');this.stripUpper=template.findNode('apm2-stripping-upper');this.stripLower=template.findNode('apm2-stripping-lower');
   this.rest={head:this.feederHead?.position.clone(),side:this.sideLay?.position.clone(),platen:this.platen?.position.clone(),upper:this.stripUpper?.position.clone(),lower:this.stripLower?.position.clone()};
-  machine.traverse(o=>{if(o.isMesh&&o.userData.driveRotor)this.rotors.push(o);if(o.userData.gripperBar)this.gripperBars.push(o);});
-  this.rotorRest=this.rotors.map(r=>r.quaternion.clone());this.barRest=this.gripperBars.map(b=>b.position.clone());
+  machine.traverse(o=>{if(o.isMesh&&o.userData.driveRotor)this.rotors.push(o);if(o.userData.gripperBar)this.gripperBars.push(o);if(o.userData.platenLink)this.platenLinks.push(o);});
+  this.rotorRest=this.rotors.map(r=>r.quaternion.clone());this.barRest=this.gripperBars.map(b=>b.position.clone());this.platenLinkRestZ=this.platenLinks.map(l=>l.rotation.z);
   this.updateGripperBars(0,0);
   this.barRest=this.gripperBars.map(b=>b.position.clone());
   this.pileAnchor=new THREE.Vector3(2.36,1.16,0);this.maxPileSheets=28;this.pileThickness=.004;
@@ -84,7 +92,7 @@ export class APM2ProcessSimulation{
  state(){
   const p=this.active?(this.elapsed%this.cycleSeconds)/this.cycleSeconds:0;
   return {available:true,blocked:false,active:this.active,running:this.running,paused:this.paused,speed:this.speed,stage:APM2_SIMULATION_STAGES[stageIndex(p)],completed:this.completed,progress:p,
-   sheetsVisible:this.sheets.filter(s=>s.mesh.visible).length,pileSheetsVisible:this.pileSheets.filter(s=>s.mesh.visible).length,rotorCount:this.rotors.length,oscillatorCount:5,mechanismCount:this.rotors.length+this.gripperBars.length+5,
+   sheetsVisible:this.sheets.filter(s=>s.mesh.visible).length,pileSheetsVisible:this.pileSheets.filter(s=>s.mesh.visible).length,rotorCount:this.rotors.length,oscillatorCount:5,mechanismCount:this.rotors.length+this.gripperBars.length+this.platenLinks.length+5,
    inkFlowCount:0,uvLampCount:0,uvActive:false,foilStarActive:false,pathVisible:this.pathVisible,inkFlowVisible:false,visualTimeScaledDemo:true,familyProductionReferenceSph:APM2_DIMENSIONS.familyReference.maxSpeedSph,
    feederSuctionActive:this.feederSuctionActive,registrationActive:this.registrationActive,sideLayActive:this.sideLayActive,transportIndexing:this.transportIndexing,transportStopped:this.transportStopped,
    platenClosing:this.platenClosing,platenClosed:this.platenClosed,pressureDwell:this.pressureDwell,strippingActive:this.strippingActive,deliveryReleaseActive:this.deliveryReleaseActive,
@@ -109,6 +117,12 @@ export class APM2ProcessSimulation{
   if(this.feederHead&&this.rest.head){this.feederHead.position.copy(this.rest.head);if(this.feederSuctionActive){const q=p/.11;this.feederHead.position.y-=.05*Math.sin(Math.PI*q);this.feederHead.position.x+=.035*Math.sin(Math.PI*q);}}
   if(this.sideLay&&this.rest.side){this.sideLay.position.copy(this.rest.side);if(this.sideLayActive){const q=(p-.11)/.11;this.sideLay.position.z-=.025*Math.sin(Math.PI*clamp(q));}}
   if(this.platen&&this.rest.platen){this.platen.position.copy(this.rest.platen);this.platen.position.y+=.085*platenStroke;}
+  // The toggle links are what actually drives the platen assembly per their label ("Toggle /
+  // Eccentric Pressure Drive"); previously they never moved even while platenStroke animated the
+  // platen itself, so the named actuator had no visible connection to the motion it supposedly
+  // causes. Flexing them by the same platenStroke ties cause (link angle closing) to effect
+  // (platen assembly rising) instead of leaving them as static decoration.
+  this.platenLinks.forEach((l,i)=>{l.rotation.z=this.platenLinkRestZ[i]*(1-.35*platenStroke);});
   if(this.stripUpper&&this.rest.upper){this.stripUpper.position.copy(this.rest.upper);this.stripUpper.position.y-=.055*stripStroke;}
   if(this.stripLower&&this.rest.lower){this.stripLower.position.copy(this.rest.lower);this.stripLower.position.y+=.035*stripStroke;}
  }
@@ -125,7 +139,7 @@ export class APM2ProcessSimulation{
  pause(){if(this.active){this.running=false;this.paused=true;this.lastNow=null;this.onUpdate?.(this.state());}return this.state();}
  resume(){if(this.active){this.running=true;this.paused=false;this.lastNow=null;this.onUpdate?.(this.state());}return this.state();}
  stop(){this.active=false;this.running=false;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;this.group.visible=false;this.resetMechanisms();for(const s of this.sheets){s.mesh.visible=false;s.cut.visible=false;s.lap=-1;s.diecut=false;s.stripped=false;}for(const p of this.pileSheets){p.mesh.visible=false;p.serial=-1;}this.onUpdate?.(this.state());return this.state();}
- resetMechanisms(){if(this.feederHead&&this.rest.head)this.feederHead.position.copy(this.rest.head);if(this.sideLay&&this.rest.side)this.sideLay.position.copy(this.rest.side);if(this.platen&&this.rest.platen)this.platen.position.copy(this.rest.platen);if(this.stripUpper&&this.rest.upper)this.stripUpper.position.copy(this.rest.upper);if(this.stripLower&&this.rest.lower)this.stripLower.position.copy(this.rest.lower);this.rotors.forEach((r,i)=>r.quaternion.copy(this.rotorRest[i]));this.gripperBars.forEach((b,i)=>b.position.copy(this.barRest[i]));this.resetFlags();}
+ resetMechanisms(){if(this.feederHead&&this.rest.head)this.feederHead.position.copy(this.rest.head);if(this.sideLay&&this.rest.side)this.sideLay.position.copy(this.rest.side);if(this.platen&&this.rest.platen)this.platen.position.copy(this.rest.platen);if(this.stripUpper&&this.rest.upper)this.stripUpper.position.copy(this.rest.upper);if(this.stripLower&&this.rest.lower)this.stripLower.position.copy(this.rest.lower);this.rotors.forEach((r,i)=>r.quaternion.copy(this.rotorRest[i]));this.gripperBars.forEach((b,i)=>b.position.copy(this.barRest[i]));this.platenLinks.forEach((l,i)=>{l.rotation.z=this.platenLinkRestZ[i];});this.resetFlags();}
  setSpeed(v){this.speed=clamp(Number(v)||1,.35,2);return this.state();}
  setPathVisible(on){this.pathVisible=!!on;this.pathLine.visible=this.pathVisible;return this.state();}
  setInkFlowVisible(){return this.state();}

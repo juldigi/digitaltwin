@@ -112,17 +112,27 @@ export class APM2MachineTemplate{
       this.cylinder(fwdS,.016,.14,[.42,1.52,z],'steel','y').userData.feederSucker=true;
       this.cylinder(fwdS,.036,.022,[.42,1.44,z],'rubber','y').userData.feederSucker=true;
     }
-    const air=this.group(g,'apm2-feeder-air','Feeder Air / Side Blowers',[0,0,0],[-.1,.12,.2]);
+    // Feed belts/rollers/air raised (+.31) to be level with the nonstop feeder guide rails
+    // (y≈1.44) and the forwarding suckers (y≈1.44–1.52) already just above them, instead of
+    // sitting ~30cm lower: a sheet just released by the suckers can't plausibly drop that far
+    // before the next mechanism grips it. Each group is shifted as a whole, so the rollers/belts
+    // keep their own internal spacing.
+    const air=this.group(g,'apm2-feeder-air','Feeder Air / Side Blowers',[0,.31,0],[-.1,.12,.2]);
     this.cylinder(air,.027,1.18,[.18,1.31,0],'steel','z');
     for(const z of [-.48,-.16,.16,.48])this.cylinder(air,.010,.16,[.18,1.24,z],'blue','y');
 
-    const belts=this.group(g,'apm2-feeder-belts','Feed Belts / Slow-down',[0,0,0],[.15,.1,0]);
+    const belts=this.group(g,'apm2-feeder-belts','Feed Belts / Slow-down',[0,.31,0],[.15,.1,0]);
     for(const z of [-.42,-.14,.14,.42])this.box(belts,[.82,.018,.055],[.68,1.13,z],'rubber',.006);
-    const rollers=this.group(g,'apm2-feeder-infeed-rollers','Infeed Rollers',[0,0,0],[.1,.1,0]);
+    const rollers=this.group(g,'apm2-feeder-infeed-rollers','Infeed Rollers',[0,.31,0],[.1,.1,0]);
     {const a=this.cylinder(rollers,.045,1.12,[.35,1.14,0],'rubber','z');a.userData.driveRotor=true;a.userData.mechanismRole='feed-roller';const b=this.cylinder(rollers,.035,1.12,[.78,1.14,0],'steel','z');b.userData.driveRotor=true;b.userData.mechanismRole='feed-roller';}
   }
   buildRegister(){
-    const g=this.group(this.root,'apm2-register','Feed Table / Register & Side Lay',[D.registerCenterX,0,0],[-.55,.15,-.25],['APM2-SP102-1994','APM2-BMJ-Q2']);
+    // Group y-offset (.43) raises the whole feed-table/register/side-lay assembly so the
+    // sheet the front lays stop and the gripper closes on sits at the sheet transport plane
+    // (D.sheetPlaneY, see gripperLoopPosition's top run in simulation-apm2.js) instead of ~43cm
+    // below it. Every child keeps its original relative position, so internal proportions and
+    // the side-lay drive/linkage geometry are unchanged.
+    const g=this.group(this.root,'apm2-register','Feed Table / Register & Side Lay',[D.registerCenterX,.43,0],[-.55,.15,-.25],['APM2-SP102-1994','APM2-BMJ-Q2']);
     const table=this.group(g,'apm2-register-table','Stainless Feed Table',[0,0,0],[-.2,.12,0]);
     this.box(table,[1.10,.055,1.38],[0,1.07,0],'silver',.008);
     for(const z of [-.48,-.16,.16,.48])this.box(table,[1.04,.012,.045],[0,1.105,z],'rubber',.004);
@@ -182,7 +192,17 @@ export class APM2MachineTemplate{
     this.cover(this.box(housing,[1.12,.17,.18],[0,.66,-1.00],'green',.02));
     const window=this.cover(this.box(housing,[.50,.38,.018],[.12,1.48,-.997],'glass',.018));window.userData.safetyWindow=true;
 
-    const tooling=this.group(g,'apm2-platen-tooling','Die-Cutting Tooling',[0,0,0],[0,.3,0]);
+    // The chase/cutting-plate/micrometric stack is the tooling that actually contacts the
+    // sheet at press time. It is deliberately nested under 'apm2-moving-platen' (not a sibling
+    // of it) so that when the simulation drives the press stroke on that one node, the whole
+    // rigid tool-and-bed assembly closes together — previously the animated node was an
+    // unrelated structural block and the visible cutting tooling never moved during the stroke.
+    // Which specific plate is fixed vs. moving in the real BMJ unit is not photo/manual-verified
+    // (see APM2_DIMENSIONS.familyReference.suffix:'UNCONFIRMED'), so this models the press as one
+    // rigid module rather than asserting an unconfirmed upper/lower kinematic split.
+    const moving=this.group(g,'apm2-moving-platen','Platen Press Assembly (Chase + Bed, Rigid)',[0,0,0],[0,.28,0]);
+    const platen=this.box(moving,[.90,.16,1.30],[-.04,1.14,0],'graphite',.014);platen.userData.plateBed=true;
+    const tooling=this.group(moving,'apm2-platen-tooling','Die-Cutting Tooling',[0,0,0],[0,.3,0]);
     const chase=this.group(tooling,'apm2-cutting-chase','Die-Cutting Chase',[0,0,0],[0,.16,0]);
     this.box(chase,[.82,.055,1.20],[-.04,1.51,0],'steel',.006);
     const cut=this.group(tooling,'apm2-cutting-plate','Cutting Plate',[0,0,0],[0,.12,0]);
@@ -190,9 +210,6 @@ export class APM2MachineTemplate{
     const micro=this.group(tooling,'apm2-micrometric','Micrometric / Compensation System',[0,0,0],[0,.12,-.2]);
     this.box(micro,[.88,.035,1.26],[-.04,1.34,0],'steel',.004);
     for(const x of [-.38,.38])for(const z of [-.55,.55])this.cylinder(micro,.018,.08,[x,1.30,z],'steel','y');
-
-    const moving=this.group(g,'apm2-moving-platen','Moving Lower Platen',[0,0,0],[0,.28,0]);
-    const platen=this.box(moving,[.90,.16,1.30],[-.04,1.14,0],'graphite',.014);platen.userData.movingPlaten=true;
     const toggle=this.group(g,'apm2-platen-toggle','Toggle / Eccentric Pressure Drive',[0,0,0],[0,.18,.28]);
     for(const z of [-.52,.52]){
       const a=this.box(toggle,[.40,.06,.07],[-.20,.78,z],'steel',.008);a.rotation.z=.45;a.userData.platenLink=true;
@@ -214,9 +231,16 @@ export class APM2MachineTemplate{
     const upper=this.group(g,'apm2-stripping-upper','Upper Stripping Frame',[0,0,0],[0,.28,0]);
     this.box(upper,[.76,.055,1.18],[0,1.48,0],'steel',.006).userData.stripUpper=true;
     for(const x of [-.28,0,.28])for(const z of [-.42,0,.42])this.cylinder(upper,.010,.10,[x,1.41,z],'steel','y');
-    const lower=this.group(g,'apm2-stripping-lower','Lower Stripping Frame',[0,0,0],[0,.18,0]);
+    // Raised (+.08) to preserve its original .12 gap to the stripping board now that the board
+    // itself was raised .08 (see below) — otherwise this counter-fixture would end up .20 below
+    // the board instead of the .12 its pins/needle-relief geometry was originally spaced for.
+    const lower=this.group(g,'apm2-stripping-lower','Lower Stripping Frame',[0,.08,0],[0,.18,0]);
     this.box(lower,[.76,.055,1.18],[0,1.18,0],'steel',.006).userData.stripLower=true;
-    const board=this.group(g,'apm2-stripping-board','Central Stripping Board',[0,0,0],[0,.16,0]);
+    // Raised (+.08) so the board sits just under the upper stripping frame's needle tips at
+    // rest (pins at local y=1.41 vs. plate at 1.48) instead of ~24cm below — close enough that
+    // the sheet it supports is in plausible reach of the needles once the upper frame strokes
+    // down, without the board clipping through the needles at rest.
+    const board=this.group(g,'apm2-stripping-board','Central Stripping Board',[0,.08,0],[0,.16,0]);
     this.box(board,[.70,.035,1.10],[0,1.30,0],'dark',.004);
     const chute=this.group(g,'apm2-waste-chute','Waste Chute / Curtain',[0,0,0],[.15,.1,.15]);
     this.box(chute,[.64,.52,1.04],[.05,.72,0],'graphite',.018);

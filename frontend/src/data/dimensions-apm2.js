@@ -41,7 +41,13 @@ export const APM2_DIMENSIONS=Object.freeze({
     pileCenterX:2.58,
     operatorSideZ:-1.03,
     driveSideZ:1.03,
-    deckY:.20
+    deckY:.20,
+    // Height of the gripper-bar shaft's top chain run (see simulation-apm2.js
+    // gripperLoopPosition) minus the .035 finger reach (buildTransport in apm2.js): the
+    // level plane a sheet actually rides at while gripper bars carry it. Shared here so the
+    // simulation's visible sheet path and the machine geometry (register table height, feeder
+    // suckers, etc.) stay consistent with a single number instead of independently guessed ones.
+    sheetPlaneY:1.535
   })
 });
 
