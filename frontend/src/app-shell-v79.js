@@ -136,19 +136,26 @@ function syncOverlayDom(state=getState()){
 function closeDrawer({restoreFocus=true}={}){document.body.classList.remove('nav-open');document.body.classList.remove('drawer-transitioning');const menuButton=q('#ui-menu-toggle');menuButton?.setAttribute('aria-expanded','false');menuButton?.setAttribute('aria-label','Buka navigasi');q('[data-mobile-nav="more"]')?.setAttribute('aria-expanded','false');if(restoreFocus)restoreOverlayFocus('navigation','#ui-menu-toggle');else overlayReturnFocus.delete('navigation')}
 function closeLayerManager({restoreFocus=true}={}){const panel=q('#layer-manager');if(panel)panel.hidden=true;document.body.classList.remove('layer-open');if(getState().overlay==='layers')closeOverlay();if(restoreFocus)restoreOverlayFocus('layers','#nav-view');else overlayReturnFocus.delete('layers')}
 function applyInspectorDom(state=getState()){
- const open=Boolean(state.inspectorState?.open),mobile=matchMedia('(max-width:767px)').matches;
+ const open=Boolean(state.inspectorState?.open),mobile=matchMedia('(max-width:767px)').matches,panel=q('#detail-panel');
  document.body.classList.toggle('panel-hidden',!open);
  document.body.classList.toggle('mobile-panel-open',open&&mobile);
+ if(panel){
+  panel.setAttribute('aria-hidden',String(!open));
+  panel.inert=!open;
+  panel.dataset.presentation=mobile?'sheet':'sidebar';
+ }
 }
 function closeInspector({restoreFocus=true}={}){
  const next=setInspector(false);
  applyInspectorDom(next);
- if(restoreFocus)restoreOverlayFocus('inspector','#panel-toggle');
+ if(restoreFocus)restoreOverlayFocus('inspector','#panel-toggle');else overlayReturnFocus.delete('inspector');
 }
 function openInspector(tab=getState().inspectorState.tab){
- beforeMajorOverlay('inspector');rememberOverlayFocus('inspector');
+ const firstOpen=!getState().inspectorState?.open;
+ beforeMajorOverlay('inspector');
+ if(firstOpen)rememberOverlayFocus('inspector');
  const next=setInspector(true,tab);applyInspectorDom(next);
- if(matchMedia('(max-width:767px)').matches)focusOverlay(q('#detail-panel'),'#close-panel');
+ if(firstOpen&&matchMedia('(max-width:767px)').matches)focusOverlay(q('#detail-panel'),'#close-panel');
 }
 function toggleInspector(){
  if(getState().inspectorState?.open)closeInspector();
