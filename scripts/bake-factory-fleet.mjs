@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 import {writeFileSync} from 'node:fs';import {gzipSync} from 'node:zlib';
-import {createMachineTemplate} from '../frontend/src/machine-runtime.js';
+import {createPolishedMachineTemplate} from '../frontend/src/machine-runtime.js';
 import {MACHINE_PLACEMENTS} from '../frontend/src/data/plant-actual.js';
 const result=[];let unknown=0;
 for(const place of MACHINE_PLACEMENTS){
- const t=createMachineTemplate(place.machineId);t.setLow?.(true);t.setExteriorOpen?.(false);t.root.updateMatrixWorld(true);
+ const t=createPolishedMachineTemplate(place.machineId);t.setLow?.(true);t.setExteriorOpen?.(false);t.root.updateMatrixWorld(true);
  const box=new THREE.Box3().setFromObject(t.root),center=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3());
  const buckets=new Map();
  t.root.traverse(o=>{
