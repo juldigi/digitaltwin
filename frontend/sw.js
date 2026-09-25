@@ -1,4 +1,4 @@
-// V228 machine visual parity: force service-worker byte change and shell recache without rotating public query identifiers.
+// V229 Sheeting + POLAR visual parity: force service-worker byte change and shell recache without rotating public query identifiers.
 const VERSION='factory-digital-twin-v222-overlay-state-ssot-20260925';
 const RELEASE='222';
 const ENTRYPOINTS=[

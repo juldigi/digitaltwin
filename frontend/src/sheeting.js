@@ -58,7 +58,7 @@ export class SheetingMachineTemplate{
       dark:0x293236,steel:0x939b9b,chrome:0xcbd1d0,paper:0xece6d6,stackPaper:0xf1ece0,
       glass:0x78b6bb,black:0x20272a,blue:0x2f67a1,red:0xc93434,green:0x4c9b4f,bronze:0xb08b55
     };
-    this.buildActualV194();this.refineActualV195();this.refineActualV196();this.refineActualV197();this.enrichActualV197();
+    this.buildActualV194();this.refineActualV195();this.refineActualV196();this.refineActualV197();this.enrichActualV197();this.markSilhouetteCriticality();
     for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}
     this.root.updateMatrixWorld(true);
   }
@@ -1414,8 +1414,32 @@ export class SheetingMachineTemplate{
   ghost(on,except=null){this.ghosted=on;for(const m of this.meshes){const fade=on&&(!except||!this.contains(except,m));m.material.transparent=fade||m.userData.exteriorCover||m.material.transparent;m.material.opacity=fade?.14:(m.material.color?.getHex()===this.palette.glass?.26:1);m.material.depthWrite=!fade;}}
   isolate(p,on=true){for(const n of this.nodes)n.visible=!on||!p||this.contains(p,n)||this.contains(n,p);}
   showOnly(ps=[],on=true){for(const n of this.nodes)n.visible=!on||!ps.length||ps.some(p=>n===p||this.contains(n,p));}
+  markSilhouetteCriticality(){
+    const criticalRoles=new Set([
+      'loaded-paper-reel','loaded-expanding-chuck','rollstand-common-base','overhead-longitudinal-beam',
+      'single-reel-arm-inner','single-reel-arm-outer','single-reel-chuck-housing','single-rollstand-hydraulic-cylinder',
+      'web-carrier-longitudinal-beam','loop-frame-upright','roller-frame-upright',
+      'large-black-draw-roll','lower-polished-entry-roll','draw-section-side-cheek','main-cutter-cabinet',
+      'inspection-panel-frame','long-inspection-window','delivery-side-frame','delivery-upper-datum-rail',
+      'delivery-crossbar-support','stack-side-rail','stack-end-crossbeam','lift-table','pallet',
+      'reference-paper-block','stacker-column','stacker-front-header','stacker-side-cabinet','stacker-base-rail',
+      'stack-white-guide-panel','stack-green-guide-head','stack-guide-handwheel','diamond-plate-catwalk',
+      'access-landing','control-console-base'
+    ]);
+    let kept=0;
+    for(const m of this.meshes){
+      if(criticalRoles.has(m.userData.role)){m.userData.silhouetteCritical=true;kept++;}
+    }
+    this.root.userData.lowLodSilhouette={
+      revision:'V229',
+      policy:'KEEP_PHOTO_VISIBLE_MACHINE_DNA__HIDE_MICRO_SERVICE_DETAIL_ONLY',
+      criticalMeshCount:kept,
+      familyEvidence:'BW_HSM56_FLAT_BED_KNIFE__ONE_FIXED_TWO_SIDED_ROLLSTAND__FLAT_PLATE_LIFT_TABLE',
+      exactMachineBoundary:'BMJ_IMG_2479_TO_2487_REMAIN_PRIMARY__NO_SPECULATIVE_INTERNAL_BLADE'
+    };
+  }
   setExteriorOpen(on=true){this.exteriorOpen=!!on;for(const m of this.meshes){if(m.userData.exteriorCover)m.visible=!on;if(m.userData.cutawayOnly)m.visible=!!on;}this.root.userData.interiorCutawayVisible=on;}
-  setLow(on){for(const m of this.detailMeshes)m.visible=!on;}
+  setLow(on){for(const m of this.detailMeshes)m.visible=!on||Boolean(m.userData.silhouetteCritical);}
   reset(){const open=this.exteriorOpen;this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const n of this.nodes)n.quaternion.copy(n.userData.restQuaternion);for(const m of this.meshes){m.position.copy(m.userData.restPosition);m.rotation.copy(m.userData.restRotation);m.visible=true;}this.setExteriorOpen(open);}
   dispose(){this.geometries.forEach(g=>g.dispose());this.materials.forEach(m=>m.dispose());}
 }
