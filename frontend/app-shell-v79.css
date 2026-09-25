@@ -1206,3 +1206,22 @@ body.modal-open aside#detail-panel{visibility:hidden!important;pointer-events:no
   max-height:calc(var(--app-vh,100dvh) - 16px)!important
  }
 }
+
+
+/* V225 2D chrome consolidation — one contextual heading, no residual 3D controls. */
+.workspace-2d .plant-plan-2d>header{display:none!important}
+.workspace-2d .scene-bottom,
+.workspace-2d .viewport-zoom{display:none!important}
+.workspace-2d .scene-heading{z-index:12}
+.workspace-2d .plant-plan-2d .dwg-warning{z-index:4}
+@media(max-width:767px){
+ .workspace-2d .plant-plan-2d .dwg-warning{
+  left:10px;right:10px;bottom:calc(72px + env(safe-area-inset-bottom));max-width:none
+ }
+ body:not(.panel-hidden).workspace-2d .plant-plan-2d .dwg-warning{visibility:hidden!important}
+}
+@media(max-width:767px) and (max-height:560px) and (orientation:landscape){
+ .workspace-2d .plant-plan-2d .dwg-warning{
+  left:max(8px,env(safe-area-inset-left));right:76px;bottom:8px
+ }
+}
