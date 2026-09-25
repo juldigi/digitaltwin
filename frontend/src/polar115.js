@@ -9,7 +9,7 @@ export class Polar115MachineTemplate{
  constructor(){
   this.root=new THREE.Group();this.root.name='POLAR-115-EM';this.parts=[];this.nodes=[];this.meshes=[];this.materials=[];this.geometries=[];this.activeMeshes=[];this.exteriorOpen=false;
   this.palette={body:0xb8bbb5,bodyDark:0x8f938f,dark:0x252b2e,table:0xb6b8b2,tableDark:0x514a43,steel:0xa9b0b1,accent:0x405961,warning:0xd0a338,screen:0x173e34,red:0xb6302d,paper:0xece5d2,black:0x111517,air:0x8bbad0};
-  this.build();this.enrichV122();this.taxonomy=POLAR115_TAXONOMY;this.taxonomyById=new Map(this.taxonomy.map(n=>[n.id,n]));
+  this.build();this.enrichV122();this.markSilhouetteCriticality();this.taxonomy=POLAR115_TAXONOMY;this.taxonomyById=new Map(this.taxonomy.map(n=>[n.id,n]));
   for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}this.root.updateMatrixWorld(true);
   this.root.userData={assetId:POLAR115_SPEC.assetId,nodeId:'POLAR-115-EM',model:POLAR115_SPEC.model,serial:POLAR115_SPEC.serial,spec:POLAR115_SPEC,sources:POLAR115_TECHNICAL_SOURCES,machineEnvelope:{reference:POLAR115_REFERENCE_DIMENSIONS},geometryStatus:'DEDICATED_BMJ_PHOTO_MATCHED__ARCHIVE_DIMENSIONS_NOT_INSTALLATION_CAD',engineeringDimensions:false,evidenceBoundary:POLAR115_SPEC.evidenceBoundary,researchVersion:'V123_PHOTO_MATCHED',researchSourceCount:V122_SOURCE_STATS.total,detailPass:'V123_POLAR115_BMJ_PHOTO_MATCHED',actualPhotoEvidence:'BMJ-POLAR-PHOTOS-2026-09',mainHousingProfile:'RECTANGULAR_ROUNDED_HEAD__NO_HALF_CYLINDER_ROOF'};
  }
@@ -206,8 +206,28 @@ export class Polar115MachineTemplate{
  ghost(on,except=null){this.ghosted=!!on;for(const m of this.meshes){const fade=on&&(!except||!this.contains(except,m)),base=m.material.userData.baseOpacity??1;m.material.transparent=fade||base<1;m.material.opacity=fade?.14:base;m.material.depthWrite=!fade;}}
  isolate(p,on=true){for(const n of this.nodes)n.visible=!on||!p||this.contains(p,n)||this.contains(n,p);}
  showOnly(ps=[],on=true){for(const n of this.nodes)n.visible=!on||!ps.length||ps.some(p=>n===p||this.contains(n,p));}
+ markSilhouetteCriticality(){
+  const criticalNodes=new Set([
+   'polar-frame','polar-feed-center','polar-feed-left','polar-feed-right','polar-feed-rear',
+   'polar-housing','polar-housing-motor-end','polar-safety-left-arm','polar-safety-right-arm',
+   'polar-control-panel','polar-control-crt'
+  ]);
+  let kept=0;
+  for(const m of this.meshes){
+   let owner=m.parent,critical=false;
+   while(owner&&owner!==this.root){if(criticalNodes.has(owner.userData?.nodeId)){critical=true;break;}owner=owner.parent;}
+   if(critical){m.userData.silhouetteCritical=true;kept++;}
+  }
+  this.root.userData.lowLodSilhouette={
+   revision:'V229',
+   policy:'KEEP_BMJ_EM_MON_PHOTO_IDENTITY__HIDE_SERVICE_MICRODETAIL_ONLY',
+   criticalMeshCount:kept,
+   archiveFamily:'115_CM_OPENING__AIR_TABLE__LEFT_RIGHT_SIDE_TABLES__PHOTOCELL_SAFETY',
+   modernizationBoundary:'KEEP_115_EM_MONITOR_SQUARE_DISPLAY_KEYPAD__DO_NOT_SUBSTITUTE_CURRENT_N115_TOUCHSCREEN'
+  };
+ }
  setExteriorOpen(on=true){this.exteriorOpen=!!on;let hidden=0;for(const m of this.meshes)if(m.userData.exteriorCover){m.visible=!on;if(on)hidden++;}this.root.userData.interiorCutawayVisible=!!on;this.root.userData.exteriorHiddenCount=on?hidden:0;}
- setLow(on){for(const m of this.meshes)if(m.userData.detail)m.visible=!on;}
+ setLow(on){for(const m of this.meshes)if(m.userData.detail)m.visible=!on||Boolean(m.userData.silhouetteCritical);}
  reset(){this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const n of this.nodes)n.quaternion.copy(n.userData.restQuaternion);if(this.exteriorOpen)this.setExteriorOpen(true);}
  dispose(){this.geometries.forEach(g=>g.dispose());this.materials.forEach(m=>m.dispose());}
 }
