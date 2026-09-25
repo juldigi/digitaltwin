@@ -853,7 +853,7 @@ async function restoreHistoryContext(){
  applyRestoredCamera(cameraPreset);
  emitDomainState({selectedAsset:record.machineId,selectedNode:restoredNode,sceneMode:'machine',viewMode,cameraPreset,activeSection:'asset'});
 }
-addEventListener('popstate',()=>{restoreHistoryContext().catch(error=>toast('Riwayat tampilan gagal dipulihkan: '+error.message,true));});
+addEventListener('popstate',()=>{dispatchEvent(new CustomEvent('bmj:historynavigationrequest'));restoreHistoryContext().catch(error=>toast('Riwayat tampilan gagal dipulihkan: '+error.message,true));});
 function machineRoute(machine){return MACHINE_ROUTE_BY_ID[machine?.machineId]||machine?.machineId||null;}
 function searchableTaxonomy(route){
  return isFoundationPrimary(route)?OFFSET5_TAXONOMY:normalizeMachineKey(route)===MACHINE_KEY?ACTIVE_TAXONOMY:[];

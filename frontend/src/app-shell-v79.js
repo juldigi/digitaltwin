@@ -133,8 +133,8 @@ function syncOverlayDom(state=getState()){
   q('[data-mobile-nav="more"]')?.setAttribute('aria-expanded','false');
  }
 }
-function closeDrawer(){document.body.classList.remove('nav-open');document.body.classList.remove('drawer-transitioning');const menuButton=q('#ui-menu-toggle');menuButton?.setAttribute('aria-expanded','false');menuButton?.setAttribute('aria-label','Buka navigasi');q('[data-mobile-nav="more"]')?.setAttribute('aria-expanded','false');restoreOverlayFocus('navigation','#ui-menu-toggle')}
-function closeLayerManager(){const panel=q('#layer-manager');if(panel)panel.hidden=true;document.body.classList.remove('layer-open');if(getState().overlay==='layers')closeOverlay();restoreOverlayFocus('layers','#nav-view')}
+function closeDrawer({restoreFocus=true}={}){document.body.classList.remove('nav-open');document.body.classList.remove('drawer-transitioning');const menuButton=q('#ui-menu-toggle');menuButton?.setAttribute('aria-expanded','false');menuButton?.setAttribute('aria-label','Buka navigasi');q('[data-mobile-nav="more"]')?.setAttribute('aria-expanded','false');if(restoreFocus)restoreOverlayFocus('navigation','#ui-menu-toggle');else overlayReturnFocus.delete('navigation')}
+function closeLayerManager({restoreFocus=true}={}){const panel=q('#layer-manager');if(panel)panel.hidden=true;document.body.classList.remove('layer-open');if(getState().overlay==='layers')closeOverlay();if(restoreFocus)restoreOverlayFocus('layers','#nav-view');else overlayReturnFocus.delete('layers')}
 function applyInspectorDom(state=getState()){
  const open=Boolean(state.inspectorState?.open),mobile=matchMedia('(max-width:767px)').matches;
  document.body.classList.toggle('panel-hidden',!open);
@@ -243,14 +243,14 @@ function openSearch(seed=''){
  searchActiveIndex=-1;requestUniversalSearch(input.value);
  requestAnimationFrame(()=>input.focus());
 }
-function closeSearch(){
+function closeSearch({restoreFocus=true}={}){
  const panel=q('#universal-search-panel'),input=q('#universal-search-input',panel||document);if(panel)panel.hidden=true;
  if(input){input.setAttribute('aria-expanded','false');input.removeAttribute('aria-activedescendant')}
  document.body.classList.remove('search-open');
  if(getState().overlay==='search')closeOverlay();
  searchActiveIndex=-1;
  suppressSearchFocus=true;
- restoreOverlayFocus('search','#global-search');
+ if(restoreFocus)restoreOverlayFocus('search','#global-search');else overlayReturnFocus.delete('search');
  requestAnimationFrame(()=>{suppressSearchFocus=false});
 }
 function requestUniversalSearch(query){
@@ -381,7 +381,7 @@ function ensureSystemBrowser(){
  <div class="canonical-layer-group unavailable"><h4>Batas data</h4><p>Jalur yang belum memiliki gambar atau verifikasi lapangan tetap ditandai belum tersedia. Aplikasi tidak membuat jalur aktual secara otomatis.</p></div>`;
  document.body.append(panel);q('[data-system-close]',panel)?.addEventListener('click',closeSystemBrowser);bindSystemFocus(panel);
 }
-function closeSystemBrowser(){const panel=q('#system-browser');if(panel)panel.hidden=true;document.body.classList.remove('system-open');if(getState().overlay==='systems')closeOverlay();const state=getState();if(state.activeSection==='system'){const next=systemReturnSection||(state.sceneMode==='machine'?'asset':'factory');setActiveSection(next);markSection(next)}systemReturnSection=null;restoreOverlayFocus('systems','#nav-systems')}
+function closeSystemBrowser({restoreFocus=true}={}){const panel=q('#system-browser');if(panel)panel.hidden=true;document.body.classList.remove('system-open');if(getState().overlay==='systems')closeOverlay();const state=getState();if(state.activeSection==='system'){const next=systemReturnSection||(state.sceneMode==='machine'?'asset':'factory');setActiveSection(next);markSection(next)}systemReturnSection=null;if(restoreFocus)restoreOverlayFocus('systems','#nav-systems');else overlayReturnFocus.delete('systems')}
 function ensureLayerManager(){
  if(q('#layer-manager'))return;
  const panel=document.createElement('section');panel.id='layer-manager';panel.className='canonical-layer-manager';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-labelledby','layer-manager-title');panel.setAttribute('tabindex','-1');
@@ -446,10 +446,22 @@ qa('#detail-panel [role="tab"]').forEach(tab=>tab.addEventListener('click',()=>{
 }));
 q('#close-panel')?.addEventListener('click',()=>closeInspector());
 const modalElement=q('#modal');
+let suppressModalFocusRestore=false;
 addEventListener('bmj:modalopenrequest',()=>{const firstOpen=getState().overlay!=='modal';beforeMajorOverlay('modal');if(firstOpen)rememberOverlayFocus('modal');openOverlay('modal')});
-addEventListener('bmj:modalcloserequest',()=>{if(getState().overlay==='modal')closeOverlay();restoreOverlayFocus('modal')});
+addEventListener('bmj:modalcloserequest',()=>{if(getState().overlay==='modal')closeOverlay();if(!suppressModalFocusRestore)restoreOverlayFocus('modal');else overlayReturnFocus.delete('modal')});
 modalElement?.addEventListener('cancel',event=>{event.preventDefault();q('#modal-close')?.click()});
-modalElement?.addEventListener('close',()=>{if(getState().overlay==='modal')closeOverlay();restoreOverlayFocus('modal')});
+modalElement?.addEventListener('close',()=>{if(getState().overlay==='modal')closeOverlay();if(!suppressModalFocusRestore)restoreOverlayFocus('modal')});
+addEventListener('bmj:historynavigationrequest',()=>{
+ const overlay=getState().overlay;
+ if(overlay==='search')closeSearch({restoreFocus:false});
+ else if(overlay==='systems')closeSystemBrowser({restoreFocus:false});
+ else if(overlay==='layers')closeLayerManager({restoreFocus:false});
+ else if(overlay==='navigation'){closeDrawer({restoreFocus:false});closeOverlay()}
+ else if(overlay==='modal'&&q('#modal')?.open){suppressModalFocusRestore=true;q('#modal-close')?.click();suppressModalFocusRestore=false}
+ if(getState().inspectorState?.open)closeInspector({restoreFocus:false});
+ if(getState().overlay)closeOverlay();
+ syncOverlayDom(getState());
+});
 const syncViewport=()=>{
  const viewport=window.visualViewport,appHeight=viewport?.height||innerHeight,w=innerWidth,mobile=w<768;
  const keyboardOpen=mobile&&Boolean(viewport)&&Math.max(0,innerHeight-appHeight)>160;

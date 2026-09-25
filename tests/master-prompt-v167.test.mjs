@@ -11,7 +11,7 @@ const sw=read('../frontend/sw.js');
 
 test('V167 navigation has one close-state owner',()=>{
  assert.doesNotMatch(ui,/e\.target\.closest\('\.rail'\)/);
- assert.match(shell,/function closeDrawer\(\)[\s\S]*data-mobile-nav="more"[\s\S]*aria-expanded','false'/);
+ assert.match(shell,/function closeDrawer\(\{restoreFocus=true\}=\{\}\)[\s\S]*data-mobile-nav="more"[\s\S]*aria-expanded','false'/);
  assert.match(shell,/menu\.setAttribute\('aria-label',open\?'Tutup navigasi':'Buka navigasi'\)/);
  assert.match(shell,/button\.setAttribute\('aria-expanded','true'\)/);
 });

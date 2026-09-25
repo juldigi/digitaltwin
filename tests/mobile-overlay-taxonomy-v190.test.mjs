@@ -21,7 +21,7 @@ test('mobile navigation drawer uses opaque panel and non-blurring backdrop',()=>
 test('drawer transition marker is always cleared',()=>{
  assert.match(shell,/classList\.add\('drawer-transitioning'\)/);
  assert.match(shell,/requestAnimationFrame\(\(\)=>document\.body\.classList\.remove\('drawer-transitioning'\)\)/);
- assert.match(shell,/closeDrawer\(\)\{document\.body\.classList\.remove\('nav-open'\);document\.body\.classList\.remove\('drawer-transitioning'\)/);
+ assert.match(shell,/closeDrawer\(\{restoreFocus=true\}=\{\}\)\{document\.body\.classList\.remove\('nav-open'\);document\.body\.classList\.remove\('drawer-transitioning'\)/);
 });
 test('mobile release identifiers are coherent',()=>{
  assert.match(index,/app-shell-v79\.css\?v=222/);
