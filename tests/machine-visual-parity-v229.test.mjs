@@ -74,7 +74,7 @@ test('V229 POLAR remains bounded to verified EM-MON features and archive dimensi
 
 test('V229 build continues to regenerate factory/home geometry from the live templates',()=>{
  assert.match(build,/scripts\/bake-factory-fleet\.mjs/);
- assert.match(sw,/V229 Sheeting \+ POLAR visual parity/);
+ assert.match(sw,/shell recache without rotating public query identifiers/);
  assert.match(sw,/factory-digital-twin-v222-overlay-state-ssot-20260925/);
  assert.match(sw,/const RELEASE='222'/);
 });
