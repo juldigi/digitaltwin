@@ -1,0 +1,13 @@
+import * as T from 'three';
+import {buildRoomFurnitureReferenceV2,roomFurnitureSemanticAuditV2,roomFurnitureBoundsAuditV2,ROOM_TEMPLATE_ENVELOPES,ROOM_FURNITURE_PLAN_VERSION} from '../../dependencies/factory-room-furniture-plan-v2.js';
+export const FURNITURE_INTEGRATION_VERSION='RFI-V3-2026-09-25';
+function cloneRoomInfo(r){return {key:r.key,label:r.label,program:r.program,width:r.width,depth:r.depth,doorSide:r.doorSide,rotation:r.rotation};}
+export function buildFactoryRoomFurnitureV3(roomSolution,{strictFit=true,minEnvelopeRatio=.92,programAllowlist=null,lod=1}={}){
+ const root=new T.Group();root.name='FACTORY_ROOM_FURNITURE_V3';root.userData={semantic:'FACTORY_ROOM_FURNITURE_REFERENCE',version:FURNITURE_INTEGRATION_VERSION,sourcePlanVersion:ROOM_FURNITURE_PLAN_VERSION,strictFit,lod};const reports=[];
+ for(const r of roomSolution?.rooms||[]){if(programAllowlist&&!programAllowlist.includes(r.program))continue;const expected=ROOM_TEMPLATE_ENVELOPES[r.program];if(!expected){reports.push({...cloneRoomInfo(r),status:'SKIPPED_NO_TEMPLATE'});continue;}const ratio=Math.min(r.width/expected[0],r.depth/expected[1]);if(strictFit&&ratio<minEnvelopeRatio){reports.push({...cloneRoomInfo(r),status:'SKIPPED_ROOM_TOO_SMALL_FOR_CURATED_TEMPLATE',ratio:+ratio.toFixed(3),template:expected});continue;}
+  let furniture;try{furniture=buildRoomFurnitureReferenceV2(r.program,{width:r.width,depth:r.depth});}catch(error){reports.push({...cloneRoomInfo(r),status:'SKIPPED_BUILDER_ERROR',error:String(error.message||error)});continue;}
+  const localBounds=roomFurnitureBoundsAuditV2(furniture,{width:r.width,depth:r.depth,padding:.08}),semantic=roomFurnitureSemanticAuditV2(furniture);if(strictFit&&!localBounds.pass){reports.push({...cloneRoomInfo(r),status:'SKIPPED_BOUNDS_VIOLATION',violations:localBounds.violations});continue;}
+  furniture.position.set((r.minX+r.maxX)/2,0,-(r.minY+r.maxY)/2);furniture.rotation.y=r.rotation||0;furniture.userData={...furniture.userData,roomKey:r.key,roomLabel:r.label,roomProgram:r.program,actualRoomEnvelope:{minX:r.minX,maxX:r.maxX,minY:r.minY,maxY:r.maxY},integrationVersion:FURNITURE_INTEGRATION_VERSION,lod};root.add(furniture);reports.push({...cloneRoomInfo(r),status:'BUILT',ratio:+ratio.toFixed(3),bounds:localBounds,semantic});
+ }
+ root.userData.reports=reports;root.userData.summary={roomsConsidered:reports.length,built:reports.filter(r=>r.status==='BUILT').length,skipped:reports.filter(r=>r.status!=='BUILT').length,boundsViolations:reports.filter(r=>r.status==='SKIPPED_BOUNDS_VIOLATION').length};return root;
+}
