@@ -130,14 +130,14 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   }
 
   const platform=this.group(shell,'o7-operator-platform-v232','Operator platform / service access family reference');
-  const deck=this.box(platform,[4.90,.10,.62],[.15,.33,-1.40],'steel',.012);
+  const deck=this.box(platform,[4.90,.10,.24],[.15,.33,-.91],'steel',.012);
   deck.userData.silhouetteCritical=true;deck.userData.mechanismRole='gravure-operator-platform-reference';
   for(let x=-2.0;x<=2.15;x+=.55){
-    const tread=this.box(platform,[.34,.020,.56],[x,.39,-1.40],'steel',0);
+    const tread=this.box(platform,[.34,.020,.20],[x,.39,-.91],'steel',0);
     tread.userData.detail=true;tread.userData.mechanismRole='platform-grating-reference';
   }
-  for(const x of [-2.12,2.24])this.cyl(platform,.020,.72,[x,.74,-1.68],'steel','y');
-  this.cyl(platform,.020,4.36,[.06,1.08,-1.68],'steel','x').userData.mechanismRole='platform-handrail-reference';
+  for(const x of [-2.12,2.24])this.cyl(platform,.020,.72,[x,.74,-1.01],'steel','y');
+  this.cyl(platform,.020,4.36,[.06,1.08,-1.01],'steel','x').userData.mechanismRole='platform-handrail-reference';
 
   // Service-door seams/handles read as industrial panels; these are not installation-specific internals.
   for(const [x,w] of [[-2.58,1.18],[2.55,1.24]])for(const z of [-1.075,1.075]){
