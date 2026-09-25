@@ -20,9 +20,9 @@ test('sheeting control mutations publish state to the shell',()=>{
  assert.match(sheeting,/setPathVisible\(v\).*this\.onUpdate\?\.\(this\.state\(\)\)/);
 });
 test('V189 release identifiers are coherent',()=>{
- assert.match(index,/app-shell-v79\.css\?v=220/);
- assert.match(index,/src\/app\.js\?v=220/);
- assert.match(index,/src\/app-shell-v79\.js\?v=220/);
- assert.match(sw,/factory-digital-twin-v220-camera-director-20260925/);
+ assert.match(index,/app-shell-v79\.css\?v=221/);
+ assert.match(index,/src\/app\.js\?v=221/);
+ assert.match(index,/src\/app-shell-v79\.js\?v=221/);
+ assert.match(sw,/factory-digital-twin-v221-ui-shell-hardening-20260925/);
  assert.match(app,/pair\('Versi aplikasi',APP_BUILD\)/);
 });
