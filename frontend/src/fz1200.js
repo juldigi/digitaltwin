@@ -14,7 +14,7 @@ export class FZ1200MachineTemplate{
   if(rotating)m.userData.spinDirection=/^(trunnion-shaft|rotation-gear)$/.test(role)?1:-1;
   return m;
  }cover(m){m.userData.exteriorCover=true;return m;}
- build(){this.buildBase();this.buildClamp();this.buildTurn();this.buildAir();this.buildJog();this.buildHydraulic();this.buildControl();}
+ build(){this.buildBase();this.buildClamp();this.buildTurn();this.buildAir();this.buildJog();this.buildHydraulic();this.buildControl();this.refineExteriorV232();}
  buildBase(){const g=this.group(this.root,'fz1200-base','Base and lift');const frame=this.group(g,'fz1200-base-frame','Floor base frame');this.box(frame,[2.55,.22,2.02],[0,.11,0],'dark',.04);for(const z of [-.78,.78])this.box(frame,[2.25,.12,.12],[0,.30,z],'steel',.02);
   for(const x of [-1.04,1.04])for(const z of [-.82,.82]){const foot=this.cyl(frame,.055,.14,[x,.07,z],'steel','levelling-foot','y');this.tag?.(foot,'fz1200-levelling-foot-reference','FZ1200_CLOSE_FAMILY_COMPONENT_REFERENCE');}
   const lift=this.group(g,'fz1200-base-lift','Vertical lift carriage');for(const x of [-.88,.88])this.box(lift,[.16,2.05,.16],[x,1.26,0],'steel',.025);
@@ -50,7 +50,36 @@ export class FZ1200MachineTemplate{
  const safe=this.group(g,'fz1200-control-safety','Interlock / E-stop architecture');for(const x of [-1.17,-1.03,-.89])this.cyl(safe,.032,.025,[x,.80,-1.35],x===-.89?'red':'green','button','z');const permissive=this.box(safe,[.08,.12,.06],[-.72,.74,-1.35],'green',.008);permissive.userData.mechanismRole='turn-permissive-indicator';
  const guard=this.group(g,'fz1200-control-guard','Perimeter guard reference');guard.userData.installedGuardGeometryVerified=false;for(const x of [-1.18,1.18])for(const z of [-.98,.98])this.box(guard,[.06,1.25,.06],[x,.85,z],'steel',.01);for(const z of [-.98,.98]){const sensor=this.box(guard,[.045,.065,.045],[-1.12,.58,z],'green',.004);sensor.userData.mechanismRole='guard-interlock-sensor-reference';}
  this.root.userData.installedNozzleCountVerified=false;this.root.userData.installedBlowerLayoutVerified=false;this.root.userData.installedCylinderCountVerified=false;this.root.userData.closeFamilyComponentBoundary='RYFZ unit-description components are service references only; BMJ FZ1200 serial-specific construction remains unverified.';}
+ refineExteriorV232(){
+  this.root.userData.visualRefinement='V232_FZ1200_OPEN_CRADLE_SERVICE_POLISH';
+  this.root.userData.homeDetailGeometryPolicy='SAME_LIVE_TEMPLATE__OPEN_CRADLE_YOKE_AND_POWERPACK_RETAINED';
+  this.root.userData.familyEvidenceBoundary='FZ1200_EXACT_MODEL_PUBLIC_PROCESS_REFERENCE__BMJ_SERIAL_SPECIFIC_OEM_AND_GUARD_GEOMETRY_UNVERIFIED';
+  const frame=this.findNode('fz1200-base-frame');
+  if(frame){
+   for(const z of [-.88,.88])for(const x of [-1.08,1.08]){
+    const outrigger=this.box(frame,[.52,.10,.12],[x,.16,z],'dark',.018);outrigger.userData.silhouetteCritical=true;outrigger.userData.mechanismRole='base-outrigger-reference';
+    const foot=this.cyl(frame,.055,.14,[x+(x<0?-.18:.18),.07,z],'steel','levelling-foot','y');foot.userData.detail=true;foot.userData.mechanismRole='levelling-foot-reference';
+   }
+  }
+  const yoke=this.findNode('fz1200-turn-yoke');
+  if(yoke){
+   for(const x of [-.98,.98])for(const z of [-.54,.54]){
+    const brace=this.box(yoke,[.10,.78,.12],[x,-.25,z],'blue',.014);brace.rotation.z=x<0?-.42:.42;brace.userData.silhouetteCritical=true;brace.userData.mechanismRole='yoke-diagonal-gusset-reference';
+   }
+   for(const x of [-.98,.98]){const cap=this.box(yoke,[.22,.18,1.46],[x,.78,0],'blue',.025);cap.userData.silhouetteCritical=true;cap.userData.mechanismRole='yoke-upper-side-cap-reference';}
+  }
+  const power=this.findNode('fz1200-hyd-power');
+  if(power){
+   const guard=this.cover(this.box(power,[.70,.62,.06],[.90,.52,-1.38],'blue',.028));guard.userData.silhouetteCritical=true;guard.userData.mechanismRole='hydraulic-powerpack-service-cover-reference';
+   for(let y=.32;y<.68;y+=.08){const slot=this.box(power,[.34,.012,.012],[.84,y,-1.415],'dark',0);slot.userData.detail=true;slot.userData.mechanismRole='powerpack-vent-slot';}
+   const handle=this.box(power,[.026,.18,.020],[1.16,.57,-1.418],'steel',.004);handle.userData.detail=true;handle.userData.mechanismRole='powerpack-door-handle';
+  }
+  const control=this.findNode('fz1200-control-hmi');
+  if(control){
+   const arm=this.box(control,[.64,.07,.08],[-.92,1.30,-1.10],'steel',.010);arm.rotation.z=-.10;arm.userData.silhouetteCritical=true;arm.userData.mechanismRole='operator-console-support-arm-reference';
+  }
+ } 
  findNode(id){return id==='fz1200-root'?this.root:this.nodes.find(n=>n.userData.nodeId===id)||null;}resolvePart(o){for(let p=o;p&&p!==this.root;p=p.parent)if(p.userData?.selectable)return p;return null;}resolveTaxonomyNode(id){return this.taxonomyById.get(id)?.meshRefs.map(ref=>this.findNode(ref)).find(Boolean)||null;}contains(a,b){for(let p=b;p;p=p.parent)if(p===a)return true;return false;}
  highlight(p){for(const m of this.meshes){m.material.emissive?.setHex(p&&this.contains(p,m)?0x17494a:0);m.material.emissiveIntensity=.3;}}highlightMany(ps=[]){for(const m of this.meshes){m.material.emissive?.setHex(ps.some(p=>this.contains(p,m))?0x17494a:0);m.material.emissiveIntensity=.3;}}ghost(on,except=null){this.ghosted=!!on;for(const m of this.meshes){const fade=on&&(!except||!this.contains(except,m)),natural=m.material.userData?.baseOpacity??1;m.material.transparent=fade||natural<1;m.material.opacity=fade?.14:natural;m.material.depthWrite=!fade;}}isolate(p,on=true){for(const n of this.nodes)n.visible=!on||!p||this.contains(p,n)||this.contains(n,p);}showOnly(ps=[],on=true){for(const n of this.nodes)n.visible=!on||!ps.length||ps.some(p=>n===p||this.contains(n,p));}
- setExteriorOpen(on=true){this.exteriorOpen=!!on;this.root.userData.interiorCutawayVisible=!!on;}explode(t,s=null){for(const n of this.nodes)n.position.copy(n.userData.rest);const targets=s?(s.children.filter(c=>c.userData.selectable).length?s.children.filter(c=>c.userData.selectable):[s]):this.parts;for(const n of targets)n.position.addScaledVector(n.userData.explode,THREE.MathUtils.clamp(+t||0,0,1));}setLow(){}reset(){this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const n of this.nodes)n.quaternion.copy(n.userData.restQuaternion);}dispose(){for(const g of this.geometries.values())g.dispose();for(const m of this.materials.values())m.dispose();}
+ setExteriorOpen(on=true){this.exteriorOpen=!!on;this.root.userData.interiorCutawayVisible=!!on;}explode(t,s=null){for(const n of this.nodes)n.position.copy(n.userData.rest);const targets=s?(s.children.filter(c=>c.userData.selectable).length?s.children.filter(c=>c.userData.selectable):[s]):this.parts;for(const n of targets)n.position.addScaledVector(n.userData.explode,THREE.MathUtils.clamp(+t||0,0,1));}setLow(on){for(const m of this.meshes)if(m.userData.detail&&!m.userData.silhouetteCritical)m.visible=!on;}reset(){this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const n of this.nodes)n.quaternion.copy(n.userData.restQuaternion);}dispose(){for(const g of this.geometries.values())g.dispose();for(const m of this.materials.values())m.dispose();}
 }

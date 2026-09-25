@@ -9,7 +9,7 @@ export class Offset9MachineTemplate{
  constructor(){
   this.root=new THREE.Group();this.root.name='Speedmaster SX 52-4+L';
   this.root.userData={assetId:'BMJ-MCH-0006',nodeId:'offset9-root',spec:OFFSET9_SPEC,sources:OFFSET9_TECHNICAL_SOURCES,orientation:OFFSET9_ORIENTATION,taxonomyVersion:'offset9-v2-oem-mechanics',evidenceGrade:'OFFICIAL_FAMILY_REFERENCE',engineeringDimensions:false,detailPass:'V123_R4_SX52_OEM_MECHANISM_DETAIL'};
-  this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.dynamicMaterials=[];this.exteriorOpen=false;this.build();
+  this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.dynamicMaterials=[];this.exteriorOpen=false;this.build();this.refineExteriorV232();
   this.taxonomy=OFFSET9_TAXONOMY;this.taxonomyById=OFFSET9_TAXONOMY_BY_ID;
   for(const node of this.nodes){node.userData.rest=node.position.clone();node.userData.restQuaternion=node.quaternion.clone();}this.root.updateMatrixWorld(true);
  }
@@ -39,7 +39,11 @@ export class Offset9MachineTemplate{
  }
  buildFeeder(){
   const g=this.group(this.root,'offset9-feeder','Central suction-belt feeder',[-3.82,0,0],[-.8,.18,0]);
-  this.cover(this.box(g,[2.05,1.42,1.92],[0,1.16,0],'ivory',.10));this.cover(this.box(g,[.50,.50,1.98],[.78,1.90,0],'graphite',.07));
+  // V232: keep the pile/head area visually open; SX52 family feeder reads as framed side cladding rather than a sealed cuboid.
+  for(const z of [-.96,.96])this.cover(this.box(g,[2.05,1.42,.12],[0,1.16,z],'ivory',.08));
+  this.cover(this.box(g,[2.05,.18,1.92],[0,1.82,0],'ivory',.06));
+  this.cover(this.box(g,[2.02,.36,1.86],[0,.55,0],'graphite',.05));
+  this.cover(this.box(g,[.50,.50,1.98],[.78,1.90,0],'graphite',.07));
   const pile=this.group(g,'offset9-feeder-pile','Pile lift and pallet table');this.box(pile,[1.25,.07,1.22],[-.40,.49,0],'steel');this.box(pile,[1.20,.72,1.16],[-.40,.89,0],'paper');
   for(const z of [-.53,.53]){this.cyl(pile,.045,.10,[-.87,.45,z],'black','pile-chain');this.cyl(pile,.045,.10,[.05,.45,z],'black','pile-chain');}
   const head=this.group(g,'offset9-feeder-head','Suction head and sheet separation');this.box(head,[.72,.25,1.18],[.18,1.86,0],'graphite');for(const z of [-.42,-.14,.14,.42]){this.cyl(head,.026,.13,[.37,1.66,z],'rubber','suction-foot','y');this.box(head,[.035,.22,.035],[.37,1.76,z],'steel');}
@@ -48,7 +52,15 @@ export class Offset9MachineTemplate{
   const venturi=this.group(reg,'offset9-register-venturi','Venturi infeed nozzles');venturi.userData.oemFunction='VENTURI_SHEET_INFEED';for(const z of [-.42,-.14,.14,.42]){const n=this.uniqueMaterial(this.cyl(venturi,.012,.07,[.46,1.245,z],'cyan','venturi-nozzle','y'));n.userData.airNozzle=true;n.userData.feederAirNozzle=true;n.userData.mechanismRole='feeder-venturi-nozzle';}
   const lays=this.group(reg,'offset9-register-lays','Front and side register lays');for(const z of [-.48,.48])this.box(lays,[.10,.08,.10],[.47,1.25,z],'silver');for(const z of [-.26,.26])this.box(lays,[.07,.07,.06],[.34,1.245,z],'steel',.006);
  }
- sideFrames(g){for(const z of [-.91,.91]){this.cover(this.box(g,[.92,1.49,.12],[0,1.43,z],'ivory',.07));this.cover(this.box(g,[.70,.23,.025],[0,2.10,z+(z<0?-.065:.065)],'graphite'));}this.cover(this.box(g,[.96,.23,1.70],[0,2.21,0],'graphite',.05));}
+ sideFrames(g){
+  for(const z of [-.91,.91]){
+   this.cover(this.box(g,[.92,1.49,.12],[0,1.43,z],'ivory',.07));
+   this.cover(this.box(g,[.92,.38,.14],[0,.70,z],'graphite',.045));
+   this.cover(this.box(g,[.70,.23,.025],[0,2.10,z+(z<0?-.065:.065)],'graphite'));
+   const trim=this.cover(this.box(g,[.075,1.18,.026],[-.34,1.52,z+(z<0?-.073:.073)],'graphite',.010));trim.userData.silhouetteCritical=true;
+  }
+  this.cover(this.box(g,[.96,.23,1.70],[0,2.21,0],'graphite',.05));
+ }
  printUnit(parent,module,index){
   const id='offset9-'+module.key.toLowerCase(),g=this.group(parent,id,module.label,[OFFSET9_CENTERS[module.key],0,0],[0,.18,(index%2?1:-1)*.24]);g.userData.moduleType='print';g.userData.moduleKey=module.key;this.sideFrames(g);
   const frame=this.group(g,id+'-frame','Paired side frames');for(const z of [-.78,.78])for(const x of [-.35,.35])this.box(frame,[.09,1.46,.09],[x,1.28,z],'steel');
@@ -73,13 +85,39 @@ export class Offset9MachineTemplate{
   const impression=this.group(g,id+'-impression','Coating impression cylinder');this.cyl(impression,.215,1.72,[-.08,.91,0],'silver','coating-impression');
  }
  buildDelivery(){
-  const g=this.group(this.root,'offset9-delivery','Preset delivery · pile-height option unverified',[4.72,0,0],[.9,.18,0]);g.userData.pileHeightOptionVerified=false;this.cover(this.box(g,[2.78,1.70,2.02],[0,1.27,0],'ivory',.10));this.cover(this.box(g,[2.28,.46,1.96],[-.15,2.10,0],'graphite',.07));
+  const g=this.group(this.root,'offset9-delivery','Preset delivery · pile-height option unverified',[4.72,0,0],[.9,.18,0]);g.userData.pileHeightOptionVerified=false;
+  // V232: portal/canopy delivery silhouette preserves chain and pile visibility.
+  for(const z of [-1.01,1.01])this.cover(this.box(g,[2.78,1.70,.12],[0,1.27,z],'ivory',.08));
+  this.cover(this.box(g,[2.78,.20,2.02],[0,2.07,0],'ivory',.07));
+  this.cover(this.box(g,[2.68,.38,1.96],[0,.58,0],'graphite',.05));
+  this.cover(this.box(g,[2.28,.46,1.96],[-.15,2.10,0],'graphite',.07));
   const chain=this.group(g,'offset9-delivery-chain','Gripper-chain transport');for(const z of [-.72,.72]){this.cyl(chain,.20,.09,[-.96,1.52,z],'steel','chain-sprocket');this.cyl(chain,.20,.09,[.92,1.52,z],'steel','chain-sprocket');this.box(chain,[1.88,.035,.035],[-.02,1.72,z],'black');}
   const grippers=this.group(g,'offset9-delivery-grippers','Delivery gripper bars · loop reference');for(let i=0;i<6;i++){const bar=this.group(grippers,'offset9-delivery-gripper-'+(i+1),'Delivery gripper bar '+(i+1),[-.96+i*(1.88/5),1.72,0]);bar.userData.deliveryGripperBar=true;bar.userData.barPhase=i/6;this.box(bar,[.045,.04,1.42],[0,0,0],'steel',.006);for(const z of [-.54,-.27,0,.27,.54])this.box(bar,[.05,.04,.03],[.02,-.035,z],'graphite',.003);}
   const guide=this.group(g,'offset9-delivery-guide','High-pile Venturi sheet guidance · option boundary');guide.userData.familyOption='HIGH_PILE_DELIVERY_VENTURI';guide.userData.installedOptionVerified=false;this.box(guide,[1.72,.035,1.44],[-.06,1.12,0],'silver');for(let x=-.68;x<=.68;x+=.34)for(const z of [-.48,0,.48]){const q=this.uniqueMaterial(this.cyl(guide,.018,.025,[x,1.15,z],'cyan','venturi-nozzle','y'));q.userData.airNozzle=true;q.userData.familyOptionReference=true;q.userData.mechanismRole='delivery-venturi-nozzle';}
   const brake=this.group(g,'offset9-delivery-brake','Sheet brake and release');brake.userData.familyFunction='CONTROLLED_SHEET_DECELERATION';for(const z of [-.47,-.16,.16,.47]){const b=this.cyl(brake,.055,.14,[.78,.88,z],'rubber','sheet-brake');b.userData.mechanismRole='delivery-sheet-brake-wheel';}
   const stack=this.group(g,'offset9-delivery-stack','Delivery pile lift');this.box(stack,[1.18,.07,1.24],[.67,.46,0],'steel');this.box(stack,[1.14,.48,1.18],[.67,.74,0],'paper');
  }
+ refineExteriorV232(){
+  this.root.userData.visualRefinement='V232_SX52_4L_FAMILY_EXTERIOR_POLISH';
+  this.root.userData.homeDetailGeometryPolicy='SAME_LIVE_TEMPLATE__OPEN_FEEDER_DELIVERY__MODULE_RHYTHM_RETAINED';
+  this.root.userData.familyEvidenceBoundary='HEIDELBERG_SX52_OFFICIAL_FAMILY__INSTALLED_OPTION_PACKAGE_UNVERIFIED';
+  const access=this.findNode('offset9-access');
+  if(access){
+   for(const x of [-3.55,-2.58,-1.60,-.62,.36,1.34,2.32,3.30])for(const z of [-1.10,1.10]){
+    const foot=this.box(access,[.22,.06,.18],[x,.42,z],'graphite',.008);foot.userData.detail=true;foot.userData.silhouetteCritical=false;foot.userData.mechanismRole='operator-step-grating-reference';
+   }
+  }
+  const feeder=this.findNode('offset9-feeder');
+  if(feeder){
+   for(const x of [-.78,.02,.78]){const seam=this.box(feeder,[.012,.84,.016],[x,1.18,-1.028],'graphite',.002);seam.userData.detail=true;seam.userData.mechanismRole='feeder-panel-seam';}
+   for(const x of [-.42,.42]){const handle=this.box(feeder,[.025,.20,.020],[x,1.35,-1.045],'black',.004);handle.userData.detail=true;handle.userData.mechanismRole='feeder-service-handle';}
+  }
+  const delivery=this.findNode('offset9-delivery');
+  if(delivery){
+   for(const x of [-.95,0,.95]){const seam=this.box(delivery,[.014,.82,.016],[x,1.25,-1.078],'graphite',.002);seam.userData.detail=true;seam.userData.mechanismRole='delivery-panel-seam';}
+   for(const x of [-.55,.55]){const handle=this.box(delivery,[.025,.22,.020],[x,1.35,-1.095],'black',.004);handle.userData.detail=true;handle.userData.mechanismRole='delivery-service-handle';}
+  }
+ } 
  buildConsole(){const g=this.group(this.root,'offset9-console','Prinect Press Center 3 · family reference',[1.18,0,-1.83],[0,.15,-.35]);g.userData.familyFeature='PRINECT_PRESS_CENTER_3';g.userData.installedGenerationVerified=false;g.userData.familyDisplayInch=24;this.box(g,[1.25,.72,.54],[0,.72,0],'graphite',.06);const screen=this.box(g,[.76,.42,.025],[-.12,1.18,-.14],'glass',.03);screen.userData.mechanismRole='prinect-press-center-display-reference';this.box(g,[.55,.05,.36],[.20,1.00,.12],'silver');}
  findNode(id){return id===this.root.userData.nodeId?this.root:this.nodes.find(node=>node.userData.nodeId===id)||null;}
  resolvePart(object){for(let parent=object;parent&&parent!==this.root;parent=parent.parent)if(parent.userData?.selectable)return parent;return null;}
@@ -92,6 +130,6 @@ export class Offset9MachineTemplate{
  showOnly(parts=[],on=true){for(const node of this.nodes)node.visible=!on||!parts.length||parts.some(part=>node===part||this.contains(node,part));}
  setExteriorOpen(on){this.exteriorOpen=!!on;let hidden=0;this.root.traverse(object=>{if(object.isMesh&&object.userData.exteriorCover){object.visible=!on;hidden++;}});this.root.userData.interiorCutawayVisible=!!on;this.root.userData.exteriorHiddenCount=on?hidden:0;}
  explode(amount,selection=null){for(const node of this.nodes)node.position.copy(node.userData.rest);const targets=selection?(selection.children.filter(c=>c.userData.selectable).length?selection.children.filter(c=>c.userData.selectable):[selection]):this.parts;for(const node of targets)node.position.addScaledVector(node.userData.explode,THREE.MathUtils.clamp(+amount||0,0,1));}
- reset(){const open=this.exteriorOpen;this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const node of this.nodes)node.quaternion.copy(node.userData.restQuaternion);this.setExteriorOpen(open);}setLow(){}
+ reset(){const open=this.exteriorOpen;this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const node of this.nodes)node.quaternion.copy(node.userData.restQuaternion);this.setExteriorOpen(open);}setLow(on){for(const mesh of this.meshes)if(mesh.userData.detail&&!mesh.userData.silhouetteCritical)mesh.visible=!on;}
  dispose(){for(const geometry of this.geometries.values())geometry.dispose();for(const material of this.materials.values())material.dispose();for(const material of this.dynamicMaterials)material.dispose();}
 }

@@ -23,6 +23,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.root.userData.newReviewedSources=V139_SOURCE_STATS.newReviewed;this.root.userData.uniqueResearchUrls=V139_SOURCE_STATS.uniqueUrls;
   this.enrichV121();
   this.refineV231VisualParity();
+  this.refineV232PriorityPolish();
   for(const n of this.nodes){
    if(!n.userData.rest)n.userData.rest=n.position.clone();
    if(!n.userData.restQuaternion)n.userData.restQuaternion=n.quaternion.clone();
@@ -94,6 +95,62 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   else if(no===28)this.root.userData.visualParityFamily='ZUND_G3_S3_MODULAR_FLATBED';
   else if(no>=29&&no<=35)this.root.userData.visualParityFamily='BRAND_SPECIFIC_ROTARY_SCREW_COMPRESSOR';
   else if(no>=36&&no<=41)this.root.userData.visualParityFamily=no===40?'SANSIN_NES_YZKJ_FAMILY':'DOUBLE_SKIN_AHU_FAMILY';
+ }
+ refineV232PriorityPolish(){
+  const no=this.cfg.machine.no;
+  if(no!==4)return;
+  this.root.userData.visualRefinement='V232_YA1A1A_SHEETFED_GRAVURE_EXTERIOR_POLISH';
+  this.root.userData.homeDetailGeometryPolicy='SAME_LIVE_TEMPLATE__OPEN_PRINT_BAY_AND_GRAVURE_PROCESS_DNA_RETAINED';
+  this.root.userData.familyEvidenceBoundary='YA1A1A_EXACT_IDENTITY__YA1B1_AND_SHEETFED_GRAVURE_FAMILY_EXTERIOR_REFERENCE__BMJ_INSTALLED_ENCLOSURE_UNVERIFIED';
+
+  const shell=this.group(this.root,'o7-exterior-v232','YA1A1A sheet-fed gravure exterior family refinement',[0,0,0],[0,.18,0]);
+  shell.userData.installedExteriorGeometryVerified=false;
+
+  // Conservative family silhouette: low dark plinth, broad end cabinets and an open central process bay.
+  const plinth=this.box(shell,[6.65,.30,2.18],[0,.27,0],'dark',.035);
+  plinth.userData.silhouetteCritical=true;plinth.userData.mechanismRole='gravure-main-plinth-reference';
+
+  for(const [x,w] of [[-2.58,1.18],[2.55,1.24]]){
+    for(const z of [-1.02,1.02]){
+      const side=this.cover(this.box(shell,[w,1.52,.10],[x,1.18,z],'body',.055));
+      side.userData.silhouetteCritical=true;side.userData.mechanismRole='gravure-end-cabinet-side-reference';
+    }
+    const top=this.cover(this.box(shell,[w,.18,2.04],[x,1.92,0],'body',.045));
+    top.userData.silhouetteCritical=true;top.userData.mechanismRole='gravure-end-cabinet-top-reference';
+  }
+
+  // Central side housings frame the cylinder/doctor zone without sealing it.
+  for(const z of [-1.02,1.02]){
+    for(const x of [-1.12,.12,1.12]){
+      const pillar=this.cover(this.box(shell,[.28,1.45,.10],[x,1.22,z],'body',.035));
+      pillar.userData.silhouetteCritical=true;pillar.userData.mechanismRole='gravure-process-bay-pillar-reference';
+    }
+    const crown=this.cover(this.box(shell,[3.00,.18,.10],[0,1.92,z],'dark',.030));
+    crown.userData.silhouetteCritical=true;crown.userData.mechanismRole='gravure-process-bay-crown-reference';
+  }
+
+  const platform=this.group(shell,'o7-operator-platform-v232','Operator platform / service access family reference');
+  const deck=this.box(platform,[4.90,.10,.24],[.15,.33,-.91],'steel',.012);
+  deck.userData.silhouetteCritical=true;deck.userData.mechanismRole='gravure-operator-platform-reference';
+  for(let x=-2.0;x<=2.15;x+=.55){
+    const tread=this.box(platform,[.34,.020,.20],[x,.39,-.91],'steel',0);
+    tread.userData.detail=true;tread.userData.mechanismRole='platform-grating-reference';
+  }
+  for(const x of [-2.12,2.24])this.cyl(platform,.020,.72,[x,.74,-1.01],'steel','y');
+  this.cyl(platform,.020,4.36,[.06,1.08,-1.01],'steel','x').userData.mechanismRole='platform-handrail-reference';
+
+  // Service-door seams/handles read as industrial panels; these are not installation-specific internals.
+  for(const [x,w] of [[-2.58,1.18],[2.55,1.24]])for(const z of [-1.075,1.075]){
+    const seam=this.box(shell,[w*.72,.010,.012],[x,1.18,z],'dark',.001);seam.userData.detail=true;seam.userData.mechanismRole='gravure-service-door-seam-reference';
+    const handle=this.box(shell,[.026,.20,.018],[x+w*.25,1.18,z],'steel',.004);handle.userData.detail=true;handle.userData.mechanismRole='gravure-service-door-handle-reference';
+  }
+
+  let retained=0;
+  for(const m of this.meshes){
+    const role=String(m.userData?.mechanismRole||'');
+    if(/gravure-main-plinth|gravure-end-cabinet|gravure-process-bay|gravure-operator-platform|platform-handrail/.test(role)){m.userData.silhouetteCritical=true;retained++;}
+  }
+  this.root.userData.homeSilhouetteCriticalCount=(this.root.userData.homeSilhouetteCriticalCount||0)+retained;
  }
  enrichGravure(){
   const f=this.activeGroup(1),reg=this.activeGroup(2),ink=this.activeGroup(3),print=this.activeGroup(4),imp=this.activeGroup(5),dryer=this.activeGroup(6),delivery=this.activeGroup(7),drive=this.activeGroup(8);
