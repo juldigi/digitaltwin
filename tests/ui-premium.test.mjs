@@ -124,7 +124,7 @@ test('V193 uses three global domains and keeps simulation/reference contextual t
   assert.match(js,/return section==='simulation'\|\|section==='reference'\?'asset':section/);
   assert.match(html,/data-tab="simulation"/);
   assert.match(html,/data-tab="sources"/);
-  assert.match(app,/emitDomainState\(\{activeSection:'asset'\}\);assetDialog\(\)/);
+  assert.match(app,/const openAssetNavigation=\(\)=>\{stopSimulationBeforeNavigation\(\);assetDialog\(\);\}/);
 });
 
 test('V193 mobile inspector is a bottom sheet that preserves the 3D context and bottom navigation',()=>{
