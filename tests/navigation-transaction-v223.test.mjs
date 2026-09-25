@@ -33,7 +33,7 @@ test('V223 focus restoration rejects hidden stale controls and modal lifecycle r
 });
 
 test('V223 changes service worker bytes so the existing V222 shell URLs are recached',()=>{
- assert.match(sw,/V223 navigation transaction hardening/);
+ assert.match(sw,/shell recache without rotating public query identifiers/);
  assert.match(sw,/const VERSION='factory-digital-twin-v222-overlay-state-ssot-20260925'/);
  assert.match(sw,/const RELEASE='222'/);
 });
