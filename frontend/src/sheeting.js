@@ -1417,10 +1417,13 @@ export class SheetingMachineTemplate{
   markSilhouetteCriticality(){
     const criticalRoles=new Set([
       'loaded-paper-reel','loaded-expanding-chuck','rollstand-common-base','overhead-longitudinal-beam',
-      'roller-frame-upright','large-black-draw-roll','lower-polished-entry-roll','main-cutter-cabinet',
-      'inspection-panel-frame','long-inspection-window','delivery-side-frame','stack-side-rail',
-      'stack-end-crossbeam','lift-table','pallet','reference-paper-block','stacker-column',
-      'stacker-front-header','stacker-side-cabinet','stacker-base-rail','diamond-plate-catwalk',
+      'single-reel-arm-inner','single-reel-arm-outer','single-reel-chuck-housing','single-rollstand-hydraulic-cylinder',
+      'web-carrier-longitudinal-beam','loop-frame-upright','roller-frame-upright',
+      'large-black-draw-roll','lower-polished-entry-roll','draw-section-side-cheek','main-cutter-cabinet',
+      'inspection-panel-frame','long-inspection-window','delivery-side-frame','delivery-upper-datum-rail',
+      'delivery-crossbar-support','stack-side-rail','stack-end-crossbeam','lift-table','pallet',
+      'reference-paper-block','stacker-column','stacker-front-header','stacker-side-cabinet','stacker-base-rail',
+      'stack-white-guide-panel','stack-green-guide-head','stack-guide-handwheel','diamond-plate-catwalk',
       'access-landing','control-console-base'
     ]);
     let kept=0;
