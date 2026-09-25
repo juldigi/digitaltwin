@@ -18,19 +18,19 @@ test('user toast never exposes raw JavaScript exception text',()=>{
 });
 
 test('HTML requests the cache-busted fixed controller',()=>{
- assert.match(html,/src\/app\.js\?v=213/);
+ assert.match(html,/src\/app\.js\?v=214/);
 });
 
 
-test('mobile 2D/3D switch cannot stretch into a full-height white strip',()=>{
- assert.match(css,/V213 mobile viewport hotfix/);
- assert.match(css,/\.viewport-mode-switch\{[\s\S]{0,260}top:8px!important;bottom:auto!important/);
+test('mobile 2D/3D switch remains compact without restoring the full-height strip',()=>{
+ assert.match(css,/V214 emergency mobile stabilization/);
+ assert.match(css,/\.viewport-mode-switch\{[\s\S]{0,320}top:8px!important;right:8px!important;bottom:auto!important/);
  assert.match(css,/max-height:44px!important/);
 });
 
-test('mobile taxonomy labels are styled overlays and bounded away from fixed controls',()=>{
- for(const selector of ['.part-label-layer{','.part-label{','.part-label-nav{'])assert.ok(css.includes(selector),selector);
- assert.match(engine,/limit=mobile\?4:16/);
- assert.match(engine,/topSafe=mobile\?112:52/);
- assert.match(engine,/bottomSafe=mobile\?118:16/);
+test('mobile renderer uses a lightweight factory proxy and disables interactive taxonomy overlays',()=>{
+ assert.match(engine,/function buildLowDetailFactory\(layout,fleet\)/);
+ assert.match(engine,/this\.actualFactory=this\.low\?buildLowDetailFactory\(l,l\.fleet\):buildActualFactory\(l,l\.fleet\)/);
+ assert.match(engine,/this\.low\|\|matchMedia\('\(max-width:767px\)'\)\.matches/);
+ assert.match(css,/\.part-label-layer\{display:none!important;pointer-events:none!important\}/);
 });
