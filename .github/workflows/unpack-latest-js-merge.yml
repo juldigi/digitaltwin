@@ -1,0 +1,46 @@
+name: Unpack latest DigitalTwin JS merge payload
+on:
+  push:
+    branches:
+      - merge/latest-js-2026-09-25
+    paths:
+      - ".merge-payload/RUN"
+permissions:
+  contents: write
+jobs:
+  unpack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: merge/latest-js-2026-09-25
+          fetch-depth: 0
+      - name: Rebuild exact ZIP payloads
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/dtmerge/u /tmp/dtmerge/c
+          cat .merge-payload/util.*.b64 | base64 -d > /tmp/dtmerge/utility.zip
+          cat .merge-payload/conv.*.b64 | base64 -d > /tmp/dtmerge/converting.zip
+          unzip -q -o /tmp/dtmerge/utility.zip -d /tmp/dtmerge/u
+          unzip -q -o /tmp/dtmerge/converting.zip -d /tmp/dtmerge/c
+          UT_ROOT="/tmp/dtmerge/u/BMJ_UTILITY_BUILDING_MODULES_V4_2026-09-25"
+          CV_ROOT="/tmp/dtmerge/c/digitaltwin_converting_v11_ultradetail"
+          (cd "$UT_ROOT" && sha256sum -c CHECKSUMS.sha256)
+          rm -rf frontend/src/merge-latest/utility-building-v4
+          mkdir -p frontend/src/merge-latest/utility-building-v4
+          cp -a "$UT_ROOT"/. frontend/src/merge-latest/utility-building-v4/
+          rm -rf frontend/src/merge-latest/converting-v11
+          mkdir -p frontend/src/merge-latest/converting-v11
+          cp -a "$CV_ROOT"/. frontend/src/merge-latest/converting-v11/
+          find frontend/src/merge-latest/utility-building-v4 frontend/src/merge-latest/converting-v11 -name '*.js' -print0 | xargs -0 -n1 node --check
+      - name: Commit exact extracted sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -rf .merge-payload
+          git add frontend/src/merge-latest
+          git commit -m "[unpack-merge] Exact merge latest JS packages"
+          git push origin HEAD:merge/latest-js-2026-09-25
