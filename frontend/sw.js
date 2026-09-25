@@ -1,4 +1,4 @@
-// V231 remaining machine families realism: force service-worker byte change and shell recache without rotating public query identifiers.
+// V232 priority remaining machine polish: force service-worker byte change and shell recache without rotating public query identifiers.
 const VERSION='factory-digital-twin-v222-overlay-state-ssot-20260925';
 const RELEASE='222';
 const ENTRYPOINTS=[
