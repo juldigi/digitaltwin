@@ -35,11 +35,14 @@ export class Offset9MachineTemplate{
   const print=this.group(this.root,'offset9-print','Four offset printing units');
   const coat=this.group(this.root,'offset9-coat','Inline coating unit');
   for(const [index,module] of OFFSET9_MODULE_SEQUENCE.entries())module.type==='print'?this.printUnit(print,module,index):this.coatingUnit(coat,module);
-  this.buildDelivery();this.buildConsole();
+  this.buildDelivery();this.buildConsole();this.buildExteriorIdentity();
  }
  buildFeeder(){
   const g=this.group(this.root,'offset9-feeder','Central suction-belt feeder',[-3.82,0,0],[-.8,.18,0]);
-  this.cover(this.box(g,[2.05,1.42,1.92],[0,1.16,0],'ivory',.10));this.cover(this.box(g,[.50,.50,1.98],[.78,1.90,0],'graphite',.07));
+  // SX 52 feeder is an open pile-handling end, not a closed cuboid enclosure.
+  this.cover(this.box(g,[2.05,.30,1.92],[0,.46,0],'graphite',.055));
+  for(const z of [-.94,.94]){this.cover(this.box(g,[1.82,1.10,.10],[-.08,1.18,z],'ivory',.055));this.cover(this.box(g,[.34,.52,.12],[.79,1.84,z],'graphite',.045));}
+  this.cover(this.box(g,[.58,.34,1.96],[.73,2.00,0],'graphite',.060));
   const pile=this.group(g,'offset9-feeder-pile','Pile lift and pallet table');this.box(pile,[1.25,.07,1.22],[-.40,.49,0],'steel');this.box(pile,[1.20,.72,1.16],[-.40,.89,0],'paper');
   for(const z of [-.53,.53]){this.cyl(pile,.045,.10,[-.87,.45,z],'black','pile-chain');this.cyl(pile,.045,.10,[.05,.45,z],'black','pile-chain');}
   const head=this.group(g,'offset9-feeder-head','Suction head and sheet separation');this.box(head,[.72,.25,1.18],[.18,1.86,0],'graphite');for(const z of [-.42,-.14,.14,.42]){this.cyl(head,.026,.13,[.37,1.66,z],'rubber','suction-foot','y');this.box(head,[.035,.22,.035],[.37,1.76,z],'steel');}
@@ -73,7 +76,12 @@ export class Offset9MachineTemplate{
   const impression=this.group(g,id+'-impression','Coating impression cylinder');this.cyl(impression,.215,1.72,[-.08,.91,0],'silver','coating-impression');
  }
  buildDelivery(){
-  const g=this.group(this.root,'offset9-delivery','Preset delivery · pile-height option unverified',[4.72,0,0],[.9,.18,0]);g.userData.pileHeightOptionVerified=false;this.cover(this.box(g,[2.78,1.70,2.02],[0,1.27,0],'ivory',.10));this.cover(this.box(g,[2.28,.46,1.96],[-.15,2.10,0],'graphite',.07));
+  const g=this.group(this.root,'offset9-delivery','Preset delivery · pile-height option unverified',[4.72,0,0],[.9,.18,0]);g.userData.pileHeightOptionVerified=false;
+  // Keep the pile and gripper-chain bay visually open; standard/high-pile height remains unverified.
+  this.cover(this.box(g,[2.78,.34,2.02],[0,.50,0],'graphite',.060));
+  for(const z of [-.98,.98]){this.cover(this.box(g,[2.62,1.30,.11],[-.05,1.30,z],'ivory',.060));this.cover(this.box(g,[2.28,.28,.13],[-.15,2.02,z],'graphite',.050));}
+  this.cover(this.box(g,[2.34,.34,1.98],[-.12,2.12,0],'graphite',.065));
+  for(const x of [-1.18,1.14])this.cover(this.box(g,[.16,1.22,1.92],[x,1.34,0],'ivory',.040));
   const chain=this.group(g,'offset9-delivery-chain','Gripper-chain transport');for(const z of [-.72,.72]){this.cyl(chain,.20,.09,[-.96,1.52,z],'steel','chain-sprocket');this.cyl(chain,.20,.09,[.92,1.52,z],'steel','chain-sprocket');this.box(chain,[1.88,.035,.035],[-.02,1.72,z],'black');}
   const grippers=this.group(g,'offset9-delivery-grippers','Delivery gripper bars · loop reference');for(let i=0;i<6;i++){const bar=this.group(grippers,'offset9-delivery-gripper-'+(i+1),'Delivery gripper bar '+(i+1),[-.96+i*(1.88/5),1.72,0]);bar.userData.deliveryGripperBar=true;bar.userData.barPhase=i/6;this.box(bar,[.045,.04,1.42],[0,0,0],'steel',.006);for(const z of [-.54,-.27,0,.27,.54])this.box(bar,[.05,.04,.03],[.02,-.035,z],'graphite',.003);}
   const guide=this.group(g,'offset9-delivery-guide','High-pile Venturi sheet guidance · option boundary');guide.userData.familyOption='HIGH_PILE_DELIVERY_VENTURI';guide.userData.installedOptionVerified=false;this.box(guide,[1.72,.035,1.44],[-.06,1.12,0],'silver');for(let x=-.68;x<=.68;x+=.34)for(const z of [-.48,0,.48]){const q=this.uniqueMaterial(this.cyl(guide,.018,.025,[x,1.15,z],'cyan','venturi-nozzle','y'));q.userData.airNozzle=true;q.userData.familyOptionReference=true;q.userData.mechanismRole='delivery-venturi-nozzle';}
@@ -81,6 +89,27 @@ export class Offset9MachineTemplate{
   const stack=this.group(g,'offset9-delivery-stack','Delivery pile lift');this.box(stack,[1.18,.07,1.24],[.67,.46,0],'steel');this.box(stack,[1.14,.48,1.18],[.67,.74,0],'paper');
  }
  buildConsole(){const g=this.group(this.root,'offset9-console','Prinect Press Center 3 · family reference',[1.18,0,-1.83],[0,.15,-.35]);g.userData.familyFeature='PRINECT_PRESS_CENTER_3';g.userData.installedGenerationVerified=false;g.userData.familyDisplayInch=24;this.box(g,[1.25,.72,.54],[0,.72,0],'graphite',.06);const screen=this.box(g,[.76,.42,.025],[-.12,1.18,-.14],'glass',.03);screen.userData.mechanismRole='prinect-press-center-display-reference';this.box(g,[.55,.05,.36],[.20,1.00,.12],'silver');}
+ buildExteriorIdentity(){
+  this.root.userData.visualRefinement='V232_SPEEDMASTER_SX52_4L_FAMILY_SILHOUETTE';
+  this.root.userData.visualSourceBoundary='HEIDELBERG_SX52_OFFICIAL_2020__BMJ_4_PLUS_L_IDENTITY__5PL_ENVELOPE_NOT_AS_BUILT';
+  this.root.userData.referenceEnvelope5LOnly=OFFSET9_SPEC.referenceEnvelope5L;
+  const g=this.group(this.root,'offset9-exterior-v232','Speedmaster SX 52 exterior identity refinement');
+  // Compact repeated lower plinth and operator-side service-panel rhythm are silhouette references,
+  // while exact serial-specific cover seams and installed options stay unasserted.
+  for(const key of ['PU1','PU2','PU3','PU4','L']){
+   const x=OFFSET9_CENTERS[key];
+   for(const z of [-.98,.98]){
+    const plinth=this.cover(this.box(g,[.94,.32,.10],[x,.51,z],'graphite',.045));plinth.userData.silhouetteCritical=true;
+    const seam=this.cover(this.box(g,[.64,.012,.018],[x,1.36,z+(z<0?-.062:.062)],'graphite',.002));seam.userData.serialSpecificSeam=false;
+   }
+  }
+  for(const key of ['PU1','PU2','PU3','PU4']){
+   const x=OFFSET9_CENTERS[key];
+   const handle=this.cover(this.box(g,[.026,.22,.024],[x+.30,1.48,-1.055],'graphite',.004));handle.userData.operatorSideServiceHandleReference=true;
+  }
+  const identity=this.cover(this.box(g,[1.02,.10,.025],[OFFSET9_CENTERS.PU2,2.26,-1.035],'graphite',.010));
+  identity.userData.familyIdentificationBand=true;
+ }
  findNode(id){return id===this.root.userData.nodeId?this.root:this.nodes.find(node=>node.userData.nodeId===id)||null;}
  resolvePart(object){for(let parent=object;parent&&parent!==this.root;parent=parent.parent)if(parent.userData?.selectable)return parent;return null;}
  resolveTaxonomyNode(id){const node=this.taxonomyById.get(id);return node?.meshRefs.map(ref=>this.findNode(ref)).find(Boolean)||null;}
