@@ -21,7 +21,7 @@ test('V222 never leaves hidden navigation overlay state after dismissing the dra
 });
 
 test('V222 modal lifecycle is reconciled without a second page backdrop',()=>{
- assert.match(shell,/modalElement\?\.addEventListener\('close',\(\)=>\{if\(getState\(\)\.overlay==='modal'\)closeOverlay\(\);restoreOverlayFocus\('modal'\)\}\)/);
+ assert.match(shell,/modalElement\?\.addEventListener\('close',\(\)=>\{if\(getState\(\)\.overlay==='modal'\)closeOverlay\(\);if\(!suppressModalFocusRestore\)restoreOverlayFocus\('modal'\)\}\)/);
  assert.match(css,/body\.modal-open \.ui-backdrop\{display:none!important\}/);
  assert.match(css,/body\.modal-open \.mobile-nav\{visibility:hidden!important;pointer-events:none!important\}/);
 });
