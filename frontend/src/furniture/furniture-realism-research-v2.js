@@ -1,0 +1,86 @@
+export const FURNITURE_REALISM_RESEARCH_VERSION = 'FRR-V2-2026-09-25';
+
+export const REALISM_POLICY = Object.freeze({
+  status: 'REFERENCE_REALISM_NOT_AS_BUILT',
+  rule: 'Never imply a BMJ asset, brand, count, exact dimension, or placement is field-verified unless supported by BMJ photo/drawing/data.',
+  placement: 'Keep door approach, machine service clearance, electrical working space, pedestrian route, aisle, and egress visually unobstructed.',
+  visualPriority: ['PROPORTION','GROUNDING','ASSEMBLY_LOGIC','MATERIAL_RESPONSE','FUNCTIONAL_ORIENTATION','MICRO_DETAIL','WEAR_VARIATION'],
+});
+
+export const SOURCE_LEDGER = Object.freeze([
+  {id:'STEELCASE_SERIES1',type:'manufacturer',title:'Steelcase Series 1 Specification Guide',url:'https://www.steelcase.com/resources/documents/series-1-spec-guide/',usedFor:['task-chair-envelope','seat-height','back-height','arm-envelope'],facts:{overallWidthM:[0.597,0.686],overallDepthM:[0.533,0.603],seatHeightM:[0.419,0.546],seatWidthM:0.495,backHeightFromSeatM:0.546}},
+  {id:'XRITE_JUDGE_QC',type:'manufacturer',title:'X-Rite Judge QC Light Booth',url:'https://www.xrite.com/judge-qc',usedFor:['qc-light-booth'],facts:{widthM:0.685,depthM:0.535,heightM:0.545,viewingWidthM:0.635,viewingDepthM:0.47,viewingHeightM:0.38}},
+  {id:'ELKAY_ESS25202',type:'manufacturer',title:'Elkay ESS25202 Wall Hung Service Sink',url:'https://www.elkay.com/products/sinks/application-type/services-utility/ess25202',usedFor:['janitor-service-sink'],facts:{widthM:0.635,depthM:0.495,bowlDepthM:0.305,backsplashM:0.305,material:'14-gauge type 304 stainless steel'}},
+  {id:'RUBBERMAID_FULL_HK',type:'manufacturer',title:'Rubbermaid Commercial Full Size Housekeeping Cart',url:'https://www.rubbermaidcommercial.com/cleaning/housekeeping-carts-accessories/full-size-housekeeping-cart/',usedFor:['housekeeping-cart'],facts:{lengthM:1.585,widthM:0.6198,heightM:1.2446}},
+  {id:'RUBBERMAID_COMPACT_HK',type:'manufacturer',title:'Rubbermaid Commercial Compact Housekeeping Cart',url:'https://www.rubbermaidcommercial.com/cleaning/housekeeping-carts-accessories/compact-housekeeping-cart/',usedFor:['compact-housekeeping-cart'],facts:{lengthM:1.3682,widthM:0.6189,heightM:1.2452}},
+  {id:'LYON_LOCKER',type:'manufacturer',title:'Lyon Standard Steel Locker Elevations',url:'https://www.lyonworkspace.com/resource-center/elevations/',usedFor:['locker-module-envelope'],facts:{commonWidthsM:[0.229,0.305,0.381,0.457],commonHeightsM:[0.94,1.219,1.524,1.829]}},
+  {id:'JUST_RITE_30G',type:'manufacturer',title:'Justrite 30 Gallon Flammable Safety Cabinet',url:'https://www.justrite.com/sure-gripr-ex-flammable-safety-cabinet-cap-30-gallons-1-shelf-2-self-close-doors',usedFor:['flammable-safety-cabinet-reference'],facts:{widthM:1.092,depthM:0.457,heightM:1.118,capacityL:114,material:'18-gauge steel'}},
+  {id:'STRONGHOLD_56_244',type:'manufacturer',title:'Strong Hold 12 Gauge Industrial Cabinet',url:'https://shop.strong-hold.com/products/56-244',usedFor:['maintenance-storage-cabinet'],facts:{widthM:1.524,depthM:0.61,heightM:1.981,doors:2,shelves:4}},
+  {id:'ULINE_H6864',type:'manufacturer',title:'Uline Industrial Packing Table 60 x 24',url:'https://www.uline.com/Product/Detail/H-6864-STEEL/Industrial-Packing-Tables/Industrial-Packing-Table-60-x-24-Steel-Top',usedFor:['packing-table'],facts:{widthM:1.524,depthM:0.61,heightRangeM:[0.762,0.94],topThicknessM:0.0381,bottomShelfDepthM:0.356}},
+  {id:'MECALUX_SELECTIVE_RACK',type:'manufacturer',title:'Interlake Mecalux Selective Pallet Racking',url:'https://www.interlakemecalux.com/warehouse-racking/pallet-racking',usedFor:['warehouse-rack-assembly'],facts:{upright:'two posts with horizontal and diagonal struts',postPitchM:0.0508,beamLock:true,safetyAccessories:true}},
+  {id:'VESTIL_DOCK_BUMPER',type:'manufacturer',title:'Vestil Specialty Molded Dock Bumpers',url:'https://www.vestil.com/product.php?FID=94',usedFor:['dock-bumper'],facts:{exampleWidthM:0.325,exampleHeightM:0.30,exampleProjectionM:0.098}},
+  {id:'POWERAMP_CHOCK',type:'manufacturer',title:'Poweramp Wheel Chocks',url:'https://www.poweramp.com/products/dock-accessories/wheel-chocks',usedFor:['dock-wheel-chock'],facts:{material:'fabric reinforced molded rubber or laminated reinforced rubber',chainHolder:true}},
+  {id:'BOBRICK_WASHROOM',type:'manufacturer',title:'Bobrick Washroom Accessories',url:'https://www.bobrick.com/products/washroom-accessories/',usedFor:['restroom-accessory-family'],facts:{families:['soap dispenser','towel/waste','mirror','grab bar','tissue dispenser','sanitary disposal']}},
+  {id:'OSHA_CHAIR',type:'regulatory-guidance',title:'OSHA Computer Workstations - Chairs',url:'https://www.osha.gov/etools/computer-workstations/components/chairs',usedFor:['office-chair-functional-logic'],facts:{principles:['adjustability','lumbar support','stable base','seat-edge comfort']}},
+  {id:'OSHA_1910_176',type:'regulation',title:'OSHA 1910.176 Material Handling and Storage',url:'https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.176',usedFor:['warehouse-placement'],facts:{principles:['clear aisles/passages','stable storage','safe material handling']}},
+]);
+
+export const DIMENSION_PRESETS = Object.freeze({
+  taskChair:{width:.63,depth:.61,height:.99,seatHeight:.47},
+  visitorChair:{width:.56,depth:.58,height:.82,seatHeight:.45},
+  industrialDesk:{width:1.50,depth:.75,height:.74},
+  meetingTable:{width:2.40,depth:1.00,height:.74},
+  industrialLocker:{moduleWidth:.305,depth:.457,height:1.829},
+  lockerBench:{depth:.36,height:.45},
+  qcLightBooth:{width:.685,depth:.535,height:.545},
+  janitorSink:{width:.635,depth:.495,bowlDepth:.305},
+  housekeepingCartFull:{length:1.585,width:.620,height:1.245},
+  housekeepingCartCompact:{length:1.368,width:.619,height:1.245},
+  packingTable:{width:1.524,depth:.610,height:.86},
+  strongCabinet:{width:1.524,depth:.610,height:1.981},
+  flammableCabinet30gal:{width:1.092,depth:.457,height:1.118},
+  palletRackBay:{width:2.75,depth:1.10,height:3.20},
+  woodPallet:{width:1.20,depth:1.00,height:.145},
+  palletJack:{length:1.55,width:.68,heightHandle:1.22},
+  dockBumper:{width:.325,height:.30,depth:.10},
+});
+
+export const MATERIAL_DNA = Object.freeze({
+  POWDER_COATED_STEEL:{roughness:.58,metalness:.25,edgeWear:'LOW'},
+  GALVANIZED_STEEL:{roughness:.46,metalness:.55,edgeWear:'LOW'},
+  STAINLESS_304_SATIN:{roughness:.28,metalness:.76,edgeWear:'VERY_LOW'},
+  PAINTED_MDF_LAMINATE:{roughness:.72,metalness:.01,edgeWear:'LOW'},
+  MULTIPLEX_BEECH:{roughness:.63,metalness:0,edgeWear:'MEDIUM'},
+  MOLDED_RESIN:{roughness:.68,metalness:0,edgeWear:'LOW'},
+  EPDM_RUBBER:{roughness:.86,metalness:0,edgeWear:'MEDIUM'},
+  CAST_IRON:{roughness:.64,metalness:.46,edgeWear:'MEDIUM'},
+  PAPERBOARD:{roughness:.88,metalness:0,edgeWear:'LOW'},
+  CLEAR_STRETCH_FILM:{roughness:.14,metalness:0,transparent:true,opacity:.16},
+});
+
+export const ROOM_REALISM_REQUIREMENTS = Object.freeze({
+  ADMIN_OFFICE:['workstation','task-chair','visitor-chair','credenza','mfp','waste-bin','planning-board','cable-management'],
+  PPIC_OFFICE:['workstation','planning-board','document-storage','mfp','visitor-chair','material-status-board'],
+  PDS_PREPRESS_OFFICE:['workstation','flat-file','plate-rack','inspection-table','plate-trolley'],
+  QC_SAMPLE:['qc-bench','light-booth','sample-cabinet','lab-stool','instrument-side-table','sample-trays'],
+  INCOMING_QC:['qc-bench','sample-cabinet','platform-trolley','material-status-board'],
+  PREPRESS:['plate-rack','plate-trolley','light-table','operator-workstation','closed-storage'],
+  DISPATCH_LOADING:['packing-table','shipping-document-station','platform-trolley','pallet-jack','dock-chock','dock-bumper','barrier'],
+  TOILET:['cubicle','commercial-toilet','lavatory','mirror','soap','tissue','towel-waste','floor-drain'],
+  ELECTRICAL:['insulating-mat','document-holder','closed-maintenance-cabinet','barrier-clearance-zone'],
+  SPAREPART_WAREHOUSE:['bin-rack','drawer-cabinet','heavy-storage-cabinet','picking-labels','aisle-clearance'],
+  WORKSHOP:['workbench','vise','shadow-board','tool-cabinet','mobile-tool-cart','industrial-stool'],
+  PANTRY:['base-cabinet-run','wall-cabinet','sink','microwave','refrigerator','water-dispenser','break-table','break-chair'],
+  LOCKER_CHANGE:['locker-bank','bench','shoe-rack','coat-hooks','waste-bin'],
+  PRAYER_ROOM:['shoe-rack','low-bench','prayer-mat','wall-hooks'],
+  FIRE_PUMP_ROOM:['maintenance-document-holder','closed-cabinet','clear-equipment-access'],
+  BROKE_WASTE_ROOM:['wheeled-waste-bin','segregation-station','platform-trolley','washdown-clearance'],
+  MEETING:['meeting-table','meeting-chair','presentation-board','credenza'],
+  SUPERVISOR_OFFICE:['workstation','task-chair','visitor-chair','credenza','planning-board'],
+  JANITOR:['service-sink','chemical-shelf','housekeeping-cart','mop-rack','floor-drain'],
+  MAINTENANCE:['workbench','heavy-cabinet','tool-cart','parts-bin-wall','shadow-board','vise'],
+  RMS:['pallet-rack','paperboard-pallet','reel-cradle','pallet-jack','floor-scale','material-status-zone','barriers'],
+  FINISHED_GOODS:['wrapped-carton-pallet','pallet-jack','packing-support','document-station','stretch-wrapper','staging-marking'],
+  PRODUCTION:['line-side-station','wip-trolley','waste-bin','mobile-qc','housekeeping-station','parking-bay'],
+  EXTERIOR:['weatherproof-bin','bollard','hose-reel-cabinet','dock-bumper','wheel-chock','guardrail'],
+});
