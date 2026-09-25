@@ -1,0 +1,12 @@
+import {buildPersonnelDoorV3,buildWideDoorV3,buildCurtainPortalV3} from './doors-openings-v3.js';
+import {buildingGroup,bBox,beamBetween} from '../common/building-primitives-v3.js';
+export const DOOR_OPENINGS_VERSION_V4='DO-V4-2026-09-25';
+function decoratePersonnel(g,width,height){
+ bBox(g,Math.max(.30,width*.28),.38,.012,'glass','DOOR_VISION_PANEL_REFERENCE',[0,height*.66,-.067],0,{lodMin:2,installed:'UNVERIFIED'});
+ bBox(g,width-.10,.18,.016,'galvanized','DOOR_KICK_PLATE_REFERENCE',[0,.12,-.065],0,{lodMin:2,installed:'UNVERIFIED'});
+ beamBetween(g,[width*.26,height-.10,-.07],[-width*.18,height-.10,-.07],.012,'dark','DOOR_CLOSER_REFERENCE',{lodMin:2,installed:'UNVERIFIED'});
+}
+export function buildPersonnelDoorV4(door,opts={}){const g=buildPersonnelDoorV3(door,opts),width=Math.max(.80,door.width||1),height=opts.height||2.10;g.userData.version=DOOR_OPENINGS_VERSION_V4;decoratePersonnel(g,width,height);return g;}
+export function buildWideDoorV4(door,opts={}){const g=buildWideDoorV3(door,opts),width=Math.max(2.4,door.width||3.2),height=opts.height||3.20;g.userData.version=DOOR_OPENINGS_VERSION_V4;bBox(g,.08,height+.26,.10,'galvanized','WIDE_DOOR_TRACK_L',[-width/2-.12,(height+.26)/2,.09],0,{lodMin:2});bBox(g,.08,height+.26,.10,'galvanized','WIDE_DOOR_TRACK_R',[width/2+.12,(height+.26)/2,.09],0,{lodMin:2});for(const x of [-width/2-.22,width/2+.22])bBox(g,.09,.90,.09,'hazard','WIDE_DOOR_BOLLARD_REFERENCE',[x,.45,-.22],0,{lodMin:2,installed:'UNVERIFIED'});return g;}
+export function buildCurtainPortalV4(curtain,opts={}){const g=buildCurtainPortalV3(curtain,opts);g.userData.version=DOOR_OPENINGS_VERSION_V4;const width=Math.max(1.6,curtain.width||2.4),height=opts.height||3.30;bBox(g,width+.16,.05,.18,'galvanized','CURTAIN_SUPPORT_CHANNEL',[0,height+.11,0],0,{lodMin:2});return g;}
+export function buildDoorSetV4(doors=[],curtains=[]){const root=buildingGroup('FACTORY_DOORS_V4','FACTORY_DOOR_SET',{version:DOOR_OPENINGS_VERSION_V4});for(const d of doors){const wide=(d.width||0)>=2.0||/dock|gate|rolling|wide/i.test(String(d.type||d.text||''));root.add(wide?buildWideDoorV4(d):buildPersonnelDoorV4(d,{reference:d.referenceGenerated===true}));}for(const c of curtains)root.add(buildCurtainPortalV4(c));return root;}
