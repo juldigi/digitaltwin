@@ -9,12 +9,12 @@
 //
 // Project documents remain the geometry/configuration source of truth.
 
-import {Offset10MachineTemplate} from './offset10.js';
-import {Offset10PrintingSimulation} from './simulation-offset10.js';
+import {Offset10MachineTemplate} from '../../../offset10.js';
+import {Offset10PrintingSimulation} from '../../../simulation-offset10.js';
 import {
  OFFSET10_DIMENSIONS,OFFSET10_MODULE_SEQUENCE,OFFSET10_MODULE_CENTERS,
  OFFSET10_PRINTING_UNIT_KEYS,OFFSET10_COATING_UNIT_KEYS,OFFSET10_Y_UNIT_KEYS
-} from './data/dimensions-offset10.js';
+} from '../../../data/dimensions-offset10.js';
 
 export const OFFSET10_FINAL_REFINEMENT=Object.freeze({
  id:'OFFSET10_CX104_SPECIAL_FINAL_REFINEMENT_R2',
