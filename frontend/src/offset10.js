@@ -94,7 +94,9 @@ export class Offset10MachineTemplate{
   buildFeeder(){
     const g=this.group(this.root,'o10-feeder','Preset Plus Feeder',[D.feederCenterX,0,0],[-1.2,.1,0],['O10-PROPOSAL','O10-FINAL-DRAWING']);
     const frame=this.group(g,'o10-feeder-frame','Feeder frame',[0,0,0],[-.3,.2,0],['O10-PROPOSAL']);
-    this.cover(this.box(frame,[2.60,1.72,3.02],[-.25,1.48,0],'light',.10));
+    // Keep the pile and suction process visually open; CX104 Preset Plus uses side cladding and a top/rear bridge rather than a solid block.
+    for(const z of [-1.42,1.42])this.cover(this.box(frame,[2.60,1.72,.17],[-.25,1.48,z],'light',.075));
+    this.cover(this.box(frame,[2.60,.30,3.02],[-.25,2.34,0],'graphite',.06));
     this.cover(this.box(frame,[1.08,.56,2.80],[-1.42,2.30,0],'graphite',.10));
     const pile=this.group(g,'o10-feeder-pile','Main / non-stop feeder pile',[0,0,0],[-.5,.1,0],['O10-PROPOSAL']);
     this.box(pile,[1.30,.10,1.72],[-1.12,.66,0],'steel',.018);

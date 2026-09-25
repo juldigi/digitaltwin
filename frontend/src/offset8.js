@@ -26,10 +26,24 @@ export class Offset8MachineTemplate{
  build(){const access=this.group(this.root,'offset8-access','Elevated access and paired side frames');this.box(access,[19,.16,3.35],[1.2,.42,0],'black');for(const z of [-1.82,1.82]){this.box(access,[18,.08,.48],[1.2,.62,z],'steel');for(let x=-7;x<10;x+=2)this.cyl(access,.022,.62,[x,1.03,z],'steel','rail','y');}
  this.buildFeeder();const pg=this.group(this.root,'offset8-print','Eight printing units');const fg=this.group(this.root,'offset8-finish','LYYL inline finishing');
  for(const [i,m] of OFFSET8_MODULE_SEQUENCE.entries()){if(m.type==='print')this.printUnit(pg,m,i);else if(m.type==='coat')this.coater(fg,m);else this.dryer(fg,m);}this.buildDelivery();}
- buildFeeder(){const g=this.group(this.root,'offset8-feeder','Preset Plus feeder',[-6.95,0,0],[-1,.2,0]);this.cover(this.box(g,[2.3,1.8,2.9],[0,1.48,0],'light',.1));const pile=this.group(g,'offset8-feeder-pile','Pile lift');this.box(pile,[1.35,.08,1.78],[-.62,.61,0],'steel');this.box(pile,[1.30,1.02,1.72],[-.62,1.16,0],'paper');
+ buildFeeder(){const g=this.group(this.root,'offset8-feeder','Preset Plus feeder',[-6.95,0,0],[-1,.2,0]);
+ // Preset Plus feeder is an open process frame with side cladding, not a solid cuboid.
+ for(const z of [-1.37,1.37])this.cover(this.box(g,[2.30,1.78,.16],[0,1.48,z],'light',.075));
+ this.cover(this.box(g,[2.30,.28,2.90],[0,2.26,0],'graphite',.055));
+ for(const z of [-1.37,1.37])this.cover(this.box(g,[.24,.34,.18],[-1.02,.73,z],'graphite',.035));
+ const pile=this.group(g,'offset8-feeder-pile','Pile lift');this.box(pile,[1.35,.08,1.78],[-.62,.61,0],'steel');this.box(pile,[1.30,1.02,1.72],[-.62,1.16,0],'paper');
  const head=this.group(g,'offset8-feeder-head','Suction head');this.box(head,[.74,.30,1.65],[.28,2.34,0],'graphite');for(const z of [-.58,-.2,.2,.58]){this.cyl(head,.032,.18,[.45,2.13,z],'rubber','sucker','y');this.box(head,[.04,.26,.04],[.45,2.23,z],'steel');}
  const reg=this.group(g,'offset8-register','Stream feeder and register',[1.55,0,0]);this.box(reg,[1.45,.56,2.42],[0,1.03,0],'graphite',.05);this.box(reg,[1.4,.035,2.2],[0,1.34,0],'steel');for(const z of [-.62,0,.62])this.cyl(reg,.028,1.24,[0,1.40,z],'rubber','feed-wheel');for(const z of [-.73,.73])this.box(reg,[.12,.10,.12],[.58,1.43,z],'silver');}
- side(g){for(const z of [-1.38,1.26]){this.cover(this.box(g,[.94,1.78,.13],[0,1.70,z],'light',.07));this.cover(this.box(g,[.72,.25,.02],[0,2.42,z+(z<0?-.07:.07)],'graphite'));}this.cover(this.box(g,[.98,.25,2.58],[0,2.56,0],'graphite',.05));}
+ side(g){
+ for(const z of [-1.38,1.26]){
+  this.cover(this.box(g,[.94,1.78,.13],[0,1.70,z],'light',.07));
+  this.cover(this.box(g,[.72,.25,.02],[0,2.42,z+(z<0?-.07:.07)],'graphite'));
+ }
+ // Dark lower plinth and operator-side vertical trim establish the real CX104 modular rhythm.
+ this.cover(this.box(g,[.98,.44,2.58],[0,.66,0],'graphite',.045));
+ this.cover(this.box(g,[.075,1.52,.028],[-.31,1.78,-1.462],'black',.008));
+ this.cover(this.box(g,[.98,.25,2.58],[0,2.56,0],'graphite',.05));
+}
  printUnit(parent,m,index){const id='offset8-'+m.key.toLowerCase(),g=this.group(parent,id,m.label,[OFFSET8_CENTERS[m.key],0,0],[0,.2,(index%2?1:-1)*.3]);g.userData.moduleType='print';g.userData.moduleKey=m.key;this.side(g);const frame=this.group(g,id+'-frame','Paired side frames');for(const z of [-1.18,1.18])for(const x of [-.38,.38])this.box(frame,[.10,1.75,.10],[x,1.53,z],'steel');
  const ct=this.group(g,id+'-cylinders','Offset cylinder train');for(const [n,r,x,y,k] of [['plate',.20,-.12,1.92,'steel'],['blanket',.22,.05,1.51,'rubber'],['impression',.27,-.10,1.02,'steel'],['transfer',.27,.34,.58,'graphite']]){const q=this.group(ct,id+'-'+n,n+' cylinder');this.cyl(q,r,2.55,[x,y,0],k,n);}
  const ink=this.group(g,id+'-inking','Inking roller train · visualization reference');ink.userData.exactRollerCountVerified=false;this.box(ink,[.62,.20,2.14],[-.25,2.75,0],'graphite');for(const [j,p] of [[0,[-.31,2.34]],[1,[-.10,2.43]],[2,[.12,2.43]],[3,[.33,2.33]]])this.cyl(ink,.063,2.06,[...p,0],j%2?'steel':'silver','distributor-'+(j+1));for(const [j,p] of [[0,[-.24,2.15]],[1,[-.08,2.22]],[2,[.10,2.22]],[3,[.25,2.14]]])this.cyl(ink,.058+j*.003,2.06,[...p,0],'rubber','form-'+(j+1));for(const [j,p] of [[0,[-.42,2.52]],[1,[-.22,2.57]],[2,[0,2.58]],[3,[.22,2.56]],[4,[.41,2.49]]])this.cyl(ink,.048,2.04,[...p,0],j%2?'rubber':'steel','transfer-ink');
@@ -46,7 +60,11 @@ export class Offset8MachineTemplate{
  const guide=this.group(g,id+'-guide','Sheet guide and process clearance');this.box(guide,[.92,.04,2.16],[0,1.03,0],'silver');
  const recirc=this.group(g,id+'-recirc','Recirculated-air plenum reference');for(const z of [-1.12,1.12])this.box(recirc,[.18,.98,.16],[.31,1.70,z],'steel',.025);this.box(recirc,[.52,.14,2.32],[.30,2.08,0],'steel',.025);
  const ex=this.group(g,id+'-exhaust','Extraction manifold');this.cyl(ex,.12,2.12,[.2,2.30,0],'steel','exhaust');}
- buildDelivery(){const g=this.group(this.root,'offset8-delivery','Preset Plus extended delivery',[11.2,0,0],[1,.2,0]);this.cover(this.box(g,[3.7,2.12,2.95],[0,1.60,0],'light',.1));
+ buildDelivery(){const g=this.group(this.root,'offset8-delivery','Preset Plus extended delivery',[11.2,0,0],[1,.2,0]);
+ // Delivery envelope follows the portal/canopy architecture visible on Preset Plus deliveries.
+ for(const z of [-1.39,1.39])this.cover(this.box(g,[3.70,2.10,.17],[0,1.60,z],'light',.08));
+ this.cover(this.box(g,[3.70,.30,2.95],[0,2.53,0],'graphite',.06));
+ for(const x of [-1.72,1.72])for(const z of [-1.39,1.39])this.cover(this.box(g,[.18,1.72,.20],[x,1.38,z],'graphite',.035));
  const chain=this.group(g,'offset8-delivery-chain','Gripper-chain delivery');for(const z of [-1.02,1.02]){this.cyl(chain,.24,.10,[-1.35,1.72,z],'steel','chain-sprocket');this.cyl(chain,.24,.10,[1.28,1.72,z],'steel','chain-sprocket');this.box(chain,[2.63,.045,.045],[0,1.94,z],'black');}
  const grippers=this.group(g,'offset8-delivery-grippers','Delivery gripper bars · loop reference');for(let i=0;i<8;i++){const bar=this.group(grippers,'offset8-delivery-gripper-'+(i+1),'Delivery gripper bar '+(i+1),[-1.35+i*(2.63/7),1.72,0]);bar.userData.deliveryGripperBar=true;bar.userData.barPhase=i/8;this.box(bar,[.045,.045,2.10],[0,0,0],'steel',.008);for(const z of [-.84,-.56,-.28,0,.28,.56,.84])this.box(bar,[.06,.045,.035],[.025,-.04,z],'dark',.004);}
  const brake=this.group(g,'offset8-delivery-brake','Dynamic sheet brake');const brakeBed=this.box(brake,[.56,.055,1.92],[1.03,1.13,0],'graphite',.018);brakeBed.userData.dynamicBrakeBed=true;for(const z of [-.68,-.23,.23,.68])this.cyl(brake,.065,.18,[1.03,1.22,z],'rubber','sheet-brake');

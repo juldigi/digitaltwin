@@ -201,7 +201,7 @@ test('v45 exposes contextual process simulation with continuous sheet flow',()=>
   assert.match(app,/engine\.startPrintingSimulation\(\)/);
   assert.match(app,/engine\.pausePrintingSimulation\(\)/);
   assert.match(app,/engine\.stopPrintingSimulation\(\)/);
-  assert.match(runtime,/if\(k==='offset5'\)return new PrintingSimulation\(machine,template\)/);
+  assert.match(runtime,/if\(k==='offset5'\)return new Offset5CD102RealismSimulation\(machine,template\)/);
   assert.match(engine,/this\.simulation\?\.update\(now\)/);
   assert.match(simulation,/CatmullRomCurve3/);
   assert.match(simulation,/getPointAt\(t\)/);
@@ -281,8 +281,8 @@ test('v53 retains the document-grounded CX104 expansion asset while foundation r
   assert.doesNotMatch(app,/machine=\$\{route\}&v=50/);
   assert.match(app,/Tidak ada foto aktual Offset 10 yang tersedia/);
   assert.match(app,/final drawing BMJ/);
-  assert.match(runtime,/Offset10MachineTemplate/);
-  assert.match(runtime,/Offset10PrintingSimulation/);
+  assert.match(runtime,/Offset10CX104SpecialRealismTemplate/);
+  assert.match(runtime,/Offset10CX104SpecialRealismSimulation/);
   assert.match(offset10,/o10-foilstar-superstructure/);
   assert.match(offset10,/o10-foilstar-unwinder/);
   assert.match(offset10,/o10-foilstar-rewinder/);

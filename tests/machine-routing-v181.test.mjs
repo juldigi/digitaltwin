@@ -6,12 +6,12 @@ import {createMachineTemplate,createMachineSimulation} from '../frontend/src/mac
 
 test('selected registry assets resolve to their own models and processes',()=>{
   const cases=[
-    ['BMJ-MCH-0003','offset5','OffsetMachineTemplate','PrintingSimulation'],
-    ['BMJ-MCH-0009','offset10','Offset10MachineTemplate','Offset10PrintingSimulation'],
+    ['BMJ-MCH-0003','offset5','Offset5CD102RealismTemplate','Offset5CD102RealismSimulation'],
+    ['BMJ-MCH-0009','offset10','Offset10CX104SpecialRealismTemplate','Offset10CX104SpecialRealismSimulation'],
     ['BMJ-MCH-0002','sheeting','SheetingMachineTemplate','SheetingProcessSimulation'],
     ['BMJ-MCH-0010','apm2','APM2MachineTemplate','APM2ProcessSimulation'],
     ['BMJ-MCH-0001','BMJ-MCH-0001','Polar115MachineTemplate','Polar115ProcessSimulation'],
-    ['BMJ-MCH-0005','BMJ-MCH-0005','Offset8MachineTemplate','Offset8PrintingSimulation'],
+    ['BMJ-MCH-0005','BMJ-MCH-0005','Offset8CX104RealismTemplate','Offset8CX104RealismSimulation'],
     ['BMJ-MCH-0004','BMJ-MCH-0004','ReferenceMachineTemplate','ReferenceProcessSimulation']
   ];
   for(const [id,route,modelName,processName] of cases){
