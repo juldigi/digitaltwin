@@ -22,6 +22,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.root.userData.researchSourceCount=V139_SOURCE_STATS.total;
   this.root.userData.newReviewedSources=V139_SOURCE_STATS.newReviewed;this.root.userData.uniqueResearchUrls=V139_SOURCE_STATS.uniqueUrls;
   this.enrichV121();
+  this.refineV231VisualParity();
   for(const n of this.nodes){
    if(!n.userData.rest)n.userData.rest=n.position.clone();
    if(!n.userData.restQuaternion)n.userData.restQuaternion=n.quaternion.clone();
@@ -64,6 +65,36 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  }
  activeGroup(i){return this.findNode('universal-module-'+i+'-active');}
  tag(mesh,role,evidence='FAMILY_REFERENCE'){mesh.userData.mechanismRole=role;mesh.userData.evidence=evidence;mesh.userData.detail=true;return mesh;}
+ refineV231VisualParity(){
+  const no=this.cfg.machine.no;
+  this.root.userData.visualParityRevision='V231';
+  this.root.userData.homeDetailGeometryPolicy='SAME_LIVE_TEMPLATE__MICRODETAIL_CULLED__SILHOUETTE_DNA_RETAINED';
+  const patterns=new Map([
+   [17,/blank-feed-table|feeder-transport-belt|blank-aligner-rail|prebreaker-guide-rail|primary-fold-transport-belt|final-fold|compression|delivery-conveyor|fgm-feeder-section-motor|folder-gluer-bearing-block/],
+   [21,/qf-lower-service-door|qf-family-accent-stripe|blanking-pressure-plate|product-receiving-tray|x-axis-linear-guide|y-axis-linear-guide/],
+   [23,/collator-bin-front-lip|feed-bin-shelf|collator-bin-air-plenum|vertical-gather-guide|set-delivery/],
+   [25,/ctp-plate-entry-slot|ctp-plate-output-slot|ctp-cooling-vent|ctp-hmi-post|ctp-hmi-display/],
+   [26,/ctp-plate-entry-slot|ctp-plate-output-slot|ctp-cooling-vent|ctp-hmi-post|ctp-hmi-display/],
+   [27,/ctf-media-cassette-door|ctf-scanner-service-door|ctf-output-service-door|ctf-media-output-slot|ctf-status-panel/],
+   [28,/vacuum-cutting-surface|travelling-beam-structure|tool-carriage-structure|gantry-linear-guide|beam-guide-carriage/]
+  ]);
+  const compressor=/compressor-cabinet-plinth|compressor-cabinet-top-panel|compressor-cabinet-side-panel|compressor-cabinet-rear-panel|compressor-service-door|compressor-service-door-handle|compressor-cooling-air-inlet-louvre|compressor-cooling-air-exhaust-grille/;
+  const pattern=no>=29&&no<=35?compressor:patterns.get(no);
+  let retained=0;
+  if(pattern)for(const mesh of this.meshes){
+   const role=String(mesh.userData?.mechanismRole||'');
+   if(pattern.test(role)){mesh.userData.silhouetteCritical=true;retained++;}
+  }
+  this.root.userData.homeSilhouetteCriticalCount=retained;
+  if(no===17)this.root.userData.visualParityFamily='FGM2_OPEN_FRAME_PROCESS_INTERSECTION';
+  else if(no===21)this.root.userData.visualParityFamily='QF100CS_QF_LQF1080_FAMILY_BLANKER';
+  else if(no===23)this.root.userData.visualParityFamily='VERTICAL_SUCTION_COLLATOR_TOWER';
+  else if(no===25||no===26)this.root.userData.visualParityFamily='HEIDELBERG_SUPRASETTER_MULTI_MODEL';
+  else if(no===27)this.root.userData.visualParityFamily='SCREEN_FTR_KATANA_MULTI_MODEL';
+  else if(no===28)this.root.userData.visualParityFamily='ZUND_G3_S3_MODULAR_FLATBED';
+  else if(no>=29&&no<=35)this.root.userData.visualParityFamily='BRAND_SPECIFIC_ROTARY_SCREW_COMPRESSOR';
+  else if(no>=36&&no<=41)this.root.userData.visualParityFamily=no===40?'SANSIN_NES_YZKJ_FAMILY':'DOUBLE_SKIN_AHU_FAMILY';
+ }
  enrichGravure(){
   const f=this.activeGroup(1),reg=this.activeGroup(2),ink=this.activeGroup(3),print=this.activeGroup(4),imp=this.activeGroup(5),dryer=this.activeGroup(6),delivery=this.activeGroup(7),drive=this.activeGroup(8);
   const sections=[f,reg,ink,print,imp,dryer,delivery,drive].filter(Boolean);
@@ -1424,7 +1455,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.base(2.65,1.72);
   const shell=this.group(this.root,'ctp-family-envelope','Suprasetter family basic-unit envelope',[0,0,0],[0,.18,0]);
   this.cover(this.box(shell,[2.52,1.30,1.58],[0,.80,0],'body',.08));
-  this.cover(this.box(shell,[2.20,.38,1.50],[-.05,1.47,0],'body',.07));
+  const familyHood=this.cover(this.box(shell,[2.20,.38,1.50],[-.05,1.47,0],'body',.07));familyHood.rotation.z=-.10;familyHood.userData.silhouetteCritical=true;familyHood.userData.visualRole='SUPRASETTER_FAMILY_SLOPED_TOP';
   this.cover(this.box(shell,[1.36,.48,1.62],[-.35,.42,0],'dark',.05));
   shell.userData.visualBoundary='MULTI_MODEL_SUPRASETTER_FAMILY_SILHOUETTE_NOT_MODEL_IDENTIFICATION';
   const facade=this.group(this.root,'ctp-family-facade','Suprasetter family facade detail',[0,0,0],[0,.16,0]);

@@ -223,7 +223,7 @@ export class UniversalMachineTemplate{
   this.cfg=universalMachineConfig(machineId);if(!this.cfg)throw new Error('Konfigurasi model 3D mesin tidak ditemukan.');
   this.root=new THREE.Group();this.root.name='MACHINE-UNIVERSAL';this.root.userData={assetId:machineId,family:this.cfg.family,confidence:this.cfg.evidence.geometry,evidenceGrade:this.cfg.evidence.grade,simulationStatus:this.cfg.evidence.simulation,evidenceReason:this.cfg.evidence.reason,geometryStatus:'MODEL_FAMILY_MECHANICAL_PROFILE__INSTALLED_OPTIONS_REQUIRE_BMJ_VERIFICATION',processPrinciple:this.cfg.profile?.process||[],installedUnknowns:this.cfg.profile?.unknowns||[]};
   this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.exteriorOpen=false;this.ghosted=false;this.activeMeshes=[];
-  this.palette={body:0xe5e7e4,dark:0x283238,steel:0x8c999d,accent:0x2d6e72,orange:0xc86f42,paper:0xeee7d2,glass:0x68a3b5,blue:0x447899,filter:0xd5c7a5};
+  this.palette={body:0xe5e7e4,dark:0x283238,steel:0x8c999d,accent:0x2d6e72,orange:0xc86f42,paper:0xeee7d2,glass:0x68a3b5,blue:0x447899,filter:0xd5c7a5,yellow:0xe7b82b,red:0xb53b34,black:0x11171a};
   this.build();this.taxonomy=universalTaxonomy(machineId);this.taxonomyById=new Map(this.taxonomy.map(n=>[n.id,n]));
   for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}this.root.updateMatrixWorld(true);
  }
@@ -239,6 +239,11 @@ export class UniversalMachineTemplate{
   if(f==='ahu')return this.buildAHU(total);
   if(f==='compressor')return this.buildCompressor(total);
   if(f==='zund')return this.buildZund(total);
+  if(f==='folder')return this.buildFolderGluer(total);
+  if(f==='blanker')return this.buildBlanker(total);
+  if(f==='collator')return this.buildCollator(total);
+  if(f==='ctp')return this.buildCTP(total);
+  if(f==='imagesetter')return this.buildImagesetter(total);
   mods.forEach((name,i)=>{const x=(i-(n-1)/2)*pitch,g=this.group(this.root,`universal-module-${i+1}`,name,[x,0,0],[Math.sign(x||1)*.45,.2,0]);
    const h=Math.max(1.15,(envelope[2]||1.8)-.45),w=pitch*.86;
    this.cover(this.box(g,[w,h,.09],[0,.3+h/2,-.93],'body',.035));this.cover(this.box(g,[w,.20,1.75],[0,.3+h,0],'body',.03));
@@ -250,9 +255,179 @@ export class UniversalMachineTemplate{
    else {for(const y of [.72,1.02,1.32])this.active(this.cyl(active,.18,1.22,[0,y,0],i%3===0?'orange':'steel','z'));}
   });
  }
- buildCompressor(total){const g=this.group(this.root,'universal-module-1','Compressor Package',[0,0,0],[.5,.2,0]);this.cover(this.box(g,[3.4,1.75,1.65],[0,1.02,0],'body',.08));const a=this.group(g,'universal-module-1-active','Motor / Compression Element',[0,0,0]);this.active(this.cyl(a,.38,1.1,[-.55,.86,0],'accent','x'));this.active(this.cyl(a,.28,.9,[.55,.86,0],'steel','x'));this.box(a,[.48,1.0,.72],[1.16,1.1,0],'dark',.04);for(let i=1;i<(this.cfg.profile?.architecture||this.cfg.modules).length;i++){const x=-1.4+i*.42,m=this.group(this.root,`universal-module-${i+1}`,(this.cfg.profile?.architecture||this.cfg.modules)[i],[x,0,0],[.3,.2,0]);this.box(m,[.28,.36,.42],[0,.48,.56],'steel',.02);}}
- buildAHU(total){this.cfg.modules.forEach((name,i)=>{const x=(i-(this.cfg.modules.length-1)/2)*1.08,g=this.group(this.root,`universal-module-${i+1}`,name,[x,0,0],[Math.sign(x||1)*.45,.2,0]);this.cover(this.box(g,[1.02,1.72,1.72],[0,1.02,0],'body',.035));const a=this.group(g,`universal-module-${i+1}-active`,name+' Active Element');if(i===4)this.active(this.cyl(a,.52,.18,[0,1.03,0],'accent','z'));else if(i===1)this.box(a,[.12,1.3,1.3],[0,1.03,0],'filter',.01);else this.active(this.cyl(a,.08,1.25,[0,1.02,0],'steel','z'));});}
- buildZund(total){const g=this.group(this.root,'universal-module-1','Vacuum Cutting Table',[0,0,0],[0,.2,0]);this.box(g,[5.8,.35,2.7],[0,.45,0],'dark',.05);this.box(g,[5.55,.06,2.45],[0,.65,0],'body',.01);for(let i=1;i<this.cfg.modules.length;i++){const x=-2.4+(i-1)*.8,m=this.group(this.root,`universal-module-${i+1}`,this.cfg.modules[i],[x,0,0],[.3,.25,0]),a=this.group(m,`universal-module-${i+1}-active`,this.cfg.modules[i]+' Active Element');this.active(this.box(a,[.28,.55,.32],[0,1.0,0],i===2?'orange':'steel',.025));}const rail=this.group(this.root,'zund-gantry','Tool Gantry');this.box(rail,[.18,1.05,2.9],[0,1.05,0],'accent',.025);}
+ buildFolderGluer(total){
+  const mods=this.cfg.profile?.architecture||this.cfg.modules,n=mods.length,pitch=(total-1.0)/Math.max(1,n-1);
+  this.root.userData.visualRefinement='V231_FGM2_MULTI_VENDOR_FOLDER_GLUER_INTERSECTION';
+  this.root.userData.installedIdentityBoundary='OEM_MODEL_SERIAL_UNKNOWN__NO_MEDIA100_IDENTITY_ASSUMED';
+  const frame=this.group(this.root,'fgm2-open-frame','FGM-2 open conveyor frame');
+  for(const z of [-.76,.76]){this.box(frame,[total-.28,.12,.10],[0,.43,z],'body',.018);this.box(frame,[total-.40,.07,.07],[0,.92,z],'steel',.012);}
+  for(let x=-total/2+.35;x<=total/2-.35;x+=.72)for(const z of [-.74,.74])this.box(frame,[.07,.66,.07],[x,.62,z],'steel',.010);
+  mods.forEach((name,i)=>{
+   const x=(i-(n-1)/2)*pitch,g=this.group(this.root,`universal-module-${i+1}`,name,[x,0,0],[Math.sign(x||1)*.45,.2,0]);
+   const active=this.group(g,`universal-module-${i+1}-active`,name+' Active Element');
+   if(i===0){
+    this.box(g,[1.05,.08,1.30],[-.18,.42,0],'steel',.010);
+    for(let k=0;k<10;k++)this.box(g,[.66,.010,.96],[-.28,.49+k*.014,0],'paper',.002);
+    for(const z of [-.48,-.16,.16,.48])this.active(this.cyl(active,.055,.22,[.34,.72,z],'dark','z'));
+   }else if(i===1){
+    for(const z of [-.58,.58]){const q=this.box(active,[1.34,.055,.055],[0,1.02,z],'steel',.008);q.rotation.z=z<0?.10:-.10;}
+    for(const z of [-.45,-.15,.15,.45])this.active(this.box(active,[1.40,.025,.085],[0,.77,z],'dark',.006));
+   }else if(i===2){
+    for(const z of [-.62,-.30,.30,.62]){const q=this.box(active,[1.48,.055,.060],[0,1.04,z],'steel',.008);q.rotation.z=z<0?.28:-.28;}
+    for(const z of [-.46,-.15,.15,.46])this.active(this.box(active,[1.48,.025,.09],[0,.77,z],'dark',.006));
+   }else if(i===3){
+    const rail=this.box(g,[1.34,.055,.055],[0,1.32,0],'steel',.008);rail.userData.glueApplicatorMountingBoundary=true;
+    for(const z of [-.52,.52])this.active(this.cyl(active,.12,.055,[-.18,.84,z],'accent','z'));
+    g.userData.installedGlueArchitectureVerified=false;
+   }else if(i===4){
+    for(const z of [-.60,.60]){const q=this.box(active,[1.48,.055,.055],[0,1.10,z],'steel',.008);q.rotation.z=z<0?.16:-.16;}
+    for(const z of [-.48,-.16,.16,.48])this.active(this.box(active,[1.50,.030,.09],[0,.78,z],'dark',.006));
+   }else if(i===5){
+    for(const y of [.75,1.02])for(const z of [-.48,-.16,.16,.48])this.active(this.box(active,[1.48,.035,.09],[0,y,z],'dark',.007));
+    for(const z of [-.64,.64])this.box(g,[1.32,.055,.055],[0,1.20,z],'steel',.008);
+   }else{
+    for(const z of [-.44,-.15,.15,.44])this.active(this.box(active,[1.20,.030,.09],[0,.75,z],'dark',.006));
+    this.cover(this.box(g,[.56,.82,.42],[.38,.84,-1.02],'body',.045));
+    this.box(g,[.36,.24,.020],[.34,1.08,-1.24],'glass',.020);
+   }
+  });
+ }
+ buildBlanker(total){
+  const mods=this.cfg.profile?.architecture||this.cfg.modules;
+  this.root.userData.visualRefinement='V231_QF100CS_BLANKER_FAMILY_SILHOUETTE';
+  this.root.userData.installedIdentityBoundary='QF100CS_EXACT_PUBLIC_EQUIVALENCE_UNVERIFIED__QF_LQF1080_FAMILY_ONLY';
+  const shell=this.group(this.root,'blanker-shell','Automatic blanker cabinet / gantry');
+  this.cover(this.box(shell,[total-.08,.62,1.78],[0,.48,0],'body',.035));
+  this.cover(this.box(shell,[total-.18,.50,.18],[0,1.76,-.78],'body',.040));
+  this.cover(this.box(shell,[total-.18,.50,.18],[0,1.76,.78],'body',.040));
+  for(const x of [-total/2+.20,total/2-.20])this.cover(this.box(shell,[.20,1.35,1.78],[x,1.30,0],'body',.035));
+  this.cover(this.box(shell,[total-.18,.24,1.78],[0,2.28,0],'body',.045));
+  const opening=this.box(shell,[total-1.0,.68,.025],[0,1.38,-.895],'glass',.020);opening.userData.openWorkEnvelope=true;
+  mods.forEach((name,i)=>{
+   const g=this.group(this.root,`universal-module-${i+1}`,name,[0,0,0],[i<2?-.45:.45,.2,0]),active=this.group(g,`universal-module-${i+1}-active`,name+' Active Element');
+   if(i===0)this.box(active,[1.20,.08,1.36],[-1.35,.82,0],'paper',.008);
+   else if(i===1){const platform=this.box(active,[2.65,.12,1.48],[0,.84,0],'steel',.015);platform.userData.xyServoPlatform=true;for(const z of [-.55,.55])this.box(active,[2.90,.055,.055],[0,.66,z],'dark',.008);}
+   else if(i===2){this.cover(this.box(active,[.72,.66,.70],[.25,1.83,0],'dark',.040));const head=this.active(this.box(active,[.56,.18,.56],[.25,1.36,0],'orange',.020));head.userData.fixedHydraulicHead=true;}
+   else if(i===3){const board=this.box(active,[1.55,.055,1.15],[.25,.94,0],'dark',.008);board.userData.honeycombPinToolingBoundary=true;g.userData.installedPinPatternVerified=false;}
+   else if(i===4){for(const z of [-.48,0,.48])this.box(active,[.10,.30,.10],[1.20,1.12,z],'steel',.010);}
+   else if(i===5){const boundary=this.box(active,[.80,.10,1.20],[1.72,.78,0],'steel',.015);boundary.userData.collectorStackerInstalled=false;}
+   else{this.cover(this.box(active,[.58,1.02,.46],[-1.52,.98,-1.10],'body',.040));this.box(active,[.38,.25,.020],[-1.48,1.27,-1.35],'glass',.018);}
+  });
+  const stripe=this.cover(this.box(shell,[total-.34,.08,.025],[0,1.02,-.92],'orange',.006));stripe.userData.familyVisualReference=true;
+ }
+ buildCollator(total){
+  const mods=this.cfg.profile?.architecture||this.cfg.modules;
+  this.root.userData.visualRefinement='V231_SUCTION_COLLATOR_TOWER_INTERSECTION';
+  this.root.userData.installedIdentityBoundary='OEM_MODEL_AND_BIN_COUNT_UNKNOWN__TEN_BIN_REFERENCE_NOT_INSTALLATION_CLAIM';
+  mods.forEach((name,i)=>{
+   const g=this.group(this.root,`universal-module-${i+1}`,name,[0,0,0],[0,.2,(i%2?1:-1)*.35]),active=this.group(g,`universal-module-${i+1}-active`,name+' Active Element');
+   if(i===0){
+    this.cover(this.box(g,[1.42,1.92,.46],[-.20,1.10,.48],'body',.035));
+    g.userData.referenceBinCount=10;g.userData.installedBinCountVerified=false;
+    for(let b=0;b<10;b++){const y=.38+b*.155;this.box(active,[1.18,.035,1.02],[-.18,y,0],'steel',.004);this.box(active,[.92,.016,.76],[-.26,y+.025,0],'paper',.002);}
+   }else if(i===1){this.cover(this.box(g,[.42,1.55,.44],[.75,1.00,.50],'dark',.035));for(let b=0;b<5;b++)this.active(this.cyl(active,.055,.18,[.58,.48+b*.25,.22],'steel','x'));}
+   else if(i===2){for(let b=0;b<10;b++){const p=this.box(active,[.055,.08,.055],[.40,.39+b*.155,-.54],'blue',.006);p.userData.feedIntegritySensorReference=true;}}
+   else if(i===3){this.box(active,[.18,1.58,.20],[.52,1.02,0],'dark',.020);for(let b=0;b<8;b++)this.active(this.cyl(active,.045,.80,[.50,.45+b*.18,0],'steel','z'));}
+   else if(i===4){this.box(active,[1.05,.20,.78],[.20,.26,-.72],'dark',.025);this.box(active,[.88,.035,.64],[.20,.39,-.72],'paper',.004);}
+   else{this.cover(this.box(g,[.48,1.10,.34],[.70,1.12,-.70],'body',.035));this.box(g,[.34,.28,.020],[.66,1.42,-.90],'glass',.020);}
+  });
+ }
+ buildCTP(total){
+  const mods=this.cfg.profile?.architecture||this.cfg.modules;
+  this.root.userData.visualRefinement='V231_HEIDELBERG_SUPRASETTER_FAMILY_SILHOUETTE';
+  this.root.userData.installedIdentityBoundary='EXACT_A52_A75_A106_106_MODEL_UNKNOWN__LOADER_PUNCH_OPTIONS_BOUNDED';
+  const shell=this.group(this.root,'ctp-shell','Suprasetter family enclosure');
+  this.cover(this.box(shell,[2.12,.72,1.58],[-.18,.72,0],'body',.08));
+  const hood=this.cover(this.box(shell,[1.35,.72,1.52],[-.20,1.35,0],'body',.08));hood.rotation.z=-.22;
+  const grille=this.cover(this.box(shell,[1.48,.55,.035],[-.46,.62,-.81],'dark',.025));grille.userData.frontVentilationIdentity=true;
+  for(let x=-1.02;x<.25;x+=.10)this.box(shell,[.035,.40,.012],[x,.62,-.835],'black',.001);
+  const output=this.cover(this.box(shell,[.95,.84,1.40],[1.05,.82,0],'body',.055));output.userData.familyOutputInterface=true;
+  mods.forEach((name,i)=>{
+   const g=this.group(this.root,`universal-module-${i+1}`,name,[0,0,0],[i<2?-.35:.35,.2,0]),active=this.group(g,`universal-module-${i+1}-active`,name+' Active Element');
+   if(i===0){this.box(active,[.82,.055,1.12],[-1.25,1.05,0],'steel',.008);g.userData.loaderTypeVerified=false;}
+   else if(i===1){for(const z of [-.42,0,.42])this.active(this.cyl(active,.045,.92,[-.62,1.02,z],'steel','x'));}
+   else if(i===2){const drum=this.active(this.cyl(active,.42,1.06,[-.05,1.02,0],'dark','z'));drum.userData.externalImagingDrum=true;}
+   else if(i===3){this.active(this.box(active,[.30,.18,.22],[-.30,1.52,-.48],'orange',.025));g.userData.thermalLaserFamilyReference=true;}
+   else if(i===4){g.userData.internalPunchInstalled=false;const b=this.box(active,[.22,.12,.24],[.52,.92,.48],'steel',.018);b.visible=false;b.userData.capabilityOnly=true;}
+   else{for(const z of [-.42,0,.42])this.active(this.cyl(active,.045,.76,[1.04,1.03,z],'steel','x'));}
+  });
+ }
+ buildImagesetter(total){
+  const mods=this.cfg.profile?.architecture||this.cfg.modules;
+  this.root.userData.visualRefinement='V231_SCREEN_FTR_KATANA_FAMILY_SILHOUETTE';
+  this.root.userData.installedIdentityBoundary='EXACT_SCREEN_MODEL_UNKNOWN__FTR_KATANA_MULTI_MODEL_INTERSECTION';
+  const shell=this.group(this.root,'imagesetter-shell','SCREEN imagesetter family enclosure');
+  this.cover(this.box(shell,[total-.10,1.12,1.18],[0,.80,0],'body',.07));
+  this.cover(this.box(shell,[total-.20,.22,1.10],[0,1.46,0],'dark',.035));
+  const cassette=this.cover(this.box(shell,[.55,.82,1.08],[-.72,.68,0],'dark',.045));cassette.userData.mediaCassetteReference=true;
+  const output=this.cover(this.box(shell,[.46,.58,1.04],[.85,.55,0],'body',.040));output.userData.outputInterfaceReference=true;
+  mods.forEach((name,i)=>{
+   const g=this.group(this.root,`universal-module-${i+1}`,name,[0,0,0],[i<3?-.35:.35,.18,0]),active=this.group(g,`universal-module-${i+1}-active`,name+' Active Element');
+   if(i===0)this.active(this.cyl(active,.32,.88,[-.66,.75,0],'paper','z'));
+   else if(i===1){for(const x of [-.38,-.05,.28])this.active(this.cyl(active,.055,.86,[x,.80,0],'steel','z'));this.box(active,[.10,.18,.86],[-.12,.52,0],'steel',.012);}
+   else if(i===2){const poly=this.active(this.cyl(active,.16,.22,[.08,1.10,0],'steel','x'));poly.userData.polygonScannerReference=true;}
+   else if(i===3){this.active(this.box(active,[.26,.18,.20],[.22,1.12,-.36],'orange',.020));g.userData.redLaserFamilyReference=true;}
+   else if(i===4){const cutter=this.box(active,[.08,.20,.88],[.62,.88,0],'steel',.010);cutter.userData.crossCutBoundary=true;g.userData.punchInstalled=false;}
+   else{for(const z of [-.34,0,.34])this.active(this.cyl(active,.045,.54,[.88,.76,z],'steel','x'));}
+  });
+ }
+ buildCompressor(total){
+  const no=this.cfg.machine.no,atlas=[29,30,35].includes(no),kaeser=[31,32,34].includes(no),swan=no===33;
+  this.root.userData.visualRefinement=atlas?'V231_ATLAS_COPCO_GA_G_FAMILY_PACKAGE':kaeser?'V231_KAESER_SIGMA_FAMILY_PACKAGE':swan?'V231_SWAN_TS_AD_TMV_FAMILY_PACKAGE':'V231_ROTARY_SCREW_PACKAGE';
+  this.root.userData.installedIdentityBoundary='EXACT_MODEL_KW_DRIVE_AND_INTEGRATED_DRYER_UNVERIFIED';
+  const modules=this.cfg.profile?.architecture||this.cfg.modules,g=this.group(this.root,'universal-module-1','Compressor Package',[0,0,0],[.5,.2,0]);
+  const shellKind=kaeser?'body':atlas?'body':'blue';
+  this.cover(this.box(g,[total-.10,1.52,1.32],[0,.92,0],shellKind,.07));
+  const front=this.cover(this.box(g,[total*.42,1.18,.035],[-total*.23,.93,-.68],'dark',.025));front.userData.ventilationPanel=true;
+  for(let y=.48;y<1.42;y+=.12)this.box(g,[total*.34,.025,.012],[-total*.23,y,-.705],'black',.001);
+  const accentKind=kaeser?'yellow':atlas?'blue':'body';
+  this.cover(this.box(g,[.10,1.36,.035],[total*.18,.94,-.695],accentKind,.012));
+  const control=this.cover(this.box(g,[.48,.72,.035],[total*.31,1.03,-.70],atlas?'blue':kaeser?'dark':'body',.025));control.userData.controllerFamilyReference=true;
+  this.box(g,[.30,.19,.015],[total*.31,1.14,-.725],'glass',.016);
+  const a=this.group(g,'universal-module-1-active','Motor / Compression Element',[0,0,0]);
+  this.active(this.cyl(a,.30,.78,[-.42,.72,0],'accent','x'));this.active(this.cyl(a,.24,.66,[.36,.72,0],'steel','x'));
+  const separator=this.cyl(a,.22,.78,[.78,.88,.22],'steel','y');separator.userData.separatorVesselReference=true;
+  for(let i=1;i<modules.length;i++){
+   const x=-total*.38+i*(total*.76/Math.max(1,modules.length-1)),m=this.group(this.root,`universal-module-${i+1}`,modules[i],[x,0,0],[.25,.18,0]),active=this.group(m,`universal-module-${i+1}-active`,modules[i]+' Active Element');
+   if(i===4)this.active(this.box(active,[.08,.88,.88],[0,.92,.42],'steel',.010));
+   else if(i===5)this.active(this.cyl(active,.24,.10,[0,1.12,.42],'dark','z'));
+   else this.box(active,[.20,.28,.28],[0,.48,.42],'steel',.018);
+  }
+ }
+ buildAHU(total){
+  const mods=this.cfg.profile?.architecture||this.cfg.modules,n=mods.length,pitch=(total-.10)/n,no=this.cfg.machine.no;
+  this.root.userData.visualRefinement=no===40?'V231_SANSIN_NES_FAMILY_AHU_SECTIONS':'V231_DOUBLE_SKIN_AHU_SECTIONAL_REALISM';
+  this.root.userData.installedIdentityBoundary='EXACT_SECTION_ORDER_FAN_COIL_FILTER_AND_AIRFLOW_DIRECTION_UNVERIFIED';
+  mods.forEach((name,i)=>{
+   const x=-total/2+pitch*(i+.5),g=this.group(this.root,`universal-module-${i+1}`,name,[x,0,0],[Math.sign(x||1)*.40,.2,0]);
+   this.cover(this.box(g,[pitch*.94,1.70,1.70],[0,1.02,0],'body',.025));
+   for(const z of [-.875,.875])this.box(g,[pitch*.86,.035,.020],[0,.24,z],'dark',.003);
+   const seam=this.box(g,[.018,1.54,.022],[pitch*.44,1.02,-.875],'dark',.002);seam.userData.panelSeam=true;
+   const handle=this.box(g,[.025,.20,.025],[pitch*.27,1.02,-.902],'dark',.004);handle.userData.serviceDoorHandle=true;
+   const a=this.group(g,`universal-module-${i+1}-active`,name+' Active Element');
+   const lower=name.toLowerCase();
+   if(/filter/.test(lower)){const f=this.box(a,[.10,1.28,1.30],[0,1.03,0],'filter',.010);f.userData.filterBankReference=true;}
+   else if(/coil|heat|evaporative/.test(lower)){for(const xx of [-.09,0,.09]){const c=this.box(a,[.030,1.18,1.22],[xx,1.03,0],'blue',.004);c.userData.coilReference=true;}this.box(a,[pitch*.55,.05,1.22],[0,.35,0],'steel',.006).userData.condensateDrainPan=true;}
+   else if(/fan|supply/.test(lower)){const fan=this.active(this.cyl(a,.50,.16,[0,1.04,0],'accent','z'));fan.userData.fanWheelReference=true;}
+   else if(/damper|intake|inlet|discharge/.test(lower)){for(let y=.56;y<=1.48;y+=.18){const l=this.box(a,[.05,.055,1.24],[0,y,0],'steel',.004);l.rotation.z=.30;l.userData.damperLouver=true;}}
+   else if(/outdoor|compressor/.test(lower)){const c=this.box(a,[pitch*.60,.76,1.10],[0,.86,0],'dark',.025);c.userData.outdoorModuleFamilyBoundary=true;g.userData.installedArrangementVerified=false;}
+   else this.box(a,[pitch*.48,.52,1.05],[0,.92,0],'steel',.020);
+  });
+ }
+ buildZund(total){
+  this.root.userData.visualRefinement='V231_ZUND_G3_S3_MODULAR_FLATBED_SILHOUETTE';
+  this.root.userData.installedIdentityBoundary='EXACT_ZUND_MODEL_TABLE_SIZE_MODULES_AND_TOOLS_UNVERIFIED';
+  const g=this.group(this.root,'universal-module-1','Vacuum Cutting Table',[0,0,0],[0,.2,0]);
+  this.box(g,[total,.34,2.64],[0,.43,0],'dark',.05);this.box(g,[total-.18,.055,2.46],[0,.64,0],'body',.010);
+  for(let x=-total/2+.25;x<total/2-.20;x+=.28)this.box(g,[.012,.008,2.32],[x,.675,0],'steel',0);
+  for(let z=-1.08;z<=1.08;z+=.27)this.box(g,[total-.32,.008,.012],[0,.677,z],'steel',0);
+  const mods=this.cfg.profile?.architecture||this.cfg.modules;
+  for(let i=1;i<mods.length;i++){const x=-total*.38+(i-1)*(total*.72/Math.max(1,mods.length-2)),m=this.group(this.root,`universal-module-${i+1}`,mods[i],[x,0,0],[.3,.25,0]),a=this.group(m,`universal-module-${i+1}-active`,mods[i]+' Active Element');const q=this.active(this.box(a,[.24,.46,.28],[0,.98,0],i===2?'orange':'steel',.022));q.userData.installedToolBoundary=true;}
+  const gantry=this.group(this.root,'zund-gantry','Travelling X beam and tool carriage');
+  for(const z of [-1.34,1.34])this.box(gantry,[.16,.78,.16],[0,1.02,z],'accent',.020);
+  this.box(gantry,[.20,.18,2.84],[0,1.38,0],'accent',.022);
+  const carriage=this.box(gantry,[.42,.42,.34],[0,1.16,0],'dark',.030);carriage.userData.moduleCarrierReference=true;
+ }
  resolvePart(o){for(let p=o;p&&p!==this.root;p=p.parent)if(p.userData.selectable)return p;return null;}findNode(id){return id==='MACHINE-UNIVERSAL'?this.root:this.nodes.find(n=>n.userData.nodeId===id)||null;}
  resolveTaxonomyNode(id){let m=this.taxonomyById.get(id);while(m){for(const r of m.meshRefs||[]){const n=this.findNode(r);if(n)return n;}m=m.parentId?this.taxonomyById.get(m.parentId):null;}return this.root;}
  contains(a,b){for(let p=b;p;p=p.parent)if(p===a)return true;return false;}
@@ -261,7 +436,7 @@ export class UniversalMachineTemplate{
  ghost(on,except=null){this.ghosted=on;for(const m of this.meshes){const fade=on&&(!except||!this.contains(except,m));m.material.transparent=fade||m.userData.exteriorCover||m.material.transparent;m.material.opacity=fade?.14:(m.material.color?.getHex()===this.palette.glass?.35:1);m.material.depthWrite=!fade;}}
  isolate(p,on=true){for(const n of this.nodes)n.visible=!on||!p||this.contains(p,n)||this.contains(n,p);}showOnly(ps=[],on=true){for(const n of this.nodes)n.visible=!on||!ps.length||ps.some(p=>n===p||this.contains(n,p));}
  setExteriorOpen(on=true){this.exteriorOpen=!!on;for(const m of this.meshes)if(m.userData.exteriorCover)m.visible=!on;this.root.userData.interiorCutawayVisible=on;}
- setLow(on){for(const m of this.meshes)if(m.userData.detail)m.visible=!on;}reset(){const open=this.exteriorOpen;this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const n of this.nodes)n.quaternion.copy(n.userData.restQuaternion);if(open)this.setExteriorOpen(true);}dispose(){this.geometries.forEach(g=>g.dispose());this.materials.forEach(m=>m.dispose());}
+ setLow(on){for(const m of this.meshes)if(m.userData.detail&&!m.userData.silhouetteCritical)m.visible=!on;}reset(){const open=this.exteriorOpen;this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const n of this.nodes)n.quaternion.copy(n.userData.restQuaternion);if(open)this.setExteriorOpen(true);}dispose(){this.geometries.forEach(g=>g.dispose());this.materials.forEach(m=>m.dispose());}
 }
 
 export class UniversalProcessSimulation{
