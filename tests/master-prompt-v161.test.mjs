@@ -37,7 +37,9 @@ test('V162 exposes Systems in both navigation surfaces and keeps identifiers coh
 });
 
 test('asset navigation opens an empty search instead of serializing the click event',()=>{
- assert.match(app,/on\('#nav-assets',\(\)=>\{stopSimulationBeforeNavigation\(\);emitDomainState\(\{activeSection:'asset'\}\);assetDialog\(\);\}\)/);
+ assert.match(app,/const openAssetNavigation=\(\)=>\{stopSimulationBeforeNavigation\(\);emitDomainState\(\{activeSection:'asset'\}\);assetDialog\(\);\}/);
+ assert.match(app,/on\('#nav-assets',openAssetNavigation\)/);
+ assert.match(app,/window\.addEventListener\('bmj:mobileassetrequest',safe\(openAssetNavigation\)\)/);
  assert.doesNotMatch(app,/on\('#nav-assets',assetDialog\)/);
  assert.match(app,/const stopSimulationBeforeNavigation=.*bmj:simulationstoprequest/);
  assert.match(app,/if\(machine\)\{closeModal\(\);if\(simulationIntent\)[\s\S]*await openAssetContext\(machine\);\}/);
