@@ -9,9 +9,9 @@
 // Critical evidence boundary: "LYYL" is preserved as 8 PU + L + Y + Y + L.
 // The installed energy technology of Y1/Y2 remains UNASSERTED.
 
-import {Offset8MachineTemplate} from './offset8.js';
-import {Offset8PrintingSimulation} from './simulation-offset8.js';
-import {OFFSET8_CENTERS,OFFSET8_SPEC} from './data/dimensions-offset8.js';
+import {Offset8MachineTemplate} from '../../../offset8.js';
+import {Offset8PrintingSimulation} from '../../../simulation-offset8.js';
+import {OFFSET8_CENTERS,OFFSET8_SPEC} from '../../../data/dimensions-offset8.js';
 
 export const OFFSET8_FINAL_REFINEMENT=Object.freeze({
  id:'OFFSET8_CX104_8LYYL_FINAL_REFINEMENT_R2',
