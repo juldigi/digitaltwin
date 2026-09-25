@@ -1,4 +1,4 @@
-const VERSION='factory-digital-twin-v212-ui-ssot-stage6-20260925';
+const VERSION='factory-digital-twin-v213-mobile-layout-20260925';
 const SHELL=[
  './','./index.html','./config.json','./assets/favicon.svg','./assets/splash-industrial-v79.webp',
  './style.css','./runtime-fallback.css','./app-shell-v79.css','./ui-v5.css','./responsive-v5.css','./experience-v37.css',
