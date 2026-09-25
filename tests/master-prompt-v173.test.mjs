@@ -9,13 +9,15 @@ const shell=read('../frontend/src/app-shell-v79.js');
 const sw=read('../frontend/sw.js');
 
 test('V193 Factory navigation preserves view mode while business navigation is owned by app.js',()=>{
- const marker="on('#nav-machine',()=>";
+ const marker="const openFactoryNavigation=()=>";
  const start=app.indexOf(marker);
  assert.notEqual(start,-1);
- const handler=app.slice(start,app.indexOf(';on(',start));
+ const handler=app.slice(start,app.indexOf(";const openAssetNavigation",start));
  assert.match(handler,/showHome\(\{historyMode:'push'\}\)/);
  assert.doesNotMatch(handler,/setViewMode\('3d'\)/);
  assert.doesNotMatch(handler,/workspace-2d/);
+ assert.match(app,/on\('#nav-machine',openFactoryNavigation\)/);
+ assert.match(app,/window\.addEventListener\('bmj:mobilefactoryrequest',safe\(openFactoryNavigation\)\)/);
  assert.doesNotMatch(shell,/q\('#nav-machine'\)\?\.addEventListener\('click'/);
  assert.match(shell,/function markSection\(section\)/);
 });
