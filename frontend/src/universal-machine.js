@@ -409,7 +409,7 @@ export class UniversalMachineTemplate{
    if(/filter/.test(lower)){const f=this.box(a,[.10,1.28,1.30],[0,1.03,0],'filter',.010);f.userData.filterBankReference=true;}
    else if(/coil|heat|evaporative/.test(lower)){for(const xx of [-.09,0,.09]){const c=this.box(a,[.030,1.18,1.22],[xx,1.03,0],'blue',.004);c.userData.coilReference=true;}this.box(a,[pitch*.55,.05,1.22],[0,.35,0],'steel',.006).userData.condensateDrainPan=true;}
    else if(/fan|supply/.test(lower)){const fan=this.active(this.cyl(a,.50,.16,[0,1.04,0],'accent','z'));fan.userData.fanWheelReference=true;}
-   else if(/damper|intake|inlet|discharge/.test(lower)){for(let z=-.55;z<=.55;z+=.22){const l=this.box(a,[.05,.10,1.20],[0,1.03,z],'steel',.004);l.rotation.x=.30;l.userData.damperLouver=true;}}
+   else if(/damper|intake|inlet|discharge/.test(lower)){for(let y=.56;y<=1.48;y+=.18){const l=this.box(a,[.05,.055,1.24],[0,y,0],'steel',.004);l.rotation.z=.30;l.userData.damperLouver=true;}}
    else if(/outdoor|compressor/.test(lower)){const c=this.box(a,[pitch*.60,.76,1.10],[0,.86,0],'dark',.025);c.userData.outdoorModuleFamilyBoundary=true;g.userData.installedArrangementVerified=false;}
    else this.box(a,[pitch*.48,.52,1.05],[0,.92,0],'steel',.020);
   });
