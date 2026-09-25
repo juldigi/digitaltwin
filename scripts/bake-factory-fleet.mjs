@@ -23,7 +23,7 @@ for(const place of MACHINE_PLACEMENTS){
  const placement={...place};if(place.status==='UNIDENTIFIED'){placement.x=112+(unknown%3)*12;placement.y=8+Math.floor(unknown/3)*12;unknown++;}
  result.push({placement,size:size.toArray(),center:center.toArray(),floor:box.min.y,meshes});t.dispose();
 }
-const encoded=gzipSync(JSON.stringify(result)).toString('base64'),chunkSize=180000;
+const encoded=gzipSync(JSON.stringify(result)).toString('base64'),chunkSize=210000; // V228: headroom while preserving the deployed 9-chunk fleet contract.
 const chunks=Array.from({length:Math.ceil(encoded.length/chunkSize)},(_,i)=>encoded.slice(i*chunkSize,(i+1)*chunkSize));
 chunks.forEach((chunk,i)=>writeFileSync(`frontend/src/data/factory-fleet-chunk-${i}.js`,`export default '${chunk}';\n`));
 writeFileSync('frontend/src/data/factory-fleet-data.js',
