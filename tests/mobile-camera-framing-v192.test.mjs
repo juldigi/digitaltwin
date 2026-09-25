@@ -5,7 +5,8 @@ const engine=readFileSync(new URL('../frontend/src/engine.js',import.meta.url),'
 const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
 const index=readFileSync(new URL('../frontend/index.html',import.meta.url),'utf8');
 const sw=readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
+const cameraDirector=readFileSync(new URL('../frontend/src/render/camera-director.js',import.meta.url),'utf8');
 test('machine camera has a portrait-specific framing profile',()=>{assert.match(engine,/framingProfile\(object=this\.machine\)/);assert.match(engine,/padding:portrait&&machine\?1\.06:1\.18/);assert.match(engine,/targetLift:portrait&&machine\?-\.08:0/);});
-test('fit uses profile without changing object geometry',()=>{assert.match(engine,/c\.y\+=size\.y\*profile\.targetLift/);assert.match(engine,/\*profile\.padding/);});
+test('fit uses one camera director without changing object geometry',()=>{assert.match(engine,/cameraFrame\(this\.camera,box/);assert.match(cameraDirector,/center\.y\+=size\.y\*targetLift/);assert.match(cameraDirector,/\*padding/);});
 test('desktop framing keeps historical padding',()=>{assert.match(engine,/1\.06:1\.18/);});
-test('mobile camera release identifiers are coherent',()=>{assert.match(index,/app-shell-v79\.css\?v=219/);assert.match(index,/src\/app\.js\?v=219/);assert.match(sw,/factory-digital-twin-v219-cinematic-focus-20260925/);assert.match(app,/pair\('Versi aplikasi',APP_BUILD\)/);});
+test('mobile camera release identifiers are coherent',()=>{assert.match(index,/app-shell-v79\.css\?v=220/);assert.match(index,/src\/app\.js\?v=220/);assert.match(sw,/factory-digital-twin-v220-camera-director-20260925/);assert.match(app,/pair\('Versi aplikasi',APP_BUILD\)/);});

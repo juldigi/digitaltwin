@@ -24,8 +24,8 @@ test('drawer transition marker is always cleared',()=>{
  assert.match(shell,/closeDrawer\(\)\{document\.body\.classList\.remove\('nav-open'\);document\.body\.classList\.remove\('drawer-transitioning'\)/);
 });
 test('mobile release identifiers are coherent',()=>{
- assert.match(index,/app-shell-v79\.css\?v=219/);
- assert.match(index,/src\/app\.js\?v=219/);
- assert.match(sw,/factory-digital-twin-v219-cinematic-focus-20260925/);
+ assert.match(index,/app-shell-v79\.css\?v=220/);
+ assert.match(index,/src\/app\.js\?v=220/);
+ assert.match(sw,/factory-digital-twin-v220-camera-director-20260925/);
  assert.match(app,/pair\('Versi aplikasi',APP_BUILD\)/);
 });

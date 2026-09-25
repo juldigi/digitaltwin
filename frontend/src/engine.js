@@ -13,6 +13,7 @@ import {EnvironmentSystem} from './render/environment-system.js';
 import {PostProcessing} from './render/post-processing.js';
 import {ShadowManager} from './render/shadow-manager.js';
 import {renderDiagnostics} from './render/render-diagnostics.js';
+import {cameraFrame,applyCameraFrame,updateCameraTransition} from './render/camera-director.js';
 
 import {OffsetMachineTemplate} from './offset5.js';
 import {PrintingSimulation} from './simulation.js';
@@ -120,29 +121,21 @@ export class FactoryEngine {
   framingProfile(object=this.machine){const portrait=this.container.clientWidth<=767&&this.container.clientHeight>this.container.clientWidth;const machine=object===this.machine&&this.view==='machine';return {portrait,machine,padding:portrait&&machine?1.06:1.18,targetLift:portrait&&machine?-.08:0};}
   fit(object=this.machine,mode='iso',animate=true){
     object.updateWorldMatrix(true,true);const box=new THREE.Box3().setFromObject(object);if(box.isEmpty())return;
-    const c=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3()),profile=this.framingProfile(object);
-    c.y+=size.y*profile.targetLift;
-    const radius=Math.max(size.length()*.5,.5),v=this.camera.fov*Math.PI/360,h=Math.atan(Math.tan(v)*this.camera.aspect),distance=radius/Math.sin(Math.min(v,h))*profile.padding;
-    // Verified operator-side view: near delivery (+X), walkway side (-Z).
-    const direction=mode==='top'?new THREE.Vector3(0,1,.0001):new THREE.Vector3(.85,.7,-1.25).normalize();
-    const end=c.clone().addScaledVector(direction,distance);
-    if(!animate||matchMedia('(prefers-reduced-motion: reduce)').matches){this.controls.target.copy(c);this.camera.position.copy(end);this.controls.update();return;}
-    this.transition={start:performance.now(),from:this.camera.position.clone(),to:end,fromTarget:this.controls.target.clone(),target:c};
+    const profile=this.framingProfile(object);
+    this.transition=applyCameraFrame(this.camera,this.controls,cameraFrame(this.camera,box,{mode,...profile,minDistance:this.controls.minDistance,maxDistance:this.controls.maxDistance}),{animate,reduceMotion:matchMedia('(prefers-reduced-motion: reduce)').matches});
   }
   fitObjects(objects=[],mode='iso',animate=true){
     const list=(objects||[]).filter(Boolean),box=new THREE.Box3();
     for(const object of list){object.updateWorldMatrix(true,true);const partBox=new THREE.Box3().setFromObject(object);if(!partBox.isEmpty())box.union(partBox);}
     if(box.isEmpty())return;
-    const center=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3()),profile=this.framingProfile(list.length===1?list[0]:null);center.y+=size.y*profile.targetLift;const radius=Math.max(size.length()*.5,.5),v=this.camera.fov*Math.PI/360,h=Math.atan(Math.tan(v)*this.camera.aspect),distance=radius/Math.sin(Math.min(v,h))*profile.padding;
-    const direction=mode==='top'?new THREE.Vector3(0,1,.0001):new THREE.Vector3(.85,.7,-1.25).normalize(),end=center.clone().addScaledVector(direction,distance);
-    if(!animate||matchMedia('(prefers-reduced-motion: reduce)').matches){this.controls.target.copy(center);this.camera.position.copy(end);this.controls.update();return;}
-    this.transition={start:performance.now(),from:this.camera.position.clone(),to:end,fromTarget:this.controls.target.clone(),target:center};
+    const profile=this.framingProfile(list.length===1?list[0]:null);
+    this.transition=applyCameraFrame(this.camera,this.controls,cameraFrame(this.camera,box,{mode,...profile,minDistance:this.controls.minDistance,maxDistance:this.controls.maxDistance}),{animate,reduceMotion:matchMedia('(prefers-reduced-motion: reduce)').matches});
   }
   render(now){this.frame=requestAnimationFrame(this.render);if(this.renderFaulted||document.hidden||now-this.last<RENDER_PROFILES[this.qualityProfile].frameInterval)return;this.last=now;
     try{
       this.simulation?.update(now);
       if(this.view==='factory')this.actualFactory?.update?.(now);
-      if(this.transition){const t=Math.min((now-this.transition.start)/RENDER_PROFILES[this.qualityProfile].cameraMs,1),e=t*t*(3-2*t),a=this.transition;this.camera.position.lerpVectors(a.from,a.to,e);this.controls.target.lerpVectors(a.fromTarget,a.target,e);if(t===1)this.transition=null;}
+      this.transition=updateCameraTransition(this.camera,this.controls,this.transition,now,RENDER_PROFILES[this.qualityProfile].cameraMs);
       this.controls.update();if(!this.postProcessing.render())this.renderer.render(this.scene,this.camera);if(this.requestedQuality==='auto'&&!document.hidden)this.adaptiveQuality.frame(now);this.updateLabel();if(!this.low){try{this.updatePartLabels();}catch(error){console.warn('[Digital Twin labels disabled after overlay error]',error);this.clearPartLabels();}}
     }catch(error){this.renderFaulted=true;console.error('[Digital Twin renderer]',error);this.onError?.('Render 3D terhenti. Tampilan dialihkan ke denah 2D agar menu tetap dapat digunakan.');}
   }

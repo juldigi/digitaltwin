@@ -22,6 +22,6 @@ test('WebGL failure falls back to the actual 2D plant drawing with honest guidan
 });
 
 test('new app controller is cache-busted on existing devices',()=>{
- assert.match(html,/src\/app\.js\?v=219/);
- assert.match(sw,/factory-digital-twin-v219-cinematic-focus-20260925/);
+ assert.match(html,/src\/app\.js\?v=220/);
+ assert.match(sw,/factory-digital-twin-v220-camera-director-20260925/);
 });

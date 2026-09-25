@@ -29,7 +29,7 @@ test('theme click changes DOM, aria state and saved preference from the same res
 });
 
 test('changed controllers have fresh page and service worker cache identifiers',()=>{
- assert.match(html,/src\/experience-v37\.js\?v=219/);
- assert.match(html,/src\/app-shell-v79\.js\?v=219/);
- assert.match(sw,/factory-digital-twin-v219-cinematic-focus-20260925/);
+ assert.match(html,/src\/experience-v37\.js\?v=220/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=220/);
+ assert.match(sw,/factory-digital-twin-v220-camera-director-20260925/);
 });

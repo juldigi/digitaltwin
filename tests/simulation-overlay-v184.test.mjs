@@ -28,9 +28,9 @@ test('system overlay is isolated above the backdrop without lifting the whole wo
 });
 
 test('V184 assets rotate browser and service-worker caches',()=>{
- assert.match(index,/app-shell-v79\.css\?v=219/);
- assert.match(index,/src\/app\.js\?v=219/);
- assert.match(index,/src\/app-shell-v79\.js\?v=219/);
- assert.match(sw,/factory-digital-twin-v219-cinematic-focus-20260925/);
+ assert.match(index,/app-shell-v79\.css\?v=220/);
+ assert.match(index,/src\/app\.js\?v=220/);
+ assert.match(index,/src\/app-shell-v79\.js\?v=220/);
+ assert.match(sw,/factory-digital-twin-v220-camera-director-20260925/);
  assert.match(app,/pair\('Versi aplikasi',APP_BUILD\)/);
 });

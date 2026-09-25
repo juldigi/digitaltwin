@@ -8,6 +8,22 @@ import {AdaptiveQuality} from '../frontend/src/render/adaptive-quality.js';
 import {ShadowManager} from '../frontend/src/render/shadow-manager.js';
 import {EnvironmentSystem} from '../frontend/src/render/environment-system.js';
 import {PostProcessing} from '../frontend/src/render/post-processing.js';
+import {cameraFrame,applyCameraFrame,updateCameraTransition} from '../frontend/src/render/camera-director.js';
+
+test('camera director frames actual bounds and settles without passing through the floor',()=>{
+ const camera=new THREE.PerspectiveCamera(38,1,.05,1000),controls={target:new THREE.Vector3(),update(){this.updated=true}};
+ const box=new THREE.Box3(new THREE.Vector3(10,0,-4),new THREE.Vector3(14,3,2));
+ const frame=cameraFrame(camera,box,{mode:'iso'});
+ assert.equal(frame.center.x,12);
+ assert.ok(frame.position.y>=.15);
+ const transition=applyCameraFrame(camera,controls,frame,{now:1000});
+ assert.equal(updateCameraTransition(camera,controls,transition,1500,1000),transition);
+ assert.equal(updateCameraTransition(camera,controls,transition,2000,1000),null);
+ assert.ok(camera.position.distanceTo(frame.position)<1e-9);
+ assert.ok(controls.target.distanceTo(frame.center)<1e-9);
+ applyCameraFrame(camera,controls,cameraFrame(camera,box,{mode:'top'}),{reduceMotion:true});
+ assert.equal(controls.updated,true);
+});
 
 test('quality choices use device capabilities and keep one renderer',()=>{
  assert.equal(recommendedProfile({mobile:true,memory:8,cores:8,maxTextureSize:8192}),'hemat');

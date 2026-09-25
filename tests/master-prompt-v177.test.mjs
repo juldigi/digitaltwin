@@ -27,6 +27,6 @@ test('V177 canonical state subscriber owns both visible mode state and mode-spec
 });
 
 test('V177 shell and service worker are cache-busted',()=>{
-  assert.match(html,/src\/app-shell-v79\.js\?v=219/);
-  assert.match(sw,/factory-digital-twin-v219-cinematic-focus-20260925/);
+  assert.match(html,/src\/app-shell-v79\.js\?v=220/);
+  assert.match(sw,/factory-digital-twin-v220-camera-director-20260925/);
 });
