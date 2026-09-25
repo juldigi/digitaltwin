@@ -20,7 +20,7 @@ test('V166 narrow mobile header cannot collide with header actions',()=>{
 });
 
 test('V166 inspector and mobile More restore a predictable focus path',()=>{
-  assert.match(shell,/const target=saved\?\.isConnected\?saved:\(fallback\?q\(fallback\):null\)/);
+  assert.match(shell,/const reusable=saved instanceof HTMLElement&&saved\.isConnected&&!saved\.closest\('\[hidden\]'\)&&!saved\.matches\(':disabled'\)/);
   assert.match(shell,/function openInspector\(tab=getState\(\)\.inspectorState\.tab\)[\s\S]*rememberOverlayFocus\('inspector'\)[\s\S]*focusOverlay\(q\('#detail-panel'\),'#close-panel'\)/);
   assert.match(shell,/key==='more'[\s\S]*rememberOverlayFocus\('navigation'\)[\s\S]*const rail=q\('\.rail'\)[\s\S]*requestAnimationFrame\(\(\)=>focusOverlay\(rail,'\.rail button:not\(\[hidden\]\)'\)\)/);
   assert.match(shell,/q\('#close-panel'\)\?\.addEventListener\('click',\(\)=>closeInspector\(\)\)/);
