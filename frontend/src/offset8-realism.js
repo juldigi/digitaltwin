@@ -28,10 +28,10 @@ export class Offset8CX104RealismTemplate extends Offset8MachineTemplate{
   this.root.userData.dryerEnergyTechnology='UNASSERTED';
   this.refineExistingModel();this.root.updateMatrixWorld(true);
  }
- tag(mesh,role,{coverMounted=false,service=false,confidence='HEIDELBERG_CX104_FAMILY'}={}){
+ tag(mesh,role,{coverMounted=false,service=false,silhouette=false,confidence='HEIDELBERG_CX104_FAMILY'}={}){
   if(!mesh)return mesh;mesh.userData.realismMicroDetail=true;mesh.userData.realismRole=role;
   mesh.userData.coverMountedDetail=coverMounted;mesh.userData.serviceDetail=mesh.userData.serviceDetail||service;
-  mesh.userData.confidence=confidence;mesh.userData.detail=true;this.realismMeshes.push(mesh);return mesh;
+  mesh.userData.confidence=confidence;mesh.userData.detail=true;if(silhouette)mesh.userData.silhouetteCritical=true;this.realismMeshes.push(mesh);return mesh;
  }
  db(p,s,x,k='graphite',r=.004,role='micro-detail',opts={}){return this.tag(this.box(p,s,x,k,r),role,opts);}
  dc(p,r,l,x,k='steel',role='micro-detail',axis='z',opts={}){return this.tag(this.cyl(p,r,l,x,k,role,axis),role,opts);}
@@ -43,8 +43,25 @@ export class Offset8CX104RealismTemplate extends Offset8MachineTemplate{
   for(const key of ['L1','L2'])this.refineCoater(key);
   for(const key of ['Y1','Y2'])this.refineDryer(key);
   this.refineDelivery();
+  this.refineExteriorIdentityV237();
  }
 
+ refineExteriorIdentityV237(){
+  this.root.userData.visualRefinement='V237_CX104_8LYYL_MODULAR_SERVICE_IDENTITY';
+  this.root.userData.homeDetailGeometryPolicy='SAME_LIVE_CX104_TEMPLATE__MODULAR_COVER_RHYTHM_RETAINED';
+  this.root.userData.visualEvidenceBoundary='HEIDELBERG_CX104_FAMILY_PLUS_BMJ_MACHINE_IDENTITY__Y_ENERGY_TECH_UNASSERTED';
+  for(let i=1;i<=8;i++){
+   const g=this.node('offset8-pu'+i);if(!g)continue;
+   const lower=this.db(g,[.64,.075,.022],[0,.67,-1.414],'black',.006,'cx104-operator-lower-service-band',{coverMounted:true,silhouette:true});
+   lower.userData.moduleKey='PU'+i;
+   const label=this.realismMeshes.find(m=>m.userData?.realismRole==='unit-identification-plate'&&m.userData?.label==='PU'+i);
+   if(label)label.userData.silhouetteCritical=true;
+  }
+  const feeder=this.node('offset8-feeder');
+  if(feeder)this.db(feeder,[.88,.075,.022],[-.20,.69,-1.405],'black',.006,'cx104-feeder-lower-service-band',{coverMounted:true,silhouette:true});
+  const delivery=this.node('offset8-delivery');
+  if(delivery)this.db(delivery,[1.20,.075,.022],[.40,.70,-1.455],'black',.006,'cx104-delivery-lower-service-band',{coverMounted:true,silhouette:true});
+ }
  refineFeeder(){
   const g=this.node('offset8-feeder');if(!g)return;
   for(const z of [-1.39,1.39]){
@@ -151,7 +168,7 @@ export class Offset8CX104RealismTemplate extends Offset8MachineTemplate{
  }
  setLow(on){
   if(typeof Offset8MachineTemplate.prototype.setLow==='function')Offset8MachineTemplate.prototype.setLow.call(this,on);
-  for(const m of this.realismMeshes)m.visible=!on;return this;
+  for(const m of this.realismMeshes)m.visible=!on||Boolean(m.userData.silhouetteCritical);return this;
  }
 }
 

@@ -12,7 +12,7 @@ export class Polar115MachineTemplate{
   this.build();this.enrichV122();this.taxonomy=POLAR115_TAXONOMY;this.taxonomyById=new Map(this.taxonomy.map(n=>[n.id,n]));
   for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}this.root.updateMatrixWorld(true);
   this.root.userData={assetId:POLAR115_SPEC.assetId,nodeId:'POLAR-115-EM',model:POLAR115_SPEC.model,serial:POLAR115_SPEC.serial,spec:POLAR115_SPEC,sources:POLAR115_TECHNICAL_SOURCES,machineEnvelope:{reference:POLAR115_REFERENCE_DIMENSIONS},geometryStatus:'DEDICATED_BMJ_PHOTO_MATCHED__ARCHIVE_DIMENSIONS_NOT_INSTALLATION_CAD',engineeringDimensions:false,evidenceBoundary:POLAR115_SPEC.evidenceBoundary,researchVersion:'V123_PHOTO_MATCHED',researchSourceCount:V122_SOURCE_STATS.total,detailPass:'V123_POLAR115_BMJ_PHOTO_MATCHED',actualPhotoEvidence:'BMJ-POLAR-PHOTOS-2026-09',mainHousingProfile:'RECTANGULAR_ROUNDED_HEAD__NO_HALF_CYLINDER_ROOF'};
-  this.markSilhouetteCriticality();
+  this.refineExteriorV237();this.markSilhouetteCriticality();
  }
  mat(kind,transparent=false){const m=new THREE.MeshStandardMaterial({color:this.palette[kind]??this.palette.body,metalness:['steel','table','tableDark'].includes(kind)?.45:.08,roughness:kind==='screen'?.18:kind==='tableDark'?.42:.52,transparent,opacity:transparent?.36:1});m.userData.baseOpacity=m.opacity;this.materials.push(m);return m;}
  group(parent,id,name,pos=[0,0,0],explode=[0,.18,0]){const g=new THREE.Group();g.name=name;g.position.set(...pos);g.userData={nodeId:id,selectable:true,explode:new THREE.Vector3(...explode)};parent.add(g);this.nodes.push(g);if(parent===this.root)this.parts.push(g);return g;}
@@ -207,6 +207,56 @@ export class Polar115MachineTemplate{
  ghost(on,except=null){this.ghosted=!!on;for(const m of this.meshes){const fade=on&&(!except||!this.contains(except,m)),base=m.material.userData.baseOpacity??1;m.material.transparent=fade||base<1;m.material.opacity=fade?.14:base;m.material.depthWrite=!fade;}}
  isolate(p,on=true){for(const n of this.nodes)n.visible=!on||!p||this.contains(p,n)||this.contains(n,p);}
  showOnly(ps=[],on=true){for(const n of this.nodes)n.visible=!on||!ps.length||ps.some(p=>n===p||this.contains(n,p));}
+ refineExteriorV237(){
+  const photo='BMJ-POLAR-PHOTOS-2026-09';
+  this.root.userData.visualRefinement='V237_POLAR115_EM_MON_LEGACY_SERVICE_IDENTITY';
+  this.root.userData.homeDetailGeometryPolicy='SAME_LIVE_EM_MON_TEMPLATE__LEGACY_CONTROL_AND_SERVICE_DNA_RETAINED';
+  this.root.userData.visualEvidenceBoundary='BMJ_POLAR_PHOTOS_PLUS_POLAR_EM_ARCHIVE__NO_N115_TOUCHSCREEN_MODERNIZATION';
+  const g=this.group(this.root,'polar-service-v237','Legacy EM-MON exterior service hardware');
+  const tag=(m,role,critical=false)=>{if(!m)return m;m.userData.detail=true;m.userData.mechanismRole=role;m.userData.evidence=photo;if(critical)m.userData.silhouetteCritical=true;return m;};
+
+  // Base cabinet door rhythm and physical latch hardware visible on legacy cutters.
+  for(const x of [-.58,0,.58]){
+   tag(this.box(g,[.40,.012,.018],[x,.31,-.604],'dark',.002),'polar-base-door-lower-seam');
+   tag(this.box(g,[.026,.16,.020],[x+.15,.31,-.617],'steel',.004),'polar-base-door-handle');
+   for(const y of [.20,.42])tag(this.cyl(g,.012,.045,[x-.17,y,-.617],'steel','y'),'polar-base-door-hinge');
+  }
+
+  // Cutter head service seams / inspection points retain the rectangular EM-era housing.
+  for(const x of [-.72,.72]){
+   tag(this.box(g,[.012,.62,.020],[x,1.25,.145],'bodyDark',.001),'polar-head-panel-seam');
+   tag(this.box(g,[.026,.18,.022],[x+.10,1.28,.128],'dark',.004),'polar-head-service-handle');
+  }
+  const motorRing=tag(this.mesh(g,new THREE.TorusGeometry(.170,.018,10,28),'bodyDark',[1.430,.76,.78],[0,Math.PI/2,0]),'polar-belt-housing-window-bezel',true);
+  motorRing.userData.legacyInspectionWindow=true;
+
+  // Physical EM-MON console bezel / keypad surround; keep square display identity.
+  const ctrl=this.findNode('polar-control');
+  if(ctrl){
+   const bezel=tag(this.box(ctrl,[.31,.27,.014],[.02,1.51,.052],'black',.012),'polar-em-monitor-display-bezel',true);
+   bezel.userData.modernTouchscreen=false;
+   const keypadFrame=tag(this.box(ctrl,[.34,.19,.012],[-.22,1.35,.050],'bodyDark',.010),'polar-em-monitor-keypad-surround',true);
+   keypadFrame.userData.legacyKeypad=true;
+   for(const x of [.43,.55,.67,.79])tag(this.cyl(ctrl,.020,.012,[x,1.34,.045],x===.79?'warning':'body','z'),'polar-em-monitor-function-button');
+  }
+
+  // Air-table support feet and adjustment hardware ground the side tables physically.
+  for(const x of [-1.23,-.80,.80,1.23]){
+   const pad=tag(this.cyl(g,.055,.025,[x,.025,-.26],'dark','y'),'polar-side-table-floor-pad',true);
+   pad.userData.floorInterface=true;
+  }
+  const right=this.findNode('polar-feed-right');
+  if(right){
+   const hub=tag(this.cyl(right,.105,.030,[.28,.62,-.67],'bodyDark','x'),'polar-side-table-crank-hub',true);
+   hub.userData.manualAdjustment=true;
+  }
+
+  // Safety arm mounting shoes are photo-visible and prevent the arms looking floated.
+  for(const x of [-.76,.76]){
+   const shoe=tag(this.box(g,[.30,.10,.28],[x,.97,-.18],'bodyDark',.020),'polar-front-safety-arm-mount',true);
+   shoe.userData.photoVisibleMount=true;
+  }
+ }
  markSilhouetteCriticality(){
   const criticalNodes=new Set([
    'polar-frame','polar-feed-center','polar-feed-left','polar-feed-right','polar-feed-rear',

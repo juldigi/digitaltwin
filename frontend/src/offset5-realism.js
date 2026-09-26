@@ -39,7 +39,7 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
     this.root.updateMatrixWorld(true);
   }
 
-  tag(mesh,role,{coverMounted=false,service=false,confidence='PHOTO_OEM_REFERENCE'}={}){
+  tag(mesh,role,{coverMounted=false,service=false,silhouette=false,confidence='PHOTO_OEM_REFERENCE'}={}){
     if(!mesh)return mesh;
     mesh.userData.realismMicroDetail=true;
     mesh.userData.realismRole=role;
@@ -47,6 +47,7 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
     mesh.userData.coverMountedDetail=coverMounted;
     mesh.userData.serviceDetail=mesh.userData.serviceDetail||service;
     mesh.userData.detail=true;
+    if(silhouette)mesh.userData.silhouetteCritical=true;
     this.realismMeshes.push(mesh);
     return mesh;
   }
@@ -64,11 +65,35 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
     this.refineCoater();
     this.refineInspection();
     this.refineDelivery();
+    this.refineExteriorIdentityV237();
   }
 
+  refineExteriorIdentityV237(){
+    this.root.userData.visualRefinement='V237_CD102_8L_PHOTO_SERVICE_IDENTITY';
+    this.root.userData.homeDetailGeometryPolicy='SAME_LIVE_CD102_TEMPLATE__PHOTO_VISIBLE_SERVICE_DNA_RETAINED';
+    this.root.userData.visualEvidenceBoundary='BMJ_OFFSET5_PHOTOS_DXF_AND_CD102_FAMILY__NO_NEW_INSTALLED_PROCESS_HARDWARE';
+    for(let i=0;i<8;i++){
+      const unit=this.node(`press-${i+1}`);if(!unit)continue;
+      const trim=this.db(unit,[.60,.075,.020],[0,.67,-1.305],'black',.006,'operator-side-lower-service-trim',{coverMounted:true,silhouette:true});
+      trim.userData.unitIndex=i+1;
+      const plate=this.realismMeshes.find(m=>m.userData?.realismRole==='unit-identification-plate'&&m.userData?.label===`PU${i+1}`);
+      if(plate)plate.userData.silhouetteCritical=true;
+      for(const x of [-.34,.34]){
+        const hinge=this.dc(unit,.012,.10,[x,1.58,-1.315],'steel','y','operator-service-door-hinge',{coverMounted:true,service:true});
+        hinge.userData.unitIndex=i+1;
+      }
+    }
+    const feeder=this.node('feeder-frame');
+    if(feeder){
+      const sill=this.db(feeder,[.82,.08,.024],[-.05,.72,-1.175],'black',.006,'feeder-open-rear-service-sill',{coverMounted:true,silhouette:true});
+      sill.userData.rearRemainsOpen=true;
+    }
+    const delivery=this.node('delivery-frame');
+    if(delivery)this.db(delivery,[.72,.08,.022],[.08,.70,-1.12],'black',.006,'delivery-service-fascia-reference',{coverMounted:true,silhouette:true});
+  }
   refinePrintingUnits(){
     for(let i=0;i<8;i++){
-      const unit=this.node(`press-${i}`);
+      const unit=this.node(`press-${i+1}`);
       if(!unit)continue;
 
       // Cover seams / quarter-turn fasteners on the existing housing.
@@ -204,7 +229,7 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
   }
   setLow(on){
     if(typeof OffsetMachineTemplate.prototype.setLow==='function')OffsetMachineTemplate.prototype.setLow.call(this,on);
-    for(const m of this.realismMeshes)m.visible=!on;
+    for(const m of this.realismMeshes)m.visible=!on||Boolean(m.userData.silhouetteCritical);
     return this;
   }
 }
