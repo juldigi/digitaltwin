@@ -14,7 +14,7 @@ export class UpgLy300MachineTemplate{
   if(rotating)m.userData.spinDirection=/^(belt-pulley|encoder)$/.test(role)?-1:1;
   return m;
  }cover(m){m.userData.exteriorCover=true;return m;}
- build(){this.buildAccess();this.buildFeeder();this.buildTransport();this.buildPrint();this.buildInk();this.buildUV();this.buildCamera();this.buildReject();this.buildCollect();this.buildControl();this.refineExteriorV232();}
+ build(){this.buildAccess();this.buildFeeder();this.buildTransport();this.buildPrint();this.buildInk();this.buildUV();this.buildCamera();this.buildReject();this.buildCollect();this.buildControl();this.refineExteriorV232();this.refineExteriorV238();}
  buildAccess(){const g=this.group(this.root,'ly300-access','Enclosure and service access');const frame=this.group(g,'ly300-access-frame','4230 mm machine base reference');this.box(frame,[4.23,.22,.72],[0,.11,0],'dark',.025);for(const x of [-1.72,-.75,.25,1.22,1.88])for(const z of [-.31,.31])this.box(frame,[.06,.65,.06],[x,.46,z],'steel',.01);const cover=this.group(g,'ly300-access-cover','Service enclosure panels');for(const z of [-.37,.37])for(const [x,w,h] of [[-.65,1.10,1.18],[.55,.95,1.18],[1.38,.62,.90]])this.cover(this.box(cover,[w,h,.04],[x,.84+h/2,z],'charcoal',.035));const door=this.group(g,'ly300-access-door','Service doors / ventilation');for(const x of [-.92,-.38,.35,.82,1.38]){this.box(door,[.42,.48,.018],[x,.55,-.395],'dark',.018);for(let y=.38;y<.68;y+=.075)this.box(door,[.22,.012,.012],[x,y,-.408],'steel',0);}}
  buildFeeder(){const g=this.group(this.root,'ly300-feeder','Automatic paging / feeding',[-1.72,0,0],[-.45,.12,0]);const stack=this.group(g,'ly300-feed-stack','Input pile support');this.box(stack,[.72,.07,.50],[-.10,.39,0],'steel');for(let i=0;i<9;i++)this.box(stack,[.44,.009,.23],[-.14,.47+i*.011,0],'paper',.002);const baffle=this.group(g,'ly300-feed-baffle','Baffle feeder');for(const z of [-.14,.14])this.box(baffle,[.10,.45,.035],[-.28,.74,z],'steel',.008);const pager=this.group(g,'ly300-feed-pager','Automatic paging mechanism');for(const z of [-.16,0,.16]){this.cyl(pager,.04,.08,[.24,.65,z],'rubber','pager-wheel','z');this.box(pager,[.44,.024,.065],[.16,.59,z],'black',.004);}const fm=this.cyl(pager,.085,.20,[-.08,.48,.28],'dark','feeder-vfd-motor','x');fm.userData.rotor=true;fm.userData.rotorAxis='x';fm.userData.spinDirection=1;const dbl=this.group(g,'ly300-feed-double','Double-sheet sensing zone');for(const z of [-.13,.13]){const sensor=this.box(dbl,[.06,.14,.07],[.39,.88,z],'cyan',.012);sensor.userData.mechanismRole=z<0?'feed-presence-sensor-reference':'double-sheet-sensor-reference';}}
  buildTransport(){const g=this.group(this.root,'ly300-transport','Servo transport and positioning',[-.72,0,0],[-.22,.12,0]);const belt=this.group(g,'ly300-transport-belt','High-temperature PU conveyor belt');this.box(belt,[2.20,.035,.52],[0,.60,0],'black',.008);for(const x of [-.98,.98])this.cyl(belt,.07,.55,[x,.59,0],'steel','belt-pulley','z');const servo=this.group(g,'ly300-transport-servo','Servo transport drive');this.cyl(servo,.12,.34,[-.86,.36,.34],'dark','servo','x');const coupling=this.cyl(servo,.045,.10,[-.66,.36,.34],'amber','servo-coupling','x');coupling.userData.mechanismRole='servo-coupling';const enc=this.group(g,'ly300-transport-encoder','Encoder / positioning reference');this.cyl(enc,.045,.08,[-.68,.72,.29],'cyan','encoder','z');const trigger=this.group(g,'ly300-transport-trigger','Print trigger / position confirmation');for(const z of [-.14,.14]){const p=this.box(trigger,[.045,.070,.045],[-.38,.78,z],z<0?'cyan':'green',.004);p.userData.mechanismRole=z<0?'print-trigger-emitter':'print-trigger-receiver';}}
@@ -63,6 +63,82 @@ export class UpgLy300MachineTemplate{
    const arm=this.box(control,[.46,.06,.06],[-.28,1.18,-.45],'steel',.008);arm.rotation.z=-.20;arm.userData.silhouetteCritical=true;arm.userData.mechanismRole='hmi-support-arm-reference';
   }
  } 
+ refineExteriorV238(){
+  this.root.userData.visualRefinement='V238_UPG_LY300_MODEL_SERVICE_REPOLISH';
+  this.root.userData.repolishRevision='V238';
+  this.root.userData.visualEvidenceBoundary='UPG_LY300_OEM_MODEL_PROCESS_AND_PUBLISHED_ENVELOPE__INSTALLED_OPTION_PACKAGE_BOUNDED';
+  const g=this.group(this.root,'ly300-service-v238','LY300 service mounting and exterior repolish');
+  const tag=(m,role,critical=false)=>{if(!m)return m;m.userData.detail=true;m.userData.mechanismRole=role;m.userData.evidence='UPG_LY300_OEM_MODEL_REFERENCE';if(critical)m.userData.silhouetteCritical=true;return m;};
+
+  // Chassis leveling pads and floor interfaces make the 4.23 m machine sit physically on the floor.
+  for(const x of [-1.88,-1.10,-.28,.55,1.36,1.90])for(const z of [-.30,.30]){
+   const pad=tag(this.cyl(g,.045,.022,[x,.018,z],'dark','leveling-foot','y'),'ly300-leveling-foot-pad',true);
+   pad.userData.floorInterface=true;
+   tag(this.cyl(g,.009,.030,[x,.045,z],'steel','anchor-bolt','y'),'ly300-leveling-foot-bolt');
+  }
+
+  // Service doors: actual physical hinges and latches supplement the V232 seams.
+  const access=this.findNode('ly300-access');
+  if(access){
+   for(const x of [-.92,-.38,.35,.82,1.38]){
+    for(const y of [.42,.65])tag(this.cyl(access,.010,.060,[x-.17,y,-.421],'steel','service-hinge','y'),'ly300-service-door-hinge');
+    tag(this.box(access,[.024,.15,.020],[x+.16,.55,-.425],'silver',.004),'ly300-service-door-latch',true);
+   }
+   // Rear-top cable tray is a bounded service-routing reference, not a claim of exact harness routing.
+   const tray=tag(this.box(access,[3.15,.055,.12],[.10,1.22,.39],'steel',.008),'ly300-cable-tray-reference',true);
+   tray.userData.exactCableRoutingVerified=false;
+   for(const x of [-1.25,-.55,.15,.85,1.55])tag(this.box(access,[.035,.16,.035],[x,1.13,.39],'steel',.004),'ly300-cable-tray-support-reference');
+  }
+
+  // Printhead hood: latches / inspection bezel make the process head read as a serviceable industrial module.
+  const print=this.findNode('ly300-print');
+  if(print){
+   for(const z of [-.27,.27]){
+    tag(this.box(print,[.030,.16,.024],[.27,1.08,z],'silver',.004),'ly300-printhead-hood-latch',true);
+    tag(this.cyl(print,.010,.055,[-.27,1.08,z],'steel','service-hinge','y'),'ly300-printhead-hood-hinge');
+   }
+   const bezel=tag(this.box(print,[.46,.14,.016],[0,.88,-.336],'black',.012),'ly300-print-zone-window-bezel',true);
+   bezel.userData.installedPrintheadCountVerified=false;
+  }
+
+  // UV hood receives service latches and heat-rejection louvers while UV technology remains OEM-model grounded.
+  const uv=this.findNode('ly300-uv');
+  if(uv){
+   for(const z of [-.27,.27])tag(this.box(uv,[.030,.16,.024],[.18,1.00,z],'silver',.004),'ly300-uv-hood-latch',true);
+   for(let y=.88;y<=1.12;y+=.06)tag(this.box(uv,[.22,.010,.012],[-.16,y,.34],'steel',0),'ly300-uv-cooling-louvre');
+  }
+
+  // Camera bridge gets cable support / focus-adjust hardware visible on real inspection stations.
+  const camera=this.findNode('ly300-camera');
+  if(camera){
+   tag(this.box(camera,[.46,.040,.040],[.02,1.22,.31],'dark',.006),'ly300-camera-cable-support-reference',true);
+   for(const z of [-.14,.14])tag(this.cyl(camera,.018,.12,[.18,1.09,z],'steel','camera-adjuster','y'),'ly300-camera-adjustment-screw-reference');
+  }
+
+  // Operator panel: bezel, physical E-stop and selector collars.
+  const control=this.findNode('ly300-control-hmi');
+  if(control){
+   const bezel=tag(this.box(control,[.42,.32,.016],[-.08,1.04,-.617],'black',.020),'ly300-hmi-bezel',true);
+   bezel.userData.oemInterfaceReference=true;
+   const estop=tag(this.cyl(control,.045,.014,[.20,.90,-.620],'amber','estop-collar','z'),'ly300-estop-collar',true);
+   estop.userData.emergencyControl=true;
+   tag(this.cyl(control,.025,.016,[.29,.90,-.620],'dark','key-selector','z'),'ly300-key-selector-reference');
+  }
+
+  // Collection alignment gets hand-adjust handles; optional strapper remains explicitly unverified.
+  const collect=this.findNode('ly300-collect-align');
+  if(collect){
+   for(const z of [-.24,.24]){
+    const h=tag(this.cyl(collect,.035,.055,[.26,.70,z],'dark','adjustment-handwheel','z'),'ly300-collection-guide-adjuster');
+    h.userData.manualAdjustment=true;
+   }
+  }
+  const strap=this.findNode('ly300-collect-strap');
+  if(strap)strap.userData.installedStrapperVerified=false;
+
+  // Preserve published OEM envelope metadata after repolish.
+  this.root.userData.oemPublishedEnvelopeMm=[4230,720,1700];
+ }
  findNode(id){return id==='ly300-root'?this.root:this.nodes.find(n=>n.userData.nodeId===id)||null;}resolvePart(o){for(let p=o;p&&p!==this.root;p=p.parent)if(p.userData?.selectable)return p;return null;}resolveTaxonomyNode(id){return this.taxonomyById.get(id)?.meshRefs.map(ref=>this.findNode(ref)).find(Boolean)||null;}contains(a,b){for(let p=b;p;p=p.parent)if(p===a)return true;return false;}
  highlight(p){for(const m of this.meshes){m.material.emissive?.setHex(p&&this.contains(p,m)?0x17494a:0);m.material.emissiveIntensity=.3;}}highlightMany(ps=[]){for(const m of this.meshes){m.material.emissive?.setHex(ps.some(p=>this.contains(p,m))?0x17494a:0);m.material.emissiveIntensity=.3;}}ghost(on,except=null){this.ghosted=!!on;for(const m of this.meshes){const fade=on&&(!except||!this.contains(except,m)),natural=m.material.userData?.baseOpacity??1;m.material.transparent=fade||natural<1;m.material.opacity=fade?.14:natural;m.material.depthWrite=!fade;}}isolate(p,on=true){for(const n of this.nodes)n.visible=!on||!p||this.contains(p,n)||this.contains(n,p);}showOnly(ps=[],on=true){for(const n of this.nodes)n.visible=!on||!ps.length||ps.some(p=>n===p||this.contains(n,p));}
  setExteriorOpen(on=true){this.exteriorOpen=!!on;let count=0;for(const m of this.meshes)if(m.userData.exteriorCover){m.visible=!on;count++;}this.root.userData.interiorCutawayVisible=!!on;this.root.userData.exteriorHiddenCount=on?count:0;}explode(t,s=null){for(const n of this.nodes)n.position.copy(n.userData.rest);const targets=s?(s.children.filter(c=>c.userData.selectable).length?s.children.filter(c=>c.userData.selectable):[s]):this.parts;for(const n of targets)n.position.addScaledVector(n.userData.explode,THREE.MathUtils.clamp(+t||0,0,1));}setLow(on){for(const m of this.meshes)if(m.userData.detail&&!m.userData.silhouetteCritical)m.visible=!on;}reset(){const open=this.exteriorOpen;this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const n of this.nodes)n.quaternion.copy(n.userData.restQuaternion);this.setExteriorOpen(open);}dispose(){for(const g of this.geometries.values())g.dispose();for(const m of this.materials.values())m.dispose();}
