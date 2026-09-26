@@ -87,7 +87,7 @@ export class FactoryEngine {
     const mobileRender=matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse)').matches;
     this.container=container;this.onSelect=onSelect;this.onTaxonomySelect=null;this.view='factory';this.layout=null;this.low=mobileRender;this.mobileRender=mobileRender;this.renderFaulted=false;this.labels=true;this.isolated=false;this.partLabelEntries=[];
     {const params=new URLSearchParams(location.search),requested=normalizeFoundationMachineKey(params.get('machine')||params.get('asset'));this.requestedMachineKey=requested;this.machineKey=null;}
-    this.renderer=new THREE.WebGLRenderer({antialias:!mobileRender,alpha:false,powerPreference:mobileRender?'low-power':'high-performance',stencil:false,preserveDrawingBuffer:false});
+    this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance',stencil:false,preserveDrawingBuffer:false});
     this.capabilities={mobile:mobileRender,memory:navigator.deviceMemory||4,cores:navigator.hardwareConcurrency||4,maxTextureSize:this.renderer.capabilities.maxTextureSize};
     this.requestedQuality='auto';this.qualityProfile=resolveProfile('auto',this.capabilities);
     this.adaptiveQuality=new AdaptiveQuality(()=>{if(this.requestedQuality==='auto'&&this.qualityProfile!=='hemat')this.applyQualityProfile('hemat');});
@@ -427,7 +427,7 @@ export class FactoryEngine {
     this.template.setLow(this.low);this.resize();return this.qualityProfile;
   }
   syncVisualSystems(){
-    const machineView=this.view==='machine'&&!this.mobileRender;
+    const machineView=this.view==='machine';
     void this.environment.setEnabled(machineView&&['tinggi','cinematic'].includes(this.qualityProfile));
     void this.postProcessing.setEnabled(machineView&&this.qualityProfile==='cinematic');
   }

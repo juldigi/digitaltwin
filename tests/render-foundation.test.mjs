@@ -26,10 +26,12 @@ test('camera director frames actual bounds and settles without passing through t
 });
 
 test('quality choices use device capabilities and keep one renderer',()=>{
- assert.equal(recommendedProfile({mobile:true,memory:8,cores:8,maxTextureSize:8192}),'hemat');
+ assert.equal(recommendedProfile({mobile:true,memory:8,cores:8,maxTextureSize:8192}),'seimbang');
+ assert.equal(recommendedProfile({mobile:true,memory:4,cores:6,maxTextureSize:8192}),'seimbang');
+ assert.equal(recommendedProfile({mobile:true,memory:2,cores:6,maxTextureSize:8192}),'hemat');
  assert.equal(recommendedProfile({mobile:false,memory:8,cores:8,maxTextureSize:8192}),'tinggi');
  assert.equal(resolveProfile('cinematic',{maxTextureSize:2048}),'hemat');
- assert.equal(resolveProfile('cinematic',{mobile:true,maxTextureSize:8192}),'seimbang');
+ assert.equal(resolveProfile('cinematic',{mobile:true,maxTextureSize:8192}),'cinematic');
  const renderer={shadowMap:{},capabilities:{},setPixelRatio(value){this.pixelRatio=value}};
  const shadowLight={shadow:{mapSize:{x:1024,set(x,y){this.x=x;this.y=y}},map:null}};
  configureRenderer(renderer,{profile:'cinematic',devicePixelRatio:3,shadowLight});

@@ -36,7 +36,7 @@ test('V215 mobile drawer owns a real fixed backdrop and leaves bottom navigation
 
 test('V215 renderer starts mobile in low-memory mode and degrades to 2D without killing navigation',()=>{
  assert.match(engine,/const mobileRender=matchMedia\('\(max-width:767px\)'\)\.matches\|\|matchMedia\('\(pointer:coarse\)'\)\.matches/);
- assert.match(engine,/antialias:!mobileRender/);
+ assert.match(engine,/antialias:true/);
  assert.match(engine,/configureRenderer\(this\.renderer,\{profile:this\.qualityProfile,devicePixelRatio/);
  assert.match(engine,/configureRenderer\(this\.renderer,\{profile:this\.qualityProfile,devicePixelRatio/);
  assert.match(engine,/webglcontextlost/);

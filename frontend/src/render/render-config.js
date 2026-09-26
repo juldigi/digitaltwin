@@ -9,8 +9,8 @@ export const RENDER_PROFILES=Object.freeze({
 });
 
 export function recommendedProfile({mobile=false,memory=4,cores=4,maxTextureSize=4096}={}){
- if(mobile||memory<=2||cores<=2||maxTextureSize<4096)return 'hemat';
- if(memory>=8&&cores>=8&&maxTextureSize>=8192)return 'tinggi';
+ if(memory<=2||cores<=2||maxTextureSize<4096)return 'hemat';
+ if(memory>=8&&cores>=8&&maxTextureSize>=8192)return mobile?'seimbang':'tinggi';
  return 'seimbang';
 }
 
@@ -18,7 +18,6 @@ export function resolveProfile(requested,capabilities={}){
  const name=requested==='auto'||!RENDER_PROFILES[requested]?recommendedProfile(capabilities):requested;
  // A coarse pointer is a hint, but available GPU texture limits are authoritative.
  if(capabilities.maxTextureSize&&capabilities.maxTextureSize<4096)return 'hemat';
- if(capabilities.mobile&&['tinggi','cinematic'].includes(name))return 'seimbang';
  return name;
 }
 
