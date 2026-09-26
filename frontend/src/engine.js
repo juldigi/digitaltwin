@@ -227,7 +227,7 @@ export class FactoryEngine {
   setPrintingSimulationInkFlowVisible(on){return this.simulation?.setInkFlowVisible(on);}
   getPrintingSimulationState(){return this.simulation?.state()||{available:false,blocked:true,blockedReason:'Simulasi belum tersedia untuk aset ini.',active:false,running:false,paused:false,speed:1,stage:null,completed:0,progress:0,sheetsVisible:0,rotorCount:0};}
   isPrintingSimulationActive(){return !!this.simulation?.active;}
-  setView(view,state){if(view!=='machine'&&this.simulation?.active)this.simulation.stop();this.view=view;this.syncVisualSystems();if(!this.sceneEditing)this.gizmo.detach();this.template.reset();this.clearPartLabels();this.isolated=false;this.machine.position.set(0,0,0);this.machine.rotation.set(0,0,0);this.machine.scale.setScalar(1);this.studio.visible=view==='machine';this.factory.visible=view==='factory';this.shadows[view==='machine'?'focus':'reset'](this.machine);if(this.factorySelectionHelper)this.factorySelectionHelper.visible=view==='factory';
+  setView(view,state){if(view!=='machine'&&this.simulation?.active)this.simulation.stop();this.view=view;this.syncVisualSystems();if(!this.sceneEditing)this.gizmo.detach();this.template.reset();this.clearPartLabels();this.isolated=false;this.machine.position.set(0,0,0);this.machine.rotation.set(0,0,0);this.machine.scale.setScalar(1);this.studio.visible=view==='machine';this.factory.visible=view==='factory';if(view==='machine')this.shadows.focusBounds(this.machineFocusBounds()||new THREE.Box3().setFromObject(this.machine));else this.shadows.reset();if(this.factorySelectionHelper)this.factorySelectionHelper.visible=view==='factory';
     if(view==='factory')this.applyPlacement(state,this.layout||state.layout);else{this.machine.visible=true;this.applySceneOverrides(state?.sceneOverrides||this.sceneOverrides||{});}
     this.fit(view==='factory'?(this.currentFactoryTarget()||this.factory):this.machine);
   }
@@ -470,7 +470,7 @@ export class FactoryEngine {
     this.machine=this.template.root;this.scene.add(this.machine);
     this.simulation=nextSimulation;
     const label=this.renderer.domElement;label.setAttribute('aria-label',`Model 3D ${this.machine.name||requested}. Gunakan tombol sudut pandang untuk navigasi.`);
-    this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);this.isolated=false;this.view='machine';this.syncVisualSystems();this.machine.visible=true;this.applySceneOverrides(this.sceneOverrides||{});this.factory.visible=false;this.template.setLow(this.low);this.shadows.focus(this.template.findNode?.('compressor-package-cabinet')||this.machine);this.fit(this.machine);this.resize();return true;
+    this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);this.isolated=false;this.view='machine';this.syncVisualSystems();this.machine.visible=true;this.applySceneOverrides(this.sceneOverrides||{});this.factory.visible=false;this.template.setLow(this.low);this.shadows.focusBounds(this.machineFocusBounds()||new THREE.Box3().setFromObject(this.machine));this.fit(this.machine);this.resize();return true;
   }
   dispose(){cancelAnimationFrame(this.frame);this.clearPartLabels();this.clearFactorySelection();this.resizeObserver.disconnect();this.controls.dispose();this.gizmo.dispose();this.simulation?.dispose();this.template.dispose();this.clearFactory();this.studio.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});this.environment.dispose();this.postProcessing.dispose();this.lighting.dispose();this.renderer.dispose();}
 }
