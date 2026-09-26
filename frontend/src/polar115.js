@@ -227,7 +227,7 @@ export class Polar115MachineTemplate{
    tag(this.box(g,[.012,.62,.020],[x,1.25,.145],'bodyDark',.001),'polar-head-panel-seam');
    tag(this.box(g,[.026,.18,.022],[x+.10,1.28,.128],'dark',.004),'polar-head-service-handle');
   }
-  const motorRing=tag(this.cyl(g,.185,.018,[1.430,.76,.78],'bodyDark','x'),'polar-belt-housing-window-bezel',true);
+  const motorRing=tag(this.mesh(g,new THREE.TorusGeometry(.170,.018,10,28),'bodyDark',[1.430,.76,.78],[0,Math.PI/2,0]),'polar-belt-housing-window-bezel',true);
   motorRing.userData.legacyInspectionWindow=true;
 
   // Physical EM-MON console bezel / keypad surround; keep square display identity.
