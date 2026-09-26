@@ -119,8 +119,20 @@ export class FactoryEngine {
   }
   resize(){const w=this.container.clientWidth,h=this.container.clientHeight;if(!w||!h)return;this.renderer.setSize(w,h);this.postProcessing.resize(w,h);this.camera.aspect=w/h;this.camera.updateProjectionMatrix();}
   framingProfile(object=this.machine){const portrait=this.container.clientWidth<=767&&this.container.clientHeight>this.container.clientWidth;const machine=object===this.machine&&this.view==='machine';return {portrait,machine,padding:portrait&&machine?1.06:1.18,targetLift:portrait&&machine?-.08:0};}
+  machineFocusBounds(){
+    const family=this.template?.cfg?.family;if(!['compressor','ahu'].includes(family))return null;
+    const box=new THREE.Box3();this.machine.updateMatrixWorld(true);
+    this.machine.traverse(object=>{
+      if(!object.isMesh||!this.isObjectVisible(object))return;
+      for(let node=object;node&&node!==this.machine;node=node.parent){
+        if(node.userData?.visualizationOnly||node.userData?.flowReference)return;
+      }
+      box.expandByObject(object);
+    });
+    return box.isEmpty()?null:box;
+  }
   fit(object=this.machine,mode='iso',animate=true){
-    object.updateWorldMatrix(true,true);const box=new THREE.Box3().setFromObject(object);if(box.isEmpty())return;
+    object.updateWorldMatrix(true,true);const box=object===this.machine&&this.view==='machine'?(this.machineFocusBounds()||new THREE.Box3().setFromObject(object)):new THREE.Box3().setFromObject(object);if(box.isEmpty())return;
     const profile=this.framingProfile(object);
     const direction=mode==='operator'?new THREE.Vector3(0,.38,-1).applyQuaternion(object.getWorldQuaternion(new THREE.Quaternion())).setY(.38):null;
     this.transition=applyCameraFrame(this.camera,this.controls,cameraFrame(this.camera,box,{mode,direction,...profile,minDistance:this.controls.minDistance,maxDistance:this.controls.maxDistance}),{animate,reduceMotion:matchMedia('(prefers-reduced-motion: reduce)').matches});
@@ -450,7 +462,7 @@ export class FactoryEngine {
     const {createPolishedMachineTemplate,createMachineSimulation}=await import('./machine-runtime.js');
     const nextTemplate=createPolishedMachineTemplate(requested);
     let nextSimulation;
-    try{nextSimulation=createMachineSimulation(requested,nextTemplate.root,nextTemplate);}
+    try{nextSimulation=createMachineSimulation(requested,nextTemplate.root,nextTemplate);if(this.mobileRender&&['compressor','ahu'].includes(nextTemplate.cfg?.family))nextSimulation.setPathVisible(false);}
     catch(error){nextTemplate.dispose?.();throw error;}
     this.gizmo.detach();this.clearPartLabels();this.simulation?.dispose();this.template?.dispose();if(this.machine)this.scene.remove(this.machine);
     this.machineKey=requested;
@@ -458,7 +470,7 @@ export class FactoryEngine {
     this.machine=this.template.root;this.scene.add(this.machine);
     this.simulation=nextSimulation;
     const label=this.renderer.domElement;label.setAttribute('aria-label',`Model 3D ${this.machine.name||requested}. Gunakan tombol sudut pandang untuk navigasi.`);
-    this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);this.isolated=false;this.view='machine';this.syncVisualSystems();this.machine.visible=true;this.applySceneOverrides(this.sceneOverrides||{});this.factory.visible=false;this.template.setLow(this.low);this.shadows.focus(this.machine);this.fit(this.machine);this.resize();return true;
+    this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);this.isolated=false;this.view='machine';this.syncVisualSystems();this.machine.visible=true;this.applySceneOverrides(this.sceneOverrides||{});this.factory.visible=false;this.template.setLow(this.low);this.shadows.focus(this.template.findNode?.('compressor-package-cabinet')||this.machine);this.fit(this.machine);this.resize();return true;
   }
   dispose(){cancelAnimationFrame(this.frame);this.clearPartLabels();this.clearFactorySelection();this.resizeObserver.disconnect();this.controls.dispose();this.gizmo.dispose();this.simulation?.dispose();this.template.dispose();this.clearFactory();this.studio.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});this.environment.dispose();this.postProcessing.dispose();this.lighting.dispose();this.renderer.dispose();}
 }
