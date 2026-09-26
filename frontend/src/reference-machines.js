@@ -24,6 +24,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.enrichV121();
   this.refineV231VisualParity();
   this.refineV232PriorityPolish();
+  this.refineV236MechanicalRealism();
   for(const n of this.nodes){
    if(!n.userData.rest)n.userData.rest=n.position.clone();
    if(!n.userData.restQuaternion)n.userData.restQuaternion=n.quaternion.clone();
@@ -151,6 +152,158 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
     if(/gravure-main-plinth|gravure-end-cabinet|gravure-process-bay|gravure-operator-platform|platform-handrail/.test(role)){m.userData.silhouetteCritical=true;retained++;}
   }
   this.root.userData.homeSilhouetteCriticalCount=(this.root.userData.homeSilhouetteCriticalCount||0)+retained;
+ }
+ refineV236MechanicalRealism(){
+  const no=this.cfg.machine.no;
+  if(no===4)return;
+  this.root.userData.mechanicalRealismRevision='V236';
+  this.root.userData.mechanicalRealismPolicy='FAMILY_OR_MODEL_EVIDENCE_ONLY__NO_UNVERIFIED_INSTALLED_OPTION_ASSERTION';
+  const mark=(mesh,role,evidence='FAMILY_VISUAL_REFERENCE',silhouette=false)=>{
+   if(!mesh)return mesh;
+   this.tag(mesh,role,evidence);
+   if(silhouette)mesh.userData.silhouetteCritical=true;
+   return mesh;
+  };
+  const serviceDoor=(g,x,y,z,w,h,kind='body',role='service-door-reference')=>{
+   const panel=this.cover(this.box(g,[w,h,.032],[x,y,z],kind,.018));mark(panel,role,'FAMILY_SERVICE_REFERENCE',true);
+   const seam=this.box(g,[w*.82,.010,.012],[x,y,z+(z<0?-.020:.020)],'dark',.001);mark(seam,role+'-seam','FAMILY_SERVICE_REFERENCE');
+   const handle=this.box(g,[.026,.18,.018],[x+w*.30,y,z+(z<0?-.030:.030)],'steel',.004);mark(handle,role+'-handle','FAMILY_SERVICE_REFERENCE');
+   return panel;
+  };
+  const foot=(g,x,z)=>{
+   const stem=this.cyl(g,.032,.16,[x,.10,z],'steel','y');mark(stem,'leveling-foot-stem','FAMILY_SERVICE_REFERENCE');
+   const pad=this.cyl(g,.075,.025,[x,.022,z],'dark','y');mark(pad,'leveling-foot-pad','FAMILY_SERVICE_REFERENCE',true);
+  };
+
+  if(no===17){
+   this.root.userData.visualRefinement='V236_FGM2_OPEN_FRAME_SERVICE_REALISM';
+   const g=this.group(this.root,'fgm2-service-v236','FGM-2 service-access and folding-rail realism');
+   g.userData.installedIdentityVerified=false;
+   for(const z of [-.79,.79]){
+    const rail=this.box(g,[10.25,.055,.055],[0,1.16,z],'steel',.008);mark(rail,'folder-gluer-longitudinal-service-rail','MULTI_VENDOR_FOLDER_GLUER_PROCESS',true);
+    for(let x=-4.8;x<=4.8;x+=1.20){
+     const post=this.box(g,[.055,.48,.055],[x,.92,z],'steel',.008);mark(post,'folder-gluer-service-rail-post');
+    }
+   }
+   for(const x of [-4.35,-2.70,-1.00,.75,2.45,4.15]){
+    const bridge=this.box(g,[.055,.50,1.62],[x,1.06,0],'steel',.008);mark(bridge,'folder-gluer-section-bridge-reference','MULTI_VENDOR_FOLDER_GLUER_PROCESS',true);
+    for(const z of [-.66,.66]){
+     const wheel=this.cyl(g,.070,.030,[x,.86,z],'dark','z');mark(wheel,'folder-gluer-adjustment-handwheel-reference','FOLDER_GLUER_SERVICE_REFERENCE');
+     const shaft=this.cyl(g,.016,.20,[x,.98,z],'steel','y');mark(shaft,'folder-gluer-adjustment-screw-reference','FOLDER_GLUER_SERVICE_REFERENCE');
+    }
+   }
+   serviceDoor(g,4.62,.72,-.90,.72,.62,'body','folder-gluer-control-service-door');
+   serviceDoor(g,-4.72,.64,-.90,.58,.52,'body','folder-gluer-feeder-service-door');
+   for(const x of [-4.85,4.85])for(const z of [-.68,.68])foot(g,x,z);
+  }else if(no===21){
+   this.root.userData.visualRefinement='V236_QF100CS_HYDRAULIC_BLANKER_SERVICE_REALISM';
+   const g=this.group(this.root,'qf100-service-v236','QF/LQF family hydraulic blanker exterior service realism');
+   g.userData.exactModelEquivalenceVerified=false;
+   serviceDoor(g,-1.63,.84,-.92,.62,.92,'body','blanker-hydraulic-service-door');
+   serviceDoor(g,1.58,.84,-.92,.60,.92,'body','blanker-electrical-service-door');
+   const tank=this.cover(this.box(g,[.74,.46,.56],[-1.62,.36,.50],'dark',.030));mark(tank,'blanker-hydraulic-reservoir-family-reference','QF_LQF_FAMILY_PRIMARY',true);
+   const pump=this.cyl(g,.12,.30,[-1.55,.62,.50],'steel','x');mark(pump,'blanker-hydraulic-pump-reference','QF_LQF_FAMILY_PRIMARY');
+   const cable=this.group(g,'qf-cable-chain-v236','Servo cable-carrier reference');
+   for(let i=0;i<18;i++){const link=this.box(cable,[.08,.045,.18],[-.95+i*.10,.70,.62],'dark',.006);mark(link,'blanker-servo-cable-carrier-link','QF_LQF_FAMILY_PRIMARY');}
+   const estopPost=this.box(g,[.09,.78,.09],[1.93,.55,-1.02],'steel',.012);mark(estopPost,'blanker-operator-post-reference','FAMILY_CONTROL_REFERENCE',true);
+   const estop=this.cyl(g,.055,.055,[1.93,.96,-1.02],'red','y');mark(estop,'blanker-emergency-stop-reference','FAMILY_CONTROL_REFERENCE');
+   for(const x of [-1.82,1.82])for(const z of [-.72,.72])foot(g,x,z);
+  }else if(no===23){
+   this.root.userData.visualRefinement='V236_COLLATOR_TOWER_SERVICE_REALISM';
+   const g=this.group(this.root,'collator-service-v236','Vertical suction collator exterior service realism');
+   g.userData.referenceBinCount=10;g.userData.installedBinCountVerified=false;
+   for(let i=0;i<10;i++){
+    const y=.40+i*.155;
+    const lip=this.box(g,[1.22,.045,.08],[-.18,y,-.58],'steel',.006);mark(lip,'collator-bin-front-lip-reference','MULTI_VENDOR_COLLATOR_REFERENCE',true);
+    const stop=this.box(g,[.035,.10,.74],[-.70,y+.02,0],'dark',.004);mark(stop,'collator-bin-side-stop-reference','MULTI_VENDOR_COLLATOR_REFERENCE');
+   }
+   const manifold=this.cyl(g,.055,1.48,[.62,1.08,.62],'dark','y');mark(manifold,'collator-vacuum-manifold-reference','MULTI_VENDOR_COLLATOR_REFERENCE',true);
+   for(let i=0;i<10;i++){const hose=this.cyl(g,.012,.38,[.53,.42+i*.155,.48],'dark','x');mark(hose,'collator-vacuum-hose-reference','MULTI_VENDOR_COLLATOR_REFERENCE');}
+   const arm=this.box(g,[.42,.045,.045],[.58,1.72,-.72],'steel',.006);arm.rotation.z=-.18;mark(arm,'collator-hmi-swing-arm-reference','CONTROL_FAMILY_REFERENCE',true);
+   const hmi=this.cover(this.box(g,[.34,.27,.045],[.77,1.78,-.75],'dark',.018));mark(hmi,'collator-hmi-reference','CONTROL_FAMILY_REFERENCE',true);
+   const tray=this.box(g,[1.08,.08,.78],[.28,.28,-.70],'dark',.018);mark(tray,'collator-set-delivery-tray-reference','MULTI_VENDOR_COLLATOR_REFERENCE',true);
+   for(const z of [-.32,.32]){const guide=this.box(g,[1.00,.16,.035],[.28,.42,-.70+z],'steel',.005);mark(guide,'collator-delivery-side-guide-reference','MULTI_VENDOR_COLLATOR_REFERENCE');}
+  }else if(no===25||no===26){
+   this.root.userData.visualRefinement='V236_SUPRASETTER_SERVICE_PANEL_REALISM';
+   const g=this.group(this.root,`ctp-service-v236-${no}`,'Suprasetter family enclosure service realism');
+   g.userData.exactModelVerified=false;
+   for(const z of [-.83,.83]){
+    serviceDoor(g,-.42,.82,z,1.10,.88,'body','ctp-main-service-door-reference');
+    for(let y=.48;y<=1.18;y+=.10){const vent=this.box(g,[.52,.020,.035],[.70,y,z+(z<0?-.025:.025)],'dark',.002);mark(vent,'ctp-cooling-vent-bank-reference','SUPRASETTER_FAMILY_VISUAL');}
+   }
+   const entryBezel=this.cover(this.box(g,[.74,.12,.08],[-1.08,.70,-.86],'dark',.012));mark(entryBezel,'ctp-entry-slot-bezel-reference','SUPRASETTER_FAMILY_VISUAL',true);
+   const outputBezel=this.cover(this.box(g,[.70,.12,.08],[1.02,.68,-.86],'dark',.012));mark(outputBezel,'ctp-output-slot-bezel-reference','SUPRASETTER_FAMILY_VISUAL',true);
+   const post=this.box(g,[.08,.72,.08],[-1.18,.88,-1.02],'dark',.010);mark(post,'ctp-hmi-support-post-reference','SUPRASETTER_FAMILY_VISUAL',true);
+   const hmi=this.cover(this.box(g,[.32,.24,.04],[-1.18,1.28,-1.02],'dark',.014));mark(hmi,'ctp-hmi-bezel-reference','SUPRASETTER_FAMILY_VISUAL',true);
+   for(const x of [-1.02,1.02])for(const z of [-.62,.62])foot(g,x,z);
+  }else if(no===27){
+   this.root.userData.visualRefinement='V236_SCREEN_IMAGESETTER_SERVICE_REALISM';
+   const g=this.group(this.root,'ctf-service-v236','SCREEN imagesetter enclosure service realism');
+   g.userData.exactScreenModelVerified=false;
+   serviceDoor(g,-.55,.77,-.63,.72,.72,'body','ctf-media-cassette-service-door');
+   serviceDoor(g,.18,.83,-.63,.62,.82,'body','ctf-scanner-service-door');
+   serviceDoor(g,.76,.66,-.63,.42,.54,'body','ctf-output-service-door');
+   for(let y=.48;y<=1.05;y+=.09){const vent=this.box(g,[.38,.018,.030],[.76,y,.62],'dark',.002);mark(vent,'ctf-cooling-vent-reference','SCREEN_FTR_KATANA_FAMILY');}
+   const slot=this.cover(this.box(g,[.52,.09,.060],[.78,.72,-.66],'dark',.010));mark(slot,'ctf-media-output-slot-bezel','SCREEN_FTR_KATANA_FAMILY',true);
+   const tower=this.box(g,[.035,.40,.035],[-.92,1.36,-.66],'steel',.004);mark(tower,'ctf-status-tower-post-reference','CONTROL_FAMILY_REFERENCE');
+   for(const [dy,k] of [[.18,'green'],[.10,'yellow'],[.02,'red']]){const lamp=this.cyl(g,.035,.05,[-.92,1.36+dy,-.66],k,'y');mark(lamp,'ctf-status-lamp-reference','CONTROL_FAMILY_REFERENCE');}
+   for(const x of [-.90,.90])for(const z of [-.46,.46])foot(g,x,z);
+  }else if(no===28){
+   this.root.userData.visualRefinement='V236_ZUND_FLATBED_SERVICE_REALISM';
+   const g=this.group(this.root,'zund-service-v236','Zünd modular flatbed service realism');
+   g.userData.exactModelVerified=false;
+   const rail1=this.box(g,[5.25,.055,.055],[0,.73,-1.18],'steel',.006);mark(rail1,'zund-x-linear-guide-reference','ZUND_G3_S3_FAMILY',true);
+   const rail2=this.box(g,[5.25,.055,.055],[0,.73,1.18],'steel',.006);mark(rail2,'zund-x-linear-guide-reference','ZUND_G3_S3_FAMILY',true);
+   const chain=this.group(g,'zund-cable-chain-v236','Travelling cable-chain reference');
+   for(let i=0;i<34;i++){const link=this.box(chain,[.10,.035,.12],[-2.35+i*.14,.78,1.34],'dark',.004);mark(link,'zund-cable-chain-link-reference','ZUND_G3_S3_FAMILY');}
+   const console=this.cover(this.box(g,[.48,.88,.42],[2.45,.80,-1.48],'body',.040));mark(console,'zund-operator-console-reference','ZUND_PLATFORM_FAMILY',true);
+   const screen=this.cover(this.box(g,[.34,.24,.025],[2.45,1.04,-1.70],'glass',.014));mark(screen,'zund-control-display-reference','ZUND_PLATFORM_FAMILY',true);
+   for(let x=-2.45;x<=2.45;x+=.70){const zone=this.box(g,[.55,.006,2.18],[x,.69,0],'dark',0);mark(zone,'zund-vacuum-zone-seam-reference','ZUND_PLATFORM_FAMILY');}
+   for(const x of [-2.55,2.55])for(const z of [-1.10,1.10])foot(g,x,z);
+  }else if(no>=29&&no<=35){
+   const atlas=[29,30,35].includes(no),kaeser=[31,32,34].includes(no),swan=no===33;
+   this.root.userData.visualRefinement=atlas?'V236_ATLAS_GA_G_EXTERIOR_SERVICE_REALISM':kaeser?'V236_KAESER_SIGMA_EXTERIOR_SERVICE_REALISM':'V236_SWAN_SCREW_EXTERIOR_SERVICE_REALISM';
+   const g=this.group(this.root,`compressor-service-v236-${no}`,'Rotary screw compressor exterior service realism');
+   g.userData.exactModelVerified=false;
+   const w=2.42;
+   const accent=atlas?'blue':kaeser?'yellow':'blue';
+   serviceDoor(g,-.52,.88,-.84,.92,1.02,'body','compressor-main-service-door');
+   serviceDoor(g,.52,.88,-.84,.84,1.02,'body','compressor-control-service-door');
+   for(let y=.48;y<=1.28;y+=.10){const l=this.box(g,[.64,.022,.038],[-.58,y,.84],'dark',.002);mark(l,'compressor-intake-louvre-reference','BRAND_FAMILY_VISUAL');}
+   for(let x=-.45;x<=.45;x+=.11){const l=this.box(g,[.045,.022,.60],[x,1.66,.08],'dark',.002);mark(l,'compressor-top-exhaust-grille-reference','BRAND_FAMILY_VISUAL');}
+   const stripe=this.cover(this.box(g,[.08,1.20,.025],[.16,.92,-.87],accent,.006));mark(stripe,'compressor-brand-family-accent-reference','BRAND_FAMILY_VISUAL',true);
+   const ctrl=this.cover(this.box(g,[.34,.28,.030],[.70,1.13,-.88],'dark',.012));mark(ctrl,'compressor-controller-bezel-reference','BRAND_FAMILY_VISUAL',true);
+   const display=this.cover(this.box(g,[.23,.13,.014],[.70,1.16,-.90],'glass',.008));mark(display,'compressor-controller-display-reference','BRAND_FAMILY_VISUAL');
+   for(const x of [-w*.40,w*.40])for(const z of [-.60,.60])foot(g,x,z);
+   this.root.userData.brandFamilyVisual=atlas?'ATLAS_COPCO_GA_G':kaeser?'KAESER_SIGMA':swan?'SWAN_TS_AD_TMV':'ROTARY_SCREW';
+  }else if(no>=36&&no<=41){
+   const sansin=no===40;
+   this.root.userData.visualRefinement=sansin?'V236_SANSIN_NES_AHU_SERVICE_REALISM':'V236_DOUBLE_SKIN_AHU_SERVICE_REALISM';
+   const g=this.group(this.root,`ahu-service-v236-${no}`,'AHU sectional exterior service realism');
+   g.userData.sectionOrderVerified=false;
+   const length=sansin?4.72:6.72;
+   const sectionCount=sansin?4:7;
+   const pitch=length/sectionCount;
+   for(let i=0;i<sectionCount;i++){
+    const x=-length/2+pitch*(i+.5);
+    const seam=this.box(g,[.020,1.72,.020],[x+pitch*.47,1.02,-1.02],'dark',.001);mark(seam,'ahu-panel-seam-reference','DOUBLE_SKIN_AHU_FAMILY');
+    const handle=this.box(g,[.025,.20,.025],[x+pitch*.20,1.02,-1.04],'dark',.004);mark(handle,'ahu-service-door-handle-reference','DOUBLE_SKIN_AHU_FAMILY');
+    for(const dy of [-.42,.42]){const hinge=this.box(g,[.035,.10,.025],[x-pitch*.33,1.02+dy,-1.04],'steel',.004);mark(hinge,'ahu-service-door-hinge-reference','DOUBLE_SKIN_AHU_FAMILY');}
+   }
+   for(const x of [-length/2+.18,length/2-.18])for(const z of [-.84,.84]){const rail=this.box(g,[.18,.16,.18],[x,.10,z],'dark',.010);mark(rail,'ahu-base-rail-foot-reference','DOUBLE_SKIN_AHU_FAMILY',true);}
+   const drain=this.cyl(g,.025,.48,[0,.18,-1.18],'steel','x');mark(drain,'ahu-condensate-drain-trap-reference','AHU_FUNCTIONAL_REFERENCE',true);
+   if(sansin){
+    const outdoor=this.cover(this.box(g,[1.30,1.35,.72],[2.62,.82,.16],'body',.050));mark(outdoor,'sansin-outdoor-module-family-reference','SANSIN_NES_YZKJ_FAMILY',true);outdoor.userData.installedArrangementVerified=false;
+    for(const y of [.54,.80,1.06]){const grille=this.box(g,[.90,.025,.50],[2.62,y,-.22],'dark',.003);mark(grille,'sansin-outdoor-coil-grille-reference','SANSIN_NES_YZKJ_FAMILY');}
+   }else{
+    const window=this.cover(this.box(g,[.34,.34,.025],[length*.18,1.18,-1.045],'glass',.018));mark(window,'ahu-service-observation-window-reference','DOUBLE_SKIN_AHU_FAMILY');
+   }
+  }
+  let retained=0;
+  for(const mesh of this.meshes){
+   if(mesh.userData?.silhouetteCritical&&mesh.userData?.detail)retained++;
+  }
+  this.root.userData.homeSilhouetteCriticalCount=Math.max(this.root.userData.homeSilhouetteCriticalCount||0,retained);
  }
  enrichGravure(){
   const f=this.activeGroup(1),reg=this.activeGroup(2),ink=this.activeGroup(3),print=this.activeGroup(4),imp=this.activeGroup(5),dryer=this.activeGroup(6),delivery=this.activeGroup(7),drive=this.activeGroup(8);
