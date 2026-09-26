@@ -136,7 +136,7 @@ test('V236 reference-machine full versus low-LOD silhouettes remain locked',()=>
 });
 
 test('V236 refreshes shell bytes without rotating the V222 public cache contract',()=>{
- assert.match(sw,/V236 mechanical realism pass 3/);
+ assert.match(sw,/shell recache without rotating public query identifiers/);
  assert.match(sw,/factory-digital-twin-v222-overlay-state-ssot-20260925/);
  assert.match(sw,/const RELEASE='222'/);
 });
