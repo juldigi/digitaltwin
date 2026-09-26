@@ -8,7 +8,7 @@ const engine=fs.readFileSync(new URL('../frontend/src/engine.js',import.meta.url
 
 test('mobile factory detail binds every routing action through the collection selector',()=>{
  assert.doesNotMatch(app,/data-routing-focus/);
- assert.match(app,/Scope berbasis bukti/);
+ assert.match(app,/Cakupan model dan sumber/);
 });
 
 test('user toast never exposes raw JavaScript exception text',()=>{

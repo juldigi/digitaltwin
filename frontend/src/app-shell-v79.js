@@ -351,7 +351,7 @@ q('#mode-3d')?.addEventListener('click',()=>{const next=setViewMode('3d');applyV
 
 const GROUPS=PHASE1_FOUNDATION?[
  ['Bangunan',[['building','Lantai & isi ruangan'],['walls','Dinding'],['furniture','Furnitur'],['roof','Atap']]],
- ['Posisi aset',[['machines','Placeholder aset'],['labels','Label'],['unidentified','Area belum teridentifikasi']]],
+ ['Posisi aset',[['machines','Penanda posisi aset'],['labels','Label'],['unidentified','Area belum teridentifikasi']]],
  ['Sumber',[['reference','Garis denah sumber']]]
 ]:[
  ['Bangunan',[['building','Lantai & isi ruangan'],['walls','Dinding'],['furniture','Furnitur'],['roof','Atap'],['landscape','Area luar']]],
@@ -394,7 +394,7 @@ function ensureLayerManager(){
  const panel=document.createElement('section');panel.id='layer-manager';panel.className='canonical-layer-manager';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-labelledby','layer-manager-title');panel.setAttribute('tabindex','-1');
  const layerControls=GROUPS.map(([title,items])=>`<div class="canonical-layer-group"><h4>${title}</h4>${items.map(([key,label])=>`<label><span>${label}</span><input type="checkbox" data-canonical-layer="${key}"></label>`).join('')}</div>`).join('');
  panel.innerHTML=`<header><div><small>TAMPILAN</small><h3 id="layer-manager-title">Pengaturan Tampilan</h3></div><button type="button" data-layer-close class="icon-btn" aria-label="Tutup">${icon('close')}</button></header>
- <p id="layer-unavailable-note" role="status" hidden>Layer 3D memerlukan WebGL. Denah 2D tetap tersedia.</p>
+ <p id="layer-unavailable-note" role="status" hidden>Lapisan 3D memerlukan WebGL. Denah 2D tetap tersedia.</p>
  <div class="canonical-layer-group"><h4>Kualitas render 3D</h4><label><span>Pilih kualitas</span><select id="layer-render-quality" aria-label="Kualitas render 3D"><option value="auto">Otomatis</option><option value="hemat">Hemat</option><option value="seimbang">Seimbang</option><option value="tinggi">Tinggi</option><option value="engineering">Teknis</option><option value="cinematic">Sinematik</option></select></label><p>Kualitas tinggi menampilkan detail lebih tajam. Otomatis menyesuaikan kemampuan perangkat.</p></div>
  ${layerControls}
  <div class="canonical-layer-group unavailable"><h4>Tentang tampilan</h4><p>Pengaturan ini hanya mengubah apa yang terlihat di layar. Data sumber dan posisi objek tidak berubah.</p></div>`;
@@ -409,7 +409,7 @@ function ensureLayerManager(){
 function syncLayerControls(){
  const state=getState(),unavailable=Boolean(q('#mode-3d')?.disabled);
  const note=q('#layer-unavailable-note');if(note)note.hidden=!unavailable;const systemNote=q('#system-unavailable-note');if(systemNote)systemNote.hidden=!unavailable;
- qa('[data-canonical-layer]').forEach(input=>{input.checked=Boolean(state.visibleLayers[input.dataset.canonicalLayer]);input.disabled=unavailable;input.title=unavailable?'Layer 3D memerlukan WebGL':''});
+ qa('[data-canonical-layer]').forEach(input=>{input.checked=Boolean(state.visibleLayers[input.dataset.canonicalLayer]);input.disabled=unavailable;input.title=unavailable?'Lapisan 3D memerlukan WebGL':''});
  const quality=q('#layer-render-quality');if(quality){quality.value=state.preferences?.visualQuality||'auto';quality.disabled=unavailable;}
  qa('[data-system-focus]').forEach(button=>{button.disabled=unavailable;button.title=unavailable?'Fokus jalur 3D memerlukan WebGL':''});
 }
@@ -427,7 +427,7 @@ addEventListener('bmj:systemcontext',event=>renderSystemContext(event.detail));
 function ensureSimulationTransport(){
  let bar=q('#simulation-transport');if(bar)return bar;
  bar=document.createElement('section');bar.id='simulation-transport';bar.className='canonical-simulation-transport';bar.hidden=true;bar.setAttribute('aria-label','Kontrol simulasi');
- bar.innerHTML=`<div class="sim-context"><small>SIMULASI PROSES</small><strong data-transport-stage>Siap</strong></div><label class="sim-mode-label">Mode<select data-transport-mode aria-label="Mode simulasi"><option value="continuous">Proses penuh</option><option value="stages">Tahap demi tahap</option></select></label><button type="button" data-transport-play class="primary" aria-label="Mulai atau jeda simulasi">Mulai</button><label>Kecepatan<select data-transport-speed aria-label="Kecepatan simulasi"><option value=".5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select></label><progress max="100" value="0" data-transport-progress aria-label="Progres simulasi"></progress><button type="button" data-transport-stop>Stop</button>`;
+ bar.innerHTML=`<div class="sim-context"><small>SIMULASI PROSES</small><strong data-transport-stage>Siap</strong></div><label class="sim-mode-label">Mode<select data-transport-mode aria-label="Mode simulasi"><option value="continuous">Proses penuh</option><option value="stages">Tahap demi tahap</option></select></label><button type="button" data-transport-play class="primary" aria-label="Mulai atau jeda simulasi">Mulai</button><label>Kecepatan<select data-transport-speed aria-label="Kecepatan simulasi"><option value=".5">0,5×</option><option value="1" selected>1×</option><option value="1.5">1,5×</option><option value="2">2×</option></select></label><progress max="100" value="0" data-transport-progress aria-label="Progres simulasi"></progress><button type="button" data-transport-stop>Hentikan</button>`;
  q('.workspace')?.append(bar);
  q('[data-transport-play]',bar).addEventListener('click',()=>dispatchEvent(new CustomEvent('bmj:simulationcommand',{detail:{action:'toggle'}})));
  q('[data-transport-stop]',bar).addEventListener('click',()=>dispatchEvent(new CustomEvent('bmj:simulationcommand',{detail:{action:'stop'}})));
@@ -444,7 +444,7 @@ function syncSimulationTransport(state=getState()){
  q('[data-transport-stage]',bar).textContent=stage;
  q('[data-transport-progress]',bar).value=progress;
  const mode=sim.mode==='stages'?'stages':'continuous',modeSelect=q('[data-transport-mode]',bar);modeSelect.value=mode;
- const play=q('[data-transport-play]',bar);play.textContent=sim.running?'Jeda':sim.active?(mode==='stages'?'Tahap berikutnya':'Lanjutkan'):'Mulai';
+ const play=q('[data-transport-play]',bar);play.textContent=sim.running?'Jeda':sim.active?(mode==='stages'?'Tahap berikutnya':'Lanjutkan'):'Mulai';play.setAttribute('aria-label',play.textContent+' simulasi');
  q('[data-transport-stop]',bar).disabled=!sim.active;
  const speed=String(sim.speed||1),speedSelect=q('[data-transport-speed]',bar);if([...speedSelect.options].some(option=>option.value===speed))speedSelect.value=speed;
 }
@@ -527,7 +527,7 @@ const relabel=()=>{
  const focus=q('#focus-machine');if(focus)focus.textContent='Fokus di 3D';
  const top=q('.panel-top .eyebrow');if(top)top.textContent='KONTEKS TERPILIH';
  const search=q('#global-search');if(search)search.placeholder='Cari mesin, area, komponen, sistem, atau sumber…';
- const connection=q('#connection');if(connection)connection.textContent=navigator.onLine?'Data tersedia':'Offline';
+ const connection=q('#connection');if(connection)connection.textContent=navigator.onLine?'Data tersedia':'Tidak tersambung';
 };
 function syncAccessibleControls(state){
  const panelToggle=q('#panel-toggle');if(panelToggle){const open=Boolean(state.inspectorState?.open);panelToggle.setAttribute('aria-expanded',String(open));panelToggle.setAttribute('aria-label',open?'Tutup detail pilihan':'Buka detail pilihan')}

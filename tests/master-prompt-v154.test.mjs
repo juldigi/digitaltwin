@@ -55,16 +55,16 @@ test('offline state explicitly distinguishes cached data from local-only mode',(
 });
 
 test('production UI exposes source confidence and explicit truth statuses',()=>{
-  assert.match(app,/pair\('3D source',truth\.source3D\)/);
-  assert.match(app,/pair\('3D detail',truth\.detail3D\)/);
-  assert.match(app,/pair\('Data confidence',truth\.dataConfidence\)/);
-  assert.match(app,/pair\('Health score',truth\.healthScore\)/);
-  assert.match(app,/UNKNOWN, UNVERIFIED, APPROXIMATE, dan CONFLICTING/);
+  assert.match(app,/pair\('Dasar model 3D',truth\.source3D\)/);
+  assert.match(app,/pair\('Detail model 3D',truth\.detail3D\)/);
+  assert.match(app,/pair\('Keandalan data',truth\.dataConfidence\)/);
+  assert.match(app,/pair\('Nilai kesehatan mesin',truth\.healthScore\)/);
+  assert.match(app,/belum diketahui, belum diverifikasi, perkiraan, atau perlu ditinjau/);
   assert.match(app,/reference-truth-row/);
   assert.match(app,/truthStatus\(src\.confidence,'UNVERIFIED'\)/);
   assert.match(app,/truthStatus\(p\.confidence,'UNVERIFIED'\)/);
-  assert.match(app,/DWG · \$\{truth\.planGeometry\}/);
-  assert.match(app,/Skala · \$\{truth\.scale\}/);
+  assert.match(app,/DWG · \$\{readableStatus\(truth\.planGeometry\)\}/);
+  assert.match(app,/Skala · \$\{readableStatus\(truth\.scale\)\}/);
   assert.doesNotMatch(app,/\$\('#lod-status'\)\.textContent=view==='factory'\?'Denah siap':'Model siap'/);
   assert.match(css,/\.reference-truth-row/);
 });
