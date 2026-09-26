@@ -21,7 +21,7 @@ test('simulation start refuses blocked or unavailable process models before open
 });
 
 test('pause control cannot accidentally start a READY simulation',()=>{
- assert.match(app,/pause\.disabled=!active/);
+ assert.match(app,/pause\.hidden=!running;pause\.disabled=!running/);
  assert.match(app,/function pausePrintingSimulation\(\)\{\s*if\(!engine\?\.isPrintingSimulationActive\(\)\)return;/);
 });
 
