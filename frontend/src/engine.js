@@ -40,7 +40,7 @@ const neutralTemplate=()=>{
 function buildLowDetailFactory(layout,fleet){
   const root=new THREE.Group();root.name='BMJ · mobile low-detail factory';
   const layers={};
-  for(const name of ['building','roof','machines','labels','landscape','reference','unidentified','utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors']){
+  for(const name of ['building','walls','furniture','roof','machines','labels','landscape','reference','unidentified','utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors']){
     layers[name]=new THREE.Group();layers[name].name=name;root.add(layers[name]);
   }
   layers.roof.visible=false;layers.labels.visible=false;layers.landscape.visible=false;layers.reference.visible=false;
@@ -70,7 +70,7 @@ function buildLowDetailFactory(layout,fleet){
   }
   if(wallSpecs.length){
     const wallMat=new THREE.MeshStandardMaterial({color:0x9aadb7,roughness:.92,metalness:0}),instanced=new THREE.InstancedMesh(boxGeo,wallMat,wallSpecs.length),dummy=new THREE.Object3D();
-    wallSpecs.forEach((w,i)=>{dummy.position.set(w.x,2.25,w.z);dummy.rotation.set(0,w.angle,0);dummy.scale.set(w.len,4.5,w.width);dummy.updateMatrix();instanced.setMatrixAt(i,dummy.matrix);});instanced.instanceMatrix.needsUpdate=true;instanced.receiveShadow=false;instanced.castShadow=false;layers.building.add(instanced);
+    wallSpecs.forEach((w,i)=>{dummy.position.set(w.x,2.25,w.z);dummy.rotation.set(0,w.angle,0);dummy.scale.set(w.len,4.5,w.width);dummy.updateMatrix();instanced.setMatrixAt(i,dummy.matrix);});instanced.instanceMatrix.needsUpdate=true;instanced.receiveShadow=false;instanced.castShadow=false;layers.walls.add(instanced);
   }
   if(assetPoints.length){
     let minX=Infinity,maxX=-Infinity,minZ=Infinity,maxZ=-Infinity;for(const [x,z] of assetPoints){minX=Math.min(minX,x);maxX=Math.max(maxX,x);minZ=Math.min(minZ,z);maxZ=Math.max(maxZ,z);}
@@ -122,7 +122,8 @@ export class FactoryEngine {
   fit(object=this.machine,mode='iso',animate=true){
     object.updateWorldMatrix(true,true);const box=new THREE.Box3().setFromObject(object);if(box.isEmpty())return;
     const profile=this.framingProfile(object);
-    this.transition=applyCameraFrame(this.camera,this.controls,cameraFrame(this.camera,box,{mode,...profile,minDistance:this.controls.minDistance,maxDistance:this.controls.maxDistance}),{animate,reduceMotion:matchMedia('(prefers-reduced-motion: reduce)').matches});
+    const direction=mode==='operator'?new THREE.Vector3(0,.38,-1).applyQuaternion(object.getWorldQuaternion(new THREE.Quaternion())).setY(.38):null;
+    this.transition=applyCameraFrame(this.camera,this.controls,cameraFrame(this.camera,box,{mode,direction,...profile,minDistance:this.controls.minDistance,maxDistance:this.controls.maxDistance}),{animate,reduceMotion:matchMedia('(prefers-reduced-motion: reduce)').matches});
   }
   fitObjects(objects=[],mode='iso',animate=true){
     const list=(objects||[]).filter(Boolean),box=new THREE.Box3();
@@ -322,7 +323,7 @@ export class FactoryEngine {
   setFactoryLayer(name,on){if(this.actualFactory?.layers[name])this.actualFactory.layers[name].visible=!!on;if(this.factorySelectionHelper&&this.factorySelectionId){const selected=this.actualFactory?.assets.get(this.factorySelectionId);this.factorySelectionHelper.visible=this.view==='factory'&&!!selected&&this.isObjectVisible(selected);}}
   isObjectVisible(object){for(let node=object;node;node=node.parent)if(node.visible===false)return false;return true;}
   clearFactorySelection(){this.factorySelectionId=null;if(this.factorySelectionHelper){this.scene.remove(this.factorySelectionHelper);this.factorySelectionHelper.geometry?.dispose();this.factorySelectionHelper.material?.dispose();this.factorySelectionHelper=null;}return true;}
-  selectFactoryAsset(id,{focus=false,mode='iso'}={}){
+  selectFactoryAsset(id,{focus=false,mode='operator'}={}){
     const object=this.actualFactory?.assets.get(id);if(!object)return null;
     this.clearFactorySelection();this.factorySelectionId=id;
     const helper=new THREE.BoxHelper(object,0x1677d2);helper.name='FACTORY_ASSET_SELECTION_OVERLAY';helper.userData={semantic:'SELECTION_OVERLAY',machineId:id,sourceType:'UI_STATE_NOT_FACTORY_GEOMETRY'};helper.material.transparent=true;helper.material.opacity=.92;helper.material.depthTest=false;helper.renderOrder=999;helper.visible=this.view==='factory'&&this.isObjectVisible(object);this.factorySelectionHelper=helper;this.scene.add(helper);
@@ -330,7 +331,7 @@ export class FactoryEngine {
   }
   currentFactoryTarget(){return this.factorySelectionId?this.actualFactory?.assets.get(this.factorySelectionId)||this.factory:this.factory;}
   focusFactorySelection(mode='iso'){const target=this.currentFactoryTarget();if(target)this.fit(target,mode);return target;}
-  focusFactoryAsset(id,mode='iso'){return this.selectFactoryAsset(id,{focus:true,mode});}
+  focusFactoryAsset(id,mode='operator'){return this.selectFactoryAsset(id,{focus:true,mode});}
   clearFactory(){this.clearFactorySelection();this.actualFactory=null;this.factory.traverse(o=>{o.geometry?.dispose();if(Array.isArray(o.material))o.material.forEach(m=>{m.map?.dispose();m.dispose();});else{o.material?.map?.dispose();o.material?.dispose();}});this.factory.clear();}
   registerSceneObjects(){
     this.sceneObjects=new Map();this.sceneObjectIds=new WeakMap();

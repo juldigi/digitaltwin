@@ -1,4 +1,4 @@
-import{getState,setState,setActiveSection,setViewMode,setLayer,setSimulation,setInspector,openOverlay,closeOverlay,subscribe}from'./state/app-state.js';
+import{getState,setState,setActiveSection,setViewMode,setLayer,setSimulation,setInspector,setPreference,openOverlay,closeOverlay,subscribe}from'./state/app-state.js';
 import{FOUNDATION_SCOPE,canOpenTechnical3D}from'./data/foundation-scope.js';
 
 const q=(s,r=document)=>r.querySelector(s);
@@ -350,11 +350,11 @@ q('#mode-2d')?.addEventListener('click',()=>{
 q('#mode-3d')?.addEventListener('click',()=>{const next=setViewMode('3d');applyViewModeDom(next);const section=getState().sceneMode==='machine'?'asset':'factory';stopSimulationForNavigation(section);setActiveSection(section);markSection(section);requestAnimationFrame(()=>{dispatchEvent(new Event('resize'));syncSimulationTransport()})});
 
 const GROUPS=PHASE1_FOUNDATION?[
- ['Bangunan',[['building','Bangunan & ruang'],['roof','Atap']]],
+ ['Bangunan',[['building','Lantai & isi ruangan'],['walls','Dinding'],['furniture','Furnitur'],['roof','Atap']]],
  ['Posisi aset',[['machines','Placeholder aset'],['labels','Label'],['unidentified','Area belum teridentifikasi']]],
  ['Sumber',[['reference','Garis denah sumber']]]
 ]:[
- ['Bangunan',[['building','Dinding & ruangan'],['roof','Atap'],['landscape','Area luar']]],
+ ['Bangunan',[['building','Lantai & isi ruangan'],['walls','Dinding'],['furniture','Furnitur'],['roof','Atap'],['landscape','Area luar']]],
  ['Produksi',[['machines','Mesin'],['labels','Label'],['unidentified','Area belum teridentifikasi']]],
  ['Utilitas',[['compressedAir','Pipa compressed air'],['ahuPiping','Pipa AHU'],['ducting','Ducting AHU'],['utilityAnchors','Titik koneksi referensi']]],
  ['Informasi',[['reference','Garis denah sumber']]]
@@ -395,10 +395,12 @@ function ensureLayerManager(){
  const layerControls=GROUPS.map(([title,items])=>`<div class="canonical-layer-group"><h4>${title}</h4>${items.map(([key,label])=>`<label><span>${label}</span><input type="checkbox" data-canonical-layer="${key}"></label>`).join('')}</div>`).join('');
  panel.innerHTML=`<header><div><small>TAMPILAN</small><h3 id="layer-manager-title">Pengaturan Tampilan</h3></div><button type="button" data-layer-close class="icon-btn" aria-label="Tutup">${icon('close')}</button></header>
  <p id="layer-unavailable-note" role="status" hidden>Layer 3D memerlukan WebGL. Denah 2D tetap tersedia.</p>
+ <div class="canonical-layer-group"><h4>Kualitas render 3D</h4><label><span>Pilih kualitas</span><select id="layer-render-quality" aria-label="Kualitas render 3D"><option value="auto">Otomatis</option><option value="hemat">Hemat</option><option value="seimbang">Seimbang</option><option value="tinggi">Tinggi</option><option value="engineering">Teknis</option><option value="cinematic">Sinematik</option></select></label><p>Kualitas tinggi menampilkan detail lebih tajam. Otomatis menyesuaikan kemampuan perangkat.</p></div>
  ${layerControls}
  <div class="canonical-layer-group unavailable"><h4>Tentang tampilan</h4><p>Pengaturan ini hanya mengubah apa yang terlihat di layar. Data sumber dan posisi objek tidak berubah.</p></div>`;
  document.body.append(panel);
  q('[data-layer-close]',panel)?.addEventListener('click',closeLayerManager);
+ q('#layer-render-quality',panel)?.addEventListener('change',event=>{const profile=event.target.value;setPreference('visualQuality',profile);setPreference('lowDetail',profile==='hemat');dispatchEvent(new CustomEvent('bmj:qualitychange',{detail:{profile}}));});
  qa('[data-canonical-layer]',panel).forEach(input=>input.addEventListener('change',()=>{
   const key=input.dataset.canonicalLayer,visible=input.checked;setLayer(key,visible);
   dispatchEvent(new CustomEvent('bmj:layerchange',{detail:{key,visible}}));
@@ -408,6 +410,7 @@ function syncLayerControls(){
  const state=getState(),unavailable=Boolean(q('#mode-3d')?.disabled);
  const note=q('#layer-unavailable-note');if(note)note.hidden=!unavailable;const systemNote=q('#system-unavailable-note');if(systemNote)systemNote.hidden=!unavailable;
  qa('[data-canonical-layer]').forEach(input=>{input.checked=Boolean(state.visibleLayers[input.dataset.canonicalLayer]);input.disabled=unavailable;input.title=unavailable?'Layer 3D memerlukan WebGL':''});
+ const quality=q('#layer-render-quality');if(quality){quality.value=state.preferences?.visualQuality||'auto';quality.disabled=unavailable;}
  qa('[data-system-focus]').forEach(button=>{button.disabled=unavailable;button.title=unavailable?'Fokus jalur 3D memerlukan WebGL':''});
 }
 function renderSystemContext(detail={}){
