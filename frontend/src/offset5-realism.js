@@ -73,7 +73,7 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
     this.root.userData.homeDetailGeometryPolicy='SAME_LIVE_CD102_TEMPLATE__PHOTO_VISIBLE_SERVICE_DNA_RETAINED';
     this.root.userData.visualEvidenceBoundary='BMJ_OFFSET5_PHOTOS_DXF_AND_CD102_FAMILY__NO_NEW_INSTALLED_PROCESS_HARDWARE';
     for(let i=0;i<8;i++){
-      const unit=this.node(`press-${i}`);if(!unit)continue;
+      const unit=this.node(`press-${i+1}`);if(!unit)continue;
       const trim=this.db(unit,[.60,.075,.020],[0,.67,-1.305],'black',.006,'operator-side-lower-service-trim',{coverMounted:true,silhouette:true});
       trim.userData.unitIndex=i+1;
       const plate=this.realismMeshes.find(m=>m.userData?.realismRole==='unit-identification-plate'&&m.userData?.label===`PU${i+1}`);
@@ -93,7 +93,7 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
   }
   refinePrintingUnits(){
     for(let i=0;i<8;i++){
-      const unit=this.node(`press-${i}`);
+      const unit=this.node(`press-${i+1}`);
       if(!unit)continue;
 
       // Cover seams / quarter-turn fasteners on the existing housing.
