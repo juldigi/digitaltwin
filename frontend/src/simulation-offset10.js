@@ -70,7 +70,7 @@ export class Offset10PrintingSimulation{
     this.points=pathPoints();this.curve=new THREE.CatmullRomCurve3(this.points,false,'centripetal',.5);this.pathLength=this.curve.getLength();
     this.sheetLength=.72;this.sheetWidth=1.04;this.sheetGap=1.30;this.cycleDistance=this.pathLength+2.6;this.sheetCount=Math.max(9,Math.floor(this.cycleDistance/this.sheetGap));
     this.sheets=[];this.pileSheets=[];this.rotors=[];this.oscillators=[];this.flows=[];this.uv=[];this.foil=[];this.materials=[];this.geometries=[];
-    this.maxPileSheets=32;this.pileThickness=.0034;this.pileAnchor=new THREE.Vector3(D.deliveryPileX,1.66,0);
+    this.staticDeliveryStack=template.findNode('o10-delivery-paper-stack');this.staticDeliveryVisible=this.staticDeliveryStack?.visible;this.maxPileSheets=32;this.pileThickness=.0034;this.pileAnchor=new THREE.Vector3(D.deliveryPileX,1.66,0);
     this.active=false;this.running=false;this.speed=1;this.elapsed=0;this.lastNow=null;this.completed=0;this.emitAt=0;this.pathVisible=true;this.inkFlowVisible=true;this.uvActive=false;this.foilStarActive=false;this.deliveryBrakeActive=false;this.onUpdate=null;this.baseMetersPerSecond=2.35;
     this.buildPath();this.buildSheets();this.buildPileSheets();this.refreshPile();this.buildFlows();this.collectMotion();this.collectUV();this.collectFoil();
   }
@@ -99,8 +99,8 @@ export class Offset10PrintingSimulation{
     for(let i=0;i<this.maxPileSheets;i++){const geo=this.geometry(createSheetGeometry()),mat=this.material({basic:true,vertexColors:true,side:THREE.DoubleSide}),mesh=new THREE.Mesh(geo,mat);mesh.visible=false;mesh.frustumCulled=false;this.group.add(mesh);const s={mesh,paper,bands,userData:{printed:-1,serial:-1}};this.colorSheet(s,11);this.pileSheets.push(s);}
   }
   refreshPile(){
-    const node=this.template.findNode('o10-delivery-paper-stack');if(!node)return this.pileAnchor;this.machine.updateMatrixWorld(true);node.updateWorldMatrix(true,true);
-    const box=new THREE.Box3().setFromObject(node),p=new THREE.Vector3((box.min.x+box.max.x)/2,box.max.y,(box.min.z+box.max.z)/2);this.machine.worldToLocal(p);this.pileAnchor.copy(p);this.pileAnchor.y+=.004;return p;
+    const table=this.template.findNode('o10-delivery-pile')?.children.find(o=>o.isMesh);if(!table)return this.pileAnchor;this.machine.updateMatrixWorld(true);table.updateWorldMatrix(true,true);
+    const box=new THREE.Box3().setFromObject(table),p=new THREE.Vector3((box.min.x+box.max.x)/2,box.max.y,(box.min.z+box.max.z)/2);this.machine.worldToLocal(p);this.pileAnchor.copy(p);this.pileAnchor.y+=.004;return p;
   }
   layoutPile(){
     const list=this.pileSheets.filter(s=>s.userData.serial>=0).sort((a,b)=>a.userData.serial-b.userData.serial),w=8,l=10;
@@ -142,10 +142,10 @@ export class Offset10PrintingSimulation{
     return {available:true,blocked:false,active:this.active,running:this.running,paused:this.active&&!this.running,speed:this.speed,stage:stageForX(p.x),completed:this.completed,progress:lead?.userData.progress||0,sheetsVisible:moving.length,pileSheetsVisible:this.pileSheets.filter(s=>s.mesh.visible).length,rotorCount:this.rotors.length,rotorRoles:[...new Set(this.rotors.map(r=>r.role))],oscillatorCount:this.oscillators.length,mechanismCount:this.rotors.length+this.oscillators.length,inkFlowCount:this.flows.length,uvLampCount:9,uvActive:this.uvActive,foilStarActive:this.foilStarActive,deliveryBrakeActive:this.deliveryBrakeActive,pathVisible:this.pathVisible,inkFlowVisible:this.inkFlowVisible};
   }
   emit(force=false){const now=performance?.now?.()||Date.now();if(!force&&now<this.emitAt)return;this.emitAt=now+120;this.onUpdate?.(this.state());}
-  start(){if(!this.active){this.elapsed=0;this.completed=0;for(const p of this.pileSheets){p.mesh.visible=false;p.userData.serial=-1;}for(const s of this.sheets)s.userData.lastCycle=-1;}this.refreshPile();this.active=true;this.running=true;this.lastNow=null;this.group.visible=true;this.emit(true);return this.state();}
+  start(){if(!this.active){this.elapsed=0;this.completed=0;for(const p of this.pileSheets){p.mesh.visible=false;p.userData.serial=-1;}for(const s of this.sheets)s.userData.lastCycle=-1;}this.refreshPile();if(this.staticDeliveryStack)this.staticDeliveryStack.visible=false;this.active=true;this.running=true;this.lastNow=null;this.group.visible=true;this.emit(true);return this.state();}
   pause(){if(this.active){this.running=false;this.lastNow=null;this.emit(true);}return this.state();}
   resume(){if(this.active){this.running=true;this.lastNow=null;this.emit(true);}return this.state();}
-  stop(){this.active=false;this.running=false;this.elapsed=0;this.lastNow=null;this.completed=0;this.group.visible=false;for(const s of this.sheets){s.mesh.visible=false;s.gripper.visible=false;s.userData.lastCycle=-1;this.colorSheet(s,0);}for(const p of this.pileSheets){p.mesh.visible=false;p.userData.serial=-1;}for(const r of this.rotors)r.mesh.quaternion.copy(r.initial);for(const o of this.oscillators)o.object.position.copy(o.initial);for(const f of this.foil)f.mesh.quaternion.copy(f.initial);this.setUV([]);this.foilStarActive=false;this.deliveryBrakeActive=false;this.emit(true);return this.state();}
+  stop(){this.active=false;this.running=false;this.elapsed=0;this.lastNow=null;this.completed=0;this.group.visible=false;for(const s of this.sheets){s.mesh.visible=false;s.gripper.visible=false;s.userData.lastCycle=-1;this.colorSheet(s,0);}for(const p of this.pileSheets){p.mesh.visible=false;p.userData.serial=-1;}for(const r of this.rotors)r.mesh.quaternion.copy(r.initial);for(const o of this.oscillators)o.object.position.copy(o.initial);for(const f of this.foil)f.mesh.quaternion.copy(f.initial);this.setUV([]);this.foilStarActive=false;this.deliveryBrakeActive=false;if(this.staticDeliveryStack)this.staticDeliveryStack.visible=this.staticDeliveryVisible;this.emit(true);return this.state();}
   setSpeed(v){this.speed=clamp(Number(v)||1,.35,2);this.emit(true);return this.state();}
   setPathVisible(on){this.pathVisible=!!on;this.pathLine.visible=this.pathVisible;this.emit(true);return this.state();}
   setInkFlowVisible(on){this.inkFlowVisible=!!on;for(const f of this.flows){f.tube.visible=this.inkFlowVisible;for(const p of f.particles)p.visible=this.inkFlowVisible;}this.emit(true);return this.state();}

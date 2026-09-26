@@ -41,7 +41,7 @@ test('V99 sheet centerline visits offset/coating nips without crossing cylinder 
 test('V99 delivery stack accumulates on the represented pile surface and dryer/coater states are occupancy-driven',()=>{
  const m=new Offset8MachineTemplate(),s=new Offset8PrintingSimulation(m.root,m);s.start();let now=1000,coat=false,dry=false,brake=false;
  for(let i=0;i<2400;i++){now+=10;s.update(now);const st=s.state();coat||=st.coatingActive;dry||=st.dryerActive;brake||=st.deliveryBrakeActive;}
- assert.ok(coat&&dry&&brake);assert.ok(s.completed>0);const visible=s.stack.filter(x=>x.visible);assert.ok(visible.length>0);assert.ok(visible.every(x=>x.position.y>=1.292));
+ assert.ok(coat&&dry&&brake);assert.equal(s.staticDeliveryStack.visible,false);assert.ok(s.completed>0);const visible=s.stack.filter(x=>x.visible);assert.ok(visible.length>0);assert.ok(visible.every(x=>x.position.y>=.654));
  s.dispose();m.dispose();
 });
 

@@ -2375,7 +2375,10 @@ export class ReferenceProcessSimulation{
    const {mesh,motion,position,quaternion}=item;mesh.position.copy(position);mesh.quaternion.copy(quaternion);
    const enabled=motion.stage===null||motion.stage===undefined||Math.abs(idx-motion.stage)<=1;if(!enabled)continue;
    const axis=AXIS[motion.axis]||AXIS.z,t=this.elapsed*motion.rate+motion.phase;
-   if(motion.type==='spin')mesh.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(axis,t));
+   if(motion.type==='spin'){
+    const shaft=mesh.geometry?.type==='CylinderGeometry'?AXIS.y:mesh.geometry?.type==='TorusGeometry'?AXIS.z:axis;
+    mesh.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(shaft,t));
+   }
    else if(motion.type==='oscillate'||motion.type==='slide')mesh.position.addScaledVector(axis,Math.sin(t)*motion.amp);
    else if(motion.type==='press')mesh.position.addScaledVector(axis,-Math.abs(Math.sin(t))*motion.amp);
   }

@@ -145,12 +145,12 @@ test('each flexible sheet accumulates print color bands only after passing print
   sim.dispose();machine.dispose();
 });
 
-test('V48 delivery releases finished sheets onto the existing paper pile and accumulates them',()=>{
+test('V48 delivery releases finished sheets above the empty table and accumulates them',()=>{
   const machine=new OffsetMachineTemplate(),sim=new PrintingSimulation(machine.root,machine);
   const anchorBefore=sim.refreshDeliveryPileAnchor().clone(),end=sim.curve.getPointAt(1);
   assert.ok(Math.abs(end.x-anchorBefore.x)<.20,`delivery path misses pile center in X: ${end.x} vs ${anchorBefore.x}`);
   assert.ok(Math.abs(end.z-anchorBefore.z)<.02,'delivery path misses pile center laterally');
-  assert.ok(end.y>=anchorBefore.y-.03&&end.y<=anchorBefore.y+.12,`delivery release height is not above pile: ${end.y} vs ${anchorBefore.y}`);
+  assert.ok(end.y>anchorBefore.y&&end.y-anchorBefore.y<1.3,`delivery release is outside the receiving table: ${end.y} vs ${anchorBefore.y}`);
   run(sim,19000);
   const state=sim.state(),pile=sim.pileSheets.filter(sheet=>sheet.mesh.visible);
   assert.ok(state.completed>0,'no sheet completed into delivery');

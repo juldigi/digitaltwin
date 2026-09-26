@@ -169,7 +169,7 @@ export class PrintingSimulation{
     this.sheetGapMeters=1.34;this.cycleDistance=this.pathLength+this.sheetGapMeters*2;this.sheetCount=Math.max(8,Math.floor(this.cycleDistance/this.sheetGapMeters));
     this.sheets=[];this.pileSheets=[];this.rotors=[];this.oscillators=[];this.levers=[];this.gripperMotions=[];this.joggerMotions=[];this.fluidFlows=[];this.inkSurfaces=[];
     this.uvLamps=[];this.uvBeams=[];this.materials=[];this.geometries=[];
-    this.maxPileSheets=32;this.pileSheetThickness=.0035;this.pileAnchor=new THREE.Vector3(D.deliveryCenterX+.10,1.22,0);
+    this.staticDeliveryStack=template.findNode('delivery-paper-stack');this.staticDeliveryVisible=this.staticDeliveryStack?.visible;this.maxPileSheets=32;this.pileSheetThickness=.0035;this.pileAnchor=new THREE.Vector3(D.deliveryCenterX+.10,1.22,0);
     this.active=false;this.running=false;this.speed=1;this.elapsed=0;this.lastNow=null;this.completed=0;this.emitAt=0;this.pathVisible=true;this.inkFlowVisible=true;this.uvActive=false;this.onUpdate=null;
     this.baseMetersPerSecond=2.15;
     this.buildPath();this.buildSheets();this.buildPileSheets();this.refreshDeliveryPileAnchor();this.buildFluidFlows();this.collectMechanicalMotion();this.collectInkSurfaces();this.collectUVSystem();
@@ -208,10 +208,10 @@ export class PrintingSimulation{
     }
   }
   refreshDeliveryPileAnchor(){
-    const stack=this.template.findNode('delivery-paper-stack');
-    if(!stack)return this.pileAnchor;
-    this.machine.updateMatrixWorld(true);stack.updateWorldMatrix(true,true);
-    const box=new THREE.Box3().setFromObject(stack),center=box.getCenter(new THREE.Vector3()),top=new THREE.Vector3(center.x,box.max.y,center.z);
+    const table=this.template.findNode('delivery-pile')?.children.find(o=>o.isMesh);
+    if(!table)return this.pileAnchor;
+    this.machine.updateMatrixWorld(true);table.updateWorldMatrix(true,true);
+    const box=new THREE.Box3().setFromObject(table),center=box.getCenter(new THREE.Vector3()),top=new THREE.Vector3(center.x,box.max.y,center.z);
     this.machine.worldToLocal(top);this.pileAnchor.copy(top);this.pileAnchor.y+=this.pileSheetThickness*.6;
     return this.pileAnchor;
   }
@@ -429,6 +429,7 @@ export class PrintingSimulation{
   start(){
     if(!this.active){this.elapsed=0;this.completed=0;this.resetDeliveryPile();}
     this.refreshDeliveryPileAnchor();
+    if(this.staticDeliveryStack)this.staticDeliveryStack.visible=false;
     this.active=true;this.running=true;this.lastNow=null;this.group.visible=true;this.applyInkFilm(true);this.emit(true);return this.state();
   }
   pause(){if(this.active){this.running=false;this.lastNow=null;this.emit(true);}return this.state();}
@@ -437,6 +438,7 @@ export class PrintingSimulation{
     this.active=false;this.running=false;this.elapsed=0;this.lastNow=null;this.completed=0;this.group.visible=false;
     for(const sheet of this.sheets){sheet.mesh.visible=false;sheet.gripper.visible=false;sheet.userData.progress=0;sheet.userData.leadDistance=0;sheet.userData.lastDeliveryCycle=-1;this.setSheetColors(sheet,0);}
     this.resetDeliveryPile();
+    if(this.staticDeliveryStack)this.staticDeliveryStack.visible=this.staticDeliveryVisible;
     for(const rotor of this.rotors)rotor.mesh.quaternion.copy(rotor.initial);
     for(const item of this.oscillators)item.object.position.copy(item.initial);
     for(const item of this.levers)item.object.rotation.z=item.initial;
