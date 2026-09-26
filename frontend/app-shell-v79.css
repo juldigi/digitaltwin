@@ -1311,6 +1311,7 @@ aside#detail-panel .panel-footer{
 }
 aside#detail-panel[aria-hidden="true"]{pointer-events:none!important}
 
+
 /* Desktop: real right sidebar, canvas automatically receives the remaining width. */
 @media(min-width:1181px){
  :root{--v195-panel:clamp(360px,29vw,430px)}
@@ -1438,4 +1439,21 @@ aside#detail-panel[aria-hidden="true"]{pointer-events:none!important}
   opacity:0!important;
   visibility:hidden!important;
  }
+}
+
+/* Mobile detail keeps navigation and tabs reachable while the content can breathe. */
+@media(max-width:767px){
+ aside#detail-panel{height:min(76dvh,700px)!important;max-height:calc(100dvh - var(--header-h,64px) - 76px - env(safe-area-inset-bottom))!important}
+ aside#detail-panel>.panel-top{min-height:46px!important;flex-basis:46px!important;padding:9px 12px 5px!important}
+ aside#detail-panel>.context-breadcrumb,aside#detail-panel>.asset-heading{display:none!important}
+ aside#detail-panel>.evidence-status{margin:3px 12px 5px!important;max-height:170px!important}
+ aside#detail-panel>.evidence-status summary{min-height:34px!important;padding:5px 10px!important}
+ aside#detail-panel>.tabs button{min-height:40px!important;padding:7px 9px!important}
+ aside#detail-panel #panel-content{scroll-padding-top:12px!important;padding-top:14px!important}
+ aside#detail-panel>.panel-footer{padding:7px 12px calc(7px + env(safe-area-inset-bottom))!important}
+ aside#detail-panel>.panel-footer button{min-height:44px!important}
+ .canonical-simulation-transport{grid-template-columns:minmax(0,1fr) 76px 72px!important}
+ .canonical-simulation-transport .sim-context strong{font-size:12px!important}
+ .canonical-simulation-transport label{min-width:0!important}
+ .canonical-simulation-transport select{width:76px!important;min-width:76px!important;padding:0 4px!important;font-size:12px!important;color:var(--ink)!important}
 }
