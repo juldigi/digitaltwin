@@ -4,7 +4,7 @@ const V=a=>new THREE.Vector3(...a);
 export class MK920MachineTemplate{
  constructor(assetId='BMJ-MCH-0011'){this.spec=mk920SpecFor(assetId);this.root=new THREE.Group();this.root.name=this.spec.sap+' · '+this.spec.model;this.root.userData={assetId:this.spec.assetId,nodeId:'mk920-root',spec:this.spec,sources:MK920_TECHNICAL_SOURCES,orientation:MK920_ORIENTATION,taxonomyVersion:'mk920-v3',evidenceGrade:'MODEL_IDENTIFIED_PROCESS_GROUNDED',geometryStatus:'DEDICATED_MODEL_PROCESS_REFERENCE__INSTALLED_OPTIONS_BOUNDED',engineeringDimensions:false};this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.build();this.taxonomy=mk920TaxonomyFor(this.spec.assetId);this.taxonomyById=new Map(this.taxonomy.map(n=>[n.id,n]));for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}this.root.updateMatrixWorld(true);}
  group(parent,id,name,pos=[0,0,0],explode=[0,0,0]){const g=new THREE.Group();g.name=name;g.position.set(...pos);g.userData={assetId:this.spec.assetId,nodeId:id,selectable:true,explode:V(explode),confidence:'PROCESS_GROUNDED'};parent.add(g);this.nodes.push(g);if(parent===this.root)this.parts.push(g);return g;}
- mat(k){if(!this.materials.has(k)){const c={ivory:0xe5e6df,green:0x467362,dark:0x20292b,black:0x101517,steel:0x879399,silver:0xc2cbce,rubber:0x23282a,paper:0xf0ead7,gold:0xc9a13b,copper:0xae633f,red:0xa84338,glass:0x75b7c7}[k]||0x888888;const m=new THREE.MeshStandardMaterial({color:c,metalness:['steel','silver','gold','copper'].includes(k)?.58:.12,roughness:k==='paper'?.9:.46,transparent:k==='glass',opacity:k==='glass'?.32:1});m.userData.baseOpacity=m.opacity;this.materials.set(k,m);}return this.materials.get(k);}
+ mat(k){if(!this.materials.has(k)){const c={ivory:0xf0f0ec,green:0x73787a,gray:0x73787a,magenta:0xa33d72,dark:0x2b3034,black:0x101517,steel:0x879399,silver:0xc2cbce,rubber:0x23282a,paper:0xf0ead7,gold:0xc9a13b,copper:0xae633f,red:0xa84338,glass:0x75b7c7}[k]||0x888888;const m=new THREE.MeshStandardMaterial({color:c,metalness:['steel','silver','gold','copper'].includes(k)?.58:.12,roughness:k==='paper'?.9:.46,transparent:k==='glass',opacity:k==='glass'?.32:1});m.userData.baseOpacity=m.opacity;this.materials.set(k,m);}return this.materials.get(k);}
  mesh(g,geo,key,k='dark',p=[0,0,0],r=null){if(!this.geometries.has(key))this.geometries.set(key,geo());const m=new THREE.Mesh(this.geometries.get(key),this.mat(k));m.position.set(...p);if(r)m.rotation.set(...r);m.castShadow=k!=='glass';m.receiveShadow=true;m.userData.ownerId=g.userData.nodeId;g.add(m);this.meshes.push(m);return m;}
  box(g,s,p,k='dark',rad=.02){return this.mesh(g,()=>rad?new RoundedBoxGeometry(...s,2,rad):new THREE.BoxGeometry(...s),'b'+s+rad,k,p);}
  cyl(g,r,l,p,k='steel',role='',axis='z'){
@@ -24,20 +24,35 @@ export class MK920MachineTemplate{
  buildTransport(){const g=this.group(this.root,'mk920-transport','Intermittent gripper transport',[.55,0,0],[.25,.18,0]);const chain=this.group(g,'mk920-transport-chain','Gripper chain');for(const z of [-.92,.92]){this.cyl(chain,.18,.10,[-1.60,1.14,z],'steel','chain-sprocket');this.cyl(chain,.18,.10,[1.72,1.14,z],'steel','chain-sprocket');this.box(chain,[3.32,.035,.035],[.06,1.32,z],'black');}const bars=this.group(g,'mk920-transport-bar','Intermittent gripper bars · represented count unverified');bars.userData.installedBarCountVerified=false;for(let i=0;i<6;i++){const x=-1.30+i*(2.75/5),bar=this.group(bars,'mk920-transport-gripper-'+(i+1),'Gripper bar reference '+(i+1),[x,1.30,0]);bar.userData.gripperBar=true;bar.userData.barPhase=i/6;this.box(bar,[.06,.045,1.78],[0,0,0],'steel');for(const z of [-.66,-.33,0,.33,.66])this.box(bar,[.10,.035,.05],[0,-.05,z],'gold');}const cam=this.group(g,'mk920-transport-cam','Indexing cam and rails');this.cyl(cam,.28,.16,[.02,.54,1.05],'dark','index-cam');this.box(cam,[3.15,.08,.10],[.10,.72,1.04],'steel');}
  buildDelivery(){const g=this.group(this.root,'mk920-delivery','Delivery section',[2.75,0,0],[.75,.18,0]);this.cover(this.box(g,[1.64,.19,2.30],[0,1.92,0],'ivory',.035));for(const x of [-.76,.76])for(const z of [-1.10,1.10])this.cover(this.box(g,[.10,1.50,.10],[x,1.10,z],'ivory',.018));for(const z of [-1.13,1.13])this.cover(this.box(g,[1.56,.38,.055],[0,1.69,z],'ivory',.012));const release=this.group(g,'mk920-delivery-release','Gripper release');this.cyl(release,.12,1.44,[-.48,1.56,0],'steel','release-cam');const pile=this.group(g,'mk920-delivery-pile','Delivery pile lift');this.box(pile,[1.06,.08,1.35],[.24,.42,0],'steel');this.box(pile,[1.02,.66,1.30],[.24,.79,0],'paper');const jog=this.group(g,'mk920-delivery-jog','Sheet joggers');for(const z of [-.68,.68]){const j=this.box(jog,[.12,.58,.09],[.40,1.14,z],'gold');j.userData.jogger=true;}const back=this.box(jog,[.09,.58,1.18],[.79,1.14,0],'gold');back.userData.jogger=true;}
  buildExteriorIdentity(){
-  const g=this.group(this.root,'mk920-exterior-v230','MK920YMI exterior silhouette refinement');
-  g.userData.visualRefinement='V230_MK920YMI_HOTFOIL_SILHOUETTE';
-  g.userData.sourceBoundary='MASTERWORK_MK920YMI_MODEL_ARCHIVE__INSTALLED_OPTION_COUNT_BOUNDED';
+  const g=this.group(this.root,'mk920-exterior-v235','MK920YMI exterior identity polish');
+  this.root.userData.visualRefinement='V235_MK920YMI_WHITE_GRAY_MAGENTA_ARCHIVE_IDENTITY';
+  this.root.userData.visualEvidenceBoundary='MK920YMI_PUBLIC_MACHINE_IMAGES__INSTALLED_FOIL_STAND_AND_OPTION_PACKAGE_BOUNDED';
+  g.userData.sourceBoundary=this.root.userData.visualEvidenceBoundary;
+  // Public MK920 YMI imagery is predominantly white/light-gray with a darker lower plinth and magenta family stripe.
   for(const z of [-1.36,1.36]){
-   this.cover(this.box(g,[4.45,.48,.12],[.28,.58,z],'green',.035));
-   this.cover(this.box(g,[3.18,.12,.13],[.25,2.56,z],'green',.025));
-   this.cover(this.box(g,[1.10,1.18,.10],[-.72,1.68,z],'ivory',.035));
-   this.cover(this.box(g,[1.05,1.18,.10],[.65,1.68,z],'ivory',.035));
+   const plinth=this.cover(this.box(g,[4.52,.52,.12],[.28,.58,z],'gray',.040));plinth.userData.silhouetteCritical=true;
+   const crown=this.cover(this.box(g,[3.22,.12,.13],[.25,2.56,z],'ivory',.025));crown.userData.silhouetteCritical=true;
+   for(const [x,w] of [[-.78,1.08],[.66,1.04]]){
+    this.cover(this.box(g,[w,1.18,.10],[x,1.68,z],'ivory',.038));
+   }
   }
-  this.cover(this.box(g,[3.12,.20,2.52],[.25,2.48,0],'green',.035));
-  const foil=this.group(g,'mk920-foil-superstructure-v230','Foil-stamping upper superstructure');
+  const top=this.cover(this.box(g,[3.18,.20,2.52],[.25,2.48,0],'ivory',.035));top.userData.silhouetteCritical=true;
+  const osBand=this.cover(this.box(g,[4.25,.075,.035],[.30,1.02,-1.445],'magenta',.010));osBand.userData.silhouetteCritical=true;osBand.userData.mechanismRole='mk920-magenta-family-stripe';
+  const dsBand=this.cover(this.box(g,[4.25,.075,.035],[.30,1.02,1.445],'magenta',.010));dsBand.userData.silhouetteCritical=true;
+  // Large service openings seen on the operator side are represented as dark/glass apertures, not sealed white slabs.
+  for(const [x,w] of [[-.78,.74],[.63,.70]]){
+   const aperture=this.box(g,[w,.64,.025],[x,1.74,-1.455],'glass',.026);aperture.userData.silhouetteCritical=true;aperture.userData.mechanismRole='mk920-operator-service-aperture';
+  }
+  const foil=this.group(g,'mk920-foil-superstructure-v235','Foil-stamping upper superstructure');
   for(const z of [-1.18,1.18])for(const x of [-.56,.58])this.box(foil,[.10,1.02,.10],[x,3.10,z],'steel',.012);
   this.box(foil,[1.28,.12,2.46],[.02,3.60,0],'steel',.014);
-  const band=this.cover(this.box(g,[1.12,.14,.035],[.15,2.23,-1.445],'dark',.012));band.userData.modelPlate='MK920YMI';
+  // Archive photos consistently show a dedicated operator stair/landing at the front working side.
+  const access=this.group(g,'mk920-operator-access-v235','Operator stair and landing');
+  for(let i=0;i<4;i++)this.box(access,[.72,.10,.64],[-1.78+i*.18,.08+i*.10,-1.72],'steel',.010);
+  this.box(access,[1.10,.10,.58],[-1.10,.46,-1.72],'dark',.014);
+  for(const x of [-1.55,-.66])this.cyl(access,.020,.78,[x,.83,-2.01],'steel','guard-post','y');
+  this.cyl(access,.020,.90,[-1.10,1.18,-2.01],'steel','guard-rail','x');
+  const plate=this.cover(this.box(g,[.92,.13,.030],[.18,2.24,-1.455],'dark',.010));plate.userData.modelPlate='MK920YMI';
  }
  buildDrive(){const g=this.group(this.root,'mk920-drive','Main drive and control',[.45,0,0],[0,.2,.55]);const motor=this.group(g,'mk920-drive-motor','Main motor');this.cyl(motor,.23,.58,[.02,.42,1.50],'dark','main-motor','x');for(let x=-.20;x<=.20;x+=.08)this.box(motor,[.025,.36,.62],[x,.42,1.50],'steel');const fly=this.group(g,'mk920-drive-flywheel','Flywheel and clutch');this.cyl(fly,.42,.16,[.72,.62,1.50],'steel','flywheel');this.cyl(fly,.16,.21,[.72,.62,1.50],'dark','clutch');const control=this.group(g,'mk920-drive-control','Operator console and safety circuit');this.box(control,[.90,.64,.52],[-.98,.72,-1.68],'dark',.06);this.box(control,[.52,.34,.025],[-1.07,1.12,-1.83],'glass',.03);this.box(control,[.45,.05,.31],[-.78,.98,-1.50],'silver');}
  findNode(id){return id==='mk920-root'?this.root:this.nodes.find(n=>n.userData.nodeId===id)||null;}resolvePart(o){for(let p=o;p&&p!==this.root;p=p.parent)if(p.userData?.selectable)return p;return null;}resolveTaxonomyNode(id){return this.taxonomyById.get(id)?.meshRefs.map(ref=>this.findNode(ref)).find(Boolean)||null;}contains(a,b){for(let p=b;p;p=p.parent)if(p===a)return true;return false;}
