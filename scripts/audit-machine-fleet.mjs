@@ -13,7 +13,7 @@ export function auditMachineFleet(){
   try{
    template=createPolishedMachineTemplate(asset.machineId);
    const root=template.root;root.updateMatrixWorld(true);
-   const box=new THREE.Box3().setFromObject(root),size=box.getSize(new THREE.Vector3());
+   const box=new THREE.Box3().setFromObject(root),size=box.getSize(new THREE.Vector3()),fullCenter=box.getCenter(new THREE.Vector3());
    let meshCount=0,visibleBefore=0,invalidVertices=0,invalidMaterials=0,coverMotionConflicts=0;
    root.traverse(o=>{
     if(!o.isMesh)return;meshCount++;if(o.visible)visibleBefore++;
@@ -30,7 +30,10 @@ export function auditMachineFleet(){
 
    template.setLow?.(true);template.setExteriorOpen?.(false);root.updateMatrixWorld(true);
    let lowVisible=0;root.traverse(o=>{if(o.isMesh&&o.visible)lowVisible++;});
-   const lowBox=new THREE.Box3().setFromObject(root),lowSize=lowBox.getSize(new THREE.Vector3());
+   const lowBox=new THREE.Box3().setFromObject(root),lowSize=lowBox.getSize(new THREE.Vector3()),lowCenter=lowBox.getCenter(new THREE.Vector3());
+   const silhouetteRatios=size.toArray().map((v,i)=>v>1e-6?lowSize.getComponent(i)/v:1);
+   const silhouetteCenterDrift=fullCenter.distanceTo(lowCenter)/Math.max(...size.toArray(),1e-6);
+   const silhouetteParityValid=silhouetteRatios.every(v=>v>=.86&&v<=1.14)&&silhouetteCenterDrift<=.10;
    template.setLow?.(false);
 
    const presentation=root.userData.presentationAudit||{};
@@ -41,6 +44,7 @@ export function auditMachineFleet(){
    if(invalidVertices)problems.push('NON_FINITE_VERTICES');
    if(invalidMaterials)problems.push('NON_FINITE_MATERIAL');
    if(lowVisible<1||!finiteVec(lowSize)||Math.min(...lowSize.toArray())<=.03)problems.push('LOW_LOD_COLLAPSED');
+   if(!silhouetteParityValid)problems.push('HOME_DETAIL_SILHOUETTE_DRIFT');
    if(coverMotionConflicts)problems.push('MOVING_EXTERIOR_COVER');
    if(presentation.invalidTransforms||presentation.invalidGeometryBounds||presentation.zeroScaleMeshes||presentation.coverMotionConflicts)problems.push('PRESENTATION_AUDIT_FAILED');
    if(root.userData.presentationPolishRevision!=='V233')problems.push('V233_NOT_APPLIED');
@@ -49,6 +53,8 @@ export function auditMachineFleet(){
     machineId:asset.machineId,no:asset.no,name:asset.name,
     meshes:meshCount,visibleBefore,visibleLow:lowVisible,
     size:size.toArray().map(v=>+v.toFixed(3)),
+    lowSize:lowSize.toArray().map(v=>+v.toFixed(3)),
+    silhouetteRatios:silhouetteRatios.map(v=>+v.toFixed(4)),silhouetteCenterDrift:+silhouetteCenterDrift.toFixed(4),silhouetteParityValid,
     presentationValid:presentation.valid===true,
     problems
    };
