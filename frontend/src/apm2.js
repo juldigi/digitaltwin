@@ -71,6 +71,7 @@ export class APM2MachineTemplate{
     this.buildControl();
     this.buildSafety();
     this.buildExteriorIdentity();
+    this.refineExteriorV237();
   }
   buildFrameAndPlatform(){
     const base=this.group(this.root,'apm2-base','Machine Base / Support',[0,0,0],[0,-.18,.35],['APM2-SP102-E-VISUAL','APM2-SP102-DIM']);
@@ -302,6 +303,56 @@ export class APM2MachineTemplate{
     const identity=this.cover(this.box(g,[.64,.14,.030],[-.02,1.78,-1.005],'dark',.012));
     identity.userData.modelFamilyPlate='SP 102';
   }
+  refineExteriorV237(){
+    this.root.userData.visualRefinement='V237_SP102_LEGACY_SERVICE_ACCESS_REALISM';
+    this.root.userData.homeDetailGeometryPolicy='SAME_LIVE_SP102_TEMPLATE__LEGACY_BODY_AND_ACCESS_DNA_RETAINED';
+    this.root.userData.visualEvidenceBoundary='SP102_1994_AND_E_VISUAL_FAMILY__E_SE_CER_BMA_SUFFIX_UNCONFIRMED';
+    const g=this.group(this.root,'apm2-service-v237','Legacy SP102 service and access detail',[0,0,0],[0,.16,-.24],['APM2-SP102-E-VISUAL','APM2-SP102-1994']);
+    const tag=(m,role,critical=false)=>{if(!m)return m;m.userData.detail=true;m.userData.mechanismRole=role;m.userData.evidence='SP102_FAMILY_VISUAL_AND_PARTS_REFERENCE';if(critical)m.userData.silhouetteCritical=true;return m;};
+
+    // Operator-side green/cream cover rhythm: seams, hinges and positive latches.
+    for(const x of [-1.62,-.78,.08,.92,1.74]){
+      tag(this.box(g,[.012,.56,.020],[x,.90,-1.035],'dark',.001),'sp102-operator-service-panel-seam');
+      tag(this.box(g,[.026,.18,.022],[x+.24,.91,-1.048],'steel',.004),'sp102-operator-service-door-handle');
+      for(const y of [.70,1.10])tag(this.cylinder(g,.012,.075,[x-.25,y,-1.052],'steel','y'),'sp102-operator-service-door-hinge');
+    }
+
+    // Guardrail / stair details make the actual service platform readable rather than a floating slab.
+    for(const x of [-2.15,-.45,1.25,2.45]){
+      const post=tag(this.cylinder(g,.024,.72,[x,.68,-1.53],'steel','y'),'sp102-operator-handrail-post',true);
+      post.userData.accessHardware=true;
+    }
+    tag(this.cylinder(g,.023,4.65,[.15,1.02,-1.53],'steel','x'),'sp102-operator-handrail-top',true);
+    for(let i=0;i<4;i++){
+      const step=tag(this.box(g,[.70,.085,.56],[-2.80+i*.18,.08+i*.10,-1.56],'steel',.008),'sp102-access-step-reference',true);
+      step.userData.familyReferenceOnly=true;
+    }
+
+    // Legacy operator panel physical bezel / button collar; no modern touchscreen substitution.
+    const panel=this.findNode('apm2-operator-panel');
+    if(panel){
+      const bezel=tag(this.box(panel,[.25,.17,.018],[-.25,1.88,-1.272],'dark',.008),'sp102-status-display-bezel',true);
+      bezel.userData.modernTouchscreen=false;
+      for(let i=0;i<5;i++){
+        const collar=tag(this.cylinder(panel,.033,.010,[-.39+i*.07,1.72,-1.270],i===0?'red':i===1?'green':'steel','z'),'sp102-control-button-collar');
+        collar.userData.legacyControl=true;
+      }
+    }
+
+    // Feeder/delivery portal latch references do not close the open pile zones.
+    for(const [x,role] of [[D.feederCenterX,'feeder'],[D.deliveryCenterX,'delivery']]){
+      for(const z of [-.94,.94]){
+        const latch=tag(this.box(g,[.032,.22,.025],[x+.42,1.48,z],'dark',.004),`sp102-${role}-portal-latch`,true);
+        latch.userData.openPileEnvelopePreserved=true;
+      }
+    }
+
+    // Floor pads remove the floating-machine appearance without changing the machine envelope materially.
+    for(const x of [-2.55,-1.55,-.55,.55,1.55,2.55])for(const z of [-.82,.82]){
+      const pad=tag(this.cylinder(g,.060,.025,[x,.020,z],'dark','y'),'sp102-leveling-foot-pad',true);
+      pad.userData.floorInterface=true;
+    }
+  }
   buildDrive(){
     const g=this.group(this.root,'apm2-drive','Main Drive / Transmission',[0,0,0],[0,.25,.65],['APM2-SP102-PARTS']);
     const main=this.group(g,'apm2-main-drive','Main Motor / Flywheel',[0,0,0],[0,.16,.35]);
@@ -373,7 +424,7 @@ export class APM2MachineTemplate{
     this.root.userData.interiorCutawayVisible=this.exteriorOpen;
     this.root.updateMatrixWorld(true);
   }
-  setLow(on){for(const m of this.meshes)if(m.userData.detail)m.visible=!on;}
+  setLow(on){for(const m of this.meshes)if(m.userData.detail)m.visible=!on||Boolean(m.userData.silhouetteCritical);}
   reset(){const open=this.exteriorOpen;this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const n of this.nodes)n.quaternion.copy(n.userData.restQuaternion);if(open)this.setExteriorOpen(true);}
   dispose(){this.geometries.forEach(g=>g.dispose());this.materials.forEach(m=>m.dispose());this.geometries.clear();this.materials.clear();}
 }
