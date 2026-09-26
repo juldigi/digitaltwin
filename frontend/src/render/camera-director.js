@@ -5,7 +5,7 @@ const ISOMETRIC=new THREE.Vector3(.85,.7,-1.25).normalize();
 
 // Frame the actual visible bounds, including a group of selected parts.
 // The same calculation serves the factory, machines, and selected components.
-export function cameraFrame(camera,box,{mode='iso',padding=1.18,targetLift=0,minDistance=.4,maxDistance=1e7}={}){
+export function cameraFrame(camera,box,{mode='iso',direction:operatingDirection=null,padding=1.18,targetLift=0,minDistance=.4,maxDistance=1e7}={}){
  if(box.isEmpty())return null;
  const center=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3());
  center.y+=size.y*targetLift;
@@ -13,7 +13,7 @@ export function cameraFrame(camera,box,{mode='iso',padding=1.18,targetLift=0,min
  const vertical=camera.fov*Math.PI/360;
  const horizontal=Math.atan(Math.tan(vertical)*camera.aspect);
  const distance=THREE.MathUtils.clamp(radius/Math.sin(Math.min(vertical,horizontal))*padding,minDistance,maxDistance);
- const direction=mode==='top'?UP:ISOMETRIC;
+ const direction=mode==='top'?UP:operatingDirection?.isVector3?operatingDirection.clone().normalize():ISOMETRIC;
  const position=center.clone().addScaledVector(direction,distance);
  // A low camera angle must never pass through the inspection floor.
  position.y=Math.max(position.y,.15);

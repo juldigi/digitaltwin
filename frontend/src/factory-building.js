@@ -50,7 +50,7 @@ export function resolvePortalClearance(portal,clearances,margin=.35){
 }
 export function buildActualFactory(layout,fleet){
  const root=new T.Group();root.name='BMJ · baseline 250804 + revisi';const layers={};
- for(const name of ['building','roof','machines','labels','landscape','reference','unidentified','utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors']){layers[name]=new T.Group();layers[name].name=name;root.add(layers[name]);}
+ for(const name of ['building','walls','furniture','roof','machines','labels','landscape','reference','unidentified','utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors']){layers[name]=new T.Group();layers[name].name=name;root.add(layers[name]);}
  layers.roof.visible=false;layers.reference.visible=false;layers.landscape.visible=false;
  for(const name of ['utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors'])layers[name].visible=false;
  const mats=new Map();const material=(color,opacity=1)=>{const k=color+':'+opacity;if(!mats.has(k))mats.set(k,new T.MeshStandardMaterial({color,roughness:.82,metalness:.04,transparent:opacity<1,opacity,depthWrite:opacity===1,side:T.DoubleSide}));return mats.get(k);};
@@ -164,7 +164,7 @@ export function buildActualFactory(layout,fleet){
   // Every finish belongs to the same wall segment, so endpoint edits move the entire assembly.
   const wallAssembly=new T.Group();wallAssembly.name='Dinding '+(w.handle||w.handles?.[0]||w.layer||'pabrik');
   const wallKey=[w.handle||w.handles?.[0]||'UNKNOWN',...a,...c].map(v=>typeof v==='number'?(Math.round(v*100)+'').replace('-','m'):String(v).replace(/[^A-Za-z0-9_-]/g,'_')).join('-');
-  wallAssembly.position.set(x,0,z);wallAssembly.rotation.y=r;wallAssembly.userData={semantic:'SOURCE_WALL_SEGMENT',editorWall:true,editorStableId:'wall:'+wallKey,sourceLength:len,sourceWidth:w.width||.12,sourceHeight:3.5,sourceEntityId:w.handle||w.handles?.[0]||'UNKNOWN',sourceLayer:w.layer||'UNKNOWN'};b.add(wallAssembly);
+  wallAssembly.position.set(x,0,z);wallAssembly.rotation.y=r;wallAssembly.userData={semantic:'SOURCE_WALL_SEGMENT',editorWall:true,editorStableId:'wall:'+wallKey,sourceLength:len,sourceWidth:w.width||.12,sourceHeight:3.5,sourceEntityId:w.handle||w.handles?.[0]||'UNKNOWN',sourceLayer:w.layer||'UNKNOWN'};layers.walls.add(wallAssembly);
   const wb=(px,py,pz,width,height,depth,color,opacity=1)=>box(wallAssembly,px,py,pz,width,height,depth,color,0,opacity);
   const wall=wb(0,1.75,0,len,3.5,w.width,0xe8e5df);wall.castShadow=true;wall.userData={...dwgObjectSourceMetadata(layout,{semantic:'WALL',sourceLayer:w.layer||'UNKNOWN',sourceEntityId:w.handle||w.handles?.[0]||'UNKNOWN',sourceHandles:w.handles,confidence:'HIGH CONFIDENCE',renderStatus:'3D_WITH_ESTIMATED_HEIGHT'}),heightStatus:'VISUAL_ESTIMATE',machineClearance:MACHINE_SERVICE_CLEARANCE};
   const plinth=wb(0,.12,0,len,.24,w.width+.035,0x64777e);detail(plinth,'WALL_BASE_PLINTH_REFERENCE');const head=wb(0,3.46,0,len,.08,w.width+.025,0x71878b);detail(head,'WALL_HEAD_FLASHING_REFERENCE');for(const gy of [.72,1.48,2.24,3.0]){const girt=wb(0,gy,0,len,.045,w.width+.06,0x74868b);detail(girt,'WALL_GIRT_REFERENCE');buildingDetailStats.wallGirts++;}const baseFlash=wb(0,.28,0,len,.055,w.width+.07,0x5f747c);detail(baseFlash,'WALL_BASE_FLASHING_REFERENCE');buildingDetailStats.wallBaseFlashings++;
@@ -822,7 +822,7 @@ export function buildActualFactory(layout,fleet){
  };
  const roomLocalSize=ctx=>ctx.doorSide==='E'||ctx.doorSide==='W'?{w:ctx.depth,d:ctx.width}:{w:ctx.width,d:ctx.depth};
  const roomGroupFor=(l,ctx)=>{
-  const cx=(ctx.minX+ctx.maxX)/2,cy=(ctx.minY+ctx.maxY)/2,g=new T.Group();g.position.set(cx,0,-cy);g.rotation.y=ctx.rotation;g.name='V202_ROOM_'+ctx.program+'_'+l.text;b.add(g);
+  const cx=(ctx.minX+ctx.maxX)/2,cy=(ctx.minY+ctx.maxY)/2,g=new T.Group();g.position.set(cx,0,-cy);g.rotation.y=ctx.rotation;g.name='V202_ROOM_'+ctx.program+'_'+l.text;layers.furniture.add(g);
   g.userData={semantic:'V202_ROOM_FURNITURE_GROUP',roomKey:ctx.key,roomLabel:l.text,roomProgram:ctx.program,doorSide:ctx.doorSide,roomEnvelope:[ctx.minX,ctx.maxX,ctx.minY,ctx.maxY],accuracy:'ROOM_FUNCTION_LAYOUT_REFERENCE_NOT_AS_BUILT',researchVersion:'V204',functionalReferenceVisible:true};
   return g;
  };
@@ -1770,6 +1770,10 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  };
  let hiddenReferenceRealism=0,visibleFunctionalReferences=0;root.traverse(o=>{if(o.userData?.supersededByV202){o.visible=false;hiddenReferenceRealism++;return;}const accuracy=String(o.userData?.accuracy||''),isReference=o.userData?.evidenceLayer==='REFERENCE_REALISM'||accuracy.includes('REFERENCE_NOT_AS_BUILT');if(isReference){const show=!!o.userData?.functionalReferenceVisible||functionalVisibleSemantic(o.userData?.semantic);o.visible=show;o.userData={...o.userData,evidenceLayer:'REFERENCE_REALISM',visualizationMode:show?'FUNCTIONAL_REFERENCE_VISIBLE':'REFERENCE_HIDDEN_BY_DEFAULT'};if(show)visibleFunctionalReferences++;else hiddenReferenceRealism++;}});
  buildingDetailStats.visibleFunctionalReferences=visibleFunctionalReferences;
+ // Keep wall finishes independently hideable while floors and room contents stay visible.
+ const wallSemantics=/^(?:V203_ROOM_INTERIOR_LINER_|V203_ROOM_SKIRTING_|V204_ROOM_DOOR_JAMB_|V204_ROOM_DOOR_HEAD_|ROOM_ENVELOPE_PLINTH_REFERENCE$|PRESS_ROOM_SKIRTING_REFERENCE$|PRESS_ROOM_KICK_RAIL_REFERENCE$|EXTERIOR_PERIMETER_(?:SUPPLEMENT|PLINTH)_REFERENCE$|IPAL_PHOTO_OPERATOR_ROOM_(?:WEST|REAR|EAST|FRONT)_WALL$)/;
+ const wallParts=[];b.traverse(o=>{if(o!==b&&wallSemantics.test(String(o.userData?.semantic||'')))wallParts.push(o);});
+ root.updateMatrixWorld(true);for(const part of wallParts)layers.walls.attach(part);
  root.userData={baselineId:layout.baselineId,dwgFidelity:layout.dwgFidelity||null,buildingDetailPass:'V204_CIRCULATION_FINISH_AND_FURNITURE_COLLISION_HARDENING',researchVersion:'V204',researchSourceCount:V204_SOURCE_STATS.total,uniqueResearchUrls:V204_SOURCE_STATS.uniqueUrls,buildingDetailStats,utilityRouting,
   architecturalEvidenceBoundary:{
    sourceGrounded:['PLANT_OUTLINE','DXF_WALL_SEGMENTS','DXF_COLUMN_POSITIONS','SOURCE_DOORS_AND_CURTAINS','MACHINE_PLACEMENTS','USER_APPROX_ROOF_4_5_TO_7M'],
