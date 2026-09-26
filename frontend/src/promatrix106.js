@@ -24,23 +24,39 @@ export class Promatrix106MachineTemplate{
  buildBlanking(){const g=this.group(this.root,'pm106-blanking','Blanking station',[2.17,0,0],[0,.34,.54]);const top=this.group(g,'pm106-blank-top','Top blanking tooling');this.box(top,[1.44,.11,1.88],[0,1.82,0],'steel');for(const z of [-.58,-.20,.20,.58]){const p=this.box(top,[.66,.08,.14],[0,1.69,z],'orange',.01);p.userData.blankingTool=true;}top.userData.blankTopMoving=true;const bottom=this.group(g,'pm106-blank-bottom','Bottom blanking tooling');this.box(bottom,[1.46,.10,1.90],[0,1.20,0],'steel');bottom.userData.blankBottomMoving=true;const vac=this.group(g,'pm106-blank-vacuum','Vacuum bar');this.box(vac,[1.20,.12,.18],[.10,1.48,.72],'blue',.025);for(const x of [-.42,-.14,.14,.42])this.cyl(vac,.025,.10,[x,1.39,.72],'dark','vacuum-port');const tie=this.group(g,'pm106-blank-tie','Tie-sheet cassette');this.box(tie,[.86,.28,1.28],[.48,.66,-.12],'graphite',.04);for(const z of [-.44,-.15,.15,.44])this.box(tie,[.70,.018,.08],[.48,.84,z],'paper',.003);}
  buildDelivery(){const g=this.group(this.root,'pm106-delivery','CSB non-stop delivery',[3.66,0,0],[.78,.18,0]);this.cover(this.box(g,[1.84,.20,2.48],[.10,2.11,0],'white',.035));for(const x of [-.76,.96])for(const z of [-1.19,1.19])this.cover(this.box(g,[.10,1.63,.10],[x,1.23,z],'white',.018));for(const z of [-1.22,1.22])this.cover(this.box(g,[1.72,.40,.055],[.10,1.81,z],'white',.012));const rake=this.group(g,'pm106-delivery-rake','Auto-Non-Stop rake reference');rake.userData.functionalReference=true;for(const z of [-.60,-.30,0,.30,.60]){const t=this.box(rake,[1.12,.045,.055],[-.20,1.10,z],'steel',.008);t.userData.deliveryRake=true;}const pallet=this.group(g,'pm106-delivery-pallet','Automatic pallet handling architecture');this.box(pallet,[1.12,.10,1.50],[.30,.43,0],'steel');this.box(pallet,[1.05,.60,1.44],[.30,.79,0],'board');for(const z of [-.62,.62])this.cyl(pallet,.06,.12,[-.10,.42,z],'dark','pallet-lift');const sample=this.group(g,'pm106-delivery-sample','Sample-sheet removal path');this.box(sample,[.92,.06,.68],[.62,1.42,-.84],'green',.01);}
  buildExteriorIdentity(){
-  const g=this.group(this.root,'pm106-exterior-v230','Promatrix 106 CSB exterior identity refinement');
-  g.userData.visualRefinement='V230_PROMATRIX106_CSB_OEM_SILHOUETTE';
-  g.userData.sourceBoundary='HEIDELBERG_PROMATRIX106_CSB_OFFICIAL__INSTALLED_OPTIONS_BOUNDED';
+  const g=this.group(this.root,'pm106-exterior-v235','Promatrix 106 CSB exterior identity polish');
+  this.root.userData.visualRefinement='V235_PROMATRIX106_CSB_OFFICIAL_VISUAL_IDENTITY';
+  this.root.userData.visualEvidenceBoundary='HEIDELBERG_PROMATRIX106_CSB_OFFICIAL_MACHINE_IMAGES__OPTIONAL_LOGISTICS_BOUNDED';
+  g.userData.sourceBoundary=this.root.userData.visualEvidenceBoundary;
   for(const z of [-1.50,1.50]){
-   this.cover(this.box(g,[5.72,.52,.10],[.48,.58,z],'dark',.035));
-   this.cover(this.box(g,[5.58,.12,.11],[.42,2.56,z],'graphite',.025));
+   const plinth=this.cover(this.box(g,[5.72,.52,.10],[.48,.58,z],'graphite',.040));plinth.userData.silhouetteCritical=true;
+   const crown=this.cover(this.box(g,[5.58,.14,.11],[.42,2.56,z],'white',.028));crown.userData.silhouetteCritical=true;
    for(const [x,w] of [[-1.38,1.34],[.42,1.34],[2.17,1.36]]){
-    this.cover(this.box(g,[.12,1.32,.11],[x-w*.43,1.70,z],'white',.022));
-    this.cover(this.box(g,[.12,1.32,.11],[x+w*.43,1.70,z],'white',.022));
+    this.cover(this.box(g,[.15,1.34,.11],[x-w*.43,1.70,z],'white',.026));
+    this.cover(this.box(g,[.15,1.34,.11],[x+w*.43,1.70,z],'white',.026));
+    // Large dark process windows are a defining visual feature in HEIDELBERG product imagery.
+    const win=this.box(g,[w*.66,.70,.025],[x,1.72,z+(z<0?-.058:.058)],'glass',.030);
+    win.userData.silhouetteCritical=true;win.userData.mechanismRole='promatrix-process-window-reference';
    }
   }
-  for(const [x,w] of [[-1.38,1.38],[.42,1.40],[2.17,1.42]])this.cover(this.box(g,[w,.20,2.74],[x,2.48,0],'white',.035));
-  const os=this.group(g,'pm106-os-access-v230','Operator-side access stairs and landing');
-  for(let i=0;i<4;i++)this.box(os,[.72,.10,.76],[3.90+i*.18,.08+i*.10,-1.86],'steel',.012);
-  this.box(os,[1.04,.12,.70],[4.38,.46,-1.86],'graphite',.018);
-  for(const x of [4.05,4.65])this.cyl(os,.020,.74,[x,.84,-2.14],'steel','guard-post','y');
-  this.cyl(os,.020,.72,[4.35,1.18,-2.14],'steel','guard-rail','x');
+  for(const [x,w] of [[-1.38,1.38],[.42,1.40],[2.17,1.42]]){
+   const top=this.cover(this.box(g,[w,.20,2.74],[x,2.48,0],'white',.040));top.userData.silhouetteCritical=true;
+  }
+  // Official visuals show a tall graphite control/service spine near the operator-side output end.
+  const spine=this.cover(this.box(g,[.48,1.86,.16],[3.24,1.58,-1.58],'graphite',.040));spine.userData.silhouetteCritical=true;spine.userData.mechanismRole='promatrix-control-spine-reference';
+  const screen=this.box(g,[.30,.24,.025],[3.24,1.87,-1.675],'glass',.018);screen.userData.mechanismRole='promatrix-integrated-display-reference';
+  // Wide black access steps/landing are visually dominant in HEIDELBERG imagery.
+  const os=this.group(g,'pm106-os-access-v235','Wide operator-side access stair bank and landing');
+  for(let i=0;i<5;i++){
+   const step=this.box(os,[1.34,.11,.92],[3.42+i*.19,.07+i*.11,-1.92],'graphite',.012);
+   step.userData.silhouetteCritical=true;step.userData.mechanismRole='promatrix-access-step-reference';
+  }
+  const landing=this.box(os,[1.42,.12,.82],[4.38,.59,-1.92],'graphite',.018);landing.userData.silhouetteCritical=true;
+  for(const x of [3.80,4.72])this.cyl(os,.020,.88,[x,.98,-2.25],'steel','guard-post','y');
+  this.cyl(os,.020,.94,[4.26,1.39,-2.25],'steel','guard-rail','x');
+  // Tower beacon location only; exact lamp stack/color package is installation-specific.
+  const mast=this.cyl(g,.028,.42,[3.23,2.72,-1.56],'steel','beacon-mast','y');mast.userData.detail=true;
+  const beacon=this.cyl(g,.065,.18,[3.23,2.96,-1.56],'orange','status-beacon-reference','y');beacon.userData.detail=true;beacon.userData.installedColorSequenceVerified=false;
  }
  buildDrive(){const g=this.group(this.root,'pm106-drive','Drive, controls and pneumatics',[.10,0,0],[0,.18,.62]);const motor=this.group(g,'pm106-drive-motor','Main drive');this.cyl(motor,.26,.62,[-.65,.46,1.62],'graphite','main-motor','x');this.cyl(motor,.44,.18,[.02,.63,1.62],'steel','flywheel');const pneu=this.group(g,'pm106-drive-pneumatic','Pneumatic locking supply');this.box(pneu,[.76,.72,.42],[1.24,.76,1.62],'light',.04);for(const x of [1.02,1.24,1.46])this.cyl(pneu,.055,.30,[x,.88,1.84],'blue','air-regulator','x');const control=this.group(g,'pm106-drive-control','Touchscreen and station controls');this.box(control,[.90,.68,.52],[-2.20,.78,-1.78],'graphite',.05);this.box(control,[.54,.36,.026],[-2.28,1.19,-1.94],'glass',.025);for(const x of [-1.96,-1.81,-1.66])this.cyl(control,.035,.03,[x,.94,-2.05],x===-1.66?'red':'orange','button','z');}
  findNode(id){return id==='pm106-root'?this.root:this.nodes.find(n=>n.userData.nodeId===id)||null;}resolvePart(o){for(let p=o;p&&p!==this.root;p=p.parent)if(p.userData?.selectable)return p;return null;}resolveTaxonomyNode(id){return this.taxonomyById.get(id)?.meshRefs.map(ref=>this.findNode(ref)).find(Boolean)||null;}contains(a,b){for(let p=b;p;p=p.parent)if(p===a)return true;return false;}
