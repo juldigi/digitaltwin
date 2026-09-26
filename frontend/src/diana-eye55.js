@@ -31,20 +31,25 @@ export class DianaEye55MachineTemplate{
  const chute=this.group(g,'diana55-reject-chute','Reject collection path');this.box(chute,[1.05,.08,.66],[.35,.55,.58],'steel',.02);this.box(chute,[.72,.40,.66],[.62,.36,.58],'light',.03);const sensor=this.group(g,'diana55-reject-sensor','Reject confirmation sensing');for(const z of [-.42,.42])this.box(sensor,[.08,.16,.10],[-.55,1.08,z],'blue',.015);}
  buildDelivery(){const g=this.group(this.root,'diana55-delivery','Accepted blank delivery',[3.55,0,0],[.72,.16,0]);const belt=this.group(g,'diana55-delivery-belt','Accepted-product belt');for(const z of [-.44,-.15,.15,.44]){this.box(belt,[1.45,.025,.10],[0,.76,z],'rubber',.006);for(const x of [-.62,.62])this.cyl(belt,.055,.14,[x,.75,z],'steel','delivery-pulley','z');}const stack=this.group(g,'diana55-delivery-stack','Delivery stack / buffer interface');this.box(stack,[.72,.08,1.02],[.78,.43,0],'steel');const counter=this.group(g,'diana55-delivery-counter','Output sensing / counter');for(const z of [-.38,.38])this.box(counter,[.08,.16,.10],[.48,1.02,z],'green',.015);}
  buildExteriorIdentity(){
-  const g=this.group(this.root,'diana55-exterior-v230','Diana Eye 55 exterior silhouette refinement');
-  g.userData.visualRefinement='V230_DIANA_EYE55_OEM_INSPECTION_SILHOUETTE';
-  g.userData.sourceBoundary='HEIDELBERG_MASTERWORK_DIANA_EYE55_OEM__INSTALLED_CAMERA_OPTIONS_BOUNDED';
+  const g=this.group(this.root,'diana55-exterior-v235','Diana Eye 55 official-family exterior identity polish');
+  this.root.userData.visualRefinement='V235_DIANA_EYE55_WHITE_INSPECTION_CELL_WITH_HMI_PEDESTAL';
+  this.root.userData.visualEvidenceBoundary='HEIDELBERG_MASTERWORK_DIANA_EYE_42_55_OFFICIAL__INSTALLED_CAMERA_REJECT_OPTIONS_BOUNDED';
+  g.userData.sourceBoundary=this.root.userData.visualEvidenceBoundary;
   for(const z of [-.90,.90]){
-   this.cover(this.box(g,[3.55,.50,.10],[.05,.55,z],'dark',.035));
-   this.cover(this.box(g,[2.28,.16,.12],[-.12,2.54,z],'white',.030));
+   const base=this.cover(this.box(g,[3.55,.50,.10],[.05,.55,z],'light',.035));base.userData.silhouetteCritical=true;
+   const crown=this.cover(this.box(g,[2.28,.16,.12],[-.12,2.54,z],'white',.030));crown.userData.silhouetteCritical=true;
    this.cover(this.box(g,[.14,1.76,.11],[-1.18,1.55,z],'white',.025));
    this.cover(this.box(g,[.14,1.76,.11],[.88,1.55,z],'white',.025));
-   const aperture=this.box(g,[1.46,.82,.025],[-.15,1.54,z+(z<0?-.055:.055)],'glass',.035);
-   aperture.userData.inspectionAperture=true;
+   const aperture=this.box(g,[1.46,.82,.025],[-.15,1.54,z+(z<0?-.055:.055)],'glass',.035);aperture.userData.inspectionAperture=true;aperture.userData.silhouetteCritical=true;
   }
-  const hood=this.cover(this.box(g,[2.18,.28,1.76],[-.15,2.43,0],'white',.050));hood.userData.cameraHood=true;
+  const hood=this.cover(this.box(g,[2.18,.30,1.76],[-.15,2.43,0],'white',.055));hood.userData.cameraHood=true;hood.userData.silhouetteCritical=true;
   const feederFascia=this.cover(this.box(g,[1.22,.30,.10],[-3.36,.62,-.88],'light',.025));feederFascia.userData.feederIdentityPanel=true;
   const outputFascia=this.cover(this.box(g,[1.28,.30,.10],[3.47,.62,-.88],'light',.025));outputFascia.userData.acceptedDeliveryPanel=true;
+  // Diana Eye product imagery shows a separate operator touchscreen pedestal beside the inspection cell.
+  const hmi=this.group(g,'diana55-hmi-pedestal-v235','Separate touchscreen pedestal reference');
+  const pedestal=this.cover(this.box(hmi,[.52,1.02,.42],[1.72,.70,-1.48],'light',.050));pedestal.userData.silhouetteCritical=true;
+  const screen=this.box(hmi,[.38,.28,.025],[1.72,1.16,-1.705],'glass',.025);screen.userData.mechanismRole='diana-eye-hmi-display-reference';
+  this.cyl(hmi,.038,.70,[1.72,.18,-1.48],'steel','pedestal-foot-reference','y');
  }
  enrichV141(){this.root.userData.researchVersion='V141';this.root.userData.researchSourceCount=V141_SOURCE_STATS.total;this.root.userData.uniqueResearchUrls=V141_SOURCE_STATS.uniqueUrls;this.root.userData.detailPass='V141_DIANA55_TRIGGER_CAPTURE_DECISION_EJECTION';
   const tag=(m,role,evidence='MASTERWORK_DIANA_EYE_55_OEM')=>{if(m){m.userData.mechanismRole=role;m.userData.evidence=evidence;m.userData.detail=true;}return m;};
