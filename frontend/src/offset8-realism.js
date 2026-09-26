@@ -28,21 +28,47 @@ export class Offset8CX104RealismTemplate extends Offset8MachineTemplate{
   this.root.userData.dryerEnergyTechnology='UNASSERTED';
   this.refineExistingModel();this.root.updateMatrixWorld(true);
  }
- tag(mesh,role,{coverMounted=false,service=false,confidence='HEIDELBERG_CX104_FAMILY'}={}){
+ tag(mesh,role,{coverMounted=false,service=false,silhouetteCritical=false,confidence='HEIDELBERG_CX104_FAMILY'}={}){
   if(!mesh)return mesh;mesh.userData.realismMicroDetail=true;mesh.userData.realismRole=role;
   mesh.userData.coverMountedDetail=coverMounted;mesh.userData.serviceDetail=mesh.userData.serviceDetail||service;
-  mesh.userData.confidence=confidence;mesh.userData.detail=true;this.realismMeshes.push(mesh);return mesh;
+  mesh.userData.confidence=confidence;mesh.userData.silhouetteCritical=Boolean(mesh.userData.silhouetteCritical||silhouetteCritical);mesh.userData.detail=true;this.realismMeshes.push(mesh);return mesh;
  }
  db(p,s,x,k='graphite',r=.004,role='micro-detail',opts={}){return this.tag(this.box(p,s,x,k,r),role,opts);}
  dc(p,r,l,x,k='steel',role='micro-detail',axis='z',opts={}){return this.tag(this.cyl(p,r,l,x,k,role,axis),role,opts);}
  node(id){return this.findNode(id);}
 
  refineExistingModel(){
+  this.refineStructuralIdentity();
   this.refineFeeder();
   for(let i=1;i<=8;i++)this.refinePrintUnit(i);
   for(const key of ['L1','L2'])this.refineCoater(key);
   for(const key of ['Y1','Y2'])this.refineDryer(key);
   this.refineDelivery();
+ }
+
+ refineStructuralIdentity(){
+  this.root.userData.visualRefinement='V236_CX104_8LYYL_STRUCTURAL_ACCESS_AND_PRESET_PLUS_IDENTITY';
+  this.root.userData.structuralEvidenceBoundary='HEIDELBERG_CX104_OFFICIAL_FAMILY__BMJ_SEQUENCE_EXACT__INSTALLED_ACCESSORY_DETAILS_BOUNDED';
+  const access=this.node('offset8-access');
+  if(access){
+   for(const z of [-1.82,1.82]){
+    this.db(access,[17.2,.034,.034],[1.20,1.37,z],'steel',.006,'continuous-gallery-top-rail',{service:true,silhouetteCritical:true});
+    this.db(access,[17.2,.030,.030],[1.20,1.10,z],'steel',.005,'continuous-gallery-mid-rail',{service:true,silhouetteCritical:true});
+   }
+   // Distinct feeder-side stair/landing keeps the home silhouette from reading as a generic long box.
+   for(let i=0;i<4;i++)this.db(access,[.68,.09,.62],[-7.92+i*.17,.08+i*.10,-1.82],'steel',.008,'feeder-access-step',{service:true,silhouetteCritical:true});
+  }
+  const feeder=this.node('offset8-feeder');
+  if(feeder){
+   for(const z of [-1.455,1.455]){
+    const trim=this.db(feeder,[1.72,.055,.025],[-.12,1.00,z],'graphite',.008,'preset-plus-feeder-lower-trim',{coverMounted:true,silhouetteCritical:true});
+    trim.userData.presetPlusFamilyReference=true;
+   }
+  }
+  const delivery=this.node('offset8-delivery');
+  if(delivery){
+   for(const z of [-1.455,1.455])this.db(delivery,[2.90,.055,.025],[.20,1.02,z],'graphite',.008,'preset-plus-delivery-lower-trim',{coverMounted:true,silhouetteCritical:true});
+  }
  }
 
  refineFeeder(){
@@ -151,7 +177,7 @@ export class Offset8CX104RealismTemplate extends Offset8MachineTemplate{
  }
  setLow(on){
   if(typeof Offset8MachineTemplate.prototype.setLow==='function')Offset8MachineTemplate.prototype.setLow.call(this,on);
-  for(const m of this.realismMeshes)m.visible=!on;return this;
+  for(const m of this.realismMeshes)m.visible=!on||Boolean(m.userData.silhouetteCritical);return this;
  }
 }
 
