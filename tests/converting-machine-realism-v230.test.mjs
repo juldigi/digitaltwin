@@ -55,7 +55,7 @@ test('V230 Diana Eye and SHARK N650 carry different inspection-tower exterior id
  assert.match(diana,/cameraHood=true/);
  assert.match(diana,/acceptedDeliveryPanel=true/);
  assert.match(shark,/V235_SHARK_N650_WHITE_TOWER_DARK_BASE_BLUE_STRIPE_HMI/);
- assert.match(shark,/P3N1_OPTION_PACKAGE_UNDECODED/);
+ assert.match(shark,/P3N1_(?:INSTALLED_)?OPTION_PACKAGE_UNDECODED/);
  assert.match(shark,/visionHood=true/);
  assert.match(shark,/familyAccent=true/);
 });
