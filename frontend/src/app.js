@@ -281,6 +281,14 @@ function commitSimulationState(next=currentSimulationState()){
 function updateSimulationPanel(next=currentSimulationState()){
  const simulation=commitSimulationState(next),running=simulation.running,active=simulation.active,progress=Math.round(simulation.progress*100);
  const status=$('#sim-status'),stage=$('#sim-stage'),count=$('#sim-completed'),visible=$('#sim-visible'),pile=$('#sim-pile'),bar=$('#sim-progress-bar'),pause=$('#sim-pause'),start=$('#sim-start'),uv=$('#sim-uv-state'),uvCount=$('#sim-uv-count'),uvIndicator=$('#sim-uv-indicator');
+ const overview=document.querySelector('#panel-content .simulation-overview');
+ if(overview&&!overview.querySelector('#sim-mode')){
+  const field=document.createElement('label');field.className='simulation-mode-field';
+  field.innerHTML='<span>Cara menjalankan simulasi</span><select id="sim-mode" aria-label="Cara menjalankan simulasi"><option value="continuous">Proses penuh · berjalan terus</option><option value="stages">Tahap demi tahap · berhenti tiap tahap</option></select>';
+  overview.querySelector('.simulation-actions')?.before(field);
+  field.querySelector('select').addEventListener('change',event=>{engine?.setPrintingSimulationMode?.(event.target.value);updateSimulationPanel(engine?.getPrintingSimulationState?.());});
+ }
+ const modeSelect=$('#sim-mode');if(modeSelect){modeSelect.value=simulation.mode==='stages'?'stages':'continuous';modeSelect.disabled=simulation.blocked||simulation.available===false;}
  if(status)status.textContent=simulation.blocked?'TIDAK TERSEDIA':running?'BERJALAN':active?'DIJEDA':'SIAP';
  if(stage)stage.textContent=simulation.stage||'Siap';
  if(count)count.textContent=String(simulation.completed||0);
@@ -290,14 +298,15 @@ function updateSimulationPanel(next=currentSimulationState()){
  if(uvCount)uvCount.textContent=String(simulation.uvLampCount||0);
  if(uvIndicator)uvIndicator.classList.toggle('active',!!simulation.uvActive);
  if(bar)bar.style.width=progress+'%';
- if(start)start.textContent=active?(running?'Running':simulation.mode==='stages'?'Tahap berikutnya':'Lanjutkan'):(IS_APM2?'Mulai Simulasi Proses':IS_SHEETING?'Mulai Simulasi Sheeting':'Mulai Simulasi Proses');
- if(pause){pause.textContent=running?'Jeda':'Lanjutkan';pause.disabled=!active;pause.setAttribute('aria-disabled',active?'false':'true');}
+ if(start){start.textContent=active?(running?'Sedang berjalan':simulation.mode==='stages'?'Tahap berikutnya':'Lanjutkan'):(IS_APM2?'Mulai Simulasi Proses':IS_SHEETING?'Mulai Simulasi Sheeting':'Mulai Simulasi Proses');start.disabled=running||simulation.blocked||simulation.available===false;}
+ if(pause){pause.textContent='Jeda';pause.hidden=!running;pause.disabled=!running;pause.setAttribute('aria-disabled',running?'false':'true');}
  document.querySelectorAll('[data-sim-speed]').forEach(b=>b.classList.toggle('active',Math.abs(+b.dataset.simSpeed-(simulation.speed||1))<.01));
  document.querySelectorAll('[data-sim-stage]').forEach(b=>b.classList.toggle('active',b.dataset.simStage===(simulation.stage||'')));
  return simulation;
 }
 function startPrintingSimulation(){
  if(!engine){toast('Simulasi 3D memerlukan WebGL di perangkat ini.',true);return;}
+ if(engine.isPrintingSimulationActive()&&engine.getPrintingSimulationState()?.running)return;
  if(!ensureMachineInspectionContext('Simulasi'))return;
  if(!engine.isPrintingSimulationActive()){
   const readiness=engine.getPrintingSimulationState?.()||currentSimulationState();
@@ -412,6 +421,8 @@ function renderContextBreadcrumb(){
   const path=taxonomyPath();
   host.innerHTML='<button type="button" data-breadcrumb-factory>Pabrik</button>'+path.map((node,index)=>`<span aria-hidden="true">/</span><button type="button" data-breadcrumb-node="${esc(node.id)}" ${index===path.length-1?'aria-current="page"':''}>${esc(node.name)}</button>`).join('');
  }
+ const contextName=host.querySelector('[aria-current="page"]')?.textContent?.trim()||'Pabrik';
+ const compactHeading=$('#detail-panel .panel-top .eyebrow');if(compactHeading){compactHeading.textContent=contextName;compactHeading.title=contextName;}
  host.querySelector('[data-breadcrumb-factory]')?.addEventListener('click',()=>{showHome({historyMode:'push'});renderContextBreadcrumb();});
  host.querySelectorAll('[data-breadcrumb-node]').forEach(button=>button.addEventListener('click',()=>{const id=button.dataset.breadcrumbNode;if(id===ACTIVE_ROOT)resetTaxonomyRoot({historyMode:'push'});else selectTaxonomy(id,{revealPanel:true,historyMode:'push'});}));
 }
@@ -983,12 +994,12 @@ function assetDialog(initialQuery='',{intent='browse'}={}){
   if(assetCategory==='component'){renderComponents(query);return;}
   const categoryFilter=machine=>assetCategory==='equipment'?machine.area==='UTILITY':machine.area!=='UTILITY';
   const found=MACHINE_REGISTRY.filter(machine=>categoryFilter(machine)&&(!area||machine.area===area)&&foundationAssetMatches(machine,query)).slice(0,100);
-  $('#asset-result-summary').textContent=found.length+' posisi '+(assetCategory==='equipment'?'peralatan':'mesin')+' ditampilkan';
+  $('#asset-result-summary').textContent=found.length+' '+(assetCategory==='equipment'?'peralatan':'mesin')+' ditampilkan';
   $('#asset-results').innerHTML=found.length?found.map(machine=>{
    const primary=canOpenTechnical3D(machine),policy=foundationAssetPolicy(machine,placementForMachine(machine.machineId));
    const copy=primary?[machine.model,machine.area].filter(Boolean).join(' · '):[machine.area,positionStatusLabel(policy.positionStatus)].filter(Boolean).join(' · ');
    return`<button type="button" data-machine-id="${machine.machineId}" class="asset-browser-row"><span class="asset-thumbnail"><b>${primary?'3D':'2D'}</b><small>${primary?'Model 3D':'Denah'}</small></span><span class="asset-browser-copy"><strong>${esc(machine.name)}</strong><small>${esc([machine.sapCode,machine.model].filter(Boolean).join(' · ')||machine.area||'Aset pabrik')}</small><span>${esc(copy)}</span></span><em class="asset-data-badge">${primary?'Buka 3D':'Lihat di pabrik'}</em></button>`;
-  }).join(''):'<p class="empty">Tidak ada posisi aset yang sesuai.</p>';
+  }).join(''):'<p class="empty">Tidak ada mesin atau peralatan yang sesuai. Coba kata kunci lain.</p>';
  $$('[data-machine-id]').forEach(button=>button.onclick=async()=>{const machine=MACHINE_REGISTRY_BY_ID.get(button.dataset.machineId);if(machine){closeModal();if(simulationIntent){dispatchEvent(new CustomEvent('bmj:simulateselectedmachine',{detail:{selectedAsset:machine.machineId}}));return;}await openAssetContext(machine);}});
  };
  $('#asset-search').value=initialQuery;
