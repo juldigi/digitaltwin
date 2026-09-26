@@ -1,5 +1,6 @@
 import {buildActualFactory} from './factory-building.js';
 import {sceneIdentity} from './scene-editor-state.js';
+import {SimulationModeController} from './simulation-mode.js';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
@@ -106,7 +107,7 @@ export class FactoryEngine {
     const floor=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.ShadowMaterial({opacity:.12}));floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;floor.position.y=.01;this.studio.add(floor);
     const grid=new THREE.GridHelper(150,100,0xd4dfe5,0xdce5ea);grid.material.transparent=true;grid.material.opacity=.38;this.studio.add(grid);this.scene.add(this.studio);
     this.template=neutralTemplate();this.machine=this.template.root;this.scene.add(this.machine);
-    this.simulation=neutralSimulation();this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);
+    this.simulationMode=new SimulationModeController();this.simulation=neutralSimulation();this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);
     this.factory=new THREE.Group();this.scene.add(this.factory);this.factorySelectionId=null;this.factorySelectionHelper=null;
     this.gizmo=new TransformControls(this.camera,this.renderer.domElement);this.scene.add(this.gizmo.getHelper());this.gizmo.addEventListener('dragging-changed',e=>{this.controls.enabled=!e.value;});this.gizmo.addEventListener('objectChange',()=>{if(!this.sceneEditing&&this.gizmo.mode==='scale')this.machine.scale.setScalar(Math.max(.0001,this.machine.scale.x));this.onTransform?.();this.onSceneTransform?.();});
     this.ray=new THREE.Raycaster();this.down=null;this.renderer.domElement.addEventListener('dblclick',()=>{if(this.sceneEditing)return;this.template.reset();this.clearPartLabels();this.isolated=false;if(this.view==='factory'){this.clearFactorySelection();this.fit(this.factory);}else this.fit(this.machine);this.onReset?.();});
@@ -147,6 +148,7 @@ export class FactoryEngine {
   render(now){this.frame=requestAnimationFrame(this.render);if(this.renderFaulted||document.hidden||now-this.last<RENDER_PROFILES[this.qualityProfile].frameInterval)return;this.last=now;
     try{
       this.simulation?.update(now);
+      this.simulationMode.observe(this.simulation);
       if(this.view==='factory')this.actualFactory?.update?.(now);
       this.transition=updateCameraTransition(this.camera,this.controls,this.transition,now,RENDER_PROFILES[this.qualityProfile].cameraMs);
       this.controls.update();if(!this.postProcessing.render())this.renderer.render(this.scene,this.camera);if(this.requestedQuality==='auto'&&!document.hidden)this.adaptiveQuality.frame(now);this.updateLabel();if(!this.low){try{this.updatePartLabels();}catch(error){console.warn('[Digital Twin labels disabled after overlay error]',error);this.clearPartLabels();}}
@@ -218,10 +220,12 @@ export class FactoryEngine {
       entry.line.setAttribute('x1',String(labelX));entry.line.setAttribute('y1',String(labelY+3));entry.line.setAttribute('x2',String(anchorX));entry.line.setAttribute('y2',String(anchorY));entry.dot.setAttribute('cx',String(anchorX));entry.dot.setAttribute('cy',String(anchorY));
     }
   }
-  startPrintingSimulation(){return this.simulation?.start();}
+  startPrintingSimulation(){const state=this.simulation?.start();this.simulationMode.reset();return state;}
   pausePrintingSimulation(){return this.simulation?.pause();}
   resumePrintingSimulation(){return this.simulation?.resume();}
-  stopPrintingSimulation(){return this.simulation?.stop();}
+  stopPrintingSimulation(){this.simulationMode.reset();return this.simulation?.stop();}
+  setPrintingSimulationMode(mode){return this.simulationMode.setMode(mode,this.simulation?.state());}
+  getPrintingSimulationMode(){return this.simulationMode.mode;}
   setPrintingSimulationSpeed(value){return this.simulation?.setSpeed(value);}
   setPrintingSimulationPathVisible(on){return this.simulation?.setPathVisible(on);}
   setPrintingSimulationInkFlowVisible(on){return this.simulation?.setInkFlowVisible(on);}

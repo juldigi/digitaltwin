@@ -274,7 +274,7 @@ function resetExteriorView(){
 }
 function commitSimulationState(next=currentSimulationState()){
  const raw=next||{},active=!!raw.active,running=!!raw.running,progress=Math.max(0,Math.min(1,Number(raw.progress)||0));
- const normalized={...currentSimulationState(),...raw,available:raw.available!==false&&!raw.blocked,blocked:!!raw.blocked,blockedReason:raw.blockedReason||null,active,running,stage:raw.stage||null,speed:Number(raw.speed)||1,progress};
+ const normalized={...currentSimulationState(),...raw,available:raw.available!==false&&!raw.blocked,blocked:!!raw.blocked,blockedReason:raw.blockedReason||null,active,running,stage:raw.stage||null,speed:Number(raw.speed)||1,progress,mode:engine?.getPrintingSimulationMode?.()||'continuous'};
  setAppSimulation(normalized);return normalized;
 }
 function updateSimulationPanel(next=currentSimulationState()){
@@ -289,7 +289,7 @@ function updateSimulationPanel(next=currentSimulationState()){
  if(uvCount)uvCount.textContent=String(simulation.uvLampCount||0);
  if(uvIndicator)uvIndicator.classList.toggle('active',!!simulation.uvActive);
  if(bar)bar.style.width=progress+'%';
- if(start)start.textContent=active?(running?'Running':'Lanjutkan'):(IS_APM2?'Mulai Simulasi Proses':IS_SHEETING?'Mulai Simulasi Sheeting':'Mulai Simulasi Proses');
+ if(start)start.textContent=active?(running?'Running':simulation.mode==='stages'?'Tahap berikutnya':'Lanjutkan'):(IS_APM2?'Mulai Simulasi Proses':IS_SHEETING?'Mulai Simulasi Sheeting':'Mulai Simulasi Proses');
  if(pause){pause.textContent=running?'Pause':'Lanjut';pause.disabled=!active;pause.setAttribute('aria-disabled',active?'false':'true');}
  document.querySelectorAll('[data-sim-speed]').forEach(b=>b.classList.toggle('active',Math.abs(+b.dataset.simSpeed-(simulation.speed||1))<.01));
  document.querySelectorAll('[data-sim-stage]').forEach(b=>b.classList.toggle('active',b.dataset.simStage===(simulation.stage||'')));
@@ -326,6 +326,7 @@ window.addEventListener('bmj:simulationcommand',event=>{
  const action=event.detail?.action,value=event.detail?.value;
  if(action==='toggle'){if(engine?.isPrintingSimulationActive?.()||currentSimulationState().active)pausePrintingSimulation();else startPrintingSimulation();return;}
  if(action==='stop'){stopPrintingSimulation({restoreExterior:true});return;}
+ if(action==='mode'){engine?.setPrintingSimulationMode?.(value);updateSimulationPanel(engine?.getPrintingSimulationState?.());return;}
  if(action==='speed')updateSimulationPanel(engine?.setPrintingSimulationSpeed?.(+value)||currentSimulationState());
 });
 function simulationLocksStructure(){
