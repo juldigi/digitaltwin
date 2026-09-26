@@ -13,7 +13,7 @@ export const SHEETING_SIMULATION_STAGES=Object.freeze([
 export const SHEETING_PROCESS_STEPS=Object.freeze([
   'The continuous web unwinds from the single loaded RIGHT-side reel and remains one continuous strip through the low entry roll, alternating guide loops and the photo-visible black draw roll',
   'The draw roll meters material at line speed. Downstream of the guarded cut point, the next sheet grows continuously while its trailing edge is still physically connected to the web',
-  'At exactly one measured cut length, the guarded cross-cut separates the material. V197 does not animate a guessed blade carrier: the BMJ cutter is enclosed and the exact HSM-CTM7 internal knife mechanism is not visible in the actual photographs',
+  'At exactly one measured cut length, the guarded cross-cut separates the material. A moving line at the cut mouth marks the cut cycle; this does not animate a guessed blade because the enclosed internal knife shape and drive remain unverified',
   'At separation, the completed sheet already occupies one full sheet length downstream with its trailing edge at the cut point. It initially has line velocity, then the take-away section accelerates it smoothly above web speed to open a real gap from the next attached sheet',
   'The sheet is then decelerated onto the slower delivery belts. The resulting pitch becomes shorter than sheet length, so successive sheets form a controlled shingled stream instead of equally spaced cards',
   'The shingled stream slows again at stack entry; each sheet settles against the guide region and onto the pile while the lift support compensates for pile height'
@@ -43,7 +43,7 @@ export class SheetingProcessSimulation{
     this.fastToSlowDecelTime=.22;
     this.slowToStackDecelTime=.32;
     this.stackSettleDuration=.28;
-    this.cutEdgeDuration=.055;
+    this.cutEdgeDuration=.22;
     this.webAdvance=0;
 
     this.reelReferenceRadius=this.layout.reel.radius;
@@ -190,17 +190,14 @@ export class SheetingProcessSimulation{
     this.processCycle=this.cutInterval*6;
   }
 
-  makeRibbonSegment(a,b,index){
-    const mid=a.clone().add(b).multiplyScalar(.5),d=b.clone().sub(a),len=Math.max(.02,Math.hypot(d.x,d.y));
-    const m=new THREE.Mesh(new THREE.BoxGeometry(len+.010,this.webThickness,this.webWidth),this.webMaterial);
-    m.position.copy(mid);m.rotation.z=Math.atan2(d.y,d.x);m.name='Continuous upstream web '+index;m.userData={webRibbon:true};
-    m.castShadow=false;m.receiveShadow=true;this.group.add(m);this.webRibbonSegments.push(m);
-  }
-
   buildContinuousWeb(){
-    const pts=this.preCutCurve.getPoints(160);
-    for(let i=0;i<pts.length-1;i++)this.makeRibbonSegment(pts[i],pts[i+1],i);
-    this.webRibbonSegments.forEach(m=>m.visible=false);
+    const pts=this.preCutCurve.getPoints(160),positions=[],indices=[];
+    for(const p of pts)positions.push(p.x,p.y,p.z-this.webWidth/2,p.x,p.y,p.z+this.webWidth/2);
+    for(let i=0;i<pts.length-1;i++){const a=i*2;indices.push(a,a+1,a+2,a+1,a+3,a+2);}
+    const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setIndex(indices);geometry.computeVertexNormals();
+    const material=this.webMaterial.clone();material.side=THREE.DoubleSide;
+    const ribbon=new THREE.Mesh(geometry,material);ribbon.name='Continuous upstream web';ribbon.userData.webRibbon=true;ribbon.visible=false;ribbon.castShadow=false;ribbon.receiveShadow=true;
+    this.group.add(ribbon);this.webRibbonSegments.push(ribbon);
   }
 
   buildPendingLeader(){
@@ -222,6 +219,10 @@ export class SheetingProcessSimulation{
     this.cutEdge.position.set(this.cutX-.006,this.cutY+.010,0);
     this.cutEdge.userData={materialCutEdge:true,notABlade:true};
     this.group.add(this.cutEdge);
+    const cueMaterial=new THREE.MeshBasicMaterial({color:0x2e87b2,depthTest:false,depthWrite:false});
+    this.cutAction=new THREE.Mesh(new THREE.BoxGeometry(.025,.026,this.webWidth*1.04),cueMaterial);
+    this.cutAction.name='Guarded cross-cut stroke cue';this.cutAction.userData={cutCycleCue:true,notABlade:true};this.cutAction.renderOrder=9;this.cutAction.visible=false;
+    this.cutAction.position.set(this.cutX-.015,this.cutY+.10,0);this.group.add(this.cutAction);
   }
 
   buildFlowMarkers(){
@@ -254,7 +255,11 @@ export class SheetingProcessSimulation{
   poseAtDistance(s){
     const u=clamp01(s/Math.max(.001,this.outputLength));
     const p=this.outputCurve.getPointAt(u),tan=this.outputCurve.getTangentAt(u);
-    return {p,tan,angle:Math.atan2(tan.y,tan.x),s};
+    let angle=Math.atan2(tan.y,tan.x);
+    // A sheet moving toward negative X still lies flat; its longitudinal axis has no 180° flip.
+    if(angle>Math.PI/2)angle-=Math.PI;
+    if(angle< -Math.PI/2)angle+=Math.PI;
+    return {p,tan,angle,s};
   }
 
   transportDistanceForAge(age){
@@ -342,7 +347,7 @@ export class SheetingProcessSimulation{
       pathVisible:this.pathVisible,inkFlowVisible:false,
       transportMode:'CONTINUOUS_WEB__FORMING_SHEET__GUARDED_CUT__SMOOTH_TAKEAWAY_ACCEL__SLOW_SHINGLE__STACK_SETTLE',
       cutterMode:'GUARDED_CROSS_CUT__INTERNAL_MECHANISM_UNRESOLVED',
-      cuttingNow,cutPhase:phase,cutEdgeVisible:!!this.cutEdge?.visible,
+      cuttingNow,cutPhase:phase,cutEdgeVisible:!!this.cutEdge?.visible,cutActionVisible:!!this.cutAction?.visible,
       bladeVisible:false,bladeCount:0,visibleKnifeGeometry:false,
       cutterMechanismEvidence:'BMJ_CUTTER_ENCLOSED__HSM56_FLAT_BED_KNIFE_WORDING_ONLY__EXACT_INTERNAL_MECHANISM_UNRESOLVED',
       webAdvance:this.webAdvance,targetCutLength:this.targetCutLength,
@@ -372,7 +377,7 @@ export class SheetingProcessSimulation{
   stop(){
     this.active=false;this.running=false;this.elapsed=0;this.webAdvance=0;this.completed=0;this.cutCount=0;this.lastCutIndex=0;this.lastNow=null;this.pendingLeaderLength=0;
     this.sheets.forEach(s=>s.visible=false);this.webFlowMarks.forEach(s=>s.visible=false);this.webRibbonSegments.forEach(s=>s.visible=false);
-    this.pendingLeaderSegments.forEach(s=>s.visible=false);this.pile.forEach(s=>s.visible=false);if(this.cutEdge)this.cutEdge.visible=false;
+    this.pendingLeaderSegments.forEach(s=>s.visible=false);this.pile.forEach(s=>s.visible=false);if(this.cutEdge)this.cutEdge.visible=false;if(this.cutAction)this.cutAction.visible=false;
     this.restoreMechanisms();this.setReferenceStackVisible(true);this.onUpdate?.(this.state());return this.state();
   }
   setSpeed(v){this.speed=Math.max(.35,Math.min(2,+v||1));this.onUpdate?.(this.state());return this.state();}
@@ -444,7 +449,9 @@ export class SheetingProcessSimulation{
     // Show the freshly separated paper edge for a few frames. This is material evidence,
     // not an invented knife animation; the physical blade remains hidden inside the enclosure.
     const timeSinceLatestCut=this.cutCount>0?this.elapsed-this.cutCount*this.cutInterval:Infinity;
-    if(this.cutEdge)this.cutEdge.visible=this.active&&timeSinceLatestCut>=0&&timeSinceLatestCut<this.cutEdgeDuration;
+    const cutProgress=timeSinceLatestCut/this.cutEdgeDuration,cutVisible=this.active&&cutProgress>=0&&cutProgress<1;
+    if(this.cutEdge)this.cutEdge.visible=cutVisible;
+    if(this.cutAction){this.cutAction.visible=cutVisible;this.cutAction.position.y=this.cutY+.10-.09*Math.sin(Math.PI*Math.max(0,Math.min(1,cutProgress)));}
     if(this.cutCount!==previousCutCount)this.lastCutIndex=this.cutCount;
 
     for(const [slot,s] of this.sheets.entries()){
@@ -475,8 +482,8 @@ export class SheetingProcessSimulation{
   dispose(){
     this.stop();
     this.sheetGeometry.dispose();this.pileGeometry.dispose();this.webFlowGeometry.dispose();this.pendingLeaderGeometry.dispose();this.cutEdgeGeometry?.dispose();
-    for(const m of this.webRibbonSegments)m.geometry.dispose();
-    this.sheetMaterial.dispose();this.webMaterial.dispose();this.flowMaterial.dispose();this.cutEdgeMaterial?.dispose();
+    for(const m of this.webRibbonSegments){m.geometry.dispose();m.material.dispose();}
+    this.sheetMaterial.dispose();this.webMaterial.dispose();this.flowMaterial.dispose();this.cutEdgeMaterial?.dispose();this.cutAction?.geometry.dispose();this.cutAction?.material.dispose();
     this.path.geometry.dispose();this.pathMaterial.dispose();this.group.removeFromParent();
   }
 }
