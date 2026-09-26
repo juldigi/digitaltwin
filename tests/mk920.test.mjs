@@ -46,9 +46,9 @@ test('MK920 foil pull and waste rewind cannot run during platen dwell and start 
  sim.dispose();model.dispose();
 });
 
-test('MK920 gripper indexing resumes after platen opens and delivery sheets land above the visible pile',()=>{
+test('MK920 gripper indexing resumes after platen opens and delivery sheets settle onto an empty pile table',()=>{
  const model=new MK920MachineTemplate(),sim=new MK920StampingSimulation(model.root,model);sim.start();let now=1000,seenRelease=false;for(let i=0;i<900;i++){now+=20;sim.update(now);seenRelease||=sim.state().gripperReleaseActive;}
- const state=sim.state();assert.ok(sim.completed>0);assert.ok(state.pileSheetsVisible>0);assert.ok(seenRelease);assert.ok(sim.stack.filter(p=>p.visible).every(p=>p.position.y>=1.125));
+ const state=sim.state();assert.ok(sim.completed>0);assert.ok(state.pileSheetsVisible>0);assert.ok(seenRelease);assert.equal(sim.staticDeliveryStack.visible,false);assert.ok(sim.stack.filter(p=>p.visible).every(p=>p.position.y>=.466));
  sim.stop();assert.equal(sim.stack.every(p=>!p.visible),true);assert.equal(sim.heaters.every(h=>h.material.emissiveIntensity===0),true);sim.dispose();model.dispose();
 });
 
