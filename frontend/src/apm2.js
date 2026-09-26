@@ -71,6 +71,7 @@ export class APM2MachineTemplate{
     this.buildControl();
     this.buildSafety();
     this.buildExteriorIdentity();
+    this.buildStructuralPolishV236();
   }
   buildFrameAndPlatform(){
     const base=this.group(this.root,'apm2-base','Machine Base / Support',[0,0,0],[0,-.18,.35],['APM2-SP102-E-VISUAL','APM2-SP102-DIM']);
@@ -301,6 +302,29 @@ export class APM2MachineTemplate{
     deliveryCrown.userData.openPileEnvelope=true;
     const identity=this.cover(this.box(g,[.64,.14,.030],[-.02,1.78,-1.005],'dark',.012));
     identity.userData.modelFamilyPlate='SP 102';
+  }
+  buildStructuralPolishV236(){
+    this.root.userData.visualRefinement='V236_SP102_LEGACY_STRUCTURAL_ACCESS_AND_SERVICE_DETAILS';
+    this.root.userData.structuralEvidenceBoundary='BOBST_SP102_LEGACY_FAMILY_PLUS_BMJ_IDENTITY__SUFFIX_AND_INSTALLED_OPTIONS_UNCONFIRMED';
+    const platform=this.findNode('apm2-platform');
+    if(platform){
+      // Existing platform receives the missing intermediate rail and a grounded stair bank.
+      this.cylinder(platform,.018,4.65,[.15,.76,-1.53],'steel','x').userData.humanAccessReference=true;
+      for(let i=0;i<4;i++){
+        const step=this.box(platform,[.68,.09,.58],[-2.78+i*.17,.07+i*.10,-1.30],'steel',.008);
+        step.userData.humanAccessReference=true;step.userData.silhouetteCritical=true;
+      }
+      for(const x of [-2.78,-2.08]){const p=this.cylinder(platform,.019,.72,[x,.82,-1.58],'steel','y');p.userData.humanAccessReference=true;p.userData.silhouetteCritical=true;}
+    }
+    // Shallow OS service-door seams/handles clarify the legacy monobloc body without inventing internals.
+    const housings=['apm2-platen-housing','apm2-stripping-housing','apm2-delivery-housing'];
+    for(const [i,id] of housings.entries()){
+      const g=this.findNode(id);if(!g)continue;
+      const y=1.35,z=-.997;
+      const seam=this.box(g,[.56,.012,.018],[0,y,z],'black',.002);seam.userData.serviceDetail=true;seam.userData.exteriorCover=true;
+      const handle=this.box(g,[.035,.22,.025],[.31,y+.05,z-.018],'dark',.004);handle.userData.serviceDetail=true;handle.userData.exteriorCover=true;
+      handle.userData.mechanismRole='sp102-service-door-handle-reference-'+(i+1);
+    }
   }
   buildDrive(){
     const g=this.group(this.root,'apm2-drive','Main Drive / Transmission',[0,0,0],[0,.25,.65],['APM2-SP102-PARTS']);
