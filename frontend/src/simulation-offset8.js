@@ -40,7 +40,7 @@ export class Offset8PrintingSimulation{
   this.coatingActive=false;this.dryerActive=false;this.deliveryBrakeActive=false;this.feederSuctionActive=false;
   root.traverse(o=>{if(o.isMesh&&o.userData.rotor)this.rotors.push(o);if(o.userData.dryerEmitter)this.emitters.push(o);if(o.userData.reciprocator)this.suckers.push(o);if(o.userData.deliveryGripperBar)this.deliveryBars.push(o);});
   this.rotorRest=this.rotors.map(o=>o.quaternion.clone());this.suckerRest=this.suckers.map(o=>o.position.clone());this.deliveryBarRest=this.deliveryBars.map(o=>o.position.clone());
-  this.feederHead=template.findNode('offset8-feeder-head');this.feederHeadRest=this.feederHead?.position.clone()||null;
+  this.staticDeliveryStack=template.findNode('offset8-delivery-paper-stack');this.staticDeliveryVisible=this.staticDeliveryStack?.visible;this.feederHead=template.findNode('offset8-feeder-head');this.feederHeadRest=this.feederHead?.position.clone()||null;
   this.points=sheetPathPoints();this.curve=polylineCurve(this.points);this.pathLength=this.curve.getLength();
   const pathGeo=new THREE.BufferGeometry().setFromPoints(this.curve.getPoints(220)),pathMat=new THREE.LineDashedMaterial({color:0x3f7f9a,dashSize:.08,gapSize:.05,transparent:true,opacity:.55});
   this.pathLine=new THREE.Line(pathGeo,pathMat);this.pathLine.name='OFFSET8-EVIDENCE-BOUNDED-SHEET-PATH';this.pathLine.computeLineDistances();this.pathLine.visible=false;root.add(this.pathLine);
@@ -55,7 +55,7 @@ export class Offset8PrintingSimulation{
    mechanismCount:this.rotors.length+this.suckers.length+this.emitters.length+this.deliveryBars.length,inkFlowCount:0,uvLampCount:0,uvActive:false,pathVisible:this.pathVisible,inkFlowVisible:false,
    feederSuctionActive:this.feederSuctionActive,coatingActive:this.coatingActive,dryerActive:this.dryerActive,deliveryBrakeActive:this.deliveryBrakeActive,deliveryGripperActive:this.active&&this.running};
  }
- start(){this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;for(const s of this.sheets)s.lap=-1;this.resetMechanisms();this.onUpdate?.(this.state());return this.state();}
+ start(){if(this.staticDeliveryStack)this.staticDeliveryStack.visible=false;for(const p of this.stack)p.visible=false;this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;for(const s of this.sheets)s.lap=-1;this.resetMechanisms();this.onUpdate?.(this.state());return this.state();}
  pause(){this.running=false;this.paused=this.active;this.onUpdate?.(this.state());return this.state();}
  resume(){if(this.active){this.running=true;this.paused=false;this.lastNow=null;}this.onUpdate?.(this.state());return this.state();}
  setSpeed(v){this.speed=Math.max(.25,Math.min(4,Number(v)||1));return this.state();}
@@ -104,7 +104,7 @@ export class Offset8PrintingSimulation{
    else s.mesh.material.roughness=.86;
    if(dryCenters.some(x=>Math.abs(pos.x-x)<.58))dry=true;
    if(pos.x>11.72&&pos.x<12.40)brake=true;
-   const lap=Math.floor(raw);if(lap>s.lap){if(s.lap>=0){this.completed++;const q=this.stack[(this.completed-1)%this.stack.length];q.visible=true;q.position.set(12.02,1.292+((this.completed-1)%this.stack.length)*.0075,0);}s.lap=lap;}
+   const lap=Math.floor(raw);if(lap>s.lap){if(s.lap>=0){this.completed++;const q=this.stack[(this.completed-1)%this.stack.length];q.visible=true;q.position.set(12.02,.654+((this.completed-1)%this.stack.length)*.0075,0);}s.lap=lap;}
   }
   this.coatingActive=coat;this.dryerActive=dry;this.deliveryBrakeActive=brake;
   for(const e of this.emitters){const wp=new THREE.Vector3();e.getWorldPosition(wp);const active=this.sheets.some(s=>s.mesh.visible&&Math.abs(s.mesh.position.x-wp.x)<.62);e.material.emissive?.setHex(active?0xff9c32:0x000000);e.material.emissiveIntensity=active?1.6:0;}
@@ -115,6 +115,6 @@ export class Offset8PrintingSimulation{
   const dt=Math.min(.12,Math.max(0,(now-this.lastNow)/1000))*this.speed;this.lastNow=now;this.elapsed+=dt;
   this.spinRotors(dt);this.updateFeeder();this.updateDeliveryBars();this.updateSheets();this.onUpdate?.(this.state());
  }
- stop(){this.active=false;this.running=false;this.paused=false;this.elapsed=0;this.lastNow=null;for(const s of this.sheets){s.mesh.visible=false;s.lap=-1;}for(const s of this.stack)s.visible=false;this.pathLine.visible=false;this.resetMechanisms();this.onUpdate?.(this.state());return this.state();}
+ stop(){this.active=false;this.running=false;this.paused=false;this.elapsed=0;this.lastNow=null;for(const s of this.sheets){s.mesh.visible=false;s.lap=-1;}for(const s of this.stack)s.visible=false;this.pathLine.visible=false;if(this.staticDeliveryStack)this.staticDeliveryStack.visible=this.staticDeliveryVisible;this.resetMechanisms();this.onUpdate?.(this.state());return this.state();}
  dispose(){this.stop();for(const s of this.sheets){this.root.remove(s.mesh);s.mesh.geometry.dispose();s.mesh.material.dispose();}for(const s of this.stack){this.root.remove(s);s.geometry.dispose();s.material.dispose();}this.root.remove(this.pathLine);this.pathLine.geometry.dispose();this.pathLine.material.dispose();}
 }

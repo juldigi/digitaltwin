@@ -58,7 +58,7 @@ export class FZ1200ProcessSimulation{
    const role=String(r.userData.mechanismRole||''),turnDrive=/^(trunnion-shaft|rotation-gear)$/.test(role)&&phase>.29&&phase<.49;
    const blowerDrive=/^(blower|blower-motor)$/.test(role)&&air,hydDrive=/^(hyd-pump|hyd-pump-motor)$/.test(role)&&hyd,chainDrive=role==='lift-chain-sprocket'&&liftDrive,move=turnDrive||blowerDrive||role==='vibration'&&jog||hydDrive||chainDrive;
    if(!move)continue;
-   const dir=r.userData.spinDirection||1,rate=blowerDrive?9:role==='vibration'?11:hydDrive?6:chainDrive?5.5:4.4,axis=r.userData.rotorAxis==='x'?new THREE.Vector3(1,0,0):r.userData.rotorAxis==='z'?Z_AXIS:Y_AXIS,q=new THREE.Quaternion().setFromAxisAngle(axis,dir*rate*dt);r.quaternion.multiply(q).normalize();
+   const dir=r.userData.spinDirection||1,rate=blowerDrive?9:role==='vibration'?11:hydDrive?6:chainDrive?5.5:4.4,axis=Y_AXIS,q=new THREE.Quaternion().setFromAxisAngle(axis,dir*rate*dt);r.quaternion.multiply(q).normalize();
   }
  }
  update(now){

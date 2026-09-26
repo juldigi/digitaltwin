@@ -3,6 +3,7 @@ import {APM2_DIMENSIONS} from './data/dimensions-apm2.js';
 
 const D=APM2_DIMENSIONS.layout;
 const Y_AXIS=new THREE.Vector3(0,1,0);
+const Z_AXIS=new THREE.Vector3(0,0,1);
 const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
 const smooth=(v,a,b)=>THREE.MathUtils.smoothstep(v,a,b);
 const lerp=(a,b,t)=>THREE.MathUtils.lerp(a,b,clamp(t));
@@ -71,7 +72,7 @@ export class APM2ProcessSimulation{
   this.rotorRest=this.rotors.map(r=>r.quaternion.clone());this.barRest=this.gripperBars.map(b=>b.position.clone());this.platenLinkRestZ=this.platenLinks.map(l=>l.rotation.z);
   this.updateGripperBars(0,0);
   this.barRest=this.gripperBars.map(b=>b.position.clone());
-  this.pileAnchor=new THREE.Vector3(2.36,1.16,0);this.maxPileSheets=28;this.pileThickness=.004;
+  this.staticDeliveryStack=template.findNode('apm2-delivery-paper-stack');this.staticDeliveryVisible=this.staticDeliveryStack?.visible;this.pileAnchor=new THREE.Vector3(2.36,.52,0);this.maxPileSheets=28;this.pileThickness=.004;
   this.buildPath();this.buildSheets();this.buildPileSheets();this.refreshPile();this.resetFlags();
  }
  material(params){const m=new THREE.MeshStandardMaterial(params);this.materials.push(m);return m;}
@@ -85,7 +86,7 @@ export class APM2ProcessSimulation{
   }
  }
  buildPileSheets(){const geo=this.geometry(new THREE.PlaneGeometry(.72,1.02,4,6));geo.rotateX(-Math.PI/2);for(let i=0;i<this.maxPileSheets;i++){const mesh=new THREE.Mesh(geo,this.material({color:0xe9e2cc,roughness:.92,metalness:0,side:THREE.DoubleSide}));mesh.visible=false;mesh.frustumCulled=false;this.group.add(mesh);this.pileSheets.push({mesh,serial:-1});}}
- refreshPile(){const node=this.template.findNode('apm2-delivery-paper-stack');if(!node)return;this.machine.updateMatrixWorld(true);node.updateWorldMatrix(true,true);const box=new THREE.Box3().setFromObject(node),p=new THREE.Vector3((box.min.x+box.max.x)/2,box.max.y,(box.min.z+box.max.z)/2);this.machine.worldToLocal(p);this.pileAnchor.copy(p);this.pileAnchor.y+=.006;}
+ refreshPile(){const node=this.template.findNode('apm2-delivery-pile-table');if(!node)return;this.machine.updateMatrixWorld(true);node.updateWorldMatrix(true,true);const box=new THREE.Box3().setFromObject(node),p=new THREE.Vector3((box.min.x+box.max.x)/2,box.max.y,(box.min.z+box.max.z)/2);this.machine.worldToLocal(p);this.pileAnchor.copy(p);this.pileAnchor.y+=.006;}
  layoutPile(){const list=this.pileSheets.filter(s=>s.serial>=0).sort((a,b)=>a.serial-b.serial);list.forEach((s,rank)=>{s.mesh.position.set(this.pileAnchor.x,this.pileAnchor.y+rank*this.pileThickness,this.pileAnchor.z);s.mesh.rotation.set(0,0,0);s.mesh.visible=true;});}
  deposit(){this.completed++;const target=this.pileSheets[(this.completed-1)%this.maxPileSheets];target.serial=this.completed;this.layoutPile();}
  resetFlags(){this.feederSuctionActive=false;this.registrationActive=false;this.sideLayActive=false;this.transportIndexing=false;this.transportStopped=true;this.platenClosing=false;this.platenClosed=false;this.pressureDwell=false;this.strippingActive=false;this.deliveryReleaseActive=false;}
@@ -100,7 +101,7 @@ export class APM2ProcessSimulation{
    interlocks:{platenRequiresStoppedTransport:this.platenClosed?!this.transportIndexing:true,strippingRequiresStoppedTransport:this.strippingActive?!this.transportIndexing:true}
   };
  }
- spin(r,dt,rate){const role=r.userData.mechanismRole;const axis=role==='main-shaft'?Y_AXIS:role==='feed-roller'||role==='chain-sprocket'?new THREE.Vector3(0,0,1):new THREE.Vector3(1,0,0);const q=new THREE.Quaternion().setFromAxisAngle(axis,rate*dt);r.quaternion.premultiply(q).normalize();}
+ spin(r,dt,rate){const axis=r.geometry?.type==='TorusGeometry'?Z_AXIS:Y_AXIS;const q=new THREE.Quaternion().setFromAxisAngle(axis,rate*dt);r.quaternion.multiply(q).normalize();}
  updateRotors(dt,p,indexing,platenMotion){
   for(const r of this.rotors){const role=String(r.userData.mechanismRole||'');let move=false,rate=4;
    if(role==='main-motor'||role==='flywheel'||role==='main-shaft'||role==='drive-gear'){move=true;rate=5.2;}
@@ -135,10 +136,10 @@ export class APM2ProcessSimulation{
    if(lap>s.lap){if(s.lap>=0&&s.diecut)this.deposit();s.lap=lap;s.diecut=false;s.stripped=false;}
   }
  }
- start(){if(!this.active){this.elapsed=0;this.completed=0;for(const p of this.pileSheets){p.mesh.visible=false;p.serial=-1;}for(const s of this.sheets){s.lap=-1;s.diecut=false;s.stripped=false;}}this.refreshPile();this.active=true;this.running=true;this.paused=false;this.lastNow=null;this.group.visible=true;this.resetMechanisms();this.onUpdate?.(this.state());return this.state();}
+ start(){if(!this.active){this.elapsed=0;this.completed=0;for(const p of this.pileSheets){p.mesh.visible=false;p.serial=-1;}for(const s of this.sheets){s.lap=-1;s.diecut=false;s.stripped=false;}}this.refreshPile();if(this.staticDeliveryStack)this.staticDeliveryStack.visible=false;this.active=true;this.running=true;this.paused=false;this.lastNow=null;this.group.visible=true;this.resetMechanisms();this.onUpdate?.(this.state());return this.state();}
  pause(){if(this.active){this.running=false;this.paused=true;this.lastNow=null;this.onUpdate?.(this.state());}return this.state();}
  resume(){if(this.active){this.running=true;this.paused=false;this.lastNow=null;this.onUpdate?.(this.state());}return this.state();}
- stop(){this.active=false;this.running=false;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;this.group.visible=false;this.resetMechanisms();for(const s of this.sheets){s.mesh.visible=false;s.cut.visible=false;s.lap=-1;s.diecut=false;s.stripped=false;}for(const p of this.pileSheets){p.mesh.visible=false;p.serial=-1;}this.onUpdate?.(this.state());return this.state();}
+ stop(){this.active=false;this.running=false;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;this.group.visible=false;this.resetMechanisms();for(const s of this.sheets){s.mesh.visible=false;s.cut.visible=false;s.lap=-1;s.diecut=false;s.stripped=false;}for(const p of this.pileSheets){p.mesh.visible=false;p.serial=-1;}if(this.staticDeliveryStack)this.staticDeliveryStack.visible=this.staticDeliveryVisible;this.onUpdate?.(this.state());return this.state();}
  resetMechanisms(){if(this.feederHead&&this.rest.head)this.feederHead.position.copy(this.rest.head);if(this.sideLay&&this.rest.side)this.sideLay.position.copy(this.rest.side);if(this.platen&&this.rest.platen)this.platen.position.copy(this.rest.platen);if(this.stripUpper&&this.rest.upper)this.stripUpper.position.copy(this.rest.upper);if(this.stripLower&&this.rest.lower)this.stripLower.position.copy(this.rest.lower);this.rotors.forEach((r,i)=>r.quaternion.copy(this.rotorRest[i]));this.gripperBars.forEach((b,i)=>b.position.copy(this.barRest[i]));this.platenLinks.forEach((l,i)=>{l.rotation.z=this.platenLinkRestZ[i];});this.resetFlags();}
  setSpeed(v){this.speed=clamp(Number(v)||1,.35,2);return this.state();}
  setPathVisible(on){this.pathVisible=!!on;this.pathLine.visible=this.pathVisible;return this.state();}

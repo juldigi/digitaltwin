@@ -38,7 +38,7 @@ export class SharkN650ProcessSimulation{
  setSpeed(v){this.speed=Math.max(.25,Math.min(4,Number(v)||1));return this.state();}
  setPathVisible(v){this.pathVisible=!!v;this.pathLine.visible=this.pathVisible;return this.state();}
  setInkFlowVisible(){return this.state();}
- spin(r,dt,rate){const axis=r.userData.rotorAxis==='x'?new THREE.Vector3(1,0,0):r.userData.rotorAxis==='z'?new THREE.Vector3(0,0,1):Y_AXIS,q=new THREE.Quaternion().setFromAxisAngle(axis,(r.userData.spinDirection||1)*rate*dt);r.quaternion.multiply(q).normalize();}
+ spin(r,dt,rate){const axis=Y_AXIS,q=new THREE.Quaternion().setFromAxisAngle(axis,(r.userData.spinDirection||1)*rate*dt);r.quaternion.multiply(q).normalize();}
  updateRotors(dt){for(const r of this.rotors){const role=String(r.userData.mechanismRole||''),transfer=['transport-pulley','transfer-drive-motor','transfer-encoder'].includes(role)&&this.transferDriveActive,vac=role==='vacuum-blower'&&this.transferVacuumReady,inspect=role==='inspection-encoder-wheel'&&(this.blankPresenceTrigger||this.scanActive),good=['good-return','good-return-motor'].includes(role)&&this.goodReturnDriveActive,bad=['bad-return','bad-return-motor'].includes(role)&&this.badReturnDriveActive;if(!(transfer||vac||inspect||good||bad))continue;const rate=vac?8.6:transfer?6.0:good||bad?5.4:6.2;this.spin(r,dt,rate);}}
  updateOptics(active){for(const l of this.lights){l.material.emissive?.setHex(active?0xe8f7ff:0x25323a);l.material.emissiveIntensity=active?2.25:.15;}}
  updateSuckers(active){this.feederSuctionActive=active;const pulse=.016*Math.sin(this.elapsed*9);this.suckers.forEach((s,i)=>{s.position.copy(this.suckerRest[i]);if(active)s.position.y-=Math.abs(pulse);});}

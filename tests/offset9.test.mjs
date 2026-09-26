@@ -47,6 +47,6 @@ test('Offset 9 taxonomy is a contiguous six-level tree mapped to real geometry',
 test('Offset 9 process cycle drives feeder coating Venturi brake grippers and stacked delivery',()=>{
  const model=new Offset9MachineTemplate(),sim=new Offset9PrintingSimulation(model.root,model);assert.ok(OFFSET9_SIMULATION_STAGES.includes('Printing Unit 4'));assert.ok(OFFSET9_SIMULATION_STAGES.includes('Inline Coating Unit'));
  sim.start();let now=1000,feed=false,coat=false,air=false,brake=false,grip=false;for(let i=0;i<1800;i++){now+=10;sim.update(now);const state=sim.state();feed||=state.feederSuctionActive;coat||=state.coatingActive;air||=state.airGuidanceActive;brake||=state.deliveryBrakeActive;grip||=state.deliveryGripperActive;}
- const state=sim.state();assert.ok(feed&&coat&&brake&&grip);assert.equal(air,false,'high-pile delivery Venturi must remain inactive until BMJ option is verified');assert.ok(state.sheetsVisible>0);assert.ok(state.completed>0);assert.ok(state.pileSheetsVisible>0);assert.ok(sim.stack.filter(x=>x.visible).every(x=>x.position.y>=.985));
+ const state=sim.state();assert.ok(feed&&coat&&brake&&grip);assert.equal(air,false,'high-pile delivery Venturi must remain inactive until BMJ option is verified');assert.ok(state.sheetsVisible>0);assert.ok(state.completed>0);assert.ok(state.pileSheetsVisible>0);assert.ok(sim.stack.filter(x=>x.visible).every(x=>x.position.y>=.505));
  sim.stop();sim.dispose();model.dispose();
 });

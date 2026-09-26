@@ -43,7 +43,7 @@ export class UpgLy300ProcessSimulation{
  setSpeed(v){this.speed=Math.max(.25,Math.min(4,Number(v)||1));return this.state();}
  setPathVisible(v){this.pathVisible=!!v;this.pathLine.visible=this.pathVisible;return this.state();}
  setInkFlowVisible(v){this.printVisible=!!v;for(const i of this.items)i.code.visible=this.printVisible&&i.printed;return this.state();}
- spin(r,dt,rate){const axis=r.userData.rotorAxis==='x'?new THREE.Vector3(1,0,0):r.userData.rotorAxis==='z'?new THREE.Vector3(0,0,1):Y_AXIS,q=new THREE.Quaternion().setFromAxisAngle(axis,(r.userData.spinDirection||1)*rate*dt);r.quaternion.multiply(q).normalize();}
+ spin(r,dt,rate){const axis=Y_AXIS,q=new THREE.Quaternion().setFromAxisAngle(axis,(r.userData.spinDirection||1)*rate*dt);r.quaternion.multiply(q).normalize();}
  updateRotors(dt){for(const r of this.rotors){const role=String(r.userData.mechanismRole||''),feed=['pager-wheel','feeder-vfd-motor'].includes(role)&&this.feederDriveActive,transport=['belt-pulley','servo','encoder'].includes(role)&&this.transportDriveActive,neg=role==='negative-pump'&&this.negativePumpActive;if(!(feed||transport||neg))continue;const rate=feed?6.4:transport?(role==='encoder'?7.0:5.8):4.6;this.spin(r,dt,rate);}}
  updateLights(uvOn,inspectOn){for(const l of this.uvLamps){l.material.emissive?.setHex(uvOn?0xaabfff:0x1b2230);l.material.emissiveIntensity=uvOn?2.5:.12;}for(const l of this.inspectionLights){l.material.emissive?.setHex(inspectOn?0xdff8ff:0x20272b);l.material.emissiveIntensity=inspectOn?2.1:.15;}}
  assignResult(item,lap){const seq=lap*this.items.length+item.index;item.result=(seq%6===0)?'REJECT_DEMO':'PASS_DEMO';item.inspected=true;item.inspectionLap=lap;this.inspectedDemoCount++;}

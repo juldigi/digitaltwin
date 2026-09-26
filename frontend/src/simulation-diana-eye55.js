@@ -41,7 +41,7 @@ export class DianaEye55ProcessSimulation{
  setSpeed(v){this.speed=Math.max(.25,Math.min(4,Number(v)||1));return this.state();}
  setPathVisible(v){this.pathVisible=!!v;this.pathLine.visible=this.pathVisible;return this.state();}
  setInkFlowVisible(){return this.state();}
- spin(r,dt,rate){const axis=r.userData.rotorAxis==='x'?new THREE.Vector3(1,0,0):r.userData.rotorAxis==='z'?new THREE.Vector3(0,0,1):Y_AXIS,q=new THREE.Quaternion().setFromAxisAngle(axis,(r.userData.spinDirection||1)*rate*dt);r.quaternion.multiply(q).normalize();}
+ spin(r,dt,rate){const axis=Y_AXIS,q=new THREE.Quaternion().setFromAxisAngle(axis,(r.userData.spinDirection||1)*rate*dt);r.quaternion.multiply(q).normalize();}
  updateRotors(dt){for(const r of this.rotors){const role=String(r.userData.mechanismRole||''),feed=role==='feed-pulley'&&this.feederDriveActive,transport=['transport-pulley','transport-drive-motor','transport-encoder'].includes(role)&&this.transportDriveActive,vac=role==='vacuum-blower'&&this.vacuumHoldActive,delivery=role==='delivery-pulley'&&this.deliveryDriveActive;if(!(feed||transport||vac||delivery))continue;const rate=vac?8.4:feed?6.1:transport?5.8:5.2;this.spin(r,dt,rate);}}
  updateOptics(active){for(const l of this.lights){l.material.emissive?.setHex(active?0xfff0b0:0x302d21);l.material.emissiveIntensity=active?2.25:.14;}}
  assignInspectionResult(blank,lap){
