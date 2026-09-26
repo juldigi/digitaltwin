@@ -9,9 +9,9 @@ export class Polar115MachineTemplate{
  constructor(){
   this.root=new THREE.Group();this.root.name='POLAR-115-EM';this.parts=[];this.nodes=[];this.meshes=[];this.materials=[];this.geometries=[];this.activeMeshes=[];this.exteriorOpen=false;
   this.palette={body:0xb8bbb5,bodyDark:0x8f938f,dark:0x252b2e,table:0xb6b8b2,tableDark:0x514a43,steel:0xa9b0b1,accent:0x405961,warning:0xd0a338,screen:0x173e34,red:0xb6302d,paper:0xece5d2,black:0x111517,air:0x8bbad0};
-  this.build();this.enrichV122();this.taxonomy=POLAR115_TAXONOMY;this.taxonomyById=new Map(this.taxonomy.map(n=>[n.id,n]));
+  this.build();this.enrichV122();this.refineStructuralV236();this.taxonomy=POLAR115_TAXONOMY;this.taxonomyById=new Map(this.taxonomy.map(n=>[n.id,n]));
   for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}this.root.updateMatrixWorld(true);
-  this.root.userData={assetId:POLAR115_SPEC.assetId,nodeId:'POLAR-115-EM',model:POLAR115_SPEC.model,serial:POLAR115_SPEC.serial,spec:POLAR115_SPEC,sources:POLAR115_TECHNICAL_SOURCES,machineEnvelope:{reference:POLAR115_REFERENCE_DIMENSIONS},geometryStatus:'DEDICATED_BMJ_PHOTO_MATCHED__ARCHIVE_DIMENSIONS_NOT_INSTALLATION_CAD',engineeringDimensions:false,evidenceBoundary:POLAR115_SPEC.evidenceBoundary,researchVersion:'V123_PHOTO_MATCHED',researchSourceCount:V122_SOURCE_STATS.total,detailPass:'V123_POLAR115_BMJ_PHOTO_MATCHED',actualPhotoEvidence:'BMJ-POLAR-PHOTOS-2026-09',mainHousingProfile:'RECTANGULAR_ROUNDED_HEAD__NO_HALF_CYLINDER_ROOF'};
+  this.root.userData={assetId:POLAR115_SPEC.assetId,nodeId:'POLAR-115-EM',model:POLAR115_SPEC.model,serial:POLAR115_SPEC.serial,spec:POLAR115_SPEC,sources:POLAR115_TECHNICAL_SOURCES,machineEnvelope:{reference:POLAR115_REFERENCE_DIMENSIONS},geometryStatus:'DEDICATED_BMJ_PHOTO_MATCHED__ARCHIVE_DIMENSIONS_NOT_INSTALLATION_CAD',engineeringDimensions:false,evidenceBoundary:POLAR115_SPEC.evidenceBoundary,researchVersion:'V123_PHOTO_MATCHED',researchSourceCount:V122_SOURCE_STATS.total,detailPass:'V123_POLAR115_BMJ_PHOTO_MATCHED',actualPhotoEvidence:'BMJ-POLAR-PHOTOS-2026-09',mainHousingProfile:'RECTANGULAR_ROUNDED_HEAD__NO_HALF_CYLINDER_ROOF',visualRefinement:'V236_POLAR115_EM_MON_STRUCTURAL_SERVICE_POLISH'};
   this.markSilhouetteCriticality();
  }
  mat(kind,transparent=false){const m=new THREE.MeshStandardMaterial({color:this.palette[kind]??this.palette.body,metalness:['steel','table','tableDark'].includes(kind)?.45:.08,roughness:kind==='screen'?.18:kind==='tableDark'?.42:.52,transparent,opacity:transparent?.36:1});m.userData.baseOpacity=m.opacity;this.materials.push(m);return m;}
@@ -207,6 +207,28 @@ export class Polar115MachineTemplate{
  ghost(on,except=null){this.ghosted=!!on;for(const m of this.meshes){const fade=on&&(!except||!this.contains(except,m)),base=m.material.userData.baseOpacity??1;m.material.transparent=fade||base<1;m.material.opacity=fade?.14:base;m.material.depthWrite=!fade;}}
  isolate(p,on=true){for(const n of this.nodes)n.visible=!on||!p||this.contains(p,n)||this.contains(n,p);}
  showOnly(ps=[],on=true){for(const n of this.nodes)n.visible=!on||!ps.length||ps.some(p=>n===p||this.contains(n,p));}
+ refineStructuralV236(){
+  const photo='BMJ-POLAR-PHOTOS-2026-09';
+  const frame=this.findNode('polar-frame');
+  if(frame){
+   for(const x of [-.58,0,.58]){
+    for(const yy of [.18,.43]){const h=this.cyl(frame,.010,.08,[x-.20,yy,-.602],'steel','y');h.userData.detail=true;h.userData.evidence=photo;}
+    const handle=this.box(frame,[.025,.16,.030],[x+.17,.31,-.615],'dark',.004);handle.userData.detail=true;handle.userData.evidence=photo;handle.userData.mechanismRole='base-service-door-handle';
+   }
+  }
+  for(const id of ['polar-feed-left','polar-feed-right']){
+   const table=this.findNode(id);if(!table)continue;
+   for(const x of [-.22,.22]){
+    const foot=this.cyl(table,.045,.035,[x,.02,-.22],'dark','y');foot.userData.detail=true;foot.userData.silhouetteCritical=true;foot.userData.evidence=photo;
+    const brace=this.box(table,[.035,.54,.035],[x,.34,-.22],'steel',.004);brace.rotation.z=x<0?.12:-.12;brace.userData.detail=true;brace.userData.evidence=photo;
+   }
+  }
+  const housing=this.findNode('polar-housing');
+  if(housing){
+   for(const x of [-.60,.60]){const latch=this.box(housing,[.035,.18,.030],[x,1.34,-.795],'dark',.004);latch.userData.detail=true;latch.userData.evidence=photo;latch.userData.mechanismRole='housing-service-latch-reference';}
+  }
+ }
+
  markSilhouetteCriticality(){
   const criticalNodes=new Set([
    'polar-frame','polar-feed-center','polar-feed-left','polar-feed-right','polar-feed-rear',
