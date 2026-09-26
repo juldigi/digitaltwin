@@ -14,7 +14,7 @@ export class FZ1200MachineTemplate{
   if(rotating)m.userData.spinDirection=/^(trunnion-shaft|rotation-gear)$/.test(role)?1:-1;
   return m;
  }cover(m){m.userData.exteriorCover=true;return m;}
- build(){this.buildBase();this.buildClamp();this.buildTurn();this.buildAir();this.buildJog();this.buildHydraulic();this.buildControl();this.refineExteriorV232();}
+ build(){this.buildBase();this.buildClamp();this.buildTurn();this.buildAir();this.buildJog();this.buildHydraulic();this.buildControl();this.refineExteriorV232();this.refineExteriorV238();}
  buildBase(){const g=this.group(this.root,'fz1200-base','Base and lift');const frame=this.group(g,'fz1200-base-frame','Floor base frame');this.box(frame,[2.55,.22,2.02],[0,.11,0],'dark',.04);for(const z of [-.78,.78])this.box(frame,[2.25,.12,.12],[0,.30,z],'steel',.02);
   for(const x of [-1.04,1.04])for(const z of [-.82,.82]){const foot=this.cyl(frame,.055,.14,[x,.07,z],'steel','levelling-foot','y');this.tag?.(foot,'fz1200-levelling-foot-reference','FZ1200_CLOSE_FAMILY_COMPONENT_REFERENCE');}
   const lift=this.group(g,'fz1200-base-lift','Vertical lift carriage');for(const x of [-.88,.88])this.box(lift,[.16,2.05,.16],[x,1.26,0],'steel',.025);
@@ -79,6 +79,72 @@ export class FZ1200MachineTemplate{
    const arm=this.box(control,[.64,.07,.08],[-.92,1.30,-1.10],'steel',.010);arm.rotation.z=-.10;arm.userData.silhouetteCritical=true;arm.userData.mechanismRole='operator-console-support-arm-reference';
   }
  } 
+ refineExteriorV238(){
+  this.root.userData.visualRefinement='V238_FZ1200_OPEN_CRADLE_MECHANICAL_REPOLISH';
+  this.root.userData.repolishRevision='V238';
+  this.root.userData.visualEvidenceBoundary='FZ1200_EXACT_MODEL_PROCESS_REFERENCE__BMJ_OEM_SERIAL_GUARD_LAYOUT_UNVERIFIED';
+  const g=this.group(this.root,'fz1200-service-v238','FZ1200 mechanical mounting and service repolish');
+  const tag=(m,role,critical=false)=>{if(!m)return m;m.userData.detail=true;m.userData.mechanismRole=role;m.userData.evidence='FZ1200_EXACT_MODEL_AND_CLOSE_FAMILY_COMPONENT_REFERENCE';if(critical)m.userData.silhouetteCritical=true;return m;};
+
+  // Trunnion housings read as heavy rotating-machine bearings instead of bare cylinders.
+  for(const z of [-.95,.95]){
+   const bolster=tag(this.box(g,[.58,.54,.12],[0,1.37,z],'dark',.055),'fz1200-trunnion-bearing-bolster',true);
+   bolster.userData.rotatingAssemblySupport=true;
+   const ring=tag(this.cyl(g,.31,.045,[0,1.37,z+(z<0?-.075:.075)],'steel','trunnion-bearing-cap','z'),'fz1200-trunnion-bearing-cap',true);
+   ring.userData.installedBearingModelVerified=false;
+   for(const [x,y] of [[-.20,1.18],[.20,1.18],[-.20,1.56],[.20,1.56]])tag(this.cyl(g,.014,.025,[x,y,z+(z<0?-.102:.102)],'steel','bearing-bolt','z'),'fz1200-trunnion-cap-bolt');
+   tag(this.cyl(g,.010,.075,[.25,1.55,z],'steel','grease-fitting','y'),'fz1200-trunnion-grease-point-reference');
+  }
+
+  // Clamp guides / pads physically locate the pile between the moving plates.
+  const clamp=this.findNode('fz1200-clamp');
+  if(clamp){
+   for(const x of [-.64,.64])for(const z of [-.43,.43]){
+    const shoe=tag(this.box(clamp,[.15,.12,.15],[x,.60,z],'dark',.012),'fz1200-clamp-guide-shoe',true);
+    shoe.userData.closeFamilyReference=true;
+   }
+   for(const z of [-.44,.44]){
+    const wear=tag(this.box(clamp,[1.20,.025,.06],[0,.07,z],'dark',.004),'fz1200-clamp-wear-strip-reference');
+    wear.userData.installedMaterialVerified=false;
+   }
+  }
+
+  // Hose clamps / bulkhead interfaces make hydraulic routing physically supported.
+  const hose=this.findNode('fz1200-hyd-hose');
+  if(hose){
+   for(const y of [.62,.92,1.22,1.48])for(const z of [-.18,.18]){
+    tag(this.box(hose,[.055,.025,.040],[.72,y,z],'steel',.004),'fz1200-hydraulic-hose-retainer');
+   }
+   for(const z of [-.18,.18])tag(this.cyl(hose,.030,.045,[.72,1.62,z],'steel','hose-bulkhead','y'),'fz1200-hydraulic-bulkhead-fitting');
+  }
+
+  // Powerpack cover gains proper hinges/latch while remaining a family reference.
+  const power=this.findNode('fz1200-hyd-power');
+  if(power){
+   for(const y of [.38,.66])tag(this.cyl(power,.012,.08,[.60,y,-1.418],'steel','service-hinge','y'),'fz1200-powerpack-cover-hinge');
+   tag(this.box(power,[.030,.20,.025],[1.16,.54,-1.420],'steel',.004),'fz1200-powerpack-cover-latch',true);
+   for(const x of [.76,.88,1.00])for(const y of [.34,.42,.50,.58,.66]){
+    tag(this.box(power,[.060,.010,.012],[x,y,-1.422],'dark',0),'fz1200-powerpack-vent-louvre');
+   }
+  }
+
+  // HMI enclosure / controls receive physical bezel, E-stop collar and support-foot detail.
+  const hmi=this.findNode('fz1200-control-hmi');
+  if(hmi){
+   const bezel=tag(this.box(hmi,[.40,.29,.020],[-1.34,1.02,-1.365],'black',.018),'fz1200-hmi-display-bezel',true);
+   bezel.userData.installedControllerGenerationVerified=false;
+   tag(this.cyl(hmi,.050,.016,[-.89,.80,-1.375],'yellow','estop-collar','z'),'fz1200-estop-collar',true);
+   const shoe=tag(this.box(hmi,[.46,.10,.42],[-1.28,.18,-1.12],'dark',.020),'fz1200-console-floor-shoe',true);
+   shoe.userData.floorInterface=true;
+  }
+
+  // Floor anchor pads at each outrigger corner.
+  for(const x of [-1.26,1.26])for(const z of [-.94,.94]){
+   const pad=tag(this.box(g,[.24,.025,.24],[x,.015,z],'dark',.008),'fz1200-floor-anchor-pad',true);
+   pad.userData.floorInterface=true;
+   for(const dx of [-.07,.07])for(const dz of [-.07,.07])tag(this.cyl(g,.010,.025,[x+dx,.035,z+dz],'steel','anchor-bolt','y'),'fz1200-floor-anchor-bolt');
+  }
+ }
  findNode(id){return id==='fz1200-root'?this.root:this.nodes.find(n=>n.userData.nodeId===id)||null;}resolvePart(o){for(let p=o;p&&p!==this.root;p=p.parent)if(p.userData?.selectable)return p;return null;}resolveTaxonomyNode(id){return this.taxonomyById.get(id)?.meshRefs.map(ref=>this.findNode(ref)).find(Boolean)||null;}contains(a,b){for(let p=b;p;p=p.parent)if(p===a)return true;return false;}
  highlight(p){for(const m of this.meshes){m.material.emissive?.setHex(p&&this.contains(p,m)?0x17494a:0);m.material.emissiveIntensity=.3;}}highlightMany(ps=[]){for(const m of this.meshes){m.material.emissive?.setHex(ps.some(p=>this.contains(p,m))?0x17494a:0);m.material.emissiveIntensity=.3;}}ghost(on,except=null){this.ghosted=!!on;for(const m of this.meshes){const fade=on&&(!except||!this.contains(except,m)),natural=m.material.userData?.baseOpacity??1;m.material.transparent=fade||natural<1;m.material.opacity=fade?.14:natural;m.material.depthWrite=!fade;}}isolate(p,on=true){for(const n of this.nodes)n.visible=!on||!p||this.contains(p,n)||this.contains(n,p);}showOnly(ps=[],on=true){for(const n of this.nodes)n.visible=!on||!ps.length||ps.some(p=>n===p||this.contains(n,p));}
  setExteriorOpen(on=true){this.exteriorOpen=!!on;this.root.userData.interiorCutawayVisible=!!on;}explode(t,s=null){for(const n of this.nodes)n.position.copy(n.userData.rest);const targets=s?(s.children.filter(c=>c.userData.selectable).length?s.children.filter(c=>c.userData.selectable):[s]):this.parts;for(const n of targets)n.position.addScaledVector(n.userData.explode,THREE.MathUtils.clamp(+t||0,0,1));}setLow(on){for(const m of this.meshes)if(m.userData.detail&&!m.userData.silhouetteCritical)m.visible=!on;}reset(){this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const n of this.nodes)n.quaternion.copy(n.userData.restQuaternion);}dispose(){for(const g of this.geometries.values())g.dispose();for(const m of this.materials.values())m.dispose();}

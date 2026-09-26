@@ -9,7 +9,7 @@ export class Offset9MachineTemplate{
  constructor(){
   this.root=new THREE.Group();this.root.name='Speedmaster SX 52-4+L';
   this.root.userData={assetId:'BMJ-MCH-0006',nodeId:'offset9-root',spec:OFFSET9_SPEC,sources:OFFSET9_TECHNICAL_SOURCES,orientation:OFFSET9_ORIENTATION,taxonomyVersion:'offset9-v2-oem-mechanics',evidenceGrade:'OFFICIAL_FAMILY_REFERENCE',engineeringDimensions:false,detailPass:'V123_R4_SX52_OEM_MECHANISM_DETAIL'};
-  this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.dynamicMaterials=[];this.exteriorOpen=false;this.build();this.refineExteriorV232();
+  this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.dynamicMaterials=[];this.exteriorOpen=false;this.build();this.refineExteriorV232();this.refineExteriorV238();
   this.taxonomy=OFFSET9_TAXONOMY;this.taxonomyById=OFFSET9_TAXONOMY_BY_ID;
   for(const node of this.nodes){node.userData.rest=node.position.clone();node.userData.restQuaternion=node.quaternion.clone();}this.root.updateMatrixWorld(true);
  }
@@ -118,6 +118,60 @@ export class Offset9MachineTemplate{
    for(const x of [-.55,.55]){const handle=this.box(delivery,[.025,.22,.020],[x,1.35,-1.095],'black',.004);handle.userData.detail=true;handle.userData.mechanismRole='delivery-service-handle';}
   }
  } 
+ refineExteriorV238(){
+  this.root.userData.visualRefinement='V238_SX52_4L_SERVICE_ACCESS_REPOLISH';
+  this.root.userData.repolishRevision='V238';
+  this.root.userData.visualEvidenceBoundary='HEIDELBERG_SX52_OFFICIAL_FAMILY__BMJ_SERIAL_OPTION_PACKAGE_UNVERIFIED';
+  const g=this.group(this.root,'offset9-service-v238','SX52 exterior service-access repolish');
+  const tag=(m,role,critical=false)=>{if(!m)return m;m.userData.detail=true;m.userData.mechanismRole=role;m.userData.evidence='HEIDELBERG_SX52_OFFICIAL_FAMILY_VISUAL';if(critical)m.userData.silhouetteCritical=true;return m;};
+
+  // Printing and coating modules retain the compact SX52 cover rhythm.
+  for(const key of ['PU1','PU2','PU3','PU4','L']){
+   const unit=this.findNode('offset9-'+key.toLowerCase());if(!unit)continue;
+   const band=tag(this.box(unit,[.62,.060,.020],[0,.66,-.985],'graphite',.005),'sx52-operator-lower-service-band',true);
+   band.userData.moduleKey=key;
+   tag(this.box(unit,[.025,.19,.020],[.28,1.47,-.992],'black',.004),'sx52-service-door-handle',true);
+   for(const y of [1.20,1.76])tag(this.cyl(unit,.011,.075,[-.30,y,-.994],'steel','service-hinge','y'),'sx52-service-door-hinge');
+   const plate=tag(this.box(unit,[.18,.065,.014],[.27,2.10,-.994],'black',.004),'sx52-module-identification-plate',true);
+   plate.userData.label=key;plate.userData.renderTextInGeometry=false;
+  }
+
+  // Feeder and delivery: visible portal latches and service fascia while the pile remains open.
+  const feeder=this.findNode('offset9-feeder');
+  if(feeder){
+   for(const z of [-.965,.965]){
+    tag(this.box(feeder,[.032,.20,.024],[.72,1.38,z],'black',.004),'sx52-feeder-portal-latch',true);
+    for(const y of [.72,1.18])tag(this.cyl(feeder,.011,.07,[-.72,y,z],'steel','service-hinge','y'),'sx52-feeder-hinge');
+   }
+   const sill=tag(this.box(feeder,[.78,.065,.022],[-.40,.56,-.985],'graphite',.005),'sx52-feeder-service-sill',true);
+   sill.userData.openPileEnvelopePreserved=true;
+  }
+  const delivery=this.findNode('offset9-delivery');
+  if(delivery){
+   for(const z of [-1.015,1.015])tag(this.box(delivery,[.032,.22,.024],[.96,1.34,z],'black',.004),'sx52-delivery-portal-latch',true);
+   const window=tag(this.box(delivery,[.56,.30,.018],[-.40,1.30,-1.018],'glass',.018),'sx52-delivery-service-window',true);
+   window.userData.familyReferenceOnly=true;
+  }
+
+  // Operator gallery posts/rails plus leveling pads eliminate the floating-machine appearance.
+  for(let x=-3.15;x<=3.75;x+=1.15){
+   tag(this.cyl(g,.022,.66,[x,.78,-1.23],'steel','guard-post','y'),'sx52-operator-guard-post',true);
+  }
+  tag(this.cyl(g,.021,6.70,[.30,1.09,-1.23],'steel','guard-rail','x'),'sx52-operator-guard-toprail',true);
+  for(const x of [-3.70,-2.40,-1.20,0,1.20,2.40,3.70,4.65])for(const z of [-.88,.88]){
+   const foot=tag(this.cyl(g,.055,.025,[x,.025,z],'graphite','leveling-foot','y'),'sx52-leveling-foot-pad',true);
+   foot.userData.floorInterface=true;
+  }
+
+  // Press Center family console physical mounting / bezel.
+  const console=this.findNode('offset9-console');
+  if(console){
+   const bezel=tag(this.box(console,[.84,.50,.020],[-.12,1.18,-.158],'black',.020),'sx52-console-display-bezel',true);
+   bezel.userData.installedGenerationVerified=false;
+   const foot=tag(this.box(console,[.50,.10,.44],[.12,.20,.04],'graphite',.020),'sx52-console-pedestal-foot',true);
+   foot.userData.floorInterface=true;
+  }
+ }
  buildConsole(){const g=this.group(this.root,'offset9-console','Prinect Press Center 3 · family reference',[1.18,0,-1.83],[0,.15,-.35]);g.userData.familyFeature='PRINECT_PRESS_CENTER_3';g.userData.installedGenerationVerified=false;g.userData.familyDisplayInch=24;this.box(g,[1.25,.72,.54],[0,.72,0],'graphite',.06);const screen=this.box(g,[.76,.42,.025],[-.12,1.18,-.14],'glass',.03);screen.userData.mechanismRole='prinect-press-center-display-reference';this.box(g,[.55,.05,.36],[.20,1.00,.12],'silver');}
  findNode(id){return id===this.root.userData.nodeId?this.root:this.nodes.find(node=>node.userData.nodeId===id)||null;}
  resolvePart(object){for(let parent=object;parent&&parent!==this.root;parent=parent.parent)if(parent.userData?.selectable)return parent;return null;}
