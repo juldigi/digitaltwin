@@ -32,8 +32,8 @@ test('factory navigation presents evidence-bounded utility systems as an active 
 test('placeholder assets expose spatial context but not inventory technical metadata in Phase-1',()=>{
  const detail=app.slice(app.indexOf('function machineDetailDialog(machine){'),app.indexOf('async function switchActiveMachine',app.indexOf('function machineDetailDialog(machine){')));
  assert.match(detail,/const placeholderData=pair\('ID posisi',machine\.machineId\)\+pair\('Area',machine\.area\)/);
- assert.match(detail,/pair\('3D source','NOT_IMPLEMENTED · LAYOUT PLACEHOLDER'\)/);
- assert.match(detail,/pair\('3D detail','NOT_IMPLEMENTED'\)/);
+ assert.match(detail,/pair\('Dasar model 3D','NOT_IMPLEMENTED · LAYOUT PLACEHOLDER'\)/);
+ assert.match(detail,/pair\('Detail model 3D','NOT_IMPLEMENTED'\)/);
  assert.match(detail,/pair\('Dasar posisi',positionStatusLabel\(policy\.positionStatus\)\)/);
  assert.match(detail,/pair\('Status detail','Belum dibuka pada fase fondasi'\)/);
  assert.match(detail,/primary\?primaryData:placeholderData/);
@@ -52,8 +52,8 @@ test('universal search keeps placeholder indexing spatial and removes utility-sy
 test('factory Phase-1 inspector excludes routing controls while retaining explicit expansion boundary',()=>{
  const panel=app.slice(app.indexOf('function renderFactoryPanel(){'),app.indexOf('function renderPanel(tab=activeInspectorTab()){'));
  assert.match(panel,/Denah pabrik/);
- assert.match(panel,/Scope berbasis bukti/);
- assert.match(panel,/Model 3D mengikuti aset yang dipilih/);
+ assert.match(panel,/Cakupan model dan sumber/);
+ assert.match(panel,/Detail 3D bergantung pada sumber tiap mesin/);
  assert.doesNotMatch(panel,/data-routing-focus/);
  assert.doesNotMatch(panel,/utility_compressed_air/);
  assert.doesNotMatch(panel,/utility_ahu_piping/);

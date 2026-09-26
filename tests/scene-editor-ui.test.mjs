@@ -16,7 +16,7 @@ test('scene editor uses a reversible isolation guard instead of destructive visi
 
 test('scene editor cannot open duplicate floating panels',()=>{
  assert.match(app,/document\.querySelector\('#scene-editor-panel'\)/);
- assert.match(app,/Editor Scene 3D sudah terbuka/);
+ assert.match(app,/Pengeditan pabrik 3D sudah terbuka/);
 });
 
 test('scene save and revision restore clear transient isolation before replaying persisted state',()=>{
@@ -43,7 +43,7 @@ test('scene editor layout is responsive and leaves canonical navigation reachabl
 
 
 test('scene editor presents a guided three-step human-first workflow',()=>{
- for(const label of ['Pilih yang ingin diubah','Atur objek','Simpan perubahan','Mesin','Dinding','Aksesori & Peralatan','Bangunan & Ruangan','Utilitas','Furniture','Bagian Mesin','Geser ','Bandingkan dengan tampilan asli','Alat lanjutan Superadmin'])assert.match(app,new RegExp(label));
+ for(const label of ['Pilih yang ingin diubah','Atur objek','Simpan perubahan','Mesin','Dinding','Aksesori & Peralatan','Bangunan & Ruangan','Utilitas','Furnitur','Bagian Mesin','Geser ','Bandingkan dengan tampilan asli','Alat lanjutan Superadmin'])assert.match(app,new RegExp(label));
  assert.match(app,/class="se-progress"/);
  assert.match(app,/class="se-advanced"/);
  assert.match(app,/class="se-admin-tools"/);

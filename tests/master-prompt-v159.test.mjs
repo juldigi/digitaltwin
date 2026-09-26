@@ -20,11 +20,11 @@ test('V194 data and source status is reachable from Settings without a floating 
 });
 
 test('OFFSET 5 overview carries all mandatory master-prompt truth fields',()=>{
- for(const label of ['Nama aset','Model','Kategori','Subkategori','Pabrikan','Spesifikasi','Lokasi','Status operasi','Health score','3D source','3D detail','Data confidence','Posisi','Source count']){
+ for(const label of ['Nama aset','Model','Kategori','Subkategori','Pabrikan','Spesifikasi','Lokasi','Status operasi','Nilai kesehatan mesin','Dasar model 3D','Detail model 3D','Keandalan data','Posisi','Jumlah sumber']){
   assert.ok(app.includes("pair('"+label+"'"),label+' missing from OFFSET 5 overview');
  }
  assert.match(app,/PROCEDURAL \/ RECONSTRUCTED/);
- assert.match(app,/PARTIAL \/ APPROXIMATE/);
+ assert.match(app,/Sebagian detail masih perkiraan/);
  assert.match(app,/primaryTruth\.operatingStatus/);
  assert.match(app,/primaryTruth\.healthScore/);
 });

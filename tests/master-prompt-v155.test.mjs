@@ -73,8 +73,8 @@ test('factory scene graph stamps provenance on core DWG objects and preserves le
 });
 
 test('Denah Pabrik exposes an auditable fidelity ledger and NOT_IMPLEMENTED rows',()=>{
- assert.match(app,/Fidelity DWG/);
- assert.match(app,/Raw entity parity tidak diklaim/);
+ assert.match(app,/Ketelitian denah DWG/);
+ assert.match(app,/Jumlah objek tidak selalu sama/);
  assert.match(app,/Belum diimplementasikan sebagai 3D fisik/);
  assert.match(app,/item\.threeDStatus/);
  assert.match(app,/buildDwgFidelityLedger\(l\)/);
