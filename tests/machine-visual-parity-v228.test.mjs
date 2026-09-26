@@ -26,8 +26,8 @@ test('V228 priority offset detail scenes use the promoted realism templates',()=
 });
 
 test('V228 factory home geometry is rebaked from the same live machine runtime before distribution',()=>{
- assert.match(bake,/createMachineTemplate/);
- assert.match(bake,/const t=createMachineTemplate\(place\.machineId\)/);
+ assert.match(bake,/createPolishedMachineTemplate/);
+ assert.match(bake,/const t=createPolishedMachineTemplate\(place\.machineId\)/);
  assert.match(bake,/t\.setLow\?\.\(true\)/);
  const rebake=build.indexOf("scripts/bake-factory-fleet.mjs");
  const copy=build.indexOf("cpSync('frontend','dist'");

@@ -446,8 +446,8 @@ export class FactoryEngine {
     if(!canOpenTechnical3D(requested)){this.onError?.('Model 3D untuk aset ini belum tersedia.');return false;}
     if(this.machineKey===requested)return true;
     if(this.simulation?.active)this.simulation.stop();
-    const {createMachineTemplate,createMachineSimulation}=await import('./machine-runtime.js');
-    const nextTemplate=createMachineTemplate(requested);
+    const {createPolishedMachineTemplate,createMachineSimulation}=await import('./machine-runtime.js');
+    const nextTemplate=createPolishedMachineTemplate(requested);
     let nextSimulation;
     try{nextSimulation=createMachineSimulation(requested,nextTemplate.root,nextTemplate);}
     catch(error){nextTemplate.dispose?.();throw error;}
