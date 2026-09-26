@@ -17,21 +17,28 @@ export class SharkN650MachineTemplate{
  build(){this.buildAccess();this.buildFeeder();this.buildTransfer();this.buildInspection();this.buildVision();this.buildProcessing();this.buildReject();this.buildReturn();this.buildExteriorIdentity();}
  buildAccess(){const g=this.group(this.root,'shark650-access','Frame, platform and guarding');const frame=this.group(g,'shark650-access-frame','Machine base frame');this.box(frame,[6.70,.28,1.86],[0,.19,0],'dark',.04);for(let x=-3.1;x<=3.1;x+=.78)for(const z of [-.78,.78])this.box(frame,[.08,.62,.08],[x,.55,z],'steel',.012);const platform=this.group(g,'shark650-access-platform','Operator platform');this.box(platform,[5.10,.13,.52],[.15,.28,-1.12],'dark');for(let x=-2.2;x<=2.45;x+=.48)this.box(platform,[.32,.022,.48],[x,.36,-1.12],'steel',0);const guard=this.group(g,'shark650-access-guard','Interlocked covers / guarding');for(const z of [-.90,.90]){this.cover(this.box(guard,[1.62,1.98,.08],[-.15,1.46,z],'white',.07));this.cover(this.box(guard,[1.20,.88,.08],[1.55,.94,z],'white',.05));}}
  buildExteriorIdentity(){
-  const g=this.group(this.root,'shark650-exterior-v230','FS-SHARK N650 exterior silhouette refinement');
-  g.userData.visualRefinement='V230_SHARK_N650_FAMILY_SILHOUETTE';
-  g.userData.sourceBoundary='FOCUSIGHT_N650_FAMILY_REFERENCE__P3N1_OPTION_PACKAGE_UNDECODED';
+  const g=this.group(this.root,'shark650-exterior-v235','FS-SHARK N650 exterior identity polish');
+  this.root.userData.visualRefinement='V235_SHARK_N650_WHITE_TOWER_DARK_BASE_BLUE_STRIPE_HMI';
+  this.root.userData.visualEvidenceBoundary='FOCUSIGHT_N650_PRIMARY_PRODUCT_VISUALS__P3N1_INSTALLED_OPTION_PACKAGE_UNDECODED';
+  g.userData.sourceBoundary=this.root.userData.visualEvidenceBoundary;
   for(const z of [-.91,.91]){
-   this.cover(this.box(g,[3.18,.50,.10],[.20,.55,z],'dark',.035));
-   this.cover(this.box(g,[1.88,.16,.12],[-.12,2.58,z],'white',.030));
+   const base=this.cover(this.box(g,[3.42,.56,.10],[.12,.53,z],'dark',.040));base.userData.silhouetteCritical=true;
+   const crown=this.cover(this.box(g,[1.92,.16,.12],[-.12,2.58,z],'white',.030));crown.userData.silhouetteCritical=true;
    this.cover(this.box(g,[.13,1.82,.11],[-1.02,1.56,z],'white',.025));
    this.cover(this.box(g,[.13,1.82,.11],[.74,1.56,z],'white',.025));
-   const window=this.box(g,[1.20,.86,.025],[-.14,1.58,z+(z<0?-.055:.055)],'glass',.035);
-   window.userData.inspectionAperture=true;
+   const window=this.box(g,[1.20,.86,.025],[-.14,1.58,z+(z<0?-.055:.055)],'glass',.035);window.userData.inspectionAperture=true;window.userData.silhouetteCritical=true;
   }
-  const hood=this.cover(this.box(g,[1.86,.30,1.80],[-.14,2.46,0],'white',.050));hood.userData.visionHood=true;
-  const accent=this.cover(this.box(g,[.09,1.48,.025],[.62,1.64,-.985],'blue',.010));accent.userData.familyAccent=true;
+  const hood=this.cover(this.box(g,[1.86,.30,1.80],[-.14,2.46,0],'white',.050));hood.userData.visionHood=true;hood.userData.silhouetteCritical=true;
+  // Focusight product imagery uses a blue horizontal accent through the white/dark chassis.
+  for(const z of [-.965,.965]){const stripe=this.cover(this.box(g,[5.65,.055,.025],[-.05,.86,z],'blue',.006));stripe.userData.familyAccent=true;stripe.userData.silhouetteCritical=true;}
   this.cover(this.box(g,[1.05,.28,.10],[-2.88,.62,-.90],'light',.025));
   this.cover(this.box(g,[1.28,.28,.10],[2.50,.62,-.90],'light',.025));
+  // Operator monitor on support arm is prominent in published N650 installations.
+  const hmi=this.group(g,'shark650-hmi-v235','Operator monitor and support arm reference');
+  this.cyl(hmi,.035,.92,[.82,1.22,-1.32],'steel','hmi-mast-reference','y');
+  const arm=this.box(hmi,[.62,.06,.06],[.52,1.62,-1.32],'steel',.010);arm.rotation.z=-.16;
+  const monitor=this.cover(this.box(hmi,[.48,.34,.08],[.22,1.72,-1.32],'dark',.035));monitor.userData.silhouetteCritical=true;
+  this.box(hmi,[.39,.26,.025],[.22,1.72,-1.375],'glass',.020).userData.mechanismRole='shark-hmi-display-reference';
  }
  buildFeeder(){const g=this.group(this.root,'shark650-feeder','Automatic feeder',[-2.92,0,0],[-.62,.16,0]);const stack=this.group(g,'shark650-feed-stack','Input blank support');this.box(stack,[.96,.08,1.24],[-.28,.40,0],'steel');for(let i=0;i<11;i++)this.box(stack,[.60,.012,.88],[-.34,.49+i*.013,0],'paper',.002);const suction=this.group(g,'shark650-feed-suction','Suction-feeder architecture reference');suction.userData.feederModeReference='suction';suction.userData.installedModeVerified=false;this.box(suction,[.68,.24,1.05],[.22,1.16,0],'dark',.035);for(const z of [-.39,-.13,.13,.39]){this.cyl(suction,.034,.15,[.42,.96,z],'rubber','suction-cup');this.box(suction,[.035,.22,.035],[.42,1.07,z],'steel');}const manifold=this.cyl(suction,.025,.96,[.18,1.18,0],'steel','feeder-vacuum-manifold','z');manifold.userData.mechanismRole='feeder-vacuum-manifold';const valve=this.box(suction,[.13,.12,.12],[-.10,.95,.54],'blue',.012);valve.userData.mechanismRole='feeder-vacuum-control-valve-reference';const gauge=this.cyl(suction,.050,.025,[.06,1.16,.54],'glass','feeder-vacuum-gauge','z');gauge.userData.mechanismRole='feeder-vacuum-gauge';const friction=this.group(g,'shark650-feed-friction','Friction-feeder option reference');friction.userData.feederModeReference='friction';friction.userData.installedModeVerified=false;for(const z of [-.44,-.15,.15,.44]){const b=this.box(friction,[.86,.025,.10],[.38,.77,z],'rubber',.006);b.userData.feederOption='friction';}const separate=this.group(g,'shark650-feed-separate','Blank separation / air assist');for(const z of [-.46,0,.46])this.box(separate,[.08,.20,.05],[-.45,.93,z],'blue',.012);}
  buildTransfer(){const g=this.group(this.root,'shark650-transfer','Full-suction transfer',[-1.58,0,0],[-.30,.16,0]);const belt=this.group(g,'shark650-transfer-belt','Full-suction transport belts');for(const z of [-.51,-.255,0,.255,.51]){const b=this.box(belt,[1.85,.025,.11],[0,.78,z],'rubber',.006);b.userData.suctionBelt=true;for(const x of [-.76,.76])this.cyl(belt,.055,.15,[x,.77,z],'steel','transport-pulley','z');}const drive=this.group(g,'shark650-transfer-drive','Transfer drive / encoder reference');const motor=this.cyl(drive,.10,.24,[-.72,.49,.68],'dark','transfer-drive-motor','x');motor.userData.rotor=true;motor.userData.rotorAxis='x';motor.userData.spinDirection=1;const coupling=this.cyl(drive,.045,.10,[-.57,.49,.68],'blue','transfer-drive-coupling','x');coupling.userData.mechanismRole='transfer-drive-coupling';const enc=this.cyl(drive,.052,.025,[.72,.77,.68],'cyan','transfer-encoder','z');enc.userData.rotor=true;enc.userData.rotorAxis='z';enc.userData.spinDirection=-1;
