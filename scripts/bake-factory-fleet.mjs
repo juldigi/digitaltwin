@@ -4,9 +4,20 @@ import {writeFileSync} from 'node:fs';import {gzipSync} from 'node:zlib';
 import {createPolishedMachineTemplate} from '../frontend/src/machine-runtime.js';
 import {MACHINE_PLACEMENTS} from '../frontend/src/data/plant-actual.js';
 const result=[];let unknown=0;
+const silhouetteParity=(fullBox,lowBox)=>{
+ const fullSize=fullBox.getSize(new THREE.Vector3()),lowSize=lowBox.getSize(new THREE.Vector3());
+ const fullCenter=fullBox.getCenter(new THREE.Vector3()),lowCenter=lowBox.getCenter(new THREE.Vector3());
+ const ratios=fullSize.toArray().map((v,i)=>v>1e-6?lowSize.getComponent(i)/v:1);
+ const maxDim=Math.max(...fullSize.toArray(),1e-6),centerDrift=fullCenter.distanceTo(lowCenter)/maxDim;
+ return {ratios,centerDrift,valid:ratios.every(v=>v>=.86&&v<=1.14)&&centerDrift<=.10};
+};
 for(const place of MACHINE_PLACEMENTS){
- const t=createPolishedMachineTemplate(place.machineId);t.setLow?.(true);t.setExteriorOpen?.(false);t.root.updateMatrixWorld(true);
+ const t=createPolishedMachineTemplate(place.machineId);t.setExteriorOpen?.(false);t.root.updateMatrixWorld(true);
+ const fullBox=new THREE.Box3().setFromObject(t.root);
+ t.setLow?.(true);t.root.updateMatrixWorld(true);
  const box=new THREE.Box3().setFromObject(t.root),center=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3());
+ const parity=silhouetteParity(fullBox,box);
+ if(!parity.valid)throw new Error(`Home/detail silhouette drift for ${place.machineId}: ratios=${parity.ratios.map(v=>v.toFixed(3)).join(',')} centerDrift=${parity.centerDrift.toFixed(3)}`);
  const buckets=new Map();
  t.root.traverse(o=>{
   if(!o.isMesh||Array.isArray(o.material))return;for(let a=o;a;a=a.parent)if(!a.visible)return;
@@ -21,7 +32,7 @@ for(const place of MACHINE_PLACEMENTS){
  });
  const meshes=[];for(const [color,gs] of buckets){const g=mergeGeometries(gs);const pos=[],idx=[],lookup=new Map(),arr=g.attributes.position.array;for(let i=0;i<arr.length;i+=9){const tri=[];for(let j=0;j<9;j+=3){const xyz=[0,1,2].map(k=>Math.round(arr[i+j+k]*40)/40),key=xyz.join(',');if(!lookup.has(key)){lookup.set(key,pos.length/3);pos.push(...xyz);}tri.push(lookup.get(key));}if(new Set(tri).size===3)idx.push(...tri);}meshes.push({color,p:pos,i:idx});g.dispose();gs.forEach(g=>g.dispose());}
  const placement={...place};if(place.status==='UNIDENTIFIED'){placement.x=112+(unknown%3)*12;placement.y=8+Math.floor(unknown/3)*12;unknown++;}
- result.push({placement,size:size.toArray(),center:center.toArray(),floor:box.min.y,meshes});t.dispose();
+ result.push({placement,size:size.toArray(),center:center.toArray(),floor:box.min.y,silhouetteParity:{ratios:parity.ratios,centerDrift:parity.centerDrift},meshes});t.dispose();
 }
 const encoded=gzipSync(JSON.stringify(result)).toString('base64'),chunkSize=210000; // V228: headroom while preserving the deployed 9-chunk fleet contract.
 const chunks=Array.from({length:Math.ceil(encoded.length/chunkSize)},(_,i)=>encoded.slice(i*chunkSize,(i+1)*chunkSize));
