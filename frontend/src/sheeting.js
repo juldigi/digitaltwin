@@ -58,7 +58,7 @@ export class SheetingMachineTemplate{
       dark:0x293236,steel:0x939b9b,chrome:0xcbd1d0,paper:0xece6d6,stackPaper:0xf1ece0,
       glass:0x78b6bb,black:0x20272a,blue:0x2f67a1,red:0xc93434,green:0x4c9b4f,bronze:0xb08b55
     };
-    this.buildActualV194();this.refineActualV195();this.refineActualV196();this.refineActualV197();this.enrichActualV197();this.markSilhouetteCriticality();
+    this.buildActualV194();this.refineActualV195();this.refineActualV196();this.refineActualV197();this.refineActualV236Structural();this.enrichActualV197();this.markSilhouetteCriticality();
     for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}
     this.root.updateMatrixWorld(true);
   }
@@ -837,6 +837,31 @@ export class SheetingMachineTemplate{
     };
   }
 
+  refineActualV236Structural(){
+    const photo='BMJ-SHEETING-PHOTOSET-20260922';
+    this.root.userData.visualRefinement='V236_HSM_CTM7_PHOTO_GROUNDED_SUPPORT_AND_ACCESS_POLISH';
+    this.root.userData.structuralEvidenceBoundary='BMJ_IMG_2479_TO_2487_PRIMARY__NO_NEW_HIDDEN_CUTTER_MECHANISM';
+    const rollstand=this.findNode('sheeting-rollstand');
+    if(rollstand&&!this.meshes.some(m=>m.userData.role==='rollstand-leveling-pad-v236')){
+      for(const x of [6.20,8.25])for(const z of [-1.49,1.49]){
+        this.box(rollstand,[.24,.035,.24],[x,.018,z],'dark',.008,{detail:true,role:'rollstand-leveling-pad-v236',sourceAnchor:photo});
+      }
+    }
+    const access=this.findNode('sheeting-access');
+    if(access&&!this.meshes.some(m=>m.userData.role==='access-step-nosing-v236')){
+      for(let i=0;i<3;i++){
+        this.box(access,[.76,.018,.06],[3.54-i*.22,.175+i*.13,-2.34],'chrome',.003,{detail:true,role:'access-step-nosing-v236',sourceAnchor:photo});
+      }
+      this.box(access,[7.10,.10,.035],[-.35,.55,-2.36],'bodyDark',.004,{detail:true,role:'catwalk-toeboard-v236',sourceAnchor:photo});
+    }
+    const delivery=this.findNode('sheeting-delivery');
+    if(delivery&&!this.meshes.some(m=>m.userData.role==='delivery-bearing-support-foot-v236')){
+      for(const x of [.82,-.30,-1.42,-2.58,-3.70])for(const z of [-1.49,1.49]){
+        this.box(delivery,[.16,.10,.16],[x,.08,z],'dark',.008,{detail:true,role:'delivery-bearing-support-foot-v236',sourceAnchor:photo});
+      }
+    }
+  }
+
   enrichActualV197(){
     this.root.userData.researchVersion='V197';
     this.root.userData.researchSourceCount=V122_SOURCE_STATS.total;
@@ -1424,7 +1449,7 @@ export class SheetingMachineTemplate{
       'delivery-crossbar-support','stack-side-rail','stack-end-crossbeam','lift-table','pallet',
       'reference-paper-block','stacker-column','stacker-front-header','stacker-side-cabinet','stacker-base-rail',
       'stack-white-guide-panel','stack-green-guide-head','stack-guide-handwheel','diamond-plate-catwalk',
-      'access-landing','control-console-base'
+      'access-landing','control-console-base','rollstand-leveling-pad-v236','access-step-nosing-v236','catwalk-toeboard-v236','delivery-bearing-support-foot-v236'
     ]);
     let kept=0;
     for(const m of this.meshes){
