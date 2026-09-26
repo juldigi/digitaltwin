@@ -25,6 +25,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.refineV231VisualParity();
   this.refineV232PriorityPolish();
   this.refineV236MechanicalRealism();
+  this.refineV238PriorityRepolish();
   for(const n of this.nodes){
    if(!n.userData.rest)n.userData.rest=n.position.clone();
    if(!n.userData.restQuaternion)n.userData.restQuaternion=n.quaternion.clone();
@@ -304,6 +305,108 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    if(mesh.userData?.silhouetteCritical&&mesh.userData?.detail)retained++;
   }
   this.root.userData.homeSilhouetteCriticalCount=Math.max(this.root.userData.homeSilhouetteCriticalCount||0,retained);
+ }
+ refineV238PriorityRepolish(){
+  const no=this.cfg.machine.no;
+  if(no!==4)return;
+  this.root.userData.visualRefinement='V238_YA1A1A_SERVICE_PROCESS_REPOLISH';
+  this.root.userData.repolishRevision='V238';
+  this.root.userData.familyEvidenceBoundary='YA1A1A_EXACT_IDENTITY__YA1B1_AND_SHEETFED_GRAVURE_FAMILY_REFERENCE__BMJ_INSTALLED_ENCLOSURE_TRANSFER_DRIVE_DRYER_UNVERIFIED';
+  this.root.userData.simulationStatus='BLOCKED_PENDING_YA1A1A_TRANSPORT_DRIVE_VERIFICATION';
+  const g=this.group(this.root,'o7-service-v238','YA1A1A family service and installation repolish',[0,0,0],[0,.15,0]);
+  g.userData.installedExteriorGeometryVerified=false;
+  const mark=(m,role,evidence='SHEETFED_GRAVURE_FAMILY',critical=false)=>{
+   if(!m)return m;this.tag(m,role,evidence);if(critical)m.userData.silhouetteCritical=true;return m;
+  };
+
+  // End cabinets: ventilation, hinges and latches make the exterior read as a serviceable press.
+  for(const [x,w] of [[-2.58,1.18],[2.55,1.24]]){
+   for(const z of [-1.085,1.085]){
+    for(const y of [.78,.90,1.02,1.14,1.26]){
+     const l=this.box(g,[w*.48,.012,.018],[x,y,z],'dark',0);mark(l,'gravure-end-cabinet-vent-louvre','YA1A1A_YA1B1_FAMILY_VISUAL');
+    }
+    for(const y of [.82,1.52])mark(this.cyl(g,.012,.085,[x-w*.34,y,z],'steel','y'),'gravure-end-cabinet-door-hinge','YA1A1A_YA1B1_FAMILY_VISUAL');
+    mark(this.box(g,[.026,.20,.020],[x+w*.27,1.18,z],'steel',.004),'gravure-end-cabinet-door-handle','YA1A1A_YA1B1_FAMILY_VISUAL',true);
+   }
+  }
+
+  // Main plinth / floor interfaces keep the press visibly grounded.
+  for(const x of [-2.90,-1.75,-.60,.60,1.75,2.90])for(const z of [-.88,.88]){
+   const pad=this.cyl(g,.060,.025,[x,.025,z],'dark','y');mark(pad,'gravure-leveling-foot-pad','SHEETFED_PRESS_FAMILY',true);pad.userData.floorInterface=true;
+   mark(this.cyl(g,.010,.028,[x,.052,z],'steel','y'),'gravure-floor-anchor-bolt','SHEETFED_PRESS_FAMILY');
+  }
+
+  // Operator platform gains toe-board / rail posts so it no longer reads as a floating strip.
+  const platform=this.findNode('o7-operator-platform-v232');
+  if(platform){
+   for(const z of [-1.01,-.82]){
+    const toe=this.box(platform,[4.70,.075,.025],[.12,.42,z],'dark',.004);mark(toe,'gravure-platform-toe-board-reference','SHEETFED_GRAVURE_FAMILY',true);
+   }
+   for(let x=-2.02;x<=2.20;x+=.70){
+    const post=this.cyl(platform,.020,.66,[x,.76,-1.01],'steel','y');mark(post,'gravure-platform-handrail-post-reference','SHEETFED_GRAVURE_FAMILY',true);
+   }
+  }
+
+  // Gravure/impression bearing service points remain process-family references, not installed bearing-model claims.
+  const grav=this.findNode('o7-gravure-cylinder');
+  if(grav)for(const z of [-.70,.70]){
+   const cap=this.cyl(grav,.080,.030,[0,.84,z],'dark','z');mark(cap,'gravure-cylinder-bearing-service-cap','SHEETFED_GRAVURE_PRIMARY',true);cap.userData.installedBearingModelVerified=false;
+   mark(this.cyl(grav,.010,.055,[.07,.96,z],'steel','y'),'gravure-cylinder-grease-point-reference','SHEETFED_GRAVURE_PRIMARY');
+  }
+  const imp=this.findNode('o7-impression-cylinder');
+  if(imp)for(const z of [-.70,.70]){
+   const cap=this.cyl(imp,.082,.030,[0,1.43,z],'dark','z');mark(cap,'impression-bearing-service-cap','SHEETFED_GRAVURE_PATENT',true);cap.userData.installedBearingModelVerified=false;
+  }
+
+  // Ink-pan drain/service hardware is supported by the circulation architecture but exact installed routing remains bounded.
+  const pan=this.findNode('o7-ink-pan');
+  if(pan){
+   const drain=this.cyl(pan,.018,.22,[.22,.35,.45],'steel','x');mark(drain,'gravure-ink-pan-drain-reference','SHEETFED_GRAVURE_FAMILY');
+   const valve=this.cyl(pan,.035,.045,[.34,.35,.45],'accent','z');mark(valve,'gravure-ink-drain-valve-reference','SHEETFED_GRAVURE_FAMILY');
+   valve.userData.installedRoutingVerified=false;
+  }
+  const circ=this.findNode('o7-ink-circulation');
+  if(circ){
+   for(const z of [-.42,.42])mark(this.box(circ,[.045,.025,.040],[.06,.72,z],'steel',.004),'gravure-ink-line-retainer-reference','FAMILY_REFERENCE');
+  }
+
+  // Doctor service adjusters are family/patent grounded; installed actuator topology remains unverified.
+  const doctor=this.findNode('o7-doctor');
+  if(doctor){
+   for(const z of [-.48,.48]){
+    const adj=this.cyl(doctor,.035,.12,[-.36,1.20,z],'steel','y');mark(adj,'gravure-doctor-pressure-adjuster-reference','GRAVURE_DOCTOR_PATENT');
+    adj.userData.installedActuatorVerified=false;
+   }
+  }
+
+  // Dryer exhaust stack gets flange/latch service detail only. Dryer energy technology remains explicitly unverified.
+  const exh=this.findNode('o7-dryer-exhaust');
+  if(exh){
+   for(const z of [-.42,.42]){
+    const flange=this.cyl(exh,.115,.025,[.18,2.52,z],'dark','y');mark(flange,'gravure-dryer-exhaust-flange-reference','SHEETFED_GRAVURE_FAMILY',true);
+    for(const dx of [-.07,.07])for(const dz of [-.07,.07])mark(this.cyl(exh,.009,.025,[.18+dx,2.52,z+dz],'steel','y'),'gravure-dryer-flange-bolt-reference','SHEETFED_GRAVURE_FAMILY');
+   }
+   const latch=this.box(exh,[.030,.18,.025],[-.02,1.45,.61],'steel',.004);mark(latch,'gravure-dryer-service-latch-reference','SHEETFED_GRAVURE_FAMILY');
+   exh.userData.installedDryerTechnologyVerified=false;
+  }
+
+  // Bounded family control pedestal: improves human-operable scale without asserting a specific controller generation.
+  const drive=this.activeGroup(8);
+  if(drive){
+   const post=this.box(drive,[.08,.72,.08],[.46,.74,-.78],'steel',.012);mark(post,'gravure-operator-console-post-reference','SHEETFED_PRESS_FAMILY',true);
+   const console=this.cover(this.box(drive,[.44,.34,.12],[.46,1.18,-.78],'body',.035));mark(console,'gravure-operator-console-family-reference','SHEETFED_PRESS_FAMILY',true);
+   const screen=this.cover(this.box(drive,[.30,.20,.020],[.46,1.20,-.85],'glass',.014));mark(screen,'gravure-operator-display-family-reference','SHEETFED_PRESS_FAMILY');
+   console.userData.installedControllerGenerationVerified=false;
+  }
+
+  let retained=0;
+  for(const mesh of this.meshes){
+   const role=String(mesh.userData?.mechanismRole||'');
+   if(/gravure-(?:leveling-foot|platform|end-cabinet-door-handle|cylinder-bearing-service-cap|dryer-exhaust-flange|operator-console)/.test(role)){
+    mesh.userData.silhouetteCritical=true;retained++;
+   }
+  }
+  this.root.userData.homeSilhouetteCriticalCount=(this.root.userData.homeSilhouetteCriticalCount||0)+retained;
  }
  enrichGravure(){
   const f=this.activeGroup(1),reg=this.activeGroup(2),ink=this.activeGroup(3),print=this.activeGroup(4),imp=this.activeGroup(5),dryer=this.activeGroup(6),delivery=this.activeGroup(7),drive=this.activeGroup(8);
