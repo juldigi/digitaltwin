@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import {pathToFileURL} from 'node:url';
 import {MACHINE_REGISTRY} from '../frontend/src/data/machine-registry.js';
-import {createPolishedMachineTemplate} from '../frontend/src/machine-runtime.js';
+import {createPolishedMachineTemplate,createMachineSimulation} from '../frontend/src/machine-runtime.js';
 
 const finite=v=>Number.isFinite(v);
 const finiteVec=v=>v&&finite(v.x)&&finite(v.y)&&finite(v.z);
@@ -9,7 +9,7 @@ const finiteVec=v=>v&&finite(v.x)&&finite(v.y)&&finite(v.z);
 export function auditMachineFleet(){
  const machines=[],failures=[];
  for(const asset of MACHINE_REGISTRY){
-  let template;
+  let template,simulation;
   try{
    template=createPolishedMachineTemplate(asset.machineId);
    const root=template.root;root.updateMatrixWorld(true);
@@ -49,13 +49,33 @@ export function auditMachineFleet(){
    if(presentation.invalidTransforms||presentation.invalidGeometryBounds||presentation.zeroScaleMeshes||presentation.coverMotionConflicts)problems.push('PRESENTATION_AUDIT_FAILED');
    if(root.userData.presentationPolishRevision!=='V233')problems.push('V233_NOT_APPLIED');
 
+   // Exercise the same simulation factory used by the live detail view. Static
+   // envelopes cannot catch a moving part acquiring an invalid transform.
+   simulation=createMachineSimulation(asset.machineId,root,template);
+   const initialState=simulation.start();
+   let invalidMotion=0,invalidState=0;
+   for(let frame=0;frame<=360;frame++){
+    simulation.update(frame*1000/60);
+    if(frame%60!==0)continue;
+    root.traverse(object=>{
+     if(!object.isMesh)return;
+     if(!finiteVec(object.position)||!finiteVec(object.scale)||
+      ![object.quaternion.x,object.quaternion.y,object.quaternion.z,object.quaternion.w].every(finite))invalidMotion++;
+    });
+    const state=simulation.state?.();
+    if(!state||Object.values(state).some(value=>typeof value==='number'&&!finite(value)))invalidState++;
+   }
+   simulation.stop();
+   if(!initialState||invalidState)problems.push('INVALID_SIMULATION_STATE');
+   if(invalidMotion)problems.push('INVALID_SIMULATION_TRANSFORM');
+
    const row={
     machineId:asset.machineId,no:asset.no,name:asset.name,
     meshes:meshCount,visibleBefore,visibleLow:lowVisible,
     size:size.toArray().map(v=>+v.toFixed(3)),
     lowSize:lowSize.toArray().map(v=>+v.toFixed(3)),
     silhouetteRatios:silhouetteRatios.map(v=>+v.toFixed(4)),silhouetteCenterDrift:+silhouetteCenterDrift.toFixed(4),silhouetteParityValid,
-    presentationValid:presentation.valid===true,
+    presentationValid:presentation.valid===true,simulationValid:!invalidState&&!invalidMotion,
     problems
    };
    machines.push(row);
@@ -63,7 +83,7 @@ export function auditMachineFleet(){
   }catch(error){
    const row={machineId:asset.machineId,no:asset.no,name:asset.name,problems:['EXCEPTION'],error:String(error?.stack||error)};
    machines.push(row);failures.push(row);
-  }finally{template?.dispose?.();}
+  }finally{simulation?.dispose?.();template?.dispose?.();}
  }
  return {total:MACHINE_REGISTRY.length,audited:machines.length,passed:machines.length-failures.length,failed:failures.length,failures,machines};
 }
