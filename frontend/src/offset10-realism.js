@@ -40,21 +40,44 @@ export class Offset10CX104SpecialRealismTemplate extends Offset10MachineTemplate
   this.root.userData.realismPolicy=OFFSET10_FINAL_REFINEMENT.policy;
   this.refineExistingModel();this.root.updateMatrixWorld(true);
  }
- tag(m,role,{coverMounted=false,service=false,confidence='O10_PROJECT_PLUS_OEM_FAMILY'}={}){
+ tag(m,role,{coverMounted=false,service=false,silhouetteCritical=false,confidence='O10_PROJECT_PLUS_OEM_FAMILY'}={}){
   if(!m)return m;m.userData.realismMicroDetail=true;m.userData.realismRole=role;m.userData.coverMountedDetail=coverMounted;
-  m.userData.serviceDetail=m.userData.serviceDetail||service;m.userData.confidence=confidence;m.userData.detail=true;this.realismMeshes.push(m);return m;
+  m.userData.serviceDetail=m.userData.serviceDetail||service;m.userData.confidence=confidence;m.userData.silhouetteCritical=Boolean(m.userData.silhouetteCritical||silhouetteCritical);m.userData.detail=true;this.realismMeshes.push(m);return m;
  }
  db(p,s,x,k='graphite',r=.004,role='micro-detail',opts={}){return this.tag(this.box(p,s,x,k,r),role,opts);}
  dc(p,r,l,x,k='steel',axis='z',role='micro-detail',opts={}){return this.tag(this.cylinder(p,r,l,x,k,axis),role,opts);}
  node(id){return this.findNode(id);}
 
  refineExistingModel(){
+  this.refineStructuralIdentity();
   this.refineFeeder();
   OFFSET10_PRINTING_UNIT_KEYS.forEach(k=>this.refinePrintUnit(k));
   OFFSET10_COATING_UNIT_KEYS.forEach(k=>this.refineCoater(k));
   OFFSET10_Y_UNIT_KEYS.forEach(k=>this.refineYUnit(k));
   this.refineFoilStar();this.refineDelivery();this.refinePeripherals();
  }
+ refineStructuralIdentity(){
+  this.root.userData.visualRefinement='V236_CX104_SPECIAL_PROJECT_STRUCTURAL_ACCESS';
+  this.root.userData.structuralEvidenceBoundary='BMJ_HEIDELBERG_FINAL_DRAWING_PLUS_CX104_OEM_FAMILY__NO_SEQUENCE_INFERENCE';
+  const platform=this.node('o10-platform');
+  if(platform){
+   // The project drawing fixes the press elevation and long OS/DS gallery. Reinforce its module rhythm without adding process hardware.
+   for(const key of OFFSET10_PRINTING_UNIT_KEYS){
+    const x=OFFSET10_MODULE_CENTERS[key];
+    this.db(platform,[.78,.022,.46],[x,.735,-1.79],'steel',.004,'os-module-landing-reference',{service:true,silhouetteCritical:true,confidence:'O10_FINAL_DRAWING'});
+    this.db(platform,[.78,.022,.42],[x,.735,1.79],'steel',.004,'ds-module-landing-reference',{service:true,silhouetteCritical:true,confidence:'O10_FINAL_DRAWING'});
+   }
+  }
+  const feeder=this.node('o10-feeder-frame');
+  if(feeder){
+   for(const z of [-1.505,1.505])this.db(feeder,[2.35,.055,.025],[-.25,.72,z],'graphite',.008,'preset-plus-feeder-base-trim',{coverMounted:true,silhouetteCritical:true,confidence:'O10_PROJECT_PLUS_OEM_FAMILY'});
+  }
+  const x3=this.node('o10-delivery-x3');
+  if(x3){
+   for(const z of [-1.505,1.505])this.db(x3,[4.10,.055,.025],[.20,.86,z],'graphite',.008,'x3-delivery-base-trim',{coverMounted:true,silhouetteCritical:true,confidence:'O10_FINAL_DRAWING'});
+  }
+ }
+
  refineFeeder(){
   const g=this.node('o10-feeder');if(!g)return;
   for(const z of [-1.48,1.48]){
@@ -174,7 +197,7 @@ export class Offset10CX104SpecialRealismTemplate extends Offset10MachineTemplate
  }
  setLow(on){
   if(typeof Offset10MachineTemplate.prototype.setLow==='function')Offset10MachineTemplate.prototype.setLow.call(this,on);
-  for(const m of this.realismMeshes)m.visible=!on;return this;
+  for(const m of this.realismMeshes)m.visible=!on||Boolean(m.userData.silhouetteCritical);return this;
  }
 }
 
