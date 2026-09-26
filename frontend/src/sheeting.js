@@ -58,7 +58,7 @@ export class SheetingMachineTemplate{
       dark:0x293236,steel:0x939b9b,chrome:0xcbd1d0,paper:0xece6d6,stackPaper:0xf1ece0,
       glass:0x78b6bb,black:0x20272a,blue:0x2f67a1,red:0xc93434,green:0x4c9b4f,bronze:0xb08b55
     };
-    this.buildActualV194();this.refineActualV195();this.refineActualV196();this.refineActualV197();this.enrichActualV197();this.markSilhouetteCriticality();
+    this.buildActualV194();this.refineActualV195();this.refineActualV196();this.refineActualV197();this.enrichActualV197();this.refineServiceRealismV237();this.markSilhouetteCriticality();
     for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}
     this.root.updateMatrixWorld(true);
   }
@@ -1414,6 +1414,75 @@ export class SheetingMachineTemplate{
   ghost(on,except=null){this.ghosted=on;for(const m of this.meshes){const fade=on&&(!except||!this.contains(except,m));m.material.transparent=fade||m.userData.exteriorCover||m.material.transparent;m.material.opacity=fade?.14:(m.material.color?.getHex()===this.palette.glass?.26:1);m.material.depthWrite=!fade;}}
   isolate(p,on=true){for(const n of this.nodes)n.visible=!on||!p||this.contains(p,n)||this.contains(n,p);}
   showOnly(ps=[],on=true){for(const n of this.nodes)n.visible=!on||!ps.length||ps.some(p=>n===p||this.contains(n,p));}
+  refineServiceRealismV237(){
+    const photo='BMJ-SHEETING-PHOTOSET-20260922';
+    this.root.userData.visualRefinement='V237_HSM_CTM7_PHOTO_SERVICE_REALISM';
+    this.root.userData.homeDetailGeometryPolicy='SAME_LIVE_PHOTO_TEMPLATE__VISIBLE_SERVICE_HARDWARE_RETAINED';
+    this.root.userData.visualEvidenceBoundary='BMJ_IMG_2479_TO_2487_PRIMARY__NO_SPECULATIVE_INTERNAL_CUTTER';
+    const g=this.group(this.root,'sheeting-service-v237','Photo-visible service and access hardware',[0,0,0],[0,.12,-.18],'VERIFIED_VISUAL');
+
+    // Main sheeter head: visible panel rhythm and access hardware around the real operator aperture.
+    for(const x of [1.62,2.65,3.68]){
+      const seam=this.box(g,[.012,1.12,.020],[x,1.33,-1.695],'bodyDark',.001,{detail:true,role:'main-head-service-panel-seam',sourceAnchor:photo});
+      seam.userData.silhouetteCritical=false;
+    }
+    for(const [x,y] of [[1.86,.86],[3.42,.86],[1.86,1.86],[3.42,1.86]]){
+      const handle=this.box(g,[.028,.22,.025],[x,y,-1.725],'dark',.004,{detail:true,role:'main-head-service-door-handle',sourceAnchor:photo});
+      handle.userData.serviceDetail=true;
+    }
+    for(const x of [1.52,3.78]){
+      const hingeTop=this.cyl(g,.014,.10,[x,1.76,-1.720],'steel','y',{detail:true,role:'main-head-service-door-hinge',sourceAnchor:photo});
+      const hingeLow=this.cyl(g,.014,.10,[x,.88,-1.720],'steel','y',{detail:true,role:'main-head-service-door-hinge',sourceAnchor:photo});
+      hingeTop.userData.serviceDetail=hingeLow.userData.serviceDetail=true;
+    }
+
+    // Rollstand: bearing/end-cap retainers and visible hydraulic hose clips; process geometry remains unchanged.
+    const reel=this.findNode('sheeting-reel');
+    if(reel){
+      const [rx,ry]=SHEETING_ACTUAL_LAYOUT.reel.loadedCenter;
+      for(const z of [-1.43,1.43]){
+        const cap=this.cyl(reel,.105,.035,[rx,ry,z],'bodyDark','z',{detail:true,role:'rollstand-chuck-bearing-cap',sourceAnchor:photo});
+        cap.userData.silhouetteCritical=true;
+        for(const dy of [-.10,.10])this.box(reel,[.040,.020,.050],[rx+.19,ry+dy,z],'steel',.003,{detail:true,role:'rollstand-bearing-retainer',sourceAnchor:photo});
+      }
+    }
+    const rollstand=this.findNode('sheeting-rollstand');
+    if(rollstand){
+      for(const z of [-1.46,1.46]){
+        const guard=this.box(rollstand,[.72,.075,.026],[7.12,.20,z],'bodyDark',.008,{detail:true,role:'rollstand-foot-service-cap',sourceAnchor:photo});
+        guard.userData.silhouetteCritical=true;
+      }
+    }
+
+    // Delivery console: photo-visible bezel and emergency-stop collar.
+    const control=this.findNode('sheeting-control');
+    if(control){
+      const bezel=this.box(control,[.42,.30,.025],[-.45,1.175,-1.960],'black',.018,{detail:true,role:'operator-hmi-bezel-v237',sourceAnchor:photo});
+      bezel.userData.silhouetteCritical=true;
+      const collar=this.cyl(control,.055,.018,[-1.44,1.195,-1.970],'warning','z',{detail:true,role:'operator-estop-collar-v237',sourceAnchor:photo});
+      collar.userData.silhouetteCritical=true;
+    }
+
+    // Stacker adjustment / safety hardware visible in the delivery-side photographs.
+    const layboy=this.findNode('sheeting-layboy');
+    if(layboy){
+      for(const z of [-1.58,1.58])for(const x of [SHEETING_ACTUAL_LAYOUT.stack.startX+.35,SHEETING_ACTUAL_LAYOUT.stack.endX-.35]){
+        this.box(layboy,[.060,.18,.045],[x,.98,z],'steel',.006,{detail:true,role:'stack-guide-lock-handle',sourceAnchor:photo});
+      }
+      for(const x of [SHEETING_ACTUAL_LAYOUT.stack.startX+.20,SHEETING_ACTUAL_LAYOUT.stack.endX-.20]){
+        const pad=this.box(layboy,[.24,.035,.24],[x,.035,-1.44],'dark',.008,{detail:true,role:'stacker-floor-anchor-pad',sourceAnchor:photo});
+        pad.userData.silhouetteCritical=true;
+      }
+    }
+
+    // Chassis feet/anchors ground the very long machine and remove the floating-frame look.
+    for(const x of [-7.0,-4.3,-1.6,1.1,3.8,6.5,8.3])for(const z of [-1.52,1.52]){
+      const pad=this.box(g,[.24,.028,.24],[x,.015,z],'dark',.006,{detail:true,role:'main-frame-floor-anchor-pad',sourceAnchor:photo});
+      pad.userData.silhouetteCritical=true;
+      this.cyl(g,.012,.035,[x,.045,z],'steel','y',{detail:true,role:'main-frame-floor-anchor-bolt',sourceAnchor:photo});
+    }
+  }
+
   markSilhouetteCriticality(){
     const criticalRoles=new Set([
       'loaded-paper-reel','loaded-expanding-chuck','rollstand-common-base','overhead-longitudinal-beam',
