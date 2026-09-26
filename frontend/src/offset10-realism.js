@@ -40,9 +40,9 @@ export class Offset10CX104SpecialRealismTemplate extends Offset10MachineTemplate
   this.root.userData.realismPolicy=OFFSET10_FINAL_REFINEMENT.policy;
   this.refineExistingModel();this.root.updateMatrixWorld(true);
  }
- tag(m,role,{coverMounted=false,service=false,confidence='O10_PROJECT_PLUS_OEM_FAMILY'}={}){
+ tag(m,role,{coverMounted=false,service=false,silhouette=false,confidence='O10_PROJECT_PLUS_OEM_FAMILY'}={}){
   if(!m)return m;m.userData.realismMicroDetail=true;m.userData.realismRole=role;m.userData.coverMountedDetail=coverMounted;
-  m.userData.serviceDetail=m.userData.serviceDetail||service;m.userData.confidence=confidence;m.userData.detail=true;this.realismMeshes.push(m);return m;
+  m.userData.serviceDetail=m.userData.serviceDetail||service;m.userData.confidence=confidence;m.userData.detail=true;if(silhouette)m.userData.silhouetteCritical=true;this.realismMeshes.push(m);return m;
  }
  db(p,s,x,k='graphite',r=.004,role='micro-detail',opts={}){return this.tag(this.box(p,s,x,k,r),role,opts);}
  dc(p,r,l,x,k='steel',axis='z',role='micro-detail',opts={}){return this.tag(this.cylinder(p,r,l,x,k,axis),role,opts);}
@@ -53,7 +53,28 @@ export class Offset10CX104SpecialRealismTemplate extends Offset10MachineTemplate
   OFFSET10_PRINTING_UNIT_KEYS.forEach(k=>this.refinePrintUnit(k));
   OFFSET10_COATING_UNIT_KEYS.forEach(k=>this.refineCoater(k));
   OFFSET10_Y_UNIT_KEYS.forEach(k=>this.refineYUnit(k));
-  this.refineFoilStar();this.refineDelivery();this.refinePeripherals();
+  this.refineFoilStar();this.refineDelivery();this.refinePeripherals();this.refineExteriorIdentityV237();
+ }
+ refineExteriorIdentityV237(){
+  this.root.userData.visualRefinement='V237_CX104_SPECIAL_PROJECT_SERVICE_IDENTITY';
+  this.root.userData.homeDetailGeometryPolicy='SAME_LIVE_PROJECT_TEMPLATE__MODULE_SEQUENCE_AND_SERVICE_DNA_RETAINED';
+  this.root.userData.visualEvidenceBoundary='O10_FINAL_DRAWING_PROPOSAL_UV_LAYOUT_AND_HEIDELBERG_FAMILY__NO_UNDOCUMENTED_MODULES';
+  for(const key of OFFSET10_PRINTING_UNIT_KEYS){
+   const g=this.node('o10-'+key.toLowerCase());if(!g)continue;
+   const band=this.db(g,[.62,.075,.022],[0,.68,-1.492],'black',.006,'o10-operator-lower-service-band',{coverMounted:true,silhouette:true,confidence:'O10_FINAL_DRAWING'});
+   band.userData.moduleKey=key;
+   const label=this.realismMeshes.find(m=>m.userData?.realismRole==='unit-identification-plate'&&m.userData?.label===key);
+   if(label)label.userData.silhouetteCritical=true;
+  }
+  const feeder=this.node('o10-feeder');
+  if(feeder)this.db(feeder,[.92,.075,.022],[-.30,.69,-1.492],'black',.006,'o10-feeder-service-band',{coverMounted:true,silhouette:true,confidence:'O10_FINAL_DRAWING'});
+  const x3=this.node('o10-delivery-x3');
+  if(x3)this.db(x3,[2.00,.075,.022],[.25,.70,-1.432],'black',.006,'o10-x3-delivery-service-band',{coverMounted:true,silhouette:true,confidence:'O10_FINAL_DRAWING'});
+  const foil=this.node('o10-foilstar-control');
+  if(foil){
+   const plate=this.realismMeshes.find(m=>m.userData?.realismRole==='foilstar-identification-plate');
+   if(plate)plate.userData.silhouetteCritical=true;
+  }
  }
  refineFeeder(){
   const g=this.node('o10-feeder');if(!g)return;
@@ -174,7 +195,7 @@ export class Offset10CX104SpecialRealismTemplate extends Offset10MachineTemplate
  }
  setLow(on){
   if(typeof Offset10MachineTemplate.prototype.setLow==='function')Offset10MachineTemplate.prototype.setLow.call(this,on);
-  for(const m of this.realismMeshes)m.visible=!on;return this;
+  for(const m of this.realismMeshes)m.visible=!on||Boolean(m.userData.silhouetteCritical);return this;
  }
 }
 
