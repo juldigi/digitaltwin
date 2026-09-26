@@ -33,7 +33,7 @@ export class Promatrix106ProcessSimulation{
   this.root=root;this.template=template;this.active=false;this.running=false;this.paused=false;this.speed=1;this.completed=0;this.elapsed=0;this.lastNow=null;this.onUpdate=null;
   this.rotors=[];this.suckers=[];this.gripperBars=[];this.sheets=[];this.productStack=[];this.waste=[];this.tieSheets=[];
   this.cutPlate=template.findNode('pm106-cut-plate');this.stripTop=template.findNode('pm106-strip-top');this.stripMiddle=template.findNode('pm106-strip-middle');this.stripBottom=template.findNode('pm106-strip-bottom');
-  this.blankTop=template.findNode('pm106-blank-top');this.blankBottom=template.findNode('pm106-blank-bottom');this.rake=template.findNode('pm106-delivery-rake');this.feederHead=template.findNode('pm106-feeder-head');
+  this.staticDeliveryStack=template.findNode('pm106-delivery-product-stack');this.staticDeliveryVisible=this.staticDeliveryStack?.visible;this.blankTop=template.findNode('pm106-blank-top');this.blankBottom=template.findNode('pm106-blank-bottom');this.rake=template.findNode('pm106-delivery-rake');this.feederHead=template.findNode('pm106-feeder-head');
   this.rest={cut:this.cutPlate?.position.clone(),st:this.stripTop?.position.clone(),sm:this.stripMiddle?.position.clone(),sb:this.stripBottom?.position.clone(),bt:this.blankTop?.position.clone(),bb:this.blankBottom?.position.clone(),rake:this.rake?.position.clone(),head:this.feederHead?.position.clone()};
   root.traverse(o=>{if(o.isMesh&&o.userData.rotor)this.rotors.push(o);if(o.isMesh&&o.userData.reciprocator)this.suckers.push(o);if(o.userData.gripperBar)this.gripperBars.push(o);});
   this.rotorRest=this.rotors.map(r=>r.quaternion.clone());this.suckerRest=this.suckers.map(s=>s.position.clone());this.updateGrippers(0);this.barRest=this.gripperBars.map(b=>b.position.clone());
@@ -60,7 +60,7 @@ export class Promatrix106ProcessSimulation{
    strippingActive:this.strippingActive,blankingActive:this.blankingActive,deliveryRakeActive:this.deliveryRakeActive,tieSheetActive:this.tieSheetActive,tieSheetDemoOnly:true,tieSheetsVisible:this.tieSheets.filter(t=>t.visible).length,
    interlocks:{cutRequiresRegisteredStop:this.cuttingActive?!this.transportIndexing:true,strippingRequiresRegisteredStop:this.strippingActive?!this.transportIndexing:true,blankingRequiresRegisteredStop:this.blankingActive?!this.transportIndexing:true}};
  }
- start(){this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;for(const s of this.sheets){s.lap=-1;s.mesh.visible=false;}for(const p of this.productStack)p.visible=false;for(const w of this.waste)w.visible=false;for(const t of this.tieSheets)t.visible=false;this.resetMechanisms();this.onUpdate?.(this.state());return this.state();}
+ start(){if(this.staticDeliveryStack)this.staticDeliveryStack.visible=false;this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;for(const s of this.sheets){s.lap=-1;s.mesh.visible=false;}for(const p of this.productStack)p.visible=false;for(const w of this.waste)w.visible=false;for(const t of this.tieSheets)t.visible=false;this.resetMechanisms();this.onUpdate?.(this.state());return this.state();}
  pause(){this.running=false;this.paused=this.active;this.onUpdate?.(this.state());return this.state();}
  resume(){if(this.active){this.running=true;this.paused=false;this.lastNow=null;}this.onUpdate?.(this.state());return this.state();}
  setSpeed(v){this.speed=Math.max(.25,Math.min(4,Number(v)||1));return this.state();}
@@ -81,8 +81,8 @@ export class Promatrix106ProcessSimulation{
  updateGrippers(globalTransport){for(const bar of this.gripperBars){const q=gripperLoopPosition(globalTransport/this.gripperBars.length+(bar.userData.barPhase||0));bar.position.set(q.x,q.y,0);}}
  updateRake(p){const delivery=p>.93||p<.08;this.deliveryRakeActive=delivery;if(this.rake&&this.rest.rake){this.rake.position.copy(this.rest.rake);if(delivery){const local=p>.93?(p-.93)/.07:p/.08;this.rake.position.x+=.22*Math.sin(Math.PI*Math.min(1,local));}}return delivery;}
  outputSheet(){
-  this.completed++;const idx=(this.completed-1)%this.productStack.length,p=this.productStack[idx],w=this.waste[idx];p.visible=true;p.position.set(3.83,.48+idx*.007,-.22);w.visible=true;w.position.set(3.35,.60+idx*.003,.58);
-  if(this.completed%6===0){const tie=this.tieSheets[idx];tie.visible=true;tie.position.set(3.83,.485+idx*.007,0);this.tieSheetActive=true;}
+  this.completed++;const idx=(this.completed-1)%this.productStack.length,p=this.productStack[idx],w=this.waste[idx];p.visible=true;p.position.set(3.83,.484+idx*.007,-.22);w.visible=true;w.position.set(3.35,.60+idx*.003,.58);
+  if(this.completed%6===0){const tie=this.tieSheets[idx];tie.visible=true;tie.position.set(3.83,.489+idx*.007,0);this.tieSheetActive=true;}
  }
  updateSheets(cycleIndex,transport){
   const global=cycleIndex+transport;
@@ -102,6 +102,6 @@ export class Promatrix106ProcessSimulation{
   this.transportIndexing=indexing;this.transportStopped=!indexing;this.cuttingActive=cut>.82;this.pressureDwell=p>=.36&&p<=.43;this.strippingActive=strip>.30;this.blankingActive=blank>.30;this.tieSheetActive=false;
   this.updateRotors(dt,p,indexing,cut,delivery);this.updateFeeder(p);this.updateGrippers(transport);this.updateSheets(cycleIndex,transport);this.onUpdate?.(this.state());
  }
- stop(){this.active=false;this.running=false;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;this.resetMechanisms();for(const s of this.sheets){s.mesh.visible=false;s.lap=-1;}for(const p of this.productStack)p.visible=false;for(const w of this.waste)w.visible=false;for(const t of this.tieSheets)t.visible=false;this.pathLine.visible=false;this.onUpdate?.(this.state());return this.state();}
+ stop(){this.active=false;this.running=false;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;this.resetMechanisms();for(const s of this.sheets){s.mesh.visible=false;s.lap=-1;}for(const p of this.productStack)p.visible=false;for(const w of this.waste)w.visible=false;for(const t of this.tieSheets)t.visible=false;this.pathLine.visible=false;if(this.staticDeliveryStack)this.staticDeliveryStack.visible=this.staticDeliveryVisible;this.onUpdate?.(this.state());return this.state();}
  dispose(){this.stop();for(const s of this.sheets){this.root.remove(s.mesh);s.mesh.geometry.dispose();s.mesh.material.dispose();}for(const p of this.productStack){this.root.remove(p);p.geometry.dispose();p.material.dispose();}for(const w of this.waste){this.root.remove(w);w.geometry.dispose();w.material.dispose();}for(const t of this.tieSheets){this.root.remove(t);t.geometry.dispose();t.material.dispose();}this.root.remove(this.pathLine);this.pathLine.geometry.dispose();this.pathLine.material.dispose();}
 }
