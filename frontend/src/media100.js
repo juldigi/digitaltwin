@@ -25,24 +25,32 @@ export class Media100MachineTemplate{
  buildFinal(){const g=this.group(this.root,'media100-final','Final fold / trombone',[2.35,0,0],[.28,.22,.40]);const trom=this.group(g,'media100-final-trombone','Trombone belts');for(const z of [-.55,-.28,.28,.55]){const b=this.box(trom,[2.35,.04,.10],[0,.88,z],'rubber',.008);b.userData.tromboneBelt=true;for(const x of [-1.0,1.0])this.cyl(trom,.07,.14,[x,.87,z],'steel','trombone-pulley','z');}const fold=this.group(g,'media100-final-fold','Final folding rails');for(const z of [-.62,.62]){const r=this.box(fold,[1.95,.055,.055],[-.10,1.17,z],'steel',.008);r.rotation.z=z<0?.16:-.16;}const kick=this.group(g,'media100-final-kicker','Kicker / spacing interface reference');kick.userData.installedKickerVerified=false;const k=this.box(kick,[.08,.35,1.12],[.94,1.02,0],'green',.02);k.userData.kicker=true;}
  buildCompression(){const g=this.group(this.root,'media100-compression','Compression delivery',[4.45,0,0],[.72,.16,0]);const belts=this.group(g,'media100-press-belts','Compression belts');const upper=this.group(belts,'media100-press-upper','Upper pressure belt carriage');for(const y of [.73,1.02])for(const z of [-.52,-.17,.17,.52]){const b=this.box(y>1?upper:belts,[1.70,.04,.10],[0,y,z],'rubber',.008);b.userData.compressionBelt=true;}const press=this.group(g,'media100-press-pressure','Pneumatic pressure setting');for(const z of [-.68,.68]){this.cyl(press,.05,.42,[-.48,1.28,z],'steel','pressure-cylinder','x');this.box(press,[1.35,.055,.06],[.12,1.19,z],'steel');}const exit=this.group(g,'media100-press-exit','Delivery / counter interface');this.box(exit,[.82,.10,1.45],[1.08,.73,0],'steel');for(const z of [-.52,-.17,.17,.52])this.cyl(exit,.06,.14,[1.13,.80,z],'rubber','exit-roller','z');}
  buildExteriorIdentity(){
-  const g=this.group(this.root,'media100-exterior-v230','BOBST MEDIA 100 II exterior identity refinement');
-  g.userData.visualRefinement='V230_MEDIA100II_OPEN_FRAME_SILHOUETTE';
-  g.userData.sourceBoundary='MEDIA100II_INSTALLED_MACHINE_VISUALS__A1_A2_AND_OPTION_KITS_BOUNDED';
+  const g=this.group(this.root,'media100-exterior-v235','BOBST MEDIA 100 II open-frame identity polish');
+  this.root.userData.visualRefinement='V235_MEDIA100II_OPEN_WHITE_RAIL_BLACK_HANDWHEEL_IDENTITY';
+  this.root.userData.visualEvidenceBoundary='MEDIA100II_USED_MACHINE_VISUALS__A1_A2_AND_INSTALLED_OPTION_KITS_BOUNDED';
+  g.userData.sourceBoundary=this.root.userData.visualEvidenceBoundary;
   for(const z of [-.88,.88]){
-   this.cover(this.box(g,[9.80,.24,.12],[-.10,.48,z],'white',.028));
+   const lower=this.cover(this.box(g,[9.80,.24,.12],[-.10,.48,z],'white',.028));lower.userData.silhouetteCritical=true;
    this.cover(this.box(g,[9.45,.12,.10],[-.04,.92,z],'ivory',.018));
   }
   for(const x of [-4.70,-3.20,-1.25,.48,2.35,4.42]){
    for(const z of [-.86,.86])this.box(g,[.10,.82,.10],[x,.70,z],'ivory',.015);
    this.box(g,[.12,.10,1.82],[x,1.12,0],'ivory',.015);
   }
-  const os=this.group(g,'media100-os-controls-v230','Operator-side adjustment hardware');
+  const os=this.group(g,'media100-os-controls-v235','Operator-side black adjustment hardware');
   for(const x of [-3.55,-2.15,-.55,1.10,2.85,4.25]){
-   const wheel=this.cyl(os,.075,.035,[x,.70,-.955],'dark','adjustment-handwheel','z');
-   wheel.userData.adjustmentReference=true;
+   const wheel=this.cyl(os,.085,.038,[x,.70,-.955],'dark','adjustment-handwheel','z');wheel.userData.adjustmentReference=true;wheel.userData.silhouetteCritical=true;
+   this.cyl(os,.025,.10,[x,.70,-.91],'steel','adjustment-shaft-reference','z');
   }
-  const feeder=this.cover(this.box(g,[1.00,.26,.10],[-4.76,.66,-.96],'white',.025));feeder.userData.feederIdentityPanel=true;
-  const delivery=this.cover(this.box(g,[1.50,.30,.10],[4.58,.68,-.96],'white',.025));delivery.userData.compressionDeliveryIdentityPanel=true;
+  // Public MEDIA 100 II imagery shows repeated open white portals above black/red transport belts.
+  for(const x of [-3.85,-2.55,-1.65,-.25,1.45,3.45]){
+   for(const z of [-.79,.79])this.box(g,[.08,.66,.08],[x,1.23,z],'white',.012);
+   this.box(g,[.08,.08,1.66],[x,1.54,0],'white',.012);
+  }
+  const feeder=this.cover(this.box(g,[1.00,.26,.10],[-4.76,.66,-.96],'white',.025));feeder.userData.feederIdentityPanel=true;feeder.userData.silhouetteCritical=true;
+  const delivery=this.cover(this.box(g,[1.50,.30,.10],[4.58,.68,-.96],'white',.025));delivery.userData.compressionDeliveryIdentityPanel=true;delivery.userData.silhouetteCritical=true;
+  // Small red safety accents only; no unsupported text/logo geometry.
+  for(const x of [-4.55,4.45]){const e=this.cyl(g,.045,.030,[x,.72,-1.02],'red','emergency-stop-reference','z');e.userData.detail=true;}
  }
  buildDrive(){const g=this.group(this.root,'media100-drive','Main drive and controls',[0,0,0],[0,.18,.60]);const motor=this.group(g,'media100-drive-motor','Main drive motor');this.cyl(motor,.22,.62,[-.45,.40,1.12],'dark','main-motor','x');for(let x=-.24;x<=.24;x+=.08)this.box(motor,[.025,.34,.64],[x-.45,.40,1.12],'steel');const trans=this.group(g,'media100-drive-transmission','Line-shaft / transmission reference');for(const x of [-3.3,-1.2,.8,2.8])this.cyl(trans,.11,.16,[x,.36,1.02],'steel','line-drive','z');this.cyl(trans,.035,7.0,[-.25,.36,1.02],'dark','line-shaft','x');const control=this.group(g,'media100-drive-control','Control console reference · generation unverified');control.userData.installedControlGenerationVerified=false;this.box(control,[.66,.74,.42],[-2.75,.78,-1.05],'dark',.05);this.box(control,[.40,.26,.024],[-2.80,1.06,-1.28],'glass',.02);for(const x of [-2.55,-2.42,-2.29])this.cyl(control,.032,.025,[x,.84,-1.28],x===-2.29?'red':'green','button','z');}
  findNode(id){return id==='media100-root'?this.root:this.nodes.find(n=>n.userData.nodeId===id)||null;}resolvePart(o){for(let p=o;p&&p!==this.root;p=p.parent)if(p.userData?.selectable)return p;return null;}resolveTaxonomyNode(id){return this.taxonomyById.get(id)?.meshRefs.map(ref=>this.findNode(ref)).find(Boolean)||null;}contains(a,b){for(let p=b;p;p=p.parent)if(p===a)return true;return false;}
