@@ -14,7 +14,7 @@ export class MK1060MachineTemplate{
   if(rotating)m.userData.spinDirection=/^(chain-sprocket|clutch|strip-cam|waste-conveyor|flywheel)$/.test(role)?-1:1;
   return m;
  }cover(m){m.userData.exteriorCover=true;return m;}
- build(){this.buildAccess();this.buildFeeder();this.buildRegister();this.buildTransport();this.buildPlaten();this.buildStripping();this.buildBlanking();this.buildWaste();this.buildDrive();this.buildExteriorIdentity();}
+ build(){this.buildAccess();this.buildFeeder();this.buildRegister();this.buildTransport();this.buildPlaten();this.buildStripping();this.buildBlanking();this.buildWaste();this.buildDrive();this.buildExteriorIdentity();this.buildStructuralPolishV236();}
  buildAccess(){const g=this.group(this.root,'mk1060-access','Frame, guards and operator access');const frame=this.group(g,'mk1060-access-frame','Main side frames');for(const z of [-1.42,1.42]){this.box(frame,[6.25,.30,.18],[.05,.38,z],'red',.04);for(const x of [-2.98,-1.59,-.06,1.47,3.05])this.box(frame,[.18,2.18,.18],[x,1.42,z],'red',.035);}const guard=this.group(g,'mk1060-access-guard','Interlocked safety guards');for(const z of [-1.50,1.50])for(const [x,w] of [[-2.38,1.18],[-.82,1.30],[.70,1.18],[2.22,1.18]]){this.cover(this.box(guard,[w,.50,.08],[x,1.06,z],'ivory',.025));this.cover(this.box(guard,[w,.40,.08],[x,2.19,z],'ivory',.025));for(const side of [-1,1])this.cover(this.box(guard,[w*.13,.68,.08],[x+side*w*.435,1.65,z],'ivory',.018));this.cover(this.box(guard,[w*.74,.68,.026],[x,1.65,z+(z<0?-.05:.05)],'glass',.014));}const platform=this.group(g,'mk1060-access-platform','Elevated operator platform and stairs');this.box(platform,[6.15,.14,.64],[.15,.30,-1.83],'dark');for(let x=-2.55;x<2.85;x+=.52)this.box(platform,[.34,.025,.60],[x,.39,-1.83],'steel',0);for(let i=0;i<4;i++)this.box(platform,[.64,.10,.78],[-3.05+i*.18,.08+i*.10,-1.83],'steel',.01);}
  buildFeeder(){const g=this.group(this.root,'mk1060-feeder','Non-stop pile feeder',[MK1060_STATIONS[0].x,0,0],[-.85,.15,0]);for(const z of [-1.14,1.14])this.cover(this.box(g,[1.62,.19,.12],[0,1.94,z],'ivory',.025));for(const x of [-.76,.76])for(const z of [-1.14,1.14])this.cover(this.box(g,[.10,1.54,.10],[x,1.16,z],'ivory',.018));for(const z of [-1.17,1.17])this.cover(this.box(g,[1.52,.37,.055],[0,1.69,z],'ivory',.012));const pile=this.group(g,'mk1060-feeder-pile','Pile lift');this.box(pile,[1.05,.08,1.42],[-.20,.42,0],'steel');this.box(pile,[1.02,.82,1.38],[-.20,.87,0],'paper');for(const z of [-.58,.58]){this.cyl(pile,.05,.10,[-.64,.42,z],'black','pile-lift');this.cyl(pile,.05,.10,[.22,.42,z],'black','pile-lift');}const head=this.group(g,'mk1060-feeder-head','Suction head');this.box(head,[.72,.28,1.34],[.34,2.03,0],'dark');for(const z of [-.48,-.16,.16,.48]){this.cyl(head,.035,.16,[.54,1.81,z],'rubber','suction-cup');this.box(head,[.04,.23,.04],[.54,1.91,z],'steel');}const ns=this.group(g,'mk1060-feeder-nonstop','Non-stop rack');for(const z of [-.54,-.27,0,.27,.54])this.box(ns,[.86,.035,.035],[-.32,1.06,z],'steel');}
  buildRegister(){const g=this.group(this.root,'mk1060-register','Feed table and register',[MK1060_STATIONS[1].x,0,0],[-.35,.15,0]);const table=this.group(g,'mk1060-register-table','Feed table');this.box(table,[1.34,.11,1.60],[0,1.03,0],'steel');for(const z of [-.56,-.28,0,.28,.56])this.cyl(table,.032,1.05,[0,1.12,z],'rubber','feed-wheel');const front=this.group(g,'mk1060-register-front','Front lays');for(const z of [-.43,.43])this.box(front,[.065,.15,.12],[.52,1.17,z],'gold');const side=this.group(g,'mk1060-register-side','Operator-side pull guide');this.box(side,[.24,.10,.18],[.20,1.17,-.72],'gold');this.box(g,[1.42,.55,1.82],[0,.67,0],'dark',.035);}
@@ -40,6 +40,25 @@ export class MK1060MachineTemplate{
   this.cover(this.box(identity,[2.25,.12,.035],[.10,2.28,-1.515],'red',.010));
   const stairs=this.group(g,'mk1060-os-stairs-v230','Operator side access stair');
   for(let i=0;i<4;i++)this.box(stairs,[.66,.10,.72],[-3.48+i*.18,.08+i*.10,-1.82],'steel',.010);
+ }
+ buildStructuralPolishV236(){
+  this.root.userData.visualRefinement='V236_MK1060ER_STRUCTURAL_ACCESS_AND_SERVICE_IDENTITY';
+  this.root.userData.structuralEvidenceBoundary='MK1060ER_MANUAL_ARCHIVE__INSTALLED_GUARD_AND_LOGISTICS_PACKAGE_BOUNDED';
+  const platform=this.findNode('mk1060-access-platform');
+  if(platform){
+   for(const x of [-2.55,-1.45,-.35,.75,1.85,2.72]){
+    const p=this.cyl(platform,.020,.78,[x,.83,-2.16],'steel','guard-post','y');p.userData.silhouetteCritical=true;
+   }
+   const top=this.cyl(platform,.020,5.35,[.08,1.20,-2.16],'steel','guard-rail','x');top.userData.silhouetteCritical=true;
+   const mid=this.cyl(platform,.017,5.35,[.08,.92,-2.16],'steel','guard-rail','x');mid.userData.silhouetteCritical=true;
+  }
+  const guard=this.findNode('mk1060-access-guard');
+  if(guard){
+   for(const x of [-2.38,-.82,.70,2.22]){
+    const seam=this.box(guard,[.72,.010,.020],[x,1.35,-1.555],'black',.002);seam.userData.serviceDetail=true;seam.userData.exteriorCover=true;
+    const handle=this.box(guard,[.032,.23,.026],[x+.38,1.64,-1.575],'black',.004);handle.userData.serviceDetail=true;handle.userData.exteriorCover=true;
+   }
+  }
  }
  buildDrive(){const g=this.group(this.root,'mk1060-drive','Drive, electrical and controls',[.10,0,0],[0,.18,.62]);const motor=this.group(g,'mk1060-drive-motor','Main motor and flywheel');this.cyl(motor,.25,.60,[-.65,.45,1.58],'dark','main-motor','x');this.cyl(motor,.43,.18,[.02,.62,1.58],'steel','flywheel');const cab=this.group(g,'mk1060-drive-cabinet','Electric cabinet');this.box(cab,[.82,1.55,.52],[2.72,1.12,1.64],'dark',.05);const control=this.group(g,'mk1060-drive-control','Touchscreen and station controls');this.box(control,[.88,.64,.50],[-2.15,.74,-1.73],'dark',.05);this.box(control,[.52,.34,.025],[-2.23,1.13,-1.88],'glass',.025);for(const x of [-1.92,-1.78,-1.64])this.cyl(control,.035,.03,[x,.91,-1.99],x===-1.64?'red':'gold','button','z');}
  enrichV122(){this.root.userData.researchVersion='V122';this.root.userData.researchSourceCount=V122_SOURCE_STATS.total;this.root.userData.detailPass='V122_MODEL_MANUAL_COMPONENT_LEVEL';
