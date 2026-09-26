@@ -49,7 +49,7 @@ export class DianaEye55MachineTemplate{
   const hmi=this.group(g,'diana55-hmi-pedestal-v235','Separate touchscreen pedestal reference');
   const pedestal=this.cover(this.box(hmi,[.52,1.02,.42],[1.72,.70,-1.48],'light',.050));pedestal.userData.silhouetteCritical=true;
   const screen=this.box(hmi,[.38,.28,.025],[1.72,1.16,-1.705],'glass',.025);screen.userData.mechanismRole='diana-eye-hmi-display-reference';
-  this.cyl(hmi,.038,.70,[1.72,.18,-1.48],'steel','pedestal-foot-reference','y');
+  this.cyl(hmi,.038,.70,[1.72,.36,-1.48],'steel','pedestal-foot-reference','y');
  }
  enrichV141(){this.root.userData.researchVersion='V141';this.root.userData.researchSourceCount=V141_SOURCE_STATS.total;this.root.userData.uniqueResearchUrls=V141_SOURCE_STATS.uniqueUrls;this.root.userData.detailPass='V141_DIANA55_TRIGGER_CAPTURE_DECISION_EJECTION';
   const tag=(m,role,evidence='MASTERWORK_DIANA_EYE_55_OEM')=>{if(m){m.userData.mechanismRole=role;m.userData.evidence=evidence;m.userData.detail=true;}return m;};
