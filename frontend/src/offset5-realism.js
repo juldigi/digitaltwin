@@ -39,13 +39,14 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
     this.root.updateMatrixWorld(true);
   }
 
-  tag(mesh,role,{coverMounted=false,service=false,confidence='PHOTO_OEM_REFERENCE'}={}){
+  tag(mesh,role,{coverMounted=false,service=false,silhouetteCritical=false,confidence='PHOTO_OEM_REFERENCE'}={}){
     if(!mesh)return mesh;
     mesh.userData.realismMicroDetail=true;
     mesh.userData.realismRole=role;
     mesh.userData.confidence=confidence;
     mesh.userData.coverMountedDetail=coverMounted;
     mesh.userData.serviceDetail=mesh.userData.serviceDetail||service;
+    mesh.userData.silhouetteCritical=Boolean(mesh.userData.silhouetteCritical||silhouetteCritical);
     mesh.userData.detail=true;
     this.realismMeshes.push(mesh);
     return mesh;
@@ -59,11 +60,42 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
   node(id){return this.findNode(id);}
 
   refineExistingModel(){
+    this.refineStructuralIdentity();
     this.refinePrintingUnits();
     this.refineFeeder();
     this.refineCoater();
     this.refineInspection();
     this.refineDelivery();
+  }
+
+  refineStructuralIdentity(){
+    this.root.userData.visualRefinement='V236_CD102_8L_STRUCTURAL_ACCESS_AND_HOME_PARITY';
+    this.root.userData.structuralEvidenceBoundary='BMJ_PHOTOS_DXF_PLUS_CD102_FAMILY__NO_NEW_PROCESS_HARDWARE';
+    const deck=this.node('platform');
+    if(deck){
+      const first=OFFSET5_UNIT_CENTERS[0],last=OFFSET5_UNIT_CENTERS.at(-1),mid=(first+last)/2,span=last-first+1.10;
+      // Keep the human-access rhythm visible in the factory overview: one supported landing per PU and continuous guard rail.
+      for(const x of OFFSET5_UNIT_CENTERS){
+        const landing=this.db(deck,[.66,.024,.50],[x,.535,1.75],'steel',.005,'pu-operator-landing-reference',{service:true,silhouetteCritical:true,confidence:'BMJ_PHOTO_DXF'});
+        landing.userData.humanAccessClearanceReference=true;
+        this.dc(deck,.018,.70,[x,.88,2.16],'steel','y','operator-guardrail-post',{service:true,silhouetteCritical:true,confidence:'BMJ_PHOTO_DXF'});
+      }
+      this.db(deck,[span,.034,.034],[mid,1.22,2.16],'steel',.006,'operator-guardrail-top',{service:true,silhouetteCritical:true,confidence:'BMJ_PHOTO_DXF'});
+      this.db(deck,[span,.030,.030],[mid,.96,2.16],'steel',.005,'operator-guardrail-mid',{service:true,silhouetteCritical:true,confidence:'BMJ_PHOTO_DXF'});
+    }
+    const feeder=this.node('feeder-frame');
+    if(feeder){
+      // Rear pile remains open; only frame bracing is strengthened.
+      const crown=this.db(feeder,[.10,.10,1.70],[.58,1.98,0],'steel',.010,'open-feeder-rear-crossbrace',{silhouetteCritical:true,confidence:'BMJ_PHOTO'});
+      crown.userData.openRearSpacePreserved=true;
+    }
+    const delivery=this.node('delivery-steps');
+    if(delivery){
+      for(let i=0;i<4;i++){
+        const nose=this.db(delivery,[.58,.018,.06],[-.44+i*.16,.20+i*.10,-.02],'steel',.004,'delivery-step-nosing',{service:true,silhouetteCritical:true,confidence:'BMJ_PHOTO'});
+        nose.userData.humanAccessReference=true;
+      }
+    }
   }
 
   refinePrintingUnits(){
@@ -204,7 +236,7 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
   }
   setLow(on){
     if(typeof OffsetMachineTemplate.prototype.setLow==='function')OffsetMachineTemplate.prototype.setLow.call(this,on);
-    for(const m of this.realismMeshes)m.visible=!on;
+    for(const m of this.realismMeshes)m.visible=!on||Boolean(m.userData.silhouetteCritical);
     return this;
   }
 }
