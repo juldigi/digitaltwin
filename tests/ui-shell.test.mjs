@@ -43,7 +43,7 @@ test('runtime hooks required by the canonical 3D application remain available',(
   for(const camera of ['iso','top','fit','reset'])assert.match(html,new RegExp(`data-camera="${camera}"`));
 });
 test('geometry baseline remains unchanged while the user interface is rebuilt',()=>{
-  assert.equal(PHOTO_RECONSTRUCTION.version,'offset5-photo-pdf-v36');
+  assert.equal(PHOTO_RECONSTRUCTION.version,'offset5-photo-pdf-v37-reality');
   assert.equal(PHOTO_RECONSTRUCTION.repeatedHousings,8);
 });
 
@@ -206,7 +206,8 @@ test('v45 exposes contextual process simulation with continuous sheet flow',()=>
   assert.match(simulation,/CatmullRomCurve3/);
   assert.match(simulation,/getPointAt\(t\)/);
   assert.match(simulation,/getTangentAt\(t\)/);
-  assert.match(simulation,/sheetGapMeters=1\.34/);
+  assert.match(simulation,/sheetGapMeters=this\.sheetPitchMeters/);
+  assert.match(simulation,/nominalSheetsPerHour=15000/);
   assert.match(simulation,/Printing Unit 8/);
   assert.match(simulation,/Coating Unit/);
   assert.match(simulation,/Inline Inspection/);
