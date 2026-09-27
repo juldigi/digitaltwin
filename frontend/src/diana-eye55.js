@@ -173,8 +173,13 @@ export class DianaEye55MachineTemplate{
 
   // Masterwork explicitly describes a scaly-paper delivery platform for finished products AND waste,
   // with a pressing roller and monitoring camera. Keep optional stacker hardware out of the live model.
+  const oldRejectChute=this.findNode('diana55-reject-chute');
+  oldRejectChute?.traverse(m=>{if(m.isMesh&&m.userData.rejectCollection){m.visible=false;m.userData.supersededByV254=true;m.userData.supersededReason='GENERIC_REJECT_BIN_REPLACED_BY_OEM_WASTE_FISH_SCALE_PATH';}});
+
   const delivery=this.findNode('diana55-delivery');
   if(delivery){
+   const oldStack=this.findNode('diana55-delivery-stack');
+   oldStack?.traverse(m=>{if(m.isMesh&&m.userData.fishScaleReference&&!m.userData.route){m.visible=false;m.userData.supersededByV254=true;m.userData.supersededReason='CENTER_GENERIC_FISHSCALE_REPLACED_BY_SEPARATE_GOOD_WASTE_LANES';}});
    const good=this.group(delivery,'diana55-delivery-good-v254','Finished-product fish-scale lane');
    const waste=this.group(delivery,'diana55-delivery-waste-v254','Waste fish-scale lane');
    good.userData.route='FINISHED_PRODUCT';waste.userData.route='WASTE';
