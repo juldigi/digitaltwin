@@ -1,4 +1,4 @@
-export const APP_BUILD='2026.09.25-222';
+export const APP_BUILD='2026.09.27-249';
 
 const DEFAULT_STATE={
   bootState:{phase:'booting',message:null},
