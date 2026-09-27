@@ -1,6 +1,6 @@
-// V237 dedicated machine realism pass; V248 mobile inspector and simulation control polish: force service-worker byte change and shell recache without rotating public query identifiers.
-const VERSION='factory-digital-twin-v222-overlay-state-ssot-20260925';
-const RELEASE='222';
+// V249 release identity refresh: force every installed client to replace the legacy V222 shell cache with the current frontend.
+const VERSION='factory-digital-twin-v249-cache-refresh-20260927';
+const RELEASE='249';
 const ENTRYPOINTS=[
  './app-shell-v79.css','./src/app.js','./src/ui-v5.js','./src/experience-v37.js','./src/app-shell-v79.js'
 ];
