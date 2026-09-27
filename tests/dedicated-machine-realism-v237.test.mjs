@@ -129,6 +129,6 @@ test('V237 critical wrapper details survive low LOD for the three priority offse
 
 test('V237 refreshes shell bytes without rotating V222 public cache identifiers',()=>{
  assert.match(sw,/V237 dedicated machine realism pass/);
- assert.match(sw,/factory-digital-twin-v249-cache-refresh-20260927/);
- assert.match(sw,/const RELEASE='249'/);
+ assert.match(sw,/factory-digital-twin-v222-overlay-state-ssot-20260925/);
+ assert.match(sw,/const RELEASE='222'/);
 });
