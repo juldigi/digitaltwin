@@ -1728,28 +1728,55 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   ppipeUnion(x+.22,.72,z,'y',.105,0x707a7c,'IPAL_PHOTO_PUMP_TOP_UNION'); 
  }
 
- // User-confirmed correction: terrestrial planting belongs outside the IPAL fence and must not obstruct the service road.
+ // V251 user field correction: the IPAL vegetation is a continuous vertical garden attached
+ // to the factory's outermost wall facing the IPAL. It is not a free-standing row and does not sit
+ // on the far-side service road. The wall anchor comes from the factory outline (Y=103) while
+ // foliage density/height remain photo-derived visual reconstruction rather than a surveyed planting plan.
  const vg=IPAL_PHOTO_EVIDENCE_V206.relativeLayout.verticalGarden,vgZ=-vg.y;
  const road=IPAL_PHOTO_EVIDENCE_V206.relativeLayout.serviceRoadClearance;
- const landscapeTag=(o,semantic,extra={})=>photoTag(o,semantic,{coreProcess:false,userConfirmedLocation:'OUTSIDE_IPAL_FENCE',...extra});
- const lbox=(x,y,z,w,h,d,color,semantic,rot=0,opacity=1,extra={})=>landscapeTag(box(layers.landscape,x,y,z,w,h,d,color,rot,opacity),semantic,extra);
- const lcyl=(x,y,z,r,h,color,semantic,extra={},segments=32)=>{const o=new T.Mesh(new T.CylinderGeometry(r,r,h,segments),material(color));o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;layers.landscape.add(o);return landscapeTag(o,semantic,extra);};
- lbox(vg.x,.24,vgZ,vg.w,.46,.54,0x5d6f62,'IPAL_PHOTO_VERTICAL_GARDEN_BASE',0,1,{placementRule:'OUTSIDE_FENCE_CLEAR_OF_SERVICE_ROAD'});
- for(let row=0;row<3;row++)for(let col=0;col<12;col++){
-  const x=vg.x-vg.w/2+.42+col*(vg.w-.84)/11,y=.58+row*.48;
-  lcyl(x,y-.10,vgZ,.12,.20,0x50483b,'IPAL_PHOTO_PLANT_POT',{placementRule:'OUTSIDE_FENCE_CLEAR_OF_SERVICE_ROAD'},12);
-  const crown=new T.Mesh(new T.IcosahedronGeometry(.18+(col%3)*.025,1),material(row===1&&col%4===0?0x6f5a78:col%3===0?0x73904e:0x4f7d58));crown.position.set(x,y+.12,vgZ);layers.landscape.add(crown);landscapeTag(crown,'IPAL_PHOTO_VERTICAL_GARDEN_PLANT',{variation:'PHOTO_INSPIRED_NON_UNIFORM',placementRule:'OUTSIDE_FENCE_CLEAR_OF_SERVICE_ROAD'});buildingDetailStats.v205IpalVegetationObjects++;
+ const wallGarden=new T.Group();wallGarden.name='IPAL_WALL_ATTACHED_VERTICAL_GARDEN_V251';ipalPhoto.add(wallGarden);
+ photoTag(wallGarden,'IPAL_PHOTO_VERTICAL_GARDEN_WALL_ATTACHED',{coreProcess:false,userConfirmedLocation:'FACTORY_OUTERMOST_WALL_FACING_IPAL',attachment:'WALL_ATTACHED_FULL_LENGTH',wallY:vg.wallY,wallSpan:vg.wallSpan});
+ // Continuous trough and trellis touch the exterior wall rather than floating in the yard.
+ const gardenBase=box(wallGarden,vg.x,.23,vgZ,vg.w,.42,vg.d||.32,0x5d6f62);
+ photoTag(gardenBase,'IPAL_PHOTO_VERTICAL_GARDEN_BASE',{coreProcess:false,attachment:'WALL_ATTACHED_FULL_LENGTH',placementRule:'TOUCH_FACTORY_OUTER_WALL'});
+ const trellisZ=-(vg.wallY+.055);
+ const trellis=box(wallGarden,vg.x,1.19,trellisZ,vg.w,1.92,.07,0x465c50);
+ photoTag(trellis,'IPAL_PHOTO_VERTICAL_GARDEN_TRELLIS',{coreProcess:false,attachment:'FACTORY_OUTER_WALL',fullWallLength:true});
+ const bayCount=Math.max(24,Math.round(vg.w/.78)),bayPitch=vg.w/bayCount;
+ for(let i=0;i<=bayCount;i++){
+  const x=vg.x-vg.w/2+i*bayPitch;
+  const rail=line(wallGarden,new T.Vector3(x,.28,trellisZ-.045),new T.Vector3(x,2.08,trellisZ-.045),.010,0x617468);
+  photoTag(rail,'IPAL_PHOTO_VERTICAL_GARDEN_TRELLIS_RAIL',{coreProcess:false,attachment:'FACTORY_OUTER_WALL'});
  }
+ for(const y of [.55,1.02,1.49,1.96]){
+  const rail=line(wallGarden,new T.Vector3(vg.x-vg.w/2,y,trellisZ-.045),new T.Vector3(vg.x+vg.w/2,y,trellisZ-.045),.010,0x617468);
+  photoTag(rail,'IPAL_PHOTO_VERTICAL_GARDEN_TRELLIS_RAIL',{coreProcess:false,attachment:'FACTORY_OUTER_WALL'});
+ }
+ const foliageCount=bayCount*3,foliageGeo=new T.IcosahedronGeometry(.20,1),foliageMat=material(0x4f7d58),foliage=new T.InstancedMesh(foliageGeo,foliageMat,foliageCount),dummy=new T.Object3D(),leafColor=new T.Color();
+ let leafIndex=0;
+ for(let row=0;row<3;row++)for(let col=0;col<bayCount;col++){
+  const x=vg.x-vg.w/2+(col+.5)*bayPitch,y=.66+row*.53+((col%3)-1)*.025,z=trellisZ-.13-(col%2)*.025;
+  dummy.position.set(x,y,z);dummy.scale.set(.78+(col%4)*.08,.88+(row%2)*.10,.58+(col%3)*.06);dummy.rotation.set(0,(col%5-.2)*.07,(col%4-1.5)*.035);dummy.updateMatrix();
+  foliage.setMatrixAt(leafIndex,dummy.matrix);leafColor.setHex((row+col)%7===0?0x6f8d4d:(row+col)%3===0?0x5f874f:0x4f7d58);foliage.setColorAt(leafIndex,leafColor);leafIndex++;
+ }
+ foliage.instanceMatrix.needsUpdate=true;if(foliage.instanceColor)foliage.instanceColor.needsUpdate=true;foliage.castShadow=true;foliage.receiveShadow=true;wallGarden.add(foliage);
+ photoTag(foliage,'IPAL_PHOTO_VERTICAL_GARDEN_PLANT',{coreProcess:false,attachment:'FACTORY_OUTER_WALL',fullWallLength:true,instanceCount:foliageCount,variation:'PHOTO_INSPIRED_NON_UNIFORM'});
+ buildingDetailStats.v205IpalVegetationObjects+=foliageCount;
  const ipalLandscapeAudit={
-  verticalGarden:{minX:vg.x-vg.w/2,maxX:vg.x+vg.w/2,minY:vg.y-.27,maxY:vg.y+.27},
+  verticalGarden:{minX:vg.x-vg.w/2,maxX:vg.x+vg.w/2,minY:vg.y-(vg.d||.32)/2,maxY:vg.y+(vg.d||.32)/2},
+  outerWall:{y:vg.wallY,minX:vg.wallSpan[0],maxX:vg.wallSpan[1]},
   serviceRoad:{minX:road.x-road.w/2,maxX:road.x+road.w/2,minY:road.y-road.d/2,maxY:road.y+road.d/2},
-  terrestrialPlantsInsideIpalFence:0,
+  wallAttached:true,
+  fullOuterWallLength:Math.abs(vg.w-(vg.wallSpan[1]-vg.wallSpan[0]))<.02,
+  wallAttachmentOffset:Math.abs(vg.y-vg.wallY),
+  freeStandingVegetationRows:0,
   serviceRoadObstructions:0,
-  correction:'USER_CONFIRMED_2026_09_27'
+  correction:'USER_CONFIRMED_V251_2026_09_27'
  };
  const gardenRoadOverlap=Math.min(ipalLandscapeAudit.verticalGarden.maxX,ipalLandscapeAudit.serviceRoad.maxX)-Math.max(ipalLandscapeAudit.verticalGarden.minX,ipalLandscapeAudit.serviceRoad.minX)>0&&Math.min(ipalLandscapeAudit.verticalGarden.maxY,ipalLandscapeAudit.serviceRoad.maxY)-Math.max(ipalLandscapeAudit.verticalGarden.minY,ipalLandscapeAudit.serviceRoad.minY)>0;
  if(gardenRoadOverlap)ipalLandscapeAudit.serviceRoadObstructions++;
- buildingDetailStats.v249IpalLandscapeRelocated=37;
+ buildingDetailStats.v249IpalLandscapeRelocated=0;
+ buildingDetailStats.v251IpalWallGardenInstances=foliageCount;
  const pd=IPAL_PHOTO_EVIDENCE_V206.relativeLayout.pond,pdZ=-pd.y;
  pbox(pd.x,.18,pdZ,pd.w,.36,pd.d,0x3c4848,'IPAL_PHOTO_ORNAMENTAL_POND_BASIN');
  const pondWater=pbox(pd.x,.37,pdZ,pd.w-.18,.025,pd.d-.18,0x3b7075,'IPAL_PHOTO_ORNAMENTAL_POND_WATER',0,.72,{context:'NON_PROCESS_WATER_FEATURE'});pondWater.userData.baseY=pondWater.position.y;ipalPhotoRuntime.waters.push(pondWater);
