@@ -95,14 +95,19 @@ test('factory editor normalizes clicks to stable walls and machine assets',()=>{
 });
 
 
-test('machine editor list is registry-driven and whole-unit keyboard movable',()=>{
+test('factory editor list is registry-driven and all selected objects are precision keyboard movable',()=>{
  assert.match(app,/registryMachineChoices=MACHINE_REGISTRY\.slice\(\)/);
  assert.match(app,/name:machine\.name/);
  assert.match(app,/if\(category==='machines'\)\{const machineId=id\.replace\(\/\^asset:\/,'\'\)\|\|node\?\.userData\?\.machineId,record=MACHINE_REGISTRY_BY_ID\.get\(machineId\);return record\?/);
  assert.match(app,/Seluruh mesin aktif sebagai satu unit/);
  assert.match(app,/document\.addEventListener\('keydown',onEditorKeyDown\)/);
  assert.match(app,/editorArrowKeys=\['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'\]/);
- assert.match(app,/const step=e\.shiftKey\?\.5:\.1/);
+ assert.match(app,/editorMoveStep=\.01/);
+ assert.match(app,/if\(!selected\|\|previewOriginal\|\|overrides\[selected\]\?\.locked\|\|!editorArrowKeys\.includes\(e\.key\)\)return/);
+ assert.match(app,/const step=e\.shiftKey\?editorMoveStep\*10:editorMoveStep/);
+ assert.match(app,/id="se-step-size"/);
+ assert.match(app,/id="se-delete-wall"/);
+ assert.match(app,/historyKey=\(e\.metaKey\|\|e\.ctrlKey\)/);
  assert.match(app,/moveSceneObjectInView\(selected,horizontal,vertical,step\)/);
  assert.match(app,/document\.removeEventListener\('keydown',onEditorKeyDown\)/);
  assert.match(css,/\.se-machine-edit-note/);
@@ -153,4 +158,13 @@ test('Stage 5 synchronizes editor machine descriptor and preserves rerender cont
  assert.match(app,/advancedOpen=panel\.querySelector\('\.se-advanced'\)\?\.open/);
  assert.match(app,/adminOpen=panel\.querySelector\('\.se-admin-tools'\)\?\.open/);
  assert.match(app,/id:'uncategorized',label:'Belum dikategorikan'/);
+});
+
+
+test('machine selection uses a clear factory-first flow before explicit 3D inspection',()=>{
+ assert.match(app,/async function openAssetContext\(machine\)\{[\s\S]*selectFactoryAssetContext\(machine,\{historyMode:'push',openDialog:true,focus:true\}\)/);
+ assert.match(app,/Pilih satu aset untuk menyorot posisinya di pabrik/);
+ assert.match(app,/asset-data-badge">Pilih di pabrik/);
+ assert.match(app,/if\(item\.type==='machine'\)\{const record=MACHINE_REGISTRY_BY_ID\.get\(item\.machineId\);if\(record\)await openAssetContext\(record\);return;\}/);
+ assert.match(app,/id="\$\{modelAvailable\?'open-machine-3d':'focus-layout-asset'\}"/);
 });
