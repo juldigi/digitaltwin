@@ -77,7 +77,7 @@ export function buildActualFactory(layout,fleet){
   dockWheelChocks:0,fgShippingDocumentStations:0,productionAisleArrows:0,operationalReferenceObjects:0,
   printingProofRacks:0,printingConsumablesCabinets:0,sheetHandlingTrolleys:0,trimWasteCarts:0,
   dieToolTrolleys:0,cartonBlankTrolleys:0,trolleyParkingBays:0,roomDoorNameplates:0,
-  contextualSupportStations:0,contextualSupportSkipped:0,roofInsulationBlankets:0,roofDaylightReferences:0,
+  contextualSupportStations:0,contextualSupportSkipped:0,roofInsulationBlankets:0,roofDaylightReferences:0,roofSolarModules:0,roofExhaustFans:0,
   roomEnvelopeSupplementWalls:0,roomEnvelopeAudited:0,outerRoomOpenEdges:0,outerRoomInvalidOpenings:0,
   outerRoomEnvelopeRooms:0,roomWallCornerErrors:0,doubleWallOverlaps:0,contextualFurnitureTemplatesApplied:0,
   furnitureAccessViolations:0,furnitureWallPenetrations:0,furnitureOrientationErrors:0,doorSwingClearanceViolations:0,
@@ -376,6 +376,27 @@ export function buildActualFactory(layout,fleet){
   // Eave gutters and approximate downpipe spacing are reference-only until facade photos/as-built MEP are supplied.
   for(const sign of [-1,1]){const ex=x+sign*half;const gutter=line(layers.roof,new T.Vector3(ex,4.43,z-d/2),new T.Vector3(ex,4.43,z+d/2),.042,0x536b73);detail(gutter,'MAIN_ROOF_GUTTER_REFERENCE');buildingDetailStats.roofGutters++;
    for(let zz=z-d/2+4;zz<z+d/2-2;zz+=18){const down=line(b,new T.Vector3(ex,4.40,zz),new T.Vector3(ex,.16,zz),.035,0x536b73);detail(down,'MAIN_ROOF_DOWNPIPE_REFERENCE');buildingDetailStats.roofDownpipes++;const shoe=line(b,new T.Vector3(ex,.16,zz),new T.Vector3(ex-sign*.38,.08,zz),.04,0x536b73);detail(shoe,'DOWNPIPE_SHOE_REFERENCE');buildingDetailStats.downpipeShoes++;}}
+  // Visual rooftop equipment stays within the main hall and clear of ridge, eaves and daylight strips.
+  // Positions and electrical/airflow connections are intentionally not asserted as installed equipment.
+  if(roofId==='MAIN_HALL'){
+   for(const sign of [-1,1])for(const zz of [-80,-62,-44,-26])for(let col=0;col<3;col++){
+    const rx=sign*(half*.36+col*2.15),px=x+rx,py=roofY(rx)+.18;
+    const module=box(layers.roof,px,py,zz,1.82,.065,4.5,0x183b53);
+    module.rotation.z=-sign*slope;
+    module.userData={semantic:'ROOF_SOLAR_MODULE_REFERENCE',roofId,accuracy:'DESIGN_REFERENCE_NOT_AS_BUILT',operationalStatus:'NOT_CONNECTED'};
+    const frame=box(layers.roof,px,py+.038,zz,1.88,.012,4.56,0x8b9fa8,0,.24);
+    frame.rotation.z=-sign*slope;frame.userData={semantic:'ROOF_SOLAR_FRAME_REFERENCE',accuracy:'DESIGN_REFERENCE_NOT_AS_BUILT'};
+    buildingDetailStats.roofSolarModules++;
+   }
+   for(const zz of [-76,-40]){
+    const fan=new T.Group();fan.position.set(x+8,roofY(8)+.01,zz);layers.roof.add(fan);
+    fan.userData={semantic:'ROOF_EXHAUST_FAN_REFERENCE',roofId,accuracy:'DESIGN_REFERENCE_NOT_AS_BUILT',operationalStatus:'STATIC'};
+    box(fan,0,.08,0,1.2,.28,1.2,0x657b83);
+    const cowl=new T.Mesh(new T.CylinderGeometry(.7,.54,.22,12),material(0x889da4));cowl.position.y=.32;fan.add(cowl);
+    for(const dx of [-.42,.42])for(const dz of [-.42,.42])line(fan,new T.Vector3(dx,.02,dz),new T.Vector3(dx,.21,dz),.025,0x455c65);
+    buildingDetailStats.roofExhaustFans++;
+   }
+  }
  }
  // Suspended linear lighting: functional density reference from industrial print halls, not an as-built fixture survey.
  const addLinearLight=(x,z,len=1.6)=>{const g=new T.Group();g.position.set(x,0,z);b.add(g);const rod1=line(g,new T.Vector3(-len*.35,4.42,0),new T.Vector3(-len*.35,4.08,0),.008,0x718087),rod2=line(g,new T.Vector3(len*.35,4.42,0),new T.Vector3(len*.35,4.08,0),.008,0x718087);detail(rod1,'LIGHT_SUSPENSION_REFERENCE');detail(rod2,'LIGHT_SUSPENSION_REFERENCE');const fixture=new T.Mesh(boxGeo,lightMaterial);fixture.position.set(0,4.04,0);fixture.scale.set(len,.055,.12);fixture.userData={semantic:'SUSPENDED_LINEAR_LED_REFERENCE',accuracy:'INDUSTRIAL_REALISM_REFERENCE_NOT_AS_BUILT'};g.add(fixture);buildingDetailStats.linearLights++;};
