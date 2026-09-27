@@ -38,7 +38,7 @@ const neutralTemplate=()=>{
  };
 };
 
-function buildLowDetailFactory(layout,fleet){
+export function buildLowDetailFactory(layout,fleet){
   const root=new THREE.Group();root.name='BMJ · mobile low-detail factory';
   const layers={};
   for(const name of ['building','walls','furniture','roof','machines','labels','landscape','reference','unidentified','utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors']){
@@ -78,6 +78,21 @@ function buildLowDetailFactory(layout,fleet){
     const floor=new THREE.Mesh(new THREE.BoxGeometry(Math.max(10,maxX-minX+8),.08,Math.max(10,maxZ-minZ+8)),createIndustrialMaterial('factoryConcrete',{color:0xdfe7eb}));
     floor.position.set((minX+maxX)/2,-.04,(minZ+maxZ)/2);floor.receiveShadow=false;layers.building.add(floor);
   }
+  // Keep the approach road and entrance recognizable on memory-limited phones.
+  // These are bounded visual references; no surveyed external dimensions are implied.
+  const exteriorMat=new THREE.MeshStandardMaterial({color:0x626d73,roughness:.96});
+  for(const [x,z,w,d] of [[47,1.8,110,7.5],[-9,-53,5,110]]){
+    const road=new THREE.Mesh(boxGeo,exteriorMat);road.position.set(x,.015,z);road.scale.set(w,.035,d);
+    road.userData={semantic:'MOBILE_APPROACH_ROAD_REFERENCE',accuracy:'LANDSCAPE_REFERENCE_NOT_AS_BUILT'};
+    layers.landscape.add(road);
+  }
+  const gateMat=new THREE.MeshStandardMaterial({color:0x71878d,roughness:.8,metalness:.15});
+  for(const z of [-61,-68]){
+    const post=new THREE.Mesh(boxGeo,gateMat);post.position.set(-9,1.2,z);post.scale.set(.45,2.4,.45);layers.landscape.add(post);
+  }
+  const gate=new THREE.Mesh(boxGeo,gateMat);gate.position.set(-9,1.15,-64.5);gate.scale.set(.09,2.1,5);
+  gate.userData={semantic:'MOBILE_ENTRANCE_GATE_REFERENCE',accuracy:'LANDSCAPE_REFERENCE_NOT_AS_BUILT'};
+  layers.landscape.add(gate);
   root.userData={baselineId:layout?.baselineId||null,mobileLowDetail:true,renderStatus:'MOBILE_LOW_DETAIL_FACTORY_PROXY'};
   return {root,layers,assets,update(){},dispose(){}};
 }

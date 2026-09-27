@@ -47,5 +47,5 @@ test('V215 renderer starts mobile in low-memory mode and degrades to 2D without 
 });
 
 test('V215 factory upgrade refits the camera after swapping to the mobile proxy',()=>{
- assert.match(app,/engine\?\.loadLayout\(activeLayout\(\)\);if\(engine\?\.view==='factory'\)engine\.fit\(engine\.factory,'iso',false\)/);
+ assert.match(app,/loadVisibleFactoryLayout\(activeLayout\(\)\);if\(engine\?\.view==='factory'\)engine\.fit\(engine\.factory,'iso',false\)/);
 });
