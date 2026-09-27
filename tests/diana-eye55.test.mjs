@@ -65,6 +65,20 @@ test('DIANA optical illumination follows scan occupancy and resets cleanly',()=>
  assert.ok(seenScan);sim.stop();assert.equal(sim.lights.every(l=>l.material.emissiveIntensity<.2),true);assert.equal(sim.rotors.every((r,i)=>r.quaternion.angleTo(sim.rotorRest[i])<1e-9),true);sim.dispose();model.dispose();
 });
 
+test('DIANA feeds blanks progressively, scans at the cell, and deposits each output once',()=>{
+ const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);
+ assert.ok(sim.staticDeliveryReferences.length>0);sim.start();assert.equal(sim.staticDeliveryReferences.every(m=>!m.visible),true);
+ let now=1000;sim.update(now);now+=10;sim.update(now);assert.equal(sim.state().sheetsVisible,1);
+ let sawScan=false,sawOutput=false;
+ for(let i=0;i<1100;i++){now+=10;sim.update(now);const first=sim.blanks[0],s=sim.state();
+  if(s.scanActive){sawScan=true;assert.ok(sim.blanks.some(b=>b.mesh.visible&&b.lastT>=sim.scanStart&&b.lastT<sim.scanEnd));}
+  if(first.result)assert.ok(first.lastT>=sim.decisionAt);
+  if(s.completed+s.rejectedDemo>0){sawOutput=true;assert.ok(s.pileSheetsVisible+s.rejectSheetsVisible>0);}
+ }
+ assert.ok(sawScan&&sawOutput);assert.equal(sim.completed+sim.rejected,sim.goodStack.filter(m=>m.visible).length+sim.rejectStack.filter(m=>m.visible).length);
+ sim.stop();assert.deepEqual(sim.staticDeliveryReferences.map(m=>m.visible),sim.staticDeliveryVisibility);sim.dispose();model.dispose();
+});
+
 test('DIANA pause/resume does not create a process-clock jump',()=>{
  const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);sim.start();sim.update(1000);sim.update(1200);const t=sim.elapsed;sim.pause();sim.update(20000);sim.resume();sim.update(30000);assert.equal(sim.elapsed,t);sim.update(30020);assert.ok(sim.elapsed-t<.03);sim.dispose();model.dispose();
 });
@@ -82,7 +96,7 @@ test('DIANA stage order preserves inspection decision tracking and fish-scale de
 
 test('V254 DIANA routes accepted and rejected blanks to separate fish-scale lanes without an invented actuator claim',()=>{
  const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);sim.start();let now=1000,goodZ=null,badZ=null,sawWaste=false;
- for(let i=0;i<1600;i++){now+=10;sim.update(now);const st=sim.state();sawWaste||=st.wasteDeliveryActive;for(const b of sim.blanks){if(b.result==='PASS_DEMO'&&b.lastT>.84)goodZ=b.mesh.position.z;if(b.result==='REJECT_DEMO'&&b.lastT>.84)badZ=b.mesh.position.z;}if(sawWaste&&goodZ!==null&&badZ!==null)break;}
+ for(let i=0;i<1600;i++){now+=10;sim.update(now);const st=sim.state();sawWaste||=st.wasteDeliveryActive;for(const b of sim.blanks){if(b.result==='PASS_DEMO'&&b.mesh.visible&&b.lastT>.84)goodZ=b.mesh.position.z;if(b.result==='REJECT_DEMO'&&b.mesh.visible&&b.lastT>.84)badZ=b.mesh.position.z;}if(sawWaste&&goodZ!==null&&badZ!==null)break;}
  assert.ok(sawWaste);assert.ok(goodZ<0);assert.ok(badZ>0);assert.ok(Math.abs(goodZ-badZ)>.25);
  assert.equal(sim.state().demoRejectActuator,'NEUTRAL_DAMAGE_FREE_EJECTION_REFERENCE__INSTALLED_ACTUATOR_UNVERIFIED');
  sim.dispose();model.dispose();

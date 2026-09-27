@@ -63,6 +63,19 @@ test('SHARK demo creates accepted and rejected collection and resets cleanly',()
  sim.stop();assert.equal(sim.goodStack.every(m=>!m.visible),true);assert.equal(sim.badStack.every(m=>!m.visible),true);assert.equal(sim.rotors.every((r,i)=>r.quaternion.angleTo(sim.rotorRest[i])<1e-9),true);sim.dispose();model.dispose();
 });
 
+test('SHARK feeds progressively, scans at the tower, and collects tracked outputs',()=>{
+ const model=new SharkN650MachineTemplate(),sim=new SharkN650ProcessSimulation(model.root,model);
+ assert.ok(sim.staticDeliveryReferences.length>0);sim.start();assert.equal(sim.staticDeliveryReferences.every(m=>!m.visible),true);
+ let now=1000;sim.update(now);now+=10;sim.update(now);assert.equal(sim.state().sheetsVisible,1);
+ let sawScan=false;
+ for(let i=0;i<1100;i++){now+=10;sim.update(now);const first=sim.blanks[0],s=sim.state();
+  if(s.scanActive){sawScan=true;assert.ok(sim.blanks.some(b=>b.mesh.visible&&b.lastT>=sim.scanStart&&b.lastT<sim.scanEnd));}
+  if(first.result)assert.ok(first.lastT>=sim.decisionAt);
+ }
+ assert.ok(sawScan);assert.ok(sim.completed+sim.rejected>0);assert.equal(sim.completed+sim.rejected,sim.goodStack.filter(m=>m.visible).length+sim.badStack.filter(m=>m.visible).length);
+ sim.stop();assert.deepEqual(sim.staticDeliveryReferences.map(m=>m.visible),sim.staticDeliveryVisibility);sim.dispose();model.dispose();
+});
+
 test('SHARK pause/resume does not jump process time',()=>{
  const model=new SharkN650MachineTemplate(),sim=new SharkN650ProcessSimulation(model.root,model);sim.start();sim.update(1000);sim.update(1200);const t=sim.elapsed;sim.pause();sim.update(20000);sim.resume();sim.update(30000);assert.equal(sim.elapsed,t);sim.update(30020);assert.ok(sim.elapsed-t<.03);sim.dispose();model.dispose();
 });
@@ -78,7 +91,7 @@ test('SHARK process sequence preserves negative-pitch inspection before good/bad
 
 test('V254 SHARK separates tracked good and bad return lanes while preserving undecoded P3N1 options',()=>{
  const model=new SharkN650MachineTemplate(),sim=new SharkN650ProcessSimulation(model.root,model);sim.start();let now=1000,goodZ=null,badZ=null;
- for(let i=0;i<1500;i++){now+=10;sim.update(now);for(const b of sim.blanks){if(b.result==='PASS_DEMO'&&b.decisionReady&&((sim.elapsed/7.2+b.phase)%1)>.82)goodZ=b.mesh.position.z;if(b.result==='REJECT_DEMO'&&b.decisionReady&&((sim.elapsed/7.2+b.phase)%1)>.82)badZ=b.mesh.position.z;}if(goodZ!==null&&badZ!==null)break;}
+ for(let i=0;i<1500;i++){now+=10;sim.update(now);for(const b of sim.blanks){if(b.result==='PASS_DEMO'&&b.decisionReady&&b.mesh.visible&&b.lastT>.82)goodZ=b.mesh.position.z;if(b.result==='REJECT_DEMO'&&b.decisionReady&&b.mesh.visible&&b.lastT>.82)badZ=b.mesh.position.z;}if(goodZ!==null&&badZ!==null)break;}
  assert.ok(goodZ<0);assert.ok(badZ>0);assert.ok(Math.abs(goodZ-badZ)>.30);
  const st=sim.state();assert.equal(st.suffixDecoded,false);assert.equal(st.installedCollectionModeVerified,false);assert.equal(st.demoRejectActuator,'NEUTRAL_KICK_OFF_REFERENCE__INSTALLED_ACTUATOR_UNVERIFIED');
  sim.dispose();model.dispose();
