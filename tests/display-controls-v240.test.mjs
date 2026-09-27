@@ -8,19 +8,22 @@ import {cameraFrame} from '../frontend/src/render/camera-director.js';
 
 test('dinding dan furnitur dapat disembunyikan tanpa menghilangkan isi ruangan',async()=>{
  const layout=await loadActualPlantLayout(),factory=buildActualFactory(layout,await loadFactoryFleet());
- const {building,walls,furniture}=factory.layers;
+ const {building,floor,walls,furniture,doors,windows,air_curtain}=factory.layers;
  let wallsCount=0,furnitureCount=0,roomFloors=0;
  walls.traverse(o=>{if(o.isMesh)wallsCount++;});
  furniture.traverse(o=>{if(o.isMesh)furnitureCount++;});
- building.traverse(o=>{if(o.userData?.semantic?.startsWith('ROOM_FLOOR_'))roomFloors++;});
+ floor.traverse(o=>{if(o.userData?.semantic?.startsWith('ROOM_FLOOR_'))roomFloors++;});
  assert.ok(wallsCount>50,'dinding aktual dan liner ruangan tersedia');
  assert.ok(furnitureCount>50,'furnitur ruangan tersedia');
  assert.ok(roomFloors>0,'lantai ruangan terpisah dari dinding');
+ assert.ok(doors.children.length>0&&windows.children.length>0&&air_curtain.children.length>0);
  walls.visible=false;
  assert.equal(furniture.visible,true);
  assert.equal(building.visible,true);
+ assert.equal(floor.visible,true);
  furniture.visible=false;walls.visible=true;
  assert.equal(building.visible,true);
+ assert.equal(floor.visible,true);
  factory.dispose?.();
 });
 

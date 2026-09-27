@@ -7,16 +7,17 @@ import {loadActualPlantLayout} from '../frontend/src/data/plant-actual.js';
 
 test('scene rebuild applies all saved layer choices, including the outdoor area',()=>{
  const makeEngine=()=>{
-  const layers=Object.fromEntries(['roof','landscape','labels','utility_ahu_ducting'].map(key=>[key,{visible:false}]));
+  const layers=Object.fromEntries(['roof','landscape','labels','floor','furniture','doors','windows','air_curtain','utility_ahu_ducting'].map(key=>[key,{visible:false}]));
   return {actualFactory:{layers},setFactoryLayer(key,on){layers[key].visible=on;}};
  };
- const preferences={roof:true,landscape:true,labels:false,ducting:false};
+ const preferences={roof:true,landscape:true,labels:false,floor:true,furniture:false,doors:true,windows:false,airCurtain:true,ducting:false};
  for(const engine of [makeEngine(),makeEngine()]){
   syncFactoryLayerVisibility(engine,preferences);
   assert.equal(engine.actualFactory.layers.roof.visible,true);
   assert.equal(engine.actualFactory.layers.landscape.visible,true);
   assert.equal(engine.actualFactory.layers.labels.visible,false);
   assert.equal(engine.actualFactory.layers.utility_ahu_ducting.visible,false);
+  for(const [layer,expected] of [['floor',true],['furniture',false],['doors',true],['windows',false],['air_curtain',true]])assert.equal(engine.actualFactory.layers[layer].visible,expected);
   assert.equal(engine.labels,false);
  }
 });

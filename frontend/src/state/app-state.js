@@ -11,7 +11,7 @@ const DEFAULT_STATE={
   viewMode:'3d',
   cameraPreset:'iso',
   visibleLayers:{
-    building:true,walls:true,furniture:true,roof:false,machines:true,labels:true,landscape:true,
+    building:true,floor:true,walls:true,doors:true,windows:true,airCurtain:true,furniture:true,roof:false,machines:true,labels:true,landscape:true,
     reference:false,unidentified:true,compressedAir:false,ahuPiping:false,
     ducting:false,utilityAnchors:false
   },

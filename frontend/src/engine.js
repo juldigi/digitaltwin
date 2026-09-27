@@ -41,7 +41,7 @@ const neutralTemplate=()=>{
 export function buildLowDetailFactory(layout,fleet){
   const root=new THREE.Group();root.name='BMJ · mobile low-detail factory';
   const layers={};
-  for(const name of ['building','walls','furniture','roof','machines','labels','landscape','reference','unidentified','utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors']){
+  for(const name of ['building','floor','walls','doors','windows','air_curtain','furniture','roof','machines','labels','landscape','reference','unidentified','utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors']){
     layers[name]=new THREE.Group();layers[name].name=name;root.add(layers[name]);
   }
   layers.roof.visible=false;layers.labels.visible=false;layers.landscape.visible=false;layers.reference.visible=false;
@@ -76,7 +76,7 @@ export function buildLowDetailFactory(layout,fleet){
   if(assetPoints.length){
     let minX=Infinity,maxX=-Infinity,minZ=Infinity,maxZ=-Infinity;for(const [x,z] of assetPoints){minX=Math.min(minX,x);maxX=Math.max(maxX,x);minZ=Math.min(minZ,z);maxZ=Math.max(maxZ,z);}
     const floor=new THREE.Mesh(new THREE.BoxGeometry(Math.max(10,maxX-minX+8),.08,Math.max(10,maxZ-minZ+8)),createIndustrialMaterial('factoryConcrete',{color:0xdfe7eb}));
-    floor.position.set((minX+maxX)/2,-.04,(minZ+maxZ)/2);floor.receiveShadow=false;layers.building.add(floor);
+    floor.position.set((minX+maxX)/2,-.04,(minZ+maxZ)/2);floor.receiveShadow=false;layers.floor.add(floor);
   }
   // Keep the approach road and entrance recognizable on memory-limited phones.
   // These are bounded visual references; no surveyed external dimensions are implied.

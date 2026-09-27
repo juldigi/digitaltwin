@@ -50,7 +50,7 @@ export function resolvePortalClearance(portal,clearances,margin=.35){
 }
 export function buildActualFactory(layout,fleet){
  const root=new T.Group();root.name='BMJ · baseline 250804 + revisi';const layers={};
- for(const name of ['building','walls','furniture','roof','machines','labels','landscape','reference','unidentified','utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors']){layers[name]=new T.Group();layers[name].name=name;root.add(layers[name]);}
+ for(const name of ['building','floor','walls','doors','windows','air_curtain','furniture','roof','machines','labels','landscape','reference','unidentified','utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors']){layers[name]=new T.Group();layers[name].name=name;root.add(layers[name]);}
  layers.roof.visible=false;layers.reference.visible=false;layers.landscape.visible=false;
  for(const name of ['utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors'])layers[name].visible=false;
  const mats=new Map();const material=(color,opacity=1)=>{const k=color+':'+opacity;if(!mats.has(k))mats.set(k,new T.MeshStandardMaterial({color,roughness:.82,metalness:.04,transparent:opacity<1,opacity,depthWrite:opacity===1,side:T.DoubleSide}));return mats.get(k);};
@@ -93,7 +93,7 @@ export function buildActualFactory(layout,fleet){
  const detail=(o,semantic,accuracy='INDUSTRIAL_REALISM_REFERENCE_NOT_AS_BUILT')=>{if(o){o.userData={...o.userData,semantic,accuracy,researchVersion:'V204',evidenceLayer:'REFERENCE_REALISM'};o.visible=false;}return o;};
  // The outline follows the source production hall and attached office/service wings.
  const outline=[[-4,2],[6,2],[6,6],[96,6],[96,90],[90,96],[73,96],[73,103],[23,103],[23,96],[6,96],[6,55],[-5,55],[-5,11],[-4,11]];
- const shape=new T.Shape(outline.map(([x,y])=>new T.Vector2(x,y))),floor=new T.Mesh(new T.ShapeGeometry(shape),material(0xc4c9c7));floor.rotation.x=-Math.PI/2;floor.position.y=-.015;floor.receiveShadow=true;floor.userData={...dwgObjectSourceMetadata(layout,{sourceType:'DWG_DERIVED',semantic:'REINFORCED_CONCRETE_FLOOR',confidence:'HIGH CONFIDENCE',renderStatus:'3D_DERIVED'}),accuracy:'SOURCE_OUTLINE_WITH_VISUAL_MATERIAL_REFERENCE'};b.add(floor);
+ const shape=new T.Shape(outline.map(([x,y])=>new T.Vector2(x,y))),floor=new T.Mesh(new T.ShapeGeometry(shape),material(0xabb4b1));floor.rotation.x=-Math.PI/2;floor.position.y=-.015;floor.receiveShadow=true;floor.userData={...dwgObjectSourceMetadata(layout,{sourceType:'DWG_DERIVED',semantic:'REINFORCED_CONCRETE_FLOOR',confidence:'HIGH CONFIDENCE',renderStatus:'3D_DERIVED'}),accuracy:'SOURCE_OUTLINE_WITH_VISUAL_MATERIAL_REFERENCE'};layers.floor.add(floor);
  // Concrete control-joint grid is a subdued realism reference, not an as-built joint survey.
  for(let x=10;x<=94;x+=8){const j=box(b,x,.002,-49,.018,.004,82,0x7f8987);detail(j,'FLOOR_CONTROL_JOINT_REFERENCE');buildingDetailStats.floorControlJoints++;}
  for(let y=10;y<=90;y+=8){const j=box(b,51,.002,-y,86,.004,.018,0x7f8987);detail(j,'FLOOR_CONTROL_JOINT_REFERENCE');buildingDetailStats.floorControlJoints++;}
@@ -311,7 +311,8 @@ export function buildActualFactory(layout,fleet){
   for(const [cx,cz] of [[room.minX+.22,-room.minY-.22],[room.maxX-.22,-room.minY-.22],[room.minX+.22,-room.maxY+.22],[room.maxX-.22,-room.maxY+.22]]){const guard=box(b,cx,.38,cz,.12,.76,.12,0xe3b52e);detail(guard,'PRESS_ROOM_CORNER_PROTECTION_REFERENCE');buildingDetailStats.pressRoomProtection++;}
  }
  for(const [x,y] of data.columns){if(intersectsMachine([x-.3,y-.3],[x+.3,y+.3]))continue;const pedestal=box(b,x,.18,-y,.72,.36,.72,0x9aa4a1);detail(pedestal,'COLUMN_CONCRETE_PEDESTAL_REFERENCE');buildingDetailStats.columnPedestals++;
-  const column=box(b,x,2.43,-y,.32,4.14,.32,0x819397);column.castShadow=true;column.userData={...dwgObjectSourceMetadata(layout,{semantic:'STRUCTURAL_COLUMN',confidence:'HIGH CONFIDENCE',renderStatus:'3D_WITH_ESTIMATED_HEIGHT'}),height:4.5,evidence:'DXF_COLUMN_POSITION'};
+  const column=box(b,x,2.43,-y,.32,4.14,.32,0x547565);column.castShadow=true;column.userData={...dwgObjectSourceMetadata(layout,{semantic:'STRUCTURAL_COLUMN',confidence:'HIGH CONFIDENCE',renderStatus:'3D_WITH_ESTIMATED_HEIGHT'}),height:4.5,evidence:'DXF_COLUMN_POSITION'};
+  const jacket=box(b,x,.89,-y,.345,1.18,.345,0xd9d8c5);jacket.userData={semantic:'PHOTO_COLUMN_LOWER_PROTECTION_REFERENCE',accuracy:'PHOTO_VISUAL_REFERENCE_NOT_AS_BUILT'};
   const plate=box(b,x,.405,-y,.62,.09,.62,0x66777b);detail(plate,'COLUMN_BASE_PLATE_REFERENCE');buildingDetailStats.columnBasePlates++;
   for(const dx of [-.22,.22])for(const dz of [-.22,.22]){const bolt=new T.Mesh(new T.CylinderGeometry(.028,.028,.08,10),material(0x4f5d61));bolt.position.set(x+dx,.49,-y+dz);bolt.userData={semantic:'COLUMN_ANCHOR_BOLT_REFERENCE',accuracy:'INDUSTRIAL_REALISM_REFERENCE_NOT_AS_BUILT'};b.add(bolt);buildingDetailStats.columnAnchorBolts++;}
   for(const sx of [-1,1]){const st=box(b,x+sx*.20,.61,-y,.10,.34,.28,0x6d8086);st.rotation.z=sx*.32;detail(st,'COLUMN_BASE_STIFFENER_REFERENCE');buildingDetailStats.columnStiffeners++;}
@@ -321,15 +322,17 @@ export function buildActualFactory(layout,fleet){
   for(const [gx,gz] of [[x-.30,-y-.30],[x+.30,-y-.30],[x-.30,-y+.30],[x+.30,-y+.30]]){const guard=box(b,gx,.34,gz,.10,.68,.10,0xd6ad2f);guard.userData={semantic:'PRODUCTION_COLUMN_IMPACT_GUARD_REFERENCE',accuracy:'VISUAL_PROTECTION_REFERENCE_NOT_AS_BUILT_OR_CODE_ASSERTION',researchVersion:'V204',functionalReferenceVisible:true};buildingDetailStats.columnImpactGuards++;}
  }
  const adjustedPortals=[];
- for(const source of allArchitecturalDoors){const d=resolvePortalClearance({...source,width:Math.max(.9,source.width)},serviceClearances);if(d.clearanceAdjusted)adjustedPortals.push(d);const g=new T.Group();g.position.set(d.x,0,-d.y);g.rotation.y=d.rotation*Math.PI/180;b.add(g);
+ for(const source of allArchitecturalDoors){const d=resolvePortalClearance({...source,width:Math.max(.9,source.width)},serviceClearances);if(d.clearanceAdjusted)adjustedPortals.push(d);const g=new T.Group();g.position.set(d.x,0,-d.y);g.rotation.y=d.rotation*Math.PI/180;layers.doors.add(g);
   const personnel=d.width<1.8;g.userData={...dwgObjectSourceMetadata(layout,{semantic:'DOOR',sourceLayer:d.layer||'UNKNOWN',sourceEntityId:d.handle||d.id||'UNKNOWN',sourceHandles:d.handles,confidence:d.referenceGenerated?'FUNCTIONAL REFERENCE':d.evidence?'HIGH CONFIDENCE':'UNVERIFIED',renderStatus:d.referenceGenerated?'3D_FUNCTIONAL_REFERENCE':'3D_POSITION_SOURCE_TYPE_REFERENCE'}),evidence:d.evidence,referenceGenerated:!!d.referenceGenerated,roomLabel:d.roomLabel||null,clearanceAdjusted:d.clearanceAdjusted,sourcePosition:[d.sourceX,d.sourceY],openingTypeReference:personnel?'PERSONNEL_HINGED':'WIDE_SECTIONAL_OR_SLIDING_REFERENCE',asBuiltTypeVerified:false};
   const h=personnel?2.45:3.05;box(g,-d.width/2,h/2,0,.095,h,.18,0x526b75);box(g,d.width/2,h/2,0,.095,h,.18,0x526b75);box(g,0,h-.045,0,d.width+.18,.09,.18,0x526b75);
   if(d.roomLabel){const plate=box(g,0,h+.16,.02,Math.min(1.15,Math.max(.48,d.width*.70)),.20,.035,0xe9e7dc);plate.userData={semantic:'ROOM_DOOR_NAMEPLATE_REFERENCE',roomLabel:d.roomLabel,accuracy:'ROOM_IDENTIFICATION_REFERENCE_NOT_AS_BUILT_SIGNAGE',researchVersion:'V204',functionalReferenceVisible:true};buildingDetailStats.roomDoorNameplates++;}
   if(personnel){buildingDetailStats.doorPersonnel++;const leaf=box(g,-d.width/2+.08,1.16,-d.width*.43,d.width*.96,2.30,.052,0x9db5bd,Math.PI/2.35);leaf.castShadow=true;detail(leaf,'PERSONNEL_DOOR_LEAF_REFERENCE');const handle=new T.Mesh(new T.SphereGeometry(.035,8,6),material(0xd5c6a2));handle.position.set(d.width*.34,1.08,-.055);leaf.add(handle);const kick=box(leaf,0,-.88,.028,d.width*.78,.24,.018,0x71858b);detail(kick,'PERSONNEL_DOOR_KICK_PLATE_REFERENCE');const closer=box(leaf,0,.98,.03,.32,.07,.06,0x5a6d74);detail(closer,'PERSONNEL_DOOR_CLOSER_REFERENCE');const threshold=box(g,0,.025,-.01,d.width-.08,.05,.16,0x6a7779);detail(threshold,'DOOR_THRESHOLD_REFERENCE');}
   else{buildingDetailStats.doorWide++;for(let yy=.22;yy<h-.18;yy+=.22){const slat=box(g,0,yy,.035,d.width-.12,.19,.045,yy>h*.58?0x8299a1:0x9caeb3);detail(slat,'WIDE_DOOR_SECTIONAL_SLAT_REFERENCE');}for(const sx of [-d.width/2+.10,d.width/2-.10])detail(box(g,sx,h/2,.08,.055,h-.18,.055,0x42565f),'WIDE_DOOR_GUIDE_TRACK_REFERENCE');for(const sx of [-d.width/2-.25,d.width/2+.25]){detail(box(g,sx,.46,-.28,.17,.92,.17,0xe2b428),'WIDE_DOOR_BOLLARD_REFERENCE');detail(box(g,sx,.61,-.28,.18,.10,.18,0x303b42),'WIDE_DOOR_BOLLARD_CAP_REFERENCE');buildingDetailStats.doorProtection++;}}
  }
- const addCurtain=(d,semantic='PVC_CURTAIN',machineId=null)=>{const g=new T.Group();g.position.set(d.x,0,-d.y);g.rotation.y=d.rotation*Math.PI/180;b.add(g);g.userData={semantic,evidence:d.evidence,clearanceAdjusted:d.clearanceAdjusted,sourcePosition:[d.sourceX,d.sourceY],machineId};
+ const addCurtain=(d,semantic='PVC_CURTAIN',machineId=null)=>{const g=new T.Group();g.position.set(d.x,0,-d.y);g.rotation.y=d.rotation*Math.PI/180;layers.air_curtain.add(g);g.userData={semantic,evidence:d.evidence,clearanceAdjusted:d.clearanceAdjusted,sourcePosition:[d.sourceX,d.sourceY],machineId};
   box(g,0,3.12,0,d.width+.32,.18,.2,0x526e7c);box(g,-d.width/2-.12,1.55,0,.14,3.1,.2,0x526e7c);box(g,d.width/2+.12,1.55,0,.14,3.1,.2,0x526e7c);
+  const airUnit=box(g,0,3.38,.04,d.width+.18,.28,.34,0xd2dcda);airUnit.userData={semantic:'AIR_CURTAIN_UNIT_REFERENCE',accuracy:'PHOTO_CONTEXT_FUNCTIONAL_REFERENCE_NOT_VERIFIED_INSTALLED',operationalStatus:'STATIC'};
+  for(let i=0;i<Math.max(4,Math.floor(d.width/.24));i++){const slot=box(g,-d.width/2+(i+.5)*d.width/Math.max(4,Math.floor(d.width/.24)),3.226,.055,.13,.008,.20,0x4b6067);slot.userData={semantic:'AIR_CURTAIN_OUTLET_SLOT_REFERENCE',accuracy:'FUNCTIONAL_VISUAL_REFERENCE_NO_AIRFLOW_MODEL'};}
   const n=Math.ceil(d.width/.2);for(let i=0;i<n;i++){const strip=box(g,-d.width/2+(i+.5)*d.width/n,1.52,.012*(i%2),d.width/n+.035,2.95,.014,i%2?0xaddde1:0xc4eaec,0,.26);strip.userData.semantic='PVC_STRIP';}
   for(const x of [-d.width/2-.42,d.width/2+.42]){box(g,x,.48,-.28,.18,.96,.18,0xe2b428);box(g,x,.48,-.28,.19,.18,.19,0x313b40);}
   return g;
@@ -360,9 +363,9 @@ export function buildActualFactory(layout,fleet){
   }
   // Portal rafters / transverse frames.
   for(let zz=z-d/2+3;zz<z+d/2;zz+=6){
-   const eave=line(b,new T.Vector3(x-w/2,4.35,zz),new T.Vector3(x+w/2,4.35,zz),.055,0x4d6570);detail(eave,'PORTAL_EAVE_TIE_REFERENCE');
-   const r1=line(b,new T.Vector3(x-w/2,4.35,zz),new T.Vector3(x,6.85,zz),.075,0x4d6570);detail(r1,'PORTAL_RAFTER_REFERENCE');
-   const r2=line(b,new T.Vector3(x,6.85,zz),new T.Vector3(x+w/2,4.35,zz),.075,0x4d6570);detail(r2,'PORTAL_RAFTER_REFERENCE');buildingDetailStats.primaryRoofFrames++;
+   const eave=line(b,new T.Vector3(x-w/2,4.35,zz),new T.Vector3(x+w/2,4.35,zz),.055,0x4f7363);detail(eave,'PORTAL_EAVE_TIE_REFERENCE');eave.userData.functionalReferenceVisible=true;
+   const r1=line(b,new T.Vector3(x-w/2,4.35,zz),new T.Vector3(x,6.85,zz),.075,0x4f7363);detail(r1,'PORTAL_RAFTER_REFERENCE');r1.userData.functionalReferenceVisible=true;
+   const r2=line(b,new T.Vector3(x,6.85,zz),new T.Vector3(x+w/2,4.35,zz),.075,0x4f7363);detail(r2,'PORTAL_RAFTER_REFERENCE');r2.userData.functionalReferenceVisible=true;buildingDetailStats.primaryRoofFrames++;
    for(const sign of [-1,1]){const hx=x+sign*(half-.72),hy=4.63;const haunch=line(b,new T.Vector3(x+sign*half,4.35,zz),new T.Vector3(hx,hy,zz),.105,0x465e68);detail(haunch,'PORTAL_EAVE_HAUNCH_REFERENCE');buildingDetailStats.eaveHaunches++;const es=line(b,new T.Vector3(x+sign*half,4.28,zz-.22),new T.Vector3(x+sign*half,4.28,zz+.22),.06,0x5d737c);detail(es,'EAVE_STRUT_REFERENCE');buildingDetailStats.eaveStruts++;}
    const apex=box(b,x,6.82,zz,.52,.18,.16,0x596f78);detail(apex,'PORTAL_APEX_SPLICE_REFERENCE');buildingDetailStats.apexSplices++;
   }
@@ -401,6 +404,18 @@ export function buildActualFactory(layout,fleet){
  // Suspended linear lighting: functional density reference from industrial print halls, not an as-built fixture survey.
  const addLinearLight=(x,z,len=1.6)=>{const g=new T.Group();g.position.set(x,0,z);b.add(g);const rod1=line(g,new T.Vector3(-len*.35,4.42,0),new T.Vector3(-len*.35,4.08,0),.008,0x718087),rod2=line(g,new T.Vector3(len*.35,4.42,0),new T.Vector3(len*.35,4.08,0),.008,0x718087);detail(rod1,'LIGHT_SUSPENSION_REFERENCE');detail(rod2,'LIGHT_SUSPENSION_REFERENCE');const fixture=new T.Mesh(boxGeo,lightMaterial);fixture.position.set(0,4.04,0);fixture.scale.set(len,.055,.12);fixture.userData={semantic:'SUSPENDED_LINEAR_LED_REFERENCE',accuracy:'INDUSTRIAL_REALISM_REFERENCE_NOT_AS_BUILT'};g.add(fixture);buildingDetailStats.linearLights++;};
  for(const x of [14,29,44,59,74,89])for(let y=12;y<=86;y+=8)addLinearLight(x,-y,1.65);
+ // Photo-grounded hall cues: suspended high-bay luminaires and a restrained galvanized supply trunk.
+ // Locations are visual references, not surveyed electrical or HVAC routes.
+ for(const x of [22,46,70])for(const y of [22,42,62,82]){
+  const g=new T.Group();g.position.set(x,0,-y);b.add(g);
+  const stem=line(g,new T.Vector3(0,4.44,0),new T.Vector3(0,3.83,0),.012,0x57666a);stem.userData={semantic:'PHOTO_HIGH_BAY_SUSPENSION_REFERENCE',accuracy:'PHOTO_VISUAL_REFERENCE_NOT_AS_BUILT'};
+  const shade=new T.Mesh(new T.CylinderGeometry(.12,.43,.28,16),material(0x7c8f90));shade.position.y=3.77;shade.userData={semantic:'PHOTO_HIGH_BAY_SHADE_REFERENCE',accuracy:'PHOTO_VISUAL_REFERENCE_NOT_AS_BUILT'};g.add(shade);
+  const diffuser=new T.Mesh(new T.CylinderGeometry(.34,.34,.025,16),lightMaterial);diffuser.position.y=3.62;diffuser.userData={semantic:'PHOTO_HIGH_BAY_DIFFUSER_REFERENCE',accuracy:'PHOTO_VISUAL_REFERENCE_NOT_AS_BUILT'};g.add(diffuser);
+ }
+ for(const z of [-27,-43,-59]){
+  const trunk=box(b,73,4.02,z,1.05,.48,15.4,0xa6b3b1);trunk.userData={semantic:'PHOTO_GALVANIZED_AIR_DUCT_REFERENCE',accuracy:'PHOTO_VISUAL_REFERENCE_ROUTE_NOT_VERIFIED'};
+  for(const end of [-7.65,7.65]){const seam=box(b,73,4.02,z+end,1.09,.51,.025,0x6f8181);seam.userData={semantic:'PHOTO_DUCT_FLANGE_REFERENCE',accuracy:'PHOTO_VISUAL_REFERENCE_NOT_AS_BUILT'};}
+ }
 
  // Source-labelled rooms receive function-specific, non-OEM interiors.
  // DXF labels define room function/position only. Furniture, storage equipment and inventory below are
@@ -1103,7 +1118,8 @@ export function buildActualFactory(layout,fleet){
  for(const x of [84.5,88.5,92.5]){for(const y of [74.0,78.0])rmsPallet(x,y,(Math.round(x+y)%2)+2);for(const y of [82.2,86.0])rmsReel(x,y);}
  const rmsSheetStack=(x,y,layersCount=12)=>{
   const g=new T.Group();g.position.set(x,0,-y);rms.add(g);g.userData={semantic:'RMS_CUT_SHEET_STACK_REFERENCE',accuracy:'PAPER_SHEET_STORAGE_REFERENCE_NOT_AS_BUILT',researchVersion:'V204'};
-  for(const z of [-.55,0,.55])box(g,0,.055,z,1.42,.11,.12,0x967953).userData={semantic:'RMS_SHEET_PALLET_SLAT_REFERENCE'};
+  for(const z of [-.55,0,.55])box(g,0,.055,z,1.42,.11,.12,0x315a94).userData={semantic:'RMS_BLUE_PLASTIC_PALLET_RUNNER_REFERENCE',accuracy:'PHOTO_VISUAL_REFERENCE_NOT_AS_BUILT'};
+  box(g,0,.12,0,1.44,.025,1.14,0x3869aa).userData={semantic:'RMS_BLUE_PLASTIC_PALLET_DECK_REFERENCE',accuracy:'PHOTO_VISUAL_REFERENCE_NOT_AS_BUILT'};
   for(let i=0;i<layersCount;i++){const p=box(g,0,.14+i*.026,0,1.34,.024,.92,i%3===0?0xe7e0d0:0xeee9dd);p.userData={semantic:'RMS_PAPER_SHEET_LAYER_REFERENCE',accuracy:'PAPER_STACK_VISUAL_REFERENCE_NOT_INVENTORY'};}
   const cap=box(g,0,.17+layersCount*.026,0,1.38,.025,.96,0xd6cbb8);cap.userData={semantic:'RMS_REAM_TOP_PROTECTOR_REFERENCE'};addPalletCornerProtectors(g,1.30,.88,.42,'RMS_CUT_SHEET');
   for(const sx of [-.42,.42])box(g,sx,.30,0,.025,.48,.98,0x617788).userData={semantic:'RMS_SHEET_STACK_STRAP_REFERENCE'};
@@ -1795,6 +1811,19 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  const wallSemantics=/^(?:V203_ROOM_INTERIOR_LINER_|V203_ROOM_SKIRTING_|V204_ROOM_DOOR_JAMB_|V204_ROOM_DOOR_HEAD_|ROOM_ENVELOPE_PLINTH_REFERENCE$|PRESS_ROOM_SKIRTING_REFERENCE$|PRESS_ROOM_KICK_RAIL_REFERENCE$|EXTERIOR_PERIMETER_(?:SUPPLEMENT|PLINTH)_REFERENCE$|IPAL_PHOTO_OPERATOR_ROOM_(?:WEST|REAR|EAST|FRONT)_WALL$)/;
  const wallParts=[];b.traverse(o=>{if(o!==b&&wallSemantics.test(String(o.userData?.semantic||'')))wallParts.push(o);});
  root.updateMatrixWorld(true);for(const part of wallParts)layers.walls.attach(part);
+ // Route independently selectable surfaces and openings after room assemblies are complete.
+ // Collect first, then attach: moving nodes during traversal would skip siblings.
+ const routed=[];
+ for(const origin of [b,layers.furniture])origin.traverse(o=>{
+  if(o===origin||o.parent===layers.doors||o.parent===layers.air_curtain)return;
+  const s=String(o.userData?.semantic||'');let target=null;
+  if(/(?:^|_)FLOOR(?:_|$)|FLOOR_CONTROL_JOINT|FLOOR_SERVICE_CLEARANCE|WAREHOUSE_FORK_WHEEL_SCUFF|(?:^|_)AISLE_(?:BOUNDARY|ARROW|MARKING)|(?:^|_)STAGING_BOUNDARY|V204_(?:ROOM_DOOR_APPROACH_ZONE|CERAMIC_GROUT|VINYL_SEAM|ROOM_CONCRETE_CONTROL_JOINT)/.test(s))target=layers.floor;
+  else if(origin===b&&/PRESS_ROOM_UPPER_GLAZING|PRESS_ROOM_GLAZING|IPAL_PHOTO_OPERATOR_ROOM_.*WINDOW|^(?:ROOM|EXTERIOR)_.*WINDOW/.test(s))target=layers.windows;
+  else if(/V204_ROOM_DOOR_(?:OPEN_LEAF|SWING_ARC)|IPAL_PHOTO_OPERATOR_ROOM_.*DOOR/.test(s))target=layers.doors;
+  else if(origin===b&&/^(?:RMS_|FG_|WRAPPED_PAPERBOARD|PRODUCTION_(?:WIP|MOBILE|HOUSEKEEPING|MATERIAL_STATUS|WASTE)|PACKAGING_)/.test(s))target=layers.furniture;
+  if(target&&o.parent!==target)routed.push([o,target]);
+ });
+ for(const [part,target] of routed)target.attach(part);
  root.userData={baselineId:layout.baselineId,dwgFidelity:layout.dwgFidelity||null,buildingDetailPass:'V204_CIRCULATION_FINISH_AND_FURNITURE_COLLISION_HARDENING',researchVersion:'V204',researchSourceCount:V204_SOURCE_STATS.total,uniqueResearchUrls:V204_SOURCE_STATS.uniqueUrls,buildingDetailStats,utilityRouting,
   architecturalEvidenceBoundary:{
    sourceGrounded:['PLANT_OUTLINE','DXF_WALL_SEGMENTS','DXF_COLUMN_POSITIONS','SOURCE_DOORS_AND_CURTAINS','MACHINE_PLACEMENTS','USER_APPROX_ROOF_4_5_TO_7M'],

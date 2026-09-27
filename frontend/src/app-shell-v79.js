@@ -350,11 +350,11 @@ q('#mode-2d')?.addEventListener('click',()=>{
 q('#mode-3d')?.addEventListener('click',()=>{const next=setViewMode('3d');applyViewModeDom(next);const section=getState().sceneMode==='machine'?'asset':'factory';stopSimulationForNavigation(section);setActiveSection(section);markSection(section);requestAnimationFrame(()=>{dispatchEvent(new Event('resize'));syncSimulationTransport()})});
 
 const GROUPS=PHASE1_FOUNDATION?[
- ['Bangunan',[['building','Lantai & isi ruangan'],['walls','Dinding'],['furniture','Furnitur'],['roof','Atap']]],
+ ['Bangunan',[['building','Struktur'],['floor','Lantai & jalur'],['walls','Dinding'],['doors','Pintu'],['windows','Jendela & kaca'],['airCurtain','Tirai PVC & air curtain (referensi)'],['furniture','Isi ruangan & material'],['roof','Atap']]],
  ['Posisi aset',[['machines','Penanda posisi aset'],['labels','Label'],['unidentified','Area belum teridentifikasi']]],
  ['Sumber',[['reference','Garis denah sumber']]]
 ]:[
- ['Bangunan',[['building','Lantai & isi ruangan'],['walls','Dinding'],['furniture','Furnitur'],['roof','Atap'],['landscape','Area luar']]],
+ ['Bangunan',[['building','Struktur'],['floor','Lantai & jalur'],['walls','Dinding'],['doors','Pintu'],['windows','Jendela & kaca'],['airCurtain','Tirai PVC & air curtain (referensi)'],['furniture','Isi ruangan & material'],['roof','Atap'],['landscape','Area luar']]],
  ['Produksi',[['machines','Mesin'],['labels','Label'],['unidentified','Area belum teridentifikasi']]],
  ['Utilitas',[['compressedAir','Pipa compressed air'],['ahuPiping','Pipa AHU'],['ducting','Ducting AHU'],['utilityAnchors','Titik koneksi referensi']]],
  ['Informasi',[['reference','Garis denah sumber']]]
