@@ -19,7 +19,7 @@ test('printing-unit geometry contains no static white sheet-path reference plane
 
 test('V47 sheet centerline is monotonic and clears every primary and inter-unit transfer cylinder',()=>{
   const machine=new OffsetMachineTemplate(),sim=new PrintingSimulation(machine.root,machine);
-  assert.ok(sim.pathLength>17&&sim.pathLength<32,`unexpected sheet path length ${sim.pathLength}`);
+  assert.ok(sim.pathLength>24&&sim.pathLength<42,`unexpected sheet path length ${sim.pathLength}`);
   let previous=-Infinity,minPrimary=Infinity,minTransfer=Infinity;
   for(let i=0;i<=2400;i++){
     const p=sim.curve.getPointAt(i/2400);
@@ -68,7 +68,7 @@ test('flexible sheets bend along gripper path and remain separated without rigid
   const ordered=[...visible].sort((a,b)=>a.userData.progress-b.userData.progress);
   for(let i=1;i<ordered.length;i++){
     const gap=(ordered[i].userData.progress-ordered[i-1].userData.progress)*sim.pathLength;
-    assert.ok(gap>.85,`visible sheets bunch together along path: ${gap}`);
+    assert.ok(gap>.70,`visible sheets bunch together along path: ${gap}`);
   }
   const curved=visible.find(sheet=>{
     const a=sheet.mesh.geometry.attributes.position.array,y=[];

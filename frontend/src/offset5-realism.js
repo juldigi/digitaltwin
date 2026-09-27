@@ -16,18 +16,18 @@ import {PrintingSimulation} from './simulation.js';
 import {OFFSET5_UNIT_CENTERS} from './data/dimensions-offset5.js';
 
 export const OFFSET5_FINAL_REFINEMENT=Object.freeze({
-  id:'OFFSET5_CD102_8L_WORLD_REALITY_R3',
+  id:'OFFSET5_CD102_8L_CUSTOM_INSTALLED_REALITY_R4',
   machine:'Heidelberg Speedmaster CD 102-8+L',
   asset:'MACHINE-OFFSET5',
   sap:'OFU-1',
   serial:'550415',
-  policy:'RECALIBRATED_CORE_GEOMETRY_PLUS_EXISTING_NODE_ENRICHMENT__NO_DUPLICATE_PROCESS_HARDWARE',
+  policy:'PRESERVE_BMJ_CUSTOM_INSTALLED_DIMENSIONS__ENRICH_EXISTING_NODES_ONLY__NO_DUPLICATE_PROCESS_HARDWARE',
   sourcePriority:[
     'BMJ Offset 5 photos + calibrated DXF',
     'supplied CD102 OEM service/roller documentation',
     'HEIDELBERG CD102 family product information',
-    'HEIDELBERG 102-format installation dimensions / 1220 mm unit increment cross-check',
-    'CD102 eight-color long-delivery dimensional and silhouette cross-checks'
+    'USER-CONFIRMED BMJ custom installed dimensions and inter-unit access take precedence over generic family dimensions',
+    'HEIDELBERG 102-format family references are used only for component topology and silhouette cross-checks'
   ]
 });
 
@@ -68,6 +68,7 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
     this.refineInspection();
     this.refineDelivery();
     this.refineExteriorIdentityV237();
+    this.refineInstalledRealityV253();
   }
 
   refineExteriorIdentityV237(){
@@ -224,6 +225,69 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
     }
   }
 
+  refineInstalledRealityV253(){
+    // Dimension-neutral realism pass. Nothing here changes root/module positions, pitch, machine envelope or height.
+    this.root.userData.dimensionLock='BMJ_CUSTOM_INSTALLED_DIMENSIONS_DO_NOT_NORMALIZE_TO_GENERIC_CD102';
+    this.root.userData.visualRefinement='V253_CUSTOM_INSTALLED_DIMENSION_LOCK_PLUS_OEM_COMPONENT_REALISM';
+    this.root.userData.referenceBoundary='PUBLIC_CD102_FAMILY_SOURCES_FOR_COMPONENT_TOPOLOGY_ONLY__BMJ_SITE_DIMENSIONS_OVERRIDE_GENERIC_FAMILY';
+
+    // Preset Plus feeder: fixed/movable guard hardware, suction-head carrier service details and the
+    // documented 15-front-lay register arrangement remain inside the existing feeder envelope.
+    const feeder=this.node('feeder-frame');
+    if(feeder){
+      for(const z of [-.92,.92]){
+        const guard=this.db(feeder,[.055,.52,.10],[.62,1.34,z],'graphite',.010,'preset-plus-movable-guard-edge',{coverMounted:true,silhouette:true});
+        guard.userData.source='HEIDELBERG_PRESET_PLUS_GUARD_REFERENCE';
+        this.dc(feeder,.016,.11,[.64,1.58,z],'steel','y','preset-plus-guard-hinge',{coverMounted:true,service:true});
+      }
+    }
+    const lays=this.node('feedboard-front-lays');
+    if(lays){lays.userData.verifiedFrontLayCount=15;lays.userData.source='HEIDELBERG_CD102_PRESET_PLUS_MANUAL';}
+
+    // Printing-unit exterior/service DNA: compact control strips, guard interlock targets and
+    // inspection windows only. The custom BMJ unit spacing and unit height are intentionally untouched.
+    for(let i=0;i<8;i++){
+      const unit=this.node(`press-${i+1}`);if(!unit)continue;
+      const osZ=-1.315;
+      const eStop=this.dc(unit,.032,.028,[.43,1.12,osZ-.018],'red','z','printing-unit-emergency-stop-reference',{coverMounted:true,silhouette:true});
+      eStop.userData.controlFunction='EMERGENCY_STOP_VISUAL_REFERENCE';
+      const label=this.db(unit,[.18,.055,.012],[-.18,.88,osZ-.018],'light',.004,'printing-unit-service-label',{coverMounted:true});
+      label.userData.text=`PU${i+1}`;label.userData.renderTextInGeometry=false;
+    }
+
+    // Coater: chamber-blade end hardware and quick-connect circulation points, without adding a second process train.
+    const chamber=this.node('coater-chamber');
+    if(chamber){
+      for(const z of [-.70,.70]){
+        this.dc(chamber,.048,.032,[-.20,1.90,z],'steel','z','coater-chamber-end-seal-reference',{service:true});
+        this.db(chamber,[.075,.045,.055],[-.25,1.84,z],'graphite',.008,'coater-chamber-clamp-reference',{service:true});
+      }
+    }
+    const supply=this.node('coater-supply');
+    if(supply){
+      for(const z of [-.66,.66]){
+        const q=this.dc(supply,.024,.040,[-.34,1.30,z],'steel','z','coating-circulation-quick-coupler',{service:true});
+        q.userData.flowSettingAsserted=false;
+      }
+    }
+
+    // Delivery: preserve the custom long/high installed delivery while clarifying sheet-brake, chain and pile hardware.
+    const brake=this.node('delivery-sheet-brake');
+    if(brake){
+      for(const z of [-.54,0,.54]){
+        this.db(brake,[.13,.075,.34],[-.54,1.34,z],'graphite',.010,'sheet-brake-vacuum-housing-reference',{service:true});
+      }
+    }
+    const gate=this.node('delivery-gate');
+    if(gate){
+      for(const z of [-.72,-.36,0,.36,.72])this.db(gate,[.055,.045,.035],[.93,1.42,z],'steel',.006,'delivery-pile-stop-finger-reference',{service:true});
+    }
+    const chain=this.node('delivery-chain-path');
+    if(chain){
+      for(const z of [-.78,.78])this.db(chain,[1.36,.045,.035],[-.04,1.68,z],'graphite',.006,'delivery-chain-guard-strip',{coverMounted:true,service:true});
+    }
+  }
+
   setExteriorOpen(on=true){
     if(typeof OffsetMachineTemplate.prototype.setExteriorOpen==='function')OffsetMachineTemplate.prototype.setExteriorOpen.call(this,on);
     for(const m of this.realismMeshes)if(m.userData.coverMountedDetail)m.visible=!on;
@@ -257,9 +321,10 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       focusightLocationPolicy:'DOWNSTREAM_AFTER_COATING_DRYING',
       feederRearPolicy:'OPEN_SERVICE_SPACE',
       processPitchM:OFFSET5_UNIT_CENTERS[1]-OFFSET5_UNIT_CENTERS[0],
+      dimensionPolicy:'USER_CONFIRMED_CUSTOM_INSTALLED_GEOMETRY_OVERRIDES_GENERIC_FAMILY_DIMENSIONS',
       nominalSheetsPerHour:15000,
       deliveryReleasePolicy:'GRIPPER_RELEASE_THEN_FLAT_SHEET_SETTLING_TO_PILE',
-      interUnitAccessPolicy:'SIDE_GALLERY_STEPS_PLUS_NARROW_SEAM_BRIDGE__NO_PROCESS_PITCH_STRETCH'
+      interUnitAccessPolicy:'BMJ_CUSTOM_BROAD_INTERUNIT_ACCESS_AND_OS_DS_STEPS_PRESERVED'
     };
   }
 }

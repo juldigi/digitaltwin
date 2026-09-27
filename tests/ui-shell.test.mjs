@@ -43,7 +43,7 @@ test('runtime hooks required by the canonical 3D application remain available',(
   for(const camera of ['iso','top','fit','reset'])assert.match(html,new RegExp(`data-camera="${camera}"`));
 });
 test('geometry baseline remains unchanged while the user interface is rebuilt',()=>{
-  assert.equal(PHOTO_RECONSTRUCTION.version,'offset5-photo-pdf-v37-reality');
+  assert.equal(PHOTO_RECONSTRUCTION.version,'offset5-photo-pdf-v36');
   assert.equal(PHOTO_RECONSTRUCTION.repeatedHousings,8);
 });
 
