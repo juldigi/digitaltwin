@@ -248,6 +248,22 @@ test('V197 upstream web wraps roller contact surfaces without penetrating roller
   sim.dispose();m.dispose();
 });
 
+test('loaded reel clears the entry rollers and the continuous web leaves tangentially',()=>{
+  const m=new SheetingMachineTemplate(),sim=new SheetingProcessSimulation(m.root,m);
+  const reel=SHEETING_ACTUAL_LAYOUT.reel,near=[SHEETING_ACTUAL_LAYOUT.lowEntryRoll,SHEETING_ACTUAL_LAYOUT.feedRollers[0]];
+  for(const roller of near){
+    const distance=Math.hypot(reel.loadedCenter[0]-roller.center[0],reel.loadedCenter[1]-roller.center[1]);
+    assert.ok(distance>reel.radius+roller.radius+.04,`${roller.id} overlaps jumbo reel`);
+  }
+  const path=sim.preCutCurve.getPoints(2000);
+  assert.ok(path.every(p=>Math.hypot(p.x-reel.loadedCenter[0],p.y-reel.loadedCenter[1])>=reel.radius+.009),
+    'upstream paper enters the loaded reel');
+  const first=path[0],second=path[1],cx=reel.loadedCenter[0],cy=reel.loadedCenter[1];
+  const dot=(first.x-cx)*(second.x-first.x)+(first.y-cy)*(second.y-first.y);
+  assert.ok(Math.abs(dot)<.001,'paper must leave along the reel tangent');
+  sim.dispose();m.dispose();
+});
+
 test('V197 pile/lift stays grounded and manual guide hardware remains static',()=>{
   const m=new SheetingMachineTemplate(),sim=new SheetingProcessSimulation(m.root,m);
   const manual=roleMeshes(m,'stack-guide-handwheel');

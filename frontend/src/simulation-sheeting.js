@@ -22,6 +22,15 @@ export const SHEETING_PROCESS_STEPS=Object.freeze([
 const LOCAL_Y=new THREE.Vector3(0,1,0);
 const clamp01=v=>Math.max(0,Math.min(1,v));
 
+// The departure point is tangent to the loaded reel rather than buried inside its paper core.
+export function reelDeparturePoint(reel,target,clearance=.018){
+  const [cx,cy]=reel.loadedCenter,[tx,ty]=target;
+  const dx=tx-cx,dy=ty-cy,distance=Math.hypot(dx,dy),radius=reel.radius+clearance;
+  if(distance<=radius)throw new RangeError('Reel and low-entry path overlap');
+  const angle=Math.atan2(dy,dx)-Math.acos(radius/distance);
+  return new THREE.Vector3(cx+Math.cos(angle)*radius,cy+Math.sin(angle)*radius,0);
+}
+
 export class SheetingProcessSimulation{
   constructor(machine,template){
     this.machine=machine;this.template=template;this.layout=SHEETING_ACTUAL_LAYOUT;
@@ -79,10 +88,11 @@ export class SheetingProcessSimulation{
 
   buildPaths(){
     const reel=this.layout.reel;
-    const pre=[new THREE.Vector3(reel.loadedCenter[0]-.46,reel.loadedCenter[1]+reel.radius*.72,0)];
-
     const low=this.layout.lowEntryRoll,lc=new THREE.Vector3(...low.center),lowR=low.radius+.018;
     this.lowEntryContactPoints=[];
+    const firstLowAngle=THREE.MathUtils.degToRad(-22);
+    const firstLowContact=[lc.x+Math.cos(firstLowAngle)*lowR,lc.y+Math.sin(firstLowAngle)*lowR];
+    const pre=[reelDeparturePoint(reel,firstLowContact)];
     for(let i=0;i<=16;i++){
       const a=THREE.MathUtils.lerp(THREE.MathUtils.degToRad(-22),THREE.MathUtils.degToRad(-158),i/16);
       const p=new THREE.Vector3(lc.x+Math.cos(a)*lowR,lc.y+Math.sin(a)*lowR,0);

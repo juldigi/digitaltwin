@@ -63,9 +63,11 @@ export class Polar115MachineTemplate{
   const enc=this.group(gauge,'polar-gauge-encoder','Length-measurement encoder reference');this.cyl(enc,.055,.10,[.70,.80,.72],'dark','z');
 
   const clamp=this.group(this.root,'polar-clamp','Hydraulic Clamp',[0,0,0],[0,.28,0]);
-  const clampBeam=this.group(clamp,'polar-clamp-beam','Clamp beam');this.active(this.box(clampBeam,[1.28,.18,.16],[0,1.25,-.01],'warning',.018,'Clamp Beam'),'clamp');
-  const clampCyl=this.group(clamp,'polar-clamp-cylinders','Clamp hydraulic actuation reference');for(const x of [-.48,.48])this.cyl(clampCyl,.055,.34,[x,1.45,.02],'steel','y');
-  const contact=this.group(clamp,'polar-clamp-contact','Stock-contact face');this.box(contact,[1.23,.025,.10],[0,1.155,-.035],'dark',.004);
+  // The pressure bar sits operator-side of the blade plane, leaving a distinct knife slot.
+  // The offset is a family-mechanism reference, not a surveyed EM-MON dimension.
+  const clampBeam=this.group(clamp,'polar-clamp-beam','Clamp beam');this.active(this.box(clampBeam,[1.28,.18,.12],[0,1.25,-.16],'warning',.018,'Clamp Beam'),'clamp');
+  const clampCyl=this.group(clamp,'polar-clamp-cylinders','Clamp hydraulic actuation reference');for(const x of [-.48,.48])this.cyl(clampCyl,.055,.34,[x,1.45,-.14],'steel','y');
+  const contact=this.group(clamp,'polar-clamp-contact','Stock-contact face');this.box(contact,[1.23,.025,.10],[0,1.155,-.16],'dark',.004);
 
   const knife=this.group(this.root,'polar-knife','Knife Cutting System',[0,0,0],[0,.42,0]);
   const carrier=this.group(knife,'polar-knife-carrier','Knife carrier');this.active(this.box(carrier,[1.34,.18,.13],[0,1.47,.035],'dark',.014,'Knife Carrier'),'knife-carrier');

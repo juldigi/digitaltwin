@@ -22,6 +22,20 @@ test('POLAR geometry uses a vertical knife blade and keeps safety hardware expli
  m.setExteriorOpen(true);assert.ok(m.root.userData.exteriorHiddenCount>=6);m.dispose();
 });
 
+test('POLAR pressure bar remains ahead of the knife plane throughout the cut stroke',()=>{
+ const m=new Polar115MachineTemplate(),sim=new Polar115ProcessSimulation(m.root,m);
+ const beam=m.findNode('polar-clamp-beam').children.find(o=>o.isMesh);
+ const blade=m.meshes.find(o=>o.userData.knifeBlade);
+ for(const [clampDrop,knifeDrop] of [[0,0],[sim.clampStroke,sim.knifeStroke]]){
+  sim.clamp.position.y=sim.rest.clamp.y-clampDrop;
+  sim.knife.position.y=sim.rest.knife.y-knifeDrop;
+  m.root.updateMatrixWorld(true);
+  const pressure=new THREE.Box3().setFromObject(beam),cutting=new THREE.Box3().setFromObject(blade);
+  assert.ok(pressure.max.z<cutting.min.z-.02,'clamp and knife intersect in the cutting slot');
+ }
+ sim.dispose();m.dispose();
+});
+
 test('POLAR taxonomy is contiguous six levels and resolves every verified major unit',()=>{
  assert.deepEqual([...new Set(POLAR115_TAXONOMY.map(n=>n.level))].sort(),[1,2,3,4,5,6]);assert.equal(new Set(POLAR115_TAXONOMY.map(n=>n.id)).size,POLAR115_TAXONOMY.length);
  for(const n of POLAR115_TAXONOMY.filter(n=>n.level>1))assert.ok(POLAR115_TAXONOMY.some(p=>p.id===n.parentId),n.id);
