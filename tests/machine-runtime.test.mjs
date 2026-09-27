@@ -547,7 +547,7 @@ test('V252 SHARK N650 tracks negative-pitch transfer, capture, decision and good
   sawNegativePitch||=st.negativePitchActive;
   assert.equal(st.suffixDecoded,false,id);
  }
- const st=sim.state();assert.equal(sawNegativePitch,true,id+' negative-pitch transport never became active');assert.equal(st.negativePitchCapabilityReference,true);assert.equal(st.transportMode,'NEGATIVE_PITCH_OFFLINE_DEMO_REFERENCE');assert.equal(st.installedFeederModeVerified,false);assert.equal(st.installedRejectTypeVerified,false);
+ const st=sim.state();assert.equal(sawNegativePitch,true,id+' negative-pitch transport never became active');assert.equal(st.negativePitchCapabilityReference,true);assert.equal(st.transportMode,'NEGATIVE_PITCH_FULL_SUCTION_OFFLINE_DEMO_REFERENCE');assert.equal(st.negativePitchPublishedCapacityGainPercent,30);assert.equal(st.goodBadReturnLineOfficial,true);assert.equal(st.installedFeederModeVerified,false);assert.equal(st.installedRejectTypeVerified,false);
  sim.dispose();t.dispose();
 });
 
