@@ -11,8 +11,10 @@ test('machine detail can report an unknown position without a primary truth reco
   assert.match(detail,/pair\('Posisi',truth\?\.position\|\|positionVerification\(placement\)\)/);
 });
 
-test('asset selection keeps factory context when 3D cannot open',()=>{
+test('asset selection keeps factory context until 3D is explicitly requested',()=>{
   const open=app.slice(app.indexOf('async function openAssetContext(machine){'),app.indexOf('function foundationAssetMatches'));
-  assert.match(open,/const opened=await switchActiveMachine\(route,\{historyMode:'push'\}\)/);
-  assert.match(open,/if\(opened\)emitDomainState\(\{selectedAsset:machine\.machineId[\s\S]*sceneMode:'machine'/);
+  assert.match(open,/selectFactoryAssetContext\(machine,\{historyMode:'push',openDialog:true,focus:true\}\)/);
+  assert.doesNotMatch(open,/switchActiveMachine/);
+  const detail=app.slice(app.indexOf('function machineDetailDialog(machine){'),app.indexOf("window.addEventListener('bmj:machinecontextrequest'"));
+  assert.match(detail,/on\('#open-machine-3d',\(\)=>switchActiveMachine\(machineRoute\(machine\)\)\)/);
 });

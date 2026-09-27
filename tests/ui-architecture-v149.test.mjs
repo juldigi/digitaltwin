@@ -160,11 +160,10 @@ test('V149 one-major-overlay policy explicitly closes the current major surface 
  assert.match(shell,/current==='modal'/);
 });
 
-test('V149 universal search never forces unverified machine geometry',()=>{
+test('V149 universal search keeps all machine results factory-first instead of forcing geometry',()=>{
  assert.match(app,/has3D:scopedRegistryHas3D\(machine\)/);
- assert.match(app,/item\.type==='machine'&&!item\.has3D/);
- assert.match(app,/await openAssetContext\(record\)/);
- assert.match(app,/focusFoundationPlaceholder/);
+ assert.match(app,/if\(item\.type==='machine'\)\{const record=MACHINE_REGISTRY_BY_ID\.get\(item\.machineId\);if\(record\)await openAssetContext\(record\);return;\}/);
+ assert.match(app,/selectFactoryAssetContext\(machine,\{historyMode:'push',openDialog:true,focus:true\}\)/);
  assert.match(app,/selectedArea:item\.title/);
 });
 
