@@ -168,14 +168,17 @@ export class PrintingSimulation{
     this.points=pathPoints();this.curve=new THREE.CatmullRomCurve3(this.points,false,'centripetal',.5);this.pathLength=this.curve.getLength();
     // CD 102 full-format reference: 720 x 1020 mm sheet, one gripper pitch per press cycle.
     this.sheetLength=.72;this.sheetWidth=1.02;this.sheetLengthSegments=12;this.sheetWidthSegments=8;
-    this.nominalSheetsPerHour=15000;this.sheetCyclesPerSecond=this.nominalSheetsPerHour/3600;this.sheetPitchMeters=1.02;
+    this.nominalSheetsPerHour=15000;this.sheetCyclesPerSecond=this.nominalSheetsPerHour/3600;
+    // The 1020 mm dimension is across the press; the 720 mm dimension is the sheet-travel direction.
+    // Keep this process pitch independent from the BMJ custom machine-unit spacing.
+    this.sheetPitchMeters=.72;
     this.sheetGapMeters=this.sheetPitchMeters;this.cycleDistance=this.pathLength+this.sheetGapMeters*2;this.sheetCount=Math.max(8,Math.floor(this.cycleDistance/this.sheetGapMeters));
     this.sheets=[];this.pileSheets=[];this.rotors=[];this.oscillators=[];this.levers=[];this.gripperMotions=[];this.joggerMotions=[];this.fluidFlows=[];this.inkSurfaces=[];
     this.uvLamps=[];this.uvBeams=[];this.materials=[];this.geometries=[];
     this.staticDeliveryStack=template.findNode('delivery-paper-stack');this.staticDeliveryVisible=this.staticDeliveryStack?.visible;this.maxPileSheets=32;this.pileSheetThickness=.0035;this.pileAnchor=new THREE.Vector3(D.deliveryCenterX+.10,.25,0);
     this.deliveryReleaseX=D.deliveryCenterX-.10;this.deliverySettleX=D.deliveryCenterX+.10;this.deliveryDropHeight=.90;
     this.active=false;this.running=false;this.speed=1;this.elapsed=0;this.lastNow=null;this.completed=0;this.emitAt=0;this.pathVisible=true;this.inkFlowVisible=true;this.uvActive=false;this.onUpdate=null;
-    this.baseMetersPerSecond=this.sheetPitchMeters*this.sheetCyclesPerSecond; // 4.25 m/s at 15,000 sph reference speed
+    this.baseMetersPerSecond=this.sheetPitchMeters*this.sheetCyclesPerSecond; // 3.0 m/s sheet-travel reference at 15,000 sph
     this.buildPath();this.buildSheets();this.buildPileSheets();this.refreshDeliveryPileAnchor();this.buildFluidFlows();this.collectMechanicalMotion();this.collectInkSurfaces();this.collectUVSystem();
   }
   material(params){
@@ -251,12 +254,19 @@ export class PrintingSimulation{
   }
   setSheetColors(sheet,printed){
     if(sheet.userData.printed===printed)return;
+    // Do not draw fake cross-sheet colour stripes. Without the actual job artwork the honest
+    // representation is a subtle full-sheet cumulative tint showing that successive units have printed.
     const attr=sheet.mesh.geometry.attributes.color,w=this.sheetWidthSegments,l=this.sheetLengthSegments;
+    const color=sheet.paperColor.clone(),count=Math.max(0,Math.min(8,printed|0));
+    for(let k=0;k<count;k++)color.lerp(sheet.bandColors[k],k<4?.055:.025);
     for(let i=0;i<=l;i++)for(let j=0;j<=w;j++){
-      const band=Math.min(w-1,j===w?w-1:j),color=band<printed?sheet.bandColors[band]:sheet.paperColor,index=i*(w+1)+j;
-      attr.setXYZ(index,color.r,color.g,color.b);
+      const index=i*(w+1)+j;
+      // Slight edge-neutral variation avoids a perfectly synthetic flat card while keeping the
+      // sheet free of invented graphics or colour bars.
+      const edge=Math.min(i/l,1-i/l,j/w,1-j/w),shade=.985+.015*Math.min(1,edge*8);
+      attr.setXYZ(index,color.r*shade,color.g*shade,color.b*shade);
     }
-    attr.needsUpdate=true;sheet.userData.printed=printed;
+    attr.needsUpdate=true;sheet.userData.printed=printed;sheet.userData.printRepresentation='CUMULATIVE_FULL_SHEET_REFERENCE_TINT_NO_FAKE_BANDS';
   }
   updateSheet(sheet,leadDistance){
     const visible=leadDistance>=this.sheetLength&&leadDistance<=this.pathLength;
@@ -435,6 +445,7 @@ export class PrintingSimulation{
       mechanismCount:this.rotors.length+this.oscillators.length+this.levers.length+this.gripperMotions.length+this.joggerMotions.length,
       inkFlowCount:this.fluidFlows.length,pileSheetsVisible:this.pileSheets.filter(sheet=>sheet.mesh.visible).length,uvLampCount:this.uvLamps.reduce((sum,item)=>sum+item.count,0),uvBeamCount:this.uvBeams.reduce((sum,item)=>sum+item.count,0),uvActive:this.uvActive,
       nominalSheetsPerHour:this.nominalSheetsPerHour,sheetPitchMeters:this.sheetPitchMeters,nominalSheetSizeM:[this.sheetLength,this.sheetWidth],nominalLineSpeedMps:this.baseMetersPerSecond,
+      printRepresentation:'CUMULATIVE_FULL_SHEET_REFERENCE_TINT_NO_FAKE_BANDS',customMachineDimensionsPreserved:true,
       inspectionTriggerActive:visible.some(s=>Math.abs(s.userData.leadPosition.x-D.inspectionCenterX)<.16),
       deliveryReleaseActive:visible.some(s=>s.userData.gripperReleased&&s.userData.deliveryDrop>0),deliveryDropHeightM:this.deliveryDropHeight
     };
