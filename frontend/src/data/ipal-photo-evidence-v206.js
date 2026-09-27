@@ -62,7 +62,7 @@ export const IPAL_PHOTO_EVIDENCE_V206=Object.freeze({
   operatorRoom:{x:56.8,y:105.9,w:4.6,d:3.3,h:2.85},
   pond:{x:53.4,y:117.2,w:8.0,d:1.0},
   outerPerimeterWall:{x:46.4,y:120.55,w:27.2,h:2.60,t:.18,placement:'USER_CONFIRMED_OUTERMOST_WALL'},
-  verticalGarden:{x:46.4,y:120.42,w:27.2,h:2.10,d:.24,placement:'WALL_MOUNTED_FULL_LENGTH_ON_IPAL_FACING_SIDE'},
+  verticalGarden:{x:46.4,y:120.34,w:27.2,h:2.10,d:.24,placement:'WALL_MOUNTED_FULL_LENGTH_ON_IPAL_FACING_SIDE'},
   serviceRoadClearance:{x:46.4,y:119.20,w:26.8,d:1.55,placement:'KEEP_CLEAR_BETWEEN_IPAL_AND_OUTER_WALL'},
   adjacentUtility:{x:61.3,y:108.0,w:2.8,d:7.2,h:1.55},
   coveredServiceBasin:{x:55.0,y:103.1,w:5.0,d:2.2,h:1.18},
