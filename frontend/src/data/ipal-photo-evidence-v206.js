@@ -61,7 +61,8 @@ export const IPAL_PHOTO_EVIDENCE_V206=Object.freeze({
   sludgeDrying:{x:35.9,y:116.0,w:5.0,d:2.25,h:1.55},
   operatorRoom:{x:56.8,y:105.9,w:4.6,d:3.3,h:2.85},
   pond:{x:53.4,y:117.2,w:8.0,d:1.0},
-  verticalGarden:{x:34.1,y:116.9,w:8.2,h:2.0},
+  verticalGarden:{x:34.1,y:120.35,w:8.2,h:2.0,placement:'OUTSIDE_IPAL_FENCE'},
+  serviceRoadClearance:{x:46.4,y:119.05,w:26.8,d:1.40,placement:'KEEP_CLEAR'},
   adjacentUtility:{x:61.3,y:108.0,w:2.8,d:7.2,h:1.55},
   coveredServiceBasin:{x:55.0,y:103.1,w:5.0,d:2.2,h:1.18},
   secondHopperVessel:{x:51.7,y:109.7,r:1.10,cylinderH:1.85,coneH:1.05},
@@ -88,6 +89,14 @@ export const IPAL_PHOTO_EVIDENCE_V206=Object.freeze({
    operatorRoom:'THREE_WINDOW_FRONT_FACADE__DOOR_ON_SIDE_WALKWAY_FACADE',
    anaerobicAccess:'NO_VERTICAL_LADDER_ASSERTION',
    paving:'HERRINGBONE_INTERLOCKING_REFERENCE',
-   chemicalRack:'RED_TANK_COUNT_AND_FRAME_DENSITY_REDUCED_TO_PHOTO_VISIBLE_CLUSTER'
+   chemicalRack:'RED_TANK_COUNT_AND_FRAME_DENSITY_REDUCED_TO_PHOTO_VISIBLE_CLUSTER',
+   terrestrialVegetation:'OUTSIDE_IPAL_FENCE_AND_CLEAR_OF_SERVICE_ROAD',
+   interiorVegetation:'NONE_EXCEPT_ORNAMENTAL_POND_AQUATIC_PLANTS'
+  }),
+  userConfirmedCorrections:Object.freeze({
+   date:'2026-09-27',
+   vegetationLocation:'TERRESTRIAL_PLANTS_OUTSIDE_IPAL_FENCE',
+   serviceRoad:'MUST_REMAIN_UNOBSTRUCTED',
+   authority:'USER_FIELD_CONFIRMATION'
   })
 });
