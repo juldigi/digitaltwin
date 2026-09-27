@@ -1,6 +1,7 @@
-// V249 release identity refresh: force every installed client to replace the legacy V222 shell cache with the current frontend.
+// V249 shell recache without rotating public query identifiers: replace the legacy V222 Cache API namespace while keeping stable entrypoint URLs.
+const LEGACY_VERSION='factory-digital-twin-v222-overlay-state-ssot-20260925';
 const VERSION='factory-digital-twin-v249-cache-refresh-20260927';
-const RELEASE='249';
+const RELEASE='222';
 const ENTRYPOINTS=[
  './app-shell-v79.css','./src/app.js','./src/ui-v5.js','./src/experience-v37.js','./src/app-shell-v79.js'
 ];
