@@ -279,7 +279,7 @@ export class PrintingSimulation{
       }
     }
     pos.needsUpdate=true;
-    const tan=this.curve.getTangentAt(leadT),angle=Math.atan2(tan.y,tan.x);
+    const t=leadT,tan=this.curve.getTangentAt(t),angle=Math.atan2(tan.y,tan.x);
     sheet.gripper.visible=visible&&releaseProgress<.02;
     if(sheet.gripper.visible){sheet.gripper.position.copy(lead);sheet.gripper.position.y+=.020;sheet.gripper.rotation.set(0,0,angle);}
     sheet.userData.deliveryDrop=deliveryDrop;sheet.userData.gripperReleased=releaseProgress>=.02;
@@ -433,7 +433,10 @@ export class PrintingSimulation{
       pathVisible:this.pathVisible,inkFlowVisible:this.inkFlowVisible,progress:leading?.userData.progress||0,sheetsVisible:visible.length,
       rotorCount:this.rotors.length,oscillatorCount:this.oscillators.length+this.levers.length+this.gripperMotions.length+this.joggerMotions.length,
       mechanismCount:this.rotors.length+this.oscillators.length+this.levers.length+this.gripperMotions.length+this.joggerMotions.length,
-      inkFlowCount:this.fluidFlows.length,pileSheetsVisible:this.pileSheets.filter(sheet=>sheet.mesh.visible).length,uvLampCount:this.uvLamps.reduce((sum,item)=>sum+item.count,0),uvBeamCount:this.uvBeams.reduce((sum,item)=>sum+item.count,0),uvActive:this.uvActive
+      inkFlowCount:this.fluidFlows.length,pileSheetsVisible:this.pileSheets.filter(sheet=>sheet.mesh.visible).length,uvLampCount:this.uvLamps.reduce((sum,item)=>sum+item.count,0),uvBeamCount:this.uvBeams.reduce((sum,item)=>sum+item.count,0),uvActive:this.uvActive,
+      nominalSheetsPerHour:this.nominalSheetsPerHour,sheetPitchMeters:this.sheetPitchMeters,nominalSheetSizeM:[this.sheetLength,this.sheetWidth],nominalLineSpeedMps:this.baseMetersPerSecond,
+      inspectionTriggerActive:visible.some(s=>Math.abs(s.userData.leadPosition.x-D.inspectionCenterX)<.16),
+      deliveryReleaseActive:visible.some(s=>s.userData.gripperReleased&&s.userData.deliveryDrop>0),deliveryDropHeightM:this.deliveryDropHeight
     };
   }
   emit(force=false){
