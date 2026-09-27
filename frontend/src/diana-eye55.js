@@ -2,7 +2,7 @@ import * as THREE from 'three';import {RoundedBoxGeometry} from 'three/addons/ge
 import {DIANA_EYE55_SPEC} from './data/dimensions-diana-eye55.js';import {DIANA_EYE55_TAXONOMY,DIANA_EYE55_TAXONOMY_BY_ID} from './data/taxonomy-diana-eye55.js';import {DIANA_EYE55_ORIENTATION,DIANA_EYE55_TECHNICAL_SOURCES} from './data/sources-diana-eye55.js';import {V141_SOURCE_STATS} from './data/research-v141.js';
 const V=a=>new THREE.Vector3(...a);
 export class DianaEye55MachineTemplate{
- constructor(){this.spec=DIANA_EYE55_SPEC;this.root=new THREE.Group();this.root.name='IPM 3 · DIANA EYE 55';this.root.userData={assetId:this.spec.assetId,nodeId:'diana55-root',spec:this.spec,sources:DIANA_EYE55_TECHNICAL_SOURCES,orientation:DIANA_EYE55_ORIENTATION,taxonomyVersion:'diana55-v252-oem-flow',detailPass:'V252_DIANA55_OEM_SILHOUETTE_FISHSCALE_FLOW',evidenceGrade:'OEM_PROCESS_GROUNDED',geometryStatus:'OEM_CURRENT_FAMILY_ENVELOPE_AND_PROCESS__BMJ_INSTALLED_OPTIONS_BOUNDED',engineeringDimensions:false,modeledEnvelopeMode:'STANDARD_FEEDER_FISH_SCALE_DELIVERY_REFERENCE'};this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.build();this.enrichV141();this.taxonomy=DIANA_EYE55_TAXONOMY;this.taxonomyById=DIANA_EYE55_TAXONOMY_BY_ID;for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}this.root.updateMatrixWorld(true);}
+ constructor(){this.spec=DIANA_EYE55_SPEC;this.root=new THREE.Group();this.root.name='IPM 3 · DIANA EYE 55';this.root.userData={assetId:this.spec.assetId,nodeId:'diana55-root',spec:this.spec,sources:DIANA_EYE55_TECHNICAL_SOURCES,orientation:DIANA_EYE55_ORIENTATION,taxonomyVersion:'diana55-v252-oem-flow',detailPass:'V252_DIANA55_OEM_SILHOUETTE_FISHSCALE_FLOW',evidenceGrade:'OEM_PROCESS_GROUNDED',geometryStatus:'OEM_CURRENT_FAMILY_ENVELOPE_AND_PROCESS__BMJ_INSTALLED_OPTIONS_BOUNDED',engineeringDimensions:false,modeledEnvelopeMode:'STANDARD_FEEDER_FISH_SCALE_DELIVERY_REFERENCE'};this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.build();this.enrichV141();this.refineV254();this.taxonomy=DIANA_EYE55_TAXONOMY;this.taxonomyById=DIANA_EYE55_TAXONOMY_BY_ID;for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}this.root.updateMatrixWorld(true);}
  group(parent,id,name,pos=[0,0,0],explode=[0,0,0]){const g=new THREE.Group();g.name=name;g.position.set(...pos);g.userData={assetId:this.spec.assetId,nodeId:id,selectable:true,explode:V(explode),confidence:'OEM_PROCESS_GROUNDED'};parent.add(g);this.nodes.push(g);if(parent===this.root)this.parts.push(g);return g;}
  mat(k){if(!this.materials.has(k)){const c={white:0xebeeee,light:0xcbd0d2,dark:0x252b2f,black:0x0d1215,steel:0x8a969b,silver:0xc3cacc,rubber:0x23282a,red:0xb4312e,blue:0x3c7289,green:0x579071,amber:0xd29b43,paper:0xe1cca2,glass:0x365c67,led:0xf0e7c2}[k]||0x888888;const m=new THREE.MeshStandardMaterial({color:c,metalness:['steel','silver'].includes(k)?.5:.08,roughness:k==='glass'?.16:.43,transparent:k==='glass',opacity:k==='glass'?.42:1});m.userData.baseOpacity=m.opacity;this.materials.set(k,m);}return this.materials.get(k);}
  mesh(g,geo,key,k='dark',p=[0,0,0],r=null){if(!this.geometries.has(key))this.geometries.set(key,geo());const m=new THREE.Mesh(this.geometries.get(key),this.mat(k));m.position.set(...p);if(r)m.rotation.set(...r);m.castShadow=k!=='glass';m.receiveShadow=true;m.userData.ownerId=g.userData.nodeId;g.add(m);this.meshes.push(m);return m;}
@@ -131,6 +131,73 @@ export class DianaEye55MachineTemplate{
   const reject=this.findNode('diana55-reject');if(reject){reject.userData.inlineFaultBlankEjectionConfirmed=true;reject.userData.installedRejectActuationVerified=false;reject.userData.boundary='OEM confirms inline ejection, but public source does not identify installed actuator type.';}
   const sensor=this.findNode('diana55-reject-sensor');if(sensor)for(const m of sensor.children.filter(o=>o.isMesh))tag(m,'reject-confirmation-sensor','MASTERWORK_DIANA_EYE_55_OEM');
  }
+
+ refineV254(){
+  this.root.userData.visualRefinement='V254_DIANA_EYE55_2023_FAMILY_PROCESS_REALISM';
+  this.root.userData.detailPass='V254_DIANA55_FEED_INSPECT_EJECT_DUAL_FISHSCALE_REALISM';
+  this.root.userData.processReality={
+   feeder:'STABLE_BELTS_PATENTED_KNIFE_VIBRATION_AND_AIR_REFERENCE',
+   transport:'SUCTION_BELT',
+   inspection:'DARK_CELL_LED_DOME_CAMERA_CAPACITY_BOUNDED',
+   reject:'DAMAGE_FREE_EJECTION_PATH__ACTUATOR_TYPE_UNVERIFIED',
+   delivery:'FISH_SCALE_FINISHED_AND_WASTE_REFERENCE'
+  };
+  this.root.userData.installedOptionPolicy='BMJ_SERIAL_2023_OPTIONS_UNVERIFIED__DO_NOT_PROMOTE_CURRENT_OPTIONAL_HARDWARE_TO_INSTALLED';
+
+  // Ground the long machine with actual-looking leveling pads instead of a floating rail.
+  const frame=this.findNode('diana55-access-frame');
+  if(frame){
+   const feet=this.group(frame,'diana55-leveling-feet-v254','Leveling feet and floor pads');
+   for(const x of [-3.42,-2.55,-1.65,-.72,.28,1.18,2.12,3.34])for(const z of [-.61,.61]){
+    const stem=this.cyl(feet,.022,.16,[x,.10,z],'steel','leveling-stem','y');stem.userData.detail=true;
+    const pad=this.cyl(feet,.075,.025,[x,.025,z],'dark','leveling-pad','y');pad.userData.detail=true;pad.userData.floorContact=true;
+   }
+  }
+
+  // OEM/Masterwork: smooth ejection channel, jam detection, open adjustment mechanism and
+  // noise-reduction safety cover. Actuator type stays neutral because BMJ serial-specific option is unknown.
+  const reject=this.findNode('diana55-reject');
+  if(reject){
+   const cover=this.group(reject,'diana55-reject-safety-v254','Reject safety / noise-reduction enclosure');
+   for(const z of [-.66,.66]){
+    const side=this.cover(this.box(cover,[.92,.48,.045],[.18,1.08,z],'light',.024));side.userData.safetyNoiseReductionReference=true;
+    const win=this.box(cover,[.46,.24,.018],[.20,1.10,z+(z<0?-.027:.027)],'glass',.014);win.userData.rejectViewingWindow=true;
+   }
+   const top=this.cover(this.box(cover,[.94,.055,1.30],[.18,1.34,0],'light',.018));top.userData.safetyNoiseReductionReference=true;
+   const adjust=this.group(reject,'diana55-reject-adjustment-v254','Open reject adjustment mechanism');
+   for(const z of [-.44,.44]){this.box(adjust,[.72,.035,.035],[.10,.67,z],'steel',.005);const wheel=this.cyl(adjust,.055,.035,[.38,.70,z],'amber','reject-adjust-handwheel','z');wheel.userData.detail=true;}
+   const jam=this.group(reject,'diana55-reject-jam-v254','Reject paper-jam detection');
+   for(const z of [-.36,.36]){const s=this.box(jam,[.045,.085,.045],[.55,.78,z],'blue',.006);s.userData.mechanismRole='reject-paper-jam-sensor';}
+   reject.userData.v254OfficialFeatures=['smooth defective-product ejection channel','open adjustment mechanism','paper jam detection','safety noise-reduction protective cover'];
+  }
+
+  // Masterwork explicitly describes a scaly-paper delivery platform for finished products AND waste,
+  // with a pressing roller and monitoring camera. Keep optional stacker hardware out of the live model.
+  const delivery=this.findNode('diana55-delivery');
+  if(delivery){
+   const good=this.group(delivery,'diana55-delivery-good-v254','Finished-product fish-scale lane');
+   const waste=this.group(delivery,'diana55-delivery-waste-v254','Waste fish-scale lane');
+   good.userData.route='FINISHED_PRODUCT';waste.userData.route='WASTE';
+   for(let i=0;i<8;i++){
+    const x=-.48+i*.16;
+    const a=this.box(good,[.46,.006,.28],[x,.755+i*.002,-.25],'paper',.001);a.userData.fishScaleReference=true;a.userData.route='GOOD';
+    const b=this.box(waste,[.46,.006,.28],[x,.735+i*.002,.28],'paper',.001);b.userData.fishScaleReference=true;b.userData.route='WASTE';
+   }
+   for(const z of [-.56,0,.56]){const guide=this.box(delivery,[1.86,.035,.025],[.12,.80,z],'steel',.004);guide.userData.deliverySideGuide=true;}
+   const monitoring=this.group(delivery,'diana55-delivery-monitor-v254','Finished / waste delivery monitoring camera');
+   this.box(monitoring,[.10,.38,.10],[.72,1.15,.66],'steel',.010);
+   const cam=this.box(monitoring,[.18,.14,.16],[.70,1.36,.50],'dark',.016);cam.userData.mechanismRole='delivery-monitoring-camera-reference';cam.userData.rotor=false;
+   this.cyl(monitoring,.035,.045,[.70,1.32,.40],'black','delivery-monitor-lens','z').userData.rotor=false;
+   const stacker=this.group(delivery,'diana55-side-stacker-capability-v254','Optional side stacker capability');
+   stacker.userData.capabilityOnly=true;stacker.userData.installedVerified=false;stacker.visible=false;
+   delivery.userData.v254DeliveryEvidence='MASTERWORK_SCALY_PAPER_FINISHED_AND_WASTE__PRESSING_ROLLER__MONITORING_CAMERA';
+  }
+
+  // Keep one physical HMI pedestal; current-generation 24-inch display is not asserted on BMJ 2023.
+  const hmi=this.findNode('diana55-hmi-pedestal-v251');
+  if(hmi){hmi.userData.bmjGenerationBoundary='2023_SERIAL__DISPLAY_SIZE_NOT_UPGRADED_FROM_CURRENT_2025_FAMILY_PAGE';}
+ }
+
  findNode(id){return id==='diana55-root'?this.root:this.nodes.find(n=>n.userData.nodeId===id)||null;}resolvePart(o){for(let p=o;p&&p!==this.root;p=p.parent)if(p.userData?.selectable)return p;return null;}resolveTaxonomyNode(id){return this.taxonomyById.get(id)?.meshRefs.map(ref=>this.findNode(ref)).find(Boolean)||null;}contains(a,b){for(let p=b;p;p=p.parent)if(p===a)return true;return false;}
  highlight(p){for(const m of this.meshes){m.material.emissive?.setHex(p&&this.contains(p,m)?0x17494a:0);m.material.emissiveIntensity=.3;}}highlightMany(ps=[]){for(const m of this.meshes){m.material.emissive?.setHex(ps.some(p=>this.contains(p,m))?0x17494a:0);m.material.emissiveIntensity=.3;}}ghost(on,except=null){this.ghosted=!!on;for(const m of this.meshes){const fade=on&&(!except||!this.contains(except,m)),natural=m.material.userData?.baseOpacity??1;m.material.transparent=fade||natural<1;m.material.opacity=fade?.14:natural;m.material.depthWrite=!fade;}}isolate(p,on=true){for(const n of this.nodes)n.visible=!on||!p||this.contains(p,n)||this.contains(n,p);}showOnly(ps=[],on=true){for(const n of this.nodes)n.visible=!on||!ps.length||ps.some(p=>n===p||this.contains(n,p));}
  setExteriorOpen(on=true){this.exteriorOpen=!!on;let count=0;for(const m of this.meshes)if(m.userData.exteriorCover){m.visible=!on;count++;}this.root.userData.interiorCutawayVisible=!!on;this.root.userData.exteriorHiddenCount=on?count:0;}explode(t,s=null){for(const n of this.nodes)n.position.copy(n.userData.rest);const targets=s?(s.children.filter(c=>c.userData.selectable).length?s.children.filter(c=>c.userData.selectable):[s]):this.parts;for(const n of targets)n.position.addScaledVector(n.userData.explode,THREE.MathUtils.clamp(+t||0,0,1));}setLow(){}reset(){const open=this.exteriorOpen;this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const n of this.nodes)n.quaternion.copy(n.userData.restQuaternion);this.setExteriorOpen(open);}dispose(){for(const g of this.geometries.values())g.dispose();for(const m of this.materials.values())m.dispose();}
