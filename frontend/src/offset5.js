@@ -358,7 +358,7 @@ export class OffsetMachineTemplate {
     if(i<7){
       // The 102-platform process pitch is compact. Human access therefore projects outward along the
       // operator/drive galleries instead of creating a fictitious 0.7 m longitudinal gap between cylinders.
-      const accessWidth=.42,seamWidth=Math.max(.10,nextGap);
+      const seamWidth=Math.max(.08,nextGap),accessWidth=Math.max(.08,seamWidth-.02);
       this.tread(stair,[accessWidth,.10,.70],[stepCenter,.34,1.82]);
       this.box(stair,[accessWidth-.04,.25,.62],[stepCenter,.165,1.82],'graphite',.018);
       this.tread(stair,[accessWidth,.10,.42],[stepCenter,.70,1.46]);
@@ -679,7 +679,7 @@ export class OffsetMachineTemplate {
     const photos=['IMG_1629.jpeg','IMG_1662.jpeg','IMG_2391(1).jpeg','IMG_2392.jpeg'];
     const pu8Right=OFFSET5_UNIT_CENTERS.at(-1)+D.printingUnitFrameWidth/2;
     const coaterLeft=D.coaterCenterX-D.coaterLength/2;
-    const puCoaterGap=Math.max(.34,coaterLeft-pu8Right);
+    const puCoaterGap=Math.max(.04,coaterLeft-pu8Right);
     const puCoater=this.group(this.root,'pu8-coater-access','PU8 / coater enclosed transfer and operator landing',[(pu8Right+coaterLeft)/2,0,0],[.15,.16,.68],photos,'PU8 hands the sheet into the coating unit through a guarded central transfer. The checker-plate landing remains on the operator side without a transverse fence.');
     this.markExteriorCover(this.box(puCoater,[puCoaterGap,.58,1.72],[0,1.12,0],'graphite',.024));
     this.markExteriorCover(this.box(puCoater,[puCoaterGap-.05,.10,1.56],[0,1.44,0],'black',.016));
@@ -689,7 +689,7 @@ export class OffsetMachineTemplate {
 
     const coaterRight=D.coaterCenterX+D.coaterLength/2;
     const dryerLeft=D.dryerCenterX-D.dryerLength/2;
-    const coaterDryerGap=Math.max(.30,dryerLeft-coaterRight);
+    const coaterDryerGap=Math.max(.04,dryerLeft-coaterRight);
     const transition=this.group(this.root,'coater-dryer-service-bay','Coater / dryer enclosed transition',[(coaterRight+dryerLeft)/2,0,0],[.18,.14,.62],photos,'The coater-to-dryer gap is a guarded sheet-path transition with continuous side decking, not an open bay crossed by railings.');
     this.markExteriorCover(this.box(transition,[coaterDryerGap,.72,1.80],[0,1.10,0],'graphite',.026));
     this.markExteriorCover(this.box(transition,[coaterDryerGap-.04,.14,1.62],[0,1.52,0],'black',.018));
@@ -698,7 +698,7 @@ export class OffsetMachineTemplate {
 
     const dryerRight=D.dryerCenterX+D.dryerLength/2;
     const deliveryLeft=D.deliveryCenterX-D.deliveryBodyLength/2;
-    const dryerDeliveryGap=Math.max(.48,deliveryLeft-dryerRight);
+    const dryerDeliveryGap=Math.max(.04,deliveryLeft-dryerRight);
     const access=this.group(this.root,'dryer-delivery-access','Dryer / delivery enclosed receiving transition',[(dryerRight+deliveryLeft)/2,0,0],[.28,.18,.78],photos,'The sheet path remains enclosed until the delivery receiving zone. Operator-side checker plate is fully supported and has no floating rail assembly.');
     this.markExteriorCover(this.box(access,[dryerDeliveryGap,.66,1.82],[0,1.16,0],'graphite',.026));
     const canopy=this.markExteriorCover(this.box(access,[dryerDeliveryGap,.18,1.92],[0,1.58,0],'light',.022));canopy.rotation.z=-.06;
