@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 
 export const DIANA_EYE55_SIMULATION_STAGES=Object.freeze([
- 'Blank feed','Suction-belt transport','LED illumination + camera capture','Image processing demo',
- 'Tracked pass / reject decision demo','Reject actuation demo','Accepted blank delivery','Output collection'
+ 'Pengumpanan blank','Suction-belt transport','LED illumination + camera capture','Pemrosesan citra demo',
+ 'Pelacakan keputusan pass / reject','Ejection demo','Fish-scale delivery','Pengumpulan output'
 ]);
 const Y_AXIS=new THREE.Vector3(0,1,0);
 const clamp=v=>Math.max(0,Math.min(1,v));
@@ -14,7 +14,7 @@ export class DianaEye55ProcessSimulation{
   this.gate=template.findNode('diana55-reject-gate');this.gateRest=this.gate?.rotation.z||0;
   root.traverse(o=>{if(o.isMesh&&o.userData.rotor)this.rotors.push(o);if(o.isMesh&&o.userData.inspectionLight)this.lights.push(o);if(o.isMesh&&o.userData.rejectAirNozzle)this.airNozzles.push(o);});
   this.rotorRest=this.rotors.map(r=>r.quaternion.clone());
-  this.points=[[-3.82,.82,0],[-3.02,.80,0],[-2.10,.80,0],[-.80,.80,0],[.45,.80,0],[1.45,.80,0],[2.42,.80,0],[3.62,.80,0],[4.20,.78,0]].map(p=>new THREE.Vector3(...p));
+  this.points=[[-3.58,.74,0],[-3.12,.73,0],[-2.42,.73,0],[-1.45,.73,0],[-.55,.73,0],[.35,.73,0],[1.30,.73,0],[1.82,.70,0],[2.55,.70,0],[3.62,.70,0]].map(p=>new THREE.Vector3(...p));
   this.curve=new THREE.CatmullRomCurve3(this.points,false,'centripetal');
   const pathGeo=new THREE.BufferGeometry().setFromPoints(this.curve.getPoints(220)),pathMat=new THREE.LineDashedMaterial({color:0x527c8a,dashSize:.055,gapSize:.035,transparent:true,opacity:.55});
   this.pathLine=new THREE.Line(pathGeo,pathMat);this.pathLine.computeLineDistances();this.pathLine.visible=false;this.pathLine.name='DIANA55-TRACKED-INSPECTION-PATH';root.add(this.pathLine);
@@ -22,17 +22,17 @@ export class DianaEye55ProcessSimulation{
    const mat=new THREE.MeshStandardMaterial({color:0xe1cca2,roughness:.88,side:THREE.DoubleSide}),mesh=new THREE.Mesh(new THREE.PlaneGeometry(.48,.36),mat);mesh.rotation.x=-Math.PI/2;mesh.visible=false;root.add(mesh);
    this.blanks.push({mesh,index:i,phase:i/7,lap:-1,result:null,captured:false,processed:false,decisionReady:false,inspectedLap:-1,lastT:0,trackingId:null,decisionSequence:null});
   }
-  for(let i=0;i<18;i++){for(const [arr,z] of [[this.goodStack,0],[this.rejectStack,.62]]){const m=new THREE.Mesh(new THREE.BoxGeometry(.48,.006,.36),new THREE.MeshStandardMaterial({color:0xe1cca2,roughness:.9}));m.visible=false;m.userData.stackZ=z;root.add(m);arr.push(m);}}
+  for(let i=0;i<18;i++){for(const [arr,z,route] of [[this.goodStack,0,'FISH_SCALE_ACCEPT'],[this.rejectStack,.52,'REJECT_CHUTE']]){const m=new THREE.Mesh(new THREE.BoxGeometry(.48,.006,.36),new THREE.MeshStandardMaterial({color:0xe1cca2,roughness:.9}));m.visible=false;m.userData.stackZ=z;m.userData.deliveryRoute=route;root.add(m);arr.push(m);}}
   this.resetFlags();this.updateOptics(false);
  }
- resetFlags(){this.scanActive=false;this.imageProcessingActive=false;this.demoRejectActive=false;this.rejectTrackingActive=false;this.acceptedDeliveryActive=false;this.demoRejectOnly=true;this.demoRejectActuator='MECHANICAL_REFERENCE';this.activeRejectTrackingIds=[];this.activePassTrackingIds=[];}
+ resetFlags(){this.scanActive=false;this.imageProcessingActive=false;this.demoRejectActive=false;this.rejectTrackingActive=false;this.acceptedDeliveryActive=false;this.fishScaleDeliveryActive=false;this.demoRejectOnly=true;this.demoRejectActuator='NEUTRAL_DIVERTER_REFERENCE';this.activeRejectTrackingIds=[];this.activePassTrackingIds=[];}
  state(){
   const p=this.active?(this.elapsed/7.8)%1:0,index=Math.min(DIANA_EYE55_SIMULATION_STAGES.length-1,Math.floor(p*DIANA_EYE55_SIMULATION_STAGES.length));
   return {available:true,blocked:false,active:this.active,running:this.running,paused:this.paused,speed:this.speed,stage:DIANA_EYE55_SIMULATION_STAGES[index],completed:this.completed,rejectedDemo:this.rejected,inspectedDemoCount:this.inspectedDemoCount,progress:p,
    sheetsVisible:this.blanks.filter(b=>b.mesh.visible).length,pileSheetsVisible:this.goodStack.filter(p=>p.visible).length,rejectSheetsVisible:this.rejectStack.filter(p=>p.visible).length,
    rotorCount:this.rotors.length,mechanismCount:this.rotors.length+this.lights.length+1,pathVisible:this.pathVisible,inkFlowVisible:false,inkFlowCount:0,uvLampCount:0,uvActive:false,
-   feederDriveActive:this.feederDriveActive,transportDriveActive:this.transportDriveActive,deliveryDriveActive:this.deliveryDriveActive,blankPresenceTrigger:this.blankPresenceTrigger,transportEncoderActive:this.transportEncoderActive,vacuumHoldActive:this.vacuumHoldActive,illuminationReady:this.illuminationReady,cameraTriggerActive:this.cameraTriggerActive,captureComplete:this.captureComplete,scanActive:this.scanActive,imageProcessingActive:this.imageProcessingActive,processingComplete:this.processingComplete,decisionReady:this.decisionReady,rejectPermit:this.rejectPermit,rejectConfirmed:this.rejectConfirmed,outputCountActive:this.outputCountActive,interlockSafe:this.interlockSafe,demoRejectActive:this.demoRejectActive,rejectTrackingActive:this.rejectTrackingActive,acceptedDeliveryActive:this.acceptedDeliveryActive,
-   demoRejectOnly:true,demoRejectActuator:this.demoRejectActuator,installedRejectActuationVerified:false,installedCameraCountVerified:false,deterministicDefectInjection:'EVERY_5TH_INSPECTED_BLANK_DEMO_ONLY',
+   feederDriveActive:this.feederDriveActive,transportDriveActive:this.transportDriveActive,deliveryDriveActive:this.deliveryDriveActive,blankPresenceTrigger:this.blankPresenceTrigger,transportEncoderActive:this.transportEncoderActive,vacuumHoldActive:this.vacuumHoldActive,illuminationReady:this.illuminationReady,cameraTriggerActive:this.cameraTriggerActive,captureComplete:this.captureComplete,scanActive:this.scanActive,imageProcessingActive:this.imageProcessingActive,processingComplete:this.processingComplete,decisionReady:this.decisionReady,rejectPermit:this.rejectPermit,rejectConfirmed:this.rejectConfirmed,outputCountActive:this.outputCountActive,interlockSafe:this.interlockSafe,demoRejectActive:this.demoRejectActive,rejectTrackingActive:this.rejectTrackingActive,acceptedDeliveryActive:this.acceptedDeliveryActive,fishScaleDeliveryActive:this.fishScaleDeliveryActive,deliveryMode:'FISH_SCALE_STANDARD_REFERENCE',
+   demoRejectOnly:true,demoRejectActuator:this.demoRejectActuator,installedRejectActuationVerified:false,installedCameraCountVerified:false,installedCameraPopulationRendered:false,deterministicDefectInjection:'EVERY_5TH_INSPECTED_BLANK_DEMO_ONLY',
    activeRejectTrackingIds:[...this.activeRejectTrackingIds],activePassTrackingIds:[...this.activePassTrackingIds],trackedResults:{pass:this.blanks.filter(b=>b.result==='PASS_DEMO').length,reject:this.blanks.filter(b=>b.result==='REJECT_DEMO').length,pending:this.blanks.filter(b=>!b.result).length}};
  }
  start(){this.active=true;this.running=true;this.paused=false;this.completed=0;this.rejected=0;this.inspectedDemoCount=0;this.elapsed=0;this.lastNow=null;for(const b of this.blanks){b.lap=-1;b.result=null;b.captured=false;b.processed=false;b.decisionReady=false;b.inspectedLap=-1;b.lastT=0;b.trackingId=null;b.decisionSequence=null;}this.resetMechanisms();this.onUpdate?.(this.state());return this.state();}
@@ -48,8 +48,13 @@ export class DianaEye55ProcessSimulation{
   const seq=lap*this.blanks.length+blank.index;blank.result=(seq%5===0)?'REJECT_DEMO':'PASS_DEMO';blank.inspectedLap=lap;blank.decisionSequence=seq;blank.trackingId='DIANA-DEMO-'+String(seq).padStart(5,'0');this.inspectedDemoCount++;
  }
  outputPreviousResult(blank){
-  if(blank.result==='REJECT_DEMO'){this.rejected++;const m=this.rejectStack[(this.rejected-1)%this.rejectStack.length];m.visible=true;m.position.set(3.05,.39+((this.rejected-1)%this.rejectStack.length)*.007,.62);}
-  else if(blank.result==='PASS_DEMO'){this.completed++;const m=this.goodStack[(this.completed-1)%this.goodStack.length];m.visible=true;m.position.set(4.20,.48+((this.completed-1)%this.goodStack.length)*.007,0);}
+  if(blank.result==='REJECT_DEMO'){
+   this.rejected++;const slot=(this.rejected-1)%this.rejectStack.length,m=this.rejectStack[slot];m.visible=true;m.position.set(2.10+.035*(slot%5),.30+.006*Math.floor(slot/5),.52);
+  }else if(blank.result==='PASS_DEMO'){
+   this.completed++;const slot=(this.completed-1)%this.goodStack.length,m=this.goodStack[slot];m.visible=true;
+   // Fish-scale output overlaps blanks longitudinally instead of building an unrealistic vertical pile.
+   m.position.set(2.45+(slot%12)*.115,.745+.003*(slot%3),0);m.rotation.y=0;
+  }
  }
  updateBlanks(){
   let trigger=false,scanCount=0,processCount=0,processedCount=0,decisionCount=0,rejectAtGate=false,rejectConfirmed=false,trackedReject=false,accepted=false,outputCount=false;const rejectIds=[],passIds=[];
@@ -64,11 +69,11 @@ export class DianaEye55ProcessSimulation{
    if(b.processed)processedCount++;if(b.decisionReady)decisionCount++;
    b.mesh.visible=this.active;const p=this.curve.getPointAt(Math.min(.999,t));b.mesh.position.copy(p);
    const reject=b.result==='REJECT_DEMO';
-   if(reject&&b.decisionReady&&t>=.69&&t<.90){trackedReject=true;if(b.trackingId)rejectIds.push(b.trackingId);const q=clamp((t-.69)/.18);b.mesh.position.z=THREE.MathUtils.lerp(0,.62,q);if(t>=.73&&t<.88)rejectAtGate=true;if(t>=.84)rejectConfirmed=true;}
-   else if(b.result==='PASS_DEMO'&&b.decisionReady&&t>=.80){accepted=true;if(b.trackingId)passIds.push(b.trackingId);if(t>=.92)outputCount=true;}
+   if(reject&&b.decisionReady&&t>=.69&&t<.90){trackedReject=true;if(b.trackingId)rejectIds.push(b.trackingId);const q=clamp((t-.69)/.16);b.mesh.position.z=THREE.MathUtils.lerp(0,.52,q);b.mesh.position.y=THREE.MathUtils.lerp(b.mesh.position.y,.48,q);if(t>=.72&&t<.86)rejectAtGate=true;if(t>=.84)rejectConfirmed=true;}
+   else if(b.result==='PASS_DEMO'&&b.decisionReady&&t>=.76){accepted=true;if(b.trackingId)passIds.push(b.trackingId);if(t>=.90)outputCount=true;}
    b.mesh.material.emissive?.setHex((t>=.30&&t<.48)?0x365e6f:reject&&t>=.62?0x6d2d23:0);b.mesh.material.emissiveIntensity=(t>=.30&&t<.48)?.8:reject&&t>=.62?.45:0;b.lastT=t;
   }
-  this.feederDriveActive=this.blanks.some(b=>b.lastT<.24);this.transportDriveActive=this.blanks.some(b=>b.lastT>=.18&&b.lastT<.90);this.deliveryDriveActive=accepted;this.blankPresenceTrigger=trigger;this.transportEncoderActive=this.transportDriveActive;this.vacuumHoldActive=this.transportDriveActive;this.illuminationReady=scanCount>0;this.cameraTriggerActive=trigger;this.captureComplete=this.blanks.some(b=>b.captured);this.scanActive=scanCount>0;this.imageProcessingActive=processCount>0;this.processingComplete=processedCount>0;this.decisionReady=decisionCount>0;this.rejectPermit=rejectAtGate&&decisionCount>0;this.rejectConfirmed=rejectConfirmed;this.outputCountActive=outputCount;this.rejectTrackingActive=trackedReject;this.demoRejectActive=this.rejectPermit;this.acceptedDeliveryActive=accepted;this.activeRejectTrackingIds=rejectIds;this.activePassTrackingIds=passIds;
+  this.feederDriveActive=this.blanks.some(b=>b.lastT<.24);this.transportDriveActive=this.blanks.some(b=>b.lastT>=.18&&b.lastT<.90);this.deliveryDriveActive=accepted;this.blankPresenceTrigger=trigger;this.transportEncoderActive=this.transportDriveActive;this.vacuumHoldActive=this.transportDriveActive;this.illuminationReady=scanCount>0;this.cameraTriggerActive=trigger;this.captureComplete=this.blanks.some(b=>b.captured);this.scanActive=scanCount>0;this.imageProcessingActive=processCount>0;this.processingComplete=processedCount>0;this.decisionReady=decisionCount>0;this.rejectPermit=rejectAtGate&&decisionCount>0;this.rejectConfirmed=rejectConfirmed;this.outputCountActive=outputCount;this.rejectTrackingActive=trackedReject;this.demoRejectActive=this.rejectPermit;this.acceptedDeliveryActive=accepted;this.fishScaleDeliveryActive=accepted;this.activeRejectTrackingIds=rejectIds;this.activePassTrackingIds=passIds;
   this.interlockSafe=(!this.demoRejectActive||this.rejectPermit)&&(!this.imageProcessingActive||this.captureComplete);
   this.updateOptics(this.scanActive);
   if(this.gate)this.gate.rotation.z=this.gateRest+(this.rejectPermit?.42:0);
