@@ -8,4 +8,5 @@ import c5 from './factory-fleet-chunk-5.js';
 import c6 from './factory-fleet-chunk-6.js';
 import c7 from './factory-fleet-chunk-7.js';
 import c8 from './factory-fleet-chunk-8.js';
-export const FACTORY_FLEET_GZIP=[c0,c1,c2,c3,c4,c5,c6,c7,c8].join('');
+import c9 from './factory-fleet-chunk-9.js';
+export const FACTORY_FLEET_GZIP=[c0,c1,c2,c3,c4,c5,c6,c7,c8,c9].join('');
