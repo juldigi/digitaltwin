@@ -54,7 +54,7 @@ for(const id of ['BMJ-MCH-0003','BMJ-MCH-0005','BMJ-MCH-0006','BMJ-MCH-0009','BM
    assert.ok(sim.staticDeliveryStack,id+' missing static pile');
    assert.equal(sim.staticDeliveryStack.visible,true);
    sim.start();
-   assert.equal(sim.staticDeliveryStack.visible,id==='BMJ-MCH-0003');
+   assert.equal(sim.staticDeliveryStack.visible,false);
    assert.equal(sim.state().pileSheetsVisible,0);
    if(id==='BMJ-MCH-0010'){
     sim.deposit();

@@ -41,16 +41,17 @@ test('V253 keeps BMJ OS/DS orientation and broad custom inter-unit access',()=>{
  }finally{m.dispose();}
 });
 
-test('V253 Offset 5 simulation uses 720 mm machine-direction sheet pitch, no fake colour bands, and realistic delivery release',()=>{
+test('Offset 5 feeds separate 720 mm sheets with a visible gap and releases them at delivery',()=>{
  const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
  try{
   assert.equal(sim.nominalSheetsPerHour,15000);
   assert.deepEqual([sim.sheetLength,sim.sheetWidth],[.72,1.02]);
-  assert.equal(sim.sheetPitchMeters,.72);
-  assert.ok(Math.abs(sim.baseMetersPerSecond-3.0)<1e-9);
+  assert.equal(sim.sheetPitchMeters,.82);
+  assert.ok(sim.sheetPitchMeters-sim.sheetLength>=.10-1e-9);
+  assert.ok(Math.abs(sim.baseMetersPerSecond-.82*15000/3600)<1e-9);
   const st=sim.state();
   assert.equal(st.customMachineDimensionsPreserved,true);
-  assert.equal(st.printRepresentation,'PROGRESSIVE_ILLUSTRATIVE_PRINT_PATTERN_NOT_JOB_ARTWORK');
+  assert.equal(st.printRepresentation,'PROGRESSIVE_TRANSVERSE_COLOUR_BANDS_PER_PU_DEMO');
   assert.equal(st.dimensionPolicy,'USER_CONFIRMED_CUSTOM_INSTALLED_GEOMETRY_OVERRIDES_GENERIC_FAMILY_DIMENSIONS');
   assert.equal(st.focusightLocationPolicy,'DOWNSTREAM_AFTER_COATING_DRYING');
   assert.equal(st.interUnitAccessPolicy,'BMJ_CUSTOM_BROAD_INTERUNIT_ACCESS_AND_OS_DS_STEPS_PRESERVED');
@@ -64,31 +65,63 @@ test('V253 Offset 5 simulation uses 720 mm machine-direction sheet pitch, no fak
   assert.equal(sawInspection,true);
   assert.equal(sawRelease,true);
   assert.ok(sim.completed>0);
-  assert.ok(sim.sheets.every(sheet=>sheet.userData.printRepresentation==='PROGRESSIVE_ILLUSTRATIVE_PRINT_PATTERN_NOT_JOB_ARTWORK'));
+  assert.ok(sim.sheets.every(sheet=>sheet.userData.printRepresentation==='PROGRESSIVE_TRANSVERSE_COLOUR_BANDS_PER_PU_DEMO'));
  }finally{sim.dispose();m.dispose();}
 });
 
-test('Offset 5 has no external block between sheets, visibly gains ink after PU and stacks at receiving height',()=>{
+test('Offset 5 adds transverse colour lines one PU at a time and stacks on an initially empty delivery',()=>{
  const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
  try{
-  const sheet=sim.sheets[0],attr=sheet.mesh.geometry.attributes.color,index=5*(sim.sheetWidthSegments+1)+4;
+  const sheet=sim.sheets[0],attr=sheet.mesh.geometry.attributes.color,index=4*(sim.sheetWidthSegments+1)+4;
   sim.setSheetColors(sheet,0);
   const blank=[attr.getX(index),attr.getY(index),attr.getZ(index)];
   sim.setSheetColors(sheet,1);
   const afterPU1=[attr.getX(index),attr.getY(index),attr.getZ(index)];
-  sim.setSheetColors(sheet,8);
-  const afterPU8=[attr.getX(index),attr.getY(index),attr.getZ(index)];
+  const secondBand=8*(sim.sheetWidthSegments+1)+4;
+  const beforePU2=[attr.getX(secondBand),attr.getY(secondBand),attr.getZ(secondBand)];
+  sim.setSheetColors(sheet,2);
+  const afterPU2=[attr.getX(secondBand),attr.getY(secondBand),attr.getZ(secondBand)];
   assert.ok(Math.hypot(...blank.map((v,i)=>v-afterPU1[i]))>.08,'PU1 must visibly ink the sheet');
-  assert.ok(Math.hypot(...afterPU1.map((v,i)=>v-afterPU8[i]))>.08,'following PUs must visibly develop the print');
-  assert.ok(sim.pileAnchor.y>1.15,'receiving surface must be the existing pile top, not the bottom table');
-  assert.ok(sim.deliveryDropHeight<.1,'delivered sheet must not fall through the existing pile');
+  assert.ok(Math.hypot(...beforePU2.map((v,i)=>v-afterPU2[i]))>.08,'PU2 must add its own band');
+  assert.ok(Math.abs(attr.getX(index)-attr.getX(index+4))<1e-8,'colour band spans the roller axis');
+  sim.setSheetColors(sheet,8);
+  for(let unit=0;unit<8;unit++){
+   const stripe=Math.round((.13+unit*.105)*sim.sheetLengthSegments)*(sim.sheetWidthSegments+1)+4;
+   const off=stripe+3*(sim.sheetWidthSegments+1);
+   assert.ok(Math.hypot(attr.getX(stripe)-attr.getX(off),attr.getY(stripe)-attr.getY(off),attr.getZ(stripe)-attr.getZ(off))>.07,`PU${unit+1} band must be a distinct transverse line`);
+  }
+  assert.ok(sim.pileAnchor.y<.5,'receiving surface begins at the empty pile table');
   sim.start();sim.update(0);
+  assert.equal(sim.staticDeliveryStack.visible,false);
+  assert.equal(sim.state().pileSheetsVisible,0);
   for(let ms=16;ms<=13000;ms+=16)sim.update(ms);
-  assert.equal(sim.staticDeliveryStack.visible,true);
+  assert.equal(sim.staticDeliveryStack.visible,false);
   assert.ok(sim.completed>0&&sim.state().pileSheetsVisible>0);
   assert.ok(sim.pileSheets.filter(item=>item.mesh.visible).every(item=>item.mesh.geometry.attributes.position.getY(0)>=sim.pileAnchor.y-.001));
   assert.ok(sim.sheets.every(item=>!item.gripper.visible),'demo gripper blocks remain visible between sheets');
-  assert.equal(sim.state().deliveryPilePolicy,'LAY_PRINTED_SHEETS_ON_TOP_OF_VISIBLE_EXISTING_STACK');
+  assert.equal(sim.state().deliveryPilePolicy,'START_EMPTY_STACK_TO_CAPACITY_THEN_CLEAR_AND_REPEAT');
+  sim.stop();assert.equal(sim.state().pileSheetsVisible,0);assert.equal(sim.staticDeliveryStack.visible,sim.staticDeliveryVisible);
+ }finally{sim.dispose();m.dispose();}
+});
+
+test('Offset 5 clears a full delivery pile before starting a new pile',()=>{
+ const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
+ try{
+  sim.start();const sheet=sim.sheets[0];
+  for(let cycle=0;cycle<sim.maxPileSheets;cycle++)sim.depositSheet(sheet,cycle);
+  assert.equal(sim.state().pileSheetsVisible,sim.maxPileSheets);
+  const last=sim.pileSheets.at(-1).mesh.geometry.attributes.position.getY(0);
+  assert.ok(last>sim.pileAnchor.y);
+  sim.depositSheet(sheet,sim.maxPileSheets);
+  assert.equal(sim.completed,sim.maxPileSheets+1);
+  assert.equal(sim.state().pileSheetsVisible,1);
+  assert.ok(Math.abs(sim.pileSheets[0].mesh.geometry.attributes.position.getY(0)-sim.pileAnchor.y)<1e-8);
+  sim.updateSheet(sim.sheets[1],sim.pathLength);
+  const incoming=sim.sheets[1].mesh.geometry.attributes.position;
+  assert.ok(Math.abs(incoming.getY(0)-(sim.pileAnchor.y+sim.pileSheetThickness+.008))<1e-6,'incoming sheet settles on the current pile top');
+  assert.ok(Math.abs(incoming.getY(0)-incoming.getY(sim.sheetLengthSegments*(sim.sheetWidthSegments+1)))<1e-8,'released sheet remains flat');
+  sim.depositSheet(sheet,sim.maxPileSheets);assert.equal(sim.completed,sim.maxPileSheets+1,'one sheet cannot deposit twice');
+  sim.stop();assert.equal(sim.state().pileSheetsVisible,0);
  }finally{sim.dispose();m.dispose();}
 });
 

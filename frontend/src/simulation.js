@@ -167,11 +167,11 @@ export class PrintingSimulation{
     this.group=new THREE.Group();this.group.name='PRINTING-TEST-SIMULATION';this.group.visible=false;this.machine.add(this.group);
     this.points=pathPoints();this.curve=new THREE.CatmullRomCurve3(this.points,false,'centripetal',.5);this.pathLength=this.curve.getLength();
     // CD 102 full-format reference: 720 x 1020 mm sheet, one gripper pitch per press cycle.
-    this.sheetLength=.72;this.sheetWidth=1.02;this.sheetLengthSegments=12;this.sheetWidthSegments=8;
+    this.sheetLength=.72;this.sheetWidth=1.02;this.sheetLengthSegments=32;this.sheetWidthSegments=8;
     this.nominalSheetsPerHour=15000;this.sheetCyclesPerSecond=this.nominalSheetsPerHour/3600;
     // The 1020 mm dimension is across the press; the 720 mm dimension is the sheet-travel direction.
     // Keep this process pitch independent from the BMJ custom machine-unit spacing.
-    this.sheetPitchMeters=.72;
+    this.sheetPitchMeters=.82; // 720 mm sheets with a visible 100 mm gap in the process illustration.
     this.sheetGapMeters=this.sheetPitchMeters;this.cycleDistance=this.pathLength+this.sheetGapMeters*2;this.sheetCount=Math.max(8,Math.floor(this.cycleDistance/this.sheetGapMeters));
     this.sheets=[];this.pileSheets=[];this.rotors=[];this.oscillators=[];this.levers=[];this.gripperMotions=[];this.joggerMotions=[];this.fluidFlows=[];this.inkSurfaces=[];
     this.uvLamps=[];this.uvBeams=[];this.materials=[];this.geometries=[];
@@ -215,12 +215,13 @@ export class PrintingSimulation{
     }
   }
   refreshDeliveryPileAnchor(){
-    const receivingSurface=this.staticDeliveryStack||this.template.findNode('delivery-pile')?.children.find(o=>o.isMesh);
+    // The receiving table is exposed when the photo-reference paper stack is hidden at start.
+    const receivingSurface=this.template.findNode('delivery-pile')?.children.find(o=>o.isMesh)||this.staticDeliveryStack;
     if(!receivingSurface)return this.pileAnchor;
     this.machine.updateMatrixWorld(true);receivingSurface.updateWorldMatrix(true,true);
     const box=new THREE.Box3().setFromObject(receivingSurface),center=box.getCenter(new THREE.Vector3()),top=new THREE.Vector3(center.x,box.max.y,center.z);
     this.machine.worldToLocal(top);this.pileAnchor.copy(top);this.pileAnchor.y+=this.pileSheetThickness*.6;
-    const rawEnd=this.curve.getPointAt(1);this.deliveryDropHeight=Math.max(0,rawEnd.y-(this.pileAnchor.y+.008));
+    const rawEnd=this.curve.getPointAt(1);this.deliveryDropHeight=Math.max(0,rawEnd.y-this.pileAnchor.y);
     return this.pileAnchor;
   }
   layoutPileSheet(sheet,rank){
@@ -242,6 +243,7 @@ export class PrintingSimulation{
   depositSheet(sheet,cycle){
     if(sheet.userData.lastDeliveryCycle===cycle)return false;
     sheet.userData.lastDeliveryCycle=cycle;this.completed++;
+    if(this.completed>1&&(this.completed-1)%this.maxPileSheets===0)this.clearDeliveredSheets();
     const slot=(this.completed-1)%this.maxPileSheets,pileSheet=this.pileSheets[slot];
     pileSheet.userData.serial=this.completed;this.setSheetColors(pileSheet,8);
     this.relayoutPileSheets();
@@ -249,8 +251,11 @@ export class PrintingSimulation{
     return true;
   }
   resetDeliveryPile(){
-    for(const sheet of this.pileSheets){sheet.mesh.visible=false;sheet.userData.serial=-1;}
+    this.clearDeliveredSheets();
     for(const sheet of this.sheets)sheet.userData.lastDeliveryCycle=-1;
+  }
+  clearDeliveredSheets(){
+    for(const sheet of this.pileSheets){sheet.mesh.visible=false;sheet.userData.serial=-1;}
   }
   setSheetColors(sheet,printed){
     if(sheet.userData.printed===printed)return;
@@ -277,11 +282,13 @@ export class PrintingSimulation{
     // In the delivery the gripper opens over the pile, then the complete sheet settles down as a flat body.
     // Apply one common vertical drop to all sheet vertices so the sheet does not turn into a ribbon/vertical flap.
     const releaseProgress=clamp((rawLead.x-this.deliveryReleaseX)/(this.deliverySettleX-this.deliveryReleaseX),0,1);
-    const easedRelease=releaseProgress*releaseProgress*(3-2*releaseProgress),deliveryDrop=easedRelease*this.deliveryDropHeight;
+    const easedRelease=releaseProgress*releaseProgress*(3-2*releaseProgress);
+    const pileHeight=this.pileSheets.filter(item=>item.mesh.visible).length*this.pileSheetThickness;
+    const deliveryDrop=easedRelease*Math.max(0,this.deliveryDropHeight-pileHeight);
     let trail=null,lead=null;
     for(let i=0;i<=l;i++){
       const distance=leadDistance-this.sheetLength*(1-i/l),t=clamp(distance/this.pathLength,0,1),p=this.curve.getPointAt(t);
-      p.y-=deliveryDrop;
+      p.y=THREE.MathUtils.lerp(p.y,rawLead.y,easedRelease)-deliveryDrop;
       if(i===0)trail=p.clone();if(i===l)lead=p.clone();
       for(let j=0;j<=w;j++){
         const z=-this.sheetWidth/2+(j/w)*this.sheetWidth,index=i*(w+1)+j;
@@ -456,8 +463,7 @@ export class PrintingSimulation{
   start(){
     if(!this.active){this.elapsed=0;this.completed=0;this.resetDeliveryPile();}
     this.refreshDeliveryPileAnchor();
-    // The installed receiving stack is the visible foundation for new sheets.
-    if(this.staticDeliveryStack)this.staticDeliveryStack.visible=this.staticDeliveryVisible;
+    if(this.staticDeliveryStack)this.staticDeliveryStack.visible=false;
     this.active=true;this.running=true;this.lastNow=null;this.group.visible=true;this.applyInkFilm(true);this.emit(true);return this.state();
   }
   pause(){if(this.active){this.running=false;this.lastNow=null;this.emit(true);}return this.state();}

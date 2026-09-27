@@ -303,24 +303,24 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
 export class Offset5CD102RealismSimulation extends PrintingSimulation{
   setSheetColors(sheet,printed){
     if(sheet.userData.printed===printed)return;
-    // Demonstration artwork: soft overlapping ink coverage makes the result of
-    // each PU legible without claiming the installed job's actual design.
+    // Each PU adds one cross-press colour band (parallel to the roller axis).
+    // This is an explanatory colour target, not the installed job artwork.
     const attr=sheet.mesh.geometry.attributes.color;
     const l=this.sheetLengthSegments,w=this.sheetWidthSegments;
     const count=Math.max(0,Math.min(8,printed|0));
-    const centers=[[.32,.38],[.59,.43],[.49,.67],[.64,.61],[.27,.63],[.73,.31],[.42,.28],[.53,.52]];
+    const centers=[.13,.235,.34,.445,.55,.655,.76,.865];
     for(let i=0;i<=l;i++)for(let j=0;j<=w;j++){
-      const u=i/l,v=j/w,color=sheet.paperColor.clone();
+      const u=i/l,color=sheet.paperColor.clone();
       for(let k=0;k<count;k++){
-        const [cx,cy]=centers[k],dx=(u-cx)/.22,dy=(v-cy)/.27;
-        const coverage=Math.exp(-2.2*(dx*dx+dy*dy));
-        color.lerp(sheet.bandColors[k],Math.min(.62,coverage*(k===3?.60:.48)));
+        const distance=Math.abs(u-centers[k]);
+        const coverage=Math.max(0,Math.min(1,(.048-distance)/.015));
+        color.lerp(sheet.bandColors[k],coverage*.88);
       }
       attr.setXYZ(i*(w+1)+j,color.r,color.g,color.b);
     }
     attr.needsUpdate=true;
     sheet.userData.printed=count;
-    sheet.userData.printRepresentation='PROGRESSIVE_ILLUSTRATIVE_PRINT_PATTERN_NOT_JOB_ARTWORK';
+    sheet.userData.printRepresentation='PROGRESSIVE_TRANSVERSE_COLOUR_BANDS_PER_PU_DEMO';
   }
   updateSheet(sheet,leadDistance){
     const visible=super.updateSheet(sheet,leadDistance);
@@ -398,10 +398,10 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       interUnitAccessPolicy:'BMJ_CUSTOM_BROAD_INTERUNIT_ACCESS_AND_OS_DS_STEPS_PRESERVED',
       inkRepresentation:'THIN_ROLLER_FILM_ONLY_NO_FREE_FLOATING_DROPLETS',
       inkRollerCount:this.inkSurfaces.length,
-      printRepresentation:'PROGRESSIVE_ILLUSTRATIVE_PRINT_PATTERN_NOT_JOB_ARTWORK',
+      printRepresentation:'PROGRESSIVE_TRANSVERSE_COLOUR_BANDS_PER_PU_DEMO',
       cylinderMotionPolicy:'SAME_STRAIGHT_PRINT_DIRECTION_ALL_PU_CONTACT_PAIRS_COUNTER_ROTATE',
       sheetVisualPolicy:'NO_EXTERNAL_FULL_WIDTH_DEMO_GRIPPER_BAR',
-      deliveryPilePolicy:'LAY_PRINTED_SHEETS_ON_TOP_OF_VISIBLE_EXISTING_STACK'
+      deliveryPilePolicy:'START_EMPTY_STACK_TO_CAPACITY_THEN_CLEAR_AND_REPEAT'
     };
   }
 }
