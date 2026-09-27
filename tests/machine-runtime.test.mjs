@@ -537,17 +537,17 @@ test('V141 Diana Eye capture processing decision and reject chain remains causal
  sim.dispose();t.dispose();
 });
 
-test('V141 SHARK N650 tracks transfer vacuum capture decision and good-bad return without decoding P3N1',()=>{
- const id='BMJ-MCH-0020',t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t);sim.start();
+test('V252 SHARK N650 tracks negative-pitch transfer, capture, decision and good-bad return without decoding P3N1',()=>{
+ const id='BMJ-MCH-0020',t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t);sim.start();let sawNegativePitch=false;
  for(const f of [.08,.24,.40,.58,.74,.90]){
   sim.elapsed=7.2*f;sim.lastNow=0;sim.update(16);const st=sim.state();
   assert.equal(st.interlockSafe,true,id+' interlock at '+f);
   if(st.processingActive)assert.equal(st.captureComplete,true,id+' processing before capture');
   if(st.demoRejectActive){assert.equal(st.rejectPermit,true,id);assert.equal(st.decisionReady,true,id);}
-  assert.equal(st.negativePitchActive,false,id);
+  sawNegativePitch||=st.negativePitchActive;
   assert.equal(st.suffixDecoded,false,id);
  }
- const st=sim.state();assert.equal(st.negativePitchCapabilityReference,true);assert.equal(st.installedFeederModeVerified,false);assert.equal(st.installedRejectTypeVerified,false);
+ const st=sim.state();assert.equal(sawNegativePitch,true,id+' negative-pitch transport never became active');assert.equal(st.negativePitchCapabilityReference,true);assert.equal(st.transportMode,'NEGATIVE_PITCH_OFFLINE_DEMO_REFERENCE');assert.equal(st.installedFeederModeVerified,false);assert.equal(st.installedRejectTypeVerified,false);
  sim.dispose();t.dispose();
 });
 
