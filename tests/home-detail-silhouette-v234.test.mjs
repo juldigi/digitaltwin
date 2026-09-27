@@ -46,6 +46,6 @@ test('V234 factory bake refuses a major silhouette mismatch before serializing h
 
 test('V234 shell marker changes without rotating V222 public cache identifiers',()=>{
  assert.match(sw,/shell recache without rotating public query identifiers/);
- assert.match(sw,/factory-digital-twin-v249-cache-refresh-20260927/);
- assert.match(sw,/const RELEASE='249'/);
+ assert.match(sw,/factory-digital-twin-v222-overlay-state-ssot-20260925/);
+ assert.match(sw,/const RELEASE='222'/);
 });
