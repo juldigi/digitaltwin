@@ -18,7 +18,7 @@ const sw=read('frontend/sw.js');
 test('V230 converting and inspection templates add family-specific exterior identity passes',()=>{
  for(const src of [apm2,mk920,mk1060,promatrix,media,diana,shark]){
   assert.match(src,/buildExteriorIdentity\(\)/);
-  assert.match(src,/visualRefinement='V2(?:30|35)_/);
+  assert.match(src,/visualRefinement='V2(?:30|35|52)_/);
   assert.match(src,/sourceBoundary=/);
  }
 });
@@ -50,13 +50,14 @@ test('V230 MEDIA 100 II stays an open-frame folder gluer with longitudinal secti
  assert.doesNotMatch(media,/buildExteriorIdentity[\s\S]{0,3000}\[9\.80,1\.[0-9]+,1\.[0-9]+\]/);
 });
 
-test('V230 Diana Eye and SHARK N650 carry different inspection-tower exterior identities',()=>{
- assert.match(diana,/V235_DIANA_EYE55_WHITE_INSPECTION_CELL_WITH_HMI_PEDESTAL/);
- assert.match(diana,/cameraHood=true/);
- assert.match(diana,/acceptedDeliveryPanel=true/);
- assert.match(shark,/V235_SHARK_N650_WHITE_TOWER_DARK_BASE_BLUE_STRIPE_HMI/);
+test('V252 supersedes the older inspection exterior passes with model-specific Diana and N650 identities',()=>{
+ assert.match(diana,/V252_DIANA_EYE55_LOW_FEEDER_WHITE_RED_CELL_FISHSCALE_DELIVERY/);
+ assert.match(diana,/deliveryMode='FISH_SCALE_STANDARD_REFERENCE'/);
+ assert.match(diana,/capabilityOnly=true;rear\.visible=false/);
+ assert.match(shark,/V252_SHARK_N650_LONG_LOW_CHASSIS_SINGLE_VISION_TOWER_BLUE_STRIPE/);
  assert.match(shark,/P3N1_(?:INSTALLED_)?OPTION_PACKAGE_UNDECODED/);
- assert.match(shark,/visionHood=true/);
+ assert.match(shark,/lowChassis=true/);
+ assert.match(shark,/officialGoodBadReturnLine=true/);
  assert.match(shark,/familyAccent=true/);
 });
 
