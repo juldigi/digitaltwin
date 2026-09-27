@@ -130,6 +130,6 @@ test('V231 factory/home still bakes live templates and keeps cache contract stab
  assert.match(bake,/const t=createPolishedMachineTemplate\(place\.machineId\)/);
  assert.match(bake,/t\.setLow\?\.\(true\)/);
  assert.match(sw,/shell recache without rotating public query identifiers/);
- assert.match(sw,/factory-digital-twin-v249-cache-refresh-20260927/);
- assert.match(sw,/const RELEASE='249'/);
+ assert.match(sw,/factory-digital-twin-v222-overlay-state-ssot-20260925/);
+ assert.match(sw,/const RELEASE='222'/);
 });
