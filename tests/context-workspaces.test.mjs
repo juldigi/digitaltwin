@@ -21,14 +21,15 @@ test('Asset Browser exposes the master-prompt search and filter dimensions',()=>
  assert.match(css,/\.asset-thumbnail/);
 });
 
-test('Asset selection updates one digital-twin context without page reload',()=>{
+test('Asset selection updates one factory-first digital-twin context without page reload',()=>{
  assert.match(app,/async function openAssetContext\(machine\)/);
- assert.match(app,/await switchActiveMachine\(route,\{historyMode:'push'\}\)/);
+ assert.match(app,/selectFactoryAssetContext\(machine,\{historyMode:'push',openDialog:true,focus:true\}\)/);
  assert.match(app,/selectedArea:machine\.area/);
  assert.match(app,/selectedAsset:machine\.machineId/);
- assert.match(app,/focusFoundationPlaceholder\(machine,\{historyMode:'push',openDialog:false\}\);machineDetailDialog\(machine\)/);
+ assert.match(app,/on\('#open-machine-3d',\(\)=>switchActiveMachine\(machineRoute\(machine\)\)\)/);
  assert.match(app,/showPanel\(\);renderPanel\('overview'\)/);
  const assetContext=app.slice(app.indexOf('async function openAssetContext'),app.indexOf('function assetDialog'));
+ assert.doesNotMatch(assetContext,/switchActiveMachine/);
  assert.doesNotMatch(assetContext,/location\.(?:reload|assign|replace)\(/);
 });
 
