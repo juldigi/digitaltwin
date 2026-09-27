@@ -544,7 +544,7 @@ export class OffsetMachineTemplate {
     this.cylinder(transfer,.235,1.48,[0,.70,0],'graphite');
     for(const z of [-.76,.76])this.cylinder(transfer,.258,.035,[0,.70,z],'steel');
     for(const a of [-.16,.16]){
-      const bar=this.group(transfer,`${base}-gripper-${a<0?'a':'b'}`,`Gripper bar ${a<0?'A':'B'} · visual reference`,[0,0,0],[a<0?-.35:.35,.18,0],photos,'Gripper bar dan fingers adalah representasi inspeksi. Pitch, jumlah aktual, spring force dan phasing belum diverifikasi.');
+      const bar=this.group(transfer,`${base}-gripper-${a<0?'a':'b'}`,`Gripper bar ${a<0?'A':'B'} · visual reference`,[0,0,0],[a<0?-.075:.075,-.21,0],photos,'Gripper bar dan fingers adalah representasi inspeksi. Pitch, jumlah aktual, spring force dan phasing belum diverifikasi.');
       this.box(bar,[.055,.055,1.38],[a,.91,0],'steel',.012);
       for(let n=0;n<7;n++){
         const z=-.60+n*.20;

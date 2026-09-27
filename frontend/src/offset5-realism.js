@@ -344,6 +344,13 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
   }
   collectMechanicalMotion(){
     super.collectMechanicalMotion();
+    // The sheet runs left to right across the upper transfer arc at every bay.
+    // Both transfer drum and gripper orbit therefore turn clockwise in this view.
+    for(let bay=1;bay<8;bay++){
+      const drum=this.template.findNode(`transfer-pu${bay}-pu${bay+1}`)?.children.find(child=>child.isMesh&&child.geometry?.type==='CylinderGeometry');
+      const rotor=this.rotors.find(item=>item.mesh===drum);
+      if(rotor){rotor.sign=-1;rotor.rate=this.baseMetersPerSecond/(Math.PI*2*this.sheetCyclesPerSecond*drum.geometry.parameters.radiusTop);rotor.role=`PU${bay}-PU${bay+1}-transfer-drum`;}
+    }
     // Each straight-printing PU carries the sheet in the same direction. Adjacent
     // contacting cylinders counter-rotate; their surface speed, not their RPM,
     // follows the sheet. The visible radii are reference geometry, not CAD.

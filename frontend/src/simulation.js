@@ -31,7 +31,7 @@ function pathPoints(){
     // Dense tangent samples prevent Catmull-Rom interpolation from cutting inside the impression cylinder.
     for(const deg of [170,155,140,125,110,95,80,65,50,35,20,5])pts.push(arcPoint(icx,icy,r,deg));
     if(i<OFFSET5_UNIT_CENTERS.length-1){
-      const next=OFFSET5_UNIT_CENTERS[i+1],tx=(cx+next)/2,ty=.70,tr=.247;
+      const next=OFFSET5_UNIT_CENTERS[i+1],tx=(cx+next)/2,ty=.722,tr=.252;
       for(const deg of [165,145,125,105,85,65,45,25,10])pts.push(arcPoint(tx,ty,tr,deg));
     }
   });
@@ -288,11 +288,12 @@ export class PrintingSimulation{
     let trail=null,lead=null;
     for(let i=0;i<=l;i++){
       const distance=leadDistance-this.sheetLength*(1-i/l),t=clamp(distance/this.pathLength,0,1),p=this.curve.getPointAt(t);
+      p.x=THREE.MathUtils.lerp(p.x,this.pileAnchor.x-this.sheetLength/2+(i/l)*this.sheetLength,easedRelease);
       p.y=THREE.MathUtils.lerp(p.y,rawLead.y,easedRelease)-deliveryDrop;
       if(i===0)trail=p.clone();if(i===l)lead=p.clone();
       for(let j=0;j<=w;j++){
         const z=-this.sheetWidth/2+(j/w)*this.sheetWidth,index=i*(w+1)+j;
-        pos.setXYZ(index,p.x,p.y+.008,z);
+        pos.setXYZ(index,p.x,p.y+easedRelease*.008,z);
       }
     }
     pos.needsUpdate=true;
@@ -385,7 +386,7 @@ export class PrintingSimulation{
       this.addLever(firstLever(this.template.findNode(`${base}-gripper-cam`)),.16,.88,n*.28);
       for(const suffix of ['a','b']){
         const object=this.template.findNode(`${base}-gripper-${suffix}`);if(!object)continue;
-        this.gripperMotions.push({object,initial:object.position.clone(),frequency:.88,phase:(suffix==='a'?0:Math.PI)+n*.28,amplitudeX:.060,amplitudeY:.040});
+        this.gripperMotions.push({object,initial:object.position.clone(),orbit:true,barX:suffix==='a'?-.16:.16,barY:.91,drumY:.70,radius:.235,phase:suffix==='a'?Math.PI:0});
       }
     }
 
@@ -502,6 +503,7 @@ export class PrintingSimulation{
       if(absolute<this.sheetLength){sheet.mesh.visible=false;sheet.gripper.visible=false;continue;}
       const cycle=Math.floor(absolute/this.cycleDistance),local=mod(absolute,this.cycleDistance);
       if(local>this.pathLength){
+        if(sheet.userData.lastDeliveryCycle!==cycle)this.updateSheet(sheet,this.pathLength);
         this.depositSheet(sheet,cycle);
         continue;
       }
@@ -517,7 +519,13 @@ export class PrintingSimulation{
     for(const item of this.oscillators)item.object.position[item.axis]=item.initial[item.axis]+Math.sin(phase*item.frequency+item.phase)*item.amplitude;
     for(const item of this.levers)item.object.rotation.z=item.initial+Math.sin(phase*item.frequency+item.phase)*item.amplitude;
     for(const item of this.gripperMotions){
-      const a=phase*item.frequency+item.phase;item.object.position.x=item.initial.x+Math.sin(a)*item.amplitudeX;item.object.position.y=item.initial.y+Math.cos(a)*item.amplitudeY;
+      if(item.orbit){
+        const a=item.phase-this.elapsed*this.baseMetersPerSecond/item.radius;
+        item.object.position.x=item.radius*Math.cos(a)-item.barX;
+        item.object.position.y=item.drumY+item.radius*Math.sin(a)-item.barY;
+      }else{
+        const a=phase*item.frequency+item.phase;item.object.position.x=item.initial.x+Math.sin(a)*item.amplitudeX;item.object.position.y=item.initial.y+Math.cos(a)*item.amplitudeY;
+      }
     }
     for(const item of this.joggerMotions)item.object.position.z=item.initial.z+Math.sin(phase*1.05+item.phase)*item.amplitude;
 

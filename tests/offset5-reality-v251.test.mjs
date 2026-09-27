@@ -125,6 +125,48 @@ test('Offset 5 clears a full delivery pile before starting a new pile',()=>{
  }finally{sim.dispose();m.dispose();}
 });
 
+test('Offset 5 first delivered sheet immediately joins the empty pile',()=>{
+ const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
+ try{
+  sim.start();sim.update(0);let firstTime=null;
+  for(let ms=16;ms<=16000;ms+=16){
+   sim.update(ms);
+   if(sim.completed){firstTime=ms;break;}
+  }
+  assert.ok(firstTime!==null,'first sheet never reached delivery');
+  assert.equal(sim.completed,1);
+  assert.equal(sim.state().pileSheetsVisible,1,'first sheet must appear on the same frame as its release');
+  assert.equal(sim.pileSheets[0].mesh.visible,true);
+ }finally{sim.dispose();m.dispose();}
+});
+
+test('Offset 5 path clears impression, blanket and inter-unit drums; grippers orbit their shaft',()=>{
+ const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
+ try{
+  m.root.updateMatrixWorld(true);
+  const samples=Array.from({length:1101},(_,i)=>sim.curve.getPointAt(i/1100));
+  for(let unit=0;unit<8;unit++)for(const type of ['impression','blanket']){
+   const box=new THREE.Box3().setFromObject(m.findNode(`press-${unit}-cylinder-${type}-body`));
+   const center=box.getCenter(new THREE.Vector3()),radius=box.getSize(new THREE.Vector3()).x/2;
+   const clearance=Math.min(...samples.map(p=>Math.hypot(p.x-center.x,p.y-center.y)-radius));
+   assert.ok(clearance>.005,`PU${unit+1} sheet penetrates ${type} cylinder`);
+  }
+  for(let unit=1;unit<8;unit++){
+   const drum=m.findNode(`transfer-pu${unit}-pu${unit+1}`).children.find(o=>o.isMesh&&o.geometry.type==='CylinderGeometry');
+   const center=drum.getWorldPosition(new THREE.Vector3()),radius=drum.geometry.parameters.radiusTop;
+   const clearance=Math.min(...samples.map(p=>Math.hypot(p.x-center.x,p.y-center.y)-radius));
+   assert.ok(clearance>.012,`PU${unit} to PU${unit+1} sheet intersects transfer drum`);
+   assert.equal(sim.rotors.find(item=>item.role===`PU${unit}-PU${unit+1}-transfer-drum`)?.sign,-1,'transfer surface must move toward delivery above the shaft');
+  }
+  sim.start();sim.update(0);sim.update(250);
+  assert.equal(sim.gripperMotions.length,14);
+  for(const item of sim.gripperMotions){
+   const radius=Math.hypot(item.object.position.x+item.barX,item.object.position.y+item.barY-item.drumY);
+   assert.ok(Math.abs(radius-item.radius)<1e-7,'gripper must orbit the transfer shaft');
+  }
+ }finally{sim.dispose();m.dispose();}
+});
+
 test('Offset 5 shows ink only as subtle roller film without floating droplets or glowing impression cylinders',()=>{
  const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
  try{

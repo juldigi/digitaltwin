@@ -1476,3 +1476,17 @@ aside#detail-panel[aria-hidden="true"]{pointer-events:none!important}
  .canonical-simulation-transport label{min-width:0!important}
  .canonical-simulation-transport select{width:76px!important;min-width:76px!important;padding:0 4px!important;font-size:12px!important;color:var(--ink)!important}
 }
+
+/* Keep the mobile process controls alongside the bottom navigation with the machine visible. */
+@media(max-width:767px){
+ .canonical-simulation-transport{left:12px!important;right:12px!important;bottom:calc(78px + env(safe-area-inset-bottom))!important;padding:7px 9px!important;gap:6px!important;grid-template-columns:minmax(0,1fr) minmax(100px,auto) 66px!important;grid-template-rows:30px 36px!important;border-radius:13px!important}
+ .canonical-simulation-transport .sim-context{grid-column:1!important;grid-row:1!important;order:initial!important}
+ .canonical-simulation-transport .sim-mode-label{grid-column:2!important;grid-row:1!important;order:initial!important}
+ .canonical-simulation-transport label:has([data-transport-speed]){grid-column:3!important;grid-row:1!important}
+ .canonical-simulation-transport [data-transport-play]{grid-column:1!important;grid-row:2!important}
+ .canonical-simulation-transport [data-transport-stop]{grid-column:2/4!important;grid-row:2!important}
+ .canonical-simulation-transport progress{display:none!important}
+ .canonical-simulation-transport button,.canonical-simulation-transport select{height:36px!important;min-height:36px!important;font-size:12px!important}
+ .canonical-simulation-transport .sim-mode-label select{height:30px!important;max-width:100%!important;min-width:0!important;width:100%!important}
+ .canonical-simulation-transport label:has([data-transport-speed]) select{height:30px!important;width:66px!important;min-width:66px!important}
+}
