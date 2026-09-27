@@ -7,6 +7,7 @@ import {OFFSET5_DIMENSIONS,OFFSET5_UNIT_CENTERS} from './data/dimensions-offset5
 // visualisation values only; they are not machine service settings.
 const D=OFFSET5_DIMENSIONS.layout;
 const UNIT_COLORS=[0x21b8d6,0xdf438c,0xf0c933,0x25282c,0xe57c32,0x4ab66d,0x4770d1,0x815ac3];
+const IMPRESSION_REFERENCE_RADIUS=.290; // visual kinematic reference from the V251 compact cylinder train
 const PAPER=0xf4f0df;
 const TAU=Math.PI*2;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -27,11 +28,11 @@ function pathPoints(){
     new THREE.Vector3(OFFSET5_UNIT_CENTERS[0]-.54,1.26,0)
   ];
   OFFSET5_UNIT_CENTERS.forEach((cx,i)=>{
-    const icx=cx+.16,icy=.95,r=.270;
+    const icx=cx+.12,icy=.94,r=.295;
     // Dense tangent samples prevent Catmull-Rom interpolation from cutting inside the impression cylinder.
     for(const deg of [170,155,140,125,110,95,80,65,50,35,20,5])pts.push(arcPoint(icx,icy,r,deg));
     if(i<OFFSET5_UNIT_CENTERS.length-1){
-      const next=OFFSET5_UNIT_CENTERS[i+1],tx=(cx+next)/2,ty=.70,tr=.247;
+      const next=OFFSET5_UNIT_CENTERS[i+1],tx=(cx+next)/2,ty=.70,tr=.240;
       for(const deg of [165,145,125,105,85,65,45,25,10])pts.push(arcPoint(tx,ty,tr,deg));
     }
   });
@@ -165,14 +166,14 @@ export class PrintingSimulation{
     this.machine=machine;this.template=template;
     this.group=new THREE.Group();this.group.name='PRINTING-TEST-SIMULATION';this.group.visible=false;this.machine.add(this.group);
     this.points=pathPoints();this.curve=new THREE.CatmullRomCurve3(this.points,false,'centripetal',.5);this.pathLength=this.curve.getLength();
-    this.sheetLength=.66;this.sheetWidth=1.02;this.sheetLengthSegments=12;this.sheetWidthSegments=8;
+    this.sheetLength=.66;this.sheetWidth=1.02;this.sheetLengthSegments=14;this.sheetWidthSegments=10;
     this.sheetGapMeters=1.34;this.cycleDistance=this.pathLength+this.sheetGapMeters*2;this.sheetCount=Math.max(8,Math.floor(this.cycleDistance/this.sheetGapMeters));
     this.sheets=[];this.pileSheets=[];this.rotors=[];this.oscillators=[];this.levers=[];this.gripperMotions=[];this.joggerMotions=[];this.fluidFlows=[];this.inkSurfaces=[];
-    this.uvLamps=[];this.uvBeams=[];this.materials=[];this.geometries=[];
+    this.uvLamps=[];this.uvBeams=[];this.inspectionLights=[];this.materials=[];this.geometries=[];
     this.staticDeliveryStack=template.findNode('delivery-paper-stack');this.staticDeliveryVisible=this.staticDeliveryStack?.visible;this.maxPileSheets=32;this.pileSheetThickness=.0035;this.pileAnchor=new THREE.Vector3(D.deliveryCenterX+.10,1.22,0);
-    this.active=false;this.running=false;this.speed=1;this.elapsed=0;this.lastNow=null;this.completed=0;this.emitAt=0;this.pathVisible=true;this.inkFlowVisible=true;this.uvActive=false;this.onUpdate=null;
-    this.baseMetersPerSecond=2.15;
-    this.buildPath();this.buildSheets();this.buildPileSheets();this.refreshDeliveryPileAnchor();this.buildFluidFlows();this.collectMechanicalMotion();this.collectInkSurfaces();this.collectUVSystem();
+    this.active=false;this.running=false;this.speed=1;this.elapsed=0;this.lastNow=null;this.completed=0;this.emitAt=0;this.pathVisible=true;this.inkFlowVisible=true;this.uvActive=false;this.inspectionActive=false;this.coatingActive=false;this.onUpdate=null;
+    this.baseMetersPerSecond=1.85; // intentionally slowed visual demonstration, not a production speed setting
+    this.buildPath();this.buildSheets();this.buildPileSheets();this.refreshDeliveryPileAnchor();this.buildFluidFlows();this.collectMechanicalMotion();this.collectInkSurfaces();this.collectUVSystem();this.collectInspectionSystem();
   }
   material(params){
     const basic=params.basic;delete params.basic;
@@ -247,11 +248,15 @@ export class PrintingSimulation{
   setSheetColors(sheet,printed){
     if(sheet.userData.printed===printed)return;
     const attr=sheet.mesh.geometry.attributes.color,w=this.sheetWidthSegments,l=this.sheetLengthSegments;
-    for(let i=0;i<=l;i++)for(let j=0;j<=w;j++){
-      const band=Math.min(w-1,j===w?w-1:j),color=band<printed?sheet.bandColors[band]:sheet.paperColor,index=i*(w+1)+j;
-      attr.setXYZ(index,color.r,color.g,color.b);
+    // Unknown production artwork must not be faked as eight full-width color bands.
+    // A subtle cumulative tint communicates successive ink transfer while the actual job image remains unspecified.
+    const color=sheet.paperColor.clone();
+    for(let unit=0;unit<printed;unit++){
+      const ink=sheet.bandColors[unit],mix=unit<4?.045:.020;
+      color.lerp(ink,mix);
     }
-    attr.needsUpdate=true;sheet.userData.printed=printed;
+    for(let i=0;i<=l;i++)for(let j=0;j<=w;j++){const index=i*(w+1)+j;attr.setXYZ(index,color.r,color.g,color.b);}
+    attr.needsUpdate=true;sheet.userData.printed=printed;sheet.userData.printVisualization='SUBTLE_CUMULATIVE_TINT__JOB_ARTWORK_UNKNOWN';
   }
   updateSheet(sheet,leadDistance){
     const visible=leadDistance>=this.sheetLength&&leadDistance<=this.pathLength;
@@ -394,6 +399,14 @@ export class PrintingSimulation{
       if(mesh.userData.uvBeam)this.uvBeams.push({mesh,material:mesh.material,count:mesh.userData.uvElementCount||1,initialVisible:mesh.visible,initialOpacity:mesh.material.opacity,initialIntensity:mesh.material.emissiveIntensity});
     });
   }
+  collectInspectionSystem(){
+    const lights=this.template.findNode('inspection-lighting');
+    lights?.traverse(mesh=>{if(mesh.isMesh&&mesh.material?.emissive)this.inspectionLights.push({mesh,material:mesh.material,initialEmissive:mesh.material.emissive.clone(),initialIntensity:mesh.material.emissiveIntensity});});
+  }
+  setInspection(active){
+    this.inspectionActive=!!active;
+    for(const light of this.inspectionLights){if(this.inspectionActive){light.material.emissive.setHex(0xe8f6ff);light.material.emissiveIntensity=1.65;}else{light.material.emissive.copy(light.initialEmissive);light.material.emissiveIntensity=light.initialIntensity;}light.material.needsUpdate=true;}
+  }
   setUV(active,intensity=1){
     this.uvActive=!!active;
     for(const lamp of this.uvLamps){
@@ -420,7 +433,7 @@ export class PrintingSimulation{
       pathVisible:this.pathVisible,inkFlowVisible:this.inkFlowVisible,progress:leading?.userData.progress||0,sheetsVisible:visible.length,
       rotorCount:this.rotors.length,oscillatorCount:this.oscillators.length+this.levers.length+this.gripperMotions.length+this.joggerMotions.length,
       mechanismCount:this.rotors.length+this.oscillators.length+this.levers.length+this.gripperMotions.length+this.joggerMotions.length,
-      inkFlowCount:this.fluidFlows.length,pileSheetsVisible:this.pileSheets.filter(sheet=>sheet.mesh.visible).length,uvLampCount:this.uvLamps.reduce((sum,item)=>sum+item.count,0),uvBeamCount:this.uvBeams.reduce((sum,item)=>sum+item.count,0),uvActive:this.uvActive
+      inkFlowCount:this.fluidFlows.length,pileSheetsVisible:this.pileSheets.filter(sheet=>sheet.mesh.visible).length,uvLampCount:this.uvLamps.reduce((sum,item)=>sum+item.count,0),uvBeamCount:this.uvBeams.reduce((sum,item)=>sum+item.count,0),uvActive:this.uvActive,inspectionActive:this.inspectionActive,coatingActive:this.coatingActive,visualSpeedScale:'SLOWED_DEMONSTRATION_NOT_PRODUCTION_SETPOINT',sheetPrintVisualization:'SUBTLE_CUMULATIVE_TINT__NO_FAKE_JOB_ARTWORK',mechanicalPhasePolicy:'LINEAR_SHEET_SPEED_TO_IMPRESSION_REFERENCE_RADIUS'
     };
   }
   emit(force=false){
@@ -444,7 +457,7 @@ export class PrintingSimulation{
     for(const item of this.levers)item.object.rotation.z=item.initial;
     for(const item of this.gripperMotions)item.object.position.copy(item.initial);
     for(const item of this.joggerMotions)item.object.position.copy(item.initial);
-    this.applyInkFilm(false);this.restoreUV();this.emit(true);return this.state();
+    this.applyInkFilm(false);this.restoreUV();this.setInspection(false);this.coatingActive=false;this.emit(true);return this.state();
   }
   setSpeed(value){this.speed=clamp(Number(value)||1,.35,2);this.emit(true);return this.state();}
   setPathVisible(on){this.pathVisible=!!on;this.pathLine.visible=this.pathVisible;this.emit(true);return this.state();}
@@ -461,8 +474,8 @@ export class PrintingSimulation{
     const scaled=dt*this.speed;this.elapsed+=scaled;
     const travelled=this.elapsed*this.baseMetersPerSecond;
 
-    let dryerOccupied=false;
-    const dryerLeft=D.dryerCenterX-D.dryerLength/2-.12,dryerRight=D.dryerCenterX+D.dryerLength/2+.12;
+    let dryerOccupied=false,inspectionOccupied=false,coaterOccupied=false;
+    const dryerLeft=D.dryerCenterX-D.dryerLength/2-.12,dryerRight=D.dryerCenterX+D.dryerLength/2+.12,inspectionLeft=D.inspectionCenterX-.28,inspectionRight=D.inspectionCenterX+.28,coaterLeft=D.coaterCenterX-D.coaterLength/2-.08,coaterRight=D.coaterCenterX+D.coaterLength/2+.08;
     for(let i=0;i<this.sheets.length;i++){
       const sheet=this.sheets[i],absolute=travelled-i*this.sheetGapMeters;
       if(absolute<this.sheetLength){sheet.mesh.visible=false;sheet.gripper.visible=false;continue;}
@@ -473,10 +486,10 @@ export class PrintingSimulation{
       }
       if(!this.updateSheet(sheet,local))continue;
       const a=sheet.userData.trailPosition.x,b=sheet.userData.leadPosition.x;
-      if(b>=dryerLeft&&a<=dryerRight)dryerOccupied=true;
+      if(b>=dryerLeft&&a<=dryerRight)dryerOccupied=true;if(b>=inspectionLeft&&a<=inspectionRight)inspectionOccupied=true;if(b>=coaterLeft&&a<=coaterRight)coaterOccupied=true;
     }
 
-    const angular=5.0*scaled;
+    const angular=(this.baseMetersPerSecond/IMPRESSION_REFERENCE_RADIUS)*scaled;
     for(const rotor of this.rotors)rotor.axis==='z'?rotor.mesh.rotateZ(rotor.sign*rotor.rate*angular):rotor.mesh.rotateY(rotor.sign*rotor.rate*angular);
     const phase=this.elapsed*TAU;
     for(const item of this.oscillators)item.object.position[item.axis]=item.initial[item.axis]+Math.sin(phase*item.frequency+item.phase)*item.amplitude;
@@ -499,7 +512,7 @@ export class PrintingSimulation{
     }
 
     const uvPulse=.82+.18*Math.sin(phase*1.8);
-    this.setUV(dryerOccupied,uvPulse);
+    this.setUV(dryerOccupied,uvPulse);this.setInspection(inspectionOccupied);this.coatingActive=coaterOccupied;
     this.emit(false);
   }
   dispose(){
