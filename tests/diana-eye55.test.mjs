@@ -54,7 +54,7 @@ test('DIANA deterministic demo assigns stable tracking IDs at inspection and car
 test('DIANA rejects only tracked reject blanks and accepted blanks remain on the main delivery path',()=>{
  const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);sim.start();let now=1000,seenReject=false,seenPass=false;
  for(let i=0;i<1500;i++){now+=10;sim.update(now);const state=sim.state();seenReject||=state.rejectTrackingActive&&state.activeRejectTrackingIds.length>0;seenPass||=state.acceptedDeliveryActive&&state.activePassTrackingIds.length>0;}
- const state=sim.state();assert.ok(seenReject&&seenPass);assert.ok(state.inspectedDemoCount>0);assert.ok(state.completed+state.rejectedDemo>0);assert.ok(state.pileSheetsVisible+state.rejectSheetsVisible>0);assert.equal(state.deliveryMode,'FISH_SCALE_STANDARD_REFERENCE');
+ const state=sim.state();assert.ok(seenReject&&seenPass);assert.ok(state.inspectedDemoCount>0);assert.ok(state.completed+state.rejectedDemo>0);assert.ok(state.pileSheetsVisible+state.rejectSheetsVisible>0);assert.equal(state.deliveryMode,'DUAL_FISH_SCALE_FINISHED_AND_WASTE_REFERENCE');
  assert.equal(sim.blanks.every(b=>!b.result||b.inspectedLap===b.lap),true);
  sim.dispose();model.dispose();
 });
