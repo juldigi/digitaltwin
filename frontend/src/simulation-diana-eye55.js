@@ -57,7 +57,7 @@ export class DianaEye55ProcessSimulation{
   }
  }
  updateBlanks(){
-  let trigger=false,scanCount=0,processCount=0,processedCount=0,decisionCount=0,rejectAtGate=false,rejectConfirmed=false,trackedReject=false,accepted=false,outputCount=false;const rejectIds=[],passIds=[];
+  let trigger=false,scanCount=0,processCount=0,processedCount=0,decisionCount=0,rejectAtGate=false,rejectConfirmed=false,trackedReject=false,accepted=false,waste=false,outputCount=false;const rejectIds=[],passIds=[];
   const base=this.elapsed/7.8;
   for(const b of this.blanks){
    const raw=base+b.phase,lap=Math.floor(raw),t=((raw%1)+1)%1;
@@ -69,11 +69,11 @@ export class DianaEye55ProcessSimulation{
    if(b.processed)processedCount++;if(b.decisionReady)decisionCount++;
    b.mesh.visible=this.active;const p=this.curve.getPointAt(Math.min(.999,t));b.mesh.position.copy(p);
    const reject=b.result==='REJECT_DEMO';
-   if(reject&&b.decisionReady&&t>=.69&&t<.96){trackedReject=true;if(b.trackingId)rejectIds.push(b.trackingId);const q=clamp((t-.69)/.20),lift=Math.sin(q*Math.PI)*.055;b.mesh.position.z=THREE.MathUtils.lerp(0,this.wasteLaneZ,q);b.mesh.position.y+=lift;if(t>=.72&&t<.86)rejectAtGate=true;if(t>=.84){rejectConfirmed=true;this.wasteDeliveryActive=true;}}
+   if(reject&&b.decisionReady&&t>=.69&&t<.96){trackedReject=true;if(b.trackingId)rejectIds.push(b.trackingId);const q=clamp((t-.69)/.20),lift=Math.sin(q*Math.PI)*.055;b.mesh.position.z=THREE.MathUtils.lerp(0,this.wasteLaneZ,q);b.mesh.position.y+=lift;if(t>=.72&&t<.86)rejectAtGate=true;if(t>=.84){rejectConfirmed=true;waste=true;}}
    else if(b.result==='PASS_DEMO'&&b.decisionReady&&t>=.76){accepted=true;if(b.trackingId)passIds.push(b.trackingId);const q=clamp((t-.76)/.18);b.mesh.position.z=THREE.MathUtils.lerp(0,this.goodLaneZ,q);if(t>=.90)outputCount=true;}
    b.mesh.material.emissive?.setHex((t>=.30&&t<.48)?0x365e6f:reject&&t>=.62?0x6d2d23:0);b.mesh.material.emissiveIntensity=(t>=.30&&t<.48)?.8:reject&&t>=.62?.45:0;b.lastT=t;
   }
-  this.feederDriveActive=this.blanks.some(b=>b.lastT<.24);this.transportDriveActive=this.blanks.some(b=>b.lastT>=.18&&b.lastT<.90);this.deliveryDriveActive=accepted||this.wasteDeliveryActive;this.blankPresenceTrigger=trigger;this.transportEncoderActive=this.transportDriveActive;this.vacuumHoldActive=this.transportDriveActive;this.illuminationReady=scanCount>0;this.cameraTriggerActive=trigger;this.captureComplete=this.blanks.some(b=>b.captured);this.scanActive=scanCount>0;this.imageProcessingActive=processCount>0;this.processingComplete=processedCount>0;this.decisionReady=decisionCount>0;this.rejectPermit=rejectAtGate&&decisionCount>0;this.rejectConfirmed=rejectConfirmed;this.outputCountActive=outputCount;this.rejectTrackingActive=trackedReject;this.demoRejectActive=this.rejectPermit;this.acceptedDeliveryActive=accepted;this.fishScaleDeliveryActive=accepted||this.wasteDeliveryActive;this.activeRejectTrackingIds=rejectIds;this.activePassTrackingIds=passIds;
+  this.feederDriveActive=this.blanks.some(b=>b.lastT<.24);this.transportDriveActive=this.blanks.some(b=>b.lastT>=.18&&b.lastT<.90);this.wasteDeliveryActive=waste;this.deliveryDriveActive=accepted||waste;this.blankPresenceTrigger=trigger;this.transportEncoderActive=this.transportDriveActive;this.vacuumHoldActive=this.transportDriveActive;this.illuminationReady=scanCount>0;this.cameraTriggerActive=trigger;this.captureComplete=this.blanks.some(b=>b.captured);this.scanActive=scanCount>0;this.imageProcessingActive=processCount>0;this.processingComplete=processedCount>0;this.decisionReady=decisionCount>0;this.rejectPermit=rejectAtGate&&decisionCount>0;this.rejectConfirmed=rejectConfirmed;this.outputCountActive=outputCount;this.rejectTrackingActive=trackedReject;this.demoRejectActive=this.rejectPermit;this.acceptedDeliveryActive=accepted;this.fishScaleDeliveryActive=accepted||waste;this.activeRejectTrackingIds=rejectIds;this.activePassTrackingIds=passIds;
   this.interlockSafe=(!this.demoRejectActive||this.rejectPermit)&&(!this.imageProcessingActive||this.captureComplete);
   this.updateOptics(this.scanActive);
   if(this.gate)this.gate.rotation.z=this.gateRest+(this.rejectPermit?.42:0);
