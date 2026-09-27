@@ -47,7 +47,7 @@ export class DianaEye55MachineTemplate{
  buildInspection(){
   const g=this.group(this.root,'diana55-inspection','Inspection enclosure',[-.24,0,0],[0,.30,.42]);
   const tunnel=this.group(g,'diana55-inspection-tunnel','White inspection cell / enclosure');this.cover(this.box(tunnel,[1.72,1.34,1.54],[0,1.30,0],'white',.055));
-  const window=this.group(g,'diana55-inspection-window','Darkened inspection window');for(const z of [-.79,.79]){const w=this.box(window,[1.22,.66,.022],[0,1.36,z],'glass',.030);w.userData.silhouetteCritical=true;}
+  const window=this.group(g,'diana55-inspection-window','Darkened inspection window');for(const z of [-.79,.79]){const w=this.box(window,[1.22,.66,.022],[0,1.36,z],'glass',.030);w.userData.inspectionAperture=true;w.userData.silhouetteCritical=true;}
   const bed=this.group(g,'diana55-inspection-bed','Inspection suction-belt bed');for(const z of [-.48,-.24,0,.24,.48]){const b=this.box(bed,[1.70,.023,.09],[0,.73,z],'green',.004);b.userData.inspectBelt=true;}
  }
  buildCameras(){
