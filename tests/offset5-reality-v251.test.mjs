@@ -67,3 +67,37 @@ test('V253 Offset 5 simulation uses 720 mm machine-direction sheet pitch, no fak
   assert.ok(sim.sheets.every(sheet=>sheet.userData.printRepresentation==='CUMULATIVE_FULL_SHEET_REFERENCE_TINT_NO_FAKE_BANDS'));
  }finally{sim.dispose();m.dispose();}
 });
+
+test('Offset 5 shows ink only as subtle roller film without floating droplets or glowing impression cylinders',()=>{
+ const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
+ try{
+  const impression=m.findNode('press-0-cylinder-impression-body');
+  const impressionMaterials=[];
+  impression.traverse(o=>{if(o.isMesh)impressionMaterials.push(o.material);});
+  const before=impressionMaterials.map(material=>material.emissiveIntensity);
+  assert.equal(sim.fluidFlows.length,0);
+  assert.ok(sim.inkSurfaces.length>8);
+  assert.equal(sim.state().inkRepresentation,'THIN_ROLLER_FILM_ONLY_NO_FREE_FLOATING_DROPLETS');
+  sim.start();
+  assert.ok(sim.inkSurfaces.every(({material})=>material.emissiveIntensity<=.055));
+  assert.deepEqual(impressionMaterials.map(material=>material.emissiveIntensity),before);
+  sim.setInkFlowVisible(false);
+  assert.ok(sim.inkSurfaces.every(({material,initialIntensity})=>material.emissiveIntensity===initialIntensity));
+  sim.stop();
+ }finally{sim.dispose();m.dispose();}
+});
+
+test('Offset 5 cylinder contacts keep one straight-print direction across all eight custom-spaced units',()=>{
+ const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
+ try{
+  const expected={plate:1,blanket:-1,impression:1,transfer:-1};
+  for(let unit=1;unit<=8;unit++)for(const [type,sign] of Object.entries(expected)){
+   const rotor=sim.rotors.find(item=>item.role===`PU${unit}-${type}-cylinder`);
+   assert.ok(rotor,`PU${unit} missing ${type} cylinder motion`);
+   assert.equal(rotor.sign,sign);
+   const surfaceSpeed=rotor.rate*rotor.mesh.geometry.parameters.radiusTop*2*Math.PI*sim.sheetCyclesPerSecond;
+   assert.ok(Math.abs(surfaceSpeed-sim.baseMetersPerSecond)<1e-9);
+  }
+  assert.equal(sim.state().cylinderMotionPolicy,'SAME_STRAIGHT_PRINT_DIRECTION_ALL_PU_CONTACT_PAIRS_COUNTER_ROTATE');
+ }finally{sim.dispose();m.dispose();}
+});

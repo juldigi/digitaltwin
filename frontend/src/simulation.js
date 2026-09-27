@@ -541,6 +541,6 @@ export const PRINTING_SIMULATION_STAGES=Object.freeze([
 ]);
 
 export const INK_SIMULATION_SEQUENCE=Object.freeze([
-  'Ink fountain / zone metering','Tetesan tinta ke ductor / vibrator','Transfer roller train','Distributor A–D oscillation',
+  'Ink fountain / zone metering','Film tinta pada ductor / vibrator','Transfer roller train','Distributor A–D oscillation',
   'Form rollers','Plate cylinder','Blanket cylinder','Sheet'
 ]);

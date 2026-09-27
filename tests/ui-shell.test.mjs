@@ -220,7 +220,7 @@ test('v45 exposes contextual process simulation with continuous sheet flow',()=>
 test('v47 exposes flexible gripper-safe sheet travel, ink drips and live UV curing',()=>{
   assert.match(app,/sim-uv-state/);
   assert.match(app,/sim-uv-indicator/);
-  assert.match(app,/Tetesan memanjang menunjukkan cucuran tinta/);
+  assert.match(app,/Tidak ada tetesan tinta yang melayang di luar mesin/);
   assert.match(app,/UV beam aktif hanya ketika sheet melewati dryer/);
   assert.match(simulation,/createSheetGeometry\(/);
   assert.match(simulation,/Flexible printing-test sheet/);

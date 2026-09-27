@@ -100,7 +100,7 @@ test('V47 shows visible ink drips plus left/right ink films and dampening paths 
   const machine=new OffsetMachineTemplate(),sim=new PrintingSimulation(machine.root,machine);
   assert.equal(sim.fluidFlows.length,32,'expected drip + two ink-film branches + dampening for each PU');
   for(const type of ['ink-drip','ink-film-left','ink-film-right','dampening'])assert.equal(sim.fluidFlows.filter(flow=>flow.type===type).length,8,`wrong ${type} count`);
-  assert.deepEqual(INK_SIMULATION_SEQUENCE.slice(0,2),['Ink fountain / zone metering','Tetesan tinta ke ductor / vibrator']);
+  assert.deepEqual(INK_SIMULATION_SEQUENCE.slice(0,2),['Ink fountain / zone metering','Film tinta pada ductor / vibrator']);
   const drip=sim.fluidFlows.find(flow=>flow.type==='ink-drip'),before=drip.particles[0].position.clone();
   sim.start();sim.update(0);for(let ms=16;ms<=3600;ms+=16)sim.update(ms);
   assert.ok(drip.particles[0].position.distanceTo(before)>.08,'visible ink droplet did not travel');

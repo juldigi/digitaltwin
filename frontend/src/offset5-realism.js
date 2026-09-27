@@ -301,6 +301,49 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
 }
 
 export class Offset5CD102RealismSimulation extends PrintingSimulation{
+  // Offset lithography transfers thin films at roller contacts. The legacy
+  // floating droplets/tubes read as leaking ink and are not part of the press.
+  buildFluidFlows(){this.fluidFlows=[];}
+  collectInkSurfaces(){
+    super.collectInkSurfaces();
+    const rollerMaterials=new Set();
+    for(let i=0;i<8;i++){
+      for(const id of [`press-${i}-ink-fountain-roller-body`,...['13','2','1','14','3','4','5','6','7','8','9','10','11','12','15'].map(code=>`press-${i}-ink-roller-${code}-body`)]){
+        this.template.findNode(id)?.traverse(mesh=>{if(mesh.isMesh&&mesh.material)rollerMaterials.add(mesh.material);});
+      }
+    }
+    this.inkSurfaces=this.inkSurfaces.filter(surface=>rollerMaterials.has(surface.material));
+  }
+  collectMechanicalMotion(){
+    super.collectMechanicalMotion();
+    // Each straight-printing PU carries the sheet in the same direction. Adjacent
+    // contacting cylinders counter-rotate; their surface speed, not their RPM,
+    // follows the sheet. The visible radii are reference geometry, not CAD.
+    const cylinderSigns={plate:1,blanket:-1,impression:1,transfer:-1};
+    for(let i=0;i<8;i++)for(const [type,sign] of Object.entries(cylinderSigns)){
+      const node=this.template.findNode(`press-${i}-cylinder-${type}-body`);
+      const mesh=node?.children.find(child=>child.isMesh&&child.geometry?.type==='CylinderGeometry');
+      const rotor=this.rotors.find(item=>item.mesh===mesh);
+      if(!rotor)continue;
+      const radius=mesh.geometry.parameters.radiusTop;
+      rotor.sign=sign;
+      rotor.rate=this.baseMetersPerSecond/(Math.PI*2*this.sheetCyclesPerSecond*radius);
+      rotor.role=`PU${i+1}-${type}-cylinder`;
+      rotor.source='CONTACTING_CYLINDER_SURFACE_SPEED_REFERENCE';
+    }
+  }
+  applyInkFilm(on){
+    for(const surface of this.inkSurfaces){
+      surface.material.emissive.copy(on&&this.inkFlowVisible?surface.color:surface.initialEmissive);
+      surface.material.emissiveIntensity=(on&&this.inkFlowVisible)? .055:surface.initialIntensity;
+      surface.material.needsUpdate=true;
+    }
+  }
+  setInkFlowVisible(on){
+    super.setInkFlowVisible(on);
+    this.applyInkFilm(this.active);
+    return this.state();
+  }
   constructor(machine,template){
     super(machine,template);
     this.realismPack=OFFSET5_FINAL_REFINEMENT.id;
@@ -324,7 +367,10 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       dimensionPolicy:'USER_CONFIRMED_CUSTOM_INSTALLED_GEOMETRY_OVERRIDES_GENERIC_FAMILY_DIMENSIONS',
       nominalSheetsPerHour:15000,
       deliveryReleasePolicy:'GRIPPER_RELEASE_THEN_FLAT_SHEET_SETTLING_TO_PILE',
-      interUnitAccessPolicy:'BMJ_CUSTOM_BROAD_INTERUNIT_ACCESS_AND_OS_DS_STEPS_PRESERVED'
+      interUnitAccessPolicy:'BMJ_CUSTOM_BROAD_INTERUNIT_ACCESS_AND_OS_DS_STEPS_PRESERVED',
+      inkRepresentation:'THIN_ROLLER_FILM_ONLY_NO_FREE_FLOATING_DROPLETS',
+      inkRollerCount:this.inkSurfaces.length,
+      cylinderMotionPolicy:'SAME_STRAIGHT_PRINT_DIRECTION_ALL_PU_CONTACT_PAIRS_COUNTER_ROTATE'
     };
   }
 }
