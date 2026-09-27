@@ -195,7 +195,7 @@ test('PU1 top exterior follows actual-photo scope and does not depend on generat
  assert.ok(top.max.y>bridge.min.y&&top.min.y<bridge.max.y,'upper housing is detached from the ink-fountain support');
  assert.ok(Math.max(Math.abs(cover.min.z),Math.abs(cover.max.z))>1.20,'broad silver shoulder cover disappeared from PU1');
  assert.equal(t.findNode('press-0-side-service-grille'),null,'rejected generated-target service grille must not remain');
- assert.equal(t.root.userData.pu1ExteriorLayout.geometryBasis,'PHOTO_CORRECTED_PU_PITCH + DXF_PLACEMENT_REFERENCE + OEM_PDF_INTERNAL');
+ assert.equal(t.root.userData.pu1ExteriorLayout.geometryBasis,'1220_MM_102_PLATFORM_PITCH_CROSSCHECK + PHOTO_SIDE_ACCESS + OEM_PDF_INTERNAL');
  t.dispose();
 });
 test('mobile low-detail mode removes exposed internal PU mechanisms that look detached',()=>{
