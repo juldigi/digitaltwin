@@ -13,14 +13,14 @@ import {createIndustrialMaterial} from './render/material-library.js';
 // Internal coordinates remain functional/visual unless a supplied OEM document states
 // a value explicitly; no unverified service setting is promoted to engineering truth.
 export const PHOTO_RECONSTRUCTION = {
-  version: 'offset5-photo-pdf-v36',
+  version: 'offset5-photo-pdf-v37-reality',
   status: 'FULL MACHINE · USER PHOTOS EXTERIOR + OEM PDF FUNCTIONAL TOPOLOGY',
-  dimensionUnit: 'PHOTO_CORRECTED_INTERUNIT_ACCESS_WITH_DXF_PLACEMENT',
+  dimensionUnit: '102_PLATFORM_PITCH_RECALIBRATED_WITH_BMJ_PHOTO_ACCESS',
   internalDimensionStatus: 'VISUAL_ONLY_UNLESS_OEM_SPECIFIED',
   installedConfiguration: 'PHOTO_CONFIRMED_CD102_8_PLUS_L',
   repeatedHousings: 8,
   photos: ['IMG_2312.jpeg','IMG_1970.jpeg','IMG_1971.jpeg','IMG_1656.jpeg','IMG_1624.jpeg','IMG_1625.jpeg','IMG_1626.jpeg','IMG_1627.jpeg','IMG_1628.jpeg','IMG_1628(2).jpeg','IMG_1629.jpeg','IMG_1630.jpeg','IMG_1631.jpeg','IMG_1633.jpeg','IMG_1634.jpeg','IMG_1165.jpeg','IMG_0947.jpeg','IMG_2388(2).jpeg','IMG_2391(1).jpeg','IMG_2392.jpeg','IMG_2389(1).jpeg','IMG_2390(1).jpeg','IMG_2395.jpeg','IMG_1662.jpeg'],
-  sourcePolicy: 'DXF_PLACEMENT_REFERENCE + USER_PHOTOS_EXTERIOR_AND_ACCESS + OEM_PDF_FUNCTIONAL_INTERNALS'
+  sourcePolicy: 'BMJ_USER_PHOTOS_EXTERIOR_AND_ACCESS + OEM_PDF_FUNCTIONAL_INTERNALS + 102_FORMAT_DIMENSION_CROSSCHECK'
 };
 const V=(a)=>new THREE.Vector3(...a);
 const OEM_ROLLER_VISUAL_RADIUS_PER_MM=.00073; // compact Fig.15 topology; nominal diameter remains metadata, not service scale
@@ -235,19 +235,21 @@ export class OffsetMachineTemplate {
   build(){
     const refUnits=['IMG_1627.jpeg','IMG_1628.jpeg','IMG_1662.jpeg'];
     const D=OFFSET5_DIMENSIONS.layout,unitXs=OFFSET5_UNIT_CENTERS,pu1X=unitXs[0],pu2X=unitXs[1];
-    const deck=this.group(this.root,'platform','Platform, walkway & tangga operator',[0,0,0],[0,-.35,1.2],refUnits,'Platform dibentangkan mengikuti service-inclusive envelope DXF dan foto aktual; detail tread tetap rekonstruksi visual.');
+    const deck=this.group(this.root,'platform','Platform, walkway & tangga operator',[0,0,0],[0,-.35,1.2],refUnits,'Platform follows the recalibrated 102-format press envelope. Human access stays on side galleries and seam bridges; it no longer stretches the printing-unit process pitch.');
     this.box(deck,[D.platformLength,.18,2.56],[D.platformCenterX,.19,0],'black',.035);
     // Continuous operator-side checker-plate gallery seen in the actual press photos.
     this.tread(deck,[D.operatorGalleryLength,.12,D.operatorWalkwayWidth],[D.operatorGalleryCenterX,.46,D.operatorWalkwayCenterZ]);
     // Local access pads at feeder and delivery keep the long gallery from looking like one generic slab.
-    this.tread(deck,[1.18,.12,.78],[-8.10,.38,1.73]);
-    this.tread(deck,[4.10,.12,.80],[D.dryerCenterX-.35,.38,1.73]);
-    this.tread(deck,[3.10,.12,.80],[D.deliveryCenterX,.38,1.73]);
+    this.tread(deck,[1.18,.12,.76],[D.feederCenterX-.78,.38,D.operatorWalkwayCenterZ]);
+    this.tread(deck,[Math.max(2.5,D.dryerLength+1.1),.12,.76],[D.dryerCenterX-.20,.38,D.operatorWalkwayCenterZ]);
+    this.tread(deck,[Math.max(2.0,D.deliveryBodyLength+.55),.12,.76],[D.deliveryCenterX,.38,D.operatorWalkwayCenterZ]);
     // Drive-side service strip follows the CAD/service correlation and the supplied drive-side photos.
     this.tread(deck,[D.driveGalleryLength,.10,D.driveWalkwayWidth],[D.driveGalleryCenterX,.43,D.driveWalkwayCenterZ]);
-    for(let i=0;i<11;i++)this.cylinder(deck,.025,.72,[-7.35+i*1.62,.83,-1.91],'steel','y');
-    this.cylinder(deck,.026,D.driveGalleryLength-.75,[D.driveGalleryCenterX,1.15,-1.91],'steel','x');
-    this.cylinder(deck,.021,D.driveGalleryLength-.75,[D.driveGalleryCenterX,.88,-1.91],'steel','x');
+    const driveRailZ=D.driveWalkwayCenterZ-Math.sign(D.driveWalkwayCenterZ||-1)*.29;
+    const railPosts=Math.max(8,Math.floor((D.driveGalleryLength-.7)/1.45));
+    for(let i=0;i<=railPosts;i++)this.cylinder(deck,.025,.72,[D.driveGalleryCenterX-D.driveGalleryLength/2+.35+i*(D.driveGalleryLength-.70)/railPosts,.83,driveRailZ],'steel','y');
+    this.cylinder(deck,.026,D.driveGalleryLength-.70,[D.driveGalleryCenterX,1.15,driveRailZ],'steel','x');
+    this.cylinder(deck,.021,D.driveGalleryLength-.70,[D.driveGalleryCenterX,.88,driveRailZ],'steel','x');
     unitXs.forEach((x,i)=>this.pressUnit(i,x,refUnits));
     for(let i=0;i<unitXs.length-1;i++)this.interUnitTransfer((unitXs[i]+unitXs[i+1])/2,i);
     this.root.userData.pu1ExteriorLayout=Object.freeze({
@@ -353,21 +355,22 @@ export class OffsetMachineTemplate {
     // Center access treads in the clear structural bay; do not clamp them back into the cover.
     const stepCenter=frameWidth/2+nextGap/2;
     if(i<7){
-      const clearWidth=Math.max(.48,nextGap-.08);
-      // IMG_1662: broad lower approach, compact middle step, then a deep main landing.
-      this.tread(stair,[clearWidth,.10,.72],[stepCenter,.34,1.85]);
-      this.box(stair,[clearWidth-.04,.25,.64],[stepCenter,.165,1.85],'graphite',.018);
-      this.tread(stair,[clearWidth,.10,.48],[stepCenter,.72,1.34]);
-      this.box(stair,[clearWidth-.04,.63,.42],[stepCenter,.355,1.34],'graphite',.018);
-      const landing=this.group(stair,`press-${i}-gap-footplate`,`PU${i+1} → PU${i+2} · full-width inter-unit footplate`,[0,0,0],[0,.10,.45],[...sources,'IMG_1662.jpeg'],'Continuous checker-plate landing fills the human access bay. No transverse railing is placed between adjacent printing units.');
-      const landingWidth=nextGap;
-      this.tread(landing,[landingWidth,.12,2.20],[stepCenter,1.14,0]);
-      this.box(landing,[landingWidth-.04,1.08,2.12],[stepCenter,.54,0],'graphite',.020);
-      const dsStair=this.markExteriorCover(this.group(g,`press-${i}-drive-steps`,`PU${i+1} → PU${i+2} · drive-side access stair`,[0,0,0],[0,.12,-1.35],[...sources,'IMG_1662.jpeg'],'Drive-side stair mirrors the operator-side lower and middle treads and joins the same full-width landing above the gripper transfer.'));
-      this.tread(dsStair,[clearWidth,.10,.72],[stepCenter,.34,-1.85]);
-      this.box(dsStair,[clearWidth-.04,.25,.64],[stepCenter,.165,-1.85],'graphite',.018);
-      this.tread(dsStair,[clearWidth,.10,.48],[stepCenter,.72,-1.34]);
-      this.box(dsStair,[clearWidth-.04,.63,.42],[stepCenter,.355,-1.34],'graphite',.018);
+      // The 102-platform process pitch is compact. Human access therefore projects outward along the
+      // operator/drive galleries instead of creating a fictitious 0.7 m longitudinal gap between cylinders.
+      const accessWidth=.42,seamWidth=Math.max(.10,nextGap);
+      this.tread(stair,[accessWidth,.10,.70],[stepCenter,.34,1.82]);
+      this.box(stair,[accessWidth-.04,.25,.62],[stepCenter,.165,1.82],'graphite',.018);
+      this.tread(stair,[accessWidth,.10,.42],[stepCenter,.70,1.46]);
+      this.box(stair,[accessWidth-.04,.59,.36],[stepCenter,.335,1.46],'graphite',.018);
+      const landing=this.group(stair,`press-${i}-gap-footplate`,`PU${i+1} → PU${i+2} · seam bridge above gripper transfer`,[0,0,0],[0,.10,.45],[...sources,'IMG_1662.jpeg'],'Narrow checker-plate seam bridge covers the transfer seam without lengthening the process pitch or enclosing the gripper path.');
+      this.tread(landing,[seamWidth,.10,2.16],[stepCenter,1.14,0]);
+      // Edge brackets support the bridge outside the central sheet-transfer corridor.
+      for(const z of [-1.02,1.02]){this.box(landing,[seamWidth,.78,.08],[stepCenter,.72,z],'graphite',.012);this.box(landing,[.16,.08,.22],[stepCenter,.36,z],'steel',.010);}
+      const dsStair=this.markExteriorCover(this.group(g,`press-${i}-drive-steps`,`PU${i+1} → PU${i+2} · drive-side access stair`,[0,0,0],[0,.12,-1.35],[...sources,'IMG_1662.jpeg'],'Drive-side steps remain outside the process envelope and meet the same narrow seam bridge.'));
+      this.tread(dsStair,[accessWidth,.10,.70],[stepCenter,.34,-1.82]);
+      this.box(dsStair,[accessWidth-.04,.25,.62],[stepCenter,.165,-1.82],'graphite',.018);
+      this.tread(dsStair,[accessWidth,.10,.42],[stepCenter,.70,-1.46]);
+      this.box(dsStair,[accessWidth-.04,.59,.36],[stepCenter,.335,-1.46],'graphite',.018);
     }
     const drive=this.markExteriorCover(this.group(g,'press-'+i+'-drive','Drive-side service cover',[0,0,0],[0,.1,-1.15],['IMG_2389(1).jpeg','IMG_2390(1).jpeg','IMG_2395.jpeg'],'Flat service cover and external hose routing are verified from drive-side photographs; the inter-PU stair is modelled separately as a mirror of the operator-side stair.'));
     this.box(drive,[i===0?.76:.86,1.54,.20],[0,1.35,-1.13],'graphite',.028);
