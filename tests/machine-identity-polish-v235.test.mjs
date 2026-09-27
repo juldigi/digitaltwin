@@ -41,9 +41,9 @@ test('V235 MEDIA 100 II remains long open-frame and keeps repeated adjustment ha
  });
 });
 
-test('V252 Diana Eye 55 keeps the OEM low-feeder inspection-cell and separate HMI identity',()=>{
+test('V254 Diana Eye 55 keeps the OEM low-feeder inspection-cell and separate HMI identity',()=>{
  withMachine('BMJ-MCH-0019',m=>{
-  assert.equal(m.root.userData.visualRefinement,'V252_DIANA_EYE55_LOW_FEEDER_WHITE_RED_CELL_FISHSCALE_DELIVERY');
+  assert.equal(m.root.userData.visualRefinement,'V254_DIANA_EYE55_2023_FAMILY_PROCESS_REALISM');
   assert.match(m.root.userData.visualEvidenceBoundary,/MASTERWORK_HEIDELBERG_CURRENT_DIANA_EYE55/);
   assert.ok(findRole(m,/diana-eye-hmi-display-reference/));
   assert.equal(m.findNode('diana55-delivery-stack')?.userData.deliveryMode,'FISH_SCALE_STANDARD_REFERENCE');
@@ -52,11 +52,14 @@ test('V252 Diana Eye 55 keeps the OEM low-feeder inspection-cell and separate HM
  });
 });
 
-test('V252 SHARK N650 keeps its long low chassis, single vision tower, blue stripe and operator HMI',()=>{
+test('V254 SHARK N650 keeps its long low chassis, single vision tower, blue stripe and operator HMI',()=>{
  withMachine('BMJ-MCH-0020',m=>{
-  assert.equal(m.root.userData.visualRefinement,'V252_SHARK_N650_LONG_LOW_CHASSIS_SINGLE_VISION_TOWER_BLUE_STRIPE');
+  assert.equal(m.root.userData.visualRefinement,'V254_SHARK_N650_AUTOMATED_NEGATIVE_PITCH_RETURN_REALISM');
   assert.match(m.root.userData.visualEvidenceBoundary,/FOCUSIGHT_N650_PRIMARY/);
   assert.ok(findRole(m,/shark-hmi-display-reference/));
+  assert.equal(m.findNode('shark650-process-hmi')?.visible,false);
+  assert.equal(m.findNode('shark650-access-platform')?.visible,false);
+  assert.ok(m.findNode('shark650-local-service-step-v254'));
   assert.equal(m.findNode('shark650-return')?.userData.officialGoodBadReturnLine,true);
   const stripes=m.meshes.filter(x=>x.userData?.familyAccent&&x.userData?.silhouetteCritical);
   assert.ok(stripes.length>=2);
