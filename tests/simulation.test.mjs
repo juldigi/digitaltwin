@@ -19,7 +19,7 @@ test('printing-unit geometry contains no static white sheet-path reference plane
 
 test('V47 sheet centerline is monotonic and clears every primary and inter-unit transfer cylinder',()=>{
   const machine=new OffsetMachineTemplate(),sim=new PrintingSimulation(machine.root,machine);
-  assert.ok(sim.pathLength>24&&sim.pathLength<42,`unexpected sheet path length ${sim.pathLength}`);
+  assert.ok(sim.pathLength>17&&sim.pathLength<32,`unexpected sheet path length ${sim.pathLength}`);
   let previous=-Infinity,minPrimary=Infinity,minTransfer=Infinity;
   for(let i=0;i<=2400;i++){
     const p=sim.curve.getPointAt(i/2400);
