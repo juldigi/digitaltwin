@@ -47,14 +47,14 @@ test('reference-family cylinders remain coaxial during simulation',()=>{
 });
 
 for(const id of ['BMJ-MCH-0003','BMJ-MCH-0005','BMJ-MCH-0006','BMJ-MCH-0009','BMJ-MCH-0010']){
- test(`${id} starts with an empty delivery and restores presentation pile after stop`,()=>{
+ test(`${id} keeps a visible receiving surface and restores the presentation pile after stop`,()=>{
   const template=createPolishedMachineTemplate(id);
   const sim=createMachineSimulation(id,template.root,template);
   try{
    assert.ok(sim.staticDeliveryStack,id+' missing static pile');
    assert.equal(sim.staticDeliveryStack.visible,true);
    sim.start();
-   assert.equal(sim.staticDeliveryStack.visible,false);
+   assert.equal(sim.staticDeliveryStack.visible,id==='BMJ-MCH-0003');
    assert.equal(sim.state().pileSheetsVisible,0);
    if(id==='BMJ-MCH-0010'){
     sim.deposit();

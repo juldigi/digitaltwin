@@ -50,7 +50,7 @@ test('V253 Offset 5 simulation uses 720 mm machine-direction sheet pitch, no fak
   assert.ok(Math.abs(sim.baseMetersPerSecond-3.0)<1e-9);
   const st=sim.state();
   assert.equal(st.customMachineDimensionsPreserved,true);
-  assert.equal(st.printRepresentation,'CUMULATIVE_FULL_SHEET_REFERENCE_TINT_NO_FAKE_BANDS');
+  assert.equal(st.printRepresentation,'PROGRESSIVE_ILLUSTRATIVE_PRINT_PATTERN_NOT_JOB_ARTWORK');
   assert.equal(st.dimensionPolicy,'USER_CONFIRMED_CUSTOM_INSTALLED_GEOMETRY_OVERRIDES_GENERIC_FAMILY_DIMENSIONS');
   assert.equal(st.focusightLocationPolicy,'DOWNSTREAM_AFTER_COATING_DRYING');
   assert.equal(st.interUnitAccessPolicy,'BMJ_CUSTOM_BROAD_INTERUNIT_ACCESS_AND_OS_DS_STEPS_PRESERVED');
@@ -64,7 +64,31 @@ test('V253 Offset 5 simulation uses 720 mm machine-direction sheet pitch, no fak
   assert.equal(sawInspection,true);
   assert.equal(sawRelease,true);
   assert.ok(sim.completed>0);
-  assert.ok(sim.sheets.every(sheet=>sheet.userData.printRepresentation==='CUMULATIVE_FULL_SHEET_REFERENCE_TINT_NO_FAKE_BANDS'));
+  assert.ok(sim.sheets.every(sheet=>sheet.userData.printRepresentation==='PROGRESSIVE_ILLUSTRATIVE_PRINT_PATTERN_NOT_JOB_ARTWORK'));
+ }finally{sim.dispose();m.dispose();}
+});
+
+test('Offset 5 has no external block between sheets, visibly gains ink after PU and stacks at receiving height',()=>{
+ const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
+ try{
+  const sheet=sim.sheets[0],attr=sheet.mesh.geometry.attributes.color,index=5*(sim.sheetWidthSegments+1)+4;
+  sim.setSheetColors(sheet,0);
+  const blank=[attr.getX(index),attr.getY(index),attr.getZ(index)];
+  sim.setSheetColors(sheet,1);
+  const afterPU1=[attr.getX(index),attr.getY(index),attr.getZ(index)];
+  sim.setSheetColors(sheet,8);
+  const afterPU8=[attr.getX(index),attr.getY(index),attr.getZ(index)];
+  assert.ok(Math.hypot(...blank.map((v,i)=>v-afterPU1[i]))>.08,'PU1 must visibly ink the sheet');
+  assert.ok(Math.hypot(...afterPU1.map((v,i)=>v-afterPU8[i]))>.08,'following PUs must visibly develop the print');
+  assert.ok(sim.pileAnchor.y>1.15,'receiving surface must be the existing pile top, not the bottom table');
+  assert.ok(sim.deliveryDropHeight<.1,'delivered sheet must not fall through the existing pile');
+  sim.start();sim.update(0);
+  for(let ms=16;ms<=13000;ms+=16)sim.update(ms);
+  assert.equal(sim.staticDeliveryStack.visible,true);
+  assert.ok(sim.completed>0&&sim.state().pileSheetsVisible>0);
+  assert.ok(sim.pileSheets.filter(item=>item.mesh.visible).every(item=>item.mesh.geometry.attributes.position.getY(0)>=sim.pileAnchor.y-.001));
+  assert.ok(sim.sheets.every(item=>!item.gripper.visible),'demo gripper blocks remain visible between sheets');
+  assert.equal(sim.state().deliveryPilePolicy,'LAY_PRINTED_SHEETS_ON_TOP_OF_VISIBLE_EXISTING_STACK');
  }finally{sim.dispose();m.dispose();}
 });
 

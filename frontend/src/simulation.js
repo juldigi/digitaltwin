@@ -215,12 +215,12 @@ export class PrintingSimulation{
     }
   }
   refreshDeliveryPileAnchor(){
-    const table=this.template.findNode('delivery-pile')?.children.find(o=>o.isMesh);
-    if(!table)return this.pileAnchor;
-    this.machine.updateMatrixWorld(true);table.updateWorldMatrix(true,true);
-    const box=new THREE.Box3().setFromObject(table),center=box.getCenter(new THREE.Vector3()),top=new THREE.Vector3(center.x,box.max.y,center.z);
+    const receivingSurface=this.staticDeliveryStack||this.template.findNode('delivery-pile')?.children.find(o=>o.isMesh);
+    if(!receivingSurface)return this.pileAnchor;
+    this.machine.updateMatrixWorld(true);receivingSurface.updateWorldMatrix(true,true);
+    const box=new THREE.Box3().setFromObject(receivingSurface),center=box.getCenter(new THREE.Vector3()),top=new THREE.Vector3(center.x,box.max.y,center.z);
     this.machine.worldToLocal(top);this.pileAnchor.copy(top);this.pileAnchor.y+=this.pileSheetThickness*.6;
-    const rawEnd=this.curve.getPointAt(1);this.deliveryDropHeight=Math.max(.10,rawEnd.y-(this.pileAnchor.y+.018));
+    const rawEnd=this.curve.getPointAt(1);this.deliveryDropHeight=Math.max(0,rawEnd.y-(this.pileAnchor.y+.008));
     return this.pileAnchor;
   }
   layoutPileSheet(sheet,rank){
@@ -456,7 +456,8 @@ export class PrintingSimulation{
   start(){
     if(!this.active){this.elapsed=0;this.completed=0;this.resetDeliveryPile();}
     this.refreshDeliveryPileAnchor();
-    if(this.staticDeliveryStack)this.staticDeliveryStack.visible=false;
+    // The installed receiving stack is the visible foundation for new sheets.
+    if(this.staticDeliveryStack)this.staticDeliveryStack.visible=this.staticDeliveryVisible;
     this.active=true;this.running=true;this.lastNow=null;this.group.visible=true;this.applyInkFilm(true);this.emit(true);return this.state();
   }
   pause(){if(this.active){this.running=false;this.lastNow=null;this.emit(true);}return this.state();}

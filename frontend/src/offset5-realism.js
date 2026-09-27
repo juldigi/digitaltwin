@@ -301,6 +301,34 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
 }
 
 export class Offset5CD102RealismSimulation extends PrintingSimulation{
+  setSheetColors(sheet,printed){
+    if(sheet.userData.printed===printed)return;
+    // Demonstration artwork: soft overlapping ink coverage makes the result of
+    // each PU legible without claiming the installed job's actual design.
+    const attr=sheet.mesh.geometry.attributes.color;
+    const l=this.sheetLengthSegments,w=this.sheetWidthSegments;
+    const count=Math.max(0,Math.min(8,printed|0));
+    const centers=[[.32,.38],[.59,.43],[.49,.67],[.64,.61],[.27,.63],[.73,.31],[.42,.28],[.53,.52]];
+    for(let i=0;i<=l;i++)for(let j=0;j<=w;j++){
+      const u=i/l,v=j/w,color=sheet.paperColor.clone();
+      for(let k=0;k<count;k++){
+        const [cx,cy]=centers[k],dx=(u-cx)/.22,dy=(v-cy)/.27;
+        const coverage=Math.exp(-2.2*(dx*dx+dy*dy));
+        color.lerp(sheet.bandColors[k],Math.min(.62,coverage*(k===3?.60:.48)));
+      }
+      attr.setXYZ(i*(w+1)+j,color.r,color.g,color.b);
+    }
+    attr.needsUpdate=true;
+    sheet.userData.printed=count;
+    sheet.userData.printRepresentation='PROGRESSIVE_ILLUSTRATIVE_PRINT_PATTERN_NOT_JOB_ARTWORK';
+  }
+  updateSheet(sheet,leadDistance){
+    const visible=super.updateSheet(sheet,leadDistance);
+    // Full-width dark bars between visible sheets were a demo gripper proxy.
+    // The actual transfer grippers remain modeled inside the press assemblies.
+    sheet.gripper.visible=false;
+    return visible;
+  }
   // Offset lithography transfers thin films at roller contacts. The legacy
   // floating droplets/tubes read as leaking ink and are not part of the press.
   buildFluidFlows(){this.fluidFlows=[];}
@@ -370,7 +398,10 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       interUnitAccessPolicy:'BMJ_CUSTOM_BROAD_INTERUNIT_ACCESS_AND_OS_DS_STEPS_PRESERVED',
       inkRepresentation:'THIN_ROLLER_FILM_ONLY_NO_FREE_FLOATING_DROPLETS',
       inkRollerCount:this.inkSurfaces.length,
-      cylinderMotionPolicy:'SAME_STRAIGHT_PRINT_DIRECTION_ALL_PU_CONTACT_PAIRS_COUNTER_ROTATE'
+      printRepresentation:'PROGRESSIVE_ILLUSTRATIVE_PRINT_PATTERN_NOT_JOB_ARTWORK',
+      cylinderMotionPolicy:'SAME_STRAIGHT_PRINT_DIRECTION_ALL_PU_CONTACT_PAIRS_COUNTER_ROTATE',
+      sheetVisualPolicy:'NO_EXTERNAL_FULL_WIDTH_DEMO_GRIPPER_BAR',
+      deliveryPilePolicy:'LAY_PRINTED_SHEETS_ON_TOP_OF_VISIBLE_EXISTING_STACK'
     };
   }
 }
