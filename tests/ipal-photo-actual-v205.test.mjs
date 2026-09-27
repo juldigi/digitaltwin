@@ -352,3 +352,23 @@ test('V206 topology correction uses batched herringbone pavers and reduced chemi
  assert.equal(collect(root,/^IPAL_PHOTO_RED_CHEMICAL_TANK$/).length,3);
  assert.equal(collect(root,/^IPAL_PHOTO_UPPER_RED_CHEMICAL_TANK$/).length,2);
 });
+
+
+test('V249 user correction keeps terrestrial planting outside the IPAL fence and service road clear',async()=>{
+ const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
+ const built=buildActualFactory(layout,fleet),root=built.root,meta=root.userData,s=meta.buildingDetailStats;
+ assert.equal(IPAL_PHOTO_EVIDENCE_V206.userConfirmedCorrections.vegetationLocation,'TERRESTRIAL_PLANTS_OUTSIDE_IPAL_FENCE');
+ assert.equal(IPAL_PHOTO_EVIDENCE_V206.photoTopologyRules.terrestrialVegetation,'OUTSIDE_IPAL_FENCE_AND_CLEAR_OF_SERVICE_ROAD');
+ assert.equal(IPAL_PHOTO_EVIDENCE_V206.photoTopologyRules.interiorVegetation,'NONE_EXCEPT_ORNAMENTAL_POND_AQUATIC_PLANTS');
+ assert.ok(IPAL_PHOTO_EVIDENCE_V206.relativeLayout.verticalGarden.y>meta.ipal.zone.maxY,'vertical garden must be outside the IPAL process-yard boundary');
+ assert.equal(collect(root,/^IPAL_PHOTO_PAVER_WEED$/).length,0,'terrestrial weeds must not remain on the IPAL service paving');
+ const plants=collect(root,/^IPAL_PHOTO_VERTICAL_GARDEN_PLANT$/);
+ const pots=collect(root,/^IPAL_PHOTO_PLANT_POT$/);
+ assert.equal(plants.length,36);
+ assert.equal(pots.length,36);
+ assert.ok([...plants,...pots].every(o=>o.userData.userConfirmedLocation==='OUTSIDE_IPAL_FENCE'));
+ assert.equal(meta.ipal.photoActual.landscapeAudit.terrestrialPlantsInsideIpalFence,0);
+ assert.equal(meta.ipal.photoActual.landscapeAudit.serviceRoadObstructions,0);
+ assert.equal(s.v249IpalInteriorVegetationRemoved,4);
+ assert.equal(s.v249IpalLandscapeRelocated,37);
+});

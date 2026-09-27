@@ -1,7 +1,14 @@
 import {execFileSync} from 'node:child_process';
 execFileSync(process.execPath,['scripts/bake-factory-fleet.mjs'],{stdio:'inherit'});
-import {cpSync,mkdirSync,readFileSync,writeFileSync,rmSync} from 'node:fs';
+import {cpSync,mkdirSync,readFileSync,writeFileSync,rmSync,readdirSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+import {join,relative} from 'node:path';
+const walk=dir=>readdirSync(dir,{withFileTypes:true}).flatMap(entry=>{const path=join(dir,entry.name);return entry.isDirectory()?walk(path):[path];});
+const fingerprint=createHash('sha256');
+for(const file of walk('frontend').sort()){fingerprint.update(relative('frontend',file));fingerprint.update('\0');fingerprint.update(readFileSync(file));}
+const buildFingerprint=fingerprint.digest('hex').slice(0,16);
 rmSync('dist',{recursive:true,force:true});cpSync('frontend','dist',{recursive:true});mkdirSync('dist/vendor/three',{recursive:true});cpSync('node_modules/three/build','dist/vendor/three/build',{recursive:true});cpSync('node_modules/three/examples/jsm','dist/vendor/three/addons',{recursive:true});cpSync('node_modules/three/LICENSE','dist/vendor/three/LICENSE');
+let sw=readFileSync('dist/sw.js','utf8');sw=sw.replace("const BUILD_FINGERPRINT='SOURCE';",`const BUILD_FINGERPRINT='${buildFingerprint}';`);writeFileSync('dist/sw.js',sw);
 // Keep modules at their original URLs so relative imports resolve identically in development and production.
 let html=readFileSync('dist/index.html','utf8');html=html.replace('<link rel="stylesheet" href="./style.css">',()=>'<style>'+readFileSync('frontend/style.css','utf8')+'</style>');writeFileSync('dist/index.html',html);
 import {initialState} from '../frontend/src/model.js';
