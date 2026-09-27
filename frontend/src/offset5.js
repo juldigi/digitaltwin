@@ -254,11 +254,11 @@ export class OffsetMachineTemplate {
     unitXs.forEach((x,i)=>this.pressUnit(i,x,refUnits));
     for(let i=0;i<unitXs.length-1;i++)this.interUnitTransfer((unitXs[i]+unitXs[i+1])/2,i);
     this.root.userData.pu1ExteriorLayout=Object.freeze({
-      dimensionUnit:'PHOTO_CORRECTED_INTERUNIT_ACCESS',pu1CenterX:pu1X,pu2CenterX:pu2X,
+      dimensionUnit:'102_PLATFORM_PITCH_WITH_EXTERNAL_ACCESS',pu1CenterX:pu1X,pu2CenterX:pu2X,
       pu1FrameWidth:D.pu1FrameWidth,pu2FrameWidth:D.printingUnitFrameWidth,
       unitPitch:D.printingUnitPitch,
       accessBay:pu2X-pu1X-(D.pu1FrameWidth+D.printingUnitFrameWidth)/2,
-      source:'IMG_1662 + USER PHOTOS + OFU-1 DXF PLACEMENT',geometryBasis:'PHOTO_CORRECTED_PU_PITCH + DXF_PLACEMENT_REFERENCE + OEM_PDF_INTERNAL'
+      source:'IMG_1662 + BMJ PHOTOS + HEIDELBERG 102-FORMAT DIMENSION CROSSCHECK',geometryBasis:'1220_MM_102_PLATFORM_PITCH_CROSSCHECK + PHOTO_SIDE_ACCESS + OEM_PDF_INTERNAL'
     });
     this.feeder(D.feederCenterX);
     const board=this.group(this.root,'feed-board','Register / feed table',[D.feedBoardCenterX,0,0],[-.5,.25,0],['IMG_1626.jpeg','pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Length is matched to the calibrated OFU-1 envelope; surface/controls follow the actual feeder-to-PU1 photographs and manual functions.');
@@ -366,7 +366,7 @@ export class OffsetMachineTemplate {
       const landing=this.group(stair,`press-${i}-gap-footplate`,`PU${i+1} → PU${i+2} · seam bridge above gripper transfer`,[0,0,0],[0,.10,.45],[...sources,'IMG_1662.jpeg'],'Narrow checker-plate seam bridge covers the transfer seam without lengthening the process pitch or enclosing the gripper path.');
       this.tread(landing,[seamWidth,.10,2.16],[stepCenter,1.14,0]);
       // Edge brackets support the bridge outside the central sheet-transfer corridor.
-      for(const z of [-1.02,1.02]){this.box(landing,[seamWidth,.78,.08],[stepCenter,.72,z],'graphite',.012);this.box(landing,[.16,.08,.22],[stepCenter,.36,z],'steel',.010);}
+      for(const z of [-1.02,1.02]){this.box(landing,[seamWidth,.78,.08],[stepCenter,.72,z],'graphite',.012);this.box(landing,[Math.max(.05,seamWidth-.03),.08,.22],[stepCenter,.36,z],'steel',.010);}
       const dsStair=this.markExteriorCover(this.group(g,`press-${i}-drive-steps`,`PU${i+1} → PU${i+2} · drive-side access stair`,[0,0,0],[0,.12,-1.35],[...sources,'IMG_1662.jpeg'],'Drive-side steps remain outside the process envelope and meet the same narrow seam bridge.'));
       this.tread(dsStair,[accessWidth,.10,.70],[stepCenter,.34,-1.82]);
       this.box(dsStair,[accessWidth-.04,.25,.62],[stepCenter,.165,-1.82],'graphite',.018);
