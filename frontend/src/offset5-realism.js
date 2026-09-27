@@ -16,16 +16,18 @@ import {PrintingSimulation} from './simulation.js';
 import {OFFSET5_UNIT_CENTERS} from './data/dimensions-offset5.js';
 
 export const OFFSET5_FINAL_REFINEMENT=Object.freeze({
-  id:'OFFSET5_CD102_8L_FINAL_REFINEMENT_R2',
+  id:'OFFSET5_CD102_8L_WORLD_REALITY_R3',
   machine:'Heidelberg Speedmaster CD 102-8+L',
   asset:'MACHINE-OFFSET5',
   sap:'OFU-1',
   serial:'550415',
-  policy:'ENRICH_EXISTING_NODES_ONLY__NO_DUPLICATE_PROCESS_HARDWARE',
+  policy:'RECALIBRATED_CORE_GEOMETRY_PLUS_EXISTING_NODE_ENRICHMENT__NO_DUPLICATE_PROCESS_HARDWARE',
   sourcePriority:[
     'BMJ Offset 5 photos + calibrated DXF',
     'supplied CD102 OEM service/roller documentation',
-    'HEIDELBERG CD102 family product information'
+    'HEIDELBERG CD102 family product information',
+    'HEIDELBERG 102-format installation dimensions / 1220 mm unit increment cross-check',
+    'CD102 eight-color long-delivery dimensional and silhouette cross-checks'
   ]
 });
 
@@ -253,7 +255,11 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       motionPolicy:'ROLE_TAGGED_PROCESS_PARTS_ONLY',
       duplicateProcessHardwareAdded:false,
       focusightLocationPolicy:'DOWNSTREAM_AFTER_COATING_DRYING',
-      feederRearPolicy:'OPEN_SERVICE_SPACE'
+      feederRearPolicy:'OPEN_SERVICE_SPACE',
+      processPitchM:OFFSET5_UNIT_CENTERS[1]-OFFSET5_UNIT_CENTERS[0],
+      nominalSheetsPerHour:15000,
+      deliveryReleasePolicy:'GRIPPER_RELEASE_THEN_FLAT_SHEET_SETTLING_TO_PILE',
+      interUnitAccessPolicy:'SIDE_GALLERY_STEPS_PLUS_NARROW_SEAM_BRIDGE__NO_PROCESS_PITCH_STRETCH'
     };
   }
 }
