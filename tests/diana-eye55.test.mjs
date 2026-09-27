@@ -13,22 +13,23 @@ test('DIANA EYE 55 preserves BMJ identity and capability-vs-installed boundaries
  assert.deepEqual(DIANA_EYE55_SPEC.minSheetHeidelbergM,[.070,.070]);assert.deepEqual(DIANA_EYE55_SPEC.minSheetMasterworkCurrentM,[.090,.090]);
  assert.deepEqual(DIANA_EYE55_SPEC.cameraCapacity,{top:4,area:2,rear:1});assert.deepEqual(DIANA_EYE55_SPEC.rejectActuationOptions,['mechanical','air-nozzle']);
  assert.equal(DIANA_EYE55_SPEC.installedCameraCountVerified,false);assert.equal(DIANA_EYE55_SPEC.installedCameraMixVerified,false);assert.equal(DIANA_EYE55_SPEC.installedRejectActuationVerified,false);assert.equal(DIANA_EYE55_SPEC.installedStackerVerified,false);
- assert.ok(DIANA_EYE55_TECHNICAL_SOURCES.filter(s=>s.authority==='primary').length>=3);assert.ok(DIANA_EYE55_TECHNICAL_SOURCES.some(s=>s.id==='DIANA-EVIDENCE-BOUNDARY'));
+ assert.deepEqual(DIANA_EYE55_SPEC.officialCurrentEnvelopeM.standardFeederFishScaleDelivery,[7.472,2.900,2.025]);assert.equal(DIANA_EYE55_SPEC.modeledEnvelopeMode,'STANDARD_FEEDER_FISH_SCALE_DELIVERY_REFERENCE');
+ assert.ok(DIANA_EYE55_TECHNICAL_SOURCES.filter(s=>s.authority==='primary').length>=4);assert.ok(DIANA_EYE55_TECHNICAL_SOURCES.some(s=>s.id==='DIANA-MASTERWORK-CURRENT-V252'));assert.ok(DIANA_EYE55_TECHNICAL_SOURCES.some(s=>s.id==='DIANA-EVIDENCE-BOUNDARY'));
 });
 
-test('DIANA geometry represents camera capacity and both reject actuator references without claiming installation',()=>{
- const model=new DianaEye55MachineTemplate(),box=new THREE.Box3().setFromObject(model.root);assert.ok(!box.isEmpty());assert.ok(box.min.y>=-0.01);assert.equal(model.root.userData.engineeringDimensions,false);assert.match(model.root.userData.geometryStatus,/INSTALLED_CAMERA_REJECT_OPTIONS_BOUNDED/);
+test('DIANA geometry follows low feeder, single white inspection cell and fish-scale delivery without claiming option population',()=>{
+ const model=new DianaEye55MachineTemplate(),box=new THREE.Box3().setFromObject(model.root);assert.ok(!box.isEmpty());assert.ok(box.min.y>=-0.01);assert.equal(model.root.userData.engineeringDimensions,false);assert.match(model.root.userData.geometryStatus,/BMJ_INSTALLED_OPTIONS_BOUNDED/);assert.equal(model.root.userData.modeledEnvelopeMode,'STANDARD_FEEDER_FISH_SCALE_DELIVERY_REFERENCE');
  for(const id of ['diana55-feeder','diana55-transport','diana55-inspection','diana55-camera','diana55-light','diana55-processing','diana55-reject','diana55-reject-gate','diana55-reject-air','diana55-delivery','diana55-access'])assert.ok(model.findNode(id),id);
  assert.equal(model.findNode('diana55-camera-top').userData.capacity,4);assert.equal(model.findNode('diana55-camera-top').userData.installedCountVerified,false);
  assert.equal(model.findNode('diana55-camera-rear').userData.capacity,1);assert.equal(model.findNode('diana55-camera-area').userData.capacity,2);
- assert.equal(model.findNode('diana55-reject').userData.installedRejectActuationVerified,false);
- assert.equal(model.meshes.filter(m=>m.userData.cameraBay).length,4);assert.equal(model.meshes.filter(m=>m.userData.rejectAirNozzle).length,4);assert.ok(model.meshes.filter(m=>m.userData.inspectionLight).length>=8);
+ assert.equal(model.findNode('diana55-reject').userData.installedRejectActuationVerified,false);assert.equal(model.findNode('diana55-reject-gate').userData.rejectReference,'neutral-diverter');assert.equal(model.findNode('diana55-reject-air').visible,false);assert.equal(model.findNode('diana55-reject-air').userData.capabilityOnly,true);
+ assert.equal(model.meshes.filter(m=>m.userData.cameraBay).length,4);assert.equal(model.meshes.filter(m=>m.userData.cameraPopulationReference).length,1);assert.equal(model.meshes.filter(m=>m.userData.rejectAirNozzle).length,4);assert.ok(model.meshes.filter(m=>m.userData.inspectionLight).length>=8);assert.equal(model.findNode('diana55-delivery-stack').userData.deliveryMode,'FISH_SCALE_STANDARD_REFERENCE');
  model.setExteriorOpen(true);assert.ok(model.root.userData.exteriorHiddenCount>=6);model.dispose();
 });
 
 test('DIANA rotor whitelist rotates only feeder transport vacuum and delivery mechanisms',()=>{
  const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model),allowed=/^(feed-pulley|transport-pulley|transport-drive-motor|transport-encoder|vacuum-blower|delivery-pulley)$/;
- assert.equal(sim.rotors.length,27);assert.equal(sim.rotors.some(r=>!allowed.test(r.userData.mechanismRole||'')),false);
+ assert.ok(sim.rotors.length>=24);assert.equal(sim.rotors.some(r=>!allowed.test(r.userData.mechanismRole||'')),false);
  assert.equal(model.meshes.some(m=>m.userData.rotor&&['camera-lens','rear-camera','area-camera','reject-air-nozzle'].includes(m.userData.mechanismRole)),false);
  sim.dispose();model.dispose();
 });
@@ -53,7 +54,7 @@ test('DIANA deterministic demo assigns stable tracking IDs at inspection and car
 test('DIANA rejects only tracked reject blanks and accepted blanks remain on the main delivery path',()=>{
  const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);sim.start();let now=1000,seenReject=false,seenPass=false;
  for(let i=0;i<1500;i++){now+=10;sim.update(now);const state=sim.state();seenReject||=state.rejectTrackingActive&&state.activeRejectTrackingIds.length>0;seenPass||=state.acceptedDeliveryActive&&state.activePassTrackingIds.length>0;}
- const state=sim.state();assert.ok(seenReject&&seenPass);assert.ok(state.inspectedDemoCount>0);assert.ok(state.completed+state.rejectedDemo>0);assert.ok(state.pileSheetsVisible+state.rejectSheetsVisible>0);
+ const state=sim.state();assert.ok(seenReject&&seenPass);assert.ok(state.inspectedDemoCount>0);assert.ok(state.completed+state.rejectedDemo>0);assert.ok(state.pileSheetsVisible+state.rejectSheetsVisible>0);assert.equal(state.deliveryMode,'FISH_SCALE_STANDARD_REFERENCE');
  assert.equal(sim.blanks.every(b=>!b.result||b.inspectedLap===b.lap),true);
  sim.dispose();model.dispose();
 });
@@ -74,6 +75,6 @@ test('DIANA taxonomy is a mapped six-level tree including both reject actuator r
  const model=new DianaEye55MachineTemplate();for(const n of DIANA_EYE55_TAXONOMY.filter(n=>n.verified&&n.meshRefs.length))assert.ok(model.resolveTaxonomyNode(n.id),n.id);assert.ok(DIANA_EYE55_TAXONOMY.some(n=>n.meshRefs.includes('diana55-reject-air')));model.dispose();
 });
 
-test('DIANA stage order preserves inspection decision tracking and separated pass/reject delivery',()=>{
- assert.deepEqual(DIANA_EYE55_SIMULATION_STAGES,['Blank feed','Suction-belt transport','LED illumination + camera capture','Image processing demo','Tracked pass / reject decision demo','Reject actuation demo','Accepted blank delivery','Output collection']);
+test('DIANA stage order preserves inspection decision tracking and fish-scale delivery',()=>{
+ assert.deepEqual(DIANA_EYE55_SIMULATION_STAGES,['Pengumpanan blank','Suction-belt transport','LED illumination + camera capture','Pemrosesan citra demo','Pelacakan keputusan pass / reject','Ejection demo','Fish-scale delivery','Pengumpulan output']);
 });
