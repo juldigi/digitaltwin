@@ -78,3 +78,12 @@ test('DIANA taxonomy is a mapped six-level tree including both reject actuator r
 test('DIANA stage order preserves inspection decision tracking and fish-scale delivery',()=>{
  assert.deepEqual(DIANA_EYE55_SIMULATION_STAGES,['Pengumpanan blank','Suction-belt transport','LED illumination + camera capture','Pemrosesan citra demo','Pelacakan keputusan pass / reject','Ejection demo','Fish-scale delivery','Pengumpulan output']);
 });
+
+
+test('V254 DIANA routes accepted and rejected blanks to separate fish-scale lanes without an invented actuator claim',()=>{
+ const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);sim.start();let now=1000,goodZ=null,badZ=null,sawWaste=false;
+ for(let i=0;i<1600;i++){now+=10;sim.update(now);const st=sim.state();sawWaste||=st.wasteDeliveryActive;for(const b of sim.blanks){if(b.result==='PASS_DEMO'&&b.lastT>.84)goodZ=b.mesh.position.z;if(b.result==='REJECT_DEMO'&&b.lastT>.84)badZ=b.mesh.position.z;}if(sawWaste&&goodZ!==null&&badZ!==null)break;}
+ assert.ok(sawWaste);assert.ok(goodZ<0);assert.ok(badZ>0);assert.ok(Math.abs(goodZ-badZ)>.25);
+ assert.equal(sim.state().demoRejectActuator,'NEUTRAL_DAMAGE_FREE_EJECTION_REFERENCE__INSTALLED_ACTUATOR_UNVERIFIED');
+ sim.dispose();model.dispose();
+});
