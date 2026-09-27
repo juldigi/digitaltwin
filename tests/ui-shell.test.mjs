@@ -307,7 +307,7 @@ test('v54 routes APM2 to its dedicated model and evidence-bounded simulation',()
   assert.match(app,/IS_OFFSET10=false,IS_APM2=false,IS_SHEETING=false/);
   assert.match(app,/from '\.\/data\/taxonomy-apm2\.js'/);
   assert.match(app,/MACHINE_ROUTE_BY_ID/);
-  assert.match(app,/if\(!canOpenTechnical3D\(machine\)\)/);
+  assert.match(app,/on\('#open-machine-3d',\(\)=>switchActiveMachine\(machineRoute\(machine\)\)\)/);
   assert.match(engine,/if\(!canOpenTechnical3D\(requested\)\)/);
   assert.match(engine,/switchMachine\(key\)/);
   assert.match(app,/Simulasi Proses APM 2/);
