@@ -2,7 +2,7 @@ import * as THREE from 'three';import {RoundedBoxGeometry} from 'three/addons/ge
 import {SHARK_N650_SPEC} from './data/dimensions-shark-n650.js';import {SHARK_N650_TAXONOMY,SHARK_N650_TAXONOMY_BY_ID} from './data/taxonomy-shark-n650.js';import {SHARK_N650_ORIENTATION,SHARK_N650_TECHNICAL_SOURCES} from './data/sources-shark-n650.js';import {V141_SOURCE_STATS} from './data/research-v141.js';
 const V=a=>new THREE.Vector3(...a);
 export class SharkN650MachineTemplate{
- constructor(){this.spec=SHARK_N650_SPEC;this.root=new THREE.Group();this.root.name='IPM 4 · FS-SHARK-N650-P3N1';this.root.userData={assetId:this.spec.assetId,nodeId:'shark650-root',spec:this.spec,sources:SHARK_N650_TECHNICAL_SOURCES,orientation:SHARK_N650_ORIENTATION,taxonomyVersion:'shark650-v252-n650-offline-flow',detailPass:'V252_SHARK_N650_NEGATIVE_PITCH_RETURN_LINE',researchVersion:'V141',researchSourceCount:V141_SOURCE_STATS.total,uniqueResearchUrls:V141_SOURCE_STATS.uniqueUrls,evidenceGrade:'MODEL_FAMILY_PROCESS_GROUNDED',geometryStatus:'CURRENT_N650_OFFLINE_PROCESS_AND_ENVELOPE_REFERENCE__P3N1_OPTIONS_UNDECODED',engineeringDimensions:false,modeledMode:'FISH_SCALE_OFFLINE_REFERENCE'};this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.build();this.taxonomy=SHARK_N650_TAXONOMY;this.taxonomyById=SHARK_N650_TAXONOMY_BY_ID;for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}this.root.updateMatrixWorld(true);}
+ constructor(){this.spec=SHARK_N650_SPEC;this.root=new THREE.Group();this.root.name='IPM 4 · FS-SHARK-N650-P3N1';this.root.userData={assetId:this.spec.assetId,nodeId:'shark650-root',spec:this.spec,sources:SHARK_N650_TECHNICAL_SOURCES,orientation:SHARK_N650_ORIENTATION,taxonomyVersion:'shark650-v252-n650-offline-flow',detailPass:'V252_SHARK_N650_NEGATIVE_PITCH_RETURN_LINE',researchVersion:'V141',researchSourceCount:V141_SOURCE_STATS.total,uniqueResearchUrls:V141_SOURCE_STATS.uniqueUrls,evidenceGrade:'MODEL_FAMILY_PROCESS_GROUNDED',geometryStatus:'CURRENT_N650_OFFLINE_PROCESS_AND_ENVELOPE_REFERENCE__P3N1_OPTIONS_UNDECODED',engineeringDimensions:false,modeledMode:'FISH_SCALE_OFFLINE_REFERENCE'};this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.build();this.refineV254();this.taxonomy=SHARK_N650_TAXONOMY;this.taxonomyById=SHARK_N650_TAXONOMY_BY_ID;for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}this.root.updateMatrixWorld(true);}
  group(parent,id,name,pos=[0,0,0],explode=[0,0,0]){const g=new THREE.Group();g.name=name;g.position.set(...pos);g.userData={assetId:this.spec.assetId,nodeId:id,selectable:true,explode:V(explode),confidence:'FAMILY_PROCESS_GROUNDED'};parent.add(g);this.nodes.push(g);if(parent===this.root)this.parts.push(g);return g;}
  mat(k){if(!this.materials.has(k)){const c={white:0xeaeeee,light:0xc9d0d2,dark:0x283138,black:0x111619,steel:0x879499,silver:0xc3cbcd,rubber:0x23282a,blue:0x3074a1,cyan:0x4d9bb5,red:0xb13a33,green:0x548b70,amber:0xd4a04c,paper:0xdec89f,glass:0x315663,led:0xece8d1}[k]||0x888888;const m=new THREE.MeshStandardMaterial({color:c,metalness:['steel','silver'].includes(k)?.5:.08,roughness:k==='glass'?.16:.44,transparent:k==='glass',opacity:k==='glass'?.38:1});m.userData.baseOpacity=m.opacity;this.materials.set(k,m);}return this.materials.get(k);}
  mesh(g,geo,key,k='dark',p=[0,0,0],r=null){if(!this.geometries.has(key))this.geometries.set(key,geo());const m=new THREE.Mesh(this.geometries.get(key),this.mat(k));m.position.set(...p);if(r)m.rotation.set(...r);m.castShadow=k!=='glass';m.receiveShadow=true;m.userData.ownerId=g.userData.nodeId;g.add(m);this.meshes.push(m);return m;}
@@ -91,6 +91,79 @@ export class SharkN650MachineTemplate{
   const stack=this.group(g,'shark650-return-stack','Good/bad collection / vertical-palletizing interface');this.box(stack,[.72,.07,.72],[.92,.37,-.18],'steel');this.box(stack,[.64,.07,.52],[.78,.29,.52],'steel');stack.userData.verticalPalletizingCapability=true;stack.userData.installedVerticalPalletizerVerified=false;
   for(const z of [-.18,.52]){const sensor=this.box(stack,[.045,.065,.045],[.52,.62,z],'green',.004);sensor.userData.mechanismRole=z<0?'good-return-confirm-sensor-reference':'bad-return-confirm-sensor-reference';}
  }
+
+ refineV254(){
+  this.root.userData.visualRefinement='V254_SHARK_N650_AUTOMATED_NEGATIVE_PITCH_RETURN_REALISM';
+  this.root.userData.detailPass='V254_N650_AUTOMATION_VISION_REJECT_RETURN_REALISM';
+  this.root.userData.processReality={
+   loading:'AUTOMATED_LOADING_REFERENCE__EXACT_FEEDER_OPTION_UNVERIFIED',
+   transfer:'FULL_SUCTION_NEGATIVE_PITCH_REFERENCE',
+   inspection:'SINGLE_VISION_TOWER_PROGRAMMED_LIGHT_SHIELDING',
+   reject:'KICK_OFF_REFERENCE__EXACT_ACTUATOR_UNVERIFIED',
+   return:'GOOD_BAD_RETURN_LINE_OFFICIAL__INSTALLED_COLLECTION_LAYOUT_UNVERIFIED'
+  };
+  this.root.userData.suffixBoundary='P3N1_PRESERVED_VERBATIM__NOT_DECODED';
+
+  // V252 accidentally rendered two operator HMIs: one bulky generic cabinet and the family-correct
+  // monitor-on-arm. Keep only the product-family monitor-on-arm visible.
+  const duplicateHmi=this.findNode('shark650-process-hmi');
+  if(duplicateHmi){duplicateHmi.visible=false;duplicateHmi.userData.supersededByV254=true;duplicateHmi.userData.supersededReason='DUPLICATE_GENERIC_HMI_REMOVED__FAMILY_MONITOR_ON_ARM_RETAINED';}
+  const hmi=this.findNode('shark650-hmi-v251');
+  if(hmi){hmi.userData.primaryOperatorInterface=true;hmi.userData.installedDisplayModelVerified=false;}
+
+  // The previous full-length raised catwalk/rail was generic factory styling and is not supported
+  // by the official N650 product description. Replace it with compact local service footing only.
+  const longPlatform=this.findNode('shark650-access-platform');
+  if(longPlatform){longPlatform.visible=false;longPlatform.userData.supersededByV254=true;longPlatform.userData.supersededReason='UNSUPPORTED_FULL_LENGTH_RAISED_CATWALK';}
+  const access=this.findNode('shark650-access');
+  if(access){
+   const local=this.group(access,'shark650-local-service-step-v254','Compact operator service step');
+   this.box(local,[1.16,.10,.42],[.48,.12,-.92],'dark',.012);
+   for(const x of [.02,.48,.94]){const foot=this.cyl(local,.06,.025,[x,.025,-.92],'dark','floor-pad','y');foot.userData.floorContact=true;}
+   local.userData.sourceBoundary='LOCAL_ACCESS_ONLY__NO_FULL_LENGTH_PLATFORM_CLAIM';
+  }
+
+  // Make the automatic loading end read as one coherent low feeder rather than loose floating pieces.
+  const feeder=this.findNode('shark650-feeder');
+  if(feeder){
+   const hood=this.group(feeder,'shark650-feeder-hood-v254','Automatic loading feeder low enclosure');
+   for(const z of [-.62,.62]){const side=this.cover(this.box(hood,[1.10,.48,.055],[-.10,.65,z],'light',.026));side.userData.lowFeederIdentity=true;}
+   const nose=this.cover(this.box(hood,[.16,.52,1.18],[-.62,.67,0],'light',.025));nose.userData.lowFeederIdentity=true;
+   for(const z of [-.42,.42]){const guide=this.box(hood,[1.02,.035,.035],[-.05,.86,z],'steel',.005);guide.userData.adjustableBlankGuide=true;}
+  }
+
+  // Official automation sequence includes loading, transfer, kicking off and collection.
+  // Add guarded transition hardware while leaving the exact reject actuator undecoded.
+  const reject=this.findNode('shark650-reject');
+  if(reject){
+   const guard=this.group(reject,'shark650-reject-guard-v254','Reject transition guard');
+   for(const z of [-.61,.61]){const panel=this.cover(this.box(guard,[.74,.42,.045],[.16,1.05,z],'light',.022));panel.userData.rejectTransitionGuard=true;}
+   this.cover(this.box(guard,[.76,.05,1.18],[.16,1.28,0],'light',.012));
+   const confirmation=this.group(reject,'shark650-reject-confirm-v254','Reject route confirmation sensing');
+   for(const z of [-.42,.42]){const s=this.box(confirmation,[.045,.085,.045],[.44,.72,z],'cyan',.006);s.userData.mechanismRole='reject-route-confirmation-sensor';}
+  }
+
+  // Good/bad return line is explicitly advertised by Focusight. Render both paths as low, continuous
+  // fish-scale/return lanes and keep vertical palletizing as capability metadata only.
+  const ret=this.findNode('shark650-return');
+  if(ret){
+   const good=this.findNode('shark650-return-good'),bad=this.findNode('shark650-return-bad');
+   for(let i=0;i<9;i++){
+    const x=-.58+i*.14;
+    if(good){const s=this.box(good,[.50,.006,.30],[x,.755+i*.002,-.18],'paper',.001);s.userData.returnReference='GOOD_FISH_SCALE';}
+    if(bad){const s=this.box(bad,[.50,.006,.26],[x,.585+i*.002,.52],'paper',.001);s.userData.returnReference='BAD_RETURN';}
+   }
+   const divider=this.box(ret,[1.58,.08,.035],[.02,.80,.18],'blue',.006);divider.userData.goodBadRouteDivider=true;
+   const counter=this.group(ret,'shark650-return-monitor-v254','Good / bad return monitoring');
+   for(const z of [-.18,.52]){const s=this.box(counter,[.055,.11,.055],[.62,.94,z],'cyan',.008);s.userData.mechanismRole=z<0?'good-return-monitor':'bad-return-monitor';}
+   ret.userData.v254OfficialEvidence='FOCUSIGHT_GOOD_BAD_RETURN_LINE_AND_AUTOMATED_COLLECTION';
+  }
+
+  // Optional whole-machine dust-reduction integration is a published option, not a BMJ-installed claim.
+  const dust=this.group(this.root,'shark650-dust-integration-capability-v254','Optional integrated dust-reduction device');
+  dust.userData.capabilityOnly=true;dust.userData.installedVerified=false;dust.visible=false;
+ }
+
  findNode(id){return id==='shark650-root'?this.root:this.nodes.find(n=>n.userData.nodeId===id)||null;}resolvePart(o){for(let p=o;p&&p!==this.root;p=p.parent)if(p.userData?.selectable)return p;return null;}resolveTaxonomyNode(id){return this.taxonomyById.get(id)?.meshRefs.map(ref=>this.findNode(ref)).find(Boolean)||null;}contains(a,b){for(let p=b;p;p=p.parent)if(p===a)return true;return false;}
  highlight(p){for(const m of this.meshes){m.material.emissive?.setHex(p&&this.contains(p,m)?0x17494a:0);m.material.emissiveIntensity=.3;}}highlightMany(ps=[]){for(const m of this.meshes){m.material.emissive?.setHex(ps.some(p=>this.contains(p,m))?0x17494a:0);m.material.emissiveIntensity=.3;}}ghost(on,except=null){this.ghosted=!!on;for(const m of this.meshes){const fade=on&&(!except||!this.contains(except,m)),natural=m.material.userData?.baseOpacity??1;m.material.transparent=fade||natural<1;m.material.opacity=fade?.14:natural;m.material.depthWrite=!fade;}}isolate(p,on=true){for(const n of this.nodes)n.visible=!on||!p||this.contains(p,n)||this.contains(n,p);}showOnly(ps=[],on=true){for(const n of this.nodes)n.visible=!on||!ps.length||ps.some(p=>n===p||this.contains(n,p));}
  setExteriorOpen(on=true){this.exteriorOpen=!!on;let count=0;for(const m of this.meshes)if(m.userData.exteriorCover){m.visible=!on;count++;}this.root.userData.interiorCutawayVisible=!!on;this.root.userData.exteriorHiddenCount=on?count:0;}explode(t,s=null){for(const n of this.nodes)n.position.copy(n.userData.rest);const targets=s?(s.children.filter(c=>c.userData.selectable).length?s.children.filter(c=>c.userData.selectable):[s]):this.parts;for(const n of targets)n.position.addScaledVector(n.userData.explode,THREE.MathUtils.clamp(+t||0,0,1));}setLow(){}reset(){const open=this.exteriorOpen;this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const n of this.nodes)n.quaternion.copy(n.userData.restQuaternion);this.setExteriorOpen(open);}dispose(){for(const g of this.geometries.values())g.dispose();for(const m of this.materials.values())m.dispose();}

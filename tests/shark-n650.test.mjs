@@ -23,6 +23,11 @@ test('SHARK geometry keeps feeder camera reject and collection alternatives as r
  for(const id of ['shark650-feeder','shark650-transfer','shark650-inspection','shark650-vision','shark650-processing','shark650-reject','shark650-return','shark650-access'])assert.ok(model.findNode(id),id);
  assert.equal(model.findNode('shark650-feed-suction').userData.installedModeVerified,false);assert.equal(model.findNode('shark650-feed-friction').userData.installedModeVerified,false);assert.equal(model.findNode('shark650-feed-friction').visible,false);assert.equal(model.findNode('shark650-feed-friction').userData.capabilityOnly,true);
  assert.equal(model.findNode('shark650-vision-camera').userData.referenceBayCount,3);assert.equal(model.findNode('shark650-vision-camera').userData.installedCameraCountVerified,false);assert.equal(model.findNode('shark650-vision-camera').userData.p3SuffixDecoded,false);
+ assert.equal(model.root.userData.visualRefinement,'V254_SHARK_N650_AUTOMATED_NEGATIVE_PITCH_RETURN_REALISM');
+ assert.equal(model.findNode('shark650-process-hmi').visible,false);assert.equal(model.findNode('shark650-access-platform').visible,false);
+ for(const id of ['shark650-local-service-step-v254','shark650-feeder-hood-v254','shark650-reject-guard-v254','shark650-reject-confirm-v254','shark650-return-monitor-v254','shark650-dust-integration-capability-v254'])assert.ok(model.findNode(id),id);
+ assert.equal(model.findNode('shark650-dust-integration-capability-v254').visible,false);assert.equal(model.findNode('shark650-dust-integration-capability-v254').userData.capabilityOnly,true);
+ assert.ok(model.meshes.filter(m=>m.userData.returnReference==='GOOD_FISH_SCALE').length>=9);assert.ok(model.meshes.filter(m=>m.userData.returnReference==='BAD_RETURN').length>=9);
  assert.equal(model.findNode('shark650-reject').userData.installedRejectTypeVerified,false);assert.equal(model.findNode('shark650-reject-plate').userData.rejectReference,'NEUTRAL_KICK_OFF_PATH');assert.equal(model.findNode('shark650-reject-air').userData.rejectReference,'AIR_OPTION');assert.equal(model.findNode('shark650-reject-air').visible,false);assert.equal(model.findNode('shark650-return').userData.installedCollectionModeVerified,false);assert.equal(model.findNode('shark650-return').userData.officialGoodBadReturnLine,true);model.dispose();
 });
 
@@ -49,7 +54,7 @@ test('SHARK reject lane carries the same tracked blank that inspection classifie
 test('SHARK uses negative-pitch infeed and supports simultaneous tracked good and bad return lanes after decisions',()=>{
  const model=new SharkN650MachineTemplate(),sim=new SharkN650ProcessSimulation(model.root,model);sim.start();let now=1000,seenGood=false,seenBad=false;
  let seenNegativePitch=false;for(let i=0;i<800;i++){now+=10;sim.update(now);const s=sim.state();seenGood||=s.goodRoutingActive&&s.activePassTrackingIds.length>0;seenBad||=s.badRoutingActive&&s.activeRejectTrackingIds.length>0;seenNegativePitch||=s.negativePitchActive;}
- assert.ok(seenNegativePitch,'official negative-pitch transport never became visible');assert.ok(seenGood&&seenBad);const state=sim.state();assert.ok(state.inspectedDemoCount>0);assert.equal(state.installedCameraPackageVerified,false);assert.equal(state.installedCollectionModeVerified,false);sim.dispose();model.dispose();
+ assert.ok(seenNegativePitch,'official negative-pitch transport never became visible');assert.ok(seenGood&&seenBad);const state=sim.state();assert.equal(state.negativePitchPublishedCapacityGainPercent,30);assert.equal(state.goodBadReturnLineOfficial,true);assert.equal(state.transportMode,'NEGATIVE_PITCH_FULL_SUCTION_OFFLINE_DEMO_REFERENCE');assert.ok(state.inspectedDemoCount>0);assert.equal(state.installedCameraPackageVerified,false);assert.equal(state.installedCollectionModeVerified,false);sim.dispose();model.dispose();
 });
 
 test('SHARK demo creates accepted and rejected collection and resets cleanly',()=>{
@@ -68,4 +73,13 @@ test('SHARK N650 taxonomy is a mapped six-level tree',()=>{
 
 test('SHARK process sequence preserves negative-pitch inspection before good/bad routing',()=>{
  assert.deepEqual(SHARK_N650_SIMULATION_STAGES,['Automatic blank feed','Negative-pitch suction transfer','Controlled lighting + camera capture','Vision processing demo','Tracked pass / reject decision demo','Reject actuation demo','Good / bad return routing','Collection']);
+});
+
+
+test('V254 SHARK separates tracked good and bad return lanes while preserving undecoded P3N1 options',()=>{
+ const model=new SharkN650MachineTemplate(),sim=new SharkN650ProcessSimulation(model.root,model);sim.start();let now=1000,goodZ=null,badZ=null;
+ for(let i=0;i<1500;i++){now+=10;sim.update(now);for(const b of sim.blanks){if(b.result==='PASS_DEMO'&&b.decisionReady&&((sim.elapsed/7.2+b.phase)%1)>.82)goodZ=b.mesh.position.z;if(b.result==='REJECT_DEMO'&&b.decisionReady&&((sim.elapsed/7.2+b.phase)%1)>.82)badZ=b.mesh.position.z;}if(goodZ!==null&&badZ!==null)break;}
+ assert.ok(goodZ<0);assert.ok(badZ>0);assert.ok(Math.abs(goodZ-badZ)>.30);
+ const st=sim.state();assert.equal(st.suffixDecoded,false);assert.equal(st.installedCollectionModeVerified,false);assert.equal(st.demoRejectActuator,'NEUTRAL_KICK_OFF_REFERENCE__INSTALLED_ACTUATOR_UNVERIFIED');
+ sim.dispose();model.dispose();
 });
