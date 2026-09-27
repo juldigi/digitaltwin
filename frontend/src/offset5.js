@@ -245,7 +245,7 @@ export class OffsetMachineTemplate {
     this.tread(deck,[Math.max(2.0,D.deliveryBodyLength+.55),.12,.76],[D.deliveryCenterX,.38,D.operatorWalkwayCenterZ]);
     // Drive-side service strip follows the CAD/service correlation and the supplied drive-side photos.
     this.tread(deck,[D.driveGalleryLength,.10,D.driveWalkwayWidth],[D.driveGalleryCenterX,.43,D.driveWalkwayCenterZ]);
-    const driveRailZ=D.driveWalkwayCenterZ-Math.sign(D.driveWalkwayCenterZ||-1)*.29;
+    const driveRailZ=D.driveWalkwayCenterZ+Math.sign(D.driveWalkwayCenterZ||-1)*.29;
     const railPosts=Math.max(8,Math.floor((D.driveGalleryLength-.7)/1.45));
     for(let i=0;i<=railPosts;i++)this.cylinder(deck,.025,.72,[D.driveGalleryCenterX-D.driveGalleryLength/2+.35+i*(D.driveGalleryLength-.70)/railPosts,.83,driveRailZ],'steel','y');
     this.cylinder(deck,.026,D.driveGalleryLength-.70,[D.driveGalleryCenterX,1.15,driveRailZ],'steel','x');
