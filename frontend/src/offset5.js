@@ -8,10 +8,11 @@ import {V122_SOURCE_STATS} from './data/research-v122.js';
 import {createIndustrialMaterial} from './render/material-library.js';
 
 // Offset 5 reconstruction.
-// The outer longitudinal/lateral envelope and repeated-unit pitch are calibrated from
-// the user-confirmed OFU-1 DXF footprint. Exterior surfaces are photo-derived.
-// Internal coordinates remain functional/visual unless a supplied OEM document states
-// a value explicitly; no unverified service setting is promoted to engineering truth.
+// The installed identity, exterior surfaces and side-access relationships are BMJ-photo grounded.
+// The repeated printing-unit pitch is recalibrated to the documented 102-platform 1220 mm increment;
+// the previous oversized pitch is intentionally retired. Overall long-delivery/inspection proportions
+// remain a photo-derived reconstruction cross-checked against 102-format family dimensions.
+// Internal coordinates remain functional/visual unless a supplied OEM document states a value explicitly.
 export const PHOTO_RECONSTRUCTION = {
   version: 'offset5-photo-pdf-v37-reality',
   status: 'FULL MACHINE · USER PHOTOS EXTERIOR + OEM PDF FUNCTIONAL TOPOLOGY',
@@ -313,7 +314,7 @@ export class OffsetMachineTemplate {
     for(let i=0;i<4;i++)this.tube(utility,[[-.55+i*.22,.08,.18],[-.55+i*.22,.34,.28],[-.42+i*.20,.62,.22]],.018,'rubber');
   }
   pressUnit(i,x,sources){
-    const g=this.group(this.root,'press-'+(i+1),'Printing Unit '+(i+1),[x,0,0],[(i-3.5)*.28,.15,0],sources,'Delapan printing unit mengikuti konfigurasi CD 102-8+L yang dikonfirmasi pengguna; pitch antarunit mengikuti fingerprint berulang dari footprint OFU-1 pada DXF.');
+    const g=this.group(this.root,'press-'+(i+1),'Printing Unit '+(i+1),[x,0,0],[(i-3.5)*.28,.15,0],sources,'Delapan printing unit mengikuti konfigurasi CD 102-8+L BMJ; pitch proses 1,22 m memakai cross-check platform 102, sedangkan akses manusia tetap dibangun di sisi luar tanpa meregangkan jarak silinder.');
     const body=this.group(g,'press-'+i+'-frame','Rangka luar & kisi pelindung',[0,0,0],[0,.12,-.65],['IMG_1626.jpeg','IMG_1628.jpeg']);
     const isPU1=i===0,frameWidth=isPU1?OFFSET5_DIMENSIONS.layout.pu1FrameWidth:OFFSET5_DIMENSIONS.layout.printingUnitFrameWidth,sidePanelWidth=frameWidth-.12,topBeamWidth=frameWidth-.14,faceX=frameWidth/2-.09,guardX=frameWidth/2-.08,glassX=frameWidth/2-.04;
     this.markExteriorCover(this.box(body,[frameWidth,.4,2.04],[0,.48,0],'black',.035));
