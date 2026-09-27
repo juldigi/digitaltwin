@@ -46,10 +46,11 @@ function pathPoints(){
     new THREE.Vector3(D.dryerCenterX+.06,1.29,0),
     new THREE.Vector3(D.dryerCenterX+.46,1.30,0),
     new THREE.Vector3(D.inspectionCenterX,1.34,0),
-    new THREE.Vector3(D.deliveryCenterX-1.00,1.54,0),
-    new THREE.Vector3(D.deliveryCenterX-.58,1.52,0),
-    new THREE.Vector3(D.deliveryCenterX-.30,1.47,0),
-    new THREE.Vector3(D.deliveryCenterX-.10,1.36,0),
+    new THREE.Vector3(D.deliveryCenterX-1.00,1.58,0),
+    new THREE.Vector3(D.deliveryCenterX-.68,1.61,0),
+    new THREE.Vector3(D.deliveryCenterX-.54,1.47,0), // sheet-brake / slowdown zone
+    new THREE.Vector3(D.deliveryCenterX-.24,1.43,0),
+    new THREE.Vector3(D.deliveryCenterX-.06,1.34,0), // gripper release / settling
     new THREE.Vector3(D.deliveryCenterX+.10,1.24,0)
   );
   return pts;
@@ -165,13 +166,15 @@ export class PrintingSimulation{
     this.machine=machine;this.template=template;
     this.group=new THREE.Group();this.group.name='PRINTING-TEST-SIMULATION';this.group.visible=false;this.machine.add(this.group);
     this.points=pathPoints();this.curve=new THREE.CatmullRomCurve3(this.points,false,'centripetal',.5);this.pathLength=this.curve.getLength();
-    this.sheetLength=.66;this.sheetWidth=1.02;this.sheetLengthSegments=12;this.sheetWidthSegments=8;
-    this.sheetGapMeters=1.34;this.cycleDistance=this.pathLength+this.sheetGapMeters*2;this.sheetCount=Math.max(8,Math.floor(this.cycleDistance/this.sheetGapMeters));
+    // CD 102 full-format reference: 720 x 1020 mm sheet, one gripper pitch per press cycle.
+    this.sheetLength=.72;this.sheetWidth=1.02;this.sheetLengthSegments=12;this.sheetWidthSegments=8;
+    this.nominalSheetsPerHour=15000;this.sheetCyclesPerSecond=this.nominalSheetsPerHour/3600;this.sheetPitchMeters=1.02;
+    this.sheetGapMeters=this.sheetPitchMeters;this.cycleDistance=this.pathLength+this.sheetGapMeters*2;this.sheetCount=Math.max(8,Math.floor(this.cycleDistance/this.sheetGapMeters));
     this.sheets=[];this.pileSheets=[];this.rotors=[];this.oscillators=[];this.levers=[];this.gripperMotions=[];this.joggerMotions=[];this.fluidFlows=[];this.inkSurfaces=[];
     this.uvLamps=[];this.uvBeams=[];this.materials=[];this.geometries=[];
     this.staticDeliveryStack=template.findNode('delivery-paper-stack');this.staticDeliveryVisible=this.staticDeliveryStack?.visible;this.maxPileSheets=32;this.pileSheetThickness=.0035;this.pileAnchor=new THREE.Vector3(D.deliveryCenterX+.10,1.22,0);
     this.active=false;this.running=false;this.speed=1;this.elapsed=0;this.lastNow=null;this.completed=0;this.emitAt=0;this.pathVisible=true;this.inkFlowVisible=true;this.uvActive=false;this.onUpdate=null;
-    this.baseMetersPerSecond=2.15;
+    this.baseMetersPerSecond=this.sheetPitchMeters*this.sheetCyclesPerSecond; // 4.25 m/s at 15,000 sph reference speed
     this.buildPath();this.buildSheets();this.buildPileSheets();this.refreshDeliveryPileAnchor();this.buildFluidFlows();this.collectMechanicalMotion();this.collectInkSurfaces();this.collectUVSystem();
   }
   material(params){
@@ -476,9 +479,10 @@ export class PrintingSimulation{
       if(b>=dryerLeft&&a<=dryerRight)dryerOccupied=true;
     }
 
-    const angular=5.0*scaled;
+    // One press cycle per sheet at nominal speed. Rotor-specific rate multipliers preserve double-size / auxiliary visual differences.
+    const angular=TAU*this.sheetCyclesPerSecond*scaled;
     for(const rotor of this.rotors)rotor.axis==='z'?rotor.mesh.rotateZ(rotor.sign*rotor.rate*angular):rotor.mesh.rotateY(rotor.sign*rotor.rate*angular);
-    const phase=this.elapsed*TAU;
+    const phase=this.elapsed*TAU*this.sheetCyclesPerSecond;
     for(const item of this.oscillators)item.object.position[item.axis]=item.initial[item.axis]+Math.sin(phase*item.frequency+item.phase)*item.amplitude;
     for(const item of this.levers)item.object.rotation.z=item.initial+Math.sin(phase*item.frequency+item.phase)*item.amplitude;
     for(const item of this.gripperMotions){
