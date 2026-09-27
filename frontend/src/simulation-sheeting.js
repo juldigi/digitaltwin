@@ -52,7 +52,7 @@ export class SheetingProcessSimulation{
     this.fastToSlowDecelTime=.22;
     this.slowToStackDecelTime=.32;
     this.stackSettleDuration=.28;
-    this.cutEdgeDuration=.22;
+    this.cutEdgeDuration=.14;
     this.webAdvance=0;
 
     this.reelReferenceRadius=this.layout.reel.radius;
@@ -211,13 +211,19 @@ export class SheetingProcessSimulation{
   }
 
   buildPendingLeader(){
-    this.pendingLeaderGeometry=new THREE.BoxGeometry(1,this.webThickness,this.webWidth);
-    this.pendingLeaderSegmentLength=this.targetCutLength/14;
-    for(let i=0;i<14;i++){
-      const m=new THREE.Mesh(this.pendingLeaderGeometry,this.webMaterial);
-      m.visible=false;m.name='Attached downstream web segment';m.userData={attachedLeader:true,index:i};
-      m.castShadow=false;m.receiveShadow=true;this.group.add(m);this.pendingLeaderSegments.push(m);
+    // One deforming ribbon prevents the repeated transverse seams left by separate box segments.
+    this.pendingLeaderSamples=48;
+    const vertices=new Float32Array((this.pendingLeaderSamples+1)*6),indices=[];
+    for(let i=0;i<this.pendingLeaderSamples;i++){
+      const a=i*2;indices.push(a,a+1,a+2,a+1,a+3,a+2);
     }
+    this.pendingLeaderGeometry=new THREE.BufferGeometry();
+    this.pendingLeaderGeometry.setAttribute('position',new THREE.BufferAttribute(vertices,3));
+    this.pendingLeaderGeometry.setIndex(indices);
+    const m=new THREE.Mesh(this.pendingLeaderGeometry,this.webMaterial);
+    m.visible=false;m.name='Continuous attached sheet forming after cutter';
+    m.userData={attachedLeader:true,continuousRibbon:true};m.castShadow=false;m.receiveShadow=true;
+    this.group.add(m);this.pendingLeaderSegments.push(m);
     this.pendingLeaderLength=0;
   }
 
@@ -229,10 +235,10 @@ export class SheetingProcessSimulation{
     this.cutEdge.position.set(this.cutX-.006,this.cutY+.010,0);
     this.cutEdge.userData={materialCutEdge:true,notABlade:true};
     this.group.add(this.cutEdge);
-    const cueMaterial=new THREE.MeshBasicMaterial({color:0x2e87b2,depthTest:false,depthWrite:false});
-    this.cutAction=new THREE.Mesh(new THREE.BoxGeometry(.025,.026,this.webWidth*1.04),cueMaterial);
-    this.cutAction.name='Guarded cross-cut stroke cue';this.cutAction.userData={cutCycleCue:true,notABlade:true};this.cutAction.renderOrder=9;this.cutAction.visible=false;
-    this.cutAction.position.set(this.cutX-.015,this.cutY+.10,0);this.group.add(this.cutAction);
+    const cueMaterial=new THREE.MeshBasicMaterial({color:0x635d51,transparent:true,opacity:.65,depthWrite:false});
+    this.cutAction=new THREE.Mesh(new THREE.BoxGeometry(.012,.004,this.webWidth*1.005),cueMaterial);
+    this.cutAction.name='Guarded cut-mouth separation cue';this.cutAction.userData={cutCycleCue:true,notABlade:true};this.cutAction.visible=false;
+    this.cutAction.position.set(this.cutX-.008,this.cutY+.012,0);this.group.add(this.cutAction);
   }
 
   buildFlowMarkers(){
@@ -379,7 +385,7 @@ export class SheetingProcessSimulation{
   start(){
     this.active=true;this.running=true;this.lastNow=null;this.group.visible=true;
     this.setReferenceStackVisible(false);
-    this.webRibbonSegments.forEach(m=>m.visible=true);this.webFlowMarks.forEach(m=>m.visible=true);
+    this.webRibbonSegments.forEach(m=>m.visible=true);this.webFlowMarks.forEach(m=>m.visible=this.pathVisible);
     this.onUpdate?.(this.state());return this.state();
   }
   pause(){if(this.active){this.running=false;this.lastNow=null;this.onUpdate?.(this.state());}return this.state();}
@@ -391,7 +397,7 @@ export class SheetingProcessSimulation{
     this.restoreMechanisms();this.setReferenceStackVisible(true);this.onUpdate?.(this.state());return this.state();
   }
   setSpeed(v){this.speed=Math.max(.35,Math.min(2,+v||1));this.onUpdate?.(this.state());return this.state();}
-  setPathVisible(v){this.pathVisible=!!v;this.path.visible=this.pathVisible;this.onUpdate?.(this.state());return this.state();}
+  setPathVisible(v){this.pathVisible=!!v;this.path.visible=this.pathVisible;for(const m of this.webFlowMarks)m.visible=this.active&&this.pathVisible;this.onUpdate?.(this.state());return this.state();}
   setInkFlowVisible(){return this.state();}
 
   restoreMechanisms(){
@@ -433,7 +439,7 @@ export class SheetingProcessSimulation{
     const len=Math.max(.001,this.preCutCurve.getLength()),phase=(this.webAdvance/len)%1;
     for(const [i,m] of this.webFlowMarks.entries()){
       const t=(phase+i/this.webFlowMarks.length)%1,p=this.preCutCurve.getPointAt(t),tan=this.preCutCurve.getTangentAt(t);
-      m.position.copy(p);m.position.y+=.015;m.rotation.set(0,0,Math.atan2(tan.y,tan.x));m.visible=this.active;
+      m.position.copy(p);m.position.y+=.015;m.rotation.set(0,0,Math.atan2(tan.y,tan.x));m.visible=this.active&&this.pathVisible;
     }
     this.updatePendingLeader();
   }
@@ -441,13 +447,18 @@ export class SheetingProcessSimulation{
   updatePendingLeader(){
     const fullCuts=Math.floor(this.webAdvance/this.targetCutLength);
     this.pendingLeaderLength=Math.max(0,this.webAdvance-fullCuts*this.targetCutLength);
-    const seg=this.pendingLeaderSegmentLength;
-    for(const [i,m] of this.pendingLeaderSegments.entries()){
-      const s0=i*seg,s1=Math.min(this.pendingLeaderLength,(i+1)*seg);
-      if(!this.active||s1<=s0+.0001){m.visible=false;continue;}
-      const mid=(s0+s1)/2,pose=this.poseAtDistance(mid),len=s1-s0;
-      m.visible=true;m.position.copy(pose.p);m.position.y+=.004;m.rotation.set(0,0,pose.angle);m.scale.set(len,1,1);
+    const ribbon=this.pendingLeaderSegments[0];
+    ribbon.visible=this.active&&this.pendingLeaderLength>.0001;
+    if(!ribbon.visible)return;
+    const vertices=this.pendingLeaderGeometry.attributes.position;
+    for(let i=0;i<=this.pendingLeaderSamples;i++){
+      const s=this.pendingLeaderLength*i/this.pendingLeaderSamples;
+      const p=this.poseAtDistance(s).p;
+      vertices.setXYZ(2*i,p.x,p.y+.004,-this.webWidth/2);
+      vertices.setXYZ(2*i+1,p.x,p.y+.004,this.webWidth/2);
     }
+    vertices.needsUpdate=true;this.pendingLeaderGeometry.computeVertexNormals();
+    this.pendingLeaderGeometry.computeBoundingSphere();
   }
 
   updateSheets(){
@@ -461,7 +472,7 @@ export class SheetingProcessSimulation{
     const timeSinceLatestCut=this.cutCount>0?this.elapsed-this.cutCount*this.cutInterval:Infinity;
     const cutProgress=timeSinceLatestCut/this.cutEdgeDuration,cutVisible=this.active&&cutProgress>=0&&cutProgress<1;
     if(this.cutEdge)this.cutEdge.visible=cutVisible;
-    if(this.cutAction){this.cutAction.visible=cutVisible;this.cutAction.position.y=this.cutY+.10-.09*Math.sin(Math.PI*Math.max(0,Math.min(1,cutProgress)));}
+    if(this.cutAction)this.cutAction.visible=cutVisible;
     if(this.cutCount!==previousCutCount)this.lastCutIndex=this.cutCount;
 
     for(const [slot,s] of this.sheets.entries()){
@@ -473,6 +484,13 @@ export class SheetingProcessSimulation{
       s.position.copy(pose.p);
       if(pose.zone==='SLOW_TRANSFER'||pose.zone==='OVERLAP_SHINGLE')s.position.y+=(Math.max(0,7-slot))*.0010;
       s.rotation.set(0,0,pose.angle);
+    }
+
+    // The exposed edge belongs to the detached sheet; it travels away from the cutter.
+    const newest=this.sheets.find(s=>s.visible&&s.userData.cutId===this.cutCount);
+    if(this.cutEdge&&newest){
+      this.cutEdge.position.set(newest.position.x+Math.cos(newest.rotation.z)*this.sheetLength/2,
+        newest.position.y+.012,0);
     }
 
     for(let i=0;i<this.pile.length;i++){

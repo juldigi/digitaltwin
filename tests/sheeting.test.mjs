@@ -264,6 +264,36 @@ test('loaded reel clears the entry rollers and the continuous web leaves tangent
   sim.dispose();m.dispose();
 });
 
+test('forming sheet is one seamless ribbon and travel stripes stay hidden in normal simulation',()=>{
+ const m=new SheetingMachineTemplate(),sim=new SheetingProcessSimulation(m.root,m);
+ sim.start();let now=1000;sim.update(now);now=advance(sim,now,sim.cutInterval*.5,.005);
+ assert.equal(sim.pendingLeaderSegments.length,1);
+ const ribbon=sim.pendingLeaderSegments[0];assert.equal(ribbon.visible,true);
+ assert.equal(ribbon.userData.continuousRibbon,true);
+ assert.ok(sim.webFlowMarks.every(mark=>!mark.visible),'periodic stripes look like paper joins');
+ const attr=ribbon.geometry.attributes.position,first=new THREE.Vector3().fromBufferAttribute(attr,0);
+ const last=new THREE.Vector3().fromBufferAttribute(attr,attr.count-2);
+ assert.ok(Math.abs(first.x-sim.cutX)<.001);
+ assert.ok(Math.abs(last.x-first.x)>.5,'the paper must grow continuously after the cutter');
+ sim.setPathVisible(true);assert.ok(sim.webFlowMarks.every(mark=>mark.visible));
+ sim.setPathVisible(false);assert.ok(sim.webFlowMarks.every(mark=>!mark.visible));
+ sim.dispose();m.dispose();
+});
+
+test('cut cue remains at the guarded mouth while the fresh edge travels with the sheet',()=>{
+ const m=new SheetingMachineTemplate(),sim=new SheetingProcessSimulation(m.root,m);
+ sim.start();let now=1000;sim.update(now);
+ now=advance(sim,now,sim.cutInterval+.015,.005);
+ assert.ok(sim.cutAction.visible&&sim.cutEdge.visible);
+ const mouthX=sim.cutAction.position.x,edgeX=sim.cutEdge.position.x;
+ now=advance(sim,now,.06,.005);
+ assert.equal(sim.cutAction.position.x,mouthX);
+ assert.ok(sim.cutEdge.position.x<edgeX-.04,'exposed paper edge remained stuck at the cutter');
+ assert.ok(sim.cutAction.position.y<sim.cutY+.03,'cut cue floats above the paper');
+ assert.equal(sim.cutAction.userData.notABlade,true);
+ sim.dispose();m.dispose();
+});
+
 test('V197 pile/lift stays grounded and manual guide hardware remains static',()=>{
   const m=new SheetingMachineTemplate(),sim=new SheetingProcessSimulation(m.root,m);
   const manual=roleMeshes(m,'stack-guide-handwheel');
