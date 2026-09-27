@@ -172,7 +172,8 @@ export class PrintingSimulation{
     this.sheetGapMeters=this.sheetPitchMeters;this.cycleDistance=this.pathLength+this.sheetGapMeters*2;this.sheetCount=Math.max(8,Math.floor(this.cycleDistance/this.sheetGapMeters));
     this.sheets=[];this.pileSheets=[];this.rotors=[];this.oscillators=[];this.levers=[];this.gripperMotions=[];this.joggerMotions=[];this.fluidFlows=[];this.inkSurfaces=[];
     this.uvLamps=[];this.uvBeams=[];this.materials=[];this.geometries=[];
-    this.staticDeliveryStack=template.findNode('delivery-paper-stack');this.staticDeliveryVisible=this.staticDeliveryStack?.visible;this.maxPileSheets=32;this.pileSheetThickness=.0035;this.pileAnchor=new THREE.Vector3(D.deliveryCenterX+.10,1.22,0);
+    this.staticDeliveryStack=template.findNode('delivery-paper-stack');this.staticDeliveryVisible=this.staticDeliveryStack?.visible;this.maxPileSheets=32;this.pileSheetThickness=.0035;this.pileAnchor=new THREE.Vector3(D.deliveryCenterX+.10,.25,0);
+    this.deliveryReleaseX=D.deliveryCenterX-.10;this.deliverySettleX=D.deliveryCenterX+.10;this.deliveryDropHeight=.90;
     this.active=false;this.running=false;this.speed=1;this.elapsed=0;this.lastNow=null;this.completed=0;this.emitAt=0;this.pathVisible=true;this.inkFlowVisible=true;this.uvActive=false;this.onUpdate=null;
     this.baseMetersPerSecond=this.sheetPitchMeters*this.sheetCyclesPerSecond; // 4.25 m/s at 15,000 sph reference speed
     this.buildPath();this.buildSheets();this.buildPileSheets();this.refreshDeliveryPileAnchor();this.buildFluidFlows();this.collectMechanicalMotion();this.collectInkSurfaces();this.collectUVSystem();
@@ -216,6 +217,7 @@ export class PrintingSimulation{
     this.machine.updateMatrixWorld(true);table.updateWorldMatrix(true,true);
     const box=new THREE.Box3().setFromObject(table),center=box.getCenter(new THREE.Vector3()),top=new THREE.Vector3(center.x,box.max.y,center.z);
     this.machine.worldToLocal(top);this.pileAnchor.copy(top);this.pileAnchor.y+=this.pileSheetThickness*.6;
+    const rawEnd=this.curve.getPointAt(1);this.deliveryDropHeight=Math.max(.10,rawEnd.y-(this.pileAnchor.y+.018));
     return this.pileAnchor;
   }
   layoutPileSheet(sheet,rank){
@@ -261,9 +263,15 @@ export class PrintingSimulation{
     sheet.mesh.visible=visible;sheet.gripper.visible=visible;
     if(!visible)return false;
     const pos=sheet.mesh.geometry.attributes.position,w=this.sheetWidthSegments,l=this.sheetLengthSegments;
+    const leadT=clamp(leadDistance/this.pathLength,0,1),rawLead=this.curve.getPointAt(leadT);
+    // In the delivery the gripper opens over the pile, then the complete sheet settles down as a flat body.
+    // Apply one common vertical drop to all sheet vertices so the sheet does not turn into a ribbon/vertical flap.
+    const releaseProgress=clamp((rawLead.x-this.deliveryReleaseX)/(this.deliverySettleX-this.deliveryReleaseX),0,1);
+    const easedRelease=releaseProgress*releaseProgress*(3-2*releaseProgress),deliveryDrop=easedRelease*this.deliveryDropHeight;
     let trail=null,lead=null;
     for(let i=0;i<=l;i++){
       const distance=leadDistance-this.sheetLength*(1-i/l),t=clamp(distance/this.pathLength,0,1),p=this.curve.getPointAt(t);
+      p.y-=deliveryDrop;
       if(i===0)trail=p.clone();if(i===l)lead=p.clone();
       for(let j=0;j<=w;j++){
         const z=-this.sheetWidth/2+(j/w)*this.sheetWidth,index=i*(w+1)+j;
@@ -271,9 +279,11 @@ export class PrintingSimulation{
       }
     }
     pos.needsUpdate=true;
-    const t=clamp(leadDistance/this.pathLength,0,1),tan=this.curve.getTangentAt(t),angle=Math.atan2(tan.y,tan.x);
-    sheet.gripper.position.copy(lead);sheet.gripper.position.y+=.020;sheet.gripper.rotation.set(0,0,angle);
-    sheet.userData.progress=t;sheet.userData.leadPosition.copy(lead);sheet.userData.trailPosition.copy(trail);sheet.userData.leadDistance=leadDistance;
+    const tan=this.curve.getTangentAt(leadT),angle=Math.atan2(tan.y,tan.x);
+    sheet.gripper.visible=visible&&releaseProgress<.02;
+    if(sheet.gripper.visible){sheet.gripper.position.copy(lead);sheet.gripper.position.y+=.020;sheet.gripper.rotation.set(0,0,angle);}
+    sheet.userData.deliveryDrop=deliveryDrop;sheet.userData.gripperReleased=releaseProgress>=.02;
+    sheet.userData.progress=leadT;sheet.userData.leadPosition.copy(lead);sheet.userData.trailPosition.copy(trail);sheet.userData.leadDistance=leadDistance;
     this.setSheetColors(sheet,printedUnitsForX(lead.x));
     return true;
   }
