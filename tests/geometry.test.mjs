@@ -24,7 +24,7 @@ test('subassembly selection resolves meshes and isolation preserves parent chain
  t.reset();assert.ok(t.nodes.every(n=>n.visible));t.dispose();
 });
 test('geometry is finite, sourced and instanced; visual dimensions remain nonengineering',()=>{
- const t=new OffsetMachineTemplate();assert.equal(t.root.userData.dimensionUnit,'PHOTO_CORRECTED_INTERUNIT_ACCESS_WITH_DXF_PLACEMENT');
+ const t=new OffsetMachineTemplate();assert.equal(t.root.userData.dimensionUnit,'102_PLATFORM_PITCH_RECALIBRATED_WITH_BMJ_PHOTO_ACCESS');
  assert.equal(t.root.userData.installedConfiguration,'PHOTO_CONFIRMED_CD102_8_PLUS_L');
  assert.ok(t.meshes.some(m=>m.isInstancedMesh));assert.ok(t.nodes.every(n=>n.userData.sourceFiles.length));
  for(const m of t.meshes){const a=m.geometry.attributes.position.array;assert.ok(a.every(Number.isFinite));}
@@ -33,7 +33,7 @@ test('geometry is finite, sourced and instanced; visual dimensions remain noneng
 });
 test('photo-aligned geometry preserves orientation and bounded machine envelope',()=>{
  const t=new OffsetMachineTemplate(),box=new THREE.Box3().setFromObject(t.root),size=box.getSize(new THREE.Vector3());
- assert.equal(t.root.userData.version,'offset5-photo-pdf-v36');
+ assert.equal(t.root.userData.version,'offset5-photo-pdf-v37-reality');
  assert.equal(t.root.userData.sideAlignment,'PHOTO_VERIFIED_OPERATOR_NEGATIVE_Z');
  assert.equal(t.root.userData.driveSideAlignment,'PHOTO_VERIFIED_DRIVE_POSITIVE_Z');
  assert.ok(t.findNode('feeder').position.x<t.findNode('delivery').position.x);
@@ -42,7 +42,7 @@ test('photo-aligned geometry preserves orientation and bounded machine envelope'
  assert.ok(new THREE.Box3().setFromObject(cover).getCenter(new THREE.Vector3()).z<0);
  assert.ok(new THREE.Box3().setFromObject(t.findNode('press-0-drive')).getCenter(new THREE.Vector3()).z>0);
  assert.ok(new THREE.Box3().setFromObject(t.findNode('drive-utilities')).getCenter(new THREE.Vector3()).z>0);
- assert.ok(size.x>=26.90&&size.x<=27.10,`clearance-corrected longitudinal service envelope unexpected: ${size.x}`);assert.ok(size.y>=2.8&&size.y<=3.25,'inspection bridge / machine height envelope unexpected');assert.ok(size.z>=4.40&&size.z<=4.90,`lateral service envelope unexpected: ${size.z}`);
+ assert.ok(size.x>=18.8&&size.x<=19.6,`reality-recalibrated longitudinal service envelope unexpected: ${size.x}`);assert.ok(size.y>=2.8&&size.y<=3.25,'inspection bridge / machine height envelope unexpected');assert.ok(size.z>=4.40&&size.z<=4.90,`lateral service envelope unexpected: ${size.z}`);
  assert.ok(t.meshes.length<1500,`full-detail mesh budget exceeded: ${t.meshes.length}`);
  for(const id of ['feeder-separation','feeder-air','vacuum-table','feedboard-guides','feedboard-detection'])assert.ok(t.findNode(id),`missing ${id}`);
  for(const id of ['feeder-pile-guides','feeder-head-linkage','feeder-rear-edge','feedboard-transport','feedboard-register','feedboard-infeed-gripper'])assert.ok(t.findNode(id),`missing ${id}`);
@@ -119,23 +119,22 @@ test('PU1 primary cylinders are ordered and have no volumetric overlap',()=>{
 });
 
 
-test('PU1 operator access bay keeps steps clear of covers and PU2',()=>{
+test('PU1 operator access stays on the side gallery without stretching the compact process pitch',()=>{
  const t=new OffsetMachineTemplate(),layout=t.root.userData.pu1ExteriorLayout;
- assert.equal(layout.dimensionUnit,'PHOTO_CORRECTED_INTERUNIT_ACCESS');
- assert.ok(layout.accessBay>=.59,'PU1-PU2 access bay is still too narrow for operator landing');
+ assert.equal(layout.dimensionUnit,'102_PLATFORM_PITCH_WITH_EXTERNAL_ACCESS');
+ assert.ok(layout.accessBay>=.08&&layout.accessBay<=.16,'PU1-PU2 seam should remain compact');
  const frame1=new THREE.Box3().setFromObject(t.findNode('press-0-frame'));
  const frame2=new THREE.Box3().setFromObject(t.findNode('press-1-frame'));
  const steps=new THREE.Box3().setFromObject(t.findNode('press-0-steps'));
  const cover=new THREE.Box3().setFromObject(t.findNode('press-0-cover'));
- const drive=new THREE.Box3().setFromObject(t.findNode('press-0-drive'));
- assert.ok(frame2.min.x-frame1.max.x>=.59,'PU1-PU2 exterior frame gap is insufficient');
+ assert.ok(frame2.min.x-frame1.max.x>=.08,'PU1-PU2 frame seam collapsed');
  assert.equal(steps.intersectsBox(cover),false,'operator steps overlap PU1 cover');
- assert.ok(steps.min.x>=frame1.max.x-.001,'operator footplate must meet but not penetrate PU1 frame');
- assert.ok(steps.max.x<=frame2.min.x+.001,'operator footplate must meet but not penetrate PU2 frame');
- assert.ok(drive.max.x<frame2.min.x,'drive-side PU1 step/cover intrudes into PU2 frame');
+ assert.ok(steps.min.x>=frame1.max.x-.015,'operator seam access must not penetrate PU1 frame');
+ assert.ok(steps.max.x<=frame2.min.x+.015,'operator seam access must not penetrate PU2 frame');
+ assert.ok(steps.min.z<-1.25,'operator-side approach must project outside the process body');
  t.dispose();
 });
-test('all seven inter-PU bays match the broad-step and deep-platform proportions in IMG_1662',()=>{
+test('all seven inter-PU seams keep compact process pitch with mirrored external OS/DS access',()=>{
  const t=new OffsetMachineTemplate();
  for(let i=0;i<7;i++){
   const frameA=new THREE.Box3().setFromObject(t.findNode(`press-${i}-frame`));
@@ -143,16 +142,15 @@ test('all seven inter-PU bays match the broad-step and deep-platform proportions
   const stairs=new THREE.Box3().setFromObject(t.findNode(`press-${i}-steps`));
   const dsStairs=new THREE.Box3().setFromObject(t.findNode(`press-${i}-drive-steps`));
   const landing=new THREE.Box3().setFromObject(t.findNode(`press-${i}-gap-footplate`));
-  assert.ok(landing.min.x<=frameA.max.x+.01,`PU${i+1}/PU${i+2} footplate leaves an upstream hole`);
-  assert.ok(landing.max.x>=frameB.min.x-.01,`PU${i+1}/PU${i+2} footplate leaves a downstream hole`);
-  assert.ok(stairs.min.y<=.05&&stairs.max.y>=1.19,`PU${i+1}/PU${i+2} landing does not cover the gripper system`);
-  assert.ok(stairs.min.z<=-2.20&&stairs.max.z>=1.09,`PU${i+1}/PU${i+2} approach and full-width landing are incomplete`);
   const transfer=new THREE.Box3().setFromObject(t.findNode(`transfer-pu${i+1}-pu${i+2}`));
-  assert.ok(landing.max.y>=transfer.max.y+.15,`PU${i+1}/PU${i+2} footplate is not above the gripper transfer`);
-  assert.ok(landing.min.z<=transfer.min.z&&landing.max.z>=transfer.max.z,`PU${i+1}/PU${i+2} footplate does not cover the gripper laterally`);
-  assert.ok(dsStairs.min.x>=frameA.max.x-.001&&dsStairs.max.x<=frameB.min.x+.001,`PU${i+1}/PU${i+2} DS stair is not inside the clear bay`);
-  assert.ok(dsStairs.min.y<=.05&&dsStairs.max.y>=.76,`PU${i+1}/PU${i+2} DS stair height does not match OS`);
-  assert.ok(dsStairs.min.z>=1.09&&dsStairs.max.z>=2.20,`PU${i+1}/PU${i+2} DS stair is not the lateral mirror of OS`);
+  const gap=frameB.min.x-frameA.max.x;
+  assert.ok(gap>=.08&&gap<=.16,`PU${i+1}/PU${i+2} seam gap is not compact: ${gap}`);
+  assert.ok(landing.min.x>=frameA.max.x-.015&&landing.max.x<=frameB.min.x+.015,`PU${i+1}/PU${i+2} seam bridge penetrates a unit`);
+  assert.ok(landing.max.y>=transfer.max.y+.12,`PU${i+1}/PU${i+2} seam bridge is not above the gripper transfer`);
+  assert.ok(landing.min.z<=transfer.min.z&&landing.max.z>=transfer.max.z,`PU${i+1}/PU${i+2} bridge does not cover the transfer laterally`);
+  assert.ok(stairs.min.x>=frameA.max.x-.015&&stairs.max.x<=frameB.min.x+.015,`PU${i+1}/PU${i+2} OS access penetrates a unit`);
+  assert.ok(dsStairs.min.x>=frameA.max.x-.015&&dsStairs.max.x<=frameB.min.x+.015,`PU${i+1}/PU${i+2} DS access penetrates a unit`);
+  assert.ok(stairs.min.z<-1.25&&dsStairs.max.z>1.25,`PU${i+1}/PU${i+2} OS/DS access does not project outside the process envelope`);
  }
  assert.equal(t.findNode('press-7-steps').children.length,0,'PU8 legacy steps must not overlap the dedicated coater access');
  assert.equal(t.findNode('press-7-drive-steps'),null,'PU8 must not create a duplicate drive-side transition stair');
@@ -291,22 +289,22 @@ test('inspection bridge remains above the press housings without inflating the m
  t.dispose();
 });
 
-test('photo-corrected dimensional contract preserves process order and operator access',()=>{
+test('reality-recalibrated dimensional contract preserves process order without fake human-width PU gaps',()=>{
  const d=OFFSET5_DIMENSIONS,a=offset5DimensionAudit();
- assert.equal(d.structuralBody.length,26.00);
- assert.equal(d.structuralBody.width,3.92);
- assert.equal(d.serviceInclusive.length,27.00);
- assert.equal(d.serviceInclusive.width,4.60);
- assert.equal(d.repeatedPitch.value,1.95);
+ assert.equal(d.structuralBody.length,18.50);
+ assert.equal(d.structuralBody.width,3.05);
+ assert.equal(d.serviceInclusive.length,19.25);
+ assert.equal(d.serviceInclusive.width,4.76);
+ assert.equal(d.repeatedPitch.value,1.22);
  assert.equal(OFFSET5_UNIT_CENTERS.length,8);
- for(let i=1;i<OFFSET5_UNIT_CENTERS.length;i++)assert.ok(Math.abs((OFFSET5_UNIT_CENTERS[i]-OFFSET5_UNIT_CENTERS[i-1])-1.95)<1e-9);
- assert.ok(a.puGap>=.72,'repeated PU access bay should fit the full landing');
- assert.ok(a.pu1ToPU2Gap>=.74,'PU1-PU2 access bay should stay open');
+ for(let i=1;i<OFFSET5_UNIT_CENTERS.length;i++)assert.ok(Math.abs((OFFSET5_UNIT_CENTERS[i]-OFFSET5_UNIT_CENTERS[i-1])-1.22)<1e-9);
+ assert.ok(a.puGap>=.08&&a.puGap<=.16,'repeated PU seam should stay compact');
+ assert.ok(a.pu1ToPU2Gap>=.08&&a.pu1ToPU2Gap<=.16,'PU1-PU2 seam should stay compact');
  assert.ok(a.feederToBoardGap>-.08,'feeder/register transition overlaps excessively');
  assert.ok(a.boardToPU1Gap>0,'register table and PU1 overlap');
- assert.ok(a.pu8ToCoaterGap>=.74,'PU8/coater access landing is too narrow');
- assert.ok(a.coaterToDryerGap>=.64,'coater/dryer service transition is too narrow');
- assert.ok(a.dryerToDeliveryGap>=.69,'dryer/delivery access landing is too narrow');
+ assert.ok(a.pu8ToCoaterGap>=.04&&a.pu8ToCoaterGap<.20,'PU8/coater transition should be compact');
+ assert.ok(a.coaterToDryerGap>=.04&&a.coaterToDryerGap<.25,'coater/dryer transition should be compact');
+ assert.ok(a.dryerToDeliveryGap>=.04&&a.dryerToDeliveryGap<.30,'dryer/delivery transition should be compact');
 });
 
 test('all eight printing-unit frames preserve the calibrated pitch and stay non-overlapping',()=>{
@@ -319,7 +317,7 @@ test('all eight printing-unit frames preserve the calibrated pitch and stay non-
  for(let i=0;i<7;i++){
    const a=new THREE.Box3().setFromObject(t.findNode(`press-${i}-frame`));
    const b=new THREE.Box3().setFromObject(t.findNode(`press-${i+1}-frame`));
-   assert.ok(b.min.x-a.max.x>=.72,`PU${i+1}-PU${i+2} frame gap too narrow`);
+   assert.ok(b.min.x-a.max.x>=.08&&b.min.x-a.max.x<=.16,`PU${i+1}-PU${i+2} frame seam is not compact`);
  }
  t.dispose();
 });
