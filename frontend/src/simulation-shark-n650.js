@@ -20,6 +20,11 @@ export class SharkN650ProcessSimulation{
   this.scanStart=progressAtX(this.curve,-.12-.54/2);
   this.scanEnd=progressAtX(this.curve,-.12+.54/2);
   this.decisionAt=this.scanEnd+.12;
+  this.returnBranchStartT=.70;
+  this.returnBranchEndT=.92;
+  this.returnBranchStart=this.curve.getPointAt(this.returnBranchStartT).clone();
+  this.goodLaneEntry=new THREE.Vector3(2.48,.755,-.18);
+  this.badLaneEntry=new THREE.Vector3(2.48,.585,.52);
   this.staticDeliveryReferences=template.meshes.filter(m=>m.userData.returnReference);
   this.staticDeliveryVisibility=this.staticDeliveryReferences.map(m=>m.visible);
   const pathGeo=new THREE.BufferGeometry().setFromPoints(this.curve.getPoints(210)),pathMat=new THREE.LineDashedMaterial({color:0x3d84a6,dashSize:.055,gapSize:.035,transparent:true,opacity:.54});
@@ -43,7 +48,7 @@ export class SharkN650ProcessSimulation{
    sheetsVisible:this.blanks.filter(b=>b.mesh.visible).length,pileSheetsVisible:this.goodStack.filter(p=>p.visible).length,rejectSheetsVisible:this.badStack.filter(p=>p.visible).length,
    rotorCount:this.rotors.length,oscillatorCount:this.suckers.length,mechanismCount:this.rotors.length+this.suckers.length+this.lights.length+1,pathVisible:this.pathVisible,inkFlowVisible:false,inkFlowCount:0,uvLampCount:0,uvActive:false,
    feederSuctionActive:this.feederSuctionActive,feederSuctionReferenceOnly:this.feederSuctionReferenceOnly,transferDriveActive:this.transferDriveActive,goodReturnDriveActive:this.goodReturnDriveActive,badReturnDriveActive:this.badReturnDriveActive,transferVacuumReady:this.transferVacuumReady,transportEncoderActive:this.transportEncoderActive,blankPresenceTrigger:this.blankPresenceTrigger,lightingProgramReady:this.lightingProgramReady,cameraTriggerActive:this.cameraTriggerActive,captureComplete:this.captureComplete,scanActive:this.scanActive,processingActive:this.processingActive,processingComplete:this.processingComplete,decisionReady:this.decisionReady,rejectPermit:this.rejectPermit,rejectConfirmed:this.rejectConfirmed,goodReturnConfirmed:this.goodReturnConfirmed,badReturnConfirmed:this.badReturnConfirmed,negativePitchCapabilityReference:this.negativePitchCapabilityReference,negativePitchActive:this.negativePitchActive,negativePitchOverlapReference:this.negativePitchOverlapReference,negativePitchPublishedCapacityGainPercent:this.negativePitchPublishedCapacityGainPercent,transportMode:'NEGATIVE_PITCH_FULL_SUCTION_OFFLINE_DEMO_REFERENCE',goodBadReturnLineOfficial:true,interlockSafe:this.interlockSafe,rejectTrackingActive:this.rejectTrackingActive,demoRejectActive:this.demoRejectActive,goodRoutingActive:this.goodRoutingActive,badRoutingActive:this.badRoutingActive,
-   demoRejectOnly:true,demoRejectActuator:this.demoRejectActuator,suffixDecoded:false,installedFeederModeVerified:false,installedCameraPackageVerified:false,installedRejectTypeVerified:false,installedCollectionModeVerified:false,deterministicDefectInjection:'EVERY_6TH_INSPECTED_BLANK_DEMO_ONLY',scanWindow:[this.scanStart,this.scanEnd],scanPositionPolicy:'BLANK_OCCUPIES_OPTICAL_TOWER',
+   demoRejectOnly:true,demoRejectActuator:this.demoRejectActuator,suffixDecoded:false,installedFeederModeVerified:false,installedCameraPackageVerified:false,installedRejectTypeVerified:false,installedCollectionModeVerified:false,deterministicDefectInjection:'EVERY_6TH_INSPECTED_BLANK_DEMO_ONLY',scanWindow:[this.scanStart,this.scanEnd],scanPositionPolicy:'BLANK_OCCUPIES_OPTICAL_TOWER',returnBranchPolicy:'TRACKED_BLANK_BRANCHES_FROM_DECISION_SPLIT_TO_GOOD_OR_BAD_RETURN_ENTRY',
    activeRejectTrackingIds:[...this.activeRejectTrackingIds],activePassTrackingIds:[...this.activePassTrackingIds],trackedResults:{pass:this.blanks.filter(b=>b.result==='PASS_DEMO').length,reject:this.blanks.filter(b=>b.result==='REJECT_DEMO').length,pending:this.blanks.filter(b=>!b.result).length}};
  }
  start(){this.active=true;this.running=true;this.paused=false;this.completed=0;this.rejected=0;this.inspectedDemoCount=0;this.elapsed=0;this.lastNow=null;for(const b of this.blanks){b.lap=-1;b.result=null;b.captured=false;b.processed=false;b.decisionReady=false;b.outputDeposited=false;b.inspectedLap=-1;b.lastT=0;b.trackingId=null;b.decisionSequence=null;b.mesh.visible=false;}this.resetMechanisms();this.staticDeliveryReferences.forEach(m=>m.visible=false);this.onUpdate?.(this.state());return this.state();}
@@ -57,7 +62,22 @@ export class SharkN650ProcessSimulation{
  updateOptics(active){for(const l of this.lights){l.material.emissive?.setHex(active?0xe8f7ff:0x25323a);l.material.emissiveIntensity=active?2.25:.15;}}
  updateSuckers(active){this.feederSuctionActive=active;const pulse=.016*Math.sin(this.elapsed*9);this.suckers.forEach((s,i)=>{s.position.copy(this.suckerRest[i]);if(active)s.position.y-=Math.abs(pulse);});}
  assignInspectionResult(blank,lap){const seq=lap*this.blanks.length+blank.index;blank.result=(seq%6===0)?'REJECT_DEMO':'PASS_DEMO';blank.inspectedLap=lap;blank.decisionSequence=seq;blank.trackingId='SHARK-DEMO-'+String(seq).padStart(5,'0');this.inspectedDemoCount++;}
- outputPreviousResult(blank){if(blank.result==='REJECT_DEMO'){this.rejected++;const slot=(this.rejected-1)%this.badStack.length,m=this.badStack[slot];m.visible=true;m.position.set(2.48+(slot%10)*.095,.585+.003*(slot%3),this.badLaneZ);m.rotation.y=0;}else if(blank.result==='PASS_DEMO'){this.completed++;const slot=(this.completed-1)%this.goodStack.length,m=this.goodStack[slot];m.visible=true;m.position.set(2.48+(slot%12)*.095,.755+.003*(slot%3),this.goodLaneZ);m.rotation.y=0;}}
+ relayoutReturnStack(stack,entry,step){
+  const visible=stack.filter(m=>m.visible).sort((a,b)=>(a.userData.outputSerial??0)-(b.userData.outputSerial??0));
+  const count=visible.length;
+  visible.forEach((m,index)=>{
+   const age=count-1-index;
+   m.position.set(entry.x+age*step,entry.y+.003*(age%3),entry.z);
+   m.rotation.y=0;
+  });
+ }
+ outputPreviousResult(blank){
+  if(blank.result==='REJECT_DEMO'){
+   this.rejected++;const slot=(this.rejected-1)%this.badStack.length,m=this.badStack[slot];m.visible=true;m.userData.outputSerial=this.rejected;m.position.copy(this.badLaneEntry);this.relayoutReturnStack(this.badStack,this.badLaneEntry,.085);
+  }else if(blank.result==='PASS_DEMO'){
+   this.completed++;const slot=(this.completed-1)%this.goodStack.length,m=this.goodStack[slot];m.visible=true;m.userData.outputSerial=this.completed;m.position.copy(this.goodLaneEntry);this.relayoutReturnStack(this.goodStack,this.goodLaneEntry,.095);
+  }
+ }
  updateBlanks(){
   let scan=0,processing=0,processed=0,decisions=0,rejectTracked=false,rejectAtGate=false,rejectConfirmed=false,goodRoute=false,badRoute=false,goodConfirmed=false,badConfirmed=false,feed=false,feedCount=0,trigger=false;const rejectIds=[],passIds=[];const base=this.elapsed/7.2;
   for(const b of this.blanks){
@@ -69,7 +89,17 @@ export class SharkN650ProcessSimulation{
    if(b.processed&&!b.decisionReady&&t>=this.decisionAt){this.assignInspectionResult(b,lap);b.decisionReady=true;}
    if(b.processed)processed++;if(b.decisionReady)decisions++;
    b.mesh.visible=this.active;b.mesh.position.copy(this.curve.getPointAt(Math.min(.999,t)));if(t<.22){const compression=1-.12*(1-t/.22);b.mesh.position.x=-3.32+(b.mesh.position.x+3.32)*compression;}
-   if(t>=.70&&b.decisionReady&&b.result){const q=clamp((t-.70)/.20);if(b.result==='REJECT_DEMO'){b.mesh.position.z=THREE.MathUtils.lerp(0,this.badLaneZ,q);b.mesh.position.y+=Math.sin(q*Math.PI)*.045;rejectTracked=true;badRoute=true;if(b.trackingId)rejectIds.push(b.trackingId);if(t>=.74&&t<.88)rejectAtGate=true;if(t>=.86)rejectConfirmed=badConfirmed=true;}else{b.mesh.position.z=THREE.MathUtils.lerp(0,this.goodLaneZ,q);goodRoute=true;if(b.trackingId)passIds.push(b.trackingId);if(t>=.90)goodConfirmed=true;}}
+   if(t>=this.returnBranchStartT&&b.decisionReady&&b.result){
+    const q=clamp((t-this.returnBranchStartT)/(this.returnBranchEndT-this.returnBranchStartT)),eased=q*q*(3-2*q);
+    const target=b.result==='REJECT_DEMO'?this.badLaneEntry:this.goodLaneEntry;
+    b.mesh.position.lerpVectors(this.returnBranchStart,target,eased);
+    if(b.result==='REJECT_DEMO'){
+     b.mesh.position.y+=Math.sin(eased*Math.PI)*.045;rejectTracked=true;badRoute=true;
+     if(b.trackingId)rejectIds.push(b.trackingId);if(t>=.74&&t<.88)rejectAtGate=true;if(t>=.86)rejectConfirmed=badConfirmed=true;
+    }else{
+     goodRoute=true;if(b.trackingId)passIds.push(b.trackingId);if(t>=.90)goodConfirmed=true;
+    }
+   }
    if(t>=.96){if(!b.outputDeposited){this.outputPreviousResult(b);b.outputDeposited=true;}b.mesh.visible=false;}
    b.mesh.material.emissive?.setHex(t>=this.scanStart&&t<this.scanEnd?0x2f7a9d:b.result==='REJECT_DEMO'&&t>=this.decisionAt?0x6e2d27:0);b.mesh.material.emissiveIntensity=t>=this.scanStart&&t<this.scanEnd?.78:b.result==='REJECT_DEMO'&&t>=this.decisionAt?.42:0;b.lastT=t;
   }
