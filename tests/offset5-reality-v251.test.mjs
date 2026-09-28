@@ -468,6 +468,30 @@ test('Offset 5 feeder suction and register transport share one sheet cycle witho
  }finally{sim.dispose();m.dispose();}
 });
 
+test('Offset 5 delivery joggers move only while a sheet occupies the receiving zone',()=>{
+ const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
+ try{
+  assert.ok(sim.joggerMotions.length>0);
+  sim.start();sim.update(0);
+  assert.equal(sim.state().deliveryJoggerActive,false);
+  const initial=sim.joggerMotions.map(item=>item.initial.clone());
+  let sawActive=false,sawMoved=false;
+  for(let ms=16;ms<=16000;ms+=16){
+   sim.update(ms);
+   if(sim.state().deliveryJoggerActive){
+    sawActive=true;
+    sawMoved ||= sim.joggerMotions.some((item,i)=>item.object.position.distanceTo(initial[i])>.0001);
+   }
+  }
+  assert.equal(sawActive,true,'delivery receiving zone was never occupied');
+  assert.equal(sawMoved,true,'delivery joggers never actuated with an incoming sheet');
+  sim.stop();
+  assert.equal(sim.state().deliveryJoggerActive,false);
+  assert.ok(sim.joggerMotions.every((item,i)=>item.object.position.distanceTo(initial[i])<1e-12));
+  assert.equal(sim.state().deliveryJoggerPolicy,'ACTIVE_ONLY_WHILE_SHEET_OCCUPIES_RECEIVING_ZONE');
+ }finally{sim.dispose();m.dispose();}
+});
+
 test('Offset 5 delivery chain shares one forward rotation sense and the sheet brake visibly decelerates',()=>{
  const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
  try{
