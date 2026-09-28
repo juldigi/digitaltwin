@@ -68,6 +68,13 @@ test('SHARK adaptive low-detail hides service micro-detail while preserving towe
  }finally{model.dispose();}
 });
 
+test('SHARK recipe logic remains addressable but is not rendered as floating physical hardware',()=>{
+ const model=new SharkN650MachineTemplate();
+ try{
+  const recipe=model.findNode('shark650-process-recipe');assert.ok(recipe);assert.equal(recipe.userData.logicalOnly,true);assert.equal(recipe.userData.renderPolicy,'SOFTWARE_LOGIC_NOT_PHYSICAL_HARDWARE');assert.equal(recipe.visible,false);assert.equal(recipe.children.length,0);
+ }finally{model.dispose();}
+});
+
 test('SHARK rotor whitelist excludes suction cups camera lenses and air nozzles',()=>{
  const model=new SharkN650MachineTemplate(),sim=new SharkN650ProcessSimulation(model.root,model),allowed=/^(transport-pulley|transfer-drive-motor|transfer-encoder|vacuum-blower|inspection-encoder-wheel|good-return|good-return-motor|bad-return|bad-return-motor)$/;
  assert.equal(sim.rotors.length,30);assert.equal(sim.rotors.some(r=>!allowed.test(r.userData.mechanismRole||'')),false);assert.equal(sim.suckers.length,4);assert.equal(sim.airNozzles.length,3);
