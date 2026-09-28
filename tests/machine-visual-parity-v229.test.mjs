@@ -64,7 +64,7 @@ test('V229 POLAR remains bounded to verified EM-MON features and archive dimensi
  const boundary=POLAR115_TECHNICAL_SOURCES.find(x=>x.id==='POLAR-EM-EVIDENCE-BOUNDARY');
  assert.equal(photos?.confidence,'VERIFIED_VISUAL');
  assert.ok(photos?.supports?.some(x=>/small square industrial program display/i.test(x)));
- assert.ok(photos?.supports?.some(x=>/side tables/i.test(x)));
+ assert.ok(photos?.supports?.some(x=>/only one white perforated air-float side table/i.test(x)));
  assert.ok(boundary);
  const m=new Polar115MachineTemplate();
  assert.equal(m.root.userData.mainHousingProfile,'RECTANGULAR_ROUNDED_HEAD__NO_HALF_CYLINDER_ROOF');

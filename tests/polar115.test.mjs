@@ -10,7 +10,29 @@ import {POLAR115_TECHNICAL_SOURCES,POLAR115_PROCESS} from '../frontend/src/data/
 test('POLAR 115 EM-MON preserves BMJ identity and archive dimensional boundaries',()=>{
  assert.equal(POLAR115_SPEC.assetId,'BMJ-MCH-0001');assert.equal(POLAR115_SPEC.model,'115 EM MON');assert.equal(POLAR115_SPEC.serial,'5831536');assert.equal(POLAR115_SPEC.cuttingWidthM,1.15);
  assert.deepEqual(POLAR115_SPEC.referenceEnvelopeM,[2.65,2.54,1.65]);assert.deepEqual(POLAR115_SPEC.publishedWeightKg,[3200,3500]);assert.deepEqual(POLAR115_SPEC.publishedClampPressureDaN,[150,4500]);
- assert.ok(POLAR115_TECHNICAL_SOURCES.some(s=>s.id==='POLAR-115-SAFETY-MANUAL'));assert.ok(POLAR115_TECHNICAL_SOURCES.some(s=>s.id==='POLAR-EM-EVIDENCE-BOUNDARY'));const photos=POLAR115_TECHNICAL_SOURCES.find(s=>s.id==='BMJ-POLAR-PHOTOS-2026-09');assert.equal(photos?.confidence,'VERIFIED_VISUAL');assert.deepEqual(photos?.photoFiles,['IMG_2488.jpeg','IMG_2490.jpeg']);
+ assert.ok(POLAR115_TECHNICAL_SOURCES.some(s=>s.id==='POLAR-115-SAFETY-MANUAL'));assert.ok(POLAR115_TECHNICAL_SOURCES.some(s=>s.id==='POLAR-EM-EVIDENCE-BOUNDARY'));const photos=POLAR115_TECHNICAL_SOURCES.find(s=>s.id==='BMJ-POLAR-PHOTOS-2026-09');assert.equal(photos?.confidence,'VERIFIED_VISUAL');assert.deepEqual(photos?.photoFiles,['IMG_2488.jpeg','IMG_2489.jpeg','IMG_2490.jpeg','IMG_2491.jpeg']);
+});
+
+test('four BMJ photo angles place the white air table and rear drive on the photographed side',()=>{
+ const m=new Polar115MachineTemplate();m.root.updateMatrixWorld(true);
+ const left=m.findNode('polar-feed-left'),right=m.findNode('polar-feed-right');
+ const holeMeshes=m.meshes.filter(x=>x.userData.airNozzle);
+ assert.equal(holeMeshes.length,54,'the actual machine has a single perforated side table');
+ assert.ok(holeMeshes.every(x=>m.contains(right,x)));
+ assert.ok(!m.meshes.some(x=>x.userData.airNozzle&&m.contains(left,x)));
+ const white=right.localToWorld(new THREE.Vector3()),drive=m.findNode('polar-housing-motor-end').localToWorld(new THREE.Vector3(1.2,0,0));
+ assert.ok(white.x<0&&drive.x<0,'white table and side drive must appear on the same photographed machine side');
+ assert.ok(m.root.userData.photoOrientation.includes('PERFORATED_TABLE_FRONT_RIGHT'));
+ const rearSlot=m.meshes.find(x=>x.userData.evidence==='IMG_2490_2491_REAR_TABLE_GUIDE_SLOT');assert.ok(rearSlot);
+ m.dispose();
+});
+
+test('POLAR simulation transfers the stock from the sole air table before gauge and cut',()=>{
+ const m=new Polar115MachineTemplate(),s=new Polar115ProcessSimulation(m.root,m);s.start();let now=1000;s.update(now);
+ assert.equal(s.stock.position.x,s.stockStartCenterX);
+ for(let i=0;i<120;i++){now+=10;s.update(now);}
+ assert.ok(Math.abs(s.stock.position.x)<.001);assert.equal(s.cutPerformed,false);
+ assert.equal(s.stock.visible,true);s.dispose();m.dispose();
 });
 
 test('POLAR geometry uses a vertical knife blade and keeps safety hardware explicit',()=>{

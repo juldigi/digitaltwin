@@ -7,11 +7,11 @@ import {V122_SOURCE_STATS} from './data/research-v122.js';
 
 export class Polar115MachineTemplate{
  constructor(){
-  this.root=new THREE.Group();this.root.name='POLAR-115-EM';this.parts=[];this.nodes=[];this.meshes=[];this.materials=[];this.geometries=[];this.activeMeshes=[];this.exteriorOpen=false;
+  this.root=new THREE.Group();this.root.name='POLAR-115-EM';this.root.scale.x=-1;this.parts=[];this.nodes=[];this.meshes=[];this.materials=[];this.geometries=[];this.activeMeshes=[];this.exteriorOpen=false;
   this.palette={body:0xb8bbb5,bodyDark:0x8f938f,dark:0x252b2e,table:0xb6b8b2,tableDark:0x514a43,steel:0xa9b0b1,accent:0x405961,warning:0xd0a338,screen:0x173e34,red:0xb6302d,paper:0xece5d2,black:0x111517,air:0x8bbad0};
   this.build();this.enrichV122();this.taxonomy=POLAR115_TAXONOMY;this.taxonomyById=new Map(this.taxonomy.map(n=>[n.id,n]));
   for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}this.root.updateMatrixWorld(true);
-  this.root.userData={assetId:POLAR115_SPEC.assetId,nodeId:'POLAR-115-EM',model:POLAR115_SPEC.model,serial:POLAR115_SPEC.serial,spec:POLAR115_SPEC,sources:POLAR115_TECHNICAL_SOURCES,machineEnvelope:{reference:POLAR115_REFERENCE_DIMENSIONS},geometryStatus:'DEDICATED_BMJ_PHOTO_MATCHED__ARCHIVE_DIMENSIONS_NOT_INSTALLATION_CAD',engineeringDimensions:false,evidenceBoundary:POLAR115_SPEC.evidenceBoundary,researchVersion:'V123_PHOTO_MATCHED',researchSourceCount:V122_SOURCE_STATS.total,detailPass:'V123_POLAR115_BMJ_PHOTO_MATCHED',actualPhotoEvidence:'BMJ-POLAR-PHOTOS-2026-09',mainHousingProfile:'RECTANGULAR_ROUNDED_HEAD__NO_HALF_CYLINDER_ROOF'};
+  this.root.userData={assetId:POLAR115_SPEC.assetId,nodeId:'POLAR-115-EM',model:POLAR115_SPEC.model,serial:POLAR115_SPEC.serial,spec:POLAR115_SPEC,sources:POLAR115_TECHNICAL_SOURCES,machineEnvelope:{reference:POLAR115_REFERENCE_DIMENSIONS},geometryStatus:'DEDICATED_BMJ_PHOTO_MATCHED__ARCHIVE_DIMENSIONS_NOT_INSTALLATION_CAD',engineeringDimensions:false,evidenceBoundary:POLAR115_SPEC.evidenceBoundary,researchVersion:'V123_PHOTO_MATCHED',photoRevision:'V260_FOUR_BMJ_PHOTO_ANGLES',researchSourceCount:V122_SOURCE_STATS.total,detailPass:'V123_POLAR115_BMJ_PHOTO_MATCHED',actualPhotoEvidence:'BMJ-POLAR-PHOTOS-2026-09',mainHousingProfile:'RECTANGULAR_ROUNDED_HEAD__NO_HALF_CYLINDER_ROOF',photoOrientation:'MIRRORED_LOCAL_X__PERFORATED_TABLE_FRONT_RIGHT__DRIVE_REAR_LEFT'};
   this.refineExteriorV237();this.markSilhouetteCriticality();
   // Exterior refinement adds selectable nodes after the first rest-pose capture.
   for(const n of this.nodes){n.userData.rest??=n.position.clone();n.userData.restQuaternion??=n.quaternion.clone();}
@@ -41,10 +41,10 @@ export class Polar115MachineTemplate{
   const mainDeck=this.box(center,[1.48,.08,.74],[-.04,.90,-.36],'tableDark',.018);mainDeck.userData.evidence=photoEvidence;
   const bevel=this.box(center,[.34,.08,.34],[.56,.90,-.02],'tableDark',.018);bevel.rotation.y=-Math.PI/4;bevel.userData.tableBevel=true;bevel.userData.evidence=photoEvidence;
 
-  const left=this.group(feed,'polar-feed-left','Left perforated air-float side table',[-1.015,0,0]);
-  const leftDeck=this.box(left,[.60,.06,.72],[0,.90,-.36],'table',.018);leftDeck.userData.evidence=photoEvidence;this.holes(left,.60,.72,.90,-.36,5,6);
-  const right=this.group(feed,'polar-feed-right','Right perforated air-float side table',[1.015,0,0]);
-  const rightDeck=this.box(right,[.60,.06,.72],[0,.90,-.36],'table',.018);rightDeck.userData.evidence=photoEvidence;this.holes(right,.60,.72,.90,-.36,5,6);
+  const left=this.group(feed,'polar-feed-left','Plain dark side extension',[-1.015,0,0]);
+  const leftDeck=this.box(left,[.60,.06,.72],[0,.90,-.36],'tableDark',.018);leftDeck.userData.evidence='IMG_2488_FRONT_LEFT_DARK_EXTENSION';
+  const right=this.group(feed,'polar-feed-right','Single perforated air-float side table',[1.015,0,0]);
+  const rightDeck=this.box(right,[.60,.06,.92],[0,.90,-.46],'table',.018);rightDeck.userData.evidence='IMG_2488_2489_FRONT_RIGHT_WHITE_PERFORATED';this.holes(right,.60,.92,.90,-.46,6,9);
   for(const g of [left,right])for(const x of [-.22,.22]){
    const leg=this.box(g,[.028,.82,.028],[x,.45,-.22],'dark',.006);leg.userData.evidence=photoEvidence;
   }
@@ -54,6 +54,8 @@ export class Polar115MachineTemplate{
   // Long back table and guides remain archive-dimension bounded; photo confirms the dark steel surface.
   const rearTable=this.group(feed,'polar-feed-rear','Back table');
   const rearDeck=this.box(rearTable,[1.44,.06,1.15],[0,.90,.565],'tableDark',.018);rearDeck.userData.evidence=photoEvidence;
+  const rearSlot=this.box(rearTable,[.035,.003,.91],[.22,.933,.58],'black',.001);rearSlot.userData={...rearSlot.userData,evidence:'IMG_2490_2491_REAR_TABLE_GUIDE_SLOT',detail:true};
+  for(const x of [-.68,.68]){const guide=this.box(rearTable,[.035,.13,.80],[x,1.005,.62],'tableDark',.004);guide.userData.evidence='IMG_2490_2491_REAR_SIDE_GUIDES';}
 
   const gauge=this.group(this.root,'polar-gauge','Backgauge Positioning',[0,0,0],[0,.20,.36]);
   const beam=this.group(gauge,'polar-gauge-beam','Backgauge beam');this.box(beam,[1.20,.14,.13],[0,1.02,.70],'accent',.018);
