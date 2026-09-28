@@ -344,9 +344,9 @@ export class DianaEye55MachineTemplate{
   if(inspection){
    const bezel=this.group(inspection,'diana55-front-aperture-bezel-v259','Operator-side inspection aperture bezel');
    const z=-.825;
-   for(const x of [-.66,.66]){const side=this.box(bezel,[.08,.82,.05],[x,1.36,z],'dark',.010);side.userData.apertureBezel=true;}
-   for(const y of [.94,1.78]){const rail=this.box(bezel,[1.40,.08,.05],[0,y,z],'dark',.010);rail.userData.apertureBezel=true;}
-   const sill=this.box(bezel,[1.22,.07,.10],[0,.91,z],'red',.008);sill.userData.familyAccent=true;sill.userData.apertureBezel=true;
+   for(const x of [-.66,.66]){const side=this.cover(this.box(bezel,[.08,.82,.05],[x,1.36,z],'dark',.010));side.userData.apertureBezel=true;}
+   for(const y of [.94,1.78]){const rail=this.cover(this.box(bezel,[1.40,.08,.05],[0,y,z],'dark',.010));rail.userData.apertureBezel=true;}
+   const sill=this.cover(this.box(bezel,[1.22,.07,.10],[0,.91,z],'red',.008));sill.userData.familyAccent=true;sill.userData.apertureBezel=true;
    bezel.userData.sourceBoundary='HEIDELBERG_DIANA_EYE55_OFFICIAL_FRONT_APERTURE_IMAGE';
   }
 
@@ -361,9 +361,9 @@ export class DianaEye55MachineTemplate{
   const window=this.findNode('diana55-inspection-window');
   if(window){
    window.userData.scanWindowPolicy='DARK_VIEWING_WINDOW_BRIGHTENS_SUBTLY_ONLY_DURING_ACTIVE_SCAN';
-   for(const mesh of window.children.filter(o=>o.isMesh&&o.userData.inspectionAperture))mesh.userData.scanWindow=true;
+   for(const mesh of window.children.filter(o=>o.isMesh&&o.userData.inspectionAperture)){mesh.userData.scanWindow=true;mesh.userData.exteriorCover=true;}
    for(const z of [-.778,.778]){
-    const backing=this.box(window,[1.16,.60,.012],[0,1.36,z],'black',.010);
+    const backing=this.cover(this.box(window,[1.16,.60,.012],[0,1.36,z],'black',.010));
     backing.userData.apertureBacking=true;backing.userData.silhouetteCritical=true;
    }
   }
