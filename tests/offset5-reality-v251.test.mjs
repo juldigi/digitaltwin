@@ -158,6 +158,26 @@ test('Offset 5 clears a full delivery pile before starting a new pile',()=>{
  }finally{sim.dispose();m.dispose();}
 });
 
+test('Offset 5 Focusight illumination follows sheet occupancy and restores after stop',()=>{
+ const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
+ try{
+  assert.ok(sim.inspectionIllumination.length>0,'inspection lighting material was not collected');
+  const initial=sim.inspectionIllumination.map(x=>x.initialIntensity);
+  sim.start();sim.update(0);
+  let seen=false;
+  for(let ms=16;ms<=14000;ms+=16){
+   sim.update(ms);
+   if(sim.state().inspectionIlluminationActive){seen=true;break;}
+  }
+  assert.equal(seen,true,'Focusight illumination never followed a passing sheet');
+  assert.ok(sim.inspectionIllumination.every(x=>x.material.emissiveIntensity>=.42));
+  assert.equal(sim.state().inspectionIlluminationPolicy,'SHEET_OCCUPANCY_TRIGGERED_EXISTING_FOCUSIGHT_LIGHTING_ONLY');
+  sim.stop();
+  assert.equal(sim.state().inspectionIlluminationActive,false);
+  assert.deepEqual(sim.inspectionIllumination.map(x=>x.material.emissiveIntensity),initial);
+ }finally{sim.dispose();m.dispose();}
+});
+
 test('Offset 5 first delivered sheet immediately joins the empty pile',()=>{
  const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
  try{
