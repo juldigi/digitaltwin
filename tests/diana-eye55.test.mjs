@@ -9,7 +9,7 @@ import {DIANA_EYE55_TECHNICAL_SOURCES} from '../frontend/src/data/sources-diana-
 
 test('DIANA station labels use clear Indonesian while preserving technical terms',()=>{
  assert.deepEqual(DIANA_EYE55_STATIONS.map(s=>s.label),[
-  'Friction feeder / alignment blank','Transport suction-belt','Enclosure inspeksi camera + LED','Pemrosesan citra','Ejection / sorting blank','Delivery blank accepted'
+  'Pengumpanan blank / friction feeder & alignment','Transport suction-belt','Enclosure inspeksi camera + LED','Pemrosesan citra','Pemisahan reject / ejection blank','Delivery blank accepted'
  ]);
 });
 
