@@ -59,7 +59,7 @@ export class Polar115MachineTemplate{
   const rearTable=this.group(feed,'polar-feed-rear','Back table');
   const rearDeck=this.box(rearTable,[1.44,.06,1.15],[0,.90,.565],'tableDark',.018);rearDeck.userData.evidence=photoEvidence;
   const rearSlot=this.box(rearTable,[.035,.003,.91],[.22,.933,.58],'black',.001);rearSlot.userData={...rearSlot.userData,evidence:'IMG_2490_2491_REAR_TABLE_GUIDE_SLOT',detail:true};
-  for(const x of [-.68,.68]){const guide=this.box(rearTable,[.035,.13,.80],[x,1.005,.62],'tableDark',.004);guide.userData.evidence='IMG_2490_2491_REAR_SIDE_GUIDES';}
+  for(const x of [-.68,.68]){const guide=this.box(rearTable,[.035,.23,1.02],[x,1.04,.62],'tableDark',.004);guide.userData.evidence='IMG_2490_2491_REAR_SIDE_GUIDES';}
 
   const gauge=this.group(this.root,'polar-gauge','Backgauge Positioning',[0,0,0],[0,.20,.36]);
   const beam=this.group(gauge,'polar-gauge-beam','Backgauge beam');this.box(beam,[1.20,.14,.13],[0,1.02,.70],'accent',.018);
@@ -103,7 +103,7 @@ export class Polar115MachineTemplate{
   const estop=this.group(safety,'polar-safety-estop','Front-left mushroom safety button');
   const estopBase=this.cyl(estop,.040,.018,[-.76,1.184,-.57],'warning','y');estopBase.userData.evidence=photoEvidence;
   const estopButton=this.cyl(estop,.027,.022,[-.76,1.204,-.57],'red','y');estopButton.userData.evidence=photoEvidence;
-  const rear=this.group(safety,'polar-safety-rear','Rear guard reference');this.cover(this.box(rear,[1.48,.24,.035],[0,1.13,1.16],'body',.018));
+  const rear=this.group(safety,'polar-safety-rear','Rear side guards');for(const x of [-.72,.72])this.cover(this.box(rear,[.035,.18,.12],[x,1.08,1.10],'body',.008));
 
   // Actual control face: small square display, keypad/controls and taped operating sheets.
   const control=this.group(this.root,'polar-control','EM-MONITOR Control',[0,0,0],[0,.24,-.20]);control.userData.evidence=photoEvidence;
@@ -134,7 +134,7 @@ export class Polar115MachineTemplate{
   housing.userData.evidence=photoEvidence;
   // IMG_2490/2491 look through the rear opening at the vertical finger field.
   // A solid rear slab used to bury the back table and backgauge inside the housing.
-  const rearBrow=this.cover(this.box(housing,[2.06,.32,.24],[0,1.64,.83],'bodyDark',.09));rearBrow.userData.evidence='IMG_2490_2491_REAR_TOP_BROW';
+  const rearBrow=this.cover(this.box(housing,[2.06,.44,.24],[0,1.58,.83],'body',.09));rearBrow.userData.evidence='IMG_2490_2491_REAR_FULL_HEIGHT_FACE';
   for(const x of [-.87,.87]){const jamb=this.cover(this.box(housing,[.32,.78,.22],[x,1.18,.84],'body',.07));jamb.userData.evidence='IMG_2490_2491_OPEN_REAR_JAMB';}
   const sill=this.box(housing,[1.50,.075,.22],[0,.68,.84],'bodyDark',.014);sill.userData.evidence='IMG_2490_2491_REAR_OPENING_LOW_SILL';
   const leftPillar=this.cover(this.box(housing,[.34,.92,.54],[-.87,1.22,.42],'body',.11));leftPillar.userData.evidence=photoEvidence;
@@ -143,11 +143,15 @@ export class Polar115MachineTemplate{
 
   // Operator-right side belt-drive enclosure with circular inspection window, visible in rear-side photo.
   const motorEnd=this.group(housing,'polar-housing-motor-end','Side belt-drive housing with inspection window',[0,0,0],[.14,.06,0]);motorEnd.userData.evidence=photoEvidence;
-  const motorCover=this.cover(this.box(motorEnd,[.42,1.10,.58],[1.20,.68,.78],'body',.13));motorCover.userData.evidence=photoEvidence;
+  const motorCover=this.cover(this.box(motorEnd,[.42,.78,.50],[1.20,.46,1.02],'body',.10));motorCover.rotation.x=-.18;motorCover.userData.evidence='IMG_2490_REAR_LEFT_FLOOR_DRIVE_CASING';
+  const driveFoot=this.box(motorEnd,[.44,.09,.52],[1.20,.045,1.13],'dark',.025);driveFoot.userData.evidence='IMG_2490_REAR_LEFT_FLOOR_DRIVE_FOOT';
   const windowRing=this.cyl(motorEnd,.16,.025,[1.415,.76,.78],'dark','x');windowRing.userData.detail=true;windowRing.userData.inspectionWindow=true;windowRing.userData.evidence=photoEvidence;
   const windowGlass=this.cyl(motorEnd,.12,.028,[1.425,.76,.78],'screen','x');windowGlass.userData.detail=true;windowGlass.userData.evidence=photoEvidence;
   const motor=this.active(this.cyl(motorEnd,.16,.42,[1.17,.20,.74],'dark','x'),'belt-drive-motor');motor.userData.evidence=photoEvidence;
   this.cyl(motorEnd,.07,.16,[1.17,.35,.74],'steel','x');
+  const rearFingerField=this.group(housing,'polar-housing-rear-fingers','Rear cutting throat guard fingers');rearFingerField.userData.evidence='IMG_2490_2491_REAR_FINGER_FIELD';
+  const rearThroat=this.box(rearFingerField,[1.43,.42,.025],[0,1.12,.96],'black',.008);rearThroat.userData.detail=true;
+  for(let i=0;i<29;i++){const finger=this.box(rearFingerField,[.012,.38,.016],[-.67+i*.048,1.10,.978],'dark',.002);finger.userData.detail=true;finger.userData.evidence='IMG_2490_2491_REAR_FINGER_FIELD';}
 
   const decal=this.group(housing,'polar-housing-decal','BAHAYA TERJEPIT pinch-point warning decal');decal.userData.detail=true;decal.userData.evidence=photoEvidence;
   this.box(decal,[.22,.12,.006],[-.72,1.49,.138],'red',0,'Pinch-Point Warning');this.box(decal,[.20,.07,.006],[-.72,1.43,.136],'paper',0);

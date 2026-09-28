@@ -34,6 +34,11 @@ test('four BMJ photo angles place the white air table and rear drive on the phot
  assert.ok(new THREE.Box3().setFromObject(apron).min.y<new THREE.Box3().setFromObject(centerDeck).min.y-.1,'dark cutting surface has the photographed thick front apron');
  assert.ok(m.root.userData.photoOrientation.includes('PERFORATED_TABLE_FRONT_RIGHT'));
  const rearSlot=m.meshes.find(x=>x.userData.evidence==='IMG_2490_2491_REAR_TABLE_GUIDE_SLOT');assert.ok(rearSlot);
+ const rearFingers=m.findNode('polar-housing-rear-fingers');
+ assert.ok(rearFingers.children.filter(x=>x.userData.evidence==='IMG_2490_2491_REAR_FINGER_FIELD').length>=25,'rear throat presents the dense finger field visible from both rear angles');
+ const driveCover=m.findNode('polar-housing-motor-end').children.find(x=>x.userData.evidence==='IMG_2490_REAR_LEFT_FLOOR_DRIVE_CASING');
+ const driveBounds=new THREE.Box3().setFromObject(driveCover);
+ assert.ok(driveBounds.min.y<.08&&driveBounds.max.y>.8,'rear-left side drive casing reaches the floor beside the machine');
  m.dispose();
 });
 
