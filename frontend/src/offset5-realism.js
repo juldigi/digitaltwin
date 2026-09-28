@@ -685,10 +685,14 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
     dryerPath?.traverse(mesh=>{
       if(!mesh.isMesh||mesh.geometry?.type!=='CylinderGeometry')return;
       const radius=mesh.geometry.parameters.radiusTop;
-      this.addRotor(mesh,-1,this.baseMetersPerSecond/(Math.PI*2*this.sheetCyclesPerSecond*radius),{
-        role:'dryer-sheet-transport-roller',
-        source:'DRYER_CONTACT_SURFACE_SPEED_MATCHED_TO_SHEET_REFERENCE'
-      });
+      this.addRotor(mesh,-1,1,{role:'dryer-sheet-transport-roller'});
+      const rotor=this.rotors.find(item=>item.mesh===mesh);
+      if(!rotor)return;
+      rotor.sign=-1;
+      rotor.rate=this.baseMetersPerSecond/(Math.PI*2*this.sheetCyclesPerSecond*radius);
+      rotor.role='dryer-sheet-transport-roller';
+      rotor.source='DRYER_CONTACT_SURFACE_SPEED_MATCHED_TO_SHEET_REFERENCE';
+      rotor.visualSpeedRatio=1;
     });
 
     // Coating contact train: keep the existing chamber/coating/impression hardware,
