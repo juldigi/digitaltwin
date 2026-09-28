@@ -15,6 +15,8 @@ export class DianaEye55ProcessSimulation{
   this.gateMount=template.findNode('diana55-reject-gate');this.gate=this.gateMount?.children.find(o=>o.isMesh&&o.userData.rejectGate)||null;this.gateRest=this.gate?.rotation.z||0;
   root.traverse(o=>{if(o.isMesh&&o.userData.rotor)this.rotors.push(o);if(o.isMesh&&o.userData.inspectionLight)this.lights.push(o);if(o.isMesh&&o.userData.rejectAirNozzle)this.airNozzles.push(o);});
   this.rotorRest=this.rotors.map(r=>r.quaternion.clone());
+  this.feederKnife=template.meshes.find(m=>m.userData.mechanismRole==='patented-feeding-knife-reference')||null;
+  this.feederKnifeRest=this.feederKnife?.position.clone()||null;
   this.points=[[-3.58,.74,0],[-3.12,.73,0],[-2.42,.73,0],[-1.45,.73,0],[-.55,.73,0],[.35,.73,0],[1.30,.73,0],[1.82,.70,0],[2.55,.70,0],[3.62,.70,0]].map(p=>new THREE.Vector3(...p));
   this.curve=new THREE.CatmullRomCurve3(this.points,false,'centripetal');
   this.scanStart=progressAtX(this.curve,-.24-.48/2);
@@ -40,7 +42,7 @@ export class DianaEye55ProcessSimulation{
   this.resetFlags();this.updateOptics(false);
  }
  resetFlags(){
-  this.feederDriveActive=false;this.transportDriveActive=false;this.deliveryDriveActive=false;
+  this.feederDriveActive=false;this.feederKnifeActive=false;this.feederKnifeStrokeM=0;this.feederAirAssistActive=false;this.transportDriveActive=false;this.deliveryDriveActive=false;
   this.blankPresenceTrigger=false;this.transportEncoderActive=false;this.vacuumHoldActive=false;
   this.illuminationReady=false;this.cameraTriggerActive=false;this.captureComplete=false;
   this.scanActive=false;this.imageProcessingActive=false;this.processingComplete=false;this.decisionReady=false;
@@ -62,7 +64,7 @@ export class DianaEye55ProcessSimulation{
   return {available:true,blocked:false,active:this.active,running:this.running,paused:this.paused,speed:this.speed,stage:DIANA_EYE55_SIMULATION_STAGES[index],stageIndex:index,stagePolicy:'MECHANISM_STATE_DRIVEN_DOWNSTREAM_PRIORITY',completed:this.completed,rejectedDemo:this.rejected,inspectedDemoCount:this.inspectedDemoCount,progress:p,
    sheetsVisible:this.blanks.filter(b=>b.mesh.visible).length,pileSheetsVisible:this.goodStack.filter(p=>p.visible).length,rejectSheetsVisible:this.rejectStack.filter(p=>p.visible).length,
    rotorCount:this.rotors.length,mechanismCount:this.rotors.length+this.lights.length+1,pathVisible:this.pathVisible,inkFlowVisible:false,inkFlowCount:0,uvLampCount:0,uvActive:false,
-   feederDriveActive:this.feederDriveActive,transportDriveActive:this.transportDriveActive,deliveryDriveActive:this.deliveryDriveActive,blankPresenceTrigger:this.blankPresenceTrigger,transportEncoderActive:this.transportEncoderActive,vacuumHoldActive:this.vacuumHoldActive,illuminationReady:this.illuminationReady,cameraTriggerActive:this.cameraTriggerActive,captureComplete:this.captureComplete,scanActive:this.scanActive,imageProcessingActive:this.imageProcessingActive,processingComplete:this.processingComplete,decisionReady:this.decisionReady,rejectPermit:this.rejectPermit,rejectConfirmed:this.rejectConfirmed,outputCountActive:this.outputCountActive,interlockSafe:this.interlockSafe,demoRejectActive:this.demoRejectActive,rejectTrackingActive:this.rejectTrackingActive,acceptedDeliveryActive:this.acceptedDeliveryActive,wasteDeliveryActive:this.wasteDeliveryActive,rejectRecoveryActive:this.wasteDeliveryActive,fishScaleDeliveryActive:this.fishScaleDeliveryActive,deliveryMode:'ACCEPTED_FISH_SCALE_PLUS_RECOVERABLE_REJECT_COLLECTION',paperJam:this.paperJam,rejectSafetyCoverReference:true,deliveryMonitoringCameraReference:true,
+   feederDriveActive:this.feederDriveActive,feederKnifeActive:this.feederKnifeActive,feederKnifeStrokeM:this.feederKnifeStrokeM,feederAirAssistActive:this.feederAirAssistActive,feederMotionPolicy:'OEM_FEEDING_KNIFE_SUBTLE_VIBRATION_AND_AIR_ASSIST_STATE__AMPLITUDE_VISUAL_ONLY',transportDriveActive:this.transportDriveActive,deliveryDriveActive:this.deliveryDriveActive,blankPresenceTrigger:this.blankPresenceTrigger,transportEncoderActive:this.transportEncoderActive,vacuumHoldActive:this.vacuumHoldActive,illuminationReady:this.illuminationReady,cameraTriggerActive:this.cameraTriggerActive,captureComplete:this.captureComplete,scanActive:this.scanActive,imageProcessingActive:this.imageProcessingActive,processingComplete:this.processingComplete,decisionReady:this.decisionReady,rejectPermit:this.rejectPermit,rejectConfirmed:this.rejectConfirmed,outputCountActive:this.outputCountActive,interlockSafe:this.interlockSafe,demoRejectActive:this.demoRejectActive,rejectTrackingActive:this.rejectTrackingActive,acceptedDeliveryActive:this.acceptedDeliveryActive,wasteDeliveryActive:this.wasteDeliveryActive,rejectRecoveryActive:this.wasteDeliveryActive,fishScaleDeliveryActive:this.fishScaleDeliveryActive,deliveryMode:'ACCEPTED_FISH_SCALE_PLUS_RECOVERABLE_REJECT_COLLECTION',paperJam:this.paperJam,rejectSafetyCoverReference:true,deliveryMonitoringCameraReference:true,
    demoRejectOnly:true,demoRejectActuator:this.demoRejectActuator,installedRejectActuationVerified:false,installedCameraCountVerified:false,installedCameraPopulationRendered:false,deterministicDefectInjection:'EVERY_5TH_INSPECTED_BLANK_DEMO_ONLY',scanWindow:[this.scanStart,this.scanEnd],scanPositionPolicy:'BLANK_OCCUPIES_OPTICAL_CELL',opticalAxisPolicy:this.template.root.userData.opticalAxisPolicy,scanPlaneY:this.template.root.userData.scanPlaneY,cameraPopulationPolicy:this.template.root.userData.cameraPopulationPolicy,rejectedOutputPolicy:'DAMAGE_FREE_RECOVERABLE_COLLECTION_FOR_RESORT_OR_REINSPECTION_REFERENCE',rejectBranchPolicy:'TRACKED_BLANK_BRANCHES_DIRECTLY_FROM_GATE_TO_RECOVERY_TRAY',acceptedBranchPolicy:'TRACKED_ACCEPTED_BLANK_BRANCHES_TO_FISH_SCALE_ENTRY_WITHOUT_TELEPORT',acceptedStackPolicy:'BOUNDED_FISH_SCALE_8_SLOTS_THEN_VERTICAL_LAYER',
    activeRejectTrackingIds:[...this.activeRejectTrackingIds],activePassTrackingIds:[...this.activePassTrackingIds],trackedResults:{pass:this.blanks.filter(b=>b.result==='PASS_DEMO').length,reject:this.blanks.filter(b=>b.result==='REJECT_DEMO').length,pending:this.blanks.filter(b=>!b.result).length}};
  }
@@ -134,12 +136,23 @@ export class DianaEye55ProcessSimulation{
   if(this.gate)this.gate.rotation.z=this.gateRest+(this.rejectPermit?.42:0);
   for(const n of this.airNozzles){n.material.emissive?.setHex(0);n.material.emissiveIntensity=0;}
  }
+ updateFeederMotion(){
+  this.feederKnifeActive=!!(this.feederDriveActive&&this.feederKnife&&this.feederKnifeRest);
+  this.feederAirAssistActive=this.feederDriveActive;
+  if(!this.feederKnife||!this.feederKnifeRest)return;
+  this.feederKnife.position.copy(this.feederKnifeRest);
+  if(this.feederKnifeActive){
+   const stroke=.006*Math.sin(this.elapsed*13.5);
+   this.feederKnife.position.y+=stroke;
+   this.feederKnifeStrokeM=stroke;
+  }else this.feederKnifeStrokeM=0;
+ }
  update(now){
   if(!this.active||!this.running){this.lastNow=now;return;}if(this.lastNow===null){this.lastNow=now;return;}
-  const dt=Math.min(.12,Math.max(0,(now-this.lastNow)/1000))*this.speed;this.lastNow=now;this.elapsed+=dt;this.updateBlanks();this.updateRotors(dt);this.onUpdate?.(this.state());
+  const dt=Math.min(.12,Math.max(0,(now-this.lastNow)/1000))*this.speed;this.lastNow=now;this.elapsed+=dt;this.updateBlanks();this.updateFeederMotion();this.updateRotors(dt);this.onUpdate?.(this.state());
  }
  resetMechanisms(){
-  if(this.gate)this.gate.rotation.z=this.gateRest;this.rotors.forEach((r,i)=>r.quaternion.copy(this.rotorRest[i]));this.updateOptics(false);for(const n of this.airNozzles){n.material.emissive?.setHex(0);n.material.emissiveIntensity=0;}for(const b of this.blanks){b.mesh.visible=false;b.mesh.material.emissive?.setHex(0);b.mesh.material.emissiveIntensity=0;}this.resetFlags();
+  if(this.gate)this.gate.rotation.z=this.gateRest;this.rotors.forEach((r,i)=>r.quaternion.copy(this.rotorRest[i]));if(this.feederKnife&&this.feederKnifeRest)this.feederKnife.position.copy(this.feederKnifeRest);this.updateOptics(false);for(const n of this.airNozzles){n.material.emissive?.setHex(0);n.material.emissiveIntensity=0;}for(const b of this.blanks){b.mesh.visible=false;b.mesh.material.emissive?.setHex(0);b.mesh.material.emissiveIntensity=0;}this.resetFlags();
  }
  stop(){this.active=false;this.running=false;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;this.rejected=0;this.inspectedDemoCount=0;this.resetMechanisms();for(const m of [...this.goodStack,...this.rejectStack])m.visible=false;this.staticDeliveryReferences.forEach((m,i)=>m.visible=this.staticDeliveryVisibility[i]);this.pathVisible=false;this.pathLine.visible=false;this.onUpdate?.(this.state());return this.state();}
  dispose(){this.stop();for(const b of this.blanks){this.root.remove(b.mesh);b.mesh.geometry.dispose();b.mesh.material.dispose();}for(const m of [...this.goodStack,...this.rejectStack]){this.root.remove(m);m.geometry.dispose();m.material.dispose();}this.root.remove(this.pathLine);this.pathLine.geometry.dispose();this.pathLine.material.dispose();}
