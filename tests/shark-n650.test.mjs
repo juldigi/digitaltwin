@@ -219,6 +219,21 @@ test('SHARK isolate, showOnly and reset preserve intentionally hidden capability
  }finally{model.dispose();}
 });
 
+test('SHARK contact pulley surface speed follows the simulated blank path speed',()=>{
+ const model=new SharkN650MachineTemplate(),sim=new SharkN650ProcessSimulation(model.root,model);
+ try{
+  assert.ok(Math.abs(sim.visualTransportMps-sim.curve.getLength()/7.2)<1e-12);
+  const contact=new Set(['transport-pulley','transfer-encoder','inspection-encoder-wheel','good-return','bad-return']);
+  const rotors=sim.rotors.filter(r=>contact.has(r.userData.mechanismRole));
+  assert.ok(rotors.length>12);
+  for(const r of rotors){
+   const radius=r.userData.radius;assert.ok(radius>0);
+   assert.ok(Math.abs(sim.rotorAngularRate(r)*radius-sim.visualTransportMps)<1e-10);
+  }
+  assert.equal(sim.state().transportSurfaceSpeedPolicy,'CONTACT_PULLEYS_MATCH_SIMULATED_BLANK_LINEAR_SPEED__NOT_INSTALLED_RPM');
+ }finally{sim.dispose();model.dispose();}
+});
+
 test('SHARK rotor whitelist excludes suction cups camera lenses and air nozzles',()=>{
  const model=new SharkN650MachineTemplate(),sim=new SharkN650ProcessSimulation(model.root,model),allowed=/^(transport-pulley|transfer-drive-motor|transfer-encoder|vacuum-blower|inspection-encoder-wheel|good-return|good-return-motor|bad-return|bad-return-motor)$/;
  assert.equal(sim.rotors.length,30);assert.equal(sim.rotors.some(r=>!allowed.test(r.userData.mechanismRole||'')),false);assert.equal(sim.suckers.length,4);assert.equal(sim.airNozzles.length,3);
