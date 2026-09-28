@@ -82,10 +82,12 @@ test('V258 DIANA matches the low feeder / white cell silhouette and keeps reject
   assert.ok(body&&screen);assert.ok(Math.abs(body.rotation.z+.10)<1e-9);assert.ok(Math.abs(screen.rotation.z+.10)<1e-9);
   assert.ok(hmi.children.some(o=>o.isMesh&&o.userData.operatorWorkShelf));
   const controls=model.findNode('diana55-cell-controls-v258');assert.ok(controls);assert.equal(controls.children.filter(o=>o.isMesh&&o.userData.cellControlButton).length,6);
-  const signal=model.findNode('diana55-signal-tower-v259'),signalVisible=signal?.visible;
-  if(signal)signal.visible=false;
-  const envelope=new THREE.Box3().setFromObject(model.root);assert.ok(envelope.max.y<=2.05,`V258 Diana body height exceeded family reference envelope: ${envelope.max.y}`);
-  if(signal)signal.visible=signalVisible;
+  const signal=model.findNode('diana55-signal-tower-v259');let bodyMaxY=-Infinity;
+  for(const mesh of model.meshes){
+   if(signal&&model.contains(signal,mesh))continue;
+   const box=new THREE.Box3().setFromObject(mesh);bodyMaxY=Math.max(bodyMaxY,box.max.y);
+  }
+  assert.ok(bodyMaxY<=2.05,`V258 Diana body height exceeded family reference envelope: ${bodyMaxY}`);
   assert.equal(model.findNode('diana55-delivery-waste-v254').visible,false);
   assert.equal(model.findNode('diana55-delivery-waste-v254').userData.supersededByV258,true);
   const tray=model.meshes.find(m=>m.userData.rejectRecoveryTray),guard=model.meshes.find(m=>m.userData.rejectRecoveryGuard);
@@ -184,7 +186,7 @@ test('V260 DIANA pivots only the reject diverter and grounds the recovery tray s
   assert.equal(model.findNode('diana55-reject-recovery-v258').userData.v260SupportPolicy,'RECOVERY_TRAY_TERMINATES_IN_VISIBLE_FLOOR_SUPPORT_FRAME');
 
   const mountQ=mount.quaternion.clone(),pivotQ=pivot.quaternion.clone();
-  sim.start();let now=1000;sim.update(now),saw=false;
+  sim.start();let now=1000,saw=false;sim.update(now);
   for(let i=0;i<1500;i++){now+=10;sim.update(now);if(sim.state().demoRejectActive){saw=true;break;}}
   assert.equal(saw,true);
   assert.ok(pivot.quaternion.angleTo(pivotQ)>.001,'Diana reject pivot never actuated');
