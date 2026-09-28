@@ -209,9 +209,14 @@ test('Offset 5 path clears impression, blanket and inter-unit drums; grippers or
   sim.start();sim.update(0);sim.update(250);
   assert.equal(sim.gripperMotions.length,14);
   for(const item of sim.gripperMotions){
-   const radius=Math.hypot(item.object.position.x+item.barX,item.object.position.y+item.barY-item.drumY);
+   const a=item.object.rotation.z,cos=Math.cos(a),sin=Math.sin(a);
+   const anchorX=item.object.position.x+cos*item.barX-sin*item.barY;
+   const anchorY=item.object.position.y+sin*item.barX+cos*item.barY;
+   const radius=Math.hypot(anchorX,anchorY-item.drumY);
    assert.ok(Math.abs(radius-item.radius)<1e-7,'gripper must orbit the transfer shaft');
+   assert.ok(Math.abs(item.currentOrbitAngle-a)<1e-10,'gripper fingers must rotate with the drum orbit');
   }
+  assert.equal(sim.state().interUnitGripperPolicy,'RIGID_FINGER_ASSEMBLY_ROTATES_WITH_TRANSFER_DRUM_ORBIT');
  }finally{sim.dispose();m.dispose();}
 });
 
