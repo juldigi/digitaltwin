@@ -285,8 +285,9 @@ export class DianaEye55MachineTemplate{
    const screen=hmi.children.find(o=>o.isMesh&&o.userData.mechanismRole==='diana-eye-hmi-display-reference');
    if(body){body.rotation.z=-.10;body.userData.v258PedestalProfile='SLANTED_OPERATOR_TERMINAL_REFERENCE';}
    if(screen){screen.rotation.z=-.10;screen.userData.v258PedestalProfile='SLANTED_DISPLAY_REFERENCE';}
+   const accent=this.box(hmi,[.09,.44,.018],[.72,.50,-1.475],'red',.006);accent.rotation.z=-.10;accent.userData.pedestalIdentityAccent=true;accent.userData.sourceBoundary='MASTERWORK_DIANA_EYE55_OFFICIAL_PRODUCT_IMAGE';
    const shelf=this.box(hmi,[.58,.055,.30],[.47,.83,-1.28],'light',.010);shelf.userData.operatorWorkShelf=true;
-   hmi.userData.v258OperatorInterface='SLANTED_PEDESTAL_WITH_WORK_SHELF__DISPLAY_SIZE_NOT_ASSERTED';
+   hmi.userData.v258OperatorInterface='SLANTED_PEDESTAL_WITH_RED_IDENTITY_ACCENT_AND_WORK_SHELF__DISPLAY_SIZE_NOT_ASSERTED';
   }
 
   const cellControls=this.group(this.findNode('diana55-inspection'),'diana55-cell-controls-v258','Kolom kontrol inspection cell');
