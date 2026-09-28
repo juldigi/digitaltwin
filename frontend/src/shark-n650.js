@@ -252,6 +252,14 @@ export class SharkN650MachineTemplate{
   this.root.userData.v260Evidence='FOCUSIGHT_FS_SHARK_650_N650_FAMILY_PRODUCT_AND_INSTALLATION_IMAGES';
   this.root.userData.v260Policy='STRUCTURAL_ATTACHMENT_AND_VIEWING_WINDOW_ONLY__P3N1_OPTIONS_REMAIN_UNDECODED';
 
+  const duplicateGuard=this.findNode('shark650-access-guard');
+  if(duplicateGuard){
+    for(const panel of duplicateGuard.children.filter(o=>o.isMesh&&o.userData.exteriorCover)){
+      panel.visible=false;panel.userData.supersededByV260=true;panel.userData.supersededReason='DUPLICATE_GUARD_SKIN_OVER_VISION_TOWER_APERTURE';
+    }
+    duplicateGuard.userData.v260SkinPolicy='PRIMARY_TOWER_ENCLOSURE_ONLY__NO_DUPLICATE_SIDE_SKIN';
+  }
+
   const suction=this.findNode('shark650-feed-suction');
   if(suction){
     const carrier=this.group(suction,'shark650-feeder-carrier-v260','Automatic suction feeder carrier frame');
@@ -276,6 +284,10 @@ export class SharkN650MachineTemplate{
   if(window){
     window.userData.scanWindowPolicy='DARK_TOWER_WINDOW_SUBTLE_GLOW_ONLY_DURING_ACTIVE_SCAN';
     for(const mesh of window.children.filter(o=>o.isMesh)){mesh.userData.scanWindow=true;mesh.userData.inspectionAperture=true;}
+    for(const z of [-.718,.718]){
+      const backing=this.box(window,[1.00,.75,.012],[0,1.55,z],'black',.010);
+      backing.userData.apertureBacking=true;backing.userData.silhouetteCritical=true;
+    }
   }
 
   const plate=this.findNode('shark650-reject-plate');
