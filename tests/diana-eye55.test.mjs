@@ -145,6 +145,24 @@ test('Diana Eye 55 reject branch leaves the main path continuously and reaches t
  }finally{sim.dispose();model.dispose();}
 });
 
+test('Diana accepted branch reaches fish-scale entry continuously and relayout keeps newest output at the infeed point',()=>{
+ const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);sim.start();let now=1000,seen=false;
+ try{
+  for(let i=0;i<1800;i++){
+   now+=10;sim.update(now);
+   const b=sim.blanks.find(x=>x.result==='PASS_DEMO'&&x.decisionReady&&x.mesh.visible&&x.lastT>=sim.goodBranchEndT);
+   if(b){assert.ok(b.mesh.position.distanceTo(sim.goodLaneEntry)<.04);seen=true;break;}
+  }
+  assert.ok(seen);assert.equal(sim.state().acceptedBranchPolicy,'TRACKED_ACCEPTED_BLANK_BRANCHES_TO_FISH_SCALE_ENTRY_WITHOUT_TELEPORT');
+  for(let i=0;i<800;i++){now+=10;sim.update(now);}
+  const visible=sim.goodStack.filter(m=>m.visible).sort((a,b)=>(a.userData.outputSerial??0)-(b.userData.outputSerial??0));
+  assert.ok(visible.length>1);
+  const newest=visible.at(-1),oldest=visible[0];
+  assert.ok(newest.position.distanceTo(sim.goodLaneEntry)<.01);
+  assert.ok(oldest.position.x>newest.position.x,'older fish-scale outputs must move downstream from the entry');
+ }finally{sim.dispose();model.dispose();}
+});
+
 test('DIANA optical illumination follows scan occupancy and resets cleanly',()=>{
  const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);sim.start();let now=1000,seenScan=false;
  for(let i=0;i<600;i++){now+=10;sim.update(now);if(sim.state().scanActive){seenScan=true;assert.ok(sim.lights.every(l=>l.material.emissiveIntensity>1));break;}}
