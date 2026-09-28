@@ -466,14 +466,15 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
       ['coating', .10,1.48],
       ['impression',-.08,1.06]
     ];
-    for(const z of [-.79,.79]){
+    for(const z of [-.90,.90]){
       const spine=this.db(chamber,[.14,1.18,.12],[.02,1.45,z],'graphite',.014,'coater-open-side-frame-spine',{confidence:'PHOTO_OEM_FUNCTIONAL_REFERENCE'});
       spine.userData.structuralCutaway=true;
       spine.userData.frameSide=z<0?'LOCAL_NEGATIVE_Z':'LOCAL_POSITIVE_Z';
       for(const [role,x,y] of rows){
-        const saddle=this.db(chamber,[.28,.13,.14],[x,y,z],'graphite',.012,'coater-roller-bearing-saddle',{confidence:'PHOTO_OEM_FUNCTIONAL_REFERENCE'});
-        saddle.userData.structuralCutaway=true;saddle.userData.coaterRollerRole=role;
-        const cap=this.dc(chamber,.070,.032,[x,y,z],'steel','z','coater-roller-bearing-cap',{service:true,confidence:'PHOTO_OEM_FUNCTIONAL_REFERENCE'});
+        const side=Math.sign(z),saddleZ=side*.84,capZ=side*.79;
+        const saddle=this.db(chamber,[.28,.13,.14],[x,y,saddleZ],'graphite',.012,'coater-roller-bearing-saddle',{confidence:'PHOTO_OEM_FUNCTIONAL_REFERENCE'});
+        saddle.userData.structuralCutaway=true;saddle.userData.coaterRollerRole=role;saddle.userData.rollerBodyClearanceM=.02;
+        const cap=this.dc(chamber,.070,.032,[x,y,capZ],'steel','z','coater-roller-bearing-cap',{service:true,confidence:'PHOTO_OEM_FUNCTIONAL_REFERENCE'});
         cap.userData.coaterRollerRole=role;
       }
     }
