@@ -149,7 +149,6 @@ test('V257 supports the existing coater rollers on both side frames without chan
 test('V258 adds only drive-side anilox service hardware to the existing coater roller train',()=>{
  const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
  try{
-  assert.equal(m.root.userData.visualRefinement,'V258_CD102_COATER_ANILOX_DRIVE_SIDE_REALISM');
   assert.equal(m.root.userData.coaterAniloxPolicy,'EXISTING_TOP_METERING_ROLLER_IS_ANILOX_VISUAL_REFERENCE__NO_DUPLICATE_ROLLER');
   assert.equal(m.root.userData.coaterDriveEvidence,'HEIDELBERG_CD102_CHAMBER_BLADE__ANILOX_ROLLER_LOCK__DRIVE_SHAFT_DS');
   const roles=['coater-anilox-drive-hub','coater-anilox-drive-shaft-ds','coater-anilox-lock-reference','coater-anilox-drive-retainer'];
@@ -163,6 +162,46 @@ test('V258 adds only drive-side anilox service hardware to the existing coater r
   const lock=m.realismMeshes.find(x=>x.userData.realismRole==='coater-anilox-lock-reference');
   assert.equal(lock.userData.serviceSettingAsserted,false);
   assert.equal(sim.rotors.filter(x=>String(x.role||'').startsWith('coater-')).length,3,'V258 must not add a duplicate coater process roller');
+  assert.equal(m.root.userData.dimensionLock,'BMJ_CUSTOM_INSTALLED_DIMENSIONS_DO_NOT_NORMALIZE_TO_GENERIC_CD102');
+  assert.equal(m.root.userData.machineEnvelope.structuralBody.length,26.00);
+  assert.equal(m.root.userData.machineEnvelope.serviceInclusive.length,27.00);
+ }finally{sim.dispose();m.dispose();}
+});
+
+test('V259 keeps coater rollers round and routes the sheet through the coating nip without core penetration',()=>{
+ const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
+ try{
+  assert.equal(m.root.userData.visualRefinement,'V259_COATER_NIP_PATH_AND_ROUND_ROLLER_GEOMETRY');
+  assert.equal(m.root.userData.coaterRoundnessPolicy,'WORLD_SPACE_ROUND_PROCESS_ROLLERS_DESPITE_CUSTOM_LONGITUDINAL_MODULE_SCALE');
+  assert.equal(m.root.userData.coaterNipPathPolicy,'IMPRESSION_SURFACE_ARC_TO_MID_GAP_COATING_NIP');
+  assert.equal(sim.state().coaterRoundnessPolicy,m.root.userData.coaterRoundnessPolicy);
+  assert.equal(sim.state().coaterNipPathPolicy,m.root.userData.coaterNipPathPolicy);
+
+  m.root.updateMatrixWorld(true);
+  const chamber=m.findNode('coater-chamber');
+  const rollers=chamber.children.filter(o=>o.isMesh&&o.userData.coaterRole);
+  assert.equal(rollers.length,3);
+  for(const roller of rollers){
+   const size=new THREE.Box3().setFromObject(roller).getSize(new THREE.Vector3());
+   assert.ok(Math.abs(size.x-size.y)<.012,`${roller.userData.coaterRole} became oval after custom coater scaling: ${size.x} x ${size.y}`);
+   assert.equal(roller.userData.roundnessCompensated,true);
+  }
+
+  const process=Object.fromEntries(rollers.map(r=>[r.userData.coaterRole,r]));
+  const impression=process['impression-cylinder'],coating=process['coating-cylinder'];
+  const impressionCenter=impression.getWorldPosition(new THREE.Vector3());
+  assert.ok(Math.abs(impressionCenter.y-1.03)<1e-9);
+  const coatingCenter=coating.getWorldPosition(new THREE.Vector3());
+  const rI=impression.geometry.parameters.radiusTop,rC=coating.geometry.parameters.radiusTop;
+  let minI=Infinity,minC=Infinity;
+  for(let i=0;i<=2600;i++){
+   const p=sim.curve.getPointAt(i/2600);
+   if(p.x<m.root.userData.machineEnvelope.layout.coaterCenterX-.75||p.x>m.root.userData.machineEnvelope.layout.coaterCenterX+.75)continue;
+   minI=Math.min(minI,Math.hypot(p.x-impressionCenter.x,p.y-impressionCenter.y)-rI);
+   minC=Math.min(minC,Math.hypot(p.x-coatingCenter.x,p.y-coatingCenter.y)-rC);
+  }
+  assert.ok(minI>-.003,`sheet path penetrates coater impression cylinder: ${minI}`);
+  assert.ok(minC>-.003,`sheet path penetrates coating cylinder: ${minC}`);
   assert.equal(m.root.userData.dimensionLock,'BMJ_CUSTOM_INSTALLED_DIMENSIONS_DO_NOT_NORMALIZE_TO_GENERIC_CD102');
   assert.equal(m.root.userData.machineEnvelope.structuralBody.length,26.00);
   assert.equal(m.root.userData.machineEnvelope.serviceInclusive.length,27.00);
