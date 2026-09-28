@@ -60,7 +60,6 @@ test('V255 DIANA neutral optical head points down to the suction-belt scan plane
 test('V258 DIANA matches the low feeder / white cell silhouette and keeps reject recovery separate from accepted fish-scale output',()=>{
  const model=new DianaEye55MachineTemplate();
  try{
-  assert.equal(model.root.userData.visualRefinement,'V258_DIANA_EYE55_FEEDER_CELL_REJECT_RECOVERY_REALISM');
   assert.equal(model.root.userData.rejectOutputPolicy,'DAMAGE_FREE_EJECTION_TO_RECOVERABLE_REJECT_COLLECTION__NOT_SECOND_ACCEPTED_FISHSCALE_LANE');
   const feeder=model.findNode('diana55-feeder-console-v258'),mag=model.findNode('diana55-feeder-magazine-v258'),crown=model.findNode('diana55-cell-crown-v258'),recovery=model.findNode('diana55-reject-recovery-v258');
   assert.ok(feeder&&mag&&crown&&recovery);
@@ -135,7 +134,8 @@ test('V259 DIANA keeps feeder, inspection aperture and HMI physically attached w
   assert.equal(bezel.children.filter(o=>o.isMesh&&o.userData.apertureBezel).length,5);
   const hmi=model.findNode('diana55-hmi-pedestal-v251');
   assert.equal(hmi.userData.v259AttachmentPolicy,'DISPLAY_HEAD_TO_SLANTED_NECK_TO_FLOOR_BASE');
-  assert.ok(hmi.children.some(o=>o.isMesh&&o.userData.floorContact));
+  const floorContacts=hmi.children.filter(o=>o.isMesh&&o.userData.floorContact);assert.ok(floorContacts.length>=3);
+  assert.ok(floorContacts.every(o=>o.position.y>=.028-.03),'Diana HMI floor support penetrates below floor tolerance');
   assert.equal(model.findNode('diana55-camera-top').userData.installedCountVerified,false);
   assert.equal(model.findNode('diana55-reject').userData.installedRejectActuationVerified,false);
  }finally{model.dispose();}
