@@ -2,7 +2,7 @@ import * as THREE from 'three';import {RoundedBoxGeometry} from 'three/addons/ge
 import {SHARK_N650_SPEC} from './data/dimensions-shark-n650.js';import {SHARK_N650_TAXONOMY,SHARK_N650_TAXONOMY_BY_ID} from './data/taxonomy-shark-n650.js';import {SHARK_N650_ORIENTATION,SHARK_N650_TECHNICAL_SOURCES} from './data/sources-shark-n650.js';import {V141_SOURCE_STATS} from './data/research-v141.js';
 const V=a=>new THREE.Vector3(...a);
 export class SharkN650MachineTemplate{
- constructor(){this.spec=SHARK_N650_SPEC;this.root=new THREE.Group();this.root.name='IPM 4 · FS-SHARK-N650-P3N1';this.root.userData={assetId:this.spec.assetId,nodeId:'shark650-root',spec:this.spec,sources:SHARK_N650_TECHNICAL_SOURCES,orientation:SHARK_N650_ORIENTATION,taxonomyVersion:'shark650-v252-n650-offline-flow',detailPass:'V252_SHARK_N650_NEGATIVE_PITCH_RETURN_LINE',researchVersion:'V141',researchSourceCount:V141_SOURCE_STATS.total,uniqueResearchUrls:V141_SOURCE_STATS.uniqueUrls,evidenceGrade:'MODEL_FAMILY_PROCESS_GROUNDED',geometryStatus:'CURRENT_N650_OFFLINE_PROCESS_AND_ENVELOPE_REFERENCE__P3N1_OPTIONS_UNDECODED',engineeringDimensions:false,modeledMode:'FISH_SCALE_OFFLINE_REFERENCE'};this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.build();this.refineV254();this.taxonomy=SHARK_N650_TAXONOMY;this.taxonomyById=SHARK_N650_TAXONOMY_BY_ID;for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}this.root.updateMatrixWorld(true);}
+ constructor(){this.spec=SHARK_N650_SPEC;this.root=new THREE.Group();this.root.name='IPM 4 · FS-SHARK-N650-P3N1';this.root.userData={assetId:this.spec.assetId,nodeId:'shark650-root',spec:this.spec,sources:SHARK_N650_TECHNICAL_SOURCES,orientation:SHARK_N650_ORIENTATION,taxonomyVersion:'shark650-v252-n650-offline-flow',detailPass:'V252_SHARK_N650_NEGATIVE_PITCH_RETURN_LINE',researchVersion:'V141',researchSourceCount:V141_SOURCE_STATS.total,uniqueResearchUrls:V141_SOURCE_STATS.uniqueUrls,evidenceGrade:'MODEL_FAMILY_PROCESS_GROUNDED',geometryStatus:'CURRENT_N650_OFFLINE_PROCESS_AND_ENVELOPE_REFERENCE__P3N1_OPTIONS_UNDECODED',engineeringDimensions:false,modeledMode:'FISH_SCALE_OFFLINE_REFERENCE'};this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.build();this.refineV254();this.refineV258();this.taxonomy=SHARK_N650_TAXONOMY;this.taxonomyById=SHARK_N650_TAXONOMY_BY_ID;for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}this.root.updateMatrixWorld(true);}
  group(parent,id,name,pos=[0,0,0],explode=[0,0,0]){const g=new THREE.Group();g.name=name;g.position.set(...pos);g.userData={assetId:this.spec.assetId,nodeId:id,selectable:true,explode:V(explode),confidence:'FAMILY_PROCESS_GROUNDED'};parent.add(g);this.nodes.push(g);if(parent===this.root)this.parts.push(g);return g;}
  mat(k){if(!this.materials.has(k)){const c={white:0xeaeeee,light:0xc9d0d2,dark:0x283138,black:0x111619,steel:0x879499,silver:0xc3cbcd,rubber:0x23282a,blue:0x3074a1,cyan:0x4d9bb5,red:0xb13a33,green:0x548b70,amber:0xd4a04c,paper:0xdec89f,glass:0x315663,led:0xece8d1}[k]||0x888888;const m=new THREE.MeshStandardMaterial({color:c,metalness:['steel','silver'].includes(k)?.5:.08,roughness:k==='glass'?.16:.44,transparent:k==='glass',opacity:k==='glass'?.38:1});m.userData.baseOpacity=m.opacity;this.materials.set(k,m);}return this.materials.get(k);}
  mesh(g,geo,key,k='dark',p=[0,0,0],r=null){if(!this.geometries.has(key))this.geometries.set(key,geo());const m=new THREE.Mesh(this.geometries.get(key),this.mat(k));m.position.set(...p);if(r)m.rotation.set(...r);m.castShadow=k!=='glass';m.receiveShadow=true;m.userData.ownerId=g.userData.nodeId;g.add(m);this.meshes.push(m);return m;}
@@ -66,7 +66,8 @@ export class SharkN650MachineTemplate{
   const camera=this.group(g,'shark650-vision-camera','Camera mounting rail · P3N1 suffix not decoded');camera.userData.referenceBayCount=3;camera.userData.installedCameraCountVerified=false;camera.userData.p3SuffixDecoded=false;
   this.box(camera,[1.04,.055,.11],[0,2.10,0],'steel',.008);
   for(const x of [-.40,0,.40]){const mount=this.box(camera,[.08,.10,.09],[x,2.04,0],'dark',.008);mount.userData.capabilityMount=true;}
-  const head=this.box(camera,[.22,.25,.20],[0,1.91,0],'dark',.020);head.userData.cameraPopulationReference='NEUTRAL_SINGLE_HEAD_VISIBLE__P3N1_NOT_DECODED';this.cyl(camera,.050,.075,[0,1.76,0],'black','camera-lens','z');
+  const head=this.box(camera,[.22,.25,.20],[0,1.91,0],'dark',.020);head.userData.cameraPopulationReference='NEUTRAL_SINGLE_HEAD_VISIBLE__P3N1_NOT_DECODED';
+  const lens=this.cyl(camera,.050,.075,[0,1.76,0],'black','camera-lens','y');lens.userData.opticalAxis='NEGATIVE_Y_TOWARD_INSPECTION_BED';lens.userData.opticalTargetY=.78;lens.userData.installedPopulationReferenceOnly=true;
   const light=this.group(g,'shark650-vision-light','Program-controlled lighting / paper-shielding system');light.userData.programControlled=true;
   for(const z of [-.48,-.24,0,.24,.48]){const l=this.box(light,[1.08,.032,.050],[0,1.39,z],'led',.006);l.userData.inspectionLight=true;l.material=l.material.clone();l.material.userData.baseOpacity=1;}
   for(const z of [-.58,.58]){const shield=this.box(light,[1.18,.34,.030],[0,1.35,z],'dark',.010);shield.userData.mechanismRole='light-column-paper-shielding-reference';}
@@ -162,6 +163,62 @@ export class SharkN650MachineTemplate{
   // Optional whole-machine dust-reduction integration is a published option, not a BMJ-installed claim.
   const dust=this.group(this.root,'shark650-dust-integration-capability-v254','Optional integrated dust-reduction device');
   dust.userData.capabilityOnly=true;dust.userData.installedVerified=false;dust.visible=false;
+ }
+
+ refineV258(){
+  this.root.userData.visualRefinement='V258_SHARK_N650_TOWER_OPEN_BAY_RETURN_REALISM';
+  this.root.userData.detailPass='V258_N650_GROUNDED_TOWER_OPTICS_AND_OPEN_REJECT_BAY';
+  this.root.userData.opticalAxisPolicy='NEUTRAL_REFERENCE_HEAD_POINTS_DOWN_TO_INSPECTION_BED__P3N1_CAMERA_PACKAGE_UNDECODED';
+  this.root.userData.scanPlaneY=.78;
+  this.root.userData.photoSilhouetteEvidence='FOCUSIGHT_FS_SHARK_650_N650_FAMILY_INSTALLATION_PHOTOS_PLUS_CURRENT_N650_PRIMARY_PAGE';
+  this.root.userData.installedOptionPolicy='P3N1_SUFFIX_PRESERVED__DO_NOT_INFER_CAMERA_OR_FEEDER_OPTION_COUNTS';
+
+  const frame=this.findNode('shark650-access-frame');
+  if(frame){
+   const feet=this.group(frame,'shark650-leveling-feet-v258','Main chassis leveling feet and floor pads');
+   for(const x of [-3.10,-2.05,-.88,.32,1.52,2.72])for(const z of [-.58,.58]){
+    const stem=this.cyl(feet,.022,.14,[x,.10,z],'steel','leveling-stem','y');stem.userData.detail=true;
+    const pad=this.cyl(feet,.072,.025,[x,.018,z],'dark','floor-pad','y');pad.userData.floorContact=true;pad.userData.detail=true;
+   }
+   frame.userData.floorSupportPolicy='TWELVE_VISIBLE_LEVELING_POINTS__VISUAL_REFERENCE_NOT_LOAD_CALCULATION';
+  }
+
+  const tower=this.findNode('shark650-inspection-tower');
+  if(tower){
+   for(const z of [-.735,.735]){
+    const header=this.cover(this.box(tower,[1.18,.16,.025],[0,2.25,z],'blue',.012));header.userData.towerIdentityHeader=true;header.userData.silhouetteCritical=true;
+    const vertical=this.cover(this.box(tower,[.08,.82,.027],[-.60,1.38,z],'blue',.008));vertical.userData.towerIdentityAccent=true;
+   }
+   tower.userData.v258TowerIdentity='WHITE_SINGLE_TOWER_DARK_APERTURE_BLUE_HEADER_AND_VERTICAL_ACCENT';
+  }
+
+  const reject=this.findNode('shark650-reject');
+  if(reject){
+   const bay=this.group(reject,'shark650-open-reject-bay-v258','Open transfer / reject structural bay');
+   for(const z of [-.62,.62]){
+    this.box(bay,[.08,.88,.08],[-.42,.77,z],'light',.012).userData.structuralOpenBay=true;
+    this.box(bay,[.08,.88,.08],[.54,.77,z],'light',.012).userData.structuralOpenBay=true;
+   }
+   this.box(bay,[1.04,.08,1.28],[.06,1.23,0],'light',.012).userData.structuralOpenBay=true;
+   this.box(bay,[1.00,.06,1.16],[.06,.39,0],'dark',.010).userData.structuralOpenBay=true;
+   bay.userData.policy='STRUCTURAL_FRAME_ONLY__EXACT_REJECT_ACTUATOR_REMAINS_UNVERIFIED';
+  }
+
+  const feeder=this.findNode('shark650-feeder');
+  if(feeder){
+   const rails=this.group(feeder,'shark650-feeder-magazine-v258','Automatic feeder blank guide frame');
+   for(const z of [-.46,.46]){
+    this.box(rails,[.035,.62,.035],[-.26,1.13,z],'steel',.004);
+    this.box(rails,[.78,.035,.035],[.04,1.42,z],'steel',.004);
+   }
+   this.box(rails,[.86,.05,.05],[.02,1.38,0],'steel',.006);
+   rails.userData.installedModeBoundary='GUIDE_FRAME_VISIBLE_FAMILY_REFERENCE__SUCTION_VS_ALTERNATE_FEEDER_OPTION_NOT_DECODED';
+  }
+
+  const ret=this.findNode('shark650-return');
+  if(ret){
+   ret.userData.v258ReturnPolicy='OFFICIAL_GOOD_BAD_RETURN_LINE__LOW_CONTINUOUS_LANES__VERTICAL_PALLETIZER_CAPABILITY_ONLY';
+  }
  }
 
  findNode(id){return id==='shark650-root'?this.root:this.nodes.find(n=>n.userData.nodeId===id)||null;}resolvePart(o){for(let p=o;p&&p!==this.root;p=p.parent)if(p.userData?.selectable)return p;return null;}resolveTaxonomyNode(id){return this.taxonomyById.get(id)?.meshRefs.map(ref=>this.findNode(ref)).find(Boolean)||null;}contains(a,b){for(let p=b;p;p=p.parent)if(p===a)return true;return false;}
