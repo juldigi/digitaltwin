@@ -167,6 +167,33 @@ test('Offset 5 path clears impression, blanket and inter-unit drums; grippers or
  }finally{sim.dispose();m.dispose();}
 });
 
+test('Offset 5 inks each section only after that section passes the PU nip',()=>{
+ const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
+ try{
+  const sheet=sim.sheets[0],w=sim.sheetWidthSegments,attr=sheet.mesh.geometry.attributes.color;
+  const firstBand=Math.round(.13*sim.sheetLengthSegments),center=firstBand*(w+1)+Math.floor(w/2);
+  const blank=new THREE.Color(0xf4f0df);
+  let candidate=null;
+  for(let distance=sim.sheetLength;distance<sim.pathLength*.38;distance+=.008){
+   sim.updateSheet(sheet,distance);
+   const pos=sheet.mesh.geometry.attributes.position;
+   const leadX=pos.getX(sim.sheetLengthSegments*(w+1)),rowX=pos.getX(center);
+   if(leadX>OFFSET5_UNIT_CENTERS[0]+.22&&rowX<OFFSET5_UNIT_CENTERS[0]+.22){candidate=distance;break;}
+  }
+  assert.ok(candidate,'a sheet must straddle the PU1 ink nip during transport');
+  assert.ok(Math.abs(attr.getX(center)-blank.r)<.001,'section upstream of PU1 remains unprinted');
+  sim.updateSheet(sheet,candidate+.65);
+  assert.ok(Math.abs(attr.getX(center)-blank.r)>.08,'same section is inked after passing the impression nip');
+  const transfer=m.findNode('transfer-pu1-pu2');
+  assert.equal(transfer.children.filter(o=>o.userData.realismRole==='interunit-drum-frame-bracket').length,4);
+  assert.equal(transfer.children.filter(o=>o.userData.realismRole==='interunit-drum-bearing-retainer').length,2);
+  const coverDetail=m.realismMeshes.find(o=>o.userData.coverMountedDetail&&o.userData.silhouetteCritical);
+  m.setExteriorOpen(true);m.setLow(true);
+  assert.equal(coverDetail.visible,false,'low-detail mode must not leave detached cover trim in the cutaway');
+  m.setExteriorOpen(false);
+ }finally{sim.dispose();m.dispose();}
+});
+
 test('Offset 5 shows ink only as subtle roller film without floating droplets or glowing impression cylinders',()=>{
  const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
  try{

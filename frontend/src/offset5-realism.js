@@ -67,6 +67,7 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
     this.refineCoater();
     this.refineInspection();
     this.refineDelivery();
+    this.refineTransferSupports();
     this.refineExteriorIdentityV237();
     this.refineInstalledRealityV253();
   }
@@ -225,6 +226,22 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
     }
   }
 
+  refineTransferSupports(){
+    // The inter-unit drum journals need visible mounts to the adjacent PU frames.
+    // Place the mounts below the sheet arc and inside the existing custom access bays.
+    for(let bay=1;bay<8;bay++){
+      const transfer=this.node(`transfer-pu${bay}-pu${bay+1}`);
+      if(!transfer)continue;
+      for(const z of [-.76,.76]){
+        for(const direction of [-1,1]){
+          const bracket=this.db(transfer,[.82,.065,.060],[direction*.41,.70,z],'graphite',.008,'interunit-drum-frame-bracket',{service:true,confidence:'FUNCTIONAL_MOUNT_REFERENCE'});
+          bracket.userData.transferBay=bay;
+        }
+        this.dc(transfer,.068,.026,[0,.70,z],'steel','z','interunit-drum-bearing-retainer',{service:true,confidence:'FUNCTIONAL_MOUNT_REFERENCE'});
+      }
+    }
+  }
+
   refineInstalledRealityV253(){
     // Dimension-neutral realism pass. Nothing here changes root/module positions, pitch, machine envelope or height.
     this.root.userData.dimensionLock='BMJ_CUSTOM_INSTALLED_DIMENSIONS_DO_NOT_NORMALIZE_TO_GENERIC_CD102';
@@ -295,7 +312,7 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
   }
   setLow(on){
     if(typeof OffsetMachineTemplate.prototype.setLow==='function')OffsetMachineTemplate.prototype.setLow.call(this,on);
-    for(const m of this.realismMeshes)m.visible=!on||Boolean(m.userData.silhouetteCritical);
+    for(const m of this.realismMeshes)m.visible=(!on||Boolean(m.userData.silhouetteCritical))&&(!this.exteriorOpen||!m.userData.coverMountedDetail);
     return this;
   }
 }
@@ -320,10 +337,36 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
     }
     attr.needsUpdate=true;
     sheet.userData.printed=count;
+    sheet.userData.contactColorRevision=-1;
     sheet.userData.printRepresentation='PROGRESSIVE_TRANSVERSE_COLOUR_BANDS_PER_PU_DEMO';
   }
   updateSheet(sheet,leadDistance){
+    const newSheetPass=leadDistance<(sheet.userData.leadDistance??0);
     const visible=super.updateSheet(sheet,leadDistance);
+    if(visible){
+      // Each section gains ink only after that section reaches the PU impression nip.
+      // The leading edge may already be at the next PU while the trailing edge is still blank.
+      const pos=sheet.mesh.geometry.attributes.position,attr=sheet.mesh.geometry.attributes.color;
+      const l=this.sheetLengthSegments,w=this.sheetWidthSegments,centers=[.13,.235,.34,.445,.55,.655,.76,.865];
+      let changed=sheet.userData.contactColorRevision!==sheet.userData.printed;
+      const rowMasks=sheet.userData.contactRowMasks??(sheet.userData.contactRowMasks=new Uint8Array(l+1));
+      if(newSheetPass)rowMasks.fill(0);
+      for(let i=0;i<=l;i++){
+        const x=pos.getX(i*(w+1));let mask=0;
+        for(let k=0;k<8;k++)if(x>OFFSET5_UNIT_CENTERS[k]+.22)mask|=1<<k;
+        if(!newSheetPass)mask|=rowMasks[i];
+        if(!changed&&rowMasks[i]===mask)continue;
+        rowMasks[i]=mask;changed=true;
+        const u=i/l,color=sheet.paperColor.clone();
+        for(let k=0;k<8;k++)if(mask&(1<<k)){
+          const coverage=Math.max(0,Math.min(1,(.048-Math.abs(u-centers[k]))/.015));
+          color.lerp(sheet.bandColors[k],coverage*.88);
+        }
+        for(let j=0;j<=w;j++)attr.setXYZ(i*(w+1)+j,color.r,color.g,color.b);
+      }
+      if(changed)attr.needsUpdate=true;
+      sheet.userData.contactColorRevision=sheet.userData.printed;
+    }
     // Full-width dark bars between visible sheets were a demo gripper proxy.
     // The actual transfer grippers remain modeled inside the press assemblies.
     sheet.gripper.visible=false;
