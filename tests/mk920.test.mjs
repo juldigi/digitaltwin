@@ -7,6 +7,38 @@ import {MK920_SPEC,MK920_SPEC_APM6} from '../frontend/src/data/dimensions-mk920.
 import {mk920TaxonomyFor} from '../frontend/src/data/taxonomy-mk920.js';
 import {MK920_TECHNICAL_SOURCES} from '../frontend/src/data/sources-mk920.js';
 
+test('MK920 foil imprint appears only after heated platen contact and resets for the next sheet cycle',()=>{
+ const model=new MK920MachineTemplate(),sim=new MK920StampingSimulation(model.root,model);
+ try{
+  sim.start();let now=1000;sim.update(now);
+  const advanceTo=seconds=>{while(sim.elapsed<seconds){now+=20;sim.update(now);}};
+  advanceTo(3.2);
+  assert.equal(sim.stampingContact,false);
+  assert.equal(sim.sheets[0].foil.visible,false,'registered blank remains unstamped before pressure dwell');
+  advanceTo(4.5);
+  assert.equal(sim.stampingContact,true);
+  assert.equal(sim.sheets[0].foil.visible,true,'heated platen transfers foil to the registered blank');
+  assert.equal(sim.sheets[1].foil.visible,false,'other sheets are not stamped simultaneously');
+  advanceTo(10.2);
+  assert.equal(sim.sheets[0].foil.visible,false,'reused sheet starts a new lap without the prior imprint');
+  sim.stop();assert.equal(sim.sheets.every(s=>!s.foil.visible),true);
+ }finally{sim.dispose();model.dispose();}
+});
+
+test('MK920 exterior service apertures remain attached to the removable cover',()=>{
+ for(const id of ['BMJ-MCH-0011','BMJ-MCH-0012']){
+  const model=new MK920MachineTemplate(id);
+  try{
+   const windows=model.meshes.filter(m=>m.userData.mechanismRole==='mk920-operator-service-aperture');
+   assert.equal(windows.length,2);
+   model.setExteriorOpen(true);
+   assert.ok(windows.every(m=>!m.visible));
+   model.setExteriorOpen(false);
+   assert.ok(windows.every(m=>m.visible));
+  }finally{model.dispose();}
+ }
+});
+
 test('MK920 YMI identities stay exact while related YM details remain reference-only',()=>{
  assert.equal(MK920_SPEC.assetId,'BMJ-MCH-0011');assert.equal(MK920_SPEC.serial,'20110509330');assert.equal(MK920_SPEC_APM6.assetId,'BMJ-MCH-0012');assert.equal(MK920_SPEC_APM6.serial,'20130529398A');assert.equal(MK920_SPEC_APM6.sap,'APM-6');
  assert.deepEqual(MK920_SPEC.maxSheet,[.920,.650]);assert.equal(MK920_SPEC.maxStampingSpeed,6500);assert.equal(MK920_SPEC.foilPullAxes,3);assert.equal(MK920_SPEC.foilAdvanceIncrementMm,1);

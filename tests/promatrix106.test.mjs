@@ -41,6 +41,22 @@ test('Promatrix tie sheets sit between product layers without intersecting the n
  }finally{sim.dispose();model.dispose();}
 });
 
+test('Promatrix cover windows and spine fittings leave with the exterior in cutaway',()=>{
+ for(const id of ['BMJ-MCH-0014','BMJ-MCH-0015']){
+  const model=new Promatrix106MachineTemplate(id);
+  try{
+   const windows=model.meshes.filter(m=>m.userData.mechanismRole==='promatrix-process-window-reference');
+   const display=model.meshes.find(m=>m.userData.mechanismRole==='promatrix-integrated-display-reference');
+   const plate=model.meshes.find(m=>m.userData.identityPlacard);
+   assert.equal(windows.length,6);assert.ok(display&&plate);
+   model.setLow(true);model.setExteriorOpen(true);
+   assert.ok([...windows,display,plate].every(m=>!m.visible));
+   model.setLow(false);model.setExteriorOpen(false);
+   assert.ok([...windows,display,plate].every(m=>m.visible));
+  }finally{model.dispose();}
+ }
+});
+
 test('Promatrix 106 CSB keeps both BMJ identities and OEM generation boundaries explicit',()=>{
  assert.equal(PROMATRIX106_SPEC.assetId,'BMJ-MCH-0014');assert.equal(PROMATRIX106_SPEC.serial,'MP.DBE0-00100');assert.equal(PROMATRIX106_SPEC_APM9.assetId,'BMJ-MCH-0015');assert.equal(PROMATRIX106_SPEC_APM9.serial,'MP.DBE0-00115');
  assert.deepEqual(PROMATRIX106_SPEC.sheetMax,[.760,1.060]);assert.equal(PROMATRIX106_SPEC.cuttingPressureMN,2.6);assert.equal(PROMATRIX106_SPEC.cuttingPressureTonnes,260);

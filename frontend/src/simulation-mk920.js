@@ -43,7 +43,7 @@ export class MK920StampingSimulation{
    // Foil is transferred at the heated platen; it is not printed on the incoming blank.
    const foil=new THREE.Group();foil.name='MK920-PROCESSED-FOIL-IMPRINT';foil.visible=false;
    for(const z of [-.19,0,.19]){const strip=new THREE.Mesh(new THREE.PlaneGeometry(.49,.065),new THREE.MeshStandardMaterial({color:0xd3aa42,metalness:.75,roughness:.23,side:THREE.DoubleSide}));strip.position.set(.03,z,.004);foil.add(strip);}
-   mesh.add(foil);this.sheets.push({mesh,foil,phase:i/6,lap:-1});
+   mesh.add(foil);this.sheets.push({mesh,foil,phase:i/6,lap:-1,stampedLap:-1});
   }
   for(let i=0;i<16;i++){const mesh=new THREE.Mesh(new THREE.BoxGeometry(.92,.006,.65),mat.clone());mesh.visible=false;root.add(mesh);this.stack.push(mesh);}
   this.pathVisible=false;this.foilVisible=true;this.resetFlags();
@@ -59,7 +59,7 @@ export class MK920StampingSimulation{
    foilAdvancing:this.foilAdvancing,wasteRewinding:this.wasteRewinding,foilAxisCount:this.foilAxes.length,foilWebCount:this.foilWebs.length,gripperReleaseActive:this.gripperReleaseActive,
    interlocks:{pressureRequiresStoppedTransport:this.pressureDwell?!this.transportIndexing:true,foilAdvanceRequiresOpenPlaten:this.foilAdvancing?!this.platenClosed&&!this.platenClosing:true,foilAdvanceForbiddenDuringDwell:!(this.foilAdvancing&&this.pressureDwell)}};
  }
- start(){if(this.staticDeliveryStack)this.staticDeliveryStack.visible=false;this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;for(const s of this.sheets){s.lap=-1;s.mesh.visible=false;}for(const p of this.stack)p.visible=false;this.resetMechanisms();this.heaterReady=true;this.updateHeaters();this.onUpdate?.(this.state());return this.state();}
+ start(){if(this.staticDeliveryStack)this.staticDeliveryStack.visible=false;this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;for(const s of this.sheets){s.lap=-1;s.stampedLap=-1;s.foil.visible=false;s.mesh.visible=false;}for(const p of this.stack)p.visible=false;this.resetMechanisms();this.heaterReady=true;this.updateHeaters();this.onUpdate?.(this.state());return this.state();}
  pause(){this.running=false;this.paused=this.active;this.onUpdate?.(this.state());return this.state();}
  resume(){if(this.active){this.running=true;this.paused=false;this.lastNow=null;}this.onUpdate?.(this.state());return this.state();}
  setSpeed(v){this.speed=Math.max(.25,Math.min(4,Number(v)||1));return this.state();}
@@ -87,7 +87,9 @@ export class MK920StampingSimulation{
   const global=cycleIndex+transport;
   for(const s of this.sheets){const raw=global-s.phase;if(raw<0){s.mesh.visible=false;continue;}const lap=Math.floor(raw),t=Math.min(.999,raw-lap);
    if(lap>s.lap){if(s.lap>=0)this.outputSheet();s.lap=lap;}
-   s.mesh.visible=true;s.mesh.position.copy(this.curve.getPointAt(t));s.mesh.rotation.set(-Math.PI/2,0,0);s.foil.visible=t>=.42;s.mesh.material.color.setHex(s.foil.visible?0xead9a8:0xf1ead7);
+   s.mesh.visible=true;s.mesh.position.copy(this.curve.getPointAt(t));s.mesh.rotation.set(-Math.PI/2,0,0);
+   if(this.stampingContact&&t>=.40&&t<=.44)s.stampedLap=lap;
+   s.foil.visible=s.stampedLap===lap;s.mesh.material.color.setHex(s.foil.visible?0xead9a8:0xf1ead7);
   }
  }
  update(now){
@@ -100,6 +102,6 @@ export class MK920StampingSimulation{
   this.transportIndexing=indexing;this.transportStopped=!indexing;this.platenClosing=p>.30&&p<.39;this.platenClosed=platenAmount>.92;this.pressureDwell=dwell;this.platenOpening=p>.61&&p<.70;this.heaterReady=true;this.stampingContact=dwell&&this.platenClosed;this.foilAdvancing=foilAdvance;this.wasteRewinding=foilAdvance;this.gripperReleaseActive=p>.88;
   this.updateHeaters();this.updateRotors(dt,p,indexing,platenMotion,foilAdvance);this.updateFeeder(p);this.updateGrippers(transport);this.updateSheets(cycleIndex,transport);this.onUpdate?.(this.state());
  }
- stop(){this.active=false;this.running=false;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;this.heaterReady=false;this.resetMechanisms();for(const s of this.sheets){s.mesh.visible=false;s.lap=-1;}for(const p of this.stack)p.visible=false;this.pathLine.visible=false;if(this.staticDeliveryStack)this.staticDeliveryStack.visible=this.staticDeliveryVisible;this.onUpdate?.(this.state());return this.state();}
+ stop(){this.active=false;this.running=false;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;this.heaterReady=false;this.resetMechanisms();for(const s of this.sheets){s.mesh.visible=false;s.foil.visible=false;s.lap=-1;s.stampedLap=-1;}for(const p of this.stack)p.visible=false;this.pathLine.visible=false;if(this.staticDeliveryStack)this.staticDeliveryStack.visible=this.staticDeliveryVisible;this.onUpdate?.(this.state());return this.state();}
  dispose(){this.stop();for(const s of this.sheets){this.root.remove(s.mesh);s.mesh.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});}for(const p of this.stack){this.root.remove(p);p.geometry.dispose();p.material.dispose();}this.root.remove(this.pathLine);this.pathLine.geometry.dispose();this.pathLine.material.dispose();}
 }
