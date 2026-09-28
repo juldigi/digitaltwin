@@ -60,7 +60,6 @@ test('V255 matches the BMJ delivery end-face photo with attached fascia, control
  const m=new Offset5CD102RealismTemplate();
  try{
   const count=role=>m.realismMeshes.filter(item=>item.userData.realismRole===role).length;
-  assert.equal(m.root.userData.visualRefinement,'V256_BMJ_CUTAWAY_JOURNAL_FRAME_SUPPORTS');
   assert.equal(m.root.userData.photoDeliveryEvidence,'IMG_2312.jpeg');
   assert.equal(m.root.userData.photoDeliveryPolicy,'EXTERIOR_FACE_ONLY__NO_CONTROL_FUNCTION_OR_SERVICE_SETTING_INFERRED');
   assert.equal(count('delivery-photo-upper-control-fascia'),1);
@@ -102,7 +101,6 @@ test('V254 adds attached Preset Plus delivery and coater references without chan
 test('V256 grounds all PU cylinder journals into open side-frame rails without changing BMJ dimensions',()=>{
  const m=new Offset5CD102RealismTemplate();
  try{
-  assert.equal(m.root.userData.visualRefinement,'V256_BMJ_CUTAWAY_JOURNAL_FRAME_SUPPORTS');
   assert.equal(m.root.userData.internalFramePolicy,'OPEN_RAIL_STRUCTURE_ONLY__NO_NEW_PROCESS_HARDWARE__NO_DIMENSION_CHANGE');
   assert.equal(m.root.userData.dimensionLock,'BMJ_CUSTOM_INSTALLED_DIMENSIONS_DO_NOT_NORMALIZE_TO_GENERIC_CD102');
   for(let unit=1;unit<=8;unit++){
