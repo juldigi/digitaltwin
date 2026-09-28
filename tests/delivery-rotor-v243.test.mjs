@@ -47,7 +47,7 @@ test('reference-family cylinders remain coaxial during simulation',()=>{
 });
 
 for(const id of ['BMJ-MCH-0003','BMJ-MCH-0005','BMJ-MCH-0006','BMJ-MCH-0009','BMJ-MCH-0010']){
- test(`${id} keeps a visible receiving surface and restores the presentation pile after stop`,()=>{
+ test(`${id} keeps a receiving surface and resets its delivery pile after stop`,()=>{
   const template=createPolishedMachineTemplate(id);
   const sim=createMachineSimulation(id,template.root,template);
   try{
@@ -62,7 +62,7 @@ for(const id of ['BMJ-MCH-0003','BMJ-MCH-0005','BMJ-MCH-0006','BMJ-MCH-0009','BM
     assert.ok(sim.pileSheets[0].mesh.position.y<.55,'result lies on the delivery table');
    }
    sim.stop();
-   assert.equal(sim.staticDeliveryStack.visible,true);
+   assert.equal(sim.staticDeliveryStack.visible,id!=='BMJ-MCH-0003','Offset 5 stays empty after stop; other machines restore their presentation pile');
    assert.equal(sim.state().pileSheetsVisible,0);
   }finally{sim.dispose();template.dispose();}
  });

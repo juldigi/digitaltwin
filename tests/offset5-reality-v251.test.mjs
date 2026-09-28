@@ -100,7 +100,7 @@ test('Offset 5 adds transverse colour lines one PU at a time and stacks on an in
   assert.ok(sim.pileSheets.filter(item=>item.mesh.visible).every(item=>item.mesh.geometry.attributes.position.getY(0)>=sim.pileAnchor.y-.001));
   assert.ok(sim.sheets.every(item=>!item.gripper.visible),'demo gripper blocks remain visible between sheets');
   assert.equal(sim.state().deliveryPilePolicy,'START_EMPTY_STACK_TO_CAPACITY_THEN_CLEAR_AND_REPEAT');
-  sim.stop();assert.equal(sim.state().pileSheetsVisible,0);assert.equal(sim.staticDeliveryStack.visible,sim.staticDeliveryVisible);
+  sim.stop();assert.equal(sim.state().pileSheetsVisible,0);assert.equal(sim.staticDeliveryStack.visible,false,'stop returns to an empty delivery rather than a prebuilt full pile');
  }finally{sim.dispose();m.dispose();}
 });
 
@@ -137,6 +137,21 @@ test('Offset 5 first delivered sheet immediately joins the empty pile',()=>{
   assert.equal(sim.completed,1);
   assert.equal(sim.state().pileSheetsVisible,1,'first sheet must appear on the same frame as its release');
   assert.equal(sim.pileSheets[0].mesh.visible,true);
+ }finally{sim.dispose();m.dispose();}
+});
+
+test('Offset 5 restart resets every reused sheet before it enters PU1',()=>{
+ const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
+ try{
+  sim.start();const sheet=sim.sheets[0],w=sim.sheetWidthSegments,index=Math.round(.13*sim.sheetLengthSegments)*(w+1)+4;
+  sim.updateSheet(sheet,sim.pathLength*.75);
+  assert.ok(sheet.userData.contactRowMasks?.some(mask=>mask!==0));
+  sim.stop();
+  assert.equal(sim.staticDeliveryStack.visible,false);
+  sim.start();sim.updateSheet(sheet,sim.sheetLength+.02);
+  const attr=sheet.mesh.geometry.attributes.color,blank=new THREE.Color(0xf4f0df);
+  assert.ok(Math.abs(attr.getX(index)-blank.r)<.001,'first sheet must reenter blank, without ink from the prior run');
+  assert.equal(sim.state().pileSheetsVisible,0);
  }finally{sim.dispose();m.dispose();}
 });
 

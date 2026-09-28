@@ -372,6 +372,24 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
     sheet.gripper.visible=false;
     return visible;
   }
+  start(){
+    if(!this.active)for(const sheet of this.sheets){
+      sheet.userData.contactRowMasks?.fill(0);
+      sheet.userData.contactColorRevision=-1;
+      this.setSheetColors(sheet,0);
+    }
+    return super.start();
+  }
+  stop(){
+    super.stop();
+    for(const sheet of this.sheets){
+      sheet.userData.contactRowMasks?.fill(0);
+      sheet.userData.contactColorRevision=-1;
+    }
+    // The simulated pile is cleared by stop; do not swap a prebuilt full pile back in.
+    if(this.staticDeliveryStack)this.staticDeliveryStack.visible=false;
+    return this.state();
+  }
   // Offset lithography transfers thin films at roller contacts. The legacy
   // floating droplets/tubes read as leaking ink and are not part of the press.
   buildFluidFlows(){this.fluidFlows=[];}
