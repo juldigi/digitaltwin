@@ -3,9 +3,15 @@ import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import {SharkN650MachineTemplate} from '../frontend/src/shark-n650.js';
 import {SharkN650ProcessSimulation,SHARK_N650_SIMULATION_STAGES} from '../frontend/src/simulation-shark-n650.js';
-import {SHARK_N650_SPEC} from '../frontend/src/data/dimensions-shark-n650.js';
+import {SHARK_N650_SPEC,SHARK_N650_STATIONS} from '../frontend/src/data/dimensions-shark-n650.js';
 import {SHARK_N650_TAXONOMY} from '../frontend/src/data/taxonomy-shark-n650.js';
 import {SHARK_N650_TECHNICAL_SOURCES} from '../frontend/src/data/sources-shark-n650.js';
+
+test('SHARK station labels use clear Indonesian while keeping technical terms',()=>{
+ assert.deepEqual(SHARK_N650_STATIONS.map(s=>s.label),[
+  'Pengumpanan otomatis','Transfer full-suction','Menara inspeksi','Camera + pencahayaan terkontrol','Pemisahan reject','Pengumpulan return good / bad'
+ ]);
+});
 
 test('SHARK N650 preserves exact BMJ suffix and conflicting current official format references without guessing',()=>{
  assert.equal(SHARK_N650_SPEC.assetId,'BMJ-MCH-0020');assert.equal(SHARK_N650_SPEC.model,'FS-SHARK-N650-P3N1');assert.equal(SHARK_N650_SPEC.serial,'FPS241216001');assert.equal(SHARK_N650_SPEC.year,2025);
