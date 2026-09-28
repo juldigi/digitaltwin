@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 // DigitalTwin BMJ — Offset 5 final realism refinement
 // Target: HEIDELBERG Speedmaster CD 102-8+L / OFU-1 / serial 550415
 //
