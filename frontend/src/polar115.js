@@ -112,7 +112,7 @@ export class Polar115MachineTemplate{
   const rear=this.group(safety,'polar-safety-rear','Rear side guards');for(const x of [-.72,.72])this.cover(this.box(rear,[.035,.18,.12],[x,1.08,1.10],'body',.008));
 
   // Actual control face: small square display, keypad/controls and taped operating sheets.
-  const control=this.group(this.root,'polar-control','EM-MONITOR Control',[0,0,0],[0,.24,-.20]);control.userData.evidence=photoEvidence;
+  const control=this.group(this.root,'polar-control','EM-MONITOR Control',[0,0,-.28],[0,.24,-.20]);control.userData.evidence=photoEvidence;
   const panel=this.group(control,'polar-control-panel','Program / dimension console');
   const panelFace=this.cover(this.box(panel,[1.30,.30,.045],[0,1.47,.125],'bodyDark',.035));panelFace.userData.evidence=photoEvidence;
   const crt=this.group(control,'polar-control-crt','Industrial program display');
@@ -141,18 +141,17 @@ export class Polar115MachineTemplate{
   // IMG_2490/2491 look through the rear opening at the vertical finger field.
   // A solid rear slab used to bury the back table and backgauge inside the housing.
   const rearBrow=this.cover(this.box(housing,[2.06,.44,.24],[0,1.58,.83],'body',.09));rearBrow.userData.evidence='IMG_2490_2491_REAR_FULL_HEIGHT_FACE';
-  for(const x of [-.87,.87]){const jamb=this.cover(this.box(housing,[.32,.78,.22],[x,1.18,.84],'body',.07));jamb.userData.evidence='IMG_2490_2491_OPEN_REAR_JAMB';}
   const sill=this.box(housing,[1.50,.075,.22],[0,.68,.84],'bodyDark',.014);sill.userData.evidence='IMG_2490_2491_REAR_OPENING_LOW_SILL';
-  const leftPillar=this.cover(this.box(housing,[.34,.92,.54],[-.87,1.22,.42],'body',.11));leftPillar.userData.evidence=photoEvidence;
-  const rightPillar=this.cover(this.box(housing,[.34,.92,.54],[.87,1.22,.42],'body',.11));rightPillar.userData.evidence=photoEvidence;
+  const leftPillar=this.cover(this.box(housing,[.34,.92,.95],[-.87,1.22,.42],'body',.11));leftPillar.userData.evidence=photoEvidence;
+  const rightPillar=this.cover(this.box(housing,[.34,.92,.95],[.87,1.22,.42],'body',.11));rightPillar.userData.evidence=photoEvidence;
   const topBridge=this.cover(this.box(housing,[1.78,.40,.54],[0,1.58,.42],'body',.12));topBridge.userData.consoleBrow=true;topBridge.userData.evidence=photoEvidence;
 
   // Operator-right side belt-drive enclosure with circular inspection window, visible in rear-side photo.
   const motorEnd=this.group(housing,'polar-housing-motor-end','Side belt-drive housing with inspection window',[0,0,0],[.14,.06,0]);motorEnd.userData.evidence=photoEvidence;
-  const motorCover=this.cover(this.box(motorEnd,[.42,.78,.50],[1.20,.46,1.02],'body',.10));motorCover.rotation.x=-.18;motorCover.userData.evidence='IMG_2490_REAR_LEFT_FLOOR_DRIVE_CASING';
-  const driveFoot=this.box(motorEnd,[.44,.09,.52],[1.20,.045,1.13],'dark',.025);driveFoot.userData.evidence='IMG_2490_REAR_LEFT_FLOOR_DRIVE_FOOT';
-  const windowRing=this.cyl(motorEnd,.16,.025,[1.415,.76,.78],'dark','x');windowRing.userData.detail=true;windowRing.userData.inspectionWindow=true;windowRing.userData.evidence=photoEvidence;
-  const windowGlass=this.cyl(motorEnd,.12,.028,[1.425,.76,.78],'screen','x');windowGlass.userData.detail=true;windowGlass.userData.evidence=photoEvidence;
+  const motorCover=this.cover(this.box(motorEnd,[.30,.58,.38],[1.16,.47,.61],'bodyDark',.05));motorCover.userData.evidence='IMG_2490_REAR_LEFT_SIDE_DRIVE_NO_REAR_BULGE';
+  const driveFoot=this.box(motorEnd,[.32,.09,.40],[1.16,.045,.61],'dark',.02);driveFoot.userData.evidence='IMG_2490_SIDE_DRIVE_FOOT';
+  const windowRing=this.cyl(motorEnd,.16,.025,[1.315,.51,.61],'dark','x');windowRing.userData.detail=true;windowRing.userData.inspectionWindow=true;windowRing.userData.evidence=photoEvidence;
+  const windowGlass=this.cyl(motorEnd,.12,.028,[1.325,.51,.61],'screen','x');windowGlass.userData.detail=true;windowGlass.userData.evidence=photoEvidence;
   const motor=this.active(this.cyl(motorEnd,.16,.42,[1.17,.20,.74],'dark','x'),'belt-drive-motor');motor.userData.evidence=photoEvidence;
   this.cyl(motorEnd,.07,.16,[1.17,.35,.74],'steel','x');
   const rearFingerField=this.group(housing,'polar-housing-rear-fingers','Rear cutting throat guard fingers');rearFingerField.userData.evidence='IMG_2490_2491_REAR_FINGER_FIELD';
@@ -251,7 +250,7 @@ export class Polar115MachineTemplate{
    tag(this.box(g,[.012,.62,.020],[x,1.25,.145],'bodyDark',.001),'polar-head-panel-seam');
    tag(this.box(g,[.026,.18,.022],[x+.10,1.28,.128],'dark',.004),'polar-head-service-handle');
   }
-  const motorRing=tag(this.mesh(g,new THREE.TorusGeometry(.170,.018,10,28),'bodyDark',[1.430,.76,.78],[0,Math.PI/2,0]),'polar-belt-housing-window-bezel',true);
+  const motorRing=tag(this.mesh(g,new THREE.TorusGeometry(.170,.018,10,28),'bodyDark',[1.330,.51,.61],[0,Math.PI/2,0]),'polar-belt-housing-window-bezel',true);
   motorRing.userData.legacyInspectionWindow=true;
 
   // Physical EM-MON console bezel / keypad surround; keep square display identity.

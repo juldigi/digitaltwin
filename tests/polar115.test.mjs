@@ -39,9 +39,9 @@ test('four BMJ photo angles place the white air table and rear drive on the phot
  const rearSlot=m.meshes.find(x=>x.userData.evidence==='IMG_2490_2491_REAR_TABLE_GUIDE_SLOT');assert.ok(rearSlot);
  const rearFingers=m.findNode('polar-housing-rear-fingers');
  assert.ok(rearFingers.children.filter(x=>x.userData.evidence==='IMG_2490_2491_REAR_FINGER_FIELD').length>=25,'rear throat presents the dense finger field visible from both rear angles');
- const driveCover=m.findNode('polar-housing-motor-end').children.find(x=>x.userData.evidence==='IMG_2490_REAR_LEFT_FLOOR_DRIVE_CASING');
+ const driveCover=m.findNode('polar-housing-motor-end').children.find(x=>x.userData.evidence==='IMG_2490_REAR_LEFT_SIDE_DRIVE_NO_REAR_BULGE');
  const driveBounds=new THREE.Box3().setFromObject(driveCover);
- assert.ok(driveBounds.min.y<.08&&driveBounds.max.y>.8,'rear-left side drive casing reaches the floor beside the machine');
+ assert.ok(driveBounds.max.z<.9&&driveBounds.getSize(new THREE.Vector3()).y<.7,'side drive must not become a large white bulge at the rear end');
  m.dispose();
 });
 
@@ -87,6 +87,17 @@ test('POLAR geometry uses a vertical knife blade and keeps safety hardware expli
  assert.equal(m.findNode('polar-safety-twohand').userData.simultaneityControlReference,true);assert.equal(m.findNode('polar-safety-twohand').userData.antiRepeatReference,true);
  const box=new THREE.Box3().setFromObject(m.root),envelope=box.getSize(new THREE.Vector3());assert.ok(box.min.y>=-0.01);assert.ok(envelope.x>=2.55&&envelope.x<=2.9);assert.ok(envelope.z>=1.7&&envelope.z<=2.8);assert.ok(envelope.y>=1.55&&envelope.y<=1.85);
  m.setExteriorOpen(true);assert.ok(m.root.userData.exteriorHiddenCount>=6);m.dispose();
+});
+
+test('front console faces the operator while the blade remains inside the cutter throat',()=>{
+ const m=new Polar115MachineTemplate();m.root.updateMatrixWorld(true);
+ const display=m.findNode('polar-control-crt').children.find(x=>x.name==='Program Display');
+ const blade=m.meshes.find(x=>x.userData.knifeBlade);
+ const controlZ=display.getWorldPosition(new THREE.Vector3()).z,knifeZ=blade.getWorldPosition(new THREE.Vector3()).z;
+ assert.ok(controlZ<knifeZ-.1,'display must be operator-side of the knife, not behind it');
+ assert.ok(display.getWorldPosition(new THREE.Vector3()).y>blade.getWorldPosition(new THREE.Vector3()).y,'display sits above the cutting aperture');
+ assert.equal(m.findNode('polar-housing').children.filter(x=>x.isMesh&&x.userData.evidence==='IMG_2490_2491_OPEN_REAR_JAMB').length,0,'rear shell has no freestanding end pillars');
+ m.dispose();
 });
 
 test('POLAR pressure bar remains ahead of the knife plane throughout the cut stroke',()=>{
