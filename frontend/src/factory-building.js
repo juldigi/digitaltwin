@@ -956,8 +956,13 @@ export function buildActualFactory(layout,fleet){
   for(let i=0;i<cols;i++){const px=x-w/2+cw*(i+.5);rb(g,px,h*.52,z+d/2+.013,cw-.018,h-.12,.024,0x80949a,tag+'_LOCKER_DOOR');rb(g,px+cw*.27,h*.54,z+d/2+.03,.014,.13,.012,0x43545b,tag+'_LOCKER_HANDLE');for(const yy of [h*.72,h*.78])rb(g,px,yy,z+d/2+.032,cw*.42,.012,.01,0x43545b,tag+'_LOCKER_VENT');buildingDetailStats.v203LockerDoors++;}
   buildingDetailStats.v202RoomCabinets++;
  };
- const localClearAisle=(g,w,d)=>{
-  const aisle=rb(g,0,.004,d/2-.43,Math.max(.7,w-.30),.008,.72,0x91a6a3,'ROOM_CLEAR_AISLE_REFERENCE',.13);aisle.userData.doorClearance=true;
+ const roomDoorOffset=(ctx,w,half)=>{
+  if(ctx.doorX===null||ctx.doorY===null)return 0;
+  const dx=ctx.doorX-(ctx.minX+ctx.maxX)/2,dy=ctx.doorY-(ctx.minY+ctx.maxY)/2;
+  return T.MathUtils.clamp(Math.cos(ctx.rotation)*dx+Math.sin(ctx.rotation)*dy,-w/2+half+.10,w/2-half-.10);
+ };
+ const localClearAisle=(g,w,d,doorX=0)=>{
+  const aisle=rb(g,doorX,.004,d/2-.43,Math.max(.7,Math.min(1.35,w-.30)),.008,.72,0x91a6a3,'ROOM_CLEAR_AISLE_REFERENCE',.13);aisle.userData.doorClearance=true;
  };
  const roomFinishForProgram=program=>/ADMIN|SUPERVISOR|PPIC|PDS|QC|INCOMING|PREPRESS|MEETING/.test(program)?'OFFICE_VINYL':/TOILET|PANTRY|LOCKER|PRAYER/.test(program)?'CERAMIC':'SEALED_CONCRETE';
  const roomFinishColor=cat=>cat==='CERAMIC'?0xc9c8bf:cat==='OFFICE_VINYL'?0xbac4c4:0xadb4b2;
@@ -977,20 +982,21 @@ export function buildActualFactory(layout,fleet){
    add(0,.018,0,.008,.005,d-.16,0x868f8d,'V204_ROOM_CONCRETE_CONTROL_JOINT_REFERENCE',.22);buildingDetailStats.v204FloorFinishJoints++;
   }
   if(!ctx.enclose){v203RoomShellAudit.push({key:ctx.key,label:l.text,program:ctx.program,localWidth:+w.toFixed(2),localDepth:+d.toFixed(2),finish:cat,doorHalf:0,ceiling:false,status:'V203_OPEN_FUNCTION_ZONE_NO_ROOM_LINER'});return g;}
-  const h=/OFFICE|PPIC|PDS|QC|INCOMING|PREPRESS|MEETING/.test(ctx.program)?2.92:3.08,doorHalf=Math.max(.48,Math.min(.78,(ctx.doorWidth||1)/2+.10)),liner=0xf0eee8;
+  const h=/OFFICE|PPIC|PDS|QC|INCOMING|PREPRESS|MEETING/.test(ctx.program)?2.92:3.08,doorHalf=Math.max(.48,Math.min(.78,(ctx.doorWidth||1)/2+.10)),doorX=roomDoorOffset(ctx,w,doorHalf),liner=0xf0eee8;
   add(0,h/2,-d/2+.026,w-.08,h,.028,liner,'V203_ROOM_INTERIOR_LINER_WORK_WALL');buildingDetailStats.roomInteriorLinerRuns++;
   for(const sx of [-w/2+.026,w/2-.026]){add(sx,h/2,0,.028,h,d-.08,liner,'V203_ROOM_INTERIOR_LINER_SIDE_WALL');buildingDetailStats.roomInteriorLinerRuns++;}
-  const sideSeg=Math.max(0,(w-2*doorHalf)/2-.04);if(sideSeg>.08){for(const sx of [-(doorHalf+sideSeg/2),doorHalf+sideSeg/2]){add(sx,h/2,d/2-.026,sideSeg,h,.028,liner,'V203_ROOM_INTERIOR_LINER_DOOR_WALL');buildingDetailStats.roomInteriorLinerRuns++;}}
-  add(0,.012,d/2-.018,Math.min(w-.18,doorHalf*2),.024,.10,0x7a8888,'V203_ROOM_THRESHOLD_TRANSITION_REFERENCE');buildingDetailStats.roomThresholdTransitions++;buildingDetailStats.v204RoomFinishTransitions++;
-  const approach=add(0,.011,d/2-.49,Math.min(w-.24,doorHalf*2+.30),.007,.92,0x87a99d,'V204_ROOM_DOOR_APPROACH_ZONE_REFERENCE',.08);approach.userData.clearZone=true;buildingDetailStats.v204DoorApproachZones++;
-  const jambH=Math.min(2.32,h-.18);for(const sx of [-doorHalf,doorHalf]){add(sx,jambH/2,d/2-.045,.045,jambH,.055,0x6d8085,'V204_ROOM_DOOR_JAMB_REFERENCE');buildingDetailStats.v204DoorJambDetails++;}
-  add(0,jambH,d/2-.045,doorHalf*2+.045,.055,.055,0x6d8085,'V204_ROOM_DOOR_HEAD_REFERENCE');buildingDetailStats.v204DoorJambDetails++;
-  const hingeX=-doorHalf+.045,swingR=Math.max(.52,Math.min(.86,doorHalf*2-.10));let prev=new T.Vector3(hingeX+swingR,.027,d/2-.055);
+  const leftSeg=Math.max(0,doorX-doorHalf+w/2-.04),rightSeg=Math.max(0,w/2-doorX-doorHalf-.04);
+  for(const [width,x] of [[leftSeg,-w/2+leftSeg/2],[rightSeg,w/2-rightSeg/2]])if(width>.08){add(x,h/2,d/2-.026,width,h,.028,liner,'V203_ROOM_INTERIOR_LINER_DOOR_WALL');buildingDetailStats.roomInteriorLinerRuns++;}
+  add(doorX,.012,d/2-.018,Math.min(w-.18,doorHalf*2),.024,.10,0x7a8888,'V203_ROOM_THRESHOLD_TRANSITION_REFERENCE');buildingDetailStats.roomThresholdTransitions++;buildingDetailStats.v204RoomFinishTransitions++;
+  const approach=add(doorX,.011,d/2-.49,Math.min(w-.24,doorHalf*2+.30),.007,.92,0x87a99d,'V204_ROOM_DOOR_APPROACH_ZONE_REFERENCE',.08);approach.userData.clearZone=true;buildingDetailStats.v204DoorApproachZones++;
+  const jambH=Math.min(2.32,h-.18);for(const sx of [doorX-doorHalf,doorX+doorHalf]){add(sx,jambH/2,d/2-.045,.045,jambH,.055,0x6d8085,'V204_ROOM_DOOR_JAMB_REFERENCE');buildingDetailStats.v204DoorJambDetails++;}
+  add(doorX,jambH,d/2-.045,doorHalf*2+.045,.055,.055,0x6d8085,'V204_ROOM_DOOR_HEAD_REFERENCE');buildingDetailStats.v204DoorJambDetails++;
+  const hingeX=doorX-doorHalf+.045,swingR=Math.max(.52,Math.min(.86,doorHalf*2-.10));let prev=new T.Vector3(hingeX+swingR,.027,d/2-.055);
   for(let ai=1;ai<=10;ai++){const a=Math.PI*.5*ai/10,next=new T.Vector3(hingeX+swingR*Math.cos(a),.027,d/2-.055-swingR*Math.sin(a)),arc=line(g,prev,next,.008,0x81958f);arc.userData={semantic:'V204_ROOM_DOOR_SWING_ARC_REFERENCE',roomKey:ctx.key,accuracy:'FUNCTIONAL_DOOR_SWING_REFERENCE_NOT_AS_BUILT_HANDING',researchVersion:'V204',functionalReferenceVisible:true};buildingDetailStats.v204DoorSwingArcs++;prev=next;}
   const leaf=line(g,new T.Vector3(hingeX,.035,d/2-.055),new T.Vector3(hingeX,.035,d/2-.055-swingR),.016,0x6d8085);leaf.userData={semantic:'V204_ROOM_DOOR_OPEN_LEAF_REFERENCE',roomKey:ctx.key,accuracy:'FUNCTIONAL_DOOR_SWING_REFERENCE_NOT_AS_BUILT_HANDING',researchVersion:'V204',functionalReferenceVisible:true};
   add(0,.065,-d/2+.045,w-.12,.11,.055,0x65787d,'V203_ROOM_SKIRTING_WORK_WALL');buildingDetailStats.roomSkirtingRuns++;
   for(const sx of [-w/2+.045,w/2-.045]){add(sx,.065,0,.055,.11,d-.12,0x65787d,'V203_ROOM_SKIRTING_SIDE_WALL');buildingDetailStats.roomSkirtingRuns++;}
-  if(sideSeg>.08){for(const sx of [-(doorHalf+sideSeg/2),doorHalf+sideSeg/2]){add(sx,.065,d/2-.045,sideSeg,.11,.055,0x65787d,'V203_ROOM_SKIRTING_DOOR_WALL');buildingDetailStats.roomSkirtingRuns++;}}
+  for(const [width,x] of [[leftSeg,-w/2+leftSeg/2],[rightSeg,w/2-rightSeg/2]])if(width>.08){add(x,.065,d/2-.045,width,.11,.055,0x65787d,'V203_ROOM_SKIRTING_DOOR_WALL');buildingDetailStats.roomSkirtingRuns++;}
   const ceilingPrograms=/ADMIN|SUPERVISOR|PPIC|PDS|QC|INCOMING|PREPRESS|MEETING|PANTRY|LOCKER|TOILET|PRAYER/;
   if(ceilingPrograms.test(ctx.program)){
    const cy2=Math.min(2.84,h-.08);add(0,cy2,0,w-.12,.022,d-.12,0xe8e9e3,'V203_ROOM_SUSPENDED_CEILING_REFERENCE',.13);buildingDetailStats.roomCeilingPanelsV203++;
@@ -1003,7 +1009,7 @@ export function buildActualFactory(layout,fleet){
    const px=(stableCode(ctx.key)%2?1:-1)*Math.min(.68,w*.24),plate=add(px,.36,-d/2+.048,.24,.16,.022,0xe5e6df,'V203_WORKSTATION_POWER_DATA_PLATE_REFERENCE');plate.userData.accuracy='ERGONOMIC_WORKSTATION_SERVICE_REFERENCE_NOT_AS_BUILT_MEP';buildingDetailStats.roomWallServiceReferences++;
    const boardW=Math.min(1.35,w*.36),boardX=-px*.55,board=add(boardX,1.52,-d/2+.050,boardW,.56,.025,/QC|INCOMING/.test(ctx.program)?0xded9c8:0xe7e6dc,'V204_ROOM_VISUAL_BOARD_REFERENCE');board.userData.boardRole=/QC|INCOMING/.test(ctx.program)?'INSPECTION_REFERENCE':'WORK_INFORMATION_REFERENCE';buildingDetailStats.v204WallVisualBoards++;
   }
-  v203RoomShellAudit.push({key:ctx.key,label:l.text,program:ctx.program,localWidth:+w.toFixed(2),localDepth:+d.toFixed(2),finish:cat,doorHalf:+doorHalf.toFixed(2),ceiling:ceilingPrograms.test(ctx.program),status:'V203_SHELL_COMPLETE'});
+  v203RoomShellAudit.push({key:ctx.key,label:l.text,program:ctx.program,localWidth:+w.toFixed(2),localDepth:+d.toFixed(2),finish:cat,doorHalf:+doorHalf.toFixed(2),doorOffsetX:+doorX.toFixed(3),ceiling:ceilingPrograms.test(ctx.program),status:'V203_SHELL_COMPLETE'});
   return g;
  };
  const buildV202Room=(l,ctx)=>{
@@ -1011,7 +1017,8 @@ export function buildActualFactory(layout,fleet){
   const g=roomGroupFor(l,ctx),local=roomLocalSize(ctx),w=Math.max(2.5,local.w-.24),d=Math.max(2.35,local.d-.24),workZ=-d/2+.48,doorLimit=d/2-.82,mirror=stableCode(ctx.key)%2?1:-1;let objectsBefore=buildingDetailStats.v202RoomFurnitureObjects;
   activeRoomFootprintContext={roomKey:ctx.key,w,d,doorWidth:ctx.doorWidth||1,mirror};
   const fpStart=v203FurnitureFootprintAudit.length,chairStart=v202ChairFacingAudit.length;
-  localClearAisle(g,w,d);
+  const doorwayX=roomDoorOffset(ctx,w,Math.max(.48,Math.min(.78,(ctx.doorWidth||1)/2+.10)));
+  localClearAisle(g,w,d,doorwayX);
   const sideX=w/2-.30;
   switch(ctx.program){
    case 'ADMIN_OFFICE':
@@ -1034,7 +1041,7 @@ export function buildActualFactory(layout,fleet){
     localDesk(g,deskX,workZ+.22,1.15,ctx.program+'_DESK');localTable(g,inspectX,inspectZ,1.34,.74,ctx.program+'_INSPECTION');
     for(let i=0;i<4;i++){rb(g,inspectX+(i-1.5)*.15,.79,inspectZ+(i%2?.08:-.08),.22,.012,.16,i%2?0xe8e2d3:0xd9d3c5,ctx.program+'_SAMPLE_SHEET');buildingDetailStats.v203QcSampleDetails++;}
     rb(g,inspectX+mirror*.34,.81,inspectZ-.12,.26,.025,.08,0x5a6870,ctx.program+'_INSPECTION_SCALE_REFERENCE');buildingDetailStats.v203QcSampleDetails++;
-    localChair(g,stoolX,stoolZ,inspectX,inspectZ,ctx.program+'_STOOL',false);localCabinet(g,mirror*(sideX-.22),.18,.42,1.65,.34,ctx.program+'_SAMPLE_STORAGE');break;
+    localChair(g,stoolX,stoolZ,inspectX,inspectZ,ctx.program+'_STOOL',false);localCabinet(g,mirror*(sideX-.22),-.18,.42,1.65,.34,ctx.program+'_SAMPLE_STORAGE');break;
    }
    case 'PREPRESS':{
     localDesk(g,-.70,workZ+.28,1.20,'PREPRESS_OPERATOR');localTable(g,.40,-.06,1.30,.72,'PREPRESS_LIGHT_TABLE');localRack(g,mirror*(sideX-.18),.10,.34,1.55,.40,'PREPRESS_PLATE_RACK');break;
@@ -1071,7 +1078,7 @@ export function buildActualFactory(layout,fleet){
     }localBlock(g,0,.10,Math.min(w-.5,2.8),.02,.76,0x555f62,'ELECTRICAL_INSULATING_MAT',.016,false);break;
    }
    case 'SPAREPART_WAREHOUSE':{
-    localRack(g,-sideX+.20,-.15,.36,1.75,d-1.25,'SPAREPART_LEFT');localRack(g,sideX-.20,-.15,.36,1.75,d-1.25,'SPAREPART_RIGHT');
+    localRack(g,-sideX+.20,-.15,.36,1.75,d-1.90,'SPAREPART_LEFT');localRack(g,sideX-.20,-.15,.36,1.75,d-1.90,'SPAREPART_RIGHT');
     for(const [side,sx] of [[-1,-sideX+.20],[1,sideX-.20]])for(const [i,zz] of [-.62,-.12,.38].entries()){
      for(const [level,cy] of [[0,.35],[1,.77],[2,1.19]]){
       const color=(i+level+side+3)%3===0?0x627d89:0x718a91;
@@ -1103,7 +1110,7 @@ export function buildActualFactory(layout,fleet){
     localTable(g,0,.18,1.30,.76,'PANTRY_BREAK');for(const [x,z] of [[-.78,.18],[.78,.18],[0,-.48]])localChair(g,x,z,0,.18,'PANTRY',false);break;
    }
    case 'LOCKER_CHANGE':{
-    localLockerBank(g,-sideX+.20,-.15,.38,1.85,d-1.20,'LOCKER_LEFT');localLockerBank(g,sideX-.20,-.15,.38,1.85,d-1.20,'LOCKER_RIGHT');localBlock(g,0,.05,1.25,.42,.36,0x8b765c,'LOCKER_BENCH',.34);break;
+    localLockerBank(g,-sideX+.20,-.15,.38,1.85,d-1.90,'LOCKER_LEFT');localLockerBank(g,sideX-.20,-.15,.38,1.85,d-1.90,'LOCKER_RIGHT');localBlock(g,0,.05,1.25,.42,.36,0x8b765c,'LOCKER_BENCH',.34);break;
    }
    case 'PRAYER_ROOM':{
     const rackX=-sideX+.18,rackZ=doorLimit-.20;localRack(g,rackX,rackZ,.34,1.15,.32,'PRAYER_SHOE_RACK');
@@ -1121,7 +1128,7 @@ export function buildActualFactory(layout,fleet){
     }localBlock(g,0,.45,.86,.62,.54,0x6e8188,'BROKE_TROLLEY',.34);break;
    }
    case 'MEETING':{
-    localTable(g,0,-.08,Math.min(2.45,w-.78),.96,'MEETING');const mx=Math.min(.92,w*.28);for(const x of [-mx,mx]){localChair(g,x,-.76,0,-.08,'MEETING',false);localChair(g,x,.62,0,-.08,'MEETING',false);}rb(g,0,1.58,-d/2+.08,Math.min(2.1,w-.45),.72,.05,0xe9e7dc,'MEETING_PRESENTATION_BOARD');break;
+    localTable(g,0,-.08,Math.min(2.45,w-.78),.96,'MEETING');const mx=Math.min(.92,w*.28),frontX=Math.min(1.42,w/2-.34);for(const x of [-mx,mx])localChair(g,x,-.76,0,-.08,'MEETING',false);for(const x of [-frontX,frontX])localChair(g,x,.62,0,-.08,'MEETING',false);rb(g,0,1.58,-d/2+.08,Math.min(2.1,w-.45),.72,.05,0xe9e7dc,'MEETING_PRESENTATION_BOARD');break;
    }
    case 'JANITOR':{
     localCabinet(g,-.58,workZ+.18,.52,1.55,.36,'JANITOR_CHEMICAL');rb(g,.55,.38,workZ+.18,.72,.52,.56,0xb9c2c0,'JANITOR_MOP_SINK');for(const x of [-.30,0,.30])rl(g,new T.Vector3(x,.10,.25),new T.Vector3(x,1.48,.25),.016,x===0?0x4e7a9b:0x7a6a4e,'JANITOR_TOOL');break;
@@ -1132,7 +1139,7 @@ export function buildActualFactory(layout,fleet){
   const hx=Math.max(Math.abs(bb.min.x-roomCx),Math.abs(bb.max.x-roomCx),.001),hz=Math.max(Math.abs(bb.min.z-roomCz),Math.abs(bb.max.z-roomCz),.001);
   const allowedX=Math.max(.75,ctx.width/2-.12),allowedZ=Math.max(.72,ctx.depth/2-.12),layoutScale=Math.min(1,allowedX/hx,allowedZ/hz);
   if(layoutScale<.999){g.scale.setScalar(layoutScale);g.userData.layoutScale=+layoutScale.toFixed(4);}
-  const fps=v203FurnitureFootprintAudit.slice(fpStart),approachHalf=Math.max(.40,Math.min(.66,(ctx.doorWidth||1)/2+.10)),doorZone={minX:-approachHalf,maxX:approachHalf,minZ:d/2-1.02,maxZ:d/2+.02};
+  const fps=v203FurnitureFootprintAudit.slice(fpStart),approachHalf=Math.max(.40,Math.min(.66,(ctx.doorWidth||1)/2+.10)),doorZone={minX:doorwayX-approachHalf,maxX:doorwayX+approachHalf,minZ:d/2-1.02,maxZ:d/2+.02};
   let accessViolations=0,wallPenetrations=0;
   for(const q of fps){
    const sx=q.x*layoutScale,sz=q.z*layoutScale,sw=q.w*layoutScale,sd=q.d*layoutScale,scaled={minX:sx-sw/2,maxX:sx+sw/2,minZ:sz-sd/2,maxZ:sz+sd/2};

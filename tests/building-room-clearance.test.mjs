@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import * as THREE from 'three';
 import {buildActualFactory,loadFactoryFleet,shiftWallFromMachineClearance,clipWallToMachineClearance,machineClearanceBoxes} from '../frontend/src/factory-building.js';
 import {loadActualPlantLayout} from '../frontend/src/data/plant-actual.js';
 
@@ -62,4 +63,18 @@ test('electrical, prayer and broke rooms use function-specific interior details'
  const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
  const {root}=buildActualFactory(layout,fleet),semantics=new Set();root.traverse(o=>{if(o.userData?.semantic)semantics.add(o.userData.semantic);});
  for(const item of ['V202_ELECTRICAL_PANEL_DOOR_REFERENCE','V202_ELECTRICAL_PANEL_DARK_DISPLAY_REFERENCE','V202_PRAYER_SHOE_PAIR_REFERENCE','V202_PRAYER_MAT_EDGE_REFERENCE','V202_BROKE_BIN_TOP_RIM_REFERENCE','V202_BROKE_VISIBLE_PAPER_SCRAP_REFERENCE'])assert.ok(semantics.has(item),item);
+});
+
+test('room door jambs and access clearance follow the source door offset',async()=>{
+ const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
+ const {root}=buildActualFactory(layout,fleet),meta=root.userData;
+ const shifted=meta.v203RoomShellAudit.filter(r=>r.status==='V203_SHELL_COMPLETE'&&Math.abs(r.doorOffsetX)>.25);
+ assert.ok(shifted.length>=5);
+ for(const r of shifted){
+  const shell=[];root.traverse(o=>{if(o.userData?.semantic==='V203_ROOM_SHELL_GROUP'&&o.userData.roomKey===r.key)shell.push(o);});assert.equal(shell.length,1,r.label);
+  const jambs=[];root.traverse(o=>{if(o.userData?.semantic==='V204_ROOM_DOOR_JAMB_REFERENCE'&&o.userData.roomKey===r.key)jambs.push(o);});assert.equal(jambs.length,2,r.label);
+  const localX=jambs.map(o=>shell[0].worldToLocal(o.getWorldPosition(new THREE.Vector3())).x);
+  assert.ok(Math.abs((localX[0]+localX[1])/2-r.doorOffsetX)<.002,r.label);
+ }
+ assert.equal(meta.furnitureLayoutSummary.doorApproachViolations,0);
 });
