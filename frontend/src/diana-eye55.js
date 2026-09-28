@@ -265,10 +265,19 @@ export class DianaEye55MachineTemplate{
 
   const delivery=this.findNode('diana55-delivery');
   if(delivery){
-   delivery.name='Accepted-product fish-scale delivery';
+   delivery.name='Fish-scale delivery produk accepted';
    delivery.userData.v258DeliveryPolicy='ONE_ACCEPTED_FISH_SCALE_LANE_PLUS_SEPARATE_RECOVERABLE_REJECT_COLLECTION';
    const good=this.findNode('diana55-delivery-good-v254');if(good)good.userData.primaryAcceptedOutput=true;
   }
+  const names={
+   'diana55-feeder':'Pengumpanan blank & alignment',
+   'diana55-transport':'Transport suction-belt',
+   'diana55-inspection':'Inspection cell',
+   'diana55-camera':'Sistem camera',
+   'diana55-light':'LED illumination',
+   'diana55-processing':'Pemrosesan citra & operator interface'
+  };
+  for(const [id,name] of Object.entries(names)){const node=this.findNode(id);if(node)node.name=name;}
  }
 
  findNode(id){return id==='diana55-root'?this.root:this.nodes.find(n=>n.userData.nodeId===id)||null;}resolvePart(o){for(let p=o;p&&p!==this.root;p=p.parent)if(p.userData?.selectable)return p;return null;}resolveTaxonomyNode(id){return this.taxonomyById.get(id)?.meshRefs.map(ref=>this.findNode(ref)).find(Boolean)||null;}contains(a,b){for(let p=b;p;p=p.parent)if(p===a)return true;return false;}
