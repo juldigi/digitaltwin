@@ -12,7 +12,7 @@ export class DianaEye55ProcessSimulation{
  constructor(root,template){
   this.root=root;this.template=template;this.active=false;this.running=false;this.paused=false;this.speed=1;this.completed=0;this.rejected=0;this.inspectedDemoCount=0;this.elapsed=0;this.lastNow=null;this.onUpdate=null;
   this.rotors=[];this.lights=[];this.airNozzles=[];this.blanks=[];this.goodStack=[];this.rejectStack=[];this.pathVisible=false;
-  this.gate=template.findNode('diana55-reject-gate');this.gateRest=this.gate?.rotation.z||0;
+  this.gateMount=template.findNode('diana55-reject-gate');this.gate=this.gateMount?.children.find(o=>o.isMesh&&o.userData.rejectGate)||null;this.gateRest=this.gate?.rotation.z||0;
   root.traverse(o=>{if(o.isMesh&&o.userData.rotor)this.rotors.push(o);if(o.isMesh&&o.userData.inspectionLight)this.lights.push(o);if(o.isMesh&&o.userData.rejectAirNozzle)this.airNozzles.push(o);});
   this.rotorRest=this.rotors.map(r=>r.quaternion.clone());
   this.points=[[-3.58,.74,0],[-3.12,.73,0],[-2.42,.73,0],[-1.45,.73,0],[-.55,.73,0],[.35,.73,0],[1.30,.73,0],[1.82,.70,0],[2.55,.70,0],[3.62,.70,0]].map(p=>new THREE.Vector3(...p));
