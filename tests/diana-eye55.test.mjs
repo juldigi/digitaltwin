@@ -207,6 +207,17 @@ test('Diana accepted branch reaches fish-scale entry continuously and relayout k
  }finally{sim.dispose();model.dispose();}
 });
 
+test('DIANA signal tower remains a visual reference with unverified status meanings',()=>{
+ const model=new DianaEye55MachineTemplate();
+ try{
+  const node=model.findNode('diana55-signal-tower-v259');assert.ok(node);
+  const refs=node.children.filter(o=>o.isMesh&&o.userData.signalTowerReference);
+  assert.equal(refs.length,4);
+  assert.ok(refs.every(o=>o.userData.statusMeaningVerified===false));
+  assert.equal(model.findNode('diana55-inspection').userData.v258CellPolicy,'SINGLE_WHITE_DARK_WINDOW_INSPECTION_CELL_WITH_SIGNAL_TOWER_REFERENCE__NO_EXTRA_CAMERA_TOWERS_INFERRED');
+ }finally{model.dispose();}
+});
+
 test('DIANA operator pedestal retains the official red vertical identity accent',()=>{
  const model=new DianaEye55MachineTemplate();
  try{
