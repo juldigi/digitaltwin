@@ -110,6 +110,15 @@ export class DianaEye55MachineTemplate{
  }
  enrichV141(){this.root.userData.researchVersion='V141';this.root.userData.researchSourceCount=V141_SOURCE_STATS.total;this.root.userData.uniqueResearchUrls=V141_SOURCE_STATS.uniqueUrls;this.root.userData.detailPass='V252_DIANA55_OEM_SILHOUETTE_FISHSCALE_FLOW';
   const tag=(m,role,evidence='MASTERWORK_DIANA_EYE_55_OEM')=>{if(m){m.userData.mechanismRole=role;m.userData.evidence=evidence;m.userData.detail=true;}return m;};
+  const serviceDoor=this.findNode('diana55-access-door');
+  if(serviceDoor){
+   for(const panel of serviceDoor.children.filter(o=>o.isMesh&&o.userData.serviceDoor)){
+    panel.position.y=.56;
+    panel.userData.v259Placement='BELOW_OPERATOR_VIEWING_APERTURE';
+   }
+   serviceDoor.userData.v259PlacementPolicy='SERVICE_PANELS_RELOCATED_BELOW_VIEWING_WINDOW__NO_WINDOW_OVERLAP';
+  }
+
   const feeder=this.findNode('diana55-feed-friction');if(feeder){
     const knife=tag(this.box(feeder,[.08,.22,1.02],[.62,.91,0],'steel',.008),'patented-feeding-knife-reference','MASTERWORK_42_55_OEM');knife.rotation.z=-.16;
     tag(this.cyl(feeder,.055,.18,[-.18,.50,.58],'dark','vibration-motor-reference','x'),'vibration-motor-reference','MASTERWORK_42_55_OEM');
@@ -314,11 +323,12 @@ export class DianaEye55MachineTemplate{
   if(feeder){
    const supports=this.group(feeder,'diana55-feeder-supports-v259','Feeder pulley bearing and frame supports');
    for(const z of [-.43,.43]){
-    const post=this.box(supports,[.08,.58,.08],[.76,.43,z],'dark',.010);post.userData.structuralAttachment=true;
-    const block=this.box(supports,[.18,.16,.16],[.76,.72,z],'steel',.018);block.userData.structuralAttachment=true;block.userData.bearingSupport=true;
-    const foot=this.box(supports,[.22,.06,.22],[.76,.16,z],'dark',.010);foot.userData.floorFrameAttachment=true;
+    const side=Math.sign(z),supportZ=z+side*.12;
+    const post=this.box(supports,[.08,.58,.08],[.76,.43,supportZ],'dark',.010);post.userData.structuralAttachment=true;
+    const block=this.box(supports,[.18,.16,.08],[.76,.72,z+side*.11],'steel',.018);block.userData.structuralAttachment=true;block.userData.bearingSupport=true;block.userData.pulleyBodyClearanceM=.04;
+    const foot=this.box(supports,[.22,.06,.18],[.76,.16,supportZ],'dark',.010);foot.userData.floorFrameAttachment=true;
    }
-   const bridge=this.box(supports,[.16,.10,.96],[.76,.93,0],'light',.012);bridge.userData.structuralAttachment=true;
+   const bridge=this.box(supports,[.16,.10,1.18],[.76,.93,0],'light',.012);bridge.userData.structuralAttachment=true;
    feeder.userData.v259AttachmentPolicy='FEED_PULLEYS_TERMINATE_IN_VISIBLE_BEARING_BLOCKS_AND_FRAME_POSTS';
   }
 
