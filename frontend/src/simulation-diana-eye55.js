@@ -37,8 +37,8 @@ export class DianaEye55ProcessSimulation{
   return {available:true,blocked:false,active:this.active,running:this.running,paused:this.paused,speed:this.speed,stage:DIANA_EYE55_SIMULATION_STAGES[index],completed:this.completed,rejectedDemo:this.rejected,inspectedDemoCount:this.inspectedDemoCount,progress:p,
    sheetsVisible:this.blanks.filter(b=>b.mesh.visible).length,pileSheetsVisible:this.goodStack.filter(p=>p.visible).length,rejectSheetsVisible:this.rejectStack.filter(p=>p.visible).length,
    rotorCount:this.rotors.length,mechanismCount:this.rotors.length+this.lights.length+1,pathVisible:this.pathVisible,inkFlowVisible:false,inkFlowCount:0,uvLampCount:0,uvActive:false,
-   feederDriveActive:this.feederDriveActive,transportDriveActive:this.transportDriveActive,deliveryDriveActive:this.deliveryDriveActive,blankPresenceTrigger:this.blankPresenceTrigger,transportEncoderActive:this.transportEncoderActive,vacuumHoldActive:this.vacuumHoldActive,illuminationReady:this.illuminationReady,cameraTriggerActive:this.cameraTriggerActive,captureComplete:this.captureComplete,scanActive:this.scanActive,imageProcessingActive:this.imageProcessingActive,processingComplete:this.processingComplete,decisionReady:this.decisionReady,rejectPermit:this.rejectPermit,rejectConfirmed:this.rejectConfirmed,outputCountActive:this.outputCountActive,interlockSafe:this.interlockSafe,demoRejectActive:this.demoRejectActive,rejectTrackingActive:this.rejectTrackingActive,acceptedDeliveryActive:this.acceptedDeliveryActive,wasteDeliveryActive:this.wasteDeliveryActive,fishScaleDeliveryActive:this.fishScaleDeliveryActive,deliveryMode:'DUAL_FISH_SCALE_FINISHED_AND_WASTE_REFERENCE',paperJam:this.paperJam,rejectSafetyCoverReference:true,deliveryMonitoringCameraReference:true,
-   demoRejectOnly:true,demoRejectActuator:this.demoRejectActuator,installedRejectActuationVerified:false,installedCameraCountVerified:false,installedCameraPopulationRendered:false,deterministicDefectInjection:'EVERY_5TH_INSPECTED_BLANK_DEMO_ONLY',scanWindow:[this.scanStart,this.scanEnd],scanPositionPolicy:'BLANK_OCCUPIES_OPTICAL_CELL',opticalAxisPolicy:this.template.root.userData.opticalAxisPolicy,scanPlaneY:this.template.root.userData.scanPlaneY,cameraPopulationPolicy:this.template.root.userData.cameraPopulationPolicy,rejectedOutputPolicy:'RECOVERABLE_FOR_REINSPECTION_REFERENCE',
+   feederDriveActive:this.feederDriveActive,transportDriveActive:this.transportDriveActive,deliveryDriveActive:this.deliveryDriveActive,blankPresenceTrigger:this.blankPresenceTrigger,transportEncoderActive:this.transportEncoderActive,vacuumHoldActive:this.vacuumHoldActive,illuminationReady:this.illuminationReady,cameraTriggerActive:this.cameraTriggerActive,captureComplete:this.captureComplete,scanActive:this.scanActive,imageProcessingActive:this.imageProcessingActive,processingComplete:this.processingComplete,decisionReady:this.decisionReady,rejectPermit:this.rejectPermit,rejectConfirmed:this.rejectConfirmed,outputCountActive:this.outputCountActive,interlockSafe:this.interlockSafe,demoRejectActive:this.demoRejectActive,rejectTrackingActive:this.rejectTrackingActive,acceptedDeliveryActive:this.acceptedDeliveryActive,wasteDeliveryActive:this.wasteDeliveryActive,rejectRecoveryActive:this.wasteDeliveryActive,fishScaleDeliveryActive:this.fishScaleDeliveryActive,deliveryMode:'ACCEPTED_FISH_SCALE_PLUS_RECOVERABLE_REJECT_COLLECTION',paperJam:this.paperJam,rejectSafetyCoverReference:true,deliveryMonitoringCameraReference:true,
+   demoRejectOnly:true,demoRejectActuator:this.demoRejectActuator,installedRejectActuationVerified:false,installedCameraCountVerified:false,installedCameraPopulationRendered:false,deterministicDefectInjection:'EVERY_5TH_INSPECTED_BLANK_DEMO_ONLY',scanWindow:[this.scanStart,this.scanEnd],scanPositionPolicy:'BLANK_OCCUPIES_OPTICAL_CELL',opticalAxisPolicy:this.template.root.userData.opticalAxisPolicy,scanPlaneY:this.template.root.userData.scanPlaneY,cameraPopulationPolicy:this.template.root.userData.cameraPopulationPolicy,rejectedOutputPolicy:'DAMAGE_FREE_RECOVERABLE_COLLECTION_FOR_RESORT_OR_REINSPECTION_REFERENCE',
    activeRejectTrackingIds:[...this.activeRejectTrackingIds],activePassTrackingIds:[...this.activePassTrackingIds],trackedResults:{pass:this.blanks.filter(b=>b.result==='PASS_DEMO').length,reject:this.blanks.filter(b=>b.result==='REJECT_DEMO').length,pending:this.blanks.filter(b=>!b.result).length}};
  }
  start(){this.active=true;this.running=true;this.paused=false;this.completed=0;this.rejected=0;this.inspectedDemoCount=0;this.elapsed=0;this.lastNow=null;for(const b of this.blanks){b.lap=-1;b.result=null;b.captured=false;b.processed=false;b.decisionReady=false;b.outputDeposited=false;b.inspectedLap=-1;b.lastT=0;b.trackingId=null;b.decisionSequence=null;b.mesh.visible=false;}this.resetMechanisms();this.staticDeliveryReferences.forEach(m=>m.visible=false);this.onUpdate?.(this.state());return this.state();}
@@ -55,7 +55,8 @@ export class DianaEye55ProcessSimulation{
  }
  outputPreviousResult(blank){
   if(blank.result==='REJECT_DEMO'){
-   this.rejected++;const slot=(this.rejected-1)%this.rejectStack.length,m=this.rejectStack[slot];m.visible=true;m.position.set(2.30+(slot%10)*.105,.735+.003*(slot%3),this.wasteLaneZ);m.rotation.y=0;
+   this.rejected++;const slot=(this.rejected-1)%this.rejectStack.length,m=this.rejectStack[slot];m.visible=true;
+   m.position.set(1.86+(slot%7)*.075,.42+.008*(slot%5),.50);m.rotation.y=0;
   }else if(blank.result==='PASS_DEMO'){
    this.completed++;const slot=(this.completed-1)%this.goodStack.length,m=this.goodStack[slot];m.visible=true;
    // Fish-scale output overlaps blanks longitudinally instead of building an unrealistic vertical pile.
@@ -76,7 +77,14 @@ export class DianaEye55ProcessSimulation{
    if(b.processed)processedCount++;if(b.decisionReady)decisionCount++;
    b.mesh.visible=this.active;const p=this.curve.getPointAt(Math.min(.999,t));b.mesh.position.copy(p);
    const reject=b.result==='REJECT_DEMO';
-   if(reject&&b.decisionReady&&t>=.69&&t<.96){trackedReject=true;if(b.trackingId)rejectIds.push(b.trackingId);const q=clamp((t-.69)/.20),lift=Math.sin(q*Math.PI)*.055;b.mesh.position.z=THREE.MathUtils.lerp(0,this.wasteLaneZ,q);b.mesh.position.y+=lift;if(t>=.72&&t<.86)rejectAtGate=true;if(t>=.84){rejectConfirmed=true;waste=true;}}
+   if(reject&&b.decisionReady&&t>=.69&&t<.96){
+    trackedReject=true;if(b.trackingId)rejectIds.push(b.trackingId);
+    const q=clamp((t-.69)/.20),lift=Math.sin(q*Math.PI)*.045;
+    b.mesh.position.z=THREE.MathUtils.lerp(0,.50,q);
+    b.mesh.position.y=THREE.MathUtils.lerp(b.mesh.position.y,.48,q)+lift;
+    if(t>=.72&&t<.86)rejectAtGate=true;
+    if(t>=.84){rejectConfirmed=true;waste=true;}
+   }
    else if(b.result==='PASS_DEMO'&&b.decisionReady&&t>=.76){accepted=true;if(b.trackingId)passIds.push(b.trackingId);const q=clamp((t-.76)/.18);b.mesh.position.z=THREE.MathUtils.lerp(0,this.goodLaneZ,q);if(t>=.90)outputCount=true;}
    if(t>=.96){if(!b.outputDeposited){this.outputPreviousResult(b);b.outputDeposited=true;}b.mesh.visible=false;}
    b.mesh.material.emissive?.setHex((t>=this.scanStart&&t<this.scanEnd)?0x365e6f:reject&&t>=this.decisionAt?0x6d2d23:0);b.mesh.material.emissiveIntensity=(t>=this.scanStart&&t<this.scanEnd)?.8:reject&&t>=this.decisionAt?.45:0;b.lastT=t;
