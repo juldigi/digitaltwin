@@ -8,6 +8,7 @@ const state=fs.readFileSync(new URL('../frontend/src/state/app-state.js',import.
 const app=fs.readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
 const ui=fs.readFileSync(new URL('../frontend/src/ui-v5.js',import.meta.url),'utf8');
 const css=fs.readFileSync(new URL('../frontend/app-shell-v79.css',import.meta.url),'utf8');
+const taxonomy=fs.readFileSync(new URL('../frontend/src/data/taxonomy-offset5.js',import.meta.url),'utf8');
 
 test('V194 primary navigation exposes only the three product domains plus contextual help/settings',()=>{
  for(const [id,label] of [['nav-machine','Pabrik'],['nav-assets','Mesin'],['nav-systems','Sistem'],['nav-view','Tampilan'],['nav-help','Bantuan']]){
@@ -188,9 +189,9 @@ test('V149 evidence status is progressive and source-derived rather than a perma
 });
 
 test('V149 taxonomy level names are human-first with L1-L6 only as secondary technical indicators',()=>{
- for(const label of ['Mesin','Unit Utama','Sub','Block','Part','Spesifik Part'])assert.match(app,new RegExp(label));
- assert.match(app,/<small>L\$\{level\}<\/small>/);
- assert.match(css,/\.stage-strip button small/);
+ for(const label of ['Mesin','Unit Utama','Sub','Block','Part','Spesifik Part'])assert.match(taxonomy,new RegExp(label));
+ assert.match(app,/L\$\{node.level\}/);
+ assert.match(css,/\.compact-part-row small/);
 });
 
 

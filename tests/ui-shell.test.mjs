@@ -70,8 +70,8 @@ test('v128 keeps one supplied BMJ identity in the global header and splash scree
 
 test('v42 has no single-element selector followed by forEach and covers dynamic button handlers',()=>{
   for(const source of [app,ui,experienceJs])assert.doesNotMatch(source,/^\s*\$\([^)]*\)\.forEach/m);
-  for(const id of ['assemble','ghost','isolate','tree-root','exterior-open','exterior-close','disconnect','mapping','view-layout','asset-result','clear-cache'])assert.ok(app.includes(id),`dynamic button ${id} has no application reference`);
-  for(const selector of ['data-taxonomy','data-stage','data-exterior-area'])assert.ok(app.includes(`document.querySelectorAll('[${selector}]')`),`multi-element handler missing for ${selector}`);
+  for(const id of ['assemble','isolate','tree-root','exterior-open','exterior-close','disconnect','mapping','view-layout','asset-result','clear-cache'])assert.ok(app.includes(id),`dynamic button ${id} has no application reference`);
+  for(const selector of ['data-taxonomy','data-exterior-area'])assert.ok(app.includes(`document.querySelectorAll('[${selector}]')`),`multi-element handler missing for ${selector}`);
 });
 
 test('all static buttons are actionable and none is permanently disabled',()=>{
@@ -133,15 +133,25 @@ test('conditional controls explain requirements rather than failing silently',()
 test('service worker refreshes the redesigned shell',()=>{
   assert.match(sw,/factory-digital-twin-v222-overlay-state-ssot-20260925/);
   assert.doesNotMatch(sw,/src\/universal-machine\.js/);
-  assert.match(app,/template\.ghost\(true,part\)/,'object selection must automatically ghost all non-selected geometry');
+  assert.match(app,/engine\.template\.ghost\(false\)/,'selection restores opaque surrounding geometry');
+  assert.match(app,/engine\.template\.ghost\(isolated,selectedPart\)/,'isolation alone makes surrounding geometry transparent');
   for(const asset of ['app-shell-v79.css','src/app-shell-v79.js','assets/splash-industrial-v79.webp','src/ui-v5.js','src/app.js','src/simulation.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
+});
+
+test('canvas selection frames the highest unit first and only isolation fades other parts',()=>{
+ assert.match(engine,/while\(node&&!node\.userData\.machineId\)node=node\.parent/);
+ assert.match(app,/const path=taxonomyPath\(meta\.id\),first=path\.find\(node=>node\.level===2\)\|\|meta/);
+ assert.match(app,/selectTaxonomy\(first\.id\)/);
+ assert.match(app,/openPartFocusPopover\(path\)/);
+ assert.match(app,/engine\.template\.ghost\(false\)/);
+ assert.match(app,/engine\.template\.ghost\(isolated,selectedPart\)/);
+ assert.doesNotMatch(app,/engine\.template\.isolate\(selectedPart,isolated\)/);
+ assert.match(appShellCss,/\.compact-part-list\{[^}]*max-height:220px/);
 });
 
 test('v41 keeps every right-sidebar taxonomy item clickable after repeated selections',()=>{
   assert.match(app,/document\.querySelectorAll\('\[data-taxonomy\]'\)\.forEach/);
-  assert.match(app,/document\.querySelectorAll\('\[data-stage\]'\)\.forEach/);
   assert.doesNotMatch(app,/\$\('\[data-taxonomy\]'\)\.forEach/);
-  assert.doesNotMatch(app,/\$\('\[data-stage\]'\)\.forEach/);
   assert.match(app,/selectTaxonomy\(b\.dataset\.taxonomy\)/);
 });
 
