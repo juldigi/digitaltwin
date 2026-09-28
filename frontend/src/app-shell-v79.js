@@ -94,16 +94,28 @@ qa('[data-mobile-tool]',mobileContextTools).forEach(button=>button.addEventListe
 
 const splash=q('.app-splash');
 const firstVisit=!sessionStorage.getItem('bmj-splash-seen');
-let documentLoaded=document.readyState==='complete',splashFinishTimer=0;
-const finishSplash=()=>{if(!splash||splash.classList.contains('is-done'))return;splash.classList.add('is-done');sessionStorage.setItem('bmj-splash-seen','1');setTimeout(()=>splash.remove(),600)};
+let documentLoaded=document.readyState==='complete',splashProgress=0;
+const splashStarted=performance.now(),splashMinimum=firstVisit?1200:450;
+const splashBar=q('.splash-loader'),splashFill=q('.splash-loader i'),splashPercent=q('.splash-percent');
+const finishSplash=()=>{if(!splash||splash.classList.contains('is-done'))return;clearInterval(splashTicker);splash.classList.add('is-done');sessionStorage.setItem('bmj-splash-seen','1');setTimeout(()=>splash.remove(),600)};
 const showBootFailure=(message='Aplikasi belum berhasil dimuat')=>{const boot=q('#boot');if(!boot)return;boot.hidden=false;boot.innerHTML='<strong>'+escapeBootText(message)+'</strong><p>Periksa koneksi atau muat ulang halaman.</p><button type="button" id="boot-retry">Muat Ulang</button>';q('#boot-retry',boot)?.addEventListener('click',()=>location.reload())};
 const escapeBootText=value=>String(value||'Aplikasi belum berhasil dimuat').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const syncSplashFromState=state=>{
  const phase=state?.bootState?.phase||'booting';
  if(phase==='error'||phase==='timeout')showBootFailure(state?.bootState?.message||'Aplikasi belum berhasil dimuat');
  if(!documentLoaded||!['ready','error','timeout'].includes(phase))return;
- clearTimeout(splashFinishTimer);splashFinishTimer=setTimeout(finishSplash,firstVisit&&phase==='ready'?900:100);
 };
+const splashTicker=setInterval(()=>{
+ if(!splash||splash.classList.contains('is-done')){clearInterval(splashTicker);return}
+ const phase=getState()?.bootState?.phase||'booting';
+ const complete=documentLoaded&&['ready','error','timeout'].includes(phase);
+ const target=complete?100:Math.min(94,Math.floor(94*(1-Math.exp(-(performance.now()-splashStarted)/3100))));
+ splashProgress=Math.min(target,splashProgress+(complete?5:1));
+ if(splashFill)splashFill.style.width=`${splashProgress}%`;
+ if(splashPercent)splashPercent.textContent=`${splashProgress}%`;
+ splashBar?.setAttribute('aria-valuenow',String(splashProgress));
+ if(complete&&splashProgress===100&&performance.now()-splashStarted>=splashMinimum)finishSplash();
+},55);
 if(!documentLoaded)addEventListener('load',()=>{documentLoaded=true;syncSplashFromState(getState())},{once:true});
 const BOOT_TIMEOUT_MS=12500;
 setTimeout(()=>{const current=getState();if(current.bootState?.phase!=='booting')return;setState({bootState:{phase:'timeout',message:'Aplikasi belum berhasil dimuat'}},{url:false})},BOOT_TIMEOUT_MS);
@@ -150,6 +162,14 @@ function closeInspector({restoreFocus=true}={}){
  applyInspectorDom(next);
  if(restoreFocus)restoreOverlayFocus('inspector','#panel-toggle');else overlayReturnFocus.delete('inspector');
 }
+addEventListener('bmj:immersivestart',()=>{
+ closeInspector({restoreFocus:false});
+ closeDrawer({restoreFocus:false});
+ closeLayerManager({restoreFocus:false});
+ closeSystemBrowser({restoreFocus:false});
+ closeOverlay();
+ syncOverlayDom(getState());
+});
 function openInspector(tab=getState().inspectorState.tab){
  const firstOpen=!getState().inspectorState?.open;
  beforeMajorOverlay('inspector');

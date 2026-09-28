@@ -1269,7 +1269,31 @@ window.addEventListener('bmj:systemfocus',event=>{
  }}));
 });
 window.addEventListener('bmj:systemassetselect',async event=>{const machine=MACHINE_REGISTRY_BY_ID.get(event.detail?.machineId);if(machine)await openAssetContext(machine);});
-on('#fullscreen',async()=>{if(!document.fullscreenEnabled){toast('Layar penuh tidak didukung browser ini.');return;}if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();});
+const immersiveRoot=document.documentElement;
+const syncImmersiveButtons=()=>{
+ const active=immersiveRoot.classList.contains('immersive-mode');
+ for(const button of [$('#fullscreen'),$('#fullscreen-top')])if(button){button.setAttribute('aria-pressed',String(active));button.setAttribute('aria-label',active?'Keluar layar penuh':'Layar penuh');button.title=active?'Keluar layar penuh':'Layar penuh';}
+};
+const toggleImmersive=async()=>{
+ const entering=!immersiveRoot.classList.contains('immersive-mode');
+ if(entering){
+  if(!$('#mode-3d')?.disabled)$('#mode-3d')?.click();
+  window.dispatchEvent(new Event('bmj:immersivestart'));
+ }
+ immersiveRoot.classList.toggle('immersive-mode',entering);
+ syncImmersiveButtons();
+ if(entering&&document.fullscreenEnabled&&document.documentElement.requestFullscreen){
+  try{await document.documentElement.requestFullscreen()}catch{ /* CSS immersive mode remains available on mobile browsers. */ }
+ }else if(document.fullscreenElement){
+  try{await document.exitFullscreen()}catch{ /* The in-app immersive view is already closed. */ }
+ }
+ window.dispatchEvent(new Event('resize'));
+};
+on('#fullscreen',toggleImmersive);
+on('#fullscreen-top',toggleImmersive);
+document.addEventListener('fullscreenchange',()=>{
+ if(!document.fullscreenElement&&immersiveRoot.classList.contains('immersive-mode')){immersiveRoot.classList.remove('immersive-mode');syncImmersiveButtons();window.dispatchEvent(new Event('resize'));}
+});
 window.addEventListener('offline',()=>{updateConnectionTruth();toast(cachedDataActive?'Koneksi terputus. Aplikasi menggunakan data tersimpan di perangkat.':'Koneksi terputus. Aplikasi tetap tersedia dalam mode lokal.');});window.addEventListener('online',()=>{updateConnectionTruth();if(role)request('/api/state').then(acceptState).then(()=>{cachedDataActive=false;updateConnectionTruth();toast('Data berhasil diperbarui.');}).catch(e=>toast(e.message,true));});
 try{const config=await fetch('./config.json').then(r=>r.json());const savedBase=readConnectionSetting('apiBase','');apiBase=savedBase==='https://digitaltwin.offsetbmj.workers.dev'?config.apiBase:(savedBase||config.apiBase||'');if(savedBase==='https://digitaltwin.offsetbmj.workers.dev')localStorage.setItem(CONNECTION_STORAGE.apiBase,apiBase);if(cacheEnabled&&apiBase){const cached=await cache.get(apiBase);if(cached?.state){state=cached.state;cachedDataActive=true;loadVisibleFactoryLayout(activeLayout());renderStatus();renderPanel();updateConnectionTruth();toast('Menampilkan data tersimpan · '+new Date(cached.savedAt).toLocaleString('id-ID'));}}else updateConnectionTruth();}catch(e){updateConnectionTruth();toast('Data tersimpan tidak dapat dibaca. Mode lokal tetap tersedia.',true);}
 window.addEventListener('resize',()=>redrawPlantPlan(),{passive:true});window.addEventListener('bmj:statechange',event=>{if(document.body.classList.contains('workspace-2d'))redrawPlantPlan(event.detail?.selectedAsset||null);});
