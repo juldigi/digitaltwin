@@ -298,8 +298,8 @@ export class SharkN650MachineTemplate{
   if(ret){
     const support=this.group(ret,'shark650-return-side-frame-v260','Good/bad return side-frame supports');
     for(const x of [-.72,.72])for(const z of [-.62,.72]){
-      const leg=this.box(support,[.07,.58,.07],[x,.42,z],'dark',.008);leg.userData.structuralAttachment=true;
-      const foot=this.cyl(support,.055,.025,[x,.12,z],'dark','return-floor-pad','y');foot.userData.floorContact=true;foot.userData.rotor=false;
+      const leg=this.box(support,[.07,.64,.07],[x,.35,z],'dark',.008);leg.userData.structuralAttachment=true;
+      const foot=this.cyl(support,.055,.025,[x,.018,z],'dark','return-floor-pad','y');foot.userData.floorContact=true;foot.userData.rotor=false;
     }
     ret.userData.v260SupportPolicy='RETURN_BELTS_TERMINATE_IN_VISIBLE_SIDE_FRAME_AND_FLOOR_SUPPORTS';
   }
