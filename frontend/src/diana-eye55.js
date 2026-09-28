@@ -2,7 +2,7 @@ import * as THREE from 'three';import {RoundedBoxGeometry} from 'three/addons/ge
 import {DIANA_EYE55_SPEC} from './data/dimensions-diana-eye55.js';import {DIANA_EYE55_TAXONOMY,DIANA_EYE55_TAXONOMY_BY_ID} from './data/taxonomy-diana-eye55.js';import {DIANA_EYE55_ORIENTATION,DIANA_EYE55_TECHNICAL_SOURCES} from './data/sources-diana-eye55.js';import {V141_SOURCE_STATS} from './data/research-v141.js';
 const V=a=>new THREE.Vector3(...a);
 export class DianaEye55MachineTemplate{
- constructor(){this.spec=DIANA_EYE55_SPEC;this.root=new THREE.Group();this.root.name='IPM 3 · DIANA EYE 55';this.root.userData={assetId:this.spec.assetId,nodeId:'diana55-root',spec:this.spec,sources:DIANA_EYE55_TECHNICAL_SOURCES,orientation:DIANA_EYE55_ORIENTATION,taxonomyVersion:'diana55-v252-oem-flow',detailPass:'V252_DIANA55_OEM_SILHOUETTE_FISHSCALE_FLOW',evidenceGrade:'OEM_PROCESS_GROUNDED',geometryStatus:'OEM_CURRENT_FAMILY_ENVELOPE_AND_PROCESS__BMJ_INSTALLED_OPTIONS_BOUNDED',engineeringDimensions:false,modeledEnvelopeMode:'STANDARD_FEEDER_FISH_SCALE_DELIVERY_REFERENCE'};this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.lowDetail=false;this.build();this.enrichV141();this.refineV254();this.refineV255();this.refineV258();this.refineV259();this.localizeUiLabels();this.taxonomy=DIANA_EYE55_TAXONOMY;this.taxonomyById=DIANA_EYE55_TAXONOMY_BY_ID;for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();n.userData.restVisible=n.visible;}this.root.updateMatrixWorld(true);}
+ constructor(){this.spec=DIANA_EYE55_SPEC;this.root=new THREE.Group();this.root.name='IPM 3 · DIANA EYE 55';this.root.userData={assetId:this.spec.assetId,nodeId:'diana55-root',spec:this.spec,sources:DIANA_EYE55_TECHNICAL_SOURCES,orientation:DIANA_EYE55_ORIENTATION,taxonomyVersion:'diana55-v252-oem-flow',detailPass:'V252_DIANA55_OEM_SILHOUETTE_FISHSCALE_FLOW',evidenceGrade:'OEM_PROCESS_GROUNDED',geometryStatus:'OEM_CURRENT_FAMILY_ENVELOPE_AND_PROCESS__BMJ_INSTALLED_OPTIONS_BOUNDED',engineeringDimensions:false,modeledEnvelopeMode:'STANDARD_FEEDER_FISH_SCALE_DELIVERY_REFERENCE'};this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.lowDetail=false;this.build();this.enrichV141();this.refineV254();this.refineV255();this.refineV258();this.refineV259();this.refineV260();this.localizeUiLabels();this.taxonomy=DIANA_EYE55_TAXONOMY;this.taxonomyById=DIANA_EYE55_TAXONOMY_BY_ID;for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();n.userData.restVisible=n.visible;}this.root.updateMatrixWorld(true);}
  group(parent,id,name,pos=[0,0,0],explode=[0,0,0]){const g=new THREE.Group();g.name=name;g.position.set(...pos);g.userData={assetId:this.spec.assetId,nodeId:id,selectable:true,explode:V(explode),confidence:'OEM_PROCESS_GROUNDED'};parent.add(g);this.nodes.push(g);if(parent===this.root)this.parts.push(g);return g;}
  mat(k,owner=null){const key=(owner?.userData?.nodeId||'root')+':'+k;if(!this.materials.has(key)){const c={white:0xebeeee,light:0xcbd0d2,dark:0x252b2f,black:0x0d1215,steel:0x8a969b,silver:0xc3cacc,rubber:0x23282a,red:0xb4312e,blue:0x3c7289,green:0x579071,amber:0xd29b43,paper:0xe1cca2,glass:0x365c67,led:0xf0e7c2}[k]||0x888888;const m=new THREE.MeshStandardMaterial({color:c,metalness:['steel','silver'].includes(k)?.5:.08,roughness:k==='glass'?.16:.43,transparent:k==='glass',opacity:k==='glass'?.42:1});m.userData.baseOpacity=m.opacity;this.materials.set(key,m);}return this.materials.get(key);}
  mesh(g,geo,key,k='dark',p=[0,0,0],r=null){if(!this.geometries.has(key))this.geometries.set(key,geo());const m=new THREE.Mesh(this.geometries.get(key),this.mat(k,g));m.position.set(...p);if(r)m.rotation.set(...r);m.castShadow=k!=='glass';m.receiveShadow=true;m.userData.ownerId=g.userData.nodeId;g.add(m);this.meshes.push(m);return m;}
@@ -366,6 +366,37 @@ export class DianaEye55MachineTemplate{
     const backing=this.box(window,[1.16,.60,.012],[0,1.36,z],'black',.010);
     backing.userData.apertureBacking=true;backing.userData.silhouetteCritical=true;
    }
+  }
+ }
+
+ refineV260(){
+  this.root.userData.visualRefinement='V260_DIANA_EYE55_REJECT_PIVOT_AND_RECOVERY_SUPPORT_REALISM';
+  this.root.userData.detailPass='V260_DIANA55_REJECT_HINGE_AND_RECOVERY_TRAY_ATTACHMENT';
+  this.root.userData.v260Policy='REJECT_PIVOT_AND_RECOVERY_SUPPORT_ONLY__ACTUATOR_TYPE_REMAINS_UNVERIFIED';
+
+  const gateMount=this.findNode('diana55-reject-gate');
+  if(gateMount){
+    const gate=gateMount.children.find(o=>o.isMesh&&o.userData.rejectGate);
+    if(gate){
+      const pivot=this.group(gateMount,'diana55-reject-pivot-v260','Reject diverter pivot and shaft reference',[-.09,1.00,0]);
+      gate.position.sub(pivot.position);pivot.add(gate);
+      pivot.userData.rejectGatePivot=true;
+      pivot.userData.motionPolicy='ROTATE_PIVOT_ONLY__REJECT_FRAME_AND_SENSORS_REMAIN_STATIC';
+      const shaft=this.cyl(pivot,.025,1.08,[0,0,0],'steel','reject-pivot-shaft','z');shaft.userData.structuralAttachment=true;shaft.userData.rotor=false;
+      for(const z of [-.56,.56]){
+        const bearing=this.box(pivot,[.14,.14,.10],[0,0,z],'dark',.012);bearing.userData.rejectPivotBearing=true;bearing.userData.structuralAttachment=true;
+      }
+    }
+  }
+
+  const recovery=this.findNode('diana55-reject-recovery-v258');
+  if(recovery){
+    const supports=this.group(recovery,'diana55-reject-recovery-support-v260','Reject recovery tray support frame');
+    for(const x of [.08,.70])for(const z of [.25,.75]){
+      const leg=this.box(supports,[.06,.34,.06],[x,.20,z],'dark',.008);leg.userData.structuralAttachment=true;
+      const foot=this.cyl(supports,.045,.022,[x,.018,z],'dark','recovery-floor-pad','y');foot.userData.floorContact=true;foot.userData.rotor=false;
+    }
+    recovery.userData.v260SupportPolicy='RECOVERY_TRAY_TERMINATES_IN_VISIBLE_FLOOR_SUPPORT_FRAME';
   }
  }
 
