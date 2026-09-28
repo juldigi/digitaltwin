@@ -46,3 +46,20 @@ test('CTP and CTF remain adjacent functional zones when the source has no partit
  const fakeWalls=[];root.traverse(o=>{if(o.userData?.semantic==='ROOM_ENVELOPE_SUPPLEMENT_REFERENCE'&&['CTP','CTF'].includes(o.userData.roomLabel))fakeWalls.push(o);});
  assert.equal(fakeWalls.length,0);
 });
+
+test('superseded meeting label inside OFFSET 10 does not create an empty room',async()=>{
+ const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
+ const {root}=buildActualFactory(layout,fleet),meta=root.userData;
+ assert.equal(meta.supersededRoomLabels.length,1);
+ assert.equal(meta.supersededRoomLabels[0].label,'Meeting');
+ assert.ok(meta.supersededRoomLabels[0].reason.includes('OFFSET10'));
+ const keys=new Set(meta.v203RoomShellAudit.map(r=>r.key));
+ assert.ok(meta.roomEnvelopeAudit.every(r=>keys.has(r.key)));
+ assert.ok(!meta.roomEnvelopeAudit.some(r=>r.label==='Meeting'&&Math.abs(r.x-49.0725)<.02));
+});
+
+test('electrical, prayer and broke rooms use function-specific interior details',async()=>{
+ const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
+ const {root}=buildActualFactory(layout,fleet),semantics=new Set();root.traverse(o=>{if(o.userData?.semantic)semantics.add(o.userData.semantic);});
+ for(const item of ['V202_ELECTRICAL_PANEL_DOOR_REFERENCE','V202_ELECTRICAL_PANEL_DARK_DISPLAY_REFERENCE','V202_PRAYER_SHOE_PAIR_REFERENCE','V202_PRAYER_MAT_EDGE_REFERENCE','V202_BROKE_BIN_TOP_RIM_REFERENCE','V202_BROKE_VISIBLE_PAPER_SCRAP_REFERENCE'])assert.ok(semantics.has(item),item);
+});
