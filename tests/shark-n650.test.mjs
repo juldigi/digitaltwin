@@ -182,6 +182,21 @@ test('SHARK demo creates accepted and rejected collection and resets cleanly',()
  sim.stop();assert.equal(sim.state().pathVisible,false);assert.equal(sim.pathLine.visible,false);assert.equal(sim.goodStack.every(m=>!m.visible),true);assert.equal(sim.badStack.every(m=>!m.visible),true);assert.equal(sim.rotors.every((r,i)=>r.quaternion.angleTo(sim.rotorRest[i])<1e-9),true);sim.dispose();model.dispose();
 });
 
+test('SHARK good and bad return stacks remain bounded inside the physical return lanes',()=>{
+ const model=new SharkN650MachineTemplate(),sim=new SharkN650ProcessSimulation(model.root,model);
+ try{
+  for(let i=0;i<sim.goodStack.length;i++){const m=sim.goodStack[i];m.visible=true;m.userData.outputSerial=i+1;}
+  for(let i=0;i<sim.badStack.length;i++){const m=sim.badStack[i];m.visible=true;m.userData.outputSerial=i+1;}
+  sim.relayoutReturnStack(sim.goodStack,sim.goodLaneEntry,.095);
+  sim.relayoutReturnStack(sim.badStack,sim.badLaneEntry,.085);
+  assert.ok(Math.max(...sim.goodStack.map(m=>m.position.x))<=sim.goodLaneEntry.x+8*.095+1e-9);
+  assert.ok(Math.max(...sim.badStack.map(m=>m.position.x))<=sim.badLaneEntry.x+8*.085+1e-9);
+  assert.ok(Math.max(...sim.goodStack.map(m=>m.position.y))>sim.goodLaneEntry.y,'good return should layer vertically after one fish-scale span');
+  assert.ok(Math.max(...sim.badStack.map(m=>m.position.y))>sim.badLaneEntry.y,'bad return should layer vertically after one fish-scale span');
+  assert.equal(sim.state().returnStackPolicy,'BOUNDED_FISH_SCALE_9_SLOTS_THEN_VERTICAL_LAYER');
+ }finally{sim.dispose();model.dispose();}
+});
+
 test('SHARK feeds progressively, scans at the tower, and collects tracked outputs',()=>{
  const model=new SharkN650MachineTemplate(),sim=new SharkN650ProcessSimulation(model.root,model);
  assert.ok(sim.staticDeliveryReferences.length>0);sim.start();assert.equal(sim.staticDeliveryReferences.every(m=>!m.visible),true);
