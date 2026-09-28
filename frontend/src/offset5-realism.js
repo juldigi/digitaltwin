@@ -461,6 +461,7 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       item.object.rotation.z=item.initialRotationZ??0;
       item.currentOrbitAngle=null;
     }
+    this.setInspectionIllumination(false);
     return this.state();
   }
   // Offset lithography transfers thin films at roller contacts. The legacy
@@ -549,6 +550,34 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       rotor.source='CONTACTING_CYLINDER_SURFACE_SPEED_REFERENCE';
     }
   }
+  collectInspectionIllumination(){
+    this.inspectionIllumination=[];
+    const seen=new Set(),node=this.template.findNode('inspection-lighting');
+    node?.traverse(mesh=>{
+      const material=mesh.isMesh?mesh.material:null;
+      if(!material?.emissive||seen.has(material))return;
+      seen.add(material);
+      this.inspectionIllumination.push({
+        material,
+        initialEmissive:material.emissive.clone(),
+        initialIntensity:material.emissiveIntensity
+      });
+    });
+    this.inspectionIlluminationActive=false;
+  }
+  setInspectionIllumination(on){
+    this.inspectionIlluminationActive=!!on;
+    for(const item of this.inspectionIllumination||[]){
+      if(this.inspectionIlluminationActive){
+        item.material.emissive.setHex(0xc9efff);
+        item.material.emissiveIntensity=.42;
+      }else{
+        item.material.emissive.copy(item.initialEmissive);
+        item.material.emissiveIntensity=item.initialIntensity;
+      }
+      item.material.needsUpdate=true;
+    }
+  }
   update(now){
     super.update(now);
     if(!this.active)return;
@@ -567,6 +596,13 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       item.object.position.y=item.drumY+item.radius*sin-rotatedY;
       item.currentOrbitAngle=angle;
     }
+    const inspectionX=OFFSET5_DIMENSIONS.layout.inspectionCenterX;
+    const inspectionOccupied=this.sheets.some(sheet=>
+      sheet.mesh.visible&&
+      sheet.userData.leadPosition.x>=inspectionX-.22&&
+      sheet.userData.trailPosition.x<=inspectionX+.22
+    );
+    this.setInspectionIllumination(inspectionOccupied);
   }
   applyInkFilm(on){
     for(const surface of this.inkSurfaces){
@@ -591,6 +627,7 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
     this.gripperMotions=this.gripperMotions.filter(o=>!o.object?.userData?.exteriorCover);
     this.joggerMotions=this.joggerMotions.filter(o=>!o.object?.userData?.exteriorCover);
     for(const item of this.gripperMotions)item.initialRotationZ=item.object.rotation.z;
+    this.collectInspectionIllumination();
   }
   state(){
     return {
@@ -617,7 +654,9 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       sheetBrakeMotionPolicy:'CONTROLLED_DECELERATION_VISUAL_REFERENCE_NOT_SERVICE_SETPOINT',
       feederMotionPolicy:'SUCTION_SEPARATOR_AND_LINKAGE_RECIPROCATE_WITHOUT_FAKE_SPIN',
       rollerHandednessPolicy:'IDENTICAL_STRAIGHT_PRINT_KINEMATIC_SIGN_PATTERN_ACROSS_ALL_EIGHT_PU',
-      interUnitGripperPolicy:'RIGID_FINGER_ASSEMBLY_ROTATES_WITH_TRANSFER_DRUM_ORBIT'
+      interUnitGripperPolicy:'RIGID_FINGER_ASSEMBLY_ROTATES_WITH_TRANSFER_DRUM_ORBIT',
+      inspectionIlluminationActive:this.inspectionIlluminationActive,
+      inspectionIlluminationPolicy:'SHEET_OCCUPANCY_TRIGGERED_EXISTING_FOCUSIGHT_LIGHTING_ONLY'
     };
   }
 }
