@@ -2,7 +2,7 @@ import * as THREE from 'three';import {RoundedBoxGeometry} from 'three/addons/ge
 import {SHARK_N650_SPEC} from './data/dimensions-shark-n650.js';import {SHARK_N650_TAXONOMY,SHARK_N650_TAXONOMY_BY_ID} from './data/taxonomy-shark-n650.js';import {SHARK_N650_ORIENTATION,SHARK_N650_TECHNICAL_SOURCES} from './data/sources-shark-n650.js';import {V141_SOURCE_STATS} from './data/research-v141.js';
 const V=a=>new THREE.Vector3(...a);
 export class SharkN650MachineTemplate{
- constructor(){this.spec=SHARK_N650_SPEC;this.root=new THREE.Group();this.root.name='IPM 4 · FS-SHARK-N650-P3N1';this.root.userData={assetId:this.spec.assetId,nodeId:'shark650-root',spec:this.spec,sources:SHARK_N650_TECHNICAL_SOURCES,orientation:SHARK_N650_ORIENTATION,taxonomyVersion:'shark650-v252-n650-offline-flow',detailPass:'V252_SHARK_N650_NEGATIVE_PITCH_RETURN_LINE',researchVersion:'V141',researchSourceCount:V141_SOURCE_STATS.total,uniqueResearchUrls:V141_SOURCE_STATS.uniqueUrls,evidenceGrade:'MODEL_FAMILY_PROCESS_GROUNDED',geometryStatus:'CURRENT_N650_OFFLINE_PROCESS_AND_ENVELOPE_REFERENCE__P3N1_OPTIONS_UNDECODED',engineeringDimensions:false,modeledMode:'FISH_SCALE_OFFLINE_REFERENCE'};this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.lowDetail=false;this.build();this.refineV254();this.refineV258();this.taxonomy=SHARK_N650_TAXONOMY;this.taxonomyById=SHARK_N650_TAXONOMY_BY_ID;for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}this.root.updateMatrixWorld(true);}
+ constructor(){this.spec=SHARK_N650_SPEC;this.root=new THREE.Group();this.root.name='IPM 4 · FS-SHARK-N650-P3N1';this.root.userData={assetId:this.spec.assetId,nodeId:'shark650-root',spec:this.spec,sources:SHARK_N650_TECHNICAL_SOURCES,orientation:SHARK_N650_ORIENTATION,taxonomyVersion:'shark650-v252-n650-offline-flow',detailPass:'V252_SHARK_N650_NEGATIVE_PITCH_RETURN_LINE',researchVersion:'V141',researchSourceCount:V141_SOURCE_STATS.total,uniqueResearchUrls:V141_SOURCE_STATS.uniqueUrls,evidenceGrade:'MODEL_FAMILY_PROCESS_GROUNDED',geometryStatus:'CURRENT_N650_OFFLINE_PROCESS_AND_ENVELOPE_REFERENCE__P3N1_OPTIONS_UNDECODED',engineeringDimensions:false,modeledMode:'FISH_SCALE_OFFLINE_REFERENCE'};this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.lowDetail=false;this.build();this.refineV254();this.refineV258();this.refineV260();this.taxonomy=SHARK_N650_TAXONOMY;this.taxonomyById=SHARK_N650_TAXONOMY_BY_ID;for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}this.root.updateMatrixWorld(true);}
  group(parent,id,name,pos=[0,0,0],explode=[0,0,0]){const g=new THREE.Group();g.name=name;g.position.set(...pos);g.userData={assetId:this.spec.assetId,nodeId:id,selectable:true,explode:V(explode),confidence:'FAMILY_PROCESS_GROUNDED'};parent.add(g);this.nodes.push(g);if(parent===this.root)this.parts.push(g);return g;}
  mat(k,owner=null){const key=(owner?.userData?.nodeId||'root')+':'+k;if(!this.materials.has(key)){const c={white:0xeaeeee,light:0xc9d0d2,dark:0x283138,black:0x111619,steel:0x879499,silver:0xc3cbcd,rubber:0x23282a,blue:0x3074a1,cyan:0x4d9bb5,red:0xb13a33,green:0x548b70,amber:0xd4a04c,paper:0xdec89f,glass:0x315663,led:0xece8d1}[k]||0x888888;const m=new THREE.MeshStandardMaterial({color:c,metalness:['steel','silver'].includes(k)?.5:.08,roughness:k==='glass'?.16:.44,transparent:k==='glass',opacity:k==='glass'?.38:1});m.userData.baseOpacity=m.opacity;this.materials.set(key,m);}return this.materials.get(key);}
  mesh(g,geo,key,k='dark',p=[0,0,0],r=null){if(!this.geometries.has(key))this.geometries.set(key,geo());const m=new THREE.Mesh(this.geometries.get(key),this.mat(k,g));m.position.set(...p);if(r)m.rotation.set(...r);m.castShadow=k!=='glass';m.receiveShadow=true;m.userData.ownerId=g.userData.nodeId;g.add(m);this.meshes.push(m);return m;}
@@ -244,6 +244,65 @@ export class SharkN650MachineTemplate{
    'shark650-reject':'Pemisahan reject'
   };
   for(const [id,name] of Object.entries(names)){const node=this.findNode(id);if(node)node.name=name;}
+ }
+
+ refineV260(){
+  this.root.userData.visualRefinement='V260_SHARK_N650_ATTACHED_FEEDER_APERTURE_REJECT_PIVOT_REALISM';
+  this.root.userData.detailPass='V260_N650_STRUCTURAL_ATTACHMENT_SCAN_WINDOW_AND_REJECT_PIVOT';
+  this.root.userData.v260Evidence='FOCUSIGHT_FS_SHARK_650_N650_FAMILY_PRODUCT_AND_INSTALLATION_IMAGES';
+  this.root.userData.v260Policy='STRUCTURAL_ATTACHMENT_AND_VIEWING_WINDOW_ONLY__P3N1_OPTIONS_REMAIN_UNDECODED';
+
+  const suction=this.findNode('shark650-feed-suction');
+  if(suction){
+    const carrier=this.group(suction,'shark650-feeder-carrier-v260','Automatic suction feeder carrier frame');
+    for(const z of [-.48,.48]){
+      const post=this.box(carrier,[.08,.56,.08],[.18,1.02,z],'dark',.010);post.userData.structuralAttachment=true;
+      const bearing=this.box(carrier,[.18,.14,.16],[.38,.89,z],'steel',.016);bearing.userData.structuralAttachment=true;bearing.userData.pickupCarrierSupport=true;
+    }
+    const cross=this.box(carrier,[.70,.08,1.02],[.10,1.25,0],'light',.012);cross.userData.structuralAttachment=true;
+    suction.userData.v260CarrierPolicy='SUCTION_PICKUP_BAR_TERMINATES_IN_VISIBLE_SIDE_CARRIERS_AND_CROSSMEMBER';
+  }
+
+  const tower=this.findNode('shark650-inspection-tower');
+  if(tower){
+    const bezel=this.group(tower,'shark650-front-aperture-bezel-v260','Operator-side vision aperture bezel');
+    const z=-.755;
+    for(const x of [-.57,.57]){const side=this.box(bezel,[.08,.94,.05],[x,1.55,z],'dark',.010);side.userData.apertureBezel=true;}
+    for(const y of [1.07,2.03]){const rail=this.box(bezel,[1.20,.08,.05],[0,y,z],'dark',.010);rail.userData.apertureBezel=true;}
+    bezel.userData.sourceBoundary='FOCUSIGHT_SHARK_650_FAMILY_FRONT_TOWER_IMAGE';
+  }
+
+  const window=this.findNode('shark650-inspection-window');
+  if(window){
+    window.userData.scanWindowPolicy='DARK_TOWER_WINDOW_SUBTLE_GLOW_ONLY_DURING_ACTIVE_SCAN';
+    for(const mesh of window.children.filter(o=>o.isMesh)){mesh.userData.scanWindow=true;mesh.userData.inspectionAperture=true;}
+  }
+
+  const plate=this.findNode('shark650-reject-plate');
+  if(plate){
+    const gate=plate.children.find(o=>o.isMesh&&o.userData.rejectGate);
+    if(gate){
+      const pivot=this.group(plate,'shark650-reject-pivot-v260','Reject gate pivot and shaft reference',[-.07,1.02,0]);
+      gate.position.sub(pivot.position);
+      pivot.add(gate);
+      pivot.userData.rejectGatePivot=true;
+      pivot.userData.motionPolicy='ROTATE_PIVOT_ONLY__SOLENOID_AND_FRAME_REMAIN_STATIC';
+      const shaft=this.cyl(pivot,.028,1.08,[0,0,0],'steel','reject-pivot-shaft','z');shaft.userData.structuralAttachment=true;shaft.userData.rotor=false;
+      for(const z of [-.56,.56]){
+        const bearing=this.box(pivot,[.14,.14,.10],[0,0,z],'dark',.012);bearing.userData.rejectPivotBearing=true;bearing.userData.structuralAttachment=true;
+      }
+    }
+  }
+
+  const ret=this.findNode('shark650-return');
+  if(ret){
+    const support=this.group(ret,'shark650-return-side-frame-v260','Good/bad return side-frame supports');
+    for(const x of [-.72,.72])for(const z of [-.62,.72]){
+      const leg=this.box(support,[.07,.58,.07],[x,.42,z],'dark',.008);leg.userData.structuralAttachment=true;
+      const foot=this.cyl(support,.055,.025,[x,.12,z],'dark','return-floor-pad','y');foot.userData.floorContact=true;foot.userData.rotor=false;
+    }
+    ret.userData.v260SupportPolicy='RETURN_BELTS_TERMINATE_IN_VISIBLE_SIDE_FRAME_AND_FLOOR_SUPPORTS';
+  }
  }
 
  findNode(id){return id==='shark650-root'?this.root:this.nodes.find(n=>n.userData.nodeId===id)||null;}resolvePart(o){for(let p=o;p&&p!==this.root;p=p.parent)if(p.userData?.selectable)return p;return null;}resolveTaxonomyNode(id){return this.taxonomyById.get(id)?.meshRefs.map(ref=>this.findNode(ref)).find(Boolean)||null;}contains(a,b){for(let p=b;p;p=p.parent)if(p===a)return true;return false;}
