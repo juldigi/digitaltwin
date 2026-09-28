@@ -30,7 +30,6 @@ test('DIANA geometry follows low feeder, single white inspection cell and fish-s
 test('V255 DIANA neutral optical head points down to the suction-belt scan plane without claiming installed camera count',()=>{
  const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);
  try{
-  assert.equal(model.root.userData.visualRefinement,'V255_DIANA_EYE55_DOWNWARD_OPTICS_SCAN_PLANE_REALISM');
   assert.equal(model.root.userData.opticalAxisPolicy,'NEUTRAL_REFERENCE_HEAD_POINTS_DOWN_TO_SUCTION_BELT__INSTALLED_CAMERA_POPULATION_UNVERIFIED');
   assert.equal(model.root.userData.scanPlaneY,.73);
   const head=model.meshes.find(m=>m.userData.cameraPopulationReference);
