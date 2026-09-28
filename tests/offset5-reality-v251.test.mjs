@@ -278,6 +278,23 @@ test('Offset 5 inks each section only after that section passes the PU nip',()=>
  }finally{sim.dispose();m.dispose();}
 });
 
+test('Offset 5 coater contact train counter-rotates at sheet surface speed',()=>{
+ const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
+ try{
+  const roles=['coater-impression-cylinder','coater-transfer-cylinder','coater-chamber-metering-roller'];
+  const rotors=roles.map(role=>sim.rotors.find(item=>item.role===role));
+  assert.ok(rotors.every(Boolean),'coater process rotors must remain available');
+  assert.deepEqual(rotors.map(r=>r.sign),[1,-1,1]);
+  for(const rotor of rotors){
+   const radius=rotor.mesh.geometry.parameters.radiusTop;
+   const surfaceSpeed=rotor.rate*radius*2*Math.PI*sim.sheetCyclesPerSecond;
+   assert.ok(Math.abs(surfaceSpeed-sim.baseMetersPerSecond)<1e-9);
+   assert.equal(rotor.source,'COATER_CONTACT_SURFACE_SPEED_MATCHED_TO_SHEET_REFERENCE');
+  }
+  assert.equal(sim.state().coaterMotionPolicy,'EXISTING_THREE_ROLL_CONTACT_TRAIN_MATCHES_SHEET_SURFACE_SPEED');
+ }finally{sim.dispose();m.dispose();}
+});
+
 test('Offset 5 shows ink only as subtle roller film without floating droplets or glowing impression cylinders',()=>{
  const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
  try{
