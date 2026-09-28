@@ -29,7 +29,7 @@ test('SHARK geometry keeps feeder camera reject and collection alternatives as r
  for(const id of ['shark650-feeder','shark650-transfer','shark650-inspection','shark650-vision','shark650-processing','shark650-reject','shark650-return','shark650-access'])assert.ok(model.findNode(id),id);
  assert.equal(model.findNode('shark650-feed-suction').userData.installedModeVerified,false);assert.equal(model.findNode('shark650-feed-friction').userData.installedModeVerified,false);assert.equal(model.findNode('shark650-feed-friction').visible,false);assert.equal(model.findNode('shark650-feed-friction').userData.capabilityOnly,true);
  assert.equal(model.findNode('shark650-vision-camera').userData.referenceBayCount,3);assert.equal(model.findNode('shark650-vision-camera').userData.installedCameraCountVerified,false);assert.equal(model.findNode('shark650-vision-camera').userData.p3SuffixDecoded,false);
- assert.equal(model.root.userData.visualRefinement,'V258_SHARK_N650_TOWER_OPEN_BAY_RETURN_REALISM');
+ assert.equal(model.root.userData.visualRefinement,'V260_SHARK_N650_ATTACHED_FEEDER_APERTURE_REJECT_PIVOT_REALISM');
  assert.equal(model.findNode('shark650-process-hmi').visible,false);assert.equal(model.findNode('shark650-access-platform').visible,false);
  for(const id of ['shark650-local-service-step-v254','shark650-feeder-hood-v254','shark650-reject-guard-v254','shark650-reject-confirm-v254','shark650-return-monitor-v254','shark650-dust-integration-capability-v254'])assert.ok(model.findNode(id),id);
  assert.equal(model.findNode('shark650-dust-integration-capability-v254').visible,false);assert.equal(model.findNode('shark650-dust-integration-capability-v254').userData.capabilityOnly,true);
@@ -42,7 +42,6 @@ test('SHARK geometry keeps feeder camera reject and collection alternatives as r
 test('V258 SHARK grounds the main chassis, points the neutral optic at the bed and structurally frames the reject bay',()=>{
  const model=new SharkN650MachineTemplate();
  try{
-  assert.equal(model.root.userData.visualRefinement,'V258_SHARK_N650_TOWER_OPEN_BAY_RETURN_REALISM');
   assert.equal(model.root.userData.opticalAxisPolicy,'NEUTRAL_REFERENCE_HEAD_POINTS_DOWN_TO_INSPECTION_BED__P3N1_CAMERA_PACKAGE_UNDECODED');
   const camera=model.findNode('shark650-vision-camera'),lens=camera.children.find(o=>o.isMesh&&o.userData.mechanismRole==='camera-lens');
   assert.ok(lens);assert.equal(lens.userData.opticalAxis,'NEGATIVE_Y_TOWARD_INSPECTION_BED');assert.equal(lens.userData.opticalTargetY,.78);
@@ -53,6 +52,51 @@ test('V258 SHARK grounds the main chassis, points the neutral optic at the bed a
   assert.equal(bay.userData.policy,'STRUCTURAL_FRAME_ONLY__EXACT_REJECT_ACTUATOR_REMAINS_UNVERIFIED');
   assert.equal(model.findNode('shark650-return').userData.v258ReturnPolicy,'OFFICIAL_GOOD_BAD_RETURN_LINE__LOW_CONTINUOUS_LANES__VERTICAL_PALLETIZER_CAPABILITY_ONLY');
  }finally{model.dispose();}
+});
+
+test('V260 SHARK physically attaches feeder, tower aperture, reject pivot and return frame without decoding P3N1 options',()=>{
+ const model=new SharkN650MachineTemplate();
+ try{
+  assert.equal(model.root.userData.visualRefinement,'V260_SHARK_N650_ATTACHED_FEEDER_APERTURE_REJECT_PIVOT_REALISM');
+  assert.equal(model.root.userData.v260Policy,'STRUCTURAL_ATTACHMENT_AND_VIEWING_WINDOW_ONLY__P3N1_OPTIONS_REMAIN_UNDECODED');
+  const carrier=model.findNode('shark650-feeder-carrier-v260');assert.ok(carrier);
+  assert.equal(carrier.children.filter(o=>o.isMesh&&o.userData.pickupCarrierSupport).length,2);
+  assert.ok(carrier.children.filter(o=>o.isMesh&&o.userData.structuralAttachment).length>=5);
+  const bezel=model.findNode('shark650-front-aperture-bezel-v260');assert.ok(bezel);
+  assert.equal(bezel.children.filter(o=>o.isMesh&&o.userData.apertureBezel).length,4);
+  const pivot=model.findNode('shark650-reject-pivot-v260');assert.ok(pivot);assert.equal(pivot.userData.rejectGatePivot,true);
+  assert.equal(pivot.userData.motionPolicy,'ROTATE_PIVOT_ONLY__SOLENOID_AND_FRAME_REMAIN_STATIC');
+  assert.equal(pivot.children.filter(o=>o.isMesh&&o.userData.rejectPivotBearing).length,2);
+  assert.ok(pivot.children.some(o=>o.isMesh&&o.userData.rejectGate));
+  const support=model.findNode('shark650-return-side-frame-v260');assert.ok(support);
+  assert.equal(support.children.filter(o=>o.isMesh&&o.userData.floorContact).length,4);
+  assert.equal(model.findNode('shark650-vision-camera').userData.installedCameraCountVerified,false);
+  assert.equal(model.findNode('shark650-reject').userData.installedRejectTypeVerified,false);
+ }finally{model.dispose();}
+});
+
+test('V260 SHARK scan window follows optical occupancy and only the reject pivot moves',()=>{
+ const model=new SharkN650MachineTemplate(),sim=new SharkN650ProcessSimulation(model.root,model);
+ try{
+  assert.equal(sim.scanWindows.length,2);
+  const pivot=model.findNode('shark650-reject-pivot-v260'),plate=model.findNode('shark650-reject-plate');
+  const plateQ=plate.quaternion.clone(),pivotQ=pivot.quaternion.clone(),initial=sim.scanWindowRest.map(x=>x.intensity);
+  sim.start();let now=1000;sim.update(now),sawScan=false,sawGate=false;
+  for(let i=0;i<1200;i++){
+   now+=10;sim.update(now);const st=sim.state();
+   if(st.scanWindowActive)sawScan=true;
+   if(st.demoRejectActive){sawGate=true;break;}
+  }
+  assert.equal(sawScan,true);
+  assert.ok(sim.scanWindows.every(w=>w.material.emissiveIntensity>=.16));
+  assert.equal(sawGate,true);
+  assert.ok(pivot.quaternion.angleTo(pivotQ)>.001,'reject pivot never actuated');
+  assert.ok(plate.quaternion.angleTo(plateQ)<1e-10,'reject parent frame must remain static');
+  assert.equal(sim.state().rejectGateMotionPolicy,'ROTATE_PIVOT_ONLY__SOLENOID_AND_FRAME_REMAIN_STATIC');
+  sim.stop();
+  assert.ok(pivot.quaternion.angleTo(pivotQ)<1e-10);
+  assert.deepEqual(sim.scanWindows.map(w=>w.material.emissiveIntensity),initial);
+ }finally{sim.dispose();model.dispose();}
 });
 
 test('SHARK automatic feeder suction cups point vertically toward the blank pickup plane',()=>{
