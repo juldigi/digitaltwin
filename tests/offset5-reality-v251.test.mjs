@@ -443,6 +443,17 @@ test('Offset 5 inks each section only after that section passes the PU nip',()=>
   m.setExteriorOpen(true);m.setLow(true);
   assert.equal(coverDetail.visible,false,'low-detail mode must not leave detached cover trim in the cutaway');
   m.setExteriorOpen(false);
+  const serviceDetail=m.realismMeshes.find(o=>o.userData.serviceDetail&&!o.userData.coverMountedDetail&&!o.userData.silhouetteCritical);
+  assert.ok(serviceDetail);
+  m.setLow(false);
+  assert.equal(coverDetail.visible,true);
+  m.setExteriorOpen(true);
+  assert.equal(serviceDetail.visible,false,'cutaway hides service decorations that would float without their mounting cover');
+  m.setLow(true);
+  m.setExteriorOpen(false);
+  assert.equal(serviceDetail.visible,false,'closing covers must preserve the selected low-detail mode');
+  m.setLow(false);
+  assert.equal(serviceDetail.visible,true,'full detail restores mounted service hardware');
  }finally{sim.dispose();m.dispose();}
 });
 

@@ -527,12 +527,13 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
 
   setExteriorOpen(on=true){
     if(typeof OffsetMachineTemplate.prototype.setExteriorOpen==='function')OffsetMachineTemplate.prototype.setExteriorOpen.call(this,on);
-    for(const m of this.realismMeshes)if(m.userData.coverMountedDetail)m.visible=!on;
+    for(const m of this.realismMeshes)m.visible=(!this.lowDetail||Boolean(m.userData.silhouetteCritical))&&(!this.exteriorOpen||!m.userData.coverMountedDetail&&!m.userData.serviceDetail);
     return this;
   }
   setLow(on){
+    this.lowDetail=!!on;
     if(typeof OffsetMachineTemplate.prototype.setLow==='function')OffsetMachineTemplate.prototype.setLow.call(this,on);
-    for(const m of this.realismMeshes)m.visible=(!on||Boolean(m.userData.silhouetteCritical))&&(!this.exteriorOpen||!m.userData.coverMountedDetail);
+    for(const m of this.realismMeshes)m.visible=(!this.lowDetail||Boolean(m.userData.silhouetteCritical))&&(!this.exteriorOpen||!m.userData.coverMountedDetail&&!m.userData.serviceDetail);
     return this;
   }
 }
