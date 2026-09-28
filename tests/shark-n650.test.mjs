@@ -68,7 +68,7 @@ test('SHARK automatic feeder suction cups point vertically toward the blank pick
 test('SHARK signal tower remains visual-only with unverified status meanings',()=>{
  const model=new SharkN650MachineTemplate();
  try{
-  const node=model.findNode('shark650-signal-tower-v259');assert.ok(node);
+  const node=model.findNode('shark650-signal-tower-v259');assert.ok(node);assert.equal(node.userData.familyPhotoReference,true);assert.equal(node.userData.installedVerified,false);
   const refs=node.children.filter(o=>o.isMesh&&o.userData.signalTowerReference);
   assert.equal(refs.length,4);
   assert.ok(refs.every(o=>o.userData.statusMeaningVerified===false));
