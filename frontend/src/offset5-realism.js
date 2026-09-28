@@ -534,6 +534,21 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       }
     }
 
+    // Coating contact train: keep the existing chamber/coating/impression hardware,
+    // but drive each contact surface at the same sheet surface speed. This removes the
+    // legacy arbitrary RPM multipliers while preserving the documented counter-rotation.
+    const coaterRotors=this.rotors.filter(item=>item.role==='coater-process-roller')
+      .sort((a,b)=>(a.mesh.position.y||0)-(b.mesh.position.y||0));
+    const coaterRoles=['coater-impression-cylinder','coater-transfer-cylinder','coater-chamber-metering-roller'];
+    for(let i=0;i<coaterRotors.length;i++){
+      const rotor=coaterRotors[i],radius=rotor.mesh?.geometry?.parameters?.radiusTop;
+      if(!radius)continue;
+      rotor.rate=this.baseMetersPerSecond/(Math.PI*2*this.sheetCyclesPerSecond*radius);
+      rotor.role=coaterRoles[i]||`coater-process-roller-${i+1}`;
+      rotor.source='COATER_CONTACT_SURFACE_SPEED_MATCHED_TO_SHEET_REFERENCE';
+      rotor.visualSpeedRatio=1;
+    }
+
     // Each straight-printing PU carries the sheet in the same direction. Adjacent
     // contacting cylinders counter-rotate; their surface speed, not their RPM,
     // follows the sheet. The visible radii are reference geometry, not CAD.
@@ -656,7 +671,8 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       rollerHandednessPolicy:'IDENTICAL_STRAIGHT_PRINT_KINEMATIC_SIGN_PATTERN_ACROSS_ALL_EIGHT_PU',
       interUnitGripperPolicy:'RIGID_FINGER_ASSEMBLY_ROTATES_WITH_TRANSFER_DRUM_ORBIT',
       inspectionIlluminationActive:this.inspectionIlluminationActive,
-      inspectionIlluminationPolicy:'SHEET_OCCUPANCY_TRIGGERED_EXISTING_FOCUSIGHT_LIGHTING_ONLY'
+      inspectionIlluminationPolicy:'SHEET_OCCUPANCY_TRIGGERED_EXISTING_FOCUSIGHT_LIGHTING_ONLY',
+      coaterMotionPolicy:'EXISTING_THREE_ROLL_CONTACT_TRAIN_MATCHES_SHEET_SURFACE_SPEED'
     };
   }
 }
