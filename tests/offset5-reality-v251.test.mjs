@@ -155,7 +155,13 @@ test('Offset 5 adds transverse colour lines one PU at a time and stacks on an in
   for(let ms=16;ms<=13000;ms+=16)sim.update(ms);
   assert.equal(sim.staticDeliveryStack.visible,false);
   assert.ok(sim.completed>0&&sim.state().pileSheetsVisible>0);
-  assert.ok(sim.pileSheets.filter(item=>item.mesh.visible).every(item=>item.mesh.geometry.attributes.position.getY(0)>=sim.pileAnchor.y-.001));
+  const visiblePile=sim.pileSheets.filter(item=>item.mesh.visible).sort((a,b)=>a.userData.serial-b.userData.serial);
+  assert.ok(visiblePile.length>0);
+  const topY=visiblePile.at(-1).mesh.geometry.attributes.position.getY(0);
+  const bottomY=visiblePile[0].mesh.geometry.attributes.position.getY(0);
+  assert.ok(Math.abs(topY-sim.pileAnchor.y)<1e-8,'delivery top receiving plane must stay fixed');
+  assert.ok(bottomY<=topY,'older delivered sheets must sit below the newest sheet as the table lowers');
+  assert.ok(sim.state().deliveryTableDropM>=0);
   assert.ok(sim.sheets.every(item=>!item.gripper.visible),'demo gripper blocks remain visible between sheets');
   assert.equal(sim.state().deliveryPilePolicy,'START_EMPTY_STACK_TO_CAPACITY_THEN_CLEAR_AND_REPEAT');
   sim.stop();assert.equal(sim.state().pileSheetsVisible,0);assert.equal(sim.staticDeliveryStack.visible,false,'stop returns to an empty delivery rather than a prebuilt full pile');
@@ -168,18 +174,25 @@ test('Offset 5 clears a full delivery pile before starting a new pile',()=>{
   sim.start();const sheet=sim.sheets[0];
   for(let cycle=0;cycle<sim.maxPileSheets;cycle++)sim.depositSheet(sheet,cycle);
   assert.equal(sim.state().pileSheetsVisible,sim.maxPileSheets);
+  const first=sim.pileSheets[0].mesh.geometry.attributes.position.getY(0);
   const last=sim.pileSheets.at(-1).mesh.geometry.attributes.position.getY(0);
-  assert.ok(last>sim.pileAnchor.y);
+  assert.ok(first<last,'older sheets must be lowered with the delivery table');
+  assert.ok(Math.abs(last-sim.pileAnchor.y)<1e-8,'newest sheet stays at the fixed receiving plane');
+  assert.ok(Math.abs(sim.state().deliveryTableDropM-(sim.maxPileSheets-1)*sim.pileSheetThickness)<1e-9);
   sim.depositSheet(sheet,sim.maxPileSheets);
   assert.equal(sim.completed,sim.maxPileSheets+1);
   assert.equal(sim.state().pileSheetsVisible,1);
   assert.ok(Math.abs(sim.pileSheets[0].mesh.geometry.attributes.position.getY(0)-sim.pileAnchor.y)<1e-8);
+  assert.equal(sim.state().deliveryTableDropM,0);
   sim.updateSheet(sim.sheets[1],sim.pathLength);
   const incoming=sim.sheets[1].mesh.geometry.attributes.position;
-  assert.ok(Math.abs(incoming.getY(0)-(sim.pileAnchor.y+sim.pileSheetThickness+.008))<1e-6,'incoming sheet settles on the current pile top');
+  assert.ok(Math.abs(incoming.getY(0)-(sim.pileAnchor.y+.008))<1e-6,'incoming sheet settles at the fixed delivery receiving plane');
   assert.ok(Math.abs(incoming.getY(0)-incoming.getY(sim.sheetLengthSegments*(sim.sheetWidthSegments+1)))<1e-8,'released sheet remains flat');
   sim.depositSheet(sheet,sim.maxPileSheets);assert.equal(sim.completed,sim.maxPileSheets+1,'one sheet cannot deposit twice');
-  sim.stop();assert.equal(sim.state().pileSheetsVisible,0);
+  sim.stop();
+  assert.equal(sim.state().pileSheetsVisible,0);
+  assert.equal(sim.state().deliveryTableDropM,0);
+  assert.ok(Math.abs(sim.deliveryTableMesh.position.y-sim.deliveryTableInitialY)<1e-12);
  }finally{sim.dispose();m.dispose();}
 });
 
