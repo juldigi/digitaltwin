@@ -8,7 +8,7 @@ import {V122_SOURCE_STATS} from './data/research-v122.js';
 export class Polar115MachineTemplate{
  constructor(){
   this.root=new THREE.Group();this.root.name='POLAR-115-EM';this.root.scale.x=-1;this.parts=[];this.nodes=[];this.meshes=[];this.materials=[];this.geometries=[];this.activeMeshes=[];this.exteriorOpen=false;
-  this.palette={body:0xb8bbb5,bodyDark:0x8f938f,dark:0x252b2e,table:0xb6b8b2,tableDark:0x514a43,steel:0xa9b0b1,accent:0x405961,warning:0xd0a338,screen:0x173e34,red:0xb6302d,paper:0xece5d2,black:0x111517,air:0x8bbad0};
+  this.palette={body:0xb8bbb5,bodyDark:0x8f938f,dark:0x252b2e,table:0xd9d8d2,tableDark:0x514a43,steel:0xa9b0b1,accent:0x405961,warning:0xd0a338,screen:0x173e34,red:0xb6302d,paper:0xece5d2,black:0x111517,air:0x8bbad0};
   this.build();this.enrichV122();this.taxonomy=POLAR115_TAXONOMY;this.taxonomyById=new Map(this.taxonomy.map(n=>[n.id,n]));
   for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}this.root.updateMatrixWorld(true);
   this.root.userData={assetId:POLAR115_SPEC.assetId,nodeId:'POLAR-115-EM',model:POLAR115_SPEC.model,serial:POLAR115_SPEC.serial,spec:POLAR115_SPEC,sources:POLAR115_TECHNICAL_SOURCES,machineEnvelope:{reference:POLAR115_REFERENCE_DIMENSIONS},geometryStatus:'DEDICATED_BMJ_PHOTO_MATCHED__ARCHIVE_DIMENSIONS_NOT_INSTALLATION_CAD',engineeringDimensions:false,evidenceBoundary:POLAR115_SPEC.evidenceBoundary,researchVersion:'V123_PHOTO_MATCHED',photoRevision:'V260_FOUR_BMJ_PHOTO_ANGLES',researchSourceCount:V122_SOURCE_STATS.total,detailPass:'V123_POLAR115_BMJ_PHOTO_MATCHED',actualPhotoEvidence:'BMJ-POLAR-PHOTOS-2026-09',mainHousingProfile:'RECTANGULAR_ROUNDED_HEAD__NO_HALF_CYLINDER_ROOF',photoOrientation:'MIRRORED_LOCAL_X__PERFORATED_TABLE_FRONT_RIGHT__DRIVE_REAR_LEFT'};
@@ -29,7 +29,7 @@ export class Polar115MachineTemplate{
   // BMJ actual machine: low base cabinet supporting a broad dark cutting deck.
   const frame=this.group(this.root,'polar-frame','Base Cabinet');
   frame.userData.evidence=photoEvidence;
-  this.cover(this.box(frame,[2.06,.58,1.64],[0,.29,.25],'bodyDark',.055));
+  this.cover(this.box(frame,[2.06,.84,1.64],[0,.42,.25],'bodyDark',.055));
   for(const x of [-.58,0,.58]){
    const door=this.box(frame,[.46,.38,.018],[x,.31,-.58],'body',.018);door.userData.detail=true;door.userData.evidence=photoEvidence;
   }
@@ -44,8 +44,9 @@ export class Polar115MachineTemplate{
   const left=this.group(feed,'polar-feed-left','Plain dark side extension',[-1.015,0,0]);
   const leftDeck=this.box(left,[.60,.06,.72],[0,.90,-.36],'tableDark',.018);leftDeck.userData.evidence='IMG_2488_FRONT_LEFT_DARK_EXTENSION';
   const right=this.group(feed,'polar-feed-right','Single perforated air-float side table',[1.015,0,0]);
-  const rightDeck=this.box(right,[.60,.06,1.30],[0,.90,-.65],'table',.018);rightDeck.userData.evidence='IMG_2488_2489_FRONT_RIGHT_WHITE_PERFORATED';this.holes(right,.60,1.30,.90,-.65,6,11);
-  for(const x of [-.22,.22])for(const z of [-1.16,-.16]){
+  const rightDeck=this.box(right,[.88,.06,1.30],[.11,.90,-.65],'table',.018);rightDeck.userData.evidence='IMG_2488_2489_FRONT_RIGHT_WHITE_PERFORATED';this.holes(right,.88,1.30,.90,-.65,8,11);
+  const rightBackstop=this.box(right,[.86,.17,.035],[.11,1.015,-.035],'body',.012);rightBackstop.userData.evidence='IMG_2489_FRONT_RIGHT_AIR_TABLE_BACKSTOP';
+  for(const x of [-.22,.44])for(const z of [-1.16,-.16]){
    const leg=this.box(right,[.028,.82,.028],[x,.45,z],'dark',.006);leg.userData.evidence='IMG_2488_2489_AIR_TABLE_CORNER_LEGS';
   }
   const crank=this.group(right,'polar-feed-right-crank','Side-table height-adjust crank wheel');crank.userData.detail=true;crank.userData.evidence=photoEvidence;
@@ -251,8 +252,8 @@ export class Polar115MachineTemplate{
   }
 
   // Air-table support feet and adjustment hardware ground the side tables physically.
-  for(const x of [-1.23,-.80,.80,1.23]){
-   const pad=tag(this.cyl(g,.055,.025,[x,.025,-.26],'dark','y'),'polar-side-table-floor-pad',true);
+  for(const x of [.795,1.455])for(const z of [-1.16,-.16]){
+   const pad=tag(this.cyl(g,.055,.025,[x,.025,z],'dark','y'),'polar-side-table-floor-pad',true);
    pad.userData.floorInterface=true;
   }
   const right=this.findNode('polar-feed-right');
