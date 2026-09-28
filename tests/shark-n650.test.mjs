@@ -47,6 +47,16 @@ test('V258 SHARK grounds the main chassis, points the neutral optic at the bed a
  }finally{model.dispose();}
 });
 
+test('SHARK automatic feeder suction cups point vertically toward the blank pickup plane',()=>{
+ const model=new SharkN650MachineTemplate();
+ try{
+  const cups=model.findNode('shark650-feed-suction').children.filter(o=>o.isMesh&&o.userData.mechanismRole==='suction-cup');
+  assert.equal(cups.length,4);
+  assert.ok(cups.every(c=>c.userData.pickupAxis==='NEGATIVE_Y_TOWARD_BLANK'));
+  assert.ok(cups.every(c=>Math.abs(c.rotation.x)<1e-12&&Math.abs(c.rotation.z)<1e-12),'suction cups must use cylinder Y axis, not lie horizontally across the feeder');
+ }finally{model.dispose();}
+});
+
 test('SHARK rotor whitelist excludes suction cups camera lenses and air nozzles',()=>{
  const model=new SharkN650MachineTemplate(),sim=new SharkN650ProcessSimulation(model.root,model),allowed=/^(transport-pulley|transfer-drive-motor|transfer-encoder|vacuum-blower|inspection-encoder-wheel|good-return|good-return-motor|bad-return|bad-return-motor)$/;
  assert.equal(sim.rotors.length,30);assert.equal(sim.rotors.some(r=>!allowed.test(r.userData.mechanismRole||'')),false);assert.equal(sim.suckers.length,4);assert.equal(sim.airNozzles.length,3);
