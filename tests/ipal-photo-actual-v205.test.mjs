@@ -364,6 +364,9 @@ test('outward vertical garden hangs on open IPAL steel frame without blocking th
  assert.equal(collect(root,/^IPAL_PHOTO_PAVER_WEED$/).length,0,'terrestrial weeds must not remain on the IPAL paving');
  const wall=collect(root,/^IPAL_OUTER_PERIMETER_WALL_REFERENCE$/),backing=collect(root,/^IPAL_PHOTO_VERTICAL_GARDEN_BACKING$/),plants=collect(root,/^IPAL_PHOTO_VERTICAL_GARDEN_PLANT$/),rails=collect(root,/^IPAL_PHOTO_VERTICAL_GARDEN_HORIZONTAL_RAIL$/),brackets=collect(root,/^IPAL_PHOTO_VERTICAL_GARDEN_CANTILEVER_BRACKET$/);
  assert.equal(wall.length,0);assert.equal(backing.length,0);assert.equal(rails.length,4);assert.equal(brackets.length,18);assert.equal(plants.length,3);
+ const pots=collect(root,/^IPAL_PHOTO_VERTICAL_GARDEN_BLACK_POTS$/),curb=collect(root,/^IPAL_PHOTO_VERTICAL_GARDEN_LOW_CONCRETE_CURB$/);
+ assert.equal(pots.length,3);assert.equal(curb.length,1);assert.equal(pots.reduce((n,o)=>n+o.userData.instanceCount,0),138);
+ assert.ok(curb[0].position.y+curb[0].scale.y/2<.78,'low curb stays below the first pot tier');
  assert.equal(plants.reduce((n,o)=>n+(o.userData.instanceCount||0),0),138);
  assert.ok(plants.every(o=>o.userData.frameAttached===true&&o.userData.facesOutward===true));
  assert.equal(audit.wallPresent,false);assert.equal(audit.frameAttached,true);assert.equal(audit.facesOutward,true);
@@ -375,4 +378,22 @@ test('outward vertical garden hangs on open IPAL steel frame without blocking th
  assert.equal(s.v249IpalInteriorVegetationRemoved,4);
  assert.equal(s.v251IpalWallVegetationInstances,138);
  assert.equal(s.v251IpalWallVegetationCoverage,1);
+});
+
+test('IPAL photo access around main tank uses open curved stairs without a fabricated vertical ladder',async()=>{
+ const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
+ const root=buildActualFactory(layout,fleet).root;
+ const treads=collect(root,/^IPAL_PHOTO_TANK_CURVED_ACCESS_TREAD$/);
+ assert.equal(treads.length,11);assert.equal(collect(root,/^IPAL_PHOTO_TANK_STAIR_GUARD_POST$/).length,11);
+ assert.ok(treads.every(o=>o.userData.openRiser&&o.userData.photoSource.includes('IMG_2523')));
+ assert.ok(treads.every((o,i)=>i===0||o.position.y>treads[i-1].position.y));
+});
+
+test('IPAL hopper landing stays beside the silver vessel shell',async()=>{
+ const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
+ const root=buildActualFactory(layout,fleet).root;
+ const shell=collect(root,/^IPAL_PHOTO_HOPPER_CYLINDER$/)[0],landing=collect(root,/^IPAL_PHOTO_HOPPER_PLATFORM_GRATING$/)[0];
+ assert.ok(shell&&landing&&landing.userData.besideVessel);
+ const shellBox=new T.Box3().setFromObject(shell),landingBox=new T.Box3().setFromObject(landing);
+ assert.ok(!shellBox.intersectsBox(landingBox),'access grating intersects the photographed hopper vessel');
 });

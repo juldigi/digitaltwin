@@ -1562,6 +1562,16 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  // Water-stain and aged shell bands keep the vessel from reading as a showroom-new cylinder.
  for(const [y,h,op] of [[.82,.22,.13],[2.58,.16,.10],[3.34,.11,.09]]){const stain=pcyl(an.x,y,anZ,an.r+.018,h,0x6d7775,'IPAL_PHOTO_TANK_WEATHERING',{weathering:'WATER_STAIN_BAND'},40,new T.MeshStandardMaterial({color:0x6d7775,roughness:.83,metalness:.18,transparent:true,opacity:op}));buildingDetailStats.v205IpalWeatheringDetails++;}
  ptorus(an.x,.10,anZ,an.r+.07,.055,0xc7a31d,'IPAL_PHOTO_TANK_YELLOW_BASE_RING');
+ // IMG_2519/2523 show yellow open treads climbing around the tank shell;
+ // they are distinct from a vertical ladder, which the photographs do not establish.
+ const tankStairSteps=11,stairStart=-.28,stairSweep=1.52;
+ for(let i=0;i<tankStairSteps;i++){
+  const a=stairStart+i*stairSweep/(tankStairSteps-1),y=.25+i*.185,r=an.r+.25,x=an.x+Math.cos(a)*r,z=anZ+Math.sin(a)*r;
+  const tread=pbox(x,y,z,.49,.045,.39,0xd2a51c,'IPAL_PHOTO_TANK_CURVED_ACCESS_TREAD',-a,1,{photoSource:['IMG_2519','IMG_2523'],openRiser:true});
+  tread.userData.stairLevel=i;
+  const gx=an.x+Math.cos(a)*(an.r+.52),gz=anZ+Math.sin(a)*(an.r+.52);
+  pline([gx,y,gz],[gx,y+.82,gz],.024,0xd2a51c,'IPAL_PHOTO_TANK_STAIR_GUARD_POST');
+ }
  // White external riser bends over the upper shell in IMG_2519/2523; service/direction remain unverified.
  pline([an.x-an.r-.58,.18,anZ-.35],[an.x-an.r-.58,4.05,anZ-.35],.052,0xe4e3da,'IPAL_PHOTO_TANK_EXTERNAL_WHITE_PIPE',{routingConfidence:'PHOTO_DERIVED_VISUAL_ROUTING_NOT_PID'});
  pline([an.x-an.r-.58,4.05,anZ-.35],[an.x-.70,4.05,anZ-.35],.052,0xe4e3da,'IPAL_PHOTO_TANK_EXTERNAL_WHITE_PIPE',{routingConfidence:'PHOTO_DERIVED_VISUAL_ROUTING_NOT_PID'});
@@ -1579,10 +1589,13 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   pbox(hv.x+dx,1.25,hz+dz,.12,2.5,.12,0xd7a817,'IPAL_PHOTO_HOPPER_SUPPORT_LEG');
   pline([hv.x+dx,.3,hz+dz],[hv.x-dx,2.25,hz+dz],.025,0xd7a817,'IPAL_PHOTO_HOPPER_SUPPORT_BRACE');
  }
- pbox(hv.x,2.55,hz,3.15,.10,2.65,0x8f9693,'IPAL_PHOTO_HOPPER_PLATFORM_GRATING');
- for(const z of [hz-1.30,hz+1.30])pbox(hv.x,2.66,z,3.15,.12,.055,0xd7a817,'IPAL_PHOTO_HOPPER_PLATFORM_TOEBOARD');
- for(const side of [-1,1])pline([hv.x-1.55,3.15,hz+side*1.30],[hv.x+1.55,3.15,hz+side*1.30],.026,0xd7a817,'IPAL_PHOTO_HOPPER_PLATFORM_HANDRAIL');
- for(const side of [-1,1])for(const x of [hv.x-1.55,hv.x-.78,hv.x,hv.x+.78,hv.x+1.55])pline([x,2.66,hz+side*1.30],[x,3.18,hz+side*1.30],.018,0xd7a817,'IPAL_PHOTO_HOPPER_GUARD_POST');
+ // IMG_2517: access grating belongs beside the vessel. A deck across its center
+ // would pass through the cylindrical shell and conceal the conical discharge.
+ const hopperLandingX=hv.x+hv.r+.54,landingHalfWidth=.38;
+ pbox(hopperLandingX,2.55,hz,landingHalfWidth*2,.10,2.65,0x8f9693,'IPAL_PHOTO_HOPPER_PLATFORM_GRATING',0,1,{besideVessel:true,photoSource:'IMG_2517'});
+ for(const z of [hz-1.30,hz+1.30])pbox(hopperLandingX,2.66,z,landingHalfWidth*2,.12,.055,0xd7a817,'IPAL_PHOTO_HOPPER_PLATFORM_TOEBOARD');
+ for(const side of [-1,1])pline([hopperLandingX-landingHalfWidth,3.15,hz+side*1.30],[hopperLandingX+landingHalfWidth,3.15,hz+side*1.30],.026,0xd7a817,'IPAL_PHOTO_HOPPER_PLATFORM_HANDRAIL');
+ for(const side of [-1,1])for(const x of [hopperLandingX-landingHalfWidth,hopperLandingX-landingHalfWidth*.5,hopperLandingX,hopperLandingX+landingHalfWidth*.5,hopperLandingX+landingHalfWidth])pline([x,2.66,hz+side*1.30],[x,3.18,hz+side*1.30],.018,0xd7a817,'IPAL_PHOTO_HOPPER_GUARD_POST');
  pcyl(hv.x,coneBase+hv.coneH+hv.cylinderH+.04,hz,hv.r*.92,.08,0x8e9896,'IPAL_PHOTO_HOPPER_TOP_LID',{function:'UNVERIFIED_FROM_PHOTO'},36,photoMetalDark);
  pcyl(hv.x+.35,coneBase+hv.coneH+hv.cylinderH+.22,hz-.18,.11,.34,0x697679,'IPAL_PHOTO_HOPPER_TOP_NOZZLE',{function:'UNVERIFIED_FROM_PHOTO'},14,photoMetalDark);
  ptorus(hv.x+.35,coneBase+hv.coneH+hv.cylinderH+.40,hz-.18,.13,.020,0x727d7e,'IPAL_PHOTO_HOPPER_TOP_NOZZLE_FLANGE',Math.PI/2,{function:'UNVERIFIED_FROM_PHOTO'});
@@ -1817,25 +1830,29 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  const landscapeTag=(o,semantic,extra={})=>photoTag(o,semantic,{coreProcess:false,userConfirmedLocation:'OUTERMOST_IPAL_STEEL_FRAME_FACING_OUTWARD',...extra});
  const lbox=(x,y,z,w,h,d,color,semantic,rot=0,opacity=1,extra={})=>landscapeTag(box(layers.landscape,x,y,z,w,h,d,color,rot,opacity),semantic,extra);
  const frameZ=-outerWall.y,gardenZ=-vg.y;
+ // IMG_2516/2518: a low concrete curb supports exposed tiers of individual black pots.
+ // It stops below the plants; the process vessels remain visible through the open lattice.
+ lbox(vg.x,.31,gardenZ+.095,vg.w,.62,.18,0x9da6a1,'IPAL_PHOTO_VERTICAL_GARDEN_LOW_CONCRETE_CURB',0,1,{photoSource:['IMG_2516','IMG_2518'],notEnclosingWall:true});
  for(const x of [33.5,38.7,43.9,49.1,54.3,59.3]){
   for(const y of [.42,1.12,1.82])pline([x,y,frameZ],[x,y,gardenZ],.024,0x53666a,'IPAL_PHOTO_VERTICAL_GARDEN_CANTILEVER_BRACKET',{frameAttached:true});
  }
  for(const y of [.38,1.05,1.72,2.16])lbox(vg.x,y,gardenZ,vg.w,.045,.045,0x53666a,'IPAL_PHOTO_VERTICAL_GARDEN_HORIZONTAL_RAIL',0,1,{frameAttached:true,openMesh:true});
  for(let col=0;col<24;col++){const x=vg.x-vg.w/2+col*vg.w/23;lbox(x,1.26,gardenZ,.036,1.85,.036,0x53666a,'IPAL_PHOTO_VERTICAL_GARDEN_VERTICAL_RAIL',0,1,{frameAttached:true,openMesh:true});}
- // Small suspended pockets and foliage sit on the road-facing side of the open steel lattice.
- // Dense wall planting uses instancing for mobile performance while preserving the long continuous planted-wall appearance.
- const cols=46,rows=3,plantCount=cols*rows,plantGeo=new T.IcosahedronGeometry(.20,1),plantMats=[
-  material(0x4f7d58),material(0x73904e),material(0x5f8556)
- ],dummyPlant=new T.Object3D(),wallPlantBatches=[];
+ // Dense planting is individual potted foliage, not a continuous green block.
+ const cols=46,rows=3,plantCount=cols*rows,plantGeo=new T.ConeGeometry(.16,.39,5),potGeo=new T.CylinderGeometry(.105,.075,.21,8),plantMats=[
+  material(0x59874b),material(0x779650),material(0x65466a)
+ ],potMat=material(0x292d2b),dummyPlant=new T.Object3D(),wallPlantBatches=[];
  for(let row=0;row<rows;row++){
   const batch=new T.InstancedMesh(plantGeo,plantMats[row],cols);batch.castShadow=true;batch.receiveShadow=true;
+  const pots=new T.InstancedMesh(potGeo,potMat,cols);pots.castShadow=true;pots.receiveShadow=true;
   for(let col=0;col<cols;col++){
-   const x=vg.x-vg.w/2+.25+col*(vg.w-.50)/(cols-1),y=.64+row*.55,z=gardenZ-.16;
-   dummyPlant.position.set(x,y,z);dummyPlant.scale.set(1+(col%4)*.08,.88+(col%5)*.05,.86+(col%3)*.08);dummyPlant.rotation.set(0,(col%7)*.11,0);dummyPlant.updateMatrix();batch.setMatrixAt(col,dummyPlant.matrix);
+   const x=vg.x-vg.w/2+.25+col*(vg.w-.50)/(cols-1),y=.78+row*.55,z=gardenZ-.13;
+   dummyPlant.position.set(x,y,z);dummyPlant.scale.set(1,1,1);dummyPlant.rotation.set(0,0,0);dummyPlant.updateMatrix();pots.setMatrixAt(col,dummyPlant.matrix);
+   dummyPlant.position.set(x,y+.26,z-.08);dummyPlant.scale.set(1+(col%4)*.09,.75+(col%5)*.11,.85+(col%3)*.09);dummyPlant.rotation.set(0,(col%7)*.23,(col%3-1)*.22);dummyPlant.updateMatrix();batch.setMatrixAt(col,dummyPlant.matrix);
   }
+  pots.instanceMatrix.needsUpdate=true;layers.landscape.add(pots);landscapeTag(pots,'IPAL_PHOTO_VERTICAL_GARDEN_BLACK_POTS',{photoSource:['IMG_2516','IMG_2518'],frameAttached:true,facesOutward:true,instanceCount:cols});
   batch.instanceMatrix.needsUpdate=true;layers.landscape.add(batch);landscapeTag(batch,'IPAL_PHOTO_VERTICAL_GARDEN_PLANT',{variation:'OUTWARD_FACING_FRAME_MOUNTED',frameAttached:true,facesOutward:true,fullFrameLength:true,instanceCount:cols});wallPlantBatches.push(batch);
  }
- for(let col=0;col<23;col++){const x=vg.x-vg.w/2+.30+col*(vg.w-.60)/22;lbox(x,.42,gardenZ-.07,.26,.18,.17,0x4f5148,'IPAL_PHOTO_SUSPENDED_PLANT_POCKET',0,1,{frameAttached:true});}
  buildingDetailStats.v205IpalVegetationObjects+=plantCount;
  const wallMinX=outerWall.x-outerWall.w/2,wallMaxX=outerWall.x+outerWall.w/2,gardenMinX=vg.x-vg.w/2,gardenMaxX=vg.x+vg.w/2;
  const roadBounds={minX:road.x-road.w/2,maxX:road.x+road.w/2,minY:road.y-road.d/2,maxY:road.y+road.d/2};
