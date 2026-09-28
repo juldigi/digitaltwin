@@ -49,6 +49,8 @@ export class MK1060ProcessSimulation{
    mesh.add(cutMarks);this.sheets.push({mesh,cutMarks,phase:i/7,lap:-1});
   }
   for(let i=0;i<20;i++){const blank=new THREE.Mesh(new THREE.BoxGeometry(.50,.006,.30),mat.clone());blank.visible=false;root.add(blank);this.blankStack.push(blank);const waste=new THREE.Mesh(new THREE.BoxGeometry(.98,.012,.07),new THREE.MeshStandardMaterial({color:0xb4966d,roughness:.9}));waste.visible=false;root.add(waste);this.wastePieces.push(waste);}
+  this.productSupport=template.findNode('mk1060-product-delivery')?.children.filter(o=>o.isMesh&&o.geometry?.parameters?.height===.045);
+  this.wasteSupport=template.findNode('mk1060-waste-conveyor')?.children.find(o=>o.isMesh&&o.geometry?.parameters?.height===.045);
   this.pathVisible=false;this.inkFlowVisible=false;this.resetStateFlags();
  }
  resetStateFlags(){this.transportIndexing=false;this.transportStopped=false;this.feederSuctionActive=false;this.platenClosed=false;this.pressureDwell=false;this.strippingActive=false;this.blankingActive=false;this.wasteConveyorActive=false;}
@@ -87,11 +89,20 @@ export class MK1060ProcessSimulation{
  updateGrippers(globalTransport){
   for(const bar of this.gripperBars){const q=gripperLoopPosition(globalTransport/this.gripperBars.length+(bar.userData.barPhase||0));bar.position.set(q.x,q.y,0);}
  }
+ deliveryPosition(support,thickness,z,fallback){
+  if(!support)return fallback.clone();
+  this.root.updateMatrixWorld(true);
+  const bounds=new THREE.Box3();
+  for(const surface of Array.isArray(support)?support:[support])bounds.expandByObject(surface);
+  if(bounds.isEmpty())return fallback.clone();
+  const world=new THREE.Vector3((bounds.min.x+bounds.max.x)/2,bounds.max.y+thickness/2,(bounds.min.z+bounds.max.z)/2+z);
+  return this.root.worldToLocal(world);
+ }
  updateSheets(cycleIndex,transport){
   const global=cycleIndex+transport;
   for(const s of this.sheets){const raw=global-s.phase;if(raw<0){s.mesh.visible=false;continue;}const lap=Math.floor(raw),t=Math.min(.999,raw-lap);s.mesh.visible=true;s.mesh.position.copy(this.curve.getPointAt(t));s.mesh.rotation.set(-Math.PI/2,0,0);s.cutMarks.visible=t>=.34;
    if(t>.52&&t<.72)s.mesh.material.color.setHex(this.strippingActive?0xd6c29b:0xe9dfc7);else if(t>.72)s.mesh.material.color.setHex(0xdcc79e);else s.mesh.material.color.setHex(0xefe8d3);
-   if(lap>s.lap){if(s.lap>=0){this.completed++;const idx=(this.completed-1)%this.blankStack.length;if(idx===0){for(const blank of this.blankStack)blank.visible=false;for(const waste of this.wastePieces)waste.visible=false;}const b=this.blankStack[idx],w=this.wastePieces[idx];b.visible=true;b.position.set(3.04,.47+idx*.007,-.24);w.visible=true;w.position.set(2.62,.58+idx*.003,.56);}s.lap=lap;}
+   if(lap>s.lap){if(s.lap>=0){this.completed++;const idx=(this.completed-1)%this.blankStack.length;if(idx===0){for(const blank of this.blankStack)blank.visible=false;for(const waste of this.wastePieces)waste.visible=false;}const b=this.blankStack[idx],w=this.wastePieces[idx];b.visible=true;b.position.copy(this.deliveryPosition(this.productSupport,.006,-.24,new THREE.Vector3(3.04,.8055,-.24)));b.position.y+=idx*.007;w.visible=true;w.position.copy(this.deliveryPosition(this.wasteSupport,.012,0,new THREE.Vector3(2.33,.7385,.56)));w.position.y+=idx*.012;}s.lap=lap;}
   }
  }
  update(now){
