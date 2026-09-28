@@ -233,8 +233,18 @@ test('Offset 5 inks each section only after that section passes the PU nip',()=>
   sim.updateSheet(sheet,candidate+.65);
   assert.ok(Math.abs(attr.getX(center)-blank.r)>.08,'same section is inked after passing the impression nip');
   const transfer=m.findNode('transfer-pu1-pu2');
-  assert.equal(transfer.children.filter(o=>o.userData.realismRole==='interunit-drum-frame-bracket').length,4);
+  assert.equal(transfer.children.filter(o=>o.userData.realismRole==='interunit-drum-frame-tie').length,4);
+  assert.equal(transfer.children.filter(o=>o.userData.realismRole==='interunit-frame-bearing-saddle').length,4);
+  assert.equal(transfer.children.filter(o=>o.userData.realismRole==='interunit-bearing-saddle-cap').length,4);
   assert.equal(transfer.children.filter(o=>o.userData.realismRole==='interunit-drum-bearing-retainer').length,2);
+  assert.equal(transfer.userData.frameMountPolicy,'JOURNAL_TO_ADJACENT_PU_INNER_FRAME_FACES');
+  assert.deepEqual(transfer.userData.lockedFrameMountEdges,[-.385,.365]);
+  for(const tie of transfer.children.filter(o=>o.userData.realismRole==='interunit-drum-frame-tie')){
+   const side=Math.sign(tie.userData.attachedFrameInnerX);
+   const box=new THREE.Box3().setFromObject(tie);
+   const bearingX=transfer.getWorldPosition(new THREE.Vector3()).x;
+   assert.ok(side<0?box.max.x>=bearingX-.01:box.min.x<=bearingX+.01,'frame tie must overlap the transfer journal center');
+  }
   const coverDetail=m.realismMeshes.find(o=>o.userData.coverMountedDetail&&o.userData.silhouetteCritical);
   m.setExteriorOpen(true);m.setLow(true);
   assert.equal(coverDetail.visible,false,'low-detail mode must not leave detached cover trim in the cutaway');
