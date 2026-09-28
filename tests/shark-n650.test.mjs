@@ -101,7 +101,7 @@ test('SHARK N650 taxonomy is a mapped six-level tree',()=>{
 });
 
 test('SHARK process sequence preserves negative-pitch inspection before good/bad routing',()=>{
- assert.deepEqual(SHARK_N650_SIMULATION_STAGES,['Automatic blank feed','Negative-pitch suction transfer','Controlled lighting + camera capture','Vision processing demo','Tracked pass / reject decision demo','Reject actuation demo','Good / bad return routing','Collection']);
+ assert.deepEqual(SHARK_N650_SIMULATION_STAGES,['Pengumpanan blank otomatis','Transfer suction negative-pitch','Pencahayaan terkontrol + camera capture','Pemrosesan vision demo','Pelacakan keputusan pass / reject','Aktuasi reject demo','Rute return good / bad','Pengumpulan output']);
 });
 
 
