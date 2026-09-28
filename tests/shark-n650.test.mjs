@@ -97,6 +97,15 @@ test('SHARK blank remains undecided before inspection and receives a stable trac
  assert.ok(id);assert.match(id,/^SHARK-DEMO-\d{5}$/);sim.dispose();model.dispose();
 });
 
+test('SHARK reject actuation rotates only the diverter blade while actuator housing remains fixed',()=>{
+ const model=new SharkN650MachineTemplate(),sim=new SharkN650ProcessSimulation(model.root,model);const fixed=sim.gateMount.children.find(o=>o!==sim.gate);const fixedQ=fixed.quaternion.clone();sim.start();let now=1000,seen=false;
+ try{
+  for(let i=0;i<1400;i++){now+=10;sim.update(now);if(sim.state().demoRejectActive){seen=true;break;}}
+  assert.ok(seen);assert.ok(Math.abs(sim.gate.rotation.z-sim.gateRest)>.1);assert.ok(Math.abs(sim.gateMount.rotation.z)<1e-12);assert.ok(fixed.quaternion.angleTo(fixedQ)<1e-12);
+  sim.stop();assert.ok(Math.abs(sim.gate.rotation.z-sim.gateRest)<1e-12);
+ }finally{sim.dispose();model.dispose();}
+});
+
 test('SHARK reject lane carries the same tracked blank that inspection classified as reject',()=>{
  const model=new SharkN650MachineTemplate(),sim=new SharkN650ProcessSimulation(model.root,model);sim.start();let now=1000,decisionId=null,gateId=null;
  for(let i=0;i<1200;i++){now+=10;sim.update(now);const rejected=sim.blanks.find(b=>b.result==='REJECT_DEMO'&&b.trackingId);if(rejected&&!decisionId)decisionId=rejected.trackingId;const st=sim.state();if(st.demoRejectActive&&st.activeRejectTrackingIds.length){gateId=st.activeRejectTrackingIds[0];break;}}
