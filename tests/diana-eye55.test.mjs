@@ -125,6 +125,19 @@ test('DIANA rejects only tracked reject blanks and accepted blanks remain on the
  sim.dispose();model.dispose();
 });
 
+test('Diana reject recovery does not spin the accepted fish-scale delivery drive',()=>{
+ const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);sim.start();let now=1000,seen=false;
+ try{
+  for(let i=0;i<1800;i++){
+   now+=10;sim.update(now);const st=sim.state();
+   if(st.rejectRecoveryActive&&!st.acceptedDeliveryActive){
+    seen=true;assert.equal(st.deliveryDriveActive,false);assert.equal(st.fishScaleDeliveryActive,false);break;
+   }
+  }
+  assert.ok(seen,'reject recovery-only state was never observed');
+ }finally{sim.dispose();model.dispose();}
+});
+
 test('Diana Eye 55 reject branch leaves the main path continuously and reaches the recovery tray without teleporting backward',()=>{
  const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);sim.start();let now=1000,lastX=null,seen=false,finished=false,id=null;
  try{
@@ -206,7 +219,7 @@ test('DIANA taxonomy is a mapped six-level tree including both reject actuator r
 });
 
 test('DIANA stage order preserves inspection decision tracking and fish-scale delivery',()=>{
- assert.deepEqual(DIANA_EYE55_SIMULATION_STAGES,['Pengumpanan blank','Suction-belt transport','LED illumination + camera capture','Pemrosesan citra demo','Pelacakan keputusan pass / reject','Ejection demo','Fish-scale delivery','Pengumpulan output']);
+ assert.deepEqual(DIANA_EYE55_SIMULATION_STAGES,['Pengumpanan blank','Suction-belt transport','LED illumination + camera capture','Pemrosesan citra demo','Pelacakan keputusan pass / reject','Ejection demo','Delivery accepted / reject recovery','Pengumpulan output']);
 });
 
 
