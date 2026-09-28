@@ -13,6 +13,20 @@ test('SHARK station labels use clear Indonesian while keeping technical terms',(
  ]);
 });
 
+test('SHARK user-facing taxonomy and selectable node names use Indonesian-first labels',()=>{
+ const model=new SharkN650MachineTemplate();
+ try{
+  assert.equal(model.root.userData.uiLanguage,'id-ID');
+  assert.equal(model.findNode('shark650-feeder').name,'Pengumpanan otomatis / negative-pitch');
+  assert.equal(model.findNode('shark650-reject').name,'Pemisahan reject');
+  assert.equal(model.findNode('shark650-return-side-frame-v260').name,'Support side-frame return good / bad');
+  const l2=SHARK_N650_TAXONOMY.filter(n=>n.level===2).map(n=>n.name);
+  assert.ok(l2.includes('Pengumpanan otomatis'));
+  assert.ok(l2.includes('Pemisahan reject'));
+  assert.ok(SHARK_N650_TAXONOMY.some(n=>n.level===4&&n.name==='Support mechanical'));
+ }finally{model.dispose();}
+});
+
 test('SHARK N650 preserves exact BMJ suffix and conflicting current official format references without guessing',()=>{
  assert.equal(SHARK_N650_SPEC.assetId,'BMJ-MCH-0020');assert.equal(SHARK_N650_SPEC.model,'FS-SHARK-N650-P3N1');assert.equal(SHARK_N650_SPEC.serial,'FPS241216001');assert.equal(SHARK_N650_SPEC.year,2025);
  assert.equal(SHARK_N650_SPEC.currentFamilyMaxSpeedMMin,400);assert.deepEqual(SHARK_N650_SPEC.currentFamilyMinInspectionM,[.070,.090]);
