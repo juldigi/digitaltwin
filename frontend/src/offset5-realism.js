@@ -606,6 +606,7 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       item.currentOrbitAngle=null;
     }
     this.setInspectionIllumination(false);
+    this.deliveryJoggerActive=false;
     return this.state();
   }
   // Offset lithography transfers thin films at roller contacts. The legacy
@@ -773,6 +774,16 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       sheet.userData.trailPosition.x<=inspectionX+.22
     );
     this.setInspectionIllumination(inspectionOccupied);
+
+    const deliveryX=OFFSET5_DIMENSIONS.layout.deliveryCenterX;
+    this.deliveryJoggerActive=this.sheets.some(sheet=>
+      sheet.mesh.visible&&
+      sheet.userData.leadPosition.x>=deliveryX-.95&&
+      sheet.userData.trailPosition.x<=deliveryX+.18
+    );
+    if(!this.deliveryJoggerActive){
+      for(const item of this.joggerMotions)item.object.position.copy(item.initial);
+    }
   }
   applyInkFilm(on){
     for(const surface of this.inkSurfaces){
@@ -801,6 +812,7 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
     this.deliveryTableMesh=this.template.findNode('delivery-pile')?.children.find(o=>o.isMesh)||null;
     this.deliveryTableInitialY=this.deliveryTableMesh?.position.y;
     this.deliveryTableDrop=0;
+    this.deliveryJoggerActive=false;
   }
   state(){
     return {
@@ -835,7 +847,9 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       coaterMotionPolicy:'EXISTING_THREE_ROLL_CONTACT_TRAIN_MATCHES_SHEET_SURFACE_SPEED',
       dryerTransportPolicy:'MOBILE_BATCHED_STATIC_REFERENCE__UV_AND_SHEET_PATH_CARRY_VISIBLE_DRYER_MOTION',
       deliveryPileElevatorPolicy:'TOP_RECEIVING_PLANE_HELD_CONSTANT_WHILE_TABLE_LOWERS_WITH_STACK',
-      deliveryTableDropM:this.deliveryTableDrop||0
+      deliveryTableDropM:this.deliveryTableDrop||0,
+      deliveryJoggerActive:this.deliveryJoggerActive,
+      deliveryJoggerPolicy:'ACTIVE_ONLY_WHILE_SHEET_OCCUPIES_RECEIVING_ZONE'
     };
   }
 }
