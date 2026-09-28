@@ -74,6 +74,16 @@ test('V258 DIANA matches the low feeder / white cell silhouette and keeps reject
  }finally{model.dispose();}
 });
 
+test('DIANA adaptive low-detail hides micro-detail but preserves silhouette-critical geometry',()=>{
+ const model=new DianaEye55MachineTemplate();
+ try{
+  const detail=model.meshes.filter(m=>m.userData.detail),silhouette=model.meshes.filter(m=>m.userData.silhouetteCritical);
+  assert.ok(detail.length>10);const before=detail.filter(m=>m.visible).length;assert.ok(before>0);
+  model.setLow(true);assert.equal(model.root.userData.lowDetailActive,true);assert.ok(detail.filter(m=>m.visible).length<before);assert.ok(silhouette.every(m=>m.visible));
+  model.setLow(false);assert.equal(model.root.userData.lowDetailActive,false);assert.equal(detail.filter(m=>m.visible).length,before);
+ }finally{model.dispose();}
+});
+
 test('DIANA rotor whitelist rotates only feeder transport vacuum and delivery mechanisms',()=>{
  const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model),allowed=/^(feed-pulley|transport-pulley|transport-drive-motor|transport-encoder|vacuum-blower|delivery-pulley)$/;
  assert.ok(sim.rotors.length>=24);assert.equal(sim.rotors.some(r=>!allowed.test(r.userData.mechanismRole||'')),false);
