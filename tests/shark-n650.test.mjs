@@ -59,6 +59,16 @@ test('SHARK automatic feeder suction cups point vertically toward the blank pick
  }finally{model.dispose();}
 });
 
+test('SHARK signal tower remains visual-only with unverified status meanings',()=>{
+ const model=new SharkN650MachineTemplate();
+ try{
+  const node=model.findNode('shark650-signal-tower-v259');assert.ok(node);
+  const refs=node.children.filter(o=>o.isMesh&&o.userData.signalTowerReference);
+  assert.equal(refs.length,4);
+  assert.ok(refs.every(o=>o.userData.statusMeaningVerified===false));
+ }finally{model.dispose();}
+});
+
 test('SHARK tower carries the official blue local-control identity without inferring button functions',()=>{
  const model=new SharkN650MachineTemplate();
  try{
