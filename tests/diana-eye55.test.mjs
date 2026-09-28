@@ -59,6 +59,12 @@ test('V258 DIANA matches the low feeder / white cell silhouette and keeps reject
   assert.equal(model.root.userData.rejectOutputPolicy,'DAMAGE_FREE_EJECTION_TO_RECOVERABLE_REJECT_COLLECTION__NOT_SECOND_ACCEPTED_FISHSCALE_LANE');
   const feeder=model.findNode('diana55-feeder-console-v258'),mag=model.findNode('diana55-feeder-magazine-v258'),crown=model.findNode('diana55-cell-crown-v258'),recovery=model.findNode('diana55-reject-recovery-v258');
   assert.ok(feeder&&mag&&crown&&recovery);
+  const hmi=model.findNode('diana55-hmi-pedestal-v251'),screen=hmi.children.find(o=>o.isMesh&&o.userData.mechanismRole==='diana-eye-hmi-display-reference');
+  const body=hmi.children.find(o=>o.isMesh&&o.userData.v258PedestalProfile==='SLANTED_OPERATOR_TERMINAL_REFERENCE');
+  assert.ok(body&&screen);assert.ok(Math.abs(body.rotation.z+.10)<1e-9);assert.ok(Math.abs(screen.rotation.z+.10)<1e-9);
+  assert.ok(hmi.children.some(o=>o.isMesh&&o.userData.operatorWorkShelf));
+  const controls=model.findNode('diana55-cell-controls-v258');assert.ok(controls);assert.equal(controls.children.filter(o=>o.isMesh&&o.userData.cellControlButton).length,6);
+  const envelope=new THREE.Box3().setFromObject(model.root);assert.ok(envelope.max.y<=2.05,`V258 Diana height exceeded family reference envelope: ${envelope.max.y}`);
   assert.equal(model.findNode('diana55-delivery-waste-v254').visible,false);
   assert.equal(model.findNode('diana55-delivery-waste-v254').userData.supersededByV258,true);
   const tray=model.meshes.find(m=>m.userData.rejectRecoveryTray),guard=model.meshes.find(m=>m.userData.rejectRecoveryGuard);
