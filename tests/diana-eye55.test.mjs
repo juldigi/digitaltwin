@@ -52,6 +52,22 @@ test('V255 DIANA neutral optical head points down to the suction-belt scan plane
  }finally{sim.dispose();model.dispose();}
 });
 
+test('V258 DIANA matches the low feeder / white cell silhouette and keeps reject recovery separate from accepted fish-scale output',()=>{
+ const model=new DianaEye55MachineTemplate();
+ try{
+  assert.equal(model.root.userData.visualRefinement,'V258_DIANA_EYE55_FEEDER_CELL_REJECT_RECOVERY_REALISM');
+  assert.equal(model.root.userData.rejectOutputPolicy,'DAMAGE_FREE_EJECTION_TO_RECOVERABLE_REJECT_COLLECTION__NOT_SECOND_ACCEPTED_FISHSCALE_LANE');
+  const feeder=model.findNode('diana55-feeder-console-v258'),mag=model.findNode('diana55-feeder-magazine-v258'),crown=model.findNode('diana55-cell-crown-v258'),recovery=model.findNode('diana55-reject-recovery-v258');
+  assert.ok(feeder&&mag&&crown&&recovery);
+  assert.equal(model.findNode('diana55-delivery-waste-v254').visible,false);
+  assert.equal(model.findNode('diana55-delivery-waste-v254').userData.supersededByV258,true);
+  const tray=model.meshes.find(m=>m.userData.rejectRecoveryTray),guard=model.meshes.find(m=>m.userData.rejectRecoveryGuard);
+  assert.ok(tray&&guard);
+  assert.equal(recovery.userData.flow,'DAMAGE_FREE_REJECT_COLLECTION_FOR_RESORT_OR_REINSPECTION_REFERENCE');
+  assert.equal(model.findNode('diana55-delivery').userData.v258DeliveryPolicy,'ONE_ACCEPTED_FISH_SCALE_LANE_PLUS_SEPARATE_RECOVERABLE_REJECT_COLLECTION');
+ }finally{model.dispose();}
+});
+
 test('DIANA rotor whitelist rotates only feeder transport vacuum and delivery mechanisms',()=>{
  const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model),allowed=/^(feed-pulley|transport-pulley|transport-drive-motor|transport-encoder|vacuum-blower|delivery-pulley)$/;
  assert.ok(sim.rotors.length>=24);assert.equal(sim.rotors.some(r=>!allowed.test(r.userData.mechanismRole||'')),false);
@@ -79,7 +95,7 @@ test('DIANA deterministic demo assigns stable tracking IDs at inspection and car
 test('DIANA rejects only tracked reject blanks and accepted blanks remain on the main delivery path',()=>{
  const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);sim.start();let now=1000,seenReject=false,seenPass=false;
  for(let i=0;i<1500;i++){now+=10;sim.update(now);const state=sim.state();seenReject||=state.rejectTrackingActive&&state.activeRejectTrackingIds.length>0;seenPass||=state.acceptedDeliveryActive&&state.activePassTrackingIds.length>0;}
- const state=sim.state();assert.ok(seenReject&&seenPass);assert.ok(state.inspectedDemoCount>0);assert.ok(state.completed+state.rejectedDemo>0);assert.ok(state.pileSheetsVisible+state.rejectSheetsVisible>0);assert.equal(state.deliveryMode,'DUAL_FISH_SCALE_FINISHED_AND_WASTE_REFERENCE');
+ const state=sim.state();assert.ok(seenReject&&seenPass);assert.ok(state.inspectedDemoCount>0);assert.ok(state.completed+state.rejectedDemo>0);assert.ok(state.pileSheetsVisible+state.rejectSheetsVisible>0);assert.equal(state.deliveryMode,'ACCEPTED_FISH_SCALE_PLUS_RECOVERABLE_REJECT_COLLECTION');assert.equal(state.rejectedOutputPolicy,'DAMAGE_FREE_RECOVERABLE_COLLECTION_FOR_RESORT_OR_REINSPECTION_REFERENCE');
  assert.equal(sim.blanks.every(b=>!b.result||b.inspectedLap===b.lap),true);
  sim.dispose();model.dispose();
 });
@@ -119,10 +135,18 @@ test('DIANA stage order preserves inspection decision tracking and fish-scale de
 });
 
 
-test('V254 DIANA routes accepted and rejected blanks to separate fish-scale lanes without an invented actuator claim',()=>{
- const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);sim.start();let now=1000,goodZ=null,badZ=null,sawWaste=false;
- for(let i=0;i<1600;i++){now+=10;sim.update(now);const st=sim.state();sawWaste||=st.wasteDeliveryActive;for(const b of sim.blanks){if(b.result==='PASS_DEMO'&&b.mesh.visible&&b.lastT>.84)goodZ=b.mesh.position.z;if(b.result==='REJECT_DEMO'&&b.mesh.visible&&b.lastT>.84)badZ=b.mesh.position.z;}if(sawWaste&&goodZ!==null&&badZ!==null)break;}
- assert.ok(sawWaste);assert.ok(goodZ<0);assert.ok(badZ>0);assert.ok(Math.abs(goodZ-badZ)>.25);
+test('V258 DIANA keeps accepted blanks on fish-scale delivery and sends rejected blanks down to recoverable collection',()=>{
+ const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);sim.start();let now=1000,goodZ=null,badZ=null,badY=null,sawRejectRecovery=false;
+ for(let i=0;i<1600;i++){
+  now+=10;sim.update(now);const st=sim.state();sawRejectRecovery||=st.rejectRecoveryActive;
+  for(const b of sim.blanks){
+   if(b.result==='PASS_DEMO'&&b.mesh.visible&&b.lastT>.84)goodZ=b.mesh.position.z;
+   if(b.result==='REJECT_DEMO'&&b.mesh.visible&&b.lastT>.84){badZ=b.mesh.position.z;badY=b.mesh.position.y;}
+  }
+  if(sawRejectRecovery&&goodZ!==null&&badZ!==null&&badY!==null)break;
+ }
+ assert.ok(sawRejectRecovery);assert.ok(goodZ<0);assert.ok(badZ>.30);assert.ok(badY<.62);assert.ok(Math.abs(goodZ-badZ)>.40);
+ assert.equal(sim.state().deliveryMode,'ACCEPTED_FISH_SCALE_PLUS_RECOVERABLE_REJECT_COLLECTION');
  assert.equal(sim.state().demoRejectActuator,'NEUTRAL_DAMAGE_FREE_EJECTION_REFERENCE__INSTALLED_ACTUATOR_UNVERIFIED');
  sim.dispose();model.dispose();
 });
