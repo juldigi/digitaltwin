@@ -77,6 +77,24 @@ test('SHARK recipe logic remains addressable but is not rendered as floating phy
  }finally{model.dispose();}
 });
 
+test('SHARK node-scoped materials prevent highlight and ghost state from leaking between assemblies',()=>{
+ const model=new SharkN650MachineTemplate();
+ try{
+  const feeder=model.findNode('shark650-feeder'),inspection=model.findNode('shark650-inspection');
+  const feederMesh=model.meshes.find(m=>model.contains(feeder,m)&&m.material);
+  const inspectionMesh=model.meshes.find(m=>model.contains(inspection,m)&&m.material&&m.material.color.getHex()===feederMesh.material.color.getHex());
+  assert.ok(feederMesh&&inspectionMesh,'need same-color meshes in different selectable nodes');
+  assert.notEqual(feederMesh.material,inspectionMesh.material,'different selectable nodes must not share one material instance');
+  model.highlight(feeder);
+  assert.ok(feederMesh.material.emissiveIntensity>.2);
+  assert.ok(inspectionMesh.material.emissiveIntensity===0,'highlight leaked into unrelated SHARK assembly');
+  model.ghost(true,feeder);
+  assert.ok(feederMesh.material.opacity>.9,'selected SHARK assembly was ghosted');
+  assert.ok(inspectionMesh.material.opacity<.2,'unrelated SHARK assembly did not ghost independently');
+  model.ghost(false);
+ }finally{model.dispose();}
+});
+
 test('SHARK rotor whitelist excludes suction cups camera lenses and air nozzles',()=>{
  const model=new SharkN650MachineTemplate(),sim=new SharkN650ProcessSimulation(model.root,model),allowed=/^(transport-pulley|transfer-drive-motor|transfer-encoder|vacuum-blower|inspection-encoder-wheel|good-return|good-return-motor|bad-return|bad-return-motor)$/;
  assert.equal(sim.rotors.length,30);assert.equal(sim.rotors.some(r=>!allowed.test(r.userData.mechanismRole||'')),false);assert.equal(sim.suckers.length,4);assert.equal(sim.airNozzles.length,3);
