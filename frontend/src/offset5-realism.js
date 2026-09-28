@@ -72,6 +72,7 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
     this.refineInstalledRealityV253();
     this.refineDeliveryDynamicsV254();
     this.refinePhotoDeliveryFaceV255();
+    this.refineInternalFrameSupportsV256();
   }
 
   refineExteriorIdentityV237(){
@@ -416,6 +417,38 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
         bracket.userData.attachment='PILE_GATE_CROSSMEMBER_END_SUPPORT';
       }
       gate.userData.photoMountPolicy='IMG_2312_GATE_RODS_TERMINATE_IN_SUPPORTED_CROSSMEMBERS';
+    }
+    this.root.userData.dimensionLock='BMJ_CUSTOM_INSTALLED_DIMENSIONS_DO_NOT_NORMALIZE_TO_GENERIC_CD102';
+  }
+
+  refineInternalFrameSupportsV256(){
+    // The CD102 roller service procedure explicitly references journal boxes and recesses
+    // in the D.S./O.S. side frames. Keep the cutaway open, but make the existing cylinder
+    // journals visibly terminate in structural frame rails instead of floating in space.
+    this.root.userData.visualRefinement='V256_BMJ_CUTAWAY_JOURNAL_FRAME_SUPPORTS';
+    this.root.userData.internalFrameEvidence='CD102_SERVICE_PROCEDURE_SIDE_FRAME_RECESS_AND_JOURNAL_BOX';
+    this.root.userData.internalFramePolicy='OPEN_RAIL_STRUCTURE_ONLY__NO_NEW_PROCESS_HARDWARE__NO_DIMENSION_CHANGE';
+
+    const bearingRows=[
+      ['plate',1.79],['blanket',1.39],['impression',.95],['transfer',.55]
+    ];
+    for(let i=0;i<8;i++){
+      const unit=this.node(`press-${i+1}`);if(!unit)continue;
+      for(const z of [-.82,.82]){
+        for(const x of [-.40,.40]){
+          const post=this.db(unit,[.10,1.86,.10],[x,1.43,z],'graphite',.014,'printing-unit-inner-frame-post',{service:false,confidence:'OEM_SIDE_FRAME_JOURNAL_TOPOLOGY'});
+          post.userData.unitIndex=i+1;
+          post.userData.structuralCutaway=true;
+          post.userData.frameSide=z<0?'LOCAL_NEGATIVE_Z':'LOCAL_POSITIVE_Z';
+        }
+        for(const [cylinderType,y] of bearingRows){
+          const rail=this.db(unit,[.76,.085,.11],[.02,y,z],'graphite',.010,'printing-unit-journal-bearing-rail',{service:false,confidence:'OEM_SIDE_FRAME_JOURNAL_TOPOLOGY'});
+          rail.userData.unitIndex=i+1;
+          rail.userData.cylinderType=cylinderType;
+          rail.userData.structuralCutaway=true;
+          rail.userData.journalPlaneZ=z;
+        }
+      }
     }
     this.root.userData.dimensionLock='BMJ_CUSTOM_INSTALLED_DIMENSIONS_DO_NOT_NORMALIZE_TO_GENERIC_CD102';
   }
