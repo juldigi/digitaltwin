@@ -32,7 +32,7 @@ test('four BMJ photo angles place the white air table and rear drive on the phot
  const airWidth=new THREE.Box3().setFromObject(whiteDeck).getSize(new THREE.Vector3()).x;
  assert.ok(airWidth>.8,'the photographed air table is broad, not a narrow wing');
  assert.equal(right.children.filter(x=>x.isMesh&&x.userData.evidence==='IMG_2488_2489_AIR_TABLE_CORNER_LEGS').length,4);
- const frame=m.findNode('polar-frame').children.find(x=>x.isMesh&&x.userData.exteriorCover);
+ const frame=m.findNode('polar-frame').children.find(x=>x.isMesh&&x.userData.evidence==='IMG_2488_FRONT_CABINET_BELOW_TABLE_WITH_OPEN_RECESS');
  const apron=m.findNode('polar-feed-center').children.find(x=>x.isMesh&&x.userData.evidence==='IMG_2488_THICK_FRONT_TABLE_APRON_AND_RECESSED_RIGHT_UNDERSIDE');
  assert.ok(new THREE.Box3().setFromObject(frame).max.y<new THREE.Box3().setFromObject(centerDeck).min.y-.15,'cabinet is lower than the front cutting table, leaving the photographed recess');
  assert.ok(new THREE.Box3().setFromObject(apron).min.y<new THREE.Box3().setFromObject(centerDeck).min.y-.1,'dark cutting surface has the photographed thick front apron');
@@ -101,16 +101,26 @@ test('front console faces the operator while the blade remains inside the cutter
  m.dispose();
 });
 
-test('Polar simulation keeps the continuous housing closed unless the operator opens interior',()=>{
+test('Polar simulation opens covers while leaving structural supports and the rear tongue attached',()=>{
  const source=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
- assert.match(source,/polarSimulation=engine\.template\?\.root\?\.userData\?\.assetId==='BMJ-MCH-0001'/);
- assert.match(source,/if\(!polarSimulation\)enableExteriorOpen\(\{forceDetail:false\}\)/);
+ assert.match(source,/simulationOwnsExterior=!isInteriorOpen\(\);\s*enableExteriorOpen\(\{forceDetail:false\}\)/);
  const m=new Polar115MachineTemplate(),housing=m.findNode('polar-housing');
  const brow=housing.children.filter(x=>x.isMesh&&x.userData.consoleBrow);
  assert.equal(brow.length,1,'upper shell is one continuous head, not several rounded roof bars');
  assert.ok(new THREE.Box3().setFromObject(brow[0]).getSize(new THREE.Vector3()).z>1,'head runs continuously from operator face to rear face');
+ const tongue=m.findNode('polar-gauge-tongue'),tongueBody=tongue.children.find(x=>x.userData.mechanismRole==='backgauge-tongue');
+ assert.ok(tongueBody,'long rear tongue belongs to the moving backgauge');
+ const rearDeck=m.findNode('polar-feed-rear').children.find(x=>x.isMesh);
+ const rearBox=new THREE.Box3().setFromObject(rearDeck),tongueBox=new THREE.Box3().setFromObject(tongueBody);
+ assert.ok(tongueBox.max.z>rearBox.max.z-.05&&tongueBox.min.z<.5,'tongue extends from the cutter opening toward the end of the rear table');
+ m.setExteriorOpen(true);
+ assert.equal(brow[0].visible,false);
+ for(const id of ['polar-frame','polar-safety-left-arm','polar-safety-right-arm','polar-housing']){
+  const node=m.findNode(id);assert.ok(node.children.some(x=>x.isMesh&&x.visible),`${id} retains a physical support in cutaway`);
+ }
+ assert.equal(tongueBody.visible,true,'backgauge tongue stays mounted during simulation');
  const s=new Polar115ProcessSimulation(m.root,m);s.start();
- assert.equal(brow[0].visible,true,'cut simulation itself must not remove the exterior cover');
+ assert.equal(tongueBody.visible,true);
  s.dispose();m.dispose();
 });
 
