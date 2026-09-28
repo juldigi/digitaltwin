@@ -745,7 +745,15 @@ export class OffsetMachineTemplate {
     for(const z of [-.50,.50]){
       const pod=this.group(g,`inspection-camera-${z<0?'a':'b'}`,`Inspection camera pod ${z<0?'A':'B'}`,[0,0,0],[0,.30,z<0?-.45:.45],photos);
       const box=this.box(pod,[.32,.24,.34],[.05,2.88,z],'graphite',.035);box.rotation.z=-.15;
-      this.cylinder(pod,.065,.04,[-.08,2.80,z],'glass','x');
+      // IMG_1630 / IMG_1633 show the optical head looking down at the moving sheet.
+      // Keep the existing pod position but replace the old horizontal lens proxy with an
+      // attached downward barrel + lens. The small Z rotation follows the camera-body pitch.
+      const barrel=this.cylinder(pod,.078,.060,[.012,2.775,z],'graphite','y');barrel.rotation.z=-.15;
+      barrel.userData.inspectionOpticalBarrel=true;barrel.userData.sourcePhoto='IMG_1630.jpeg + IMG_1633.jpeg';
+      const lens=this.cylinder(pod,.062,.018,[.018,2.742,z],'glass','y');lens.rotation.z=-.15;
+      lens.userData.inspectionLens=true;lens.userData.opticalAxis='DOWNWARD_TOWARD_SHEET_PLANE_WITH_SMALL_PROCESS_DIRECTION_TILT';
+      lens.userData.sourcePhoto='IMG_1630.jpeg + IMG_1633.jpeg';
+      pod.userData.opticalAxisPolicy='PHOTO_VERIFIED_DOWNWARD_TO_SHEET_PLANE';
       this.box(pod,[.20,.035,.24],[.10,2.98,z],'steel',.008);
     }
     const lights=this.group(g,'inspection-lighting','Inspection lighting bars',[0,0,0],[0,.25,.45],photos);
