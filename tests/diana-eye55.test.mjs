@@ -3,9 +3,15 @@ import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import {DianaEye55MachineTemplate} from '../frontend/src/diana-eye55.js';
 import {DianaEye55ProcessSimulation,DIANA_EYE55_SIMULATION_STAGES} from '../frontend/src/simulation-diana-eye55.js';
-import {DIANA_EYE55_SPEC} from '../frontend/src/data/dimensions-diana-eye55.js';
+import {DIANA_EYE55_SPEC,DIANA_EYE55_STATIONS} from '../frontend/src/data/dimensions-diana-eye55.js';
 import {DIANA_EYE55_TAXONOMY} from '../frontend/src/data/taxonomy-diana-eye55.js';
 import {DIANA_EYE55_TECHNICAL_SOURCES} from '../frontend/src/data/sources-diana-eye55.js';
+
+test('DIANA station labels use clear Indonesian while preserving technical terms',()=>{
+ assert.deepEqual(DIANA_EYE55_STATIONS.map(s=>s.label),[
+  'Friction feeder / alignment blank','Transport suction-belt','Enclosure inspeksi camera + LED','Pemrosesan citra','Ejection / sorting blank','Delivery blank accepted'
+ ]);
+});
 
 test('DIANA EYE 55 preserves BMJ identity and capability-vs-installed boundaries',()=>{
  assert.equal(DIANA_EYE55_SPEC.assetId,'BMJ-MCH-0019');assert.equal(DIANA_EYE55_SPEC.serial,'MP.FBA0-00058');assert.equal(DIANA_EYE55_SPEC.year,2023);
