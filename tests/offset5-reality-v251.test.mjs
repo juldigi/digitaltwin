@@ -99,6 +99,29 @@ test('V254 adds attached Preset Plus delivery and coater references without chan
  }finally{m.dispose();}
 });
 
+test('V256 grounds all PU cylinder journals into open side-frame rails without changing BMJ dimensions',()=>{
+ const m=new Offset5CD102RealismTemplate();
+ try{
+  assert.equal(m.root.userData.visualRefinement,'V256_BMJ_CUTAWAY_JOURNAL_FRAME_SUPPORTS');
+  assert.equal(m.root.userData.internalFramePolicy,'OPEN_RAIL_STRUCTURE_ONLY__NO_NEW_PROCESS_HARDWARE__NO_DIMENSION_CHANGE');
+  assert.equal(m.root.userData.dimensionLock,'BMJ_CUSTOM_INSTALLED_DIMENSIONS_DO_NOT_NORMALIZE_TO_GENERIC_CD102');
+  for(let unit=1;unit<=8;unit++){
+   const u=m.findNode(`press-${unit}`);
+   const posts=u.children.filter(x=>x.userData.realismRole==='printing-unit-inner-frame-post');
+   const rails=u.children.filter(x=>x.userData.realismRole==='printing-unit-journal-bearing-rail');
+   assert.equal(posts.length,4,`PU${unit} must have four open inner-frame posts`);
+   assert.equal(rails.length,8,`PU${unit} must have eight side-frame bearing rails`);
+   for(const type of ['plate','blanket','impression','transfer']){
+    assert.equal(rails.filter(x=>x.userData.cylinderType===type).length,2,`PU${unit} missing ${type} journal support on both sides`);
+   }
+  }
+  m.setExteriorOpen(true);
+  assert.ok(m.realismMeshes.filter(x=>x.userData.structuralCutaway).every(x=>x.visible),'cutaway structural rails must remain visible when covers open');
+  assert.equal(m.root.userData.machineEnvelope.structuralBody.length,26.00);
+  assert.equal(m.root.userData.machineEnvelope.serviceInclusive.length,27.00);
+ }finally{m.dispose();}
+});
+
 test('Offset 5 feeds separate 720 mm sheets with a visible gap and releases them at delivery',()=>{
  const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
  try{
