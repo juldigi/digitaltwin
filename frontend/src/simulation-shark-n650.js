@@ -12,8 +12,13 @@ export class SharkN650ProcessSimulation{
  constructor(root,template){
   this.root=root;this.template=template;this.active=false;this.running=false;this.paused=false;this.speed=1;this.completed=0;this.rejected=0;this.inspectedDemoCount=0;this.elapsed=0;this.lastNow=null;this.onUpdate=null;
   this.rotors=[];this.suckers=[];this.lights=[];this.airNozzles=[];this.blanks=[];this.goodStack=[];this.badStack=[];this.pathVisible=false;
-  this.gateMount=template.findNode('shark650-reject-plate');this.gate=this.gateMount?.children.find(o=>o.isMesh&&o.userData.rejectGate)||null;this.gateRest=this.gate?.rotation.z||0;
+  this.gateMount=template.findNode('shark650-reject-plate');
+  this.gate=template.findNode('shark650-reject-pivot-v260')||null;
+  if(!this.gate){this.gateMount?.traverse(o=>{if(!this.gate&&o.isMesh&&o.userData.rejectGate)this.gate=o;});}
+  this.gateRest=this.gate?.rotation.z||0;
   root.traverse(o=>{if(o.isMesh&&o.userData.rotor)this.rotors.push(o);if(o.isMesh&&o.userData.reciprocator)this.suckers.push(o);if(o.isMesh&&o.userData.inspectionLight)this.lights.push(o);if(o.isMesh&&o.userData.mechanismRole==='air-nozzle')this.airNozzles.push(o);});
+  this.scanWindows=template.meshes.filter(m=>m.userData.scanWindow);
+  this.scanWindowRest=this.scanWindows.map(m=>({emissive:m.material.emissive?.clone(),intensity:m.material.emissiveIntensity||0}));
   this.rotorRest=this.rotors.map(r=>r.quaternion.clone());this.suckerRest=this.suckers.map(s=>s.position.clone());
   this.points=[[-3.32,.75,0],[-2.72,.73,0],[-1.82,.73,0],[-.78,.73,0],[.20,.73,0],[1.38,.71,0],[2.25,.71,0],[3.36,.71,0]].map(p=>new THREE.Vector3(...p));
   this.curve=new THREE.CatmullRomCurve3(this.points,false,'centripetal');
@@ -48,7 +53,7 @@ export class SharkN650ProcessSimulation{
    sheetsVisible:this.blanks.filter(b=>b.mesh.visible).length,pileSheetsVisible:this.goodStack.filter(p=>p.visible).length,rejectSheetsVisible:this.badStack.filter(p=>p.visible).length,
    rotorCount:this.rotors.length,oscillatorCount:this.suckers.length,mechanismCount:this.rotors.length+this.suckers.length+this.lights.length+1,pathVisible:this.pathVisible,inkFlowVisible:false,inkFlowCount:0,uvLampCount:0,uvActive:false,
    feederSuctionActive:this.feederSuctionActive,feederPickupPhase:this.feederPickupPhase,feederPickupStrokeM:this.feederPickupStroke,feederSuctionReferenceOnly:this.feederSuctionReferenceOnly,transferDriveActive:this.transferDriveActive,goodReturnDriveActive:this.goodReturnDriveActive,badReturnDriveActive:this.badReturnDriveActive,transferVacuumReady:this.transferVacuumReady,transportEncoderActive:this.transportEncoderActive,blankPresenceTrigger:this.blankPresenceTrigger,lightingProgramReady:this.lightingProgramReady,cameraTriggerActive:this.cameraTriggerActive,captureComplete:this.captureComplete,scanActive:this.scanActive,processingActive:this.processingActive,processingComplete:this.processingComplete,decisionReady:this.decisionReady,rejectPermit:this.rejectPermit,rejectConfirmed:this.rejectConfirmed,goodReturnConfirmed:this.goodReturnConfirmed,badReturnConfirmed:this.badReturnConfirmed,negativePitchCapabilityReference:this.negativePitchCapabilityReference,negativePitchActive:this.negativePitchActive,negativePitchOverlapReference:this.negativePitchOverlapReference,negativePitchPublishedCapacityGainPercent:this.negativePitchPublishedCapacityGainPercent,transportMode:'NEGATIVE_PITCH_FULL_SUCTION_OFFLINE_DEMO_REFERENCE',goodBadReturnLineOfficial:true,interlockSafe:this.interlockSafe,rejectTrackingActive:this.rejectTrackingActive,demoRejectActive:this.demoRejectActive,goodRoutingActive:this.goodRoutingActive,badRoutingActive:this.badRoutingActive,
-   demoRejectOnly:true,demoRejectActuator:this.demoRejectActuator,suffixDecoded:false,installedFeederModeVerified:false,installedCameraPackageVerified:false,installedRejectTypeVerified:false,installedCollectionModeVerified:false,deterministicDefectInjection:'EVERY_6TH_INSPECTED_BLANK_DEMO_ONLY',scanWindow:[this.scanStart,this.scanEnd],scanPositionPolicy:'BLANK_OCCUPIES_OPTICAL_TOWER',returnBranchPolicy:'TRACKED_BLANK_BRANCHES_FROM_DECISION_SPLIT_TO_GOOD_OR_BAD_RETURN_ENTRY',returnStackPolicy:'BOUNDED_FISH_SCALE_9_SLOTS_THEN_VERTICAL_LAYER',
+   demoRejectOnly:true,demoRejectActuator:this.demoRejectActuator,suffixDecoded:false,installedFeederModeVerified:false,installedCameraPackageVerified:false,installedRejectTypeVerified:false,installedCollectionModeVerified:false,deterministicDefectInjection:'EVERY_6TH_INSPECTED_BLANK_DEMO_ONLY',scanWindow:[this.scanStart,this.scanEnd],scanPositionPolicy:'BLANK_OCCUPIES_OPTICAL_TOWER',scanWindowActive:this.scanActive,scanWindowPolicy:'DARK_TOWER_WINDOW_SUBTLE_OCCUPANCY_GLOW_ONLY',rejectGateMotionPolicy:'ROTATE_PIVOT_ONLY__SOLENOID_AND_FRAME_REMAIN_STATIC',returnBranchPolicy:'TRACKED_BLANK_BRANCHES_FROM_DECISION_SPLIT_TO_GOOD_OR_BAD_RETURN_ENTRY',returnStackPolicy:'BOUNDED_FISH_SCALE_9_SLOTS_THEN_VERTICAL_LAYER',
    activeRejectTrackingIds:[...this.activeRejectTrackingIds],activePassTrackingIds:[...this.activePassTrackingIds],trackedResults:{pass:this.blanks.filter(b=>b.result==='PASS_DEMO').length,reject:this.blanks.filter(b=>b.result==='REJECT_DEMO').length,pending:this.blanks.filter(b=>!b.result).length}};
  }
  start(){this.active=true;this.running=true;this.paused=false;this.completed=0;this.rejected=0;this.inspectedDemoCount=0;this.elapsed=0;this.lastNow=null;for(const b of this.blanks){b.lap=-1;b.result=null;b.captured=false;b.processed=false;b.decisionReady=false;b.outputDeposited=false;b.inspectedLap=-1;b.lastT=0;b.trackingId=null;b.decisionSequence=null;b.mesh.visible=false;}this.resetMechanisms();this.staticDeliveryReferences.forEach(m=>m.visible=false);this.onUpdate?.(this.state());return this.state();}
@@ -59,7 +64,17 @@ export class SharkN650ProcessSimulation{
  setInkFlowVisible(){return this.state();}
  spin(r,dt,rate){const axis=Y_AXIS,q=new THREE.Quaternion().setFromAxisAngle(axis,(r.userData.spinDirection||1)*rate*dt);r.quaternion.multiply(q).normalize();}
  updateRotors(dt){for(const r of this.rotors){const role=String(r.userData.mechanismRole||''),transfer=['transport-pulley','transfer-drive-motor','transfer-encoder'].includes(role)&&this.transferDriveActive,vac=role==='vacuum-blower'&&this.transferVacuumReady,inspect=role==='inspection-encoder-wheel'&&(this.blankPresenceTrigger||this.scanActive),good=['good-return','good-return-motor'].includes(role)&&this.goodReturnDriveActive,bad=['bad-return','bad-return-motor'].includes(role)&&this.badReturnDriveActive;if(!(transfer||vac||inspect||good||bad))continue;const rate=vac?8.6:transfer?6.0:good||bad?5.4:6.2;this.spin(r,dt,rate);}}
- updateOptics(active){for(const l of this.lights){l.material.emissive?.setHex(active?0xe8f7ff:0x25323a);l.material.emissiveIntensity=active?2.25:.15;}}
+ updateOptics(active){
+  for(const l of this.lights){l.material.emissive?.setHex(active?0xe8f7ff:0x25323a);l.material.emissiveIntensity=active?2.25:.15;}
+  this.scanWindows.forEach((w,i)=>{
+    if(w.material.emissive){
+      if(active)w.material.emissive.setHex(0x477d95);
+      else if(this.scanWindowRest[i]?.emissive)w.material.emissive.copy(this.scanWindowRest[i].emissive);
+    }
+    w.material.emissiveIntensity=active?.16:(this.scanWindowRest[i]?.intensity??0);
+    w.material.needsUpdate=true;
+  });
+ }
  updateSuckers(active,pickupPhase=null){
   this.feederSuctionActive=active;
   const phase=pickupPhase===null?0:clamp(pickupPhase/.22),stroke=Math.sin(phase*Math.PI),travel=.028*stroke;
