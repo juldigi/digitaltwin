@@ -120,6 +120,42 @@ test('DIANA node-scoped materials prevent highlight and ghost state from leaking
  }finally{model.dispose();}
 });
 
+test('V259 DIANA keeps feeder, inspection aperture and HMI physically attached without inferring installed options',()=>{
+ const model=new DianaEye55MachineTemplate();
+ try{
+  assert.equal(model.root.userData.visualRefinement,'V259_DIANA_EYE55_ATTACHED_FEEDER_APERTURE_HMI_REALISM');
+  assert.equal(model.root.userData.v259Policy,'EXTERIOR_ATTACHMENT_AND_SCAN_WINDOW_ONLY__NO_INSTALLED_OPTION_POPULATION_INFERRED__NO_ENVELOPE_CHANGE');
+  const supports=model.findNode('diana55-feeder-supports-v259');
+  assert.ok(supports);
+  assert.equal(supports.children.filter(o=>o.isMesh&&o.userData.bearingSupport).length,2);
+  assert.equal(supports.children.filter(o=>o.isMesh&&o.userData.floorFrameAttachment).length,2);
+  assert.ok(supports.children.filter(o=>o.isMesh&&o.userData.structuralAttachment).length>=5);
+  const bezel=model.findNode('diana55-front-aperture-bezel-v259');
+  assert.ok(bezel);
+  assert.equal(bezel.children.filter(o=>o.isMesh&&o.userData.apertureBezel).length,5);
+  const hmi=model.findNode('diana55-hmi-pedestal-v251');
+  assert.equal(hmi.userData.v259AttachmentPolicy,'DISPLAY_HEAD_TO_SLANTED_NECK_TO_FLOOR_BASE');
+  assert.ok(hmi.children.some(o=>o.isMesh&&o.userData.floorContact));
+  assert.equal(model.findNode('diana55-camera-top').userData.installedCountVerified,false);
+  assert.equal(model.findNode('diana55-reject').userData.installedRejectActuationVerified,false);
+ }finally{model.dispose();}
+});
+
+test('V259 DIANA viewing window follows active scan occupancy and restores after stop',()=>{
+ const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);
+ try{
+  assert.equal(sim.scanWindows.length,2);
+  const initial=sim.scanWindowRest.map(x=>x.intensity);
+  sim.start();let now=1000;sim.update(now);let seen=false;
+  for(let i=0;i<700;i++){now+=10;sim.update(now);if(sim.state().scanWindowActive){seen=true;break;}}
+  assert.equal(seen,true);
+  assert.ok(sim.scanWindows.every(w=>w.material.emissiveIntensity>=.18));
+  assert.equal(sim.state().scanWindowPolicy,'DARK_VIEWING_WINDOW_SUBTLE_OCCUPANCY_GLOW_ONLY');
+  sim.stop();
+  assert.deepEqual(sim.scanWindows.map(w=>w.material.emissiveIntensity),initial);
+ }finally{sim.dispose();model.dispose();}
+});
+
 test('DIANA rotor whitelist rotates only feeder transport vacuum and delivery mechanisms',()=>{
  const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model),allowed=/^(feed-pulley|transport-pulley|transport-drive-motor|transport-encoder|vacuum-blower|delivery-pulley)$/;
  assert.ok(sim.rotors.length>=24);assert.equal(sim.rotors.some(r=>!allowed.test(r.userData.mechanismRole||'')),false);
