@@ -607,9 +607,8 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
     // Register/feed-table transport must read as one sheet-moving system, not alternating generic
     // cylinders. Keep only the documented tape/pressure roller contacts and drive them toward PU1.
     this.rotors=this.rotors.filter(item=>{
-      const owner=item.mesh?.userData?.ownerId,r=item.mesh?.geometry?.parameters?.radiusTop;
-      if(owner==='feedboard-transport')return Math.abs((r||0)-.034)<1e-6;
-      if(owner==='vacuum-table')return Math.abs((r||0)-.055)<1e-6;
+      const owner=item.mesh?.userData?.ownerId;
+      if(owner==='feedboard-transport'||owner==='vacuum-table')return item.mesh?.userData?.runtimeIndependent===true;
       return true;
     });
     for(const rotor of this.rotors){
@@ -618,7 +617,7 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       if(owner==='feedboard-transport'||owner==='vacuum-table'){
         rotor.sign=-1;
         rotor.rate=this.baseMetersPerSecond/(Math.PI*2*this.sheetCyclesPerSecond*radius);
-        rotor.role=owner==='feedboard-transport'?'register-pressure-transport-roller':'vacuum-table-tape-drive-roller';
+        rotor.role=rotor.mesh.userData.runtimeRotorRole||(owner==='feedboard-transport'?'register-pressure-transport-roller':'vacuum-table-tape-drive-roller');
         rotor.source='REGISTER_SHEET_TRANSPORT_SURFACE_SPEED_REFERENCE';
         rotor.visualSpeedRatio=1;
       }
