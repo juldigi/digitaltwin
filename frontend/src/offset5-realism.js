@@ -16,7 +16,7 @@ import {PrintingSimulation} from './simulation.js';
 import {OFFSET5_UNIT_CENTERS} from './data/dimensions-offset5.js';
 
 export const OFFSET5_FINAL_REFINEMENT=Object.freeze({
-  id:'OFFSET5_CD102_8L_CUSTOM_INSTALLED_REALITY_R4',
+  id:'OFFSET5_CD102_8L_CUSTOM_INSTALLED_REALITY_R5',
   machine:'Heidelberg Speedmaster CD 102-8+L',
   asset:'MACHINE-OFFSET5',
   sap:'OFU-1',
@@ -70,6 +70,7 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
     this.refineTransferSupports();
     this.refineExteriorIdentityV237();
     this.refineInstalledRealityV253();
+    this.refineDeliveryDynamicsV254();
   }
 
   refineExteriorIdentityV237(){
@@ -78,12 +79,12 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
     this.root.userData.visualEvidenceBoundary='BMJ_OFFSET5_PHOTOS_DXF_AND_CD102_FAMILY__NO_NEW_INSTALLED_PROCESS_HARDWARE';
     for(let i=0;i<8;i++){
       const unit=this.node(`press-${i+1}`);if(!unit)continue;
-      const trim=this.db(unit,[.60,.075,.020],[0,.67,-1.305],'black',.006,'operator-side-lower-service-trim',{coverMounted:true,silhouette:true});
+      const trim=this.db(unit,[.60,.075,.020],[0,.67,1.305],'black',.006,'operator-side-lower-service-trim',{coverMounted:true,silhouette:true});
       trim.userData.unitIndex=i+1;
       const plate=this.realismMeshes.find(m=>m.userData?.realismRole==='unit-identification-plate'&&m.userData?.label===`PU${i+1}`);
       if(plate)plate.userData.silhouetteCritical=true;
       for(const x of [-.34,.34]){
-        const hinge=this.dc(unit,.012,.10,[x,1.58,-1.315],'steel','y','operator-service-door-hinge',{coverMounted:true,service:true});
+        const hinge=this.dc(unit,.012,.10,[x,1.58,1.315],'steel','y','operator-service-door-hinge',{coverMounted:true,service:true});
         hinge.userData.unitIndex=i+1;
       }
     }
@@ -93,7 +94,7 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
       sill.userData.rearRemainsOpen=true;
     }
     const delivery=this.node('delivery-frame');
-    if(delivery)this.db(delivery,[.72,.08,.022],[.08,.70,-1.12],'black',.006,'delivery-service-fascia-reference',{coverMounted:true,silhouette:true});
+    if(delivery)this.db(delivery,[.72,.08,.022],[.08,.70,1.12],'black',.006,'delivery-service-fascia-reference',{coverMounted:true,silhouette:true});
   }
   refinePrintingUnits(){
     for(let i=0;i<8;i++){
@@ -150,7 +151,7 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
       }
 
       // Visual machine/unit plate on OS; text is metadata so renderer/UI may draw it later.
-      const plate=this.db(unit,[.22,.085,.012],[.33,2.31,-1.302],'black',.005,'unit-identification-plate',{coverMounted:true});
+      const plate=this.db(unit,[.22,.085,.012],[.33,2.31,1.302],'black',.005,'unit-identification-plate',{coverMounted:true});
       plate.userData.label=`PU${i+1}`;
       plate.userData.renderTextInGeometry=false;
     }
@@ -265,7 +266,8 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
     // inspection windows only. The custom BMJ unit spacing and unit height are intentionally untouched.
     for(let i=0;i<8;i++){
       const unit=this.node(`press-${i+1}`);if(!unit)continue;
-      const osZ=-1.315;
+      // The base photo-alignment mirrors each top-level machine module on Z; local +Z is world operator side (-Z).
+      const osZ=1.315;
       const eStop=this.dc(unit,.032,.028,[.43,1.12,osZ-.018],'red','z','printing-unit-emergency-stop-reference',{coverMounted:true,silhouette:true});
       eStop.userData.controlFunction='EMERGENCY_STOP_VISUAL_REFERENCE';
       const label=this.db(unit,[.18,.055,.012],[-.18,.88,osZ-.018],'light',.004,'printing-unit-service-label',{coverMounted:true});
@@ -302,6 +304,59 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
     const chain=this.node('delivery-chain-path');
     if(chain){
       for(const z of [-.78,.78])this.db(chain,[1.36,.045,.035],[-.04,1.68,z],'graphite',.006,'delivery-chain-guard-strip',{coverMounted:true,service:true});
+    }
+  }
+
+  refineDeliveryDynamicsV254(){
+    // Correct the post-alignment handedness of new micro-details and add only brochure-backed
+    // Preset Plus delivery/coater hardware. The BMJ custom machine envelope and module pitch remain untouched.
+    this.root.userData.visualRefinement='V254_OPERATOR_SIDE_CORRECTION_PLUS_PRESET_PLUS_DELIVERY_DNA';
+    this.root.userData.operatorSideDetailPolicy='TOP_LEVEL_MODULES_ARE_Z_MIRRORED__LOCAL_POSITIVE_Z_MAPS_TO_WORLD_NEGATIVE_Z';
+    this.root.userData.deliveryEvidence='HEIDELBERG_SPEEDMASTER_CD102_PRODUCT_INFORMATION_MAR_2020';
+
+    const frame=this.node('delivery-frame');
+    if(frame){
+      const console=this.db(frame,[.28,.34,.060],[.48,2.18,1.095],'graphite',.022,'preset-plus-delivery-touch-console',{coverMounted:true,silhouette:true,confidence:'HEIDELBERG_CD102_BROCHURE'});
+      console.userData.controlFunction='PRESET_PLUS_DELIVERY_LOCAL_CONTROL';
+      const display=this.db(frame,[.19,.20,.014],[.48,2.22,1.132],'glass',.010,'preset-plus-delivery-touch-display',{coverMounted:true,confidence:'HEIDELBERG_CD102_BROCHURE'});
+      display.userData.displayFunction='INTUITIVE_NAVIGATION_VISUAL_REFERENCE';
+      const jog=this.dc(frame,.050,.030,[.48,2.055,1.136],'steel','z','preset-plus-delivery-jogwheel',{coverMounted:true,service:true,confidence:'HEIDELBERG_CD102_BROCHURE'});
+      jog.userData.controlFunction='JOGWHEEL_VISUAL_REFERENCE';
+    }
+
+    const brake=this.node('delivery-sheet-brake');
+    if(brake){
+      // CD102 literature describes positionable sheet brakes. A continuous support rail makes the
+      // three existing brake heads read as mounted/adjustable hardware rather than floating rollers.
+      const rail=this.dc(brake,.020,1.54,[-.54,1.385,0],'steel','z','sheet-brake-positioning-rail',{service:true,confidence:'HEIDELBERG_CD102_BROCHURE'});
+      rail.userData.adjustment='TRANSVERSE_POSITION_REFERENCE_ONLY';
+      for(const z of [-.54,0,.54]){
+        const shoe=this.db(brake,[.12,.055,.070],[-.54,1.385,z],'graphite',.008,'sheet-brake-slide-carriage',{service:true,confidence:'HEIDELBERG_CD102_BROCHURE'});
+        shoe.userData.adjustment='POSITIONABLE_SHEET_BRAKE_VISUAL_REFERENCE';
+      }
+    }
+
+    const chain=this.node('delivery-chain-path');
+    if(chain){
+      // StaticStar is documented directly for CD102 delivery. Keep this as an attached antistatic
+      // reference bar, with no invented electrical rating or ionization setpoint.
+      const bar=this.dc(chain,.018,1.46,[-.31,1.535,0],'steel','z','staticstar-antistatic-bar',{service:true,confidence:'HEIDELBERG_CD102_BROCHURE'});
+      bar.userData.function='ANTISTATIC_SHEET_TRAVEL_REFERENCE';
+      for(const z of [-.60,-.40,-.20,0,.20,.40,.60]){
+        const pin=this.dc(chain,.005,.055,[-.31,1.505,z],'steel','y','staticstar-electrode-reference',{service:true,confidence:'HEIDELBERG_CD102_BROCHURE'});
+        pin.userData.electricalSettingAsserted=false;
+      }
+    }
+
+    const locks=this.node('coater-chamber-locks');
+    if(locks){
+      // The CD102 brochure identifies combination clamps on the chamber-blade coating unit.
+      for(const z of [-.77,.77]){
+        const clamp=this.db(locks,[.090,.045,.070],[-.04,1.84,z],'graphite',.008,'coater-combination-clamp-reference',{service:true,confidence:'HEIDELBERG_CD102_BROCHURE'});
+        clamp.userData.function='SPOT_FULL_AREA_CHANGEOVER_VISUAL_REFERENCE';
+        const lever=this.db(locks,[.13,.026,.030],[.02,1.90,z],'steel',.006,'coater-combination-clamp-lever',{service:true,confidence:'HEIDELBERG_CD102_BROCHURE'});
+        lever.rotation.z=z<0?-.18:.18;
+      }
     }
   }
 
@@ -412,6 +467,25 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       const rotor=this.rotors.find(item=>item.mesh===drum);
       if(rotor){rotor.sign=-1;rotor.rate=this.baseMetersPerSecond/(Math.PI*2*this.sheetCyclesPerSecond*drum.geometry.parameters.radiusTop);rotor.role=`PU${bay}-PU${bay+1}-transfer-drum`;}
     }
+    // Delivery is one forward-moving chain loop: both drive/return sprocket references rotate
+    // in the same sense so the upper span travels toward the pile. The sheet brake is deliberately
+    // slower as a visual deceleration reference; neither ratio is a service setting.
+    for(const rotor of this.rotors){
+      const radius=rotor.mesh?.geometry?.parameters?.radiusTop;
+      if(!radius)continue;
+      if(rotor.role==='delivery-chain-sprocket'){
+        rotor.sign=-1;
+        rotor.rate=this.baseMetersPerSecond/(Math.PI*2*this.sheetCyclesPerSecond*radius);
+        rotor.source='PRESET_PLUS_DELIVERY_FORWARD_CHAIN_VISUAL_REFERENCE';
+        rotor.visualSpeedRatio=1;
+      }else if(rotor.role==='sheet-brake-roller'){
+        rotor.sign=-1;
+        rotor.rate=.82*this.baseMetersPerSecond/(Math.PI*2*this.sheetCyclesPerSecond*radius);
+        rotor.source='POSITIONABLE_SHEET_BRAKE_CONTROLLED_DECELERATION_VISUAL_REFERENCE';
+        rotor.visualSpeedRatio=.82;
+      }
+    }
+
     // Each straight-printing PU carries the sheet in the same direction. Adjacent
     // contacting cylinders counter-rotate; their surface speed, not their RPM,
     // follows the sheet. The visible radii are reference geometry, not CAD.
@@ -469,7 +543,11 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       printRepresentation:'PROGRESSIVE_TRANSVERSE_COLOUR_BANDS_PER_PU_DEMO',
       cylinderMotionPolicy:'SAME_STRAIGHT_PRINT_DIRECTION_ALL_PU_CONTACT_PAIRS_COUNTER_ROTATE',
       sheetVisualPolicy:'NO_EXTERNAL_FULL_WIDTH_DEMO_GRIPPER_BAR',
-      deliveryPilePolicy:'START_EMPTY_STACK_TO_CAPACITY_THEN_CLEAR_AND_REPEAT'
+      deliveryPilePolicy:'START_EMPTY_STACK_TO_CAPACITY_THEN_CLEAR_AND_REPEAT',
+      operatorSideMicrodetailPolicy:'WORLD_NEGATIVE_Z_AFTER_TOP_LEVEL_PHOTO_MIRROR',
+      presetPlusDeliveryDetailPolicy:'TOUCH_DISPLAY_JOGWHEEL_STATICSTAR_AND_POSITIONABLE_SHEET_BRAKE_REFERENCES',
+      deliveryChainMotionPolicy:'SINGLE_FORWARD_LOOP_SPROCKETS_SHARE_ROTATION_DIRECTION',
+      sheetBrakeMotionPolicy:'CONTROLLED_DECELERATION_VISUAL_REFERENCE_NOT_SERVICE_SETPOINT'
     };
   }
 }
