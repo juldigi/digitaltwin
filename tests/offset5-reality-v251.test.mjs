@@ -472,7 +472,9 @@ test('Offset 5 feeder suction and register transport share one sheet cycle witho
 test('Offset 5 delivery joggers move only while a sheet occupies the receiving zone',()=>{
  const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
  try{
-  assert.ok(sim.joggerMotions.length>0);
+  assert.equal(sim.joggerMotions.length,2);
+  assert.deepEqual(new Set(sim.joggerMotions.map(item=>item.object.userData.joggerSide)),new Set(['DS','OS']));
+  assert.ok(sim.joggerMotions.every(item=>item.object.userData.joggerElementCount===2));
   sim.start();sim.update(0);
   assert.equal(sim.state().deliveryJoggerActive,false);
   const initial=sim.joggerMotions.map(item=>item.initial.clone());
