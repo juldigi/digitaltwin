@@ -89,7 +89,7 @@ export class SharkN650MachineTemplate{
   const bad=this.group(g,'shark650-return-bad','Rejected-product return lane');
   for(const z of [.38,.58]){this.box(bad,[1.48,.023,.10],[-.04,.56,z],'rubber',.004);for(const x of [-.62,.62])this.cyl(bad,.048,.13,[x,.55,z],'steel','bad-return','z');}
   const bm=this.cyl(bad,.082,.20,[-.68,.36,.66],'dark','bad-return-motor','x');bm.userData.rotor=true;bm.userData.rotorAxis='x';bm.userData.spinDirection=1;
-  const stack=this.group(g,'shark650-return-stack','Good/bad collection / vertical-palletizing interface');this.box(stack,[.72,.07,.72],[.92,.37,-.18],'steel');this.box(stack,[.64,.07,.52],[.78,.29,.52],'steel');stack.userData.verticalPalletizingCapability=true;stack.userData.installedVerticalPalletizerVerified=false;
+  const stack=this.group(g,'shark650-return-stack','Vertical-palletizing capability reference');this.box(stack,[.72,.07,.72],[.92,.37,-.18],'steel');this.box(stack,[.64,.07,.52],[.78,.29,.52],'steel');stack.userData.verticalPalletizingCapability=true;stack.userData.installedVerticalPalletizerVerified=false;stack.userData.capabilityOnly=true;stack.visible=false;
   for(const z of [-.18,.52]){const sensor=this.box(stack,[.045,.065,.045],[.52,.62,z],'green',.004);sensor.userData.mechanismRole=z<0?'good-return-confirm-sensor-reference':'bad-return-confirm-sensor-reference';}
  }
 
@@ -219,6 +219,7 @@ export class SharkN650MachineTemplate{
   if(ret){
    ret.name='Return good/bad & pengumpulan output';
    ret.userData.v258ReturnPolicy='OFFICIAL_GOOD_BAD_RETURN_LINE__LOW_CONTINUOUS_LANES__VERTICAL_PALLETIZER_CAPABILITY_ONLY';
+   const palletizer=this.findNode('shark650-return-stack');if(palletizer){palletizer.visible=false;palletizer.userData.capabilityOnly=true;}
   }
   const names={
    'shark650-feeder':'Pengumpanan otomatis / negative-pitch',
