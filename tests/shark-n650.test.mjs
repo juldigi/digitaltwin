@@ -69,7 +69,9 @@ test('V260 SHARK physically attaches feeder, tower aperture, reject pivot and re
   assert.equal(pivot.children.filter(o=>o.isMesh&&o.userData.rejectPivotBearing).length,2);
   assert.ok(pivot.children.some(o=>o.isMesh&&o.userData.rejectGate));
   const support=model.findNode('shark650-return-side-frame-v260');assert.ok(support);
-  assert.equal(support.children.filter(o=>o.isMesh&&o.userData.floorContact).length,4);
+  const returnPads=support.children.filter(o=>o.isMesh&&o.userData.floorContact);assert.equal(returnPads.length,4);
+  assert.ok(returnPads.every(o=>Math.abs(o.position.y-.018)<1e-9),'SHARK return floor pads must sit on the machine floor plane');
+  assert.equal(model.findNode('shark650-return').userData.v260SupportPolicy,'RETURN_BELTS_TERMINATE_IN_VISIBLE_SIDE_FRAME_AND_FLOOR_SUPPORTS');
   assert.equal(model.findNode('shark650-vision-camera').userData.installedCameraCountVerified,false);
   assert.equal(model.findNode('shark650-reject').userData.installedRejectTypeVerified,false);
  }finally{model.dispose();}
