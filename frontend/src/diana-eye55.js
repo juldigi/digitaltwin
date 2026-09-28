@@ -278,6 +278,23 @@ export class DianaEye55MachineTemplate{
    'diana55-processing':'Pemrosesan citra & operator interface'
   };
   for(const [id,name] of Object.entries(names)){const node=this.findNode(id);if(node)node.name=name;}
+
+  const hmi=this.findNode('diana55-hmi-pedestal-v251');
+  if(hmi){
+   const body=hmi.children.find(o=>o.isMesh&&o.userData.silhouetteCritical);
+   const screen=hmi.children.find(o=>o.isMesh&&o.userData.mechanismRole==='diana-eye-hmi-display-reference');
+   if(body){body.rotation.z=-.10;body.userData.v258PedestalProfile='SLANTED_OPERATOR_TERMINAL_REFERENCE';}
+   if(screen){screen.rotation.z=-.10;screen.userData.v258PedestalProfile='SLANTED_DISPLAY_REFERENCE';}
+   const shelf=this.box(hmi,[.58,.055,.30],[.47,.83,-1.28],'light',.010);shelf.userData.operatorWorkShelf=true;
+   hmi.userData.v258OperatorInterface='SLANTED_PEDESTAL_WITH_WORK_SHELF__DISPLAY_SIZE_NOT_ASSERTED';
+  }
+
+  const cellControls=this.group(this.findNode('diana55-inspection'),'diana55-cell-controls-v258','Kolom kontrol inspection cell');
+  const panel=this.cover(this.box(cellControls,[.12,.64,.055],[.67,1.34,-.80],'light',.012));panel.userData.cellControlColumn=true;
+  for(let i=0;i<6;i++){
+   const button=this.cyl(cellControls,.018,.018,[.67,1.56-i*.085,-.835],i===5?'red':'dark','cell-control-button','z');
+   button.userData.rotor=false;button.userData.cellControlButton=true;
+  }
  }
 
  findNode(id){return id==='diana55-root'?this.root:this.nodes.find(n=>n.userData.nodeId===id)||null;}resolvePart(o){for(let p=o;p&&p!==this.root;p=p.parent)if(p.userData?.selectable)return p;return null;}resolveTaxonomyNode(id){return this.taxonomyById.get(id)?.meshRefs.map(ref=>this.findNode(ref)).find(Boolean)||null;}contains(a,b){for(let p=b;p;p=p.parent)if(p===a)return true;return false;}
