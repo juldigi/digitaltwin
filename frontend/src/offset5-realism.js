@@ -433,6 +433,29 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
 }
 
 export class Offset5CD102RealismSimulation extends PrintingSimulation{
+  clearDeliveredSheets(){
+    super.clearDeliveredSheets();
+    if(this.deliveryTableMesh&&Number.isFinite(this.deliveryTableInitialY))this.deliveryTableMesh.position.y=this.deliveryTableInitialY;
+    this.deliveryTableDrop=0;
+  }
+  relayoutPileSheets(){
+    const visible=this.pileSheets.filter(sheet=>sheet.userData.serial>=0).sort((a,b)=>a.userData.serial-b.userData.serial);
+    const count=visible.length,drop=Math.max(0,count-1)*this.pileSheetThickness;
+    this.deliveryTableDrop=drop;
+    if(this.deliveryTableMesh)this.deliveryTableMesh.position.y=this.deliveryTableInitialY-drop;
+    visible.forEach((sheet,rank)=>{
+      const pos=sheet.mesh.geometry.attributes.position,w=this.sheetWidthSegments,l=this.sheetLengthSegments;
+      const y=this.pileAnchor.y-(count-1-rank)*this.pileSheetThickness;
+      for(let i=0;i<=l;i++){
+        const x=this.pileAnchor.x-this.sheetLength/2+(i/l)*this.sheetLength;
+        for(let j=0;j<=w;j++){
+          const z=this.pileAnchor.z-this.sheetWidth/2+(j/w)*this.sheetWidth,index=i*(w+1)+j;
+          pos.setXYZ(index,x,y,z);
+        }
+      }
+      pos.needsUpdate=true;sheet.mesh.visible=true;
+    });
+  }
   setSheetColors(sheet,printed){
     if(sheet.userData.printed===printed)return;
     // Each PU adds one cross-press colour band (parallel to the roller axis).
@@ -459,6 +482,21 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
     const newSheetPass=leadDistance<(sheet.userData.leadDistance??0);
     const visible=super.updateSheet(sheet,leadDistance);
     if(visible){
+      // Delivery pile elevator keeps the top receiving plane approximately constant while
+      // the table lowers with accumulated sheets. Compensate the base settling target,
+      // which otherwise rises by one sheet thickness for every deposited sheet.
+      const pileCount=this.pileSheets.filter(item=>item.mesh.visible).length;
+      const releaseProgress=THREE.MathUtils.clamp((sheet.userData.leadPosition.x-this.deliveryReleaseX)/(this.deliverySettleX-this.deliveryReleaseX),0,1);
+      const easedRelease=releaseProgress*releaseProgress*(3-2*releaseProgress);
+      if(easedRelease>0&&pileCount>0){
+        const shift=easedRelease*pileCount*this.pileSheetThickness;
+        const deliveryPos=sheet.mesh.geometry.attributes.position;
+        for(let idx=0;idx<deliveryPos.count;idx++)deliveryPos.setY(idx,deliveryPos.getY(idx)-shift);
+        deliveryPos.needsUpdate=true;
+        sheet.userData.leadPosition.y-=shift;
+        sheet.userData.trailPosition.y-=shift;
+      }
+
       // Each section gains ink only after that section reaches the PU impression nip.
       // The leading edge may already be at the next PU while the trailing edge is still blank.
       const pos=sheet.mesh.geometry.attributes.position,attr=sheet.mesh.geometry.attributes.color;
@@ -728,6 +766,9 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
     this.joggerMotions=this.joggerMotions.filter(o=>!o.object?.userData?.exteriorCover);
     for(const item of this.gripperMotions)item.initialRotationZ=item.object.rotation.z;
     this.collectInspectionIllumination();
+    this.deliveryTableMesh=this.template.findNode('delivery-pile')?.children.find(o=>o.isMesh)||null;
+    this.deliveryTableInitialY=this.deliveryTableMesh?.position.y;
+    this.deliveryTableDrop=0;
   }
   state(){
     return {
@@ -759,7 +800,9 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       inspectionIlluminationActive:this.inspectionIlluminationActive,
       inspectionIlluminationPolicy:'SHEET_OCCUPANCY_TRIGGERED_EXISTING_FOCUSIGHT_LIGHTING_ONLY',
       coaterMotionPolicy:'EXISTING_THREE_ROLL_CONTACT_TRAIN_MATCHES_SHEET_SURFACE_SPEED',
-      dryerTransportPolicy:'SIX_EXISTING_EXTENSION_ROLLERS_ROTATE_AT_SHEET_SURFACE_SPEED'
+      dryerTransportPolicy:'SIX_EXISTING_EXTENSION_ROLLERS_ROTATE_AT_SHEET_SURFACE_SPEED',
+      deliveryPileElevatorPolicy:'TOP_RECEIVING_PLANE_HELD_CONSTANT_WHILE_TABLE_LOWERS_WITH_STACK',
+      deliveryTableDropM:this.deliveryTableDrop||0
     };
   }
 }
