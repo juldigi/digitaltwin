@@ -41,9 +41,9 @@ test('V235 MEDIA 100 II remains long open-frame and keeps repeated adjustment ha
  });
 });
 
-test('V254 Diana Eye 55 keeps the OEM low-feeder inspection-cell and separate HMI identity',()=>{
+test('V255 Diana Eye 55 keeps the OEM low-feeder inspection-cell and separate HMI identity',()=>{
  withMachine('BMJ-MCH-0019',m=>{
-  assert.equal(m.root.userData.visualRefinement,'V254_DIANA_EYE55_2023_FAMILY_PROCESS_REALISM');
+  assert.equal(m.root.userData.visualRefinement,'V255_DIANA_EYE55_DOWNWARD_OPTICS_SCAN_PLANE_REALISM');
   assert.match(m.root.userData.visualEvidenceBoundary,/MASTERWORK_HEIDELBERG_CURRENT_DIANA_EYE55/);
   assert.ok(findRole(m,/diana-eye-hmi-display-reference/));
   assert.equal(m.findNode('diana55-delivery-stack')?.userData.deliveryMode,'FISH_SCALE_STANDARD_REFERENCE');
