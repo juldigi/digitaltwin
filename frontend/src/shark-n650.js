@@ -37,7 +37,8 @@ export class SharkN650MachineTemplate{
   const feederFascia=this.cover(this.box(g,[1.05,.22,.08],[-2.92,.55,-.69],'light',.018));feederFascia.userData.feederIdentityPanel=true;
   // Operator monitor on a support arm is prominent in the product family.
   const hmi=this.group(g,'shark650-hmi-v251','Operator monitor and support arm reference');
-  this.cyl(hmi,.032,.86,[.86,1.16,-1.02],'steel','hmi-mast-reference','y');
+  const mast=this.cyl(hmi,.032,.86,[.86,1.16,-1.02],'steel','hmi-mast-reference','y');mast.userData.structuralMountReference=true;
+  const mount=this.box(hmi,[.16,.12,.38],[.86,.78,-.86],'steel',.010);mount.userData.hmiChassisMount=true;mount.userData.mountPolicy='CHASSIS_SIDE_TO_MONITOR_MAST_STRUCTURAL_REFERENCE';
   const arm=this.box(hmi,[.58,.055,.055],[.57,1.53,-1.02],'steel',.008);arm.rotation.z=-.15;
   const monitor=this.cover(this.box(hmi,[.46,.32,.075],[.29,1.63,-1.02],'dark',.030));monitor.userData.silhouetteCritical=true;
   this.box(hmi,[.37,.24,.020],[.29,1.63,-1.061],'glass',.016).userData.mechanismRole='shark-hmi-display-reference';
