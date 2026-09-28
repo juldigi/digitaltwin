@@ -27,6 +27,31 @@ test('DIANA geometry follows low feeder, single white inspection cell and fish-s
  model.setExteriorOpen(true);assert.ok(model.root.userData.exteriorHiddenCount>=6);model.dispose();
 });
 
+test('V255 DIANA neutral optical head points down to the suction-belt scan plane without claiming installed camera count',()=>{
+ const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);
+ try{
+  assert.equal(model.root.userData.visualRefinement,'V255_DIANA_EYE55_DOWNWARD_OPTICS_SCAN_PLANE_REALISM');
+  assert.equal(model.root.userData.opticalAxisPolicy,'NEUTRAL_REFERENCE_HEAD_POINTS_DOWN_TO_SUCTION_BELT__INSTALLED_CAMERA_POPULATION_UNVERIFIED');
+  assert.equal(model.root.userData.scanPlaneY,.73);
+  const head=model.meshes.find(m=>m.userData.cameraPopulationReference);
+  const barrel=model.meshes.find(m=>m.userData.mechanismRole==='camera-optical-barrel');
+  const lens=model.meshes.find(m=>m.userData.mechanismRole==='line-scan-camera-lens');
+  assert.ok(head&&barrel&&lens);
+  assert.equal(head.userData.installedCountAsserted,false);
+  assert.equal(barrel.userData.opticalAxis,'NEGATIVE_Y_TOWARD_SUCTION_BELT');
+  assert.equal(lens.userData.opticalAxis,'NEGATIVE_Y_TOWARD_SUCTION_BELT');
+  assert.equal(lens.userData.scanPlaneY,.73);
+  const hp=head.getWorldPosition(new THREE.Vector3()),lp=lens.getWorldPosition(new THREE.Vector3());
+  assert.ok(lp.y<hp.y&&lp.y>.73,'lens must sit below the reference head and above the scan plane');
+  assert.equal(model.meshes.filter(m=>m.userData.cameraPopulationReference).length,1);
+  assert.equal(model.meshes.filter(m=>m.userData.cameraBay).length,4);
+  const st=sim.state();
+  assert.equal(st.opticalAxisPolicy,model.root.userData.opticalAxisPolicy);
+  assert.equal(st.scanPlaneY,.73);
+  assert.match(st.cameraPopulationPolicy,/UP_TO_FOUR_TOP_CAMERAS_CAPABILITY_ONLY/);
+ }finally{sim.dispose();model.dispose();}
+});
+
 test('DIANA rotor whitelist rotates only feeder transport vacuum and delivery mechanisms',()=>{
  const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model),allowed=/^(feed-pulley|transport-pulley|transport-drive-motor|transport-encoder|vacuum-blower|delivery-pulley)$/;
  assert.ok(sim.rotors.length>=24);assert.equal(sim.rotors.some(r=>!allowed.test(r.userData.mechanismRole||'')),false);
