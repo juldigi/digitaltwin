@@ -190,7 +190,13 @@ export class SharkN650MachineTemplate{
     const header=this.cover(this.box(tower,[1.18,.16,.025],[0,2.25,z],'blue',.012));header.userData.towerIdentityHeader=true;header.userData.silhouetteCritical=true;
     const vertical=this.cover(this.box(tower,[.08,.82,.027],[-.60,1.38,z],'blue',.008));vertical.userData.towerIdentityAccent=true;
    }
-   tower.userData.v258TowerIdentity='WHITE_SINGLE_TOWER_DARK_APERTURE_BLUE_HEADER_AND_VERTICAL_ACCENT';
+   const localControl=this.group(tower,'shark650-tower-local-control-v259','Tower local status / control strip reference');
+   const controlRail=this.box(localControl,[.10,.66,.035],[-.60,1.40,-.758],'blue',.006);controlRail.userData.towerLocalControlStrip=true;controlRail.userData.sourceBoundary='FOCUSIGHT_N650_OFFICIAL_PRODUCT_IMAGE__FUNCTION_ASSIGNMENT_NOT_INFERRED';
+   for(let i=0;i<6;i++){
+    const lamp=this.cyl(localControl,.017,.014,[-.60,1.64-i*.09,-.781],i===5?'red':i===0?'green':'light','tower-local-control-reference','z');
+    lamp.userData.towerLocalControlReference=true;lamp.userData.controlFunctionVerified=false;lamp.userData.detail=true;
+   }
+   tower.userData.v258TowerIdentity='WHITE_SINGLE_TOWER_DARK_APERTURE_BLUE_HEADER_AND_VERTICAL_ACCENT_WITH_LOCAL_CONTROL_STRIP';
   }
 
   const reject=this.findNode('shark650-reject');
