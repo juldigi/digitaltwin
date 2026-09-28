@@ -73,7 +73,7 @@ export class DianaEye55MachineTemplate{
   const g=this.group(this.root,'diana55-processing','Image processing and operator interface',[.96,0,0],[.25,.20,.52]);
   const compute=this.group(g,'diana55-process-compute','GPU+CPU processing cabinet');this.box(compute,[.62,1.18,.54],[.06,.86,.66],'dark',.035);for(let y=.48;y<1.26;y+=.16)this.box(compute,[.40,.026,.020],[.38,y,.94],'steel',0);
   const hmi=this.group(g,'diana55-process-hmi','Operator terminal interface');hmi.userData.externalPedestal=true;
-  const recipe=this.group(g,'diana55-process-recipe','Master / tolerance recipe interface');this.box(recipe,[.38,.15,.24],[.34,.62,-.72],'red',.018);
+  const recipe=this.group(g,'diana55-process-recipe','Master / tolerance recipe logic');recipe.userData.logicalOnly=true;recipe.userData.renderPolicy='SOFTWARE_LOGIC_NOT_PHYSICAL_HARDWARE';recipe.visible=false;
  }
  buildReject(){
   const g=this.group(this.root,'diana55-reject','Blank ejection / sorting',[1.62,0,0],[.52,.16,0]);g.userData.installedRejectActuationVerified=false;
