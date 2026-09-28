@@ -20,6 +20,10 @@ export class DianaEye55ProcessSimulation{
   this.scanStart=progressAtX(this.curve,-.24-.48/2);
   this.scanEnd=progressAtX(this.curve,-.24+.48/2);
   this.decisionAt=this.scanEnd+.12;
+  this.rejectBranchStartT=.69;
+  this.rejectBranchEndT=.90;
+  this.rejectBranchStart=this.curve.getPointAt(this.rejectBranchStartT).clone();
+  this.rejectTrayEntry=new THREE.Vector3(2.04,.44,.50);
   this.staticDeliveryReferences=template.meshes.filter(m=>m.userData.fishScaleReference&&!m.userData.supersededByV254);
   this.staticDeliveryVisibility=this.staticDeliveryReferences.map(m=>m.visible);
   const pathGeo=new THREE.BufferGeometry().setFromPoints(this.curve.getPoints(220)),pathMat=new THREE.LineDashedMaterial({color:0x527c8a,dashSize:.055,gapSize:.035,transparent:true,opacity:.55});
@@ -55,7 +59,7 @@ export class DianaEye55ProcessSimulation{
    sheetsVisible:this.blanks.filter(b=>b.mesh.visible).length,pileSheetsVisible:this.goodStack.filter(p=>p.visible).length,rejectSheetsVisible:this.rejectStack.filter(p=>p.visible).length,
    rotorCount:this.rotors.length,mechanismCount:this.rotors.length+this.lights.length+1,pathVisible:this.pathVisible,inkFlowVisible:false,inkFlowCount:0,uvLampCount:0,uvActive:false,
    feederDriveActive:this.feederDriveActive,transportDriveActive:this.transportDriveActive,deliveryDriveActive:this.deliveryDriveActive,blankPresenceTrigger:this.blankPresenceTrigger,transportEncoderActive:this.transportEncoderActive,vacuumHoldActive:this.vacuumHoldActive,illuminationReady:this.illuminationReady,cameraTriggerActive:this.cameraTriggerActive,captureComplete:this.captureComplete,scanActive:this.scanActive,imageProcessingActive:this.imageProcessingActive,processingComplete:this.processingComplete,decisionReady:this.decisionReady,rejectPermit:this.rejectPermit,rejectConfirmed:this.rejectConfirmed,outputCountActive:this.outputCountActive,interlockSafe:this.interlockSafe,demoRejectActive:this.demoRejectActive,rejectTrackingActive:this.rejectTrackingActive,acceptedDeliveryActive:this.acceptedDeliveryActive,wasteDeliveryActive:this.wasteDeliveryActive,rejectRecoveryActive:this.wasteDeliveryActive,fishScaleDeliveryActive:this.fishScaleDeliveryActive,deliveryMode:'ACCEPTED_FISH_SCALE_PLUS_RECOVERABLE_REJECT_COLLECTION',paperJam:this.paperJam,rejectSafetyCoverReference:true,deliveryMonitoringCameraReference:true,
-   demoRejectOnly:true,demoRejectActuator:this.demoRejectActuator,installedRejectActuationVerified:false,installedCameraCountVerified:false,installedCameraPopulationRendered:false,deterministicDefectInjection:'EVERY_5TH_INSPECTED_BLANK_DEMO_ONLY',scanWindow:[this.scanStart,this.scanEnd],scanPositionPolicy:'BLANK_OCCUPIES_OPTICAL_CELL',opticalAxisPolicy:this.template.root.userData.opticalAxisPolicy,scanPlaneY:this.template.root.userData.scanPlaneY,cameraPopulationPolicy:this.template.root.userData.cameraPopulationPolicy,rejectedOutputPolicy:'DAMAGE_FREE_RECOVERABLE_COLLECTION_FOR_RESORT_OR_REINSPECTION_REFERENCE',
+   demoRejectOnly:true,demoRejectActuator:this.demoRejectActuator,installedRejectActuationVerified:false,installedCameraCountVerified:false,installedCameraPopulationRendered:false,deterministicDefectInjection:'EVERY_5TH_INSPECTED_BLANK_DEMO_ONLY',scanWindow:[this.scanStart,this.scanEnd],scanPositionPolicy:'BLANK_OCCUPIES_OPTICAL_CELL',opticalAxisPolicy:this.template.root.userData.opticalAxisPolicy,scanPlaneY:this.template.root.userData.scanPlaneY,cameraPopulationPolicy:this.template.root.userData.cameraPopulationPolicy,rejectedOutputPolicy:'DAMAGE_FREE_RECOVERABLE_COLLECTION_FOR_RESORT_OR_REINSPECTION_REFERENCE',rejectBranchPolicy:'TRACKED_BLANK_BRANCHES_DIRECTLY_FROM_GATE_TO_RECOVERY_TRAY',
    activeRejectTrackingIds:[...this.activeRejectTrackingIds],activePassTrackingIds:[...this.activePassTrackingIds],trackedResults:{pass:this.blanks.filter(b=>b.result==='PASS_DEMO').length,reject:this.blanks.filter(b=>b.result==='REJECT_DEMO').length,pending:this.blanks.filter(b=>!b.result).length}};
  }
  start(){this.active=true;this.running=true;this.paused=false;this.completed=0;this.rejected=0;this.inspectedDemoCount=0;this.elapsed=0;this.lastNow=null;for(const b of this.blanks){b.lap=-1;b.result=null;b.captured=false;b.processed=false;b.decisionReady=false;b.outputDeposited=false;b.inspectedLap=-1;b.lastT=0;b.trackingId=null;b.decisionSequence=null;b.mesh.visible=false;}this.resetMechanisms();this.staticDeliveryReferences.forEach(m=>m.visible=false);this.onUpdate?.(this.state());return this.state();}
@@ -73,7 +77,7 @@ export class DianaEye55ProcessSimulation{
  outputPreviousResult(blank){
   if(blank.result==='REJECT_DEMO'){
    this.rejected++;const slot=(this.rejected-1)%this.rejectStack.length,m=this.rejectStack[slot];m.visible=true;
-   m.position.set(1.86+(slot%7)*.075,.42+.008*(slot%5),.50);m.rotation.y=0;
+   m.position.set(1.78+(slot%7)*.075,.42+.008*(slot%5),.50);m.rotation.y=0;
   }else if(blank.result==='PASS_DEMO'){
    this.completed++;const slot=(this.completed-1)%this.goodStack.length,m=this.goodStack[slot];m.visible=true;
    // Fish-scale output overlaps blanks longitudinally instead of building an unrealistic vertical pile.
@@ -94,11 +98,12 @@ export class DianaEye55ProcessSimulation{
    if(b.processed)processedCount++;if(b.decisionReady)decisionCount++;
    b.mesh.visible=this.active;const p=this.curve.getPointAt(Math.min(.999,t));b.mesh.position.copy(p);
    const reject=b.result==='REJECT_DEMO';
-   if(reject&&b.decisionReady&&t>=.69&&t<.96){
+   if(reject&&b.decisionReady&&t>=this.rejectBranchStartT&&t<.96){
     trackedReject=true;if(b.trackingId)rejectIds.push(b.trackingId);
-    const q=clamp((t-.69)/.20),lift=Math.sin(q*Math.PI)*.045;
-    b.mesh.position.z=THREE.MathUtils.lerp(0,.50,q);
-    b.mesh.position.y=THREE.MathUtils.lerp(b.mesh.position.y,.48,q)+lift;
+    const q=clamp((t-this.rejectBranchStartT)/(this.rejectBranchEndT-this.rejectBranchStartT));
+    const eased=q*q*(3-2*q),lift=Math.sin(eased*Math.PI)*.045;
+    b.mesh.position.lerpVectors(this.rejectBranchStart,this.rejectTrayEntry,eased);
+    b.mesh.position.y+=lift;
     if(t>=.72&&t<.86)rejectAtGate=true;
     if(t>=.84){rejectConfirmed=true;waste=true;}
    }
