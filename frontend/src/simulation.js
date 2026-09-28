@@ -36,11 +36,26 @@ function pathPoints(){
     }
   });
   const last=OFFSET5_UNIT_CENTERS.at(-1);
+  pts.push(new THREE.Vector3(last+.62,.94,0));
+
+  // Coater nip: the custom module is stretched longitudinally, but its process rollers are
+  // round in world space. Route the sheet around the impression-cylinder surface toward the
+  // coating nip instead of cutting through the cylinder core.
+  const coaterScaleX=D.coaterLength/1.15;
+  const impression={x:D.coaterCenterX-.08*coaterScaleX,y:1.03,r:.255};
+  const coating={x:D.coaterCenterX+.10*coaterScaleX,y:1.48,r:.235};
+  const dx=coating.x-impression.x,dy=coating.y-impression.y,centerDistance=Math.hypot(dx,dy);
+  const ux=dx/centerDistance,uy=dy/centerDistance;
+  const nipGap=Math.max(0,centerDistance-impression.r-coating.r);
+  const sheetRadius=impression.r+nipGap/2;
+  const nipDeg=THREE.MathUtils.radToDeg(Math.atan2(uy,ux));
+  pts.push(new THREE.Vector3(D.coaterCenterX-.48,1.02,0));
+  for(let j=0;j<=10;j++){
+    const deg=THREE.MathUtils.lerp(170,nipDeg,j/10);
+    pts.push(arcPoint(impression.x,impression.y,sheetRadius,deg));
+  }
   pts.push(
-    new THREE.Vector3(last+.62,.94,0),
-    new THREE.Vector3(D.coaterCenterX-.48,1.02,0),
-    new THREE.Vector3(D.coaterCenterX-.12,1.20,0),
-    new THREE.Vector3(D.coaterCenterX+.42,1.24,0),
+    new THREE.Vector3(D.coaterCenterX+.42,1.29,0),
     new THREE.Vector3(D.dryerCenterX-.70,1.29,0),
     new THREE.Vector3(D.dryerCenterX-.32,1.29,0),
     new THREE.Vector3(D.dryerCenterX+.06,1.29,0),
