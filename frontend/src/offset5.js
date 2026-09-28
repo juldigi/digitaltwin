@@ -142,7 +142,7 @@ export class OffsetMachineTemplate {
     // depends on this flag surviving batching so covers can disappear independently.
     for(const group of this.nodes){
       const batches=new Map();
-      for(const mesh of group.children.filter(c=>c.isMesh&&!c.isInstancedMesh&&!c.userData.dynamicRotor)){
+      for(const mesh of group.children.filter(c=>c.isMesh&&!c.isInstancedMesh&&!c.userData.dynamicRotor&&!c.userData.dynamicJogger)){
         const cover=!!mesh.userData.exteriorCover;
         const semantic=mesh.userData.uvLamp?'uvLamp':mesh.userData.uvBeam?'uvBeam':mesh.userData.uvWindow?'uvWindow':mesh.userData.uvReflector?'uvReflector':mesh.userData.rotorRoleReference?'rotorRef:'+mesh.userData.rotorRoleReference:'normal';
         const key=mesh.material.uuid+':'+(cover?'cover':'structure')+':'+semantic+':'+(mesh.visible?'visible':'hidden');
@@ -812,7 +812,12 @@ export class OffsetMachineTemplate {
     this.cylinder(powder,.028,1.52,[-.38,1.72,0],'steel','z');
     for(const z of [-.60,-.30,0,.30,.60])this.cylinder(powder,.010,.07,[-.38,1.65,z],'glass','y');
     const joggers=this.group(g,'delivery-joggers','Delivery joggers D.S. / O.S.',[0,0,0],[.35,.18,.55],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'12M6 / 12M7 jogger function is represented at the pile sides; exact stroke is not inferred.');
-    for(const z of [-.86,.86]){this.box(joggers,[.18,.34,.07],[.34,.95,z],'graphite',.015);this.box(joggers,[.34,.05,.10],[.18,.84,z],'steel',.008);}
+    for(const z of [-.86,.86]){
+      const face=this.box(joggers,[.18,.34,.07],[.34,.95,z],'graphite',.015);
+      const arm=this.box(joggers,[.34,.05,.10],[.18,.84,z],'steel',.008);
+      Object.assign(face.userData,{dynamicJogger:true,joggerSide:z<0?'DS':'OS'});
+      Object.assign(arm.userData,{dynamicJogger:true,joggerSide:z<0?'DS':'OS'});
+    }
     const pileLift=this.group(g,'delivery-pile-lift','Delivery pile lift shaft, lead-screw & shoes',[0,0,0],[.26,.12,-.50],photos,'The paired lift elements explain table guidance and elevation. Screw lead, load rating, motor ratio and travel limits must come from the installed-machine documentation.');
     for(const z of [-.88,.88]){this.cylinder(pileLift,.035,1.28,[.72,.78,z],'steel','y');for(const y of [.26,.54,.82,1.10,1.34])this.ring(pileLift,.046,.006,[.72,y,z],'graphite','y');this.box(pileLift,[.18,.12,.18],[.66,.22,z],'graphite',.014);}
 
