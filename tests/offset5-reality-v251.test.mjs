@@ -135,6 +135,9 @@ test('V257 supports the existing coater rollers on both side frames without chan
   assert.equal(spines.length,2);
   assert.equal(saddles.length,6);
   assert.equal(caps.length,6);
+  assert.ok(spines.every(x=>Math.abs(Math.abs(x.position.z)-.90)<1e-9),'coater spine must sit outside all roller bodies');
+  assert.ok(saddles.every(x=>Math.abs(Math.abs(x.position.z)-.84)<1e-9&&x.userData.rollerBodyClearanceM>=.02),'coater saddle must clear the roller body');
+  assert.ok(caps.every(x=>Math.abs(Math.abs(x.position.z)-.79)<1e-9),'bearing cap must remain near the journal plane');
   for(const role of ['metering','coating','impression']){
    assert.equal(saddles.filter(x=>x.userData.coaterRollerRole===role).length,2,`missing ${role} coater support on one side`);
    assert.equal(caps.filter(x=>x.userData.coaterRollerRole===role).length,2,`missing ${role} coater bearing cap`);
