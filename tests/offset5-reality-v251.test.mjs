@@ -219,6 +219,25 @@ test('Offset 5 clears a full delivery pile before starting a new pile',()=>{
  }finally{sim.dispose();m.dispose();}
 });
 
+test('Offset 5 Focusight optical heads are attached and face the sheet plane',()=>{
+ const m=new Offset5CD102RealismTemplate();
+ try{
+  for(const side of ['a','b']){
+   const pod=m.findNode(`inspection-camera-${side}`);
+   assert.ok(pod,`missing Focusight camera pod ${side}`);
+   assert.equal(pod.userData.opticalAxisPolicy,'PHOTO_VERIFIED_DOWNWARD_TO_SHEET_PLANE');
+   const barrel=pod.children.find(o=>o.isMesh&&o.userData.inspectionOpticalBarrel);
+   const lens=pod.children.find(o=>o.isMesh&&o.userData.inspectionLens);
+   assert.ok(barrel&&lens,`camera pod ${side} is missing attached optical barrel/lens`);
+   assert.equal(lens.userData.opticalAxis,'DOWNWARD_TOWARD_SHEET_PLANE_WITH_SMALL_PROCESS_DIRECTION_TILT');
+   assert.ok(lens.position.y<barrel.position.y,'lens must sit below its barrel toward the sheet');
+   assert.ok(barrel.position.y<2.88,'barrel must sit below the camera body center');
+   assert.ok(Math.abs(lens.rotation.z+.15)<1e-9&&Math.abs(barrel.rotation.z+.15)<1e-9,'optics must share the camera body process-direction tilt');
+  }
+  assert.equal(m.root.userData.machineEnvelope.structuralBody.length,26.00);
+ }finally{m.dispose();}
+});
+
 test('Offset 5 Focusight illumination follows sheet occupancy and restores after stop',()=>{
  const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
  try{
