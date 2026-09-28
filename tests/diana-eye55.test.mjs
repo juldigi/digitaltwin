@@ -106,6 +106,27 @@ test('DIANA rejects only tracked reject blanks and accepted blanks remain on the
  sim.dispose();model.dispose();
 });
 
+test('Diana Eye 55 reject branch leaves the main path continuously and reaches the recovery tray without teleporting backward',()=>{
+ const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);sim.start();let now=1000,lastX=null,seen=false,finished=false,id=null;
+ try{
+  for(let i=0;i<1800;i++){
+   now+=10;sim.update(now);
+   const b=sim.blanks.find(x=>x.result==='REJECT_DEMO'&&x.decisionReady&&x.mesh.visible&&x.lastT>=sim.rejectBranchStartT);
+   if(!b)continue;
+   if(!id)id=b.trackingId;
+   if(b.trackingId!==id)continue;
+   seen=true;
+   if(lastX!==null)assert.ok(b.mesh.position.x>=lastX-.015,'reject blank moved backward while branching to recovery tray');
+   lastX=b.mesh.position.x;
+   if(b.lastT>=sim.rejectBranchEndT){
+    assert.ok(b.mesh.position.distanceTo(sim.rejectTrayEntry)<.055,'reject blank did not reach recovery tray entry');
+    finished=true;break;
+   }
+  }
+  assert.ok(seen&&finished);assert.equal(sim.state().rejectBranchPolicy,'TRACKED_BLANK_BRANCHES_DIRECTLY_FROM_GATE_TO_RECOVERY_TRAY');
+ }finally{sim.dispose();model.dispose();}
+});
+
 test('DIANA optical illumination follows scan occupancy and resets cleanly',()=>{
  const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);sim.start();let now=1000,seenScan=false;
  for(let i=0;i<600;i++){now+=10;sim.update(now);if(sim.state().scanActive){seenScan=true;assert.ok(sim.lights.every(l=>l.material.emissiveIntensity>1));break;}}
