@@ -18,6 +18,7 @@ test('MEDIA100 keeps BMJ identities separate and optional kits evidence bounded'
 test('both MEDIA100 BMJ assets instantiate the family process train without claiming installation CAD',()=>{
  for(const assetId of ['BMJ-MCH-0016','BMJ-MCH-0018']){const model=new Media100MachineTemplate(assetId),box=new THREE.Box3().setFromObject(model.root);assert.equal(model.root.userData.assetId,assetId);assert.equal(model.root.userData.engineeringDimensions,false);assert.match(model.root.userData.geometryStatus,/INSTALLED_KITS_BOUNDED/);assert.ok(!box.isEmpty());assert.ok(box.min.y>=-0.01);
   for(const id of ['media100-feeder','media100-prefold','media100-forming','media100-glue','media100-final','media100-compression','media100-drive','media100-access'])assert.ok(model.findNode(id),id);
+  const placards=[];model.root.traverse(o=>{if(o.userData?.identityPlacard)placards.push(o);});assert.equal(placards.length,1);assert.equal(placards[0].userData.identityPlacard.serial,model.spec.serial);
   assert.equal(model.findNode('media100-form-servo').userData.installedCornerServoPackageVerified,false);assert.equal(model.findNode('media100-glue-upper').userData.installedGlueHeadCountVerified,false);assert.equal(model.findNode('media100-final-kicker').userData.installedKickerVerified,false);assert.equal(model.findNode('media100-drive-control').userData.installedControlGenerationVerified,false);model.dispose();}
 });
 
@@ -34,22 +35,22 @@ test('MEDIA100 rotor whitelist excludes static crossbars servo housings pressure
 });
 
 test('MEDIA100 continuous line supports multiple carton stages simultaneously',()=>{
- const model=new Media100MachineTemplate(),sim=new Media100ProcessSimulation(model.root,model);sim.start();sim.update(1000);sim.update(1100);const state=sim.state(),active=Object.entries(state.activeByStage).filter(([,n])=>n>0);
+ const model=new Media100MachineTemplate(),sim=new Media100ProcessSimulation(model.root,model);sim.start();sim.update(1000);sim.update(1100);assert.equal(sim.completed,0);assert.equal(sim.exitStack.some(p=>p.visible),false);for(let now=1200;now<=8500;now+=100)sim.update(now);const state=sim.state(),active=Object.entries(state.activeByStage).filter(([,n])=>n>0);
  assert.ok(active.length>=5,JSON.stringify(state.activeByStage));assert.equal(state.referenceJobDemoOnly,true);assert.ok(state.preBreakActive);assert.ok(state.formingActive);assert.ok(state.foldingActive);assert.ok(state.compressionActive);sim.dispose();model.dispose();
 });
 
 test('MEDIA100 folding is carton-position based rather than globally synchronized',()=>{
- const model=new Media100MachineTemplate(),sim=new Media100ProcessSimulation(model.root,model);sim.start();sim.update(1000);sim.update(1200);
+ const model=new Media100MachineTemplate(),sim=new Media100ProcessSimulation(model.root,model);sim.start();sim.update(1000);for(let now=1100;now<=8200;now+=100)sim.update(now);
  const leftAngles=sim.cartons.map(c=>Number(c.left.rotation.x.toFixed(4))),frontAngles=sim.cartons.map(c=>Number(c.front.rotation.z.toFixed(4)));
- assert.ok(new Set(leftAngles).size>=4,leftAngles.join(','));assert.ok(new Set(frontAngles).size>=3,frontAngles.join(','));
+ assert.ok(new Set(leftAngles).size>=4,leftAngles.join(','));assert.ok(frontAngles.every(a=>a===0),frontAngles.join(','));assert.ok(sim.cartons.every(c=>c.rear.rotation.z===0));
  for(const c of sim.cartons){const stage=c.lastStage;assert.equal(c.glue.visible,['GLUE','FINAL','PRESS','DELIVERY'].includes(stage));assert.equal(c.group.scale.z,1);}
  sim.dispose();model.dispose();
 });
 
 test('MEDIA100 glue stays on the blank after application and can be hidden independently',()=>{
- const model=new Media100MachineTemplate(),sim=new Media100ProcessSimulation(model.root,model);sim.start();sim.update(1000);sim.update(1200);
+ const model=new Media100MachineTemplate(),sim=new Media100ProcessSimulation(model.root,model);sim.start();sim.update(1000);for(let now=1100;now<=6200;now+=100)sim.update(now);
  assert.ok(sim.cartons.some(c=>c.glue.visible));assert.equal(sim.cartons.every(c=>!c.glue.visible||['GLUE','FINAL','PRESS','DELIVERY'].includes(c.lastStage)),true);
- sim.setInkFlowVisible(false);sim.update(1220);assert.equal(sim.cartons.every(c=>!c.glue.visible),true);sim.dispose();model.dispose();
+ sim.setInkFlowVisible(false);sim.update(6220);assert.equal(sim.cartons.every(c=>!c.glue.visible),true);sim.dispose();model.dispose();
 });
 
 test('MEDIA100 delivers cartons at the exit level and pause/resume does not jump time',()=>{
@@ -64,7 +65,7 @@ test('MEDIA100 carton panels hinge at score lines and compression acts on belts'
  assert.equal(carton.left.position.z,-.21);assert.equal(carton.right.position.z,.21);
  assert.equal(carton.front.position.x,.31);assert.equal(carton.rear.position.x,-.31);
  const upper=model.findNode('media100-press-upper'),rest=upper.position.y;
- sim.start();sim.update(1000);sim.update(1200);
+ sim.start();sim.update(1000);for(let now=1100;now<=9400;now+=100)sim.update(now);
  assert.ok(upper.position.y<rest,'upper belt carriage must descend onto cartons');
  assert.ok(sim.cartons.every(c=>c.group.scale.equals(new THREE.Vector3(1,1,1))));
  sim.exitStack[0].visible=true;sim.start();assert.equal(sim.exitStack[0].visible,false);
@@ -76,5 +77,5 @@ test('MEDIA100 taxonomy is a complete six-level mapped tree for FGM1 and FGM3',(
 });
 
 test('MEDIA100 stage order follows continuous folder-gluer process',()=>{
- assert.deepEqual(MEDIA100_SIMULATION_STAGES,['Blank separation','Feeder transport','Alignment / pre-break','Lock-bottom forming reference','Glue application reference','Final fold / trombone','Compression dwell','Delivery']);
+ assert.deepEqual(MEDIA100_SIMULATION_STAGES,['Blank separation','Feeder transport','Alignment / pre-break','Straight-line folding reference','Glue application reference','Final fold / trombone','Compression dwell','Delivery']);
 });

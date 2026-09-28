@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 export const MEDIA100_SIMULATION_STAGES=Object.freeze([
- 'Blank separation','Feeder transport','Alignment / pre-break','Lock-bottom forming reference',
+ 'Blank separation','Feeder transport','Alignment / pre-break','Straight-line folding reference',
  'Glue application reference','Final fold / trombone','Compression dwell','Delivery'
 ]);
 const Y_AXIS=new THREE.Vector3(0,1,0);
@@ -31,7 +31,7 @@ export class Media100ProcessSimulation{
   const frontPanel=new THREE.Mesh(new THREE.BoxGeometry(.16,.016,.36),mat.clone()),rearPanel=new THREE.Mesh(new THREE.BoxGeometry(.16,.016,.36),mat.clone());frontPanel.position.x=.08;rearPanel.position.x=-.08;front.add(frontPanel);rear.add(rearPanel);
   const glue=new THREE.Mesh(new THREE.BoxGeometry(.34,.009,.018),new THREE.MeshStandardMaterial({color:0xd3ab46,roughness:.48,emissive:0x5a3c00,emissiveIntensity:.2}));glue.position.set(.05,.018,.20);glue.visible=false;group.add(glue);
   const datum=new THREE.Mesh(new THREE.BoxGeometry(.04,.01,.04),new THREE.MeshBasicMaterial({color:0x467b93,transparent:true,opacity:.55}));datum.position.set(-.23,.024,-.16);datum.visible=false;group.add(datum);
-  group.visible=false;group.userData.referenceJob='LOCK_BOTTOM_VISUALIZATION_DEMO';group.userData.demoOnly=true;this.root.add(group);
+  group.visible=false;group.userData.referenceJob='STRAIGHT_LINE_VISUALIZATION_DEMO';group.userData.demoOnly=true;this.root.add(group);
   return {group,left,right,front,rear,glue,datum,phase,lap:-1,lastStage:'FEED'};
  }
  resetFlags(){this.feedingActive=false;this.preBreakActive=false;this.formingActive=false;this.glueApplying=false;this.foldingActive=false;this.compressionActive=false;this.deliveryActive=false;this.referenceJobDemoOnly=true;this.activeByStage={FEED:0,PREFOLD:0,FORM:0,GLUE:0,FINAL:0,PRESS:0,DELIVERY:0};}
@@ -57,22 +57,25 @@ export class Media100ProcessSimulation{
   }
  }
  updateCarton(c,raw){
-  const t=((raw%1)+1)%1,stage=stageFor(t);c.lastStage=stage;this.activeByStage[stage]++;c.group.visible=this.active;c.group.position.copy(this.curve.getPointAt(Math.min(.999,t)));
+  if(raw<0){c.group.visible=false;c.glue.visible=false;return;}
+  const lap=Math.floor(raw),t=Math.min(.999,raw-lap),stage=stageFor(t);c.lastStage=stage;this.activeByStage[stage]++;c.group.visible=this.active;c.group.position.copy(this.curve.getPointAt(t));
   const next=this.curve.getPointAt(Math.min(.999,t+.002));c.group.rotation.y=-Math.atan2(next.z-c.group.position.z,Math.max(.001,next.x-c.group.position.x));
   const pre=smooth(t,.12,.30),bottom=smooth(t,.30,.48),final=smooth(t,.60,.82);
   c.left.rotation.x=.28*pre+.38*bottom+.70*final;c.right.rotation.x=-(.28*pre+.38*bottom+.70*final);
-  c.front.rotation.z=-.55*bottom-.42*final;c.rear.rotation.z=.55*bottom+.42*final;
+  // The BMJ asset record has no installed crash-lock kit evidence. Keep this
+  // default job straight-line: no simulated hook or front/rear lock-bottom fold.
+  c.front.rotation.z=0;c.rear.rotation.z=0;
   c.glue.visible=this.glueVisible&&t>=.48;c.glue.material.emissiveIntensity=this.glueVisible&&stage==='GLUE'?1.2:.2;
   c.datum.visible=false;
   c.group.scale.set(1,1,1);
-  const lap=Math.floor(raw);if(lap>c.lap){if(c.lap>=0)this.outputCarton();c.lap=lap;}
+  if(lap>c.lap){if(c.lap>=0)this.outputCarton();c.lap=lap;}
  }
- outputCarton(){this.completed++;const idx=(this.completed-1)%this.exitStack.length,p=this.exitStack[idx];p.visible=true;const lane=idx%3,layer=Math.floor(idx/3);p.position.set(5.30,.83+layer*.028,(lane-1)*.34);}
+ outputCarton(){this.completed++;const idx=(this.completed-1)%this.exitStack.length;if(idx===0)for(const carton of this.exitStack)carton.visible=false;const p=this.exitStack[idx];p.visible=true;const lane=idx%3,layer=Math.floor(idx/3);p.position.set(5.30,.83+layer*.028,(lane-1)*.34);}
  update(now){
   if(!this.active||!this.running){this.lastNow=now;return;}if(this.lastNow===null){this.lastNow=now;return;}
   const dt=Math.min(.12,Math.max(0,(now-this.lastNow)/1000))*this.speed;this.lastNow=now;this.elapsed+=dt;this.updateRotors(dt);
   this.activeByStage={FEED:0,PREFOLD:0,FORM:0,GLUE:0,FINAL:0,PRESS:0,DELIVERY:0};
-  const base=this.elapsed/8.8;for(const c of this.cartons)this.updateCarton(c,base+c.phase);
+  const base=this.elapsed/8.8;for(const c of this.cartons)this.updateCarton(c,base-c.phase);
   if(this.upperPress&&this.upperPressRest){this.upperPress.position.copy(this.upperPressRest);this.upperPress.position.y-=this.activeByStage.PRESS>0?.025:0;}
   this.feedingActive=this.activeByStage.FEED>0;this.preBreakActive=this.activeByStage.PREFOLD>0;this.formingActive=this.activeByStage.FORM>0;this.glueApplying=this.activeByStage.GLUE>0;this.foldingActive=this.activeByStage.FINAL>0;this.compressionActive=this.activeByStage.PRESS>0;this.deliveryActive=this.activeByStage.DELIVERY>0;
   this.onUpdate?.(this.state());
