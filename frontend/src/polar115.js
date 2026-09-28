@@ -29,7 +29,7 @@ export class Polar115MachineTemplate{
   // BMJ actual machine: low base cabinet supporting a broad dark cutting deck.
   const frame=this.group(this.root,'polar-frame','Base Cabinet');
   frame.userData.evidence=photoEvidence;
-  this.cover(this.box(frame,[2.06,.84,1.64],[0,.42,.25],'bodyDark',.055));
+  const cabinet=this.cover(this.box(frame,[2.06,.67,1.64],[0,.335,.25],'bodyDark',.04));cabinet.userData.evidence='IMG_2488_FRONT_CABINET_BELOW_TABLE_WITH_OPEN_RECESS';
   for(const x of [-.58,0,.58]){
    const door=this.box(frame,[.46,.38,.018],[x,.31,-.58],'body',.018);door.userData.detail=true;door.userData.evidence=photoEvidence;
   }
@@ -39,10 +39,13 @@ export class Polar115MachineTemplate{
   feed.userData.evidence=photoEvidence;
   const center=this.group(feed,'polar-feed-center','Main dark cutting table');
   const mainDeck=this.box(center,[1.48,.08,.74],[-.04,.90,-.36],'tableDark',.018);mainDeck.userData.evidence=photoEvidence;
+  const frontApron=this.box(center,[1.15,.16,.045],[-.245,.80,-.75],'bodyDark',.008);frontApron.userData.evidence='IMG_2488_THICK_FRONT_TABLE_APRON_AND_RECESSED_RIGHT_UNDERSIDE';
+  const apronSwitch=this.box(center,[.115,.09,.01],[.27,.79,-.781],'steel',.005);apronSwitch.userData.evidence='IMG_2488_FRONT_TABLE_INSET_SWITCH';
   const bevel=this.box(center,[.34,.08,.34],[.56,.90,-.02],'tableDark',.018);bevel.rotation.y=-Math.PI/4;bevel.userData.tableBevel=true;bevel.userData.evidence=photoEvidence;
 
   const left=this.group(feed,'polar-feed-left','Plain dark side extension',[-1.015,0,0]);
   const leftDeck=this.box(left,[.60,.06,.72],[0,.90,-.36],'tableDark',.018);leftDeck.userData.evidence='IMG_2488_FRONT_LEFT_DARK_EXTENSION';
+  const leftApron=this.box(left,[.60,.16,.045],[0,.795,-.73],'bodyDark',.008);leftApron.userData.evidence='IMG_2488_LEFT_TABLE_THICK_FRONT_EDGE';
   const right=this.group(feed,'polar-feed-right','Single perforated air-float side table',[1.015,0,0]);
   const rightDeck=this.box(right,[.88,.06,1.30],[.11,.90,-.65],'table',.018);rightDeck.userData.evidence='IMG_2488_2489_FRONT_RIGHT_WHITE_PERFORATED';this.holes(right,.88,1.30,.90,-.65,8,11);
   const rightBackstop=this.box(right,[.86,.17,.035],[.11,1.015,-.035],'body',.012);rightBackstop.userData.evidence='IMG_2489_FRONT_RIGHT_AIR_TABLE_BACKSTOP';

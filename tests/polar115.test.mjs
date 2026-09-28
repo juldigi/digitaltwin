@@ -29,7 +29,9 @@ test('four BMJ photo angles place the white air table and rear drive on the phot
  assert.ok(airWidth>.8,'the photographed air table is broad, not a narrow wing');
  assert.equal(right.children.filter(x=>x.isMesh&&x.userData.evidence==='IMG_2488_2489_AIR_TABLE_CORNER_LEGS').length,4);
  const frame=m.findNode('polar-frame').children.find(x=>x.isMesh&&x.userData.exteriorCover);
- assert.ok(new THREE.Box3().setFromObject(frame).max.y>=new THREE.Box3().setFromObject(centerDeck).min.y-.1,'base cabinet supports the dark cutting table');
+ const apron=m.findNode('polar-feed-center').children.find(x=>x.isMesh&&x.userData.evidence==='IMG_2488_THICK_FRONT_TABLE_APRON_AND_RECESSED_RIGHT_UNDERSIDE');
+ assert.ok(new THREE.Box3().setFromObject(frame).max.y<new THREE.Box3().setFromObject(centerDeck).min.y-.15,'cabinet is lower than the front cutting table, leaving the photographed recess');
+ assert.ok(new THREE.Box3().setFromObject(apron).min.y<new THREE.Box3().setFromObject(centerDeck).min.y-.1,'dark cutting surface has the photographed thick front apron');
  assert.ok(m.root.userData.photoOrientation.includes('PERFORATED_TABLE_FRONT_RIGHT'));
  const rearSlot=m.meshes.find(x=>x.userData.evidence==='IMG_2490_2491_REAR_TABLE_GUIDE_SLOT');assert.ok(rearSlot);
  m.dispose();
