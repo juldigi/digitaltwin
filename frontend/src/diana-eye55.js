@@ -2,7 +2,7 @@ import * as THREE from 'three';import {RoundedBoxGeometry} from 'three/addons/ge
 import {DIANA_EYE55_SPEC} from './data/dimensions-diana-eye55.js';import {DIANA_EYE55_TAXONOMY,DIANA_EYE55_TAXONOMY_BY_ID} from './data/taxonomy-diana-eye55.js';import {DIANA_EYE55_ORIENTATION,DIANA_EYE55_TECHNICAL_SOURCES} from './data/sources-diana-eye55.js';import {V141_SOURCE_STATS} from './data/research-v141.js';
 const V=a=>new THREE.Vector3(...a);
 export class DianaEye55MachineTemplate{
- constructor(){this.spec=DIANA_EYE55_SPEC;this.root=new THREE.Group();this.root.name='IPM 3 · DIANA EYE 55';this.root.userData={assetId:this.spec.assetId,nodeId:'diana55-root',spec:this.spec,sources:DIANA_EYE55_TECHNICAL_SOURCES,orientation:DIANA_EYE55_ORIENTATION,taxonomyVersion:'diana55-v252-oem-flow',detailPass:'V252_DIANA55_OEM_SILHOUETTE_FISHSCALE_FLOW',evidenceGrade:'OEM_PROCESS_GROUNDED',geometryStatus:'OEM_CURRENT_FAMILY_ENVELOPE_AND_PROCESS__BMJ_INSTALLED_OPTIONS_BOUNDED',engineeringDimensions:false,modeledEnvelopeMode:'STANDARD_FEEDER_FISH_SCALE_DELIVERY_REFERENCE'};this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.build();this.enrichV141();this.refineV254();this.taxonomy=DIANA_EYE55_TAXONOMY;this.taxonomyById=DIANA_EYE55_TAXONOMY_BY_ID;for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}this.root.updateMatrixWorld(true);}
+ constructor(){this.spec=DIANA_EYE55_SPEC;this.root=new THREE.Group();this.root.name='IPM 3 · DIANA EYE 55';this.root.userData={assetId:this.spec.assetId,nodeId:'diana55-root',spec:this.spec,sources:DIANA_EYE55_TECHNICAL_SOURCES,orientation:DIANA_EYE55_ORIENTATION,taxonomyVersion:'diana55-v252-oem-flow',detailPass:'V252_DIANA55_OEM_SILHOUETTE_FISHSCALE_FLOW',evidenceGrade:'OEM_PROCESS_GROUNDED',geometryStatus:'OEM_CURRENT_FAMILY_ENVELOPE_AND_PROCESS__BMJ_INSTALLED_OPTIONS_BOUNDED',engineeringDimensions:false,modeledEnvelopeMode:'STANDARD_FEEDER_FISH_SCALE_DELIVERY_REFERENCE'};this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.build();this.enrichV141();this.refineV254();this.refineV255();this.taxonomy=DIANA_EYE55_TAXONOMY;this.taxonomyById=DIANA_EYE55_TAXONOMY_BY_ID;for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}this.root.updateMatrixWorld(true);}
  group(parent,id,name,pos=[0,0,0],explode=[0,0,0]){const g=new THREE.Group();g.name=name;g.position.set(...pos);g.userData={assetId:this.spec.assetId,nodeId:id,selectable:true,explode:V(explode),confidence:'OEM_PROCESS_GROUNDED'};parent.add(g);this.nodes.push(g);if(parent===this.root)this.parts.push(g);return g;}
  mat(k){if(!this.materials.has(k)){const c={white:0xebeeee,light:0xcbd0d2,dark:0x252b2f,black:0x0d1215,steel:0x8a969b,silver:0xc3cacc,rubber:0x23282a,red:0xb4312e,blue:0x3c7289,green:0x579071,amber:0xd29b43,paper:0xe1cca2,glass:0x365c67,led:0xf0e7c2}[k]||0x888888;const m=new THREE.MeshStandardMaterial({color:c,metalness:['steel','silver'].includes(k)?.5:.08,roughness:k==='glass'?.16:.43,transparent:k==='glass',opacity:k==='glass'?.42:1});m.userData.baseOpacity=m.opacity;this.materials.set(k,m);}return this.materials.get(k);}
  mesh(g,geo,key,k='dark',p=[0,0,0],r=null){if(!this.geometries.has(key))this.geometries.set(key,geo());const m=new THREE.Mesh(this.geometries.get(key),this.mat(k));m.position.set(...p);if(r)m.rotation.set(...r);m.castShadow=k!=='glass';m.receiveShadow=true;m.userData.ownerId=g.userData.nodeId;g.add(m);this.meshes.push(m);return m;}
@@ -55,7 +55,9 @@ export class DianaEye55MachineTemplate{
   const top=this.group(g,'diana55-camera-top','Upper camera rail · installed population unverified');top.userData.capacity=4;top.userData.installedCountVerified=false;
   this.box(top,[1.22,.055,.12],[0,1.84,0],'steel',.008);
   for(const x of [-.54,-.18,.18,.54]){const mount=this.box(top,[.08,.11,.10],[x,1.79,0],'dark',.010);mount.userData.cameraBay=true;mount.userData.capabilityMount=true;}
-  const installedNeutral=this.box(top,[.22,.24,.20],[0,1.72,0],'dark',.022);installedNeutral.userData.cameraPopulationReference='ONE_NEUTRAL_HEAD_VISIBLE__ACTUAL_COUNT_UNKNOWN';this.cyl(top,.050,.075,[0,1.58,0],'black','camera-lens','z');
+  const installedNeutral=this.box(top,[.22,.24,.20],[0,1.72,0],'dark',.022);installedNeutral.userData.cameraPopulationReference='ONE_NEUTRAL_HEAD_VISIBLE__ACTUAL_COUNT_UNKNOWN';installedNeutral.userData.installedCountAsserted=false;
+  const barrel=this.cyl(top,.055,.080,[0,1.58,0],'dark','camera-optical-barrel','y');barrel.userData.opticalAxis='NEGATIVE_Y_TOWARD_SUCTION_BELT';barrel.userData.installedPopulationReferenceOnly=true;
+  const lens=this.cyl(top,.046,.018,[0,1.535,0],'black','camera-lens','y');lens.userData.opticalAxis='NEGATIVE_Y_TOWARD_SUCTION_BELT';lens.userData.scanPlaneY=.73;lens.userData.installedPopulationReferenceOnly=true;
   const low=this.group(g,'diana55-camera-low','Low-angle mirror path');for(const z of [-.48,.48]){const m=this.box(low,[.38,.020,.15],[-.20,1.30,z],'silver',.004);m.rotation.z=z<0?.22:-.22;}
   const rear=this.group(g,'diana55-camera-rear','Rear-side camera capability bay');rear.userData.capacity=1;rear.userData.installedCountVerified=false;rear.userData.capabilityOnly=true;rear.visible=false;this.box(rear,[.20,.18,.18],[.30,.58,0],'dark',.020);
   const area=this.group(g,'diana55-camera-area','Area-camera capability bays');area.userData.capacity=2;area.userData.installedCountVerified=false;area.userData.capabilityOnly=true;area.visible=false;for(const z of [-.52,.52])this.box(area,[.17,.20,.17],[.44,1.45,z],'dark',.018);
@@ -201,6 +203,14 @@ export class DianaEye55MachineTemplate{
   // Keep one physical HMI pedestal; current-generation 24-inch display is not asserted on BMJ 2023.
   const hmi=this.findNode('diana55-hmi-pedestal-v251');
   if(hmi){hmi.userData.bmjGenerationBoundary='2023_SERIAL__DISPLAY_SIZE_NOT_UPGRADED_FROM_CURRENT_2025_FAMILY_PAGE';}
+ }
+
+ refineV255(){
+  this.root.userData.visualRefinement='V255_DIANA_EYE55_DOWNWARD_OPTICS_SCAN_PLANE_REALISM';
+  this.root.userData.detailPass='V255_DIANA55_OPTICAL_AXIS_AND_SCAN_PLANE_REALISM';
+  this.root.userData.opticalAxisPolicy='NEUTRAL_REFERENCE_HEAD_POINTS_DOWN_TO_SUCTION_BELT__INSTALLED_CAMERA_POPULATION_UNVERIFIED';
+  this.root.userData.scanPlaneY=.73;
+  this.root.userData.cameraPopulationPolicy='ONE_NEUTRAL_REFERENCE_HEAD_RENDERED__UP_TO_FOUR_TOP_CAMERAS_CAPABILITY_ONLY';
  }
 
  findNode(id){return id==='diana55-root'?this.root:this.nodes.find(n=>n.userData.nodeId===id)||null;}resolvePart(o){for(let p=o;p&&p!==this.root;p=p.parent)if(p.userData?.selectable)return p;return null;}resolveTaxonomyNode(id){return this.taxonomyById.get(id)?.meshRefs.map(ref=>this.findNode(ref)).find(Boolean)||null;}contains(a,b){for(let p=b;p;p=p.parent)if(p===a)return true;return false;}
