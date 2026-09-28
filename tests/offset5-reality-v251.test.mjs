@@ -60,7 +60,7 @@ test('V255 matches the BMJ delivery end-face photo with attached fascia, control
  const m=new Offset5CD102RealismTemplate();
  try{
   const count=role=>m.realismMeshes.filter(item=>item.userData.realismRole===role).length;
-  assert.equal(m.root.userData.visualRefinement,'V255_BMJ_PHOTO_DELIVERY_FACE_AND_SUPPORTED_GATE');
+  assert.equal(m.root.userData.visualRefinement,'V256_BMJ_CUTAWAY_JOURNAL_FRAME_SUPPORTS');
   assert.equal(m.root.userData.photoDeliveryEvidence,'IMG_2312.jpeg');
   assert.equal(m.root.userData.photoDeliveryPolicy,'EXTERIOR_FACE_ONLY__NO_CONTROL_FUNCTION_OR_SERVICE_SETTING_INFERRED');
   assert.equal(count('delivery-photo-upper-control-fascia'),1);
@@ -230,9 +230,11 @@ test('Offset 5 Focusight optical heads are attached and face the sheet plane',()
    const lens=pod.children.find(o=>o.isMesh&&o.userData.inspectionLens);
    assert.ok(barrel&&lens,`camera pod ${side} is missing attached optical barrel/lens`);
    assert.equal(lens.userData.opticalAxis,'DOWNWARD_TOWARD_SHEET_PLANE_WITH_SMALL_PROCESS_DIRECTION_TILT');
-   assert.ok(lens.position.y<barrel.position.y,'lens must sit below its barrel toward the sheet');
-   assert.ok(barrel.position.y<2.88,'barrel must sit below the camera body center');
-   assert.ok(Math.abs(lens.rotation.z+.15)<1e-9&&Math.abs(barrel.rotation.z+.15)<1e-9,'optics must share the camera body process-direction tilt');
+   const barrelY=barrel.userData.opticalBarrelCenter?.[1]??barrel.position.y;
+   const barrelTilt=barrel.userData.opticalTiltZ??barrel.rotation.z;
+   assert.ok(lens.position.y<barrelY,'lens must sit below its barrel toward the sheet');
+   assert.ok(barrelY<2.88,'barrel must sit below the camera body center');
+   assert.ok(Math.abs(lens.rotation.z+.15)<1e-9&&Math.abs(barrelTilt+.15)<1e-9,'optics must share the camera body process-direction tilt');
   }
   assert.equal(m.root.userData.machineEnvelope.structuralBody.length,26.00);
  }finally{m.dispose();}
@@ -358,19 +360,15 @@ test('Offset 5 inks each section only after that section passes the PU nip',()=>
  }finally{sim.dispose();m.dispose();}
 });
 
-test('Offset 5 dryer extension transport rollers rotate with the sheet',()=>{
+test('Offset 5 dryer keeps transport rollers batched while sheet and UV carry visible process motion',()=>{
  const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
  try{
-  const rollers=sim.rotors.filter(item=>item.role==='dryer-sheet-transport-roller');
-  assert.equal(rollers.length,6);
-  assert.ok(rollers.every(item=>item.sign===-1));
-  for(const item of rollers){
-   const r=item.mesh.geometry.parameters.radiusTop;
-   const surface=item.rate*r*2*Math.PI*sim.sheetCyclesPerSecond;
-   assert.ok(Math.abs(surface-sim.baseMetersPerSecond)<1e-9);
-   assert.equal(item.source,'DRYER_CONTACT_SURFACE_SPEED_MATCHED_TO_SHEET_REFERENCE');
-  }
-  assert.equal(sim.state().dryerTransportPolicy,'SIX_EXISTING_EXTENSION_ROLLERS_ROTATE_AT_SHEET_SURFACE_SPEED');
+  assert.equal(sim.rotors.filter(item=>item.role==='dryer-sheet-transport-roller').length,0);
+  const ref=m.findNode('dryer-sheet-path');
+  const referenceMeshes=[];
+  ref?.traverse(o=>{if(o.isMesh&&o.userData.rotorRoleReference==='dryer-transport-roller')referenceMeshes.push(o);});
+  assert.ok(referenceMeshes.reduce((sum,o)=>sum+(o.userData.rotorElementCount||1),0)>=6);
+  assert.equal(sim.state().dryerTransportPolicy,'MOBILE_BATCHED_STATIC_REFERENCE__UV_AND_SHEET_PATH_CARRY_VISIBLE_DRYER_MOTION');
  }finally{sim.dispose();m.dispose();}
 });
 
@@ -420,18 +418,9 @@ test('Offset 5 feeder suction and register transport share one sheet cycle witho
    assert.ok(oscillator,`missing cyclic motion for ${id}`);
    assert.equal(oscillator.frequency,1,`${id} must share one press-sheet cycle`);
   }
-  const transport=sim.rotors.filter(item=>item.role==='register-pressure-transport-roller');
-  const vacuum=sim.rotors.filter(item=>item.role==='vacuum-table-tape-drive-roller');
-  assert.equal(transport.length,4);
-  assert.equal(vacuum.length,2);
-  assert.ok([...transport,...vacuum].every(item=>item.sign===-1&&item.visualSpeedRatio===1));
-  for(const item of [...transport,...vacuum]){
-   const r=item.mesh.geometry.parameters.radiusTop;
-   const surface=item.rate*r*2*Math.PI*sim.sheetCyclesPerSecond;
-   assert.ok(Math.abs(surface-sim.baseMetersPerSecond)<1e-9);
-   assert.equal(item.source,'REGISTER_SHEET_TRANSPORT_SURFACE_SPEED_REFERENCE');
-  }
-  assert.ok(sim.rotors.every(item=>item.mesh?.userData?.ownerId!=='feedboard-transport'||Math.abs(item.mesh.geometry.parameters.radiusTop-.034)<1e-6));
+  assert.equal(sim.rotors.filter(item=>item.role==='register-pressure-transport-roller').length,0);
+  assert.equal(sim.rotors.filter(item=>item.role==='vacuum-table-tape-drive-roller').length,0);
+  assert.equal(sim.state().registerTransportPolicy,'MOBILE_BATCHED_CONTACT_REFERENCE__SHEET_PATH_AND_INFEED_GRIPPER_CARRY_VISIBLE_MOTION');
   for(const code of ['13','2','1','14','3','4','5','6','7','8','9','10','11','12','15']){
    const a=sim.rotors.find(item=>item.role===`PU1-ink-roller-${code}`);
    const b=sim.rotors.find(item=>item.role===`PU2-ink-roller-${code}`);
@@ -445,7 +434,6 @@ test('Offset 5 feeder suction and register transport share one sheet cycle witho
    assert.equal(a.sign,b.sign,`damp roller ${code} reverses handedness between adjacent identical PUs`);
   }
   assert.equal(sim.state().feederMotionPolicy,'SUCTION_SEPARATOR_LINKAGE_FRONT_LAYS_AND_INFEED_GRIPPER_SHARE_ONE_SHEET_CYCLE');
-  assert.equal(sim.state().registerTransportPolicy,'ONLY_CONTACT_ROLLERS_ROTATE_AND_MATCH_SHEET_SURFACE_SPEED_TOWARD_PU1');
   assert.equal(sim.state().rollerHandednessPolicy,'IDENTICAL_STRAIGHT_PRINT_KINEMATIC_SIGN_PATTERN_ACROSS_ALL_EIGHT_PU');
  }finally{sim.dispose();m.dispose();}
 });
