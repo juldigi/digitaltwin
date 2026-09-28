@@ -74,6 +74,7 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
     this.refineDeliveryDynamicsV254();
     this.refinePhotoDeliveryFaceV255();
     this.refineInternalFrameSupportsV256();
+    this.refineCoaterFrameSupportsV257();
   }
 
   refineExteriorIdentityV237(){
@@ -449,6 +450,31 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
           rail.userData.structuralCutaway=true;
           rail.userData.journalPlaneZ=z;
         }
+      }
+    }
+    this.root.userData.dimensionLock='BMJ_CUSTOM_INSTALLED_DIMENSIONS_DO_NOT_NORMALIZE_TO_GENERIC_CD102';
+  }
+
+  refineCoaterFrameSupportsV257(){
+    // The three existing coater contact rollers already define the process train.
+    // Add only open bearing-side structure so the cutaway reads as mechanically supported.
+    this.root.userData.visualRefinement='V257_BMJ_COATER_OPEN_BEARING_FRAME_SUPPORTS';
+    this.root.userData.coaterFramePolicy='SUPPORT_EXISTING_THREE_ROLL_CONTACT_TRAIN_ONLY__NO_SECOND_COATER__NO_DIMENSION_CHANGE';
+    const chamber=this.node('coater-chamber');if(!chamber)return;
+    const rows=[
+      ['metering',-.02,1.80],
+      ['coating', .10,1.48],
+      ['impression',-.08,1.06]
+    ];
+    for(const z of [-.79,.79]){
+      const spine=this.db(chamber,[.14,1.18,.12],[.02,1.45,z],'graphite',.014,'coater-open-side-frame-spine',{confidence:'PHOTO_OEM_FUNCTIONAL_REFERENCE'});
+      spine.userData.structuralCutaway=true;
+      spine.userData.frameSide=z<0?'LOCAL_NEGATIVE_Z':'LOCAL_POSITIVE_Z';
+      for(const [role,x,y] of rows){
+        const saddle=this.db(chamber,[.28,.13,.14],[x,y,z],'graphite',.012,'coater-roller-bearing-saddle',{confidence:'PHOTO_OEM_FUNCTIONAL_REFERENCE'});
+        saddle.userData.structuralCutaway=true;saddle.userData.coaterRollerRole=role;
+        const cap=this.dc(chamber,.070,.032,[x,y,z],'steel','z','coater-roller-bearing-cap',{service:true,confidence:'PHOTO_OEM_FUNCTIONAL_REFERENCE'});
+        cap.userData.coaterRollerRole=role;
       }
     }
     this.root.userData.dimensionLock='BMJ_CUSTOM_INSTALLED_DIMENSIONS_DO_NOT_NORMALIZE_TO_GENERIC_CD102';
