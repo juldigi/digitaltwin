@@ -71,6 +71,7 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
     this.refineExteriorIdentityV237();
     this.refineInstalledRealityV253();
     this.refineDeliveryDynamicsV254();
+    this.refinePhotoDeliveryFaceV255();
   }
 
   refineExteriorIdentityV237(){
@@ -372,6 +373,51 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
         lever.rotation.z=z<0?-.18:.18;
       }
     }
+  }
+
+  refinePhotoDeliveryFaceV255(){
+    // IMG_2312 is the clearest installed-machine reference for the delivery end face.
+    // Add only thin exterior/readability details to the existing delivery shell: no module
+    // position, BMJ custom dimension, process hardware, control function or service setting changes.
+    this.root.userData.visualRefinement='V255_BMJ_PHOTO_DELIVERY_FACE_AND_SUPPORTED_GATE';
+    this.root.userData.photoDeliveryEvidence='IMG_2312.jpeg';
+    this.root.userData.photoDeliveryPolicy='EXTERIOR_FACE_ONLY__NO_CONTROL_FUNCTION_OR_SERVICE_SETTING_INFERRED';
+
+    const hood=this.node('delivery-hood');
+    if(hood){
+      const evidence={coverMounted:true,confidence:'BMJ_PHOTO_IMG_2312'};
+      const fascia=this.db(hood,[.020,.18,1.78],[.972,2.335,0],'light',.005,'delivery-photo-upper-control-fascia',{...evidence,silhouette:true});
+      fascia.userData.photoFeature='BROAD_PALE_END_FACE_CONTROL_BAND';
+      for(const z of [-.62,0,.62]){
+        const seam=this.db(hood,[.022,.155,.008],[.984,2.335,z],'graphite',.001,'delivery-photo-fascia-seam',evidence);
+        seam.userData.photoFeature='CONTROL_FASCIA_PANEL_BREAK';
+      }
+      for(const z of [-.76,-.62,-.48,-.34]){
+        const knob=this.dc(hood,.025,.020,[.994,2.365,z],'black','x','delivery-photo-control-knob',{...evidence,service:true});
+        knob.userData.controlFunctionAsserted=false;
+      }
+      for(const z of [-.76,-.62,-.48,-.34,-.20]){
+        const indicator=this.db(hood,[.018,.044,.060],[.994,2.235,z],'black',.004,'delivery-photo-status-window',evidence);
+        indicator.userData.statusMeaningAsserted=false;
+      }
+      this.db(hood,[.020,.035,1.44],[.974,2.315,0],'graphite',.004,'delivery-photo-window-bezel-top',evidence);
+      this.db(hood,[.020,.035,1.44],[.974,1.765,0],'graphite',.004,'delivery-photo-window-bezel-bottom',evidence);
+      for(const z of [-.72,.72])this.db(hood,[.020,.55,.035],[.974,2.04,z],'graphite',.004,'delivery-photo-window-bezel-side',evidence);
+      for(const z of [-.76,.76]){
+        const mount=this.dc(hood,.012,.080,[.960,1.70,z],'steel','x','delivery-front-rail-standoff',{coverMounted:true,service:true,confidence:'BMJ_PHOTO_IMG_2312'});
+        mount.userData.attachment='END_FACE_TO_EXISTING_FRONT_RAIL';
+      }
+    }
+
+    const gate=this.node('delivery-gate');
+    if(gate){
+      for(const y of [.30,1.53])for(const z of [-.94,.94]){
+        const bracket=this.db(gate,[.095,.085,.075],[.96,y,z],'graphite',.008,'delivery-gate-end-anchor',{service:true,confidence:'BMJ_PHOTO_IMG_2312'});
+        bracket.userData.attachment='PILE_GATE_CROSSMEMBER_END_SUPPORT';
+      }
+      gate.userData.photoMountPolicy='IMG_2312_GATE_RODS_TERMINATE_IN_SUPPORTED_CROSSMEMBERS';
+    }
+    this.root.userData.dimensionLock='BMJ_CUSTOM_INSTALLED_DIMENSIONS_DO_NOT_NORMALIZE_TO_GENERIC_CD102';
   }
 
   setExteriorOpen(on=true){
