@@ -47,7 +47,7 @@ export class SharkN650MachineTemplate{
   const stack=this.group(g,'shark650-feed-stack','Input blank support');this.box(stack,[.92,.07,1.08],[-.24,.32,0],'steel');for(let i=0;i<9;i++)this.box(stack,[.58,.009,.82],[-.30,.38+i*.010,0],'paper',.001);
   const suction=this.group(g,'shark650-feed-suction','Automatic suction pickup reference');suction.userData.feederModeReference='AUTOMATIC_SUCTION_PICKUP_REFERENCE';suction.userData.installedModeVerified=false;
   this.box(suction,[.62,.18,.96],[.18,1.04,0],'dark',.026);
-  for(const z of [-.36,-.12,.12,.36]){const cup=this.cyl(suction,.030,.13,[.38,.89,z],'rubber','suction-cup');cup.userData.reciprocator=true;this.box(suction,[.030,.18,.030],[.38,1.00,z],'steel');}
+  for(const z of [-.36,-.12,.12,.36]){const cup=this.cyl(suction,.030,.13,[.38,.89,z],'rubber','suction-cup','y');cup.userData.reciprocator=true;cup.userData.pickupAxis='NEGATIVE_Y_TOWARD_BLANK';this.box(suction,[.030,.18,.030],[.38,1.00,z],'steel');}
   const manifold=this.cyl(suction,.022,.90,[.14,1.08,0],'steel','feeder-vacuum-manifold','z');manifold.userData.mechanismRole='feeder-vacuum-manifold';
   const friction=this.group(g,'shark650-feed-friction','Alternate feeder capability reference');friction.userData.feederModeReference='ALTERNATE_FAMILY_OPTION';friction.userData.installedModeVerified=false;friction.userData.capabilityOnly=true;friction.visible=false;for(const z of [-.36,-.12,.12,.36])this.box(friction,[.82,.022,.09],[.34,.72,z],'rubber',.004);
   const separate=this.group(g,'shark650-feed-separate','Blank separation / spacing control');for(const z of [-.42,0,.42]){const p=this.box(separate,[.07,.17,.045],[-.42,.86,z],'blue',.010);p.userData.negativePitchSpacingReference=true;}
