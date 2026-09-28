@@ -12,7 +12,7 @@ export class SharkN650ProcessSimulation{
  constructor(root,template){
   this.root=root;this.template=template;this.active=false;this.running=false;this.paused=false;this.speed=1;this.completed=0;this.rejected=0;this.inspectedDemoCount=0;this.elapsed=0;this.lastNow=null;this.onUpdate=null;
   this.rotors=[];this.suckers=[];this.lights=[];this.airNozzles=[];this.blanks=[];this.goodStack=[];this.badStack=[];this.pathVisible=false;
-  this.gate=template.findNode('shark650-reject-plate');this.gateRest=this.gate?.rotation.z||0;
+  this.gateMount=template.findNode('shark650-reject-plate');this.gate=this.gateMount?.children.find(o=>o.isMesh&&o.userData.rejectGate)||null;this.gateRest=this.gate?.rotation.z||0;
   root.traverse(o=>{if(o.isMesh&&o.userData.rotor)this.rotors.push(o);if(o.isMesh&&o.userData.reciprocator)this.suckers.push(o);if(o.isMesh&&o.userData.inspectionLight)this.lights.push(o);if(o.isMesh&&o.userData.mechanismRole==='air-nozzle')this.airNozzles.push(o);});
   this.rotorRest=this.rotors.map(r=>r.quaternion.clone());this.suckerRest=this.suckers.map(s=>s.position.clone());
   this.points=[[-3.32,.75,0],[-2.72,.73,0],[-1.82,.73,0],[-.78,.73,0],[.20,.73,0],[1.38,.71,0],[2.25,.71,0],[3.36,.71,0]].map(p=>new THREE.Vector3(...p));
