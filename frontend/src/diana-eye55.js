@@ -389,6 +389,14 @@ export class DianaEye55MachineTemplate{
     }
   }
 
+  const cutawayExteriorAccessory=id=>{
+    const node=this.findNode(id);if(!node)return;
+    node.traverse(o=>{if(o.isMesh)o.userData.exteriorCover=true;});
+    node.userData.cutawayPolicy='HIDE_COMPLETE_EXTERNAL_ACCESSORY_WITH_MACHINE_COVERS';
+  };
+  for(const id of ['diana55-signal-tower-v259','diana55-cell-controls-v258','diana55-feeder-console-v258','diana55-hmi-pedestal-v251'])cutawayExteriorAccessory(id);
+  this.root.userData.externalAccessoryCutawayPolicy='EXTERNAL_CONTROLS_AND_SIGNAL_HARDWARE_HIDE_AS_COMPLETE_ASSEMBLIES__PROCESS_INTERNALS_REMAIN_VISIBLE';
+
   const recovery=this.findNode('diana55-reject-recovery-v258');
   if(recovery){
     const supports=this.group(recovery,'diana55-reject-recovery-support-v260','Reject recovery tray support frame');
