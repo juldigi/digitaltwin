@@ -38,6 +38,21 @@ export function clipWallToMachineClearance(w,clearances,minLength=.28){
  const visible=[];let cursor=0;for(const [lo,hi] of merged){if(lo>cursor)visible.push([cursor,lo]);cursor=Math.max(cursor,hi);}if(cursor<1)visible.push([cursor,1]);
  return visible.map(([u,v])=>({...w,a:[a[0]+dx*u,a[1]+dy*u],b:[a[0]+dx*v,a[1]+dy*v]})).filter(s=>Math.hypot(s.b[0]-s.a[0],s.b[1]-s.a[1])>=minLength);
 }
+export function shiftWallFromMachineClearance(w,clearances,portals=[],maxShift=3.5){
+ const dx=w.b[0]-w.a[0],dy=w.b[1]-w.a[1],vertical=Math.abs(dx)<.08&&Math.abs(dy)>.4,horizontal=Math.abs(dy)<.08&&Math.abs(dx)>.4;
+ if(!vertical&&!horizontal)return w;
+ const crosses=clearances.some(b=>intervalInBox(w.a,w.b,b)?.some((v,i,a)=>i===1&&v-a[0]>1e-5));
+ if(!crosses)return w;
+ // A portal cut must remain tied to its original jamb and wall. Never move a
+ // source door independently of the source wall to which it belongs.
+ const nearPortal=portals.some(p=>{const ax=w.a[0],ay=w.a[1],len2=dx*dx+dy*dy,t=Math.max(0,Math.min(1,((p.x-ax)*dx+(p.y-ay)*dy)/(len2||1)));return Math.hypot(p.x-(ax+t*dx),p.y-(ay+t*dy))<Math.max(.45,(p.width||1)/2+.18);});
+ if(nearPortal)return w;
+ const perpendicular=vertical?w.a[0]:w.a[1], candidates=new Set();
+ for(const b of clearances){const lo=vertical?b.minX:b.minY,hi=vertical?b.maxX:b.maxY;if(perpendicular>lo-.2&&perpendicular<hi+.2){candidates.add(lo-.17);candidates.add(hi+.17);}}
+ const options=[...candidates].map(value=>({value,delta:value-perpendicular})).filter(c=>Math.abs(c.delta)<=maxShift).sort((a,b)=>Math.abs(a.delta)-Math.abs(b.delta));
+ for(const c of options){const shifted={...w,a:vertical?[c.value,w.a[1]]:[w.a[0],c.value],b:vertical?[c.value,w.b[1]]:[w.b[0],c.value],sourceShiftM:+c.delta.toFixed(3),sourceCoordinates:[w.a,w.b]};if(clearances.every(b=>!intervalInBox(shifted.a,shifted.b,b)))return shifted;}
+ return w;
+}
 export function resolvePortalClearance(portal,clearances,margin=.35){
  const p={...portal,sourceX:portal.x,sourceY:portal.y,clearanceAdjusted:false};
  for(let pass=0;pass<clearances.length;pass++){
@@ -158,13 +173,13 @@ export function buildActualFactory(layout,fleet){
  const roomAccessAudit=architecturalRoomLabels.map(l=>{const ds=allArchitecturalDoors.map(d=>({d:Math.hypot(l.x-d.x,l.y-d.y),reference:!!d.referenceGenerated})).sort((a,b)=>a.d-b.d);const hit=ds[0]||null;return {label:l.text,x:l.x,y:l.y,nearestDoorDistance:hit?+hit.d.toFixed(2):null,access:hit?(hit.reference?'FUNCTIONAL_REFERENCE_DOOR':'SOURCE_DOOR'):'UNRESOLVED'};});
  const omitted=[];
  const ipalRemovedWalls=[];
- const wallPieces=[];for(const w of wallDedupe.walls){if(wallInsideIpal(w)){ipalRemovedWalls.push(w);continue;}const pieces=clipWallToMachineClearance(w,[...serviceClearances,...pressRooms,...portalCutBoxes]);if(pieces.length!==1||pieces[0].a[0]!==w.a[0]||pieces[0].a[1]!==w.a[1]||pieces[0].b[0]!==w.b[0]||pieces[0].b[1]!==w.b[1])omitted.push(w);wallPieces.push(...pieces);}
+ const wallPieces=[];for(const w of wallDedupe.walls){if(wallInsideIpal(w)){ipalRemovedWalls.push(w);continue;}const moved=shiftWallFromMachineClearance(w,[...serviceClearances,...pressRooms],allArchitecturalDoors);const pieces=clipWallToMachineClearance(moved,[...serviceClearances,...pressRooms,...portalCutBoxes]);if(pieces.length!==1||pieces[0].a[0]!==w.a[0]||pieces[0].a[1]!==w.a[1]||pieces[0].b[0]!==w.b[0]||pieces[0].b[1]!==w.b[1])omitted.push(w);wallPieces.push(...pieces);}
  for(const w of wallPieces){const [a,c]=[w.a,w.b];
   const dx=c[0]-a[0],dy=c[1]-a[1],len=Math.hypot(dx,dy),r=Math.atan2(dy,dx),x=(a[0]+c[0])/2,z=-(a[1]+c[1])/2;
   // Every finish belongs to the same wall segment, so endpoint edits move the entire assembly.
   const wallAssembly=new T.Group();wallAssembly.name='Dinding '+(w.handle||w.handles?.[0]||w.layer||'pabrik');
   const wallKey=[w.handle||w.handles?.[0]||'UNKNOWN',...a,...c].map(v=>typeof v==='number'?(Math.round(v*100)+'').replace('-','m'):String(v).replace(/[^A-Za-z0-9_-]/g,'_')).join('-');
-  wallAssembly.position.set(x,0,z);wallAssembly.rotation.y=r;wallAssembly.userData={semantic:'SOURCE_WALL_SEGMENT',editorWall:true,editorStableId:'wall:'+wallKey,sourceLength:len,sourceWidth:w.width||.12,sourceHeight:3.5,sourceEntityId:w.handle||w.handles?.[0]||'UNKNOWN',sourceLayer:w.layer||'UNKNOWN'};layers.walls.add(wallAssembly);
+  wallAssembly.position.set(x,0,z);wallAssembly.rotation.y=r;wallAssembly.userData={semantic:'SOURCE_WALL_SEGMENT',editorWall:true,editorStableId:'wall:'+wallKey,sourceLength:len,sourceWidth:w.width||.12,sourceHeight:3.5,sourceEntityId:w.handle||w.handles?.[0]||'UNKNOWN',sourceLayer:w.layer||'UNKNOWN',sourceShiftM:w.sourceShiftM||0,sourceCoordinates:w.sourceCoordinates||null};layers.walls.add(wallAssembly);
   const wb=(px,py,pz,width,height,depth,color,opacity=1)=>box(wallAssembly,px,py,pz,width,height,depth,color,0,opacity);
   const wall=wb(0,1.75,0,len,3.5,w.width,0xe8e5df);wall.castShadow=true;wall.userData={...dwgObjectSourceMetadata(layout,{semantic:'WALL',sourceLayer:w.layer||'UNKNOWN',sourceEntityId:w.handle||w.handles?.[0]||'UNKNOWN',sourceHandles:w.handles,confidence:'HIGH CONFIDENCE',renderStatus:'3D_WITH_ESTIMATED_HEIGHT'}),heightStatus:'VISUAL_ESTIMATE',machineClearance:MACHINE_SERVICE_CLEARANCE};
   const plinth=wb(0,.12,0,len,.24,w.width+.035,0x64777e);detail(plinth,'WALL_BASE_PLINTH_REFERENCE');const head=wb(0,3.46,0,len,.08,w.width+.025,0x71878b);detail(head,'WALL_HEAD_FLASHING_REFERENCE');for(const gy of [.72,1.48,2.24,3.0]){const girt=wb(0,gy,0,len,.045,w.width+.06,0x74868b);detail(girt,'WALL_GIRT_REFERENCE');buildingDetailStats.wallGirts++;}const baseFlash=wb(0,.28,0,len,.055,w.width+.07,0x5f747c);detail(baseFlash,'WALL_BASE_FLASHING_REFERENCE');buildingDetailStats.wallBaseFlashings++;
@@ -1017,15 +1032,39 @@ export function buildActualFactory(layout,fleet){
     const stallSpan=Math.min(1.90,w-.55),stallDepth=.92;
     registerLocalFootprint('TOILET_STALL_ZONE',0,workZ+.28,stallSpan,stallDepth);
     for(const sx of [-stallSpan/2,0,stallSpan/2])rb(g,sx,1.08,workZ+.28,.035,2.05,stallDepth,0xd9e2df,'TOILET_STALL_PARTITION');
-    for(const sx of [-stallSpan*.25,stallSpan*.25]){rb(g,sx,.34,workZ+.26,.40,.42,.58,0xf0f3f1,'TOILET_FIXTURE');rb(g,sx,1.02,workZ+.74,stallSpan*.42,1.90,.035,0xe0e4df,'TOILET_STALL_DOOR');}
-    localBlock(g,0,.34,1.10,.82,.42,0xcbd5d4,'TOILET_BASIN_COUNTER',.84);rb(g,0,1.38,.14,.84,.48,.035,0xb9d1d3,'TOILET_MIRROR');break;
+    for(const sx of [-stallSpan*.25,stallSpan*.25]){
+     rb(g,sx,.22,workZ-.08,.38,.43,.30,0xf5f6f2,'TOILET_FIXTURE');
+     const bowl=new T.Mesh(new T.SphereGeometry(1,16,12),material(0xf7f8f4));bowl.position.set(sx,.42,workZ+.18);bowl.scale.set(.25,.14,.34);bowl.userData={semantic:'V202_TOILET_PORCELAIN_BOWL_REFERENCE',accuracy:'ROOM_FUNCTION_LAYOUT_REFERENCE_NOT_AS_BUILT'};g.add(bowl);
+     const recess=new T.Mesh(new T.CircleGeometry(.17,20),material(0x889ba0));recess.rotation.x=-Math.PI/2;recess.scale.set(.90,1.28,1);recess.position.set(sx,.558,workZ+.18);recess.userData={semantic:'V202_TOILET_BOWL_RECESS_REFERENCE',accuracy:'ROOM_FUNCTION_LAYOUT_REFERENCE_NOT_AS_BUILT'};g.add(recess);
+     const seat=new T.Mesh(new T.TorusGeometry(.22,.035,8,20),material(0xe1e6e1));seat.rotation.x=Math.PI/2;seat.scale.set(.88,1.23,1);seat.position.set(sx,.57,workZ+.18);seat.userData={semantic:'V202_TOILET_SEAT_RING_REFERENCE',accuracy:'ROOM_FUNCTION_LAYOUT_REFERENCE_NOT_AS_BUILT'};g.add(seat);
+     rb(g,sx,.69,workZ-.22,.39,.49,.18,0xf3f5f0,'TOILET_CISTERN_REFERENCE');rb(g,sx,.95,workZ-.22,.12,.025,.06,0x899a9b,'TOILET_FLUSH_BUTTON_REFERENCE');
+     const pivot=new T.Group();pivot.position.set(sx-stallSpan*.21,0,workZ+.74);pivot.rotation.y=-.40;g.add(pivot);
+     rb(pivot,stallSpan*.21,1.02,0,stallSpan*.42,1.90,.035,0xe0e4df,'TOILET_STALL_DOOR');rb(pivot,stallSpan*.36,1.04,.041,.025,.11,.025,0x61737a,'TOILET_STALL_LATCH_REFERENCE');
+    }
+    localBlock(g,0,.34,1.10,.82,.42,0xcbd5d4,'TOILET_BASIN_COUNTER',.84);
+    const basin=new T.Mesh(new T.SphereGeometry(1,16,10),material(0xf1f3ef));basin.position.set(0,.87,.34);basin.scale.set(.36,.09,.25);basin.userData={semantic:'V202_TOILET_BASIN_BOWL_REFERENCE',accuracy:'ROOM_FUNCTION_LAYOUT_REFERENCE_NOT_AS_BUILT'};g.add(basin);
+    rb(g,0,1.09,.14,.035,.33,.035,0x798b90,'TOILET_FAUCET_STEM_REFERENCE');rb(g,0,1.24,.22,.035,.035,.22,0x798b90,'TOILET_FAUCET_SPOUT_REFERENCE');
+    rb(g,0,1.38,.14,.84,.48,.035,0xb9d1d3,'TOILET_MIRROR');rb(g,.56,1.23,.17,.14,.26,.10,0xd9dedd,'TOILET_SOAP_DISPENSER_REFERENCE');
+    rb(g,-.68,.026,-.18,.17,.018,.17,0x66777b,'TOILET_FLOOR_DRAIN_REFERENCE');break;
    }
    case 'ELECTRICAL':{
     const count=Math.max(2,Math.min(4,Math.floor(w/.8)));for(let i=0;i<count;i++){const px=(i-(count-1)/2)*.78;localBlock(g,px,workZ+.08,.66,2.05,.32,0x657984,'ELECTRICAL_PANEL',1.05);}localBlock(g,0,.10,Math.min(w-.5,2.8),.02,.76,0x555f62,'ELECTRICAL_INSULATING_MAT',.016,false);break;
    }
    case 'SPAREPART_WAREHOUSE':{
     localRack(g,-sideX+.20,-.15,.36,1.75,d-1.25,'SPAREPART_LEFT');localRack(g,sideX-.20,-.15,.36,1.75,d-1.25,'SPAREPART_RIGHT');
-    for(const sx of [-sideX+.20,sideX-.20])for(const zz of [-.62,-.12,.38]){rb(g,sx,.46,zz,.28,.22,.30,0x5d8190,'SPAREPART_BIN');buildingDetailStats.v203SparepartBins++;}
+    for(const [side,sx] of [[-1,-sideX+.20],[1,sideX-.20]])for(const [i,zz] of [-.62,-.12,.38].entries()){
+     for(const [level,cy] of [[0,.35],[1,.77],[2,1.19]]){
+      const color=(i+level+side+3)%3===0?0x627d89:0x718a91;
+      rb(g,sx,cy,zz,.28,.19,.30,color,'SPAREPART_BIN');
+      const front=rb(g,sx-side*.15,cy,zz,.012,.14,.23,0x536f79,'SPAREPART_BIN_FACE_REFERENCE');front.userData.inventoryKnown=false;
+      rb(g,sx-side*.16,cy+.015,zz,.013,.055,.13,0xe8e6da,'SPAREPART_BIN_UNNUMBERED_LABEL_REFERENCE');
+      buildingDetailStats.v203SparepartBins++;
+     }
+    }
+    for(const [sx,zz] of [[-sideX+.20,.86],[sideX-.20,.86],[-sideX+.20,-1.02],[sideX-.20,-1.02]]){
+     rb(g,sx,.34,zz,.29,.26,.33,0xc2ad8b,'SPAREPART_CLOSED_CARTON_REFERENCE');
+     rb(g,sx,.49,zz,.28,.014,.32,0x9f886c,'SPAREPART_CARTON_LID_REFERENCE');
+    }
     localBlock(g,0,.18,.72,.55,.46,0x6d8189,'SPAREPART_PICKING_TROLLEY',.30);break;
    }
    case 'WORKSHOP':
