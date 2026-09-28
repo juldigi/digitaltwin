@@ -561,6 +561,18 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       }
     }
 
+    // Dryer/extension transport rollers are existing modeled hardware and should not stay
+    // visually frozen while sheets pass above them. Drive only those six contact rollers.
+    const dryerPath=this.template.findNode('dryer-sheet-path');
+    dryerPath?.traverse(mesh=>{
+      if(!mesh.isMesh||mesh.geometry?.type!=='CylinderGeometry')return;
+      const radius=mesh.geometry.parameters.radiusTop;
+      this.addRotor(mesh,-1,this.baseMetersPerSecond/(Math.PI*2*this.sheetCyclesPerSecond*radius),{
+        role:'dryer-sheet-transport-roller',
+        source:'DRYER_CONTACT_SURFACE_SPEED_MATCHED_TO_SHEET_REFERENCE'
+      });
+    });
+
     // Coating contact train: keep the existing chamber/coating/impression hardware,
     // but drive each contact surface at the same sheet surface speed. This removes the
     // legacy arbitrary RPM multipliers while preserving the documented counter-rotation.
@@ -700,7 +712,8 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       interUnitGripperPolicy:'RIGID_FINGER_ASSEMBLY_ROTATES_WITH_TRANSFER_DRUM_ORBIT',
       inspectionIlluminationActive:this.inspectionIlluminationActive,
       inspectionIlluminationPolicy:'SHEET_OCCUPANCY_TRIGGERED_EXISTING_FOCUSIGHT_LIGHTING_ONLY',
-      coaterMotionPolicy:'EXISTING_THREE_ROLL_CONTACT_TRAIN_MATCHES_SHEET_SURFACE_SPEED'
+      coaterMotionPolicy:'EXISTING_THREE_ROLL_CONTACT_TRAIN_MATCHES_SHEET_SURFACE_SPEED',
+      dryerTransportPolicy:'SIX_EXISTING_EXTENSION_ROLLERS_ROTATE_AT_SHEET_SURFACE_SPEED'
     };
   }
 }
