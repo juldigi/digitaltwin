@@ -44,9 +44,9 @@ export class Polar115MachineTemplate{
   const left=this.group(feed,'polar-feed-left','Plain dark side extension',[-1.015,0,0]);
   const leftDeck=this.box(left,[.60,.06,.72],[0,.90,-.36],'tableDark',.018);leftDeck.userData.evidence='IMG_2488_FRONT_LEFT_DARK_EXTENSION';
   const right=this.group(feed,'polar-feed-right','Single perforated air-float side table',[1.015,0,0]);
-  const rightDeck=this.box(right,[.60,.06,.92],[0,.90,-.46],'table',.018);rightDeck.userData.evidence='IMG_2488_2489_FRONT_RIGHT_WHITE_PERFORATED';this.holes(right,.60,.92,.90,-.46,6,9);
-  for(const g of [left,right])for(const x of [-.22,.22]){
-   const leg=this.box(g,[.028,.82,.028],[x,.45,-.22],'dark',.006);leg.userData.evidence=photoEvidence;
+  const rightDeck=this.box(right,[.60,.06,1.30],[0,.90,-.65],'table',.018);rightDeck.userData.evidence='IMG_2488_2489_FRONT_RIGHT_WHITE_PERFORATED';this.holes(right,.60,1.30,.90,-.65,6,11);
+  for(const x of [-.22,.22])for(const z of [-1.16,-.16]){
+   const leg=this.box(right,[.028,.82,.028],[x,.45,z],'dark',.006);leg.userData.evidence='IMG_2488_2489_AIR_TABLE_CORNER_LEGS';
   }
   const crank=this.group(right,'polar-feed-right-crank','Side-table height-adjust crank wheel');crank.userData.detail=true;crank.userData.evidence=photoEvidence;
   this.cyl(crank,.082,.025,[.28,.62,-.66],'dark','x');this.cyl(crank,.013,.16,[.28,.62,-.66],'steel','x');
@@ -90,15 +90,15 @@ export class Polar115MachineTemplate{
   const safety=this.group(this.root,'polar-safety','Safety System',[0,0,0],[0,.24,-.45]);
   const photo=this.group(safety,'polar-safety-photo','Front safety / control arms');photo.userData.evidence=photoEvidence;
   const leftArm=this.group(photo,'polar-safety-left-arm','Front-left safety/control arm');
-  const la=this.cover(this.box(leftArm,[.24,.19,.66],[-.76,1.08,-.18],'body',.055));la.rotation.x=.045;la.userData.evidence=photoEvidence;
+  const la=this.cover(this.box(leftArm,[.24,.19,.72],[-.76,1.08,-.39],'body',.055));la.rotation.x=.045;la.userData.evidence=photoEvidence;
   const rightArm=this.group(photo,'polar-safety-right-arm','Front-right drilled safety arm');
-  const ra=this.cover(this.box(rightArm,[.24,.19,.66],[.76,1.08,-.18],'body',.055));ra.rotation.x=.045;ra.userData.evidence=photoEvidence;
-  for(let i=0;i<4;i++){const aperture=this.cyl(rightArm,.025,.015,[.885,1.09,-.42+i*.12],'black','x');aperture.userData.detail=true;aperture.userData.photoCell=true;aperture.userData.evidence=photoEvidence;}
+  const ra=this.cover(this.box(rightArm,[.24,.19,.72],[.76,1.08,-.39],'body',.055));ra.rotation.x=.045;ra.userData.evidence=photoEvidence;
+  for(let i=0;i<4;i++){const aperture=this.cyl(rightArm,.025,.015,[.885,1.09,-.68+i*.13],'black','x');aperture.userData.detail=true;aperture.userData.photoCell=true;aperture.userData.evidence=photoEvidence;}
   const twohand=this.group(safety,'polar-safety-twohand','Two-hand cut control reference');twohand.userData.simultaneityControlReference=true;twohand.userData.antiRepeatReference=true;
-  for(const x of [-.76,.76]){const base=this.cyl(twohand,.035,.018,[x,1.185,-.40],'warning','y');base.userData.detail=true;const button=this.cyl(twohand,.022,.020,[x,1.202,-.40],'red','y');button.userData.twoHandButton=true;}
+  for(const x of [-.76,.76]){const base=this.cyl(twohand,.035,.018,[x,1.185,-.65],'warning','y');base.userData.detail=true;const button=this.cyl(twohand,.022,.020,[x,1.202,-.65],'red','y');button.userData.twoHandButton=true;}
   const estop=this.group(safety,'polar-safety-estop','Front-left mushroom safety button');
-  const estopBase=this.cyl(estop,.040,.018,[-.76,1.184,-.30],'warning','y');estopBase.userData.evidence=photoEvidence;
-  const estopButton=this.cyl(estop,.027,.022,[-.76,1.204,-.30],'red','y');estopButton.userData.evidence=photoEvidence;
+  const estopBase=this.cyl(estop,.040,.018,[-.76,1.184,-.57],'warning','y');estopBase.userData.evidence=photoEvidence;
+  const estopButton=this.cyl(estop,.027,.022,[-.76,1.204,-.57],'red','y');estopButton.userData.evidence=photoEvidence;
   const rear=this.group(safety,'polar-safety-rear','Rear guard reference');this.cover(this.box(rear,[1.48,.24,.035],[0,1.13,1.16],'body',.018));
 
   // Actual control face: small square display, keypad/controls and taped operating sheets.

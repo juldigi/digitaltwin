@@ -17,11 +17,15 @@ test('four BMJ photo angles place the white air table and rear drive on the phot
  const m=new Polar115MachineTemplate();m.root.updateMatrixWorld(true);
  const left=m.findNode('polar-feed-left'),right=m.findNode('polar-feed-right');
  const holeMeshes=m.meshes.filter(x=>x.userData.airNozzle);
- assert.equal(holeMeshes.length,54,'the actual machine has a single perforated side table');
+ assert.equal(holeMeshes.length,66,'the extended single perforated table carries the full nozzle grid');
  assert.ok(holeMeshes.every(x=>m.contains(right,x)));
  assert.ok(!m.meshes.some(x=>x.userData.airNozzle&&m.contains(left,x)));
  const white=right.localToWorld(new THREE.Vector3()),drive=m.findNode('polar-housing-motor-end').localToWorld(new THREE.Vector3(1.2,0,0));
  assert.ok(white.x<0&&drive.x<0,'white table and side drive must appear on the same photographed machine side');
+ const whiteDeck=right.children.find(x=>x.isMesh&&x.userData.evidence==='IMG_2488_2489_FRONT_RIGHT_WHITE_PERFORATED');
+ const centerDeck=m.findNode('polar-feed-center').children.find(x=>x.isMesh);
+ assert.ok(new THREE.Box3().setFromObject(whiteDeck).min.z<new THREE.Box3().setFromObject(centerDeck).min.z-.3,'white air table must project toward the operator beyond the center table');
+ assert.equal(right.children.filter(x=>x.isMesh&&x.userData.evidence==='IMG_2488_2489_AIR_TABLE_CORNER_LEGS').length,4);
  assert.ok(m.root.userData.photoOrientation.includes('PERFORATED_TABLE_FRONT_RIGHT'));
  const rearSlot=m.meshes.find(x=>x.userData.evidence==='IMG_2490_2491_REAR_TABLE_GUIDE_SLOT');assert.ok(rearSlot);
  m.dispose();
