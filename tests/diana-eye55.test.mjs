@@ -207,6 +207,17 @@ test('Diana accepted branch reaches fish-scale entry continuously and relayout k
  }finally{sim.dispose();model.dispose();}
 });
 
+test('DIANA operator pedestal retains the official red vertical identity accent',()=>{
+ const model=new DianaEye55MachineTemplate();
+ try{
+  const hmi=model.findNode('diana55-hmi-pedestal-v251');assert.ok(hmi);
+  const accent=hmi.children.find(o=>o.isMesh&&o.userData.pedestalIdentityAccent);
+  assert.ok(accent);assert.equal(accent.userData.sourceBoundary,'MASTERWORK_DIANA_EYE55_OFFICIAL_PRODUCT_IMAGE');
+  assert.ok(Math.abs(accent.rotation.z+.10)<1e-9);
+  assert.equal(hmi.userData.v258OperatorInterface,'SLANTED_PEDESTAL_WITH_RED_IDENTITY_ACCENT_AND_WORK_SHELF__DISPLAY_SIZE_NOT_ASSERTED');
+ }finally{model.dispose();}
+});
+
 test('DIANA delivery monitoring camera is structurally grounded to the delivery bed',()=>{
  const model=new DianaEye55MachineTemplate();
  try{
