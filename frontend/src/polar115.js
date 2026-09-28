@@ -128,7 +128,11 @@ export class Polar115MachineTemplate{
   // Photo-matched rectangular cutter head with rounded shoulders. No half-cylinder roof.
   const housing=this.group(this.root,'polar-housing','Main Housing');
   housing.userData.evidence=photoEvidence;
-  const rearShell=this.cover(this.box(housing,[2.06,1.05,.28],[0,1.13,.83],'bodyDark',.12));rearShell.userData.evidence=photoEvidence;
+  // IMG_2490/2491 look through the rear opening at the vertical finger field.
+  // A solid rear slab used to bury the back table and backgauge inside the housing.
+  const rearBrow=this.cover(this.box(housing,[2.06,.32,.24],[0,1.64,.83],'bodyDark',.09));rearBrow.userData.evidence='IMG_2490_2491_REAR_TOP_BROW';
+  for(const x of [-.87,.87]){const jamb=this.cover(this.box(housing,[.32,.78,.22],[x,1.18,.84],'body',.07));jamb.userData.evidence='IMG_2490_2491_OPEN_REAR_JAMB';}
+  const sill=this.box(housing,[1.50,.075,.22],[0,.68,.84],'bodyDark',.014);sill.userData.evidence='IMG_2490_2491_REAR_OPENING_LOW_SILL';
   const leftPillar=this.cover(this.box(housing,[.34,.92,.54],[-.87,1.22,.42],'body',.11));leftPillar.userData.evidence=photoEvidence;
   const rightPillar=this.cover(this.box(housing,[.34,.92,.54],[.87,1.22,.42],'body',.11));rightPillar.userData.evidence=photoEvidence;
   const topBridge=this.cover(this.box(housing,[1.78,.40,.54],[0,1.58,.42],'body',.12));topBridge.userData.consoleBrow=true;topBridge.userData.evidence=photoEvidence;

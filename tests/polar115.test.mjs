@@ -27,12 +27,36 @@ test('four BMJ photo angles place the white air table and rear drive on the phot
  m.dispose();
 });
 
+test('rear housing leaves the photographed backgauge opening and table unobstructed',()=>{
+ const m=new Polar115MachineTemplate();m.root.updateMatrixWorld(true);
+ const housing=m.findNode('polar-housing'),rearTable=m.findNode('polar-feed-rear');
+ const rearTop=rearTable.children.find(x=>x.isMesh&&x.userData.evidence==='BMJ-POLAR-PHOTOS-2026-09');
+ assert.ok(rearTop);
+ for(const shell of housing.children.filter(x=>x.isMesh)){
+  const shellBox=new THREE.Box3().setFromObject(shell);
+  assert.ok(!shellBox.containsPoint(m.root.localToWorld(new THREE.Vector3(0,.90,.84))),'rear shell cuts through the center of the back table');
+  assert.ok(!shellBox.containsPoint(m.root.localToWorld(new THREE.Vector3(0,1.15,.84))),'rear shell closes the finger opening');
+ }
+ m.dispose();
+});
+
 test('POLAR simulation transfers the stock from the sole air table before gauge and cut',()=>{
  const m=new Polar115MachineTemplate(),s=new Polar115ProcessSimulation(m.root,m);s.start();let now=1000;s.update(now);
  assert.equal(s.stock.position.x,s.stockStartCenterX);
  for(let i=0;i<120;i++){now+=10;s.update(now);}
  assert.ok(Math.abs(s.stock.position.x)<.001);assert.equal(s.cutPerformed,false);
  assert.equal(s.stock.visible,true);s.dispose();m.dispose();
+});
+
+test('POLAR photographed red cut guide rides above the positioned stock until separation',()=>{
+ const m=new Polar115MachineTemplate(),s=new Polar115ProcessSimulation(m.root,m);s.start();let now=1000;s.update(now);
+ while(s.phase()<.34){now+=10;s.update(now);}
+ assert.equal(s.stockCutGuide.visible,true);
+ assert.ok(s.stockCutGuide.position.y>s.stock.position.y+.04);
+ assert.equal(s.stockCutGuide.position.z,s.cutLineZ);
+ while(!s.cutPerformed){now+=10;s.update(now);}
+ assert.equal(s.stockCutGuide.visible,false);
+ s.dispose();m.dispose();
 });
 
 test('POLAR geometry uses a vertical knife blade and keeps safety hardware explicit',()=>{

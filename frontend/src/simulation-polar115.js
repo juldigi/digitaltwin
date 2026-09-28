@@ -11,7 +11,7 @@ export class Polar115ProcessSimulation{
   this.cycleSeconds=9;this.cycleIndex=0;this.lightBarrierClear=true;this.twoHandEnabled=true;this.cutCycleLatched=false;this.cutPerformed=false;this.cutCounted=false;this.clampHoldAmount=0;this.knifeHoldAmount=0;
   this.clamp=this.template.findNode('polar-clamp');this.knife=this.template.findNode('polar-knife');this.gauge=this.template.findNode('polar-gauge');
   this.rest={clamp:this.clamp?.position.clone(),knife:this.knife?.position.clone(),gauge:this.gauge?.position.clone()};
-  this.stock=null;this.cutPiece=null;this.path=null;this.airIndicators=[];
+  this.stock=null;this.cutPiece=null;this.path=null;this.stockCutGuide=null;this.airIndicators=[];
   this.stockDepth=.68;this.frontPieceDepth=.42;this.rearPieceDepth=.26;this.stockStartCenterX=.76;this.stockStartCenterZ=-.34;this.stockFinalCenterZ=-.08;this.cutLineZ=0;this.frontPieceCenterZ=-.21;this.rearPieceCenterZ=.13;
   this.clampStroke=.11;this.knifeStroke=.33;this.resetRuntime();this.build();
  }
@@ -19,11 +19,13 @@ export class Polar115ProcessSimulation{
   const mat=new THREE.MeshStandardMaterial({color:0xf0e7d4,roughness:.84,side:THREE.DoubleSide});
   this.stock=new THREE.Mesh(new THREE.BoxGeometry(1.08,.085,this.stockDepth),mat);this.stock.name='Reference paper pile / rear remainder';this.stock.position.set(this.stockStartCenterX,1.005,this.stockStartCenterZ);
   this.cutPiece=new THREE.Mesh(new THREE.BoxGeometry(1.08,.088,this.frontPieceDepth),mat.clone());this.cutPiece.name='Front cut piece / offcut reference';this.cutPiece.position.set(0,1.006,this.frontPieceCenterZ);this.cutPiece.visible=false;
+  this.stockCutGuide=new THREE.Mesh(new THREE.BoxGeometry(1.05,.002,.009),new THREE.MeshBasicMaterial({color:0xb82d29,depthWrite:false}));
+  this.stockCutGuide.name='Optical cut line on positioned paper';this.stockCutGuide.userData={photoReference:'IMG_2488_FRONT_CUT_LINE',notPhysicalBlade:true};this.stockCutGuide.visible=false;
   const points=[new THREE.Vector3(0,1.06,-.74),new THREE.Vector3(0,1.06,-.34),new THREE.Vector3(0,1.06,-.04)];
   const geo=new THREE.BufferGeometry().setFromPoints(points),lineMat=new THREE.LineDashedMaterial({color:0x4e8299,dashSize:.05,gapSize:.035,transparent:true,opacity:.55});
   this.path=new THREE.Line(geo,lineMat);this.path.computeLineDistances();
   for(const x of [-.42,-.14,.14,.42])for(const z of [-.55,-.32,-.09]){const a=new THREE.Mesh(new THREE.CylinderGeometry(.007,.018,.08,10),new THREE.MeshStandardMaterial({color:0x8bbad0,transparent:true,opacity:.55,emissive:0x3d7189,emissiveIntensity:.35}));a.position.set(x,.965,z);a.visible=false;this.group.add(a);this.airIndicators.push(a);}
-  this.group.add(this.stock,this.cutPiece,this.path);this.group.visible=false;
+  this.group.add(this.stock,this.cutPiece,this.stockCutGuide,this.path);this.group.visible=false;
  }
  resetRuntime(){
   this.airTableActive=false;this.backgaugeMoving=false;this.twoHandCommand=false;this.clampActive=false;this.clampContact=false;this.knifeDownstroke=false;this.knifeUpstroke=false;this.knifeAtCutLine=false;this.cutSeparated=false;this.safetyBlocked=false;this.stockLateralTransfer=false;
@@ -51,6 +53,7 @@ export class Polar115ProcessSimulation{
   if(this.clamp&&this.rest.clamp)this.clamp.position.copy(this.rest.clamp);if(this.knife&&this.rest.knife)this.knife.position.copy(this.rest.knife);if(this.gauge&&this.rest.gauge)this.gauge.position.copy(this.rest.gauge);
   if(this.stock){this.stock.position.set(this.stockStartCenterX,1.005,this.stockStartCenterZ);this.stock.scale.set(1,1,1);this.stock.rotation.set(0,0,0);this.stock.visible=true;}
   if(this.cutPiece){this.cutPiece.position.set(0,1.006,this.frontPieceCenterZ);this.cutPiece.scale.set(1,1,1);this.cutPiece.visible=false;}
+  if(this.stockCutGuide)this.stockCutGuide.visible=false;
   for(const a of this.airIndicators)a.visible=false;
  }
  updateStock(p){
@@ -62,6 +65,8 @@ export class Polar115ProcessSimulation{
    this.stock.scale.set(1,1,this.rearPieceDepth/this.stockDepth);this.stock.position.set(0,1.005,this.rearPieceCenterZ);
    this.cutPiece.visible=true;const out=smooth(p,.74,.94);this.cutPiece.position.set(0,1.006,THREE.MathUtils.lerp(this.frontPieceCenterZ,-.56,out));
   }
+  this.stockCutGuide.visible=!this.cutPerformed&&p>=.32&&p<.64;
+  if(this.stockCutGuide)this.stockCutGuide.position.set(this.stock.position.x,this.stock.position.y+.045,this.cutLineZ);
  }
  update(now){
   if(!this.active||!this.running){this.lastNow=now;return;}if(this.lastNow===null){this.lastNow=now;return;}
