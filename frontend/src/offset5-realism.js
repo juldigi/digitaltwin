@@ -460,6 +460,35 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
   }
   collectMechanicalMotion(){
     super.collectMechanicalMotion();
+
+    // The suction/separator assemblies translate with the feeder cycle; their stems and cups do not
+    // spin like transport rollers. Remove the inherited generic cylinder-rotation fallback while
+    // retaining the group oscillation already created by the base simulation.
+    const nonRotatingFeederOwners=new Set(['feeder-suction-cups','feeder-separation','feeder-head-linkage']);
+    this.rotors=this.rotors.filter(item=>!nonRotatingFeederOwners.has(item.mesh?.userData?.ownerId));
+
+    // Every straight-printing unit has the same installed handedness. The legacy simulator flipped
+    // the ink/dampening train by PU parity, making PU2/4/6/8 visibly run backwards. Preserve the
+    // existing relative roller pattern but normalize it identically across all eight PUs.
+    const inkCodes=['13','2','1','14','3','4','5','6','7','8','9','10','11','12','15'];
+    const dampCodes=['16','17','FR','19','18'];
+    const rotorFor=id=>this.rotors.find(item=>item.mesh?.userData?.ownerId===id);
+    for(let i=0;i<8;i++){
+      const fountain=rotorFor(`press-${i}-ink-fountain-roller-body`);
+      if(fountain){fountain.sign=1;fountain.role=`PU${i+1}-ink-fountain-roller`;fountain.source='SAME_HANDED_STRAIGHT_PRINT_UNIT_VISUAL_KINEMATICS';}
+      inkCodes.forEach((code,index)=>{
+        const rotor=rotorFor(`press-${i}-ink-roller-${code}-body`);if(!rotor)return;
+        rotor.sign=index%2?-1:1;rotor.role=`PU${i+1}-ink-roller-${code}`;rotor.source='SAME_HANDED_STRAIGHT_PRINT_UNIT_VISUAL_KINEMATICS';
+      });
+      for(const code of ['A','B','C','D']){
+        const rotor=rotorFor(`press-${i}-ink-distributor-${code}-body`);if(!rotor)continue;
+        rotor.sign=code.charCodeAt(0)%2?-1:1;rotor.role=`PU${i+1}-ink-distributor-${code}`;rotor.source='SAME_HANDED_STRAIGHT_PRINT_UNIT_VISUAL_KINEMATICS';
+      }
+      dampCodes.forEach((code,index)=>{
+        const rotor=rotorFor(`press-${i}-damp-roller-${code}-body`);if(!rotor)return;
+        rotor.sign=index%2?-1:1;rotor.role=`PU${i+1}-damp-roller-${code}`;rotor.source='SAME_HANDED_STRAIGHT_PRINT_UNIT_VISUAL_KINEMATICS';
+      });
+    }
     // The sheet runs left to right across the upper transfer arc at every bay.
     // Both transfer drum and gripper orbit therefore turn clockwise in this view.
     for(let bay=1;bay<8;bay++){
@@ -547,7 +576,9 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       operatorSideMicrodetailPolicy:'WORLD_NEGATIVE_Z_AFTER_TOP_LEVEL_PHOTO_MIRROR',
       presetPlusDeliveryDetailPolicy:'TOUCH_DISPLAY_JOGWHEEL_STATICSTAR_AND_POSITIONABLE_SHEET_BRAKE_REFERENCES',
       deliveryChainMotionPolicy:'SINGLE_FORWARD_LOOP_SPROCKETS_SHARE_ROTATION_DIRECTION',
-      sheetBrakeMotionPolicy:'CONTROLLED_DECELERATION_VISUAL_REFERENCE_NOT_SERVICE_SETPOINT'
+      sheetBrakeMotionPolicy:'CONTROLLED_DECELERATION_VISUAL_REFERENCE_NOT_SERVICE_SETPOINT',
+      feederMotionPolicy:'SUCTION_SEPARATOR_AND_LINKAGE_RECIPROCATE_WITHOUT_FAKE_SPIN',
+      rollerHandednessPolicy:'IDENTICAL_STRAIGHT_PRINT_KINEMATIC_SIGN_PATTERN_ACROSS_ALL_EIGHT_PU'
     };
   }
 }
