@@ -27,7 +27,7 @@ test('V253 keeps BMJ OS/DS orientation and broad custom inter-unit access',()=>{
  try{
   assert.equal(m.root.userData.sideAlignment,'PHOTO_VERIFIED_OPERATOR_NEGATIVE_Z');
   assert.equal(m.root.userData.driveSideAlignment,'PHOTO_VERIFIED_DRIVE_POSITIVE_Z');
-  assert.equal(m.root.userData.realismPack,'OFFSET5_CD102_8L_CUSTOM_INSTALLED_REALITY_R4');
+  assert.equal(m.root.userData.realismPack,'OFFSET5_CD102_8L_CUSTOM_INSTALLED_REALITY_R5');
   assert.equal(m.root.userData.dimensionLock,'BMJ_CUSTOM_INSTALLED_DIMENSIONS_DO_NOT_NORMALIZE_TO_GENERIC_CD102');
   for(let i=0;i<7;i++){
    const frameA=new THREE.Box3().setFromObject(m.findNode(`press-${i}-frame`));
@@ -38,6 +38,39 @@ test('V253 keeps BMJ OS/DS orientation and broad custom inter-unit access',()=>{
    assert.ok(landing.min.x<=frameA.max.x+.01&&landing.max.x>=frameB.min.x-.01,`PU${i+1}/PU${i+2} landing no longer spans the custom access bay`);
    assert.ok(landing.max.y>=transfer.max.y+.15,`PU${i+1}/PU${i+2} landing is not above the gripper transfer`);
   }
+ }finally{m.dispose();}
+});
+
+test('V254 keeps newly added operator-side micro-details on the photo-verified world -Z side',()=>{
+ const m=new Offset5CD102RealismTemplate();
+ try{
+  m.root.updateMatrixWorld(true);
+  const roles=['operator-side-lower-service-trim','printing-unit-emergency-stop-reference','preset-plus-delivery-touch-console'];
+  for(const role of roles){
+   const mesh=m.realismMeshes.find(item=>item.userData.realismRole===role);
+   assert.ok(mesh,`missing ${role}`);
+   const world=mesh.getWorldPosition(new THREE.Vector3());
+   assert.ok(world.z<0,`${role} leaked onto drive side after the top-level Z mirror`);
+  }
+  assert.equal(m.root.userData.operatorSideDetailPolicy,'TOP_LEVEL_MODULES_ARE_Z_MIRRORED__LOCAL_POSITIVE_Z_MAPS_TO_WORLD_NEGATIVE_Z');
+ }finally{m.dispose();}
+});
+
+test('V254 adds attached Preset Plus delivery and coater references without changing machine dimensions',()=>{
+ const m=new Offset5CD102RealismTemplate();
+ try{
+  const roleCount=role=>m.realismMeshes.filter(item=>item.userData.realismRole===role).length;
+  assert.equal(roleCount('preset-plus-delivery-touch-console'),1);
+  assert.equal(roleCount('preset-plus-delivery-touch-display'),1);
+  assert.equal(roleCount('preset-plus-delivery-jogwheel'),1);
+  assert.equal(roleCount('sheet-brake-positioning-rail'),1);
+  assert.equal(roleCount('sheet-brake-slide-carriage'),3);
+  assert.equal(roleCount('staticstar-antistatic-bar'),1);
+  assert.equal(roleCount('staticstar-electrode-reference'),7);
+  assert.equal(roleCount('coater-combination-clamp-reference'),2);
+  assert.equal(m.root.userData.dimensionLock,'BMJ_CUSTOM_INSTALLED_DIMENSIONS_DO_NOT_NORMALIZE_TO_GENERIC_CD102');
+  assert.equal(m.root.userData.machineEnvelope.structuralBody.length,26.00);
+  assert.equal(m.root.userData.machineEnvelope.structuralBody.width,3.92);
  }finally{m.dispose();}
 });
 
@@ -225,6 +258,31 @@ test('Offset 5 shows ink only as subtle roller film without floating droplets or
   sim.setInkFlowVisible(false);
   assert.ok(sim.inkSurfaces.every(({material,initialIntensity})=>material.emissiveIntensity===initialIntensity));
   sim.stop();
+ }finally{sim.dispose();m.dispose();}
+});
+
+test('Offset 5 delivery chain shares one forward rotation sense and the sheet brake visibly decelerates',()=>{
+ const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
+ try{
+  const chain=sim.rotors.filter(item=>item.role==='delivery-chain-sprocket');
+  const brakes=sim.rotors.filter(item=>item.role==='sheet-brake-roller');
+  assert.equal(chain.length,4);
+  assert.equal(brakes.length,3);
+  assert.ok(chain.every(item=>item.sign===-1&&item.visualSpeedRatio===1));
+  assert.ok(brakes.every(item=>item.sign===-1&&item.visualSpeedRatio===.82));
+  for(const item of chain){
+   const r=item.mesh.geometry.parameters.radiusTop;
+   const surface=item.rate*r*2*Math.PI*sim.sheetCyclesPerSecond;
+   assert.ok(Math.abs(surface-sim.baseMetersPerSecond)<1e-9);
+  }
+  for(const item of brakes){
+   const r=item.mesh.geometry.parameters.radiusTop;
+   const surface=item.rate*r*2*Math.PI*sim.sheetCyclesPerSecond;
+   assert.ok(Math.abs(surface-.82*sim.baseMetersPerSecond)<1e-9);
+  }
+  const st=sim.state();
+  assert.equal(st.deliveryChainMotionPolicy,'SINGLE_FORWARD_LOOP_SPROCKETS_SHARE_ROTATION_DIRECTION');
+  assert.equal(st.sheetBrakeMotionPolicy,'CONTROLLED_DECELERATION_VISUAL_REFERENCE_NOT_SERVICE_SETPOINT');
  }finally{sim.dispose();m.dispose();}
 });
 
