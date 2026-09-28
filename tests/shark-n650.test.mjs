@@ -57,6 +57,16 @@ test('SHARK automatic feeder suction cups point vertically toward the blank pick
  }finally{model.dispose();}
 });
 
+test('SHARK adaptive low-detail hides service micro-detail while preserving tower and monitor silhouette',()=>{
+ const model=new SharkN650MachineTemplate();
+ try{
+  const detail=model.meshes.filter(m=>m.userData.detail),silhouette=model.meshes.filter(m=>m.userData.silhouetteCritical);
+  assert.ok(detail.length>=12);const before=detail.filter(m=>m.visible).length;assert.ok(before>0);
+  model.setLow(true);assert.equal(model.root.userData.lowDetailActive,true);assert.ok(detail.filter(m=>m.visible).length<before);assert.ok(silhouette.every(m=>m.visible));
+  model.setLow(false);assert.equal(model.root.userData.lowDetailActive,false);assert.equal(detail.filter(m=>m.visible).length,before);
+ }finally{model.dispose();}
+});
+
 test('SHARK rotor whitelist excludes suction cups camera lenses and air nozzles',()=>{
  const model=new SharkN650MachineTemplate(),sim=new SharkN650ProcessSimulation(model.root,model),allowed=/^(transport-pulley|transfer-drive-motor|transfer-encoder|vacuum-blower|inspection-encoder-wheel|good-return|good-return-motor|bad-return|bad-return-motor)$/;
  assert.equal(sim.rotors.length,30);assert.equal(sim.rotors.some(r=>!allowed.test(r.userData.mechanismRole||'')),false);assert.equal(sim.suckers.length,4);assert.equal(sim.airNozzles.length,3);
