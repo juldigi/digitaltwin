@@ -79,7 +79,10 @@ test('V260 SHARK physically attaches feeder, tower aperture, reject pivot and re
   const bezel=model.findNode('shark650-front-aperture-bezel-v260');assert.ok(bezel);
   assert.equal(bezel.children.filter(o=>o.isMesh&&o.userData.apertureBezel).length,4);
   const guard=model.findNode('shark650-access-guard');assert.equal(guard.userData.v260SkinPolicy,'PRIMARY_TOWER_ENCLOSURE_ONLY__NO_DUPLICATE_SIDE_SKIN');
-  assert.ok(guard.children.filter(o=>o.isMesh&&o.userData.supersededByV260).every(o=>o.visible===false));
+  const hiddenGuard=guard.children.filter(o=>o.isMesh&&o.userData.supersededByV260);
+  assert.ok(hiddenGuard.every(o=>o.visible===false&&o.userData.permanentlyHidden===true));
+  model.setExteriorOpen(true);model.setExteriorOpen(false);
+  assert.ok(hiddenGuard.every(o=>o.visible===false),'SHARK duplicate guard skin reappeared after cutaway toggle');
   const aperture=model.findNode('shark650-inspection-window');assert.equal(aperture.children.filter(o=>o.isMesh&&o.userData.apertureBacking).length,2);
   const pivot=model.findNode('shark650-reject-pivot-v260');assert.ok(pivot);assert.equal(pivot.userData.rejectGatePivot,true);
   assert.equal(pivot.userData.motionPolicy,'ROTATE_PIVOT_ONLY__SOLENOID_AND_FRAME_REMAIN_STATIC');
