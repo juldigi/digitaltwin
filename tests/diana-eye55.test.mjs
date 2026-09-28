@@ -207,6 +207,20 @@ test('Diana accepted branch reaches fish-scale entry continuously and relayout k
  }finally{sim.dispose();model.dispose();}
 });
 
+test('DIANA delivery monitoring camera is structurally grounded to the delivery bed',()=>{
+ const model=new DianaEye55MachineTemplate();
+ try{
+  const node=model.findNode('diana55-delivery-monitor-v254');assert.ok(node);
+  const mast=node.children.find(o=>o.isMesh&&o.userData.deliveryMonitoringMast);
+  const cam=node.children.find(o=>o.isMesh&&o.userData.mechanismRole==='delivery-monitoring-camera-reference');
+  assert.ok(mast&&cam);
+  assert.equal(mast.userData.mountPolicy,'DELIVERY_BED_TO_CAMERA_HEAD_STRUCTURAL_REFERENCE');
+  const mastBottom=mast.position.y-.72/2,mastTop=mast.position.y+.72/2;
+  assert.ok(mastBottom<=.71,'Diana monitoring mast must reach the delivery bed');
+  assert.ok(cam.position.y<=mastTop+.02,'Diana monitoring camera must remain attached to the mast top');
+ }finally{model.dispose();}
+});
+
 test('DIANA optical illumination follows scan occupancy and resets cleanly',()=>{
  const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);sim.start();let now=1000,seenScan=false;
  for(let i=0;i<600;i++){now+=10;sim.update(now);if(sim.state().scanActive){seenScan=true;assert.ok(sim.lights.every(l=>l.material.emissiveIntensity>1));break;}}
