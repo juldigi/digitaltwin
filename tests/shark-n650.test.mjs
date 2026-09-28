@@ -127,6 +127,23 @@ test('V260 SHARK scan window follows optical occupancy and only the reject pivot
  }finally{sim.dispose();model.dispose();}
 });
 
+test('SHARK cutaway hides complete external controls and signal assemblies while preserving process internals',()=>{
+ const model=new SharkN650MachineTemplate();
+ try{
+  const ids=['shark650-signal-tower-v259','shark650-tower-local-control-v259','shark650-hmi-v251'];
+  const groups=ids.map(id=>model.findNode(id));assert.ok(groups.every(Boolean));
+  const meshes=groups.flatMap(g=>{const a=[];g.traverse(o=>{if(o.isMesh)a.push(o);});return a;});
+  assert.ok(meshes.length>8&&meshes.every(m=>m.visible));
+  const internal=model.findNode('shark650-inspection-bed'),internalMeshes=[];internal.traverse(o=>{if(o.isMesh)internalMeshes.push(o);});
+  model.setExteriorOpen(true);
+  assert.ok(meshes.every(m=>m.visible===false),'SHARK external accessory remained floating in cutaway');
+  assert.ok(internalMeshes.some(m=>m.visible),'SHARK cutaway incorrectly hid process internals');
+  model.setExteriorOpen(false);
+  assert.ok(meshes.every(m=>m.visible===true));
+  assert.equal(model.root.userData.externalAccessoryCutawayPolicy,'EXTERNAL_CONTROLS_AND_SIGNAL_HARDWARE_HIDE_AS_COMPLETE_ASSEMBLIES__PROCESS_INTERNALS_REMAIN_VISIBLE');
+ }finally{model.dispose();}
+});
+
 test('SHARK automatic feeder suction cups point vertically toward the blank pickup plane',()=>{
  const model=new SharkN650MachineTemplate();
  try{
