@@ -14,6 +14,8 @@ export class DianaEye55ProcessSimulation{
   this.rotors=[];this.lights=[];this.airNozzles=[];this.blanks=[];this.goodStack=[];this.rejectStack=[];this.pathVisible=false;
   this.gateMount=template.findNode('diana55-reject-gate');this.gate=this.gateMount?.children.find(o=>o.isMesh&&o.userData.rejectGate)||null;this.gateRest=this.gate?.rotation.z||0;
   root.traverse(o=>{if(o.isMesh&&o.userData.rotor)this.rotors.push(o);if(o.isMesh&&o.userData.inspectionLight)this.lights.push(o);if(o.isMesh&&o.userData.rejectAirNozzle)this.airNozzles.push(o);});
+  this.scanWindows=template.meshes.filter(m=>m.userData.scanWindow);
+  this.scanWindowRest=this.scanWindows.map(m=>({emissive:m.material.emissive?.clone(),intensity:m.material.emissiveIntensity||0}));
   this.rotorRest=this.rotors.map(r=>r.quaternion.clone());
   this.feederKnife=template.meshes.find(m=>m.userData.mechanismRole==='patented-feeding-knife-reference')||null;
   this.feederKnifeRest=this.feederKnife?.position.clone()||null;
@@ -65,7 +67,7 @@ export class DianaEye55ProcessSimulation{
    sheetsVisible:this.blanks.filter(b=>b.mesh.visible).length,pileSheetsVisible:this.goodStack.filter(p=>p.visible).length,rejectSheetsVisible:this.rejectStack.filter(p=>p.visible).length,
    rotorCount:this.rotors.length,mechanismCount:this.rotors.length+this.lights.length+1,pathVisible:this.pathVisible,inkFlowVisible:false,inkFlowCount:0,uvLampCount:0,uvActive:false,
    feederDriveActive:this.feederDriveActive,feederKnifeActive:this.feederKnifeActive,feederKnifeStrokeM:this.feederKnifeStrokeM,feederAirAssistActive:this.feederAirAssistActive,feederMotionPolicy:'OEM_FEEDING_KNIFE_SUBTLE_VIBRATION_AND_AIR_ASSIST_STATE__AMPLITUDE_VISUAL_ONLY',transportDriveActive:this.transportDriveActive,deliveryDriveActive:this.deliveryDriveActive,blankPresenceTrigger:this.blankPresenceTrigger,transportEncoderActive:this.transportEncoderActive,vacuumHoldActive:this.vacuumHoldActive,illuminationReady:this.illuminationReady,cameraTriggerActive:this.cameraTriggerActive,captureComplete:this.captureComplete,scanActive:this.scanActive,imageProcessingActive:this.imageProcessingActive,processingComplete:this.processingComplete,decisionReady:this.decisionReady,rejectPermit:this.rejectPermit,rejectConfirmed:this.rejectConfirmed,outputCountActive:this.outputCountActive,interlockSafe:this.interlockSafe,demoRejectActive:this.demoRejectActive,rejectTrackingActive:this.rejectTrackingActive,acceptedDeliveryActive:this.acceptedDeliveryActive,wasteDeliveryActive:this.wasteDeliveryActive,rejectRecoveryActive:this.wasteDeliveryActive,fishScaleDeliveryActive:this.fishScaleDeliveryActive,deliveryMode:'ACCEPTED_FISH_SCALE_PLUS_RECOVERABLE_REJECT_COLLECTION',paperJam:this.paperJam,rejectSafetyCoverReference:true,deliveryMonitoringCameraReference:true,
-   demoRejectOnly:true,demoRejectActuator:this.demoRejectActuator,installedRejectActuationVerified:false,installedCameraCountVerified:false,installedCameraPopulationRendered:false,deterministicDefectInjection:'EVERY_5TH_INSPECTED_BLANK_DEMO_ONLY',scanWindow:[this.scanStart,this.scanEnd],scanPositionPolicy:'BLANK_OCCUPIES_OPTICAL_CELL',opticalAxisPolicy:this.template.root.userData.opticalAxisPolicy,scanPlaneY:this.template.root.userData.scanPlaneY,cameraPopulationPolicy:this.template.root.userData.cameraPopulationPolicy,rejectedOutputPolicy:'DAMAGE_FREE_RECOVERABLE_COLLECTION_FOR_RESORT_OR_REINSPECTION_REFERENCE',rejectBranchPolicy:'TRACKED_BLANK_BRANCHES_DIRECTLY_FROM_GATE_TO_RECOVERY_TRAY',acceptedBranchPolicy:'TRACKED_ACCEPTED_BLANK_BRANCHES_TO_FISH_SCALE_ENTRY_WITHOUT_TELEPORT',acceptedStackPolicy:'BOUNDED_FISH_SCALE_8_SLOTS_THEN_VERTICAL_LAYER',
+   demoRejectOnly:true,demoRejectActuator:this.demoRejectActuator,installedRejectActuationVerified:false,installedCameraCountVerified:false,installedCameraPopulationRendered:false,deterministicDefectInjection:'EVERY_5TH_INSPECTED_BLANK_DEMO_ONLY',scanWindow:[this.scanStart,this.scanEnd],scanPositionPolicy:'BLANK_OCCUPIES_OPTICAL_CELL',opticalAxisPolicy:this.template.root.userData.opticalAxisPolicy,scanPlaneY:this.template.root.userData.scanPlaneY,cameraPopulationPolicy:this.template.root.userData.cameraPopulationPolicy,scanWindowActive:this.scanActive,scanWindowPolicy:'DARK_VIEWING_WINDOW_SUBTLE_OCCUPANCY_GLOW_ONLY',rejectedOutputPolicy:'DAMAGE_FREE_RECOVERABLE_COLLECTION_FOR_RESORT_OR_REINSPECTION_REFERENCE',rejectBranchPolicy:'TRACKED_BLANK_BRANCHES_DIRECTLY_FROM_GATE_TO_RECOVERY_TRAY',acceptedBranchPolicy:'TRACKED_ACCEPTED_BLANK_BRANCHES_TO_FISH_SCALE_ENTRY_WITHOUT_TELEPORT',acceptedStackPolicy:'BOUNDED_FISH_SCALE_8_SLOTS_THEN_VERTICAL_LAYER',
    activeRejectTrackingIds:[...this.activeRejectTrackingIds],activePassTrackingIds:[...this.activePassTrackingIds],trackedResults:{pass:this.blanks.filter(b=>b.result==='PASS_DEMO').length,reject:this.blanks.filter(b=>b.result==='REJECT_DEMO').length,pending:this.blanks.filter(b=>!b.result).length}};
  }
  start(){this.active=true;this.running=true;this.paused=false;this.completed=0;this.rejected=0;this.inspectedDemoCount=0;this.elapsed=0;this.lastNow=null;for(const b of this.blanks){b.lap=-1;b.result=null;b.captured=false;b.processed=false;b.decisionReady=false;b.outputDeposited=false;b.inspectedLap=-1;b.lastT=0;b.trackingId=null;b.decisionSequence=null;b.mesh.visible=false;}this.resetMechanisms();this.staticDeliveryReferences.forEach(m=>m.visible=false);this.onUpdate?.(this.state());return this.state();}
@@ -76,7 +78,17 @@ export class DianaEye55ProcessSimulation{
  setInkFlowVisible(){return this.state();}
  spin(r,dt,rate){const axis=Y_AXIS,q=new THREE.Quaternion().setFromAxisAngle(axis,(r.userData.spinDirection||1)*rate*dt);r.quaternion.multiply(q).normalize();}
  updateRotors(dt){for(const r of this.rotors){const role=String(r.userData.mechanismRole||''),feed=role==='feed-pulley'&&this.feederDriveActive,transport=['transport-pulley','transport-drive-motor','transport-encoder'].includes(role)&&this.transportDriveActive,vac=role==='vacuum-blower'&&this.vacuumHoldActive,delivery=role==='delivery-pulley'&&this.deliveryDriveActive;if(!(feed||transport||vac||delivery))continue;const rate=vac?8.4:feed?6.1:transport?5.8:5.2;this.spin(r,dt,rate);}}
- updateOptics(active){for(const l of this.lights){l.material.emissive?.setHex(active?0xfff0b0:0x302d21);l.material.emissiveIntensity=active?2.25:.14;}}
+ updateOptics(active){
+  for(const l of this.lights){l.material.emissive?.setHex(active?0xfff0b0:0x302d21);l.material.emissiveIntensity=active?2.25:.14;}
+  this.scanWindows.forEach((w,i)=>{
+   if(w.material.emissive){
+    if(active)w.material.emissive.setHex(0x6b8791);
+    else if(this.scanWindowRest[i]?.emissive)w.material.emissive.copy(this.scanWindowRest[i].emissive);
+   }
+   w.material.emissiveIntensity=active?.18:(this.scanWindowRest[i]?.intensity??0);
+   w.material.needsUpdate=true;
+  });
+ }
  assignInspectionResult(blank,lap){
   const seq=lap*this.blanks.length+blank.index;blank.result=(seq%5===0)?'REJECT_DEMO':'PASS_DEMO';blank.inspectedLap=lap;blank.decisionSequence=seq;blank.trackingId='DIANA-DEMO-'+String(seq).padStart(5,'0');this.inspectedDemoCount++;
  }
