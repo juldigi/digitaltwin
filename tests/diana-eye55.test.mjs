@@ -126,6 +126,17 @@ test('DIANA feeds blanks progressively, scans at the cell, and deposits each out
  sim.stop();assert.deepEqual(sim.staticDeliveryReferences.map(m=>m.visible),sim.staticDeliveryVisibility);sim.dispose();model.dispose();
 });
 
+test('DIANA Stop & Reset clears every live process/interlock state',()=>{
+ const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);sim.start();let now=1000;
+ for(let i=0;i<900;i++){now+=10;sim.update(now);}
+ sim.stop();const s=sim.state();
+ for(const key of ['feederDriveActive','transportDriveActive','deliveryDriveActive','blankPresenceTrigger','transportEncoderActive','vacuumHoldActive','illuminationReady','cameraTriggerActive','captureComplete','scanActive','imageProcessingActive','processingComplete','decisionReady','rejectPermit','rejectConfirmed','outputCountActive','demoRejectActive','rejectTrackingActive','acceptedDeliveryActive','wasteDeliveryActive','fishScaleDeliveryActive'])assert.equal(s[key],false,key);
+ assert.equal(s.interlockSafe,true);
+ assert.equal(s.stageIndex,0);
+ assert.equal(s.stagePolicy,'MECHANISM_STATE_DRIVEN_DOWNSTREAM_PRIORITY');
+ sim.dispose();model.dispose();
+});
+
 test('DIANA pause/resume does not create a process-clock jump',()=>{
  const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);sim.start();sim.update(1000);sim.update(1200);const t=sim.elapsed;sim.pause();sim.update(20000);sim.resume();sim.update(30000);assert.equal(sim.elapsed,t);sim.update(30020);assert.ok(sim.elapsed-t<.03);sim.dispose();model.dispose();
 });
