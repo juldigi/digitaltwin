@@ -110,6 +110,14 @@ export class DianaEye55MachineTemplate{
  }
  enrichV141(){this.root.userData.researchVersion='V141';this.root.userData.researchSourceCount=V141_SOURCE_STATS.total;this.root.userData.uniqueResearchUrls=V141_SOURCE_STATS.uniqueUrls;this.root.userData.detailPass='V252_DIANA55_OEM_SILHOUETTE_FISHSCALE_FLOW';
   const tag=(m,role,evidence='MASTERWORK_DIANA_EYE_55_OEM')=>{if(m){m.userData.mechanismRole=role;m.userData.evidence=evidence;m.userData.detail=true;}return m;};
+  const duplicateGuard=this.findNode('diana55-access-guard');
+  if(duplicateGuard){
+   for(const panel of duplicateGuard.children.filter(o=>o.isMesh&&o.userData.exteriorCover&&o.position.y>1.0)){
+    panel.visible=false;panel.userData.supersededByV259=true;panel.userData.supersededReason='DUPLICATE_WHITE_GUARD_SKIN_BEHIND_INSPECTION_APERTURE';
+   }
+   duplicateGuard.userData.v259SkinPolicy='PRIMARY_INSPECTION_TUNNEL_SKIN_ONLY__RED_IDENTITY_STRIPE_RETAINED';
+  }
+
   const serviceDoor=this.findNode('diana55-access-door');
   if(serviceDoor){
    for(const panel of serviceDoor.children.filter(o=>o.isMesh&&o.userData.serviceDoor)){
@@ -354,6 +362,10 @@ export class DianaEye55MachineTemplate{
   if(window){
    window.userData.scanWindowPolicy='DARK_VIEWING_WINDOW_BRIGHTENS_SUBTLY_ONLY_DURING_ACTIVE_SCAN';
    for(const mesh of window.children.filter(o=>o.isMesh&&o.userData.inspectionAperture))mesh.userData.scanWindow=true;
+   for(const z of [-.778,.778]){
+    const backing=this.box(window,[1.16,.60,.012],[0,1.36,z],'black',.010);
+    backing.userData.apertureBacking=true;backing.userData.silhouetteCritical=true;
+   }
   }
  }
 
