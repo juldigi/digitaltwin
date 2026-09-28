@@ -190,6 +190,17 @@ test('DIANA optical illumination follows scan occupancy and resets cleanly',()=>
  assert.ok(seenScan);sim.stop();assert.equal(sim.lights.every(l=>l.material.emissiveIntensity<.2),true);assert.equal(sim.rotors.every((r,i)=>r.quaternion.angleTo(sim.rotorRest[i])<1e-9),true);sim.dispose();model.dispose();
 });
 
+test('DIANA accepted fish-scale stack remains bounded inside the delivery lane',()=>{
+ const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);
+ try{
+  for(let i=0;i<sim.goodStack.length;i++){const m=sim.goodStack[i];m.visible=true;m.userData.outputSerial=i+1;}
+  sim.relayoutAcceptedFishScale();
+  assert.ok(Math.max(...sim.goodStack.map(m=>m.position.x))<=sim.goodLaneEntry.x+7*.115+1e-9);
+  assert.ok(Math.max(...sim.goodStack.map(m=>m.position.y))>sim.goodLaneEntry.y,'accepted output should layer vertically after one fish-scale span');
+  assert.equal(sim.state().acceptedStackPolicy,'BOUNDED_FISH_SCALE_8_SLOTS_THEN_VERTICAL_LAYER');
+ }finally{sim.dispose();model.dispose();}
+});
+
 test('DIANA feeds blanks progressively, scans at the cell, and deposits each output once',()=>{
  const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);
  assert.ok(sim.staticDeliveryReferences.length>0);sim.start();assert.equal(sim.staticDeliveryReferences.every(m=>!m.visible),true);
