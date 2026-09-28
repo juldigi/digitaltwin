@@ -76,6 +76,7 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
     this.refineInternalFrameSupportsV256();
     this.refineCoaterFrameSupportsV257();
     this.refineCoaterAniloxDriveV258();
+    this.refineCoaterNipPathV259();
   }
 
   refineExteriorIdentityV237(){
@@ -465,7 +466,7 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
     const rows=[
       ['metering',-.02,1.80],
       ['coating', .10,1.48],
-      ['impression',-.08,1.06]
+      ['impression',-.08,1.03]
     ];
     for(const z of [-.90,.90]){
       const spine=this.db(chamber,[.14,1.18,.12],[.02,1.45,z],'graphite',.014,'coater-open-side-frame-spine',{confidence:'PHOTO_OEM_FUNCTIONAL_REFERENCE'});
@@ -476,7 +477,8 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
         const saddle=this.db(chamber,[.28,.13,.14],[x,y,saddleZ],'graphite',.012,'coater-roller-bearing-saddle',{confidence:'PHOTO_OEM_FUNCTIONAL_REFERENCE'});
         saddle.userData.structuralCutaway=true;saddle.userData.coaterRollerRole=role;saddle.userData.rollerBodyClearanceM=.02;
         const cap=this.dc(chamber,.070,.032,[x,y,capZ],'steel','z','coater-roller-bearing-cap',{service:true,confidence:'PHOTO_OEM_FUNCTIONAL_REFERENCE'});
-        cap.userData.coaterRollerRole=role;
+        cap.scale.x=1/(this.node('coater')?.scale.x||1);
+        cap.userData.coaterRollerRole=role;cap.userData.roundnessCompensated=true;
       }
     }
     this.root.userData.dimensionLock='BMJ_CUSTOM_INSTALLED_DIMENSIONS_DO_NOT_NORMALIZE_TO_GENERIC_CD102';
@@ -491,12 +493,14 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
     this.root.userData.coaterDriveEvidence='HEIDELBERG_CD102_CHAMBER_BLADE__ANILOX_ROLLER_LOCK__DRIVE_SHAFT_DS';
     const chamber=this.node('coater-chamber');if(!chamber)return;
 
-    const driveZ=-.86;
+    const driveZ=-.86,roundnessScale=1/(this.node('coater')?.scale.x||1);
     const hub=this.dc(chamber,.082,.070,[-.02,1.80,driveZ],'graphite','z','coater-anilox-drive-hub',{service:true,confidence:'HEIDELBERG_CD102_SERVICE_REFERENCE'});
+    hub.scale.x=roundnessScale;hub.userData.roundnessCompensated=true;
     hub.userData.coaterRollerFunction='ANILOX_METERING_REFERENCE';
     hub.userData.driveSideOnly=true;
 
     const shaft=this.dc(chamber,.038,.145,[-.02,1.80,-.925],'steel','z','coater-anilox-drive-shaft-ds',{service:true,confidence:'HEIDELBERG_CD102_SERVICE_REFERENCE'});
+    shaft.scale.x=roundnessScale;shaft.userData.roundnessCompensated=true;
     shaft.userData.coaterRollerFunction='ANILOX_METERING_REFERENCE';
     shaft.userData.driveSideOnly=true;
 
@@ -507,6 +511,17 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
     const retainer=this.db(chamber,[.09,.055,.06],[.08,1.80,-.82],'steel',.008,'coater-anilox-drive-retainer',{service:true,confidence:'HEIDELBERG_CD102_SERVICE_REFERENCE'});
     retainer.userData.driveSideOnly=true;
 
+    this.root.userData.dimensionLock='BMJ_CUSTOM_INSTALLED_DIMENSIONS_DO_NOT_NORMALIZE_TO_GENERIC_CD102';
+  }
+
+  refineCoaterNipPathV259(){
+    // The BMJ custom coater module is longer than the unscaled visual base, but round process
+    // cylinders must remain round in world space. The sheet centerline follows the impression
+    // surface into the small coating nip instead of penetrating either process-cylinder core.
+    this.root.userData.visualRefinement='V259_COATER_NIP_PATH_AND_ROUND_ROLLER_GEOMETRY';
+    this.root.userData.coaterRoundnessPolicy='WORLD_SPACE_ROUND_PROCESS_ROLLERS_DESPITE_CUSTOM_LONGITUDINAL_MODULE_SCALE';
+    this.root.userData.coaterNipPathPolicy='IMPRESSION_SURFACE_ARC_TO_MID_GAP_COATING_NIP';
+    this.root.userData.coaterImpressionCenterY=1.03;
     this.root.userData.dimensionLock='BMJ_CUSTOM_INSTALLED_DIMENSIONS_DO_NOT_NORMALIZE_TO_GENERIC_CD102';
   }
 
@@ -875,6 +890,8 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       inspectionIlluminationActive:this.inspectionIlluminationActive,
       inspectionIlluminationPolicy:'SHEET_OCCUPANCY_TRIGGERED_EXISTING_FOCUSIGHT_LIGHTING_ONLY',
       coaterMotionPolicy:'EXISTING_THREE_ROLL_CONTACT_TRAIN_MATCHES_SHEET_SURFACE_SPEED',
+      coaterRoundnessPolicy:this.template.root.userData.coaterRoundnessPolicy,
+      coaterNipPathPolicy:this.template.root.userData.coaterNipPathPolicy,
       dryerTransportPolicy:'MOBILE_BATCHED_STATIC_REFERENCE__UV_AND_SHEET_PATH_CARRY_VISIBLE_DRYER_MOTION',
       deliveryPileElevatorPolicy:'TOP_RECEIVING_PLANE_HELD_CONSTANT_WHILE_TABLE_LOWERS_WITH_STACK',
       deliveryTableDropM:this.deliveryTableDrop||0,
