@@ -275,17 +275,17 @@ export class SharkN650MachineTemplate{
   if(tower){
     const bezel=this.group(tower,'shark650-front-aperture-bezel-v260','Operator-side vision aperture bezel');
     const z=-.755;
-    for(const x of [-.57,.57]){const side=this.box(bezel,[.08,.94,.05],[x,1.55,z],'dark',.010);side.userData.apertureBezel=true;}
-    for(const y of [1.07,2.03]){const rail=this.box(bezel,[1.20,.08,.05],[0,y,z],'dark',.010);rail.userData.apertureBezel=true;}
+    for(const x of [-.57,.57]){const side=this.cover(this.box(bezel,[.08,.94,.05],[x,1.55,z],'dark',.010));side.userData.apertureBezel=true;}
+    for(const y of [1.07,2.03]){const rail=this.cover(this.box(bezel,[1.20,.08,.05],[0,y,z],'dark',.010));rail.userData.apertureBezel=true;}
     bezel.userData.sourceBoundary='FOCUSIGHT_SHARK_650_FAMILY_FRONT_TOWER_IMAGE';
   }
 
   const window=this.findNode('shark650-inspection-window');
   if(window){
     window.userData.scanWindowPolicy='DARK_TOWER_WINDOW_SUBTLE_GLOW_ONLY_DURING_ACTIVE_SCAN';
-    for(const mesh of window.children.filter(o=>o.isMesh)){mesh.userData.scanWindow=true;mesh.userData.inspectionAperture=true;}
+    for(const mesh of window.children.filter(o=>o.isMesh)){mesh.userData.scanWindow=true;mesh.userData.inspectionAperture=true;mesh.userData.exteriorCover=true;}
     for(const z of [-.718,.718]){
-      const backing=this.box(window,[1.00,.75,.012],[0,1.55,z],'black',.010);
+      const backing=this.cover(this.box(window,[1.00,.75,.012],[0,1.55,z],'black',.010));
       backing.userData.apertureBacking=true;backing.userData.silhouetteCritical=true;
     }
   }
