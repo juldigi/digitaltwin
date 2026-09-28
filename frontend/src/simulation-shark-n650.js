@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import {progressAtX} from './inspection-path.js';
 
 export const SHARK_N650_SIMULATION_STAGES=Object.freeze([
- 'Automatic blank feed','Negative-pitch suction transfer','Controlled lighting + camera capture','Vision processing demo',
- 'Tracked pass / reject decision demo','Reject actuation demo','Good / bad return routing','Collection'
+ 'Pengumpanan blank otomatis','Transfer suction negative-pitch','Pencahayaan terkontrol + camera capture','Pemrosesan vision demo',
+ 'Pelacakan keputusan pass / reject','Aktuasi reject demo','Rute return good / bad','Pengumpulan output'
 ]);
 const Y_AXIS=new THREE.Vector3(0,1,0);
 const clamp=v=>Math.max(0,Math.min(1,v));
