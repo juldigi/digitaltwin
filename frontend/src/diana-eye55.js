@@ -193,7 +193,7 @@ export class DianaEye55MachineTemplate{
    }
    for(const z of [-.56,0,.56]){const guide=this.box(delivery,[1.86,.035,.025],[.12,.80,z],'steel',.004);guide.userData.deliverySideGuide=true;}
    const monitoring=this.group(delivery,'diana55-delivery-monitor-v254','Finished / waste delivery monitoring camera');
-   this.box(monitoring,[.10,.38,.10],[.72,1.15,.66],'steel',.010);
+   const mast=this.box(monitoring,[.10,.72,.10],[.72,1.06,.66],'steel',.010);mast.userData.deliveryMonitoringMast=true;mast.userData.mountPolicy='DELIVERY_BED_TO_CAMERA_HEAD_STRUCTURAL_REFERENCE';
    const cam=this.box(monitoring,[.18,.14,.16],[.70,1.36,.50],'dark',.016);cam.userData.mechanismRole='delivery-monitoring-camera-reference';cam.userData.rotor=false;
    this.cyl(monitoring,.035,.045,[.70,1.32,.40],'black','delivery-monitor-lens','z').userData.rotor=false;
    const stacker=this.group(delivery,'diana55-side-stacker-capability-v254','Optional side stacker capability');
