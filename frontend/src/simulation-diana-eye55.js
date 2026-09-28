@@ -31,7 +31,16 @@ export class DianaEye55ProcessSimulation{
   for(let i=0;i<18;i++){for(const [arr,z,route] of [[this.goodStack,0,'FISH_SCALE_ACCEPT'],[this.rejectStack,.52,'REJECT_CHUTE']]){const m=new THREE.Mesh(new THREE.BoxGeometry(.48,.006,.36),new THREE.MeshStandardMaterial({color:0xe1cca2,roughness:.9}));m.visible=false;m.userData.stackZ=z;m.userData.deliveryRoute=route;root.add(m);arr.push(m);}}
   this.resetFlags();this.updateOptics(false);
  }
- resetFlags(){this.scanActive=false;this.imageProcessingActive=false;this.demoRejectActive=false;this.rejectTrackingActive=false;this.acceptedDeliveryActive=false;this.wasteDeliveryActive=false;this.fishScaleDeliveryActive=false;this.demoRejectOnly=true;this.demoRejectActuator='NEUTRAL_DAMAGE_FREE_EJECTION_REFERENCE__INSTALLED_ACTUATOR_UNVERIFIED';this.goodLaneZ=-.25;this.wasteLaneZ=.28;this.paperJam=false;this.activeRejectTrackingIds=[];this.activePassTrackingIds=[];}
+ resetFlags(){
+  this.feederDriveActive=false;this.transportDriveActive=false;this.deliveryDriveActive=false;
+  this.blankPresenceTrigger=false;this.transportEncoderActive=false;this.vacuumHoldActive=false;
+  this.illuminationReady=false;this.cameraTriggerActive=false;this.captureComplete=false;
+  this.scanActive=false;this.imageProcessingActive=false;this.processingComplete=false;this.decisionReady=false;
+  this.rejectPermit=false;this.rejectConfirmed=false;this.outputCountActive=false;this.interlockSafe=true;
+  this.demoRejectActive=false;this.rejectTrackingActive=false;this.acceptedDeliveryActive=false;this.wasteDeliveryActive=false;this.fishScaleDeliveryActive=false;
+  this.demoRejectOnly=true;this.demoRejectActuator='NEUTRAL_DAMAGE_FREE_EJECTION_REFERENCE__INSTALLED_ACTUATOR_UNVERIFIED';
+  this.goodLaneZ=-.25;this.wasteLaneZ=.28;this.paperJam=false;this.activeRejectTrackingIds=[];this.activePassTrackingIds=[];
+ }
  state(){
   const p=this.active?(this.elapsed/7.8)%1:0;
   let index=0;
