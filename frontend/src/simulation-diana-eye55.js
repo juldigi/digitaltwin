@@ -33,8 +33,16 @@ export class DianaEye55ProcessSimulation{
  }
  resetFlags(){this.scanActive=false;this.imageProcessingActive=false;this.demoRejectActive=false;this.rejectTrackingActive=false;this.acceptedDeliveryActive=false;this.wasteDeliveryActive=false;this.fishScaleDeliveryActive=false;this.demoRejectOnly=true;this.demoRejectActuator='NEUTRAL_DAMAGE_FREE_EJECTION_REFERENCE__INSTALLED_ACTUATOR_UNVERIFIED';this.goodLaneZ=-.25;this.wasteLaneZ=.28;this.paperJam=false;this.activeRejectTrackingIds=[];this.activePassTrackingIds=[];}
  state(){
-  const p=this.active?(this.elapsed/7.8)%1:0,index=Math.min(DIANA_EYE55_SIMULATION_STAGES.length-1,Math.floor(p*DIANA_EYE55_SIMULATION_STAGES.length));
-  return {available:true,blocked:false,active:this.active,running:this.running,paused:this.paused,speed:this.speed,stage:DIANA_EYE55_SIMULATION_STAGES[index],completed:this.completed,rejectedDemo:this.rejected,inspectedDemoCount:this.inspectedDemoCount,progress:p,
+  const p=this.active?(this.elapsed/7.8)%1:0;
+  let index=0;
+  if(this.transportDriveActive)index=1;
+  if(this.scanActive)index=2;
+  if(this.imageProcessingActive)index=3;
+  if(this.decisionReady)index=4;
+  if(this.demoRejectActive)index=5;
+  if(this.acceptedDeliveryActive||this.wasteDeliveryActive)index=6;
+  if(!this.deliveryDriveActive&&(this.completed>0||this.rejected>0)&&!this.scanActive&&!this.imageProcessingActive&&!this.demoRejectActive)index=7;
+  return {available:true,blocked:false,active:this.active,running:this.running,paused:this.paused,speed:this.speed,stage:DIANA_EYE55_SIMULATION_STAGES[index],stageIndex:index,stagePolicy:'MECHANISM_STATE_DRIVEN_DOWNSTREAM_PRIORITY',completed:this.completed,rejectedDemo:this.rejected,inspectedDemoCount:this.inspectedDemoCount,progress:p,
    sheetsVisible:this.blanks.filter(b=>b.mesh.visible).length,pileSheetsVisible:this.goodStack.filter(p=>p.visible).length,rejectSheetsVisible:this.rejectStack.filter(p=>p.visible).length,
    rotorCount:this.rotors.length,mechanismCount:this.rotors.length+this.lights.length+1,pathVisible:this.pathVisible,inkFlowVisible:false,inkFlowCount:0,uvLampCount:0,uvActive:false,
    feederDriveActive:this.feederDriveActive,transportDriveActive:this.transportDriveActive,deliveryDriveActive:this.deliveryDriveActive,blankPresenceTrigger:this.blankPresenceTrigger,transportEncoderActive:this.transportEncoderActive,vacuumHoldActive:this.vacuumHoldActive,illuminationReady:this.illuminationReady,cameraTriggerActive:this.cameraTriggerActive,captureComplete:this.captureComplete,scanActive:this.scanActive,imageProcessingActive:this.imageProcessingActive,processingComplete:this.processingComplete,decisionReady:this.decisionReady,rejectPermit:this.rejectPermit,rejectConfirmed:this.rejectConfirmed,outputCountActive:this.outputCountActive,interlockSafe:this.interlockSafe,demoRejectActive:this.demoRejectActive,rejectTrackingActive:this.rejectTrackingActive,acceptedDeliveryActive:this.acceptedDeliveryActive,wasteDeliveryActive:this.wasteDeliveryActive,rejectRecoveryActive:this.wasteDeliveryActive,fishScaleDeliveryActive:this.fishScaleDeliveryActive,deliveryMode:'ACCEPTED_FISH_SCALE_PLUS_RECOVERABLE_REJECT_COLLECTION',paperJam:this.paperJam,rejectSafetyCoverReference:true,deliveryMonitoringCameraReference:true,
