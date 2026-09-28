@@ -306,6 +306,14 @@ export class SharkN650MachineTemplate{
     }
   }
 
+  const cutawayExteriorAccessory=id=>{
+    const node=this.findNode(id);if(!node)return;
+    node.traverse(o=>{if(o.isMesh)o.userData.exteriorCover=true;});
+    node.userData.cutawayPolicy='HIDE_COMPLETE_EXTERNAL_ACCESSORY_WITH_MACHINE_COVERS';
+  };
+  for(const id of ['shark650-signal-tower-v259','shark650-tower-local-control-v259','shark650-hmi-v251'])cutawayExteriorAccessory(id);
+  this.root.userData.externalAccessoryCutawayPolicy='EXTERNAL_CONTROLS_AND_SIGNAL_HARDWARE_HIDE_AS_COMPLETE_ASSEMBLIES__PROCESS_INTERNALS_REMAIN_VISIBLE';
+
   const ret=this.findNode('shark650-return');
   if(ret){
     const support=this.group(ret,'shark650-return-side-frame-v260','Good/bad return side-frame supports');
