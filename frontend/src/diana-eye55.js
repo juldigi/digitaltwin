@@ -334,9 +334,9 @@ export class DianaEye55MachineTemplate{
 
   const hmi=this.findNode('diana55-hmi-pedestal-v251');
   if(hmi){
-   const neck=this.box(hmi,[.16,.54,.16],[.72,.54,-1.28],'light',.025);neck.rotation.z=-.10;neck.userData.structuralAttachment=true;
+   const neck=this.box(hmi,[.18,.18,.18],[.72,.15,-1.28],'light',.025);neck.rotation.z=-.10;neck.userData.structuralAttachment=true;
    const base=this.box(hmi,[.56,.08,.46],[.72,.06,-1.28],'dark',.018);base.userData.floorContact=true;base.userData.structuralAttachment=true;
-   for(const z of [-1.42,-1.14]){const foot=this.cyl(hmi,.035,.055,[.72,.01,z],'dark','hmi-floor-foot','y');foot.userData.floorContact=true;foot.userData.rotor=false;}
+   for(const z of [-1.42,-1.14]){const foot=this.cyl(hmi,.035,.055,[.72,.028,z],'dark','hmi-floor-foot','y');foot.userData.floorContact=true;foot.userData.rotor=false;}
    hmi.userData.v259AttachmentPolicy='DISPLAY_HEAD_TO_SLANTED_NECK_TO_FLOOR_BASE';
   }
 
