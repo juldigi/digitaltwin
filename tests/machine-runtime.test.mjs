@@ -510,8 +510,8 @@ test('V140 FZ1200 service morphology and taxonomy expose close-family drive hydr
 
 test('V141 inspection and inkjet twins expose detailed drive trigger sensor and reject service morphology',()=>{
  const cases=[
-  ['BMJ-MCH-0019',['diana55-transport-drive','diana55-transport-trigger'],['Suction-belt drive / encoder','Inspection trigger / blank presence sensing','Capture → process → decision → reject permissive chain']],
-  ['BMJ-MCH-0020',['shark650-transfer-drive'],['Transfer drive / encoder reference','Program-controlled lighting / light-column shielding reference','Capture → processing → decision → reject permissive chain']],
+  ['BMJ-MCH-0019',['diana55-transport-drive','diana55-transport-trigger'],['Drive suction-belt / encoder','Trigger inspeksi / sensing kehadiran blank','Rantai permissive capture → process → decision → reject']],
+  ['BMJ-MCH-0020',['shark650-transfer-drive'],['Drive transfer / referensi encoder','Pencahayaan program-controlled / referensi shielding light-column','Rantai permissive capture → processing → decision → reject']],
   ['BMJ-MCH-0024',['ly300-transport-trigger'],['Print trigger / position confirmation','Negative-pressure pump / gauge / ready sensing / filter','Inspection decision → reject permit chain']]
  ];
  for(const [id,nodes,terms] of cases){
