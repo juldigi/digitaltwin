@@ -59,6 +59,19 @@ test('SHARK automatic feeder suction cups point vertically toward the blank pick
  }finally{model.dispose();}
 });
 
+test('SHARK operator monitor mast is physically tied back to the chassis side',()=>{
+ const model=new SharkN650MachineTemplate();
+ try{
+  const hmi=model.findNode('shark650-hmi-v251');assert.ok(hmi);
+  const mast=hmi.children.find(o=>o.isMesh&&o.userData.structuralMountReference);
+  const mount=hmi.children.find(o=>o.isMesh&&o.userData.hmiChassisMount);
+  assert.ok(mast&&mount);
+  assert.equal(mount.userData.mountPolicy,'CHASSIS_SIDE_TO_MONITOR_MAST_STRUCTURAL_REFERENCE');
+  const mountMinZ=mount.position.z-.38/2,mountMaxZ=mount.position.z+.38/2;
+  assert.ok(mountMinZ<=mast.position.z+.04&&mountMaxZ>=-.70,'SHARK monitor bracket must bridge mast to chassis-side panel');
+ }finally{model.dispose();}
+});
+
 test('SHARK adaptive low-detail hides service micro-detail while preserving tower and monitor silhouette',()=>{
  const model=new SharkN650MachineTemplate();
  try{
