@@ -156,6 +156,18 @@ test('V259 DIANA viewing window follows active scan occupancy and restores after
  }finally{sim.dispose();model.dispose();}
 });
 
+test('DIANA isolate, showOnly and reset preserve intentionally hidden capability nodes',()=>{
+ const model=new DianaEye55MachineTemplate();
+ try{
+  const ids=['diana55-camera-rear','diana55-camera-area','diana55-reject-air','diana55-side-stacker-capability-v254','diana55-process-recipe','diana55-delivery-waste-v254'];
+  const hidden=ids.map(id=>model.findNode(id));assert.ok(hidden.every(Boolean));assert.ok(hidden.every(n=>n.visible===false));
+  const feeder=model.findNode('diana55-feeder');
+  model.isolate(feeder,true);model.isolate(null,false);assert.ok(hidden.every(n=>n.visible===false),'DIANA isolate exit resurrected hidden capability node');
+  model.showOnly([feeder],true);model.showOnly([],false);assert.ok(hidden.every(n=>n.visible===false),'DIANA showOnly exit resurrected hidden capability node');
+  model.reset();assert.ok(hidden.every(n=>n.visible===false),'DIANA reset resurrected hidden capability node');
+ }finally{model.dispose();}
+});
+
 test('DIANA rotor whitelist rotates only feeder transport vacuum and delivery mechanisms',()=>{
  const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model),allowed=/^(feed-pulley|transport-pulley|transport-drive-motor|transport-encoder|vacuum-blower|delivery-pulley)$/;
  assert.ok(sim.rotors.length>=24);assert.equal(sim.rotors.some(r=>!allowed.test(r.userData.mechanismRole||'')),false);
