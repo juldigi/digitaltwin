@@ -123,7 +123,6 @@ test('V256 grounds all PU cylinder journals into open side-frame rails without c
 test('V257 supports the existing coater rollers on both side frames without changing the machine envelope',()=>{
  const m=new Offset5CD102RealismTemplate();
  try{
-  assert.equal(m.root.userData.visualRefinement,'V257_BMJ_COATER_OPEN_BEARING_FRAME_SUPPORTS');
   assert.equal(m.root.userData.coaterFramePolicy,'SUPPORT_EXISTING_THREE_ROLL_CONTACT_TRAIN_ONLY__NO_SECOND_COATER__NO_DIMENSION_CHANGE');
   const chamber=m.findNode('coater-chamber');
   assert.ok(chamber);
@@ -145,6 +144,29 @@ test('V257 supports the existing coater rollers on both side frames without chan
   assert.equal(m.root.userData.machineEnvelope.structuralBody.length,26.00);
   assert.equal(m.root.userData.machineEnvelope.serviceInclusive.length,27.00);
  }finally{m.dispose();}
+});
+
+test('V258 adds only drive-side anilox service hardware to the existing coater roller train',()=>{
+ const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
+ try{
+  assert.equal(m.root.userData.visualRefinement,'V258_CD102_COATER_ANILOX_DRIVE_SIDE_REALISM');
+  assert.equal(m.root.userData.coaterAniloxPolicy,'EXISTING_TOP_METERING_ROLLER_IS_ANILOX_VISUAL_REFERENCE__NO_DUPLICATE_ROLLER');
+  assert.equal(m.root.userData.coaterDriveEvidence,'HEIDELBERG_CD102_CHAMBER_BLADE__ANILOX_ROLLER_LOCK__DRIVE_SHAFT_DS');
+  const roles=['coater-anilox-drive-hub','coater-anilox-drive-shaft-ds','coater-anilox-lock-reference','coater-anilox-drive-retainer'];
+  for(const role of roles)assert.equal(m.realismMeshes.filter(x=>x.userData.realismRole===role).length,1,`missing or duplicated ${role}`);
+  m.root.updateMatrixWorld(true);
+  for(const role of ['coater-anilox-drive-hub','coater-anilox-drive-shaft-ds','coater-anilox-drive-retainer']){
+   const mesh=m.realismMeshes.find(x=>x.userData.realismRole===role);
+   assert.equal(mesh.userData.driveSideOnly,true,role);
+   assert.ok(mesh.getWorldPosition(new THREE.Vector3()).z>0,`${role} must remain on the photo-verified drive side after the top-level Z mirror`);
+  }
+  const lock=m.realismMeshes.find(x=>x.userData.realismRole==='coater-anilox-lock-reference');
+  assert.equal(lock.userData.serviceSettingAsserted,false);
+  assert.equal(sim.rotors.filter(x=>String(x.role||'').startsWith('coater-')).length,3,'V258 must not add a duplicate coater process roller');
+  assert.equal(m.root.userData.dimensionLock,'BMJ_CUSTOM_INSTALLED_DIMENSIONS_DO_NOT_NORMALIZE_TO_GENERIC_CD102');
+  assert.equal(m.root.userData.machineEnvelope.structuralBody.length,26.00);
+  assert.equal(m.root.userData.machineEnvelope.serviceInclusive.length,27.00);
+ }finally{sim.dispose();m.dispose();}
 });
 
 test('Offset 5 feeds separate 720 mm sheets with a visible gap and releases them at delivery',()=>{
