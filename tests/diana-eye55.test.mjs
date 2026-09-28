@@ -156,6 +156,7 @@ test('V259 DIANA keeps feeder, inspection aperture and HMI physically attached w
   const hiddenGuard=guard.children.filter(o=>o.isMesh&&o.userData.supersededByV259);
   assert.ok(hiddenGuard.every(o=>o.visible===false&&o.userData.permanentlyHidden===true));
   const aperture=model.findNode('diana55-inspection-window');
+  const bezel=model.findNode('diana55-front-aperture-bezel-v259');assert.ok(bezel);
   const bezelMeshes=bezel.children.filter(o=>o.isMesh&&o.userData.apertureBezel);
   const apertureMeshes=aperture.children.filter(o=>o.isMesh&&(o.userData.inspectionAperture||o.userData.apertureBacking));
   model.setExteriorOpen(true);
@@ -164,8 +165,6 @@ test('V259 DIANA keeps feeder, inspection aperture and HMI physically attached w
   assert.ok(hiddenGuard.every(o=>o.visible===false),'Diana duplicate guard skin reappeared after cutaway toggle');
   assert.ok([...bezelMeshes,...apertureMeshes].every(o=>o.visible===true),'Diana aperture assembly did not restore after closing cutaway');
   assert.equal(aperture.children.filter(o=>o.isMesh&&o.userData.apertureBacking).length,2);
-  const bezel=model.findNode('diana55-front-aperture-bezel-v259');
-  assert.ok(bezel);
   assert.equal(bezel.children.filter(o=>o.isMesh&&o.userData.apertureBezel).length,5);
   const hmi=model.findNode('diana55-hmi-pedestal-v251');
   assert.equal(hmi.userData.v259AttachmentPolicy,'DISPLAY_HEAD_TO_SLANTED_NECK_TO_FLOOR_BASE');
