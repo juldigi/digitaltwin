@@ -56,6 +56,31 @@ test('V254 keeps newly added operator-side micro-details on the photo-verified w
  }finally{m.dispose();}
 });
 
+test('V255 matches the BMJ delivery end-face photo with attached fascia, controls, rail mounts and gate anchors',()=>{
+ const m=new Offset5CD102RealismTemplate();
+ try{
+  const count=role=>m.realismMeshes.filter(item=>item.userData.realismRole===role).length;
+  assert.equal(m.root.userData.visualRefinement,'V255_BMJ_PHOTO_DELIVERY_FACE_AND_SUPPORTED_GATE');
+  assert.equal(m.root.userData.photoDeliveryEvidence,'IMG_2312.jpeg');
+  assert.equal(m.root.userData.photoDeliveryPolicy,'EXTERIOR_FACE_ONLY__NO_CONTROL_FUNCTION_OR_SERVICE_SETTING_INFERRED');
+  assert.equal(count('delivery-photo-upper-control-fascia'),1);
+  assert.equal(count('delivery-photo-fascia-seam'),3);
+  assert.equal(count('delivery-photo-control-knob'),4);
+  assert.equal(count('delivery-photo-status-window'),5);
+  assert.equal(count('delivery-photo-window-bezel-top'),1);
+  assert.equal(count('delivery-photo-window-bezel-bottom'),1);
+  assert.equal(count('delivery-photo-window-bezel-side'),2);
+  assert.equal(count('delivery-front-rail-standoff'),2);
+  assert.equal(count('delivery-gate-end-anchor'),4);
+  const gate=m.findNode('delivery-gate');
+  assert.equal(gate.userData.photoMountPolicy,'IMG_2312_GATE_RODS_TERMINATE_IN_SUPPORTED_CROSSMEMBERS');
+  assert.ok(m.realismMeshes.filter(item=>item.userData.realismRole==='delivery-front-rail-standoff').every(item=>item.userData.attachment==='END_FACE_TO_EXISTING_FRONT_RAIL'));
+  assert.equal(m.root.userData.dimensionLock,'BMJ_CUSTOM_INSTALLED_DIMENSIONS_DO_NOT_NORMALIZE_TO_GENERIC_CD102');
+  assert.equal(m.root.userData.machineEnvelope.structuralBody.length,26.00);
+  assert.equal(m.root.userData.machineEnvelope.structuralBody.width,3.92);
+ }finally{m.dispose();}
+});
+
 test('V254 adds attached Preset Plus delivery and coater references without changing machine dimensions',()=>{
  const m=new Offset5CD102RealismTemplate();
  try{
