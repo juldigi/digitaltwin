@@ -1810,20 +1810,19 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   ppipeUnion(x+.22,.72,z,'y',.105,0x707a7c,'IPAL_PHOTO_PUMP_TOP_UNION'); 
  }
 
- // User-confirmed correction: the terrestrial vegetation is a wall-mounted strip on the IPAL-facing side
- // of the outermost site wall, and it spans that wall end-to-end. It is not a free-standing planter in the yard.
+ // User-confirmed correction: planting hangs from the outer steel frame and faces outwards; no wall behind it.
  const outerWall=IPAL_PHOTO_EVIDENCE_V206.relativeLayout.outerPerimeterWall;
  const vg=IPAL_PHOTO_EVIDENCE_V206.relativeLayout.verticalGarden,vgZ=-vg.y;
  const road=IPAL_PHOTO_EVIDENCE_V206.relativeLayout.serviceRoadClearance;
- const landscapeTag=(o,semantic,extra={})=>photoTag(o,semantic,{coreProcess:false,userConfirmedLocation:'ATTACHED_TO_OUTERMOST_WALL_FULL_LENGTH',...extra});
+ const landscapeTag=(o,semantic,extra={})=>photoTag(o,semantic,{coreProcess:false,userConfirmedLocation:'OUTERMOST_IPAL_STEEL_FRAME_FACING_OUTWARD',...extra});
  const lbox=(x,y,z,w,h,d,color,semantic,rot=0,opacity=1,extra={})=>landscapeTag(box(layers.landscape,x,y,z,w,h,d,color,rot,opacity),semantic,extra);
- // The perimeter wall remains landscape/site context and therefore does not convert the open-sided IPAL process yard into an enclosure.
- const outerWallMesh=lbox(outerWall.x,outerWall.h/2,-outerWall.y,outerWall.w,outerWall.h,outerWall.t,0xbfc3bc,'IPAL_OUTER_PERIMETER_WALL_REFERENCE',0,1,{siteBoundary:true,notIpalEnclosure:true,placementRule:'USER_CONFIRMED_OUTERMOST_WALL'});
- outerWallMesh.castShadow=true;outerWallMesh.receiveShadow=true;
- // Thin backing and continuous low planter physically touch the wall face. Both run for the complete wall length.
- const wallFacingZ=-(outerWall.y-outerWall.t/2-vg.d/2);
- lbox(vg.x,1.28,wallFacingZ,vg.w,2.18,.14,0x566457,'IPAL_PHOTO_VERTICAL_GARDEN_BACKING',0,1,{wallAttached:true,fullWallLength:true});
- lbox(vg.x,.23,wallFacingZ+.08,vg.w,.42,.34,0x5d6f62,'IPAL_PHOTO_VERTICAL_GARDEN_BASE',0,1,{wallAttached:true,fullWallLength:true});
+ const frameZ=-outerWall.y,gardenZ=-vg.y;
+ for(const x of [33.5,38.7,43.9,49.1,54.3,59.3]){
+  for(const y of [.42,1.12,1.82])pline([x,y,frameZ],[x,y,gardenZ],.024,0x53666a,'IPAL_PHOTO_VERTICAL_GARDEN_CANTILEVER_BRACKET',{frameAttached:true});
+ }
+ for(const y of [.38,1.05,1.72,2.16])lbox(vg.x,y,gardenZ,vg.w,.045,.045,0x53666a,'IPAL_PHOTO_VERTICAL_GARDEN_HORIZONTAL_RAIL',0,1,{frameAttached:true,openMesh:true});
+ for(let col=0;col<24;col++){const x=vg.x-vg.w/2+col*vg.w/23;lbox(x,1.26,gardenZ,.036,1.85,.036,0x53666a,'IPAL_PHOTO_VERTICAL_GARDEN_VERTICAL_RAIL',0,1,{frameAttached:true,openMesh:true});}
+ // Small suspended pockets and foliage sit on the road-facing side of the open steel lattice.
  // Dense wall planting uses instancing for mobile performance while preserving the long continuous planted-wall appearance.
  const cols=46,rows=3,plantCount=cols*rows,plantGeo=new T.IcosahedronGeometry(.20,1),plantMats=[
   material(0x4f7d58),material(0x73904e),material(0x5f8556)
@@ -1831,13 +1830,12 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  for(let row=0;row<rows;row++){
   const batch=new T.InstancedMesh(plantGeo,plantMats[row],cols);batch.castShadow=true;batch.receiveShadow=true;
   for(let col=0;col<cols;col++){
-   const x=vg.x-vg.w/2+.25+col*(vg.w-.50)/(cols-1),y=.64+row*.55,z=wallFacingZ+.15;
+   const x=vg.x-vg.w/2+.25+col*(vg.w-.50)/(cols-1),y=.64+row*.55,z=gardenZ-.16;
    dummyPlant.position.set(x,y,z);dummyPlant.scale.set(1+(col%4)*.08,.88+(col%5)*.05,.86+(col%3)*.08);dummyPlant.rotation.set(0,(col%7)*.11,0);dummyPlant.updateMatrix();batch.setMatrixAt(col,dummyPlant.matrix);
   }
-  batch.instanceMatrix.needsUpdate=true;layers.landscape.add(batch);landscapeTag(batch,'IPAL_PHOTO_VERTICAL_GARDEN_PLANT',{variation:'WALL_MOUNTED_DENSE_INSTANCED',wallAttached:true,fullWallLength:true,instanceCount:cols});wallPlantBatches.push(batch);
+  batch.instanceMatrix.needsUpdate=true;layers.landscape.add(batch);landscapeTag(batch,'IPAL_PHOTO_VERTICAL_GARDEN_PLANT',{variation:'OUTWARD_FACING_FRAME_MOUNTED',frameAttached:true,facesOutward:true,fullFrameLength:true,instanceCount:cols});wallPlantBatches.push(batch);
  }
- // Narrow planter divisions are flush to the wall, never in the service-road travel envelope.
- for(let col=0;col<23;col++){const x=vg.x-vg.w/2+.30+col*(vg.w-.60)/22;lbox(x,.30,wallFacingZ+.09,.025,.52,.37,0x4f5148,'IPAL_PHOTO_PLANTER_DIVIDER',0,1,{wallAttached:true});}
+ for(let col=0;col<23;col++){const x=vg.x-vg.w/2+.30+col*(vg.w-.60)/22;lbox(x,.42,gardenZ-.07,.26,.18,.17,0x4f5148,'IPAL_PHOTO_SUSPENDED_PLANT_POCKET',0,1,{frameAttached:true});}
  buildingDetailStats.v205IpalVegetationObjects+=plantCount;
  const wallMinX=outerWall.x-outerWall.w/2,wallMaxX=outerWall.x+outerWall.w/2,gardenMinX=vg.x-vg.w/2,gardenMaxX=vg.x+vg.w/2;
  const roadBounds={minX:road.x-road.w/2,maxX:road.x+road.w/2,minY:road.y-road.d/2,maxY:road.y+road.d/2};
@@ -1849,12 +1847,13 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   serviceRoad:roadBounds,
   terrestrialPlantsInsideIpalFence:0,
   serviceRoadObstructions:gardenRoadOverlap?1:0,
-  wallAttached:true,
+  wallAttached:false,frameAttached:true,facesOutward:true,wallPresent:false,
   fullWallCoverageRatio:+((gardenMaxX-gardenMinX)/(wallMaxX-wallMinX)).toFixed(4),
   endGapWest:+Math.abs(gardenMinX-wallMinX).toFixed(4),
   endGapEast:+Math.abs(gardenMaxX-wallMaxX).toFixed(4),
-  wallNormalGap:+Math.abs((vg.y+vg.d/2)-(outerWall.y-outerWall.t/2)).toFixed(4),
-  correction:'USER_CONFIRMED_OUTERMOST_WALL_FULL_LENGTH_2026_09_27'
+  wallNormalGap:0,
+  frameNormalGap:+Math.max(0,vg.y-vg.d/2-outerWall.y-.25).toFixed(4),
+  correction:'USER_CONFIRMED_OUTERMOST_STEEL_FRAME_NO_WALL_2026_09_28'
  };
  buildingDetailStats.v249IpalLandscapeRelocated=plantCount;
  buildingDetailStats.v251IpalWallVegetationInstances=plantCount;

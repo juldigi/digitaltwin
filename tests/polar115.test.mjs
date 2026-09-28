@@ -68,6 +68,16 @@ test('POLAR disabled two-hand command prevents cut even with a clear light barri
  const st=s.state();assert.equal(s.completed,0);assert.equal(s.cutPerformed,false);assert.equal(st.interlocks.twoHandCommand,false);assert.equal(st.interlocks.lightBarrierClear,true);assert.equal(s.cutPiece.visible,false);s.dispose();m.dispose();
 });
 
+test('POLAR obstruction during clamp approach releases clamp and retracts uncommitted knife',()=>{
+ const m=new Polar115MachineTemplate(),s=new Polar115ProcessSimulation(m.root,m);s.start();let now=1000;s.update(now);
+ while(s.phase()<.53){now+=10;s.update(now);}
+ assert.ok(s.clampHoldAmount>.9);
+ s.setLightBarrierClear(false);now+=10;s.update(now);
+ assert.equal(s.clampHoldAmount,0);assert.equal(s.knifeHoldAmount,0);
+ assert.equal(s.clamp.position.y,s.rest.clamp.y);assert.equal(s.knife.position.y,s.rest.knife.y);
+ assert.equal(s.cutPerformed,false);s.dispose();m.dispose();
+});
+
 test('POLAR clamp stroke and knife stroke stop short of unrealistic deep penetration',()=>{
  const m=new Polar115MachineTemplate(),s=new Polar115ProcessSimulation(m.root,m);assert.ok(s.clampStroke<=.12);assert.ok(s.knifeStroke<=.34);
  const clamp0=s.rest.clamp.clone(),knife0=s.rest.knife.clone();s.start();let now=1000,maxClamp=0,maxKnife=0;for(let i=0;i<850;i++){now+=10;s.update(now);maxClamp=Math.max(maxClamp,clamp0.y-s.clamp.position.y);maxKnife=Math.max(maxKnife,knife0.y-s.knife.position.y);}

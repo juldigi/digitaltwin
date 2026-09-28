@@ -71,7 +71,9 @@ export class Polar115ProcessSimulation{
   if(this.gauge&&this.rest.gauge){this.gauge.position.copy(this.rest.gauge);this.gauge.position.z=this.rest.gauge.z-.26*smooth(p,.10,.28);}
   if(p>=.38&&p<.56&&this.lightBarrierClear&&this.twoHandCommand)this.cutCycleLatched=true;
   const clampDesired=this.cutCycleLatched?smooth(p,.43,.50)*(1-smooth(p,.76,.84)):0;
-  if(this.lightBarrierClear||p<.43||p>.84)this.clampHoldAmount=clampDesired;
+  // A broken safety beam aborts the simulated stroke and returns the pressure bar.
+  // Do not leave the clamp frozen against the paper after an obstruction.
+  this.clampHoldAmount=this.lightBarrierClear?clampDesired:0;
   this.clampActive=this.clampHoldAmount>.02;this.clampContact=this.clampHoldAmount>.90;
   if(this.clamp&&this.rest.clamp){this.clamp.position.copy(this.rest.clamp);this.clamp.position.y-=this.clampStroke*this.clampHoldAmount;}
   const downWindow=p>=.56&&p<.64,knifePermission=this.lightBarrierClear&&this.twoHandCommand&&this.cutCycleLatched&&this.clampContact;
@@ -80,6 +82,7 @@ export class Polar115ProcessSimulation{
    this.knifeDownstroke=downWindow&&knifePermission&&this.knifeHoldAmount>0;
    if(this.knifeHoldAmount>.97){this.cutPerformed=true;this.knifeAtCutLine=true;if(!this.cutCounted){this.completed++;this.cutCounted=true;}}
   }
+  if(!this.lightBarrierClear&&!this.cutPerformed)this.knifeHoldAmount=0;
   if(this.cutPerformed){
    if(p>=.64&&p<.74){this.knifeUpstroke=true;this.knifeHoldAmount=1-smooth(p,.64,.74);}
    else if(p>=.74)this.knifeHoldAmount=0;

@@ -333,7 +333,9 @@ export class SheetingProcessSimulation{
   currentPileMetrics(){
     const visible=Math.min(this.pile.length,this.completed),rawTop=this.palletTopY+visible*this.pileSheetThickness;
     const liftDrop=Math.min(this.maxLiftDrop,Math.max(0,rawTop-this.targetStackTopY));
-    return {visible,liftDrop,top:Math.min(this.targetStackTopY,rawTop-liftDrop)};
+    // Once the lift reaches its travel limit, the pile rises above the target entry plane.
+    // The incoming sheet must settle onto that real top rather than sinking through the pile.
+    return {visible,liftDrop,top:rawTop-liftDrop};
   }
 
   state(){

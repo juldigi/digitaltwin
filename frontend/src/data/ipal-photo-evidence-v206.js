@@ -61,8 +61,8 @@ export const IPAL_PHOTO_EVIDENCE_V206=Object.freeze({
   sludgeDrying:{x:35.9,y:116.0,w:5.0,d:2.25,h:1.55},
   operatorRoom:{x:56.8,y:105.9,w:4.6,d:3.3,h:2.85},
   pond:{x:53.4,y:117.2,w:8.0,d:1.0},
-  outerPerimeterWall:{x:46.4,y:120.55,w:27.2,h:2.60,t:.18,placement:'USER_CONFIRMED_OUTERMOST_WALL'},
-  verticalGarden:{x:46.4,y:120.34,w:27.2,h:2.10,d:.24,placement:'WALL_MOUNTED_FULL_LENGTH_ON_IPAL_FACING_SIDE'},
+  outerPerimeterWall:{x:46.4,y:117.8,w:25.8,h:4.5,t:0,placement:'OUTERMOST_IPAL_STEEL_FRAME_NO_WALL'},
+  verticalGarden:{x:46.4,y:118.04,w:25.8,h:2.10,d:.28,placement:'STEEL_FRAME_MOUNTED_FACING_OUTWARD_NO_WALL'},
   serviceRoadClearance:{x:46.4,y:119.20,w:26.8,d:1.55,placement:'KEEP_CLEAR_BETWEEN_IPAL_AND_OUTER_WALL'},
   adjacentUtility:{x:61.3,y:108.0,w:2.8,d:7.2,h:1.55},
   coveredServiceBasin:{x:55.0,y:103.1,w:5.0,d:2.2,h:1.18},
@@ -91,14 +91,14 @@ export const IPAL_PHOTO_EVIDENCE_V206=Object.freeze({
    anaerobicAccess:'NO_VERTICAL_LADDER_ASSERTION',
    paving:'HERRINGBONE_INTERLOCKING_REFERENCE',
    chemicalRack:'RED_TANK_COUNT_AND_FRAME_DENSITY_REDUCED_TO_PHOTO_VISIBLE_CLUSTER',
-   terrestrialVegetation:'ATTACHED_TO_OUTERMOST_WALL_FULL_LENGTH_AND_CLEAR_OF_SERVICE_ROAD',
+   terrestrialVegetation:'ATTACHED_TO_OUTERMOST_IPAL_STEEL_FRAME_FACING_OUTWARD_NO_WALL',
    interiorVegetation:'NONE_EXCEPT_ORNAMENTAL_POND_AQUATIC_PLANTS'
   }),
   userConfirmedCorrections:Object.freeze({
    date:'2026-09-27',
-   vegetationLocation:'ATTACHED_TO_OUTERMOST_WALL_FULL_LENGTH',
-   vegetationWallFace:'IPAL_FACING_SIDE',
-   vegetationCoverage:'FULL_LENGTH_OF_OUTERMOST_WALL',
+   vegetationLocation:'ATTACHED_TO_OUTERMOST_IPAL_STEEL_FRAME',
+   vegetationWallFace:'OUTWARD_FACING_NO_WALL',
+   vegetationCoverage:'FULL_LENGTH_OF_OUTERMOST_STEEL_FRAME',
    serviceRoad:'MUST_REMAIN_UNOBSTRUCTED_BETWEEN_IPAL_AND_OUTER_WALL',
    authority:'USER_FIELD_CONFIRMATION'
   })

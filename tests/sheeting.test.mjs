@@ -315,6 +315,17 @@ test('V197 pile/lift stays grounded and manual guide hardware remains static',()
   sim.dispose();m.dispose();
 });
 
+test('Sheeting stack entry follows the actual pile top when lift travel is exhausted',()=>{
+ const m=new SheetingMachineTemplate(),sim=new SheetingProcessSimulation(m.root,m);
+ sim.completed=sim.pile.length;
+ const pile=sim.currentPileMetrics();
+ assert.equal(pile.liftDrop,sim.maxLiftDrop);
+ assert.ok(Math.abs(pile.top-(sim.palletTopY+pile.visible*sim.pileSheetThickness-pile.liftDrop))<1e-10);
+ const arriving=sim.sheetPoseForAge(sim.motionTime+sim.stackSettleDuration*.99,pile.top);
+ assert.ok(arriving.p.y>sim.targetStackTopY,'incoming sheet must rise with the full pile');
+ sim.dispose();m.dispose();
+});
+
 test('V197 keeps speculative option modules out and all geometry finite/grounded',()=>{
   const m=new SheetingMachineTemplate();m.root.updateMatrixWorld(true);
   for(const id of [
