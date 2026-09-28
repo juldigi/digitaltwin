@@ -160,6 +160,7 @@ export class DianaEye55MachineTemplate{
   // noise-reduction safety cover. Actuator type stays neutral because BMJ serial-specific option is unknown.
   const reject=this.findNode('diana55-reject');
   if(reject){
+   reject.name='Blank ejection / recoverable reject sorting';
    const cover=this.group(reject,'diana55-reject-safety-v254','Reject safety / noise-reduction enclosure');
    for(const z of [-.66,.66]){
     const side=this.cover(this.box(cover,[.92,.48,.045],[.18,1.08,z],'light',.024));side.userData.safetyNoiseReductionReference=true;
@@ -240,7 +241,7 @@ export class DianaEye55MachineTemplate{
   const cell=this.findNode('diana55-inspection');
   if(cell){
    const crown=this.group(cell,'diana55-cell-crown-v258','Inspection cell upper service crown');
-   const top=this.cover(this.box(crown,[1.82,.18,1.58],[0,2.00,0],'white',.035));top.userData.silhouetteCritical=true;
+   const top=this.cover(this.box(crown,[1.82,.10,1.58],[0,1.97,0],'white',.030));top.userData.silhouetteCritical=true;
    for(const z of [-.73,.73]){const seam=this.cover(this.box(crown,[1.48,.018,.018],[0,1.91,z],'red',.004));seam.userData.familyAccent=true;}
    cell.userData.v258CellPolicy='SINGLE_WHITE_DARK_WINDOW_INSPECTION_CELL__NO_EXTRA_CAMERA_TOWERS_INFERRED';
   }
@@ -264,6 +265,7 @@ export class DianaEye55MachineTemplate{
 
   const delivery=this.findNode('diana55-delivery');
   if(delivery){
+   delivery.name='Accepted-product fish-scale delivery';
    delivery.userData.v258DeliveryPolicy='ONE_ACCEPTED_FISH_SCALE_LANE_PLUS_SEPARATE_RECOVERABLE_REJECT_COLLECTION';
    const good=this.findNode('diana55-delivery-good-v254');if(good)good.userData.primaryAcceptedOutput=true;
   }
