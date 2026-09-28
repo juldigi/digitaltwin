@@ -610,7 +610,10 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       if(['feeder-suction-cups','feeder-separation','feeder-head-linkage','feedboard-front-lays'].includes(item.object?.userData?.nodeId))item.frequency=1;
     }
     const infeed=this.template.findNode('feedboard-infeed-gripper');
-    if(infeed&&!this.oscillators.some(item=>item.object===infeed))this.addOscillator(infeed,'x',.022,1,.30);
+    if(infeed){
+      if(!this.oscillators.some(item=>item.object===infeed))this.addOscillator(infeed,'x',.022,1,.30);
+      if(!this.levers.some(item=>item.object===infeed))this.addLever(infeed,.085,1,.30);
+    }
 
     // Every straight-printing unit has the same installed handedness. The legacy simulator flipped
     // the ink/dampening train by PU parity, making PU2/4/6/8 visibly run backwards. Preserve the
@@ -797,6 +800,7 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       deliveryChainMotionPolicy:'SINGLE_FORWARD_LOOP_SPROCKETS_SHARE_ROTATION_DIRECTION',
       sheetBrakeMotionPolicy:'CONTROLLED_DECELERATION_VISUAL_REFERENCE_NOT_SERVICE_SETPOINT',
       feederMotionPolicy:'SUCTION_SEPARATOR_LINKAGE_FRONT_LAYS_AND_INFEED_GRIPPER_SHARE_ONE_SHEET_CYCLE',
+      infeedHandoffPolicy:'INFEED_GRIPPER_RECIPROCATES_AND_ROCKS_WITH_ONE_PRESS_CYCLE',
       registerTransportPolicy:'MOBILE_BATCHED_CONTACT_REFERENCE__SHEET_PATH_AND_INFEED_GRIPPER_CARRY_VISIBLE_MOTION',
       rollerHandednessPolicy:'IDENTICAL_STRAIGHT_PRINT_KINEMATIC_SIGN_PATTERN_ACROSS_ALL_EIGHT_PU',
       interUnitGripperPolicy:'RIGID_FINGER_ASSEMBLY_ROTATES_WITH_TRANSFER_DRUM_ORBIT',
