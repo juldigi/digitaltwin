@@ -272,11 +272,11 @@ export class OffsetMachineTemplate {
     this.box(vacuum,[.88,.026,.40],[0,1.355,0],'black',.012);
     this.box(vacuum,[.82,.010,.23],[0,1.373,0],'rubber',.006);
     for(let i=0;i<11;i++)for(const z of [-.07,.07])this.cylinder(vacuum,.009,.006,[-.37+i*.074,1.381,z],'glass','y');
-    for(const x0 of [-.41,.41])this.cylinder(vacuum,.055,.34,[x0,1.35,0],'steel','z');
+    for(const x0 of [-.41,.41]){const r=this.cylinder(vacuum,.055,.34,[x0,1.35,0],'steel','z');Object.assign(r.userData,{dynamicRotor:true,rotorRole:'vacuum-table-tape-drive-roller',rotorSign:-1,rotorRate:1});}
     for(const x0 of [-.24,0,.24])this.box(vacuum,[.13,.018,.31],[x0,1.342,0],'graphite',.006);
     const transport=this.group(board,'feedboard-transport','Suction tape, pressure roller & transport reference',[0,0,0],[-.12,.28,0],['IMG_1626.jpeg'],'Jalur transport luar mengikuti foto dan paten Heidelberg. Pembagian vakum, tekanan nip dan kecepatan tape tidak diverifikasi.');
     for(const z of [-.34,.34])this.box(transport,[.86,.018,.075],[0,1.395,z],'rubber',.006);
-    for(const x0 of [-.39,.39])for(const z of [-.34,.34])this.cylinder(transport,.034,.09,[x0,1.41,z],'steel','z');
+    for(const x0 of [-.39,.39])for(const z of [-.34,.34]){const r=this.cylinder(transport,.034,.09,[x0,1.41,z],'steel','z');Object.assign(r.userData,{dynamicRotor:true,rotorRole:'register-pressure-transport-roller',rotorSign:-1,rotorRate:1});}
     for(const z of [-.55,.55])this.cylinder(transport,.028,.78,[.18,1.445,z],'steel','x');
     const guides=this.group(board,'feedboard-guides','Feed-table guides & alignment references',[0,0,0],[0,.25,.65],['IMG_1626.jpeg'],'Guide luar terlihat; front lay dan side alignment ditandai sebagai reference-only pada taxonomy.');
     for(const z of [-.72,.72]){this.box(guides,[.82,.035,.035],[0,1.405,z],'steel',.008);this.box(guides,[.08,.12,.08],[.34,1.44,z],'graphite',.012);}
@@ -731,7 +731,7 @@ export class OffsetMachineTemplate {
     const monitoring=this.group(g,'dryer-monitoring','Dryer temperature / airflow monitoring points',[0,0,0],[.12,.30,-.46],photos,'Sensor heads are service-location references only; sensor type, alarm threshold and control-loop behavior are not inferred.');
     for(const x0 of [-.36,.36]){this.box(monitoring,[.10,.08,.06],[x0,1.52,-.99],'graphite',.010);this.cylinder(monitoring,.012,.11,[x0,1.47,-.91],'steel','z');}
     const path=this.group(g,'dryer-sheet-path','Sheet transport through extension',[0,0,0],[.35,.20,0],photos);
-    for(const x0 of [-.60,-.36,-.12,.12,.36,.60]){const r=this.cylinder(path,.035,1.42,[x0,1.29,0],'steel');Object.assign(r.userData,{rotorRoleReference:'dryer-transport-roller',motionBudget:'STATIC_REFERENCE_MOBILE'});}
+    for(const x0 of [-.60,-.36,-.12,.12,.36,.60]){const r=this.cylinder(path,.035,1.42,[x0,1.29,0],'steel');Object.assign(r.userData,{dynamicRotor:true,rotorRole:'dryer-sheet-transport-roller',rotorSign:-1,rotorRate:1,motionBudget:'DYNAMIC_PROCESS_CONTACT'});}
   }
   inspectionBridge(x){
     const photos=['IMG_1630.jpeg','IMG_1631.jpeg','IMG_1633.jpeg','IMG_2391(1).jpeg'];
