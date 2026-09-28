@@ -139,7 +139,6 @@ test('DIANA node-scoped materials prevent highlight and ghost state from leaking
 test('V259 DIANA keeps feeder, inspection aperture and HMI physically attached without inferring installed options',()=>{
  const model=new DianaEye55MachineTemplate();
  try{
-  assert.equal(model.root.userData.visualRefinement,'V259_DIANA_EYE55_ATTACHED_FEEDER_APERTURE_HMI_REALISM');
   assert.equal(model.root.userData.v259Policy,'EXTERIOR_ATTACHMENT_AND_SCAN_WINDOW_ONLY__NO_INSTALLED_OPTION_POPULATION_INFERRED__NO_ENVELOPE_CHANGE');
   const supports=model.findNode('diana55-feeder-supports-v259');
   assert.ok(supports);
@@ -167,6 +166,33 @@ test('V259 DIANA keeps feeder, inspection aperture and HMI physically attached w
   assert.equal(model.findNode('diana55-camera-top').userData.installedCountVerified,false);
   assert.equal(model.findNode('diana55-reject').userData.installedRejectActuationVerified,false);
  }finally{model.dispose();}
+});
+
+test('V260 DIANA pivots only the reject diverter and grounds the recovery tray support',()=>{
+ const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);
+ try{
+  assert.equal(model.root.userData.visualRefinement,'V260_DIANA_EYE55_REJECT_PIVOT_AND_RECOVERY_SUPPORT_REALISM');
+  assert.equal(model.root.userData.v260Policy,'REJECT_PIVOT_AND_RECOVERY_SUPPORT_ONLY__ACTUATOR_TYPE_REMAINS_UNVERIFIED');
+  const pivot=model.findNode('diana55-reject-pivot-v260'),mount=model.findNode('diana55-reject-gate');
+  assert.ok(pivot&&mount);assert.equal(pivot.userData.rejectGatePivot,true);
+  assert.equal(pivot.userData.motionPolicy,'ROTATE_PIVOT_ONLY__REJECT_FRAME_AND_SENSORS_REMAIN_STATIC');
+  assert.equal(pivot.children.filter(o=>o.isMesh&&o.userData.rejectPivotBearing).length,2);
+  assert.ok(pivot.children.some(o=>o.isMesh&&o.userData.rejectGate));
+  const support=model.findNode('diana55-reject-recovery-support-v260');assert.ok(support);
+  const pads=support.children.filter(o=>o.isMesh&&o.userData.floorContact);assert.equal(pads.length,4);
+  assert.ok(pads.every(o=>Math.abs(o.position.y-.018)<1e-9));
+  assert.equal(model.findNode('diana55-reject-recovery-v258').userData.v260SupportPolicy,'RECOVERY_TRAY_TERMINATES_IN_VISIBLE_FLOOR_SUPPORT_FRAME');
+
+  const mountQ=mount.quaternion.clone(),pivotQ=pivot.quaternion.clone();
+  sim.start();let now=1000;sim.update(now),saw=false;
+  for(let i=0;i<1500;i++){now+=10;sim.update(now);if(sim.state().demoRejectActive){saw=true;break;}}
+  assert.equal(saw,true);
+  assert.ok(pivot.quaternion.angleTo(pivotQ)>.001,'Diana reject pivot never actuated');
+  assert.ok(mount.quaternion.angleTo(mountQ)<1e-10,'Diana reject parent frame must remain static');
+  assert.equal(sim.state().rejectGateMotionPolicy,'ROTATE_PIVOT_ONLY__REJECT_FRAME_AND_SENSORS_REMAIN_STATIC');
+  sim.stop();
+  assert.ok(pivot.quaternion.angleTo(pivotQ)<1e-10);
+ }finally{sim.dispose();model.dispose();}
 });
 
 test('V259 DIANA viewing window follows active scan occupancy and restores after stop',()=>{
