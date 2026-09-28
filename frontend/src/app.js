@@ -312,8 +312,9 @@ function startPrintingSimulation(){
  if(!engine.isPrintingSimulationActive()){
   const readiness=engine.getPrintingSimulationState?.()||currentSimulationState();
   if(readiness?.blocked||readiness?.available===false){toast(readiness?.blockedReason||'Simulasi proses untuk aset ini belum tersedia.',true);updateSimulationPanel(readiness);return;}
-  simulationOwnsExterior=!isInteriorOpen();
-  enableExteriorOpen({forceDetail:false});
+  const polarSimulation=engine.template?.root?.userData?.assetId==='BMJ-MCH-0001';
+  simulationOwnsExterior=!polarSimulation&&!isInteriorOpen();
+  if(!polarSimulation)enableExteriorOpen({forceDetail:false});
   engine.template.ghost(false);engine.isolated=false;engine.clearPartLabels();selectedPart=null;setActiveTaxonomyId(ACTIVE_ROOT);setExplodeLevel(0);
   updateSimulationPanel(engine.startPrintingSimulation());
   engine.fit(engine.machine);

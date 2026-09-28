@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
+import {readFileSync} from 'node:fs';
 import {Polar115MachineTemplate} from '../frontend/src/polar115.js';
 import {Polar115ProcessSimulation,POLAR115_SIMULATION_STAGES} from '../frontend/src/simulation-polar115.js';
 import {POLAR115_TAXONOMY} from '../frontend/src/data/taxonomy-polar115.js';
@@ -98,6 +99,19 @@ test('front console faces the operator while the blade remains inside the cutter
  assert.ok(display.getWorldPosition(new THREE.Vector3()).y>blade.getWorldPosition(new THREE.Vector3()).y,'display sits above the cutting aperture');
  assert.equal(m.findNode('polar-housing').children.filter(x=>x.isMesh&&x.userData.evidence==='IMG_2490_2491_OPEN_REAR_JAMB').length,0,'rear shell has no freestanding end pillars');
  m.dispose();
+});
+
+test('Polar simulation keeps the continuous housing closed unless the operator opens interior',()=>{
+ const source=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
+ assert.match(source,/polarSimulation=engine\.template\?\.root\?\.userData\?\.assetId==='BMJ-MCH-0001'/);
+ assert.match(source,/if\(!polarSimulation\)enableExteriorOpen\(\{forceDetail:false\}\)/);
+ const m=new Polar115MachineTemplate(),housing=m.findNode('polar-housing');
+ const brow=housing.children.filter(x=>x.isMesh&&x.userData.consoleBrow);
+ assert.equal(brow.length,1,'upper shell is one continuous head, not several rounded roof bars');
+ assert.ok(new THREE.Box3().setFromObject(brow[0]).getSize(new THREE.Vector3()).z>1,'head runs continuously from operator face to rear face');
+ const s=new Polar115ProcessSimulation(m.root,m);s.start();
+ assert.equal(brow[0].visible,true,'cut simulation itself must not remove the exterior cover');
+ s.dispose();m.dispose();
 });
 
 test('POLAR pressure bar remains ahead of the knife plane throughout the cut stroke',()=>{

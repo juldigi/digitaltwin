@@ -140,11 +140,10 @@ export class Polar115MachineTemplate{
   housing.userData.evidence=photoEvidence;
   // IMG_2490/2491 look through the rear opening at the vertical finger field.
   // A solid rear slab used to bury the back table and backgauge inside the housing.
-  const rearBrow=this.cover(this.box(housing,[2.06,.44,.24],[0,1.58,.83],'body',.09));rearBrow.userData.evidence='IMG_2490_2491_REAR_FULL_HEIGHT_FACE';
   const sill=this.box(housing,[1.50,.075,.22],[0,.68,.84],'bodyDark',.014);sill.userData.evidence='IMG_2490_2491_REAR_OPENING_LOW_SILL';
-  const leftPillar=this.cover(this.box(housing,[.34,.92,.95],[-.87,1.22,.42],'body',.11));leftPillar.userData.evidence=photoEvidence;
-  const rightPillar=this.cover(this.box(housing,[.34,.92,.95],[.87,1.22,.42],'body',.11));rightPillar.userData.evidence=photoEvidence;
-  const topBridge=this.cover(this.box(housing,[1.78,.40,.54],[0,1.58,.42],'body',.12));topBridge.userData.consoleBrow=true;topBridge.userData.evidence=photoEvidence;
+  const leftPillar=this.cover(this.box(housing,[.34,.92,1.05],[-.87,1.22,.37],'body',.045));leftPillar.userData.evidence=photoEvidence;
+  const rightPillar=this.cover(this.box(housing,[.34,.92,1.05],[.87,1.22,.37],'body',.045));rightPillar.userData.evidence=photoEvidence;
+  const topBridge=this.cover(this.box(housing,[2.06,.44,1.10],[0,1.58,.40],'body',.035));topBridge.userData.consoleBrow=true;topBridge.userData.evidence='IMG_2488_2490_2491_SINGLE_CONTINUOUS_HEAD';
 
   // Operator-right side belt-drive enclosure with circular inspection window, visible in rear-side photo.
   const motorEnd=this.group(housing,'polar-housing-motor-end','Side belt-drive housing with inspection window',[0,0,0],[.14,.06,0]);motorEnd.userData.evidence=photoEvidence;
