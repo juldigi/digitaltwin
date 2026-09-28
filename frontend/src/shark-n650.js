@@ -217,8 +217,18 @@ export class SharkN650MachineTemplate{
 
   const ret=this.findNode('shark650-return');
   if(ret){
+   ret.name='Return good/bad & pengumpulan output';
    ret.userData.v258ReturnPolicy='OFFICIAL_GOOD_BAD_RETURN_LINE__LOW_CONTINUOUS_LANES__VERTICAL_PALLETIZER_CAPABILITY_ONLY';
   }
+  const names={
+   'shark650-feeder':'Pengumpanan otomatis / negative-pitch',
+   'shark650-transfer':'Transfer full-suction',
+   'shark650-inspection':'Menara inspeksi',
+   'shark650-vision':'Camera & pencahayaan terkontrol',
+   'shark650-processing':'Pemrosesan vision & recipe',
+   'shark650-reject':'Pemisahan reject'
+  };
+  for(const [id,name] of Object.entries(names)){const node=this.findNode(id);if(node)node.name=name;}
  }
 
  findNode(id){return id==='shark650-root'?this.root:this.nodes.find(n=>n.userData.nodeId===id)||null;}resolvePart(o){for(let p=o;p&&p!==this.root;p=p.parent)if(p.userData?.selectable)return p;return null;}resolveTaxonomyNode(id){return this.taxonomyById.get(id)?.meshRefs.map(ref=>this.findNode(ref)).find(Boolean)||null;}contains(a,b){for(let p=b;p;p=p.parent)if(p===a)return true;return false;}
