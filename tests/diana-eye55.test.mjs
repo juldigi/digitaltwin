@@ -107,6 +107,15 @@ test('DIANA deterministic demo assigns stable tracking IDs at inspection and car
  sim.dispose();model.dispose();
 });
 
+test('Diana reject actuation rotates only the diverter blade while the fixed home sensor stays on the frame',()=>{
+ const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);const fixed=sim.gateMount.children.find(o=>o!==sim.gate);const fixedQ=fixed.quaternion.clone();sim.start();let now=1000,seen=false;
+ try{
+  for(let i=0;i<1400;i++){now+=10;sim.update(now);if(sim.state().demoRejectActive){seen=true;break;}}
+  assert.ok(seen);assert.ok(Math.abs(sim.gate.rotation.z-sim.gateRest)>.1);assert.ok(Math.abs(sim.gateMount.rotation.z)<1e-12);assert.ok(fixed.quaternion.angleTo(fixedQ)<1e-12);
+  sim.stop();assert.ok(Math.abs(sim.gate.rotation.z-sim.gateRest)<1e-12);
+ }finally{sim.dispose();model.dispose();}
+});
+
 test('DIANA rejects only tracked reject blanks and accepted blanks remain on the main delivery path',()=>{
  const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);sim.start();let now=1000,seenReject=false,seenPass=false;
  for(let i=0;i<1500;i++){now+=10;sim.update(now);const state=sim.state();seenReject||=state.rejectTrackingActive&&state.activeRejectTrackingIds.length>0;seenPass||=state.acceptedDeliveryActive&&state.activePassTrackingIds.length>0;}
