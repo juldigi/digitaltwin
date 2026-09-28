@@ -129,9 +129,14 @@ test('V259 DIANA keeps feeder, inspection aperture and HMI physically attached w
   assert.equal(model.root.userData.v259Policy,'EXTERIOR_ATTACHMENT_AND_SCAN_WINDOW_ONLY__NO_INSTALLED_OPTION_POPULATION_INFERRED__NO_ENVELOPE_CHANGE');
   const supports=model.findNode('diana55-feeder-supports-v259');
   assert.ok(supports);
-  assert.equal(supports.children.filter(o=>o.isMesh&&o.userData.bearingSupport).length,2);
+  const bearings=supports.children.filter(o=>o.isMesh&&o.userData.bearingSupport);
+  assert.equal(bearings.length,2);
+  assert.ok(bearings.every(o=>o.userData.pulleyBodyClearanceM>=.04));
   assert.equal(supports.children.filter(o=>o.isMesh&&o.userData.floorFrameAttachment).length,2);
   assert.ok(supports.children.filter(o=>o.isMesh&&o.userData.structuralAttachment).length>=5);
+  const serviceDoor=model.findNode('diana55-access-door');assert.ok(serviceDoor);
+  const servicePanels=serviceDoor.children.filter(o=>o.isMesh&&o.userData.serviceDoor);
+  assert.ok(servicePanels.every(o=>o.userData.v259Placement==='BELOW_OPERATOR_VIEWING_APERTURE'&&o.position.y<.90));
   const bezel=model.findNode('diana55-front-aperture-bezel-v259');
   assert.ok(bezel);
   assert.equal(bezel.children.filter(o=>o.isMesh&&o.userData.apertureBezel).length,5);
