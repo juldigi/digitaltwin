@@ -168,8 +168,7 @@ export function buildActualFactory(layout,fleet){
   const wb=(px,py,pz,width,height,depth,color,opacity=1)=>box(wallAssembly,px,py,pz,width,height,depth,color,0,opacity);
   const wall=wb(0,1.75,0,len,3.5,w.width,0xe8e5df);wall.castShadow=true;wall.userData={...dwgObjectSourceMetadata(layout,{semantic:'WALL',sourceLayer:w.layer||'UNKNOWN',sourceEntityId:w.handle||w.handles?.[0]||'UNKNOWN',sourceHandles:w.handles,confidence:'HIGH CONFIDENCE',renderStatus:'3D_WITH_ESTIMATED_HEIGHT'}),heightStatus:'VISUAL_ESTIMATE',machineClearance:MACHINE_SERVICE_CLEARANCE};
   const plinth=wb(0,.12,0,len,.24,w.width+.035,0x64777e);detail(plinth,'WALL_BASE_PLINTH_REFERENCE');const head=wb(0,3.46,0,len,.08,w.width+.025,0x71878b);detail(head,'WALL_HEAD_FLASHING_REFERENCE');for(const gy of [.72,1.48,2.24,3.0]){const girt=wb(0,gy,0,len,.045,w.width+.06,0x74868b);detail(girt,'WALL_GIRT_REFERENCE');buildingDetailStats.wallGirts++;}const baseFlash=wb(0,.28,0,len,.055,w.width+.07,0x5f747c);detail(baseFlash,'WALL_BASE_FLASHING_REFERENCE');buildingDetailStats.wallBaseFlashings++;
-  if(len>5.5){const glass=wb(0,2.35,0,Math.max(.6,len-.7),.55,w.width+.025,0xa5cbd0,.38);glass.userData.semantic='FROSTED_CLERESTORY';
-   const joints=Math.min(12,Math.floor(len/1.45));for(let i=1;i<joints;i++){const u=i/joints;const joint=wb((u-.5)*len,1.62,0,.024,3.22,w.width+.04,0xcbd1ce);detail(joint,'WALL_PANEL_OR_CONTROL_JOINT_REFERENCE');buildingDetailStats.wallPanelJoints++;}}
+  if(len>5.5){const joints=Math.min(12,Math.floor(len/1.45));for(let i=1;i<joints;i++){const u=i/joints;const joint=wb((u-.5)*len,1.62,0,.024,3.22,w.width+.04,0xcbd1ce);detail(joint,'WALL_PANEL_OR_CONTROL_JOINT_REFERENCE');buildingDetailStats.wallPanelJoints++;}}
  }
 
  // V200: retain the verified V199 outer-envelope closure and add operational realism inside it. Source walls remain authoritative;
@@ -269,7 +268,8 @@ export function buildActualFactory(layout,fleet){
   const wall=box(b,x,h/2,z,len,h,.12,office?0xe5e6e1:0xe1e2dc,r);wall.castShadow=true;
   wall.userData={semantic:'ROOM_ENVELOPE_SUPPLEMENT_REFERENCE',roomLabel:ctx.label,roomProgram:ctx.program,accuracy:'SOURCE_ROOM_FUNCTION_CLOSURE_REFERENCE_NOT_AS_BUILT_PARTITION_SURVEY',researchVersion:'V204',functionalReferenceVisible:true};
   const pl=box(b,x,.11,z,len,.22,.15,0x62777d,r);pl.userData={semantic:'ROOM_ENVELOPE_PLINTH_REFERENCE',roomLabel:ctx.label,accuracy:'ROOM_FINISH_REFERENCE_NOT_AS_BUILT',researchVersion:'V204',functionalReferenceVisible:true};
-  if(office&&len>1.6){const transom=box(b,x,2.46,z,Math.max(.5,len-.22),.55,.126,0xb5d3d4,r,.24);transom.userData={semantic:'ROOM_ENVELOPE_FROSTED_TRANSOM_REFERENCE',roomLabel:ctx.label,accuracy:'OFFICE_PARTITION_VISUAL_REFERENCE_NOT_AS_BUILT',researchVersion:'V204',functionalReferenceVisible:true};}
+  // No glazing overlay on an opaque partition: the source drawing does not
+  // specify a transom opening. Keep the generated wall physically solid.
   roomEnvelopeSegments.push(seg);buildingDetailStats.roomEnvelopeSupplementWalls++;
  };
  for(const ctx of roomEnvelopeContexts){
@@ -326,7 +326,17 @@ export function buildActualFactory(layout,fleet){
   const personnel=d.width<1.8;g.userData={...dwgObjectSourceMetadata(layout,{semantic:'DOOR',sourceLayer:d.layer||'UNKNOWN',sourceEntityId:d.handle||d.id||'UNKNOWN',sourceHandles:d.handles,confidence:d.referenceGenerated?'FUNCTIONAL REFERENCE':d.evidence?'HIGH CONFIDENCE':'UNVERIFIED',renderStatus:d.referenceGenerated?'3D_FUNCTIONAL_REFERENCE':'3D_POSITION_SOURCE_TYPE_REFERENCE'}),evidence:d.evidence,referenceGenerated:!!d.referenceGenerated,roomLabel:d.roomLabel||null,clearanceAdjusted:d.clearanceAdjusted,sourcePosition:[d.sourceX,d.sourceY],openingTypeReference:personnel?'PERSONNEL_HINGED':'WIDE_SECTIONAL_OR_SLIDING_REFERENCE',asBuiltTypeVerified:false};
   const h=personnel?2.45:3.05;box(g,-d.width/2,h/2,0,.095,h,.18,0x526b75);box(g,d.width/2,h/2,0,.095,h,.18,0x526b75);box(g,0,h-.045,0,d.width+.18,.09,.18,0x526b75);
   if(d.roomLabel){const plate=box(g,0,h+.16,.02,Math.min(1.15,Math.max(.48,d.width*.70)),.20,.035,0xe9e7dc);plate.userData={semantic:'ROOM_DOOR_NAMEPLATE_REFERENCE',roomLabel:d.roomLabel,accuracy:'ROOM_IDENTIFICATION_REFERENCE_NOT_AS_BUILT_SIGNAGE',researchVersion:'V204',functionalReferenceVisible:true};buildingDetailStats.roomDoorNameplates++;}
-  if(personnel){buildingDetailStats.doorPersonnel++;const leaf=box(g,-d.width/2+.08,1.16,-d.width*.43,d.width*.96,2.30,.052,0x9db5bd,Math.PI/2.35);leaf.castShadow=true;detail(leaf,'PERSONNEL_DOOR_LEAF_REFERENCE');const handle=new T.Mesh(new T.SphereGeometry(.035,8,6),material(0xd5c6a2));handle.position.set(d.width*.34,1.08,-.055);leaf.add(handle);const kick=box(leaf,0,-.88,.028,d.width*.78,.24,.018,0x71858b);detail(kick,'PERSONNEL_DOOR_KICK_PLATE_REFERENCE');const closer=box(leaf,0,.98,.03,.32,.07,.06,0x5a6d74);detail(closer,'PERSONNEL_DOOR_CLOSER_REFERENCE');const threshold=box(g,0,.025,-.01,d.width-.08,.05,.16,0x6a7779);detail(threshold,'DOOR_THRESHOLD_REFERENCE');}
+  if(personnel){
+   buildingDetailStats.doorPersonnel++;
+   // A single hinge pivot fixes the leaf to its jamb; all leaf hardware moves
+   // with it, so the open reference cannot float across the corridor.
+   const hinge=new T.Group();hinge.position.set(-d.width/2+.055,0,0);hinge.rotation.y=-Math.PI/3.3;g.add(hinge);
+   const leaf=box(hinge,(d.width-.12)/2,1.16,0,d.width-.12,2.30,.052,0x9db5bd);leaf.castShadow=true;detail(leaf,'PERSONNEL_DOOR_LEAF_REFERENCE');
+   const handle=box(hinge,d.width-.20,1.08,.052,.055,.11,.038,0xd5c6a2);detail(handle,'PERSONNEL_DOOR_HANDLE_REFERENCE');
+   const kick=box(hinge,(d.width-.12)/2,.28,.035,d.width-.24,.24,.018,0x71858b);detail(kick,'PERSONNEL_DOOR_KICK_PLATE_REFERENCE');
+   const closer=box(hinge,.19,2.20,.04,.32,.07,.06,0x5a6d74);detail(closer,'PERSONNEL_DOOR_CLOSER_REFERENCE');
+   const threshold=box(g,0,.025,-.01,d.width-.08,.05,.16,0x6a7779);detail(threshold,'DOOR_THRESHOLD_REFERENCE');
+  }
   else{buildingDetailStats.doorWide++;for(let yy=.22;yy<h-.18;yy+=.22){const slat=box(g,0,yy,.035,d.width-.12,.19,.045,yy>h*.58?0x8299a1:0x9caeb3);detail(slat,'WIDE_DOOR_SECTIONAL_SLAT_REFERENCE');}for(const sx of [-d.width/2+.10,d.width/2-.10])detail(box(g,sx,h/2,.08,.055,h-.18,.055,0x42565f),'WIDE_DOOR_GUIDE_TRACK_REFERENCE');for(const sx of [-d.width/2-.25,d.width/2+.25]){detail(box(g,sx,.46,-.28,.17,.92,.17,0xe2b428),'WIDE_DOOR_BOLLARD_REFERENCE');detail(box(g,sx,.61,-.28,.18,.10,.18,0x303b42),'WIDE_DOOR_BOLLARD_CAP_REFERENCE');buildingDetailStats.doorProtection++;}}
  }
  const addCurtain=(d,semantic='PVC_CURTAIN',machineId=null)=>{const g=new T.Group();g.position.set(d.x,0,-d.y);g.rotation.y=d.rotation*Math.PI/180;layers.air_curtain.add(g);g.userData={semantic,evidence:d.evidence,clearanceAdjusted:d.clearanceAdjusted,sourcePosition:[d.sourceX,d.sourceY],machineId};
