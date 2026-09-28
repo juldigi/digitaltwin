@@ -278,6 +278,22 @@ test('Offset 5 inks each section only after that section passes the PU nip',()=>
  }finally{sim.dispose();m.dispose();}
 });
 
+test('Offset 5 dryer extension transport rollers rotate with the sheet',()=>{
+ const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
+ try{
+  const rollers=sim.rotors.filter(item=>item.role==='dryer-sheet-transport-roller');
+  assert.equal(rollers.length,6);
+  assert.ok(rollers.every(item=>item.sign===-1));
+  for(const item of rollers){
+   const r=item.mesh.geometry.parameters.radiusTop;
+   const surface=item.rate*r*2*Math.PI*sim.sheetCyclesPerSecond;
+   assert.ok(Math.abs(surface-sim.baseMetersPerSecond)<1e-9);
+   assert.equal(item.source,'DRYER_CONTACT_SURFACE_SPEED_MATCHED_TO_SHEET_REFERENCE');
+  }
+  assert.equal(sim.state().dryerTransportPolicy,'SIX_EXISTING_EXTENSION_ROLLERS_ROTATE_AT_SHEET_SURFACE_SPEED');
+ }finally{sim.dispose();m.dispose();}
+});
+
 test('Offset 5 coater contact train counter-rotates at sheet surface speed',()=>{
  const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
  try{
