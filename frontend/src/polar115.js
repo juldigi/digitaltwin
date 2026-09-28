@@ -7,12 +7,18 @@ import {V122_SOURCE_STATS} from './data/research-v122.js';
 
 export class Polar115MachineTemplate{
  constructor(){
-  this.root=new THREE.Group();this.root.name='POLAR-115-EM';this.root.scale.x=-1;this.parts=[];this.nodes=[];this.meshes=[];this.materials=[];this.geometries=[];this.activeMeshes=[];this.exteriorOpen=false;
+  this.root=new THREE.Group();this.root.name='POLAR-115-EM';this.parts=[];this.nodes=[];this.meshes=[];this.materials=[];this.geometries=[];this.activeMeshes=[];this.exteriorOpen=false;
   this.palette={body:0xb8bbb5,bodyDark:0x8f938f,dark:0x252b2e,table:0xd9d8d2,tableDark:0x514a43,steel:0xa9b0b1,accent:0x405961,warning:0xd0a338,screen:0x173e34,red:0xb6302d,paper:0xece5d2,black:0x111517,air:0x8bbad0};
   this.build();this.enrichV122();this.taxonomy=POLAR115_TAXONOMY;this.taxonomyById=new Map(this.taxonomy.map(n=>[n.id,n]));
   for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}this.root.updateMatrixWorld(true);
   this.root.userData={assetId:POLAR115_SPEC.assetId,nodeId:'POLAR-115-EM',model:POLAR115_SPEC.model,serial:POLAR115_SPEC.serial,spec:POLAR115_SPEC,sources:POLAR115_TECHNICAL_SOURCES,machineEnvelope:{reference:POLAR115_REFERENCE_DIMENSIONS},geometryStatus:'DEDICATED_BMJ_PHOTO_MATCHED__ARCHIVE_DIMENSIONS_NOT_INSTALLATION_CAD',engineeringDimensions:false,evidenceBoundary:POLAR115_SPEC.evidenceBoundary,researchVersion:'V123_PHOTO_MATCHED',photoRevision:'V260_FOUR_BMJ_PHOTO_ANGLES',researchSourceCount:V122_SOURCE_STATS.total,detailPass:'V123_POLAR115_BMJ_PHOTO_MATCHED',actualPhotoEvidence:'BMJ-POLAR-PHOTOS-2026-09',mainHousingProfile:'RECTANGULAR_ROUNDED_HEAD__NO_HALF_CYLINDER_ROOF',photoOrientation:'MIRRORED_LOCAL_X__PERFORATED_TABLE_FRONT_RIGHT__DRIVE_REAR_LEFT'};
-  this.refineExteriorV237();this.markSilhouetteCriticality();
+  this.refineExteriorV237();
+  // FactoryEngine resets the machine root to uniform scale when switching views.
+  // Keep the photographed handedness inside the model so the live scene and simulation agree.
+  this.photoFrame=new THREE.Group();this.photoFrame.name='Polar photo orientation';
+  for(const child of [...this.root.children])this.photoFrame.add(child);
+  this.photoFrame.scale.x=-1;this.root.add(this.photoFrame);this.root.updateMatrixWorld(true);
+  this.markSilhouetteCriticality();
   // Exterior refinement adds selectable nodes after the first rest-pose capture.
   for(const n of this.nodes){n.userData.rest??=n.position.clone();n.userData.restQuaternion??=n.quaternion.clone();}
  }

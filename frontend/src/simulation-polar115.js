@@ -6,7 +6,7 @@ const smooth=(v,a,b)=>THREE.MathUtils.smoothstep(v,a,b);
 
 export class Polar115ProcessSimulation{
  constructor(machine,template){
-  this.machine=machine;this.template=template;this.group=new THREE.Group();this.group.name='POLAR-115-SAFETY-INTERLOCKED-CUT-CYCLE';machine.add(this.group);
+  this.machine=machine;this.template=template;this.group=new THREE.Group();this.group.name='POLAR-115-SAFETY-INTERLOCKED-CUT-CYCLE';(template.photoFrame||machine).add(this.group);
   this.active=false;this.running=false;this.paused=false;this.speed=1;this.elapsed=0;this.lastNow=null;this.completed=0;this.pathVisible=true;this.inkFlowVisible=false;this.onUpdate=null;
   this.cycleSeconds=9;this.cycleIndex=0;this.lightBarrierClear=true;this.twoHandEnabled=true;this.cutCycleLatched=false;this.cutPerformed=false;this.cutCounted=false;this.clampHoldAmount=0;this.knifeHoldAmount=0;
   this.clamp=this.template.findNode('polar-clamp');this.knife=this.template.findNode('polar-knife');this.gauge=this.template.findNode('polar-gauge');

@@ -22,6 +22,9 @@ test('four BMJ photo angles place the white air table and rear drive on the phot
  assert.ok(!m.meshes.some(x=>x.userData.airNozzle&&m.contains(left,x)));
  const white=right.localToWorld(new THREE.Vector3()),drive=m.findNode('polar-housing-motor-end').localToWorld(new THREE.Vector3(1.2,0,0));
  assert.ok(white.x<0&&drive.x<0,'white table and side drive must appear on the same photographed machine side');
+ m.root.scale.setScalar(1);m.root.updateMatrixWorld(true);
+ assert.ok(right.localToWorld(new THREE.Vector3()).x<0,'factory engine resetting the machine root must not flip the photographed air-table side');
+ assert.ok(m.findNode('polar-housing-motor-end').localToWorld(new THREE.Vector3(1.2,0,0)).x<0,'rear drive keeps its photographed side after a machine view switch');
  const whiteDeck=right.children.find(x=>x.isMesh&&x.userData.evidence==='IMG_2488_2489_FRONT_RIGHT_WHITE_PERFORATED');
  const centerDeck=m.findNode('polar-feed-center').children.find(x=>x.isMesh);
  assert.ok(new THREE.Box3().setFromObject(whiteDeck).min.z<new THREE.Box3().setFromObject(centerDeck).min.z-.3,'white air table must project toward the operator beyond the center table');
@@ -58,6 +61,9 @@ test('rear housing leaves the photographed backgauge opening and table unobstruc
 test('POLAR simulation transfers the stock from the sole air table before gauge and cut',()=>{
  const m=new Polar115MachineTemplate(),s=new Polar115ProcessSimulation(m.root,m);s.start();let now=1000;s.update(now);
  assert.equal(s.stock.position.x,s.stockStartCenterX);
+ m.root.scale.setScalar(1);m.root.updateMatrixWorld(true);
+ assert.equal(s.group.parent,m.photoFrame,'paper simulation uses the same persistent photo orientation as the machine');
+ assert.ok(s.stock.getWorldPosition(new THREE.Vector3()).x<0,'paper begins on the photographed white table side in the live machine view');
  for(let i=0;i<120;i++){now+=10;s.update(now);}
  assert.ok(Math.abs(s.stock.position.x)<.001);assert.equal(s.cutPerformed,false);
  assert.equal(s.stock.visible,true);s.dispose();m.dispose();
