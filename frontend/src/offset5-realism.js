@@ -604,24 +604,6 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
     const nonRotatingFeederOwners=new Set(['feeder-suction-cups','feeder-separation','feeder-head-linkage']);
     this.rotors=this.rotors.filter(item=>!nonRotatingFeederOwners.has(item.mesh?.userData?.ownerId));
 
-    // Register/feed-table transport must read as one sheet-moving system, not alternating generic
-    // cylinders. Keep only the documented tape/pressure roller contacts and drive them toward PU1.
-    this.rotors=this.rotors.filter(item=>{
-      const owner=item.mesh?.userData?.ownerId;
-      if(owner==='feedboard-transport'||owner==='vacuum-table')return item.mesh?.userData?.runtimeIndependent===true;
-      return true;
-    });
-    for(const rotor of this.rotors){
-      const owner=rotor.mesh?.userData?.ownerId,radius=rotor.mesh?.geometry?.parameters?.radiusTop;
-      if(!radius)continue;
-      if(owner==='feedboard-transport'||owner==='vacuum-table'){
-        rotor.sign=-1;
-        rotor.rate=this.baseMetersPerSecond/(Math.PI*2*this.sheetCyclesPerSecond*radius);
-        rotor.role=rotor.mesh.userData.runtimeRotorRole||(owner==='feedboard-transport'?'register-pressure-transport-roller':'vacuum-table-tape-drive-roller');
-        rotor.source='REGISTER_SHEET_TRANSPORT_SURFACE_SPEED_REFERENCE';
-        rotor.visualSpeedRatio=1;
-      }
-    }
     // Suction head, separator, linkage and front lays all belong to the same sheet cycle.
     // Preserve the conservative amplitudes, but remove the legacy 1.15x phase drift.
     for(const item of this.oscillators){
@@ -677,22 +659,6 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
         rotor.visualSpeedRatio=.82;
       }
     }
-
-    // Dryer/extension transport rollers are existing modeled hardware and should not stay
-    // visually frozen while sheets pass above them. Drive only those six contact rollers.
-    const dryerPath=this.template.findNode('dryer-sheet-path');
-    dryerPath?.traverse(mesh=>{
-      if(!mesh.isMesh||mesh.geometry?.type!=='CylinderGeometry')return;
-      const radius=mesh.geometry.parameters.radiusTop;
-      this.addRotor(mesh,-1,1,{role:'dryer-sheet-transport-roller'});
-      const rotor=this.rotors.find(item=>item.mesh===mesh);
-      if(!rotor)return;
-      rotor.sign=-1;
-      rotor.rate=this.baseMetersPerSecond/(Math.PI*2*this.sheetCyclesPerSecond*radius);
-      rotor.role='dryer-sheet-transport-roller';
-      rotor.source='DRYER_CONTACT_SURFACE_SPEED_MATCHED_TO_SHEET_REFERENCE';
-      rotor.visualSpeedRatio=1;
-    });
 
     // Coating contact train: keep the existing chamber/coating/impression hardware,
     // but drive each contact surface at the same sheet surface speed. This removes the
@@ -831,13 +797,13 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       deliveryChainMotionPolicy:'SINGLE_FORWARD_LOOP_SPROCKETS_SHARE_ROTATION_DIRECTION',
       sheetBrakeMotionPolicy:'CONTROLLED_DECELERATION_VISUAL_REFERENCE_NOT_SERVICE_SETPOINT',
       feederMotionPolicy:'SUCTION_SEPARATOR_LINKAGE_FRONT_LAYS_AND_INFEED_GRIPPER_SHARE_ONE_SHEET_CYCLE',
-      registerTransportPolicy:'ONLY_CONTACT_ROLLERS_ROTATE_AND_MATCH_SHEET_SURFACE_SPEED_TOWARD_PU1',
+      registerTransportPolicy:'MOBILE_BATCHED_CONTACT_REFERENCE__SHEET_PATH_AND_INFEED_GRIPPER_CARRY_VISIBLE_MOTION',
       rollerHandednessPolicy:'IDENTICAL_STRAIGHT_PRINT_KINEMATIC_SIGN_PATTERN_ACROSS_ALL_EIGHT_PU',
       interUnitGripperPolicy:'RIGID_FINGER_ASSEMBLY_ROTATES_WITH_TRANSFER_DRUM_ORBIT',
       inspectionIlluminationActive:this.inspectionIlluminationActive,
       inspectionIlluminationPolicy:'SHEET_OCCUPANCY_TRIGGERED_EXISTING_FOCUSIGHT_LIGHTING_ONLY',
       coaterMotionPolicy:'EXISTING_THREE_ROLL_CONTACT_TRAIN_MATCHES_SHEET_SURFACE_SPEED',
-      dryerTransportPolicy:'SIX_EXISTING_EXTENSION_ROLLERS_ROTATE_AT_SHEET_SURFACE_SPEED',
+      dryerTransportPolicy:'MOBILE_BATCHED_STATIC_REFERENCE__UV_AND_SHEET_PATH_CARRY_VISIBLE_DRYER_MOTION',
       deliveryPileElevatorPolicy:'TOP_RECEIVING_PLANE_HELD_CONSTANT_WHILE_TABLE_LOWERS_WITH_STACK',
       deliveryTableDropM:this.deliveryTableDrop||0
     };
