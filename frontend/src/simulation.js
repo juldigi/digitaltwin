@@ -393,8 +393,9 @@ export class PrintingSimulation{
     this.addTaggedRotors();
     const joggers=this.template.findNode('delivery-joggers');
     joggers?.traverse(object=>{
-      if(!object.isMesh||object.geometry?.type!=='BoxGeometry')return;
-      this.joggerMotions.push({object,initial:object.position.clone(),amplitude:.016,phase:object.position.z<0?0:Math.PI});
+      if(!object.isMesh||(!object.userData.dynamicJogger&&object.geometry?.type!=='BoxGeometry'))return;
+      const side=object.userData.joggerSide;
+      this.joggerMotions.push({object,initial:object.position.clone(),amplitude:.016,phase:side==='OS'?Math.PI:0});
     });
   }
   collectInkSurfaces(){
