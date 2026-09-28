@@ -7,6 +7,40 @@ import {PROMATRIX106_SPEC,PROMATRIX106_SPEC_APM9} from '../frontend/src/data/dim
 import {promatrix106TaxonomyFor} from '../frontend/src/data/taxonomy-promatrix106.js';
 import {PROMATRIX106_TECHNICAL_SOURCES} from '../frontend/src/data/sources-promatrix106.js';
 
+test('Promatrix waste is collected under stripping before the first product reaches delivery',()=>{
+ const model=new Promatrix106MachineTemplate(),sim=new Promatrix106ProcessSimulation(model.root,model);
+ try{
+  const collection=model.findNode('pm106-strip-waste-reference');
+  assert.equal(collection.userData.installedGeometryVerified,false);
+  sim.start();let now=1000;sim.update(now);
+  while(sim.elapsed<7.5){now+=20;sim.update(now);}
+  assert.ok(sim.wasteCompleted>0);
+  assert.equal(sim.completed,0);
+  const piece=sim.waste.find(p=>p.visible),support=sim.wasteSupport;
+  assert.ok(piece&&support);
+  const bounds=new THREE.Box3().setFromObject(support),position=piece.getWorldPosition(new THREE.Vector3());
+  assert.ok(Math.abs(position.y-.006-bounds.max.y)<.002,'stripping waste rests in its collection tray');
+  assert.ok(position.x>=bounds.min.x&&position.x<=bounds.max.x);
+  assert.ok(position.z>=bounds.min.z&&position.z<=bounds.max.z);
+  sim.stop();assert.equal(sim.wasteCompleted,0);assert.equal(sim.waste.some(p=>p.visible),false);
+ }finally{sim.dispose();model.dispose();}
+});
+
+test('Promatrix tie sheets sit between product layers without intersecting the next blank',()=>{
+ const model=new Promatrix106MachineTemplate(),sim=new Promatrix106ProcessSimulation(model.root,model);
+ try{
+  sim.start();for(let i=0;i<13;i++)sim.outputSheet();
+  for(const index of [5,11]){
+   const lower=new THREE.Box3().setFromObject(sim.productStack[index]);
+   const tie=new THREE.Box3().setFromObject(sim.tieSheets[index]);
+   const upper=new THREE.Box3().setFromObject(sim.productStack[index+1]);
+   assert.ok(sim.tieSheets[index].visible);
+   assert.ok(tie.min.y>=lower.max.y-1e-6);
+   assert.ok(upper.min.y>=tie.max.y-1e-6);
+  }
+ }finally{sim.dispose();model.dispose();}
+});
+
 test('Promatrix 106 CSB keeps both BMJ identities and OEM generation boundaries explicit',()=>{
  assert.equal(PROMATRIX106_SPEC.assetId,'BMJ-MCH-0014');assert.equal(PROMATRIX106_SPEC.serial,'MP.DBE0-00100');assert.equal(PROMATRIX106_SPEC_APM9.assetId,'BMJ-MCH-0015');assert.equal(PROMATRIX106_SPEC_APM9.serial,'MP.DBE0-00115');
  assert.deepEqual(PROMATRIX106_SPEC.sheetMax,[.760,1.060]);assert.equal(PROMATRIX106_SPEC.cuttingPressureMN,2.6);assert.equal(PROMATRIX106_SPEC.cuttingPressureTonnes,260);
