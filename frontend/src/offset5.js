@@ -748,7 +748,7 @@ export class OffsetMachineTemplate {
       // IMG_1630 / IMG_1633 show the optical head looking down at the moving sheet.
       // Keep the existing pod position but replace the old horizontal lens proxy with an
       // attached downward barrel + lens. The small Z rotation follows the camera-body pitch.
-      const barrel=this.cylinder(pod,.078,.060,[.012,2.775,z],'graphite','y');barrel.rotation.z=-.15;
+      const barrel=this.cylinder(pod,.078,.060,[.012,2.775,z],'black','y');barrel.rotation.z=-.15;
       barrel.userData.inspectionOpticalBarrel=true;barrel.userData.sourcePhoto='IMG_1630.jpeg + IMG_1633.jpeg';
       const lens=this.cylinder(pod,.062,.018,[.018,2.742,z],'glass','y');lens.rotation.z=-.15;
       lens.userData.inspectionLens=true;lens.userData.opticalAxis='DOWNWARD_TOWARD_SHEET_PLANE_WITH_SMALL_PROCESS_DIRECTION_TILT';
