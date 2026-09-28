@@ -42,7 +42,12 @@ export class MK1060ProcessSimulation{
   const pathGeo=new THREE.BufferGeometry().setFromPoints(this.curve.getPoints(180)),pathMat=new THREE.LineDashedMaterial({color:0x528a9d,dashSize:.065,gapSize:.045,transparent:true,opacity:.55});
   this.pathLine=new THREE.Line(pathGeo,pathMat);this.pathLine.computeLineDistances();this.pathLine.visible=false;this.pathLine.name='MK1060-INTERMITTENT-SHEET-PATH';root.add(this.pathLine);
   const mat=new THREE.MeshStandardMaterial({color:0xefe8d3,roughness:.88,side:THREE.DoubleSide});
-  for(let i=0;i<7;i++){const mesh=new THREE.Mesh(new THREE.PlaneGeometry(1.02,.72),mat.clone());mesh.rotation.x=-Math.PI/2;mesh.visible=false;root.add(mesh);this.sheets.push({mesh,phase:i/7,lap:-1});}
+  for(let i=0;i<7;i++){
+   const mesh=new THREE.Mesh(new THREE.PlaneGeometry(1.02,.72),mat.clone());mesh.rotation.x=-Math.PI/2;mesh.visible=false;root.add(mesh);
+   const cutMarks=new THREE.Group();cutMarks.name='MK1060-DIE-CUT-CREASE-REFERENCE';cutMarks.visible=false;
+   for(const x of [-.25,.25]){const pts=[[-.20,-.25],[.20,-.25],[.20,.25],[-.20,.25]].map(([a,b])=>new THREE.Vector3(x+a*.55,b,.004));const line=new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:0x927357,transparent:true,opacity:.72}));cutMarks.add(line);}
+   mesh.add(cutMarks);this.sheets.push({mesh,cutMarks,phase:i/7,lap:-1});
+  }
   for(let i=0;i<20;i++){const blank=new THREE.Mesh(new THREE.BoxGeometry(.50,.006,.30),mat.clone());blank.visible=false;root.add(blank);this.blankStack.push(blank);const waste=new THREE.Mesh(new THREE.BoxGeometry(.98,.012,.07),new THREE.MeshStandardMaterial({color:0xb4966d,roughness:.9}));waste.visible=false;root.add(waste);this.wastePieces.push(waste);}
   this.pathVisible=false;this.inkFlowVisible=false;this.resetStateFlags();
  }
@@ -84,9 +89,9 @@ export class MK1060ProcessSimulation{
  }
  updateSheets(cycleIndex,transport){
   const global=cycleIndex+transport;
-  for(const s of this.sheets){const raw=global+s.phase,t=((raw%1)+1)%1;s.mesh.visible=true;s.mesh.position.copy(this.curve.getPointAt(Math.min(.999,t)));s.mesh.rotation.set(-Math.PI/2,0,0);
+  for(const s of this.sheets){const raw=global-s.phase;if(raw<0){s.mesh.visible=false;continue;}const lap=Math.floor(raw),t=Math.min(.999,raw-lap);s.mesh.visible=true;s.mesh.position.copy(this.curve.getPointAt(t));s.mesh.rotation.set(-Math.PI/2,0,0);s.cutMarks.visible=t>=.34;
    if(t>.52&&t<.72)s.mesh.material.color.setHex(this.strippingActive?0xd6c29b:0xe9dfc7);else if(t>.72)s.mesh.material.color.setHex(0xdcc79e);else s.mesh.material.color.setHex(0xefe8d3);
-   const lap=Math.floor(raw);if(lap>s.lap){if(s.lap>=0){this.completed++;const idx=(this.completed-1)%this.blankStack.length,b=this.blankStack[idx],w=this.wastePieces[idx];b.visible=true;b.position.set(3.04,.47+idx*.007,-.24);w.visible=true;w.position.set(2.62,.58+idx*.003,.56);}s.lap=lap;}
+   if(lap>s.lap){if(s.lap>=0){this.completed++;const idx=(this.completed-1)%this.blankStack.length;if(idx===0){for(const blank of this.blankStack)blank.visible=false;for(const waste of this.wastePieces)waste.visible=false;}const b=this.blankStack[idx],w=this.wastePieces[idx];b.visible=true;b.position.set(3.04,.47+idx*.007,-.24);w.visible=true;w.position.set(2.62,.58+idx*.003,.56);}s.lap=lap;}
   }
  }
  update(now){
@@ -101,5 +106,5 @@ export class MK1060ProcessSimulation{
   this.updateRotors(dt,p,indexing,cut,strip,waste);this.updateFeeder(p);this.updateGrippers(transport);this.updateSheets(cycleIndex,transport);this.onUpdate?.(this.state());
  }
  stop(){this.active=false;this.running=false;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;this.resetMechanisms();for(const s of this.sheets){s.mesh.visible=false;s.lap=-1;}for(const b of this.blankStack)b.visible=false;for(const w of this.wastePieces)w.visible=false;this.pathLine.visible=false;this.onUpdate?.(this.state());return this.state();}
- dispose(){this.stop();for(const s of this.sheets){this.root.remove(s.mesh);s.mesh.geometry.dispose();s.mesh.material.dispose();}for(const b of this.blankStack){this.root.remove(b);b.geometry.dispose();b.material.dispose();}for(const w of this.wastePieces){this.root.remove(w);w.geometry.dispose();w.material.dispose();}this.root.remove(this.pathLine);this.pathLine.geometry.dispose();this.pathLine.material.dispose();}
+ dispose(){this.stop();for(const s of this.sheets){this.root.remove(s.mesh);s.mesh.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});}for(const b of this.blankStack){this.root.remove(b);b.geometry.dispose();b.material.dispose();}for(const w of this.wastePieces){this.root.remove(w);w.geometry.dispose();w.material.dispose();}this.root.remove(this.pathLine);this.pathLine.geometry.dispose();this.pathLine.material.dispose();}
 }

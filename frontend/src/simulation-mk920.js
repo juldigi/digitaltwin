@@ -38,7 +38,13 @@ export class MK920StampingSimulation{
   const pathGeo=new THREE.BufferGeometry().setFromPoints(this.curve.getPoints(160)),pathMat=new THREE.LineDashedMaterial({color:0x8b7650,dashSize:.06,gapSize:.04,transparent:true,opacity:.52});
   this.pathLine=new THREE.Line(pathGeo,pathMat);this.pathLine.computeLineDistances();this.pathLine.visible=false;this.pathLine.name='MK920-INTERMITTENT-STAMPING-PATH';root.add(this.pathLine);
   const mat=new THREE.MeshStandardMaterial({color:0xf1ead7,roughness:.88,side:THREE.DoubleSide});
-  for(let i=0;i<6;i++){const mesh=new THREE.Mesh(new THREE.PlaneGeometry(.92,.65),mat.clone());mesh.rotation.x=-Math.PI/2;mesh.visible=false;root.add(mesh);this.sheets.push({mesh,phase:i/6,lap:-1});}
+  for(let i=0;i<6;i++){
+   const mesh=new THREE.Mesh(new THREE.PlaneGeometry(.92,.65),mat.clone());mesh.rotation.x=-Math.PI/2;mesh.visible=false;root.add(mesh);
+   // Foil is transferred at the heated platen; it is not printed on the incoming blank.
+   const foil=new THREE.Group();foil.name='MK920-PROCESSED-FOIL-IMPRINT';foil.visible=false;
+   for(const z of [-.19,0,.19]){const strip=new THREE.Mesh(new THREE.PlaneGeometry(.49,.065),new THREE.MeshStandardMaterial({color:0xd3aa42,metalness:.75,roughness:.23,side:THREE.DoubleSide}));strip.position.set(.03,z,.004);foil.add(strip);}
+   mesh.add(foil);this.sheets.push({mesh,foil,phase:i/6,lap:-1});
+  }
   for(let i=0;i<16;i++){const mesh=new THREE.Mesh(new THREE.BoxGeometry(.92,.006,.65),mat.clone());mesh.visible=false;root.add(mesh);this.stack.push(mesh);}
   this.pathVisible=false;this.foilVisible=true;this.resetFlags();
  }
@@ -76,11 +82,12 @@ export class MK920StampingSimulation{
  }
  updateFeeder(p){const active=p<.18,local=Math.min(1,p/.18);this.feederSuctionActive=active;if(this.feederHead&&this.headRest){this.feederHead.position.copy(this.headRest);if(active){this.feederHead.position.y-=.04*Math.sin(Math.PI*local);this.feederHead.position.x+=.03*Math.sin(Math.PI*local);}}this.suckers.forEach((s,i)=>{s.position.copy(this.suckerRest[i]);if(active)s.position.y-=.016*Math.sin(Math.PI*local);});}
  updateGrippers(globalTransport){for(const bar of this.gripperBars){const q=gripperLoopPosition(globalTransport/this.gripperBars.length+(bar.userData.barPhase||0));bar.position.set(q.x,q.y,0);}}
- outputSheet(){this.completed++;const p=this.stack[(this.completed-1)%this.stack.length];p.visible=true;p.position.set(2.99,.466+((this.completed-1)%this.stack.length)*.007,0);}
+ outputSheet(){this.completed++;const index=(this.completed-1)%this.stack.length;if(index===0&&this.completed>1)for(const sheet of this.stack)sheet.visible=false;const p=this.stack[index];p.visible=true;p.position.set(2.99,.466+index*.007,0);p.material.color.setHex(0xe9d9a8);}
  updateSheets(cycleIndex,transport){
   const global=cycleIndex+transport;
-  for(const s of this.sheets){const raw=global+s.phase,t=((raw%1)+1)%1;s.mesh.visible=true;s.mesh.position.copy(this.curve.getPointAt(Math.min(.999,t)));s.mesh.rotation.set(-Math.PI/2,0,0);s.mesh.material.color.setHex(this.stampingContact&&t>.40&&t<.60?0xe1c06a:t>.55?0xead9a8:0xf1ead7);
-   const lap=Math.floor(raw);if(lap>s.lap){if(s.lap>=0)this.outputSheet();s.lap=lap;}
+  for(const s of this.sheets){const raw=global-s.phase;if(raw<0){s.mesh.visible=false;continue;}const lap=Math.floor(raw),t=Math.min(.999,raw-lap);
+   if(lap>s.lap){if(s.lap>=0)this.outputSheet();s.lap=lap;}
+   s.mesh.visible=true;s.mesh.position.copy(this.curve.getPointAt(t));s.mesh.rotation.set(-Math.PI/2,0,0);s.foil.visible=t>=.42;s.mesh.material.color.setHex(s.foil.visible?0xead9a8:0xf1ead7);
   }
  }
  update(now){
@@ -94,5 +101,5 @@ export class MK920StampingSimulation{
   this.updateHeaters();this.updateRotors(dt,p,indexing,platenMotion,foilAdvance);this.updateFeeder(p);this.updateGrippers(transport);this.updateSheets(cycleIndex,transport);this.onUpdate?.(this.state());
  }
  stop(){this.active=false;this.running=false;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;this.heaterReady=false;this.resetMechanisms();for(const s of this.sheets){s.mesh.visible=false;s.lap=-1;}for(const p of this.stack)p.visible=false;this.pathLine.visible=false;if(this.staticDeliveryStack)this.staticDeliveryStack.visible=this.staticDeliveryVisible;this.onUpdate?.(this.state());return this.state();}
- dispose(){this.stop();for(const s of this.sheets){this.root.remove(s.mesh);s.mesh.geometry.dispose();s.mesh.material.dispose();}for(const p of this.stack){this.root.remove(p);p.geometry.dispose();p.material.dispose();}this.root.remove(this.pathLine);this.pathLine.geometry.dispose();this.pathLine.material.dispose();}
+ dispose(){this.stop();for(const s of this.sheets){this.root.remove(s.mesh);s.mesh.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});}for(const p of this.stack){this.root.remove(p);p.geometry.dispose();p.material.dispose();}this.root.remove(this.pathLine);this.pathLine.geometry.dispose();this.pathLine.material.dispose();}
 }

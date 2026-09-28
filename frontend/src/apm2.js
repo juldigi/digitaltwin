@@ -3,6 +3,7 @@ import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js'
 import {APM2_DIMENSIONS,apm2DimensionAudit} from './data/dimensions-apm2.js';
 import {APM2_ORIENTATION,APM2_TECHNICAL_SOURCES} from './data/sources-apm2.js';
 import {APM2_TAXONOMY,APM2_TAXONOMY_BY_ID} from './data/taxonomy-apm2.js';
+import {applyMachineIdentityPlacard,disposeMachineIdentityPlacards} from './machine-identity-placard.js';
 
 const V=a=>new THREE.Vector3(...a);
 const D=APM2_DIMENSIONS.layout;
@@ -302,6 +303,7 @@ export class APM2MachineTemplate{
     deliveryCrown.userData.openPileEnvelope=true;
     const identity=this.cover(this.box(g,[.64,.14,.030],[-.02,1.78,-1.005],'dark',.012));
     identity.userData.modelFamilyPlate='SP 102';
+    applyMachineIdentityPlacard(identity,{sap:'APM-2',model:'SP 102',serial:APM2_DIMENSIONS.verified.serial});
   }
   refineExteriorV237(){
     this.root.userData.visualRefinement='V237_SP102_LEGACY_SERVICE_ACCESS_REALISM';
@@ -426,5 +428,5 @@ export class APM2MachineTemplate{
   }
   setLow(on){for(const m of this.meshes)if(m.userData.detail)m.visible=!on||Boolean(m.userData.silhouetteCritical);}
   reset(){const open=this.exteriorOpen;this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const n of this.nodes)n.quaternion.copy(n.userData.restQuaternion);if(open)this.setExteriorOpen(true);}
-  dispose(){this.geometries.forEach(g=>g.dispose());this.materials.forEach(m=>m.dispose());this.geometries.clear();this.materials.clear();}
+  dispose(){disposeMachineIdentityPlacards(this.root);this.geometries.forEach(g=>g.dispose());this.materials.forEach(m=>m.dispose());this.geometries.clear();this.materials.clear();}
 }
