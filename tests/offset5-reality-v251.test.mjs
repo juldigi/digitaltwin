@@ -122,6 +122,30 @@ test('V256 grounds all PU cylinder journals into open side-frame rails without c
  }finally{m.dispose();}
 });
 
+test('V257 supports the existing coater rollers on both side frames without changing the machine envelope',()=>{
+ const m=new Offset5CD102RealismTemplate();
+ try{
+  assert.equal(m.root.userData.visualRefinement,'V257_BMJ_COATER_OPEN_BEARING_FRAME_SUPPORTS');
+  assert.equal(m.root.userData.coaterFramePolicy,'SUPPORT_EXISTING_THREE_ROLL_CONTACT_TRAIN_ONLY__NO_SECOND_COATER__NO_DIMENSION_CHANGE');
+  const chamber=m.findNode('coater-chamber');
+  assert.ok(chamber);
+  const spines=chamber.children.filter(x=>x.userData.realismRole==='coater-open-side-frame-spine');
+  const saddles=chamber.children.filter(x=>x.userData.realismRole==='coater-roller-bearing-saddle');
+  const caps=chamber.children.filter(x=>x.userData.realismRole==='coater-roller-bearing-cap');
+  assert.equal(spines.length,2);
+  assert.equal(saddles.length,6);
+  assert.equal(caps.length,6);
+  for(const role of ['metering','coating','impression']){
+   assert.equal(saddles.filter(x=>x.userData.coaterRollerRole===role).length,2,`missing ${role} coater support on one side`);
+   assert.equal(caps.filter(x=>x.userData.coaterRollerRole===role).length,2,`missing ${role} coater bearing cap`);
+  }
+  m.setExteriorOpen(true);
+  assert.ok(spines.every(x=>x.visible)&&saddles.every(x=>x.visible),'coater structural supports must remain visible in cutaway');
+  assert.equal(m.root.userData.machineEnvelope.structuralBody.length,26.00);
+  assert.equal(m.root.userData.machineEnvelope.serviceInclusive.length,27.00);
+ }finally{m.dispose();}
+});
+
 test('Offset 5 feeds separate 720 mm sheets with a visible gap and releases them at delivery',()=>{
  const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
  try{
