@@ -649,7 +649,8 @@ export class OffsetMachineTemplate {
   coatingUnit(x){
     const photos=['IMG_1629.jpeg','IMG_2391(1).jpeg','IMG_2392.jpeg'];
     const g=this.group(this.root,'coater','Coating unit · housing & chamber reference',[x,0,0],[.8,.25,0],photos,'Exterior follows the photographed transition after PU8. Chamber-blade/coating-cylinder functions follow Heidelberg CD102 product information; exact installed roller diameters and coating settings are not inferred.');
-    g.scale.x=OFFSET5_DIMENSIONS.layout.coaterLength/1.15;
+    const coaterScaleX=OFFSET5_DIMENSIONS.layout.coaterLength/1.15;
+    g.scale.x=coaterScaleX;
     const frame=this.group(g,'coater-frame','Coating unit side frames',[0,0,0],[.25,.15,-.55],photos);
     this.box(frame,[1.15,.42,2.02],[0,.49,0],'black',.035);
     for(const z of [-1.03,1.03])this.markExteriorCover(this.box(frame,[.98,1.55,.24],[0,1.42,z],'graphite',.035));
@@ -660,9 +661,9 @@ export class OffsetMachineTemplate {
     this.tread(op,[.30,.09,.37],[.35,1.03,1.34]);
     const chamber=this.group(g,'coater-chamber','Chamber blade & coating roller functional reference',[0,0,0],[0,.62,-.20],['IMG_1629.jpeg','pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'The chamber-blade system is supported by Heidelberg product information. Geometry is functional/sectional only.');
     this.box(chamber,[.38,.12,1.55],[-.14,2.02,0],'graphite',.018);
-    {const r=this.cylinder(chamber,.115,1.46,[-.02,1.80,0],'steel');Object.assign(r.userData,{dynamicRotor:true,rotorRole:'coater-process-roller',rotorSign:1,rotorRate:.82});}
-    {const r=this.cylinder(chamber,.235,1.48,[.10,1.48,0],'rubber');Object.assign(r.userData,{dynamicRotor:true,rotorRole:'coater-process-roller',rotorSign:-1,rotorRate:.78});}
-    {const r=this.cylinder(chamber,.255,1.50,[-.08,1.06,0],'steel');Object.assign(r.userData,{dynamicRotor:true,rotorRole:'coater-process-roller',rotorSign:1,rotorRate:.74});}
+    {const r=this.cylinder(chamber,.115,1.46,[-.02,1.80,0],'steel');r.scale.x=1/coaterScaleX;Object.assign(r.userData,{dynamicRotor:true,rotorRole:'coater-process-roller',coaterRole:'anilox-metering',rotorSign:1,rotorRate:.82,roundnessCompensated:true});}
+    {const r=this.cylinder(chamber,.235,1.48,[.10,1.48,0],'rubber');r.scale.x=1/coaterScaleX;Object.assign(r.userData,{dynamicRotor:true,rotorRole:'coater-process-roller',coaterRole:'coating-cylinder',rotorSign:-1,rotorRate:.78,roundnessCompensated:true});}
+    {const r=this.cylinder(chamber,.255,1.50,[-.08,1.03,0],'steel');r.scale.x=1/coaterScaleX;Object.assign(r.userData,{dynamicRotor:true,rotorRole:'coater-process-roller',coaterRole:'impression-cylinder',rotorSign:1,rotorRate:.74,roundnessCompensated:true});}
     const blade=this.box(chamber,[.11,.06,1.48],[-.20,1.90,0],'light',.012);blade.rotation.z=-.18;
     const locks=this.group(g,'coater-chamber-locks','Chamber end locks, bearing collars & blade clamps',[0,0,0],[.14,.40,-.58],photos,'End hardware is an inspection-oriented functional reference; clamp force, blade angle and bearing specification are not asserted.');
     for(const z of [-.77,.77]){this.cylinder(locks,.075,.055,[-.02,1.80,z],'graphite','z');this.ring(locks,.060,.010,[-.02,1.80,z],'steel','z');this.handle(locks,[-.19,1.94,z],'z',.11);}
