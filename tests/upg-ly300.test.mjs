@@ -7,6 +7,23 @@ import {UPG_LY300_SPEC} from '../frontend/src/data/dimensions-upg-ly300.js';
 import {UPG_LY300_TAXONOMY} from '../frontend/src/data/taxonomy-upg-ly300.js';
 import {UPG_LY300_TECHNICAL_SOURCES} from '../frontend/src/data/sources-upg-ly300.js';
 
+test('UPG LY300 open service view hides doors, seams and UV-shield fittings together',()=>{
+ const model=new UpgLy300MachineTemplate();
+ try{
+  const cover=model.meshes.find(m=>m.userData.exteriorCover);
+  const door=model.meshes.find(m=>m.userData.ownerId==='ly300-access-door');
+  const handle=model.meshes.find(m=>m.userData.mechanismRole==='service-door-handle');
+  const uvSensor=model.meshes.find(m=>m.userData.mechanismRole==='uv-shield-interlock-sensor-reference');
+  assert.ok(cover&&door&&handle&&uvSensor);
+  model.setLow(true);model.setExteriorOpen(true);
+  for(const part of [cover,door,handle,uvSensor])assert.equal(part.visible,false);
+  model.setExteriorOpen(false);
+  assert.equal(door.visible,true);assert.equal(handle.visible,false,'low detail remains selected');
+  model.setLow(false);
+  assert.equal(handle.visible,true);assert.equal(uvSensor.visible,true);
+ }finally{model.dispose();}
+});
+
 test('UPG LY300 OEM process data keeps line and print-speed references distinct',()=>{
  assert.equal(UPG_LY300_SPEC.assetId,'BMJ-MCH-0024');assert.equal(UPG_LY300_SPEC.oemReferenceModel,'LQ-UPG LY300');assert.deepEqual(UPG_LY300_SPEC.envelopeM,[4.230,.720,1.700]);assert.equal(UPG_LY300_SPEC.weightKg,800);
  assert.deepEqual(UPG_LY300_SPEC.materialWidthMm,[50,250]);assert.equal(UPG_LY300_SPEC.lineSpeedMaxMMin,70);assert.equal(UPG_LY300_SPEC.printSpeedReferenceMMin,114);assert.notEqual(UPG_LY300_SPEC.lineSpeedMaxMMin,UPG_LY300_SPEC.printSpeedReferenceMMin);

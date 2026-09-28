@@ -7,6 +7,23 @@ import {FZ1200_ASSET_PROFILES} from '../frontend/src/data/dimensions-fz1200.js';
 import {fz1200TaxonomyFor} from '../frontend/src/data/taxonomy-fz1200.js';
 import {FZ1200_TECHNICAL_SOURCES} from '../frontend/src/data/sources-fz1200.js';
 
+test('FZ1200 power-pack cutaway removes cover-mounted fittings and retains detail quality state',()=>{
+ const model=new FZ1200MachineTemplate();
+ try{
+  const cover=model.meshes.find(m=>m.userData.exteriorCover);
+  const vent=model.meshes.find(m=>m.userData.mechanismRole==='powerpack-vent-slot');
+  const handle=model.meshes.find(m=>m.userData.mechanismRole==='powerpack-door-handle');
+  assert.ok(cover&&vent&&handle);
+  model.setExteriorOpen(true);
+  assert.equal(cover.visible,false);assert.equal(vent.visible,false);assert.equal(handle.visible,false);
+  assert.ok(model.root.userData.exteriorHiddenCount>=1);
+  model.setLow(true);model.setExteriorOpen(false);
+  assert.equal(cover.visible,true);assert.equal(vent.visible,false);
+  model.setLow(false);
+  assert.equal(vent.visible,true);assert.equal(handle.visible,true);
+ }finally{model.dispose();}
+});
+
 test('FZ1200 keeps all three BMJ identities and supplier numbers remain reference-only',()=>{
  assert.equal(Object.keys(FZ1200_ASSET_PROFILES).length,3);assert.equal(FZ1200_ASSET_PROFILES['BMJ-MCH-0007'].serial,'24RVOFS0920');assert.equal(FZ1200_ASSET_PROFILES['BMJ-MCH-0008'].serial,'2105080SF34');assert.equal(FZ1200_ASSET_PROFILES['BMJ-MCH-0022'].serial,'22000320');
  const ref=FZ1200_ASSET_PROFILES['BMJ-MCH-0007'];assert.equal(ref.exactModelPublicReference.maxPileKg,1200);assert.deepEqual(ref.exactModelPublicReference.openingM,[.76,1.64]);assert.equal(ref.exactModelPublicReference.powerKw,9);
