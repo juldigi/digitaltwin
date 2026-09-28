@@ -190,7 +190,7 @@ export class SharkN650MachineTemplate{
     const header=this.cover(this.box(tower,[1.18,.16,.025],[0,2.25,z],'blue',.012));header.userData.towerIdentityHeader=true;header.userData.silhouetteCritical=true;
     const vertical=this.cover(this.box(tower,[.08,.82,.027],[-.60,1.38,z],'blue',.008));vertical.userData.towerIdentityAccent=true;
    }
-   const beacon=this.group(tower,'shark650-signal-tower-v259','Vision tower signal-light reference');
+   const beacon=this.group(tower,'shark650-signal-tower-v259','Vision tower signal-light reference');beacon.userData.familyPhotoReference=true;beacon.userData.installedVerified=false;
    const mast=this.cyl(beacon,.016,.34,[.34,2.47,.18],'dark','signal-tower-mast','y');mast.userData.signalTowerReference=true;mast.userData.statusMeaningVerified=false;
    for(const [i,kind] of ['green','amber','red'].entries()){
     const lamp=this.cyl(beacon,.032,.068,[.34,2.64+i*.068,.18],kind,'signal-tower-lamp','y');
