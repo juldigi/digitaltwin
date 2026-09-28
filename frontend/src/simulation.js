@@ -47,15 +47,17 @@ function pathPoints(){
   const dx=coating.x-impression.x,dy=coating.y-impression.y,centerDistance=Math.hypot(dx,dy);
   const ux=dx/centerDistance,uy=dy/centerDistance;
   const nipGap=Math.max(0,centerDistance-impression.r-coating.r);
-  const sheetRadius=impression.r+nipGap/2;
+  const sheetRadius=impression.r+nipGap/2+.001;
   const nipDeg=THREE.MathUtils.radToDeg(Math.atan2(uy,ux));
   pts.push(new THREE.Vector3(D.coaterCenterX-.48,1.02,0));
-  for(let j=0;j<=10;j++){
-    const deg=THREE.MathUtils.lerp(170,nipDeg,j/10);
+  // Continue around the impression cylinder beyond the nip. Stopping exactly at the nip lets
+  // Catmull-Rom overshoot into the coating-cylinder core on the exit segment.
+  for(let j=0;j<=15;j++){
+    const deg=THREE.MathUtils.lerp(170,35,j/15);
     pts.push(arcPoint(impression.x,impression.y,sheetRadius,deg));
   }
   pts.push(
-    new THREE.Vector3(D.coaterCenterX+.42,1.29,0),
+    new THREE.Vector3(D.coaterCenterX+.42,1.24,0),
     new THREE.Vector3(D.dryerCenterX-.70,1.29,0),
     new THREE.Vector3(D.dryerCenterX-.32,1.29,0),
     new THREE.Vector3(D.dryerCenterX+.06,1.29,0),
