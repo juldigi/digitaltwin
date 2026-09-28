@@ -63,6 +63,7 @@ test('SHARK adaptive low-detail hides service micro-detail while preserving towe
   const detail=model.meshes.filter(m=>m.userData.detail),silhouette=model.meshes.filter(m=>m.userData.silhouetteCritical);
   assert.ok(detail.length>=12);const before=detail.filter(m=>m.visible).length;assert.ok(before>0);
   model.setLow(true);assert.equal(model.root.userData.lowDetailActive,true);assert.ok(detail.filter(m=>m.visible).length<before);assert.ok(silhouette.every(m=>m.visible));
+  model.setExteriorOpen(true);model.setExteriorOpen(false);assert.equal(detail.filter(m=>m.visible).length,0,'cutaway toggle must not leak low-detail meshes back on');
   model.setLow(false);assert.equal(model.root.userData.lowDetailActive,false);assert.equal(detail.filter(m=>m.visible).length,before);
  }finally{model.dispose();}
 });
