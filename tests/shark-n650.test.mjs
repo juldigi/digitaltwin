@@ -23,12 +23,28 @@ test('SHARK geometry keeps feeder camera reject and collection alternatives as r
  for(const id of ['shark650-feeder','shark650-transfer','shark650-inspection','shark650-vision','shark650-processing','shark650-reject','shark650-return','shark650-access'])assert.ok(model.findNode(id),id);
  assert.equal(model.findNode('shark650-feed-suction').userData.installedModeVerified,false);assert.equal(model.findNode('shark650-feed-friction').userData.installedModeVerified,false);assert.equal(model.findNode('shark650-feed-friction').visible,false);assert.equal(model.findNode('shark650-feed-friction').userData.capabilityOnly,true);
  assert.equal(model.findNode('shark650-vision-camera').userData.referenceBayCount,3);assert.equal(model.findNode('shark650-vision-camera').userData.installedCameraCountVerified,false);assert.equal(model.findNode('shark650-vision-camera').userData.p3SuffixDecoded,false);
- assert.equal(model.root.userData.visualRefinement,'V254_SHARK_N650_AUTOMATED_NEGATIVE_PITCH_RETURN_REALISM');
+ assert.equal(model.root.userData.visualRefinement,'V258_SHARK_N650_TOWER_OPEN_BAY_RETURN_REALISM');
  assert.equal(model.findNode('shark650-process-hmi').visible,false);assert.equal(model.findNode('shark650-access-platform').visible,false);
  for(const id of ['shark650-local-service-step-v254','shark650-feeder-hood-v254','shark650-reject-guard-v254','shark650-reject-confirm-v254','shark650-return-monitor-v254','shark650-dust-integration-capability-v254'])assert.ok(model.findNode(id),id);
  assert.equal(model.findNode('shark650-dust-integration-capability-v254').visible,false);assert.equal(model.findNode('shark650-dust-integration-capability-v254').userData.capabilityOnly,true);
  assert.ok(model.meshes.filter(m=>m.userData.returnReference==='GOOD_FISH_SCALE').length>=9);assert.ok(model.meshes.filter(m=>m.userData.returnReference==='BAD_RETURN').length>=9);
  assert.equal(model.findNode('shark650-reject').userData.installedRejectTypeVerified,false);assert.equal(model.findNode('shark650-reject-plate').userData.rejectReference,'NEUTRAL_KICK_OFF_PATH');assert.equal(model.findNode('shark650-reject-air').userData.rejectReference,'AIR_OPTION');assert.equal(model.findNode('shark650-reject-air').visible,false);assert.equal(model.findNode('shark650-return').userData.installedCollectionModeVerified,false);assert.equal(model.findNode('shark650-return').userData.officialGoodBadReturnLine,true);model.dispose();
+});
+
+test('V258 SHARK grounds the main chassis, points the neutral optic at the bed and structurally frames the reject bay',()=>{
+ const model=new SharkN650MachineTemplate();
+ try{
+  assert.equal(model.root.userData.visualRefinement,'V258_SHARK_N650_TOWER_OPEN_BAY_RETURN_REALISM');
+  assert.equal(model.root.userData.opticalAxisPolicy,'NEUTRAL_REFERENCE_HEAD_POINTS_DOWN_TO_INSPECTION_BED__P3N1_CAMERA_PACKAGE_UNDECODED');
+  const camera=model.findNode('shark650-vision-camera'),lens=camera.children.find(o=>o.isMesh&&o.userData.mechanismRole==='camera-lens');
+  assert.ok(lens);assert.equal(lens.userData.opticalAxis,'NEGATIVE_Y_TOWARD_INSPECTION_BED');assert.equal(lens.userData.opticalTargetY,.78);
+  const feet=model.findNode('shark650-leveling-feet-v258');assert.ok(feet);
+  const pads=[];feet.traverse(o=>{if(o.isMesh&&o.userData.floorContact)pads.push(o);});assert.equal(pads.length,12);assert.ok(pads.every(p=>Math.abs(p.position.y-.018)<1e-9));
+  const tower=model.findNode('shark650-inspection-tower'),headers=[];tower.traverse(o=>{if(o.isMesh&&o.userData.towerIdentityHeader)headers.push(o);});assert.equal(headers.length,2);
+  const bay=model.findNode('shark650-open-reject-bay-v258');assert.ok(bay);const structures=[];bay.traverse(o=>{if(o.isMesh&&o.userData.structuralOpenBay)structures.push(o);});assert.equal(structures.length,6);
+  assert.equal(bay.userData.policy,'STRUCTURAL_FRAME_ONLY__EXACT_REJECT_ACTUATOR_REMAINS_UNVERIFIED');
+  assert.equal(model.findNode('shark650-return').userData.v258ReturnPolicy,'OFFICIAL_GOOD_BAD_RETURN_LINE__LOW_CONTINUOUS_LANES__VERTICAL_PALLETIZER_CAPABILITY_ONLY');
+ }finally{model.dispose();}
 });
 
 test('SHARK rotor whitelist excludes suction cups camera lenses and air nozzles',()=>{
