@@ -36,3 +36,13 @@ test('toilet and sparepart warehouse show usable fixtures and stored materials',
  root.traverse(o=>{const s=o.userData?.semantic;if(s)items.set(s,(items.get(s)||0)+1);});
  for(const type of ['V202_TOILET_PORCELAIN_BOWL_REFERENCE','V202_TOILET_SEAT_RING_REFERENCE','V202_TOILET_CISTERN_REFERENCE','V202_TOILET_BASIN_BOWL_REFERENCE','V202_TOILET_FAUCET_SPOUT_REFERENCE','V202_TOILET_FLOOR_DRAIN_REFERENCE','V202_SPAREPART_BIN_FACE_REFERENCE','V202_SPAREPART_BIN_UNNUMBERED_LABEL_REFERENCE','V202_SPAREPART_CLOSED_CARTON_REFERENCE'])assert.ok(items.get(type)>0,type);
 });
+
+test('CTP and CTF remain adjacent functional zones when the source has no partition',async()=>{
+ const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
+ const {root}=buildActualFactory(layout,fleet),rooms=root.userData.roomEnvelopeAudit.filter(r=>['CTP','CTF'].includes(r.label)).sort((a,b)=>a.x-b.x);
+ assert.equal(rooms.length,2);
+ assert.ok(rooms.every(r=>r.sharedUnpartitionedBay&&!r.enclose));
+ assert.ok(rooms[0].maxX<=rooms[1].minX+.001);
+ const fakeWalls=[];root.traverse(o=>{if(o.userData?.semantic==='ROOM_ENVELOPE_SUPPLEMENT_REFERENCE'&&['CTP','CTF'].includes(o.userData.roomLabel))fakeWalls.push(o);});
+ assert.equal(fakeWalls.length,0);
+});

@@ -77,7 +77,7 @@ test('V204 room visual-management boards appear only as contextual support refer
  const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
  const built=buildActualFactory(layout,fleet),root=built.root,s=root.userData.buildingDetailStats;
  const boards=collect(root,/^V204_ROOM_VISUAL_BOARD_REFERENCE$/);
- const eligible=built.root.userData.v203RoomShellAudit.filter(r=>/ADMIN|SUPERVISOR|PPIC|PDS|QC|INCOMING|PREPRESS/.test(r.program)).length;
+ const eligible=built.root.userData.v203RoomShellAudit.filter(r=>r.status==='V203_SHELL_COMPLETE'&&/ADMIN|SUPERVISOR|PPIC|PDS|QC|INCOMING|PREPRESS/.test(r.program)).length;
  assert.equal(boards.length,eligible);
  assert.equal(s.v204WallVisualBoards,eligible);
  assert.ok(boards.every(o=>o.visible));
