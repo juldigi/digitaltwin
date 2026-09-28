@@ -314,13 +314,28 @@ test('Offset 5 shows ink only as subtle roller film without floating droplets or
  }finally{sim.dispose();m.dispose();}
 });
 
-test('Offset 5 feeder suction hardware reciprocates without fake rotor spin and all PUs keep one roller handedness',()=>{
+test('Offset 5 feeder suction and register transport share one sheet cycle without fake rotor spin',()=>{
  const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
  try{
   const blockedOwners=new Set(['feeder-suction-cups','feeder-separation','feeder-head-linkage']);
   assert.ok(sim.rotors.every(item=>!blockedOwners.has(item.mesh?.userData?.ownerId)),'feeder suction/linkage hardware must not be treated as spinning transport rollers');
-  assert.ok(sim.oscillators.some(item=>item.object===m.findNode('feeder-suction-cups')));
-  assert.ok(sim.oscillators.some(item=>item.object===m.findNode('feeder-separation')));
+  for(const id of ['feeder-suction-cups','feeder-separation','feeder-head-linkage','feedboard-front-lays','feedboard-infeed-gripper']){
+   const oscillator=sim.oscillators.find(item=>item.object===m.findNode(id));
+   assert.ok(oscillator,`missing cyclic motion for ${id}`);
+   assert.equal(oscillator.frequency,1,`${id} must share one press-sheet cycle`);
+  }
+  const transport=sim.rotors.filter(item=>item.role==='register-pressure-transport-roller');
+  const vacuum=sim.rotors.filter(item=>item.role==='vacuum-table-tape-drive-roller');
+  assert.equal(transport.length,4);
+  assert.equal(vacuum.length,2);
+  assert.ok([...transport,...vacuum].every(item=>item.sign===-1&&item.visualSpeedRatio===1));
+  for(const item of [...transport,...vacuum]){
+   const r=item.mesh.geometry.parameters.radiusTop;
+   const surface=item.rate*r*2*Math.PI*sim.sheetCyclesPerSecond;
+   assert.ok(Math.abs(surface-sim.baseMetersPerSecond)<1e-9);
+   assert.equal(item.source,'REGISTER_SHEET_TRANSPORT_SURFACE_SPEED_REFERENCE');
+  }
+  assert.ok(sim.rotors.every(item=>item.mesh?.userData?.ownerId!=='feedboard-transport'||Math.abs(item.mesh.geometry.parameters.radiusTop-.034)<1e-6));
   for(const code of ['13','2','1','14','3','4','5','6','7','8','9','10','11','12','15']){
    const a=sim.rotors.find(item=>item.role===`PU1-ink-roller-${code}`);
    const b=sim.rotors.find(item=>item.role===`PU2-ink-roller-${code}`);
@@ -333,7 +348,8 @@ test('Offset 5 feeder suction hardware reciprocates without fake rotor spin and 
    assert.ok(a&&b,`missing PU1/PU2 damp roller ${code}`);
    assert.equal(a.sign,b.sign,`damp roller ${code} reverses handedness between adjacent identical PUs`);
   }
-  assert.equal(sim.state().feederMotionPolicy,'SUCTION_SEPARATOR_AND_LINKAGE_RECIPROCATE_WITHOUT_FAKE_SPIN');
+  assert.equal(sim.state().feederMotionPolicy,'SUCTION_SEPARATOR_LINKAGE_FRONT_LAYS_AND_INFEED_GRIPPER_SHARE_ONE_SHEET_CYCLE');
+  assert.equal(sim.state().registerTransportPolicy,'ONLY_CONTACT_ROLLERS_ROTATE_AND_MATCH_SHEET_SURFACE_SPEED_TOWARD_PU1');
   assert.equal(sim.state().rollerHandednessPolicy,'IDENTICAL_STRAIGHT_PRINT_KINEMATIC_SIGN_PATTERN_ACROSS_ALL_EIGHT_PU');
  }finally{sim.dispose();m.dispose();}
 });
