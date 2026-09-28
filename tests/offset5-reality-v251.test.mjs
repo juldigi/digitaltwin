@@ -238,7 +238,8 @@ test('Offset 5 inks each section only after that section passes the PU nip',()=>
   assert.equal(transfer.children.filter(o=>o.userData.realismRole==='interunit-bearing-saddle-cap').length,4);
   assert.equal(transfer.children.filter(o=>o.userData.realismRole==='interunit-drum-bearing-retainer').length,2);
   assert.equal(transfer.userData.frameMountPolicy,'JOURNAL_TO_ADJACENT_PU_INNER_FRAME_FACES');
-  assert.deepEqual(transfer.userData.lockedFrameMountEdges,[-.385,.365]);
+  assert.ok(Math.abs(transfer.userData.lockedFrameMountEdges[0]+.385)<1e-9);
+  assert.ok(Math.abs(transfer.userData.lockedFrameMountEdges[1]-.365)<1e-9);
   for(const tie of transfer.children.filter(o=>o.userData.realismRole==='interunit-drum-frame-tie')){
    const side=Math.sign(tie.userData.attachedFrameInnerX);
    const box=new THREE.Box3().setFromObject(tie);
