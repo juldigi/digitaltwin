@@ -457,6 +457,10 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
     }
     // The simulated pile is cleared by stop; do not swap a prebuilt full pile back in.
     if(this.staticDeliveryStack)this.staticDeliveryStack.visible=false;
+    for(const item of this.gripperMotions){
+      item.object.rotation.z=item.initialRotationZ??0;
+      item.currentOrbitAngle=null;
+    }
     return this.state();
   }
   // Offset lithography transfers thin films at roller contacts. The legacy
@@ -545,6 +549,25 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       rotor.source='CONTACTING_CYLINDER_SURFACE_SPEED_REFERENCE';
     }
   }
+  update(now){
+    super.update(now);
+    if(!this.active)return;
+    // Keep each inter-unit gripper assembly rigidly attached to its drum orbit.
+    // The base simulator already moves the bar center around the correct shaft; here we also
+    // rotate the merged finger assembly about that bar center so the fingers do not stay
+    // unnaturally world-horizontal while orbiting.
+    for(const item of this.gripperMotions){
+      if(!item.orbit)continue;
+      const angle=item.phase-this.elapsed*this.baseMetersPerSecond/item.radius;
+      const cos=Math.cos(angle),sin=Math.sin(angle);
+      const localX=item.barX,localY=item.barY;
+      const rotatedX=cos*localX-sin*localY,rotatedY=sin*localX+cos*localY;
+      item.object.rotation.z=angle;
+      item.object.position.x=item.radius*cos-rotatedX;
+      item.object.position.y=item.drumY+item.radius*sin-rotatedY;
+      item.currentOrbitAngle=angle;
+    }
+  }
   applyInkFilm(on){
     for(const surface of this.inkSurfaces){
       surface.material.emissive.copy(on&&this.inkFlowVisible?surface.color:surface.initialEmissive);
@@ -567,6 +590,7 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
     this.levers=this.levers.filter(o=>!o.object?.userData?.exteriorCover&&!o.object?.userData?.coverMountedDetail);
     this.gripperMotions=this.gripperMotions.filter(o=>!o.object?.userData?.exteriorCover);
     this.joggerMotions=this.joggerMotions.filter(o=>!o.object?.userData?.exteriorCover);
+    for(const item of this.gripperMotions)item.initialRotationZ=item.object.rotation.z;
   }
   state(){
     return {
@@ -592,7 +616,8 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       deliveryChainMotionPolicy:'SINGLE_FORWARD_LOOP_SPROCKETS_SHARE_ROTATION_DIRECTION',
       sheetBrakeMotionPolicy:'CONTROLLED_DECELERATION_VISUAL_REFERENCE_NOT_SERVICE_SETPOINT',
       feederMotionPolicy:'SUCTION_SEPARATOR_AND_LINKAGE_RECIPROCATE_WITHOUT_FAKE_SPIN',
-      rollerHandednessPolicy:'IDENTICAL_STRAIGHT_PRINT_KINEMATIC_SIGN_PATTERN_ACROSS_ALL_EIGHT_PU'
+      rollerHandednessPolicy:'IDENTICAL_STRAIGHT_PRINT_KINEMATIC_SIGN_PATTERN_ACROSS_ALL_EIGHT_PU',
+      interUnitGripperPolicy:'RIGID_FINGER_ASSEMBLY_ROTATES_WITH_TRANSFER_DRUM_ORBIT'
     };
   }
 }
