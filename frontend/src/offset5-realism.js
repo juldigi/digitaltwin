@@ -13,7 +13,7 @@
 
 import {OffsetMachineTemplate} from './offset5.js';
 import {PrintingSimulation} from './simulation.js';
-import {OFFSET5_UNIT_CENTERS} from './data/dimensions-offset5.js';
+import {OFFSET5_DIMENSIONS,OFFSET5_UNIT_CENTERS} from './data/dimensions-offset5.js';
 
 export const OFFSET5_FINAL_REFINEMENT=Object.freeze({
   id:'OFFSET5_CD102_8L_CUSTOM_INSTALLED_REALITY_R5',
@@ -228,17 +228,31 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
   }
 
   refineTransferSupports(){
-    // The inter-unit drum journals need visible mounts to the adjacent PU frames.
-    // Place the mounts below the sheet arc and inside the existing custom access bays.
+    // In cutaway, every inter-unit transfer drum must still read as physically mounted.
+    // Tie the journal center directly into the inner face of the adjacent PU frames.
+    // The tie lengths are derived from the locked BMJ custom pitch/frame widths; no PU is moved.
+    const d=OFFSET5_DIMENSIONS.layout,pitch=d.printingUnitPitch;
     for(let bay=1;bay<8;bay++){
       const transfer=this.node(`transfer-pu${bay}-pu${bay+1}`);
       if(!transfer)continue;
+      const leftWidth=bay===1?d.pu1FrameWidth:d.printingUnitFrameWidth;
+      const rightWidth=d.printingUnitFrameWidth;
+      const leftInner=-(pitch/2-leftWidth/2),rightInner=pitch/2-rightWidth/2;
+      transfer.userData.frameMountPolicy='JOURNAL_TO_ADJACENT_PU_INNER_FRAME_FACES';
+      transfer.userData.lockedFrameMountEdges=[leftInner,rightInner];
       for(const z of [-.76,.76]){
-        for(const direction of [-1,1]){
-          const bracket=this.db(transfer,[.82,.065,.060],[direction*.41,.70,z],'graphite',.008,'interunit-drum-frame-bracket',{service:true,confidence:'FUNCTIONAL_MOUNT_REFERENCE'});
-          bracket.userData.transferBay=bay;
+        for(const innerX of [leftInner,rightInner]){
+          const span=Math.abs(innerX),centerX=innerX/2;
+          const tie=this.db(transfer,[span+.055,.070,.075],[centerX,.70,z],'graphite',.008,'interunit-drum-frame-tie',{service:true,confidence:'FUNCTIONAL_MOUNT_REFERENCE'});
+          tie.userData.transferBay=bay;tie.userData.attachedFrameInnerX=innerX;
+          const saddle=this.db(transfer,[.095,.38,.15],[innerX,.515,z],'graphite',.010,'interunit-frame-bearing-saddle',{service:true,confidence:'FUNCTIONAL_MOUNT_REFERENCE'});
+          saddle.userData.transferBay=bay;saddle.userData.attachedFrameInnerX=innerX;
+          const cap=this.db(transfer,[.14,.055,.18],[innerX,.705,z],'steel',.007,'interunit-bearing-saddle-cap',{service:true,confidence:'FUNCTIONAL_MOUNT_REFERENCE'});
+          cap.userData.transferBay=bay;
+          for(const boltZ of [-.045,.045])this.dc(transfer,.010,.020,[innerX,.715,z+boltZ],'steel','z','interunit-saddle-fastener',{service:true,confidence:'FUNCTIONAL_MOUNT_REFERENCE'});
         }
-        this.dc(transfer,.068,.026,[0,.70,z],'steel','z','interunit-drum-bearing-retainer',{service:true,confidence:'FUNCTIONAL_MOUNT_REFERENCE'});
+        const retainer=this.dc(transfer,.068,.030,[0,.70,z],'steel','z','interunit-drum-bearing-retainer',{service:true,confidence:'FUNCTIONAL_MOUNT_REFERENCE'});
+        retainer.userData.transferBay=bay;
       }
     }
   }
