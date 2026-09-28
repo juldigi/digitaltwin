@@ -121,6 +121,27 @@ test('DIANA rotor whitelist rotates only feeder transport vacuum and delivery me
  sim.dispose();model.dispose();
 });
 
+test('DIANA feeder knife and air-assist state follow live blank feeding and reset exactly',()=>{
+ const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);
+ try{
+  assert.ok(sim.feederKnife&&sim.feederKnifeRest);
+  sim.start();let now=1000,seen=false,maxStroke=0;sim.update(now);
+  for(let i=0;i<500;i++){
+   now+=10;sim.update(now);const st=sim.state();
+   if(st.feederKnifeActive){
+    seen=true;maxStroke=Math.max(maxStroke,Math.abs(st.feederKnifeStrokeM));
+    assert.equal(st.feederAirAssistActive,true);
+    assert.ok(sim.feederKnife.position.distanceTo(sim.feederKnifeRest)<=.0061);
+   }
+  }
+  assert.ok(seen);assert.ok(maxStroke>.001&&maxStroke<=.0061);
+  assert.equal(sim.state().feederMotionPolicy,'OEM_FEEDING_KNIFE_SUBTLE_VIBRATION_AND_AIR_ASSIST_STATE__AMPLITUDE_VISUAL_ONLY');
+  sim.stop();
+  assert.equal(sim.state().feederKnifeActive,false);assert.equal(sim.state().feederAirAssistActive,false);assert.equal(sim.state().feederKnifeStrokeM,0);
+  assert.ok(sim.feederKnife.position.distanceTo(sim.feederKnifeRest)<1e-12);
+ }finally{sim.dispose();model.dispose();}
+});
+
 test('DIANA does not assign a pass/reject decision before a blank reaches the inspection zone',()=>{
  const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);sim.start();sim.update(1000);sim.update(1010);
  const pending=sim.blanks.filter(b=>b.lastT<.30);assert.ok(pending.length>0);assert.equal(pending.every(b=>b.result===null&&b.trackingId===null),true);
