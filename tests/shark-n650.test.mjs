@@ -74,9 +74,9 @@ test('SHARK uses negative-pitch infeed and supports simultaneous tracked good an
 });
 
 test('SHARK demo creates accepted and rejected collection and resets cleanly',()=>{
- const model=new SharkN650MachineTemplate(),sim=new SharkN650ProcessSimulation(model.root,model);sim.start();let now=1000;for(let i=0;i<1200;i++){now+=20;sim.update(now);}
+ const model=new SharkN650MachineTemplate(),sim=new SharkN650ProcessSimulation(model.root,model);sim.start();sim.setPathVisible(true);let now=1000;for(let i=0;i<1200;i++){now+=20;sim.update(now);}
  const state=sim.state();assert.ok(state.completed>0);assert.ok(state.rejectedDemo>0);assert.ok(state.pileSheetsVisible>0);assert.ok(state.rejectSheetsVisible>0);
- sim.stop();assert.equal(sim.goodStack.every(m=>!m.visible),true);assert.equal(sim.badStack.every(m=>!m.visible),true);assert.equal(sim.rotors.every((r,i)=>r.quaternion.angleTo(sim.rotorRest[i])<1e-9),true);sim.dispose();model.dispose();
+ sim.stop();assert.equal(sim.state().pathVisible,false);assert.equal(sim.pathLine.visible,false);assert.equal(sim.goodStack.every(m=>!m.visible),true);assert.equal(sim.badStack.every(m=>!m.visible),true);assert.equal(sim.rotors.every((r,i)=>r.quaternion.angleTo(sim.rotorRest[i])<1e-9),true);sim.dispose();model.dispose();
 });
 
 test('SHARK feeds progressively, scans at the tower, and collects tracked outputs',()=>{
