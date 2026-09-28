@@ -73,6 +73,30 @@ test('SHARK uses negative-pitch infeed and supports simultaneous tracked good an
  assert.ok(seenNegativePitch,'official negative-pitch transport never became visible');assert.ok(seenGood&&seenBad);const state=sim.state();assert.equal(state.negativePitchPublishedCapacityGainPercent,30);assert.equal(state.goodBadReturnLineOfficial,true);assert.equal(state.transportMode,'NEGATIVE_PITCH_FULL_SUCTION_OFFLINE_DEMO_REFERENCE');assert.ok(state.inspectedDemoCount>0);assert.equal(state.installedCameraPackageVerified,false);assert.equal(state.installedCollectionModeVerified,false);sim.dispose();model.dispose();
 });
 
+test('SHARK N650 branches tracked blanks continuously into good and bad return entries without teleport',()=>{
+ const model=new SharkN650MachineTemplate(),sim=new SharkN650ProcessSimulation(model.root,model);sim.start();let now=1000,goodDone=false,badDone=false;
+ try{
+  for(let i=0;i<1800&&(!goodDone||!badDone);i++){
+   now+=10;sim.update(now);
+   for(const b of sim.blanks){
+    if(!b.mesh.visible||!b.decisionReady||b.lastT<sim.returnBranchStartT)continue;
+    if(b.result==='PASS_DEMO'&&b.lastT>=sim.returnBranchEndT){
+     assert.ok(b.mesh.position.distanceTo(sim.goodLaneEntry)<.04,'accepted blank missed good return entry');goodDone=true;
+    }
+    if(b.result==='REJECT_DEMO'&&b.lastT>=sim.returnBranchEndT){
+     assert.ok(b.mesh.position.distanceTo(sim.badLaneEntry)<.055,'rejected blank missed bad return entry');badDone=true;
+    }
+   }
+  }
+  assert.ok(goodDone&&badDone);assert.equal(sim.state().returnBranchPolicy,'TRACKED_BLANK_BRANCHES_FROM_DECISION_SPLIT_TO_GOOD_OR_BAD_RETURN_ENTRY');
+  for(let i=0;i<500;i++){now+=10;sim.update(now);}
+  const good=sim.goodStack.filter(m=>m.visible),bad=sim.badStack.filter(m=>m.visible);
+  assert.ok(good.length>0&&bad.length>0);
+  assert.ok(good.some(m=>Math.abs(m.position.z-sim.goodLaneEntry.z)<1e-9));
+  assert.ok(bad.some(m=>Math.abs(m.position.z-sim.badLaneEntry.z)<1e-9));
+ }finally{sim.dispose();model.dispose();}
+});
+
 test('SHARK demo creates accepted and rejected collection and resets cleanly',()=>{
  const model=new SharkN650MachineTemplate(),sim=new SharkN650ProcessSimulation(model.root,model);sim.start();sim.setPathVisible(true);let now=1000;for(let i=0;i<1200;i++){now+=20;sim.update(now);}
  const state=sim.state();assert.ok(state.completed>0);assert.ok(state.rejectedDemo>0);assert.ok(state.pileSheetsVisible>0);assert.ok(state.rejectSheetsVisible>0);
