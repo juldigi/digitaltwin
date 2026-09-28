@@ -196,6 +196,21 @@ test('DIANA isolate, showOnly and reset preserve intentionally hidden capability
  }finally{model.dispose();}
 });
 
+test('DIANA contact pulley surface speed follows the simulated blank path speed',()=>{
+ const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);
+ try{
+  assert.ok(Math.abs(sim.visualTransportMps-sim.curve.getLength()/7.8)<1e-12);
+  const contact=new Set(['feed-pulley','transport-pulley','transport-encoder','delivery-pulley']);
+  const rotors=sim.rotors.filter(r=>contact.has(r.userData.mechanismRole));
+  assert.ok(rotors.length>10);
+  for(const r of rotors){
+   const radius=r.userData.radius;assert.ok(radius>0);
+   assert.ok(Math.abs(sim.rotorAngularRate(r)*radius-sim.visualTransportMps)<1e-10);
+  }
+  assert.equal(sim.state().transportSurfaceSpeedPolicy,'CONTACT_PULLEYS_MATCH_SIMULATED_BLANK_LINEAR_SPEED__NOT_INSTALLED_RPM');
+ }finally{sim.dispose();model.dispose();}
+});
+
 test('DIANA rotor whitelist rotates only feeder transport vacuum and delivery mechanisms',()=>{
  const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model),allowed=/^(feed-pulley|transport-pulley|transport-drive-motor|transport-encoder|vacuum-blower|delivery-pulley)$/;
  assert.ok(sim.rotors.length>=24);assert.equal(sim.rotors.some(r=>!allowed.test(r.userData.mechanismRole||'')),false);
