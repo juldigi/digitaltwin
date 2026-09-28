@@ -103,7 +103,7 @@ test('V260 SHARK scan window follows optical occupancy and only the reject pivot
   assert.equal(sim.scanWindows.length,2);
   const pivot=model.findNode('shark650-reject-pivot-v260'),plate=model.findNode('shark650-reject-plate');
   const plateQ=plate.quaternion.clone(),pivotQ=pivot.quaternion.clone(),initial=sim.scanWindowRest.map(x=>x.intensity);
-  sim.start();let now=1000;sim.update(now),sawScan=false,sawGate=false;
+  sim.start();let now=1000,sawScan=false,sawGate=false;sim.update(now);
   for(let i=0;i<1200;i++){
    now+=10;sim.update(now);const st=sim.state();
    if(st.scanWindowActive)sawScan=true;
