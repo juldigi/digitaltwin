@@ -84,6 +84,13 @@ test('DIANA adaptive low-detail hides micro-detail but preserves silhouette-crit
  }finally{model.dispose();}
 });
 
+test('Diana recipe logic remains addressable but is not rendered as floating physical hardware',()=>{
+ const model=new DianaEye55MachineTemplate();
+ try{
+  const recipe=model.findNode('diana55-process-recipe');assert.ok(recipe);assert.equal(recipe.userData.logicalOnly,true);assert.equal(recipe.userData.renderPolicy,'SOFTWARE_LOGIC_NOT_PHYSICAL_HARDWARE');assert.equal(recipe.visible,false);assert.equal(recipe.children.length,0);
+ }finally{model.dispose();}
+});
+
 test('DIANA rotor whitelist rotates only feeder transport vacuum and delivery mechanisms',()=>{
  const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model),allowed=/^(feed-pulley|transport-pulley|transport-drive-motor|transport-encoder|vacuum-blower|delivery-pulley)$/;
  assert.ok(sim.rotors.length>=24);assert.equal(sim.rotors.some(r=>!allowed.test(r.userData.mechanismRole||'')),false);
