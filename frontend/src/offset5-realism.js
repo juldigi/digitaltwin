@@ -486,6 +486,33 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
     const nonRotatingFeederOwners=new Set(['feeder-suction-cups','feeder-separation','feeder-head-linkage']);
     this.rotors=this.rotors.filter(item=>!nonRotatingFeederOwners.has(item.mesh?.userData?.ownerId));
 
+    // Register/feed-table transport must read as one sheet-moving system, not alternating generic
+    // cylinders. Keep only the documented tape/pressure roller contacts and drive them toward PU1.
+    this.rotors=this.rotors.filter(item=>{
+      const owner=item.mesh?.userData?.ownerId,r=item.mesh?.geometry?.parameters?.radiusTop;
+      if(owner==='feedboard-transport')return Math.abs((r||0)-.034)<1e-6;
+      if(owner==='vacuum-table')return Math.abs((r||0)-.055)<1e-6;
+      return true;
+    });
+    for(const rotor of this.rotors){
+      const owner=rotor.mesh?.userData?.ownerId,radius=rotor.mesh?.geometry?.parameters?.radiusTop;
+      if(!radius)continue;
+      if(owner==='feedboard-transport'||owner==='vacuum-table'){
+        rotor.sign=-1;
+        rotor.rate=this.baseMetersPerSecond/(Math.PI*2*this.sheetCyclesPerSecond*radius);
+        rotor.role=owner==='feedboard-transport'?'register-pressure-transport-roller':'vacuum-table-tape-drive-roller';
+        rotor.source='REGISTER_SHEET_TRANSPORT_SURFACE_SPEED_REFERENCE';
+        rotor.visualSpeedRatio=1;
+      }
+    }
+    // Suction head, separator, linkage and front lays all belong to the same sheet cycle.
+    // Preserve the conservative amplitudes, but remove the legacy 1.15x phase drift.
+    for(const item of this.oscillators){
+      if(['feeder-suction-cups','feeder-separation','feeder-head-linkage','feedboard-front-lays'].includes(item.object?.userData?.nodeId))item.frequency=1;
+    }
+    const infeed=this.template.findNode('feedboard-infeed-gripper');
+    if(infeed&&!this.oscillators.some(item=>item.object===infeed))this.addOscillator(infeed,'x',.022,1,.30);
+
     // Every straight-printing unit has the same installed handedness. The legacy simulator flipped
     // the ink/dampening train by PU parity, making PU2/4/6/8 visibly run backwards. Preserve the
     // existing relative roller pattern but normalize it identically across all eight PUs.
@@ -667,7 +694,8 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       presetPlusDeliveryDetailPolicy:'TOUCH_DISPLAY_JOGWHEEL_STATICSTAR_AND_POSITIONABLE_SHEET_BRAKE_REFERENCES',
       deliveryChainMotionPolicy:'SINGLE_FORWARD_LOOP_SPROCKETS_SHARE_ROTATION_DIRECTION',
       sheetBrakeMotionPolicy:'CONTROLLED_DECELERATION_VISUAL_REFERENCE_NOT_SERVICE_SETPOINT',
-      feederMotionPolicy:'SUCTION_SEPARATOR_AND_LINKAGE_RECIPROCATE_WITHOUT_FAKE_SPIN',
+      feederMotionPolicy:'SUCTION_SEPARATOR_LINKAGE_FRONT_LAYS_AND_INFEED_GRIPPER_SHARE_ONE_SHEET_CYCLE',
+      registerTransportPolicy:'ONLY_CONTACT_ROLLERS_ROTATE_AND_MATCH_SHEET_SURFACE_SPEED_TOWARD_PU1',
       rollerHandednessPolicy:'IDENTICAL_STRAIGHT_PRINT_KINEMATIC_SIGN_PATTERN_ACROSS_ALL_EIGHT_PU',
       interUnitGripperPolicy:'RIGID_FINGER_ASSEMBLY_ROTATES_WITH_TRANSFER_DRUM_ORBIT',
       inspectionIlluminationActive:this.inspectionIlluminationActive,
