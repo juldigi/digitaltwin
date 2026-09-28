@@ -203,6 +203,23 @@ test('V260 DIANA pivots only the reject diverter and grounds the recovery tray s
  }finally{sim.dispose();model.dispose();}
 });
 
+test('DIANA cutaway hides complete external control and signal assemblies without hiding process internals',()=>{
+ const model=new DianaEye55MachineTemplate();
+ try{
+  const ids=['diana55-signal-tower-v259','diana55-cell-controls-v258','diana55-feeder-console-v258','diana55-hmi-pedestal-v251'];
+  const groups=ids.map(id=>model.findNode(id));assert.ok(groups.every(Boolean));
+  const meshes=groups.flatMap(g=>{const a=[];g.traverse(o=>{if(o.isMesh)a.push(o);});return a;});
+  assert.ok(meshes.length>8&&meshes.every(m=>m.visible));
+  const internal=model.findNode('diana55-inspection-bed'),internalMeshes=[];internal.traverse(o=>{if(o.isMesh)internalMeshes.push(o);});
+  model.setExteriorOpen(true);
+  assert.ok(meshes.every(m=>m.visible===false),'Diana external accessory remained floating in cutaway');
+  assert.ok(internalMeshes.some(m=>m.visible),'Diana cutaway incorrectly hid process internals');
+  model.setExteriorOpen(false);
+  assert.ok(meshes.every(m=>m.visible===true));
+  assert.equal(model.root.userData.externalAccessoryCutawayPolicy,'EXTERNAL_CONTROLS_AND_SIGNAL_HARDWARE_HIDE_AS_COMPLETE_ASSEMBLIES__PROCESS_INTERNALS_REMAIN_VISIBLE');
+ }finally{model.dispose();}
+});
+
 test('V259 DIANA viewing window follows active scan occupancy and restores after stop',()=>{
  const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);
  try{
