@@ -91,6 +91,29 @@ test('Diana recipe logic remains addressable but is not rendered as floating phy
  }finally{model.dispose();}
 });
 
+test('DIANA node-scoped materials prevent highlight and ghost state from leaking between assemblies',()=>{
+ const model=new DianaEye55MachineTemplate();
+ try{
+  const feeder=model.findNode('diana55-feeder'),inspection=model.findNode('diana55-inspection');
+  const feederMeshes=model.meshes.filter(m=>model.contains(feeder,m)&&m.material);
+  const inspectionMeshes=model.meshes.filter(m=>model.contains(inspection,m)&&m.material);
+  let feederMesh=null,inspectionMesh=null;
+  for(const fm of feederMeshes){
+   const match=inspectionMeshes.find(im=>im.material.color.getHex()===fm.material.color.getHex());
+   if(match){feederMesh=fm;inspectionMesh=match;break;}
+  }
+  assert.ok(feederMesh&&inspectionMesh,'need same-color meshes in different Diana nodes');
+  assert.notEqual(feederMesh.material,inspectionMesh.material,'different Diana selectable nodes must not share one material instance');
+  model.highlight(feeder);
+  assert.ok(feederMesh.material.emissiveIntensity>.2);
+  assert.equal(inspectionMesh.material.emissiveIntensity,0,'Diana highlight leaked into unrelated assembly');
+  model.ghost(true,feeder);
+  assert.ok(feederMesh.material.opacity>.9,'selected Diana assembly was ghosted');
+  assert.ok(inspectionMesh.material.opacity<.2,'unrelated Diana assembly did not ghost independently');
+  model.ghost(false);
+ }finally{model.dispose();}
+});
+
 test('DIANA rotor whitelist rotates only feeder transport vacuum and delivery mechanisms',()=>{
  const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model),allowed=/^(feed-pulley|transport-pulley|transport-drive-motor|transport-encoder|vacuum-blower|delivery-pulley)$/;
  assert.ok(sim.rotors.length>=24);assert.equal(sim.rotors.some(r=>!allowed.test(r.userData.mechanismRole||'')),false);
