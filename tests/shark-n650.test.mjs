@@ -185,6 +185,18 @@ test('SHARK node-scoped materials prevent highlight and ghost state from leaking
  }finally{model.dispose();}
 });
 
+test('SHARK isolate, showOnly and reset preserve intentionally hidden capability nodes',()=>{
+ const model=new SharkN650MachineTemplate();
+ try{
+  const ids=['shark650-feed-friction','shark650-process-hmi','shark650-access-platform','shark650-reject-air','shark650-return-stack','shark650-dust-integration-capability-v254','shark650-process-recipe'];
+  const hidden=ids.map(id=>model.findNode(id));assert.ok(hidden.every(Boolean));assert.ok(hidden.every(n=>n.visible===false));
+  const feeder=model.findNode('shark650-feeder');
+  model.isolate(feeder,true);model.isolate(null,false);assert.ok(hidden.every(n=>n.visible===false),'SHARK isolate exit resurrected hidden capability node');
+  model.showOnly([feeder],true);model.showOnly([],false);assert.ok(hidden.every(n=>n.visible===false),'SHARK showOnly exit resurrected hidden capability node');
+  model.reset();assert.ok(hidden.every(n=>n.visible===false),'SHARK reset resurrected hidden capability node');
+ }finally{model.dispose();}
+});
+
 test('SHARK rotor whitelist excludes suction cups camera lenses and air nozzles',()=>{
  const model=new SharkN650MachineTemplate(),sim=new SharkN650ProcessSimulation(model.root,model),allowed=/^(transport-pulley|transfer-drive-motor|transfer-encoder|vacuum-blower|inspection-encoder-wheel|good-return|good-return-motor|bad-return|bad-return-motor)$/;
  assert.equal(sim.rotors.length,30);assert.equal(sim.rotors.some(r=>!allowed.test(r.userData.mechanismRole||'')),false);assert.equal(sim.suckers.length,4);assert.equal(sim.airNozzles.length,3);
