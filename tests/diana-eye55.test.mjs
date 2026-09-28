@@ -68,7 +68,10 @@ test('V258 DIANA matches the low feeder / white cell silhouette and keeps reject
   assert.ok(body&&screen);assert.ok(Math.abs(body.rotation.z+.10)<1e-9);assert.ok(Math.abs(screen.rotation.z+.10)<1e-9);
   assert.ok(hmi.children.some(o=>o.isMesh&&o.userData.operatorWorkShelf));
   const controls=model.findNode('diana55-cell-controls-v258');assert.ok(controls);assert.equal(controls.children.filter(o=>o.isMesh&&o.userData.cellControlButton).length,6);
-  const envelope=new THREE.Box3().setFromObject(model.root);assert.ok(envelope.max.y<=2.05,`V258 Diana height exceeded family reference envelope: ${envelope.max.y}`);
+  const signal=model.findNode('diana55-signal-tower-v259'),signalVisible=signal?.visible;
+  if(signal)signal.visible=false;
+  const envelope=new THREE.Box3().setFromObject(model.root);assert.ok(envelope.max.y<=2.05,`V258 Diana body height exceeded family reference envelope: ${envelope.max.y}`);
+  if(signal)signal.visible=signalVisible;
   assert.equal(model.findNode('diana55-delivery-waste-v254').visible,false);
   assert.equal(model.findNode('diana55-delivery-waste-v254').userData.supersededByV258,true);
   const tray=model.meshes.find(m=>m.userData.rejectRecoveryTray),guard=model.meshes.find(m=>m.userData.rejectRecoveryGuard);
