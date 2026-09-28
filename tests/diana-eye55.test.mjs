@@ -13,6 +13,20 @@ test('DIANA station labels use clear Indonesian while preserving technical terms
  ]);
 });
 
+test('DIANA user-facing taxonomy and selectable node names use Indonesian-first labels',()=>{
+ const model=new DianaEye55MachineTemplate();
+ try{
+  assert.equal(model.root.userData.uiLanguage,'id-ID');
+  assert.equal(model.findNode('diana55-feeder').name,'Pengumpanan blank & alignment');
+  assert.equal(model.findNode('diana55-processing').name,'Pemrosesan citra & interface operator');
+  assert.equal(model.findNode('diana55-front-aperture-bezel-v259').name,'Bezel aperture inspeksi sisi operator');
+  const l2=DIANA_EYE55_TAXONOMY.filter(n=>n.level===2).map(n=>n.name);
+  assert.ok(l2.includes('Pengumpanan blank & alignment'));
+  assert.ok(l2.includes('Pemrosesan citra & interface operator'));
+  assert.ok(DIANA_EYE55_TAXONOMY.some(n=>n.level===4&&n.name==='Assembly drive / support'));
+ }finally{model.dispose();}
+});
+
 test('DIANA EYE 55 preserves BMJ identity and capability-vs-installed boundaries',()=>{
  assert.equal(DIANA_EYE55_SPEC.assetId,'BMJ-MCH-0019');assert.equal(DIANA_EYE55_SPEC.serial,'MP.FBA0-00058');assert.equal(DIANA_EYE55_SPEC.year,2023);
  assert.equal(DIANA_EYE55_SPEC.maxSpeedMMin,300);assert.deepEqual(DIANA_EYE55_SPEC.materialGsm,[90,650]);assert.deepEqual(DIANA_EYE55_SPEC.maxSheetM,[.550,.500]);
