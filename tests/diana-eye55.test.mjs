@@ -237,7 +237,7 @@ test('Diana accepted branch reaches fish-scale entry continuously and relayout k
 test('DIANA signal tower remains a visual reference with unverified status meanings',()=>{
  const model=new DianaEye55MachineTemplate();
  try{
-  const node=model.findNode('diana55-signal-tower-v259');assert.ok(node);
+  const node=model.findNode('diana55-signal-tower-v259');assert.ok(node);assert.equal(node.userData.familyPhotoReference,true);assert.equal(node.userData.installedVerified,false);
   const refs=node.children.filter(o=>o.isMesh&&o.userData.signalTowerReference);
   assert.equal(refs.length,4);
   assert.ok(refs.every(o=>o.userData.statusMeaningVerified===false));
