@@ -75,6 +75,7 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
     this.refinePhotoDeliveryFaceV255();
     this.refineInternalFrameSupportsV256();
     this.refineCoaterFrameSupportsV257();
+    this.refineCoaterAniloxDriveV258();
   }
 
   refineExteriorIdentityV237(){
@@ -478,6 +479,34 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
         cap.userData.coaterRollerRole=role;
       }
     }
+    this.root.userData.dimensionLock='BMJ_CUSTOM_INSTALLED_DIMENSIONS_DO_NOT_NORMALIZE_TO_GENERIC_CD102';
+  }
+
+  refineCoaterAniloxDriveV258(){
+    // HEIDELBERG CD 102 product/service references identify a chamber-blade coating unit,
+    // an anilox/screen roller and a drive-side anilox drive shaft/lock. Reuse the existing
+    // top metering roller as that visual reference; do not create a second process roller.
+    this.root.userData.visualRefinement='V258_CD102_COATER_ANILOX_DRIVE_SIDE_REALISM';
+    this.root.userData.coaterAniloxPolicy='EXISTING_TOP_METERING_ROLLER_IS_ANILOX_VISUAL_REFERENCE__NO_DUPLICATE_ROLLER';
+    this.root.userData.coaterDriveEvidence='HEIDELBERG_CD102_CHAMBER_BLADE__ANILOX_ROLLER_LOCK__DRIVE_SHAFT_DS';
+    const chamber=this.node('coater-chamber');if(!chamber)return;
+
+    const driveZ=-.86;
+    const hub=this.dc(chamber,.082,.070,[-.02,1.80,driveZ],'graphite','z','coater-anilox-drive-hub',{service:true,confidence:'HEIDELBERG_CD102_SERVICE_REFERENCE'});
+    hub.userData.coaterRollerFunction='ANILOX_METERING_REFERENCE';
+    hub.userData.driveSideOnly=true;
+
+    const shaft=this.dc(chamber,.038,.145,[-.02,1.80,-.925],'steel','z','coater-anilox-drive-shaft-ds',{service:true,confidence:'HEIDELBERG_CD102_SERVICE_REFERENCE'});
+    shaft.userData.coaterRollerFunction='ANILOX_METERING_REFERENCE';
+    shaft.userData.driveSideOnly=true;
+
+    const lock=this.db(chamber,[.15,.13,.055],[-.11,1.80,-.82],'graphite',.010,'coater-anilox-lock-reference',{service:true,confidence:'HEIDELBERG_CD102_SERVICE_REFERENCE'});
+    lock.userData.lockFunction='ANILOX_ROLLER_POSITION_RETENTION_REFERENCE';
+    lock.userData.serviceSettingAsserted=false;
+
+    const retainer=this.db(chamber,[.09,.055,.06],[.08,1.80,-.82],'steel',.008,'coater-anilox-drive-retainer',{service:true,confidence:'HEIDELBERG_CD102_SERVICE_REFERENCE'});
+    retainer.userData.driveSideOnly=true;
+
     this.root.userData.dimensionLock='BMJ_CUSTOM_INSTALLED_DIMENSIONS_DO_NOT_NORMALIZE_TO_GENERIC_CD102';
   }
 
