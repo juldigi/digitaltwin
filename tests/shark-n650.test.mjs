@@ -63,6 +63,23 @@ test('SHARK rotor whitelist excludes suction cups camera lenses and air nozzles'
  assert.equal(model.meshes.some(m=>m.userData.rotor&&['suction-cup','camera-lens','air-nozzle'].includes(m.userData.mechanismRole)),false);sim.dispose();model.dispose();
 });
 
+test('SHARK suction stroke follows live blank pickup phase and resets exactly',()=>{
+ const model=new SharkN650MachineTemplate(),sim=new SharkN650ProcessSimulation(model.root,model);sim.start();let now=1000,seenStroke=false,maxStroke=0;
+ try{
+  for(let i=0;i<500;i++){
+   now+=10;sim.update(now);const st=sim.state();
+   if(st.feederSuctionActive&&st.feederPickupStrokeM>0){
+    seenStroke=true;maxStroke=Math.max(maxStroke,st.feederPickupStrokeM);
+    assert.ok(st.feederPickupPhase!==null&&st.feederPickupPhase>=0&&st.feederPickupPhase<.22);
+    assert.ok(sim.suckers.some((s,j)=>s.position.y<sim.suckerRest[j].y));
+   }
+  }
+  assert.ok(seenStroke);assert.ok(maxStroke<=.028+1e-9&&maxStroke>.010);
+  sim.stop();assert.equal(sim.state().feederPickupStrokeM,0);assert.equal(sim.state().feederPickupPhase,null);
+  assert.ok(sim.suckers.every((s,j)=>s.position.distanceTo(sim.suckerRest[j])<1e-12));
+ }finally{sim.dispose();model.dispose();}
+});
+
 test('SHARK blank remains undecided before inspection and receives a stable tracking ID only after scan',()=>{
  const model=new SharkN650MachineTemplate(),sim=new SharkN650ProcessSimulation(model.root,model);sim.start();sim.update(1000);sim.update(1010);
  const pending=sim.blanks.filter(b=>((sim.elapsed/7.2+b.phase)%1)<.31);assert.ok(pending.length>0);assert.equal(pending.every(b=>b.result===null&&b.trackingId===null),true);
