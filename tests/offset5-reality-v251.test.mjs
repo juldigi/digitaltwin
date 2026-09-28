@@ -418,6 +418,12 @@ test('Offset 5 feeder suction and register transport share one sheet cycle witho
    assert.ok(oscillator,`missing cyclic motion for ${id}`);
    assert.equal(oscillator.frequency,1,`${id} must share one press-sheet cycle`);
   }
+  const infeed=m.findNode('feedboard-infeed-gripper');
+  const infeedRock=sim.levers.find(item=>item.object===infeed);
+  assert.ok(infeedRock,'infeed gripper must visibly rock during handoff');
+  assert.equal(infeedRock.frequency,1);
+  assert.equal(infeedRock.amplitude,.085);
+  assert.equal(sim.state().infeedHandoffPolicy,'INFEED_GRIPPER_RECIPROCATES_AND_ROCKS_WITH_ONE_PRESS_CYCLE');
   assert.equal(sim.rotors.filter(item=>item.role==='register-pressure-transport-roller').length,0);
   assert.equal(sim.rotors.filter(item=>item.role==='vacuum-table-tape-drive-roller').length,0);
   assert.equal(sim.state().registerTransportPolicy,'MOBILE_BATCHED_CONTACT_REFERENCE__SHEET_PATH_AND_INFEED_GRIPPER_CARRY_VISIBLE_MOTION');
