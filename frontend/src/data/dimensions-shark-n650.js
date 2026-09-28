@@ -12,7 +12,7 @@ export const SHARK_N650_SPEC=Object.freeze({
  dimensionalBoundary:'Current Focusight FS-SHARK N650 pages agree on 400 m/min and 70×90 mm minimum format but conflict on maximum inspection size: English publishes 630×300 mm while Chinese publishes 630×450 mm. The current page also prints paper weight with g/mm² units; that raw wording is retained rather than silently converted. Older N650/650 references show lower speeds and different sheet windows. BMJ suffix P3N1 is preserved verbatim and not decoded into camera count or options. Exact installed format, feeder mode, cameras, lighting modules, reject type and return-line arrangement remain serial-specific.'
 });
 export const SHARK_N650_STATIONS=Object.freeze([
- {key:'FEED',label:'Automatic feeder',x:-3.10},{key:'TRANSFER',label:'Full-suction transfer',x:-1.95},
- {key:'INSPECT',label:'Inspection tower',x:-.35},{key:'VISION',label:'Camera + controlled lighting',x:.10},
- {key:'REJECT',label:'Reject separation',x:1.65},{key:'RETURN',label:'Good/bad return collection',x:2.85}
+ {key:'FEED',label:'Pengumpanan otomatis',x:-3.10},{key:'TRANSFER',label:'Transfer full-suction',x:-1.95},
+ {key:'INSPECT',label:'Menara inspeksi',x:-.35},{key:'VISION',label:'Camera + pencahayaan terkontrol',x:.10},
+ {key:'REJECT',label:'Pemisahan reject',x:1.65},{key:'RETURN',label:'Pengumpulan return good / bad',x:2.85}
 ]);
