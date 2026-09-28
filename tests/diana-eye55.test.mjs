@@ -127,9 +127,9 @@ test('DIANA feeds blanks progressively, scans at the cell, and deposits each out
 });
 
 test('DIANA Stop & Reset clears every live process/interlock state',()=>{
- const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);sim.start();let now=1000;
+ const model=new DianaEye55MachineTemplate(),sim=new DianaEye55ProcessSimulation(model.root,model);sim.start();sim.setPathVisible(true);let now=1000;
  for(let i=0;i<900;i++){now+=10;sim.update(now);}
- sim.stop();const s=sim.state();
+ sim.stop();const s=sim.state();assert.equal(s.pathVisible,false);assert.equal(sim.pathLine.visible,false);
  for(const key of ['feederDriveActive','transportDriveActive','deliveryDriveActive','blankPresenceTrigger','transportEncoderActive','vacuumHoldActive','illuminationReady','cameraTriggerActive','captureComplete','scanActive','imageProcessingActive','processingComplete','decisionReady','rejectPermit','rejectConfirmed','outputCountActive','demoRejectActive','rejectTrackingActive','acceptedDeliveryActive','wasteDeliveryActive','fishScaleDeliveryActive'])assert.equal(s[key],false,key);
  assert.equal(s.interlockSafe,true);
  assert.equal(s.stageIndex,0);
