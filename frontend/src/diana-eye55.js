@@ -2,7 +2,7 @@ import * as THREE from 'three';import {RoundedBoxGeometry} from 'three/addons/ge
 import {DIANA_EYE55_SPEC} from './data/dimensions-diana-eye55.js';import {DIANA_EYE55_TAXONOMY,DIANA_EYE55_TAXONOMY_BY_ID} from './data/taxonomy-diana-eye55.js';import {DIANA_EYE55_ORIENTATION,DIANA_EYE55_TECHNICAL_SOURCES} from './data/sources-diana-eye55.js';import {V141_SOURCE_STATS} from './data/research-v141.js';
 const V=a=>new THREE.Vector3(...a);
 export class DianaEye55MachineTemplate{
- constructor(){this.spec=DIANA_EYE55_SPEC;this.root=new THREE.Group();this.root.name='IPM 3 · DIANA EYE 55';this.root.userData={assetId:this.spec.assetId,nodeId:'diana55-root',spec:this.spec,sources:DIANA_EYE55_TECHNICAL_SOURCES,orientation:DIANA_EYE55_ORIENTATION,taxonomyVersion:'diana55-v252-oem-flow',detailPass:'V252_DIANA55_OEM_SILHOUETTE_FISHSCALE_FLOW',evidenceGrade:'OEM_PROCESS_GROUNDED',geometryStatus:'OEM_CURRENT_FAMILY_ENVELOPE_AND_PROCESS__BMJ_INSTALLED_OPTIONS_BOUNDED',engineeringDimensions:false,modeledEnvelopeMode:'STANDARD_FEEDER_FISH_SCALE_DELIVERY_REFERENCE'};this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.build();this.enrichV141();this.refineV254();this.refineV255();this.refineV258();this.taxonomy=DIANA_EYE55_TAXONOMY;this.taxonomyById=DIANA_EYE55_TAXONOMY_BY_ID;for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}this.root.updateMatrixWorld(true);}
+ constructor(){this.spec=DIANA_EYE55_SPEC;this.root=new THREE.Group();this.root.name='IPM 3 · DIANA EYE 55';this.root.userData={assetId:this.spec.assetId,nodeId:'diana55-root',spec:this.spec,sources:DIANA_EYE55_TECHNICAL_SOURCES,orientation:DIANA_EYE55_ORIENTATION,taxonomyVersion:'diana55-v252-oem-flow',detailPass:'V252_DIANA55_OEM_SILHOUETTE_FISHSCALE_FLOW',evidenceGrade:'OEM_PROCESS_GROUNDED',geometryStatus:'OEM_CURRENT_FAMILY_ENVELOPE_AND_PROCESS__BMJ_INSTALLED_OPTIONS_BOUNDED',engineeringDimensions:false,modeledEnvelopeMode:'STANDARD_FEEDER_FISH_SCALE_DELIVERY_REFERENCE'};this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.lowDetail=false;this.build();this.enrichV141();this.refineV254();this.refineV255();this.refineV258();this.taxonomy=DIANA_EYE55_TAXONOMY;this.taxonomyById=DIANA_EYE55_TAXONOMY_BY_ID;for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}this.root.updateMatrixWorld(true);}
  group(parent,id,name,pos=[0,0,0],explode=[0,0,0]){const g=new THREE.Group();g.name=name;g.position.set(...pos);g.userData={assetId:this.spec.assetId,nodeId:id,selectable:true,explode:V(explode),confidence:'OEM_PROCESS_GROUNDED'};parent.add(g);this.nodes.push(g);if(parent===this.root)this.parts.push(g);return g;}
  mat(k){if(!this.materials.has(k)){const c={white:0xebeeee,light:0xcbd0d2,dark:0x252b2f,black:0x0d1215,steel:0x8a969b,silver:0xc3cacc,rubber:0x23282a,red:0xb4312e,blue:0x3c7289,green:0x579071,amber:0xd29b43,paper:0xe1cca2,glass:0x365c67,led:0xf0e7c2}[k]||0x888888;const m=new THREE.MeshStandardMaterial({color:c,metalness:['steel','silver'].includes(k)?.5:.08,roughness:k==='glass'?.16:.43,transparent:k==='glass',opacity:k==='glass'?.42:1});m.userData.baseOpacity=m.opacity;this.materials.set(k,m);}return this.materials.get(k);}
  mesh(g,geo,key,k='dark',p=[0,0,0],r=null){if(!this.geometries.has(key))this.geometries.set(key,geo());const m=new THREE.Mesh(this.geometries.get(key),this.mat(k));m.position.set(...p);if(r)m.rotation.set(...r);m.castShadow=k!=='glass';m.receiveShadow=true;m.userData.ownerId=g.userData.nodeId;g.add(m);this.meshes.push(m);return m;}
@@ -65,7 +65,7 @@ export class DianaEye55MachineTemplate{
  buildLights(){
   const g=this.group(this.root,'diana55-light','LED illumination',[-.24,0,0],[0,.45,-.42]);
   const dome=this.group(g,'diana55-light-dome','Light-dome architecture');
-  for(const x of [-.48,0,.48]){const a=this.box(dome,[.34,.05,1.06],[x,1.51,0],'led',.020);a.userData.inspectionLight=true;a.material=a.material.clone();a.material.userData.baseOpacity=1;for(let z=-.42;z<=.42;z+=.14){const fin=this.box(dome,[.28,.045,.016],[x,1.565,z],'silver',.002);fin.userData.mechanismRole='light-housing-cooling-fin-reference';}}
+  for(const x of [-.48,0,.48]){const a=this.box(dome,[.34,.05,1.06],[x,1.51,0],'led',.020);a.userData.inspectionLight=true;a.material=a.material.clone();a.material.userData.baseOpacity=1;for(let z=-.42;z<=.42;z+=.14){const fin=this.box(dome,[.28,.045,.016],[x,1.565,z],'silver',.002);fin.userData.mechanismRole='light-housing-cooling-fin-reference';fin.userData.detail=true;}}
   const led=this.group(g,'diana55-light-led','Software-adjustable LED arrays');for(const z of [-.48,-.24,0,.24,.48]){const a=this.box(led,[1.12,.030,.045],[0,1.18,z],'led',.006);a.userData.inspectionLight=true;a.material=a.material.clone();a.material.userData.baseOpacity=1;}
   const low=this.group(g,'diana55-light-low','Low-angle illumination');for(const z of [-.56,.56]){const a=this.box(low,[1.02,.035,.045],[.06,1.00,z],'led',.006);a.rotation.x=z<0?.18:-.18;a.userData.inspectionLight=true;a.material=a.material.clone();a.material.userData.baseOpacity=1;}
  }
@@ -227,7 +227,7 @@ export class DianaEye55MachineTemplate{
    const fascia=this.cover(this.box(cab,[1.04,.70,.16],[-.30,.56,-.70],'light',.030));fascia.userData.silhouetteCritical=true;
    const deck=this.cover(this.box(cab,[.72,.18,.34],[.16,.86,-.60],'white',.025));deck.rotation.z=-.12;deck.userData.silhouetteCritical=true;
    const display=this.box(cab,[.20,.13,.018],[.09,.91,-.785],'glass',.012);display.userData.mechanismRole='feeder-local-display-reference';
-   for(let i=0;i<4;i++){const b=this.cyl(cab,.018,.018,[.25+i*.07,.90,-.792],i===3?'red':'dark','feeder-console-button','z');b.userData.rotor=false;}
+   for(let i=0;i<4;i++){const b=this.cyl(cab,.018,.018,[.25+i*.07,.90,-.792],i===3?'red':'dark','feeder-console-button','z');b.userData.rotor=false;b.userData.detail=true;}
    const magazine=this.group(feeder,'diana55-feeder-magazine-v258','Open blank magazine and side guides');
    for(const z of [-.48,.48]){
     this.box(magazine,[.035,.84,.035],[.20,1.20,z],'steel',.004);
@@ -293,11 +293,27 @@ export class DianaEye55MachineTemplate{
   const panel=this.cover(this.box(cellControls,[.12,.64,.055],[.67,1.34,-.80],'light',.012));panel.userData.cellControlColumn=true;
   for(let i=0;i<6;i++){
    const button=this.cyl(cellControls,.018,.018,[.67,1.56-i*.085,-.835],i===5?'red':'dark','cell-control-button','z');
-   button.userData.rotor=false;button.userData.cellControlButton=true;
+   button.userData.rotor=false;button.userData.cellControlButton=true;button.userData.detail=true;
   }
  }
 
  findNode(id){return id==='diana55-root'?this.root:this.nodes.find(n=>n.userData.nodeId===id)||null;}resolvePart(o){for(let p=o;p&&p!==this.root;p=p.parent)if(p.userData?.selectable)return p;return null;}resolveTaxonomyNode(id){return this.taxonomyById.get(id)?.meshRefs.map(ref=>this.findNode(ref)).find(Boolean)||null;}contains(a,b){for(let p=b;p;p=p.parent)if(p===a)return true;return false;}
  highlight(p){for(const m of this.meshes){m.material.emissive?.setHex(p&&this.contains(p,m)?0x17494a:0);m.material.emissiveIntensity=.3;}}highlightMany(ps=[]){for(const m of this.meshes){m.material.emissive?.setHex(ps.some(p=>this.contains(p,m))?0x17494a:0);m.material.emissiveIntensity=.3;}}ghost(on,except=null){this.ghosted=!!on;for(const m of this.meshes){const fade=on&&(!except||!this.contains(except,m)),natural=m.material.userData?.baseOpacity??1;m.material.transparent=fade||natural<1;m.material.opacity=fade?.14:natural;m.material.depthWrite=!fade;}}isolate(p,on=true){for(const n of this.nodes)n.visible=!on||!p||this.contains(p,n)||this.contains(n,p);}showOnly(ps=[],on=true){for(const n of this.nodes)n.visible=!on||!ps.length||ps.some(p=>n===p||this.contains(n,p));}
- setExteriorOpen(on=true){this.exteriorOpen=!!on;let count=0;for(const m of this.meshes)if(m.userData.exteriorCover){m.visible=!on;count++;}this.root.userData.interiorCutawayVisible=!!on;this.root.userData.exteriorHiddenCount=on?count:0;}explode(t,s=null){for(const n of this.nodes)n.position.copy(n.userData.rest);const targets=s?(s.children.filter(c=>c.userData.selectable).length?s.children.filter(c=>c.userData.selectable):[s]):this.parts;for(const n of targets)n.position.addScaledVector(n.userData.explode,THREE.MathUtils.clamp(+t||0,0,1));}setLow(){}reset(){const open=this.exteriorOpen;this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const n of this.nodes)n.quaternion.copy(n.userData.restQuaternion);this.setExteriorOpen(open);}dispose(){for(const g of this.geometries.values())g.dispose();for(const m of this.materials.values())m.dispose();}
+ setExteriorOpen(on=true){this.exteriorOpen=!!on;let count=0;for(const m of this.meshes)if(m.userData.exteriorCover){m.visible=!on;count++;}this.root.userData.interiorCutawayVisible=!!on;this.root.userData.exteriorHiddenCount=on?count:0;}explode(t,s=null){for(const n of this.nodes)n.position.copy(n.userData.rest);const targets=s?(s.children.filter(c=>c.userData.selectable).length?s.children.filter(c=>c.userData.selectable):[s]):this.parts;for(const n of targets)n.position.addScaledVector(n.userData.explode,THREE.MathUtils.clamp(+t||0,0,1));}setLow(on=true){
+  const next=!!on;if(next===this.lowDetail)return;
+  this.lowDetail=next;
+  let affected=0;
+  for(const m of this.meshes){
+   if(!m.userData.detail||m.userData.silhouetteCritical)continue;
+   if(next){
+    m.userData.lowDetailRestoreVisible=m.visible;m.visible=false;affected++;
+   }else if(Object.prototype.hasOwnProperty.call(m.userData,'lowDetailRestoreVisible')){
+    const restore=!!m.userData.lowDetailRestoreVisible;
+    m.visible=(m.userData.exteriorCover&&this.exteriorOpen)?false:restore;
+    delete m.userData.lowDetailRestoreVisible;affected++;
+   }
+  }
+  this.root.userData.lowDetailActive=next;
+  this.root.userData.lowDetailAffectedMeshes=affected;
+}reset(){const open=this.exteriorOpen;this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const n of this.nodes)n.quaternion.copy(n.userData.restQuaternion);this.setExteriorOpen(open);}dispose(){for(const g of this.geometries.values())g.dispose();for(const m of this.materials.values())m.dispose();}
 }
