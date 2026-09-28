@@ -81,8 +81,13 @@ test('SHARK node-scoped materials prevent highlight and ghost state from leaking
  const model=new SharkN650MachineTemplate();
  try{
   const feeder=model.findNode('shark650-feeder'),inspection=model.findNode('shark650-inspection');
-  const feederMesh=model.meshes.find(m=>model.contains(feeder,m)&&m.material);
-  const inspectionMesh=model.meshes.find(m=>model.contains(inspection,m)&&m.material&&m.material.color.getHex()===feederMesh.material.color.getHex());
+  const feederMeshes=model.meshes.filter(m=>model.contains(feeder,m)&&m.material);
+  const inspectionMeshes=model.meshes.filter(m=>model.contains(inspection,m)&&m.material);
+  let feederMesh=null,inspectionMesh=null;
+  for(const fm of feederMeshes){
+   const match=inspectionMeshes.find(im=>im.material.color.getHex()===fm.material.color.getHex());
+   if(match){feederMesh=fm;inspectionMesh=match;break;}
+  }
   assert.ok(feederMesh&&inspectionMesh,'need same-color meshes in different selectable nodes');
   assert.notEqual(feederMesh.material,inspectionMesh.material,'different selectable nodes must not share one material instance');
   model.highlight(feeder);
