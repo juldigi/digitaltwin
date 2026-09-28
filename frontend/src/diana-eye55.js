@@ -243,7 +243,7 @@ export class DianaEye55MachineTemplate{
    const crown=this.group(cell,'diana55-cell-crown-v258','Inspection cell upper service crown');
    const top=this.cover(this.box(crown,[1.82,.10,1.58],[0,1.97,0],'white',.030));top.userData.silhouetteCritical=true;
    for(const z of [-.73,.73]){const seam=this.cover(this.box(crown,[1.48,.018,.018],[0,1.91,z],'red',.004));seam.userData.familyAccent=true;}
-   const beacon=this.group(crown,'diana55-signal-tower-v259','Inspection cell signal tower reference');
+   const beacon=this.group(crown,'diana55-signal-tower-v259','Inspection cell signal tower reference');beacon.userData.familyPhotoReference=true;beacon.userData.installedVerified=false;
    const mast=this.cyl(beacon,.018,.54,[.56,2.27,.42],'dark','signal-tower-mast','y');mast.userData.signalTowerReference=true;mast.userData.statusMeaningVerified=false;
    for(const [i,kind] of ['green','amber','red'].entries()){
     const lamp=this.cyl(beacon,.036,.075,[.56,2.47+i*.075,.42],kind,'signal-tower-lamp','y');
