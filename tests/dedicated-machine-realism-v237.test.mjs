@@ -13,7 +13,7 @@ const realismRoles=m=>(m.realismMeshes||[]).map(x=>String(x.userData?.realismRol
 
 test('V237 priority dedicated machines advertise the dedicated realism pass and evidence boundary',()=>{
  const expected=new Map([
-  ['BMJ-MCH-0003','V254_OPERATOR_SIDE_CORRECTION_PLUS_PRESET_PLUS_DELIVERY_DNA'],
+  ['BMJ-MCH-0003','V255_BMJ_PHOTO_DELIVERY_FACE_AND_SUPPORTED_GATE'],
   ['BMJ-MCH-0005','V237_CX104_8LYYL_MODULAR_SERVICE_IDENTITY'],
   ['BMJ-MCH-0009','V237_CX104_SPECIAL_PROJECT_SERVICE_IDENTITY'],
   ['BMJ-MCH-0002','V237_HSM_CTM7_PHOTO_SERVICE_REALISM'],
