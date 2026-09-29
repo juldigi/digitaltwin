@@ -184,3 +184,26 @@ test('V266 keeps machine terminology when translation would reduce technical acc
   'Functional Location','DWG','CAD','WebGL','UV','shadow map','environment lighting'
  ])assert.ok(runtime.includes(technicalTerm),technicalTerm);
 });
+
+
+test('V266 presentation separators read naturally without changing technical identifiers',()=>{
+ for(const copy of [
+  'Feeder dan pemisahan lembar','Register dan SideLay','Penggerak utama dan transmisi',
+  'Kontrol dan kelistrikan','Pengaman dan pelindung','Sistem UV dan pengering',
+  'Platform dan jalur akses','Guide miring, tension, dan EPC','Main head dan zona potong',
+  'Fast · Slow · Overlap · Stacker','Catwalk dan struktur','Ukuran atau skala',
+  'Titik awal X dan Y','Roll dan penggerak aktif','Jogging (penyelarasan)'
+ ])assert.ok(app.includes(copy),copy);
+ for(const oldCopy of [
+  'Feeder / pemisahan lembar','Register / SideLay','Penggerak utama / transmisi',
+  'Kontrol / kelistrikan','Pengaman / pelindung','Sistem UV / pengering',
+  'Platform / jalur akses','Guide miring / tension / EPC','Main head / zona potong',
+  'Fast / Slow / Overlap / Stacker','Catwalk / struktur','Ukuran / skala','Titik awal X / Y'
+ ])assert.equal(app.includes(oldCopy),false,oldCopy);
+});
+
+test('V266 placeholder machine details translate internal availability codes at presentation time',()=>{
+ assert.match(app,/pair\('Dasar model 3D',readableStatus\('NOT_IMPLEMENTED · LAYOUT PLACEHOLDER'\)\)/);
+ assert.match(app,/pair\('Detail model 3D',readableStatus\('NOT_IMPLEMENTED'\)\)/);
+ assert.doesNotMatch(app,/pair\('Dasar model 3D','NOT_IMPLEMENTED · LAYOUT PLACEHOLDER'\)/);
+});
