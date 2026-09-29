@@ -159,11 +159,11 @@ test('factory engine draws OFU-1 inferred CAD overlay without modifying machine 
   const fs=await import('node:fs/promises');
   const engine=await fs.readFile(new URL('../frontend/src/engine.js',import.meta.url),'utf8');
   const machine=await fs.readFile(new URL('../frontend/src/offset5.js',import.meta.url),'utf8');
-  assert.match(engine,/OFU-1 structural body candidate/);
+  assert.match(engine,/Kandidat badan struktur OFU-1/);
   assert.match(engine,/DXF_GEOMETRIC_INFERENCE/);
   assert.match(engine,/serviceInclusiveBounds/);
   assert.match(machine,/offset5-photo-pdf-v36/);
-  assert.doesNotMatch(machine,/OFU-1 structural body candidate|DXF_GEOMETRIC_INFERENCE/);
+  assert.doesNotMatch(machine,/Kandidat badan struktur OFU-1|DXF_GEOMETRIC_INFERENCE/);
 });
 
 
