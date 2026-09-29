@@ -17,6 +17,15 @@ test('scene import accepts generated primitives and valid copies but rejects sta
  assert.throws(()=>validateSceneImport(imported,{...resolver,identityFor:()=>''}),/tidak sesuai/);
 });
 
+test('scene import preserves overrides for an inactive known machine without accepting unknown machine IDs',()=>{
+ const value={position:[0,0,0],rotation:[0,0,0],scale:[1,1,1],visible:true};
+ const changes={'part:offset10:PU1-body':value};
+ const accepted=validateSceneImport(changes,{hasObject:()=>false,identityFor:()=>'',activeMachineKey:'offset5',isKnownMachine:key=>key==='offset10'});
+ assert.equal(accepted,changes);
+ assert.throws(()=>validateSceneImport({'part:unknown:PU1-body':value},{hasObject:()=>false,identityFor:()=>'',activeMachineKey:'offset5',isKnownMachine:()=>false}),/tidak sesuai/);
+ assert.throws(()=>validateSceneImport(changes,{hasObject:()=>false,identityFor:()=>'',activeMachineKey:'offset10',isKnownMachine:()=>true}),/tidak sesuai/);
+});
+
 test('scene overrides preserve reversible delete and lock, with strict bounded transforms',()=>{
  assert.deepEqual(validateSceneOverrides({'node:0.1':original}),{'node:0.1':original});
  assert.throws(()=>validateSceneOverrides({'node:0.1':{...original,position:[Infinity,0,0]}}),/Transform/);
