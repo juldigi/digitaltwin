@@ -91,6 +91,7 @@ test('V264 editor scopes controls to the selected object and scope',()=>{
  assert.ok(app.includes('id="se-remove-generated"'));
  assert.ok(app.includes('id="se-restore-default"'));
  assert.ok(app.includes('id="se-reset" ${selectedChanged?\'\':\'disabled\'}'));
+ assert.ok(app.includes("selectedGenerated&&!savedOverrides[selected]?'Batalkan objek baru':'Batalkan perubahan objek'"));
  assert.ok(app.includes("selectedGenerated||wallId===selected?'':`<div class=\"se-danger-zone\""));
 });
 
@@ -102,6 +103,9 @@ test('V264 editor avoids false transactions and destructive ambiguity',()=>{
  assert.ok(app.includes("if(!engine.alignSceneObject(selected,targetId,button.dataset.seAlign)){undo.pop()"));
  assert.ok(app.includes('Hapus objek ini dari tampilan 3D?'));
  assert.ok(app.includes('Pulihkan objek ini ke posisi bawaan model?'));
+ assert.ok(app.includes('engine.rotateSceneObjectWorldY(selected,Number(button.dataset.seTurn)*editorRotateStep)'));
+ assert.ok(app.includes('engine.moveSceneObjectWorld(selected,0,Number(direction)*editorMoveStep,0)'));
+ assert.ok(app.includes("selectedGenerated&&savedOverrides[selected]?`<button id=\"se-remove-generated\""));
  assert.ok(app.includes('Pulihkan revisi ini? Perubahan editor yang belum disimpan akan diganti'));
  assert.ok(app.includes('removedSavedOverride=Object.keys(savedOverrides).some'));
  assert.ok(app.includes("stableJson(imported)===stableJson(overrides)"));
