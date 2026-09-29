@@ -8,7 +8,7 @@ test('Stage 5 scene editor refreshes continuous transforms incrementally',()=>{
   assert.match(app,/const refreshEditorTransformUi=/);
   assert.match(app,/const scheduleEditorTransformUi=/);
   assert.match(app,/onEditorKeyUp=e=>\{[^}]*refreshEditorTransformUi\(\)/);
-  assert.match(app,/onDragEnd=\(\)=>\{if\(!selected\)return;if\(!dragChanged\)\{undo\.pop\(\);redo=dragRedo;refreshEditorTransformUi\(\);return;\}/);
+  assert.match(app,/onDragEnd=\(\)=>\{if\(!selected\)return;if\(!dragChanged\)\{rollbackSnapshot\(dragTransaction\);dragTransaction=null;refreshEditorTransformUi\(\);return;\}/);
   assert.match(app,/engine\.onSceneTransform=\(\)=>\{if\(!isTransformBlocked\(\)\)\{dragChanged=true;overrides\[selected\]=current\(\);scheduleEditorTransformUi\(\);\}\}/);
   assert.match(app,/data-se-size/);
   assert.match(app,/data-se-collision/);
