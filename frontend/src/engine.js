@@ -256,11 +256,11 @@ export class FactoryEngine {
   }
   loadLayout(l){if(l===this.layout&&this.factory.children.length&&(!l?.fleet||this.loadedFleet===l.fleet))return;this.clearFactory();this.sceneBase=new WeakMap();this.appliedSceneIds=new Set();this.layout=l;if(!l)return;
     if(l.baselineId&&l.fleet){
-      // The factory view uses the same polished machine templates as "Buka Model 3D".
-      // Fleet meshes remain only as progressive fallbacks until each detailed twin is mounted.
-      this.actualFactory=buildActualFactory(l,l.fleet);
+      // Keep the proven lightweight building context only on severely memory-limited devices.
+      // Machine wrappers are still progressively replaced by the same polished templates used by "Buka Model 3D".
+      this.actualFactory=this.capabilities?.memory<=2?buildLowDetailFactory(l,l.fleet):buildActualFactory(l,l.fleet);
       this.factory.add(this.actualFactory.root);this.loadedFleet=l.fleet;this.layoutStats={total:l.source.entityCount,rendered:l.actual.walls.length,unimplemented:0};
-      void this.hydrateFactoryDetailedMachines(l,l.fleet);
+      void this.hydrateFactoryDetailedMachines?.(l,l.fleet);
       return;
     }
     if(Array.isArray(l.referenceBatches)){
