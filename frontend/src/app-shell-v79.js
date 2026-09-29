@@ -78,30 +78,30 @@ const mobileIcons={factory:'factory',asset:'machine',system:'system',view:'layer
 qa('[data-mobile-nav]').forEach(el=>{const label=q('small',el)?.textContent||el.getAttribute('aria-label')||'';el.innerHTML=icon(mobileIcons[el.dataset.mobileNav]||'more')+`<small>${label}</small>`});
 const mobileFeatureHub=document.createElement('section');
 mobileFeatureHub.className='mobile-feature-hub';
-mobileFeatureHub.setAttribute('aria-label','Fitur lengkap versi mobile');
-mobileFeatureHub.innerHTML=`<div class="mobile-hub-heading"><small>VERSI MOBILE</small><strong>Kontrol Lengkap</strong><span>Semua fitur utama desktop tetap tersedia tanpa memenuhi layar 3D.</span></div>
+mobileFeatureHub.setAttribute('aria-label','Fitur lengkap pada perangkat seluler');
+mobileFeatureHub.innerHTML=`<div class="mobile-hub-heading"><small>VERSI SELULER</small><strong>Kontrol lengkap</strong><span>Semua fitur utama komputer tetap tersedia tanpa memenuhi tampilan 3D.</span></div>
 <div class="mobile-hub-section"><small>AKSES CEPAT</small><div class="mobile-hub-grid">
 <button type="button" data-mobile-action="search">${icon('search')}<span><b>Cari</b><small>Mesin, area, komponen</small></span></button>
-<button type="button" data-mobile-action="display">${icon('layers')}<span><b>Tampilan</b><small>Kualitas & lapisan</small></span></button>
+<button type="button" data-mobile-action="display">${icon('layers')}<span><b>Tampilan</b><small>Kualitas dan lapisan</small></span></button>
 <button type="button" data-mobile-action="2d">${icon('layers')}<span><b>Mode 2D</b><small>Denah pabrik</small></span></button>
 <button type="button" data-mobile-action="3d">${icon('factory')}<span><b>Mode 3D</b><small>Digital twin</small></span></button>
 </div></div>
 <div class="mobile-hub-section"><small>KONTROL 3D</small><div class="mobile-hub-grid mobile-hub-grid-tools">
 <button type="button" data-mobile-action="iso">${icon('factory')}<span><b>Isometrik</b><small>Sudut 3D utama</small></span></button>
-<button type="button" data-mobile-action="top">${icon('focus')}<span><b>Tampak Atas</b><small>Lihat dari atas</small></span></button>
+<button type="button" data-mobile-action="top">${icon('focus')}<span><b>Tampak atas</b><small>Lihat dari atas</small></span></button>
 <button type="button" data-mobile-action="fit">${icon('focus')}<span><b>Fokus</b><small>Ke pilihan aktif</small></span></button>
-<button type="button" data-mobile-action="zoom-in">${icon('zoom-in')}<span><b>Perbesar</b><small>Zoom masuk</small></span></button>
-<button type="button" data-mobile-action="zoom-out">${icon('zoom-out')}<span><b>Perkecil</b><small>Zoom keluar</small></span></button>
+<button type="button" data-mobile-action="zoom-in">${icon('zoom-in')}<span><b>Perbesar</b><small>Perbesar tampilan</small></span></button>
+<button type="button" data-mobile-action="zoom-out">${icon('zoom-out')}<span><b>Perkecil</b><small>Perkecil tampilan</small></span></button>
 <button type="button" data-mobile-action="explode">${icon('machine')}<span><b>Urai</b><small>Komponen mesin</small></span></button>
-<button type="button" data-mobile-action="isolate">${icon('focus')}<span><b>Tampilkan Sendiri</b><small>Isolasi pilihan</small></span></button>
-<button type="button" data-mobile-action="interior">${icon('interior')}<span><b>Buka Interior</b><small>Potongan mesin</small></span></button>
+<button type="button" data-mobile-action="isolate">${icon('focus')}<span><b>Tampilkan sendiri</b><small>Fokus pada pilihan</small></span></button>
+<button type="button" data-mobile-action="interior">${icon('interior')}<span><b>Buka interior</b><small>Lihat bagian dalam</small></span></button>
 <button type="button" data-mobile-action="labels">${icon('label')}<span><b>Label</b><small>Nama objek</small></span></button>
-<button type="button" data-mobile-action="home">${icon('home-view')}<span><b>Tampilan Awal</b><small>Reset kamera</small></span></button>
-<button type="button" data-mobile-action="fullscreen">${icon('fullscreen')}<span><b>Layar Penuh</b><small>Mode presentasi</small></span></button>
+<button type="button" data-mobile-action="home">${icon('home-view')}<span><b>Tampilan awal</b><small>Kembalikan kamera</small></span></button>
+<button type="button" data-mobile-action="fullscreen">${icon('fullscreen')}<span><b>Layar penuh</b><small>Mode presentasi</small></span></button>
 </div></div>
 <div class="mobile-hub-section"><small>APLIKASI</small><div class="mobile-hub-grid">
-<button type="button" data-mobile-action="theme">${icon('theme')}<span><b data-mobile-theme-label>Tema</b><small>Terang / gelap</small></span></button>
-<button type="button" data-mobile-action="settings">${icon('settings')}<span><b>Pengaturan</b><small>Koneksi & preferensi</small></span></button>
+<button type="button" data-mobile-action="theme">${icon('theme')}<span><b data-mobile-theme-label>Tema</b><small>Terang atau gelap</small></span></button>
+<button type="button" data-mobile-action="settings">${icon('settings')}<span><b>Pengaturan</b><small>Koneksi dan preferensi</small></span></button>
 <button type="button" data-mobile-action="help">${icon('help')}<span><b>Bantuan</b><small>Panduan penggunaan</small></span></button>
 </div></div>
 <div class="mobile-hub-status" aria-label="Status aplikasi"><span><small>KUALITAS</small><b data-mobile-quality-summary>Otomatis</b></span><span><small>KONEKSI</small><b data-mobile-connection-summary>Memeriksa…</b></span></div>`;
@@ -439,21 +439,21 @@ q('#mode-2d')?.addEventListener('click',()=>{
 q('#mode-3d')?.addEventListener('click',()=>{const next=setViewMode('3d');applyViewModeDom(next);const section=getState().sceneMode==='machine'?'asset':'factory';stopSimulationForNavigation(section);setActiveSection(section);markSection(section);requestAnimationFrame(()=>{dispatchEvent(new Event('resize'));syncSimulationTransport()})});
 
 const GROUPS=PHASE1_FOUNDATION?[
- ['Bangunan',[['building','Struktur'],['floor','Lantai & jalur'],['walls','Dinding'],['doors','Pintu'],['windows','Jendela & kaca'],['airCurtain','Tirai PVC & air curtain (referensi)'],['furniture','Isi ruangan & material'],['roof','Atap']]],
+ ['Bangunan',[['building','Struktur'],['floor','Lantai dan jalur'],['walls','Dinding'],['doors','Pintu'],['windows','Jendela dan kaca'],['airCurtain','Tirai PVC dan air curtain (referensi)'],['furniture','Isi ruangan dan material'],['roof','Atap']]],
  ['Posisi aset',[['machines','Penanda posisi aset'],['labels','Label'],['unidentified','Area belum teridentifikasi']]],
  ['Sumber',[['reference','Garis denah sumber']]]
 ]:[
- ['Bangunan',[['building','Struktur'],['floor','Lantai & jalur'],['walls','Dinding'],['doors','Pintu'],['windows','Jendela & kaca'],['airCurtain','Tirai PVC & air curtain (referensi)'],['furniture','Isi ruangan & material'],['roof','Atap'],['landscape','Area luar']]],
+ ['Bangunan',[['building','Struktur'],['floor','Lantai dan jalur'],['walls','Dinding'],['doors','Pintu'],['windows','Jendela dan kaca'],['airCurtain','Tirai PVC dan air curtain (referensi)'],['furniture','Isi ruangan dan material'],['roof','Atap'],['landscape','Area luar']]],
  ['Produksi',[['machines','Mesin'],['labels','Label'],['unidentified','Area belum teridentifikasi']]],
- ['Utilitas',[['compressedAir','Pipa compressed air'],['ahuPiping','Pipa AHU'],['ducting','Ducting AHU'],['utilityAnchors','Titik koneksi referensi']]],
+ ['Utilitas',[['compressedAir','Pipa udara bertekanan (compressed air)'],['ahuPiping','Pipa AHU'],['ducting','Ducting AHU'],['utilityAnchors','Titik koneksi referensi']]],
  ['Informasi',[['reference','Garis denah sumber']]]
 ];
 function systemSurfaceMarkup(){
  return PHASE1_FOUNDATION?'':`<div class="canonical-system-grid">
-  <button type="button" data-system-focus="hvac"><strong>HVAC</strong><small>Pipa AHU + ducting</small><span>Lihat jalur & peralatan</span></button>
-  <button type="button" data-system-focus="compressedAir"><strong>Udara Bertekanan</strong><small>Pipa distribusi udara</small><span>Lihat jalur & peralatan</span></button>
-  <button type="button" data-system-focus="routing"><strong>Jalur Utilitas</strong><small>Semua jalur yang tersedia</small><span>Lihat seluruh jalur</span></button>
-  <button type="button" data-system-focus="water" class="system-unavailable"><strong>Air / IPAL</strong><small>Peralatan tersedia · jalur belum tersedia</small><span>Lihat batas data</span></button>
+  <button type="button" data-system-focus="hvac"><strong>HVAC</strong><small>Pipa AHU dan ducting</small><span>Lihat jalur dan peralatan</span></button>
+  <button type="button" data-system-focus="compressedAir"><strong>Udara bertekanan</strong><small>Pipa distribusi udara</small><span>Lihat jalur dan peralatan</span></button>
+  <button type="button" data-system-focus="routing"><strong>Jalur utilitas</strong><small>Semua jalur yang tersedia</small><span>Lihat seluruh jalur</span></button>
+  <button type="button" data-system-focus="water" class="system-unavailable"><strong>Air dan IPAL</strong><small>Peralatan tersedia · jalur belum tersedia</small><span>Lihat batas data</span></button>
   <button type="button" data-system-focus="electrical" class="system-unavailable"><strong>Kelistrikan</strong><small>Jalur terpisah belum tersedia</small><span>Lihat batas data</span></button>
  </div><section id="system-context" class="canonical-system-context" aria-live="polite"><p>Pilih sistem untuk melihat jalur, peralatan terkait, status data, dan batas verifikasi.</p></section>`;
 }
@@ -488,11 +488,11 @@ function qualityDeviceCapabilities(){
  }catch{}
  return {mobile,memory:Number.isFinite(reportedMemory)&&reportedMemory>0?reportedMemory:4,memoryReported:Number.isFinite(reportedMemory)&&reportedMemory>0?reportedMemory:null,cores:Number.isFinite(reportedCores)&&reportedCores>0?reportedCores:4,coresReported:Number.isFinite(reportedCores)&&reportedCores>0?reportedCores:null,maxTextureSize};
 }
-function qualityDeviceLabel(caps){return caps.mobile?'Ponsel / perangkat sentuh':innerWidth<=1180?'Tablet / layar menengah':'Desktop / laptop';}
+function qualityDeviceLabel(caps){return caps.mobile?'Ponsel / perangkat sentuh':innerWidth<=1180?'Tablet / layar menengah':'Komputer / laptop';}
 function qualityRecommendationMarkup(caps=qualityDeviceCapabilities()){
  const recommended=recommendedProfile(caps),info=RENDER_PROFILE_INFO[recommended]||RENDER_PROFILE_INFO.seimbang;
- const memory=caps.memoryReported?caps.memoryReported+' GB':'tidak dilaporkan browser',cores=caps.coresReported||caps.cores||'tidak diketahui';
- return `<div class="quality-device-recommendation" data-quality-recommendation><div><small>REKOMENDASI PERANGKAT INI</small><strong>${escapeHtml(info.label)}</strong></div><p>Dipilih dari kemampuan perangkat yang sedang membuka aplikasi.</p><dl><div><dt>Perangkat</dt><dd>${escapeHtml(qualityDeviceLabel(caps))}</dd></div><div><dt>Memori</dt><dd>${escapeHtml(memory)}</dd></div><div><dt>Thread CPU</dt><dd>${escapeHtml(String(cores))}</dd></div><div><dt>Batas tekstur GPU</dt><dd>${escapeHtml(caps.maxTextureSize.toLocaleString('id-ID')+' px')}</dd></div></dl></div>`;
+ const memory=caps.memoryReported?caps.memoryReported+' GB':'tidak dilaporkan peramban',cores=caps.coresReported||caps.cores||'tidak diketahui';
+ return `<div class="quality-device-recommendation" data-quality-recommendation><div><small>REKOMENDASI PERANGKAT INI</small><strong>${escapeHtml(info.label)}</strong></div><p>Dipilih dari kemampuan perangkat yang sedang membuka aplikasi.</p><dl><div><dt>Perangkat</dt><dd>${escapeHtml(qualityDeviceLabel(caps))}</dd></div><div><dt>Memori</dt><dd>${escapeHtml(memory)}</dd></div><div><dt>Thread CPU yang tersedia</dt><dd>${escapeHtml(String(cores))}</dd></div><div><dt>Batas tekstur GPU</dt><dd>${escapeHtml(caps.maxTextureSize.toLocaleString('id-ID')+' px')}</dd></div></dl></div>`;
 }
 function qualityProfileDetailMarkup(requested,caps=qualityDeviceCapabilities()){
  const recommended=recommendedProfile(caps),effective=requested==='auto'?recommended:requested;
@@ -517,7 +517,7 @@ function ensureLayerManager(){
  if(q('#layer-manager'))return;
  const panel=document.createElement('section');panel.id='layer-manager';panel.className='canonical-layer-manager';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-labelledby','layer-manager-title');panel.setAttribute('tabindex','-1');
  const layerControls=GROUPS.map(([title,items])=>`<div class="canonical-layer-group"><h4>${title}</h4>${items.map(([key,label])=>`<label><span>${label}</span><input type="checkbox" data-canonical-layer="${key}"></label>`).join('')}</div>`).join('');
- panel.innerHTML=`<header><div><small>TAMPILAN</small><h3 id="layer-manager-title">Pengaturan Tampilan</h3></div><button type="button" data-layer-close class="icon-btn" aria-label="Tutup">${icon('close')}</button></header>
+ panel.innerHTML=`<header><div><small>TAMPILAN</small><h3 id="layer-manager-title">Pengaturan tampilan</h3></div><button type="button" data-layer-close class="icon-btn" aria-label="Tutup">${icon('close')}</button></header>
  <p id="layer-unavailable-note" role="status" hidden>Lapisan 3D memerlukan WebGL. Denah 2D tetap tersedia.</p>
  <div class="canonical-layer-group quality-render-group"><h4>Kualitas render 3D</h4>${qualityRecommendationMarkup()}<label><span>Pilih kualitas</span><select id="layer-render-quality" aria-label="Kualitas render 3D">${qualityOptionsMarkup(getState().preferences?.visualQuality||'auto')}</select></label>${qualityProfileDetailMarkup(getState().preferences?.visualQuality||'auto')}</div>
  ${layerControls}
@@ -551,7 +551,7 @@ addEventListener('bmj:systemcontext',event=>renderSystemContext(event.detail));
 function ensureSimulationTransport(){
  let bar=q('#simulation-transport');if(bar)return bar;
  bar=document.createElement('section');bar.id='simulation-transport';bar.className='canonical-simulation-transport';bar.hidden=true;bar.setAttribute('aria-label','Kontrol simulasi');
- bar.innerHTML=`<div class="sim-context"><small>SIMULASI PROSES</small><strong data-transport-stage>Siap</strong></div><label class="sim-mode-label">Mode<select data-transport-mode aria-label="Mode simulasi"><option value="continuous">Proses penuh</option><option value="stages">Tahap demi tahap</option></select></label><button type="button" data-transport-play class="primary" aria-label="Mulai atau jeda simulasi">Mulai</button><label>Kecepatan<select data-transport-speed aria-label="Kecepatan simulasi"><option value=".5">0,5×</option><option value="1" selected>1×</option><option value="1.5">1,5×</option><option value="2">2×</option></select></label><progress max="100" value="0" data-transport-progress aria-label="Progres simulasi"></progress><button type="button" data-transport-stop>Hentikan</button>`;
+ bar.innerHTML=`<div class="sim-context"><small>SIMULASI PROSES</small><strong data-transport-stage>Siap</strong></div><label class="sim-mode-label">Mode<select data-transport-mode aria-label="Mode simulasi"><option value="continuous">Proses penuh</option><option value="stages">Tahap demi tahap</option></select></label><button type="button" data-transport-play class="primary" aria-label="Mulai atau jeda simulasi">Mulai</button><label>Kecepatan<select data-transport-speed aria-label="Kecepatan simulasi"><option value=".5">0,5×</option><option value="1" selected>1×</option><option value="1.5">1,5×</option><option value="2">2×</option></select></label><progress max="100" value="0" data-transport-progress aria-label="Kemajuan simulasi"></progress><button type="button" data-transport-stop>Hentikan</button>`;
  q('.workspace')?.append(bar);
  q('[data-transport-play]',bar).addEventListener('click',()=>dispatchEvent(new CustomEvent('bmj:simulationcommand',{detail:{action:'toggle'}})));
  q('[data-transport-stop]',bar).addEventListener('click',()=>dispatchEvent(new CustomEvent('bmj:simulationcommand',{detail:{action:'stop'}})));
