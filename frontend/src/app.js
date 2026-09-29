@@ -1028,7 +1028,7 @@ function openSceneEditor(){
  const selectedHasUnsavedChanges=()=>Boolean(selected)&&stableJson(savedOverrides[selected])!==stableJson(overrides[selected]);
  const markSavedCheckpoint=value=>{savedOverrides=cloneOverrides(value??overrides);};
  let selected=null,undo=[],redo=[],isolated=false,previewOriginal=false,editorBusy=false,history=[],editorCategory='machines',editorScope='factory',editorMachineId=null,editorMoveStep=.01,editorRotateStep=Math.PI/180;const isolationGuard=createSceneIsolationGuard();engine.gizmo.setTranslationSnap(editorMoveStep);engine.gizmo.setRotationSnap(editorRotateStep);
- const panel=document.createElement('section');panel.id='scene-editor-panel';panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-label','Edit pabrik 3D');panel.setAttribute('aria-busy','false');panel.tabIndex=-1;const editorReturnFocus=document.querySelector('#settings');
+ const panel=document.createElement('section');panel.id='scene-editor-panel';panel.setAttribute('role','dialog');panel.setAttribute('aria-label','Edit pabrik 3D');panel.setAttribute('aria-busy','false');panel.tabIndex=-1;const editorReturnFocus=document.querySelector('#settings');
  const editorBackgroundTargets=[...document.querySelectorAll('.rail,.global-search,.header-actions,#panel-toggle,.scene-bottom,.viewport-mode-switch,aside#detail-panel,.canonical-simulation-transport,.mobile-nav')],editorBackgroundInert=editorBackgroundTargets.map(element=>[element,Boolean(element.inert)]);
  for(const element of editorBackgroundTargets)element.inert=true;
  document.body.classList.add('scene-editor-open');document.body.append(panel);
@@ -1188,7 +1188,7 @@ function openSceneEditor(){
  </section>
  <section class="se-step se-save-step">
   <div class="se-step-title"><b>3</b><div><strong>Simpan perubahan</strong><span>${previewOriginal?'Sedang melihat kondisi terakhir tersimpan.':'Perubahan belum permanen sampai tombol Simpan ditekan.'}</span></div></div>
-  <div class="se-review-row"><button id="se-preview" ${!previewOriginal&&!hasUnsaved?'disabled':''}>${previewOriginal?'Kembali ke hasil edit':'Bandingkan sebelum / sesudah'}</button><span id="se-status">${previewOriginal?'Kondisi terakhir tersimpan · hanya melihat':draftCount?draftCount+' objek memiliki perubahan baru':'Belum ada perubahan baru'}</span></div>
+  <div class="se-review-row"><button id="se-preview" ${!previewOriginal&&!hasUnsaved?'disabled':''}>${previewOriginal?'Kembali ke hasil edit':'Bandingkan sebelum / sesudah'}</button><span id="se-status" aria-live="polite">${previewOriginal?'Kondisi terakhir tersimpan · hanya melihat':draftCount?draftCount+' objek memiliki perubahan baru':'Belum ada perubahan baru'}</span></div>
   <div class="se-save-bar"><div><button id="se-undo" ${!undo.length?'disabled':''}>Urungkan</button><button id="se-redo" ${!redo.length?'disabled':''}>Ulangi</button></div><button id="se-save" class="primary" ${previewOriginal||!hasUnsaved?'disabled':''}>Simpan semua perubahan</button></div>
  </section>
  <details class="se-admin-tools"><summary>Alat teknis Superadmin</summary><div class="se-advanced-body">
