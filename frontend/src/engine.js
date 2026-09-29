@@ -458,6 +458,18 @@ export class FactoryEngine {
     if(node.parent){node.parent.updateWorldMatrix(true,false);node.position.copy(node.parent.worldToLocal(world));}else node.position.copy(world);
     return true;
   }
+  rotateSceneObjectWorldY(id,radians=0){
+    const node=this.sceneObjects?.get(id);if(!node||!Number.isFinite(radians)||Math.abs(radians)<1e-12)return false;
+    node.updateWorldMatrix(true,false);
+    const worldQuaternion=node.getWorldQuaternion(new THREE.Quaternion());
+    worldQuaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),radians));
+    if(node.parent){
+      node.parent.updateWorldMatrix(true,false);
+      const parentWorld=node.parent.getWorldQuaternion(new THREE.Quaternion());
+      node.quaternion.copy(parentWorld.invert().multiply(worldQuaternion));
+    }else node.quaternion.copy(worldQuaternion);
+    return true;
+  }
   moveSceneObjectInView(id,horizontal=0,vertical=0,step=.1){
     const node=this.sceneObjects?.get(id);if(!node||(!horizontal&&!vertical))return false;
     const forward=new THREE.Vector3();this.camera.getWorldDirection(forward);forward.y=0;if(forward.lengthSq()<1e-8)forward.set(0,0,-1);forward.normalize();
