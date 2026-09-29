@@ -131,7 +131,7 @@ test('V264 editor owns the application context while it is open',()=>{
  assert.match(app,/for\(const element of editorBackgroundTargets\)element\.inert=true/);
  assert.match(app,/for\(const \[element,wasInert\] of editorBackgroundInert\)element\.inert=wasInert/);
  assert.match(app,/update\(\);panel\.focus\(\{preventScroll:true\}\)/);
- assert.match(app,/document\.body\.classList\.remove\('scene-editor-open'\)/);
+ assert.match(app,/document\.body\.classList\.remove\('scene-editor-open','scene-editor-busy'\)/);
  assert.match(css,/body\.scene-editor-open \.rail button/);
  assert.match(css,/body\.scene-editor-open #panel-toggle/);
  assert.match(css,/body\.scene-editor-open \.mobile-nav/);
@@ -147,11 +147,11 @@ test('V264 editor preview is fully read-only and uses the last persisted state',
 });
 
 test('V264 editor guards hidden deleted locked and isolated objects consistently',()=>{
- assert.match(app,/const isTransformBlocked=\(\)=>\{const value=current\(\);return !selected\|\|previewOriginal\|\|!value\|\|value\.locked\|\|value\.deleted\|\|value\.visible===false;\}/);
+ assert.match(app,/const isTransformBlocked=\(\)=>\{const value=current\(\);return editorBusy\|\|!selected\|\|previewOriginal\|\|!value\|\|value\.locked\|\|value\.deleted\|\|value\.visible===false;\}/);
  assert.doesNotMatch(app,/\btransformBlocked\(\)/);
  assert.match(app,/engine\.onSceneTransform=\(\)=>\{if\(!isTransformBlocked\(\)\)/);
  assert.match(app,/if\(hiding&&isolated\)\{isolated=false;isolationGuard\.restore\(\);\}/);
- assert.match(app,/if\(!selected\|\|!selectedVisible\|\|previewOriginal\)return;isolated=!isolated/);
+ assert.match(app,/if\(editorBusy\|\|!selected\|\|!selectedVisible\|\|previewOriginal\)return;isolated=!isolated/);
  assert.match(app,/const node=selected&&engine\.sceneObjects\.get\(selected\);if\(isolated&&node\)isolationGuard\.isolate/);
  assert.match(app,/\$\{v\?\.deleted\?'':`<button id="se-hide"/);
 });
@@ -308,4 +308,46 @@ test('machine selection uses a clear factory-first flow before explicit 3D inspe
  assert.match(app,/asset-data-badge">Pilih di pabrik/);
  assert.match(app,/if\(item\.type==='machine'\)\{const record=MACHINE_REGISTRY_BY_ID\.get\(item\.machineId\);if\(record\)await openAssetContext\(record\);return;\}/);
  assert.match(app,/id="\$\{modelAvailable\?'open-machine-3d':'focus-layout-asset'\}"/);
+});
+
+
+test('V265 editor locks asynchronous transactions and rolls back failed machine loads',()=>{
+ assert.match(app,/editorBusy=false/);
+ assert.match(app,/panel\.setAttribute\('role','dialog'\)/);
+ assert.match(app,/panel\.setAttribute\('aria-busy','false'\)/);
+ assert.doesNotMatch(app,/panel\.setAttribute\('aria-modal','true'\)/);
+ assert.match(app,/id="se-status" aria-live="polite"/);
+ assert.match(app,/const setEditorBusy=\(on,message=''\)=>/);
+ assert.match(app,/document\.body\.classList\.toggle\('scene-editor-busy',editorBusy\)/);
+ assert.match(app,/panel\.querySelectorAll\('button,input,select'\)\.forEach\(control=>control\.disabled=true\)/);
+ assert.match(app,/input\.disabled=Boolean\(editorBusy\|\|v\.locked/);
+ assert.match(app,/undoButton\.disabled=editorBusy\|\|!undo\.length/);
+ assert.match(app,/if\(liveEditorUiFrame\)\{cancelAnimationFrame\(liveEditorUiFrame\);liveEditorUiFrame=0;\}/);
+ assert.match(app,/const payload=cloneOverrides\(overrides\);setEditorBusy\(true,'Menyimpan perubahan…'\)/);
+ assert.match(app,/data:\{overrides:payload\}/);
+ assert.match(app,/setEditorBusy\(true,'Membuka model bagian mesin…'\)/);
+ assert.match(app,/catch\(error\)\{clearActiveMachineDescriptor\(\);applyActiveMachineState\(\);engine\.clearMachineContext\?\.\(\);engine\.setView\('factory',state\)/);
+ assert.match(app,/finally\{setEditorBusy\(false\);\}\}\);/);
+ assert.match(app,/engine\.onSceneSelect=\(id,node\)=>\{if\(editorBusy\)\{engine\.gizmo\.detach\(\);return;\}/);
+ assert.match(css,/V265 editor transaction lock/);
+ assert.match(css,/body\.scene-editor-busy #viewport\{[\s\S]*?pointer-events:none!important/);
+});
+
+test('V265 editor keyboard and focus lifecycle cannot leave incomplete transactions',()=>{
+ assert.match(app,/String\(e\.key\|\|''\)==='Escape'/);
+ assert.match(app,/panel\.querySelector\('#se-close'\)\?\.click\(\)/);
+ assert.match(app,/const finishKeyboardMove=\(\)=>/);
+ assert.match(app,/const onEditorWindowBlur=\(\)=>finishKeyboardMove\(\)/);
+ assert.match(app,/window\.addEventListener\('blur',onEditorWindowBlur\)/);
+ assert.match(app,/window\.removeEventListener\('blur',onEditorWindowBlur\)/);
+ assert.match(app,/queueMicrotask\(\(\)=>editorReturnFocus\?\.isConnected&&editorReturnFocus\.focus/);
+});
+
+test('V265 editor releases busy state for save import and revision outcomes',()=>{
+ assert.match(app,/if\(stableJson\(imported\)===stableJson\(overrides\)\)\{setEditorBusy\(false\);return toast\('Cadangan ini sama dengan kondisi editor saat ini\.'\);\}/);
+ assert.match(app,/setEditorBusy\(true,'Memeriksa cadangan editor…'\)/);
+ assert.match(app,/setEditorBusy\(true,'Memulihkan revisi…'\)/);
+ assert.match(app,/setEditorBusy\(false\);toast\('Revisi berhasil dipulihkan\.'\)/);
+ assert.match(app,/catch\(error\)\{setEditorBusy\(false\);toast\(error\.message,true\);\}/);
+ assert.match(app,/document\.body\.classList\.remove\('scene-editor-open','scene-editor-busy'\)/);
 });

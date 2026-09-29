@@ -1823,3 +1823,16 @@ body.scene-editor-open #viewport{pointer-events:auto}
   width:min(460px,64vw);bottom:max(8px,env(safe-area-inset-bottom))
  }
 }
+
+
+/* V265 editor transaction lock */
+body.scene-editor-busy #viewport{
+ pointer-events:none!important;
+ cursor:progress!important
+}
+body.scene-editor-busy #scene-editor-panel{
+ cursor:progress
+}
+body.scene-editor-busy #scene-editor-panel [aria-busy="true"]{
+ cursor:progress
+}
