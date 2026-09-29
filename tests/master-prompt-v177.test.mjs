@@ -9,9 +9,9 @@ const sw=read('../frontend/sw.js');
 
 test('V177 2D mode uses explicit plan copy instead of stale 3D wording',()=>{
   assert.match(shell,/syncViewModeText\(q\('#view-kicker'\),'DENAH PABRIK · 2D',is2d\)/);
-  assert.match(shell,/Aset terpilih ditandai pada denah pabrik/);
-  assert.match(shell,/Denah 2D · Aset terpilih/);
-  assert.match(shell,/Pilih aset melalui menu Aset atau denah 2D\./);
+  assert.match(shell,/Objek terpilih ditandai pada denah pabrik/);
+  assert.match(shell,/Denah 2D · Mesin atau peralatan terpilih/);
+  assert.match(shell,/Pilih mesin atau peralatan melalui menu Mesin atau denah 2D\./);
 });
 
 test('V177 preserves external 3D copy while 2D mode is active and restores it later',()=>{
