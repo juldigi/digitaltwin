@@ -211,7 +211,7 @@ test('scene editor uses human-readable units and converts degree input back to r
  assert.match(app,/Rotasi relatif terhadap induk \(derajat\)/);
  assert.match(app,/data-se-unit="\$\{key==='rotation'\?'deg':'raw'\}"/);
  assert.match(app,/stored=input\.dataset\.seUnit==='deg'\?value\*Math\.PI\/180:value/);
- assert.match(app,/Gerak bertahap/);
+ assert.match(app,/Gerakkan bertahap saat diseret/);
 });
 
 test('progressive editor controls are safe before any object is selected',()=>{
