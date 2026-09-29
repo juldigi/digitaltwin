@@ -35,10 +35,10 @@ test('V257 release manifest records one chronological implementation path with e
  for(const item of RELEASE_MANIFEST_V257.filter(x=>x.status==='merged'))assert.match(item.mergeCommit,/^[a-f0-9]{40}$/);
 });
 
-test('V262 application identity keeps the V257 lineage and rotates the shell for mobile parity',()=>{
- assert.equal(APP_BUILD,'2026.09.29-262');
- assert.match(state,/APP_BUILD='2026\.09\.29-262'/);
- assert.match(sw,/const VERSION='factory-digital-twin-v262-mobile-parity-20260929'/);
+test('V263 application identity keeps the V257 lineage and rotates the shell for simplified editor',()=>{
+ assert.equal(APP_BUILD,'2026.09.29-263');
+ assert.match(state,/APP_BUILD='2026\.09\.29-263'/);
+ assert.match(sw,/const VERSION='factory-digital-twin-v263-simplified-editor-20260929'/);
  assert.match(sw,/const LEGACY_VERSION='factory-digital-twin-v222-overlay-state-ssot-20260925'/);
  assert.match(sw,/const RELEASE='222'/);
  assert.match(sw,/const BUILD_FINGERPRINT='SOURCE'/);

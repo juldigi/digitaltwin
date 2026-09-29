@@ -42,13 +42,18 @@ test('scene editor layout is responsive and leaves canonical navigation reachabl
 });
 
 
-test('scene editor presents a guided three-step human-first workflow',()=>{
- for(const label of ['Pilih yang ingin diubah','Atur objek','Simpan perubahan','Mesin','Dinding','Aksesori & Peralatan','Bangunan & Ruangan','Utilitas','Furnitur','Bagian Mesin','Geser ','Bandingkan dengan tampilan asli','Alat lanjutan Superadmin'])assert.match(app,new RegExp(label));
+test('V263 scene editor presents a simplified pick-adjust-save workflow',()=>{
+ for(const label of ['Apa yang ingin diubah?','Atur objek','Simpan perubahan','Mesin','Dinding','Peralatan','Bangunan','Utilitas','Furnitur','Bagian Mesin','Jarak tiap klik','Geser sesuai arah layar','Taruh di lantai','Opsi lainnya','Pengaturan presisi','Bandingkan sebelum / sesudah','Alat teknis Superadmin'])assert.ok(app.includes(label),label);
  assert.match(app,/class="se-progress"/);
+ assert.match(app,/primaryEditorCategories=editorCategories\.filter/);
+ assert.match(app,/data-se-screen="up"/);
+ assert.match(app,/moveSceneObjectInView\(selected,horizontal,vertical,editorMoveStep\)/);
+ assert.match(app,/class="se-more-actions"/);
  assert.match(app,/class="se-advanced"/);
  assert.match(app,/class="se-admin-tools"/);
- assert.match(css,/\.se-step-title/);
- assert.match(css,/\.se-selected-card/);
+ assert.match(css,/V263 simplified editor/);
+ assert.match(css,/\.se-direction-pad/);
+ assert.match(css,/\.se-easy-toolbar/);
  assert.match(css,/\.se-save-bar/);
 });
 
@@ -99,7 +104,7 @@ test('factory editor list is registry-driven and all selected objects are precis
  assert.match(app,/registryMachineChoices=MACHINE_REGISTRY\.slice\(\)/);
  assert.match(app,/name:machine\.name/);
  assert.match(app,/if\(category==='machines'\)\{const machineId=id\.replace\(\/\^asset:\/,'\'\)\|\|node\?\.userData\?\.machineId,record=MACHINE_REGISTRY_BY_ID\.get\(machineId\);return record\?/);
- assert.match(app,/Seluruh mesin aktif sebagai satu unit/);
+ assert.match(app,/Seluruh mesin bergerak sebagai satu unit/);
  assert.match(app,/document\.addEventListener\('keydown',onEditorKeyDown\)/);
  assert.match(app,/editorArrowKeys=\['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'\]/);
  assert.match(app,/editorMoveStep=\.01/);
@@ -135,7 +140,7 @@ test('V197 editor shows the full registry and labels unplaced machines',()=>{
  assert.match(app,/registryMachineChoices=MACHINE_REGISTRY\.slice\(\)/);
  assert.match(app,/placed:Boolean\(engine\.actualFactory\?\.assets\?\.has\(machine\.machineId\)\)/);
  assert.match(app,/belum ditempatkan/);
- assert.match(app,/Mesin ada di database, belum ditempatkan di scene/);
+ assert.match(app,/Mesin belum ditempatkan di pabrik 3D/);
 });
 
 test('V197 machine keyboard movement is camera-relative and installs one stable listener pair',async()=>{
@@ -156,6 +161,7 @@ test('Stage 5 synchronizes editor machine descriptor and preserves rerender cont
  assert.match(app,/clearActiveMachineDescriptor\(\);applyActiveMachineState\(\);engine\.clearMachineContext\?\.\(\)/);
  assert.match(app,/scrollBefore=panel\.scrollTop/);
  assert.match(app,/advancedOpen=panel\.querySelector\('\.se-advanced'\)\?\.open/);
+ assert.match(app,/moreOpen=panel\.querySelector\('\.se-more-actions'\)\?\.open/);
  assert.match(app,/adminOpen=panel\.querySelector\('\.se-admin-tools'\)\?\.open/);
  assert.match(app,/id:'uncategorized',label:'Belum dikategorikan'/);
 });
