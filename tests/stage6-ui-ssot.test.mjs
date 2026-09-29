@@ -96,3 +96,12 @@ test('Stage 6 generic asset header does not present machine family as manufactur
  assert.doesNotMatch(app,/stage:MACHINE_KEY\?'Feeder':null/);
  assert.match(app,/simulation\.stage\|\|'Siap'/);
 });
+
+
+test('Stage 6 keeps canvas part selection inside the canonical inspector',()=>{
+ assert.doesNotMatch(html,/machine-quick-actions|machine-detail-shortcut|machine-simulation-shortcut|machine-part-shortcut/);
+ assert.doesNotMatch(css,/part-focus-popover|part-focus-options|machine-quick-actions/);
+ assert.doesNotMatch(app,/openPartFocusPopover|closePartFocusPopover|part-focus-popover|machine-detail-shortcut|machine-simulation-shortcut|machine-part-shortcut/);
+ assert.doesNotMatch(app,/document\.addEventListener\('keydown',event=>\{if\(event\.key==='Escape'\)/);
+ assert.match(app,/function selectPartFromCanvas\(part\)\{[\s\S]*path\.find\(node=>node\.level===2\)\|\|meta[\s\S]*selectTaxonomy\(first\.id,\{revealPanel:true,historyMode:'push'\}\)/);
+});
