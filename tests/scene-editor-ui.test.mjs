@@ -28,7 +28,7 @@ test('scene save and revision restore clear transient isolation before replaying
 });
 
 test('removed generated selections detach the gizmo instead of leaving an orphan transform target',()=>{
- assert.match(app,/!engine\.sceneObjects\.has\(selected\)\)\{engine\.gizmo\.detach\(\);if\(selected\.startsWith\('copy:'\)\|\|selected\.startsWith\('new:'\)\)selected=null/);
+ assert.match(app,/selected&&!engine\.sceneObjects\.has\(selected\)&&\(selected\.startsWith\('copy:'\)\|\|selected\.startsWith\('new:'\)\)\)selected=null/);
 });
 
 
@@ -70,9 +70,9 @@ test('V264 editor compares drafts against the last saved checkpoint',()=>{
 });
 
 test('V264 lock state disables transform controls without blocking visibility state',()=>{
- assert.ok(app.includes('data-se-screen="up" ${v?.locked?\'disabled\':\'\'}'));
- assert.ok(app.includes('data-se-mode="scale" ${engine.gizmo.mode===\'scale\'?\'class="active"\':\'\'} ${v?.locked?\'disabled\':\'\'}'));
- assert.ok(app.includes('id="se-ground" ${v?.locked?\'disabled\':\'\'}'));
+ assert.ok(app.includes('data-se-screen="up" ${transformBlocked?\'disabled\':\'\'}'));
+ assert.ok(app.includes('data-se-mode="scale" ${engine.gizmo.mode===\'scale\'?\'class="active"\':\'\'} ${transformBlocked?\'disabled\':\'\'}'));
+ assert.ok(app.includes('id="se-ground" ${transformBlocked?\'disabled\':\'\'}'));
  assert.ok(app.includes('const mutate=(fn,{allowLocked=false'));
  assert.ok(app.includes("querySelector('#se-hide')?.addEventListener('click',()=>mutate"));
  assert.ok(app.includes('allowLocked:true'));
@@ -80,7 +80,7 @@ test('V264 lock state disables transform controls without blocking visibility st
 
 test('V264 editor scopes controls to the selected object and scope',()=>{
  assert.ok(app.includes("editorScope==='factory'?`<button id=\"se-ground\""));
- assert.ok(app.includes("canDuplicate=Boolean(selected&&editorScope==='factory'&&editorCategory!=='machines'"));
+ assert.ok(app.includes("canDuplicate=Boolean(selected&&selectedVisible&&editorScope==='factory'&&editorCategory!=='machines'"));
  assert.ok(app.includes("editorScope==='factory'?`<fieldset><legend>Sejajarkan dengan aset lain"));
  assert.ok(app.includes('id="se-remove-generated"'));
  assert.ok(app.includes('id="se-restore-default"'));
@@ -96,6 +96,10 @@ test('V264 editor avoids false transactions and destructive ambiguity',()=>{
  assert.ok(app.includes('Hapus objek ini dari tampilan 3D?'));
  assert.ok(app.includes('Pulihkan objek ini ke posisi bawaan model?'));
  assert.ok(app.includes('Pulihkan revisi ini? Perubahan editor yang belum disimpan akan diganti'));
+ assert.ok(app.includes('removedSavedOverride=Object.keys(savedOverrides).some'));
+ assert.ok(app.includes("stableJson(imported)===stableJson(overrides)"));
+ assert.match(css,/V264 editor context guard/);
+ assert.match(css,/body\.scene-editor-open aside#detail-panel/);
 });
 
 test('scene editor exposes real-world categories and keeps internal identifiers out of normal UI',()=>{
@@ -149,7 +153,7 @@ test('factory editor list is registry-driven and all selected objects are precis
  assert.match(app,/document\.addEventListener\('keydown',onEditorKeyDown\)/);
  assert.match(app,/editorArrowKeys=\['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'\]/);
  assert.match(app,/editorMoveStep=\.01/);
- assert.match(app,/if\(!selected\|\|previewOriginal\|\|overrides\[selected\]\?\.locked\|\|!editorArrowKeys\.includes\(e\.key\)\)return/);
+ assert.match(app,/node\.visible===false\|\|!editorArrowKeys\.includes\(e\.key\)\)return/);
  assert.match(app,/const step=e\.shiftKey\?editorMoveStep\*10:editorMoveStep/);
  assert.match(app,/id="se-step-size"/);
  assert.match(app,/id="se-delete-wall"/);
