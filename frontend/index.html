@@ -10,10 +10,10 @@
 <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
 <link rel="stylesheet" href="./style.css">
 <link rel="stylesheet" href="./runtime-fallback.css">
-<link rel="stylesheet" href="./app-shell-v79.css?v=222">
+<link rel="stylesheet" href="./app-shell-v79.css?v=262">
 <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/addons/"}}</script>
 <script id="sw-bootstrap">
-(()=>{if(!('serviceWorker'in navigator))return;const guard='bmj-sw-v222-reloaded';navigator.serviceWorker.addEventListener('controllerchange',()=>{if(document.documentElement.dataset.appReady==='ready'||sessionStorage.getItem(guard))return;sessionStorage.setItem(guard,'1');location.reload();});navigator.serviceWorker.register('./sw.js').then(reg=>reg.update()).catch(()=>{});addEventListener('load',()=>setTimeout(()=>{if(document.documentElement.dataset.appReady==='ready')sessionStorage.removeItem(guard)},2500),{once:true});})();
+(()=>{if(!('serviceWorker'in navigator))return;const guard='bmj-sw-v262-reloaded';navigator.serviceWorker.addEventListener('controllerchange',()=>{if(document.documentElement.dataset.appReady==='ready'||sessionStorage.getItem(guard))return;sessionStorage.setItem(guard,'1');location.reload();});navigator.serviceWorker.register('./sw.js').then(reg=>reg.update()).catch(()=>{});addEventListener('load',()=>setTimeout(()=>{if(document.documentElement.dataset.appReady==='ready')sessionStorage.removeItem(guard)},2500),{once:true});})();
 </script>
 </head>
 <body class="panel-hidden ui-simple">
@@ -110,6 +110,7 @@
   <button type="button" data-mobile-nav="factory" class="active" aria-label="Pabrik"><span aria-hidden="true"></span><small>Pabrik</small></button>
   <button type="button" data-mobile-nav="asset" aria-label="Mesin"><span aria-hidden="true"></span><small>Mesin</small></button>
   <button type="button" data-mobile-nav="system" aria-label="Sistem utilitas"><span aria-hidden="true"></span><small>Sistem</small></button>
+  <button type="button" data-mobile-nav="view" aria-label="Tampilan"><span aria-hidden="true"></span><small>Tampilan</small></button>
   <button type="button" data-mobile-nav="more" aria-label="Lainnya" aria-expanded="false" aria-controls="main-navigation"><span aria-hidden="true"></span><small>Lainnya</small></button>
 </nav>
 
@@ -119,9 +120,9 @@
 
 <dialog id="modal" aria-labelledby="modal-title" aria-modal="true"><div class="modal-head"><button id="modal-back" class="modal-back" type="button" aria-label="Kembali ke dialog sebelumnya" hidden><span aria-hidden="true"></span><b>Kembali</b></button><h2 id="modal-title"></h2><button id="modal-close" class="icon-btn" aria-label="Tutup dialog"></button></div><div id="modal-body"></div></dialog>
 <div id="toast" role="status" aria-live="polite" hidden></div>
-<script type="module" src="./src/app.js?v=222"></script>
-<script type="module" src="./src/ui-v5.js?v=222"></script>
-<script type="module" src="./src/experience-v37.js?v=222"></script>
-<script type="module" src="./src/app-shell-v79.js?v=222"></script>
+<script type="module" src="./src/app.js?v=262"></script>
+<script type="module" src="./src/ui-v5.js?v=262"></script>
+<script type="module" src="./src/experience-v37.js?v=262"></script>
+<script type="module" src="./src/app-shell-v79.js?v=262"></script>
 </body>
 </html>
