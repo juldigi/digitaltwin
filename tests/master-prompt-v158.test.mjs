@@ -34,8 +34,8 @@ test('scene click and factory selector share one persistent asset context',()=>{
 test('Phase-1 placeholders stay spatial-only while exposing honest implementation truth',()=>{
  const detail=app.slice(app.indexOf('function machineDetailDialog(machine){'),app.indexOf('async function switchActiveMachine',app.indexOf('function machineDetailDialog(machine){')));
  assert.match(detail,/pair\('ID posisi',machine\.machineId\)\+pair\('Area',machine\.area\)/);
- assert.match(detail,/pair\('Dasar model 3D','NOT_IMPLEMENTED · LAYOUT PLACEHOLDER'\)/);
- assert.match(detail,/pair\('Detail model 3D','NOT_IMPLEMENTED'\)/);
+ assert.match(detail,/pair\('Dasar model 3D',readableStatus\('NOT_IMPLEMENTED · LAYOUT PLACEHOLDER'\)\)/);
+ assert.match(detail,/pair\('Detail model 3D',readableStatus\('NOT_IMPLEMENTED'\)\)/);
  assert.match(detail,/pair\('Status detail','Belum dibuka pada fase fondasi'\)/);
  assert.ok(!/placeholderData=.*Serial Number/.test(detail));
  assert.ok(!/placeholderData=.*SAP Code/.test(detail));
