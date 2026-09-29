@@ -693,7 +693,7 @@ function syncViewModeText(el,next2d,is2d){
 function syncViewModeContext(state){
  const is2d=state.viewMode==='2d',hasAsset=Boolean(state.selectedAsset);
  syncViewModeText(q('#view-kicker'),'DENAH PABRIK · 2D',is2d);
- syncViewModeText(q('#view-subtitle'),hasAsset?'Objek terpilih ditandai pada denah pabrik':'Posisi mesin, area produksi, dan konteks pabrik',is2d);
+ syncViewModeText(q('#view-subtitle'),hasAsset?'Mesin atau peralatan terpilih ditandai pada denah pabrik':'Posisi mesin, area produksi, dan konteks pabrik',is2d);
  syncViewModeText(q('#geometry-caption'),hasAsset?'Denah 2D · Mesin atau peralatan terpilih':'Denah 2D · Seluruh area',is2d);
  syncViewModeText(q('#scene-hint'),hasAsset?'Mesin atau peralatan terpilih ditandai pada denah · pilih yang lain melalui menu Mesin':'Pilih mesin atau peralatan melalui menu Mesin atau denah 2D.',is2d);
 }
