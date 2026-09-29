@@ -157,15 +157,15 @@ test('v41 keeps every right-sidebar taxonomy item clickable after repeated selec
 
 test('v42 opens removable exterior covers while retaining frame and interior geometry',()=>{
   assert.match(html,/id="tool-interior"/);
-  assert.match(html,/Buka Interior/);
+  assert.match(html,/BUKA INTERIOR/);
   assert.doesNotMatch(html,/data-tab="exterior"/);
   assert.match(app,/renderPanel\('exterior'\)/);
   assert.match(app,/function enableExteriorOpen\(\{forceDetail=true\}=\{\}\)/);
   assert.match(app,/engine\.applyQualityProfile/);
   assert.match(app,/template\.setExteriorOpen\(true\)/);
-  assert.match(app,/Buka semua cover luar/);
-  assert.match(app,/Tutup kembali cover/);
-  assert.match(app,/Interior \+ rangka dan penyangga/);
+  assert.match(app,/Buka semua penutup luar/);
+  assert.match(app,/Tutup kembali penutup/);
+  assert.match(app,/Interior, rangka, dan penyangga/);
   assert.match(app,/document\.querySelectorAll\('\[data-exterior-area\]'\)\.forEach/);
   assert.match(engine,/fitObjects\(objects=\[\]/);
   assert.match(offset5,/markExteriorCover\(object\)/);
