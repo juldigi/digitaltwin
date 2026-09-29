@@ -74,25 +74,85 @@ for(const [id,name]of Object.entries(iconMap)){
 }
 const contextBackIcon=q('#context-back span');if(contextBackIcon)contextBackIcon.innerHTML=icon('back');
 const modalBackIcon=q('#modal-back span');if(modalBackIcon)modalBackIcon.innerHTML=icon('back');
-const mobileIcons={factory:'factory',asset:'machine',system:'system',more:'more'};
+const mobileIcons={factory:'factory',asset:'machine',system:'system',view:'layers',more:'more'};
 qa('[data-mobile-nav]').forEach(el=>{const label=q('small',el)?.textContent||el.getAttribute('aria-label')||'';el.innerHTML=icon(mobileIcons[el.dataset.mobileNav]||'more')+`<small>${label}</small>`});
-const mobileContextTools=document.createElement('section');mobileContextTools.className='mobile-context-tools';mobileContextTools.setAttribute('aria-label','Aksi tampilan dan inspeksi');mobileContextTools.innerHTML=`<small>INSPEKSI & TAMPILAN</small>
-<button type="button" data-mobile-tool="top">${icon('focus')}<span>Tampak Atas</span></button>
-<button type="button" data-mobile-tool="interior">${icon('interior')}<span>Buka Interior</span></button>
-<button type="button" data-mobile-tool="labels">${icon('label')}<span>Label</span></button>
-<button type="button" data-mobile-tool="home">${icon('home-view')}<span>Tampilan Awal</span></button>
-<button type="button" data-mobile-tool="fullscreen">${icon('fullscreen')}<span>Layar Penuh</span></button>`;
-q('.rail-bottom')?.before(mobileContextTools);
-qa('[data-mobile-tool]',mobileContextTools).forEach(button=>button.addEventListener('click',()=>{
- const action=button.dataset.mobileTool;
- if(action==='top')q('[data-camera="top"]')?.click();
- if(action==='interior')q('#tool-interior')?.click();
- if(action==='labels')q('#labels')?.click();
- if(action==='home')q('[data-camera="reset"]')?.click();
- if(action==='fullscreen')q('#fullscreen')?.click();
- closeDrawer();closeOverlay();
-}));
+const mobileFeatureHub=document.createElement('section');
+mobileFeatureHub.className='mobile-feature-hub';
+mobileFeatureHub.setAttribute('aria-label','Fitur lengkap versi mobile');
+mobileFeatureHub.innerHTML=`<div class="mobile-hub-heading"><small>VERSI MOBILE</small><strong>Kontrol Lengkap</strong><span>Semua fitur utama desktop tetap tersedia tanpa memenuhi layar 3D.</span></div>
+<div class="mobile-hub-section"><small>AKSES CEPAT</small><div class="mobile-hub-grid">
+<button type="button" data-mobile-action="search">${icon('search')}<span><b>Cari</b><small>Mesin, area, komponen</small></span></button>
+<button type="button" data-mobile-action="display">${icon('layers')}<span><b>Tampilan</b><small>Kualitas & lapisan</small></span></button>
+<button type="button" data-mobile-action="2d">${icon('layers')}<span><b>Mode 2D</b><small>Denah pabrik</small></span></button>
+<button type="button" data-mobile-action="3d">${icon('factory')}<span><b>Mode 3D</b><small>Digital twin</small></span></button>
+</div></div>
+<div class="mobile-hub-section"><small>KONTROL 3D</small><div class="mobile-hub-grid mobile-hub-grid-tools">
+<button type="button" data-mobile-action="iso">${icon('factory')}<span><b>Isometrik</b><small>Sudut 3D utama</small></span></button>
+<button type="button" data-mobile-action="top">${icon('focus')}<span><b>Tampak Atas</b><small>Lihat dari atas</small></span></button>
+<button type="button" data-mobile-action="fit">${icon('focus')}<span><b>Fokus</b><small>Ke pilihan aktif</small></span></button>
+<button type="button" data-mobile-action="zoom-in">${icon('zoom-in')}<span><b>Perbesar</b><small>Zoom masuk</small></span></button>
+<button type="button" data-mobile-action="zoom-out">${icon('zoom-out')}<span><b>Perkecil</b><small>Zoom keluar</small></span></button>
+<button type="button" data-mobile-action="explode">${icon('machine')}<span><b>Urai</b><small>Komponen mesin</small></span></button>
+<button type="button" data-mobile-action="isolate">${icon('focus')}<span><b>Tampilkan Sendiri</b><small>Isolasi pilihan</small></span></button>
+<button type="button" data-mobile-action="interior">${icon('interior')}<span><b>Buka Interior</b><small>Potongan mesin</small></span></button>
+<button type="button" data-mobile-action="labels">${icon('label')}<span><b>Label</b><small>Nama objek</small></span></button>
+<button type="button" data-mobile-action="home">${icon('home-view')}<span><b>Tampilan Awal</b><small>Reset kamera</small></span></button>
+<button type="button" data-mobile-action="fullscreen">${icon('fullscreen')}<span><b>Layar Penuh</b><small>Mode presentasi</small></span></button>
+</div></div>
+<div class="mobile-hub-section"><small>APLIKASI</small><div class="mobile-hub-grid">
+<button type="button" data-mobile-action="theme">${icon('theme')}<span><b data-mobile-theme-label>Tema</b><small>Terang / gelap</small></span></button>
+<button type="button" data-mobile-action="settings">${icon('settings')}<span><b>Pengaturan</b><small>Koneksi & preferensi</small></span></button>
+<button type="button" data-mobile-action="help">${icon('help')}<span><b>Bantuan</b><small>Panduan penggunaan</small></span></button>
+</div></div>
+<div class="mobile-hub-status" aria-label="Status aplikasi"><span><small>KUALITAS</small><b data-mobile-quality-summary>Otomatis</b></span><span><small>KONEKSI</small><b data-mobile-connection-summary>Memeriksa…</b></span></div>`;
+q('.rail-bottom')?.before(mobileFeatureHub);
 
+function closeMobileNavigationForAction(){
+ const wasNavigation=getState().overlay==='navigation';
+ closeDrawer({restoreFocus:false});
+ if(wasNavigation)closeOverlay();
+}
+function runMobileAction(action){
+ closeMobileNavigationForAction();
+ if(action==='search'){openSearch('');return}
+ if(action==='display'){openLayerManager();return}
+ if(action==='2d'){q('#mode-2d')?.click();return}
+ if(action==='3d'){q('#mode-3d')?.click();return}
+ if(action==='iso'){q('[data-camera="iso"]')?.click();return}
+ if(action==='top'){q('[data-camera="top"]')?.click();return}
+ if(action==='fit'){q('[data-camera="fit"]')?.click();return}
+ if(action==='zoom-in'){q('#zoom-plus')?.click();return}
+ if(action==='zoom-out'){q('#zoom-minus')?.click();return}
+ if(action==='explode'){q('#tool-explode')?.click();return}
+ if(action==='isolate'){q('#tool-isolate')?.click();return}
+ if(action==='interior'){q('#tool-interior')?.click();return}
+ if(action==='labels'){q('#labels')?.click();return}
+ if(action==='home'){q('[data-camera="reset"]')?.click();return}
+ if(action==='fullscreen'){q('#fullscreen')?.click();return}
+ if(action==='theme'){q('#ui-theme-toggle')?.click();return}
+ if(action==='settings'){q('#settings')?.click();return}
+ if(action==='help'){q('#nav-help')?.click()}
+}
+qa('[data-mobile-action]',mobileFeatureHub).forEach(button=>button.addEventListener('click',()=>runMobileAction(button.dataset.mobileAction)));
+
+function syncMobileFeatureHub(state=getState()){
+ const is2d=state.viewMode==='2d';
+ const pressed={'2d':is2d,'3d':!is2d,explode:Boolean(state.inspectionMode?.explode),isolate:Boolean(state.inspectionMode?.isolate),interior:Boolean(state.inspectionMode?.interior),labels:Boolean(state.visibleLayers?.labels)};
+ for(const [action,active] of Object.entries(pressed)){
+  const button=q('[data-mobile-action="'+action+'"]',mobileFeatureHub);
+  if(button){button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));}
+ }
+ const themeLabel=q('[data-mobile-theme-label]',mobileFeatureHub);
+ if(themeLabel)themeLabel.textContent=state.preferences?.theme==='light'?'Gunakan Tema Gelap':'Gunakan Tema Terang';
+ const requested=state.preferences?.visualQuality||'auto';
+ const effective=requested==='auto'?recommendedProfile(qualityDeviceCapabilities()):requested;
+ const quality=q('[data-mobile-quality-summary]',mobileFeatureHub);
+ if(quality)quality.textContent=requested==='auto'?'Otomatis · '+(RENDER_PROFILE_INFO[effective]?.label||'Seimbang'):(RENDER_PROFILE_INFO[requested]?.label||requested);
+ const connection=q('[data-mobile-connection-summary]',mobileFeatureHub);
+ if(connection)connection.textContent=navigator.onLine?'Data tersedia':'Tidak tersambung';
+}
+addEventListener('online',()=>syncMobileFeatureHub());
+addEventListener('offline',()=>syncMobileFeatureHub());
 const splash=q('.app-splash');
 const firstVisit=!sessionStorage.getItem('bmj-splash-seen');
 let documentLoaded=document.readyState==='complete',splashProgress=0;
@@ -144,6 +204,13 @@ function syncOverlayDom(state=getState()){
  if(active!=='navigation'){
   q('#ui-menu-toggle')?.setAttribute('aria-expanded','false');
   q('[data-mobile-nav="more"]')?.setAttribute('aria-expanded','false');
+ }
+ if(active==='layers'||active==='navigation'){
+  qa('[data-mobile-nav]').forEach(el=>{
+   const selected=active==='layers'?el.dataset.mobileNav==='view':el.dataset.mobileNav==='more';
+   el.classList.toggle('active',selected);
+   if(selected)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current');
+  });
  }
 }
 function closeDrawer({restoreFocus=true}={}){document.body.classList.remove('nav-open');document.body.classList.remove('drawer-transitioning');const menuButton=q('#ui-menu-toggle');menuButton?.setAttribute('aria-expanded','false');menuButton?.setAttribute('aria-label','Buka navigasi');q('[data-mobile-nav="more"]')?.setAttribute('aria-expanded','false');if(restoreFocus)restoreOverlayFocus('navigation','#ui-menu-toggle');else overlayReturnFocus.delete('navigation')}
@@ -359,7 +426,8 @@ qa('[data-mobile-nav]').forEach(button=>button.addEventListener('click',event=>{
  if(document.body.classList.contains('nav-open')){closeDrawer();if(getState().overlay==='navigation')closeOverlay();}
  if(key==='factory'){dispatchEvent(new CustomEvent('bmj:mobilefactoryrequest'));return;}
  if(key==='asset'){dispatchEvent(new CustomEvent('bmj:mobileassetrequest'));return;}
- if(key==='system'){stopSimulationForNavigation('system');openSystemBrowser();}
+ if(key==='system'){stopSimulationForNavigation('system');openSystemBrowser();return;}
+ if(key==='view'){openLayerManager();}
 }));
 
 q('#mode-2d')?.addEventListener('click',()=>{
@@ -637,5 +705,5 @@ function syncPressedTools(state=getState()){
  };
  for(const [id,active] of Object.entries(values)){const el=q('#'+id);if(el){el.classList.toggle('active',active);el.setAttribute('aria-pressed',String(active));}}
 }
-relabel();const initialState=getState();syncOverlayDom(initialState);applyViewModeDom(initialState);syncSplashFromState(initialState);syncPressedTools(initialState);syncInspectorTabs(initialState);subscribe(state=>{applyInspectorDom(state);applyViewModeDom(state);markSection(state.activeSection);syncLayerControls();syncAccessibleControls(state);syncPressedTools(state);syncInspectorTabs(state);syncVisualHierarchy(state);syncViewModeContext(state);syncSplashFromState(state);syncSimulationTransport(state);syncOverlayDom(state)});
-document.documentElement.dataset.uiArchitecture='v212-ui-ssot';
+relabel();const initialState=getState();syncOverlayDom(initialState);applyViewModeDom(initialState);syncSplashFromState(initialState);syncPressedTools(initialState);syncInspectorTabs(initialState);syncMobileFeatureHub(initialState);subscribe(state=>{applyInspectorDom(state);applyViewModeDom(state);markSection(state.activeSection);syncLayerControls();syncAccessibleControls(state);syncPressedTools(state);syncInspectorTabs(state);syncVisualHierarchy(state);syncViewModeContext(state);syncSplashFromState(state);syncSimulationTransport(state);syncOverlayDom(state);syncMobileFeatureHub(state)});
+document.documentElement.dataset.uiArchitecture='v262-mobile-parity';
