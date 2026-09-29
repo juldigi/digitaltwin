@@ -145,7 +145,7 @@ test('V264 editor guards hidden deleted locked and isolated objects consistently
  assert.match(app,/if\(hiding&&isolated\)\{isolated=false;isolationGuard\.restore\(\);\}/);
  assert.match(app,/if\(!selected\|\|!selectedVisible\|\|previewOriginal\)return;isolated=!isolated/);
  assert.match(app,/const node=selected&&engine\.sceneObjects\.get\(selected\);if\(isolated&&node\)isolationGuard\.isolate/);
- assert.ok(app.includes("\${v?.deleted?'':\`<button id=\\"se-hide\\""));
+ assert.match(app,/\$\{v\?\.deleted\?'':`<button id="se-hide"/);
 });
 
 test('V264 editor movement labels and handlers match screen/world semantics',()=>{
