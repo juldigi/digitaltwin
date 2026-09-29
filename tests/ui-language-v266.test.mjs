@@ -207,3 +207,65 @@ test('V266 placeholder machine details translate internal availability codes at 
  assert.match(app,/pair\('Detail model 3D',readableStatus\('NOT_IMPLEMENTED'\)\)/);
  assert.doesNotMatch(app,/pair\('Dasar model 3D','NOT_IMPLEMENTED · LAYOUT PLACEHOLDER'\)/);
 });
+
+
+test('V267 residual pass removes remaining developer-facing wording',()=>{
+ for(const oldCopy of [
+  'Scene sudah berubah','Taruh di lantai','Pabrik · Seluruh Area',
+  'Kecocokan denah DWG','Lihat kecocokan denah','PANDUAN KONTEKSTUAL',
+  'Simulasi belum tervalidasi','Memulihkan revisi langsung menyimpan perubahan'
+ ])assert.equal(app.includes(oldCopy),false,oldCopy);
+ for(const copy of [
+  'Struktur model 3D sudah berubah.','Letakkan di lantai','Pabrik · Seluruh area',
+  'Kecocokan dengan denah DWG','Lihat kecocokan dengan denah',
+  'PANDUAN SESUAI KONTEKS','Simulasi belum divalidasi',
+  'Memulihkan revisi akan langsung menyimpan perubahan'
+ ])assert.ok(app.includes(copy),copy);
+ assert.match(app,/<b>Tingkat \$\{node\.level\}<\/b>/);
+});
+
+test('V267 localizes simulation stages only in the presentation layer',()=>{
+ assert.match(app,/readableSimulationStage\(simulation\.stage\|\|'Siap'\)/);
+ assert.match(shell,/readableSimulationStage\(sim\.stage\|\|'Siap'\)/);
+ assert.match(app,/data-sim-stage="\$\{esc\(stage\)\}"[\s\S]*?readableSimulationStage\(stage\)/);
+ assert.doesNotMatch(app,/<b>\$\{esc\(stage\)\}<\/b>/);
+ for(const copy of [
+  'Register dan meja pengumpan','Pemisahan tumpukan dan pengambilan dengan suction',
+  'Pelepasan gulungan dan tension web','Cross-cut terlindung dan pemisahan material',
+  'Memuat tumpukan','Pemosisian servo'
+ ])assert.ok(display.includes(copy),copy);
+});
+
+test('V267 translates evidence grades geometry and reasons before rendering them',()=>{
+ assert.match(app,/readableEvidenceReason\(e\.reason\)/);
+ assert.match(app,/readableStatus\(e\.grade\)/);
+ assert.match(app,/readableStatus\(e\.geometry\)/);
+ assert.doesNotMatch(app,/<p>\$\{esc\(e\.reason\)\}<\/p>/);
+ assert.doesNotMatch(app,/\$\{esc\(e\.grade\)\}/);
+ assert.doesNotMatch(app,/\$\{esc\(e\.geometry\)\}/);
+ for(const copy of [
+  'Berdasarkan foto aktual BMJ','Berdasarkan dokumen teknis',
+  'Acuan fungsi AHU sectional berdasarkan prinsip Eurovent',
+  'Bukti khusus untuk mesin ini belum cukup untuk membuat geometri mekanis atau simulasi',
+  'Model khusus OFFSET 8 menggabungkan identitas'
+ ])assert.ok(display.includes(copy),copy);
+});
+
+test('V267 presents DWG audit uncertainty in user-readable Indonesian',()=>{
+ assert.match(app,/readableDwgReason\(item\.entityType\)/);
+ assert.match(app,/readableDwgReason\(item\.semanticType\)/);
+ assert.match(app,/readableDwgReason\(item\.threeDStatus\)/);
+ assert.match(app,/readableDwgReason\(item\.reason\)/);
+ for(const copy of [
+  'Sebagian; hasil ekstraksi telah dinormalisasi',
+  'Kelas entitas sumber belum dirinci oleh ekstraktor data',
+  'Denah DWG belum dimuat.',
+  'DWG X → 3D X · DWG Y → 3D Z · 3D Y → elevasi'
+ ])assert.ok(display.includes(copy),copy);
+});
+
+test('V267 clarifies mobile explode and quality controls',()=>{
+ assert.match(shell,/<b>Urai komponen<\/b><small>Pisahkan tampilan bagian mesin<\/small>/);
+ assert.match(app,/Pilih kualitas render<\/label>/);
+ assert.match(app,/<h3>Data tersimpan di perangkat<\/h3>/);
+});
