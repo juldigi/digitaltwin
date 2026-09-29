@@ -5,7 +5,7 @@ const STATUS_LABELS=Object.freeze({
  APPROXIMATE:'Perkiraan',CONFLICTING:'Perlu ditinjau','DWG-VERIFIED':'Terverifikasi dari DWG',
  'USER-CONFIRMED':'Dikonfirmasi oleh pengguna','NOT_IMPLEMENTED':'Belum tersedia',
  'LAYOUT PLACEHOLDER':'Penanda posisi pada denah','PROCEDURAL':'Dibuat secara digital',
- RECONSTRUCTED:'Direkonstruksi','PARTIAL':'Sebagian','OFFLINE':'Tidak tersambung',
+ RECONSTRUCTED:'Direkonstruksi dari sumber','PARTIAL':'Sebagian','OFFLINE':'Tidak tersambung',
  'CACHED DATA':'Salinan data di perangkat','MODE LOKAL':'Mode lokal'
 });
 export function readableStatus(value){
@@ -19,7 +19,9 @@ export function readableStatus(value){
   'OFFLINE / CACHED DATA':'Tidak tersambung; menampilkan salinan data di perangkat',
   'OFFLINE / MODE LOKAL':'Tidak tersambung; mode lokal',
   'CACHED DATA':'Menampilkan salinan data di perangkat',
-  'DATA TERSAMBUNG':'Data tersambung'
+  'DATA TERSAMBUNG':'Data tersambung',
+  'TEMPLATE_ONLY':'Hanya acuan template','LAYOUT_ESTIMATED':'Perkiraan dari denah','DRAWING_BASED':'Berdasarkan gambar','FIELD_VERIFIED':'Terverifikasi di lapangan','AS_BUILT_CONFIRMED':'Kondisi terpasang terkonfirmasi',
+  'UNPLACED':'Belum ditempatkan','UNPLACED_UNTIL_DRAWING_AVAILABLE':'Belum ditempatkan; menunggu gambar aktual','AS_BUILT_OR_DRAWING_APPLIED':'Menggunakan data terpasang atau gambar aktual','MIXED_TEMPLATE_AND_APPLIED':'Gabungan acuan dan data yang sudah diterapkan'
  };
  if(known[raw])return known[raw];
  return raw.replace(/\b(?:HIGH CONFIDENCE|MEDIUM CONFIDENCE|DWG-VERIFIED|USER-CONFIRMED|NOT_IMPLEMENTED|LAYOUT PLACEHOLDER|CACHED DATA|MODE LOKAL|VERIFIED|ESTIMATED|UNKNOWN|UNVERIFIED|APPROXIMATE|CONFLICTING|PROCEDURAL|RECONSTRUCTED|PARTIAL|OFFLINE)\b/g,word=>STATUS_LABELS[word]||word);
