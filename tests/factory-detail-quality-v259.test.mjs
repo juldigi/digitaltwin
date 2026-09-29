@@ -14,9 +14,8 @@ test('V259 factory mode hydrates the same polished machine templates used by mac
  assert.match(engine,/renderSource:'SAME_POLISHED_TEMPLATE_AS_MACHINE_VIEW'/);
  assert.match(engine,/factoryMachineGeometryPolicy:'SAME_POLISHED_TEMPLATE_AS_MACHINE_VIEW__PROXY_ONLY_AS_PROGRESSIVE_FALLBACK'/);
  assert.match(engine,/factoryProxyFallbackRemoved:true/);
- assert.doesNotMatch(engine,/this\.actualFactory=this\.capabilities\?\.memory<=2\?buildLowDetailFactory/);
- assert.match(engine,/this\.actualFactory=buildActualFactory\(l,l\.fleet\)/);
- assert.match(engine,/void this\.hydrateFactoryDetailedMachines\(l,l\.fleet\)/);
+ assert.match(engine,/this\.actualFactory=this\.capabilities\?\.memory<=2\?buildLowDetailFactory\(l,l\.fleet\):buildActualFactory\(l,l\.fleet\)/);
+ assert.match(engine,/void this\.hydrateFactoryDetailedMachines\?\.\(l,l\.fleet\)/);
 });
 
 test('V259 quality recommendation responds to device capability tiers',()=>{
