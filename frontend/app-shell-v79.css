@@ -1769,18 +1769,20 @@ html.immersive-mode .header-actions #fullscreen-top{display:grid!important}
 
 
 /* V264 editor context guard */
-body.scene-editor-open .rail>button,
+body.scene-editor-open .rail button,
 body.scene-editor-open .global-search,
 body.scene-editor-open .header-actions,
+body.scene-editor-open #panel-toggle,
 body.scene-editor-open .scene-bottom,
 body.scene-editor-open .viewport-mode-switch,
 body.scene-editor-open aside#detail-panel,
 body.scene-editor-open .canonical-simulation-transport{
  pointer-events:none!important
 }
-body.scene-editor-open .rail>button,
+body.scene-editor-open .rail button,
 body.scene-editor-open .global-search,
-body.scene-editor-open .header-actions{
+body.scene-editor-open .header-actions,
+body.scene-editor-open #panel-toggle{
  opacity:.38!important
 }
 body.scene-editor-open .scene-bottom,
