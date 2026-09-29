@@ -27,5 +27,5 @@ test('V222 modal lifecycle is reconciled without a second page backdrop',()=>{
 });
 
 test('V222 build identity is coherent',()=>{
- assert.match(state,/APP_BUILD='2026\.09\.29-265'/);
+ assert.match(state,/APP_BUILD='2026\.09\.29-266'/);
 });
