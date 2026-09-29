@@ -92,7 +92,7 @@ test('V253 preserves BMJ custom Offset 5 dimensions after every later merge',()=
 test('V252/V254 inspection work remains present together with the later V258-V260 structural refinements',()=>{
  const d=new DianaEye55MachineTemplate(),s=new SharkN650MachineTemplate();
  try{
-  assert.equal(d.root.userData.visualRefinement,'V260_DIANA_EYE55_ATTACHED_FEEDER_APERTURE_REJECT_PIVOT_REALISM');
+  assert.equal(d.root.userData.visualRefinement,'V260_DIANA_EYE55_REJECT_PIVOT_AND_RECOVERY_SUPPORT_REALISM');
   assert.equal(s.root.userData.visualRefinement,'V260_SHARK_N650_ATTACHED_FEEDER_APERTURE_REJECT_PIVOT_REALISM');
   assert.ok(d.findNode('diana55-reject-safety-v254'));
   assert.ok(s.findNode('shark650-reject-guard-v254'));
