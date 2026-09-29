@@ -1765,3 +1765,19 @@ html.immersive-mode .header-actions #fullscreen-top{display:grid!important}
  #scene-editor-panel .se-category-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
  #scene-editor-panel .se-direction-pad{max-width:230px}
 }
+
+
+/* V264 editor context guard */
+body.scene-editor-open .mobile-nav,
+body.scene-editor-open .rail>button,
+body.scene-editor-open .global-search,
+body.scene-editor-open #settings,
+body.scene-editor-open #mode-2d{
+ pointer-events:none!important;
+ opacity:.42!important
+}
+body.scene-editor-open #scene-editor-panel{pointer-events:auto}
+body.scene-editor-open #viewport{pointer-events:auto}
+@media(max-width:767px){
+ body.scene-editor-open .mobile-nav{filter:grayscale(.35)}
+}
