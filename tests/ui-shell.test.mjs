@@ -128,7 +128,7 @@ test('visible shell avoids deployment and prototype terminology',()=>{
 test('conditional controls explain requirements rather than failing silently',()=>{
   assert.match(app,/Pengaturan denah memerlukan izin pengaturan/);
   assert.match(app,/Pilih bagian mesin terlebih dahulu/);
-  assert.match(app,/Edit Pabrik 3D/);
+  assert.match(app,/Edit pabrik 3D/);
 });
 test('service worker refreshes the redesigned shell',()=>{
   assert.match(sw,/factory-digital-twin-v222-overlay-state-ssot-20260925/);
