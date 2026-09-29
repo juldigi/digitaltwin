@@ -20,7 +20,7 @@ test('V232 SX52 uses open feeder and portal delivery instead of sealed cuboid en
  assert.doesNotMatch(offset9src,/\[2\.05,1\.42,1\.92\],\[0,1\.16,0\]/);
  assert.doesNotMatch(offset9src,/\[2\.78,1\.70,2\.02\],\[0,1\.27,0\]/);
  withMachine('BMJ-MCH-0006',m=>{
-  assert.equal(m.root.userData.visualRefinement,'V232_SX52_4L_FAMILY_EXTERIOR_POLISH');
+  assert.match(m.root.userData.visualRefinement,/^V(?:232_SX52_4L_FAMILY_EXTERIOR_POLISH|238_SX52_4L_SERVICE_ACCESS_REPOLISH)$/);
   const feeder=m.findNode('offset9-feeder');
   const delivery=m.findNode('offset9-delivery');
   assert.ok(feeder&&delivery);
@@ -57,8 +57,8 @@ test('V232 UPG LY300 preserves OEM-published long-low envelope and process silho
 test('V232 YA1A1A gravure adds conservative sheetfed-gravure exterior without unblocking speculative motion',()=>{
  assert.match(refsrc,/V232_YA1A1A_SHEETFED_GRAVURE_EXTERIOR_POLISH/);
  withMachine('BMJ-MCH-0004',m=>{
-  assert.equal(m.root.userData.visualRefinement,'V232_YA1A1A_SHEETFED_GRAVURE_EXTERIOR_POLISH');
-  assert.match(m.root.userData.familyEvidenceBoundary,/BMJ_INSTALLED_ENCLOSURE_UNVERIFIED/);
+  assert.match(m.root.userData.visualRefinement,/^V(?:232_YA1A1A_SHEETFED_GRAVURE_EXTERIOR_POLISH|238_YA1A1A_SERVICE_PROCESS_REPOLISH)$/);
+  assert.match(m.root.userData.familyEvidenceBoundary,/BMJ_INSTALLED_ENCLOSURE(?:_TRANSFER_DRIVE_DRYER)?_UNVERIFIED/);
   assert.match(m.root.userData.simulationStatus,/BLOCKED/);
   const plinth=m.meshes.find(x=>x.userData?.mechanismRole==='gravure-main-plinth-reference');
   const pillar=m.meshes.find(x=>x.userData?.mechanismRole==='gravure-process-bay-pillar-reference');
