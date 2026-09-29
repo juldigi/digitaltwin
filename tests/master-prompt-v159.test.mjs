@@ -34,8 +34,8 @@ test('V194 retires the duplicate classic position editor in favor of Edit Pabrik
  assert.doesNotMatch(app,/function editorPanel\(\)/);
  assert.match(app,/Edit Pabrik 3D/);
  assert.match(app,/openSceneEditor\(\)/);
- assert.match(app,/Posisi \(meter\)/);
- assert.match(app,/Rotasi \(derajat\)/);
+ assert.match(app,/Posisi relatif induk \(meter\)/);
+ assert.match(app,/Rotasi relatif induk \(derajat\)/);
 });
 
 test('V159 preserves V158 camera and selection interaction contract',()=>{
