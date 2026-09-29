@@ -19,34 +19,34 @@ export const initialState = {
 };
 export function finite(v) { return typeof v === 'number' && Number.isFinite(v); }
 export function validatePosition(p) {
-  if(!p || !['x','y','z','rotation','scale'].every(k=>finite(p[k]))) throw new Error('Koordinat, rotasi, dan skala harus angka finite.');
+  if(!p || !['x','y','z','rotation','scale'].every(k=>finite(p[k]))) throw new Error('Koordinat, rotasi, dan skala harus berupa angka yang valid.');
   if(Math.max(Math.abs(p.x),Math.abs(p.y),Math.abs(p.z))>1e7 || p.scale<=0 || p.scale>1e4 || Math.abs(p.rotation)>36000) throw new Error('Transformasi di luar rentang yang didukung.');
   if(!['APPROXIMATE','USER-CONFIRMED'].includes(p.confidence)) throw new Error('Pilih tingkat keyakinan posisi.');
   return p;
 }
 export function validateLayout(l) {
-  if(!l || l.schemaVersion!==1 || l.source?.type!=='DWG' || typeof l.source.file!=='string' || !l.source.file.toLowerCase().endsWith('.dwg')) throw new Error('Dibutuhkan layout JSON versi 1 dengan referensi DWG asli.');
+  if(!l || l.schemaVersion!==1 || l.source?.type!=='DWG' || typeof l.source.file!=='string' || !l.source.file.toLowerCase().endsWith('.dwg')) throw new Error('Dibutuhkan berkas layout JSON versi 1 yang merujuk ke DWG asli.');
   if(!/^[a-f0-9]{64}$/i.test(l.source.sha256||'')) throw new Error('SHA-256 DWG asli wajib disertakan.');
   if(typeof l.source.extractionMethod!=='string' || !l.source.extractionMethod.trim()) throw new Error('Metode ekstraksi DWG belum dicatat.');
   const t=l.transform;
-  if(!t || !['UNKNOWN','mm','cm','m','inch','foot'].includes(t.sourceUnits)) throw new Error('Unit CAD tidak valid.');
+  if(!t || !['UNKNOWN','mm','cm','m','inch','foot'].includes(t.sourceUnits)) throw new Error('Satuan CAD tidak valid.');
   if(![t.originX,t.originY,t.rotation].every(finite) || (t.scale!==null && (!finite(t.scale)||t.scale<=0||t.scale>1e6))) throw new Error('Transformasi tidak valid.');
-  if(t.sourceUnits==='UNKNOWN' && t.scale!==null && !(t.calibration?.knownDistance>0 && t.calibration?.sourceDistance>0)) throw new Error('Unit UNKNOWN memerlukan referensi kalibrasi untuk skala.');
+  if(t.sourceUnits==='UNKNOWN' && t.scale!==null && !(t.calibration?.knownDistance>0 && t.calibration?.sourceDistance>0)) throw new Error('Satuan sumber yang belum diketahui memerlukan referensi kalibrasi untuk menentukan skala.');
   if(t.sourceUnits==='UNKNOWN' && t.scale!==null && Math.abs(t.scale-t.calibration.knownDistance/t.calibration.sourceDistance)>1e-9) throw new Error('Skala tidak sesuai referensi kalibrasi.');
   const scales={mm:.001,cm:.01,m:1,inch:.0254,foot:.3048};
-  if(t.sourceUnits!=='UNKNOWN' && Math.abs(t.scale-scales[t.sourceUnits])>1e-9) throw new Error('Skala tidak sesuai unit sumber.');
+  if(t.sourceUnits!=='UNKNOWN' && Math.abs(t.scale-scales[t.sourceUnits])>1e-9) throw new Error('Skala tidak sesuai dengan satuan sumber.');
   if(!Array.isArray(l.entities)||l.entities.length>30000) throw new Error('Daftar entitas maksimal 30.000.');
   const ids=new Set();
   for(const e of l.entities){
-    if(!e || typeof e.id!=='string'||ids.has(e.id)||typeof e.layer!=='string'||!CONFIDENCES.includes(e.confidence)) throw new Error('ID, layer, atau confidence entitas tidak valid.');
+    if(!e || typeof e.id!=='string'||ids.has(e.id)||typeof e.layer!=='string'||!CONFIDENCES.includes(e.confidence)) throw new Error('ID, layer, atau tingkat keyakinan entitas tidak valid.');
     ids.add(e.id);
     if(e.points && (!Array.isArray(e.points)||e.points.length>20000||e.points.some(p=>!Array.isArray(p)||p.length!==2||!p.every(finite)||p.some(n=>Math.abs(n)>1e9)))) throw new Error('Koordinat entitas tidak valid.');
     if(e.height!==undefined && e.height!==null && (!finite(e.height)||e.height<=0||e.height>1e7)) throw new Error('Tinggi tidak valid.');
   }
   if(l.machineAnchor){
     const a=l.machineAnchor;
-    if(![a.x,a.y,a.z,a.rotation].every(finite) || !['DWG-VERIFIED','APPROXIMATE','USER-CONFIRMED'].includes(a.confidence)) throw new Error('Anchor tidak valid.');
-    if(a.confidence==='DWG-VERIFIED' && !ids.has(a.sourceEntityId)) throw new Error('Anchor harus menunjuk entitas sumber.');
+    if(![a.x,a.y,a.z,a.rotation].every(finite) || !['DWG-VERIFIED','APPROXIMATE','USER-CONFIRMED'].includes(a.confidence)) throw new Error('Titik acuan tidak valid.');
+    if(a.confidence==='DWG-VERIFIED' && !ids.has(a.sourceEntityId)) throw new Error('Titik acuan harus menunjuk entitas sumber.');
   }
   return l;
 }
