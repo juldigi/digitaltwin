@@ -119,7 +119,7 @@ export class FactoryEngine {
     this.lighting=createIndustrialLighting(this.scene);this.key=this.lighting.key;
     this.shadows=new ShadowManager(this.key);
     configureRenderer(this.renderer,{profile:this.qualityProfile,devicePixelRatio,shadowLight:this.key});
-    this.studio=new THREE.Group();this.studio.name='Inspection studio — not factory';
+    this.studio=new THREE.Group();this.studio.name='Studio inspeksi — bukan pabrik';
     const floor=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.ShadowMaterial({opacity:.12}));floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;floor.position.y=.01;this.studio.add(floor);
     const grid=new THREE.GridHelper(150,100,0xd4dfe5,0xdce5ea);grid.material.transparent=true;grid.material.opacity=.38;this.studio.add(grid);this.scene.add(this.studio);
     this.template=neutralTemplate();this.machine=this.template.root;this.scene.add(this.machine);
@@ -270,7 +270,7 @@ export class FactoryEngine {
       if(profile){
         const p0=plantDisplayPoint(l.bounds.minX,l.bounds.minY,l),p1=plantDisplayPoint(l.bounds.maxX,l.bounds.maxY,l);
         const floor=new THREE.Mesh(new THREE.BoxGeometry(Math.abs(p1.x-p0.x),profile.floor.thicknessMeters,Math.abs(p1.z-p0.z)),new THREE.MeshStandardMaterial({color:0xdce4e7,roughness:.96,metalness:0}));
-        floor.position.set((p0.x+p1.x)/2,-profile.floor.thicknessMeters/2,(p0.z+p1.z)/2);floor.receiveShadow=true;floor.name='DXF factory floor';floor.userData={sourceType:'DXF_PLAN_EXTRUSION',semantic:'FLOOR',confidence:profile.floor.confidence,renderStatus:'3D_ASSUMED_HEIGHT'};this.factory.add(floor);
+        floor.position.set((p0.x+p1.x)/2,-profile.floor.thicknessMeters/2,(p0.z+p1.z)/2);floor.receiveShadow=true;floor.name='Lantai pabrik DXF';floor.userData={sourceType:'DXF_PLAN_EXTRUSION',semantic:'FLOOR',confidence:profile.floor.confidence,renderStatus:'3D_ASSUMED_HEIGHT'};this.factory.add(floor);
         const box=new THREE.BoxGeometry(1,1,1),dummy=new THREE.Object3D();
         for(const spec of [{semantic:'WALL',color:0x8198a3,...profile.wall},{semantic:'COLUMN',color:0x526d7a,...profile.column}]){
           const segments=[];
@@ -318,8 +318,8 @@ export class FactoryEngine {
           const group=new THREE.Group();group.name=name;group.userData={sourceType:'DXF_GEOMETRIC_INFERENCE',sourceFile:l.source.file,assetCode:f.assetCode,confidence:f.placementConfidence,semantic:kind,renderStatus:'INFERRED_OVERLAY'};
           group.add(line);this.factory.add(group);this.layoutStats.rendered++;
         };
-        addRect(f.serviceInclusiveBounds,0xb08352,.34,'OFU-1 service-inclusive analysis envelope','ANALYSIS_ENVELOPE');
-        addRect(f.structuralBodyBounds,0xffb45f,.92,'OFU-1 structural body candidate','STRUCTURAL_BODY_CANDIDATE');
+        addRect(f.serviceInclusiveBounds,0xb08352,.34,'Batas analisis OFU-1 termasuk area servis','ANALYSIS_ENVELOPE');
+        addRect(f.structuralBodyBounds,0xffb45f,.92,'Kandidat badan struktur OFU-1','STRUCTURAL_BODY_CANDIDATE');
         const zoneStyle={
           DELIVERY_EXTENSION_CANDIDATE:[0xe3a65a,.82],
           REPEATED_PRESS_TRAIN_CANDIDATE:[0x57b6d9,.88],
@@ -389,7 +389,7 @@ export class FactoryEngine {
         let template=null;
         try{
           template=createPolishedMachineTemplate(id);template.setLow?.(this.low);
-          const detail=template.root;detail.name=(wrapper.name||id)+' · detailed factory twin';
+          const detail=template.root;detail.name=(wrapper.name||id)+' · detail Digital Twin pabrik';
           detail.position.set(0,0,0);detail.rotation.set(0,0,0);detail.scale.setScalar(1);
           detail.userData={...detail.userData,machineId:id,factoryDetailedTwin:true,renderSource:'SAME_POLISHED_TEMPLATE_AS_MACHINE_VIEW'};
           const proxies=[...wrapper.children];wrapper.add(detail);
