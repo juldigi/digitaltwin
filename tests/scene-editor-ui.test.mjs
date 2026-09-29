@@ -89,9 +89,9 @@ test('V264 editor scopes controls to the selected object and scope',()=>{
  assert.ok(app.includes("canDuplicate=Boolean(selected&&selectedVisible&&editorScope==='factory'&&editorCategory!=='machines'"));
  assert.ok(app.includes("!selected.startsWith('new:')"));
  assert.ok(app.includes("(canScale?['position','rotation','scale']:['position','rotation'])"));
- assert.ok(app.includes("Posisi relatif induk (meter)"));
- assert.ok(app.includes("Rotasi relatif induk (derajat)"));
- assert.ok(app.includes("editorScope==='factory'?`<fieldset><legend>Sejajarkan dengan aset lain"));
+ assert.ok(app.includes("Posisi relatif terhadap induk (meter)"));
+ assert.ok(app.includes("Rotasi relatif terhadap induk (derajat)"));
+ assert.ok(app.includes("editorScope==='factory'?`<fieldset><legend>Sejajarkan dengan objek lain"));
  assert.ok(app.includes('id="se-remove-generated"'));
  assert.ok(app.includes('id="se-restore-default"'));
  assert.ok(app.includes('id="se-reset" ${selectedChanged?\'\':\'disabled\'}'));
