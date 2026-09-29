@@ -73,7 +73,7 @@ test('V264 lock state disables transform controls without blocking visibility st
  assert.ok(app.includes('data-se-screen="up" ${transformBlocked?\'disabled\':\'\'}'));
  assert.ok(app.includes('data-se-mode="scale" ${engine.gizmo.mode===\'scale\'?\'class="active"\':\'\'} ${transformBlocked?\'disabled\':\'\'}'));
  assert.ok(app.includes('id="se-ground" ${transformBlocked?\'disabled\':\'\'}'));
- assert.ok(app.includes('const mutate=(fn,{allowLocked=false'));
+ assert.ok(app.includes('const mutate=(fn,{allowLocked=false,allowHidden=false'));
  assert.ok(app.includes("querySelector('#se-hide')?.addEventListener('click',()=>mutate"));
  assert.ok(app.includes('allowLocked:true'));
 });
@@ -89,7 +89,7 @@ test('V264 editor scopes controls to the selected object and scope',()=>{
 
 test('V264 editor avoids false transactions and destructive ambiguity',()=>{
  assert.ok(app.includes('let dragChanged=false'));
- assert.ok(app.includes('if(!dragChanged){undo.pop();refreshEditorTransformUi();return;}'));
+ assert.ok(app.includes('if(!dragChanged){undo.pop();redo=dragRedo;refreshEditorTransformUi();return;}'));
  assert.ok(app.includes('Math.abs((v[key]?.[axis]??0)-stored)<1e-9'));
  assert.ok(app.includes("if(!engine.dropSceneObjectToFloor(selected)){undo.pop()"));
  assert.ok(app.includes("if(!engine.alignSceneObject(selected,targetId,button.dataset.seAlign)){undo.pop()"));
@@ -97,7 +97,7 @@ test('V264 editor avoids false transactions and destructive ambiguity',()=>{
  assert.ok(app.includes('Pulihkan objek ini ke posisi bawaan model?'));
  assert.ok(app.includes('Pulihkan revisi ini? Perubahan editor yang belum disimpan akan diganti'));
  assert.ok(app.includes('removedSavedOverride=Object.keys(savedOverrides).some'));
- assert.ok(app.includes("stableJson(imported)===stableJson(overrides)"));
+ assert.ok(app.includes("stableJson(imported)===stableJson(overrides)"));\n assert.ok(app.includes('activeMachineKey:engine.machineKey||null'));
  assert.match(css,/V264 editor context guard/);
  assert.match(css,/body\.scene-editor-open aside#detail-panel/);
 });
@@ -153,7 +153,7 @@ test('factory editor list is registry-driven and all selected objects are precis
  assert.match(app,/document\.addEventListener\('keydown',onEditorKeyDown\)/);
  assert.match(app,/editorArrowKeys=\['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'\]/);
  assert.match(app,/editorMoveStep=\.01/);
- assert.match(app,/node\.visible===false\|\|!editorArrowKeys\.includes\(e\.key\)\)return/);
+ assert.match(app,/if\(isTransformBlocked\(\)\|\|!editorArrowKeys\.includes\(e\.key\)\)return/);
  assert.match(app,/const step=e\.shiftKey\?editorMoveStep\*10:editorMoveStep/);
  assert.match(app,/id="se-step-size"/);
  assert.match(app,/id="se-delete-wall"/);
