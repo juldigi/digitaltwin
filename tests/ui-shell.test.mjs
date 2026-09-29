@@ -321,9 +321,9 @@ test('v54 routes APM2 to its dedicated model and evidence-bounded simulation',()
   assert.match(app,/on\('#open-machine-3d',\(\)=>switchActiveMachine\(machineRoute\(machine\)\)\)/);
   assert.match(engine,/if\(!canOpenTechnical3D\(requested\)\)/);
   assert.match(engine,/switchMachine\(key\)/);
-  assert.match(app,/Simulasi Proses APM 2/);
+  assert.match(app,/Simulasi proses APM 2/);
   assert.match(app,/register dan SideLay/);
-  assert.match(app,/suffix E\/SE\/CER\/BMA tidak tersedia/);
+  assert.match(app,/akhiran model \(suffix\) E\/SE\/CER\/BMA tidak tersedia/);
   assert.match(app,/MACHINE_ROUTE_BY_ID/);
   assert.match(runtime,/APM2MachineTemplate/);
   assert.match(runtime,/APM2ProcessSimulation/);
