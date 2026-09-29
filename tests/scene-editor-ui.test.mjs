@@ -166,7 +166,7 @@ test('V264 editor movement labels and handlers match screen/world semantics',()=
 });
 
 test('V264 editor parent and alignment controls cannot target invalid hierarchy states',()=>{
- assert.ok(app.includes("editorScope==='machine'&&selected?'<button id=\\"se-parent\\""));
+ assert.match(app,/editorScope==='machine'&&selected\?'<button id="se-parent"/);
  assert.ok(app.includes("normalized==='machine:'+engine.machineKey+':root'"));
  assert.ok(app.includes("!selectableEditorObject(normalized,target)"));
  assert.ok(app.includes(".filter(([id])=>'asset:'+id!==selected).map"));
