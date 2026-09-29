@@ -258,7 +258,7 @@ test('v48 removes the odd PU8 step, uses structural UV supports and accumulates 
   assert.match(simulation,/refreshDeliveryPileAnchor\(\)/);
   assert.match(simulation,/pileSheetsVisible/);
   assert.match(app,/id="sim-pile"/);
-  assert.match(app,/gripper melepaskan sheet tepat di atas main pile/);
+  assert.match(app,/gripper melepaskan lembar tepat di atas main pile/);
 });
 
 test('asset browser exposes every registry machine with its own model status',()=>{
