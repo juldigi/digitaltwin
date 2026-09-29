@@ -320,6 +320,9 @@ test('V265 editor locks asynchronous transactions and rolls back failed machine 
  assert.match(app,/const setEditorBusy=\(on,message=''\)=>/);
  assert.match(app,/document\.body\.classList\.toggle\('scene-editor-busy',editorBusy\)/);
  assert.match(app,/panel\.querySelectorAll\('button,input,select'\)\.forEach\(control=>control\.disabled=true\)/);
+ assert.match(app,/input\.disabled=Boolean\(editorBusy\|\|v\.locked/);
+ assert.match(app,/undoButton\.disabled=editorBusy\|\|!undo\.length/);
+ assert.match(app,/if\(liveEditorUiFrame\)\{cancelAnimationFrame\(liveEditorUiFrame\);liveEditorUiFrame=0;\}/);
  assert.match(app,/const payload=cloneOverrides\(overrides\);setEditorBusy\(true,'Menyimpan perubahan…'\)/);
  assert.match(app,/data:\{overrides:payload\}/);
  assert.match(app,/setEditorBusy\(true,'Membuka model bagian mesin…'\)/);
