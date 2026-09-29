@@ -36,7 +36,41 @@ export function readableStatus(value){
   'DATA TERSAMBUNG':'Data tersambung',
   'TEMPLATE_ONLY':'Hanya acuan template','LAYOUT_ESTIMATED':'Perkiraan dari denah','DRAWING_BASED':'Berdasarkan gambar','FIELD_VERIFIED':'Terverifikasi di lapangan','AS_BUILT_CONFIRMED':'Kondisi terpasang terkonfirmasi',
   'UNPLACED':'Belum ditempatkan','UNPLACED_UNTIL_DRAWING_AVAILABLE':'Belum ditempatkan; menunggu gambar aktual','AS_BUILT_OR_DRAWING_APPLIED':'Menggunakan data terpasang atau gambar aktual','MIXED_TEMPLATE_AND_APPLIED':'Gabungan acuan dan data yang sudah diterapkan',
-  'INFERRED_POSITION':'Posisi hasil inferensi','REFERENCE_ONLY':'Hanya berdasarkan referensi','PHOTO_VERIFIED':'Terverifikasi dari foto','REFERENCE_PLUS_PHOTO':'Diverifikasi dengan referensi dan foto','SOURCE_REFERENCE':'Acuan sumber','DOCUMENTATION_REQUIRED':'Dokumentasi diperlukan'
+  'INFERRED_POSITION':'Posisi hasil inferensi','REFERENCE_ONLY':'Hanya berdasarkan referensi','PHOTO_VERIFIED':'Terverifikasi dari foto','REFERENCE_PLUS_PHOTO':'Diverifikasi dengan referensi dan foto','SOURCE_REFERENCE':'Acuan sumber','DOCUMENTATION_REQUIRED':'Dokumentasi diperlukan',
+  'BMJ_ACTUAL_PHOTO_GROUNDED':'Berdasarkan foto aktual BMJ',
+  'MODEL_IDENTIFIED_PROCESS_GROUNDED':'Model teridentifikasi; proses didukung sumber',
+  'DOCUMENT_GROUNDED':'Berdasarkan dokumen teknis',
+  'MODEL_IDENTIFIED_EXACT_PUBLIC_REFERENCE':'Model teridentifikasi; acuan publik model yang sama tersedia',
+  'MODEL_MANUAL_PROCESS_GROUNDED':'Proses didukung manual model',
+  'OEM_PROCESS_GROUNDED':'Proses didukung dokumentasi OEM',
+  'MODEL_FAMILY_PROCESS_GROUNDED':'Proses didukung acuan keluarga mesin',
+  'FUNCTIONAL_MULTI_VENDOR_REFERENCE':'Acuan fungsi dari beberapa vendor',
+  'MODEL_IDENTIFIED_CLOSE_FAMILY_PROCESS':'Model teridentifikasi; proses menggunakan acuan keluarga terdekat',
+  'OEM_MODEL_GROUNDED':'Berdasarkan dokumentasi model OEM',
+  'OEM_MULTI_MODEL_FAMILY_REFERENCE':'Acuan keluarga beberapa model OEM',
+  'BRAND_FAMILY_REFERENCE':'Acuan keluarga merek',
+  'IDENTITY_ONLY':'Hanya identitas yang terverifikasi',
+  'DEDICATED_BMJ_PHOTO_MATCHED__ARCHIVE_DIMENSIONS_BOUNDED':'Model khusus dicocokkan dengan foto BMJ; dimensi dibatasi data arsip',
+  'YA1A1A_EXACT_IDENTITY__SHEETFED_GRAVURE_MECHANISM_REFERENCE':'Identitas YA1A1A terverifikasi; mekanisme menggunakan acuan sheet-fed gravure',
+  'DEDICATED_OFFICIAL_FAMILY_REFERENCE':'Model khusus menggunakan acuan resmi keluarga mesin',
+  'FZ1200_EXACT_MODEL_PROCESS_REFERENCE__BMJ_OEM_UNVERIFIED':'Proses mengacu pada model FZ1200; OEM unit BMJ belum terverifikasi',
+  'DEDICATED_PROCESS_REFERENCE':'Model khusus menggunakan acuan proses',
+  'DEDICATED_MANUAL_PROCESS_REFERENCE':'Model khusus menggunakan acuan manual',
+  'DEDICATED_OEM_PROCESS_REFERENCE':'Model khusus menggunakan acuan proses OEM',
+  'DEDICATED_FAMILY_PROCESS_REFERENCE':'Model khusus menggunakan acuan proses keluarga mesin',
+  'MULTI_VENDOR_FOLDER_GLUER_PROCESS_REFERENCE':'Acuan proses folder gluer dari beberapa vendor',
+  'QF_LQF_1080_FAMILY_PROCESS_REFERENCE__QF100CS_EXACT_EQUIVALENCE_UNVERIFIED':'Acuan proses keluarga QF/LQF 1080; kesetaraan persis QF100CS belum terverifikasi',
+  'MULTI_VENDOR_10_BIN_SUCTION_COLLATOR_PROCESS_REFERENCE':'Acuan proses suction collator 10-bin dari beberapa vendor',
+  'DEDICATED_OEM_MODEL_REFERENCE':'Acuan khusus model OEM',
+  'HEIDELBERG_SUPRASETTER_MULTI_MODEL_FAMILY_REFERENCE':'Acuan keluarga beberapa model HEIDELBERG Suprasetter',
+  'SCREEN_FTR_KATANA_MULTI_MODEL_FAMILY_REFERENCE':'Acuan keluarga beberapa model SCREEN/FTR Katana',
+  'ZUND_G3_S3_MODULAR_PLATFORM_REFERENCE':'Acuan platform modular Zünd G3/S3',
+  'ATLAS_COPCO_GA_G_OIL_INJECTED_FAMILY_REFERENCE':'Acuan keluarga Atlas Copco GA/G oil-injected screw',
+  'KAESER_SIGMA_FLUID_COOLED_FAMILY_REFERENCE':'Acuan keluarga KAESER SIGMA fluid-cooled screw',
+  'SWAN_TS_AD_TMV_SCREW_FAMILY_REFERENCE':'Acuan keluarga SWAN TS-AD/TMV screw',
+  'EUROVENT_SECTIONAL_AHU_FUNCTIONAL_REFERENCE':'Acuan fungsi AHU sectional berdasarkan prinsip Eurovent',
+  'SANSIN_NES_YZKJ_INDOOR_OUTDOOR_REFERENCE':'Acuan keluarga SANSIN NES/YZKJ indoor/outdoor',
+  'PLACEHOLDER':'Penanda sementara; detail belum tersedia'
  };
  if(known[raw])return known[raw];
  return raw.replace(/\b(?:HIGH CONFIDENCE|MEDIUM CONFIDENCE|DWG-VERIFIED|USER-CONFIRMED|NOT_IMPLEMENTED|LAYOUT PLACEHOLDER|CACHED DATA|MODE LOKAL|VERIFIED|ESTIMATED|UNKNOWN|UNVERIFIED|APPROXIMATE|CONFLICTING|PROCEDURAL|RECONSTRUCTED|PARTIAL|OFFLINE)\b/g,word=>STATUS_LABELS[word]||word);
@@ -155,4 +189,43 @@ export function readableSimulationStage(value){
  if(value==null||value==='')return 'Siap';
  const raw=String(value);
  return SIMULATION_TEXT[raw]||raw;
+}
+
+
+const EVIDENCE_REASON_LABELS=Object.freeze({
+ 'Dedicated OFFSET 8 twin combines the BMJ CX 104-8+LYYL identity/serial/year and installed 8 PU + L + Y + Y + L sequence with official HEIDELBERG CX 104 sheet, stock, speed, pile and Preset Plus architecture. Dryer energy technology and serial-specific option packages remain intentionally unasserted.':'Model khusus OFFSET 8 menggabungkan identitas, nomor seri, tahun, dan urutan terpasang 8 PU + L + Y + Y + L dari BMJ dengan data resmi HEIDELBERG CX 104 untuk lembar, material, kecepatan, tumpukan, dan arsitektur Preset Plus. Teknologi energi dryer serta paket opsi spesifik nomor seri belum diklaim karena belum terverifikasi.',
+ 'Dedicated SX 52-4+L twin uses official HEIDELBERG sheet limits, central suction-tape/Venturi feed, offset-cylinder/TransferJacket architecture, speed-compensated inking, Alcolor film dampening, chamber-blade coating and Venturi delivery principles plus the BMJ identity/configuration record. Standard versus high-pile delivery, dryer/UV/perfector/Anicolor options and exact internal roller counts remain unverified.':'Model khusus SX 52-4+L menggunakan batas lembar resmi HEIDELBERG, feeder suction-tape/Venturi tengah, arsitektur silinder offset/TransferJacket, sistem tinta berkompensasi kecepatan, Alcolor film dampening, chamber-blade coating, dan prinsip Venturi delivery, ditambah data identitas dan konfigurasi BMJ. Jenis delivery standar atau high-pile, opsi dryer/UV/perfector/Anicolor, serta jumlah roller internal belum terverifikasi.',
+ 'BMJ records exact model FZ 1200. Dedicated twin now uses public exact-model FZ1200 mechanics and service references for clamp/lift, 180° turning, high-pressure airing, dust removal, vibration/alignment and hydraulic station. UANCHOR publishes 1200 kg, 1200×800 mm, 760–1640 mm opening, 9 kW and max 16 MPa for FZ1200, but none of the three BMJ serials has a public OEM match; therefore supplier/OEM and installed ratings/layout remain unverified.':'Database BMJ mencatat model FZ 1200 secara spesifik. Model 3D menggunakan referensi publik FZ1200 untuk clamp/lift, pembalikan 180°, high-pressure airing, pembuangan debu, vibration/alignment, dan hydraulic station. UANCHOR memublikasikan kapasitas 1.200 kg, ukuran 1.200 × 800 mm, bukaan 760–1.640 mm, daya 9 kW, dan tekanan maksimum 16 MPa. Namun, nomor seri BMJ belum memiliki kecocokan OEM publik sehingga pemasok/OEM, rating terpasang, dan tata letak aktual belum terverifikasi.',
+ 'Dedicated MK 920 YMI twin uses BMJ identity plus reference-supported sheet limits, rated speed, flatbed stamping architecture and three foil-pull axes. Serial-specific options remain bounded.':'Model khusus MK 920 YMI menggunakan identitas BMJ serta acuan untuk batas lembar, kecepatan nominal, arsitektur flatbed stamping, dan tiga sumbu penarik foil. Opsi yang spesifik terhadap nomor seri belum diklaim.',
+ 'APM-6 is the second BMJ MK 920 YMI asset. It uses the same reference-supported flatbed stamping architecture and three foil-pull axes as APM-5 while keeping its own serial/year/SAP identity; no extra option is inferred from the site suffix II.':'APM-6 adalah unit MK 920 YMI kedua di BMJ. Model menggunakan arsitektur flatbed stamping dan tiga sumbu penarik foil yang sama-sama didukung referensi seperti APM-5, sambil mempertahankan identitas nomor seri, tahun, dan SAP unitnya sendiri. Tidak ada opsi tambahan yang diasumsikan hanya dari akhiran nama “II”.',
+ 'Dedicated MK 1060 ER twin uses BMJ identity plus the 2013 operating-manual architecture: suction feeder, feed table, platen press, double-action stripping, blanking and sheet-edge waste delivery. Exact BMJ tooling and guard details remain serial-specific.':'Model khusus MK 1060 ER menggunakan identitas BMJ dan arsitektur dari operating manual 2013: suction feeder, feed table, platen press, double-action stripping, blanking, dan delivery sisa tepi lembar. Detail tooling dan guard pada unit BMJ tetap dianggap spesifik terhadap unit dan belum diklaim tanpa sumber.',
+ 'Dedicated APM-8 Promatrix 106 CSB twin follows HEIDELBERG documentation for non-stop feeder, suction-belt register table, cutting, stripping, blanking and CSB non-stop delivery. Optional MasterSet/logistics/tooling are not inferred.':'Model khusus APM-8 Promatrix 106 CSB mengikuti dokumentasi HEIDELBERG untuk non-stop feeder, suction-belt register table, cutting, stripping, blanking, dan CSB non-stop delivery. Opsi MasterSet, logistics, dan tooling tidak diasumsikan tanpa bukti.',
+ 'Dedicated APM-9 Promatrix 106 CSB twin follows HEIDELBERG documentation for non-stop feeder, suction-belt register table, cutting, stripping, blanking and CSB non-stop delivery. Optional MasterSet/logistics/tooling are not inferred.':'Model khusus APM-9 Promatrix 106 CSB mengikuti dokumentasi HEIDELBERG untuk non-stop feeder, suction-belt register table, cutting, stripping, blanking, dan CSB non-stop delivery. Opsi MasterSet, logistics, dan tooling tidak diasumsikan tanpa bukti.',
+ 'Dedicated FGM-1 MEDIA 100 II twin follows the documented MEDIA II folder-gluer process and machine examples: feeder, pre-fold, folding, glue application, final fold/trombone and compression delivery. The default demonstration uses a straight-line carton. Crash-lock conversion, A1/A2 suffix and installed accessories remain unverified.':'Model khusus FGM-1 MEDIA 100 II mengikuti proses folder gluer MEDIA II yang terdokumentasi: feeder, pre-fold, folding, aplikasi lem, final fold/trombone, dan compression delivery. Demonstrasi standar menggunakan straight-line carton. Konversi crash-lock, akhiran A1/A2, dan aksesori yang terpasang belum terverifikasi.',
+ 'Dedicated FGM-3 MEDIA 100 II twin uses the same evidence-bounded MEDIA II process architecture while retaining its own BMJ serial/SAP identity. No A1/A2 or accessory difference is inferred.':'Model khusus FGM-3 MEDIA 100 II menggunakan arsitektur proses MEDIA II yang sama-sama dibatasi oleh bukti, sambil mempertahankan identitas nomor seri dan SAP unit BMJ. Perbedaan A1/A2 atau aksesori tidak diasumsikan tanpa bukti.',
+ 'Dedicated DIANA EYE 55 twin follows official HEIDELBERG/Masterwork architecture for blank feeding, suction-belt inspection, camera/LED imaging, image processing and inline reject separation. Installed camera mix, reject actuation and optional stacker remain serial-specific.':'Model khusus DIANA EYE 55 mengikuti arsitektur resmi HEIDELBERG/Masterwork untuk pengumpanan blank, inspeksi suction-belt, imaging kamera/LED, pemrosesan gambar, dan pemisahan reject inline. Kombinasi kamera terpasang, mekanisme reject, dan stacker opsional tetap dianggap spesifik terhadap unit.',
+ 'Dedicated IPM-4 twin follows Focusight FS-SHARK N650 primary documentation for automated feeding, full-suction transfer, high-speed vision inspection, reject separation and good/bad return collection. The P3N1 suffix and installed camera/feeder/reject configuration remain undecoded.':'Model khusus IPM-4 mengikuti dokumentasi utama Focusight FS-SHARK N650 untuk automated feeding, full-suction transfer, high-speed vision inspection, pemisahan reject, serta pengumpulan hasil baik/buruk. Arti akhiran P3N1 dan konfigurasi kamera, feeder, serta reject yang terpasang belum terverifikasi.',
+ 'Dedicated UPG-LY300 twin uses the matching manufacturer model documentation for automatic paging, servo transport, Ricoh G5 UV inkjet, LED UV curing, 2K inspection, plate-turn rejection and collection. Optional/custom accessories remain bounded.':'Model khusus UPG-LY300 menggunakan dokumentasi model pabrikan yang sesuai untuk automatic paging, servo transport, Ricoh G5 UV inkjet, LED UV curing, inspeksi 2K, plate-turn rejection, dan collection. Aksesori opsional atau custom tidak diasumsikan tanpa sumber.',
+ 'CTP-1 is confirmed Heidelberg but exact Suprasetter model/serial/format is absent. The twin uses only mechanisms supported across the official Suprasetter family: plate entry/transport, external imaging drum, HEIDELBERG thermal laser architecture and IDS, plus unload. ATL/DTL/ACL/DCL/APL loaders, internal punch, debris removal, temperature stabilization, downstream processor/stacker and laser-module count remain explicit capability boundaries and are not animated as installed.':'CTP-1 terkonfirmasi sebagai Heidelberg, tetapi model, nomor seri, dan format Suprasetter yang persis belum tersedia. Model 3D hanya menggunakan mekanisme yang didukung keluarga Suprasetter resmi: plate entry/transport, external imaging drum, arsitektur thermal laser HEIDELBERG dan IDS, serta unload. Loader ATL/DTL/ACL/DCL/APL, internal punch, debris removal, temperature stabilization, processor/stacker lanjutan, dan jumlah modul laser tetap menjadi batas kemampuan dan tidak ditampilkan sebagai konfigurasi terpasang.',
+ 'CTP-2 is confirmed Heidelberg but exact Suprasetter model/serial/format is absent. It remains a distinct BMJ asset while sharing the bounded Suprasetter family process architecture. Automatic loader type, punch, debris removal, temperature stabilization, processor/stacker and laser-module/productivity configuration are not inferred.':'CTP-2 terkonfirmasi sebagai Heidelberg, tetapi model, nomor seri, dan format Suprasetter yang persis belum tersedia. Unit tetap diperlakukan sebagai mesin BMJ yang berbeda, dengan arsitektur proses keluarga Suprasetter yang dibatasi sumber. Jenis automatic loader, punch, debris removal, temperature stabilization, processor/stacker, serta konfigurasi modul laser dan produktivitas tidak diasumsikan.',
+ 'The BMJ registry identifies the AHU asset but provides no OEM/model/section order/airflow direction. The twin uses Eurovent-neutral AHU functions only: inlet/damper, filter bank, finned heat-exchange coil, condensate pan/trap for dehumidifying cooling, supply fan, service access and discharge/control. Mixing arrangement, filter class, coil fluid/DX type, droplet eliminator, fan type/drive and section order are explicit configuration boundaries.':'Database BMJ mengidentifikasi unit AHU, tetapi belum memuat OEM, model, urutan section, atau arah aliran udara. Model 3D hanya menggunakan fungsi AHU netral berdasarkan prinsip Eurovent: inlet/damper, filter bank, finned heat-exchange coil, condensate pan/trap untuk dehumidifying cooling, supply fan, service access, dan discharge/control. Susunan mixing, kelas filter, jenis fluida coil/DX, droplet eliminator, jenis/drive fan, dan urutan section tetap menjadi batas konfigurasi yang belum diklaim.',
+ 'Machine-specific evidence is insufficient for mechanically faithful geometry or simulation.':'Bukti khusus untuk mesin ini belum cukup untuk membuat geometri mekanis atau simulasi yang dapat dianggap setia terhadap mesin aktual.'
+});
+
+export function readableEvidenceReason(value){
+ if(value==null||value==='')return 'Dasar informasi belum tersedia.';
+ const raw=String(value);
+ return EVIDENCE_REASON_LABELS[raw]||raw;
+}
+
+const DWG_REASON_LABELS=Object.freeze({
+ 'DWG layout is not loaded.':'Denah DWG belum dimuat.',
+ 'Entity type is retained in the extraction audit but is not promoted to physical 3D geometry without semantic evidence.':'Jenis entitas tetap dicatat pada audit ekstraksi, tetapi belum ditampilkan sebagai geometri fisik 3D karena bukti semantiknya belum cukup.',
+ 'The packed factory baseline contains normalized geometry, labels and source identity, but does not expose a complete per-type raw-entity ledger. Coverage must not be interpreted as 100%.':'Baseline pabrik memuat geometri yang sudah dinormalisasi, label, dan identitas sumber, tetapi belum menyediakan daftar lengkap setiap entitas mentah berdasarkan jenis. Cakupan ini tidak boleh dianggap 100%.',
+ 'DWG X → THREE X · DWG Y → THREE Z · THREE Y → ELEVATION':'DWG X → 3D X · DWG Y → 3D Z · 3D Y → elevasi'
+});
+export function readableDwgReason(value){
+ if(value==null||value==='')return 'Belum tersedia';
+ const raw=String(value);
+ return DWG_REASON_LABELS[raw]||readableStatus(raw);
 }
