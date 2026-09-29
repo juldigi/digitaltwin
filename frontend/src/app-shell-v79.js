@@ -144,7 +144,7 @@ function syncMobileFeatureHub(state=getState()){
   if(button){button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));}
  }
  const themeLabel=q('[data-mobile-theme-label]',mobileFeatureHub);
- if(themeLabel)themeLabel.textContent=state.preferences?.theme==='light'?'Gunakan Tema Gelap':'Gunakan Tema Terang';
+ if(themeLabel)themeLabel.textContent=state.preferences?.theme==='light'?'Gunakan tema gelap':'Gunakan tema terang';
  const requested=state.preferences?.visualQuality||'auto';
  const effective=requested==='auto'?recommendedProfile(qualityDeviceCapabilities()):requested;
  const quality=q('[data-mobile-quality-summary]',mobileFeatureHub);
