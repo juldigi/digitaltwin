@@ -97,10 +97,10 @@ test('V264 editor scopes controls to the selected object and scope',()=>{
 
 test('V264 editor avoids false transactions and destructive ambiguity',()=>{
  assert.ok(app.includes('let dragChanged=false'));
- assert.ok(app.includes('if(!dragChanged){undo.pop();redo=dragRedo;refreshEditorTransformUi();return;}'));
+ assert.ok(app.includes('if(!dragChanged){rollbackSnapshot(dragTransaction);dragTransaction=null;refreshEditorTransformUi();return;}'));
  assert.ok(app.includes('Math.abs((v[key]?.[axis]??0)-stored)<1e-9'));
- assert.ok(app.includes("if(!engine.dropSceneObjectToFloor(selected)){undo.pop()"));
- assert.ok(app.includes("if(!engine.alignSceneObject(selected,targetId,button.dataset.seAlign)){undo.pop()"));
+ assert.ok(app.includes("if(!engine.dropSceneObjectToFloor(selected)){rollbackSnapshot(transaction)"));
+ assert.ok(app.includes("if(!engine.alignSceneObject(selected,targetId,button.dataset.seAlign)){rollbackSnapshot(transaction)"));
  assert.ok(app.includes('Hapus objek ini dari tampilan 3D?'));
  assert.ok(app.includes('Pulihkan objek ini ke posisi bawaan model?'));
  assert.ok(app.includes('engine.rotateSceneObjectWorldY(selected,Number(button.dataset.seTurn)*editorRotateStep)'));
@@ -110,10 +110,10 @@ test('V264 editor avoids false transactions and destructive ambiguity',()=>{
  assert.ok(app.includes('removedSavedOverride=Object.keys(savedOverrides).some'));
  assert.ok(app.includes("stableJson(imported)===stableJson(overrides)"));
  assert.ok(app.includes('activeMachineKey:engine.machineKey||null'));
- assert.ok(app.includes("const snapshot=()=>{const redoBefore=[...redo]"));
- assert.ok(app.includes("redo=redoBefore;return toast('Objek sudah berada di lantai.'"));
- assert.ok(app.includes('let dragChanged=false,dragRedo=[]'));
- assert.ok(app.includes('redo=dragRedo;refreshEditorTransformUi()'));
+ assert.ok(app.includes("const snapshot=()=>{const transaction={redoBefore:[...redo],dropped:undo.length>=50?undo[0]:null}"));
+ assert.ok(app.includes('const rollbackSnapshot=transaction=>{undo.pop();'));
+ assert.ok(app.includes('if(transaction?.dropped!==null&&transaction?.dropped!==undefined)undo.unshift(transaction.dropped)'));
+ assert.ok(app.includes('let dragChanged=false,dragTransaction=null'));
  assert.match(css,/V264 editor context guard/);
  assert.match(css,/body\.scene-editor-open aside#detail-panel/);
 });
@@ -153,6 +153,7 @@ test('V264 editor movement labels and handlers match screen/world semantics',()=
  assert.ok(app.includes('Bawah layar'));
  assert.ok(app.includes("engine.moveSceneObjectWorld(selected,0,Number(direction)*editorMoveStep,0)"));
  assert.ok(app.includes("engine.moveSceneObjectInView(selected,horizontal,vertical,editorMoveStep)"));
+ assert.ok(app.includes("engine.rotateSceneObjectWorldY(selected,Number(button.dataset.seTurn)*editorRotateStep)"));
  assert.ok(app.includes("Hanya objek ini"));
 });
 
