@@ -118,8 +118,8 @@ test('scene editor exposes real-world categories and keeps internal identifiers 
 });
 
 test('scene editor uses human-readable units and converts degree input back to radians',()=>{
- assert.match(app,/Posisi \(meter\)/);
- assert.match(app,/Rotasi \(derajat\)/);
+ assert.match(app,/Posisi relatif induk \(meter\)/);
+ assert.match(app,/Rotasi relatif induk \(derajat\)/);
  assert.match(app,/data-se-unit="\$\{key==='rotation'\?'deg':'raw'\}"/);
  assert.match(app,/stored=input\.dataset\.seUnit==='deg'\?value\*Math\.PI\/180:value/);
  assert.match(app,/Gerak bertahap/);
