@@ -27,7 +27,7 @@ test('scene rebuild applies all saved layer choices, including the outdoor area'
 
 test('factory panel exposes the outdoor area and every scene load restores preferences',()=>{
  const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
- assert.match(app,/\['landscape','Taman, jalan & gerbang'\]/);
+ assert.match(app,/\['landscape','Taman, jalan, dan gerbang'\]/);
  assert.match(app,/function loadVisibleFactoryLayout\(layout\)/);
  assert.doesNotMatch(app,/engine\?\.loadLayout\(/);
 });
