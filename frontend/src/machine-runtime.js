@@ -48,7 +48,7 @@ export const isDedicatedMachineKey=key=>{const normalized=normalizeMachineKey(ke
 
 export function createMachineTemplate(key){
  const k=normalizeMachineKey(key);
- if(!k)throw new Error('Machine key is required');
+ if(!k)throw new Error('Kunci mesin wajib tersedia');
  if(k==='offset5')return new Offset5CD102RealismTemplate();
  if(k==='sheeting')return new SheetingMachineTemplate();
  if(k==='offset10')return new Offset10CX104SpecialRealismTemplate();
@@ -66,7 +66,7 @@ export function createMachineTemplate(key){
  if(k==='BMJ-MCH-0024')return new UpgLy300MachineTemplate();
  if(isReferenceMachineKey(k))return new ReferenceMachineTemplate(k);
  if(universalMachineConfig(k))return new UniversalMachineTemplate(k);
- throw new Error(`No 3D template registered for ${k}`);
+ throw new Error(`Model 3D belum terdaftar untuk ${k}`);
 }
 
 export function createPolishedMachineTemplate(key){
@@ -76,7 +76,7 @@ export function createPolishedMachineTemplate(key){
 
 export function createMachineSimulation(key,machine,template){
  const k=normalizeMachineKey(key);
- if(!k)throw new Error('Machine key is required');
+ if(!k)throw new Error('Kunci mesin wajib tersedia');
  if(k==='offset5')return new Offset5CD102RealismSimulation(machine,template);
  if(k==='sheeting')return new SheetingProcessSimulation(machine,template);
  if(k==='offset10')return new Offset10CX104SpecialRealismSimulation(machine,template);
@@ -94,5 +94,5 @@ export function createMachineSimulation(key,machine,template){
  if(k==='BMJ-MCH-0024')return new UpgLy300ProcessSimulation(machine,template);
  if(isReferenceMachineKey(k))return new ReferenceProcessSimulation(machine,template);
  if(universalMachineConfig(k))return new UniversalProcessSimulation(machine,template);
- throw new Error(`No simulation registered for ${k}`);
+ throw new Error(`Simulasi belum terdaftar untuk ${k}`);
 }
