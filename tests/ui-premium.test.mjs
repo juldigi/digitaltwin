@@ -138,7 +138,7 @@ test('V193 removes internal machine identifiers from the normal asset browser co
   const app=fs.readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
   assert.match(app,/\[machine\.sapCode,machine\.model\]\.filter\(Boolean\)\.join\(' · '\)/);
   assert.doesNotMatch(app,/<small>\$\{esc\(machine\.machineId\)\}<\/small>/);
-  assert.match(app,/Edit Pabrik 3D/);
+  assert.match(app,/Edit pabrik 3D/);
 });
 
 
