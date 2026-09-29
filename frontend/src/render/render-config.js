@@ -7,11 +7,11 @@ export const RENDER_PROFILE_INFO=Object.freeze({
   label:'Otomatis',
   difference:'Aplikasi memilih preset yang paling sesuai dengan kemampuan perangkat saat ini.',
   pros:'Praktis, aman untuk penggunaan harian, dan otomatis menyesuaikan kelas perangkat tanpa perlu mencoba satu per satu.',
-  cons:'Hasil akhirnya dapat berbeda antar perangkat karena preset efektif mengikuti kemampuan hardware.'
+  cons:'Hasil akhirnya dapat berbeda antar perangkat karena preset efektif mengikuti kemampuan perangkat keras.'
  }),
  hemat:Object.freeze({
   label:'Hemat',
-  difference:'Resolusi render 1,0×, bayangan dinamis dimatikan, shadow map 512 disiapkan sebagai fallback, dan interval frame dibuat lebih longgar.',
+  difference:'Resolusi render 1,0×, bayangan dinamis dimatikan, shadow map 512 disiapkan sebagai cadangan, dan interval frame dibuat lebih longgar.',
   pros:'Paling ringan untuk GPU, lebih hemat baterai, suhu perangkat lebih rendah, dan paling stabil untuk perangkat lama atau memori terbatas.',
   cons:'Ketajaman lebih rendah dan kedalaman visual berkurang karena bayangan dinamis tidak aktif.'
  }),
@@ -19,24 +19,24 @@ export const RENDER_PROFILE_INFO=Object.freeze({
   label:'Seimbang',
   difference:'Resolusi render sampai 1,35× dengan bayangan lunak 1024 dan target interaksi normal.',
   pros:'Kompromi terbaik antara detail, kelancaran, konsumsi daya, dan kestabilan untuk mayoritas perangkat.',
-  cons:'Tidak setajam mode Tinggi/Sinematik dan masih memakai GPU lebih besar daripada Hemat.'
+  cons:'Tidak setajam mode Tinggi atau Sinematik dan masih memakai GPU lebih besar daripada Hemat.'
  }),
  tinggi:Object.freeze({
   label:'Tinggi',
-  difference:'Resolusi render sampai 1,75×, bayangan 1536, dan environment lighting aktif saat membuka model mesin.',
+  difference:'Resolusi render sampai 1,75×, bayangan 1536, dan environment lighting (pencahayaan lingkungan) aktif saat membuka model mesin.',
   pros:'Detail permukaan, tepi geometri, dan bayangan lebih tajam untuk inspeksi visual.',
-  cons:'Lebih berat untuk GPU dan baterai; pada perangkat mobile dapat meningkatkan suhu dan menurunkan FPS.'
+  cons:'Lebih berat untuk GPU dan baterai; pada ponsel atau perangkat seluler dapat meningkatkan suhu dan menurunkan FPS.'
  }),
  engineering:Object.freeze({
   label:'Teknis',
-  difference:'Resolusi render sampai 1,50× dengan bayangan 1024, exposure lebih netral, dan perpindahan kamera lebih cepat untuk inspeksi teknis.',
+  difference:'Resolusi render sampai 1,50× dengan bayangan 1024, exposure yang lebih netral, dan perpindahan kamera lebih cepat untuk inspeksi teknis.',
   pros:'Geometri tetap jelas dan respons navigasi cepat tanpa beban efek visual Sinematik.',
-  cons:'Tampilan kurang dramatis dibanding Tinggi/Sinematik dan bukan mode paling ringan.'
+  cons:'Tampilan kurang dramatis dibanding mode Tinggi atau Sinematik dan bukan mode paling ringan.'
  }),
  cinematic:Object.freeze({
   label:'Sinematik',
-  difference:'Resolusi render sampai 2,0×, bayangan 2048, environment lighting, dan post-processing saat membuka model mesin.',
-  pros:'Kualitas visual tertinggi untuk presentasi, screenshot, dan pemeriksaan estetika.',
+  difference:'Resolusi render sampai 2,0×, bayangan 2048, environment lighting (pencahayaan lingkungan), dan post-processing saat membuka model mesin.',
+  pros:'Kualitas visual tertinggi untuk presentasi, tangkapan layar, dan pemeriksaan estetika.',
   cons:'Paling berat untuk GPU, memori, baterai, dan suhu perangkat; tidak ideal untuk perangkat dengan performa terbatas.'
  })
 });
