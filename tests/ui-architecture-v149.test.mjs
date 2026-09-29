@@ -88,8 +88,8 @@ test('visible product copy removes prototype and test-mode terms',()=>{
  assert.doesNotMatch(html,/Mode uji/);
  assert.doesNotMatch(html,/Siap diuji/);
  assert.doesNotMatch(html,/Printing Test/);
- assert.match(html,/Buka Interior/);
- assert.match(html,/Fokus di 3D/);
+ assert.match(html,/id="tool-interior"[\s\S]*BUKA INTERIOR/);
+ assert.match(html,/data-camera="fit"[\s\S]*FOKUS <span>Pilihan<\/span>/);
 });
 
 test('V194 inspector exposes contextual tabs and keeps Interior only as a direct inspection action',()=>{
