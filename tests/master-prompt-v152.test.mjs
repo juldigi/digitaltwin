@@ -49,7 +49,7 @@ test('user-facing system workspace no longer exposes implementation jargon',()=>
   assert.doesNotMatch(app,/routing scaffold|Consumer network/);
   assert.match(shell,/KONTEKS SISTEM/);
   assert.match(shell,/titik · .*jalur · .*titik koneksi peralatan/);
-  assert.match(app,/Udara Bertekanan/);
+  assert.match(app,/Udara bertekanan/);
   assert.match(app,/Jalur Utilitas/);
 });
 
