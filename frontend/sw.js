@@ -1,6 +1,6 @@
-// V237 dedicated machine realism pass; V249 shell recache without rotating public query identifiers: replace the legacy V222 Cache API namespace while keeping stable entrypoint URLs.
-const LEGACY_VERSION='factory-digital-twin-v222-overlay-state-ssot-20260925';
-const VERSION='factory-digital-twin-v249-cache-refresh-20260927';
+// V255 UI SSOT repair: rotate the Cache API namespace so clients discard the overlapping V249 shell while keeping stable public entrypoint URLs.
+const LEGACY_VERSION='factory-digital-twin-v249-cache-refresh-20260927';
+const VERSION='factory-digital-twin-v255-ui-ssot-20260929';
 const RELEASE='222';
 const BUILD_FINGERPRINT='SOURCE';
 const ENTRYPOINTS=[
