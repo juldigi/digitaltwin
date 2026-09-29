@@ -188,9 +188,9 @@ test('V149 evidence status is progressive and source-derived rather than a perma
  assert.match(css,/\.evidence-status/);
 });
 
-test('V149 taxonomy level names are human-first with L1-L6 only as secondary technical indicators',()=>{
+test('V149 taxonomy level names remain human-first with an explicit level indicator',()=>{
  for(const label of ['Mesin','Unit Utama','Sub','Block','Part','Spesifik Part'])assert.match(taxonomy,new RegExp(label));
- assert.match(app,/L\$\{node.level\}/);
+ assert.match(app,/Tingkat \$\{node.level\}/);
  assert.match(css,/\.compact-part-row small/);
 });
 
