@@ -31,7 +31,7 @@ test('V266 removes legacy mixed-language UI wording while preserving useful tech
   'Status Data & Sumber','Sambungkan Data','Bersihkan Data Tersimpan','Informasi Sistem',
   'Ganti Kata Sandi','Simpan Kata Sandi','Buka Semua Cover','Tutup Interior',
   'Anchor tidak valid','Unit CAD tidak valid','harus angka finite',"'Running'",'MESIN & PERALATAN',
-  'Offline: berkas belum tersimpan.','Penampil 3D belum tersedia','menu Aset','RIGHT → LEFT','BMJ Machine Database','ditemukan pada registry.','Buka semua cover luar','Tutup kembali cover','tampilan cover','Identitas aset','Posisi aset','Penanda posisi aset','Nama area dan aset','Sejajarkan dengan aset lain','Pilih aset acuan','posisi aset pada denah','Aset belum memiliki konteks tata letak'
+  'Offline: berkas belum tersimpan.','Penampil 3D belum tersedia','menu Aset','RIGHT → LEFT','BMJ Machine Database','ditemukan pada registry.','Buka semua cover luar','Tutup kembali cover','tampilan cover','Identitas aset','Posisi aset','Penanda posisi aset','Nama area dan aset','Sejajarkan dengan aset lain','Pilih aset acuan','posisi aset pada denah','Aset belum memiliki konteks tata letak','Aset dipilih','Aset pabrik','Aset pada tautan','Simulasi proses untuk aset ini','Pilih satu aset','aset dapat dipilih','Kategori aset','Nama aset','Profil cover'
  ])assert.equal(runtime.includes(oldCopy),false,oldCopy);
  for(const technicalTerm of ['DWG','CAD','GPU','WebGL','UV','Superadmin','shadow map','environment lighting','SideLay','gripper'])assert.ok(runtime.includes(technicalTerm),technicalTerm);
 });
@@ -106,5 +106,19 @@ test('V266 replaces generic asset jargon with object and machine wording',()=>{
   'Sejajarkan dengan objek lain','Pilih objek acuan',
   'posisi mesin atau peralatan pada denah',
   'Mesin atau peralatan ini belum memiliki posisi tata letak yang dapat dibuka.'
+ ])assert.ok(app.includes(copy),copy);
+});
+
+test('V266 uses machine or equipment wording across chooser status and fallbacks',()=>{
+ for(const copy of [
+  'Mesin atau peralatan dipilih · buka detail untuk melihat model 3D',
+  'Mesin atau peralatan pabrik',
+  'Mesin atau peralatan pada tautan ini tidak ditemukan.',
+  'Simulasi proses untuk mesin atau peralatan ini belum tersedia.',
+  'Pilih mesin atau peralatan untuk menyorot posisinya di pabrik.',
+  'model 3D tersedia',
+  'Kategori mesin atau peralatan',
+  'Nama mesin atau peralatan',
+  'Profil penutup dan jalur mekanisme'
  ])assert.ok(app.includes(copy),copy);
 });
