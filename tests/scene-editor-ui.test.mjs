@@ -151,7 +151,7 @@ test('V264 editor guards hidden deleted locked and isolated objects consistently
  assert.doesNotMatch(app,/\btransformBlocked\(\)/);
  assert.match(app,/engine\.onSceneTransform=\(\)=>\{if\(!isTransformBlocked\(\)\)/);
  assert.match(app,/if\(hiding&&isolated\)\{isolated=false;isolationGuard\.restore\(\);\}/);
- assert.match(app,/if\(!selected\|\|!selectedVisible\|\|previewOriginal\)return;isolated=!isolated/);
+ assert.match(app,/if\(editorBusy\|\|!selected\|\|!selectedVisible\|\|previewOriginal\)return;isolated=!isolated/);
  assert.match(app,/const node=selected&&engine\.sceneObjects\.get\(selected\);if\(isolated&&node\)isolationGuard\.isolate/);
  assert.match(app,/\$\{v\?\.deleted\?'':`<button id="se-hide"/);
 });
