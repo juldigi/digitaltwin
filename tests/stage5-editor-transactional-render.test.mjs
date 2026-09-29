@@ -7,7 +7,9 @@ const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8')
 test('Stage 5 scene editor refreshes continuous transforms incrementally',()=>{
   assert.match(app,/const refreshEditorTransformUi=/);
   assert.match(app,/const scheduleEditorTransformUi=/);
-  assert.match(app,/onEditorKeyUp=e=>\{[^}]*refreshEditorTransformUi\(\)/);
+  assert.match(app,/const finishKeyboardMove=\(\)=>\{if\(!keyboardMoveActive\)return;keyboardMoveActive=false;refreshEditorTransformUi\(\);\}/);
+  assert.match(app,/onEditorKeyUp=e=>\{if\(!editorArrowKeys\.includes\(e\.key\)\)return;finishKeyboardMove\(\);\}/);
+  assert.match(app,/onEditorWindowBlur=\(\)=>finishKeyboardMove\(\)/);
   assert.match(app,/onDragEnd=\(\)=>\{if\(!selected\)return;if\(!dragChanged\)\{rollbackSnapshot\(dragTransaction\);dragTransaction=null;refreshEditorTransformUi\(\);return;\}/);
   assert.match(app,/engine\.onSceneTransform=\(\)=>\{if\(!isTransformBlocked\(\)\)\{dragChanged=true;overrides\[selected\]=current\(\);scheduleEditorTransformUi\(\);\}\}/);
   assert.match(app,/data-se-size/);
