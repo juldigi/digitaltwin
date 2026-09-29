@@ -441,7 +441,7 @@ q('#mode-3d')?.addEventListener('click',()=>{const next=setViewMode('3d');applyV
 
 const GROUPS=PHASE1_FOUNDATION?[
  ['Bangunan',[['building','Struktur'],['floor','Lantai dan jalur'],['walls','Dinding'],['doors','Pintu'],['windows','Jendela dan kaca'],['airCurtain','Tirai PVC dan air curtain (referensi)'],['furniture','Isi ruangan dan material'],['roof','Atap']]],
- ['Posisi aset',[['machines','Penanda posisi aset'],['labels','Label'],['unidentified','Area belum teridentifikasi']]],
+ ['Posisi mesin dan peralatan',[['machines','Penanda posisi mesin dan peralatan'],['labels','Label'],['unidentified','Area belum teridentifikasi']]],
  ['Sumber',[['reference','Garis denah sumber']]]
 ]:[
  ['Bangunan',[['building','Struktur'],['floor','Lantai dan jalur'],['walls','Dinding'],['doors','Pintu'],['windows','Jendela dan kaca'],['airCurtain','Tirai PVC dan air curtain (referensi)'],['furniture','Isi ruangan dan material'],['roof','Atap'],['landscape','Area luar']]],
