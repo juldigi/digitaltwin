@@ -23,7 +23,7 @@ test('scene save and revision restore clear transient isolation before replaying
  const save=app.indexOf("panel.querySelector('#se-save')");
  const restore=app.indexOf("request('/api/scene/restore'");
  assert.ok(save>=0&&restore>=0);
- const saveFlow=app.slice(save,restore);assert.match(saveFlow,/isolationGuard\.restore\(\);await acceptState\(next\)/);assert.match(saveFlow,/markSavedCheckpoint\(overrides\);applyIsolation\(\)/);
+ const saveFlow=app.slice(save,restore);assert.match(saveFlow,/isolationGuard\.restore\(\);await acceptState\(next\)/);assert.match(saveFlow,/markSavedCheckpoint\(overrides\);baseline=captureEditorBaseline\(\);applyIsolation\(\)/);
  assert.match(app.slice(restore,restore+1200),/isolationGuard\.restore\(\);await acceptState\(next\)/);
 });
 
