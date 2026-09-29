@@ -391,9 +391,12 @@ export class FactoryEngine {
           const detail=template.root;detail.name=(wrapper.name||id)+' · detailed factory twin';
           detail.position.set(0,0,0);detail.rotation.set(0,0,0);detail.scale.setScalar(1);
           detail.userData={...detail.userData,machineId:id,factoryDetailedTwin:true,renderSource:'SAME_POLISHED_TEMPLATE_AS_MACHINE_VIEW'};
-          for(const child of wrapper.children){if(child!==detail){child.visible=false;child.userData={...child.userData,factoryProxyFallback:true};}}
-          wrapper.add(detail);
-          wrapper.userData={...wrapper.userData,renderStatus:'FULL_TECHNICAL_3D_SHARED_TEMPLATE',factoryDetailHydrated:true,factoryDetailSource:'createPolishedMachineTemplate'};
+          const proxies=[...wrapper.children];wrapper.add(detail);
+          for(const child of proxies){
+            wrapper.remove(child);
+            child.traverse?.(object=>{object.geometry?.dispose?.();if(Array.isArray(object.material))object.material.forEach(material=>{material.map?.dispose?.();material.dispose?.();});else{object.material?.map?.dispose?.();object.material?.dispose?.();}});
+          }
+          wrapper.userData={...wrapper.userData,renderStatus:'FULL_TECHNICAL_3D_SHARED_TEMPLATE',factoryDetailHydrated:true,factoryDetailSource:'createPolishedMachineTemplate',factoryProxyFallbackRemoved:true};
           this.factoryMachineTemplates.set(id,{template,root:detail});mounted++;
         }catch(error){
           template?.dispose?.();
