@@ -1,6 +1,6 @@
 // Translate only presentation values. Keep API and machine identifiers unchanged.
 const STATUS_LABELS=Object.freeze({
- VERIFIED:'Terverifikasi','HIGH CONFIDENCE':'Keyakinan tinggi','MEDIUM CONFIDENCE':'Keyakinan sedang',
+ VERIFIED:'Terverifikasi','HIGH CONFIDENCE':'Tingkat keyakinan tinggi','MEDIUM CONFIDENCE':'Tingkat keyakinan sedang',
  ESTIMATED:'Perkiraan',UNKNOWN:'Belum diketahui',UNVERIFIED:'Belum diverifikasi',
  APPROXIMATE:'Perkiraan',CONFLICTING:'Perlu ditinjau','DWG-VERIFIED':'Terverifikasi dari DWG',
  'USER-CONFIRMED':'Dikonfirmasi oleh pengguna','NOT_IMPLEMENTED':'Belum tersedia',
