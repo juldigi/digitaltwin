@@ -10,6 +10,39 @@ import {ReferenceMachineTemplate,ReferenceProcessSimulation,isReferenceMachineKe
 const referenceAssets=MACHINE_REGISTRY.filter(m=>!isDedicatedMachineKey(m.machineId));
 const blockedReferenceIds=new Set(['BMJ-MCH-0004']);
 
+test('PDS service details remain attached to covers while family process internals stay visible',()=>{
+ for(const id of ['BMJ-MCH-0025','BMJ-MCH-0026','BMJ-MCH-0027','BMJ-MCH-0028']){
+  const model=createMachineTemplate(id);
+  try{
+   const attached=model.meshes.filter(mesh=>mesh.userData.coverMountedDetail);
+   assert.ok(attached.length>=1,id);
+   model.setExteriorOpen(true);model.setLow(true);
+   assert.ok(attached.every(mesh=>!mesh.visible),`${id} left an exterior fitting floating in cutaway`);
+   const core=model.activeMeshes.length?model.activeMeshes:model.findNode('zund-gantry-beam')?.children.filter(mesh=>mesh.isMesh)||[];
+   assert.ok(core.some(mesh=>mesh.visible),`${id} interior became empty`);
+   model.setLow(false);
+   assert.ok(attached.every(mesh=>!mesh.visible),`${id} quality switch reopened exterior fittings`);
+   model.setExteriorOpen(false);
+   assert.ok(attached.every(mesh=>mesh.visible),`${id} failed to restore service details`);
+  }finally{model.dispose();}
+ }
+});
+
+test('Zünd family material remains seated on the vacuum bed before and during hold',()=>{
+ const model=createMachineTemplate('BMJ-MCH-0028'),sim=createMachineSimulation('BMJ-MCH-0028',model.root,model);
+ try{
+  const bed=new THREE.Box3().setFromObject(model.findNode('zund-vacuum-bed'));
+  const assertContact=()=>{
+   const material=new THREE.Box3().setFromObject(sim.zundMaterial);
+   assert.ok(Math.abs(material.min.y-bed.max.y)<.002,`material gap or penetration: ${material.min.y-bed.max.y}`);
+  };
+  sim.start();sim.update(1000);assertContact();
+  for(let now=1020;now<4500;now+=20)sim.update(now);
+  assert.equal(sim.zund.vacuumHoldActive,true);assertContact();
+  sim.stop();sim.start();assertContact();
+ }finally{sim.dispose();model.dispose();}
+});
+
 test('all 21 formerly generic assets now route to evidence-grounded reference builders',()=>{
  assert.equal(referenceAssets.length,21);
  for(const machine of referenceAssets){
