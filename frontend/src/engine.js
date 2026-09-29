@@ -31,7 +31,7 @@ const neutralSimulation=()=>({
  dispose(){}
 });
 const neutralTemplate=()=>{
- const root=new THREE.Group();root.name='Factory context';root.visible=false;root.userData={semantic:'FACTORY_CONTEXT'};
+ const root=new THREE.Group();root.name='Konteks pabrik';root.visible=false;root.userData={semantic:'FACTORY_CONTEXT'};
  return{
   root,taxonomy:[],taxonomyById:new Map(),
   reset(){},resolvePart(){return null},findNode(){return null},resolveTaxonomyNode(){return null},
