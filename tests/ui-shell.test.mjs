@@ -142,7 +142,7 @@ test('canvas selection frames the highest unit first and only isolation fades ot
  assert.match(engine,/while\(node&&!node\.userData\.machineId\)node=node\.parent/);
  assert.match(app,/const path=taxonomyPath\(meta\.id\),first=path\.find\(node=>node\.level===2\)\|\|meta/);
  assert.match(app,/selectTaxonomy\(first\.id\)/);
- assert.match(app,/openPartFocusPopover\(path\)/);
+ assert.doesNotMatch(app,/openPartFocusPopover|part-focus-popover/,'part selection stays inside the canonical Structure inspector');
  assert.match(app,/engine\.template\.ghost\(false\)/);
  assert.match(app,/engine\.template\.ghost\(isolated,selectedPart\)/);
  assert.doesNotMatch(app,/engine\.template\.isolate\(selectedPart,isolated\)/);
