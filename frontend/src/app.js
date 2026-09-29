@@ -1125,6 +1125,7 @@ function openSceneEditor(){
   const tag=e.target?.tagName;if(tag==='INPUT'||tag==='SELECT'||tag==='TEXTAREA'||e.target?.isContentEditable)return;
   const key=String(e.key||'').toLowerCase(),historyKey=(e.metaKey||e.ctrlKey)&&!e.altKey&&(key==='z'||key==='y');
   if(historyKey){e.preventDefault();keyboardMoveActive=false;if(key==='y'||e.shiftKey)redoChange();else undoChange();return;}
+  if(e.target?.closest?.('button,summary,a,[role="button"]'))return;
   if(isTransformBlocked()||!editorArrowKeys.includes(e.key))return;
   const node=engine.sceneObjects.get(selected);if(!node)return;
   e.preventDefault();if(!keyboardMoveActive){snapshot();keyboardMoveActive=true;}
