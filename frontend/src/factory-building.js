@@ -65,7 +65,7 @@ export function resolvePortalClearance(portal,clearances,margin=.35){
 }
 export function buildActualFactory(layout,fleet){
  const root=new T.Group();root.name='BMJ · baseline 250804 + revisi';const layers={};
- for(const name of ['building','floor','walls','doors','windows','air_curtain','furniture','roof','machines','labels','landscape','reference','unidentified','utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors']){layers[name]=new T.Group();layers[name].name=name;root.add(layers[name]);}
+ for(const name of ['building','ipal','floor','walls','doors','windows','air_curtain','furniture','roof','machines','labels','landscape','reference','unidentified','utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors']){layers[name]=new T.Group();layers[name].name=name;root.add(layers[name]);}
  layers.roof.visible=false;layers.reference.visible=false;layers.landscape.visible=false;
  for(const name of ['utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors'])layers[name].visible=false;
  const mats=new Map();const material=(color,opacity=1)=>{const k=color+':'+opacity;if(!mats.has(k))mats.set(k,new T.MeshStandardMaterial({color,roughness:.82,metalness:.04,transparent:opacity<1,opacity,depthWrite:opacity===1,side:T.DoubleSide}));return mats.get(k);};
@@ -1316,7 +1316,7 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  }
 
  // IPAL is an outdoor process yard: concrete slab + open steel frame + roof, with no enclosing walls.
- const ipal=new T.Group();ipal.name='IPAL_OPEN_AIR_WATER_TREATMENT';b.add(ipal);
+ const ipal=new T.Group();ipal.name='IPAL_OPEN_AIR_WATER_TREATMENT';ipal.userData={semantic:'IPAL_SYSTEM_LAYER_ROOT',layer:'ipal',independentFromBuildingStructure:true};layers.ipal.add(ipal);
  box(ipal,46.4,.08,-110.9,26.4,.16,14.1,0xaeb7b5).userData={semantic:'IPAL_CONCRETE_SLAB'};
  const ipalEquipment=[];
  const registerIpal=(o,semantic,bounds)=>{o.userData={...o.userData,semantic,accuracy:'FUNCTIONAL_WATER_TREATMENT_VISUALIZATION'};ipalEquipment.push({semantic,...bounds});return o;};
