@@ -115,7 +115,7 @@ test('V149 Systems is a real network context without invented Water or Electrica
  assert.match(shell,/data-system-focus="hvac"/);
  assert.match(shell,/data-system-focus="compressedAir"/);
  assert.match(shell,/data-system-focus="routing"/);
- assert.match(shell,/Air \/ IPAL[\s\S]*Jalur terpisah belum tersedia/);
+ assert.match(shell,/Air dan IPAL[\s\S]*Peralatan tersedia · jalur belum tersedia/);
  assert.match(shell,/Kelistrikan[\s\S]*Jalur terpisah belum tersedia/);
  assert.match(shell,/bmj:systemfocus/);
  assert.match(app,/window\.addEventListener\('bmj:systemfocus'/);
