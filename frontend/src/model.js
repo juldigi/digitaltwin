@@ -9,11 +9,11 @@ export const initialState = {
     layout_x:null,layout_y:null,layout_z:null,rotation:null,scale:null,status:'UNKNOWN',health_score:null,
     '3d_status':'PROCEDURAL / APPROXIMATE',data_confidence:'UNVERIFIED',discovery_status:'DOCUMENTATION_REQUIRED',last_updated:null,
     positionConfidence:'UNKNOWN',dimensions:null,configuration:null,components:[],
-    sources:[{id:'SOURCE-PROMPT-01',title:'Master prompt yang diberikan pengguna',
+    sources:[{id:'SOURCE-PROMPT-01',title:'Instruksi utama yang diberikan pengguna',
       file:'NewPrompt-MASTER_PROMPT_3D_FACTORY_DIGITAL_TWIN_OFFSET5_HEIDELBERG_SPEEDMASTER_CD102-8L.txt',
       section:'Bagian 2 dan 15',type:'USER_PROVIDED',confidence:'HIGH CONFIDENCE',verification:'USER_ASSERTED',
       supports:['asset_id','asset_code','model','description','source_description','manufacturer','specification'],
-      note:'Identitas dinyatakan di prompt. Foto, manual, DWG, dimensi, dan konfigurasi terpasang belum tersedia.'},{id:'SOURCE-USER-CODENAME-01',title:'Kode nama aset dari pengguna',type:'USER_PROVIDED',confidence:'HIGH CONFIDENCE',verification:'USER_ASSERTED',supports:['codename','description'],note:'Pengguna mengonfirmasi bahwa kode nama OFFSET 5 adalah OFU-1. Pernyataan ini tidak menetapkan koordinat CAD.'}]
+      note:'Identitas dinyatakan dalam instruksi pengguna. Foto, manual, DWG, dimensi, dan konfigurasi terpasang belum tersedia.'},{id:'SOURCE-USER-CODENAME-01',title:'Kode nama mesin dari pengguna',type:'USER_PROVIDED',confidence:'HIGH CONFIDENCE',verification:'USER_ASSERTED',supports:['codename','description'],note:'Pengguna mengonfirmasi bahwa kode nama OFFSET 5 adalah OFU-1. Pernyataan ini tidak menetapkan koordinat CAD.'}]
   },
   layout:null
 };
