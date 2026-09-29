@@ -123,3 +123,52 @@ test('V266 uses machine or equipment wording across chooser status and fallbacks
   'Profil penutup dan jalur mekanisme'
  ])assert.ok(app.includes(copy),copy);
 });
+
+
+test('V266 resumed audit removes remaining mixed language from machine detail panels',()=>{
+ for(const copy of [
+  'Pilih mesin dari daftar mesin','TUMPUKAN HASIL','REEL MASUK',
+  'Batas dimensi referensi','Batas dimensi struktur','Batas dimensi termasuk area servis',
+  'Jarak antarunit (pitch)','Jarak modul berulang (pitch)',
+  'KELUARGA SP 102','AKHIRAN MODEL BELUM TERKONFIRMASI',
+  'Functional Location (lokasi fungsional)','ID mesin (Machine ID)',
+  'Troli','Palet','Sistem udara bertekanan'
+ ])assert.ok(runtime.includes(copy),copy);
+ for(const oldCopy of [
+  'Pilih mesin dari daftar aset','Envelope referensi','Envelope struktur','Envelope termasuk area servis',
+  'Pitch modul','referensi legacy','suffix mesin','baseline visual','OUTPUT / STACKER','INPUT REEL',
+  'Trolley','Pallet','SP 102 FAMILY','SUFFIX BELUM TERKONFIRMASI','LEXUS HSM56 VISUAL REF'
+ ])assert.equal(runtime.includes(oldCopy),false,oldCopy);
+});
+
+test('V266 presentation layer localizes internal evidence and model status codes',()=>{
+ for(const copy of [
+  'Model 3D dibuat dari foto aktual dan dokumen yang tersedia',
+  'Model 3D dibuat berdasarkan dokumen teknis yang tersedia',
+  'Model 3D dibuat dari database BMJ dan referensi lama keluarga mesin',
+  'Model 3D khusus dibuat dari rekonstruksi foto aktual BMJ',
+  'Bukti aktual BMJ tersedia','Dokumen resmi tersedia','Referensi keluarga SP 102 tersedia',
+  'Foto aktual BMJ menjadi sumber utama; referensi proses keluarga HSM menjadi sumber pendukung',
+  'Mesin produksi','Printing offset','Render 3D belum tersedia','Anotasi sumber; perlu ditinjau'
+ ])assert.ok(display.includes(copy),copy);
+});
+
+test('V266 editor-facing source labels do not leak internal English scene names',()=>{
+ for(const copy of [
+  'Konteks pabrik','Studio inspeksi — bukan pabrik','Lantai pabrik DXF',
+  'Batas analisis OFU-1 termasuk area servis','Kandidat badan struktur OFU-1',
+  'detail Digital Twin pabrik','Instruksi utama yang diberikan pengguna','Kode nama mesin dari pengguna'
+ ])assert.ok(runtime.includes(copy),copy);
+ for(const oldCopy of [
+  'Factory context','Inspection studio — not factory','DXF factory floor',
+  'service-inclusive analysis envelope','structural body candidate','detailed factory twin',
+  'Master prompt yang diberikan pengguna','Kode nama aset dari pengguna'
+ ])assert.equal(runtime.includes(oldCopy),false,oldCopy);
+});
+
+test('V266 keeps machine terminology when translation would reduce technical accuracy',()=>{
+ for(const technicalTerm of [
+  'SideLay','gripper','rollstand','opposed chuck','lift-table stacker',
+  'Functional Location','DWG','CAD','WebGL','UV','shadow map','environment lighting'
+ ])assert.ok(runtime.includes(technicalTerm),technicalTerm);
+});
