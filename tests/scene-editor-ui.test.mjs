@@ -147,7 +147,7 @@ test('V264 editor preview is fully read-only and uses the last persisted state',
 });
 
 test('V264 editor guards hidden deleted locked and isolated objects consistently',()=>{
- assert.match(app,/const isTransformBlocked=\(\)=>\{const value=current\(\);return !selected\|\|previewOriginal\|\|!value\|\|value\.locked\|\|value\.deleted\|\|value\.visible===false;\}/);
+ assert.match(app,/const isTransformBlocked=\(\)=>\{const value=current\(\);return editorBusy\|\|!selected\|\|previewOriginal\|\|!value\|\|value\.locked\|\|value\.deleted\|\|value\.visible===false;\}/);
  assert.doesNotMatch(app,/\btransformBlocked\(\)/);
  assert.match(app,/engine\.onSceneTransform=\(\)=>\{if\(!isTransformBlocked\(\)\)/);
  assert.match(app,/if\(hiding&&isolated\)\{isolated=false;isolationGuard\.restore\(\);\}/);
