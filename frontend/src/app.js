@@ -25,7 +25,7 @@ import {assetTruth,connectionTruth,layoutTruth,positionVerification,truthStatus}
 import {readableStatus} from './display-language.js';
 import {buildDwgFidelityLedger} from './data/dwg-fidelity.js';
 import {RENDER_PROFILE_INFO,RENDER_PROFILE_ORDER,recommendedProfile} from './render/render-config.js';
-import {APP_BUILD,getState as getAppState,setDomainState,setSimulation as setAppSimulation,setInspector as setAppInspector,setBoot as setAppBoot,setPreference,readUrlState,buildContextUrl} from './state/app-state.js';
+import {APP_BUILD,getState as getAppState,setDomainState,setSimulation as setAppSimulation,setInspector as setAppInspector,setBoot as setAppBoot,setPreference,readUrlState,buildContextUrl,closeOverlay as closeAppOverlay} from './state/app-state.js';
 const MACHINE_ROUTE_BY_ID=Object.freeze({
  'BMJ-MCH-0002':'sheeting',
  [FOUNDATION_SCOPE.referenceMachineId]:'offset5',
@@ -1017,7 +1017,7 @@ function assetDialog(initialQuery='',{intent='browse'}={}){
 function openSceneEditor(){
  if(role!=='superadmin'||!engine?.actualFactory)return toast('Untuk mengedit pabrik, masuk sebagai Superadmin dan buka tampilan 3D.',true);
  const existingPanel=document.querySelector('#scene-editor-panel');if(existingPanel){existingPanel.querySelector('#se-search,button')?.focus();return toast('Pengeditan pabrik 3D sudah terbuka.');}
- setView('factory');setAppInspector(false,'overview');engine.setSceneEditing(true);engine.gizmo.setMode('translate');
+ setView('factory');closeAppOverlay();setAppInspector(false,'overview');engine.setSceneEditing(true);engine.gizmo.setMode('translate');
  const baseline=new Map([...engine.sceneObjects].map(([id,node])=>[id,{position:node.position.toArray(),rotation:[node.rotation.x,node.rotation.y,node.rotation.z],scale:node.scale.toArray(),visible:node.visible}]));
  const cloneOverrides=value=>JSON.parse(JSON.stringify(value||{}));
  const stableJson=value=>JSON.stringify(value??null,(key,item)=>item&&typeof item==='object'&&!Array.isArray(item)?Object.fromEntries(Object.keys(item).sort().map(name=>[name,item[name]])):item);
