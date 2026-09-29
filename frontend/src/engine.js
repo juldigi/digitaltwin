@@ -41,7 +41,7 @@ const neutralTemplate=()=>{
 export function buildLowDetailFactory(layout,fleet){
   const root=new THREE.Group();root.name='BMJ · mobile low-detail factory';
   const layers={};
-  for(const name of ['building','floor','walls','doors','windows','air_curtain','furniture','roof','machines','labels','landscape','reference','unidentified','utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors']){
+  for(const name of ['building','ipal','floor','walls','doors','windows','air_curtain','furniture','roof','machines','labels','landscape','reference','unidentified','utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors']){
     layers[name]=new THREE.Group();layers[name].name=name;root.add(layers[name]);
   }
   layers.roof.visible=false;layers.labels.visible=false;layers.landscape.visible=false;layers.reference.visible=false;
