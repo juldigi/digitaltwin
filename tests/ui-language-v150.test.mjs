@@ -16,8 +16,8 @@ test('V150 asset and reference copy is human-first without changing technical so
   assert.equal(app.includes('<small>ASSET BROWSER</small>'),false);
   assert.equal(app.includes('<span>Merek</span>'),false);
   assert.equal(app.includes("nodes.length+' komponen '+activeMachine.name+' ditampilkan'"),true);
-  assert.equal(app.includes('Gambar / Denah'),true);
-  assert.equal(app.includes('Bukti / Sumber'),true);
+  assert.equal(app.includes('Gambar dan denah'),true);
+  assert.equal(app.includes('Bukti dan sumber'),true);
   assert.equal(app.includes('sisi operator'),true);
   assert.equal(app.includes('sisi penggerak'),true);
   assert.match(app,/TECHNICAL_SOURCES/);
@@ -30,14 +30,14 @@ test('V150 contextual help follows active workspace and avoids implementation ja
   for(const section of ['simulation','reference','asset'])assert.equal(app.includes("section==='"+section+"'"),true,section);
   assert.equal(app.includes("section==='system'"),false,'system help context must stay out of Phase-1');
   assert.match(app,/PANDUAN KONTEKSTUAL/);
-  assert.match(app,/Kejujuran data/);
+  assert.match(app,/Kejelasan status data/);
   assert.equal(app.includes('memakai simulation engine mesin yang sedang aktif'),false);
   assert.equal(app.includes('Klik node sampai enam tingkat'),false);
 });
 
 test('V150 settings expose only real controls and keep label state synchronized',()=>{
   assert.match(app,/modal\('Pengaturan'/);
-  assert.match(app,/Optimasi untuk perangkat dengan performa terbatas/);
+  assert.match(app,/Optimalkan untuk perangkat dengan performa terbatas/);
   assert.match(app,/Tampilkan nama mesin dan area/);
   assert.match(app,/engine\?\.setQualityProfile/);
   assert.match(app,/const labels=Boolean\(e\.target\.checked\);setDomainState\(\{visibleLayers:\{labels\}\}\);if\(engine\)engine\.labels=labels/);
