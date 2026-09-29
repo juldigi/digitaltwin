@@ -18,6 +18,7 @@ test('V262 mobile navigation exposes core destinations plus a complete phone-nat
  }
  assert.match(shell,/if\(key==='view'\)\{openLayerManager\(\);\}/);
  assert.match(shell,/syncMobileFeatureHub/);
+ assert.match(shell,/focusOverlay\(rail,'\[data-mobile-action="search"\]'\)/);
  assert.match(shell,/bmj:mobilefactoryrequest/);
  assert.match(shell,/bmj:mobileassetrequest/);
  assert.doesNotMatch(shell,/MOBILE_TARGET/);
