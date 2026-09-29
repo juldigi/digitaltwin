@@ -245,7 +245,7 @@ export class FactoryEngine {
   setPrintingSimulationSpeed(value){return this.simulation?.setSpeed(value);}
   setPrintingSimulationPathVisible(on){return this.simulation?.setPathVisible(on);}
   setPrintingSimulationInkFlowVisible(on){return this.simulation?.setInkFlowVisible(on);}
-  getPrintingSimulationState(){return this.simulation?.state()||{available:false,blocked:true,blockedReason:'Simulasi belum tersedia untuk aset ini.',active:false,running:false,paused:false,speed:1,stage:null,completed:0,progress:0,sheetsVisible:0,rotorCount:0};}
+  getPrintingSimulationState(){return this.simulation?.state()||{available:false,blocked:true,blockedReason:'Simulasi belum tersedia untuk mesin atau peralatan ini.',active:false,running:false,paused:false,speed:1,stage:null,completed:0,progress:0,sheetsVisible:0,rotorCount:0};}
   isPrintingSimulationActive(){return !!this.simulation?.active;}
   setView(view,state){if(view!=='machine'&&this.simulation?.active)this.simulation.stop();this.view=view;this.syncVisualSystems();if(!this.sceneEditing)this.gizmo.detach();this.template.reset();this.clearPartLabels();this.isolated=false;this.machine.position.set(0,0,0);this.machine.rotation.set(0,0,0);this.machine.scale.setScalar(1);this.studio.visible=view==='machine';this.factory.visible=view==='factory';if(view==='machine')this.shadows.focusBounds(this.machineFocusBounds()||new THREE.Box3().setFromObject(this.machine));else this.shadows.reset();if(this.factorySelectionHelper)this.factorySelectionHelper.visible=view==='factory';
     if(view==='factory')this.applyPlacement(state,this.layout||state.layout);else{this.machine.visible=true;this.applySceneOverrides(state?.sceneOverrides||this.sceneOverrides||{});}
@@ -548,8 +548,8 @@ export class FactoryEngine {
   }
   async switchMachine(key){
     const requested=normalizeFoundationMachineKey(key);
-    if(!requested){this.onError?.('Pilih aset sebelum membuka model 3D.');return false;}
-    if(!canOpenTechnical3D(requested)){this.onError?.('Model 3D untuk aset ini belum tersedia.');return false;}
+    if(!requested){this.onError?.('Pilih mesin atau peralatan sebelum membuka model 3D.');return false;}
+    if(!canOpenTechnical3D(requested)){this.onError?.('Model 3D untuk mesin atau peralatan ini belum tersedia.');return false;}
     if(this.machineKey===requested)return true;
     if(this.simulation?.active)this.simulation.stop();
     const {createPolishedMachineTemplate,createMachineSimulation}=await import('./machine-runtime.js');
