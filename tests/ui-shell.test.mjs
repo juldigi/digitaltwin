@@ -349,7 +349,7 @@ test('v57 opens Sheeting Lexus as a dedicated right-to-left twin',()=>{
   assert.match(app,/MACHINE_ROUTE_BY_ID/);
   assert.match(app,/SHEETING LEXUS/);
   assert.match(app,/RIGHT → LEFT/);
-  assert.match(app,/Simulasi Proses Sheeting/);
+  assert.match(app,/Simulasi proses Sheeting/);
   assert.match(runtime,/SheetingMachineTemplate/);
   assert.match(runtime,/SheetingProcessSimulation/);
   assert.match(runtime,/if\(k==='sheeting'\)return new SheetingMachineTemplate\(\)/);
