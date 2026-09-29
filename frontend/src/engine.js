@@ -109,7 +109,7 @@ export class FactoryEngine {
     this.requestedQuality='auto';this.qualityProfile=resolveProfile('auto',this.capabilities);
     this.adaptiveQuality=new AdaptiveQuality(()=>{if(this.requestedQuality==='auto'&&this.qualityProfile!=='hemat')this.applyQualityProfile('hemat');});
     configureRenderer(this.renderer,{profile:this.qualityProfile,devicePixelRatio});
-    container.appendChild(this.renderer.domElement);this.renderer.domElement.setAttribute('aria-label','Digital Twin 3D Pabrik Packaging Offset. Pilih mesin untuk membuka model detail.');this.renderer.domElement.setAttribute('tabindex','0');
+    container.appendChild(this.renderer.domElement);this.renderer.domElement.setAttribute('aria-label','Tampilan 3D pabrik Packaging Offset. Pilih mesin untuk membuka model 3D secara rinci.');this.renderer.domElement.setAttribute('tabindex','0');
     this.scene=new THREE.Scene();this.scene.background=new THREE.Color(0xe8eef2);
     this.camera=new THREE.PerspectiveCamera(38,1,.05,1e7);
     this.environment=new EnvironmentSystem(this.renderer,this.scene);
@@ -204,9 +204,9 @@ export class FactoryEngine {
     for(const [index,item] of [...selected,...others].entries()){
       const label=document.createElement('button');label.type='button';label.className='part-label'+(item.selected?' is-selected':'')+(!item.mapped?' is-reference':'');label.title=item.name;
       const name=document.createElement('span');name.className='part-label-name';name.textContent=item.name;label.append(name);
-      const meta=document.createElement('span');meta.className='part-label-meta';meta.textContent=item.meta?('L'+item.meta.level+(item.childCount?' · buka detail':item.mapped?' · komponen':' · referensi')):'Komponen 3D';label.append(meta);
+      const meta=document.createElement('span');meta.className='part-label-meta';meta.textContent=item.meta?('L'+item.meta.level+(item.childCount?' · buka rincian':item.mapped?' · komponen':' · referensi')):'Komponen 3D';label.append(meta);
       if(item.meta){
-        label.dataset.taxonomyId=item.meta.id;label.setAttribute('aria-label',item.name+', tingkat '+item.meta.level+(item.childCount?', buka detail berikutnya':''));
+        label.dataset.taxonomyId=item.meta.id;label.setAttribute('aria-label',item.name+', tingkat '+item.meta.level+(item.childCount?', buka rincian berikutnya':''));
         label.addEventListener('pointerdown',event=>event.stopPropagation());
         label.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();this.onTaxonomySelect?.(item.meta.id);});
       }else label.disabled=true;
@@ -298,7 +298,7 @@ export class FactoryEngine {
         const assetPattern=/(CX\s*104|SX\s*52|Polar-115|MACHINE\s+IPM|MESIN\s+UV|CTP#\d+)/i;
         for(const label of l.identifiedLabels){
           const p=plantDisplayPoint(label.x,label.y,l),asset=assetPattern.test(label.text||'');
-          const marker=new THREE.Group();marker.name='CAD label · '+label.text;
+          const marker=new THREE.Group();marker.name='Label CAD · '+label.text;
           marker.position.set(p.x,.08,p.z);marker.userData={sourceType:'DXF_DERIVED_FROM_DWG',sourceFile:l.source.file,derivedFile:l.source.derivedFile,sourceLayer:label.layer,sourceEntityId:label.handle||null,semantic:asset?'ASSET_POSITION_PLACEHOLDER':'CAD_LABEL',confidence:'SOURCE_REFERENCE',engineeringScale:'UNKNOWN',label:label.text,sourceX:label.x,sourceY:label.y};
           const dot=new THREE.Mesh(new THREE.CircleGeometry(asset ? .38 : .20,16),new THREE.MeshBasicMaterial({color:asset?0x36a9e1:0x6f8793,transparent:true,opacity:asset ? .95 : .7,side:THREE.DoubleSide}));dot.rotation.x=-Math.PI/2;marker.add(dot);
           if(typeof document!=='undefined'){
@@ -332,7 +332,7 @@ export class FactoryEngine {
         }
         const a=plantDisplayPoint(f.cadCenterlineX,f.centerlineSpan.minY,l),b=plantDisplayPoint(f.cadCenterlineX,f.centerlineSpan.maxY,l);
         const center=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(a.x,.07,a.z),new THREE.Vector3(b.x,.07,b.z)]),new THREE.LineDashedMaterial({color:0xffcf8a,transparent:true,opacity:.7,dashSize:.8,gapSize:.45}));center.computeLineDistances();
-        center.name='OFU-1 CAD centerline';center.userData={sourceType:'DXF_GEOMETRIC_INFERENCE',assetCode:f.assetCode,confidence:f.placementConfidence,semantic:'CENTERLINE_REFERENCE'};this.factory.add(center);this.layoutStats.rendered++;
+        center.name='OFU-1 · garis tengah CAD';center.userData={sourceType:'DXF_GEOMETRIC_INFERENCE',assetCode:f.assetCode,confidence:f.placementConfidence,semantic:'CENTERLINE_REFERENCE'};this.factory.add(center);this.layoutStats.rendered++;
       }
       this.layoutStats.unimplemented=Math.max(0,this.layoutStats.total-this.layoutStats.rendered);
       return;
@@ -543,7 +543,7 @@ export class FactoryEngine {
     if(this.simulation?.active)this.simulation.stop();
     this.gizmo.detach();this.clearPartLabels();this.simulation?.dispose();this.template?.dispose();if(this.machine)this.scene.remove(this.machine);
     this.machineKey=null;this.template=neutralTemplate();this.machine=this.template.root;this.scene.add(this.machine);this.simulation=neutralSimulation();this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);
-    this.machine.visible=false;this.isolated=false;this.view='factory';this.syncVisualSystems();this.shadows.reset();this.studio.visible=false;this.factory.visible=true;this.renderer.domElement.setAttribute('aria-label','Digital Twin 3D Pabrik Packaging Offset. Pilih mesin untuk membuka model detail.');
+    this.machine.visible=false;this.isolated=false;this.view='factory';this.syncVisualSystems();this.shadows.reset();this.studio.visible=false;this.factory.visible=true;this.renderer.domElement.setAttribute('aria-label','Tampilan 3D pabrik Packaging Offset. Pilih mesin untuk membuka model 3D secara rinci.');
     this.applySceneOverrides(this.sceneOverrides||{});if(this.factory?.children?.length)this.fit(this.factory,'iso');this.resize();return true;
   }
   async switchMachine(key){
