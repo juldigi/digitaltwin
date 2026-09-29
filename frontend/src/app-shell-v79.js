@@ -400,7 +400,7 @@ document.addEventListener('click',event=>{
 },true);
 
 const menu=q('#ui-menu-toggle');
-menu?.addEventListener('click',()=>{const open=getState().overlay!=='navigation';document.body.classList.add('drawer-transitioning');if(open){beforeMajorOverlay('navigation');rememberOverlayFocus('navigation')}document.body.classList.toggle('nav-open',open);requestAnimationFrame(()=>document.body.classList.remove('drawer-transitioning'));menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Tutup navigasi':'Buka navigasi');if(open){openOverlay('navigation');focusOverlay(q('.rail'),'.rail button:not([hidden])')}else{closeOverlay();restoreOverlayFocus('navigation','#ui-menu-toggle')}});
+menu?.addEventListener('click',()=>{const open=getState().overlay!=='navigation';document.body.classList.add('drawer-transitioning');if(open){beforeMajorOverlay('navigation');rememberOverlayFocus('navigation')}document.body.classList.toggle('nav-open',open);requestAnimationFrame(()=>document.body.classList.remove('drawer-transitioning'));menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Tutup navigasi':'Buka navigasi');if(open){openOverlay('navigation');focusOverlay(q('.rail'),matchMedia('(max-width:767px)').matches?'[data-mobile-action="search"]':'.rail button:not([hidden])')}else{closeOverlay();restoreOverlayFocus('navigation','#ui-menu-toggle')}});
 q('#ui-backdrop')?.addEventListener('click',()=>{
  const overlay=getState().overlay;
  if(overlay==='search')closeSearch();
@@ -421,7 +421,7 @@ qa('[data-mobile-nav]').forEach(button=>button.addEventListener('click',event=>{
   if(getState().overlay==='navigation'){closeDrawer();closeOverlay();return;}
   beforeMajorOverlay('navigation');rememberOverlayFocus('navigation');document.body.classList.add('nav-open');
   menu?.setAttribute('aria-expanded','true');button.setAttribute('aria-expanded','true');menu?.setAttribute('aria-label','Tutup navigasi');
-  openOverlay('navigation');const rail=q('.rail');if(rail)requestAnimationFrame(()=>focusOverlay(rail,'.rail button:not([hidden])'));return;
+  openOverlay('navigation');const rail=q('.rail');if(rail)requestAnimationFrame(()=>focusOverlay(rail,'[data-mobile-action="search"]'));return;
  }
  if(document.body.classList.contains('nav-open')){closeDrawer();if(getState().overlay==='navigation')closeOverlay();}
  if(key==='factory'){dispatchEvent(new CustomEvent('bmj:mobilefactoryrequest'));return;}
