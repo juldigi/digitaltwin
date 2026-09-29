@@ -19,7 +19,7 @@ test('V266 uses clear Indonesian for navigation controls editor and settings',()
  for(const copy of [
   'KONTROL SELULER','Kualitas dan lapisan','Hanya objek ini','Buka interior','Kembalikan kamera',
   'Data dan sumber','Status data dan sumber','Gerakkan bertahap saat diseret',
-  'Thread CPU yang terdeteksi','MESIN DAN PERALATAN','Bandingkan sebelum dan sesudah',
+  'Jumlah thread CPU yang terdeteksi','MESIN DAN PERALATAN','Bandingkan sebelum dan sesudah',
   'Posisi relatif terhadap induk (meter)','Rotasi relatif terhadap induk (derajat)','Kejelasan status data'
  ])assert.ok(runtime.includes(copy),copy);
 });
@@ -32,7 +32,7 @@ test('V266 removes legacy mixed-language UI wording while preserving useful tech
   'Status Data & Sumber','Sambungkan Data','Bersihkan Data Tersimpan','Informasi Sistem',
   'Ganti Kata Sandi','Simpan Kata Sandi','Buka Semua Cover','Tutup Interior',
   'Anchor tidak valid','Unit CAD tidak valid','harus angka finite',"'Running'",'MESIN & PERALATAN',
-  'Offline: berkas belum tersimpan.','Penampil 3D belum tersedia','menu Aset','RIGHT → LEFT','BMJ Machine Database','ditemukan pada registry.','Buka semua cover luar','Tutup kembali cover','tampilan cover','Identitas aset','Posisi aset','Penanda posisi aset','Nama area dan aset','Sejajarkan dengan aset lain','Pilih aset acuan','posisi aset pada denah','Aset belum memiliki konteks tata letak','Aset dipilih','Aset pabrik','Aset pada tautan','Simulasi proses untuk aset ini','Pilih satu aset','aset dapat dipilih','Kategori aset','Nama aset','Profil cover'
+  'Offline: berkas belum tersimpan.','Penampil 3D belum tersedia','menu Aset','RIGHT → LEFT','BMJ Machine Database','ditemukan pada registry.','Buka semua cover luar','Tutup kembali cover','tampilan cover','Identitas aset','Posisi aset','Penanda posisi aset','Nama area dan aset','Sejajarkan dengan aset lain','Pilih aset acuan','posisi aset pada denah','Aset belum memiliki konteks tata letak','Aset dipilih','Aset pabrik','Aset pada tautan','Simulasi proses untuk aset ini','Pilih satu aset','aset dapat dipilih','Kategori aset','Nama aset','Profil cover','Denah 2D · Aset terpilih','Objek terpilih ditandai pada denah','Fallback mesin aktif:','Registry mesin','Alur media & exposure','Thread CPU terdeteksi'
  ])assert.equal(runtime.includes(oldCopy),false,oldCopy);
  for(const technicalTerm of ['DWG','CAD','GPU','WebGL','UV','Superadmin','shadow map','environment lighting','SideLay','gripper'])assert.ok(runtime.includes(technicalTerm),technicalTerm);
 });
@@ -164,6 +164,18 @@ test('V266 editor-facing source labels do not leak internal English scene names'
   'service-inclusive analysis envelope','structural body candidate','detailed factory twin',
   'Master prompt yang diberikan pengguna','Kode nama aset dari pengguna'
  ])assert.equal(runtime.includes(oldCopy),false,oldCopy);
+});
+
+test('V266 keeps localized simulation markup valid and explanatory',()=>{
+ assert.equal(app.includes('<div<b>'),false);
+ assert.match(app,/<div><b>UV Curing System \(sistem curing UV\)<\/b>/);
+ assert.match(app,/Mulai simulasi Sheeting/);
+ assert.match(app,/Tampilkan garis acuan jalur proses/);
+ assert.match(app,/Simulasi kompresor memperlihatkan udara masuk/);
+ assert.match(app,/cooling coil \(koil pendingin\)/);
+ assert.match(app,/vacuum \(vakum\) menahan material/);
+ assert.match(app,/delivery \(keluaran\)/);
+ assert.match(app,/Model acuan tetap dapat diputar, difokuskan, dan dibuka strukturnya/);
 });
 
 test('V266 keeps machine terminology when translation would reduce technical accuracy',()=>{
