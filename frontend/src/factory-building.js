@@ -1316,13 +1316,13 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  }
 
  // IPAL is an outdoor process yard: concrete slab + open steel frame + roof, with no enclosing walls.
- const ipal=new T.Group();ipal.name='IPAL_OPEN_AIR_WATER_TREATMENT';ipal.userData={semantic:'IPAL_SYSTEM_LAYER_ROOT',layer:'ipal',independentFromBuildingStructure:true};layers.ipal.add(ipal);
+ const ipal=new T.Group();ipal.name='IPAL_OPEN_AIR_WATER_TREATMENT';ipal.userData={semantic:'IPAL_SYSTEM_LAYER_ROOT',layer:'ipal',independentFromBuildingStructure:true,ownsCanopyStructure:true,ownsCanopyRoof:true};layers.ipal.add(ipal);
  box(ipal,46.4,.08,-110.9,26.4,.16,14.1,0xaeb7b5).userData={semantic:'IPAL_CONCRETE_SLAB'};
  const ipalEquipment=[];
  const registerIpal=(o,semantic,bounds)=>{o.userData={...o.userData,semantic,accuracy:'FUNCTIONAL_WATER_TREATMENT_VISUALIZATION'};ipalEquipment.push({semantic,...bounds});return o;};
  for(const x of [33.5,38.7,43.9,49.1,54.3,59.3])for(const y of [104,117.8]){const post=box(ipal,x,2.25,-y,.18,4.5,.18,0x526b75);post.userData={semantic:'IPAL_OPEN_FRAME_COLUMN'};box(ipal,x,.12,-y,.48,.24,.48,0x7c898a);}
  const ridge=5.65,eave=4.5,half=7.15,slope=Math.atan2(ridge-eave,half),roofLen=Math.hypot(half,ridge-eave);
- for(const sign of [-1,1]){const roof=box(layers.roof,46.4,(ridge+eave)/2,-110.9-sign*half/2,26.7,.12,roofLen,0x78929a);roof.rotation.x=sign*slope;roof.userData={semantic:'IPAL_CANOPY_ROOF',openSides:true,eavesHeight:eave,ridgeHeight:ridge};}
+ for(const sign of [-1,1]){const roof=box(ipal,46.4,(ridge+eave)/2,-110.9-sign*half/2,26.7,.12,roofLen,0x78929a);roof.rotation.x=sign*slope;roof.userData={semantic:'IPAL_CANOPY_ROOF',openSides:true,eavesHeight:eave,ridgeHeight:ridge};}
  for(const x of [33.5,38.7,43.9,49.1,54.3,59.3]){line(ipal,new T.Vector3(x,4.5,-104),new T.Vector3(x,ridge,-110.9),.055,0x465f69);line(ipal,new T.Vector3(x,ridge,-110.9),new T.Vector3(x,4.5,-117.8),.055,0x465f69);}
  // Open-frame wall-plane X bracing: structural reference only, sides remain fully open.
  const ipalXs=[33.5,38.7,43.9,49.1,54.3,59.3];for(let i=1;i<ipalXs.length;i+=2){const xa=ipalXs[i-1],xb=ipalXs[i];for(const z of [-104,-117.8]){detail(line(ipal,new T.Vector3(xa,.55,z),new T.Vector3(xb,4.05,z),.022,0x60757d),'IPAL_X_BRACE_REFERENCE');detail(line(ipal,new T.Vector3(xb,.55,z),new T.Vector3(xa,4.05,z),.022,0x60757d),'IPAL_X_BRACE_REFERENCE');buildingDetailStats.ipalFrameBraces+=2;}}
@@ -1371,7 +1371,7 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  const flowArrow=(x,y,z,rotation=0)=>{const cone=new T.Mesh(new T.ConeGeometry(.13,.38,10),material(0x3ba5b0));cone.position.set(x,y,z);cone.rotation.z=-Math.PI/2;cone.rotation.y=rotation;cone.userData={semantic:'IPAL_FLOW_DIRECTION',accuracy:'FUNCTIONAL_WATER_TREATMENT_VISUALIZATION'};ipal.add(cone);};for(const p of [[40.5,.72,-107,0],[48.6,.82,-109,0],[55.3,.82,-111,0]])flowArrow(...p);
  for(const [x,z] of [[33.7,-117.45],[59.05,-117.45],[54.55,-113]]){const bollard=box(ipal,x,.45,z,.18,.9,.18,0xe2b428);bollard.userData={semantic:'IPAL_SAFETY_BOLLARD'};box(ipal,x,.58,z,.19,.12,.19,0x27343a);}
  for(const x of [38.7,49.1,59.3]){const fixture=box(ipal,x,4.18,-110.9,1.15,.09,.38,0xd8e3df);fixture.userData={semantic:'IPAL_WORK_LIGHT'};const glow=box(ipal,x,4.12,-110.9,.92,.025,.28,0xeaf4cf,0,.8);glow.userData={semantic:'IPAL_WORK_LIGHT_LENS'};}
- for(const z of [-103.9,-117.9]){const gutter=line(layers.roof,new T.Vector3(33.1,4.42,z),new T.Vector3(59.7,4.42,z),.055,0x526b75);gutter.userData={semantic:'IPAL_ROOF_GUTTER'};}for(const [x,z] of [[33.5,-103.9],[59.3,-117.9]]){const down=line(ipal,new T.Vector3(x,4.42,z),new T.Vector3(x,.18,z),.045,0x526b75);down.userData={semantic:'IPAL_ROOF_DOWNPIPE'};}
+ for(const z of [-103.9,-117.9]){const gutter=line(ipal,new T.Vector3(33.1,4.42,z),new T.Vector3(59.7,4.42,z),.055,0x526b75);gutter.userData={semantic:'IPAL_ROOF_GUTTER'};}for(const [x,z] of [[33.5,-103.9],[59.3,-117.9]]){const down=line(ipal,new T.Vector3(x,4.42,z),new T.Vector3(x,.18,z),.045,0x526b75);down.userData={semantic:'IPAL_ROOF_DOWNPIPE'};}
  for(const [x,z] of [[34.2,-118.0],[46.4,-118.0],[58.6,-118.0]]){const frame=new T.Mesh(new T.CylinderGeometry(.31,.31,.06,24),material(0x4d5b60));frame.position.set(x,.075,z);frame.userData={semantic:'IPAL_INSPECTION_MANHOLE_FRAME_REFERENCE',accuracy:'DRAINAGE_ACCESS_REFERENCE_NOT_AS_BUILT',researchVersion:'V204'};ipal.add(frame);const cover=new T.Mesh(new T.CylinderGeometry(.27,.27,.025,24),material(0x657278));cover.position.set(x,.115,z);cover.userData={semantic:'IPAL_INSPECTION_MANHOLE_COVER_REFERENCE',accuracy:'DRAINAGE_ACCESS_REFERENCE_NOT_AS_BUILT',researchVersion:'V204'};ipal.add(cover);for(let a=0;a<Math.PI*2;a+=Math.PI/4)line(ipal,new T.Vector3(x,.13,z),new T.Vector3(x+Math.cos(a)*.20,.13,z+Math.sin(a)*.20),.006,0x38464b);buildingDetailStats.ipalManholes++;}
 
  // V206 — corrected photo-topology reconstruction from the 15 actual IPAL images (IMG_2511..2525).
@@ -1477,19 +1477,19 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   const za=canopyZ0+(canopyZ1-canopyZ0)*ta,zb=canopyZ0+(canopyZ1-canopyZ0)*tb;
   const ya=canopyEave+canopyRise*Math.sin(Math.PI*ta),yb=canopyEave+canopyRise*Math.sin(Math.PI*tb);
   const len=Math.hypot(zb-za,yb-ya),translucent=i===3||i===8;
-  const roof=box(layers.roof,46.4,(ya+yb)/2,(za+zb)/2,26.7,.055,len+.035,translucent?0xc8d4cd:0x788c90,0,translucent?.58:1);
+  const roof=box(ipalPhoto,46.4,(ya+yb)/2,(za+zb)/2,26.7,.055,len+.035,translucent?0xc8d4cd:0x788c90,0,translucent?.58:1);
   roof.rotation.x=-Math.atan2(yb-ya,zb-za);
   photoTag(roof,translucent?'IPAL_PHOTO_TRANSLUCENT_ROOF_PANEL':'IPAL_PHOTO_CORRUGATED_CANOPY_ROOF',{openSides:true,roofForm:'SHALLOW_CURVED_SEGMENTED_TANGENTS'});
  }
  // Purlins run across the canopy at the same curved roof stations.
  for(let i=1;i<canopyArcSteps;i++){
   const t=i/canopyArcSteps,z=canopyZ0+(canopyZ1-canopyZ0)*t,y=canopyEave+canopyRise*Math.sin(Math.PI*t);
-  const p=line(layers.roof,new T.Vector3(33.25,y+.035,z),new T.Vector3(59.55,y+.035,z),.027,0x50636a);photoTag(p,'IPAL_PHOTO_ROOF_PURLIN');
+  const p=line(ipalPhoto,new T.Vector3(33.25,y+.035,z),new T.Vector3(59.55,y+.035,z),.027,0x50636a);photoTag(p,'IPAL_PHOTO_ROOF_PURLIN');
  }
  // Fine anti-sag/tie rods are intentionally slender and sparse.
  for(let x=35.0;x<59;x+=4.2){pline([x,4.34,canopyZ0],[x+3.0,5.08,-110.9],.010,0x4a555a,'IPAL_PHOTO_CANOPY_TIE_ROD');pline([x+3.0,5.08,-110.9],[x,4.34,canopyZ1],.010,0x4a555a,'IPAL_PHOTO_CANOPY_TIE_ROD');}
  for(const z of [canopyZ0,canopyZ1]){
-  const gutter=line(layers.roof,new T.Vector3(33.25,4.38,z),new T.Vector3(59.55,4.38,z),.050,0x53666c);photoTag(gutter,'IPAL_PHOTO_ROOF_GUTTER');
+  const gutter=line(ipalPhoto,new T.Vector3(33.25,4.38,z),new T.Vector3(59.55,4.38,z),.050,0x53666c);photoTag(gutter,'IPAL_PHOTO_ROOF_GUTTER');
  }
  for(const [x,z] of [[33.6,canopyZ0],[59.2,canopyZ1]])pline([x,4.38,z],[x,.18,z],.042,0x53666c,'IPAL_PHOTO_ROOF_DOWNPIPE');
  // Batched corrugation ridges: hundreds of visual ribs in one draw call, preserving mobile performance.
@@ -1503,7 +1503,7 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   }
  }
  const roofRibGeometry=new T.BufferGeometry();roofRibGeometry.setAttribute('position',new T.Float32BufferAttribute(roofRibPositions,3));
- const roofRibs=new T.LineSegments(roofRibGeometry,new T.LineBasicMaterial({color:0x687b7e,transparent:true,opacity:.58}));layers.roof.add(roofRibs);photoTag(roofRibs,'IPAL_PHOTO_CANOPY_CORRUGATION_RIBS',{batched:true,drawCallOptimized:true});
+ const roofRibs=new T.LineSegments(roofRibGeometry,new T.LineBasicMaterial({color:0x687b7e,transparent:true,opacity:.58}));ipalPhoto.add(roofRibs);photoTag(roofRibs,'IPAL_PHOTO_CANOPY_CORRUGATION_RIBS',{batched:true,drawCallOptimized:true});
  // Linear work lights hang below the canopy rather than floating at roof-sheet level.
  for(const x of [38.7,49.1,58.2])pbox(x,4.05,-110.9,1.15,.07,.30,0xd8e3df,'IPAL_PHOTO_WORK_LIGHT',0,1,{coreProcess:false});
 

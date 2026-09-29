@@ -35,9 +35,9 @@ test('V257 release manifest records one chronological implementation path with e
  for(const item of RELEASE_MANIFEST_V257.filter(x=>x.status==='merged'))assert.match(item.mergeCommit,/^[a-f0-9]{40}$/);
 });
 
-test('V258 application identity keeps the V257 release lineage while public shell cache contract remains stable',()=>{
- assert.equal(APP_BUILD,'2026.09.29-258');
- assert.match(state,/APP_BUILD='2026\.09\.29-258'/);
+test('V259 application identity keeps the V257 release lineage while public shell cache contract remains stable',()=>{
+ assert.equal(APP_BUILD,'2026.09.29-259');
+ assert.match(state,/APP_BUILD='2026\.09\.29-259'/);
  assert.match(sw,/const VERSION='factory-digital-twin-v249-cache-refresh-20260927'/);
  assert.match(sw,/const LEGACY_VERSION='factory-digital-twin-v222-overlay-state-ssot-20260925'/);
  assert.match(sw,/const RELEASE='222'/);
@@ -54,7 +54,7 @@ test('V240 through V248 controls coexist without parallel UI ownership',()=>{
  assert.match(shell,/data-transport-mode/);
  assert.match(shell,/Proses penuh/);
  assert.match(shell,/Tahap demi tahap/);
- assert.match(app,/Kualitas visual/);
+ assert.match(app,/Pilih kualitas/);
  assert.match(app,/Edit Pabrik 3D/);
  assert.match(app,/editorMoveStep=\.01/);
  assert.match(app,/undo=\[\],redo=\[\]/);

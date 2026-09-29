@@ -62,3 +62,21 @@ test('V258 hiding building structure does not hide the IPAL process yard',async(
  assert.equal(visibleThroughParents(ipal),true,'IPAL must remain visible through the complete parent chain');
  assert.equal(ipal.userData.independentFromBuildingStructure,true);
 });
+
+
+test('V259 IPAL canopy roof and steel stay owned by IPAL when building and global roof are hidden',async()=>{
+ const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
+ const built=buildActualFactory(layout,fleet),ipal=built.root.getObjectByName('IPAL_OPEN_AIR_WATER_TREATMENT');
+ assert.ok(ipal?.userData.ownsCanopyStructure);
+ assert.ok(ipal?.userData.ownsCanopyRoof);
+ const canopyPattern=/^IPAL_PHOTO_(?:CANOPY_COLUMN|CURVED_CANOPY_RAFTER|CORRUGATED_CANOPY_ROOF|TRANSLUCENT_ROOF_PANEL|ROOF_PURLIN|ROOF_GUTTER|CANOPY_CORRUGATION_RIBS)$/;
+ const canopy=[],leaked=[];
+ ipal.traverse(object=>{if(canopyPattern.test(String(object.userData?.semantic||'')))canopy.push(object);});
+ built.layers.roof.traverse(object=>{if(canopyPattern.test(String(object.userData?.semantic||'')))leaked.push(object);});
+ assert.ok(canopy.length>=20,'photo-derived IPAL canopy must remain present');
+ assert.equal(leaked.length,0,'IPAL canopy must not leak into the global factory roof layer');
+ const engine={actualFactory:built,setFactoryLayer(name,on){built.layers[name].visible=on;}};
+ syncFactoryLayerVisibility(engine,{building:false,roof:false,ipal:true});
+ const visibleThroughParents=object=>{for(let node=object;node;node=node.parent)if(node.visible===false)return false;return true;};
+ assert.ok(canopy.every(visibleThroughParents),'hiding main building/roof must not open the IPAL canopy');
+});

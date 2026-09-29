@@ -6,7 +6,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import { cadToWorld } from './model.js';
 import { plantDisplayPoint } from './data/plant-layout-data.js';
-import {RENDER_PROFILES,resolveProfile,configureRenderer} from './render/render-config.js';
+import {RENDER_PROFILES,recommendedProfile,resolveProfile,configureRenderer} from './render/render-config.js';
 import {createIndustrialLighting} from './render/lighting-system.js';
 import {createIndustrialMaterial} from './render/material-library.js';
 import {AdaptiveQuality} from './render/adaptive-quality.js';
@@ -101,10 +101,10 @@ export function buildLowDetailFactory(layout,fleet){
 export class FactoryEngine {
   constructor(container,onSelect){
     const mobileRender=matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse)').matches;
-    this.container=container;this.onSelect=onSelect;this.onTaxonomySelect=null;this.view='factory';this.layout=null;this.low=mobileRender;this.mobileRender=mobileRender;this.renderFaulted=false;this.labels=true;this.isolated=false;this.partLabelEntries=[];
+    this.container=container;this.onSelect=onSelect;this.onTaxonomySelect=null;this.view='factory';this.layout=null;this.low=mobileRender;this.mobileRender=mobileRender;this.renderFaulted=false;this.labels=true;this.isolated=false;this.partLabelEntries=[];this.factoryMachineTemplates=new Map();this.factoryDetailHydration=0;this.factoryDetailPromise=null;
     {const params=new URLSearchParams(location.search),requested=normalizeFoundationMachineKey(params.get('machine')||params.get('asset'));this.requestedMachineKey=requested;this.machineKey=null;}
     this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance',stencil:false,preserveDrawingBuffer:false});
-    this.capabilities={mobile:mobileRender,memory:navigator.deviceMemory||4,cores:navigator.hardwareConcurrency||4,maxTextureSize:this.renderer.capabilities.maxTextureSize};
+    {const reportedMemory=Number(navigator.deviceMemory),reportedCores=Number(navigator.hardwareConcurrency);this.capabilities={mobile:mobileRender,memory:Number.isFinite(reportedMemory)&&reportedMemory>0?reportedMemory:4,memoryReported:Number.isFinite(reportedMemory)&&reportedMemory>0?reportedMemory:null,cores:Number.isFinite(reportedCores)&&reportedCores>0?reportedCores:4,coresReported:Number.isFinite(reportedCores)&&reportedCores>0?reportedCores:null,maxTextureSize:this.renderer.capabilities.maxTextureSize};}
     this.requestedQuality='auto';this.qualityProfile=resolveProfile('auto',this.capabilities);
     this.adaptiveQuality=new AdaptiveQuality(()=>{if(this.requestedQuality==='auto'&&this.qualityProfile!=='hemat')this.applyQualityProfile('hemat');});
     configureRenderer(this.renderer,{profile:this.qualityProfile,devicePixelRatio});
@@ -256,11 +256,12 @@ export class FactoryEngine {
   }
   loadLayout(l){if(l===this.layout&&this.factory.children.length&&(!l?.fleet||this.loadedFleet===l.fleet))return;this.clearFactory();this.sceneBase=new WeakMap();this.appliedSceneIds=new Set();this.layout=l;if(!l)return;
     if(l.baselineId&&l.fleet){
-      // Low render resolution must not replace the real plant with block proxies.
-      // Retain the detailed scene on phones; the proxy is reserved for truly
-      // constrained devices that report no more than 2 GB of memory.
+      // Keep the proven lightweight building context only on severely memory-limited devices.
+      // Machine wrappers are still progressively replaced by the same polished templates used by "Buka Model 3D".
       this.actualFactory=this.capabilities?.memory<=2?buildLowDetailFactory(l,l.fleet):buildActualFactory(l,l.fleet);
-      this.factory.add(this.actualFactory.root);this.loadedFleet=l.fleet;this.layoutStats={total:l.source.entityCount,rendered:l.actual.walls.length,unimplemented:0};return;
+      this.factory.add(this.actualFactory.root);this.loadedFleet=l.fleet;this.layoutStats={total:l.source.entityCount,rendered:l.actual.walls.length,unimplemented:0};
+      void this.hydrateFactoryDetailedMachines?.(l,l.fleet);
+      return;
     }
     if(Array.isArray(l.referenceBatches)){
       this.layoutStats={total:l.source?.entityCount??l.referenceBatches.length,rendered:0,unimplemented:l.source?.entityCount??0};
@@ -363,7 +364,55 @@ export class FactoryEngine {
   currentFactoryTarget(){return this.factorySelectionId?this.actualFactory?.assets.get(this.factorySelectionId)||this.factory:this.factory;}
   focusFactorySelection(mode='iso'){const target=this.currentFactoryTarget();if(target)this.fit(target,mode);return target;}
   focusFactoryAsset(id,mode='operator'){return this.selectFactoryAsset(id,{focus:true,mode});}
-  clearFactory(){this.clearFactorySelection();this.actualFactory=null;this.factory.traverse(o=>{o.geometry?.dispose();if(Array.isArray(o.material))o.material.forEach(m=>{m.map?.dispose();m.dispose();});else{o.material?.map?.dispose();o.material?.dispose();}});this.factory.clear();}
+  disposeFactoryMachineTemplates(){
+    this.factoryDetailHydration++;
+    for(const entry of this.factoryMachineTemplates.values()){
+      entry.root?.removeFromParent?.();
+      entry.template?.dispose?.();
+    }
+    this.factoryMachineTemplates.clear();this.factoryDetailPromise=null;
+  }
+  clearFactory(){this.clearFactorySelection();this.disposeFactoryMachineTemplates();this.actualFactory=null;this.factory.traverse(o=>{o.geometry?.dispose();if(Array.isArray(o.material))o.material.forEach(m=>{m.map?.dispose();m.dispose();});else{o.material?.map?.dispose();o.material?.dispose();}});this.factory.clear();}
+  getRecommendedQualityProfile(){return recommendedProfile(this.capabilities);}
+  getQualityCapabilities(){return {...this.capabilities};}
+  async hydrateFactoryDetailedMachines(layout=this.layout,fleet=layout?.fleet){
+    const actual=this.actualFactory;if(!actual?.assets||!Array.isArray(fleet))return 0;
+    const generation=++this.factoryDetailHydration;
+    const run=(async()=>{
+      const {createPolishedMachineTemplate}=await import('./machine-runtime.js');
+      let mounted=0;
+      for(const record of fleet){
+        if(generation!==this.factoryDetailHydration||actual!==this.actualFactory)break;
+        const id=record?.placement?.machineId;if(!id||!canOpenTechnical3D(id)||this.factoryMachineTemplates.has(id))continue;
+        const wrapper=actual.assets.get(id);if(!wrapper)continue;
+        let template=null;
+        try{
+          template=createPolishedMachineTemplate(id);template.setLow?.(this.low);
+          const detail=template.root;detail.name=(wrapper.name||id)+' · detailed factory twin';
+          detail.position.set(0,0,0);detail.rotation.set(0,0,0);detail.scale.setScalar(1);
+          detail.userData={...detail.userData,machineId:id,factoryDetailedTwin:true,renderSource:'SAME_POLISHED_TEMPLATE_AS_MACHINE_VIEW'};
+          const proxies=[...wrapper.children];wrapper.add(detail);
+          for(const child of proxies){
+            wrapper.remove(child);
+            child.traverse?.(object=>{object.geometry?.dispose?.();if(Array.isArray(object.material))object.material.forEach(material=>{material.map?.dispose?.();material.dispose?.();});else{object.material?.map?.dispose?.();object.material?.dispose?.();}});
+          }
+          wrapper.userData={...wrapper.userData,renderStatus:'FULL_TECHNICAL_3D_SHARED_TEMPLATE',factoryDetailHydrated:true,factoryDetailSource:'createPolishedMachineTemplate',factoryProxyFallbackRemoved:true};
+          this.factoryMachineTemplates.set(id,{template,root:detail});mounted++;
+        }catch(error){
+          template?.dispose?.();
+          wrapper.userData={...wrapper.userData,factoryDetailHydrated:false,factoryDetailError:String(error?.message||error)};
+        }
+        await new Promise(resolve=>{if(typeof requestAnimationFrame==='function')requestAnimationFrame(()=>resolve());else queueMicrotask(resolve);});
+      }
+      if(generation===this.factoryDetailHydration&&actual===this.actualFactory){
+        actual.root.userData={...actual.root.userData,factoryDetailedMachineCount:this.factoryMachineTemplates.size,factoryMachineGeometryPolicy:'SAME_POLISHED_TEMPLATE_AS_MACHINE_VIEW__PROXY_ONLY_AS_PROGRESSIVE_FALLBACK'};
+        if(this.sceneEditing)this.registerSceneObjects();
+      }
+      return mounted;
+    })();
+    this.factoryDetailPromise=run;
+    try{return await run;}finally{if(this.factoryDetailPromise===run)this.factoryDetailPromise=null;}
+  }
   registerSceneObjects(){
     this.sceneObjects=new Map();this.sceneObjectIds=new WeakMap();
     const walk=(node,path)=>{
@@ -456,7 +505,7 @@ export class FactoryEngine {
     this.low=this.qualityProfile==='hemat';
     configureRenderer(this.renderer,{profile:this.qualityProfile,devicePixelRatio,shadowLight:this.key});
     this.syncVisualSystems();
-    this.template.setLow(this.low);this.resize();return this.qualityProfile;
+    this.template.setLow(this.low);for(const entry of this.factoryMachineTemplates.values())entry.template?.setLow?.(this.low);this.resize();return this.qualityProfile;
   }
   syncVisualSystems(){
     const machineView=this.view==='machine';
