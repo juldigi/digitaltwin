@@ -443,7 +443,14 @@ export class FactoryEngine {
     const old=node.getWorldPosition(new THREE.Vector3()),delta=center.sub(new THREE.Box3().setFromObject(node).getCenter(new THREE.Vector3()));
     node.parent.updateWorldMatrix(true,false);node.position.copy(node.parent.worldToLocal(old.add(delta)));return true;
   }
-  dropSceneObjectToFloor(id){const node=this.sceneObjects?.get(id);if(!node)return;const box=new THREE.Box3().setFromObject(node);node.position.y-=box.min.y;}
+  dropSceneObjectToFloor(id){
+    const node=this.sceneObjects?.get(id);if(!node)return false;
+    node.updateWorldMatrix(true,true);const box=new THREE.Box3().setFromObject(node);if(box.isEmpty())return false;
+    const worldDelta=-box.min.y;if(!Number.isFinite(worldDelta)||Math.abs(worldDelta)<1e-5)return false;
+    const world=node.getWorldPosition(new THREE.Vector3());world.y+=worldDelta;
+    if(node.parent){node.parent.updateWorldMatrix(true,false);node.position.copy(node.parent.worldToLocal(world));}else node.position.copy(world);
+    return true;
+  }
   moveSceneObjectInView(id,horizontal=0,vertical=0,step=.1){
     const node=this.sceneObjects?.get(id);if(!node||(!horizontal&&!vertical))return false;
     const forward=new THREE.Vector3();this.camera.getWorldDirection(forward);forward.y=0;if(forward.lengthSq()<1e-8)forward.set(0,0,-1);forward.normalize();
