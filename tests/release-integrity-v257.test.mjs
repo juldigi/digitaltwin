@@ -35,9 +35,9 @@ test('V257 release manifest records one chronological implementation path with e
  for(const item of RELEASE_MANIFEST_V257.filter(x=>x.status==='merged'))assert.match(item.mergeCommit,/^[a-f0-9]{40}$/);
 });
 
-test('V257 application identity is newer while public shell cache contract remains stable',()=>{
- assert.equal(APP_BUILD,'2026.09.29-257');
- assert.match(state,/APP_BUILD='2026\.09\.29-257'/);
+test('V258 application identity keeps the V257 release lineage while public shell cache contract remains stable',()=>{
+ assert.equal(APP_BUILD,'2026.09.29-258');
+ assert.match(state,/APP_BUILD='2026\.09\.29-258'/);
  assert.match(sw,/const VERSION='factory-digital-twin-v249-cache-refresh-20260927'/);
  assert.match(sw,/const LEGACY_VERSION='factory-digital-twin-v222-overlay-state-ssot-20260925'/);
  assert.match(sw,/const RELEASE='222'/);
@@ -66,6 +66,8 @@ test('V240 through V248 controls coexist without parallel UI ownership',()=>{
 
 test('V250 and V251 retain open IPAL topology with the requested exterior full-length wall vegetation',()=>{
  assert.match(building,/IPAL_OPEN_AIR_WATER_TREATMENT/);
+ assert.match(building,/layers\.ipal\.add\(ipal\)/);
+ assert.doesNotMatch(building,/b\.add\(ipal\)/);
  assert.match(building,/IPAL_PHOTO_VERTICAL_GARDEN_PLANT/);
  assert.match(building,/fullFrameLength:true/);
  assert.match(building,/v251IpalWallVegetationCoverage/);
