@@ -29,7 +29,7 @@ test('V150 contextual help follows active workspace and avoids implementation ja
   assert.match(app,/activeSection\|\|'factory'/);
   for(const section of ['simulation','reference','asset'])assert.equal(app.includes("section==='"+section+"'"),true,section);
   assert.equal(app.includes("section==='system'"),false,'system help context must stay out of Phase-1');
-  assert.match(app,/PANDUAN KONTEKSTUAL/);
+  assert.match(app,/PANDUAN SESUAI KONTEKS/);
   assert.match(app,/Kejelasan status data/);
   assert.equal(app.includes('memakai simulation engine mesin yang sedang aktif'),false);
   assert.equal(app.includes('Klik node sampai enam tingkat'),false);
