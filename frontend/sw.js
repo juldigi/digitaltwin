@@ -1,7 +1,7 @@
-// V262 mobile-first parity rotates the shell cache so the purpose-built phone UI replaces older cached chrome immediately.
+// V237 dedicated machine realism pass; V249 shell recache without rotating public query identifiers; V255 UI SSOT repair recaches the corrected canonical shell through the build fingerprint; V262 rotates the internal shell cache for mobile-first parity.
 const LEGACY_VERSION='factory-digital-twin-v222-overlay-state-ssot-20260925';
 const VERSION='factory-digital-twin-v262-mobile-parity-20260929';
-const RELEASE='262';
+const RELEASE='222';
 const BUILD_FINGERPRINT='SOURCE';
 const ENTRYPOINTS=[
  './app-shell-v79.css','./src/app.js','./src/ui-v5.js','./src/experience-v37.js','./src/app-shell-v79.js'
