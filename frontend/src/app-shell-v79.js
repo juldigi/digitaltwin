@@ -1,5 +1,6 @@
 import{getState,setState,setActiveSection,setViewMode,setLayer,setSimulation,setInspector,setPreference,openOverlay,closeOverlay,subscribe}from'./state/app-state.js';
 import{FOUNDATION_SCOPE,canOpenTechnical3D}from'./data/foundation-scope.js';
+import{RENDER_PROFILE_INFO,RENDER_PROFILE_ORDER,recommendedProfile}from'./render/render-config.js';
 
 const q=(s,r=document)=>r.querySelector(s);
 // The 2D plan is a sibling of the 3D workspace. Keep this switch outside the
@@ -230,7 +231,7 @@ function openSystemBrowser(){
 function openSystemLayers(){openSystemBrowser()}
 function openLayerManager(){
  beforeMajorOverlay('layers');rememberOverlayFocus('layers');ensureLayerManager();
- const panel=q('#layer-manager');panel.hidden=false;document.body.classList.add('layer-open');openOverlay('layers');syncLayerControls();focusOverlay(panel,'[data-layer-close]');
+ const panel=q('#layer-manager');panel.hidden=false;document.body.classList.add('layer-open');openOverlay('layers');refreshCanonicalQualityGuide();syncLayerControls();focusOverlay(panel,'[data-layer-close]');
 }
 function enterSimulation(){
  beforeMajorOverlay('inspector');
@@ -409,18 +410,53 @@ function ensureSystemBrowser(){
  document.body.append(panel);q('[data-system-close]',panel)?.addEventListener('click',closeSystemBrowser);bindSystemFocus(panel);
 }
 function closeSystemBrowser({restoreFocus=true}={}){const panel=q('#system-browser');if(panel)panel.hidden=true;document.body.classList.remove('system-open');if(getState().overlay==='systems')closeOverlay();const state=getState();if(state.activeSection==='system'){const next=systemReturnSection||(state.sceneMode==='machine'?'asset':'factory');setActiveSection(next);markSection(next)}systemReturnSection=null;if(restoreFocus)restoreOverlayFocus('systems','#nav-systems');else overlayReturnFocus.delete('systems')}
+function qualityDeviceCapabilities(){
+ const mobile=matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse)').matches;
+ const reportedMemory=Number(navigator.deviceMemory),reportedCores=Number(navigator.hardwareConcurrency);
+ let maxTextureSize=4096;
+ try{
+  const canvas=document.createElement('canvas'),gl=canvas.getContext('webgl2',{powerPreference:'high-performance'})||canvas.getContext('webgl',{powerPreference:'high-performance'});
+  if(gl){const measured=Number(gl.getParameter(gl.MAX_TEXTURE_SIZE));if(Number.isFinite(measured)&&measured>0)maxTextureSize=measured;gl.getExtension('WEBGL_lose_context')?.loseContext?.();}
+ }catch{}
+ return {mobile,memory:Number.isFinite(reportedMemory)&&reportedMemory>0?reportedMemory:4,memoryReported:Number.isFinite(reportedMemory)&&reportedMemory>0?reportedMemory:null,cores:Number.isFinite(reportedCores)&&reportedCores>0?reportedCores:4,coresReported:Number.isFinite(reportedCores)&&reportedCores>0?reportedCores:null,maxTextureSize};
+}
+function qualityDeviceLabel(caps){return caps.mobile?'Ponsel / perangkat sentuh':innerWidth<=1180?'Tablet / layar menengah':'Desktop / laptop';}
+function qualityRecommendationMarkup(caps=qualityDeviceCapabilities()){
+ const recommended=recommendedProfile(caps),info=RENDER_PROFILE_INFO[recommended]||RENDER_PROFILE_INFO.seimbang;
+ const memory=caps.memoryReported?caps.memoryReported+' GB':'tidak dilaporkan browser',cores=caps.coresReported||caps.cores||'tidak diketahui';
+ return `<div class="quality-device-recommendation" data-quality-recommendation><div><small>REKOMENDASI PERANGKAT INI</small><strong>${escapeHtml(info.label)}</strong></div><p>Dipilih dari kemampuan perangkat yang sedang membuka aplikasi.</p><dl><div><dt>Perangkat</dt><dd>${escapeHtml(qualityDeviceLabel(caps))}</dd></div><div><dt>Memori</dt><dd>${escapeHtml(memory)}</dd></div><div><dt>Thread CPU</dt><dd>${escapeHtml(String(cores))}</dd></div><div><dt>Batas tekstur GPU</dt><dd>${escapeHtml(caps.maxTextureSize.toLocaleString('id-ID')+' px')}</dd></div></dl></div>`;
+}
+function qualityProfileDetailMarkup(requested,caps=qualityDeviceCapabilities()){
+ const recommended=recommendedProfile(caps),effective=requested==='auto'?recommended:requested;
+ const selected=RENDER_PROFILE_INFO[requested]||RENDER_PROFILE_INFO.auto,actual=RENDER_PROFILE_INFO[effective]||RENDER_PROFILE_INFO.seimbang;
+ const title=requested==='auto'?`Otomatis → ${actual.label}`:actual.label;
+ const difference=requested==='auto'?`Pada perangkat ini mode Otomatis memakai ${actual.label}. ${actual.difference}`:actual.difference;
+ return `<div class="quality-profile-detail-card" data-quality-profile-detail><strong>${escapeHtml(title)}</strong><p><b>Perbedaan utama:</b> ${escapeHtml(difference)}</p><p><b>Kelebihan:</b> ${escapeHtml(requested==='auto'?selected.pros:actual.pros)}</p><p><b>Kompromi / kekurangan:</b> ${escapeHtml(requested==='auto'?selected.cons:actual.cons)}</p></div>`;
+}
+function qualityOptionsMarkup(selected='auto',caps=qualityDeviceCapabilities()){
+ const recommended=recommendedProfile(caps);
+ return RENDER_PROFILE_ORDER.map(value=>{const info=RENDER_PROFILE_INFO[value],label=value==='auto'?`Otomatis · ${RENDER_PROFILE_INFO[recommended]?.label||'Seimbang'} untuk perangkat ini`:info.label+(value===recommended?' · Direkomendasikan':'');return `<option value="${value}" ${selected===value?'selected':''}>${escapeHtml(label)}</option>`;}).join('');
+}
+function refreshCanonicalQualityGuide(){
+ const panel=q('#layer-manager');if(!panel)return;
+ const state=getState(),caps=qualityDeviceCapabilities(),selected=state.preferences?.visualQuality||'auto';
+ const recommendation=q('[data-quality-recommendation]',panel),detail=q('[data-quality-profile-detail]',panel),select=q('#layer-render-quality',panel);
+ if(recommendation)recommendation.outerHTML=qualityRecommendationMarkup(caps);
+ if(select){select.innerHTML=qualityOptionsMarkup(selected,caps);select.value=selected;}
+ const current=q('[data-quality-profile-detail]',panel);if(current)current.outerHTML=qualityProfileDetailMarkup(selected,caps);
+}
 function ensureLayerManager(){
  if(q('#layer-manager'))return;
  const panel=document.createElement('section');panel.id='layer-manager';panel.className='canonical-layer-manager';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-labelledby','layer-manager-title');panel.setAttribute('tabindex','-1');
  const layerControls=GROUPS.map(([title,items])=>`<div class="canonical-layer-group"><h4>${title}</h4>${items.map(([key,label])=>`<label><span>${label}</span><input type="checkbox" data-canonical-layer="${key}"></label>`).join('')}</div>`).join('');
  panel.innerHTML=`<header><div><small>TAMPILAN</small><h3 id="layer-manager-title">Pengaturan Tampilan</h3></div><button type="button" data-layer-close class="icon-btn" aria-label="Tutup">${icon('close')}</button></header>
  <p id="layer-unavailable-note" role="status" hidden>Lapisan 3D memerlukan WebGL. Denah 2D tetap tersedia.</p>
- <div class="canonical-layer-group"><h4>Kualitas render 3D</h4><label><span>Pilih kualitas</span><select id="layer-render-quality" aria-label="Kualitas render 3D"><option value="auto">Otomatis</option><option value="hemat">Hemat</option><option value="seimbang">Seimbang</option><option value="tinggi">Tinggi</option><option value="engineering">Teknis</option><option value="cinematic">Sinematik</option></select></label><p>Kualitas tinggi menampilkan detail lebih tajam. Otomatis menyesuaikan kemampuan perangkat.</p></div>
+ <div class="canonical-layer-group quality-render-group"><h4>Kualitas render 3D</h4>${qualityRecommendationMarkup()}<label><span>Pilih kualitas</span><select id="layer-render-quality" aria-label="Kualitas render 3D">${qualityOptionsMarkup(getState().preferences?.visualQuality||'auto')}</select></label>${qualityProfileDetailMarkup(getState().preferences?.visualQuality||'auto')}</div>
  ${layerControls}
  <div class="canonical-layer-group unavailable"><h4>Tentang tampilan</h4><p>Pengaturan ini hanya mengubah apa yang terlihat di layar. Data sumber dan posisi objek tidak berubah.</p></div>`;
  document.body.append(panel);
  q('[data-layer-close]',panel)?.addEventListener('click',closeLayerManager);
- q('#layer-render-quality',panel)?.addEventListener('change',event=>{const profile=event.target.value;setPreference('visualQuality',profile);setPreference('lowDetail',profile==='hemat');dispatchEvent(new CustomEvent('bmj:qualitychange',{detail:{profile}}));});
+ q('#layer-render-quality',panel)?.addEventListener('change',event=>{const profile=event.target.value;setPreference('visualQuality',profile);setPreference('lowDetail',profile==='hemat');const caps=qualityDeviceCapabilities(),detail=q('[data-quality-profile-detail]',panel);if(detail)detail.outerHTML=qualityProfileDetailMarkup(profile,caps);event.target.innerHTML=qualityOptionsMarkup(profile,caps);event.target.value=profile;dispatchEvent(new CustomEvent('bmj:qualitychange',{detail:{profile}}));});
  qa('[data-canonical-layer]',panel).forEach(input=>input.addEventListener('change',()=>{
   const key=input.dataset.canonicalLayer,visible=input.checked;setLayer(key,visible);
   dispatchEvent(new CustomEvent('bmj:layerchange',{detail:{key,visible}}));
@@ -430,7 +466,7 @@ function syncLayerControls(){
  const state=getState(),unavailable=Boolean(q('#mode-3d')?.disabled);
  const note=q('#layer-unavailable-note');if(note)note.hidden=!unavailable;const systemNote=q('#system-unavailable-note');if(systemNote)systemNote.hidden=!unavailable;
  qa('[data-canonical-layer]').forEach(input=>{input.checked=Boolean(state.visibleLayers[input.dataset.canonicalLayer]);input.disabled=unavailable;input.title=unavailable?'Lapisan 3D memerlukan WebGL':''});
- const quality=q('#layer-render-quality');if(quality){quality.value=state.preferences?.visualQuality||'auto';quality.disabled=unavailable;}
+ const quality=q('#layer-render-quality');if(quality){refreshCanonicalQualityGuide();quality.disabled=unavailable;}
  qa('[data-system-focus]').forEach(button=>{button.disabled=unavailable;button.title=unavailable?'Fokus jalur 3D memerlukan WebGL':''});
 }
 function renderSystemContext(detail={}){
