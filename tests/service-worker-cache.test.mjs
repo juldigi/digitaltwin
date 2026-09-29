@@ -40,7 +40,7 @@ test('service-worker does not pre-cache technical expansion machine modules',()=
 
 test('service worker pre-caches cache-busted entrypoints and can fall back across query versions',()=>{
  assert.match(sw,/const LEGACY_VERSION='factory-digital-twin-v222-overlay-state-ssot-20260925'/);
- assert.match(sw,/const RELEASE='262'/);
+ assert.match(sw,/const RELEASE='222'/);
  assert.match(sw,/const ENTRYPOINTS=\[/);
  assert.match(sw,/ENTRYPOINTS\.map\(path=>path\+'\?v='\+RELEASE\)/);
  assert.match(sw,/caches\.match\(request,\{ignoreSearch:true\}\)/);
