@@ -131,7 +131,7 @@ test('V264 editor owns the application context while it is open',()=>{
  assert.match(app,/for\(const element of editorBackgroundTargets\)element\.inert=true/);
  assert.match(app,/for\(const \[element,wasInert\] of editorBackgroundInert\)element\.inert=wasInert/);
  assert.match(app,/update\(\);panel\.focus\(\{preventScroll:true\}\)/);
- assert.match(app,/document\.body\.classList\.remove\('scene-editor-open'\)/);
+ assert.match(app,/document\.body\.classList\.remove\('scene-editor-open','scene-editor-busy'\)/);
  assert.match(css,/body\.scene-editor-open \.rail button/);
  assert.match(css,/body\.scene-editor-open #panel-toggle/);
  assert.match(css,/body\.scene-editor-open \.mobile-nav/);
