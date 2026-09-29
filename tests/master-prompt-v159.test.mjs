@@ -24,7 +24,7 @@ test('OFFSET 5 overview carries all mandatory master-prompt truth fields',()=>{
   assert.ok(app.includes("pair('"+label+"'"),label+' missing from OFFSET 5 overview');
  }
  assert.match(app,/primaryTruth\.source3D/);
- assert.match(app,/Sebagian detail masih berupa perkiraan/);
+ assert.match(app,/primaryTruth\.detail3D/);
  assert.match(app,/primaryTruth\.operatingStatus/);
  assert.match(app,/primaryTruth\.healthScore/);
 });
