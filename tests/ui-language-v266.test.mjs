@@ -20,7 +20,7 @@ test('V266 uses clear Indonesian for navigation controls editor and settings',()
   'KONTROL SELULER','Kualitas dan lapisan','Hanya objek ini','Buka interior','Kembalikan kamera',
   'Data dan sumber','Status data dan sumber','Gerakkan bertahap saat diseret',
   'Thread CPU yang terdeteksi','MESIN DAN PERALATAN','Bandingkan sebelum dan sesudah',
-  'Posisi relatif terhadap induk (meter)','Kejelasan status data'
+  'Posisi relatif terhadap induk (meter)','Rotasi relatif terhadap induk (derajat)','Kejelasan status data'
  ])assert.ok(runtime.includes(copy),copy);
 });
 
@@ -28,7 +28,7 @@ test('V266 removes legacy mixed-language UI wording while preserving useful tech
  for(const oldCopy of [
   'VERSI MOBILE','VERSI SELULER','Kualitas & lapisan','Zoom masuk','Zoom keluar','Reset kamera',
   'Tampilkan Sendiri','Tampilkan sendiri','Buka Interior','Gerak bertahap saat drag',
-  'Gerak bertahap saat diseret','tidak dilaporkan browser','Thread CPU browser','Thread CPU yang dilaporkan peramban',
+  'Gerak bertahap saat diseret','Rotasi relatif induk (derajat)','tidak dilaporkan browser','Thread CPU browser','Thread CPU yang dilaporkan peramban',
   'Status Data & Sumber','Sambungkan Data','Bersihkan Data Tersimpan','Informasi Sistem',
   'Ganti Kata Sandi','Simpan Kata Sandi','Buka Semua Cover','Tutup Interior',
   'Anchor tidak valid','Unit CAD tidak valid','harus angka finite',"'Running'",'MESIN & PERALATAN',
