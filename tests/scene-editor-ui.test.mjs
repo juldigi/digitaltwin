@@ -219,6 +219,7 @@ test('factory editor list is registry-driven and all selected objects are precis
  assert.match(app,/id="se-step-size"/);
  assert.match(app,/id="se-delete-wall"/);
  assert.match(app,/historyKey=\(e\.metaKey\|\|e\.ctrlKey\)/);
+ assert.match(app,/e\.target\?\.closest\?\.\('button,summary,a,\[role="button"\]'\)\)return/);
  assert.match(app,/moveSceneObjectInView\(selected,horizontal,vertical,step\)/);
  assert.match(app,/document\.removeEventListener\('keydown',onEditorKeyDown\)/);
  assert.match(css,/\.se-machine-edit-note/);
