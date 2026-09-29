@@ -66,7 +66,7 @@
       <section id="plant-plan-2d" class="plant-plan-2d" aria-label="Denah 2D pabrik" hidden>
         <header><strong>Denah pabrik</strong><small id="dwg-context">Seluruh area</small></header>
         <canvas id="dwg-canvas" aria-label="Denah 2D pabrik"></canvas>
-        <div id="dwg-warning" class="dwg-warning">Posisi aset mengikuti denah yang tersedia.</div>
+        <div id="dwg-warning" class="dwg-warning">Posisi mesin dan peralatan mengikuti denah yang tersedia.</div>
       </section>
 
       <div class="viewport-mode-switch" role="group" aria-label="Mode tampilan"><button id="mode-2d" aria-pressed="false">2D</button><button id="mode-3d" class="active" aria-pressed="true">3D</button></div>
@@ -88,16 +88,16 @@
         </div>
       </div>
 
-      <div class="scene-caption"><span id="geometry-caption">Pabrik · Seluruh Area</span><span id="scene-hint">Putar: seret · Perbesar/perkecil: cubit atau gulir · Pilih komponen untuk melihat rincian</span></div>
+      <div class="scene-caption"><span id="geometry-caption">Pabrik · Seluruh area</span><span id="scene-hint">Putar: seret · Perbesar/perkecil: cubit atau gulir · Pilih komponen untuk melihat rincian</span></div>
 
     </section>
   </div>
 
-  <aside id="detail-panel" aria-label="Detail pilihan">
+  <aside id="detail-panel" aria-label="Detail objek terpilih">
     <div class="panel-top"><button id="context-back" class="context-back" type="button" aria-label="Kembali satu tingkat" hidden><span aria-hidden="true"></span><b>Kembali</b></button><span class="eyebrow">PILIHAN AKTIF</span><button id="close-panel" class="icon-btn" aria-label="Tutup detail"></button></div>
     <nav id="context-breadcrumb" class="context-breadcrumb" aria-label="Jejak konteks"><button type="button" data-breadcrumb-factory>Pabrik</button></nav>
     <div class="asset-preview"><span class="preview-lines"></span></div>
-    <div class="asset-heading"><div class="asset-icon">3D</div><div><h2>Detail pilihan</h2><p>Pilih mesin atau komponen untuk melihat informasi.</p></div><span class="chip">KONTEKS</span></div>
+    <div class="asset-heading"><div class="asset-icon">3D</div><div><h2>Detail objek terpilih</h2><p>Pilih mesin atau komponen untuk melihat informasi.</p></div><span class="chip">KONTEKS</span></div>
     <details class="evidence-status"><summary><span>Sumber informasi</span><strong id="evidence-summary">Memeriksa sumber…</strong></summary><div id="evidence-detail" class="evidence-detail"></div></details>
     <div class="inspector-actions" aria-hidden="true"></div>
     <div class="tabs" role="tablist" aria-label="Bagian detail"><button role="tab" aria-selected="true" aria-controls="panel-content" tabindex="0" data-tab="overview">Ringkasan</button><button role="tab" aria-selected="false" aria-controls="panel-content" tabindex="-1" data-tab="structure">Struktur</button><button role="tab" aria-selected="false" aria-controls="panel-content" tabindex="-1" data-tab="simulation">Simulasi</button><button role="tab" class="secondary-inspector-tab" aria-selected="false" aria-controls="panel-content" tabindex="-1" data-tab="data" hidden>Data</button><button role="tab" aria-selected="false" aria-controls="panel-content" tabindex="-1" data-tab="sources">Referensi</button></div>
