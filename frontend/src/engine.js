@@ -473,7 +473,7 @@ export class FactoryEngine {
     for(const id of this.appliedSceneIds||[]){const node=this.sceneObjects.get(id),v=node&&this.sceneBase.get(node);if(!v)continue;node.position.fromArray(v.position);node.rotation.set(...v.rotation);node.scale.fromArray(v.scale);node.visible=v.visible;}
     this.appliedSceneIds=new Set();
     for(const [id,v] of Object.entries(overrides)){
-      if(id.startsWith('copy:'))continue;
+      if(id.startsWith('copy:')||id.startsWith('new:'))continue;
       const node=this.sceneObjects.get(id);if(!node){this.staleSceneOverrides.push(id);continue;}
       if(v.identity&&v.identity!==sceneIdentity(node)){this.staleSceneOverrides.push(id);continue;}
       node.position.fromArray(v.position);node.rotation.set(...v.rotation);node.scale.fromArray(v.scale);node.visible=v.visible&&!v.deleted;
