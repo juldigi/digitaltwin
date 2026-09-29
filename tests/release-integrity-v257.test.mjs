@@ -35,10 +35,10 @@ test('V257 release manifest records one chronological implementation path with e
  for(const item of RELEASE_MANIFEST_V257.filter(x=>x.status==='merged'))assert.match(item.mergeCommit,/^[a-f0-9]{40}$/);
 });
 
-test('V265 application identity keeps the V257 lineage and rotates the shell for editor transaction lock',()=>{
- assert.equal(APP_BUILD,'2026.09.29-265');
- assert.match(state,/APP_BUILD='2026\.09\.29-265'/);
- assert.match(sw,/const VERSION='factory-digital-twin-v265-editor-transaction-lock-20260929'/);
+test('V266 application identity keeps the V257 lineage and rotates the shell for the language audit',()=>{
+ assert.equal(APP_BUILD,'2026.09.29-266');
+ assert.match(state,/APP_BUILD='2026\.09\.29-266'/);
+ assert.match(sw,/const VERSION='factory-digital-twin-v266-ui-language-eyd-20260929'/);
  assert.match(sw,/const LEGACY_VERSION='factory-digital-twin-v222-overlay-state-ssot-20260925'/);
  assert.match(sw,/const RELEASE='222'/);
  assert.match(sw,/const BUILD_FINGERPRINT='SOURCE'/);
@@ -55,7 +55,7 @@ test('V240 through V248 controls coexist without parallel UI ownership',()=>{
  assert.match(shell,/Proses penuh/);
  assert.match(shell,/Tahap demi tahap/);
  assert.match(app,/Pilih kualitas/);
- assert.match(app,/Edit Pabrik 3D/);
+ assert.match(app,/Edit pabrik 3D/);
  assert.match(app,/editorMoveStep=\.01/);
  assert.match(app,/undo=\[\],redo=\[\]/);
  assert.doesNotMatch(app,/openPartFocusPopover|closePartFocusPopover|machine-detail-shortcut|machine-simulation-shortcut|machine-part-shortcut/);
