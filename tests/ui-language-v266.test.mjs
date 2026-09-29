@@ -31,7 +31,7 @@ test('V266 removes legacy mixed-language UI wording while preserving useful tech
   'Status Data & Sumber','Sambungkan Data','Bersihkan Data Tersimpan','Informasi Sistem',
   'Ganti Kata Sandi','Simpan Kata Sandi','Buka Semua Cover','Tutup Interior',
   'Anchor tidak valid','Unit CAD tidak valid','harus angka finite',"'Running'",'MESIN & PERALATAN',
-  'Offline: berkas belum tersimpan.','Penampil 3D belum tersedia','menu Aset','RIGHT → LEFT','BMJ Machine Database','ditemukan pada registry.','Buka semua cover luar','Tutup kembali cover','tampilan cover','Identitas aset','Posisi aset','Nama area dan aset','Sejajarkan dengan aset lain','Pilih aset acuan','posisi aset pada denah','Aset belum memiliki konteks tata letak'
+  'Offline: berkas belum tersimpan.','Penampil 3D belum tersedia','menu Aset','RIGHT → LEFT','BMJ Machine Database','ditemukan pada registry.','Buka semua cover luar','Tutup kembali cover','tampilan cover','Identitas aset','Posisi aset','Penanda posisi aset','Nama area dan aset','Sejajarkan dengan aset lain','Pilih aset acuan','posisi aset pada denah','Aset belum memiliki konteks tata letak'
  ])assert.equal(runtime.includes(oldCopy),false,oldCopy);
  for(const technicalTerm of ['DWG','CAD','GPU','WebGL','UV','Superadmin','shadow map','environment lighting','SideLay','gripper'])assert.ok(runtime.includes(technicalTerm),technicalTerm);
 });
@@ -102,7 +102,7 @@ test('V266 finishes interior fallback and mapping wording in Indonesian',()=>{
 
 test('V266 replaces generic asset jargon with object and machine wording',()=>{
  for(const copy of [
-  'Identitas mesin atau peralatan','Posisi mesin dan peralatan','Nama area, mesin, dan peralatan',
+  'Identitas mesin atau peralatan','Posisi mesin dan peralatan','Penanda posisi mesin dan peralatan','Nama area, mesin, dan peralatan',
   'Sejajarkan dengan objek lain','Pilih objek acuan',
   'posisi mesin atau peralatan pada denah',
   'Mesin atau peralatan ini belum memiliki posisi tata letak yang dapat dibuka.'
