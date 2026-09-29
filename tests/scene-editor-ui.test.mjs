@@ -314,8 +314,9 @@ test('machine selection uses a clear factory-first flow before explicit 3D inspe
 test('V265 editor locks asynchronous transactions and rolls back failed machine loads',()=>{
  assert.match(app,/editorBusy=false/);
  assert.match(app,/panel\.setAttribute\('role','dialog'\)/);
- assert.match(app,/panel\.setAttribute\('aria-modal','true'\)/);
  assert.match(app,/panel\.setAttribute\('aria-busy','false'\)/);
+ assert.doesNotMatch(app,/panel\.setAttribute\('aria-modal','true'\)/);
+ assert.match(app,/id="se-status" aria-live="polite"/);
  assert.match(app,/const setEditorBusy=\(on,message=''\)=>/);
  assert.match(app,/document\.body\.classList\.toggle\('scene-editor-busy',editorBusy\)/);
  assert.match(app,/panel\.querySelectorAll\('button,input,select'\)\.forEach\(control=>control\.disabled=true\)/);
