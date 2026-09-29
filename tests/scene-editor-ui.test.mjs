@@ -43,7 +43,7 @@ test('scene editor layout is responsive and leaves canonical navigation reachabl
 
 
 test('V263 scene editor presents a simplified pick-adjust-save workflow',()=>{
- for(const label of ['Apa yang ingin diubah?','Atur objek','Simpan perubahan','Mesin','Dinding','Peralatan','Bangunan','Utilitas','Furnitur','Bagian Mesin','Jarak tiap klik','Geser sesuai arah layar','Taruh di lantai','Opsi lainnya','Pengaturan presisi','Bandingkan sebelum / sesudah','Alat teknis Superadmin'])assert.ok(app.includes(label),label);
+ for(const label of ['Apa yang ingin diubah?','Atur objek','Simpan perubahan','Mesin','Dinding','Peralatan','Bangunan','Utilitas','Furnitur','Bagian Mesin','Jarak tiap klik','Geser sesuai arah layar','Taruh di lantai','Opsi lainnya','Pengaturan presisi','Bandingkan sebelum dan sesudah','Alat teknis Superadmin'])assert.ok(app.includes(label),label);
  assert.match(app,/class="se-progress"/);
  assert.match(app,/primaryEditorCategories=editorCategories\.filter/);
  assert.match(app,/data-se-screen="up"/);
