@@ -65,6 +65,10 @@ test('V264 editor compares drafts against the last saved checkpoint',()=>{
  assert.ok(app.includes('engine.applySceneOverrides(savedOverrides)'));
  assert.ok(!app.includes("previewOriginal){engine.gizmo.detach();engine.applySceneOverrides({})"));
  assert.ok(app.includes('markSavedCheckpoint(overrides)'));
+ assert.ok(app.includes('const captureEditorBaseline=()=>new Map'));
+ assert.ok(app.includes('const refreshAssetNodeIndex=()=>'));
+ assert.ok(app.includes('refreshAssetNodeIndex();Object.keys(overrides).forEach'));
+ assert.ok(app.includes('baseline=captureEditorBaseline();applyIsolation()'));
  assert.ok(app.includes("previewOriginal||!hasUnsaved"));
  assert.ok(app.includes("objek memiliki perubahan baru"));
 });
