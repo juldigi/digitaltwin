@@ -5,6 +5,7 @@ import fs from 'node:fs';
 const read=path=>fs.readFileSync(new URL(path,import.meta.url),'utf8');
 const app=read('../frontend/src/app.js');
 const shell=read('../frontend/src/app-shell-v79.js');
+const css=read('../frontend/app-shell-v79.css');
 const state=read('../frontend/src/state/app-state.js');
 const html=read('../frontend/index.html');
 const experience=read('../frontend/src/experience-v37.js');
@@ -95,4 +96,21 @@ test('Stage 6 generic asset header does not present machine family as manufactur
  assert.doesNotMatch(app,/IS_GENERIC\?GENERIC_CONFIG\.label:'Belum memilih mesin'/);
  assert.doesNotMatch(app,/stage:MACHINE_KEY\?'Feeder':null/);
  assert.match(app,/simulation\.stage\|\|'Siap'/);
+});
+
+
+test('Stage 6 keeps canvas part selection inside the canonical inspector',()=>{
+ assert.doesNotMatch(html,/machine-quick-actions|machine-detail-shortcut|machine-simulation-shortcut|machine-part-shortcut/);
+ assert.doesNotMatch(css,/part-focus-popover|part-focus-options|machine-quick-actions/);
+ assert.doesNotMatch(app,/openPartFocusPopover|closePartFocusPopover|part-focus-popover|machine-detail-shortcut|machine-simulation-shortcut|machine-part-shortcut/);
+ assert.doesNotMatch(app,/document\.addEventListener\('keydown',event=>\{if\(event\.key==='Escape'\)/);
+ assert.match(app,/function selectPartFromCanvas\(part\)\{[\s\S]*path\.find\(node=>node\.level===2\)\|\|meta[\s\S]*selectTaxonomy\(first\.id\)/);
+});
+
+
+test('Stage 6 canonical shell stylesheet is structurally balanced',()=>{
+ const opens=[...css].filter(char=>char==='{').length;
+ const closes=[...css].filter(char=>char==='}').length;
+ assert.equal(opens,closes,'app-shell-v79.css must keep balanced rule braces');
+ assert.doesNotMatch(css,/@media\(max-width:767px\)\{@media\(max-width:767px\)\{\s*$/);
 });
