@@ -163,6 +163,25 @@ test('V264 editor parent and alignment controls cannot target invalid hierarchy 
  assert.ok(app.includes(".filter(([id])=>'asset:'+id!==selected).map"));
 });
 
+
+test('V264 editor has no orphan interactive controls',()=>{
+ const ids=['se-close','se-object','se-focus','se-isolate','se-edit-machine-parts','se-back-machine','se-parent','se-wall','se-hide','se-delete','se-delete-wall','se-lock','se-ground','se-duplicate','se-reset','se-remove-generated','se-restore-default','se-preview','se-undo','se-redo','se-save','se-export','se-load-file','se-history'];
+ for(const id of ids){
+  assert.ok(app.includes('id="'+id+'"'),id+' markup missing');
+  assert.ok(app.includes("querySelector('#"+id+"')"),id+' handler missing');
+ }
+ for(const attr of ['data-se-category','data-se-mode','data-se-screen','data-se-nudge','data-se-turn','data-se-align','data-se-add','data-se-key','data-wall-point','data-se-revision']){
+  assert.ok(app.includes(attr+'='),attr+' markup missing');
+  assert.ok(app.includes("querySelectorAll('["+attr+"]')"),attr+' handler missing');
+ }
+});
+
+test('V264 mobile editor keeps primary touch targets at least 44px',()=>{
+ assert.match(css,/@media\(max-width:767px\)\{[\s\S]*?#scene-editor-panel \.se-header button,[\s\S]*?#scene-editor-panel \.se-primary-tools button,[\s\S]*?#scene-editor-panel \.se-turn-row button,[\s\S]*?#scene-editor-panel \.se-save-bar button,[\s\S]*?\{min-height:44px\}/);
+ assert.match(css,/#scene-editor-panel \.se-direction-pad button,[\s\S]*?min-height:52px/);
+ assert.match(css,/#scene-editor-panel \.se-category-grid button\{min-height:46px/);
+});
+
 test('scene editor exposes real-world categories and keeps internal identifiers out of normal UI',()=>{
  assert.match(app,/editorCategories=\[/);
  for(const category of ['machines','walls','equipment','building','utilities','furniture'])assert.match(app,new RegExp("id:'"+category+"'"));
