@@ -291,7 +291,7 @@ test('v53 retains the document-grounded CX104 expansion asset while foundation r
   assert.match(app,/history\.pushState/);
   assert.doesNotMatch(app,/machine=\$\{route\}&v=50/);
   assert.match(app,/Tidak ada foto aktual Offset 10 yang tersedia/);
-  assert.match(app,/final drawing BMJ/);
+  assert.match(app,/final drawing \(gambar final\) BMJ/);
   assert.match(runtime,/Offset10CX104SpecialRealismTemplate/);
   assert.match(runtime,/Offset10CX104SpecialRealismSimulation/);
   assert.match(offset10,/o10-foilstar-superstructure/);
