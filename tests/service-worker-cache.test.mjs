@@ -26,7 +26,7 @@ test('service-worker Phase-1 shell cache references only deployable frontend fil
 });
 
 test('service-worker cache version advances with the Phase-1 foundation release',()=>{
- assert.match(sw,/factory-digital-twin-v255-ui-ssot-20260929/);
+ assert.match(sw,/factory-digital-twin-v249-cache-refresh-20260927/);
 });
 
 test('service-worker does not pre-cache technical expansion machine modules',()=>{
