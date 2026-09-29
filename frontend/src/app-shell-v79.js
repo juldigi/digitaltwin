@@ -440,13 +440,13 @@ q('#mode-2d')?.addEventListener('click',()=>{
 q('#mode-3d')?.addEventListener('click',()=>{const next=setViewMode('3d');applyViewModeDom(next);const section=getState().sceneMode==='machine'?'asset':'factory';stopSimulationForNavigation(section);setActiveSection(section);markSection(section);requestAnimationFrame(()=>{dispatchEvent(new Event('resize'));syncSimulationTransport()})});
 
 const GROUPS=PHASE1_FOUNDATION?[
- ['Bangunan',[['building','Struktur'],['floor','Lantai dan jalur'],['walls','Dinding'],['doors','Pintu'],['windows','Jendela dan kaca'],['airCurtain','Tirai PVC dan air curtain (referensi)'],['furniture','Isi ruangan dan material'],['roof','Atap']]],
+ ['Bangunan',[['building','Struktur'],['floor','Lantai dan jalur'],['walls','Dinding'],['doors','Pintu'],['windows','Jendela dan kaca'],['airCurtain','Tirai PVC dan air curtain (acuan)'],['furniture','Isi ruangan dan material'],['roof','Atap']]],
  ['Posisi mesin dan peralatan',[['machines','Penanda posisi mesin dan peralatan'],['labels','Label'],['unidentified','Area belum teridentifikasi']]],
  ['Sumber',[['reference','Garis denah sumber']]]
 ]:[
- ['Bangunan',[['building','Struktur'],['floor','Lantai dan jalur'],['walls','Dinding'],['doors','Pintu'],['windows','Jendela dan kaca'],['airCurtain','Tirai PVC dan air curtain (referensi)'],['furniture','Isi ruangan dan material'],['roof','Atap'],['landscape','Area luar']]],
+ ['Bangunan',[['building','Struktur'],['floor','Lantai dan jalur'],['walls','Dinding'],['doors','Pintu'],['windows','Jendela dan kaca'],['airCurtain','Tirai PVC dan air curtain (acuan)'],['furniture','Isi ruangan dan material'],['roof','Atap'],['landscape','Area luar']]],
  ['Produksi',[['machines','Mesin'],['labels','Label'],['unidentified','Area belum teridentifikasi']]],
- ['Utilitas',[['compressedAir','Pipa udara bertekanan (compressed air)'],['ahuPiping','Pipa AHU'],['ducting','Ducting AHU'],['utilityAnchors','Titik koneksi referensi']]],
+ ['Utilitas',[['compressedAir','Pipa udara bertekanan (compressed air)'],['ahuPiping','Pipa AHU'],['ducting','Ducting AHU'],['utilityAnchors','Titik koneksi acuan']]],
  ['Informasi',[['reference','Garis denah sumber']]]
 ];
 function systemSurfaceMarkup(){
@@ -694,8 +694,8 @@ function syncViewModeContext(state){
  const is2d=state.viewMode==='2d',hasAsset=Boolean(state.selectedAsset);
  syncViewModeText(q('#view-kicker'),'DENAH PABRIK · 2D',is2d);
  syncViewModeText(q('#view-subtitle'),hasAsset?'Objek terpilih ditandai pada denah pabrik':'Posisi mesin, area produksi, dan konteks pabrik',is2d);
- syncViewModeText(q('#geometry-caption'),hasAsset?'Denah 2D · Aset terpilih':'Denah 2D · Seluruh area',is2d);
- syncViewModeText(q('#scene-hint'),hasAsset?'Objek terpilih ditandai pada denah · pilih mesin atau peralatan lain melalui menu Mesin':'Pilih mesin atau peralatan melalui menu Mesin atau denah 2D.',is2d);
+ syncViewModeText(q('#geometry-caption'),hasAsset?'Denah 2D · Mesin atau peralatan terpilih':'Denah 2D · Seluruh area',is2d);
+ syncViewModeText(q('#scene-hint'),hasAsset?'Mesin atau peralatan terpilih ditandai pada denah · pilih yang lain melalui menu Mesin':'Pilih mesin atau peralatan melalui menu Mesin atau denah 2D.',is2d);
 }
 function syncPressedTools(state=getState()){
  const values={
