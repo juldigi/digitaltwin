@@ -304,7 +304,7 @@ test('Stage 5 synchronizes editor machine descriptor and preserves rerender cont
 
 test('machine selection uses a clear factory-first flow before explicit 3D inspection',()=>{
  assert.match(app,/async function openAssetContext\(machine\)\{[\s\S]*selectFactoryAssetContext\(machine,\{historyMode:'push',openDialog:true,focus:true\}\)/);
- assert.match(app,/Pilih satu aset untuk menyorot posisinya di pabrik/);
+ assert.match(app,/Pilih mesin atau peralatan untuk menyorot posisinya di pabrik/);
  assert.match(app,/asset-data-badge">Pilih di pabrik/);
  assert.match(app,/if\(item\.type==='machine'\)\{const record=MACHINE_REGISTRY_BY_ID\.get\(item\.machineId\);if\(record\)await openAssetContext\(record\);return;\}/);
  assert.match(app,/id="\$\{modelAvailable\?'open-machine-3d':'focus-layout-asset'\}"/);
