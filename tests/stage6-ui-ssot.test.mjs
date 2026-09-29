@@ -5,6 +5,7 @@ import fs from 'node:fs';
 const read=path=>fs.readFileSync(new URL(path,import.meta.url),'utf8');
 const app=read('../frontend/src/app.js');
 const shell=read('../frontend/src/app-shell-v79.js');
+const css=read('../frontend/app-shell-v79.css');
 const state=read('../frontend/src/state/app-state.js');
 const html=read('../frontend/index.html');
 const experience=read('../frontend/src/experience-v37.js');
