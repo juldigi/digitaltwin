@@ -35,9 +35,9 @@ test('V257 release manifest records one chronological implementation path with e
  for(const item of RELEASE_MANIFEST_V257.filter(x=>x.status==='merged'))assert.match(item.mergeCommit,/^[a-f0-9]{40}$/);
 });
 
-test('V259 application identity keeps the V257 release lineage while public shell cache contract remains stable',()=>{
- assert.equal(APP_BUILD,'2026.09.29-259');
- assert.match(state,/APP_BUILD='2026\.09\.29-259'/);
+test('V260 application identity keeps the V257 release lineage while public shell cache contract remains stable',()=>{
+ assert.equal(APP_BUILD,'2026.09.29-260');
+ assert.match(state,/APP_BUILD='2026\.09\.29-260'/);
  assert.match(sw,/const VERSION='factory-digital-twin-v249-cache-refresh-20260927'/);
  assert.match(sw,/const LEGACY_VERSION='factory-digital-twin-v222-overlay-state-ssot-20260925'/);
  assert.match(sw,/const RELEASE='222'/);
