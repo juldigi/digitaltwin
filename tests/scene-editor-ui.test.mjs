@@ -79,12 +79,15 @@ test('V264 lock state disables transform controls without blocking visibility st
 });
 
 test('V264 editor scopes controls to the selected object and scope',()=>{
- assert.ok(app.includes("editorScope==='factory'?`<button id=\"se-ground\""));
+ assert.ok(app.includes("canGround=Boolean(selected&&selectedVisible&&editorScope==='factory'&&['machines','furniture','uncategorized'].includes(editorCategory))"));
+ assert.ok(app.includes('${canGround?`<button id="se-ground"'));
+ assert.ok(app.includes("canScale=Boolean(selected&&selectedVisible&&editorScope==='factory'&&['furniture','uncategorized'].includes(editorCategory))"));
  assert.ok(app.includes("canDuplicate=Boolean(selected&&selectedVisible&&editorScope==='factory'&&editorCategory!=='machines'"));
  assert.ok(app.includes("editorScope==='factory'?`<fieldset><legend>Sejajarkan dengan aset lain"));
  assert.ok(app.includes('id="se-remove-generated"'));
  assert.ok(app.includes('id="se-restore-default"'));
  assert.ok(app.includes('id="se-reset" ${selectedChanged?\'\':\'disabled\'}'));
+ assert.ok(app.includes("selectedGenerated||wallId===selected?'':`<div class=\"se-danger-zone\""));
 });
 
 test('V264 editor avoids false transactions and destructive ambiguity',()=>{
@@ -97,7 +100,8 @@ test('V264 editor avoids false transactions and destructive ambiguity',()=>{
  assert.ok(app.includes('Pulihkan objek ini ke posisi bawaan model?'));
  assert.ok(app.includes('Pulihkan revisi ini? Perubahan editor yang belum disimpan akan diganti'));
  assert.ok(app.includes('removedSavedOverride=Object.keys(savedOverrides).some'));
- assert.ok(app.includes("stableJson(imported)===stableJson(overrides)"));\n assert.ok(app.includes('activeMachineKey:engine.machineKey||null'));
+ assert.ok(app.includes("stableJson(imported)===stableJson(overrides)"));
+ assert.ok(app.includes('activeMachineKey:engine.machineKey||null'));
  assert.match(css,/V264 editor context guard/);
  assert.match(css,/body\.scene-editor-open aside#detail-panel/);
 });
