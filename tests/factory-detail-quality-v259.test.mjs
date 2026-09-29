@@ -6,6 +6,7 @@ import {RENDER_PROFILE_INFO,RENDER_PROFILE_ORDER,recommendedProfile} from '../fr
 const read=path=>readFileSync(new URL(path,import.meta.url),'utf8');
 const engine=read('../frontend/src/engine.js');
 const app=read('../frontend/src/app.js');
+const shell=read('../frontend/src/app-shell-v79.js');
 
 test('V259 factory mode hydrates the same polished machine templates used by machine view',()=>{
  assert.match(engine,/async hydrateFactoryDetailedMachines\(/);
@@ -36,10 +37,15 @@ test('V259 every quality option explains differences, advantages, and compromise
   assert.ok(info?.cons,key+' cons');
  }
  assert.match(app,/Rekomendasi perangkat ini:/);
- assert.match(app,/Perbedaan utama:/);
- assert.match(app,/Kelebihan:/);
- assert.match(app,/Kompromi \/ kekurangan:/);
- assert.match(app,/Direkomendasikan/);
- assert.match(app,/Pilih kualitas/);
  assert.match(app,/qualityRecommendationProfile/);
+ assert.match(shell,/REKOMENDASI PERANGKAT INI/);
+ assert.match(shell,/Perbedaan utama:/);
+ assert.match(shell,/Kelebihan:/);
+ assert.match(shell,/Kompromi \/ kekurangan:/);
+ assert.match(shell,/Direkomendasikan/);
+ assert.match(shell,/Pilih kualitas/);
+ assert.match(shell,/qualityDeviceCapabilities/);
+ assert.match(shell,/qualityProfileDetailMarkup/);
+ assert.match(shell,/qualityOptionsMarkup/);
+ assert.match(shell,/refreshCanonicalQualityGuide/);
 });
