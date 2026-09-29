@@ -19,12 +19,14 @@ test('v221 2D switch does not leak through overlays and selector is valid',()=>{
   assert.match(css,/body\.layer-open \.viewport-mode-switch,[\s\S]*?visibility:hidden!important/);
 });
 
-test('v221 mobile bottom navigation matches the four rendered actions',()=>{
+test('V262 mobile bottom navigation adds Tampilan without crowding the viewport',()=>{
   assert.match(html,/data-mobile-nav="factory"/);
   assert.match(html,/data-mobile-nav="asset"/);
   assert.match(html,/data-mobile-nav="system"/);
+  assert.match(html,/data-mobile-nav="view"/);
   assert.match(html,/data-mobile-nav="more"/);
-  assert.match(css,/grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
+  assert.equal((html.match(/data-mobile-nav="/g)||[]).length,5);
+  assert.match(css,/V262 mobile-first feature parity[\s\S]*grid-template-columns:repeat\(5,minmax\(0,1fr\)\)!important/);
 });
 
 test('v221 display overlay restores focus to Tampilan',()=>{

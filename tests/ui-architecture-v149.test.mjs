@@ -144,10 +144,10 @@ test('V149 deep links preserve machine asset node and workspace view without nav
  assert.doesNotMatch(app,/location\.(?:href|assign|replace)\s*=/);
 });
 
-test('V149 mobile Lainnya keeps primary viewport actions limited and preserves contextual inspection access',()=>{
- assert.match(css,/\.mobile-context-tools\{display:none\}/);
- assert.match(css,/@media\(max-width:767px\)[\s\S]*\.mobile-context-tools\{display:grid/);
- for(const action of ['top','interior','labels','home','fullscreen'])assert.match(shell,new RegExp(`data-mobile-tool="${action}"`));
+test('V262 mobile Lainnya exposes desktop capabilities through a phone-native feature hub',()=>{
+ assert.match(css,/\.mobile-feature-hub\{display:none\}/);
+ assert.match(css,/@media\(max-width:767px\)[\s\S]*\.mobile-feature-hub\{[\s\S]*display:grid/);
+ for(const action of ['search','display','2d','3d','iso','top','fit','zoom-in','zoom-out','explode','isolate','interior','labels','home','fullscreen','theme','settings','help'])assert.match(shell,new RegExp(`data-mobile-action="${action}"`));
  assert.match(shell,/tool-interior/);
  assert.match(shell,/data-camera="reset"/);
  assert.match(shell,/#fullscreen/);
