@@ -36,12 +36,12 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  }
  setExteriorOpen(on=true){
   super.setExteriorOpen(on);
-  if(this.cfg.machine.area==='PDS')for(const mesh of this.meshes)if(mesh.userData.coverMountedDetail)mesh.visible=!this.exteriorOpen;
+  if(['PDS','UTILITY'].includes(this.cfg.machine.area))for(const mesh of this.meshes)if(mesh.userData.coverMountedDetail)mesh.visible=!this.exteriorOpen;
   return this;
  }
  setLow(on){
   super.setLow(on);
-  if(this.cfg.machine.area==='PDS'){
+  if(['PDS','UTILITY'].includes(this.cfg.machine.area)){
    // Keep the actual family-process mechanism readable when the shell is opened
    // on a phone; low LOD may remove microdetail, not the only moving internals.
    for(const mesh of this.activeMeshes)if(!mesh.userData.referencePlaceholder&&mesh.userData.simulationEnabled!==false)mesh.visible=true;
@@ -284,8 +284,8 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    const accent=atlas?'blue':kaeser?'yellow':'blue';
    serviceDoor(g,-.52,.88,-.84,.92,1.02,'body','compressor-main-service-door');
    serviceDoor(g,.52,.88,-.84,.84,1.02,'body','compressor-control-service-door');
-   for(let y=.48;y<=1.28;y+=.10){const l=this.box(g,[.64,.022,.038],[-.58,y,.84],'dark',.002);mark(l,'compressor-intake-louvre-reference','BRAND_FAMILY_VISUAL');}
-   for(let x=-.45;x<=.45;x+=.11){const l=this.box(g,[.045,.022,.60],[x,1.66,.08],'dark',.002);mark(l,'compressor-top-exhaust-grille-reference','BRAND_FAMILY_VISUAL');}
+   for(let y=.48;y<=1.28;y+=.10){const l=this.box(g,[.64,.022,.038],[-.58,y,.84],'dark',.002);mark(l,'compressor-intake-louvre-reference','BRAND_FAMILY_VISUAL');l.userData.coverMountedDetail=true;}
+   for(let x=-.45;x<=.45;x+=.11){const l=this.box(g,[.045,.022,.60],[x,1.66,.08],'dark',.002);mark(l,'compressor-top-exhaust-grille-reference','BRAND_FAMILY_VISUAL');l.userData.coverMountedDetail=true;}
    const stripe=this.cover(this.box(g,[.08,1.20,.025],[.16,.92,-.87],accent,.006));mark(stripe,'compressor-brand-family-accent-reference','BRAND_FAMILY_VISUAL',true);
    const ctrl=this.cover(this.box(g,[.34,.28,.030],[.70,1.13,-.88],'dark',.012));mark(ctrl,'compressor-controller-bezel-reference','BRAND_FAMILY_VISUAL',true);
    const display=this.cover(this.box(g,[.23,.13,.014],[.70,1.16,-.90],'glass',.008));mark(display,'compressor-controller-display-reference','BRAND_FAMILY_VISUAL');
@@ -301,15 +301,15 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    const pitch=length/sectionCount;
    for(let i=0;i<sectionCount;i++){
     const x=-length/2+pitch*(i+.5);
-    const seam=this.box(g,[.020,1.72,.020],[x+pitch*.47,1.02,-1.02],'dark',.001);mark(seam,'ahu-panel-seam-reference','DOUBLE_SKIN_AHU_FAMILY');
-    const handle=this.box(g,[.025,.20,.025],[x+pitch*.20,1.02,-1.04],'dark',.004);mark(handle,'ahu-service-door-handle-reference','DOUBLE_SKIN_AHU_FAMILY');
-    for(const dy of [-.42,.42]){const hinge=this.box(g,[.035,.10,.025],[x-pitch*.33,1.02+dy,-1.04],'steel',.004);mark(hinge,'ahu-service-door-hinge-reference','DOUBLE_SKIN_AHU_FAMILY');}
+    const seam=this.box(g,[.020,1.72,.020],[x+pitch*.47,1.02,-1.02],'dark',.001);mark(seam,'ahu-panel-seam-reference','DOUBLE_SKIN_AHU_FAMILY');seam.userData.coverMountedDetail=true;
+    const handle=this.box(g,[.025,.20,.025],[x+pitch*.20,1.02,-1.04],'dark',.004);mark(handle,'ahu-service-door-handle-reference','DOUBLE_SKIN_AHU_FAMILY');handle.userData.coverMountedDetail=true;
+    for(const dy of [-.42,.42]){const hinge=this.box(g,[.035,.10,.025],[x-pitch*.33,1.02+dy,-1.04],'steel',.004);mark(hinge,'ahu-service-door-hinge-reference','DOUBLE_SKIN_AHU_FAMILY');hinge.userData.coverMountedDetail=true;}
    }
    for(const x of [-length/2+.18,length/2-.18])for(const z of [-.84,.84]){const rail=this.box(g,[.18,.16,.18],[x,.10,z],'dark',.010);mark(rail,'ahu-base-rail-foot-reference','DOUBLE_SKIN_AHU_FAMILY',true);}
    const drain=this.cyl(g,.025,.48,[0,.18,-1.18],'steel','x');mark(drain,'ahu-condensate-drain-trap-reference','AHU_FUNCTIONAL_REFERENCE',true);
    if(sansin){
     const outdoor=this.cover(this.box(g,[1.30,1.35,.72],[2.62,.82,.16],'body',.050));mark(outdoor,'sansin-outdoor-module-family-reference','SANSIN_NES_YZKJ_FAMILY',true);outdoor.userData.installedArrangementVerified=false;
-    for(const y of [.54,.80,1.06]){const grille=this.box(g,[.90,.025,.50],[2.62,y,-.22],'dark',.003);mark(grille,'sansin-outdoor-coil-grille-reference','SANSIN_NES_YZKJ_FAMILY');}
+    for(const y of [.54,.80,1.06]){const grille=this.box(g,[.90,.025,.50],[2.62,y,-.22],'dark',.003);mark(grille,'sansin-outdoor-coil-grille-reference','SANSIN_NES_YZKJ_FAMILY');grille.userData.coverMountedDetail=true;}
    }else{
     const window=this.cover(this.box(g,[.34,.34,.025],[length*.18,1.18,-1.045],'glass',.018));mark(window,'ahu-service-observation-window-reference','DOUBLE_SKIN_AHU_FAMILY');
    }
@@ -2054,9 +2054,11 @@ export class ReferenceProcessSimulation{
   }else{
    const t=smooth((s.p-.80)/.20);flat.visible=this.active;wrap.visible=false;flat.position.set(lerp(.28,1.06,t),lerp(.84,.66,t),0);flat.rotation.set(0,0,lerp(-.12,0,t));
   }
-  if(this.ctp.drum){this.ctp.drum.quaternion.copy(this.ctp.drumRestQuaternion||this.ctp.drum.userData.ctpRestQuaternion);if(s.exposure)this.ctp.drum.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(AXIS.z,this.elapsed*5.2));}
-  const spinDrive=(obj,on,axis=AXIS.x,rate=7)=>{if(!obj)return;obj.quaternion.copy(obj.userData.ctpRestQuaternion||new THREE.Quaternion());if(on)obj.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(axis,this.elapsed*rate));};
-  spinDrive(this.ctp.transportMotor,s.loading||s.unloading,AXIS.x,6.2);spinDrive(this.ctp.drumMotor,s.exposure,AXIS.x,5.2);
+  // CylinderGeometry is built along local Y; the mesh's rest quaternion maps it
+  // to the installed X/Z shaft. Spin in local Y so that mapping stays fixed.
+  if(this.ctp.drum){this.ctp.drum.quaternion.copy(this.ctp.drumRestQuaternion||this.ctp.drum.userData.ctpRestQuaternion);if(s.exposure)this.ctp.drum.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(AXIS.y,this.elapsed*5.2));}
+  const spinDrive=(obj,on,rate=7)=>{if(!obj)return;obj.quaternion.copy(obj.userData.ctpRestQuaternion||new THREE.Quaternion());if(on)obj.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(AXIS.y,this.elapsed*rate));};
+  spinDrive(this.ctp.transportMotor,s.loading||s.unloading,6.2);spinDrive(this.ctp.drumMotor,s.exposure,5.2);
   let laserZ=0;if(this.ctp.laser){this.ctp.laser.position.copy(this.ctp.laserRestPosition);if(s.exposure){laserZ=THREE.MathUtils.lerp(-.38,.38,(Math.sin(this.elapsed*1.45)+1)/2);this.ctp.laser.position.z+=laserZ;}}
   if(this.ctpLaserBeam){this.ctpLaserBeam.visible=this.active&&s.exposure;this.ctpLaserBeam.position.z=laserZ;}if(this.ctpLaserSpot){this.ctpLaserSpot.visible=this.active&&s.exposure;this.ctpLaserSpot.position.z=laserZ;}
   if(this.ctp.laser?.material?.emissive){this.ctp.laser.material.emissive.setHex(s.exposure?0x4c1515:0);this.ctp.laser.material.emissiveIntensity=s.exposure?.65:0;}
@@ -2115,7 +2117,7 @@ export class ReferenceProcessSimulation{
   else if(p<.86){const t=smooth((p-.72)/.14);x=lerp(.34,.58,t);y=.78-.16*Math.sin(Math.PI*t);rz=-.07*Math.sin(Math.PI*t);}
   else {const t=smooth((p-.86)/.14);x=lerp(.58,.90,t);y=lerp(.76,.56,t);}
   m.position.set(x,y,0);m.rotation.set(0,0,rz);m.visible=this.active;
-  const spin=(obj,rate,on)=>{if(!obj)return;obj.quaternion.copy(obj.userData.imagesetterRestQuaternion||new THREE.Quaternion());if(on)obj.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(AXIS.z,this.elapsed*rate));};
+  const spin=(obj,rate,on)=>{if(!obj)return;obj.quaternion.copy(obj.userData.imagesetterRestQuaternion||new THREE.Quaternion());if(on)obj.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(AXIS.y,this.elapsed*rate));};
   spin(i.supplyRoll,2.1,p<.86);spin(i.capstan,6.2,s.capstanEncoder);spin(i.gravityRoller,4.4,p>=.16&&p<.80);spin(i.capstanMotor,6.2,s.capstanEncoder);
   if(i.polygon){i.polygon.quaternion.copy(i.polygon.userData.imagesetterRestQuaternion||new THREE.Quaternion());if(s.polygonAtSpeed||s.exposure)i.polygon.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(AXIS.y,this.elapsed*18));}
   if(i.cutter&&i.cutterRestPosition){i.cutter.position.copy(i.cutterRestPosition);if(s.cutting){const q=THREE.MathUtils.clamp((p-.72)/.14,0,1);i.cutter.position.y-=Math.sin(Math.PI*q)*.045;}}

@@ -43,6 +43,40 @@ test('Zünd family material remains seated on the vacuum bed before and during h
  }finally{sim.dispose();model.dispose();}
 });
 
+test('PDS drum and capstan rotate around their installed shaft axes',()=>{
+ for(const [id,key,part] of [
+  ['BMJ-MCH-0025','ctp','drum'],['BMJ-MCH-0026','ctp','drum'],['BMJ-MCH-0027','imagesetter','capstan']
+ ]){
+  const model=createMachineTemplate(id),sim=createMachineSimulation(id,model.root,model);
+  try{
+   const shaft=sim[key][part],initial=shaft.quaternion.clone();
+   assert.ok(shaft,id);
+   const initialAxis=new THREE.Vector3(0,1,0).applyQuaternion(initial).normalize();
+   sim.start();let now=1000;sim.update(now);
+   while(sim.elapsed<sim.cycle*.55){now+=20;sim.update(now);}
+   const rotatedAxis=new THREE.Vector3(0,1,0).applyQuaternion(shaft.quaternion).normalize();
+   assert.ok(initialAxis.dot(rotatedAxis)>.999,`${id} shaft wobbles off its installed axis`);
+   assert.ok(shaft.quaternion.angleTo(initial)>.01,`${id} shaft did not rotate`);
+  }finally{sim.dispose();model.dispose();}
+ }
+});
+
+test('all utility reference covers remove attached exterior fittings without hiding process internals',()=>{
+ for(let no=29;no<=41;no++){
+  const id=`BMJ-MCH-${String(no).padStart(4,'0')}`,model=createMachineTemplate(id);
+  try{
+   const fittings=model.meshes.filter(mesh=>mesh.userData.coverMountedDetail);
+   assert.ok(fittings.length>=3,`${id} needs cover attachment metadata`);
+   model.setExteriorOpen(true);model.setLow(true);
+   assert.ok(fittings.every(mesh=>!mesh.visible),`${id} has floating exterior fittings`);
+   const core=model.activeMeshes.filter(mesh=>!mesh.userData.referencePlaceholder&&mesh.userData.simulationEnabled!==false);
+   assert.ok(core.every(mesh=>mesh.visible),`${id} hides its working internals`);
+   model.setLow(false);assert.ok(fittings.every(mesh=>!mesh.visible));
+   model.setExteriorOpen(false);assert.ok(fittings.every(mesh=>mesh.visible));
+  }finally{model.dispose();}
+ }
+});
+
 test('all 21 formerly generic assets now route to evidence-grounded reference builders',()=>{
  assert.equal(referenceAssets.length,21);
  for(const machine of referenceAssets){
