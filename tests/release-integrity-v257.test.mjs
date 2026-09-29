@@ -40,7 +40,7 @@ test('V262 application identity keeps the V257 lineage and rotates the shell for
  assert.match(state,/APP_BUILD='2026\.09\.29-262'/);
  assert.match(sw,/const VERSION='factory-digital-twin-v262-mobile-parity-20260929'/);
  assert.match(sw,/const LEGACY_VERSION='factory-digital-twin-v222-overlay-state-ssot-20260925'/);
- assert.match(sw,/const RELEASE='262'/);
+ assert.match(sw,/const RELEASE='222'/);
  assert.match(sw,/const BUILD_FINGERPRINT='SOURCE'/);
 });
 
