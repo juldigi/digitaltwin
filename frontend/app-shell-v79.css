@@ -1710,6 +1710,7 @@ html.immersive-mode .header-actions #fullscreen-top{display:grid!important}
 #scene-editor-panel .se-precision-tools{
  display:grid;grid-template-columns:minmax(100px,.8fr) minmax(0,1.4fr);gap:6px;align-items:stretch;margin-bottom:6px
 }
+#scene-editor-panel .se-precision-tools.single-tool{grid-template-columns:1fr}
 #scene-editor-panel .se-precision-tools>button{font-size:9px}
 #scene-editor-panel .se-precision-tools .se-snap-toggle{white-space:normal;line-height:1.2}
 #scene-editor-panel .se-height-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0}
@@ -1744,6 +1745,20 @@ html.immersive-mode .header-actions #fullscreen-top{display:grid!important}
  #scene-editor-panel .se-easy-toolbar .se-step-size{grid-template-columns:100px minmax(0,1fr)}
  #scene-editor-panel .se-direction-pad{max-width:260px}
  #scene-editor-panel .se-direction-pad button,#scene-editor-panel .se-direction-pad>span,#scene-editor-panel .se-step-indicator{min-height:52px}
+ #scene-editor-panel .se-header button,
+ #scene-editor-panel .se-selected-card button,
+ #scene-editor-panel .se-primary-tools button,
+ #scene-editor-panel .se-turn-row button,
+ #scene-editor-panel .se-essential-actions button,
+ #scene-editor-panel .se-more-actions>summary,
+ #scene-editor-panel .se-advanced>summary,
+ #scene-editor-panel .se-admin-tools>summary,
+ #scene-editor-panel .se-review-row button,
+ #scene-editor-panel .se-save-bar button,
+ #scene-editor-panel .se-height-actions button,
+ #scene-editor-panel .se-object-actions button,
+ #scene-editor-panel .se-inline-actions button,
+ #scene-editor-panel .se-admin-grid button{min-height:44px}
  #scene-editor-panel .se-essential-actions button{min-height:44px}
  #scene-editor-panel .se-save-bar{
   bottom:-11px;margin:9px -9px -9px;padding:9px 9px calc(9px + env(safe-area-inset-bottom))
@@ -1764,4 +1779,47 @@ html.immersive-mode .header-actions #fullscreen-top{display:grid!important}
  #scene-editor-panel{right:76px;left:8px;width:auto;height:auto;max-height:none}
  #scene-editor-panel .se-category-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
  #scene-editor-panel .se-direction-pad{max-width:230px}
+}
+
+
+/* V264 editor context guard */
+body.scene-editor-open .rail button,
+body.scene-editor-open .global-search,
+body.scene-editor-open .header-actions,
+body.scene-editor-open #panel-toggle,
+body.scene-editor-open .scene-bottom,
+body.scene-editor-open .viewport-mode-switch,
+body.scene-editor-open aside#detail-panel,
+body.scene-editor-open .canonical-simulation-transport{
+ pointer-events:none!important
+}
+body.scene-editor-open .rail button,
+body.scene-editor-open .global-search,
+body.scene-editor-open .header-actions,
+body.scene-editor-open #panel-toggle{
+ opacity:.38!important
+}
+body.scene-editor-open .scene-bottom,
+body.scene-editor-open .viewport-mode-switch,
+body.scene-editor-open aside#detail-panel,
+body.scene-editor-open .canonical-simulation-transport{
+ visibility:hidden!important;opacity:0!important
+}
+body.scene-editor-open #scene-editor-panel{pointer-events:auto}
+body.scene-editor-open #viewport{pointer-events:auto}
+@media(max-width:767px){
+ body.scene-editor-open .mobile-nav{
+  visibility:hidden!important;pointer-events:none!important;opacity:0!important
+ }
+ body.scene-editor-open #scene-editor-panel{
+  bottom:max(8px,env(safe-area-inset-bottom));
+  height:min(82dvh,780px);
+  max-height:calc(100dvh - var(--header-h,58px) - 16px - env(safe-area-inset-bottom))
+ }
+}
+@media(max-width:767px) and (max-height:560px) and (orientation:landscape){
+ body.scene-editor-open #scene-editor-panel{
+  right:max(8px,env(safe-area-inset-right));left:auto;
+  width:min(460px,64vw);bottom:max(8px,env(safe-area-inset-bottom))
+ }
 }

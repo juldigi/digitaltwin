@@ -21,6 +21,7 @@ import {PrintingSimulation} from './simulation.js';
 import {FOUNDATION_SCOPE,canOpenTechnical3D} from './data/foundation-scope.js';
 export {OffsetMachineTemplate};
 const normalizeFoundationMachineKey=key=>{const raw=String(key??'').trim();return raw==='BMJ-MCH-0003'?'offset5':raw||null;};
+const editorMachineKey=id=>/^(?:part|machine):([A-Za-z0-9_-]+):/.exec(String(id||''))?.[1]||null;
 
 const neutralSimulation=()=>({
  active:false,onUpdate:null,
@@ -443,15 +444,38 @@ export class FactoryEngine {
     const old=node.getWorldPosition(new THREE.Vector3()),delta=center.sub(new THREE.Box3().setFromObject(node).getCenter(new THREE.Vector3()));
     node.parent.updateWorldMatrix(true,false);node.position.copy(node.parent.worldToLocal(old.add(delta)));return true;
   }
-  dropSceneObjectToFloor(id){const node=this.sceneObjects?.get(id);if(!node)return;const box=new THREE.Box3().setFromObject(node);node.position.y-=box.min.y;}
+  dropSceneObjectToFloor(id){
+    const node=this.sceneObjects?.get(id);if(!node)return false;
+    node.updateWorldMatrix(true,true);const box=new THREE.Box3().setFromObject(node);if(box.isEmpty())return false;
+    const worldDelta=-box.min.y;if(!Number.isFinite(worldDelta)||Math.abs(worldDelta)<1e-5)return false;
+    const world=node.getWorldPosition(new THREE.Vector3());world.y+=worldDelta;
+    if(node.parent){node.parent.updateWorldMatrix(true,false);node.position.copy(node.parent.worldToLocal(world));}else node.position.copy(world);
+    return true;
+  }
+  moveSceneObjectWorld(id,dx=0,dy=0,dz=0){
+    const node=this.sceneObjects?.get(id);if(!node||(!dx&&!dy&&!dz))return false;
+    node.updateWorldMatrix(true,false);const world=node.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(dx,dy,dz));
+    if(node.parent){node.parent.updateWorldMatrix(true,false);node.position.copy(node.parent.worldToLocal(world));}else node.position.copy(world);
+    return true;
+  }
+  rotateSceneObjectWorldY(id,radians=0){
+    const node=this.sceneObjects?.get(id);if(!node||!Number.isFinite(radians)||Math.abs(radians)<1e-12)return false;
+    node.updateWorldMatrix(true,false);
+    const worldQuaternion=node.getWorldQuaternion(new THREE.Quaternion());
+    worldQuaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),radians));
+    if(node.parent){
+      node.parent.updateWorldMatrix(true,false);
+      const parentWorld=node.parent.getWorldQuaternion(new THREE.Quaternion());
+      node.quaternion.copy(parentWorld.invert().multiply(worldQuaternion));
+    }else node.quaternion.copy(worldQuaternion);
+    return true;
+  }
   moveSceneObjectInView(id,horizontal=0,vertical=0,step=.1){
     const node=this.sceneObjects?.get(id);if(!node||(!horizontal&&!vertical))return false;
     const forward=new THREE.Vector3();this.camera.getWorldDirection(forward);forward.y=0;if(forward.lengthSq()<1e-8)forward.set(0,0,-1);forward.normalize();
     const right=new THREE.Vector3().crossVectors(forward,new THREE.Vector3(0,1,0)).normalize();
     const delta=new THREE.Vector3().addScaledVector(right,horizontal*step).addScaledVector(forward,vertical*step);
-    node.updateWorldMatrix(true,false);const world=node.getWorldPosition(new THREE.Vector3()).add(delta);
-    if(node.parent){node.parent.updateWorldMatrix(true,false);node.position.copy(node.parent.worldToLocal(world));}else node.position.copy(world);
-    return true;
+    return this.moveSceneObjectWorld(id,delta.x,delta.y,delta.z);
   }
   sceneObjectInfo(id){const node=this.sceneObjects?.get(id);if(!node)return null;node.updateWorldMatrix(true,true);const box=new THREE.Box3().setFromObject(node),size=box.getSize(new THREE.Vector3());const collisions=[];
     if(id.startsWith('asset:')&&!box.isEmpty())for(const [otherId,other] of this.actualFactory?.assets||[]){if('asset:'+otherId===id||!this.isObjectVisible(other))continue;const otherBox=new THREE.Box3().setFromObject(other);if(box.intersectsBox(otherBox)){const overlap=box.clone().intersect(otherBox).getSize(new THREE.Vector3());if(Math.min(overlap.x,overlap.y,overlap.z)>.05)collisions.push(otherId);}}
@@ -466,15 +490,16 @@ export class FactoryEngine {
     for(const id of this.appliedSceneIds||[]){const node=this.sceneObjects.get(id),v=node&&this.sceneBase.get(node);if(!v)continue;node.position.fromArray(v.position);node.rotation.set(...v.rotation);node.scale.fromArray(v.scale);node.visible=v.visible;}
     this.appliedSceneIds=new Set();
     for(const [id,v] of Object.entries(overrides)){
-      if(id.startsWith('copy:'))continue;
-      const node=this.sceneObjects.get(id);if(!node){this.staleSceneOverrides.push(id);continue;}
+      if(id.startsWith('copy:')||id.startsWith('new:'))continue;
+      const node=this.sceneObjects.get(id);if(!node){const machineKey=editorMachineKey(id);if(machineKey&&machineKey!==this.machineKey&&canOpenTechnical3D(machineKey))continue;this.staleSceneOverrides.push(id);continue;}
       if(v.identity&&v.identity!==sceneIdentity(node)){this.staleSceneOverrides.push(id);continue;}
       node.position.fromArray(v.position);node.rotation.set(...v.rotation);node.scale.fromArray(v.scale);node.visible=v.visible&&!v.deleted;
       this.appliedSceneIds.add(id);
     }
     for(const [id,v] of Object.entries(overrides))if(id.startsWith('copy:')){
       const source=this.sceneObjects.get(v.sourceId);
-      if(!source||v.identity&&v.identity!==sceneIdentity(source)){this.staleSceneOverrides.push(id);continue;}
+      if(!source){const machineKey=editorMachineKey(v.sourceId);if(machineKey&&machineKey!==this.machineKey&&canOpenTechnical3D(machineKey))continue;this.staleSceneOverrides.push(id);continue;}
+      if(v.identity&&v.identity!==sceneIdentity(source)){this.staleSceneOverrides.push(id);continue;}
       let meshCount=0;source.traverse(node=>{if(node.isMesh)meshCount++;});
       if(meshCount>300){this.staleSceneOverrides.push(id);continue;}
       const copy=source.clone(true);copy.name='Duplikat '+(source.name||source.userData.semantic||v.sourceId);

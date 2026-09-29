@@ -17,6 +17,15 @@ test('scene import accepts generated primitives and valid copies but rejects sta
  assert.throws(()=>validateSceneImport(imported,{...resolver,identityFor:()=>''}),/tidak sesuai/);
 });
 
+test('scene import preserves overrides for an inactive known machine without accepting unknown machine IDs',()=>{
+ const value={position:[0,0,0],rotation:[0,0,0],scale:[1,1,1],visible:true};
+ const changes={'part:offset10:PU1-body':value};
+ const accepted=validateSceneImport(changes,{hasObject:()=>false,identityFor:()=>'',activeMachineKey:'offset5',isKnownMachine:key=>key==='offset10'});
+ assert.equal(accepted,changes);
+ assert.throws(()=>validateSceneImport({'part:unknown:PU1-body':value},{hasObject:()=>false,identityFor:()=>'',activeMachineKey:'offset5',isKnownMachine:()=>false}),/tidak sesuai/);
+ assert.throws(()=>validateSceneImport(changes,{hasObject:()=>false,identityFor:()=>'',activeMachineKey:'offset10',isKnownMachine:()=>true}),/tidak sesuai/);
+});
+
 test('scene overrides preserve reversible delete and lock, with strict bounded transforms',()=>{
  assert.deepEqual(validateSceneOverrides({'node:0.1':original}),{'node:0.1':original});
  assert.throws(()=>validateSceneOverrides({'node:0.1':{...original,position:[Infinity,0,0]}}),/Transform/);
@@ -85,6 +94,7 @@ test('created primitive persists by ID and is disposed when removed',()=>{
  const factory=new THREE.Group(),engine={factory,actualFactory:{assets:new Map()},sceneBase:new WeakMap(),registerSceneObjects:FactoryEngine.prototype.registerSceneObjects};
  const id='new:123e4567-e89b-12d3-a456-426614174000',value={shape:'box',position:[4,.5,8],rotation:[0,0,0],scale:[2,1,3],visible:true};
  validateSceneOverrides({[id]:value});FactoryEngine.prototype.applySceneOverrides.call(engine,{[id]:value});
+ assert.deepEqual(engine.staleSceneOverrides,[],'valid generated primitives must not be reported as stale');
  const first=engine.sceneObjects.get(id);assert.equal(first.position.x,4);assert.equal(first.scale.z,3);
  FactoryEngine.prototype.applySceneOverrides.call(engine,{[id]:{...value,deleted:true}});
  assert.equal(factory.children.length,1);assert.equal(engine.sceneObjects.get(id).visible,false);
@@ -104,6 +114,71 @@ test('source wall endpoint editing carries the entire finish assembly',async()=>
  child.updateWorldMatrix(true,false);assert.ok(child.getWorldPosition(new THREE.Vector3()).distanceTo(childBefore)>.1);
 });
 
+
+test('drop-to-floor keeps nested objects correct in world space',()=>{
+ const factory=new THREE.Group(),parent=new THREE.Group(),child=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshBasicMaterial());
+ parent.position.set(2,3,-1);parent.scale.set(1.2,2,0.8);parent.rotation.z=Math.PI/12;child.position.set(.4,1.8,.2);parent.add(child);factory.add(parent);factory.updateWorldMatrix(true,true);
+ const engine={sceneObjects:new Map([['node:0',child]])};
+ assert.equal(FactoryEngine.prototype.dropSceneObjectToFloor.call(engine,'node:0'),true);
+ factory.updateWorldMatrix(true,true);const box=new THREE.Box3().setFromObject(child);
+ assert.ok(Math.abs(box.min.y)<1e-5,'child world-space bottom must land on y=0');
+ assert.deepEqual(parent.position.toArray(),[2,3,-1],'parent transform must remain unchanged');
+ assert.equal(FactoryEngine.prototype.dropSceneObjectToFloor.call(engine,'node:0'),false,'already grounded object must be a no-op');
+});
+
+test('world movement keeps vertical controls aligned to the factory floor axis',()=>{
+ const factory=new THREE.Group(),parent=new THREE.Group(),child=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshBasicMaterial());
+ parent.position.set(3,2,-4);parent.rotation.set(.18,0,.31);parent.scale.set(1.4,.8,1.1);child.position.set(.6,1.2,-.3);parent.add(child);factory.add(parent);factory.updateWorldMatrix(true,true);
+ const engine={sceneObjects:new Map([['node:0',child]])},before=child.getWorldPosition(new THREE.Vector3()),parentBefore={position:parent.position.clone(),rotation:parent.rotation.clone(),scale:parent.scale.clone()};
+ assert.equal(FactoryEngine.prototype.moveSceneObjectWorld.call(engine,'node:0',0,.25,0),true);
+ factory.updateWorldMatrix(true,true);const after=child.getWorldPosition(new THREE.Vector3());
+ assert.ok(Math.abs(after.x-before.x)<1e-6);
+ assert.ok(Math.abs(after.y-before.y-.25)<1e-6);
+ assert.ok(Math.abs(after.z-before.z)<1e-6);
+ assert.ok(parent.position.distanceTo(parentBefore.position)<1e-9);
+ assert.ok(Math.abs(parent.rotation.x-parentBefore.rotation.x)<1e-9&&Math.abs(parent.rotation.z-parentBefore.rotation.z)<1e-9);
+ assert.ok(parent.scale.distanceTo(parentBefore.scale)<1e-9);
+});
+
+test('world turn keeps left-right rotation around the factory up axis',()=>{
+ const factory=new THREE.Group(),parent=new THREE.Group(),child=new THREE.Group();
+ parent.position.set(1,2,3);parent.rotation.set(.22,.35,-.18);parent.scale.setScalar(1.2);child.rotation.set(.1,-.25,.08);parent.add(child);factory.add(parent);factory.updateWorldMatrix(true,true);
+ const engine={sceneObjects:new Map([['node:0',child]])},before=child.getWorldQuaternion(new THREE.Quaternion()),angle=Math.PI/6;
+ const expected=before.clone().premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),angle));
+ assert.equal(FactoryEngine.prototype.rotateSceneObjectWorldY.call(engine,'node:0',angle),true);
+ factory.updateWorldMatrix(true,true);const after=child.getWorldQuaternion(new THREE.Quaternion());
+ assert.ok(after.angleTo(expected)<1e-6,'turn must be world-Y, independent of parent rotation');
+ assert.equal(FactoryEngine.prototype.rotateSceneObjectWorldY.call(engine,'node:0',0),false);
+});
+
+
+
+test('world-space editor movement preserves nested parent transforms',()=>{
+ const factory=new THREE.Group(),parent=new THREE.Group(),child=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshBasicMaterial());
+ parent.position.set(5,2,-3);parent.rotation.x=Math.PI/8;parent.rotation.z=Math.PI/7;parent.scale.set(1.3,.8,1.1);child.position.set(.4,1.2,-.6);parent.add(child);factory.add(parent);factory.updateWorldMatrix(true,true);
+ const engine={sceneObjects:new Map([['node:0',child]])};
+ const before=child.getWorldPosition(new THREE.Vector3()).clone(),parentBefore={position:parent.position.clone(),rotation:parent.rotation.clone(),scale:parent.scale.clone()};
+ assert.equal(FactoryEngine.prototype.moveSceneObjectWorld.call(engine,'node:0',0,.05,0),true);
+ factory.updateWorldMatrix(true,true);const after=child.getWorldPosition(new THREE.Vector3());
+ assert.ok(Math.abs(after.x-before.x)<1e-6);
+ assert.ok(Math.abs(after.y-before.y-.05)<1e-6);
+ assert.ok(Math.abs(after.z-before.z)<1e-6);
+ assert.ok(parent.position.equals(parentBefore.position));
+ assert.ok(parent.scale.equals(parentBefore.scale));
+ assert.ok(Math.abs(parent.rotation.x-parentBefore.rotation.x)<1e-12&&Math.abs(parent.rotation.z-parentBefore.rotation.z)<1e-12);
+});
+
+test('inactive known machine overrides stay dormant while active missing parts are stale',()=>{
+ const factory=new THREE.Group(),machine=new THREE.Group(),engine={factory,machine,machineKey:'offset5',actualFactory:{assets:new Map()},sceneBase:new WeakMap(),registerSceneObjects:FactoryEngine.prototype.registerSceneObjects};
+ engine.registerSceneObjects();
+ const value={position:[.1,0,0],rotation:[0,0,0],scale:[1,1,1],visible:true};
+ FactoryEngine.prototype.applySceneOverrides.call(engine,{'part:offset10:PU1-body':value});
+ assert.deepEqual(engine.staleSceneOverrides,[],'another known machine should remain dormant, not stale');
+ engine.machineKey='offset10';FactoryEngine.prototype.applySceneOverrides.call(engine,{'part:offset10:PU1-body':value});
+ assert.deepEqual(engine.staleSceneOverrides,['part:offset10:PU1-body'],'missing part on the active machine must be stale');
+ engine.machineKey='offset5';FactoryEngine.prototype.applySceneOverrides.call(engine,{'part:unknown:PU1-body':value});
+ assert.deepEqual(engine.staleSceneOverrides,['part:unknown:PU1-body'],'unknown machine override must be stale');
+});
 
 test('scene isolation is reversible and stays inside its editor scope',()=>{
  const scene=new THREE.Group(),factory=new THREE.Group(),machine=new THREE.Group(),part=new THREE.Group(),otherPart=new THREE.Group(),hiddenPart=new THREE.Group();
