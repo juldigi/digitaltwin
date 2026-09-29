@@ -492,8 +492,8 @@ function qualityDeviceCapabilities(){
 function qualityDeviceLabel(caps){return caps.mobile?'Ponsel atau perangkat sentuh':innerWidth<=1180?'Tablet atau layar menengah':'Komputer atau laptop';}
 function qualityRecommendationMarkup(caps=qualityDeviceCapabilities()){
  const recommended=recommendedProfile(caps),info=RENDER_PROFILE_INFO[recommended]||RENDER_PROFILE_INFO.seimbang;
- const memory=caps.memoryReported?caps.memoryReported+' GB':'tidak dilaporkan peramban',cores=caps.coresReported||caps.cores||'tidak diketahui';
- return `<div class="quality-device-recommendation" data-quality-recommendation><div><small>REKOMENDASI PERANGKAT INI</small><strong>${escapeHtml(info.label)}</strong></div><p>Rekomendasi dibuat berdasarkan kemampuan perangkat yang sedang digunakan.</p><dl><div><dt>Perangkat</dt><dd>${escapeHtml(qualityDeviceLabel(caps))}</dd></div><div><dt>Memori</dt><dd>${escapeHtml(memory)}</dd></div><div><dt>Thread CPU terdeteksi</dt><dd>${escapeHtml(String(cores))}</dd></div><div><dt>Batas tekstur GPU</dt><dd>${escapeHtml(caps.maxTextureSize.toLocaleString('id-ID')+' px')}</dd></div></dl></div>`;
+ const memory=caps.memoryReported?caps.memoryReported+' GB':'tidak dilaporkan oleh peramban',cores=caps.coresReported||caps.cores||'tidak diketahui';
+ return `<div class="quality-device-recommendation" data-quality-recommendation><div><small>REKOMENDASI PERANGKAT INI</small><strong>${escapeHtml(info.label)}</strong></div><p>Rekomendasi dibuat berdasarkan kemampuan perangkat yang sedang digunakan.</p><dl><div><dt>Perangkat</dt><dd>${escapeHtml(qualityDeviceLabel(caps))}</dd></div><div><dt>Memori</dt><dd>${escapeHtml(memory)}</dd></div><div><dt>Jumlah thread CPU yang terdeteksi</dt><dd>${escapeHtml(String(cores))}</dd></div><div><dt>Batas tekstur GPU</dt><dd>${escapeHtml(caps.maxTextureSize.toLocaleString('id-ID')+' px')}</dd></div></dl></div>`;
 }
 function qualityProfileDetailMarkup(requested,caps=qualityDeviceCapabilities()){
  const recommended=recommendedProfile(caps),effective=requested==='auto'?recommended:requested;
