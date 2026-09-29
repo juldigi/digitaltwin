@@ -12,6 +12,7 @@ const runtimeModule=read('../frontend/src/machine-runtime.js');
 const render=read('../frontend/src/render/render-config.js');
 const display=read('../frontend/src/display-language.js');
 const confidence=read('../frontend/src/data/confidence.js');
+const sw=read('../frontend/sw.js');
 const runtime=[index,shell,app,engine,model,runtimeModule,render,display,confidence].join('\n');
 
 test('V266 uses clear Indonesian for navigation controls editor and settings',()=>{
@@ -55,7 +56,7 @@ test('V266 translates generic status labels without rewriting OEM process termin
 });
 
 test('V266 localizes connection fallback and runtime failures',()=>{
- assert.match(runtime,/Tidak tersambung: berkas belum tersimpan di perangkat\./);
+ assert.match(sw,/Tidak tersambung: berkas belum tersimpan di perangkat\./);
  assert.match(runtimeModule,/Kunci mesin wajib tersedia/);
  assert.match(runtimeModule,/Model 3D belum terdaftar/);
  assert.match(runtimeModule,/Simulasi belum terdaftar/);
@@ -106,7 +107,7 @@ test('V266 replaces generic asset jargon with object and machine wording',()=>{
   'Sejajarkan dengan objek lain','Pilih objek acuan',
   'posisi mesin atau peralatan pada denah',
   'Mesin atau peralatan ini belum memiliki posisi tata letak yang dapat dibuka.'
- ])assert.ok(app.includes(copy),copy);
+ ])assert.ok(runtime.includes(copy),copy);
 });
 
 test('V266 uses machine or equipment wording across chooser status and fallbacks',()=>{
