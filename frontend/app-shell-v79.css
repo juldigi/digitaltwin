@@ -1547,14 +1547,7 @@ html.immersive-mode .header-actions #fullscreen-top{display:grid!important}
   border-bottom:1px solid #dfe8ef;background:#fff!important;
   color:#5e7285!important;text-align:left!important;font-size:9px!important;font-weight:850;letter-spacing:.13em
  }
- .rail>button{
-  flex:0 0 auto!important;min-height:48px!important;flex-direction:row!important;justify-content:flex-start!important;
-  gap:12px!important;padding:0 12px!important;border:1px solid #dfe8ef!important;border-radius:12px!important;
-  background:#fff!important;color:#52677b!important
- }
- .rail>button.active{border-color:#bddcf7!important;background:#edf6ff!important;color:#086fd5!important;box-shadow:none!important}
- .rail>button.active:before{display:none!important}
- .rail>button small{font-size:11px!important}
+ .rail>button{display:none!important}
  .rail-bottom{display:none!important}
 
  .mobile-feature-hub{
