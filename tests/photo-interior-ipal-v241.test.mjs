@@ -31,18 +31,18 @@ test('IPAL operator windows are openings in walls and mixer motors sit over actu
  const f=await scene(),photos=f.root.userData.ipal.photoActual;
  assert.deepEqual(photos.equipmentEnvelopeCollisions,[]);
  assert.equal(photos.supportGroundingAudit.floatingLegs,0);
- const windows=matching(f.layers.windows,'IPAL_PHOTO_OPERATOR_ROOM_FRONT_WINDOW');
- const piers=matching(f.layers.walls,'IPAL_PHOTO_OPERATOR_ROOM_FRONT_PIER');
- const sill=matching(f.layers.walls,'IPAL_PHOTO_OPERATOR_ROOM_FRONT_WALL')[0];
- const header=matching(f.layers.walls,'IPAL_PHOTO_OPERATOR_ROOM_FRONT_HEADER_WALL')[0];
+ const windows=matching(f.layers.ipal,'IPAL_PHOTO_OPERATOR_ROOM_FRONT_WINDOW');
+ const piers=matching(f.layers.ipal,'IPAL_PHOTO_OPERATOR_ROOM_FRONT_PIER');
+ const sill=matching(f.layers.ipal,'IPAL_PHOTO_OPERATOR_ROOM_FRONT_WALL')[0];
+ const header=matching(f.layers.ipal,'IPAL_PHOTO_OPERATOR_ROOM_FRONT_HEADER_WALL')[0];
  assert.equal(windows.length,3);
  assert.equal(piers.length,4);
  const center=new THREE.Vector3();new THREE.Box3().setFromObject(windows[1]).getCenter(center);
  assert.ok(new THREE.Box3().setFromObject(sill).max.y<center.y);
  assert.ok(new THREE.Box3().setFromObject(header).min.y>center.y);
  for(const pier of piers)assert.equal(new THREE.Box3().setFromObject(pier).containsPoint(center),false);
- const tanks=matching(f.layers.building,'IPAL_PHOTO_UPPER_RED_CHEMICAL_TANK');
- const drives=matching(f.layers.building,'IPAL_PHOTO_CHEMICAL_MIXER_DRIVE');
+ const tanks=matching(f.layers.ipal,'IPAL_PHOTO_UPPER_RED_CHEMICAL_TANK');
+ const drives=matching(f.layers.ipal,'IPAL_PHOTO_CHEMICAL_MIXER_DRIVE');
  assert.equal(tanks.length,2);assert.equal(drives.length,2);
  for(const motor of drives){
   const below=tanks.find(t=>Math.hypot(t.position.x-motor.position.x,t.position.z-motor.position.z)<.01);
