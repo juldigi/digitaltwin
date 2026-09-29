@@ -309,3 +309,41 @@ test('machine selection uses a clear factory-first flow before explicit 3D inspe
  assert.match(app,/if\(item\.type==='machine'\)\{const record=MACHINE_REGISTRY_BY_ID\.get\(item\.machineId\);if\(record\)await openAssetContext\(record\);return;\}/);
  assert.match(app,/id="\$\{modelAvailable\?'open-machine-3d':'focus-layout-asset'\}"/);
 });
+
+
+test('V265 editor locks asynchronous transactions and rolls back failed machine loads',()=>{
+ assert.match(app,/editorBusy=false/);
+ assert.match(app,/panel\.setAttribute\('role','dialog'\)/);
+ assert.match(app,/panel\.setAttribute\('aria-modal','true'\)/);
+ assert.match(app,/panel\.setAttribute\('aria-busy','false'\)/);
+ assert.match(app,/const setEditorBusy=\(on,message=''\)=>/);
+ assert.match(app,/document\.body\.classList\.toggle\('scene-editor-busy',editorBusy\)/);
+ assert.match(app,/panel\.querySelectorAll\('button,input,select'\)\.forEach\(control=>control\.disabled=true\)/);
+ assert.match(app,/const payload=cloneOverrides\(overrides\);setEditorBusy\(true,'Menyimpan perubahan…'\)/);
+ assert.match(app,/data:\{overrides:payload\}/);
+ assert.match(app,/setEditorBusy\(true,'Membuka model bagian mesin…'\)/);
+ assert.match(app,/catch\(error\)\{clearActiveMachineDescriptor\(\);applyActiveMachineState\(\);engine\.clearMachineContext\?\.\(\);engine\.setView\('factory',state\)/);
+ assert.match(app,/finally\{setEditorBusy\(false\);\}\}\);/);
+ assert.match(app,/engine\.onSceneSelect=\(id,node\)=>\{if\(editorBusy\)\{engine\.gizmo\.detach\(\);return;\}/);
+ assert.match(css,/V265 editor transaction lock/);
+ assert.match(css,/body\.scene-editor-busy #viewport\{[\s\S]*?pointer-events:none!important/);
+});
+
+test('V265 editor keyboard and focus lifecycle cannot leave incomplete transactions',()=>{
+ assert.match(app,/String\(e\.key\|\|''\)==='Escape'/);
+ assert.match(app,/panel\.querySelector\('#se-close'\)\?\.click\(\)/);
+ assert.match(app,/const finishKeyboardMove=\(\)=>/);
+ assert.match(app,/const onEditorWindowBlur=\(\)=>finishKeyboardMove\(\)/);
+ assert.match(app,/window\.addEventListener\('blur',onEditorWindowBlur\)/);
+ assert.match(app,/window\.removeEventListener\('blur',onEditorWindowBlur\)/);
+ assert.match(app,/queueMicrotask\(\(\)=>editorReturnFocus\?\.isConnected&&editorReturnFocus\.focus/);
+});
+
+test('V265 editor releases busy state for save import and revision outcomes',()=>{
+ assert.match(app,/if\(stableJson\(imported\)===stableJson\(overrides\)\)\{setEditorBusy\(false\);return toast\('Cadangan ini sama dengan kondisi editor saat ini\.'\);\}/);
+ assert.match(app,/setEditorBusy\(true,'Memeriksa cadangan editor…'\)/);
+ assert.match(app,/setEditorBusy\(true,'Memulihkan revisi…'\)/);
+ assert.match(app,/setEditorBusy\(false\);toast\('Revisi berhasil dipulihkan\.'\)/);
+ assert.match(app,/catch\(error\)\{setEditorBusy\(false\);toast\(error\.message,true\);\}/);
+ assert.match(app,/document\.body\.classList\.remove\('scene-editor-open','scene-editor-busy'\)/);
+});
