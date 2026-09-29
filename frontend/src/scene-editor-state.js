@@ -29,12 +29,19 @@ export function validateSceneOverrides(changes){
 
 // Generated objects do not exist in the scene until overrides are replayed.
 // Duplicates must be checked against their original source, not their new ID.
-export function validateSceneImport(changes,{hasObject,identityFor}){
+const editorMachineKey=id=>/^(?:part|machine):([A-Za-z0-9_-]+):/.exec(String(id||''))?.[1]||null;
+
+export function validateSceneImport(changes,{hasObject,identityFor,activeMachineKey=null,isKnownMachine=()=>false}){
   validateSceneOverrides(changes);
   for(const [id,value] of Object.entries(changes)){
     if(id.startsWith('new:'))continue;
     const source=id.startsWith('copy:')?value.sourceId:id;
-    if(!hasObject(source)||value.identity&&value.identity!==identityFor(source))throw new Error('Berkas berisi objek yang tidak sesuai versi scene saat ini.');
+    if(!hasObject(source)){
+      const machineKey=editorMachineKey(source);
+      if(machineKey&&machineKey!==activeMachineKey&&isKnownMachine(machineKey))continue;
+      throw new Error('Berkas berisi objek yang tidak sesuai versi scene saat ini.');
+    }
+    if(value.identity&&value.identity!==identityFor(source))throw new Error('Berkas berisi objek yang tidak sesuai versi scene saat ini.');
   }
   return changes;
 }
