@@ -23,7 +23,7 @@ test('OFFSET 5 overview carries all mandatory master-prompt truth fields',()=>{
  for(const label of ['Nama mesin atau peralatan','Model','Kategori','Subkategori','Pabrikan','Spesifikasi','Lokasi','Status operasi','Nilai kesehatan mesin','Dasar model 3D','Detail model 3D','Keandalan data','Posisi','Jumlah sumber']){
   assert.ok(app.includes("pair('"+label+"'"),label+' missing from OFFSET 5 overview');
  }
- assert.match(app,/PROCEDURAL \/ RECONSTRUCTED/);
+ assert.match(app,/primaryTruth\.source3D/);
  assert.match(app,/Sebagian detail masih merupakan perkiraan/);
  assert.match(app,/primaryTruth\.operatingStatus/);
  assert.match(app,/primaryTruth\.healthScore/);
@@ -32,7 +32,7 @@ test('OFFSET 5 overview carries all mandatory master-prompt truth fields',()=>{
 test('V194 retires the duplicate classic position editor in favor of Edit pabrik 3D',()=>{
  assert.doesNotMatch(html,/id="edit-position"/);
  assert.doesNotMatch(app,/function editorPanel\(\)/);
- assert.match(app,/Edit Pabrik 3D/);
+ assert.match(app,/Edit pabrik 3D/);
  assert.match(app,/openSceneEditor\(\)/);
  assert.match(app,/Posisi relatif terhadap induk \(meter\)/);
  assert.match(app,/Rotasi relatif terhadap induk \(derajat\)/);
