@@ -126,6 +126,32 @@ test('drop-to-floor keeps nested objects correct in world space',()=>{
  assert.equal(FactoryEngine.prototype.dropSceneObjectToFloor.call(engine,'node:0'),false,'already grounded object must be a no-op');
 });
 
+test('world movement keeps vertical controls aligned to the factory floor axis',()=>{
+ const factory=new THREE.Group(),parent=new THREE.Group(),child=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshBasicMaterial());
+ parent.position.set(3,2,-4);parent.rotation.set(.18,0,.31);parent.scale.set(1.4,.8,1.1);child.position.set(.6,1.2,-.3);parent.add(child);factory.add(parent);factory.updateWorldMatrix(true,true);
+ const engine={sceneObjects:new Map([['node:0',child]])},before=child.getWorldPosition(new THREE.Vector3()),parentBefore={position:parent.position.clone(),rotation:parent.rotation.clone(),scale:parent.scale.clone()};
+ assert.equal(FactoryEngine.prototype.moveSceneObjectWorld.call(engine,'node:0',0,.25,0),true);
+ factory.updateWorldMatrix(true,true);const after=child.getWorldPosition(new THREE.Vector3());
+ assert.ok(Math.abs(after.x-before.x)<1e-6);
+ assert.ok(Math.abs(after.y-before.y-.25)<1e-6);
+ assert.ok(Math.abs(after.z-before.z)<1e-6);
+ assert.ok(parent.position.distanceTo(parentBefore.position)<1e-9);
+ assert.ok(Math.abs(parent.rotation.x-parentBefore.rotation.x)<1e-9&&Math.abs(parent.rotation.z-parentBefore.rotation.z)<1e-9);
+ assert.ok(parent.scale.distanceTo(parentBefore.scale)<1e-9);
+});
+
+test('world turn keeps left-right rotation around the factory up axis',()=>{
+ const factory=new THREE.Group(),parent=new THREE.Group(),child=new THREE.Group();
+ parent.position.set(1,2,3);parent.rotation.set(.22,.35,-.18);parent.scale.setScalar(1.2);child.rotation.set(.1,-.25,.08);parent.add(child);factory.add(parent);factory.updateWorldMatrix(true,true);
+ const engine={sceneObjects:new Map([['node:0',child]])},before=child.getWorldQuaternion(new THREE.Quaternion()),angle=Math.PI/6;
+ const expected=before.clone().premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),angle));
+ assert.equal(FactoryEngine.prototype.rotateSceneObjectWorldY.call(engine,'node:0',angle),true);
+ factory.updateWorldMatrix(true,true);const after=child.getWorldQuaternion(new THREE.Quaternion());
+ assert.ok(after.angleTo(expected)<1e-6,'turn must be world-Y, independent of parent rotation');
+ assert.equal(FactoryEngine.prototype.rotateSceneObjectWorldY.call(engine,'node:0',0),false);
+});
+
+
 
 test('world-space editor movement preserves nested parent transforms',()=>{
  const factory=new THREE.Group(),parent=new THREE.Group(),child=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshBasicMaterial());
