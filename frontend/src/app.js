@@ -1340,7 +1340,7 @@ window.addEventListener('bmj:systemassetselect',async event=>{const machine=MACH
 const immersiveRoot=document.documentElement;
 const syncImmersiveButtons=()=>{
  const active=immersiveRoot.classList.contains('immersive-mode');
- for(const button of [$('#fullscreen'),$('#fullscreen-top')])if(button){button.setAttribute('aria-pressed',String(active));button.setAttribute('aria-label',active?'Keluar layar penuh':'Layar penuh');button.title=active?'Keluar layar penuh':'Layar penuh';}
+ for(const button of [$('#fullscreen'),$('#fullscreen-top')])if(button){button.setAttribute('aria-pressed',String(active));button.setAttribute('aria-label',active?'Keluar dari layar penuh':'Layar penuh');button.title=active?'Keluar layar penuh':'Layar penuh';}
 };
 const toggleImmersive=async()=>{
  const entering=!immersiveRoot.classList.contains('immersive-mode');
