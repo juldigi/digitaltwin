@@ -20,22 +20,22 @@ test('V194 data and source status is reachable from Settings without a floating 
 });
 
 test('OFFSET 5 overview carries all mandatory master-prompt truth fields',()=>{
- for(const label of ['Nama aset','Model','Kategori','Subkategori','Pabrikan','Spesifikasi','Lokasi','Status operasi','Nilai kesehatan mesin','Dasar model 3D','Detail model 3D','Keandalan data','Posisi','Jumlah sumber']){
+ for(const label of ['Nama mesin atau peralatan','Model','Kategori','Subkategori','Pabrikan','Spesifikasi','Lokasi','Status operasi','Nilai kesehatan mesin','Dasar model 3D','Detail model 3D','Keandalan data','Posisi','Jumlah sumber']){
   assert.ok(app.includes("pair('"+label+"'"),label+' missing from OFFSET 5 overview');
  }
  assert.match(app,/PROCEDURAL \/ RECONSTRUCTED/);
- assert.match(app,/Sebagian detail masih perkiraan/);
+ assert.match(app,/Sebagian detail masih merupakan perkiraan/);
  assert.match(app,/primaryTruth\.operatingStatus/);
  assert.match(app,/primaryTruth\.healthScore/);
 });
 
-test('V194 retires the duplicate classic position editor in favor of Edit Pabrik 3D',()=>{
+test('V194 retires the duplicate classic position editor in favor of Edit pabrik 3D',()=>{
  assert.doesNotMatch(html,/id="edit-position"/);
  assert.doesNotMatch(app,/function editorPanel\(\)/);
  assert.match(app,/Edit Pabrik 3D/);
  assert.match(app,/openSceneEditor\(\)/);
- assert.match(app,/Posisi relatif induk \(meter\)/);
- assert.match(app,/Rotasi relatif induk \(derajat\)/);
+ assert.match(app,/Posisi relatif terhadap induk \(meter\)/);
+ assert.match(app,/Rotasi relatif terhadap induk \(derajat\)/);
 });
 
 test('V159 preserves V158 camera and selection interaction contract',()=>{
@@ -48,7 +48,7 @@ test('V159 preserves V158 camera and selection interaction contract',()=>{
 });
 
 test('V159 search promise matches strict Phase-1 scope and cache identifiers are coherent',()=>{
- assert.match(shell,/Cari mesin, area, komponen, sistem, atau sumber/);
+ assert.match(shell,/Cari mesin, area, komponen, sistem, atau referensi/);
   assert.match(html,/app-shell-v79\.css\?v=222/);
  assert.match(html,/src\/app\.js\?v=222/);
  assert.match(html,/src\/ui-v5\.js\?v=222/);
