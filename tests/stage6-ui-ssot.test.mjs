@@ -106,3 +106,11 @@ test('Stage 6 keeps canvas part selection inside the canonical inspector',()=>{
  assert.doesNotMatch(app,/document\.addEventListener\('keydown',event=>\{if\(event\.key==='Escape'\)/);
  assert.match(app,/function selectPartFromCanvas\(part\)\{[\s\S]*path\.find\(node=>node\.level===2\)\|\|meta[\s\S]*selectTaxonomy\(first\.id\)/);
 });
+
+
+test('Stage 6 canonical shell stylesheet is structurally balanced',()=>{
+ const opens=[...css].filter(char=>char==='{').length;
+ const closes=[...css].filter(char=>char==='}').length;
+ assert.equal(opens,closes,'app-shell-v79.css must keep balanced rule braces');
+ assert.doesNotMatch(css,/@media\(max-width:767px\)\{@media\(max-width:767px\)\{\s*$/);
+});

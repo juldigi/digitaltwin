@@ -1,7 +1,7 @@
 // V237 dedicated machine realism pass; V249 shell recache without rotating public query identifiers; V255 UI SSOT repair recaches the corrected canonical shell through the build fingerprint.
-const LEGACY_VERSION='factory-digital-twin-v222-overlay-state-ssot-20260925';
-const VERSION='factory-digital-twin-v249-cache-refresh-20260927';
-const RELEASE='222';
+const LEGACY_VERSION='factory-digital-twin-v249-cache-refresh-20260927';
+const VERSION='factory-digital-twin-v255-ui-ssot-20260929';
+const RELEASE='255';
 const BUILD_FINGERPRINT='SOURCE';
 const ENTRYPOINTS=[
  './app-shell-v79.css','./src/app.js','./src/ui-v5.js','./src/experience-v37.js','./src/app-shell-v79.js'
