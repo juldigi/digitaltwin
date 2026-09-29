@@ -105,6 +105,17 @@ test('source wall endpoint editing carries the entire finish assembly',async()=>
 });
 
 
+test('drop-to-floor keeps nested objects correct in world space',()=>{
+ const factory=new THREE.Group(),parent=new THREE.Group(),child=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshBasicMaterial());
+ parent.position.set(2,3,-1);parent.scale.set(1.2,2,0.8);parent.rotation.z=Math.PI/12;child.position.set(.4,1.8,.2);parent.add(child);factory.add(parent);factory.updateWorldMatrix(true,true);
+ const engine={sceneObjects:new Map([['node:0',child]])};
+ assert.equal(FactoryEngine.prototype.dropSceneObjectToFloor.call(engine,'node:0'),true);
+ factory.updateWorldMatrix(true,true);const box=new THREE.Box3().setFromObject(child);
+ assert.ok(Math.abs(box.min.y)<1e-5,'child world-space bottom must land on y=0');
+ assert.deepEqual(parent.position.toArray(),[2,3,-1],'parent transform must remain unchanged');
+ assert.equal(FactoryEngine.prototype.dropSceneObjectToFloor.call(engine,'node:0'),false,'already grounded object must be a no-op');
+});
+
 test('scene isolation is reversible and stays inside its editor scope',()=>{
  const scene=new THREE.Group(),factory=new THREE.Group(),machine=new THREE.Group(),part=new THREE.Group(),otherPart=new THREE.Group(),hiddenPart=new THREE.Group();
  hiddenPart.visible=false;machine.add(part,otherPart,hiddenPart);scene.add(factory,machine);
