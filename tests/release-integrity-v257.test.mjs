@@ -96,7 +96,9 @@ test('V252/V254 inspection work remains present together with the later V258-V26
   assert.equal(s.root.userData.visualRefinement,'V260_SHARK_N650_ATTACHED_FEEDER_APERTURE_REJECT_PIVOT_REALISM');
   assert.ok(d.findNode('diana55-reject-safety-v254'));
   assert.ok(s.findNode('shark650-reject-guard-v254'));
-  assert.ok(d.findNode('diana55-front-aperture-bezel-v260'));
+  assert.ok(d.findNode('diana55-front-aperture-bezel-v259'));
+  assert.ok(d.findNode('diana55-reject-pivot-v260'));
+  assert.ok(d.findNode('diana55-reject-recovery-support-v260'));
   assert.ok(s.findNode('shark650-front-aperture-bezel-v260'));
   assert.equal(d.findNode('diana55-camera-top')?.userData.installedCountVerified,false);
   assert.equal(s.findNode('shark650-vision-camera')?.userData.installedCameraCountVerified,false);
