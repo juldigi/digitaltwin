@@ -27,7 +27,7 @@ test('V266 removes legacy mixed-language UI wording while preserving technical i
   'Buka Interior','Gerak bertahap saat drag','tidak dilaporkan browser','Thread CPU browser',
   'Status Data & Sumber','Sambungkan Data','Bersihkan Data Tersimpan','Informasi Sistem',
   'Ganti Kata Sandi','Simpan Kata Sandi','Buka Semua Cover','Tutup Interior',
-  'Anchor tidak valid','Unit CAD tidak valid','harus angka finite',"'Running'",'MESIN & PERALATAN'
+  'Anchor tidak valid','Unit CAD tidak valid','harus angka finite',"'Running'",'MESIN & PERALATAN','Offline: berkas belum tersimpan.'
  ])assert.equal(runtime.includes(oldCopy),false,oldCopy);
  for(const technicalTerm of ['DWG','CAD','GPU','WebGL','UV','Superadmin','shadow map','environment lighting'])assert.ok(runtime.includes(technicalTerm),technicalTerm);
 });
@@ -39,6 +39,10 @@ test('V266 translates generic status labels without rewriting OEM process termin
   'Pembuangan kondensat','Pemuatan tumpukan','Tekanan hidraulik','Lipatan akhir'
  ])assert.ok(app.includes(copy),copy);
  for(const preserved of ['Gripper indexing','Feeder suction','Pressure dwell','SideLay','UV curing','Screw compression','Laser exposure'])assert.ok(app.includes(preserved),preserved);
+});
+
+test('V266 localizes connection fallback messages',()=>{
+ assert.match(runtime,/Tidak tersambung: berkas belum tersimpan di perangkat\./);
 });
 
 test('V266 presents validation and confidence language in standard Indonesian',()=>{
