@@ -127,6 +127,9 @@ test('V264 editor owns the application context while it is open',()=>{
  assert.match(app,/closeOverlay as closeAppOverlay/);
  assert.match(app,/setView\('factory'\);closeAppOverlay\(\);setAppInspector\(false,'overview'\);engine\.setSceneEditing\(true\)/);
  assert.match(app,/document\.body\.classList\.add\('scene-editor-open'\)/);
+ assert.match(app,/editorBackgroundTargets=\[\.\.\.document\.querySelectorAll\('\.rail,\.global-search,\.header-actions,#panel-toggle,\.scene-bottom,\.viewport-mode-switch,aside#detail-panel,\.canonical-simulation-transport,\.mobile-nav'\)\]/);
+ assert.match(app,/for\(const element of editorBackgroundTargets\)element\.inert=true/);
+ assert.match(app,/for\(const \[element,wasInert\] of editorBackgroundInert\)element\.inert=wasInert/);
  assert.match(app,/document\.body\.classList\.remove\('scene-editor-open'\)/);
  assert.match(css,/body\.scene-editor-open \.rail button/);
  assert.match(css,/body\.scene-editor-open #panel-toggle/);
