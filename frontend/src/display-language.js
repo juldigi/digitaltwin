@@ -37,6 +37,10 @@ export function readableStatus(value){
   'TEMPLATE_ONLY':'Hanya acuan template','LAYOUT_ESTIMATED':'Perkiraan dari denah','DRAWING_BASED':'Berdasarkan gambar','FIELD_VERIFIED':'Terverifikasi di lapangan','AS_BUILT_CONFIRMED':'Kondisi terpasang terkonfirmasi',
   'UNPLACED':'Belum ditempatkan','UNPLACED_UNTIL_DRAWING_AVAILABLE':'Belum ditempatkan; menunggu gambar aktual','AS_BUILT_OR_DRAWING_APPLIED':'Menggunakan data terpasang atau gambar aktual','MIXED_TEMPLATE_AND_APPLIED':'Gabungan acuan dan data yang sudah diterapkan',
   'INFERRED_POSITION':'Posisi hasil inferensi','REFERENCE_ONLY':'Hanya berdasarkan referensi','PHOTO_VERIFIED':'Terverifikasi dari foto','REFERENCE_PLUS_PHOTO':'Diverifikasi dengan referensi dan foto','SOURCE_REFERENCE':'Acuan sumber','DOCUMENTATION_REQUIRED':'Dokumentasi diperlukan',
+  'SOURCE_MISSING':'Sumber belum tersedia',
+  'AUDITABLE_PARTIAL':'Dapat diaudit; cakupan masih sebagian',
+  'PARTIAL / SOURCE COUNT UNKNOWN':'Sebagian; jumlah entitas sumber belum diketahui',
+  'PARTIAL / NORMALIZED EXTRACTION':'Sebagian; hasil ekstraksi telah dinormalisasi',
   'BMJ_ACTUAL_PHOTO_GROUNDED':'Berdasarkan foto aktual BMJ',
   'MODEL_IDENTIFIED_PROCESS_GROUNDED':'Model teridentifikasi; proses didukung sumber',
   'DOCUMENT_GROUNDED':'Berdasarkan dokumen teknis',
@@ -222,7 +226,11 @@ const DWG_REASON_LABELS=Object.freeze({
  'DWG layout is not loaded.':'Denah DWG belum dimuat.',
  'Entity type is retained in the extraction audit but is not promoted to physical 3D geometry without semantic evidence.':'Jenis entitas tetap dicatat pada audit ekstraksi, tetapi belum ditampilkan sebagai geometri fisik 3D karena bukti semantiknya belum cukup.',
  'The packed factory baseline contains normalized geometry, labels and source identity, but does not expose a complete per-type raw-entity ledger. Coverage must not be interpreted as 100%.':'Baseline pabrik memuat geometri yang sudah dinormalisasi, label, dan identitas sumber, tetapi belum menyediakan daftar lengkap setiap entitas mentah berdasarkan jenis. Cakupan ini tidak boleh dianggap 100%.',
- 'DWG X → THREE X · DWG Y → THREE Z · THREE Y → ELEVATION':'DWG X → 3D X · DWG Y → 3D Z · 3D Y → elevasi'
+ 'DWG X → THREE X · DWG Y → THREE Z · THREE Y → ELEVATION':'DWG X → 3D X · DWG Y → 3D Z · 3D Y → elevasi',
+ 'SOURCE ENTITY CLASSES NOT ENUMERATED BY PACKED EXTRACTOR':'Kelas entitas sumber belum dirinci oleh ekstraktor data',
+ 'NOT_IMPLEMENTED':'Belum ditampilkan dalam 3D',
+ 'UNKNOWN':'Belum diketahui',
+ 'meter':'meter'
 });
 export function readableDwgReason(value){
  if(value==null||value==='')return 'Belum tersedia';
