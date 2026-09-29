@@ -234,7 +234,7 @@ test('V197 starts from a neutral factory context instead of loading OFFSET 5 imp
   assert.match(engine,/clearMachineContext\(\)/);
   assert.match(scope,/defaultMachineId:null/);
   assert.match(scope,/referenceMachineId:'BMJ-MCH-0003'/);
-  assert.match(html,/id="geometry-caption">Pabrik · Seluruh Area</);
+  assert.match(html,/id="geometry-caption">Pabrik · Seluruh area</);
   assert.doesNotMatch(html,/id="geometry-caption">Model Offset 5</);
   assert.match(sw,/factory-digital-twin-v222-overlay-state-ssot-20260925/);
 });
