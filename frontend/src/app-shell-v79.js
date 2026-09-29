@@ -488,7 +488,7 @@ function qualityDeviceCapabilities(){
  }catch{}
  return {mobile,memory:Number.isFinite(reportedMemory)&&reportedMemory>0?reportedMemory:4,memoryReported:Number.isFinite(reportedMemory)&&reportedMemory>0?reportedMemory:null,cores:Number.isFinite(reportedCores)&&reportedCores>0?reportedCores:4,coresReported:Number.isFinite(reportedCores)&&reportedCores>0?reportedCores:null,maxTextureSize};
 }
-function qualityDeviceLabel(caps){return caps.mobile?'Ponsel / perangkat sentuh':innerWidth<=1180?'Tablet / layar menengah':'Komputer / laptop';}
+function qualityDeviceLabel(caps){return caps.mobile?'Ponsel atau perangkat sentuh':innerWidth<=1180?'Tablet atau layar menengah':'Komputer atau laptop';}
 function qualityRecommendationMarkup(caps=qualityDeviceCapabilities()){
  const recommended=recommendedProfile(caps),info=RENDER_PROFILE_INFO[recommended]||RENDER_PROFILE_INFO.seimbang;
  const memory=caps.memoryReported?caps.memoryReported+' GB':'tidak dilaporkan peramban',cores=caps.coresReported||caps.cores||'tidak diketahui';
@@ -498,7 +498,7 @@ function qualityProfileDetailMarkup(requested,caps=qualityDeviceCapabilities()){
  const recommended=recommendedProfile(caps),effective=requested==='auto'?recommended:requested;
  const selected=RENDER_PROFILE_INFO[requested]||RENDER_PROFILE_INFO.auto,actual=RENDER_PROFILE_INFO[effective]||RENDER_PROFILE_INFO.seimbang;
  const title=requested==='auto'?`Otomatis → ${actual.label}`:actual.label;
- const difference=requested==='auto'?`Pada perangkat ini mode Otomatis memakai ${actual.label}. ${actual.difference}`:actual.difference;
+ const difference=requested==='auto'?`Pada perangkat ini, mode Otomatis menggunakan ${actual.label}. ${actual.difference}`:actual.difference;
  return `<div class="quality-profile-detail-card" data-quality-profile-detail><strong>${escapeHtml(title)}</strong><p><b>Perbedaan utama:</b> ${escapeHtml(difference)}</p><p><b>Kelebihan:</b> ${escapeHtml(requested==='auto'?selected.pros:actual.pros)}</p><p><b>Kompromi / kekurangan:</b> ${escapeHtml(requested==='auto'?selected.cons:actual.cons)}</p></div>`;
 }
 function qualityOptionsMarkup(selected='auto',caps=qualityDeviceCapabilities()){
