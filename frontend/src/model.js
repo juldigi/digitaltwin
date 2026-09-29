@@ -20,7 +20,7 @@ export const initialState = {
 export function finite(v) { return typeof v === 'number' && Number.isFinite(v); }
 export function validatePosition(p) {
   if(!p || !['x','y','z','rotation','scale'].every(k=>finite(p[k]))) throw new Error('Koordinat, rotasi, dan skala harus berupa angka yang valid.');
-  if(Math.max(Math.abs(p.x),Math.abs(p.y),Math.abs(p.z))>1e7 || p.scale<=0 || p.scale>1e4 || Math.abs(p.rotation)>36000) throw new Error('Transformasi di luar rentang yang didukung.');
+  if(Math.max(Math.abs(p.x),Math.abs(p.y),Math.abs(p.z))>1e7 || p.scale<=0 || p.scale>1e4 || Math.abs(p.rotation)>36000) throw new Error('Nilai posisi, rotasi, atau skala berada di luar rentang yang didukung.');
   if(!['APPROXIMATE','USER-CONFIRMED'].includes(p.confidence)) throw new Error('Pilih tingkat keyakinan posisi.');
   return p;
 }
@@ -30,9 +30,9 @@ export function validateLayout(l) {
   if(typeof l.source.extractionMethod!=='string' || !l.source.extractionMethod.trim()) throw new Error('Metode ekstraksi DWG belum dicatat.');
   const t=l.transform;
   if(!t || !['UNKNOWN','mm','cm','m','inch','foot'].includes(t.sourceUnits)) throw new Error('Satuan CAD tidak valid.');
-  if(![t.originX,t.originY,t.rotation].every(finite) || (t.scale!==null && (!finite(t.scale)||t.scale<=0||t.scale>1e6))) throw new Error('Transformasi tidak valid.');
+  if(![t.originX,t.originY,t.rotation].every(finite) || (t.scale!==null && (!finite(t.scale)||t.scale<=0||t.scale>1e6))) throw new Error('Posisi, rotasi, atau skala tidak valid.');
   if(t.sourceUnits==='UNKNOWN' && t.scale!==null && !(t.calibration?.knownDistance>0 && t.calibration?.sourceDistance>0)) throw new Error('Satuan sumber yang belum diketahui memerlukan referensi kalibrasi untuk menentukan skala.');
-  if(t.sourceUnits==='UNKNOWN' && t.scale!==null && Math.abs(t.scale-t.calibration.knownDistance/t.calibration.sourceDistance)>1e-9) throw new Error('Skala tidak sesuai referensi kalibrasi.');
+  if(t.sourceUnits==='UNKNOWN' && t.scale!==null && Math.abs(t.scale-t.calibration.knownDistance/t.calibration.sourceDistance)>1e-9) throw new Error('Skala tidak sesuai dengan referensi kalibrasi.');
   const scales={mm:.001,cm:.01,m:1,inch:.0254,foot:.3048};
   if(t.sourceUnits!=='UNKNOWN' && Math.abs(t.scale-scales[t.sourceUnits])>1e-9) throw new Error('Skala tidak sesuai dengan satuan sumber.');
   if(!Array.isArray(l.entities)||l.entities.length>30000) throw new Error('Jumlah entitas tidak boleh melebihi 30.000.');
@@ -41,7 +41,7 @@ export function validateLayout(l) {
     if(!e || typeof e.id!=='string'||ids.has(e.id)||typeof e.layer!=='string'||!CONFIDENCES.includes(e.confidence)) throw new Error('ID, layer (lapisan), atau tingkat keyakinan entitas tidak valid.');
     ids.add(e.id);
     if(e.points && (!Array.isArray(e.points)||e.points.length>20000||e.points.some(p=>!Array.isArray(p)||p.length!==2||!p.every(finite)||p.some(n=>Math.abs(n)>1e9)))) throw new Error('Koordinat entitas tidak valid.');
-    if(e.height!==undefined && e.height!==null && (!finite(e.height)||e.height<=0||e.height>1e7)) throw new Error('Tinggi tidak valid.');
+    if(e.height!==undefined && e.height!==null && (!finite(e.height)||e.height<=0||e.height>1e7)) throw new Error('Nilai tinggi tidak valid.');
   }
   if(l.machineAnchor){
     const a=l.machineAnchor;
