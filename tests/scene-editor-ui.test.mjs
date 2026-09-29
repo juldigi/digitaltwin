@@ -74,7 +74,7 @@ test('V264 lock state disables transform controls without blocking visibility st
  assert.ok(app.includes('data-se-mode="scale" ${engine.gizmo.mode===\'scale\'?\'class="active"\':\'\'} ${transformBlocked?\'disabled\':\'\'}'));
  assert.ok(app.includes('id="se-ground" ${transformBlocked?\'disabled\':\'\'}'));
  assert.ok(app.includes('const mutate=(fn,{allowLocked=false,allowHidden=false'));
- assert.ok(app.includes("querySelector('#se-hide')?.addEventListener('click',()=>mutate"));
+ assert.ok(app.includes("querySelector('#se-hide')?.addEventListener('click',()=>{if(!selected||previewOriginal||current()?.deleted)return"));
  assert.ok(app.includes('allowLocked:true'));
 });
 
@@ -83,6 +83,10 @@ test('V264 editor scopes controls to the selected object and scope',()=>{
  assert.ok(app.includes('${canGround?`<button id="se-ground"'));
  assert.ok(app.includes("canScale=Boolean(selected&&selectedVisible&&editorScope==='factory'&&['furniture','uncategorized'].includes(editorCategory))"));
  assert.ok(app.includes("canDuplicate=Boolean(selected&&selectedVisible&&editorScope==='factory'&&editorCategory!=='machines'"));
+ assert.ok(app.includes("!selected.startsWith('new:')"));
+ assert.ok(app.includes("(canScale?['position','rotation','scale']:['position','rotation'])"));
+ assert.ok(app.includes("Posisi relatif induk (meter)"));
+ assert.ok(app.includes("Rotasi relatif induk (derajat)"));
  assert.ok(app.includes("editorScope==='factory'?`<fieldset><legend>Sejajarkan dengan aset lain"));
  assert.ok(app.includes('id="se-remove-generated"'));
  assert.ok(app.includes('id="se-restore-default"'));
@@ -102,8 +106,57 @@ test('V264 editor avoids false transactions and destructive ambiguity',()=>{
  assert.ok(app.includes('removedSavedOverride=Object.keys(savedOverrides).some'));
  assert.ok(app.includes("stableJson(imported)===stableJson(overrides)"));
  assert.ok(app.includes('activeMachineKey:engine.machineKey||null'));
+ assert.ok(app.includes("const snapshot=()=>{const redoBefore=[...redo]"));
+ assert.ok(app.includes("redo=redoBefore;return toast('Objek sudah berada di lantai.'"));
+ assert.ok(app.includes('let dragChanged=false,dragRedo=[]'));
+ assert.ok(app.includes('redo=dragRedo;refreshEditorTransformUi()'));
  assert.match(css,/V264 editor context guard/);
  assert.match(css,/body\.scene-editor-open aside#detail-panel/);
+});
+
+
+test('V264 editor owns the application context while it is open',()=>{
+ assert.match(app,/closeOverlay as closeAppOverlay/);
+ assert.match(app,/setView\('factory'\);closeAppOverlay\(\);setAppInspector\(false,'overview'\);engine\.setSceneEditing\(true\)/);
+ assert.match(app,/document\.body\.classList\.add\('scene-editor-open'\)/);
+ assert.match(app,/document\.body\.classList\.remove\('scene-editor-open'\)/);
+ assert.match(css,/body\.scene-editor-open \.rail button/);
+ assert.match(css,/body\.scene-editor-open #panel-toggle/);
+ assert.match(css,/body\.scene-editor-open \.mobile-nav/);
+ assert.match(css,/body\.scene-editor-open \.canonical-simulation-transport/);
+});
+
+test('V264 editor preview is fully read-only and uses the last persisted state',()=>{
+ assert.match(app,/engine\.applySceneOverrides\(savedOverrides\)/);
+ assert.match(app,/panel\.querySelectorAll\('button,input,select'\)\.forEach\(control=>\{if\(!\['se-preview','se-close'\]\.includes\(control\.id\)\)control\.disabled=true;\}\)/);
+ assert.match(app,/Sedang melihat kondisi terakhir tersimpan/);
+ assert.match(app,/Kondisi terakhir tersimpan · hanya melihat/);
+ assert.doesNotMatch(app,/engine\.applySceneOverrides\(\{\}\);applyIsolation\(\)/);
+});
+
+test('V264 editor guards hidden deleted locked and isolated objects consistently',()=>{
+ assert.match(app,/const isTransformBlocked=\(\)=>\{const value=current\(\);return !selected\|\|previewOriginal\|\|!value\|\|value\.locked\|\|value\.deleted\|\|value\.visible===false;\}/);
+ assert.doesNotMatch(app,/\btransformBlocked\(\)/);
+ assert.match(app,/engine\.onSceneTransform=\(\)=>\{if\(!isTransformBlocked\(\)\)/);
+ assert.match(app,/if\(hiding&&isolated\)\{isolated=false;isolationGuard\.restore\(\);\}/);
+ assert.match(app,/if\(!selected\|\|!selectedVisible\|\|previewOriginal\)return;isolated=!isolated/);
+ assert.match(app,/const node=selected&&engine\.sceneObjects\.get\(selected\);if\(isolated&&node\)isolationGuard\.isolate/);
+ assert.ok(app.includes("\${v?.deleted?'':\`<button id=\\"se-hide\\""));
+});
+
+test('V264 editor movement labels and handlers match screen/world semantics',()=>{
+ assert.ok(app.includes('Atas layar'));
+ assert.ok(app.includes('Bawah layar'));
+ assert.ok(app.includes("engine.moveSceneObjectWorld(selected,0,Number(direction)*editorMoveStep,0)"));
+ assert.ok(app.includes("engine.moveSceneObjectInView(selected,horizontal,vertical,editorMoveStep)"));
+ assert.ok(app.includes("Hanya objek ini"));
+});
+
+test('V264 editor parent and alignment controls cannot target invalid hierarchy states',()=>{
+ assert.ok(app.includes("editorScope==='machine'&&selected?'<button id=\\"se-parent\\""));
+ assert.ok(app.includes("normalized==='machine:'+engine.machineKey+':root'"));
+ assert.ok(app.includes("!selectableEditorObject(normalized,target)"));
+ assert.ok(app.includes(".filter(([id])=>'asset:'+id!==selected).map"));
 });
 
 test('scene editor exposes real-world categories and keeps internal identifiers out of normal UI',()=>{
