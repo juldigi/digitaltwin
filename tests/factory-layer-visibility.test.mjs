@@ -60,23 +60,30 @@ test('V258 hiding building structure does not hide the IPAL process yard',async(
  assert.equal(built.layers.ipal.visible,true);
  const visibleThroughParents=object=>{for(let node=object;node;node=node.parent)if(node.visible===false)return false;return true;};
  assert.equal(visibleThroughParents(ipal),true,'IPAL must remain visible through the complete parent chain');
- assert.equal(ipal.userData.independentFromBuildingStructure,true);
+ assert.equal(ipal.userData.independentProcessFromBuildingStructure,true);
 });
 
 
-test('V259 IPAL canopy roof and steel stay owned by IPAL when building and global roof are hidden',async()=>{
+test('V260 hiding main building structure also hides the IPAL canopy while process equipment remains visible',async()=>{
  const [layout,fleet]=await Promise.all([loadActualPlantLayout(),loadFactoryFleet()]);
- const built=buildActualFactory(layout,fleet),ipal=built.root.getObjectByName('IPAL_OPEN_AIR_WATER_TREATMENT');
- assert.ok(ipal?.userData.ownsCanopyStructure);
- assert.ok(ipal?.userData.ownsCanopyRoof);
- const canopyPattern=/^IPAL_PHOTO_(?:CANOPY_COLUMN|CURVED_CANOPY_RAFTER|CORRUGATED_CANOPY_ROOF|TRANSLUCENT_ROOF_PANEL|ROOF_PURLIN|ROOF_GUTTER|CANOPY_CORRUGATION_RIBS)$/;
+ const built=buildActualFactory(layout,fleet),ipal=built.root.getObjectByName('IPAL_OPEN_AIR_WATER_TREATMENT'),structure=built.ipalStructure;
+ assert.ok(ipal?.userData.independentProcessFromBuildingStructure,'IPAL process root stays independent');
+ assert.equal(ipal?.userData.canopyFollowsBuildingStructure,true);
+ assert.ok(structure,'dedicated IPAL structural subtree must exist');
+ assert.equal(structure.parent,built.layers.building,'IPAL canopy must be owned by the main building structure layer');
+ assert.equal(structure.userData.followsMainBuildingStructure,true);
+ assert.ok(structure.userData.objectCount>=20,'photo-derived canopy members must move into the structural subtree');
+ const canopyPattern=/^IPAL_PHOTO_(?:CANOPY_COLUMN|CANOPY_COLUMN_BASE|CURVED_CANOPY_RAFTER|LATTICE_COLUMN_CHORD|LATTICE_COLUMN_DIAGONAL|CANOPY_X_BRACE|CORRUGATED_CANOPY_ROOF|TRANSLUCENT_ROOF_PANEL|ROOF_PURLIN|CANOPY_TIE_ROD|ROOF_GUTTER|ROOF_DOWNPIPE|CANOPY_CORRUGATION_RIBS|WORK_LIGHT)$/;
  const canopy=[],leaked=[];
- ipal.traverse(object=>{if(canopyPattern.test(String(object.userData?.semantic||'')))canopy.push(object);});
- built.layers.roof.traverse(object=>{if(canopyPattern.test(String(object.userData?.semantic||'')))leaked.push(object);});
- assert.ok(canopy.length>=20,'photo-derived IPAL canopy must remain present');
- assert.equal(leaked.length,0,'IPAL canopy must not leak into the global factory roof layer');
+ structure.traverse(object=>{if(canopyPattern.test(String(object.userData?.semantic||'')))canopy.push(object);});
+ ipal.traverse(object=>{if(canopyPattern.test(String(object.userData?.semantic||'')))leaked.push(object);});
+ assert.ok(canopy.length>=20,'canopy structure must remain present under building');
+ assert.equal(leaked.length,0,'visible canopy members must no longer live under the independent IPAL process root');
+ const processObjects=[];ipal.traverse(object=>{if(/^IPAL_PHOTO_(?:BAK_|TANGKI_|TRANSFER_PUMP_BODY|CHEMICAL_)/.test(String(object.userData?.semantic||'')))processObjects.push(object);});
+ assert.ok(processObjects.length>0,'IPAL process equipment must remain in the IPAL layer');
  const engine={actualFactory:built,setFactoryLayer(name,on){built.layers[name].visible=on;}};
- syncFactoryLayerVisibility(engine,{building:false,roof:false,ipal:true});
+ syncFactoryLayerVisibility(engine,{building:false,ipal:true});
  const visibleThroughParents=object=>{for(let node=object;node;node=node.parent)if(node.visible===false)return false;return true;};
- assert.ok(canopy.every(visibleThroughParents),'hiding main building/roof must not open the IPAL canopy');
+ assert.ok(canopy.every(object=>!visibleThroughParents(object)),'main structure OFF must hide all IPAL canopy members');
+ assert.ok(processObjects.some(visibleThroughParents),'main structure OFF must leave IPAL process equipment visible');
 });
