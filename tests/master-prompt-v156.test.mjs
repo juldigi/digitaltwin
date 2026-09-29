@@ -37,7 +37,7 @@ test('placeholder assets expose spatial context but not inventory technical meta
  assert.match(detail,/pair\('Dasar posisi',positionStatusLabel\(policy\.positionStatus\)\)/);
  assert.match(detail,/pair\('Status detail','Belum dibuka pada fase fondasi'\)/);
  assert.match(detail,/primary\?primaryData:placeholderData/);
- assert.match(detail,/Model 3D belum tersedia untuk aset ini/);
+ assert.match(detail,/Model 3D belum tersedia untuk mesin atau peralatan ini/);
 });
 
 test('universal search keeps placeholder indexing spatial and removes utility-system discovery',()=>{
