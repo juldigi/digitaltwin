@@ -1618,3 +1618,150 @@ html.immersive-mode .header-actions #fullscreen-top{display:grid!important}
   max-height:calc(100dvh - var(--header-h) - 14px)!important
  }
 }
+
+
+/* V263 simplified editor */
+#scene-editor-panel{
+ width:min(400px,calc(100vw - 24px));
+ padding:14px;
+ background:#f8fbfd;
+}
+#scene-editor-panel .se-header{
+ top:-14px;margin:-14px -14px 10px;padding:13px 14px 11px;
+ background:rgba(255,255,255,.98)
+}
+#scene-editor-panel .se-header small{color:#6e8190;letter-spacing:.11em}
+#scene-editor-panel .se-header strong{font-size:18px}
+#scene-editor-panel .se-header span{max-width:270px;font-size:10px;line-height:1.35}
+#scene-editor-panel .se-progress{gap:5px;margin-bottom:9px}
+#scene-editor-panel .se-progress span{
+ justify-content:center;min-height:36px;padding:5px 6px;border-radius:999px;
+ font-size:9px
+}
+#scene-editor-panel .se-progress b{width:20px;height:20px;flex-basis:20px}
+#scene-editor-panel .se-step{margin-bottom:9px;padding:11px;border-radius:13px}
+#scene-editor-panel .se-step-title{margin-bottom:8px}
+#scene-editor-panel .se-step-title>b{width:25px;height:25px;flex-basis:25px;border-radius:8px}
+#scene-editor-panel .se-step-title strong{font-size:12px}
+#scene-editor-panel .se-step-title span{font-size:9px;line-height:1.35}
+
+#scene-editor-panel .se-category-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+#scene-editor-panel .se-category-grid button{
+ min-height:44px;padding:6px 7px;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px
+}
+#scene-editor-panel .se-category-grid button strong{font-size:9px}
+#scene-editor-panel .se-category-grid button span{
+ position:absolute;align-self:flex-end;min-width:20px;width:auto;height:20px;padding:0 6px
+}
+#scene-editor-panel #se-object{min-height:96px;max-height:132px}
+#scene-editor-panel .se-selected-card{padding:9px}
+#scene-editor-panel .se-selected-card button{min-height:36px;padding:0 10px;font-size:9px}
+
+#scene-editor-panel .se-primary-tools{
+ grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;padding:3px;margin-bottom:7px
+}
+#scene-editor-panel .se-primary-tools button{min-height:40px;font-size:11px}
+#scene-editor-panel .se-easy-toolbar{
+ display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;align-items:stretch;margin:7px 0
+}
+#scene-editor-panel .se-easy-toolbar .se-step-size{
+ display:grid;grid-template-columns:auto minmax(0,1fr);min-width:0;padding:5px 7px
+}
+#scene-editor-panel .se-easy-toolbar .se-step-size select{
+ width:100%;min-width:0;padding:0 5px
+}
+#scene-editor-panel .se-easy-toolbar>button{min-width:96px;font-size:9px}
+
+#scene-editor-panel .se-nudge-card{
+ margin:7px 0;padding:10px 11px;border-color:#d5e5f1;background:#f6fbff
+}
+#scene-editor-panel .se-direction-pad{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;align-items:stretch;margin:9px auto 6px;
+ max-width:286px
+}
+#scene-editor-panel .se-direction-pad>span{min-height:48px}
+#scene-editor-panel .se-direction-pad button{
+ min-height:48px;display:grid;place-items:center;gap:0;padding:4px;font-size:18px;
+ border-color:#bed8ee;background:#fff
+}
+#scene-editor-panel .se-direction-pad button small{
+ display:block;margin-top:-2px;color:#647b8b;font-size:8px;font-weight:750
+}
+#scene-editor-panel .se-step-indicator{
+ display:grid;place-items:center;min-height:48px;padding:4px;border:1px dashed #bad2e4;border-radius:10px;
+ background:#eef7ff;color:#146bbc;text-align:center
+}
+#scene-editor-panel .se-step-indicator strong{font-size:11px}
+#scene-editor-panel .se-step-indicator small{font-size:7px;color:#6d8292}
+#scene-editor-panel .se-turn-row{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+#scene-editor-panel .se-turn-row button{min-height:38px;font-size:9px}
+#scene-editor-panel .se-essential-actions{
+ display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:7px
+}
+#scene-editor-panel .se-essential-actions button{min-height:40px;font-size:9px}
+#scene-editor-panel .se-essential-actions #se-reset{grid-column:1/-1;background:#fafcfd}
+
+#scene-editor-panel .se-more-actions,#scene-editor-panel .se-advanced{margin-top:7px}
+#scene-editor-panel .se-more-actions>summary,#scene-editor-panel .se-advanced>summary{
+ min-height:38px;padding:9px 11px;font-size:10px
+}
+#scene-editor-panel .se-object-actions{margin-top:0}
+#scene-editor-panel .se-object-actions #se-reset{grid-column:auto}
+#scene-editor-panel .se-precision-tools{
+ display:grid;grid-template-columns:minmax(100px,.8fr) minmax(0,1.4fr);gap:6px;align-items:stretch;margin-bottom:6px
+}
+#scene-editor-panel .se-precision-tools>button{font-size:9px}
+#scene-editor-panel .se-precision-tools .se-snap-toggle{white-space:normal;line-height:1.2}
+#scene-editor-panel .se-height-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0}
+#scene-editor-panel .se-height-actions button{font-size:9px}
+#scene-editor-panel .se-admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px}
+#scene-editor-panel .se-admin-grid button{font-size:9px}
+#scene-editor-panel .se-admin-grid button:first-child{grid-column:1/-1}
+#scene-editor-panel .se-admin-tools>summary{color:#697c89;font-size:10px}
+#scene-editor-panel .se-save-step{padding-bottom:10px}
+#scene-editor-panel .se-save-bar .primary{min-width:165px}
+#scene-editor-panel .se-review-row button{font-size:9px}
+
+@media(max-width:767px){
+ #scene-editor-panel{
+  left:max(7px,env(safe-area-inset-left));right:max(7px,env(safe-area-inset-right));
+  bottom:calc(70px + env(safe-area-inset-bottom));
+  height:min(74dvh,720px);
+  max-height:calc(100dvh - var(--header-h,58px) - 80px - env(safe-area-inset-bottom));
+  padding:11px;border-radius:18px 18px 14px 14px
+ }
+ #scene-editor-panel:before{
+  content:"";display:block;width:40px;height:4px;margin:-4px auto 7px;border-radius:999px;background:#c9d7e0
+ }
+ #scene-editor-panel .se-header{top:-11px;margin:-11px -11px 8px;padding:10px 11px 9px}
+ #scene-editor-panel .se-header strong{font-size:16px}
+ #scene-editor-panel .se-progress{position:sticky;top:50px;z-index:4;padding:3px 0;background:#f8fbfd}
+ #scene-editor-panel .se-category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #scene-editor-panel .se-category-grid button{min-height:46px;align-items:flex-start}
+ #scene-editor-panel #se-object{min-height:92px}
+ #scene-editor-panel .se-easy-toolbar{grid-template-columns:1fr}
+ #scene-editor-panel .se-easy-toolbar>button{width:100%}
+ #scene-editor-panel .se-easy-toolbar .se-step-size{grid-template-columns:100px minmax(0,1fr)}
+ #scene-editor-panel .se-direction-pad{max-width:260px}
+ #scene-editor-panel .se-direction-pad button,#scene-editor-panel .se-direction-pad>span,#scene-editor-panel .se-step-indicator{min-height:52px}
+ #scene-editor-panel .se-essential-actions button{min-height:44px}
+ #scene-editor-panel .se-save-bar{
+  bottom:-11px;margin:9px -9px -9px;padding:9px 9px calc(9px + env(safe-area-inset-bottom))
+ }
+ #scene-editor-panel .se-save-bar .primary{min-width:148px}
+}
+@media(max-width:390px){
+ #scene-editor-panel .se-progress span{font-size:7.5px}
+ #scene-editor-panel .se-step{padding:9px}
+ #scene-editor-panel .se-category-grid button strong{font-size:8.5px}
+ #scene-editor-panel .se-selected-card{display:grid}
+ #scene-editor-panel .se-selected-card button{width:100%}
+ #scene-editor-panel .se-save-bar{flex-direction:column-reverse}
+ #scene-editor-panel .se-save-bar>div{display:grid;grid-template-columns:1fr 1fr}
+ #scene-editor-panel .se-save-bar .primary{width:100%}
+}
+@media(max-width:767px) and (max-height:560px) and (orientation:landscape){
+ #scene-editor-panel{right:76px;left:8px;width:auto;height:auto;max-height:none}
+ #scene-editor-panel .se-category-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ #scene-editor-panel .se-direction-pad{max-width:230px}
+}
