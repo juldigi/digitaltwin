@@ -50,7 +50,7 @@ test('user-facing system workspace no longer exposes implementation jargon',()=>
   assert.match(shell,/KONTEKS SISTEM/);
   assert.match(shell,/titik · .*jalur · .*titik koneksi peralatan/);
   assert.match(app,/Udara bertekanan/);
-  assert.match(app,/Jalur Utilitas/);
+  assert.match(app,/Jalur utilitas/);
 });
 
 test('technical diagnostics live inside Settings System Information and focus is visibly accessible',()=>{
