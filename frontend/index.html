@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
 <meta name="theme-color" content="#ffffff">
-<meta name="description" content="Packaging Offset Factory Digital Twin untuk eksplorasi bangunan, mesin, struktur dan simulasi BMJ.">
+<meta name="description" content="Packaging Offset Factory Digital Twin untuk eksplorasi bangunan, mesin, struktur, dan simulasi BMJ.">
 <title>Packaging Offset Factory Digital Twin</title>
 <style id="splash-critical">html,body{margin:0;background:#061524}.app-splash{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;overflow:hidden;color:#fff;background:#061524}.app-splash:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(4,15,28,.48),rgba(4,20,37,.35),rgba(4,15,28,.55)),url("./assets/splash-industrial-v79.webp") center/cover no-repeat}.splash-content{position:relative;text-align:center;padding:24px;font-family:Inter,"Segoe UI",sans-serif}.splash-mark{display:grid;place-items:center;width:82px;height:82px;margin:0 auto 18px;border:1px solid rgba(255,255,255,.3);border-radius:24px;background:rgba(20,100,170,.35);font-size:28px;font-weight:900}.splash-content h1{margin:0;font-size:clamp(25px,4vw,42px)}.splash-content p{margin:8px 0 22px;color:#c6d9ea;font-size:12px;letter-spacing:.08em}.splash-loader{width:min(260px,70vw);height:7px;margin:auto;overflow:hidden;border-radius:7px;background:rgba(255,255,255,.25)}.splash-loader i{display:block;width:0%;height:100%;background:#39bfff;transition:width .1s linear}.splash-percent{display:block;margin-top:10px;text-align:center;font:700 13px/1.4 system-ui,sans-serif;font-variant-numeric:tabular-nums;color:#eaf8ff}</style>
 <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
@@ -57,14 +57,14 @@
           <span class="eyebrow" id="view-kicker">PABRIK · DIGITAL TWIN</span>
           <h1 id="view-title">Packaging Offset Factory</h1>
           <p id="view-subtitle">Bangunan, area, mesin, dan utilitas dalam satu konteks</p>
-          <div class="scene-context-line"><span>Packaging Offset</span><span>Area Produksi</span><span>Tampilan Interaktif</span></div>
+          <div class="scene-context-line"><span>Packaging Offset</span><span>Area produksi</span><span>Tampilan interaktif</span></div>
         </div>
         <button id="panel-toggle" class="icon-btn" aria-label="Buka detail pilihan" aria-expanded="false" aria-controls="detail-panel">☷</button>
       </div>
 
       <div id="viewport"><div id="boot" class="boot"><strong>Menyiapkan tampilan 3D…</strong><p>Memuat mesin dan informasi yang tersedia.</p></div><div id="part-label-layer" class="part-label-layer" aria-live="polite" aria-label="Label komponen terpilih"><svg aria-hidden="true"></svg><div class="part-label-items"></div><div class="part-label-nav" hidden><button type="button" data-part-label-back>← Naik</button><span data-part-label-stage></span></div></div></div>
       <section id="plant-plan-2d" class="plant-plan-2d" aria-label="Denah 2D pabrik" hidden>
-        <header><strong>Denah Pabrik</strong><small id="dwg-context">Seluruh area</small></header>
+        <header><strong>Denah pabrik</strong><small id="dwg-context">Seluruh area</small></header>
         <canvas id="dwg-canvas" aria-label="Denah 2D pabrik"></canvas>
         <div id="dwg-warning" class="dwg-warning">Posisi aset mengikuti denah yang tersedia.</div>
       </section>
@@ -75,12 +75,12 @@
       <div class="scene-bottom">
         <div class="view-switch" role="group" aria-label="Kontrol tampilan">
           <button data-camera="iso" class="active camera-tool">3D <span>Isometrik</span></button>
-          <button data-camera="top" class="camera-tool">ATAS <span>Tampak Atas</span></button>
+          <button data-camera="top" class="camera-tool">ATAS <span>Tampak atas</span></button>
           <button data-camera="fit" class="camera-tool context-tool">FOKUS <span>Pilihan</span></button>
           <button id="tool-explode" class="inspect-tool" aria-pressed="false">URAI <span>Komponen</span></button>
-          <button id="tool-isolate" class="inspect-tool" aria-pressed="false">TAMPILKAN SENDIRI <span>Pilihan</span></button>
-          <button id="tool-interior" class="inspect-tool" aria-pressed="false">Buka Interior <span>Potongan mesin</span></button>
-          <button data-camera="reset" class="camera-tool reset-tool">TAMPILAN AWAL <span>Kembali ke awal</span></button>
+          <button id="tool-isolate" class="inspect-tool" aria-pressed="false">TAMPILKAN SENDIRI <span>Pilihan aktif</span></button>
+          <button id="tool-interior" class="inspect-tool" aria-pressed="false">Buka interior <span>Lihat bagian dalam</span></button>
+          <button data-camera="reset" class="camera-tool reset-tool">TAMPILAN AWAL <span>Kembalikan kamera</span></button>
         </div>
         <div class="scene-options">
           <button id="labels" class="icon-btn active" title="Label" aria-label="Tampilkan atau sembunyikan label" aria-pressed="true">Aa</button>
@@ -88,7 +88,7 @@
         </div>
       </div>
 
-      <div class="scene-caption"><span id="geometry-caption">Pabrik · Seluruh Area</span><span id="scene-hint">Putar: seret · Zoom: cubit/scroll · Klik komponen untuk melihat detail</span></div>
+      <div class="scene-caption"><span id="geometry-caption">Pabrik · Seluruh Area</span><span id="scene-hint">Putar: seret · Perbesar/perkecil: cubit atau gulir · Pilih komponen untuk melihat rincian</span></div>
 
     </section>
   </div>
@@ -102,11 +102,11 @@
     <div class="inspector-actions" aria-hidden="true"></div>
     <div class="tabs" role="tablist" aria-label="Bagian detail"><button role="tab" aria-selected="true" aria-controls="panel-content" tabindex="0" data-tab="overview">Ringkasan</button><button role="tab" aria-selected="false" aria-controls="panel-content" tabindex="-1" data-tab="structure">Struktur</button><button role="tab" aria-selected="false" aria-controls="panel-content" tabindex="-1" data-tab="simulation">Simulasi</button><button role="tab" class="secondary-inspector-tab" aria-selected="false" aria-controls="panel-content" tabindex="-1" data-tab="data" hidden>Data</button><button role="tab" aria-selected="false" aria-controls="panel-content" tabindex="-1" data-tab="sources">Referensi</button></div>
     <div id="panel-content" class="panel-content" role="tabpanel"><div class="ui-panel-state ui-panel-state-loading" role="status"><span class="ui-state-spinner" aria-hidden="true"></span><strong>Menyiapkan detail…</strong><small>Memuat konteks, struktur, dan referensi yang tersedia.</small></div></div>
-    <div class="panel-footer"><button id="focus-machine" class="primary">Fokus di 3D</button></div>
+    <div class="panel-footer"><button id="focus-machine" class="primary">Fokuskan di 3D</button></div>
   </aside>
 </main>
 
-<nav class="mobile-nav" aria-label="Navigasi utama mobile" hidden>
+<nav class="mobile-nav" aria-label="Navigasi utama pada ponsel" hidden>
   <button type="button" data-mobile-nav="factory" class="active" aria-label="Pabrik"><span aria-hidden="true"></span><small>Pabrik</small></button>
   <button type="button" data-mobile-nav="asset" aria-label="Mesin"><span aria-hidden="true"></span><small>Mesin</small></button>
   <button type="button" data-mobile-nav="system" aria-label="Sistem utilitas"><span aria-hidden="true"></span><small>Sistem</small></button>
