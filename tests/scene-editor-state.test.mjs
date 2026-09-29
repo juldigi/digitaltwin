@@ -94,6 +94,7 @@ test('created primitive persists by ID and is disposed when removed',()=>{
  const factory=new THREE.Group(),engine={factory,actualFactory:{assets:new Map()},sceneBase:new WeakMap(),registerSceneObjects:FactoryEngine.prototype.registerSceneObjects};
  const id='new:123e4567-e89b-12d3-a456-426614174000',value={shape:'box',position:[4,.5,8],rotation:[0,0,0],scale:[2,1,3],visible:true};
  validateSceneOverrides({[id]:value});FactoryEngine.prototype.applySceneOverrides.call(engine,{[id]:value});
+ assert.deepEqual(engine.staleSceneOverrides,[],'valid generated primitives must not be reported as stale');
  const first=engine.sceneObjects.get(id);assert.equal(first.position.x,4);assert.equal(first.scale.z,3);
  FactoryEngine.prototype.applySceneOverrides.call(engine,{[id]:{...value,deleted:true}});
  assert.equal(factory.children.length,1);assert.equal(engine.sceneObjects.get(id).visible,false);
@@ -123,6 +124,34 @@ test('drop-to-floor keeps nested objects correct in world space',()=>{
  assert.ok(Math.abs(box.min.y)<1e-5,'child world-space bottom must land on y=0');
  assert.deepEqual(parent.position.toArray(),[2,3,-1],'parent transform must remain unchanged');
  assert.equal(FactoryEngine.prototype.dropSceneObjectToFloor.call(engine,'node:0'),false,'already grounded object must be a no-op');
+});
+
+
+test('world-space editor movement preserves nested parent transforms',()=>{
+ const factory=new THREE.Group(),parent=new THREE.Group(),child=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshBasicMaterial());
+ parent.position.set(5,2,-3);parent.rotation.x=Math.PI/8;parent.rotation.z=Math.PI/7;parent.scale.set(1.3,.8,1.1);child.position.set(.4,1.2,-.6);parent.add(child);factory.add(parent);factory.updateWorldMatrix(true,true);
+ const engine={sceneObjects:new Map([['node:0',child]])};
+ const before=child.getWorldPosition(new THREE.Vector3()).clone(),parentBefore={position:parent.position.clone(),rotation:parent.rotation.clone(),scale:parent.scale.clone()};
+ assert.equal(FactoryEngine.prototype.moveSceneObjectWorld.call(engine,'node:0',0,.05,0),true);
+ factory.updateWorldMatrix(true,true);const after=child.getWorldPosition(new THREE.Vector3());
+ assert.ok(Math.abs(after.x-before.x)<1e-6);
+ assert.ok(Math.abs(after.y-before.y-.05)<1e-6);
+ assert.ok(Math.abs(after.z-before.z)<1e-6);
+ assert.ok(parent.position.equals(parentBefore.position));
+ assert.ok(parent.scale.equals(parentBefore.scale));
+ assert.ok(Math.abs(parent.rotation.x-parentBefore.rotation.x)<1e-12&&Math.abs(parent.rotation.z-parentBefore.rotation.z)<1e-12);
+});
+
+test('inactive known machine overrides stay dormant while active missing parts are stale',()=>{
+ const factory=new THREE.Group(),machine=new THREE.Group(),engine={factory,machine,machineKey:'offset5',actualFactory:{assets:new Map()},sceneBase:new WeakMap(),registerSceneObjects:FactoryEngine.prototype.registerSceneObjects};
+ engine.registerSceneObjects();
+ const value={position:[.1,0,0],rotation:[0,0,0],scale:[1,1,1],visible:true};
+ FactoryEngine.prototype.applySceneOverrides.call(engine,{'part:offset10:PU1-body':value});
+ assert.deepEqual(engine.staleSceneOverrides,[],'another known machine should remain dormant, not stale');
+ engine.machineKey='offset10';FactoryEngine.prototype.applySceneOverrides.call(engine,{'part:offset10:PU1-body':value});
+ assert.deepEqual(engine.staleSceneOverrides,['part:offset10:PU1-body'],'missing part on the active machine must be stale');
+ engine.machineKey='offset5';FactoryEngine.prototype.applySceneOverrides.call(engine,{'part:unknown:PU1-body':value});
+ assert.deepEqual(engine.staleSceneOverrides,['part:unknown:PU1-body'],'unknown machine override must be stale');
 });
 
 test('scene isolation is reversible and stays inside its editor scope',()=>{
