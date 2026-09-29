@@ -1768,16 +1768,41 @@ html.immersive-mode .header-actions #fullscreen-top{display:grid!important}
 
 
 /* V264 editor context guard */
-body.scene-editor-open .mobile-nav,
 body.scene-editor-open .rail>button,
 body.scene-editor-open .global-search,
-body.scene-editor-open #settings,
-body.scene-editor-open #mode-2d{
- pointer-events:none!important;
- opacity:.42!important
+body.scene-editor-open .header-actions,
+body.scene-editor-open .scene-bottom,
+body.scene-editor-open .viewport-mode-switch,
+body.scene-editor-open aside#detail-panel,
+body.scene-editor-open .canonical-simulation-transport{
+ pointer-events:none!important
+}
+body.scene-editor-open .rail>button,
+body.scene-editor-open .global-search,
+body.scene-editor-open .header-actions{
+ opacity:.38!important
+}
+body.scene-editor-open .scene-bottom,
+body.scene-editor-open .viewport-mode-switch,
+body.scene-editor-open aside#detail-panel,
+body.scene-editor-open .canonical-simulation-transport{
+ visibility:hidden!important;opacity:0!important
 }
 body.scene-editor-open #scene-editor-panel{pointer-events:auto}
 body.scene-editor-open #viewport{pointer-events:auto}
 @media(max-width:767px){
- body.scene-editor-open .mobile-nav{filter:grayscale(.35)}
+ body.scene-editor-open .mobile-nav{
+  visibility:hidden!important;pointer-events:none!important;opacity:0!important
+ }
+ body.scene-editor-open #scene-editor-panel{
+  bottom:max(8px,env(safe-area-inset-bottom));
+  height:min(82dvh,780px);
+  max-height:calc(100dvh - var(--header-h,58px) - 16px - env(safe-area-inset-bottom))
+ }
+}
+@media(max-width:767px) and (max-height:560px) and (orientation:landscape){
+ body.scene-editor-open #scene-editor-panel{
+  right:max(8px,env(safe-area-inset-right));left:auto;
+  width:min(460px,64vw);bottom:max(8px,env(safe-area-inset-bottom))
+ }
 }
