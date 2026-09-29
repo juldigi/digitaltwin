@@ -163,9 +163,9 @@ test('v42 opens removable exterior covers while retaining frame and interior geo
   assert.match(app,/function enableExteriorOpen\(\{forceDetail=true\}=\{\}\)/);
   assert.match(app,/engine\.applyQualityProfile/);
   assert.match(app,/template\.setExteriorOpen\(true\)/);
-  assert.match(app,/Buka Semua Cover/);
-  assert.match(app,/Tutup Interior|Tutup Semua Cover/);
-  assert.match(app,/Interior \+ frame\/support/);
+  assert.match(app,/Buka semua cover luar/);
+  assert.match(app,/Tutup kembali cover/);
+  assert.match(app,/Interior \+ rangka dan penyangga/);
   assert.match(app,/document\.querySelectorAll\('\[data-exterior-area\]'\)\.forEach/);
   assert.match(engine,/fitObjects\(objects=\[\]/);
   assert.match(offset5,/markExteriorCover\(object\)/);
@@ -206,7 +206,7 @@ test('v45 exposes contextual process simulation with continuous sheet flow',()=>
   assert.doesNotMatch(html,/id="tool-simulation"/);
   assert.match(html,/data-tab="simulation"/);
   assert.match(app,/PRINTING_SIMULATION_STAGES/);
-  assert.match(app,/Mulai Simulasi Proses/);
+  assert.match(app,/Mulai simulasi proses/);
   assert.match(app,/simulationLocksStructure\(\)/);
   assert.match(app,/engine\.startPrintingSimulation\(\)/);
   assert.match(app,/engine\.pausePrintingSimulation\(\)/);
@@ -348,7 +348,7 @@ test('v57 opens Sheeting Lexus as a dedicated right-to-left twin',()=>{
   assert.match(app,/from '\.\/data\/taxonomy-sheeting\.js'/);
   assert.match(app,/MACHINE_ROUTE_BY_ID/);
   assert.match(app,/SHEETING LEXUS/);
-  assert.match(app,/RIGHT → LEFT/);
+  assert.match(app,/KANAN → KIRI/);
   assert.match(app,/Simulasi proses Sheeting/);
   assert.match(runtime,/SheetingMachineTemplate/);
   assert.match(runtime,/SheetingProcessSimulation/);
