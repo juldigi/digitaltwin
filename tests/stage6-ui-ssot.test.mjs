@@ -103,5 +103,5 @@ test('Stage 6 keeps canvas part selection inside the canonical inspector',()=>{
  assert.doesNotMatch(css,/part-focus-popover|part-focus-options|machine-quick-actions/);
  assert.doesNotMatch(app,/openPartFocusPopover|closePartFocusPopover|part-focus-popover|machine-detail-shortcut|machine-simulation-shortcut|machine-part-shortcut/);
  assert.doesNotMatch(app,/document\.addEventListener\('keydown',event=>\{if\(event\.key==='Escape'\)/);
- assert.match(app,/function selectPartFromCanvas\(part\)\{[\s\S]*path\.find\(node=>node\.level===2\)\|\|meta[\s\S]*selectTaxonomy\(first\.id,\{revealPanel:true,historyMode:'push'\}\)/);
+ assert.match(app,/function selectPartFromCanvas\(part\)\{[\s\S]*path\.find\(node=>node\.level===2\)\|\|meta[\s\S]*selectTaxonomy\(first\.id\)/);
 });
