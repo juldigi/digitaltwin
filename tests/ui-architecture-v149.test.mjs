@@ -88,8 +88,8 @@ test('visible product copy removes prototype and test-mode terms',()=>{
  assert.doesNotMatch(html,/Mode uji/);
  assert.doesNotMatch(html,/Siap diuji/);
  assert.doesNotMatch(html,/Printing Test/);
- assert.match(html,/Buka Interior/);
- assert.match(html,/Fokus di 3D/);
+ assert.match(html,/id="tool-interior"[\s\S]*BUKA INTERIOR/);
+ assert.match(html,/data-camera="fit"[\s\S]*FOKUS <span>Pilihan<\/span>/);
 });
 
 test('V194 inspector exposes contextual tabs and keeps Interior only as a direct inspection action',()=>{
@@ -115,7 +115,7 @@ test('V149 Systems is a real network context without invented Water or Electrica
  assert.match(shell,/data-system-focus="hvac"/);
  assert.match(shell,/data-system-focus="compressedAir"/);
  assert.match(shell,/data-system-focus="routing"/);
- assert.match(shell,/Air \/ IPAL[\s\S]*Jalur terpisah belum tersedia/);
+ assert.match(shell,/Air dan IPAL[\s\S]*Peralatan tersedia · jalur belum tersedia/);
  assert.match(shell,/Kelistrikan[\s\S]*Jalur terpisah belum tersedia/);
  assert.match(shell,/bmj:systemfocus/);
  assert.match(app,/window\.addEventListener\('bmj:systemfocus'/);

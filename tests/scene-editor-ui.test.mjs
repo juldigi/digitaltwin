@@ -43,7 +43,7 @@ test('scene editor layout is responsive and leaves canonical navigation reachabl
 
 
 test('V263 scene editor presents a simplified pick-adjust-save workflow',()=>{
- for(const label of ['Apa yang ingin diubah?','Atur objek','Simpan perubahan','Mesin','Dinding','Peralatan','Bangunan','Utilitas','Furnitur','Bagian Mesin','Jarak tiap klik','Geser sesuai arah layar','Taruh di lantai','Opsi lainnya','Pengaturan presisi','Bandingkan sebelum / sesudah','Alat teknis Superadmin'])assert.ok(app.includes(label),label);
+ for(const label of ['Apa yang ingin diubah?','Atur objek','Simpan perubahan','Mesin','Dinding','Peralatan','Bangunan','Utilitas','Furnitur','Bagian Mesin','Jarak tiap klik','Geser sesuai arah layar','Taruh di lantai','Opsi lainnya','Pengaturan presisi','Bandingkan sebelum dan sesudah','Alat teknis Superadmin'])assert.ok(app.includes(label),label);
  assert.match(app,/class="se-progress"/);
  assert.match(app,/primaryEditorCategories=editorCategories\.filter/);
  assert.match(app,/data-se-screen="up"/);
@@ -89,9 +89,9 @@ test('V264 editor scopes controls to the selected object and scope',()=>{
  assert.ok(app.includes("canDuplicate=Boolean(selected&&selectedVisible&&editorScope==='factory'&&editorCategory!=='machines'"));
  assert.ok(app.includes("!selected.startsWith('new:')"));
  assert.ok(app.includes("(canScale?['position','rotation','scale']:['position','rotation'])"));
- assert.ok(app.includes("Posisi relatif induk (meter)"));
- assert.ok(app.includes("Rotasi relatif induk (derajat)"));
- assert.ok(app.includes("editorScope==='factory'?`<fieldset><legend>Sejajarkan dengan aset lain"));
+ assert.ok(app.includes("Posisi relatif terhadap induk (meter)"));
+ assert.ok(app.includes("Rotasi relatif terhadap induk (derajat)"));
+ assert.ok(app.includes("editorScope==='factory'?`<fieldset><legend>Sejajarkan dengan objek lain"));
  assert.ok(app.includes('id="se-remove-generated"'));
  assert.ok(app.includes('id="se-restore-default"'));
  assert.ok(app.includes('id="se-reset" ${selectedChanged?\'\':\'disabled\'}'));
@@ -207,11 +207,11 @@ test('scene editor exposes real-world categories and keeps internal identifiers 
 });
 
 test('scene editor uses human-readable units and converts degree input back to radians',()=>{
- assert.match(app,/Posisi relatif induk \(meter\)/);
- assert.match(app,/Rotasi relatif induk \(derajat\)/);
+ assert.match(app,/Posisi relatif terhadap induk \(meter\)/);
+ assert.match(app,/Rotasi relatif terhadap induk \(derajat\)/);
  assert.match(app,/data-se-unit="\$\{key==='rotation'\?'deg':'raw'\}"/);
  assert.match(app,/stored=input\.dataset\.seUnit==='deg'\?value\*Math\.PI\/180:value/);
- assert.match(app,/Gerak bertahap/);
+ assert.match(app,/Gerakkan bertahap saat diseret/);
 });
 
 test('progressive editor controls are safe before any object is selected',()=>{
@@ -304,7 +304,7 @@ test('Stage 5 synchronizes editor machine descriptor and preserves rerender cont
 
 test('machine selection uses a clear factory-first flow before explicit 3D inspection',()=>{
  assert.match(app,/async function openAssetContext\(machine\)\{[\s\S]*selectFactoryAssetContext\(machine,\{historyMode:'push',openDialog:true,focus:true\}\)/);
- assert.match(app,/Pilih satu aset untuk menyorot posisinya di pabrik/);
+ assert.match(app,/Pilih mesin atau peralatan untuk menyorot posisinya di pabrik/);
  assert.match(app,/asset-data-badge">Pilih di pabrik/);
  assert.match(app,/if\(item\.type==='machine'\)\{const record=MACHINE_REGISTRY_BY_ID\.get\(item\.machineId\);if\(record\)await openAssetContext\(record\);return;\}/);
  assert.match(app,/id="\$\{modelAvailable\?'open-machine-3d':'focus-layout-asset'\}"/);

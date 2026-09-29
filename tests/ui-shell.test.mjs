@@ -128,7 +128,7 @@ test('visible shell avoids deployment and prototype terminology',()=>{
 test('conditional controls explain requirements rather than failing silently',()=>{
   assert.match(app,/Pengaturan denah memerlukan izin pengaturan/);
   assert.match(app,/Pilih bagian mesin terlebih dahulu/);
-  assert.match(app,/Edit Pabrik 3D/);
+  assert.match(app,/Edit pabrik 3D/);
 });
 test('service worker refreshes the redesigned shell',()=>{
   assert.match(sw,/factory-digital-twin-v222-overlay-state-ssot-20260925/);
@@ -157,15 +157,15 @@ test('v41 keeps every right-sidebar taxonomy item clickable after repeated selec
 
 test('v42 opens removable exterior covers while retaining frame and interior geometry',()=>{
   assert.match(html,/id="tool-interior"/);
-  assert.match(html,/Buka Interior/);
+  assert.match(html,/BUKA INTERIOR/);
   assert.doesNotMatch(html,/data-tab="exterior"/);
   assert.match(app,/renderPanel\('exterior'\)/);
   assert.match(app,/function enableExteriorOpen\(\{forceDetail=true\}=\{\}\)/);
   assert.match(app,/engine\.applyQualityProfile/);
   assert.match(app,/template\.setExteriorOpen\(true\)/);
-  assert.match(app,/Buka Semua Cover/);
-  assert.match(app,/Tutup Interior|Tutup Semua Cover/);
-  assert.match(app,/Interior \+ frame\/support/);
+  assert.match(app,/Buka semua penutup luar/);
+  assert.match(app,/Tutup kembali penutup/);
+  assert.match(app,/Interior, rangka, dan penyangga/);
   assert.match(app,/document\.querySelectorAll\('\[data-exterior-area\]'\)\.forEach/);
   assert.match(engine,/fitObjects\(objects=\[\]/);
   assert.match(offset5,/markExteriorCover\(object\)/);
@@ -206,7 +206,7 @@ test('v45 exposes contextual process simulation with continuous sheet flow',()=>
   assert.doesNotMatch(html,/id="tool-simulation"/);
   assert.match(html,/data-tab="simulation"/);
   assert.match(app,/PRINTING_SIMULATION_STAGES/);
-  assert.match(app,/Mulai Simulasi Proses/);
+  assert.match(app,/Mulai simulasi proses/);
   assert.match(app,/simulationLocksStructure\(\)/);
   assert.match(app,/engine\.startPrintingSimulation\(\)/);
   assert.match(app,/engine\.pausePrintingSimulation\(\)/);
@@ -231,7 +231,7 @@ test('v47 exposes flexible gripper-safe sheet travel, ink drips and live UV curi
   assert.match(app,/sim-uv-state/);
   assert.match(app,/sim-uv-indicator/);
   assert.match(app,/Tidak ada tetesan tinta yang melayang di luar mesin/);
-  assert.match(app,/UV beam aktif hanya ketika sheet melewati dryer/);
+  assert.match(app,/UV beam aktif hanya ketika lembar \(sheet\) melewati dryer/);
   assert.match(simulation,/createSheetGeometry\(/);
   assert.match(simulation,/Flexible printing-test sheet/);
   assert.match(simulation,/ink-drip/);
@@ -258,7 +258,7 @@ test('v48 removes the odd PU8 step, uses structural UV supports and accumulates 
   assert.match(simulation,/refreshDeliveryPileAnchor\(\)/);
   assert.match(simulation,/pileSheetsVisible/);
   assert.match(app,/id="sim-pile"/);
-  assert.match(app,/gripper melepaskan sheet tepat di atas main pile/);
+  assert.match(app,/gripper melepaskan lembar tepat di atas main pile/);
 });
 
 test('asset browser exposes every registry machine with its own model status',()=>{
@@ -266,7 +266,7 @@ test('asset browser exposes every registry machine with its own model status',()
   assert.match(app,/MACHINE_REGISTRY/);
   assert.match(app,/foundationAssetMatches\(/);
   assert.match(app,/data-machine-id/);
-  assert.match(app,/MESIN & PERALATAN/);
+  assert.match(app,/MESIN DAN PERALATAN/);
   assert.match(app,/MACHINE_REGISTRY_STATS\.modeled3D/);
   assert.match(app,/asset-data-badge/);
   assert.doesNotMatch(app,/id="asset-data-status"/);
@@ -291,7 +291,7 @@ test('v53 retains the document-grounded CX104 expansion asset while foundation r
   assert.match(app,/history\.pushState/);
   assert.doesNotMatch(app,/machine=\$\{route\}&v=50/);
   assert.match(app,/Tidak ada foto aktual Offset 10 yang tersedia/);
-  assert.match(app,/final drawing BMJ/);
+  assert.match(app,/final drawing \(gambar final\) BMJ/);
   assert.match(runtime,/Offset10CX104SpecialRealismTemplate/);
   assert.match(runtime,/Offset10CX104SpecialRealismSimulation/);
   assert.match(offset10,/o10-foilstar-superstructure/);
@@ -321,9 +321,9 @@ test('v54 routes APM2 to its dedicated model and evidence-bounded simulation',()
   assert.match(app,/on\('#open-machine-3d',\(\)=>switchActiveMachine\(machineRoute\(machine\)\)\)/);
   assert.match(engine,/if\(!canOpenTechnical3D\(requested\)\)/);
   assert.match(engine,/switchMachine\(key\)/);
-  assert.match(app,/Simulasi Proses APM 2/);
+  assert.match(app,/Simulasi proses APM 2/);
   assert.match(app,/register dan SideLay/);
-  assert.match(app,/suffix E\/SE\/CER\/BMA tidak tersedia/);
+  assert.match(app,/akhiran model \(suffix\) E\/SE\/CER\/BMA tidak tersedia/);
   assert.match(app,/MACHINE_ROUTE_BY_ID/);
   assert.match(runtime,/APM2MachineTemplate/);
   assert.match(runtime,/APM2ProcessSimulation/);
@@ -348,8 +348,8 @@ test('v57 opens Sheeting Lexus as a dedicated right-to-left twin',()=>{
   assert.match(app,/from '\.\/data\/taxonomy-sheeting\.js'/);
   assert.match(app,/MACHINE_ROUTE_BY_ID/);
   assert.match(app,/SHEETING LEXUS/);
-  assert.match(app,/RIGHT → LEFT/);
-  assert.match(app,/Simulasi Proses Sheeting/);
+  assert.match(app,/KANAN → KIRI/);
+  assert.match(app,/Simulasi proses Sheeting/);
   assert.match(runtime,/SheetingMachineTemplate/);
   assert.match(runtime,/SheetingProcessSimulation/);
   assert.match(runtime,/if\(k==='sheeting'\)return new SheetingMachineTemplate\(\)/);

@@ -41,7 +41,7 @@ test('V259 every quality option explains differences, advantages, and compromise
  assert.match(shell,/REKOMENDASI PERANGKAT INI/);
  assert.match(shell,/Perbedaan utama:/);
  assert.match(shell,/Kelebihan:/);
- assert.match(shell,/Kompromi \/ kekurangan:/);
+ assert.match(shell,/Kompromi dan kekurangan:/);
  assert.match(shell,/Direkomendasikan/);
  assert.match(shell,/Pilih kualitas/);
  assert.match(shell,/qualityDeviceCapabilities/);

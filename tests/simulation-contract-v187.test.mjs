@@ -17,7 +17,7 @@ test('core simulations expose an explicit availability contract',()=>{
 
 test('simulation start refuses blocked or unavailable process models before opening the machine',()=>{
  assert.match(app,/readiness\?\.blocked\|\|readiness\?\.available===false/);
- assert.match(app,/blockedReason\|\|'Simulasi proses untuk aset ini belum tersedia\.'/);
+ assert.match(app,/blockedReason\|\|'Simulasi proses untuk mesin atau peralatan ini belum tersedia\.'/);
 });
 
 test('pause control cannot accidentally start a READY simulation',()=>{

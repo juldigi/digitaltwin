@@ -47,7 +47,7 @@ test('factory-first boot stays covered until CAD layout is loaded and failures a
   assert.match(app,/boot\.hidden=true/);
   assert.match(app,/Denah pabrik belum dapat dimuat/);
   assert.match(app,/Tidak ada geometri pengganti yang dibuat/);
-  assert.match(app,/Muat Ulang/);
+  assert.match(app,/Muat ulang/);
 });
 
 test('V153 cache includes the foundation policy and current cache-busted controller',()=>{

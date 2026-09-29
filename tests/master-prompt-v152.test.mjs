@@ -48,13 +48,13 @@ test('user-facing system workspace no longer exposes implementation jargon',()=>
   assert.doesNotMatch(shell,/Buka network context|Distribution piping|SYSTEM CONTEXT|Evidence \/ source|Reference \/ template/);
   assert.doesNotMatch(app,/routing scaffold|Consumer network/);
   assert.match(shell,/KONTEKS SISTEM/);
-  assert.match(shell,/titik · .*jalur · .*titik peralatan/);
-  assert.match(app,/Udara Bertekanan/);
-  assert.match(app,/Jalur Utilitas/);
+  assert.match(shell,/titik · .*jalur · .*titik koneksi peralatan/);
+  assert.match(app,/Udara bertekanan/);
+  assert.match(app,/Jalur utilitas/);
 });
 
 test('technical diagnostics live inside Settings System Information and focus is visibly accessible',()=>{
-  assert.match(app,/Informasi Sistem/);
+  assert.match(app,/Informasi sistem/);
   assert.match(app,/Diagnostik teknis ditempatkan di sini agar tampilan utama tetap sederhana/);
   assert.match(app,/pair\('Versi aplikasi',APP_BUILD\)/);
   assert.match(css,/:focus-visible/);

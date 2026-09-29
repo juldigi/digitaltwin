@@ -138,7 +138,7 @@ test('V193 removes internal machine identifiers from the normal asset browser co
   const app=fs.readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
   assert.match(app,/\[machine\.sapCode,machine\.model\]\.filter\(Boolean\)\.join\(' · '\)/);
   assert.doesNotMatch(app,/<small>\$\{esc\(machine\.machineId\)\}<\/small>/);
-  assert.match(app,/Edit Pabrik 3D/);
+  assert.match(app,/Edit pabrik 3D/);
 });
 
 
@@ -234,7 +234,7 @@ test('V197 starts from a neutral factory context instead of loading OFFSET 5 imp
   assert.match(engine,/clearMachineContext\(\)/);
   assert.match(scope,/defaultMachineId:null/);
   assert.match(scope,/referenceMachineId:'BMJ-MCH-0003'/);
-  assert.match(html,/id="geometry-caption">Pabrik · Seluruh Area</);
+  assert.match(html,/id="geometry-caption">Pabrik · Seluruh area</);
   assert.doesNotMatch(html,/id="geometry-caption">Model Offset 5</);
   assert.match(sw,/factory-digital-twin-v222-overlay-state-ssot-20260925/);
 });

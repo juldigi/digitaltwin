@@ -8,7 +8,7 @@ const index=readFileSync(new URL('../frontend/index.html',import.meta.url),'utf8
 const sw=readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 
 test('missing simulation is explicit unavailable instead of fake feeder-ready state',()=>{
- assert.match(engine,/available:false,blocked:true,blockedReason:'Simulasi belum tersedia untuk aset ini\.'/);
+ assert.match(engine,/available:false,blocked:true,blockedReason:'Simulasi belum tersedia untuk mesin atau peralatan ini\.'/);
  assert.match(engine,/stage:null/);
 });
 test('sheeting pause and resume cannot activate an inactive simulation',()=>{

@@ -32,12 +32,12 @@ test('factory navigation presents evidence-bounded utility systems as an active 
 test('placeholder assets expose spatial context but not inventory technical metadata in Phase-1',()=>{
  const detail=app.slice(app.indexOf('function machineDetailDialog(machine){'),app.indexOf('async function switchActiveMachine',app.indexOf('function machineDetailDialog(machine){')));
  assert.match(detail,/const placeholderData=pair\('ID posisi',machine\.machineId\)\+pair\('Area',machine\.area\)/);
- assert.match(detail,/pair\('Dasar model 3D','NOT_IMPLEMENTED · LAYOUT PLACEHOLDER'\)/);
- assert.match(detail,/pair\('Detail model 3D','NOT_IMPLEMENTED'\)/);
+ assert.match(detail,/pair\('Dasar model 3D',readableStatus\('NOT_IMPLEMENTED · LAYOUT PLACEHOLDER'\)\)/);
+ assert.match(detail,/pair\('Detail model 3D',readableStatus\('NOT_IMPLEMENTED'\)\)/);
  assert.match(detail,/pair\('Dasar posisi',positionStatusLabel\(policy\.positionStatus\)\)/);
  assert.match(detail,/pair\('Status detail','Belum dibuka pada fase fondasi'\)/);
  assert.match(detail,/primary\?primaryData:placeholderData/);
- assert.match(detail,/Model 3D belum tersedia untuk aset ini/);
+ assert.match(detail,/Model 3D belum tersedia untuk mesin atau peralatan ini/);
 });
 
 test('universal search keeps placeholder indexing spatial and removes utility-system discovery',()=>{
