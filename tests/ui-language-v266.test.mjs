@@ -31,7 +31,7 @@ test('V266 removes legacy mixed-language UI wording while preserving useful tech
   'Status Data & Sumber','Sambungkan Data','Bersihkan Data Tersimpan','Informasi Sistem',
   'Ganti Kata Sandi','Simpan Kata Sandi','Buka Semua Cover','Tutup Interior',
   'Anchor tidak valid','Unit CAD tidak valid','harus angka finite',"'Running'",'MESIN & PERALATAN',
-  'Offline: berkas belum tersimpan.','Penampil 3D belum tersedia','menu Aset'
+  'Offline: berkas belum tersimpan.','Penampil 3D belum tersedia','menu Aset','RIGHT → LEFT','BMJ Machine Database','ditemukan pada registry.','Buka semua cover luar','Tutup kembali cover','tampilan cover'
  ])assert.equal(runtime.includes(oldCopy),false,oldCopy);
  for(const technicalTerm of ['DWG','CAD','GPU','WebGL','UV','Superadmin','shadow map','environment lighting','SideLay','gripper'])assert.ok(runtime.includes(technicalTerm),technicalTerm);
 });
@@ -86,4 +86,16 @@ test('V266 keeps render-quality technical terms but explains them in Indonesian'
  assert.match(render,/environment lighting \(pencahayaan lingkungan\)/);
  assert.match(render,/tangkapan layar/);
  assert.match(render,/ponsel atau perangkat seluler/);
+});
+
+
+test('V266 finishes interior fallback and mapping wording in Indonesian',()=>{
+ assert.match(app,/KANAN → KIRI · Rollstand/);
+ assert.match(app,/Pilih posisi mesin atau peralatan melalui menu Mesin atau denah 2D\./);
+ assert.match(app,/Database Mesin BMJ/);
+ assert.match(app,/Identitas mesin aktif tidak ditemukan pada daftar mesin\./);
+ assert.match(app,/Buka semua penutup luar/);
+ assert.match(app,/Tutup kembali penutup/);
+ assert.match(app,/Interior, rangka, dan penyangga/);
+ assert.match(app,/u==='UNKNOWN'\?'Belum diketahui':u/);
 });
