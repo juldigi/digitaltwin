@@ -350,7 +350,7 @@ function selectPartFromCanvas(part){
  if(!part||!engine||simulationLocksStructure())return;
  const meta=taxonomyForPart(part);if(!meta){choosePart(part);return;}
  const path=taxonomyPath(meta.id),first=path.find(node=>node.level===2)||meta;
- selectTaxonomy(first.id,{revealPanel:true,historyMode:'push'});
+ selectTaxonomy(first.id);
 }
 function taxonomyForPart(part){const id=part?.userData?.nodeId;if(!id)return null;return ACTIVE_TAXONOMY.filter(n=>(n.meshRefs||[]).includes(id)).sort((a,b)=>Math.abs(a.level-5)-Math.abs(b.level-5))[0]||null;}
 function taxonomyPath(id=activeTaxonomyId()){
