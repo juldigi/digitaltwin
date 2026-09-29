@@ -266,7 +266,7 @@ test('asset browser exposes every registry machine with its own model status',()
   assert.match(app,/MACHINE_REGISTRY/);
   assert.match(app,/foundationAssetMatches\(/);
   assert.match(app,/data-machine-id/);
-  assert.match(app,/MESIN & PERALATAN/);
+  assert.match(app,/MESIN DAN PERALATAN/);
   assert.match(app,/MACHINE_REGISTRY_STATS\.modeled3D/);
   assert.match(app,/asset-data-badge/);
   assert.doesNotMatch(app,/id="asset-data-status"/);
