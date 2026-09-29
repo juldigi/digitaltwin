@@ -1026,7 +1026,6 @@ function openSceneEditor(){
  const hasUnsavedChanges=()=>changedOverrideIds().length>0;
  const selectedHasUnsavedChanges=()=>Boolean(selected)&&stableJson(savedOverrides[selected])!==stableJson(overrides[selected]);
  const markSavedCheckpoint=value=>{savedOverrides=cloneOverrides(value??overrides);};
- const transformBlocked=()=>{const value=current?.();return !selected||previewOriginal||!value||value.locked||value.deleted||value.visible===false;};
  let selected=null,undo=[],redo=[],isolated=false,previewOriginal=false,history=[],editorCategory='machines',editorScope='factory',editorMachineId=null,editorMoveStep=.01,editorRotateStep=Math.PI/180;const isolationGuard=createSceneIsolationGuard();engine.gizmo.setTranslationSnap(editorMoveStep);engine.gizmo.setRotationSnap(editorRotateStep);
  const panel=document.createElement('section');panel.id='scene-editor-panel';panel.setAttribute('aria-label','Edit pabrik 3D');panel.tabIndex=-1;document.body.classList.add('scene-editor-open');document.body.append(panel);
  const editorCategories=[
