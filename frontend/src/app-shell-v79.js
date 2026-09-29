@@ -646,7 +646,7 @@ document.addEventListener('keydown',event=>{
 });
 
 const relabel=()=>{
- const labels={overview:'Ringkasan',structure:'Struktur',simulation:'Simulasi',exterior:'Buka Interior',sources:'Referensi'};
+ const labels={overview:'Ringkasan',structure:'Struktur',simulation:'Simulasi',exterior:'Buka interior',sources:'Referensi'};
  qa('[data-tab]').forEach(btn=>{if(labels[btn.dataset.tab])btn.textContent=labels[btn.dataset.tab]});
  const focus=q('#focus-machine');if(focus)focus.textContent='Fokus di 3D';
  const top=q('.panel-top .eyebrow');if(top)top.textContent='KONTEKS TERPILIH';
