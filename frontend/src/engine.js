@@ -21,6 +21,7 @@ import {PrintingSimulation} from './simulation.js';
 import {FOUNDATION_SCOPE,canOpenTechnical3D} from './data/foundation-scope.js';
 export {OffsetMachineTemplate};
 const normalizeFoundationMachineKey=key=>{const raw=String(key??'').trim();return raw==='BMJ-MCH-0003'?'offset5':raw||null;};
+const editorMachineKey=id=>/^(?:part|machine):([A-Za-z0-9_-]+):/.exec(String(id||''))?.[1]||null;
 
 const neutralSimulation=()=>({
  active:false,onUpdate:null,
@@ -474,14 +475,15 @@ export class FactoryEngine {
     this.appliedSceneIds=new Set();
     for(const [id,v] of Object.entries(overrides)){
       if(id.startsWith('copy:')||id.startsWith('new:'))continue;
-      const node=this.sceneObjects.get(id);if(!node){this.staleSceneOverrides.push(id);continue;}
+      const node=this.sceneObjects.get(id);if(!node){const machineKey=editorMachineKey(id);if(machineKey&&machineKey!==this.machineKey&&canOpenTechnical3D(machineKey))continue;this.staleSceneOverrides.push(id);continue;}
       if(v.identity&&v.identity!==sceneIdentity(node)){this.staleSceneOverrides.push(id);continue;}
       node.position.fromArray(v.position);node.rotation.set(...v.rotation);node.scale.fromArray(v.scale);node.visible=v.visible&&!v.deleted;
       this.appliedSceneIds.add(id);
     }
     for(const [id,v] of Object.entries(overrides))if(id.startsWith('copy:')){
       const source=this.sceneObjects.get(v.sourceId);
-      if(!source||v.identity&&v.identity!==sceneIdentity(source)){this.staleSceneOverrides.push(id);continue;}
+      if(!source){const machineKey=editorMachineKey(v.sourceId);if(machineKey&&machineKey!==this.machineKey&&canOpenTechnical3D(machineKey))continue;this.staleSceneOverrides.push(id);continue;}
+      if(v.identity&&v.identity!==sceneIdentity(source)){this.staleSceneOverrides.push(id);continue;}
       let meshCount=0;source.traverse(node=>{if(node.isMesh)meshCount++;});
       if(meshCount>300){this.staleSceneOverrides.push(id);continue;}
       const copy=source.clone(true);copy.name='Duplikat '+(source.name||source.userData.semantic||v.sourceId);
