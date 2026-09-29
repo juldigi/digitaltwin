@@ -82,7 +82,7 @@ mobileFeatureHub.className='mobile-feature-hub';
 mobileFeatureHub.setAttribute('aria-label','Fitur lengkap pada perangkat seluler');
 mobileFeatureHub.innerHTML=`<div class="mobile-hub-heading"><small>KONTROL SELULER</small><strong>Kontrol lengkap</strong><span>Fitur utama tetap tersedia tanpa menutupi tampilan 3D.</span></div>
 <div class="mobile-hub-section"><small>AKSES CEPAT</small><div class="mobile-hub-grid">
-<button type="button" data-mobile-action="search">${icon('search')}<span><b>Cari</b><small>Mesin, area, komponen</small></span></button>
+<button type="button" data-mobile-action="search">${icon('search')}<span><b>Cari</b><small>Mesin, area, dan komponen</small></span></button>
 <button type="button" data-mobile-action="display">${icon('layers')}<span><b>Tampilan</b><small>Kualitas dan lapisan</small></span></button>
 <button type="button" data-mobile-action="2d">${icon('layers')}<span><b>Mode 2D</b><small>Denah pabrik</small></span></button>
 <button type="button" data-mobile-action="3d">${icon('factory')}<span><b>Mode 3D</b><small>Digital Twin</small></span></button>
@@ -456,7 +456,7 @@ function systemSurfaceMarkup(){
   <button type="button" data-system-focus="routing"><strong>Jalur utilitas</strong><small>Semua jalur yang tersedia</small><span>Lihat seluruh jalur</span></button>
   <button type="button" data-system-focus="water" class="system-unavailable"><strong>Air dan IPAL</strong><small>Peralatan tersedia · jalur belum tersedia</small><span>Lihat batas data</span></button>
   <button type="button" data-system-focus="electrical" class="system-unavailable"><strong>Kelistrikan</strong><small>Jalur terpisah belum tersedia</small><span>Lihat batas data</span></button>
- </div><section id="system-context" class="canonical-system-context" aria-live="polite"><p>Pilih sistem untuk melihat jalur, peralatan terkait, status data, dan batas verifikasi.</p></section>`;
+ </div><section id="system-context" class="canonical-system-context" aria-live="polite"><p>Pilih sistem untuk melihat jalur, peralatan terkait, status data, serta batas verifikasi.</p></section>`;
 }
 function bindSystemFocus(panel){
  if(PHASE1_FOUNDATION)return;
@@ -542,7 +542,7 @@ function renderSystemContext(detail={}){
  const host=q('#system-context');if(!host)return;
  const networks=Array.isArray(detail.networks)?detail.networks:[],equipment=Array.isArray(detail.equipment)?detail.equipment:[];
  const networkRows=networks.length?networks.map(net=>`<div class="system-network-row"><span><strong>${escapeHtml(net.system.replaceAll('_',' '))}</strong><small>${escapeHtml(net.status||'')}</small></span><em>${net.nodeCount||0} titik · ${net.segmentCount||0} jalur · ${net.equipmentAnchorCount||0} titik koneksi peralatan</em></div>`).join(''):'<p class="system-context-empty">Jalur terpisah belum tersedia untuk sistem ini.</p>';
- const equipmentRows=equipment.length?equipment.map(item=>`<button type="button" data-system-machine="${escapeHtml(item.machineId)}"><span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.model||item.sapCode||item.machineId)}</small></span><em>Buka mesin/peralatan</em></button>`).join(''):'<p class="system-context-empty">Belum ada peralatan terkait yang dapat ditampilkan pada jalur sistem ini.</p>';
+ const equipmentRows=equipment.length?equipment.map(item=>`<button type="button" data-system-machine="${escapeHtml(item.machineId)}"><span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.model||item.sapCode||item.machineId)}</small></span><em>Buka mesin atau peralatan</em></button>`).join(''):'<p class="system-context-empty">Belum ada peralatan terkait yang dapat ditampilkan pada jalur sistem ini.</p>';
  host.innerHTML=`<header><div><small>KONTEKS SISTEM</small><h4>${escapeHtml(detail.title||'Sistem')}</h4></div><span class="system-route-status ${detail.actualRoutingApplied?'verified':'reference'}">${detail.actualRoutingApplied?'Jalur terverifikasi':'Acuan belum terverifikasi'}</span></header><div class="system-context-actions"><button type="button" data-system-refocus="${escapeHtml(detail.system||'')}">${icon('focus')}<span>Fokus jalur</span></button></div><h5>Jalur</h5>${networkRows}<h5>Peralatan terkait</h5><div class="system-equipment-list">${equipmentRows}</div><h5>Tujuan distribusi</h5><p class="system-context-empty">${escapeHtml(detail.consumerText||'Tujuan distribusi belum tersedia.')}</p><h5>Dasar data</h5><p class="system-context-empty">${escapeHtml(detail.sourceText||'Sumber data jalur belum tersedia.')}</p><div class="system-boundary"><strong>Batas data</strong><p>${escapeHtml(detail.boundary||'Status jalur belum tersedia.')}</p><small>Status data: ${escapeHtml(readableStatus(detail.routeMode||'UNKNOWN'))}</small></div>`;
  qa('[data-system-machine]',host).forEach(button=>button.addEventListener('click',()=>dispatchEvent(new CustomEvent('bmj:systemassetselect',{detail:{machineId:button.dataset.systemMachine}}))));
  q('[data-system-refocus]',host)?.addEventListener('click',event=>dispatchEvent(new CustomEvent('bmj:systemfocus',{detail:{system:event.currentTarget.dataset.systemRefocus}})));
