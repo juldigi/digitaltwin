@@ -387,6 +387,114 @@ dialog#modal::backdrop{
   color:var(--f270-text)!important;
 }
 
+/* Dynamic content surfaces: asset browser, structure, references, systems, settings and quality. */
+.asset-browser,.compact-structure,.context-summary,.reference-context-summary,.simulation-overview,.exterior-overview,
+.dwg-fidelity-ledger,.technical-details,.settings-section,.system-information{color:var(--f270-text)}
+.asset-browser-copy,.asset-result-summary,.context-note,.compact-part-path,.taxonomy-copy,.reference-kind,
+.system-boundary,.system-route-status,.system-unavailable,.quality-recommendation,.se-category-hint,.se-info-line{color:var(--f270-muted)!important}
+.asset-browser-row,.compact-part-row,.component-row,.geometry-node,.context-status-card,.context-reference-card,
+.reference-truth-row,.system-network-row,.system-equipment-list>*,.dwg-unimplemented-row,.simulation-uv-card,
+.quality-recommendation,.quality-profile-detail,.technical-details-body,.system-context-empty,.static-factory-fallback-copy{
+ border:1px solid var(--f270-line)!important;border-radius:var(--f270-radius-md)!important;
+ background:var(--f270-surface-2)!important;color:var(--f270-text)!important;box-shadow:none
+}
+.asset-browser-row,.compact-part-row,.component-row,.geometry-node,.context-reference-card,.reference-truth-row,
+.system-network-row,.dwg-unimplemented-row{
+ transition:border-color var(--f270-fast) var(--f270-ease),background var(--f270-fast) var(--f270-ease),box-shadow var(--f270-fast) var(--f270-ease),transform var(--f270-fast) var(--f270-ease)
+}
+.asset-browser-row.active,.compact-part-row.active,.component-row.active,.geometry-node.active,.exterior-area-button.active,
+.context-selected,.reference-truth-row.is-active{
+ border-color:rgba(11,114,231,.35)!important;background:var(--f270-accent-soft)!important;
+ color:var(--f270-text)!important;box-shadow:inset 3px 0 var(--f270-blue)!important
+}
+.asset-thumbnail{
+ border:1px solid var(--f270-line)!important;border-radius:13px!important;
+ background:linear-gradient(145deg,var(--f270-surface-3),var(--f270-accent-soft))!important;color:var(--f270-blue)!important
+}
+.asset-browser-stat,.asset-data-badge,.tag,.tax-level,.reference-kind,.simulation-state,.system-route-status{
+ display:inline-flex;align-items:center;min-height:24px;padding:3px 8px;border:1px solid var(--f270-line);
+ border-radius:999px;background:var(--f270-surface-3);color:var(--f270-text-2);font-size:9px;font-weight:760;line-height:1.2
+}
+.asset-category-tabs,.reference-filter-strip,.compact-part-tools,.context-primary-actions,.simulation-actions,
+.system-context-actions,.se-inline-actions,.se-essential-actions,.se-object-actions,.se-height-actions,.se-turn-row{gap:8px!important}
+.asset-category-tabs button,.reference-filter-strip button,.compact-part-tools button,.context-primary-actions button,
+.simulation-actions button,.system-context-actions button{
+ min-height:38px;border:1px solid var(--f270-line)!important;border-radius:var(--f270-radius-sm)!important;
+ background:var(--f270-surface)!important;color:var(--f270-text-2)!important
+}
+.asset-category-tabs button.active,.reference-filter-strip button.active,.compact-part-tools button.active,
+.context-primary-actions button.active,.simulation-actions button.active,.system-context-actions button.active{
+ border-color:rgba(11,114,231,.30)!important;background:var(--f270-accent-soft)!important;color:var(--f270-blue)!important
+}
+.context-summary-head,.simulation-status-row,.system-info-grid,.context-summary-data{color:var(--f270-text)!important}
+.context-summary-data dt,.system-info-grid dt{color:var(--f270-muted)!important}
+.context-summary-data dd,.system-info-grid dd{color:var(--f270-text)!important}
+.context-reference-list,.compact-part-list,.asset-browser-results,.universal-search-results,.exterior-area-list{gap:8px!important}
+.universal-search-field,.asset-search-wide{
+ border:1px solid var(--f270-line)!important;border-radius:var(--f270-radius-md)!important;
+ background:var(--f270-surface-2)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.03)
+}
+.universal-search-result{border:1px solid transparent!important;border-radius:var(--f270-radius-sm)!important;color:var(--f270-text)!important}
+.universal-search-result:hover,.universal-search-result:focus-visible,.universal-search-result[aria-selected=true]{
+ border-color:rgba(11,114,231,.22)!important;background:var(--f270-accent-soft)!important;color:var(--f270-blue)!important
+}
+.universal-search-empty,.system-context-empty,.se-empty-selection{
+ padding:18px;border:1px dashed var(--f270-line-strong)!important;border-radius:var(--f270-radius-md)!important;
+ background:var(--f270-surface-2)!important;color:var(--f270-muted)!important;text-align:center
+}
+.canonical-layer-group,.canonical-system-context,.canonical-system-grid>*,.layer-row{border-color:var(--f270-line)!important;color:var(--f270-text)!important}
+.canonical-layer-group,.canonical-system-context{border-radius:var(--f270-radius-md)!important;background:var(--f270-surface-2)!important}
+.quality-device-recommendation,.quality-profile-detail-card{
+ border-color:var(--f270-line)!important;border-radius:var(--f270-radius-md)!important;
+ background:linear-gradient(145deg,var(--f270-accent-soft),var(--f270-surface-2))!important;color:var(--f270-text)!important
+}
+.quality-render-group{border:1px solid var(--f270-line)!important;border-radius:var(--f270-radius-md)!important;background:var(--f270-surface-2)!important}
+.settings-section{
+ padding:16px!important;border:1px solid var(--f270-line)!important;border-radius:var(--f270-radius-md)!important;background:var(--f270-surface-2)!important
+}
+.settings-section+.settings-section{margin-top:12px!important}
+.settings-section h3,.help-grid h3,.help-intro h3{color:var(--f270-text)!important}
+.help-intro{
+ padding:16px;border:1px solid rgba(11,114,231,.18);border-radius:var(--f270-radius-lg);
+ background:linear-gradient(145deg,var(--f270-accent-soft),var(--f270-surface))
+}
+.help-grid>section{
+ border:1px solid var(--f270-line)!important;border-radius:var(--f270-radius-md)!important;
+ background:var(--f270-surface-2)!important;color:var(--f270-text)!important
+}
+.technical-details{
+ border:1px solid var(--f270-line)!important;border-radius:var(--f270-radius-md)!important;
+ background:var(--f270-surface-2)!important;overflow:hidden
+}
+.technical-details summary,.settings-section summary,.system-information summary{min-height:42px;color:var(--f270-text)!important;font-weight:720}
+.simulation-mode-field,.simulation-speed{
+ border:1px solid var(--f270-line)!important;border-radius:var(--f270-radius-sm)!important;
+ background:var(--f270-surface-2)!important;color:var(--f270-text)!important
+}
+.simulation-progress{
+ overflow:hidden!important;border:1px solid var(--f270-line)!important;border-radius:999px!important;background:var(--f270-surface-3)!important
+}
+.simulation-progress>span{background:linear-gradient(90deg,var(--f270-blue),var(--f270-cyan))!important}
+.simulation-flow,.simulation-ink-flow{color:var(--f270-text-2)!important}
+.exterior-area-button{
+ min-height:44px;border:1px solid var(--f270-line)!important;border-radius:var(--f270-radius-sm)!important;
+ background:var(--f270-surface)!important;color:var(--f270-text)!important
+}
+.static-machine-fallback{
+ border:1px solid var(--f270-line)!important;border-radius:var(--f270-radius-lg)!important;
+ background:var(--f270-surface)!important;color:var(--f270-text)!important;box-shadow:var(--f270-shadow-2)!important
+}
+.static-machine-fallback p{color:var(--f270-muted)!important}
+.se-alert{
+ border:1px solid rgba(184,109,9,.24)!important;border-radius:var(--f270-radius-sm)!important;
+ background:var(--f270-warning-soft)!important;color:var(--f270-warning)!important
+}
+.se-danger-zone{
+ border:1px solid rgba(201,67,85,.22)!important;border-radius:var(--f270-radius-md)!important;background:var(--f270-danger-soft)!important
+}
+.se-progress{border-radius:999px!important;background:var(--f270-surface-3)!important;overflow:hidden}
+.se-progress>span{background:linear-gradient(90deg,var(--f270-blue),var(--f270-cyan))!important}
+
 /* Simulation transport */
 .canonical-simulation-transport{
   border-color:var(--f270-line)!important;
