@@ -79,8 +79,8 @@ const mobileIcons={factory:'factory',asset:'machine',system:'system',view:'layer
 qa('[data-mobile-nav]').forEach(el=>{const label=q('small',el)?.textContent||el.getAttribute('aria-label')||'';el.innerHTML=icon(mobileIcons[el.dataset.mobileNav]||'more')+`<small>${label}</small>`});
 const mobileFeatureHub=document.createElement('section');
 mobileFeatureHub.className='mobile-feature-hub';
-mobileFeatureHub.setAttribute('aria-label','Fitur lengkap pada perangkat seluler');
-mobileFeatureHub.innerHTML=`<div class="mobile-hub-heading"><small>KONTROL SELULER</small><strong>Kontrol lengkap</strong><span>Fitur utama tetap tersedia tanpa menutupi tampilan 3D.</span></div>
+mobileFeatureHub.setAttribute('aria-label','Fitur lengkap pada ponsel');
+mobileFeatureHub.innerHTML=`<div class="mobile-hub-heading"><small>KONTROL PONSEL</small><strong>Kontrol lengkap</strong><span>Fitur utama tetap tersedia tanpa menutupi tampilan 3D.</span></div>
 <div class="mobile-hub-section"><small>AKSES CEPAT</small><div class="mobile-hub-grid">
 <button type="button" data-mobile-action="search">${icon('search')}<span><b>Cari</b><small>Mesin, area, dan komponen</small></span></button>
 <button type="button" data-mobile-action="display">${icon('layers')}<span><b>Tampilan</b><small>Kualitas dan lapisan</small></span></button>
@@ -90,7 +90,7 @@ mobileFeatureHub.innerHTML=`<div class="mobile-hub-heading"><small>KONTROL SELUL
 <div class="mobile-hub-section"><small>KONTROL 3D</small><div class="mobile-hub-grid mobile-hub-grid-tools">
 <button type="button" data-mobile-action="iso">${icon('factory')}<span><b>Isometrik</b><small>Sudut 3D utama</small></span></button>
 <button type="button" data-mobile-action="top">${icon('focus')}<span><b>Tampak atas</b><small>Lihat dari atas</small></span></button>
-<button type="button" data-mobile-action="fit">${icon('focus')}<span><b>Fokus</b><small>Fokus ke pilihan</small></span></button>
+<button type="button" data-mobile-action="fit">${icon('focus')}<span><b>Fokus</b><small>Fokus pada pilihan</small></span></button>
 <button type="button" data-mobile-action="zoom-in">${icon('zoom-in')}<span><b>Perbesar</b><small>Perbesar tampilan</small></span></button>
 <button type="button" data-mobile-action="zoom-out">${icon('zoom-out')}<span><b>Perkecil</b><small>Perkecil tampilan</small></span></button>
 <button type="button" data-mobile-action="explode">${icon('machine')}<span><b>Urai</b><small>Komponen mesin</small></span></button>
@@ -150,7 +150,7 @@ function syncMobileFeatureHub(state=getState()){
  const quality=q('[data-mobile-quality-summary]',mobileFeatureHub);
  if(quality)quality.textContent=requested==='auto'?'Otomatis · '+(RENDER_PROFILE_INFO[effective]?.label||'Seimbang'):(RENDER_PROFILE_INFO[requested]?.label||requested);
  const connection=q('[data-mobile-connection-summary]',mobileFeatureHub);
- if(connection)connection.textContent=navigator.onLine?'Data tersedia':'Tidak tersambung';
+ if(connection)connection.textContent=navigator.onLine?'Jaringan tersedia':'Tidak tersambung';
 }
 addEventListener('online',()=>syncMobileFeatureHub());
 addEventListener('offline',()=>syncMobileFeatureHub());
@@ -440,11 +440,11 @@ q('#mode-2d')?.addEventListener('click',()=>{
 q('#mode-3d')?.addEventListener('click',()=>{const next=setViewMode('3d');applyViewModeDom(next);const section=getState().sceneMode==='machine'?'asset':'factory';stopSimulationForNavigation(section);setActiveSection(section);markSection(section);requestAnimationFrame(()=>{dispatchEvent(new Event('resize'));syncSimulationTransport()})});
 
 const GROUPS=PHASE1_FOUNDATION?[
- ['Bangunan',[['building','Struktur'],['floor','Lantai dan jalur'],['walls','Dinding'],['doors','Pintu'],['windows','Jendela dan kaca'],['airCurtain','Tirai PVC dan air curtain (acuan)'],['furniture','Isi ruangan dan material'],['roof','Atap']]],
+ ['Bangunan',[['building','Struktur'],['floor','Lantai dan jalur'],['walls','Dinding'],['doors','Pintu'],['windows','Jendela dan kaca'],['airCurtain','Tirai PVC dan air curtain (tirai udara, acuan)'],['furniture','Isi ruangan dan material'],['roof','Atap']]],
  ['Posisi mesin dan peralatan',[['machines','Penanda posisi mesin dan peralatan'],['labels','Label'],['unidentified','Area belum teridentifikasi']]],
  ['Sumber',[['reference','Garis denah sumber']]]
 ]:[
- ['Bangunan',[['building','Struktur'],['floor','Lantai dan jalur'],['walls','Dinding'],['doors','Pintu'],['windows','Jendela dan kaca'],['airCurtain','Tirai PVC dan air curtain (acuan)'],['furniture','Isi ruangan dan material'],['roof','Atap'],['landscape','Area luar']]],
+ ['Bangunan',[['building','Struktur'],['floor','Lantai dan jalur'],['walls','Dinding'],['doors','Pintu'],['windows','Jendela dan kaca'],['airCurtain','Tirai PVC dan air curtain (tirai udara, acuan)'],['furniture','Isi ruangan dan material'],['roof','Atap'],['landscape','Area luar']]],
  ['Produksi',[['machines','Mesin'],['labels','Label'],['unidentified','Area belum teridentifikasi']]],
  ['Utilitas',[['compressedAir','Pipa udara bertekanan (compressed air)'],['ahuPiping','Pipa AHU'],['ducting','Ducting AHU'],['utilityAnchors','Titik koneksi acuan']]],
  ['Informasi',[['reference','Garis denah sumber']]]
@@ -493,7 +493,7 @@ function qualityDeviceLabel(caps){return caps.mobile?'Ponsel atau perangkat sent
 function qualityRecommendationMarkup(caps=qualityDeviceCapabilities()){
  const recommended=recommendedProfile(caps),info=RENDER_PROFILE_INFO[recommended]||RENDER_PROFILE_INFO.seimbang;
  const memory=caps.memoryReported?caps.memoryReported+' GB':'tidak dilaporkan oleh peramban',cores=caps.coresReported||caps.cores||'tidak diketahui';
- return `<div class="quality-device-recommendation" data-quality-recommendation><div><small>REKOMENDASI PERANGKAT INI</small><strong>${escapeHtml(info.label)}</strong></div><p>Rekomendasi dibuat berdasarkan kemampuan perangkat yang sedang digunakan.</p><dl><div><dt>Perangkat</dt><dd>${escapeHtml(qualityDeviceLabel(caps))}</dd></div><div><dt>Memori</dt><dd>${escapeHtml(memory)}</dd></div><div><dt>Jumlah thread CPU yang terdeteksi</dt><dd>${escapeHtml(String(cores))}</dd></div><div><dt>Batas tekstur GPU</dt><dd>${escapeHtml(caps.maxTextureSize.toLocaleString('id-ID')+' px')}</dd></div></dl></div>`;
+ return `<div class="quality-device-recommendation" data-quality-recommendation><div><small>REKOMENDASI PERANGKAT INI</small><strong>${escapeHtml(info.label)}</strong></div><p>Rekomendasi dibuat berdasarkan kemampuan perangkat yang sedang digunakan.</p><dl><div><dt>Perangkat</dt><dd>${escapeHtml(qualityDeviceLabel(caps))}</dd></div><div><dt>Memori</dt><dd>${escapeHtml(memory)}</dd></div><div><dt>Thread CPU terdeteksi</dt><dd>${escapeHtml(String(cores))}</dd></div><div><dt>Batas tekstur GPU</dt><dd>${escapeHtml(caps.maxTextureSize.toLocaleString('id-ID')+' px')}</dd></div></dl></div>`;
 }
 function qualityProfileDetailMarkup(requested,caps=qualityDeviceCapabilities()){
  const recommended=recommendedProfile(caps),effective=requested==='auto'?recommended:requested;
@@ -652,7 +652,7 @@ const relabel=()=>{
  const focus=q('#focus-machine');if(focus)focus.textContent='Fokus pada objek di 3D';
  const top=q('.panel-top .eyebrow');if(top)top.textContent='PILIHAN AKTIF';
  const search=q('#global-search');if(search)search.placeholder='Cari mesin, area, komponen, sistem, atau referensi…';
- const connection=q('#connection');if(connection)connection.textContent=navigator.onLine?'Data tersedia':'Tidak tersambung';
+ const connection=q('#connection');if(connection)connection.textContent=navigator.onLine?'Jaringan tersedia':'Tidak tersambung';
 };
 function syncAccessibleControls(state){
  const panelToggle=q('#panel-toggle');if(panelToggle){const open=Boolean(state.inspectorState?.open);panelToggle.setAttribute('aria-expanded',String(open));panelToggle.setAttribute('aria-label',open?'Tutup detail objek terpilih':'Buka detail objek terpilih')}

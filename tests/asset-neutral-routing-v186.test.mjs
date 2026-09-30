@@ -10,9 +10,9 @@ const sw=readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 
 test('runtime no longer defaults unknown or empty routes to Offset 5',()=>{
  assert.match(runtime,/return raw\?\(LEGACY_MACHINE_ROUTE\[raw\]\|\|raw\):null/);
- assert.match(runtime,/if\(!k\)throw new Error\('Kunci mesin wajib tersedia'\)/);
- assert.match(runtime,/throw new Error\(\`Model 3D belum terdaftar untuk \$\{k\}\`\)/);
- assert.match(runtime,/throw new Error\(\`Simulasi belum terdaftar untuk \$\{k\}\`\)/);
+ assert.match(runtime,/if\(!k\)throw new Error\('Identitas mesin belum tersedia\.'\)/);
+ assert.match(runtime,/throw new Error\(\`Model 3D untuk \$\{k\} belum tersedia\.\`\)/);
+ assert.match(runtime,/throw new Error\(\`Simulasi untuk \$\{k\} belum tersedia\.\`\)/);
  assert.doesNotMatch(runtime,/return new OffsetMachineTemplate\(\);\s*\}/);
 });
 

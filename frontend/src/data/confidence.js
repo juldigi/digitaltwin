@@ -3,5 +3,5 @@ export const CONFIDENCE=Object.freeze({
   HIGH:'HIGH_CONFIDENCE',MEDIUM:'MEDIUM_CONFIDENCE',ESTIMATED:'ESTIMATED',INFERRED:'INFERRED_POSITION',
   REFERENCE_ONLY:'REFERENCE_ONLY',UNKNOWN:'UNKNOWN',UNVERIFIED:'UNVERIFIED',CONFLICTING:'CONFLICTING'
 });
-export const confidenceLabel=value=>({PHOTO_VERIFIED:'Foto terverifikasi',REFERENCE_PLUS_PHOTO:'Referensi dan foto',HIGH_CONFIDENCE:'Tingkat keyakinan tinggi',MEDIUM_CONFIDENCE:'Tingkat keyakinan sedang',INFERRED_POSITION:'Posisi hasil inferensi',REFERENCE_ONLY:'Referensi saja'}[value]||value);
+export const confidenceLabel=value=>({PHOTO_VERIFIED:'Terverifikasi dari foto',REFERENCE_PLUS_PHOTO:'Referensi dan foto',HIGH_CONFIDENCE:'Tingkat keyakinan tinggi',MEDIUM_CONFIDENCE:'Tingkat keyakinan sedang',INFERRED_POSITION:'Posisi diperkirakan dari data yang tersedia',REFERENCE_ONLY:'Hanya berdasarkan referensi'}[value]||value);
 
