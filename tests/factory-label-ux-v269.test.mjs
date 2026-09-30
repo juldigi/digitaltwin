@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 
 const read=path=>readFileSync(new URL(path,import.meta.url),'utf8');
 const engine=read('../frontend/src/engine.js');
+const app=read('../frontend/src/app.js');
 const factory=read('../frontend/src/factory-building.js');
 const state=read('../frontend/src/state/app-state.js');
 const sw=read('../frontend/sw.js');
@@ -37,6 +38,11 @@ test('V269 component labels also stay out of the way while camera focus is movin
 test('V269 label toggle controls every tagged factory label including non-label subgroups',()=>{
  assert.match(engine,/if\(name==='labels'\)this\.labels=!!on/);
  assert.match(engine,/const selectedId=this\.factorySelectionId\|\|null,enabled=this\.labels!==false/);
+});
+
+test('V269 manual Label controls stay synchronized with the factory label layer',()=>{
+ assert.match(app,/engine\.setFactoryLayer\('labels',labels\)/);
+ assert.equal((app.match(/engine\.setFactoryLayer\('labels',labels\)/g)||[]).length,2);
 });
 
 test('V269 rotates internal build/cache identity without changing public release query',()=>{
