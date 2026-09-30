@@ -122,6 +122,8 @@ test('V267 keeps DWG audit internals out of the user-facing fidelity popup',()=>
  assert.match(app,/readableStatus\(item\.semanticType\)/);
  assert.match(app,/readableStatus\(item\.threeDStatus\)/);
  assert.match(display,/PARTIAL \/ NORMALIZED EXTRACTION/);
+ assert.match(dwg,/DWG X → THREE X · DWG Y → THREE Z · THREE Y → ELEVATION/);
+ assert.match(display,/DWG X → sumbu X 3D · DWG Y → sumbu Z 3D · sumbu Y 3D → elevasi/);
 });
 
 test('V267 replaces developer-facing editor import validation wording',()=>{
