@@ -291,7 +291,7 @@ export class FactoryEngine {
       // Keep the proven lightweight building context only on severely memory-limited devices.
       // Machine wrappers are still progressively replaced by the same polished templates used by "Buka model 3D".
       this.actualFactory=this.capabilities?.memory<=2?buildLowDetailFactory(l,l.fleet):buildActualFactory(l,l.fleet);
-      this.factory.add(this.actualFactory.root);this.captureFactoryLabels();this.loadedFleet=l.fleet;this.layoutStats={total:l.source.entityCount,rendered:l.actual.walls.length,unimplemented:0};
+      this.factory.add(this.actualFactory.root);this.captureFactoryLabels?.();this.loadedFleet=l.fleet;this.layoutStats={total:l.source.entityCount,rendered:l.actual.walls.length,unimplemented:0};
       void this.hydrateFactoryDetailedMachines?.(l,l.fleet);
       return;
     }
@@ -339,7 +339,7 @@ export class FactoryEngine {
           this.factory.add(marker);this.layoutStats.rendered++;
         }
       }
-      this.captureFactoryLabels();
+      this.captureFactoryLabels?.();
       if(l.machineFootprint?.structuralBodyBounds){
         const f=l.machineFootprint;
         const addRect=(bounds,color,opacity,name,kind)=>{
