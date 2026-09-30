@@ -30,6 +30,8 @@ export function readableStatus(value){
   'SOURCE ANNOTATION / REVIEW':'Anotasi sumber; perlu ditinjau',
   'PROCEDURAL / RECONSTRUCTED':'Model 3D dibuat dari sumber yang tersedia',
   'PARTIAL / APPROXIMATE':'Sebagian detail masih merupakan perkiraan',
+  'PARTIAL / SOURCE COUNT UNKNOWN':'Sebagian; jumlah entitas sumber belum diketahui',
+  'PARTIAL / NORMALIZED EXTRACTION':'Sebagian; hasil ekstraksi sudah dinormalisasi',
   'OFFLINE / CACHED DATA':'Tidak tersambung; menampilkan salinan data di perangkat',
   'OFFLINE / MODE LOKAL':'Tidak tersambung; mode lokal',
   'CACHED DATA':'Menampilkan salinan data di perangkat',
