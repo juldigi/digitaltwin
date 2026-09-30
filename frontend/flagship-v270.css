@@ -664,3 +664,33 @@ body.ui-performance-lite #viewport{background:var(--f270-bg-2)!important}
     background:var(--f270-surface)!important;
   }
 }
+
+
+/* Flagship confirmation actions replace native browser confirms. */
+.flagship-confirm{
+ display:grid;grid-template-columns:44px minmax(0,1fr);gap:13px;align-items:start;
+ padding:4px 2px 16px;color:var(--f270-text)
+}
+.flagship-confirm-icon{
+ display:grid;place-items:center;width:44px;height:44px;border:1px solid rgba(11,114,231,.18);
+ border-radius:14px;background:var(--f270-accent-soft);color:var(--f270-blue);
+ font-size:18px;font-weight:900;box-shadow:var(--f270-shadow-1)
+}
+.flagship-confirm strong{display:block;margin:2px 0 4px;font-size:15px;letter-spacing:-.015em}
+.flagship-confirm p{margin:0!important;color:var(--f270-text-2)!important;font-size:12px;line-height:1.55}
+.flagship-confirm.is-danger .flagship-confirm-icon{
+ border-color:rgba(201,67,85,.24);background:var(--f270-danger-soft);color:var(--f270-danger)
+}
+.flagship-confirm-actions{
+ display:flex;justify-content:flex-end;gap:8px;padding-top:14px;border-top:1px solid var(--f270-line)
+}
+.flagship-confirm-actions button{min-width:108px;min-height:44px;border-radius:12px;font-weight:760}
+.danger-action{
+ border:1px solid transparent!important;
+ background:linear-gradient(145deg,#d24d60,#b93649)!important;
+ color:#fff!important;box-shadow:0 8px 20px rgba(185,54,73,.20)
+}
+@media(max-width:520px){
+ .flagship-confirm-actions{display:grid;grid-template-columns:1fr 1fr}
+ .flagship-confirm-actions button{min-width:0;width:100%}
+}
