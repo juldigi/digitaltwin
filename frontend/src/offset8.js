@@ -82,5 +82,5 @@ export class Offset8MachineTemplate{
  }
  findNode(id){return this.nodes.find(n=>n.userData.nodeId===id)||null;} resolvePart(o){for(let p=o;p&&p!==this.root;p=p.parent)if(p.userData?.selectable)return p;return null;}resolveTaxonomyNode(id){const n=this.taxonomyById.get(id);return n?.meshRefs.map(r=>this.findNode(r)).find(Boolean)||null;}
  setExteriorOpen(on){this.exteriorOpen=!!on;let n=0;this.root.traverse(o=>{if(o.isMesh&&o.userData.exteriorCover){o.visible=!on;n++;}});this.root.userData.interiorCutawayVisible=!!on;this.root.userData.exteriorHiddenCount=on?n:0;}
- explode(on){for(const n of this.parts)n.position.copy(n.userData.rest).add(on?n.userData.explode:new THREE.Vector3());} reset(){this.explode(false);this.setExteriorOpen(false);} setLow(){} dispose(){for(const g of this.geometries.values())g.dispose();for(const m of this.materials.values())m.dispose();}
+ explode(on){for(const n of this.parts)n.position.copy(n.userData.rest).add(on?n.userData.explode:new THREE.Vector3());} reset(){const open=this.exteriorOpen;this.explode(false);this.setExteriorOpen(open);} setLow(){} dispose(){for(const g of this.geometries.values())g.dispose();for(const m of this.materials.values())m.dispose();}
 }
