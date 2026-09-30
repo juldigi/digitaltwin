@@ -102,7 +102,7 @@ export function buildLowDetailFactory(layout,fleet){
 export class FactoryEngine {
   constructor(container,onSelect){
     const mobileRender=matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse)').matches;
-    this.container=container;this.onSelect=onSelect;this.onTaxonomySelect=null;this.view='factory';this.layout=null;this.low=mobileRender;this.mobileRender=mobileRender;this.renderFaulted=false;this.labels=true;this.isolated=false;this.partLabelEntries=[];this.factoryMachineTemplates=new Map();this.factoryDetailHydration=0;this.factoryDetailPromise=null;
+    this.container=container;this.onSelect=onSelect;this.onTaxonomySelect=null;this.view='factory';this.layout=null;this.low=mobileRender;this.mobileRender=mobileRender;this.renderFaulted=false;this.labels=true;this.isolated=false;this.partLabelEntries=[];this.factoryLabelSprites=[];this.factoryMachineTemplates=new Map();this.factoryDetailHydration=0;this.factoryDetailPromise=null;
     {const params=new URLSearchParams(location.search),requested=normalizeFoundationMachineKey(params.get('machine')||params.get('asset'));this.requestedMachineKey=requested;this.machineKey=null;}
     this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance',stencil:false,preserveDrawingBuffer:false});
     {const reportedMemory=Number(navigator.deviceMemory),reportedCores=Number(navigator.hardwareConcurrency);this.capabilities={mobile:mobileRender,memory:Number.isFinite(reportedMemory)&&reportedMemory>0?reportedMemory:4,memoryReported:Number.isFinite(reportedMemory)&&reportedMemory>0?reportedMemory:null,cores:Number.isFinite(reportedCores)&&reportedCores>0?reportedCores:4,coresReported:Number.isFinite(reportedCores)&&reportedCores>0?reportedCores:null,maxTextureSize:this.renderer.capabilities.maxTextureSize};}
@@ -167,10 +167,40 @@ export class FactoryEngine {
       this.simulationMode.observe(this.simulation);
       if(this.view==='factory')this.actualFactory?.update?.(now);
       this.transition=updateCameraTransition(this.camera,this.controls,this.transition,now,RENDER_PROFILES[this.qualityProfile].cameraMs);
-      this.controls.update();if(!this.postProcessing.render())this.renderer.render(this.scene,this.camera);if(this.requestedQuality==='auto'&&!document.hidden)this.adaptiveQuality.frame(now);this.updateLabel();if(!this.low){try{this.updatePartLabels();}catch(error){console.warn('[Digital Twin labels disabled after overlay error]',error);this.clearPartLabels();}}
+      this.controls.update();if(this.view==='factory')this.updateFactoryLabels();if(!this.postProcessing.render())this.renderer.render(this.scene,this.camera);if(this.requestedQuality==='auto'&&!document.hidden)this.adaptiveQuality.frame(now);this.updateLabel();if(!this.low){try{this.updatePartLabels();}catch(error){console.warn('[Digital Twin labels disabled after overlay error]',error);this.clearPartLabels();}}
     }catch(error){this.renderFaulted=true;console.error('[Digital Twin renderer]',error);this.onError?.('Render 3D terhenti. Aplikasi beralih ke denah 2D agar menu tetap dapat digunakan.');}
   }
   updateLabel(){const el=document.getElementById('machine-label');if(!el)return;el.hidden=!this.labels||!this.machine.visible;if(el.hidden)return;this.machine.updateWorldMatrix(true,true);const p=new THREE.Vector3(0,2.9,0).applyMatrix4(this.machine.matrixWorld);const distance=p.distanceTo(this.camera.position);p.project(this.camera);if(p.z>1||p.z< -1||Math.abs(p.x)>.97||Math.abs(p.y)>.94){el.hidden=true;return;}el.style.left=((p.x*.5+.5)*this.container.clientWidth)+'px';el.style.top=((-p.y*.5+.5)*this.container.clientHeight)+'px';document.getElementById('label-detail').hidden=distance>80;}
+  captureFactoryLabels(){
+    this.factoryLabelSprites=[];this.factory.traverse(object=>{if(object.isSprite&&object.userData?.factoryLabel)this.factoryLabelSprites.push(object);});return this.factoryLabelSprites;
+  }
+  updateFactoryLabels(){
+    const sprites=this.factoryLabelSprites||[];if(this.view!=='factory'||!sprites.length)return;
+    this.factory.updateWorldMatrix(true,true);
+    const selectedId=this.factorySelectionId||null,enabled=this.labels!==false,w=Math.max(1,this.container.clientWidth),h=Math.max(1,this.container.clientHeight),entries=[];
+    for(const sprite of sprites){
+      const data=sprite.userData||{},parentVisible=sprite.parent?this.isObjectVisible(sprite.parent):true;
+      if(!enabled||!parentVisible){sprite.visible=false;continue;}
+      const selected=Boolean(selectedId&&data.machineId===selectedId);
+      if(selectedId&&!selected){sprite.visible=false;continue;}
+      const world=sprite.getWorldPosition(new THREE.Vector3()),distance=Math.max(.1,world.distanceTo(this.camera.position)),projected=world.clone().project(this.camera);
+      if(projected.z< -1||projected.z>1||Math.abs(projected.x)>1.06||Math.abs(projected.y)>1.06){sprite.visible=false;continue;}
+      const priority=selected?3:data.labelRole==='MACHINE'?2:1;
+      entries.push({sprite,data,distance,projected,selected,priority});
+    }
+    entries.sort((a,b)=>b.priority-a.priority||a.distance-b.distance);
+    const placed=[];
+    for(const entry of entries){
+      const {sprite,data,distance,projected,selected}=entry,baseWidth=Number(data.baseLabelWidth)||Math.max(.5,sprite.scale.x),baseHeight=Number(data.baseLabelHeight)||Math.max(.1,sprite.scale.y);
+      const adaptive=THREE.MathUtils.clamp(distance/45,.12,1.25)*(selected?.72:1);
+      sprite.scale.set(baseWidth*adaptive,baseHeight*adaptive,1);
+      if(sprite.material){sprite.material.transparent=true;sprite.material.opacity=selected?.94:data.labelRole==='MACHINE'?.9:.8;}
+      const screenX=(projected.x*.5+.5)*w,screenY=(-projected.y*.5+.5)*h,text=String(data.labelText||''),boxW=Math.min(190,Math.max(66,62+text.length*2.6)),boxH=26;
+      const overlaps=!selected&&placed.some(p=>Math.abs(screenX-p.x)<(boxW+p.w)/2+8&&Math.abs(screenY-p.y)<(boxH+p.h)/2+5);
+      sprite.visible=!overlaps;
+      if(sprite.visible)placed.push({x:screenX,y:screenY,w:boxW,h:boxH});
+    }
+  }
   clearPartLabels(){
     this.partLabelEntries=[];const layer=document.getElementById('part-label-layer');if(!layer)return;
     layer.hidden=true;layer.querySelector('.part-label-items')?.replaceChildren();layer.querySelector('svg')?.replaceChildren();
@@ -260,7 +290,7 @@ export class FactoryEngine {
       // Keep the proven lightweight building context only on severely memory-limited devices.
       // Machine wrappers are still progressively replaced by the same polished templates used by "Buka model 3D".
       this.actualFactory=this.capabilities?.memory<=2?buildLowDetailFactory(l,l.fleet):buildActualFactory(l,l.fleet);
-      this.factory.add(this.actualFactory.root);this.loadedFleet=l.fleet;this.layoutStats={total:l.source.entityCount,rendered:l.actual.walls.length,unimplemented:0};
+      this.factory.add(this.actualFactory.root);this.captureFactoryLabels();this.loadedFleet=l.fleet;this.layoutStats={total:l.source.entityCount,rendered:l.actual.walls.length,unimplemented:0};
       void this.hydrateFactoryDetailedMachines?.(l,l.fleet);
       return;
     }
@@ -303,11 +333,12 @@ export class FactoryEngine {
           const dot=new THREE.Mesh(new THREE.CircleGeometry(asset ? .38 : .20,16),new THREE.MeshBasicMaterial({color:asset?0x36a9e1:0x6f8793,transparent:true,opacity:asset ? .95 : .7,side:THREE.DoubleSide}));dot.rotation.x=-Math.PI/2;marker.add(dot);
           if(typeof document!=='undefined'){
             const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
-            if(ctx){canvas.width=256;canvas.height=48;ctx.font='600 18px system-ui';ctx.fillStyle=asset?'#bce9ff':'#9cb3be';ctx.fillText(String(label.text).slice(0,26),6,28);const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,transparent:true,depthTest:false}));sprite.scale.set(7.2,1.35,1);sprite.position.set(3.7,.85,0);marker.add(sprite);}
+            if(ctx){canvas.width=256;canvas.height=48;ctx.font='600 18px system-ui';ctx.fillStyle=asset?'#bce9ff':'#9cb3be';ctx.fillText(String(label.text).slice(0,26),6,28);const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,transparent:true,depthTest:true,depthWrite:false}));sprite.scale.set(7.2,1.35,1);sprite.position.set(3.7,.85,0);sprite.userData={factoryLabel:true,labelText:String(label.text),labelRole:asset?'MACHINE':'CONTEXT',machineId:null,baseLabelWidth:7.2,baseLabelHeight:1.35};marker.add(sprite);}
           }
           this.factory.add(marker);this.layoutStats.rendered++;
         }
       }
+      this.captureFactoryLabels();
       if(l.machineFootprint?.structuralBodyBounds){
         const f=l.machineFootprint;
         const addRect=(bounds,color,opacity,name,kind)=>{
@@ -353,7 +384,7 @@ export class FactoryEngine {
       this.layoutStats.rendered++;
     }
   }
-  setFactoryLayer(name,on){if(this.actualFactory?.layers[name])this.actualFactory.layers[name].visible=!!on;if(this.factorySelectionHelper&&this.factorySelectionId){const selected=this.actualFactory?.assets.get(this.factorySelectionId);this.factorySelectionHelper.visible=this.view==='factory'&&!!selected&&this.isObjectVisible(selected);}}
+  setFactoryLayer(name,on){if(name==='labels')this.labels=!!on;if(this.actualFactory?.layers[name])this.actualFactory.layers[name].visible=!!on;if(this.factorySelectionHelper&&this.factorySelectionId){const selected=this.actualFactory?.assets.get(this.factorySelectionId);this.factorySelectionHelper.visible=this.view==='factory'&&!!selected&&this.isObjectVisible(selected);}}
   isObjectVisible(object){for(let node=object;node;node=node.parent)if(node.visible===false)return false;return true;}
   clearFactorySelection(){this.factorySelectionId=null;if(this.factorySelectionHelper){this.scene.remove(this.factorySelectionHelper);this.factorySelectionHelper.geometry?.dispose();this.factorySelectionHelper.material?.dispose();this.factorySelectionHelper=null;}return true;}
   selectFactoryAsset(id,{focus=false,mode='operator'}={}){
@@ -373,7 +404,7 @@ export class FactoryEngine {
     }
     this.factoryMachineTemplates.clear();this.factoryDetailPromise=null;
   }
-  clearFactory(){this.clearFactorySelection();this.disposeFactoryMachineTemplates();this.actualFactory=null;this.factory.traverse(o=>{o.geometry?.dispose();if(Array.isArray(o.material))o.material.forEach(m=>{m.map?.dispose();m.dispose();});else{o.material?.map?.dispose();o.material?.dispose();}});this.factory.clear();}
+  clearFactory(){this.clearFactorySelection();this.disposeFactoryMachineTemplates();this.actualFactory=null;this.factoryLabelSprites=[];this.factory.traverse(o=>{o.geometry?.dispose();if(Array.isArray(o.material))o.material.forEach(m=>{m.map?.dispose();m.dispose();});else{o.material?.map?.dispose();o.material?.dispose();}});this.factory.clear();}
   getRecommendedQualityProfile(){return recommendedProfile(this.capabilities);}
   getQualityCapabilities(){return {...this.capabilities};}
   async hydrateFactoryDetailedMachines(layout=this.layout,fleet=layout?.fleet){
