@@ -178,6 +178,7 @@ export class FactoryEngine {
     const sprites=this.factoryLabelSprites||[];if(this.view!=='factory'||!sprites.length)return;
     this.factory.updateWorldMatrix(true,true);
     const selectedId=this.factorySelectionId||null,enabled=this.labels!==false,w=Math.max(1,this.container.clientWidth),h=Math.max(1,this.container.clientHeight),entries=[];
+    if(selectedId&&this.transition){for(const sprite of sprites)sprite.visible=false;return;}
     for(const sprite of sprites){
       const data=sprite.userData||{},parentVisible=sprite.parent?this.isObjectVisible(sprite.parent):true;
       if(!enabled||!parentVisible){sprite.visible=false;continue;}
@@ -192,9 +193,9 @@ export class FactoryEngine {
     const placed=[];
     for(const entry of entries){
       const {sprite,data,distance,projected,selected}=entry,baseWidth=Number(data.baseLabelWidth)||Math.max(.5,sprite.scale.x),baseHeight=Number(data.baseLabelHeight)||Math.max(.1,sprite.scale.y);
-      const adaptive=THREE.MathUtils.clamp(distance/45,.12,1.25)*(selected?.72:1);
+      const adaptive=THREE.MathUtils.clamp(distance/45,.12,1.25)*(selected?0.72:1);
       sprite.scale.set(baseWidth*adaptive,baseHeight*adaptive,1);
-      if(sprite.material){sprite.material.transparent=true;sprite.material.opacity=selected?.94:data.labelRole==='MACHINE'?.9:.8;}
+      if(sprite.material){sprite.material.transparent=true;sprite.material.opacity=selected?0.94:(data.labelRole==='MACHINE'?0.9:0.8);}
       const screenX=(projected.x*.5+.5)*w,screenY=(-projected.y*.5+.5)*h,text=String(data.labelText||''),boxW=Math.min(190,Math.max(66,62+text.length*2.6)),boxH=26;
       const overlaps=!selected&&placed.some(p=>Math.abs(screenX-p.x)<(boxW+p.w)/2+8&&Math.abs(screenY-p.y)<(boxH+p.h)/2+5);
       sprite.visible=!overlaps;
@@ -250,7 +251,7 @@ export class FactoryEngine {
   }
   updatePartLabels(){
     const layer=document.getElementById('part-label-layer');if(!layer||!this.partLabelEntries.length){if(layer)layer.hidden=true;return;}
-    layer.hidden=!this.labels||!this.machine.visible||this.view!=='machine';if(layer.hidden)return;
+    layer.hidden=!this.labels||!this.machine.visible||this.view!=='machine'||Boolean(this.transition);if(layer.hidden)return;
     this.machine.updateWorldMatrix(true,true);const w=this.container.clientWidth,h=this.container.clientHeight,placed=[];
     for(const entry of this.partLabelEntries){
       const visibleNodes=entry.nodes.filter(node=>node.visible);if(!visibleNodes.length){entry.label.hidden=entry.line.hidden=entry.dot.hidden=true;continue;}
