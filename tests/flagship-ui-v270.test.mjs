@@ -17,6 +17,9 @@ test('V270 loads one final flagship layer after the canonical shell',()=>{
  assert.ok(flagshipIndex>shellIndex,'flagship layer must load after canonical shell');
  assert.match(html,/<body class="panel-hidden ui-simple light-mode">/);
  assert.match(html,/<meta name="theme-color" content="#f3f7fb">/);
+ assert.match(html,/id="theme-bootstrap"/);
+ assert.match(html,/bmj-digitaltwin-theme/);
+ assert.match(html,/document\.documentElement\.dataset\.theme=theme/);
 });
 
 test('V270 design system covers primary surfaces and both real themes',()=>{
@@ -25,7 +28,7 @@ test('V270 design system covers primary surfaces and both real themes',()=>{
   '--f270-shadow-1','--f270-shadow-2','--f270-shadow-3','--f270-radius-xl'
  ])assert.ok(css.includes(token),token);
  assert.match(css,/body\.light-mode\{/);
- assert.match(css,/body:not\(\.light-mode\)\{/);
+ assert.match(css,/body:not\(\.light-mode\),html\[data-theme="dark"\] body\{/);
  for(const surface of [
   '.topbar','.rail','.scene-heading>div','aside#detail-panel','dialog#modal',
   '.canonical-simulation-transport','#scene-editor-panel','.mobile-nav',
