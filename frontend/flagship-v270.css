@@ -746,8 +746,12 @@ button:not(:disabled):active{transform:translateY(0) scale(.985)}
 body.ui-performance-lite :is(
  .topbar,.rail,.scene-heading>div,.viewport-mode-switch,.viewport-zoom,.scene-bottom,
  aside#detail-panel,.panel-top,.panel-footer,.canonical-simulation-transport,.mobile-nav,
- .ui-backdrop,dialog#modal::backdrop
+ .ui-backdrop
 ){
+ backdrop-filter:none!important;
+ -webkit-backdrop-filter:none!important;
+}
+body.ui-performance-lite dialog#modal::backdrop{
  backdrop-filter:none!important;
  -webkit-backdrop-filter:none!important;
 }
