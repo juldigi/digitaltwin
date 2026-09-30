@@ -1,6 +1,6 @@
-// V237 dedicated machine realism pass; V249 shell recache without rotating public query identifiers; V255 UI SSOT repair recaches the corrected canonical shell through the build fingerprint; V262 rotates the internal shell cache for mobile-first parity; V263 recaches the simplified editor; V264 recaches hardened editor controls; V265 locks editor async transactions; V266 recaches the EYD user-language audit; V267 recaches the deep language consistency pass.
+// V237 dedicated machine realism pass; V249 shell recache without rotating public query identifiers; V255 UI SSOT repair recaches the corrected canonical shell through the build fingerprint; V262 rotates the internal shell cache for mobile-first parity; V263 recaches the simplified editor; V264 recaches hardened editor controls; V265 locks editor async transactions; V266 recaches the EYD user-language audit; V267 recaches the deep language consistency pass; V268 localizes simulation-stage presentation and clarifies the mobile explode control.
 const LEGACY_VERSION='factory-digital-twin-v222-overlay-state-ssot-20260925';
-const VERSION='factory-digital-twin-v267-ui-language-deep-audit-20260930';
+const VERSION='factory-digital-twin-v268-simulation-language-20260930';
 const RELEASE='222';
 const BUILD_FINGERPRINT='SOURCE';
 const ENTRYPOINTS=[
