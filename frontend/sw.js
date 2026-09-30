@@ -12,7 +12,7 @@ const SHELL=[
  './style.css','./runtime-fallback.css','./ui-v5.css','./responsive-v5.css','./experience-v37.css',
  ...ENTRYPOINTS,
  './src/state/app-state.js','./src/render/render-config.js','./src/render/lighting-system.js','./src/render/material-library.js','./src/render/adaptive-quality.js','./src/render/environment-system.js','./src/render/post-processing.js','./src/render/shadow-manager.js','./src/render/render-diagnostics.js','./src/render/camera-director.js',
- './src/model.js','./src/scene-editor-state.js','./src/engine.js','./src/simulation-mode.js','./src/display-language.js','./src/offset5.js','./src/simulation.js',
+ './src/model.js','./src/scene-editor-state.js','./src/engine.js','./src/machine-visibility.js','./src/simulation-mode.js','./src/display-language.js','./src/offset5.js','./src/simulation.js',
  './src/data/foundation-scope.js','./src/data/truth-status.js','./src/data/dwg-fidelity.js',
  './src/data/dimensions-offset5.js','./src/data/confidence.js','./src/data/sources-offset5.js','./src/data/taxonomy-offset5.js',
  './src/data/plant-layout-data.js','./src/data/plant-layout-deep.js','./src/data/plant-actual.js','./src/data/plant-actual-data.js',
