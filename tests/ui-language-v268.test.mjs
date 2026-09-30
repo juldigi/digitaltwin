@@ -15,7 +15,11 @@ test('V268 localizes simulation-stage presentation without changing raw stage id
   ['Unwind / Web Tension','Pelepasan gulungan dan tension web'],
   ['Gripper-chain delivery','Delivery dengan gripper chain'],
   ['Pile separation','Pemisahan tumpukan'],
-  ['Front and side register','Register depan dan samping']
+  ['Front and side register','Register depan dan samping'],
+  ['Printing Unit 8','Printing Unit 8 (unit cetak 8)'],
+  ['Ink fountain / zone metering','Ink fountain dan zone metering (bak tinta dan pengaturan zona)'],
+  ['Transfer roller train','Rangkaian transfer roller'],
+  ['Y Unit 1 · Interdeck UV','Y Unit 1 · Interdeck UV (pengering antarunit)']
  ])assert.ok(display.includes("'"+raw+"':'"+label+"'"),raw);
  assert.match(app,/stage\.textContent=readableSimulationStage\(simulation\.stage\|\|'Siap'\)/);
  assert.match(shell,/stage=readableSimulationStage\(sim\.stage\|\|'Siap'\)/);
