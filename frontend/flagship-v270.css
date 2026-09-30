@@ -694,3 +694,29 @@ body.ui-performance-lite #viewport{background:var(--f270-bg-2)!important}
  .flagship-confirm-actions{display:grid;grid-template-columns:1fr 1fr}
  .flagship-confirm-actions button{min-width:0;width:100%}
 }
+
+
+/* V270 legibility floor — compact, never microscopic. */
+.eyebrow{font-size:10px!important;line-height:1.25}
+.scene-heading p{font-size:12px!important;line-height:1.45}
+.scene-context-line,.scene-caption{font-size:10px!important;line-height:1.4}
+.rail-title{font-size:9px!important}
+.rail button small{font-size:10px!important;line-height:1.2}
+.tabs button{font-size:11px!important;line-height:1.2}
+.panel-content{font-size:12px!important;line-height:1.5}
+.confidence-panel h4,.confidence-row,.asset-heading p{font-size:10px!important;line-height:1.4}
+.inspector-actions button{font-size:10px!important}
+.panel-footer button{font-size:11px!important}
+.mobile-hub-heading>span{font-size:11px!important}
+.rail .mobile-hub-grid button b{font-size:10px!important}
+.rail .mobile-hub-grid button small{font-size:8.5px!important}
+#scene-editor-panel .se-header span,
+#scene-editor-panel .se-step-title span{font-size:10px!important;line-height:1.45}
+#scene-editor-panel .se-step-title strong{font-size:12px!important}
+#scene-editor-panel .se-category-grid button strong{font-size:10px!important}
+#scene-editor-panel .se-direction-pad button small{font-size:8.5px!important}
+@media(max-width:767px){
+ .scene-heading p{font-size:10px!important}
+ .mobile-nav button small{font-size:8.5px!important;line-height:1.1}
+ .tabs button{font-size:10.5px!important}
+}
