@@ -38,8 +38,48 @@ export function readableStatus(value){
   'DATA TERSAMBUNG':'Data tersambung',
   'TEMPLATE_ONLY':'Hanya acuan template','LAYOUT_ESTIMATED':'Perkiraan dari denah','DRAWING_BASED':'Berdasarkan gambar','FIELD_VERIFIED':'Terverifikasi di lapangan','AS_BUILT_CONFIRMED':'Kondisi terpasang terkonfirmasi',
   'UNPLACED':'Belum ditempatkan','UNPLACED_UNTIL_DRAWING_AVAILABLE':'Belum ditempatkan; menunggu gambar aktual','AS_BUILT_OR_DRAWING_APPLIED':'Menggunakan data terpasang atau gambar aktual','MIXED_TEMPLATE_AND_APPLIED':'Gabungan acuan dan data yang sudah diterapkan',
-  'INFERRED_POSITION':'Posisi diperkirakan dari data yang tersedia','REFERENCE_ONLY':'Hanya berdasarkan referensi','PHOTO_VERIFIED':'Terverifikasi dari foto','REFERENCE_PLUS_PHOTO':'Diverifikasi dengan referensi dan foto','SOURCE_REFERENCE':'Acuan sumber','DOCUMENTATION_REQUIRED':'Dokumentasi diperlukan'
+  'INFERRED_POSITION':'Posisi diperkirakan dari data yang tersedia','REFERENCE_ONLY':'Hanya berdasarkan referensi','PHOTO_VERIFIED':'Terverifikasi dari foto','REFERENCE_PLUS_PHOTO':'Diverifikasi dengan referensi dan foto','SOURCE_REFERENCE':'Acuan sumber','DOCUMENTATION_REQUIRED':'Dokumentasi diperlukan',
+  'BMJ_ACTUAL_PHOTO_GROUNDED':'Berdasarkan foto aktual BMJ',
+  'MODEL_IDENTIFIED_PROCESS_GROUNDED':'Identitas model dan proses didukung sumber',
+  'DOCUMENT_GROUNDED':'Berdasarkan dokumen',
+  'MODEL_IDENTIFIED_EXACT_PUBLIC_REFERENCE':'Model teridentifikasi; referensi publik model tersedia',
+  'MODEL_MANUAL_PROCESS_GROUNDED':'Model dan proses didukung manual',
+  'OEM_PROCESS_GROUNDED':'Proses didukung sumber OEM',
+  'MODEL_FAMILY_PROCESS_GROUNDED':'Proses didukung referensi keluarga model',
+  'FUNCTIONAL_MULTI_VENDOR_REFERENCE':'Referensi fungsi dari beberapa vendor',
+  'MODEL_IDENTIFIED_CLOSE_FAMILY_PROCESS':'Model teridentifikasi; proses mengacu keluarga terdekat',
+  'OEM_MODEL_GROUNDED':'Model didukung sumber OEM',
+  'OEM_MULTI_MODEL_FAMILY_REFERENCE':'Referensi OEM beberapa model dalam satu keluarga',
+  'BRAND_FAMILY_REFERENCE':'Referensi keluarga merek',
+  'IDENTITY_ONLY':'Hanya identitas mesin',
+  'DEDICATED_BMJ_PHOTO_MATCHED__ARCHIVE_DIMENSIONS_BOUNDED':'Model khusus berdasarkan foto BMJ; dimensi dibatasi arsip',
+  'YA1A1A_EXACT_IDENTITY__SHEETFED_GRAVURE_MECHANISM_REFERENCE':'Identitas YA1A1A; mekanisme mengacu referensi gravure sheet-fed',
+  'DEDICATED_OFFICIAL_FAMILY_REFERENCE':'Model khusus berdasarkan referensi resmi keluarga mesin',
+  'FZ1200_EXACT_MODEL_PROCESS_REFERENCE__BMJ_OEM_UNVERIFIED':'Model FZ1200; OEM unit BMJ belum terverifikasi',
+  'DEDICATED_PROCESS_REFERENCE':'Model khusus berdasarkan referensi proses',
+  'DEDICATED_MANUAL_PROCESS_REFERENCE':'Model khusus berdasarkan manual dan referensi proses',
+  'DEDICATED_OEM_PROCESS_REFERENCE':'Model khusus berdasarkan referensi proses OEM',
+  'DEDICATED_FAMILY_PROCESS_REFERENCE':'Model khusus berdasarkan referensi proses keluarga',
+  'MULTI_VENDOR_FOLDER_GLUER_PROCESS_REFERENCE':'Model fungsi Folder Gluer berdasarkan beberapa referensi vendor',
+  'QF_LQF_1080_FAMILY_PROCESS_REFERENCE__QF100CS_EXACT_EQUIVALENCE_UNVERIFIED':'Model keluarga QF/LQF 1080; kesetaraan QF-100CS belum terverifikasi',
+  'MULTI_VENDOR_10_BIN_SUCTION_COLLATOR_PROCESS_REFERENCE':'Model Collator 10-bin berdasarkan referensi beberapa vendor',
+  'DEDICATED_OEM_MODEL_REFERENCE':'Model khusus berdasarkan referensi model OEM',
+  'HEIDELBERG_SUPRASETTER_MULTI_MODEL_FAMILY_REFERENCE':'Model keluarga Heidelberg Suprasetter',
+  'SCREEN_FTR_KATANA_MULTI_MODEL_FAMILY_REFERENCE':'Model keluarga SCREEN FT-R/Katana',
+  'ZUND_G3_S3_MODULAR_PLATFORM_REFERENCE':'Model platform modular Zünd G3/S3',
+  'ATLAS_COPCO_GA_G_OIL_INJECTED_FAMILY_REFERENCE':'Model keluarga Atlas Copco GA/G oil-injected screw',
+  'KAESER_SIGMA_FLUID_COOLED_FAMILY_REFERENCE':'Model keluarga KAESER SIGMA fluid-cooled screw',
+  'SWAN_TS_AD_TMV_SCREW_FAMILY_REFERENCE':'Model keluarga SWAN TS-AD/TMV screw',
+  'EUROVENT_SECTIONAL_AHU_FUNCTIONAL_REFERENCE':'Model fungsi AHU sectional berdasarkan referensi Eurovent',
+  'SANSIN_NES_YZKJ_INDOOR_OUTDOOR_REFERENCE':'Model keluarga SANSIN/NES indoor-outdoor',
+  'PLACEHOLDER':'Model penanda sementara',
+  'VERIFIED_PROCESS_MODEL':'Simulasi tersedia; proses didukung sumber',
+  'FAMILY_PROCESS_MODEL':'Simulasi tersedia sebagai acuan proses keluarga',
+  'BLOCKED':'Simulasi belum dapat dijalankan; bukti belum cukup'
  };
+ if(known[raw])return known[raw];
+ const procedural=/^(DEDICATED )?PROCEDURAL \/ (.+)$/.exec(raw);
+ if(procedural&&known[procedural[2]])return (procedural[1]?'Model 3D khusus; ':'Model 3D; ')+known[procedural[2]];
  if(known[raw])return known[raw];
  return raw.replace(/\b(?:HIGH CONFIDENCE|MEDIUM CONFIDENCE|DWG-VERIFIED|USER-CONFIRMED|NOT_IMPLEMENTED|LAYOUT PLACEHOLDER|CACHED DATA|MODE LOKAL|VERIFIED|ESTIMATED|UNKNOWN|UNVERIFIED|APPROXIMATE|CONFLICTING|PROCEDURAL|RECONSTRUCTED|PARTIAL|OFFLINE)\b/g,word=>STATUS_LABELS[word]||word);
 }
