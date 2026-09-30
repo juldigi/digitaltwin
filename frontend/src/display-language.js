@@ -39,6 +39,7 @@ export function readableStatus(value){
   'TEMPLATE_ONLY':'Hanya acuan template','LAYOUT_ESTIMATED':'Perkiraan dari denah','DRAWING_BASED':'Berdasarkan gambar','FIELD_VERIFIED':'Terverifikasi di lapangan','AS_BUILT_CONFIRMED':'Kondisi terpasang terkonfirmasi',
   'UNPLACED':'Belum ditempatkan','UNPLACED_UNTIL_DRAWING_AVAILABLE':'Belum ditempatkan; menunggu gambar aktual','AS_BUILT_OR_DRAWING_APPLIED':'Menggunakan data terpasang atau gambar aktual','MIXED_TEMPLATE_AND_APPLIED':'Gabungan acuan dan data yang sudah diterapkan',
   'INFERRED_POSITION':'Posisi diperkirakan dari data yang tersedia','REFERENCE_ONLY':'Hanya berdasarkan referensi','PHOTO_VERIFIED':'Terverifikasi dari foto','REFERENCE_PLUS_PHOTO':'Diverifikasi dengan referensi dan foto','SOURCE_REFERENCE':'Acuan sumber','DOCUMENTATION_REQUIRED':'Dokumentasi diperlukan',
+  'DWG X → THREE X · DWG Y → THREE Z · THREE Y → ELEVATION':'DWG X → sumbu X 3D · DWG Y → sumbu Z 3D · sumbu Y 3D → elevasi',
   'BMJ_ACTUAL_PHOTO_GROUNDED':'Berdasarkan foto aktual BMJ',
   'MODEL_IDENTIFIED_PROCESS_GROUNDED':'Identitas model dan proses didukung sumber',
   'DOCUMENT_GROUNDED':'Berdasarkan dokumen',
