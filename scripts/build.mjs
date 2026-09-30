@@ -8,7 +8,9 @@ const fingerprint=createHash('sha256');
 for(const file of walk('frontend').sort()){fingerprint.update(relative('frontend',file));fingerprint.update('\0');fingerprint.update(readFileSync(file));}
 const buildFingerprint=fingerprint.digest('hex').slice(0,16);
 rmSync('dist',{recursive:true,force:true});cpSync('frontend','dist',{recursive:true});mkdirSync('dist/vendor/three',{recursive:true});cpSync('node_modules/three/build','dist/vendor/three/build',{recursive:true});cpSync('node_modules/three/examples/jsm','dist/vendor/three/addons',{recursive:true});cpSync('node_modules/three/LICENSE','dist/vendor/three/LICENSE');
-let sw=readFileSync('dist/sw.js','utf8');sw=sw.replace("const BUILD_FINGERPRINT='SOURCE';",`const BUILD_FINGERPRINT='${buildFingerprint}';`);writeFileSync('dist/sw.js',sw);
+const fleetChunkCount=[...readFileSync('dist/src/data/factory-fleet-data.js','utf8').matchAll(/import c\d+ from '\.\/factory-fleet-chunk-\d+\.js';/g)].length;
+if(!fleetChunkCount)throw new Error('Manifest geometri pabrik tidak memiliki chunk.');
+let sw=readFileSync('dist/sw.js','utf8');sw=sw.replace("const BUILD_FINGERPRINT='SOURCE';",`const BUILD_FINGERPRINT='${buildFingerprint}';`).replace(/const FLEET_CHUNK_COUNT=\d+;/,`const FLEET_CHUNK_COUNT=${fleetChunkCount};`);writeFileSync('dist/sw.js',sw);
 // Keep modules at their original URLs so relative imports resolve identically in development and production.
 let html=readFileSync('dist/index.html','utf8');html=html.replace('<link rel="stylesheet" href="./style.css">',()=>'<style>'+readFileSync('frontend/style.css','utf8')+'</style>');writeFileSync('dist/index.html',html);
 import {initialState} from '../frontend/src/model.js';

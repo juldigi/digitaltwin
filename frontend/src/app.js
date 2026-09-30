@@ -870,6 +870,11 @@ window.addEventListener('bmj:simulateselectedmachine',async event=>{
 });
 function qStaticFallbackClear(){const viewport=$('#viewport');viewport?.querySelectorAll('.static-machine-fallback').forEach(node=>node.remove());}
 async function restoreHistoryContext(){
+ const unavailable3d=!engine||engine.renderFaulted;
+ if(unavailable3d){
+  const fallbackContext={...readUrlState(),viewMode:'2d'};
+  history.replaceState(history.state,'',buildContextUrl(fallbackContext));
+ }
  const restored=readUrlState(),route=restored.selectedAsset,node=restored.selectedNode,viewMode=restored.viewMode,cameraPreset=restored.cameraPreset,sceneMode=restored.sceneMode;
  if(!route){
   showHome({historyMode:'none'});applyRestoredCamera(cameraPreset);
@@ -1141,6 +1146,7 @@ function openSceneEditor(){
  let keyboardMoveActive=false;
  const editorArrowKeys=['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'];
  const onEditorKeyDown=e=>{
+  if(e.defaultPrevented||$('#modal')?.open||e.target?.closest?.('dialog'))return;
   if(String(e.key||'')==='Escape'){if(editorBusy)return;e.preventDefault();keyboardMoveActive=false;panel.querySelector('#se-close')?.click();return;}
   if(editorBusy)return;
   const tag=e.target?.tagName;if(tag==='INPUT'||tag==='SELECT'||tag==='TEXTAREA'||e.target?.isContentEditable)return;
