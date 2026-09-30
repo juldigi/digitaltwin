@@ -444,7 +444,7 @@ function resetTaxonomyRoot({historyMode='none'}={}){
 }
 function renderContextBreadcrumb(){
  const host=$('#context-breadcrumb');if(!host)return;
- if(engine?.view==='factory'){
+ if(getAppState().sceneMode==='factory'||engine?.view==='factory'){
   const selected=getAppState().selectedAsset,record=machineRecordForRoute(selected);
   host.innerHTML=record?'<button type="button" data-breadcrumb-factory>Pabrik</button><span aria-hidden="true">/</span><button type="button" aria-current="page">'+esc(record.name)+'</button>':'<button type="button" data-breadcrumb-factory aria-current="page">Pabrik</button>';
  }else{
@@ -794,6 +794,13 @@ function selectFactoryAssetContext(machine,{historyMode='none',openDialog=false,
 function focusFoundationPlaceholder(machine,{historyMode='push',openDialog=false}={}){
  return selectFactoryAssetContext(machine,{historyMode,openDialog,focus:true});
 }
+function syncFactoryAssetHeading(machine,placement){
+ const heading=$('.asset-heading h2'),subtitle=$('.asset-heading p'),summary=$('#evidence-summary'),detail=$('#evidence-detail');
+ if(heading)heading.textContent=machine.name;
+ if(subtitle)subtitle.textContent=[machine.sapCode,machine.model].filter(Boolean).join(' · ')||machine.area||'Mesin atau peralatan pabrik';
+ if(summary)summary.textContent='Identitas dan posisi mesin';
+ if(detail)detail.innerHTML=pair('Identitas mesin atau peralatan',machine.machineId)+pair('Sumber identitas',machine.source==='USER_CONFIRMED'?'Konfirmasi pengguna':machine.source||'Belum tersedia')+pair('Posisi',positionVerification(placement));
+}
 function machineDetailDialog(machine){
  const placement=placementForMachine(machine.machineId),policy=foundationAssetPolicy(machine,placement),primary=policy.canOpenTechnical3D;
  const modelAvailable=primary&&!$('#mode-3d')?.disabled;
@@ -804,7 +811,7 @@ function machineDetailDialog(machine){
  const primaryData=primary?pair('ID mesin',machine.machineId)+pair('Area',machine.area)+pair('Model',machine.model)+pair('Nomor seri',machine.serial)+pair('Lokasi fungsional SAP',machine.functionalLocation)+pair('Kode SAP',machine.sapCode)+pair('Tahun',machine.year)+pair('Dasar model 3D',truth?.source3D||machine.source)+pair('Detail model 3D',truth?.detail3D||'Model berbasis acuan')+pair('Keandalan data',truth?.dataConfidence||'Sesuai sumber tersedia')+pair('Posisi',truth?.position||positionVerification(placement))+pair('Dasar posisi',positionStatusLabel(policy.positionStatus))+pair('Sumber identitas',machine.source==='USER_CONFIRMED'?'Konfirmasi pengguna':'Daftar mesin'):'';
  const placeholderData=pair('ID posisi',machine.machineId)+pair('Area',machine.area)+pair('Dasar model 3D',readableStatus('NOT_IMPLEMENTED · LAYOUT PLACEHOLDER'))+pair('Detail model 3D',readableStatus('NOT_IMPLEMENTED'))+pair('Posisi',positionVerification(placement))+pair('Dasar posisi',positionStatusLabel(policy.positionStatus))+pair('Status detail','Belum dibuka pada fase fondasi');
  const technicalData=primary?primaryData:placeholderData;
- closeModal();setDomainState({inspectorState:{tab:'overview'}});showPanel();
+ closeModal();setDomainState({inspectorState:{tab:'overview'}});showPanel();syncFactoryAssetHeading(machine,placement);
  $('#panel-content').innerHTML=`<section class="context-summary"><div class="context-summary-head"><small>MESIN ATAU PERALATAN TERPILIH</small><h3>${esc(machine.name)}</h3><p>${esc([machine.sapCode,machine.model].filter(Boolean).join(' · ')||machine.area||'Mesin atau peralatan pabrik')}</p></div><div class="card accent context-status-card"><h4>${esc(status)}</h4><p>${esc(copy)}</p></div><dl class="data-list context-summary-data">${summaryData}</dl>${primary&&machine.note?`<div class="card context-note"><h4>Catatan</h4><p>${esc(machine.note)}</p></div>`:''}<details class="technical-details"><summary>Informasi teknis</summary><div class="technical-details-body"><dl class="data-list">${technicalData}</dl></div></details><div class="actions context-primary-actions single-action"><button id="${modelAvailable?'open-machine-3d':'focus-layout-asset'}" class="primary">${modelAvailable?'Buka model 3D':'Pusatkan di pabrik'}</button></div></section>`;
  emitDomainState({selectedAsset:machine.machineId,selectedArea:machine.area||null,selectedNode:null,activeReference:null,activeSection:'asset',sceneMode:'factory',cameraPreset:'iso',inspectorState:{open:true,tab:'overview'}});
  renderContextBreadcrumb();
