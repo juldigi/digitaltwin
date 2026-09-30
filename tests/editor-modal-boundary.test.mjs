@@ -35,3 +35,14 @@ test('all baked factory chunks are available in the offline shell',()=>{
   assert.ok(cached.includes('./src/data/'+file),file+' missing from offline cache');
  }
 });
+
+test('history restoration keeps the 2D fallback when 3D is unavailable',async()=>{
+ const body=app.split('async function restoreHistoryContext(){')[1].split("\naddEventListener('popstate'")[0];
+ for(const engine of [null,{renderFaulted:true}]){
+  let context={selectedAsset:null,selectedNode:null,viewMode:'3d',cameraPreset:'iso',sceneMode:'factory'},final;
+  const sandbox={engine,readUrlState:()=>({...context}),history:{state:null,replaceState:(_state,_title,next)=>{context=next}},
+   buildContextUrl:next=>next,showHome(){},applyRestoredCamera(){},emitDomainState:next=>{final=next}};
+  await vm.runInNewContext(`(async()=>{${body})()`,sandbox);
+  assert.equal(final.viewMode,'2d');assert.equal(context.viewMode,'2d');
+ }
+});

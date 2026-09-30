@@ -870,6 +870,11 @@ window.addEventListener('bmj:simulateselectedmachine',async event=>{
 });
 function qStaticFallbackClear(){const viewport=$('#viewport');viewport?.querySelectorAll('.static-machine-fallback').forEach(node=>node.remove());}
 async function restoreHistoryContext(){
+ const unavailable3d=!engine||engine.renderFaulted;
+ if(unavailable3d){
+  const fallbackContext={...readUrlState(),viewMode:'2d'};
+  history.replaceState(history.state,'',buildContextUrl(fallbackContext));
+ }
  const restored=readUrlState(),route=restored.selectedAsset,node=restored.selectedNode,viewMode=restored.viewMode,cameraPreset=restored.cameraPreset,sceneMode=restored.sceneMode;
  if(!route){
   showHome({historyMode:'none'});applyRestoredCamera(cameraPreset);
