@@ -207,7 +207,7 @@ function confirmAction(title,message,{confirmLabel='Lanjutkan',cancelLabel='Bata
   dialog.addEventListener('close',onClose,{once:true});
   $('#flagship-confirm-cancel')?.addEventListener('click',()=>finish(false),{once:true});
   $('#flagship-confirm-ok')?.addEventListener('click',()=>finish(true),{once:true});
-  requestAnimationFrame(()=>$('#flagship-confirm-ok')?.focus({preventScroll:true}));
+  requestAnimationFrame(()=>$(danger?'#flagship-confirm-cancel':'#flagship-confirm-ok')?.focus({preventScroll:true}));
  });
 }
 function emitDomainState(detail){return setDomainState(detail);}
