@@ -45,8 +45,8 @@ test('V269 manual Label controls stay synchronized with the factory label layer'
  assert.equal((app.match(/engine\.setFactoryLayer\('labels',labels\)/g)||[]).length,2);
 });
 
-test('V269 rotates internal build/cache identity without changing public release query',()=>{
- assert.match(state,/APP_BUILD='2026\.09\.30-269'/);
- assert.match(sw,/factory-digital-twin-v269-adaptive-map-labels-20260930/);
+test('V269 label behavior remains covered after later internal build/cache rotations',()=>{
+ assert.match(state,/APP_BUILD='2026\.09\.30-\d+'/);
+ assert.match(sw,/const VERSION='factory-digital-twin-v\d+[-a-z0-9]*-20260930'/);
  assert.match(sw,/const RELEASE='222'/);
 });

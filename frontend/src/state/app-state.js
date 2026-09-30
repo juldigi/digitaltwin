@@ -1,4 +1,4 @@
-export const APP_BUILD='2026.09.30-269';
+export const APP_BUILD='2026.09.30-270';
 
 const DEFAULT_STATE={
   bootState:{phase:'booting',message:null},
@@ -19,7 +19,7 @@ const DEFAULT_STATE={
   simulationState:{available:false,blocked:false,blockedReason:null,active:false,running:false,stage:null,speed:1,progress:0,completed:0,sheetsVisible:0,pileSheetsVisible:0},
   referenceState:{filter:'all'},
   inspectorState:{open:false,tab:'overview'},
-  preferences:{theme:'dark',lowDetail:false,visualQuality:'auto'},
+  preferences:{theme:'light',lowDetail:false,visualQuality:'auto'},
   activeReference:null,
   deviceMode:'desktop',
   overlay:null
@@ -39,9 +39,9 @@ const INSPECTOR_TABS=new Set(['overview','structure','simulation','data','source
 const BOOT_PHASES=new Set(['booting','ready','error','timeout']);
 const PREF_KEYS=Object.freeze({theme:'bmj-digitaltwin-theme',lowDetail:'bmj-digitaltwin-low',visualQuality:'bmj-digitaltwin-visual-quality'});
 const LEGACY_PREF_KEYS=Object.freeze({theme:'offset5-theme',lowDetail:'offset5-low'});
-const readStoredPreference=(key,fallback)=>{if(typeof localStorage==='undefined')return fallback;try{const current=localStorage.getItem(PREF_KEYS[key]),legacy=current===null&&LEGACY_PREF_KEYS[key]?localStorage.getItem(LEGACY_PREF_KEYS[key]):null,value=current??legacy;if(legacy!==null){localStorage.setItem(PREF_KEYS[key],legacy);localStorage.removeItem(LEGACY_PREF_KEYS[key]);}if(key==='theme')return value==='light'?'light':'dark';if(key==='lowDetail')return value==='1';if(key==='visualQuality')return ['auto','hemat','seimbang','tinggi','engineering','cinematic'].includes(value)?value:'auto';}catch{}return fallback;};
+const readStoredPreference=(key,fallback)=>{if(typeof localStorage==='undefined')return fallback;try{const current=localStorage.getItem(PREF_KEYS[key]),legacy=current===null&&LEGACY_PREF_KEYS[key]?localStorage.getItem(LEGACY_PREF_KEYS[key]):null,value=current??legacy;if(legacy!==null){localStorage.setItem(PREF_KEYS[key],legacy);localStorage.removeItem(LEGACY_PREF_KEYS[key]);}if(key==='theme')return value===null?fallback:(value==='light'?'light':'dark');if(key==='lowDetail')return value==='1';if(key==='visualQuality')return ['auto','hemat','seimbang','tinggi','engineering','cinematic'].includes(value)?value:'auto';}catch{}return fallback;};
 const runtimeHref=()=>{if(typeof location!=='undefined'&&location.href)return location.href;const path=typeof location!=='undefined'?(location.pathname||'/'):'/';const search=typeof location!=='undefined'?(location.search||''):'';const hash=typeof location!=='undefined'?(location.hash||''):'';return 'http://localhost'+path+search+hash;};
-let state={...clone(DEFAULT_STATE),preferences:{theme:readStoredPreference('theme','dark'),lowDetail:readStoredPreference('lowDetail',false),visualQuality:readStoredPreference('visualQuality','auto')}};
+let state={...clone(DEFAULT_STATE),preferences:{theme:readStoredPreference('theme','light'),lowDetail:readStoredPreference('lowDetail',false),visualQuality:readStoredPreference('visualQuality','auto')}};
 let notifyQueued=false;
 
 export function getState(){return clone(state)}

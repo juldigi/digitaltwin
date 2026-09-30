@@ -59,7 +59,7 @@ test('V267 presents runtime errors as user-facing availability messages',()=>{
 });
 
 test('V267 improves editor settings and confidence copy without changing technical terminology',()=>{
- assert.match(app,/Tutup editor\?/);
+ assert.match(app,/Tutup editor tanpa menyimpan\?/);
  assert.match(app,/Thread CPU terdeteksi/);
  assert.match(app,/Kualitas yang direkomendasikan/);
  assert.match(app,/Penyimpanan di perangkat/);
