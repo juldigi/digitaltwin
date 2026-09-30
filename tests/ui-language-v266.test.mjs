@@ -17,9 +17,9 @@ const runtime=[index,shell,app,engine,model,runtimeModule,render,display,confide
 
 test('V266 uses clear Indonesian for navigation controls editor and settings',()=>{
  for(const copy of [
-  'KONTROL SELULER','Kualitas dan lapisan','Hanya objek ini','Buka interior','Kembalikan kamera',
+  'KONTROL PONSEL','Kualitas dan lapisan','Hanya objek ini','Buka interior','Kembalikan kamera',
   'Data dan sumber','Status data dan sumber','Gerakkan bertahap saat diseret',
-  'Jumlah thread CPU yang terdeteksi','MESIN DAN PERALATAN','Bandingkan sebelum dan sesudah',
+  'Thread CPU terdeteksi','MESIN DAN PERALATAN','Bandingkan sebelum dan sesudah',
   'Posisi relatif terhadap induk (meter)','Rotasi relatif terhadap induk (derajat)','Kejelasan status data'
  ])assert.ok(runtime.includes(copy),copy);
 });
@@ -32,7 +32,7 @@ test('V266 removes legacy mixed-language UI wording while preserving useful tech
   'Status Data & Sumber','Sambungkan Data','Bersihkan Data Tersimpan','Informasi Sistem',
   'Ganti Kata Sandi','Simpan Kata Sandi','Buka Semua Cover','Tutup Interior',
   'Anchor tidak valid','Unit CAD tidak valid','harus angka finite',"'Running'",'MESIN & PERALATAN','MESIN / PERALATAN TERPILIH',
-  'Offline: berkas belum tersimpan.','Penampil 3D belum tersedia','menu Aset','RIGHT → LEFT','BMJ Machine Database','ditemukan pada registry.','Buka semua cover luar','Tutup kembali cover','tampilan cover','Identitas aset','Posisi aset','Penanda posisi aset','Nama area dan aset','Sejajarkan dengan aset lain','Pilih aset acuan','posisi aset pada denah','Aset belum memiliki konteks tata letak','Aset dipilih','Aset pabrik','Aset pada tautan','Simulasi proses untuk aset ini','Pilih satu aset','aset dapat dipilih','Kategori aset','Nama aset','Profil cover','Denah 2D · Aset terpilih','Objek terpilih ditandai pada denah','Fallback mesin aktif:','Registry mesin','Alur media & exposure','Thread CPU terdeteksi'
+  'Offline: berkas belum tersimpan.','Penampil 3D belum tersedia','menu Aset','RIGHT → LEFT','BMJ Machine Database','ditemukan pada registry.','Buka semua cover luar','Tutup kembali cover','tampilan cover','Identitas aset','Posisi aset','Penanda posisi aset','Nama area dan aset','Sejajarkan dengan aset lain','Pilih aset acuan','posisi aset pada denah','Aset belum memiliki konteks tata letak','Aset dipilih','Aset pabrik','Aset pada tautan','Simulasi proses untuk aset ini','Pilih satu aset','aset dapat dipilih','Kategori aset','Nama aset','Profil cover','Denah 2D · Aset terpilih','Objek terpilih ditandai pada denah','Fallback mesin aktif:','Registry mesin','Alur media & exposure','Jumlah thread CPU yang terdeteksi'
  ])assert.equal(runtime.includes(oldCopy),false,oldCopy);
  for(const technicalTerm of ['DWG','CAD','GPU','WebGL','UV','Superadmin','shadow map','environment lighting','SideLay','gripper'])assert.ok(runtime.includes(technicalTerm),technicalTerm);
 });
@@ -57,9 +57,9 @@ test('V266 translates generic status labels without rewriting OEM process termin
 
 test('V266 localizes connection fallback and runtime failures',()=>{
  assert.match(sw,/Tidak tersambung: berkas belum tersimpan di perangkat\./);
- assert.match(runtimeModule,/Kunci mesin wajib tersedia/);
- assert.match(runtimeModule,/Model 3D belum terdaftar/);
- assert.match(runtimeModule,/Simulasi belum terdaftar/);
+ assert.match(runtimeModule,/Identitas mesin belum tersedia\./);
+ assert.match(runtimeModule,/Model 3D untuk \$\{k\} belum tersedia\./);
+ assert.match(runtimeModule,/Simulasi untuk \$\{k\} belum tersedia\./);
  assert.match(engine,/Pilih mesin atau peralatan sebelum membuka model 3D/);
 });
 
@@ -67,7 +67,7 @@ test('V266 presents validation confidence and routing status in standard Indones
  for(const copy of [
   'Titik acuan tidak valid.','Satuan CAD tidak valid.','Koordinat, rotasi, dan skala harus berupa angka yang valid.',
   'Nilai posisi, rotasi, atau skala berada di luar rentang yang didukung.',
-  'Referensi dan foto','Posisi hasil inferensi','Dikonfirmasi oleh pengguna',
+  'Referensi dan foto','Posisi diperkirakan dari data yang tersedia','Dikonfirmasi oleh pengguna',
   'Kondisi terpasang terkonfirmasi','Belum ditempatkan; menunggu gambar aktual'
  ])assert.ok(runtime.includes(copy),copy);
  assert.match(shell,/readableStatus\(detail\.routeMode\|\|'UNKNOWN'\)/);
@@ -83,7 +83,7 @@ test('V266 removes implementation-version jargon from primary Sheeting explanati
 test('V266 keeps render-quality technical terms but explains them in Indonesian',()=>{
  assert.match(render,/profil kualitas/);
  assert.match(render,/perangkat keras/);
- assert.match(render,/shadow map 512 hanya disiapkan sebagai cadangan/);
+ assert.match(render,/shadow map \(peta bayangan\) 512 hanya disiapkan sebagai cadangan/);
  assert.match(render,/environment lighting \(pencahayaan lingkungan\)/);
  assert.match(render,/tangkapan layar/);
  assert.match(render,/ponsel atau perangkat seluler/);
@@ -145,7 +145,7 @@ test('V266 presentation layer localizes internal evidence and model status codes
  for(const copy of [
   'Model 3D dibuat dari foto aktual dan dokumen yang tersedia',
   'Model 3D dibuat berdasarkan dokumen teknis yang tersedia',
-  'Model 3D dibuat dari database BMJ dan referensi lama keluarga mesin',
+  'Model 3D dibuat dari data BMJ dan referensi lama keluarga mesin',
   'Model 3D khusus dibuat dari rekonstruksi foto aktual BMJ',
   'Bukti aktual BMJ tersedia','Dokumen resmi tersedia','Referensi keluarga SP 102 tersedia',
   'Foto aktual BMJ menjadi sumber utama; referensi proses keluarga HSM menjadi sumber pendukung',
