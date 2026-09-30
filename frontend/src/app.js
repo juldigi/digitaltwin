@@ -7,7 +7,7 @@ import {initialState,validateLayout,validatePosition,worldToCad} from './model.j
 import {OFFSET5_TAXONOMY,TAXONOMY_BY_ID as OFFSET5_BY_ID,taxonomyChildren as offset5Children,taxonomyStats as offset5Stats} from './data/taxonomy-offset5.js';
 import {PHOTO_REGISTRY as OFFSET5_PHOTOS,TECHNICAL_SOURCES as OFFSET5_SOURCES,photoStats as offset5PhotoStats,ORIENTATION as OFFSET5_ORIENTATION} from './data/sources-offset5.js';
 import {confidenceLabel} from './data/confidence.js';
-import {loadBundledPlantLayout,drawPlantPlan} from './data/plant-layout-data.js';
+import {loadBundledPlantLayout,drawPlantPlan,pickPlantPlanAsset} from './data/plant-layout-data.js';
 import {PRINTING_SIMULATION_STAGES as OFFSET5_SIM_STAGES,INK_SIMULATION_SEQUENCE as OFFSET5_INK_SEQUENCE} from './simulation.js';
 import {MACHINE_REGISTRY,MACHINE_REGISTRY_BY_ID,MACHINE_REGISTRY_STATS} from './data/machine-registry.js';
 import {FOUNDATION_SCOPE,foundationAssetPolicy,scopedRegistryHas3D,canOpenTechnical3D,isFoundationPrimary} from './data/foundation-scope.js';
@@ -1392,6 +1392,12 @@ document.addEventListener('fullscreenchange',()=>{
 });
 window.addEventListener('offline',()=>{updateConnectionTruth();toast(cachedDataActive?'Koneksi terputus. Aplikasi menggunakan data tersimpan di perangkat.':'Koneksi terputus. Aplikasi tetap tersedia dalam mode lokal.');});window.addEventListener('online',()=>{updateConnectionTruth();if(role)request('/api/state').then(acceptState).then(()=>{cachedDataActive=false;updateConnectionTruth();toast('Data berhasil diperbarui.');}).catch(e=>toast(e.message,true));});
 try{const config=await fetch('./config.json').then(r=>r.json());const savedBase=readConnectionSetting('apiBase','');apiBase=savedBase==='https://digitaltwin.offsetbmj.workers.dev'?config.apiBase:(savedBase||config.apiBase||'');if(savedBase==='https://digitaltwin.offsetbmj.workers.dev')localStorage.setItem(CONNECTION_STORAGE.apiBase,apiBase);if(cacheEnabled&&apiBase){const cached=await cache.get(apiBase);if(cached?.state){state=cached.state;cachedDataActive=true;loadVisibleFactoryLayout(activeLayout());renderStatus();renderPanel();updateConnectionTruth();toast('Menampilkan data tersimpan · '+new Date(cached.savedAt).toLocaleString('id-ID'));}}else updateConnectionTruth();}catch(e){updateConnectionTruth();toast('Data tersimpan tidak dapat dibaca. Mode lokal tetap tersedia.',true);}
+on('#dwg-canvas',event=>{
+ if(getAppState().viewMode!=='2d'||$('#modal')?.open)return;
+ const machineId=pickPlantPlanAsset(event.currentTarget,bundledLayout,event.clientX,event.clientY);
+ const machine=MACHINE_REGISTRY_BY_ID.get(machineId);
+ if(machine)selectFactoryAssetContext(machine,{historyMode:'push',openDialog:true,focus:true});
+});
 window.addEventListener('resize',schedulePlantPlanRedraw,{passive:true});window.addEventListener('bmj:statechange',event=>{if(event.detail?.viewMode==='2d')schedulePlantPlanRedraw();});
 schedulePlantPlanRedraw();
 window.addEventListener('pagehide',()=>{token='';});
