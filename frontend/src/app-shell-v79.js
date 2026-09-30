@@ -1,7 +1,7 @@
 import{getState,setState,setActiveSection,setViewMode,setLayer,setSimulation,setInspector,setPreference,openOverlay,closeOverlay,subscribe}from'./state/app-state.js';
 import{FOUNDATION_SCOPE,canOpenTechnical3D}from'./data/foundation-scope.js';
 import{RENDER_PROFILE_INFO,RENDER_PROFILE_ORDER,recommendedProfile}from'./render/render-config.js';
-import{readableStatus}from'./display-language.js';
+import{readableStatus,readableSimulationStage}from'./display-language.js';
 
 const q=(s,r=document)=>r.querySelector(s);
 // The 2D plan is a sibling of the 3D workspace. Keep this switch outside the
@@ -93,7 +93,7 @@ mobileFeatureHub.innerHTML=`<div class="mobile-hub-heading"><small>KONTROL PONSE
 <button type="button" data-mobile-action="fit">${icon('focus')}<span><b>Fokus</b><small>Fokus pada pilihan</small></span></button>
 <button type="button" data-mobile-action="zoom-in">${icon('zoom-in')}<span><b>Perbesar</b><small>Perbesar tampilan</small></span></button>
 <button type="button" data-mobile-action="zoom-out">${icon('zoom-out')}<span><b>Perkecil</b><small>Perkecil tampilan</small></span></button>
-<button type="button" data-mobile-action="explode">${icon('machine')}<span><b>Urai</b><small>Komponen mesin</small></span></button>
+<button type="button" data-mobile-action="explode">${icon('machine')}<span><b>Urai komponen</b><small>Pisahkan tampilan bagian mesin</small></span></button>
 <button type="button" data-mobile-action="isolate">${icon('focus')}<span><b>Hanya objek ini</b><small>Fokus pada pilihan</small></span></button>
 <button type="button" data-mobile-action="interior">${icon('interior')}<span><b>Buka interior</b><small>Lihat bagian dalam</small></span></button>
 <button type="button" data-mobile-action="labels">${icon('label')}<span><b>Label</b><small>Nama objek</small></span></button>
@@ -562,7 +562,7 @@ function ensureSimulationTransport(){
 }
 function syncSimulationTransport(state=getState()){
  const bar=ensureSimulationTransport(),section=state.activeSection,sim=state.simulationState||{};
- const progress=Math.max(0,Math.min(100,(Number(sim.progress)||0)*100)),stage=sim.stage||'Siap';
+ const progress=Math.max(0,Math.min(100,(Number(sim.progress)||0)*100)),stage=readableSimulationStage(sim.stage||'Siap');
  const transportOpen=section==='simulation'&&state.inspectorState?.tab==='simulation'&&Boolean(state.selectedAsset)&&sim.available!==false&&!sim.blocked;
  bar.hidden=!transportOpen;
  document.body.classList.toggle('simulation-transport-open',transportOpen);
