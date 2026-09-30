@@ -3,6 +3,7 @@ const LEGACY_VERSION='factory-digital-twin-v222-overlay-state-ssot-20260925';
 const VERSION='factory-digital-twin-v270-flagship-ui-20260930';
 const RELEASE='222';
 const BUILD_FINGERPRINT='SOURCE';
+const FLEET_CHUNK_COUNT=10;
 const ENTRYPOINTS=[
  './app-shell-v79.css','./flagship-v270.css','./src/app.js','./src/ui-v5.js','./src/experience-v37.js','./src/app-shell-v79.js'
 ];
@@ -18,7 +19,7 @@ const SHELL=[
  './src/data/machine-registry.js','./src/factory-building.js','./src/utility-routing.js',
  './src/data/compressed-air-routes.js','./src/data/ahu-pipe-routes.js','./src/data/ahu-duct-routes.js',
  './src/data/factory-fleet-data.js','./src/data/ipal-photo-evidence-v206.js',
- ...Array.from({length:9},(_,i)=>`./src/data/factory-fleet-chunk-${i}.js`),
+ ...Array.from({length:FLEET_CHUNK_COUNT},(_,i)=>`./src/data/factory-fleet-chunk-${i}.js`),
  './vendor/three/build/three.module.js','./vendor/three/build/three.core.js',
  './vendor/three/addons/controls/OrbitControls.js','./vendor/three/addons/controls/TransformControls.js',
  './vendor/three/addons/utils/BufferGeometryUtils.js','./vendor/three/addons/geometries/RoundedBoxGeometry.js'

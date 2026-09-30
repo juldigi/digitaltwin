@@ -409,7 +409,10 @@ test('V194 adaptive shell has one overlay owner and a canonical 2D plan surface'
   assert.match(mobileStableUi,/document\.addEventListener\('keydown'/);
 });
 test('V79 interface keeps the scene primary, readable and secondary panels dismissible',()=>{
-  assert.match(html,/<body class="panel-hidden ui-simple light-mode">/);
+  const bodyClasses=html.match(/<body class="([^"]+)"/)?.[1].split(/\s+/)||[];
+  assert.ok(bodyClasses.includes('panel-hidden'));
+  assert.ok(bodyClasses.includes('ui-simple'));
+  assert.ok(bodyClasses.includes('light-mode'));
   assert.match(html,/app-shell-v79\.css/);
   assert.match(html,/app-shell-v79\.js/);
   assert.match(appShellCss,/aside#detail-panel/);

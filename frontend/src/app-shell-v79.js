@@ -642,7 +642,7 @@ document.addEventListener('keydown',event=>{
  if(overlay==='systems'){closeSystemBrowser();return}
  if(overlay==='layers'){closeLayerManager();return}
  if(overlay==='navigation'){closeDrawer();closeOverlay();return}
- if(overlay==='modal'&&q('#modal')?.open){q('#modal-close')?.click();closeOverlay();return}
+ if(overlay==='modal'&&q('#modal')?.open){event.preventDefault();event.stopImmediatePropagation();q('#modal-close')?.click();closeOverlay();return}
  if(getState().inspectorState?.open)closeInspector();
 });
 

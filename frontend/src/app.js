@@ -1141,6 +1141,7 @@ function openSceneEditor(){
  let keyboardMoveActive=false;
  const editorArrowKeys=['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'];
  const onEditorKeyDown=e=>{
+  if(e.defaultPrevented||$('#modal')?.open||e.target?.closest?.('dialog'))return;
   if(String(e.key||'')==='Escape'){if(editorBusy)return;e.preventDefault();keyboardMoveActive=false;panel.querySelector('#se-close')?.click();return;}
   if(editorBusy)return;
   const tag=e.target?.tagName;if(tag==='INPUT'||tag==='SELECT'||tag==='TEXTAREA'||e.target?.isContentEditable)return;
