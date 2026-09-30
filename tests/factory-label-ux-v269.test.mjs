@@ -25,8 +25,13 @@ test('V269 keeps label size stable while zooming and culls overlapping labels',(
  assert.match(engine,/captureFactoryLabels\(\)/);
  assert.match(engine,/updateFactoryLabels\(\)/);
  assert.match(engine,/THREE\.MathUtils\.clamp\(distance\/45,\.12,1\.25\)/);
+ assert.match(engine,/if\(selectedId&&this\.transition\)\{for\(const sprite of sprites\)sprite\.visible=false;return;\}/);
  assert.match(engine,/const overlaps=!selected&&placed\.some/);
  assert.match(engine,/if\(this\.view==='factory'\)this\.updateFactoryLabels\(\)/);
+});
+
+test('V269 component labels also stay out of the way while camera focus is moving',()=>{
+ assert.match(engine,/layer\.hidden=!this\.labels\|\|!this\.machine\.visible\|\|this\.view!=='machine'\|\|Boolean\(this\.transition\)/);
 });
 
 test('V269 label toggle controls every tagged factory label including non-label subgroups',()=>{
