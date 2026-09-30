@@ -66,7 +66,7 @@ export function createMachineTemplate(key){
  if(k==='BMJ-MCH-0024')return new UpgLy300MachineTemplate();
  if(isReferenceMachineKey(k))return new ReferenceMachineTemplate(k);
  if(universalMachineConfig(k))return new UniversalMachineTemplate(k);
- throw new Error(`Model 3D belum terdaftar untuk ${k}`);
+ throw new Error(`Model 3D untuk ${k} belum tersedia.`);
 }
 
 export function createPolishedMachineTemplate(key){
@@ -94,5 +94,5 @@ export function createMachineSimulation(key,machine,template){
  if(k==='BMJ-MCH-0024')return new UpgLy300ProcessSimulation(machine,template);
  if(isReferenceMachineKey(k))return new ReferenceProcessSimulation(machine,template);
  if(universalMachineConfig(k))return new UniversalProcessSimulation(machine,template);
- throw new Error(`Simulasi belum terdaftar untuk ${k}`);
+ throw new Error(`Simulasi untuk ${k} belum tersedia.`);
 }
