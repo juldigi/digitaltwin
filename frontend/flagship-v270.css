@@ -66,7 +66,7 @@ body.light-mode{
   color-scheme:light;
 }
 
-body:not(.light-mode){
+body:not(.light-mode),html[data-theme="dark"] body{
   --f270-bg:#07111c;
   --f270-bg-2:#0a1725;
   --f270-surface:#0d1c2b;
@@ -195,7 +195,9 @@ code,.code{border:1px solid var(--f270-line);background:var(--f270-surface-2)!im
     radial-gradient(circle at 50% 43%,rgba(255,255,255,.78) 0,rgba(233,241,247,.82) 52%,rgba(220,231,239,.90) 100%)!important;
 }
 body:not(.light-mode) .workspace,
-body:not(.light-mode) #viewport{
+body:not(.light-mode) #viewport,
+html[data-theme="dark"] .workspace,
+html[data-theme="dark"] #viewport{
   background:
     radial-gradient(circle at 50% 42%,rgba(37,64,88,.75) 0,rgba(15,32,47,.94) 48%,rgba(7,18,29,.99) 100%)!important;
 }
@@ -581,18 +583,22 @@ dialog#modal::backdrop{
 .dwg-warning{color:var(--f270-text-2)!important}
 
 /* Dark theme hardening for historical hard-coded light surfaces */
-body:not(.light-mode) :is(.topbar,.rail,aside#detail-panel,.panel-top,.panel-footer,dialog#modal,.modal-head,.scene-bottom,.viewport-mode-switch,.viewport-zoom,.scene-heading>div,.canonical-simulation-transport){
+body:not(.light-mode) :is(.topbar,.rail,aside#detail-panel,.panel-top,.panel-footer,dialog#modal,.modal-head,.scene-bottom,.viewport-mode-switch,.viewport-zoom,.scene-heading>div,.canonical-simulation-transport),
+html[data-theme="dark"] body :is(.topbar,.rail,aside#detail-panel,.panel-top,.panel-footer,dialog#modal,.modal-head,.scene-bottom,.viewport-mode-switch,.viewport-zoom,.scene-heading>div,.canonical-simulation-transport){
   color:var(--f270-text)!important;
 }
-body:not(.light-mode) :is(.quiet,.icon-btn,.secondary,.list-button,.card,.empty,.confidence-panel,.evidence-status,.context-back,.modal-back,.context-breadcrumb button,.tabs button,.panel-footer button,.layer-row,.check){
+body:not(.light-mode) :is(.quiet,.icon-btn,.secondary,.list-button,.card,.empty,.confidence-panel,.evidence-status,.context-back,.modal-back,.context-breadcrumb button,.tabs button,.panel-footer button,.layer-row,.check),
+html[data-theme="dark"] body :is(.quiet,.icon-btn,.secondary,.list-button,.card,.empty,.confidence-panel,.evidence-status,.context-back,.modal-back,.context-breadcrumb button,.tabs button,.panel-footer button,.layer-row,.check){
   background-color:var(--f270-surface)!important;
   color:var(--f270-text)!important;
   border-color:var(--f270-line)!important;
 }
-body:not(.light-mode) :is(.panel-content,.data-list dd,.card h4,.asset-heading h2,.modal-head h2,#modal-body h3,#modal-body h4){
+body:not(.light-mode) :is(.panel-content,.data-list dd,.card h4,.asset-heading h2,.modal-head h2,#modal-body h3,#modal-body h4),
+html[data-theme="dark"] body :is(.panel-content,.data-list dd,.card h4,.asset-heading h2,.modal-head h2,#modal-body h3,#modal-body h4){
   color:var(--f270-text)!important;
 }
-body:not(.light-mode) :is(.data-list dt,.subtle,.asset-heading p,.card p,.context-breadcrumb,.scene-context-line,.scene-caption){
+body:not(.light-mode) :is(.data-list dt,.subtle,.asset-heading p,.card p,.context-breadcrumb,.scene-context-line,.scene-caption),
+html[data-theme="dark"] body :is(.data-list dt,.subtle,.asset-heading p,.card p,.context-breadcrumb,.scene-context-line,.scene-caption){
   color:var(--f270-muted)!important;
 }
 
