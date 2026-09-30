@@ -1,3 +1,4 @@
+import {applyMachineDetailVisibility} from './machine-visibility.js';
 import {buildActualFactory} from './factory-building.js';
 import {sceneIdentity} from './scene-editor-state.js';
 import {SimulationModeController} from './simulation-mode.js';
@@ -126,7 +127,7 @@ export class FactoryEngine {
     this.simulationMode=new SimulationModeController();this.simulation=neutralSimulation();this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);
     this.factory=new THREE.Group();this.scene.add(this.factory);this.factorySelectionId=null;this.factorySelectionHelper=null;
     this.gizmo=new TransformControls(this.camera,this.renderer.domElement);this.scene.add(this.gizmo.getHelper());this.gizmo.addEventListener('dragging-changed',e=>{this.controls.enabled=!e.value;});this.gizmo.addEventListener('objectChange',()=>{if(!this.sceneEditing&&this.gizmo.mode==='scale')this.machine.scale.setScalar(Math.max(.0001,this.machine.scale.x));this.onTransform?.();this.onSceneTransform?.();});
-    this.ray=new THREE.Raycaster();this.down=null;this.renderer.domElement.addEventListener('dblclick',()=>{if(this.sceneEditing)return;this.template.reset();this.clearPartLabels();this.isolated=false;if(this.view==='factory'){this.clearFactorySelection();this.fit(this.factory);}else this.fit(this.machine);this.onReset?.();});
+    this.ray=new THREE.Raycaster();this.down=null;this.renderer.domElement.addEventListener('dblclick',()=>{if(this.sceneEditing||this.simulation?.active)return;this.template.reset();this.clearPartLabels();this.isolated=false;if(this.view==='factory'){this.clearFactorySelection();this.fit(this.factory);}else this.fit(this.machine);this.onReset?.();});
     this.renderer.domElement.addEventListener('pointerdown',e=>this.down=[e.clientX,e.clientY]);
     this.renderer.domElement.addEventListener('pointerup',e=>{if(!this.down||Math.hypot(e.clientX-this.down[0],e.clientY-this.down[1])>5||this.gizmo.dragging||this.simulation?.active)return;const r=this.renderer.domElement.getBoundingClientRect();this.ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),this.camera);if(this.sceneEditing){const hit=this.ray.intersectObject(this.view==='machine'?this.machine:this.factory,true).find(h=>this.isObjectVisible(h.object));if(hit){let node=hit.object;while(node&&!this.sceneObjectIds?.has(node))node=node.parent;if(node)this.selectSceneObject(this.sceneObjectIds.get(node));}return;}if(this.view==='factory'&&this.actualFactory){const hit=this.ray.intersectObjects([...this.actualFactory.assets.values()],true).find(h=>{for(let p=h.object;p;p=p.parent)if(!p.visible)return false;return true;});if(hit){let node=hit.object;while(node&&!node.userData.machineId)node=node.parent;if(node)this.onFactorySelect?.(node.userData.machineId);}return;}const hit=this.ray.intersectObject(this.machine,true).find(h=>{for(let p=h.object;p;p=p.parent)if(!p.visible)return false;return true;});if(hit&&this.machine.visible){const part=this.template.resolvePart(hit.object);if(part)this.onSelect(part);}});
     this.resizeObserver=new ResizeObserver(()=>this.resize());this.resizeObserver.observe(container);
@@ -562,7 +563,7 @@ export class FactoryEngine {
     this.low=this.qualityProfile==='hemat';
     configureRenderer(this.renderer,{profile:this.qualityProfile,devicePixelRatio,shadowLight:this.key});
     this.syncVisualSystems();
-    this.template.setLow(this.low);for(const entry of this.factoryMachineTemplates.values())entry.template?.setLow?.(this.low);this.resize();return this.qualityProfile;
+    applyMachineDetailVisibility(this.template,this.low);for(const entry of this.factoryMachineTemplates.values())applyMachineDetailVisibility(entry.template,this.low);this.resize();return this.qualityProfile;
   }
   syncVisualSystems(){
     const machineView=this.view==='machine';

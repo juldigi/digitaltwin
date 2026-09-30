@@ -115,6 +115,6 @@ export class Offset8PrintingSimulation{
   const dt=Math.min(.12,Math.max(0,(now-this.lastNow)/1000))*this.speed;this.lastNow=now;this.elapsed+=dt;
   this.spinRotors(dt);this.updateFeeder();this.updateDeliveryBars();this.updateSheets();this.onUpdate?.(this.state());
  }
- stop(){this.active=false;this.running=false;this.paused=false;this.elapsed=0;this.lastNow=null;for(const s of this.sheets){s.mesh.visible=false;s.lap=-1;}for(const s of this.stack)s.visible=false;this.pathLine.visible=false;if(this.staticDeliveryStack)this.staticDeliveryStack.visible=this.staticDeliveryVisible;this.resetMechanisms();this.onUpdate?.(this.state());return this.state();}
+ stop(){this.active=false;this.running=false;this.paused=false;this.completed=0;this.elapsed=0;this.lastNow=null;for(const s of this.sheets){s.mesh.visible=false;s.lap=-1;}for(const s of this.stack)s.visible=false;this.pathLine.visible=false;if(this.staticDeliveryStack)this.staticDeliveryStack.visible=this.staticDeliveryVisible;this.resetMechanisms();this.onUpdate?.(this.state());return this.state();}
  dispose(){this.stop();for(const s of this.sheets){this.root.remove(s.mesh);s.mesh.geometry.dispose();s.mesh.material.dispose();}for(const s of this.stack){this.root.remove(s);s.geometry.dispose();s.material.dispose();}this.root.remove(this.pathLine);this.pathLine.geometry.dispose();this.pathLine.material.dispose();}
 }
