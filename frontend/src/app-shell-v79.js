@@ -652,7 +652,7 @@ const relabel=()=>{
  const focus=q('#focus-machine');if(focus)focus.textContent='Fokus pada objek di 3D';
  const top=q('.panel-top .eyebrow');if(top)top.textContent='PILIHAN AKTIF';
  const search=q('#global-search');if(search)search.placeholder='Cari mesin, area, komponen, sistem, atau referensi…';
- const connection=q('#connection');if(connection)connection.textContent=navigator.onLine?'Data tersedia':'Tidak tersambung';
+ const connection=q('#connection');if(connection)connection.textContent=navigator.onLine?'Jaringan tersedia':'Tidak tersambung';
 };
 function syncAccessibleControls(state){
  const panelToggle=q('#panel-toggle');if(panelToggle){const open=Boolean(state.inspectorState?.open);panelToggle.setAttribute('aria-expanded',String(open));panelToggle.setAttribute('aria-label',open?'Tutup detail objek terpilih':'Buka detail objek terpilih')}
