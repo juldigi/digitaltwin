@@ -28,7 +28,10 @@ test('V270 design system covers primary surfaces and both real themes',()=>{
  assert.match(css,/body:not\(\.light-mode\)\{/);
  for(const surface of [
   '.topbar','.rail','.scene-heading>div','aside#detail-panel','dialog#modal',
-  '.canonical-simulation-transport','#scene-editor-panel','.mobile-nav'
+  '.canonical-simulation-transport','#scene-editor-panel','.mobile-nav',
+  '.asset-browser-row','.compact-part-row','.context-reference-card','.reference-truth-row',
+  '.canonical-layer-group','.quality-device-recommendation','.settings-section','.help-grid>section',
+  '.simulation-mode-field','.exterior-area-button','.static-machine-fallback'
  ])assert.ok(css.includes(surface),surface);
  const opens=[...css].filter(c=>c==='{').length,closes=[...css].filter(c=>c==='}').length;
  assert.equal(opens,closes,'flagship CSS braces must stay balanced');
