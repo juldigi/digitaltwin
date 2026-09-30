@@ -48,7 +48,7 @@ export const isDedicatedMachineKey=key=>{const normalized=normalizeMachineKey(ke
 
 export function createMachineTemplate(key){
  const k=normalizeMachineKey(key);
- if(!k)throw new Error('Kunci mesin wajib tersedia');
+ if(!k)throw new Error('Identitas mesin belum tersedia.');
  if(k==='offset5')return new Offset5CD102RealismTemplate();
  if(k==='sheeting')return new SheetingMachineTemplate();
  if(k==='offset10')return new Offset10CX104SpecialRealismTemplate();
@@ -76,7 +76,7 @@ export function createPolishedMachineTemplate(key){
 
 export function createMachineSimulation(key,machine,template){
  const k=normalizeMachineKey(key);
- if(!k)throw new Error('Kunci mesin wajib tersedia');
+ if(!k)throw new Error('Identitas mesin belum tersedia.');
  if(k==='offset5')return new Offset5CD102RealismSimulation(machine,template);
  if(k==='sheeting')return new SheetingProcessSimulation(machine,template);
  if(k==='offset10')return new Offset10CX104SpecialRealismSimulation(machine,template);
