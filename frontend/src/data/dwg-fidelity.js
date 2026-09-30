@@ -60,7 +60,7 @@ export function buildDwgFidelityLedger(layout){
     rotation:finite(layout.transform?.rotation),
     originX:finite(layout.transform?.originX),
     originY:finite(layout.transform?.originY),
-    axisMap:'DWG X → sumbu X 3D · DWG Y → sumbu Z 3D · sumbu Y 3D → elevasi',
+    axisMap:'DWG X → THREE X · DWG Y → THREE Z · THREE Y → ELEVATION',
     displayFlipY:layout.displayTransform?.flipY===true
   });
 
