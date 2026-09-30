@@ -37,7 +37,7 @@ test('V175 2D source labels use readable adaptive text rather than the legacy 6p
 test('V175 app redraws the 2D plan when selection state changes',()=>{
  assert.match(app,/function redrawPlantPlan\(selectedAsset=getAppState\(\)\.selectedAsset\|\|null\)/);
  assert.match(app,/drawPlantPlan\(\$\('#dwg-canvas'\),bundledLayout,\{selectedAsset:selectedMachineId\}\)/);
- assert.match(app,/addEventListener\('bmj:statechange',event=>\{if\(document\.body\.classList\.contains\('workspace-2d'\)\)redrawPlantPlan\(event\.detail\?\.selectedAsset\|\|null\);\}\)/);
+ assert.match(app,/addEventListener\('bmj:statechange',event=>\{if\(event\.detail\?\.viewMode==='2d'\)schedulePlantPlanRedraw\(\);\}\)/);
  assert.match(app,/Pilihan aktif · /);
 });
 
