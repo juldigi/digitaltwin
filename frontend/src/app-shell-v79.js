@@ -80,7 +80,7 @@ qa('[data-mobile-nav]').forEach(el=>{const label=q('small',el)?.textContent||el.
 const mobileFeatureHub=document.createElement('section');
 mobileFeatureHub.className='mobile-feature-hub';
 mobileFeatureHub.setAttribute('aria-label','Fitur lengkap pada perangkat seluler');
-mobileFeatureHub.innerHTML=`<div class="mobile-hub-heading"><small>KONTROL SELULER</small><strong>Kontrol lengkap</strong><span>Fitur utama tetap tersedia tanpa menutupi tampilan 3D.</span></div>
+mobileFeatureHub.innerHTML=`<div class="mobile-hub-heading"><small>KONTROL PONSEL</small><strong>Kontrol lengkap</strong><span>Fitur utama tetap tersedia tanpa menutupi tampilan 3D.</span></div>
 <div class="mobile-hub-section"><small>AKSES CEPAT</small><div class="mobile-hub-grid">
 <button type="button" data-mobile-action="search">${icon('search')}<span><b>Cari</b><small>Mesin, area, dan komponen</small></span></button>
 <button type="button" data-mobile-action="display">${icon('layers')}<span><b>Tampilan</b><small>Kualitas dan lapisan</small></span></button>
@@ -150,7 +150,7 @@ function syncMobileFeatureHub(state=getState()){
  const quality=q('[data-mobile-quality-summary]',mobileFeatureHub);
  if(quality)quality.textContent=requested==='auto'?'Otomatis · '+(RENDER_PROFILE_INFO[effective]?.label||'Seimbang'):(RENDER_PROFILE_INFO[requested]?.label||requested);
  const connection=q('[data-mobile-connection-summary]',mobileFeatureHub);
- if(connection)connection.textContent=navigator.onLine?'Data tersedia':'Tidak tersambung';
+ if(connection)connection.textContent=navigator.onLine?'Jaringan tersedia':'Tidak tersambung';
 }
 addEventListener('online',()=>syncMobileFeatureHub());
 addEventListener('offline',()=>syncMobileFeatureHub());
@@ -493,7 +493,7 @@ function qualityDeviceLabel(caps){return caps.mobile?'Ponsel atau perangkat sent
 function qualityRecommendationMarkup(caps=qualityDeviceCapabilities()){
  const recommended=recommendedProfile(caps),info=RENDER_PROFILE_INFO[recommended]||RENDER_PROFILE_INFO.seimbang;
  const memory=caps.memoryReported?caps.memoryReported+' GB':'tidak dilaporkan oleh peramban',cores=caps.coresReported||caps.cores||'tidak diketahui';
- return `<div class="quality-device-recommendation" data-quality-recommendation><div><small>REKOMENDASI PERANGKAT INI</small><strong>${escapeHtml(info.label)}</strong></div><p>Rekomendasi dibuat berdasarkan kemampuan perangkat yang sedang digunakan.</p><dl><div><dt>Perangkat</dt><dd>${escapeHtml(qualityDeviceLabel(caps))}</dd></div><div><dt>Memori</dt><dd>${escapeHtml(memory)}</dd></div><div><dt>Jumlah thread CPU yang terdeteksi</dt><dd>${escapeHtml(String(cores))}</dd></div><div><dt>Batas tekstur GPU</dt><dd>${escapeHtml(caps.maxTextureSize.toLocaleString('id-ID')+' px')}</dd></div></dl></div>`;
+ return `<div class="quality-device-recommendation" data-quality-recommendation><div><small>REKOMENDASI PERANGKAT INI</small><strong>${escapeHtml(info.label)}</strong></div><p>Rekomendasi dibuat berdasarkan kemampuan perangkat yang sedang digunakan.</p><dl><div><dt>Perangkat</dt><dd>${escapeHtml(qualityDeviceLabel(caps))}</dd></div><div><dt>Memori</dt><dd>${escapeHtml(memory)}</dd></div><div><dt>Thread CPU terdeteksi</dt><dd>${escapeHtml(String(cores))}</dd></div><div><dt>Batas tekstur GPU</dt><dd>${escapeHtml(caps.maxTextureSize.toLocaleString('id-ID')+' px')}</dd></div></dl></div>`;
 }
 function qualityProfileDetailMarkup(requested,caps=qualityDeviceCapabilities()){
  const recommended=recommendedProfile(caps),effective=requested==='auto'?recommended:requested;
