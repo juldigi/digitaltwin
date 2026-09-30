@@ -131,7 +131,7 @@ test('V266 resumed audit removes remaining mixed language from machine detail pa
   'Batas dimensi referensi','Batas dimensi struktur','Batas dimensi termasuk area servis',
   'Jarak antarunit (pitch)','Jarak modul berulang (pitch)',
   'KELUARGA SP 102','AKHIRAN MODEL BELUM TERKONFIRMASI',
-  'Functional Location (lokasi fungsional)','ID mesin (Machine ID)',
+  'Lokasi fungsional (Functional Location)','ID mesin (Machine ID)',
   'Troli','Palet','Sistem udara bertekanan'
  ])assert.ok(runtime.includes(copy),copy);
  for(const oldCopy of [
@@ -173,8 +173,8 @@ test('V266 keeps localized simulation markup valid and explanatory',()=>{
  assert.match(app,/Tampilkan garis acuan jalur proses/);
  assert.match(app,/Simulasi kompresor memperlihatkan udara masuk/);
  assert.match(app,/cooling coil \(koil pendingin\)/);
- assert.match(app,/vacuum \(vakum\) menahan material/);
- assert.match(app,/delivery \(keluaran\)/);
+ assert.match(app,/vakum \(vacuum\) menahan material/);
+ assert.match(app,/bagian keluaran \(delivery\)/);
  assert.match(app,/Model acuan tetap dapat diputar, difokuskan, dan dibuka strukturnya/);
 });
 
