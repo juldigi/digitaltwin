@@ -15,7 +15,7 @@ export function buildDwgFidelityLedger(layout){
     semantic3DCounts:Object.freeze({floor:0,walls:0,columns:0,doors:0,openings:0,labels:0}),
     preservation:'UNKNOWN',
     reviewRequired:true,
-    unimplemented:Object.freeze([{entityType:'UNKNOWN',semanticType:'UNKNOWN',threeDStatus:'NOT_IMPLEMENTED',count:null,reason:'DWG layout is not loaded.'}])
+    unimplemented:Object.freeze([{entityType:'UNKNOWN',semanticType:'UNKNOWN',threeDStatus:'NOT_IMPLEMENTED',count:null,reason:'Denah DWG belum dimuat.'}])
   });
 
   const source=layout.source||{},actual=layout.actual||{},audit=layout.audit||{};
@@ -43,14 +43,14 @@ export function buildDwgFidelityLedger(layout){
       semanticType:'UNKNOWN',
       threeDStatus:'NOT_IMPLEMENTED',
       count:null,
-      reason:'Entity type is retained in the extraction audit but is not promoted to physical 3D geometry without semantic evidence.'
+      reason:'Jenis entitas tetap dicatat dalam audit ekstraksi, tetapi tidak diubah menjadi geometri fisik 3D tanpa bukti semantik yang memadai.'
     }))
     :[Object.freeze({
-      entityType:'SOURCE ENTITY CLASSES NOT ENUMERATED BY PACKED EXTRACTOR',
+      entityType:'KELAS ENTITAS SUMBER BELUM DIRINCI OLEH EKSTRAKTOR',
       semanticType:'UNKNOWN',
       threeDStatus:'NOT_IMPLEMENTED',
       count:null,
-      reason:'The packed factory baseline contains normalized geometry, labels and source identity, but does not expose a complete per-type raw-entity ledger. Coverage must not be interpreted as 100%.'
+      reason:'Data dasar pabrik berisi geometri, label, dan identitas sumber yang sudah dinormalisasi, tetapi belum memuat daftar lengkap entitas mentah untuk setiap jenis. Cakupan ini tidak boleh dianggap 100%.'
     })];
 
   const transform=Object.freeze({
@@ -60,7 +60,7 @@ export function buildDwgFidelityLedger(layout){
     rotation:finite(layout.transform?.rotation),
     originX:finite(layout.transform?.originX),
     originY:finite(layout.transform?.originY),
-    axisMap:'DWG X → THREE X · DWG Y → THREE Z · THREE Y → ELEVATION',
+    axisMap:'DWG X → sumbu X 3D · DWG Y → sumbu Z 3D · sumbu Y 3D → elevasi',
     displayFlipY:layout.displayTransform?.flipY===true
   });
 
@@ -85,7 +85,7 @@ export function buildDwgFidelityLedger(layout){
     sourcePreserved:true,
     rawEntityParityClaim:false,
     unimplemented:Object.freeze(unimplemented),
-    note:'DWG remains the spatial source of truth. Normalized extraction is auditable, but raw CAD entity parity is not claimed unless explicitly proven.'
+    note:'DWG tetap menjadi sumber utama posisi dan geometri. Hasil ekstraksi yang dinormalisasi dapat diaudit, tetapi kesetaraan satu per satu dengan seluruh entitas CAD mentah tidak diklaim tanpa bukti.'
   });
 }
 
