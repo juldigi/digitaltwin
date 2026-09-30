@@ -28,7 +28,7 @@ test('scene import preserves overrides for an inactive known machine without acc
 
 test('scene overrides preserve reversible delete and lock, with strict bounded transforms',()=>{
  assert.deepEqual(validateSceneOverrides({'node:0.1':original}),{'node:0.1':original});
- assert.throws(()=>validateSceneOverrides({'node:0.1':{...original,position:[Infinity,0,0]}}),/Transform/);
+ assert.throws(()=>validateSceneOverrides({'node:0.1':{...original,position:[Infinity,0,0]}}),/Posisi, rotasi, atau skala objek tidak valid/);
  assert.throws(()=>validateSceneOverrides({'node:0.1':{...original,scale:[0,1,1]}}),/Skala/);
  assert.throws(()=>validateSceneOverrides({'node:0.1':{...original,unexpected:true}}),/tidak dikenal/);
  assert.throws(()=>validateSceneOverrides({'node:0.1':{...original,identity:'x'.repeat(301)}}),/Identitas/);
