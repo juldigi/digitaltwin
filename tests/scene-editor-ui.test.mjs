@@ -105,12 +105,12 @@ test('V264 editor avoids false transactions and destructive ambiguity',()=>{
  assert.ok(app.includes('Math.abs((v[key]?.[axis]??0)-stored)<1e-9'));
  assert.ok(app.includes("if(!engine.dropSceneObjectToFloor(selected)){rollbackSnapshot(transaction)"));
  assert.ok(app.includes("if(!engine.alignSceneObject(selected,targetId,button.dataset.seAlign)){rollbackSnapshot(transaction)"));
- assert.ok(app.includes('Hapus objek ini dari tampilan 3D?'));
- assert.ok(app.includes('Pulihkan objek ini ke posisi bawaan model?'));
+ assert.ok(app.includes("confirmAction('Hapus objek?'"));
+ assert.ok(app.includes("confirmAction('Pulihkan posisi bawaan?'"));
  assert.ok(app.includes('engine.rotateSceneObjectWorldY(selected,Number(button.dataset.seTurn)*editorRotateStep)'));
  assert.ok(app.includes('engine.moveSceneObjectWorld(selected,0,Number(direction)*editorMoveStep,0)'));
  assert.ok(app.includes("selectedGenerated&&savedOverrides[selected]?`<button id=\"se-remove-generated\""));
- assert.ok(app.includes('Pulihkan revisi ini? Perubahan editor yang belum disimpan akan diganti'));
+ assert.ok(app.includes("confirmAction('Pulihkan revisi?'"));
  assert.ok(app.includes('removedSavedOverride=Object.keys(savedOverrides).some'));
  assert.ok(app.includes("stableJson(imported)===stableJson(overrides)"));
  assert.ok(app.includes('activeMachineKey:engine.machineKey||null'));
