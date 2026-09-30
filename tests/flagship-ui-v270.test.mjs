@@ -67,6 +67,7 @@ test('V270 modal, confirmation and toast interaction states are accessible and p
  assert.match(app,/await confirmAction\('Hapus objek\?'/);
  assert.match(app,/await confirmAction\('Tutup editor tanpa menyimpan\?'/);
  assert.doesNotMatch(app,/\bconfirm\(/);
+ assert.match(app,/danger\?'#flagship-confirm-cancel':'#flagship-confirm-ok'/);
  assert.match(css,/\.flagship-confirm-actions/);
  assert.match(css,/\.danger-action/);
 });
