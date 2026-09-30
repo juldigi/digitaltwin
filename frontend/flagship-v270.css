@@ -628,6 +628,24 @@ button:not(:disabled):active{transform:translateY(0) scale(.985)}
   aside#detail-panel{box-shadow:-16px 0 42px rgba(4,18,33,.24)!important}
 }
 
+/* Performance-aware UI: mode Hemat reduces expensive compositing around the live 3D canvas. */
+body.ui-performance-lite :is(
+ .topbar,.rail,.scene-heading>div,.viewport-mode-switch,.viewport-zoom,.scene-bottom,
+ aside#detail-panel,.panel-top,.panel-footer,.canonical-simulation-transport,.mobile-nav,
+ .ui-backdrop,dialog#modal::backdrop
+){
+ backdrop-filter:none!important;
+ -webkit-backdrop-filter:none!important;
+}
+body.ui-performance-lite :is(
+ .topbar,.rail,.scene-heading>div,.viewport-mode-switch,.viewport-zoom,.scene-bottom,
+ aside#detail-panel,.canonical-simulation-transport,.mobile-nav
+){
+ box-shadow:var(--f270-shadow-1)!important;
+}
+body.ui-performance-lite .workspace,
+body.ui-performance-lite #viewport{background:var(--f270-bg-2)!important}
+
 /* Accessibility preferences */
 @media(prefers-reduced-motion:reduce){
   .ui-state-spinner{animation-duration:1.4s!important}
