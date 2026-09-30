@@ -16,7 +16,7 @@ export function readableStatus(value){
   'IDENTITY VERIFIED / ACTUAL PHOTO GEOMETRY / CUTTER INTERNAL UNRESOLVED':'Identitas dan bentuk luar mengacu pada foto aktual; bagian dalam pemotong belum terverifikasi',
   'PROCEDURAL / PHOTO + DOCUMENT GROUNDED':'Model 3D dibuat dari foto aktual dan dokumen yang tersedia',
   'PROCEDURAL / DOCUMENT-GROUNDED':'Model 3D dibuat berdasarkan dokumen teknis yang tersedia',
-  'PROCEDURAL / DATABASE + LEGACY FAMILY REFERENCES':'Model 3D dibuat dari database BMJ dan referensi lama keluarga mesin',
+  'PROCEDURAL / DATABASE + LEGACY FAMILY REFERENCES':'Model 3D dibuat dari data BMJ dan referensi lama keluarga mesin',
   'DEDICATED PROCEDURAL / BMJ PHOTO-GROUNDED RECONSTRUCTION':'Model 3D khusus dibuat dari rekonstruksi foto aktual BMJ',
   'BMJ_ACTUAL_EVIDENCE_AVAILABLE':'Bukti aktual BMJ tersedia',
   'OFFICIAL_DOCUMENTS_AVAILABLE':'Dokumen resmi tersedia',
@@ -36,7 +36,7 @@ export function readableStatus(value){
   'DATA TERSAMBUNG':'Data tersambung',
   'TEMPLATE_ONLY':'Hanya acuan template','LAYOUT_ESTIMATED':'Perkiraan dari denah','DRAWING_BASED':'Berdasarkan gambar','FIELD_VERIFIED':'Terverifikasi di lapangan','AS_BUILT_CONFIRMED':'Kondisi terpasang terkonfirmasi',
   'UNPLACED':'Belum ditempatkan','UNPLACED_UNTIL_DRAWING_AVAILABLE':'Belum ditempatkan; menunggu gambar aktual','AS_BUILT_OR_DRAWING_APPLIED':'Menggunakan data terpasang atau gambar aktual','MIXED_TEMPLATE_AND_APPLIED':'Gabungan acuan dan data yang sudah diterapkan',
-  'INFERRED_POSITION':'Posisi hasil inferensi','REFERENCE_ONLY':'Hanya berdasarkan referensi','PHOTO_VERIFIED':'Terverifikasi dari foto','REFERENCE_PLUS_PHOTO':'Diverifikasi dengan referensi dan foto','SOURCE_REFERENCE':'Acuan sumber','DOCUMENTATION_REQUIRED':'Dokumentasi diperlukan'
+  'INFERRED_POSITION':'Posisi diperkirakan dari data yang tersedia','REFERENCE_ONLY':'Hanya berdasarkan referensi','PHOTO_VERIFIED':'Terverifikasi dari foto','REFERENCE_PLUS_PHOTO':'Diverifikasi dengan referensi dan foto','SOURCE_REFERENCE':'Acuan sumber','DOCUMENTATION_REQUIRED':'Dokumentasi diperlukan'
  };
  if(known[raw])return known[raw];
  return raw.replace(/\b(?:HIGH CONFIDENCE|MEDIUM CONFIDENCE|DWG-VERIFIED|USER-CONFIRMED|NOT_IMPLEMENTED|LAYOUT PLACEHOLDER|CACHED DATA|MODE LOKAL|VERIFIED|ESTIMATED|UNKNOWN|UNVERIFIED|APPROXIMATE|CONFLICTING|PROCEDURAL|RECONSTRUCTED|PARTIAL|OFFLINE)\b/g,word=>STATUS_LABELS[word]||word);
