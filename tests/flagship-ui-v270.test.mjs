@@ -56,12 +56,19 @@ test('V270 theme preference starts from the visible light shell and preserves st
  assert.match(experience,/setAttribute\('aria-label',light\?'Gunakan tema gelap':'Gunakan tema terang'\)/);
 });
 
-test('V270 modal and toast interaction states are accessible and polished',()=>{
+test('V270 modal, confirmation and toast interaction states are accessible and polished',()=>{
  assert.match(app,/el\.setAttribute\('role',error\?'alert':'status'\)/);
  assert.match(app,/el\.setAttribute\('aria-live',error\?'assertive':'polite'\)/);
  assert.match(app,/modalBody\.scrollTop=0/);
  assert.match(app,/modalBody\.querySelector\('input:not\(\[disabled\]\),select:not\(\[disabled\]\),textarea:not\(\[disabled\]\),button:not\(\[disabled\]\)'\)/);
  assert.match(app,/target\?\.focus\(\{preventScroll:true\}\)/);
+ assert.match(app,/function confirmAction\(/);
+ assert.match(app,/flagship-confirm/);
+ assert.match(app,/await confirmAction\('Hapus objek\?'/);
+ assert.match(app,/await confirmAction\('Tutup editor tanpa menyimpan\?'/);
+ assert.doesNotMatch(app,/\bconfirm\(/);
+ assert.match(css,/\.flagship-confirm-actions/);
+ assert.match(css,/\.danger-action/);
 });
 
 test('V270 flagship UI is part of the offline shell and public release query remains stable',()=>{
