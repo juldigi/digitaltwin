@@ -42,6 +42,7 @@ test('V270 makes touch, focus, motion and contrast preferences first-class',()=>
  assert.match(css,/@media\(prefers-contrast:more\)/);
  assert.match(css,/@media\(forced-colors:active\)/);
  assert.match(css,/@supports not \(backdrop-filter:blur\(1px\)\)/);
+ assert.match(css,/body\.ui-performance-lite/);
 });
 
 test('V270 theme preference starts from the visible light shell and preserves stored user choice',()=>{
@@ -49,6 +50,7 @@ test('V270 theme preference starts from the visible light shell and preserves st
  assert.match(state,/preferences:\{theme:'light',lowDetail:false,visualQuality:'auto'\}/);
  assert.match(state,/value===null\?fallback:\(value==='light'\?'light':'dark'\)/);
  assert.match(state,/theme:readStoredPreference\('theme','light'\)/);
+ assert.match(experience,/document\.body\.classList\.toggle\('ui-performance-lite',Boolean\(state\.preferences\?\.lowDetail\|\|state\.preferences\?\.visualQuality==='hemat'\)\)/);
  assert.match(experience,/document\.documentElement\.style\.colorScheme=light\?'light':'dark'/);
  assert.match(experience,/themeMeta\.content=light\?'#f3f7fb':'#07111c'/);
  assert.match(experience,/setAttribute\('aria-label',light\?'Gunakan tema gelap':'Gunakan tema terang'\)/);
