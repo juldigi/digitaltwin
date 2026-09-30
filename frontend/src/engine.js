@@ -102,7 +102,7 @@ export function buildLowDetailFactory(layout,fleet){
 export class FactoryEngine {
   constructor(container,onSelect){
     const mobileRender=matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse)').matches;
-    this.container=container;this.onSelect=onSelect;this.onTaxonomySelect=null;this.view='factory';this.layout=null;this.low=mobileRender;this.mobileRender=mobileRender;this.renderFaulted=false;this.labels=true;this.isolated=false;this.partLabelEntries=[];this.factoryLabelSprites=[];this.factoryMachineTemplates=new Map();this.factoryDetailHydration=0;this.factoryDetailPromise=null;
+    this.container=container;this.onSelect=onSelect;this.onTaxonomySelect=null;this.view='factory';this.layout=null;this.low=mobileRender;this.mobileRender=mobileRender;this.renderFaulted=false;this.labels=true;this.isolated=false;this.partLabelEntries=[];this.factoryLabelSprites=[];this.factoryLabelProbe=new THREE.Vector3();this.factoryMachineTemplates=new Map();this.factoryDetailHydration=0;this.factoryDetailPromise=null;
     {const params=new URLSearchParams(location.search),requested=normalizeFoundationMachineKey(params.get('machine')||params.get('asset'));this.requestedMachineKey=requested;this.machineKey=null;}
     this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance',stencil:false,preserveDrawingBuffer:false});
     {const reportedMemory=Number(navigator.deviceMemory),reportedCores=Number(navigator.hardwareConcurrency);this.capabilities={mobile:mobileRender,memory:Number.isFinite(reportedMemory)&&reportedMemory>0?reportedMemory:4,memoryReported:Number.isFinite(reportedMemory)&&reportedMemory>0?reportedMemory:null,cores:Number.isFinite(reportedCores)&&reportedCores>0?reportedCores:4,coresReported:Number.isFinite(reportedCores)&&reportedCores>0?reportedCores:null,maxTextureSize:this.renderer.capabilities.maxTextureSize};}
@@ -184,19 +184,19 @@ export class FactoryEngine {
       if(!enabled||!parentVisible){sprite.visible=false;continue;}
       const selected=Boolean(selectedId&&data.machineId===selectedId);
       if(selectedId&&!selected){sprite.visible=false;continue;}
-      const world=sprite.getWorldPosition(new THREE.Vector3()),distance=Math.max(.1,world.distanceTo(this.camera.position)),projected=world.clone().project(this.camera);
+      const projected=sprite.getWorldPosition(this.factoryLabelProbe),distance=Math.max(.1,projected.distanceTo(this.camera.position));projected.project(this.camera);
       if(projected.z< -1||projected.z>1||Math.abs(projected.x)>1.06||Math.abs(projected.y)>1.06){sprite.visible=false;continue;}
       const priority=selected?3:data.labelRole==='MACHINE'?2:1;
-      entries.push({sprite,data,distance,projected,selected,priority});
+      entries.push({sprite,data,distance,projectedX:projected.x,projectedY:projected.y,selected,priority});
     }
     entries.sort((a,b)=>b.priority-a.priority||a.distance-b.distance);
     const placed=[];
     for(const entry of entries){
-      const {sprite,data,distance,projected,selected}=entry,baseWidth=Number(data.baseLabelWidth)||Math.max(.5,sprite.scale.x),baseHeight=Number(data.baseLabelHeight)||Math.max(.1,sprite.scale.y);
+      const {sprite,data,distance,projectedX,projectedY,selected}=entry,baseWidth=Number(data.baseLabelWidth)||Math.max(.5,sprite.scale.x),baseHeight=Number(data.baseLabelHeight)||Math.max(.1,sprite.scale.y);
       const adaptive=THREE.MathUtils.clamp(distance/45,.12,1.25)*(selected?0.72:1);
       sprite.scale.set(baseWidth*adaptive,baseHeight*adaptive,1);
       if(sprite.material){sprite.material.transparent=true;sprite.material.opacity=selected?0.94:(data.labelRole==='MACHINE'?0.9:0.8);}
-      const screenX=(projected.x*.5+.5)*w,screenY=(-projected.y*.5+.5)*h,text=String(data.labelText||''),boxW=Math.min(190,Math.max(66,62+text.length*2.6)),boxH=26;
+      const screenX=(projectedX*.5+.5)*w,screenY=(-projectedY*.5+.5)*h,text=String(data.labelText||''),boxW=Math.min(190,Math.max(66,62+text.length*2.6)),boxH=26;
       const overlaps=!selected&&placed.some(p=>Math.abs(screenX-p.x)<(boxW+p.w)/2+8&&Math.abs(screenY-p.y)<(boxH+p.h)/2+5);
       sprite.visible=!overlaps;
       if(sprite.visible)placed.push({x:screenX,y:screenY,w:boxW,h:boxH});
