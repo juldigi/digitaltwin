@@ -137,7 +137,7 @@ function applyMachineShell(){
  }
 }
 if(MACHINE_KEY)applyMachineShell();
-const toast=(message,error=false)=>{clearTimeout(toastTimer);$('#toast').textContent=message;$('#toast').classList.toggle('error',error);$('#toast').hidden=false;toastTimer=setTimeout(()=>$('#toast').hidden=true,error?9000:5000);};
+const toast=(message,error=false)=>{clearTimeout(toastTimer);const el=$('#toast');if(!el)return;el.textContent=message;el.classList.toggle('error',error);el.setAttribute('role',error?'alert':'status');el.setAttribute('aria-live',error?'assertive':'polite');el.hidden=false;toastTimer=setTimeout(()=>{el.hidden=true;el.setAttribute('aria-live','polite');},error?9000:5000);};
 function handleEngineError(message='Penampil 3D mengalami gangguan.'){
  console.error('[Digital Twin engine]',message);toast(message,true);
  document.body.classList.add('workspace-2d','webgl-unavailable');
@@ -190,9 +190,10 @@ let modalBackHandler=null;
 function modal(title,html,{back=null}={}){
  modalBackHandler=typeof back==='function'?back:null;
  const backButton=$('#modal-back');if(backButton)backButton.hidden=!modalBackHandler;
- $('#modal-title').textContent=title;$('#modal-body').innerHTML=html;
+ $('#modal-title').textContent=title;const modalBody=$('#modal-body');modalBody.innerHTML=html;modalBody.scrollTop=0;
  dispatchEvent(new CustomEvent('bmj:modalopenrequest'));
- if(!$('#modal').open)$('#modal').showModal();
+ const dialog=$('#modal');if(!dialog.open)dialog.showModal();
+ requestAnimationFrame(()=>{const target=modalBody.querySelector('input:not([disabled]),select:not([disabled]),textarea:not([disabled]),button:not([disabled])')||$('#modal-close');target?.focus({preventScroll:true});});
 }
 function goModalBack(){const back=modalBackHandler;if(back){modalBackHandler=null;back();return;}closeModal();}
 function closeModal(){modalBackHandler=null;const backButton=$('#modal-back');if(backButton)backButton.hidden=true;const dialog=$('#modal');if(dialog?.open)dialog.close();dispatchEvent(new CustomEvent('bmj:modalcloserequest'));}
