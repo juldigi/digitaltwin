@@ -46,3 +46,16 @@ test('history restoration keeps the 2D fallback when 3D is unavailable',async()=
   assert.equal(final.viewMode,'2d');assert.equal(context.viewMode,'2d');
  }
 });
+
+test('plan redraw waits for layout and combines updates using the latest selection',()=>{
+ const body=app.split('function schedulePlantPlanRedraw(){')[1].split('\nfunction pair(')[0];
+ const frames=[];let state={viewMode:'2d',selectedAsset:null},draws=0;
+ const context=vm.createContext({plantPlanRedrawFrame:0,requestAnimationFrame:callback=>{frames.push(callback);return frames.length;},
+  getAppState:()=>state,redrawPlantPlan:()=>{draws++;assert.equal(state.selectedAsset,'offset5');}});
+ vm.runInContext(`function schedulePlantPlanRedraw(){${body}`,context);
+ vm.runInContext('schedulePlantPlanRedraw();schedulePlantPlanRedraw();',context);
+ assert.equal(draws,0);assert.equal(frames.length,1);
+ state={viewMode:'2d',selectedAsset:'offset5'};frames[0]();assert.equal(draws,1);
+ vm.runInContext('schedulePlantPlanRedraw();',context);state={viewMode:'3d'};frames[1]();assert.equal(draws,1);
+ assert.match(app,/\nschedulePlantPlanRedraw\(\);/,'redraw must also be scheduled after boot listeners attach');
+});

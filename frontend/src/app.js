@@ -225,6 +225,14 @@ function redrawPlantPlan(selectedAsset=getAppState().selectedAsset||null){
  const context=$('#dwg-context'),machine=selectedMachineId?MACHINE_REGISTRY_BY_ID.get(selectedMachineId):null;
  if(context)context.textContent=machine?'Pilihan aktif · '+machine.name:'Sumber denah aktual';
 }
+let plantPlanRedrawFrame=0;
+function schedulePlantPlanRedraw(){
+ if(plantPlanRedrawFrame)return;
+ plantPlanRedrawFrame=requestAnimationFrame(()=>{
+  plantPlanRedrawFrame=0;
+  if(getAppState().viewMode==='2d')redrawPlantPlan();
+ });
+}
 function pair(label,value){return `<dt>${esc(label)}</dt><dd${value==null?' class="unknown"':''}>${esc(readableStatus(value))}</dd>`;}
 const exteriorAreas=()=>IS_APM2?[
  {key:'feeder',name:'Feeder dan pemisahan lembar',ids:['apm2-feeder']},
@@ -1384,5 +1392,6 @@ document.addEventListener('fullscreenchange',()=>{
 });
 window.addEventListener('offline',()=>{updateConnectionTruth();toast(cachedDataActive?'Koneksi terputus. Aplikasi menggunakan data tersimpan di perangkat.':'Koneksi terputus. Aplikasi tetap tersedia dalam mode lokal.');});window.addEventListener('online',()=>{updateConnectionTruth();if(role)request('/api/state').then(acceptState).then(()=>{cachedDataActive=false;updateConnectionTruth();toast('Data berhasil diperbarui.');}).catch(e=>toast(e.message,true));});
 try{const config=await fetch('./config.json').then(r=>r.json());const savedBase=readConnectionSetting('apiBase','');apiBase=savedBase==='https://digitaltwin.offsetbmj.workers.dev'?config.apiBase:(savedBase||config.apiBase||'');if(savedBase==='https://digitaltwin.offsetbmj.workers.dev')localStorage.setItem(CONNECTION_STORAGE.apiBase,apiBase);if(cacheEnabled&&apiBase){const cached=await cache.get(apiBase);if(cached?.state){state=cached.state;cachedDataActive=true;loadVisibleFactoryLayout(activeLayout());renderStatus();renderPanel();updateConnectionTruth();toast('Menampilkan data tersimpan · '+new Date(cached.savedAt).toLocaleString('id-ID'));}}else updateConnectionTruth();}catch(e){updateConnectionTruth();toast('Data tersimpan tidak dapat dibaca. Mode lokal tetap tersedia.',true);}
-window.addEventListener('resize',()=>redrawPlantPlan(),{passive:true});window.addEventListener('bmj:statechange',event=>{if(document.body.classList.contains('workspace-2d'))redrawPlantPlan(event.detail?.selectedAsset||null);});
+window.addEventListener('resize',schedulePlantPlanRedraw,{passive:true});window.addEventListener('bmj:statechange',event=>{if(event.detail?.viewMode==='2d')schedulePlantPlanRedraw();});
+schedulePlantPlanRedraw();
 window.addEventListener('pagehide',()=>{token='';});
