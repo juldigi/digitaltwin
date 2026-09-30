@@ -38,3 +38,8 @@ test('double click does not reset a running or paused simulation',()=>{
  const engine=readFileSync('frontend/src/engine.js','utf8');const body=engine.split("addEventListener('dblclick',()=>{")[1].split('});')[0];
  for(const running of [true,false]){let resets=0;const target={sceneEditing:false,simulation:{active:true,running},template:{reset(){resets++}}};vm.runInNewContext(`(function(){${body}}).call(target)`,{target});assert.equal(resets,0);}
 });
+
+test('OFFSET 8 reset preserves the inspection cutaway just like the other machines',()=>{
+ const t=createPolishedMachineTemplate('BMJ-MCH-0005');
+ try{t.setExteriorOpen(true);t.explode(true);t.reset();assert.equal(t.exteriorOpen,true);assert.ok(t.meshes.filter(m=>m.userData.exteriorCover).every(m=>!m.visible));t.setExteriorOpen(false);t.reset();assert.equal(t.exteriorOpen,false);}finally{t.dispose();}
+});
