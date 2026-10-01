@@ -52,7 +52,7 @@ test('V270 makes touch, focus, motion and contrast preferences first-class',()=>
 });
 
 test('V270 theme preference starts from the visible light shell and preserves stored user choice',()=>{
- assert.match(state,/APP_BUILD='2026\.09\.30-270'/);
+ assert.match(state,/APP_BUILD='2026\.10\.01-273'/);
  assert.match(state,/preferences:\{theme:'light',lowDetail:false,visualQuality:'auto'\}/);
  assert.match(state,/value===null\?fallback:\(value==='light'\?'light':'dark'\)/);
  assert.match(state,/theme:readStoredPreference\('theme','light'\)/);
