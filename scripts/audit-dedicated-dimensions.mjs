@@ -19,7 +19,7 @@ const contracts=Object.freeze([
  {id:'BMJ-MCH-0019',label:'DIANA EYE 55',reference:DIANA_EYE55_SPEC.officialCurrentEnvelopeM.standardFeederFishScaleDelivery,tolerance:[.60,1.55],evidence:'CURRENT_FAMILY_CONFIGURATION'},
  {id:'BMJ-MCH-0020',label:'FS-SHARK N650',reference:[SHARK_N650_SPEC.modeledEnvelopeReferenceM.length,SHARK_N650_SPEC.modeledEnvelopeReferenceM.width,SHARK_N650_SPEC.modeledEnvelopeReferenceM.height],tolerance:[.60,1.55],evidence:'OEM_FISH_SCALE_OFFLINE_REFERENCE'},
  {id:'BMJ-MCH-0024',label:'UPG-LY300',reference:UPG_LY300_SPEC.envelopeM,tolerance:[.70,1.45],evidence:'EXACT_MODEL_OEM_REFERENCE'},
- {id:'BMJ-MCH-0009',label:'OFFSET 10 CX104',reference:[OFFSET10_DIMENSIONS.verified.baseReferenceLength,OFFSET10_DIMENSIONS.layout.structuralWidth,OFFSET10_DIMENSIONS.layout.foilStarTopY],tolerance:[.78,1.32],evidence:'BMJ_FINAL_DRAWING'}
+ {id:'BMJ-MCH-0009',label:'OFFSET 10 CX104',reference:[OFFSET10_DIMENSIONS.verified.baseReferenceLength,OFFSET10_DIMENSIONS.verified.serviceEnvelopeWidth,OFFSET10_DIMENSIONS.layout.foilStarTopY],tolerance:[.70,1.32],evidence:'BMJ_FINAL_DRAWING_SERVICE_ENVELOPE'}
 ]);
 
 export function auditDedicatedDimensionEnvelopes(){
