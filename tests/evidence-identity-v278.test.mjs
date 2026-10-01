@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {MACHINE_REGISTRY_BY_ID} from '../frontend/src/data/machine-registry.js';
 import {universalMachineConfig} from '../frontend/src/universal-machine.js';
+import {machineTruthProfile} from '../frontend/src/data/machine-truth-profile.js';
 import {normalizePhotoRegistry} from '../frontend/src/data/photo-evidence.js';
 import {SHEETING_PHOTO_REGISTRY} from '../frontend/src/data/sources-sheeting.js';
 
@@ -15,16 +16,20 @@ test('V278 separates simulation availability from dedicated-model truth',()=>{
  assert.equal(dedicated.evidence.simulation,'VERIFIED_PROCESS_MODEL');
  assert.equal(family.evidence.simulation,'FAMILY_PROCESS_MODEL');
  assert.equal(blocked.evidence.simulation,'BLOCKED');
- assert.match(app,/IS_DEDICATED_REGISTRY_MODEL=IS_GENERIC&&GENERIC_CONFIG\.evidence\.simulation==='VERIFIED_PROCESS_MODEL'/);
- assert.match(app,/IS_VERIFIED_REGISTRY_SIM=IS_GENERIC&&\['VERIFIED_PROCESS_MODEL','FAMILY_PROCESS_MODEL'\]\.includes\(GENERIC_CONFIG\.evidence\.simulation\)/);
- assert.match(app,/'3d_status':IS_DEDICATED_REGISTRY_MODEL\?'DEDICATED PROCEDURAL \/ '/);
- assert.match(app,/IS_VERIFIED_REGISTRY_SIM\?'REFERENCE PROCEDURAL \/ '/);
+ const dedicatedTruth=machineTruthProfile('BMJ-MCH-0001'),familyTruth=machineTruthProfile('BMJ-MCH-0017');
+ assert.equal(dedicatedTruth.dedicated,true);
+ assert.equal(familyTruth.dedicated,false);
+ assert.equal(familyTruth.simulationAvailable,true);
+ assert.match(app,/IS_VERIFIED_REGISTRY_SIM=IS_GENERIC&&modelTruth\.simulationAvailable/);
+ assert.match(app,/IS_DEDICATED_REGISTRY_MODEL=IS_GENERIC&&modelTruth\.dedicated/);
+ assert.match(app,/state\.asset=\{\.\.\.state\.asset,'3d_status':modelTruth\.source3D,data_confidence:modelTruth\.dataConfidence,discovery_status:modelTruth\.discoveryStatus\}/);
  assert.match(app,/IS_DEDICATED_REGISTRY_MODEL\?'Model khusus berbasis sumber':IS_VERIFIED_REGISTRY_SIM\?'Model acuan proses keluarga'/);
 });
 
 test('V278 keeps family-reference simulations available without presenting them as serial-specific models',()=>{
  assert.match(app,/else if\(IS_GENERIC&&IS_VERIFIED_REGISTRY_SIM\)/);
- assert.match(app,/discovery_status:IS_DEDICATED_REGISTRY_MODEL\?'DEDICATED_EVIDENCE_AVAILABLE':IS_VERIFIED_REGISTRY_SIM\?'FAMILY_REFERENCE_AVAILABLE'/);
+ assert.equal(machineTruthProfile('BMJ-MCH-0017').discoveryStatus,'FAMILY_REFERENCE_AVAILABLE');
+ assert.equal(machineTruthProfile('BMJ-MCH-0004').discoveryStatus,'EVIDENCE_BOUNDED_REFERENCE');
 });
 
 test('V278 fills manufacturer only from identifiable registry/model evidence and separates registry identity from actual photos',()=>{
