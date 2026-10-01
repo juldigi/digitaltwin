@@ -21,6 +21,7 @@ import {SHEETING_TAXONOMY,SHEETING_TAXONOMY_BY_ID,sheetingTaxonomyChildren,sheet
 import {SHEETING_PHOTO_REGISTRY,SHEETING_TECHNICAL_SOURCES,sheetingPhotoStats,SHEETING_ORIENTATION} from './data/sources-sheeting.js';
 import {POLAR115_PHOTO_REGISTRY,polar115PhotoStats} from './data/sources-polar115.js';
 import {normalizePhotoRegistry} from './data/photo-evidence.js';
+import {searchCorpusForMachine} from './data/search-corpus.js';
 import {SHEETING_SIMULATION_STAGES,SHEETING_PROCESS_STEPS} from './simulation-sheeting.js';
 import {universalMachineConfig,universalTaxonomy,universalTechnicalSources} from './universal-machine.js';
 import {assetTruth,connectionTruth,layoutTruth,positionVerification,truthStatus} from './data/truth-status.js';
@@ -915,15 +916,6 @@ async function restoreHistoryContext(){
 }
 addEventListener('popstate',()=>{dispatchEvent(new CustomEvent('bmj:historynavigationrequest'));restoreHistoryContext().catch(error=>toast('Riwayat tampilan gagal dipulihkan: '+error.message,true));});
 function machineRoute(machine){return MACHINE_ROUTE_BY_ID[machine?.machineId]||machine?.machineId||null;}
-function searchableTaxonomy(route){
- return isFoundationPrimary(route)?OFFSET5_TAXONOMY:normalizeMachineKey(route)===MACHINE_KEY?ACTIVE_TAXONOMY:[];
-}
-function searchableSources(route){
- return isFoundationPrimary(route)?OFFSET5_SOURCES:normalizeMachineKey(route)===MACHINE_KEY?TECHNICAL_SOURCES:[];
-}
-function searchablePhotos(route){
- return isFoundationPrimary(route)?OFFSET5_PHOTOS:normalizeMachineKey(route)===MACHINE_KEY?PHOTO_REGISTRY:[];
-}
 const normalizeSearchText=value=>String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 let UNIVERSAL_SEARCH_INDEX=null;
 function buildUniversalSearchIndex(){
@@ -937,20 +929,20 @@ function buildUniversalSearchIndex(){
   const keywords=primary?[machine.name,machine.machineId,machine.sapCode,machine.functionalLocation,machine.model,machine.serial,machine.area,...aliases]:[machine.name,machine.machineId,machine.area];
   items.push({type:'machine',group:'MESIN',title:machine.name,subtitle,route,machineId:machine.machineId,has3D:scopedRegistryHas3D(machine),aliases,keywords:keywords.filter(Boolean).join(' ')});
   if(!scopedRegistryHas3D(machine))continue;
-  const taxonomy=searchableTaxonomy(route),byId=new Map(taxonomy.map(node=>[node.id,node]));
+  const corpus=searchCorpusForMachine(machine,route),taxonomy=corpus.taxonomy,byId=new Map(taxonomy.map(node=>[node.id,node]));
   const pathFor=node=>{const path=[];let cursor=node,guard=0;while(cursor&&guard++<8){path.unshift(cursor.name||cursor.id);cursor=cursor.parentId?byId.get(cursor.parentId):null;}return path.join(' › ')};
   for(const node of taxonomy){
    if((node.level||1)<=1)continue;
    const path=pathFor(node);
    items.push({type:'component',group:'KOMPONEN',title:node.name||node.id,subtitle:machine.name+' › '+path,route,machineId:machine.machineId,nodeId:node.id,keywords:[node.id,node.name,path,machine.name,machine.model].filter(Boolean).join(' ')});
   }
-  for(const source of searchableSources(route)){
+  for(const source of corpus.sources){
    const sourceKey=route+'|'+(source.id||source.title||source.url);if(documentSeen.has(sourceKey))continue;documentSeen.add(sourceKey);
    items.push({type:'reference',group:'DOKUMEN',title:source.title||source.id||'Dokumen',subtitle:[machine.name,source.publisher,source.type].filter(Boolean).join(' · '),route,machineId:machine.machineId,referenceId:source.id||source.title,keywords:[source.title,source.publisher,source.type,source.id,machine.name].filter(Boolean).join(' ')});
   }
-  for(const photo of searchablePhotos(route)){
+  for(const photo of corpus.photos){
    const photoKey=route+'|'+(photo.filename||photo.id);if(photoSeen.has(photoKey))continue;photoSeen.add(photoKey);
-   items.push({type:'reference',group:'FOTO',title:photo.filename||photo.id||'Foto',subtitle:[machine.name,photo.machineZone,photo.viewDirection].filter(Boolean).join(' · '),route,machineId:machine.machineId,referenceId:photo.filename||photo.id,keywords:[photo.filename,photo.machineZone,photo.viewDirection,machine.name].filter(Boolean).join(' ')});
+   items.push({type:'reference',group:'FOTO',title:photo.filename||photo.id||'Foto',subtitle:[machine.name,photo.machineZone,photo.viewDirection].filter(Boolean).join(' · '),route,machineId:machine.machineId,referenceId:photo.id||photo.filename,keywords:[photo.filename,photo.machineZone,photo.viewDirection,machine.name].filter(Boolean).join(' ')});
   }
  }
  for(const area of [...areas].filter(Boolean).sort())items.push({type:'area',group:'AREA',title:area,subtitle:'Area pabrik',keywords:area});
@@ -981,13 +973,16 @@ addEventListener('bmj:searchselect',async event=>{
   if(item.type==='machine'){const record=MACHINE_REGISTRY_BY_ID.get(item.machineId);if(record)await openAssetContext(record);return;}
   if(item.route)await switchActiveMachine(item.route,{historyMode:'push'});
   else setView('machine');
+  const selectedAssetId=activeMachineAssetId();
   if(item.type==='component'){
    selectTaxonomy(item.nodeId,{revealPanel:true,historyMode:'push'});
-   emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:item.nodeId,activeSection:'asset',sceneMode:'machine'});
+   emitDomainState({selectedAsset:selectedAssetId,selectedNode:item.nodeId,activeSection:'asset',sceneMode:'machine'});
   }else if(item.type==='reference'){
-   showPanel();renderPanel('sources');emitDomainState({selectedAsset:MACHINE_KEY,activeReference:item.referenceId,activeSection:'reference',sceneMode:'machine'});
+   emitDomainState({selectedAsset:selectedAssetId,activeReference:item.referenceId,activeSection:'reference',sceneMode:'machine',inspectorState:{open:true,tab:'sources'}});
+   showPanel();renderPanel('sources');
   }else{
-   showPanel();renderPanel('overview');emitDomainState({selectedAsset:MACHINE_KEY,selectedNode:null,activeSection:'asset',sceneMode:'machine'});
+   emitDomainState({selectedAsset:selectedAssetId,selectedNode:null,activeSection:'asset',sceneMode:'machine',inspectorState:{open:true,tab:'overview'}});
+   showPanel();renderPanel('overview');
   }
  }catch(error){toast('Hasil pencarian tidak dapat dibuka: '+error.message,true);}
 });
