@@ -2,6 +2,10 @@ import test from 'node:test';import assert from 'node:assert/strict';import {Dat
 const origin='https://juldigi0107.github.io';
 function environment(){const sqlite=new DatabaseSync(':memory:');sqlite.exec(readFileSync(new URL('../backend/migrations/0001_initial.sql',import.meta.url),'utf8'));return {ADMIN_TOKEN:'test-admin-not-a-production-secret',VIEWER_TOKEN:'test-viewer-not-a-production-secret',ALLOWED_ORIGINS:origin,DB:{prepare(sql){let args=[];const stmt=sqlite.prepare(sql);return {bind(...a){args=a;return this;},async first(){return stmt.get(...args);},async run(){const r=stmt.run(...args);return{meta:{changes:Number(r.changes)}};}};}},close:()=>sqlite.close()};}
 const req=(path,{token='test-admin-not-a-production-secret',method='GET',data,rev='0',from=origin}={})=>new Request('https://worker.test/api/'+path,{method,headers:{Origin:from,Authorization:'Bearer '+token,'Content-Type':'application/json','If-Match':rev},body:data===undefined?undefined:JSON.stringify(data)});
+async function legacyPasswordHash(password,salt){
+ const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveBits']);
+ return Array.from(new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2',salt:new TextEncoder().encode(salt),iterations:150000,hash:'SHA-256'},key,256))).map(x=>x.toString(16).padStart(2,'0')).join('');
+}
 const fixture=()=>({schemaVersion:1,source:{type:'DWG',file:'TEST_ONLY.dwg',sha256:'b'.repeat(64),extractionMethod:'Unit-test synthetic geometry; never shipped as factory'},transform:{sourceUnits:'m',scale:1,originX:0,originY:0,rotation:0},entities:[]});
 test('authentication required and origin allowlist enforced',async()=>{const env=environment();assert.equal((await worker.fetch(req('state',{token:''}),env)).status,401);assert.equal((await worker.fetch(req('state',{from:'https://evil.test'}),env)).status,403);env.close();});
 test('viewer can read but cannot mutate layout or position',async()=>{const env=environment(),token=env.VIEWER_TOKEN;assert.equal((await worker.fetch(req('state',{token}),env)).status,200);assert.equal((await worker.fetch(req('layout',{token,method:'PUT',data:fixture()}),env)).status,403);env.close();});
@@ -41,13 +45,19 @@ test('Superadmin legacy generation-zero password hash migrates under the 100k ru
  env.close();
 });
 
-test('Superadmin changed-password legacy hashes fail safely instead of requesting unsupported PBKDF2 work',async()=>{
- const env=environment();
+test('Superadmin changed-password legacy 150k hash is verified once then migrated to the 100k record',async()=>{
+ const env=environment(),password='legacy-changed-password',salt='legacy-custom-salt';
  let login=await worker.fetch(req('superadmin/login',{method:'POST',data:{password:'superadmin123'}}),env);
  assert.equal(login.status,200);
- await env.DB.prepare('UPDATE superadmin_auth SET salt=?,password_hash=?,generation=2 WHERE id=1').bind('legacy-custom-salt','b'.repeat(64)).run();
- login=await worker.fetch(req('superadmin/login',{method:'POST',data:{password:'any-password'}}),env);
- assert.equal(login.status,409);
- assert.match((await login.json()).error,/PBKDF2 lama|PBKDF2 legacy/);
+ const legacyHash=await legacyPasswordHash(password,salt);
+ await env.DB.prepare('UPDATE superadmin_auth SET salt=?,password_hash=?,generation=2 WHERE id=1').bind(salt,legacyHash).run();
+ login=await worker.fetch(req('superadmin/login',{method:'POST',data:{password}}),env);
+ assert.equal(login.status,200,await login.clone().text());
+ const payload=await login.json(),row=await env.DB.prepare('SELECT salt,password_hash,generation FROM superadmin_auth WHERE id=1').first();
+ assert.equal(row.generation,2);
+ assert.notEqual(row.salt,salt);
+ assert.match(row.password_hash,/^pbkdf2-sha256:100000:[a-f0-9]{64}$/);
+ assert.equal((await worker.fetch(req('session',{token:payload.token}),env)).status,200);
+ assert.equal((await worker.fetch(req('superadmin/login',{method:'POST',data:{password:'wrong-password'}}),env)).status,401);
  env.close();
 });
