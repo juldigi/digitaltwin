@@ -24,6 +24,7 @@ import {POLAR115_PHOTO_REGISTRY,polar115PhotoStats} from './data/sources-polar11
 import {normalizePhotoRegistry} from './data/photo-evidence.js';
 import {searchCorpusForMachine} from './data/search-corpus.js';
 import {machineTruthProfile} from './data/machine-truth-profile.js';
+import {machineEvidenceNote} from './data/machine-evidence-note.js';
 import {SHEETING_SIMULATION_STAGES,SHEETING_PROCESS_STEPS} from './simulation-sheeting.js';
 import {universalMachineConfig,universalTaxonomy,universalTechnicalSources} from './universal-machine.js';
 import {assetTruth,connectionTruth,layoutTruth,positionVerification} from './data/truth-status.js';
@@ -689,7 +690,7 @@ function setView(view){
  const title=$('#notice-title'),note=$('#notice-text');
  if(title&&note){
   title.textContent=view==='factory'?'Informasi denah':'Catatan tampilan';
-  note.textContent=view==='factory'?'Posisi mesin ditampilkan mengikuti denah yang tersedia. Beberapa tinggi bangunan masih berupa perkiraan visual.':(IS_OFFSET10?'Offset 10 direkonstruksi dari dokumen proyek BMJ dan referensi resmi Heidelberg; foto aktual mesin belum tersedia.':IS_APM2?'APM 2 memakai identitas data BMJ dan referensi BOBST SP 102 lama; kode akhiran model dan foto aktual belum tersedia.':IS_SHEETING?'Sheeting mempertahankan acuan visual yang sudah dikoreksi: gulungan (reel) masuk berada di kanan, kertas kontinu (web) bergerak dari kanan ke kiri, lalu melewati unit pemotong (cutter) dan delivery/layboy hingga mencapai tumpukan hasil di kiri.':'Model dibuat berdasarkan foto dan dokumen mesin yang tersedia.');
+  const genericTruth=machineTruthProfile(machineRecordForRoute(MACHINE_KEY)||MACHINE_KEY),genericEvidenceNote=machineEvidenceNote({dedicated:genericTruth.dedicated,simulationAvailable:genericTruth.simulationAvailable,photoCount:PHOTO_REGISTRY.length,sourceCount:TECHNICAL_SOURCES.length});note.textContent=view==='factory'?'Posisi mesin ditampilkan mengikuti denah yang tersedia. Beberapa tinggi bangunan masih berupa perkiraan visual.':(IS_OFFSET10?'Offset 10 direkonstruksi dari dokumen proyek BMJ dan referensi resmi Heidelberg; foto aktual mesin belum tersedia.':IS_APM2?'APM 2 memakai identitas data BMJ dan referensi BOBST SP 102 lama; kode akhiran model dan foto aktual belum tersedia.':IS_SHEETING?'Sheeting mempertahankan acuan visual yang sudah dikoreksi: gulungan (reel) masuk berada di kanan, kertas kontinu (web) bergerak dari kanan ke kiri, lalu melewati unit pemotong (cutter) dan delivery/layboy hingga mencapai tumpukan hasil di kiri.':genericEvidenceNote);
  }
  renderPanel();redrawPlantPlan();emitDomainState({activeSection:view==='factory'?'factory':'asset',sceneMode:view==='factory'?'factory':'machine'});
 }
