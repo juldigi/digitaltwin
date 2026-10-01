@@ -26,8 +26,8 @@ test('V291 legacy cached records with privileged history are detectable for safe
 });
 
 test('V291 app sanitizes both cache writes and legacy cache reads',()=>{
- assert.match(app,/state:publicCacheState\(state\),savedAt:new Date\(\)\.toISOString\(\)/);
+ assert.match(app,/state:publicCacheState\(next\),savedAt:new Date\(\)\.toISOString\(\)/);
  assert.match(app,/const hadPrivileged=cacheContainsPrivilegedState\(cached\.state\),safeState=publicCacheState\(cached\.state\)/);
  assert.match(app,/if\(hadPrivileged\)await cache\.set\(apiBase,\{\.\.\.cached,state:safeState\}\)/);
- assert.match(app,/state=safeState/);
+ assert.match(app,/state=mergeIncomingSharedTwinState\(safeState,state\)/);
 });
