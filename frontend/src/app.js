@@ -798,22 +798,38 @@ function selectFactoryAssetContext(machine,{historyMode='none',openDialog=false,
 function focusFoundationPlaceholder(machine,{historyMode='push',openDialog=false}={}){
  return selectFactoryAssetContext(machine,{historyMode,openDialog,focus:true});
 }
+function factoryMachineTruth(machine,placement){
+ const route=machineRoute(machine),corpus=searchCorpusForMachine(machine,route);
+ let maturity={asset_id:machine.machineId,'3d_status':'UNKNOWN',data_confidence:'UNVERIFIED',discovery_status:'UNKNOWN'};
+ if(route==='offset5')maturity={...maturity,'3d_status':'PROCEDURAL / PHOTO + DOCUMENT GROUNDED',data_confidence:'HIGH CONFIDENCE',discovery_status:'BMJ_ACTUAL_EVIDENCE_AVAILABLE'};
+ else if(route==='offset10')maturity={...maturity,'3d_status':'PROCEDURAL / DOCUMENT-GROUNDED',data_confidence:'HIGH CONFIDENCE',discovery_status:'OFFICIAL_DOCUMENTS_AVAILABLE'};
+ else if(route==='apm2')maturity={...maturity,'3d_status':'PROCEDURAL / DATABASE + LEGACY FAMILY REFERENCES',data_confidence:'IDENTITY VERIFIED / VARIANT REFERENCE',discovery_status:'SP102_FAMILY_REFERENCE_AVAILABLE'};
+ else if(route==='sheeting')maturity={...maturity,'3d_status':'DEDICATED PROCEDURAL / BMJ PHOTO-GROUNDED RECONSTRUCTION',data_confidence:'IDENTITY VERIFIED / ACTUAL PHOTO GEOMETRY / CUTTER INTERNAL UNRESOLVED',discovery_status:'BMJ_ACTUAL_PHOTOSET_PRIMARY__HSM_FAMILY_PROCESS_SECONDARY'};
+ else{
+  const cfg=universalMachineConfig(machine.machineId);
+  if(cfg){
+   const dedicated=cfg.evidence.simulation==='VERIFIED_PROCESS_MODEL',runnable=['VERIFIED_PROCESS_MODEL','FAMILY_PROCESS_MODEL'].includes(cfg.evidence.simulation);
+   maturity={...maturity,'3d_status':dedicated?'DEDICATED PROCEDURAL / '+cfg.evidence.geometry:runnable?'REFERENCE PROCEDURAL / '+cfg.evidence.geometry:'PROCEDURAL / '+cfg.evidence.geometry,data_confidence:cfg.evidence.grade,discovery_status:dedicated?'DEDICATED_EVIDENCE_AVAILABLE':runnable?'FAMILY_REFERENCE_AVAILABLE':'EVIDENCE_BOUNDED_REFERENCE'};
+  }
+ }
+ return assetTruth(maturity,{placement,sourceCount:corpus.sources.length});
+}
 function syncFactoryAssetHeading(machine,placement){
  const heading=$('.asset-heading h2'),subtitle=$('.asset-heading p'),summary=$('#evidence-summary'),detail=$('#evidence-detail');
  if(heading)heading.textContent=machine.name;
  if(subtitle)subtitle.textContent=[machine.sapCode,machine.model].filter(Boolean).join(' · ')||machine.area||'Mesin atau peralatan pabrik';
  if(summary)summary.textContent='Identitas dan posisi mesin';
- if(detail)detail.innerHTML=pair('Identitas mesin atau peralatan',machine.machineId)+pair('Sumber identitas',machine.source==='USER_CONFIRMED'?'Konfirmasi pengguna':machine.source||'Belum tersedia')+pair('Posisi',positionVerification(placement));
+ if(detail)detail.innerHTML=pair('Identitas mesin atau peralatan',machine.machineId)+pair('Sumber identitas',machine.source==='USER_CONFIRMED'?'Konfirmasi pengguna':machine.source||'Belum tersedia')+pair('Posisi',readableStatus(positionVerification(placement)));
 }
 function machineDetailDialog(machine){
  const placement=placementForMachine(machine.machineId),policy=foundationAssetPolicy(machine,placement),primary=policy.canOpenTechnical3D;
  const modelAvailable=primary&&!$('#mode-3d')?.disabled;
  const status=primary?'Model 3D tersedia':'Posisi pada denah';
  const copy=primary?'Buka model mesin untuk melihat struktur, simulasi, dan referensi yang tersedia.':'Model 3D belum tersedia untuk mesin atau peralatan ini. Posisi pada denah tetap dapat diperiksa.';
- const truth=primary&&isFoundationPrimary(machine)?assetTruth(state?.asset,{placement,sourceCount:TECHNICAL_SOURCES.length}):null;
- const summaryData=pair('Area',machine.area)+pair('Model',machine.model||'Belum tersedia')+pair('Tahun',machine.year||'Belum tersedia')+pair('Posisi',truth?.position||positionVerification(placement));
- const primaryData=primary?pair('ID mesin',machine.machineId)+pair('Area',machine.area)+pair('Model',machine.model)+pair('Nomor seri',machine.serial)+pair('Lokasi fungsional SAP',machine.functionalLocation)+pair('Kode SAP',machine.sapCode)+pair('Tahun',machine.year)+pair('Dasar model 3D',truth?.source3D||machine.source)+pair('Detail model 3D',truth?.detail3D||'Model berbasis acuan')+pair('Keandalan data',truth?.dataConfidence||'Sesuai sumber tersedia')+pair('Posisi',truth?.position||positionVerification(placement))+pair('Dasar posisi',positionStatusLabel(policy.positionStatus))+pair('Sumber identitas',machine.source==='USER_CONFIRMED'?'Konfirmasi pengguna':'Daftar mesin'):'';
- const placeholderData=pair('ID posisi',machine.machineId)+pair('Area',machine.area)+pair('Dasar model 3D',readableStatus('NOT_IMPLEMENTED · LAYOUT PLACEHOLDER'))+pair('Detail model 3D',readableStatus('NOT_IMPLEMENTED'))+pair('Posisi',positionVerification(placement))+pair('Dasar posisi',positionStatusLabel(policy.positionStatus))+pair('Status detail','Belum dibuka pada fase fondasi');
+ const truth=primary?factoryMachineTruth(machine,placement):null;
+ const summaryData=pair('Area',machine.area)+pair('Model',machine.model||'Belum tersedia')+pair('Tahun',machine.year||'Belum tersedia')+pair('Posisi',readableStatus(truth?.position||positionVerification(placement)));
+ const primaryData=primary?pair('ID mesin',machine.machineId)+pair('Area',machine.area)+pair('Model',machine.model)+pair('Nomor seri',machine.serial)+pair('Lokasi fungsional SAP',machine.functionalLocation)+pair('Kode SAP',machine.sapCode)+pair('Tahun',machine.year)+pair('Dasar model 3D',readableStatus(truth?.source3D||'UNKNOWN'))+pair('Detail model 3D',readableStatus(truth?.detail3D||'UNKNOWN'))+pair('Keandalan data',readableStatus(truth?.dataConfidence||'UNVERIFIED'))+pair('Posisi',readableStatus(truth?.position||positionVerification(placement)))+pair('Dasar posisi',positionStatusLabel(policy.positionStatus))+pair('Referensi teknis',truth?.sourceCount?truth.sourceCount+' sumber':'Belum tersedia')+pair('Sumber identitas',machine.source==='USER_CONFIRMED'?'Konfirmasi pengguna':'Daftar mesin'):'';
+ const placeholderData=pair('ID posisi',machine.machineId)+pair('Area',machine.area)+pair('Dasar model 3D',readableStatus('NOT_IMPLEMENTED · LAYOUT PLACEHOLDER'))+pair('Detail model 3D',readableStatus('NOT_IMPLEMENTED'))+pair('Posisi',readableStatus(positionVerification(placement)))+pair('Dasar posisi',positionStatusLabel(policy.positionStatus))+pair('Status detail','Belum dibuka pada fase fondasi');
  const technicalData=primary?primaryData:placeholderData;
  closeModal();setDomainState({inspectorState:{tab:'overview'}});showPanel();syncFactoryAssetHeading(machine,placement);
  $('#panel-content').innerHTML=`<section class="context-summary"><div class="context-summary-head"><small>MESIN ATAU PERALATAN TERPILIH</small><h3>${esc(machine.name)}</h3><p>${esc([machine.sapCode,machine.model].filter(Boolean).join(' · ')||machine.area||'Mesin atau peralatan pabrik')}</p></div><div class="card accent context-status-card"><h4>${esc(status)}</h4><p>${esc(copy)}</p></div><dl class="data-list context-summary-data">${summaryData}</dl>${primary&&machine.note?`<div class="card context-note"><h4>Catatan</h4><p>${esc(machine.note)}</p></div>`:''}<details class="technical-details"><summary>Informasi teknis</summary><div class="technical-details-body"><dl class="data-list">${technicalData}</dl></div></details><div class="actions context-primary-actions single-action"><button id="${modelAvailable?'open-machine-3d':'focus-layout-asset'}" class="primary">${modelAvailable?'Buka model 3D':'Pusatkan di pabrik'}</button></div></section>`;
