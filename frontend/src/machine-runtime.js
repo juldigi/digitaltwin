@@ -72,15 +72,6 @@ export function createPolishedMachineTemplate(key){
  return applyMachinePresentationPolish(createMachineTemplate(key),normalized);
 }
 
-export function resolveSemanticMachinePart(template,object){
- if(!template||!object)return null;
- const refs=template.__semanticClickNodeIds??=new Set((template.taxonomy||[]).flatMap(node=>node.meshRefs||[]));
- for(let node=object;node&&node!==template.root;node=node.parent){
-  const id=node.userData?.nodeId;
-  if(id&&refs.has(id))return node;
- }
- return null;
-}
 
 export function createMachineSimulation(key,machine,template){
  const k=normalizeMachineKey(key);
