@@ -1,7 +1,7 @@
 import {applyMachineDetailVisibility} from './machine-visibility.js';
 import {buildActualFactory} from './factory-building.js';
 import {sceneIdentity} from './scene-editor-state.js';
-import {SimulationModeController} from './simulation-mode.js';
+import {SimulationModeController,simulationModePreset} from './simulation-mode.js';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
@@ -272,10 +272,15 @@ export class FactoryEngine {
   pausePrintingSimulation(){return this.simulation?.pause();}
   resumePrintingSimulation(){return this.simulation?.resume();}
   stopPrintingSimulation(){this.simulationMode.reset();return this.simulation?.stop();}
-  setPrintingSimulationMode(mode){return this.simulationMode.setMode(mode,this.simulation?.state());}
+  setPrintingSimulationMode(mode){
+    const selected=this.simulationMode.setMode(mode,this.simulation?.state()),preset=simulationModePreset(selected);
+    if(preset.lockSpeed!==null)this.simulation?.setSpeed(preset.lockSpeed);
+    if(preset.forcePathVisible)this.simulation?.setPathVisible(true);
+    return selected;
+  }
   getPrintingSimulationMode(){return this.simulationMode.mode;}
-  setPrintingSimulationSpeed(value){return this.simulation?.setSpeed(value);}
-  setPrintingSimulationPathVisible(on){return this.simulation?.setPathVisible(on);}
+  setPrintingSimulationSpeed(value){const preset=simulationModePreset(this.simulationMode.mode);return this.simulation?.setSpeed(preset.lockSpeed??value);}
+  setPrintingSimulationPathVisible(on){const preset=simulationModePreset(this.simulationMode.mode);return this.simulation?.setPathVisible(preset.forcePathVisible?true:on);}
   setPrintingSimulationInkFlowVisible(on){return this.simulation?.setInkFlowVisible(on);}
   getPrintingSimulationState(){return this.simulation?.state()||{available:false,blocked:true,blockedReason:'Simulasi belum tersedia untuk mesin atau peralatan ini.',active:false,running:false,paused:false,speed:1,stage:null,completed:0,progress:0,sheetsVisible:0,rotorCount:0};}
   isPrintingSimulationActive(){return !!this.simulation?.active;}
