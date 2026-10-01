@@ -1380,7 +1380,7 @@ const syncImmersiveButtons=()=>{
 const toggleImmersive=async()=>{
  const entering=!immersiveRoot.classList.contains('immersive-mode');
  if(entering){
-  if(!$('#mode-3d')?.disabled)$('#mode-3d')?.click();
+  if(getAppState().viewMode==='2d'&&!$('#mode-3d')?.disabled)$('#mode-3d')?.click();
   window.dispatchEvent(new Event('bmj:immersivestart'));
  }
  immersiveRoot.classList.toggle('immersive-mode',entering);
