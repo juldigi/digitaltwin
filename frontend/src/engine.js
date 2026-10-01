@@ -598,8 +598,9 @@ export class FactoryEngine {
   }
   setLow(on){return this.setQualityProfile(on?'hemat':'auto');}
   getRenderDiagnostics(){return renderDiagnostics(this.renderer,this.qualityProfile,this.adaptiveQuality);}
+  cancelMachineSwitch(){this.machineSwitchGeneration++;return this.machineSwitchGeneration;}
   clearMachineContext(){
-    this.machineSwitchGeneration++;
+    this.cancelMachineSwitch();
     if(this.simulation?.active)this.simulation.stop();
     this.gizmo.detach();this.clearPartLabels();this.simulation?.dispose();this.template?.dispose();if(this.machine)this.scene.remove(this.machine);
     this.machineKey=null;this.template=neutralTemplate();this.machine=this.template.root;this.scene.add(this.machine);this.simulation=neutralSimulation();this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);
@@ -626,5 +627,5 @@ export class FactoryEngine {
     const label=this.renderer.domElement;label.setAttribute('aria-label',`Model 3D ${this.machine.name||requested}. Gunakan tombol sudut pandang untuk mengatur kamera.`);
     this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);this.isolated=false;this.view='machine';this.syncVisualSystems();this.machine.visible=true;this.applySceneOverrides(this.sceneOverrides||{});this.factory.visible=false;this.template.setLow(this.low);this.shadows.focusBounds(this.machineFocusBounds()||new THREE.Box3().setFromObject(this.machine));this.fit(this.machine);this.resize();return true;
   }
-  dispose(){this.machineSwitchGeneration++;cancelAnimationFrame(this.frame);this.clearPartLabels();this.clearFactorySelection();this.resizeObserver.disconnect();this.controls.dispose();this.gizmo.dispose();this.simulation?.dispose();this.template.dispose();this.clearFactory();this.studio.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});this.environment.dispose();this.postProcessing.dispose();this.lighting.dispose();this.renderer.dispose();}
+  dispose(){this.cancelMachineSwitch();cancelAnimationFrame(this.frame);this.clearPartLabels();this.clearFactorySelection();this.resizeObserver.disconnect();this.controls.dispose();this.gizmo.dispose();this.simulation?.dispose();this.template.dispose();this.clearFactory();this.studio.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});this.environment.dispose();this.postProcessing.dispose();this.lighting.dispose();this.renderer.dispose();}
 }
