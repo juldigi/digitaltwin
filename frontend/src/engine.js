@@ -1,7 +1,7 @@
 import {applyMachineDetailVisibility} from './machine-visibility.js';
 import {buildActualFactory} from './factory-building.js';
 import {sceneIdentity} from './scene-editor-state.js';
-import {SimulationModeController} from './simulation-mode.js';
+import {SimulationModeController,simulationModePreset} from './simulation-mode.js';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
@@ -268,14 +268,20 @@ export class FactoryEngine {
       entry.line.setAttribute('x1',String(labelX));entry.line.setAttribute('y1',String(labelY+3));entry.line.setAttribute('x2',String(anchorX));entry.line.setAttribute('y2',String(anchorY));entry.dot.setAttribute('cx',String(anchorX));entry.dot.setAttribute('cy',String(anchorY));
     }
   }
-  startPrintingSimulation(){const state=this.simulation?.start();this.simulationMode.reset();return state;}
+  startPrintingSimulation(){this.simulation?.start();this.simulationMode.reset();this.applyPrintingSimulationModePreset();return this.simulation?.state?.();}
   pausePrintingSimulation(){return this.simulation?.pause();}
   resumePrintingSimulation(){return this.simulation?.resume();}
   stopPrintingSimulation(){this.simulationMode.reset();return this.simulation?.stop();}
-  setPrintingSimulationMode(mode){return this.simulationMode.setMode(mode,this.simulation?.state());}
+  applyPrintingSimulationModePreset(){
+    const preset=simulationModePreset(this.simulationMode.mode);
+    if(preset.lockSpeed!==null)this.simulation?.setSpeed(preset.lockSpeed);
+    if(preset.forcePathVisible)this.simulation?.setPathVisible(true);
+    return preset;
+  }
+  setPrintingSimulationMode(mode){const selected=this.simulationMode.setMode(mode,this.simulation?.state());this.applyPrintingSimulationModePreset();return selected;}
   getPrintingSimulationMode(){return this.simulationMode.mode;}
-  setPrintingSimulationSpeed(value){return this.simulation?.setSpeed(value);}
-  setPrintingSimulationPathVisible(on){return this.simulation?.setPathVisible(on);}
+  setPrintingSimulationSpeed(value){const preset=simulationModePreset(this.simulationMode.mode);return this.simulation?.setSpeed(preset.lockSpeed??value);}
+  setPrintingSimulationPathVisible(on){const preset=simulationModePreset(this.simulationMode.mode);return this.simulation?.setPathVisible(preset.forcePathVisible?true:on);}
   setPrintingSimulationInkFlowVisible(on){return this.simulation?.setInkFlowVisible(on);}
   getPrintingSimulationState(){return this.simulation?.state()||{available:false,blocked:true,blockedReason:'Simulasi belum tersedia untuk mesin atau peralatan ini.',active:false,running:false,paused:false,speed:1,stage:null,completed:0,progress:0,sheetsVisible:0,rotorCount:0};}
   isPrintingSimulationActive(){return !!this.simulation?.active;}
@@ -594,7 +600,7 @@ export class FactoryEngine {
     this.machineKey=requested;
     this.template=nextTemplate;
     this.machine=this.template.root;this.scene.add(this.machine);
-    this.simulation=nextSimulation;
+    this.simulation=nextSimulation;this.applyPrintingSimulationModePreset();
     const label=this.renderer.domElement;label.setAttribute('aria-label',`Model 3D ${this.machine.name||requested}. Gunakan tombol sudut pandang untuk mengatur kamera.`);
     this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);this.isolated=false;this.view='machine';this.syncVisualSystems();this.machine.visible=true;this.applySceneOverrides(this.sceneOverrides||{});this.factory.visible=false;this.template.setLow(this.low);this.shadows.focusBounds(this.machineFocusBounds()||new THREE.Box3().setFromObject(this.machine));this.fit(this.machine);this.resize();return true;
   }
