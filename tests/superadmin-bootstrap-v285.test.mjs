@@ -8,6 +8,9 @@ const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8')
 test('V285 bootstrap Superadmin sessions are explicitly restricted until password change',()=>{
  assert.match(worker,/async function superadminSession\(db,token\)/);
  assert.match(worker,/passwordChangeRequired=superadmin&&superadminSessionInfo\.generation===0/);
+ assert.match(worker,/authStore\(env\.DB,env\.SUPERADMIN_BOOTSTRAP_PASSWORD\|\|env\.ADMIN_TOKEN\)/);
+ assert.match(worker,/const INSECURE_LEGACY_PASSWORD='superadmin123'/);
+ assert.match(worker,/superadminBootstrapReady:!!\(env\.SUPERADMIN_BOOTSTRAP_PASSWORD\|\|env\.ADMIN_TOKEN\)/);
  assert.match(worker,/admin=tokenAdmin\|\|\(superadmin&&!passwordChangeRequired\)/);
  assert.match(worker,/Ganti kata sandi awal Superadmin sebelum mengubah scene/);
  assert.match(worker,/Ganti kata sandi awal Superadmin sebelum membuka riwayat scene/);
