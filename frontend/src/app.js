@@ -24,7 +24,7 @@ import {normalizePhotoRegistry} from './data/photo-evidence.js';
 import {searchCorpusForMachine} from './data/search-corpus.js';
 import {SHEETING_SIMULATION_STAGES,SHEETING_PROCESS_STEPS} from './simulation-sheeting.js';
 import {universalMachineConfig,universalTaxonomy,universalTechnicalSources} from './universal-machine.js';
-import {assetTruth,connectionTruth,layoutTruth,positionVerification,truthStatus} from './data/truth-status.js';
+import {assetTruth,connectionTruth,layoutTruth,positionVerification} from './data/truth-status.js';
 import {readableStatus,readableSimulationStage,readableEvidenceConfidence,readablePhotoCategory} from './display-language.js';
 import {buildDwgFidelityLedger} from './data/dwg-fidelity.js';
 import {RENDER_PROFILE_INFO,RENDER_PROFILE_ORDER,recommendedProfile} from './render/render-config.js';
