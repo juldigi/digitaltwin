@@ -24,6 +24,7 @@ export function readableStatus(value){
   'BMJ_ACTUAL_PHOTOSET_PRIMARY__HSM_FAMILY_PROCESS_SECONDARY':'Foto aktual BMJ menjadi sumber utama; referensi proses keluarga HSM menjadi sumber pendukung',
   'DEDICATED_EVIDENCE_AVAILABLE':'Bukti khusus untuk mesin ini tersedia',
   'FAMILY_REFERENCE_AVAILABLE':'Referensi keluarga mesin tersedia',
+  'EVIDENCE_BOUNDED_REFERENCE':'Model acuan; bukti masih dibatasi sumber yang tersedia',
   'PRODUCTION_MACHINE':'Mesin produksi',
   'OFFSET_PRINTING':'Printing offset',
   '3D renderer unavailable':'Render 3D belum tersedia',
@@ -79,8 +80,8 @@ export function readableStatus(value){
   'BLOCKED':'Simulasi belum dapat dijalankan; bukti belum cukup'
  };
  if(known[raw])return known[raw];
- const procedural=/^(DEDICATED )?PROCEDURAL \/ (.+)$/.exec(raw);
- if(procedural&&known[procedural[2]])return (procedural[1]?'Model 3D khusus; ':'Model 3D; ')+known[procedural[2]];
+ const procedural=/^(DEDICATED |REFERENCE )?PROCEDURAL \/ (.+)$/.exec(raw);
+ if(procedural&&known[procedural[2]]){const prefix=procedural[1]==='DEDICATED '?'Model 3D khusus; ':procedural[1]==='REFERENCE '?'Model 3D acuan; ':'Model 3D; ';return prefix+known[procedural[2]];}
  if(known[raw])return known[raw];
  return raw.replace(/\b(?:HIGH CONFIDENCE|MEDIUM CONFIDENCE|DWG-VERIFIED|USER-CONFIRMED|NOT_IMPLEMENTED|LAYOUT PLACEHOLDER|CACHED DATA|MODE LOKAL|VERIFIED|ESTIMATED|UNKNOWN|UNVERIFIED|APPROXIMATE|CONFLICTING|PROCEDURAL|RECONSTRUCTED|PARTIAL|OFFLINE)\b/g,word=>STATUS_LABELS[word]||word);
 }
