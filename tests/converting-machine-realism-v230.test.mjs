@@ -70,7 +70,7 @@ test('V230 factory/home geometry continues to be regenerated from these same liv
 });
 
 test('V230 refreshes shell bytes without rotating V222 public cache identifiers',()=>{
- assert.match(sw,/shell recache without rotating public query identifiers/);
- assert.match(sw,/factory-digital-twin-v222-overlay-state-ssot-20260925/);
- assert.match(sw,/const RELEASE='222'/);
+ assert.match(sw,/V273 rotates public entrypoint identities/);
+ assert.match(sw,/factory-digital-twin-v273-full-fleet-state-sync-20261001/);
+ assert.match(sw,/const RELEASE='273'/);
 });
