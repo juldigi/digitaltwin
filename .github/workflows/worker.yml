@@ -43,6 +43,7 @@ jobs:
           workingDirectory: backend
           command: d1 migrations apply DB --remote
       - name: Deploy current application to Cloudflare Workers
+        if: steps.prepare_d1.outcome == 'success'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -52,5 +53,5 @@ jobs:
       - name: Report D1 permission failure
         if: steps.prepare_d1.outcome == 'failure'
         run: |
-          echo 'Worker terdeploy untuk perbaikan UI, tetapi D1 belum terhubung. Berikan D1 Read dan D1 Write pada CLOUDFLARE_API_TOKEN di GitHub Secrets.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Deployment dibatalkan: D1 belum siap, sehingga Worker produksi sebelumnya tetap dipertahankan. Berikan D1 Read dan D1 Write pada CLOUDFLARE_API_TOKEN di GitHub Secrets.' >> "$GITHUB_STEP_SUMMARY"
           exit 1
