@@ -35,7 +35,7 @@ test('UPG LY300 OEM process data keeps line and print-speed references distinct'
 test('UPG LY300 geometry preserves exact OEM station train but bounds installed accessories',()=>{
  const model=new UpgLy300MachineTemplate(),box=new THREE.Box3().setFromObject(model.root);assert.ok(!box.isEmpty());assert.ok(box.min.y>=-0.01);assert.equal(model.root.userData.engineeringDimensions,false);assert.match(model.root.userData.geometryStatus,/ACCESSORIES_BOUNDED/);
  for(const id of ['ly300-feeder','ly300-transport','ly300-print','ly300-ink','ly300-uv','ly300-camera','ly300-reject','ly300-collect','ly300-control','ly300-access'])assert.ok(model.findNode(id),id);
- assert.equal(model.findNode('ly300-print-head').userData.installedPrintheadCountVerified,false);assert.equal(model.findNode('ly300-collect-strap').userData.installedStrapperVerified,false);assert.ok(model.meshes.some(m=>m.userData.nozzleArray));assert.ok(model.meshes.some(m=>m.userData.uvLamp));model.dispose();
+ assert.equal(model.findNode('ly300-print-head').userData.installedPrintheadCountVerified,false);assert.equal(model.findNode('ly300-control-hmi').userData.envelopePolicy,'OEM_ENVELOPE_BOUNDED__EXACT_INSTALLED_PLACEMENT_UNVERIFIED');assert.equal(model.findNode('ly300-control-drive').userData.envelopePolicy,'OEM_ENVELOPE_BOUNDED__EXACT_INSTALLED_PLACEMENT_UNVERIFIED');assert.equal(model.findNode('ly300-collect-strap').userData.installedStrapperVerified,false);assert.ok(model.meshes.some(m=>m.userData.nozzleArray));assert.ok(model.meshes.some(m=>m.userData.uvLamp));model.dispose();
 });
 
 test('UPG LY300 rotor whitelist excludes camera lens ink line and pneumatic reject cylinder',()=>{
