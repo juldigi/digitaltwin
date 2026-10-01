@@ -1,7 +1,7 @@
-// V237 dedicated machine realism pass; V249 shell recache without rotating public query identifiers; V255 UI SSOT repair recaches the corrected canonical shell through the build fingerprint; V262 rotates the internal shell cache for mobile-first parity; V263 recaches the simplified editor; V264 recaches hardened editor controls; V265 locks editor async transactions; V266 recaches the EYD user-language audit; V267 recaches the deep language consistency pass; V268 localizes simulation-stage presentation and clarifies the mobile explode control; V269 adds adaptive non-obstructive factory labels; V270 adds the consolidated flagship UI system and real theme surfaces; V271/V272 harden full-fleet simulation state; V273 rotates public release identity so clients cannot remain pinned to the V222 query namespace.
-const LEGACY_VERSION='factory-digital-twin-v270-flagship-ui-20260930';
-const VERSION='factory-digital-twin-v273-release-freshness-20261001';
-const RELEASE='273';
+// V237 dedicated machine realism pass; V249 shell recache without rotating public query identifiers; V255 UI SSOT repair recaches the corrected canonical shell through the build fingerprint; V262 rotates the internal shell cache for mobile-first parity; V263 recaches the simplified editor; V264 recaches hardened editor controls; V265 locks editor async transactions; V266 recaches the EYD user-language audit; V267 recaches the deep language consistency pass; V268 localizes simulation-stage presentation and clarifies the mobile explode control; V269 adds adaptive non-obstructive factory labels; V270 adds the consolidated flagship UI system and real theme surfaces.
+const LEGACY_VERSION='factory-digital-twin-v222-overlay-state-ssot-20260925';
+const VERSION='factory-digital-twin-v270-flagship-ui-20260930';
+const RELEASE='222';
 const BUILD_FINGERPRINT='SOURCE';
 const FLEET_CHUNK_COUNT=10;
 const ENTRYPOINTS=[
