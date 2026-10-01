@@ -43,11 +43,11 @@ test('Phase-1 placeholders stay spatial-only while exposing honest implementatio
 
 test('OFFSET 5 contextual detail exposes source detail confidence and verified-position semantics',()=>{
  const detail=app.slice(app.indexOf('function machineDetailDialog(machine){'),app.indexOf('async function switchActiveMachine',app.indexOf('function machineDetailDialog(machine){')));
- assert.match(detail,/assetTruth\(state\?\.asset,\{placement,sourceCount:TECHNICAL_SOURCES\.length\}\)/);
- assert.match(detail,/pair\('Dasar model 3D',truth\?\.source3D\|\|machine\.source\)/);
- assert.match(detail,/pair\('Detail model 3D',truth\?\.detail3D\|\|'Model berbasis acuan'\)/);
- assert.match(detail,/pair\('Keandalan data',truth\?\.dataConfidence\|\|'Sesuai sumber tersedia'\)/);
- assert.match(detail,/pair\('Posisi',truth\?\.position\|\|positionVerification\(placement\)\)/);
+ assert.match(detail,/machineTruthProfile\(machine\)/);
+ assert.match(detail,/pair\('Dasar model 3D',readableStatus\(modelTruth\.source3D\)\)/);
+ assert.match(detail,/pair\('Detail model 3D',readableStatus\(modelTruth\.discoveryStatus\)\)/);
+ assert.match(detail,/pair\('Keandalan data',readableStatus\(modelTruth\.dataConfidence\)\)/);
+ assert.match(detail,/pair\('Posisi',positionTruth\)/);
 });
 
 test('returning to factory overview clears selection and restores whole-factory focus',()=>{
