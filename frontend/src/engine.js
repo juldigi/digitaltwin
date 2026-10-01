@@ -402,6 +402,12 @@ export class FactoryEngine {
     if(focus)this.fit(object,mode);return object;
   }
   currentFactoryTarget(){return this.factorySelectionId?this.actualFactory?.assets.get(this.factorySelectionId)||this.factory:this.factory;}
+  refreshFactorySelectionAfterHydration(id,wrapper){
+    if(this.factorySelectionId!==id||!this.factorySelectionHelper||!wrapper)return false;
+    wrapper.updateWorldMatrix?.(true,true);this.factorySelectionHelper.update?.();
+    if(this.view==='factory'&&this.transition&&this.isObjectVisible(wrapper))this.fit(wrapper,'operator');
+    return true;
+  }
   focusFactorySelection(mode='iso'){const target=this.currentFactoryTarget();if(target)this.fit(target,mode);return target;}
   focusFactoryAsset(id,mode='operator'){return this.selectFactoryAsset(id,{focus:true,mode});}
   disposeFactoryMachineTemplates(){
@@ -438,6 +444,7 @@ export class FactoryEngine {
           }
           wrapper.userData={...wrapper.userData,renderStatus:'FULL_TECHNICAL_3D_SHARED_TEMPLATE',factoryDetailHydrated:true,factoryDetailSource:'createPolishedMachineTemplate',factoryProxyFallbackRemoved:true};
           this.factoryMachineTemplates.set(id,{template,root:detail});mounted++;
+          this.refreshFactorySelectionAfterHydration(id,wrapper);
         }catch(error){
           template?.dispose?.();
           wrapper.userData={...wrapper.userData,factoryDetailHydrated:false,factoryDetailError:String(error?.message||error)};
