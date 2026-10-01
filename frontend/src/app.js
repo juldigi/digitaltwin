@@ -28,6 +28,7 @@ import {assetTruth,connectionTruth,layoutTruth,positionVerification} from './dat
 import {readableStatus,readableSimulationStage,readableEvidenceConfidence,readablePhotoCategory} from './display-language.js';
 import {buildDwgFidelityLedger} from './data/dwg-fidelity.js';
 import {RENDER_PROFILE_INFO,RENDER_PROFILE_ORDER,recommendedProfile} from './render/render-config.js';
+import {simulationModeOptions} from './simulation-mode.js';
 import {APP_BUILD,getState as getAppState,setDomainState,setSimulation as setAppSimulation,setInspector as setAppInspector,setBoot as setAppBoot,setPreference,readUrlState,buildContextUrl,closeOverlay as closeAppOverlay} from './state/app-state.js';
 const MACHINE_ROUTE_BY_ID=Object.freeze({
  'BMJ-MCH-0002':'sheeting',
@@ -312,11 +313,11 @@ function updateSimulationPanel(next=currentSimulationState()){
  const overview=document.querySelector('#panel-content .simulation-overview');
  if(overview&&!overview.querySelector('#sim-mode')){
   const field=document.createElement('label');field.className='simulation-mode-field';
-  field.innerHTML='<span>Cara menjalankan simulasi</span><select id="sim-mode" aria-label="Cara menjalankan simulasi"><option value="continuous">Proses penuh · berjalan terus</option><option value="stages">Tahap demi tahap · berhenti tiap tahap</option></select>';
+  field.innerHTML='<span>Cara menjalankan simulasi</span><select id="sim-mode" aria-label="Cara menjalankan simulasi"></select><small id="sim-mode-help"></small>';
   overview.querySelector('.simulation-actions')?.before(field);
   field.querySelector('select').addEventListener('change',event=>{engine?.setPrintingSimulationMode?.(event.target.value);updateSimulationPanel(engine?.getPrintingSimulationState?.());});
  }
- const modeSelect=$('#sim-mode');if(modeSelect){modeSelect.value=simulation.mode==='stages'?'stages':'continuous';modeSelect.disabled=simulation.blocked||simulation.available===false;}
+ const modeSelect=$('#sim-mode');if(modeSelect){const options=simulationModeOptions(machineRecordForRoute(MACHINE_KEY)),selected=['continuous','stages','training'].includes(simulation.mode)?simulation.mode:'continuous';modeSelect.innerHTML=options.map(option=>`<option value="${esc(option.id)}">${esc(option.label)}</option>`).join('');modeSelect.value=selected;modeSelect.disabled=simulation.blocked||simulation.available===false;const help=$('#sim-mode-help');if(help)help.textContent=selected==='training'?'Mode Pelatihan mengunci kecepatan 0,5×, menampilkan jalur proses, dan berhenti otomatis setiap berganti tahap.':selected==='stages'?'Simulasi berhenti otomatis saat masuk tahap berikutnya.':'Simulasi berjalan terus sampai dihentikan atau dijeda.';}
  if(status)status.textContent=simulation.blocked?'TIDAK TERSEDIA':running?'BERJALAN':active?'DIJEDA':'SIAP';
  if(stage)stage.textContent=readableSimulationStage(simulation.stage||'Siap');
  if(count)count.textContent=String(simulation.completed||0);
@@ -326,9 +327,9 @@ function updateSimulationPanel(next=currentSimulationState()){
  if(uvCount)uvCount.textContent=String(simulation.uvLampCount||0);
  if(uvIndicator)uvIndicator.classList.toggle('active',!!simulation.uvActive);
  if(bar)bar.style.width=progress+'%';
- if(start){start.textContent=active?(running?'Sedang berjalan':simulation.mode==='stages'?'Tahap berikutnya':'Lanjutkan'):(IS_APM2?'Mulai simulasi proses':IS_SHEETING?'Mulai simulasi sheeting':'Mulai simulasi proses');start.disabled=running||simulation.blocked||simulation.available===false;}
+ if(start){start.textContent=active?(running?'Sedang berjalan':['stages','training'].includes(simulation.mode)?'Tahap berikutnya':'Lanjutkan'):(IS_APM2?'Mulai simulasi proses':IS_SHEETING?'Mulai simulasi sheeting':'Mulai simulasi proses');start.disabled=running||simulation.blocked||simulation.available===false;}
  if(pause){pause.textContent='Jeda';pause.hidden=!running;pause.disabled=!running;pause.setAttribute('aria-disabled',running?'false':'true');}
- document.querySelectorAll('[data-sim-speed]').forEach(b=>b.classList.toggle('active',Math.abs(+b.dataset.simSpeed-(simulation.speed||1))<.01));
+ document.querySelectorAll('[data-sim-speed]').forEach(b=>{b.classList.toggle('active',Math.abs(+b.dataset.simSpeed-(simulation.speed||1))<.01);b.disabled=simulation.mode==='training';b.title=simulation.mode==='training'?'Kecepatan dikunci 0,5× pada Mode Pelatihan':'';});const trainingPath=$('#sim-path');if(trainingPath){trainingPath.disabled=simulation.mode==='training';if(simulation.mode==='training')trainingPath.checked=true;}
  document.querySelectorAll('[data-sim-stage]').forEach(b=>b.classList.toggle('active',b.dataset.simStage===(simulation.stage||'')));
  return simulation;
 }
