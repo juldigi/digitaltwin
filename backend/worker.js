@@ -1,7 +1,7 @@
 import {initialState,validateLayout,validatePosition} from '../frontend/src/model.js';
 import {validateSceneOverrides} from '../frontend/src/scene-editor-state.js';
 const MAX_BYTES=4*1024*1024;
-const DEFAULT_PASSWORD='superadmin123';
+const INSECURE_LEGACY_PASSWORD='superadmin123';
 const PASSWORD_ITERATIONS=100000;
 const PASSWORD_RECORD_PREFIX='pbkdf2-sha256';
 const digest=async value=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))).map(x=>x.toString(16).padStart(2,'0')).join('');
@@ -22,19 +22,24 @@ async function verifyPassword(password,account){
   if(record.iterations>PASSWORD_ITERATIONS)return {ok:false,unsupported:true};
   return {ok:await same(await passwordHash(password,account.salt,record.iterations),record.hash),unsupported:false};
 }
-async function authStore(db){
+async function authStore(db,bootstrapPassword){
+  if(typeof bootstrapPassword!=='string'||bootstrapPassword.length<12)throw Object.assign(new Error('Kredensial bootstrap Superadmin belum dikonfigurasi dengan aman.'),{status:503});
   await db.prepare('CREATE TABLE IF NOT EXISTS superadmin_auth (id INTEGER PRIMARY KEY CHECK(id = 1), salt TEXT NOT NULL, password_hash TEXT NOT NULL, generation INTEGER NOT NULL DEFAULT 0)').run();
   await db.prepare('CREATE TABLE IF NOT EXISTS superadmin_sessions (token_hash TEXT PRIMARY KEY, generation INTEGER NOT NULL, expires INTEGER NOT NULL)').run();
   await db.prepare('CREATE TABLE IF NOT EXISTS superadmin_attempts (client_hash TEXT PRIMARY KEY, count INTEGER NOT NULL, reset_at INTEGER NOT NULL)').run();
   let account=await db.prepare('SELECT salt,password_hash,generation FROM superadmin_auth WHERE id = 1').first();
   if(!account){
-    const salt=crypto.randomUUID(),hash=await passwordRecord(DEFAULT_PASSWORD,salt);
+    const salt=crypto.randomUUID(),hash=await passwordRecord(bootstrapPassword,salt);
     await db.prepare('INSERT OR IGNORE INTO superadmin_auth(id,salt,password_hash,generation) VALUES(1,?,?,0)').bind(salt,hash).run();
     account=await db.prepare('SELECT salt,password_hash,generation FROM superadmin_auth WHERE id = 1').first();
-  }else if(account.generation===0&&parsePasswordRecord(account.password_hash)?.legacy){
-    const salt=crypto.randomUUID(),hash=await passwordRecord(DEFAULT_PASSWORD,salt);
-    await db.prepare('UPDATE superadmin_auth SET salt=?,password_hash=? WHERE id=1 AND generation=0').bind(salt,hash).run();
-    account={...account,salt,password_hash:hash};
+  }else if(account.generation===0){
+    const parsed=parsePasswordRecord(account.password_hash);
+    const matchesBootstrap=!parsed?.legacy&&(await verifyPassword(bootstrapPassword,account)).ok;
+    if(!matchesBootstrap){
+      const salt=crypto.randomUUID(),hash=await passwordRecord(bootstrapPassword,salt);
+      await db.prepare('UPDATE superadmin_auth SET salt=?,password_hash=? WHERE id=1 AND generation=0').bind(salt,hash).run();
+      account={...account,salt,password_hash:hash};
+    }
   }
   return account;
 }
@@ -63,11 +68,11 @@ export default {async fetch(req,env){
   if(origin&&!sameOrigin&&!allowed.includes(origin))return json({error:'Origin tidak diizinkan.'},403);
   if(req.method==='OPTIONS')return new Response(null,{status:204,headers:{...cors,'Access-Control-Allow-Methods':'GET,POST,PUT,DELETE,OPTIONS','Access-Control-Allow-Headers':'Authorization,Content-Type,If-Match','Access-Control-Max-Age':'600'}});
   try{
-    if(path==='/api/health'&&req.method==='GET')return json({service:'bmj-digitaltwin',ready:!!env.DB&&!!env.ADMIN_TOKEN&&!!env.VIEWER_TOKEN,assets:!!env.ASSETS,sceneEditorReady:!!env.DB},200,cors);
+    if(path==='/api/health'&&req.method==='GET')return json({service:'bmj-digitaltwin',ready:!!env.DB&&!!env.ADMIN_TOKEN&&!!env.VIEWER_TOKEN,assets:!!env.ASSETS,sceneEditorReady:!!env.DB,superadminBootstrapReady:!!(env.SUPERADMIN_BOOTSTRAP_PASSWORD||env.ADMIN_TOKEN)},200,cors);
     const token=req.headers.get('Authorization')?.replace(/^Bearer /,'');
     if(path==='/api/superadmin/login'&&req.method==='POST'){
       if(!env.DB)return json({error:'Database D1 belum terhubung.'},503,cors);
-      const account=await authStore(env.DB);
+      const account=await authStore(env.DB,env.SUPERADMIN_BOOTSTRAP_PASSWORD||env.ADMIN_TOKEN);
       const client=await digest((req.headers.get('CF-Connecting-IP')||'unknown')+'|'+(env.ADMIN_TOKEN||''));
       const attempt=await env.DB.prepare('SELECT count,reset_at FROM superadmin_attempts WHERE client_hash=?').bind(client).first();
       if(attempt?.count>=5&&attempt.reset_at>Date.now())return json({error:'Terlalu banyak percobaan. Coba lagi dalam 15 menit.'},429,cors);
@@ -85,10 +90,10 @@ export default {async fetch(req,env){
     const superadminSessionInfo=env.DB?await superadminSession(env.DB,token):null,superadmin=!!superadminSessionInfo,passwordChangeRequired=superadmin&&superadminSessionInfo.generation===0;
     if(path==='/api/superadmin/password'&&req.method==='POST'){
       if(!superadmin)return json({error:'Sesi Superadmin tidak valid. Masuk kembali.'},401,cors);
-      const data=await body(req),account=await authStore(env.DB),verification=typeof data.currentPassword==='string'?await verifyPassword(data.currentPassword,account):{ok:false,unsupported:false};
+      const data=await body(req),account=await authStore(env.DB,env.SUPERADMIN_BOOTSTRAP_PASSWORD||env.ADMIN_TOKEN),verification=typeof data.currentPassword==='string'?await verifyPassword(data.currentPassword,account):{ok:false,unsupported:false};
       if(verification.unsupported)return json({error:'Hash kata sandi lama memakai PBKDF2 legacy yang tidak didukung runtime saat ini.'},409,cors);
       if(!verification.ok)return json({error:'Kata sandi lama salah.'},403,cors);
-      if(typeof data.newPassword!=='string'||data.newPassword.length<12||data.newPassword.length>128||data.newPassword===DEFAULT_PASSWORD)return json({error:'Kata sandi baru minimal 12 karakter dan berbeda dari kata sandi awal.'},400,cors);
+      if(typeof data.newPassword!=='string'||data.newPassword.length<12||data.newPassword.length>128||data.newPassword===INSECURE_LEGACY_PASSWORD)return json({error:'Kata sandi baru minimal 12 karakter dan berbeda dari kata sandi awal.'},400,cors);
       const salt=crypto.randomUUID(),hash=await passwordRecord(data.newPassword,salt);
       await env.DB.prepare('UPDATE superadmin_auth SET salt=?,password_hash=?,generation=generation+1 WHERE id=1').bind(salt,hash).run();
       await env.DB.prepare('DELETE FROM superadmin_sessions').run();
