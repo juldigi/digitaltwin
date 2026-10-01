@@ -26,6 +26,6 @@ test('V222 modal lifecycle is reconciled without a second page backdrop',()=>{
  assert.match(css,/body\.modal-open \.mobile-nav\{visibility:hidden!important;pointer-events:none!important\}/);
 });
 
-test('V222 build identity is coherent',()=>{
+test('current release build identity is coherent after V273 rotation',()=>{
  assert.match(state,/APP_BUILD='2026\\.10\\.01-273'/);
 });
