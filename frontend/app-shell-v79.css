@@ -241,6 +241,8 @@ body:not(.panel-hidden) .canonical-simulation-transport,body.modal-open .canonic
 #simulation-transport[hidden]{display:none!important}
 #panel-content .simulation-mode-field{display:grid;gap:7px;margin:12px 0;padding:12px;border:1px solid #dce8f2;border-radius:12px;background:#f6faff;color:var(--ink);font-size:12px;font-weight:700}
 #panel-content .simulation-mode-field select{width:100%;min-height:44px;padding:9px 12px;border:1px solid #cbd9e5;border-radius:9px;background:#fff;color:var(--ink);font:inherit;font-weight:600}
+#panel-content .simulation-mode-field small{color:var(--muted);font-size:11px;font-weight:500;line-height:1.4}
+#panel-content .simulation-speed button:disabled,#panel-content #sim-path:disabled{opacity:.52;cursor:not-allowed}
 #panel-content .simulation-actions button[hidden]{display:none!important}
 #panel-content .simulation-actions button:disabled{opacity:.55;cursor:default}
 @media(max-width:767px){
