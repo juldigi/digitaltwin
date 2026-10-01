@@ -31,7 +31,7 @@ export class FZ1200MachineTemplate{
   const clampSense=this.group(g,'fz1200-clamp-sensing','Clamp position / pressure confirmation reference');for(const z of [-.42,.42]){const sen=this.box(clampSense,[.045,.055,.040],[.54,.45,z],'green',.005);sen.userData.mechanismRole='clamp-confirm-sensor';}
  }
  buildTurn(){const pivotY=1.36,g=this.group(this.root,'fz1200-turn','Turning yoke / trunnion',[0,0,0],[.35,.20,0]);
-  const yoke=this.group(g,'fz1200-turn-yoke','Rotating yoke',[0,pivotY,0]);for(const x of [-.98,.98])this.box(yoke,[.16,1.78,1.45],[x,-.01,0],'blue',.04);this.box(yoke,[2.08,.15,1.42],[0,.84,0],'blue',.03);yoke.userData.rotatingAssembly=true;yoke.userData.turnPivotY=pivotY;
+  const yoke=this.group(g,'fz1200-turn-yoke','Rotating yoke',[0,pivotY,0]);for(const x of [-.86,.86])this.box(yoke,[.16,1.70,1.45],[x,-.01,0],'blue',.04);this.box(yoke,[1.88,.15,1.42],[0,.77,0],'blue',.03);yoke.userData.rotatingAssembly=true;yoke.userData.turnPivotY=pivotY;yoke.userData.familyEnvelopeRefinement='V284_FZ1200_CRADLE_SWEEP_BOUNDED_TO_PUBLIC_FAMILY_ENVELOPE';
   const tr=this.group(g,'fz1200-turn-trunnion','Trunnion bearings');for(const z of [-.86,.86]){this.cyl(tr,.28,.18,[0,1.37,z],'steel','trunnion','z');this.cyl(tr,.12,.24,[0,1.37,z],'dark','trunnion-shaft','z');const housing=this.box(tr,[.38,.38,.16],[0,1.37,z],'dark',.04);housing.userData.mechanismRole='pivot-bearing-housing-reference';}
   const drive=this.group(g,'fz1200-turn-drive','Rotation drive interface');this.cyl(drive,.22,.24,[.58,.48,.94],'dark','rotation-drive','z');this.cyl(drive,.10,.28,[.58,.48,.94],'steel','rotation-gear','z');
   const turnCyl=this.group(g,'fz1200-turn-cylinder','Tilting / turning cylinder reference');const tc=this.cyl(turnCyl,.06,.78,[.76,.92,.66],'steel','tilting-cylinder','y');tc.rotation.z=-.42;tc.userData.closeFamilyReference=true;
@@ -63,10 +63,10 @@ export class FZ1200MachineTemplate{
   }
   const yoke=this.findNode('fz1200-turn-yoke');
   if(yoke){
-   for(const x of [-.98,.98])for(const z of [-.54,.54]){
+   for(const x of [-.86,.86])for(const z of [-.54,.54]){
     const brace=this.box(yoke,[.10,.78,.12],[x,-.25,z],'blue',.014);brace.rotation.z=x<0?-.42:.42;brace.userData.silhouetteCritical=true;brace.userData.mechanismRole='yoke-diagonal-gusset-reference';
    }
-   for(const x of [-.98,.98]){const cap=this.box(yoke,[.22,.18,1.46],[x,.78,0],'blue',.025);cap.userData.silhouetteCritical=true;cap.userData.mechanismRole='yoke-upper-side-cap-reference';}
+   for(const x of [-.86,.86]){const cap=this.box(yoke,[.22,.18,1.46],[x,.71,0],'blue',.025);cap.userData.silhouetteCritical=true;cap.userData.mechanismRole='yoke-upper-side-cap-reference';}
   }
   const power=this.findNode('fz1200-hyd-power');
   if(power){
