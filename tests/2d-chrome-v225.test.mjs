@@ -27,7 +27,7 @@ test('V225 synchronizes 2D semantics with the visible surfaces',()=>{
 });
 
 test('V225 refreshes shell bytes without rotating the V222 cache contract',()=>{
- assert.match(sw,/shell recache without rotating public query identifiers/);
- assert.match(sw,/factory-digital-twin-v222-overlay-state-ssot-20260925/);
- assert.match(sw,/const RELEASE='222'/);
+ assert.match(sw,/V273 rotates public entrypoint identities/);
+ assert.match(sw,/factory-digital-twin-v273-full-fleet-state-sync-20261001/);
+ assert.match(sw,/const RELEASE='273'/);
 });
