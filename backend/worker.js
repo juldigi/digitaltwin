@@ -1,5 +1,6 @@
 import {initialState,validateLayout,validatePosition} from '../frontend/src/model.js';
 import {validateSceneOverrides} from '../frontend/src/scene-editor-state.js';
+import {serializeStateForD1} from './state-storage-budget.js';
 const MAX_BYTES=4*1024*1024;
 const INSECURE_LEGACY_PASSWORD='superadmin123';
 const PASSWORD_ITERATIONS=100000;
@@ -139,7 +140,8 @@ export default {async fetch(req,env){
       Object.assign(state.asset,{layout_x:null,layout_y:null,layout_z:null,rotation:null,scale:null,positionConfidence:'UNKNOWN'});
     }
     const old=state.revision;state.revision++;
-    const result=await env.DB.prepare('UPDATE twin_state SET data = ?, revision = ? WHERE id = 1 AND revision = ?').bind(JSON.stringify(state),state.revision,old).run();
+    const storage=serializeStateForD1(state);
+    const result=await env.DB.prepare('UPDATE twin_state SET data = ?, revision = ? WHERE id = 1 AND revision = ?').bind(storage.payload,state.revision,old).run();
     if(!result.meta.changes)return json({error:'Konflik revisi atau migrasi database belum dijalankan.'},409,cors);
     return json(state,200,cors);
   }catch(e){return json({error:e instanceof SyntaxError?'JSON tidak valid.':e.message||'Permintaan gagal.'},e.status||400,cors);}
