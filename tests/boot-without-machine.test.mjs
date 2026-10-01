@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
+import {preserveSharedTwinState} from '../frontend/src/data/shared-twin-state.js';
 
 test('factory home initializes with no machine selected',()=>{
  const source=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
@@ -9,7 +10,7 @@ test('factory home initializes with no machine selected',()=>{
  const end=source.indexOf('\napplyActiveMachineState();',start);
  assert.ok(start>=0&&end>start,'machine state initializer exists');
  const context={
-  structuredClone:value=>JSON.parse(JSON.stringify(value)),
+  structuredClone:value=>JSON.parse(JSON.stringify(value)),preserveSharedTwinState,
   initialState:{asset:{manufacturer:'previous machine'}},
   setReferenceFilter:()=>{},setAppSimulation:()=>{},MACHINE_KEY:null,IS_SHEETING:false
  };
