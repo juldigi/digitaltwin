@@ -1,7 +1,7 @@
-// V237 dedicated machine realism pass; V249 shell recache without rotating public query identifiers; V255 UI SSOT repair recaches the corrected canonical shell through the build fingerprint; V262 rotates the internal shell cache for mobile-first parity; V263 recaches the simplified editor; V264 recaches hardened editor controls; V265 locks editor async transactions; V266 recaches the EYD user-language audit; V267 recaches the deep language consistency pass; V268 localizes simulation-stage presentation and clarifies the mobile explode control; V269 adds adaptive non-obstructive factory labels; V270 adds the consolidated flagship UI system and real theme surfaces.
-const LEGACY_VERSION='factory-digital-twin-v222-overlay-state-ssot-20260925';
-const VERSION='factory-digital-twin-v270-flagship-ui-20260930';
-const RELEASE='222';
+// V273 rotates public entrypoint identities after V271 full-fleet lifecycle coverage and V272 simulation state synchronization. This prevents stale V222 query URLs from masking current main on long-lived mobile/desktop service-worker installations.
+const LEGACY_VERSION='factory-digital-twin-v270-flagship-ui-20260930';
+const VERSION='factory-digital-twin-v273-full-fleet-state-sync-20261001';
+const RELEASE='273';
 const BUILD_FINGERPRINT='SOURCE';
 const FLEET_CHUNK_COUNT=10;
 const ENTRYPOINTS=[
