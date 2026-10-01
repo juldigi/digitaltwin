@@ -2,6 +2,8 @@ import{getState,setState,setActiveSection,setViewMode,setLayer,setSimulation,set
 import{FOUNDATION_SCOPE,canOpenTechnical3D}from'./data/foundation-scope.js';
 import{RENDER_PROFILE_INFO,RENDER_PROFILE_ORDER,recommendedProfile}from'./render/render-config.js';
 import{readableStatus,readableSimulationStage}from'./display-language.js';
+import{MACHINE_REGISTRY_BY_ID}from'./data/machine-registry.js';
+import{simulationModeOptions}from'./simulation-mode.js';
 
 const q=(s,r=document)=>r.querySelector(s);
 // The 2D plan is a sibling of the 3D workspace. Keep this switch outside the
@@ -552,7 +554,7 @@ addEventListener('bmj:systemcontext',event=>renderSystemContext(event.detail));
 function ensureSimulationTransport(){
  let bar=q('#simulation-transport');if(bar)return bar;
  bar=document.createElement('section');bar.id='simulation-transport';bar.className='canonical-simulation-transport';bar.hidden=true;bar.setAttribute('aria-label','Kontrol simulasi');
- bar.innerHTML=`<div class="sim-context"><small>SIMULASI PROSES</small><strong data-transport-stage>Siap</strong></div><label class="sim-mode-label">Mode<select data-transport-mode aria-label="Mode simulasi"><option value="continuous">Proses penuh</option><option value="stages">Tahap demi tahap</option></select></label><button type="button" data-transport-play class="primary" aria-label="Mulai atau jeda simulasi">Mulai</button><label>Kecepatan<select data-transport-speed aria-label="Kecepatan simulasi"><option value=".5">0,5×</option><option value="1" selected>1×</option><option value="1.5">1,5×</option><option value="2">2×</option></select></label><progress max="100" value="0" data-transport-progress aria-label="Kemajuan simulasi"></progress><button type="button" data-transport-stop>Hentikan</button>`;
+ bar.innerHTML=`<div class="sim-context"><small>SIMULASI PROSES</small><strong data-transport-stage>Siap</strong></div><label class="sim-mode-label">Mode<select data-transport-mode aria-label="Mode simulasi"></select></label><button type="button" data-transport-play class="primary" aria-label="Mulai atau jeda simulasi">Mulai</button><label>Kecepatan<select data-transport-speed aria-label="Kecepatan simulasi"><option value=".5">0,5×</option><option value="1" selected>1×</option><option value="1.5">1,5×</option><option value="2">2×</option></select></label><progress max="100" value="0" data-transport-progress aria-label="Kemajuan simulasi"></progress><button type="button" data-transport-stop>Hentikan</button>`;
  q('.workspace')?.append(bar);
  q('[data-transport-play]',bar).addEventListener('click',()=>dispatchEvent(new CustomEvent('bmj:simulationcommand',{detail:{action:'toggle'}})));
  q('[data-transport-stop]',bar).addEventListener('click',()=>dispatchEvent(new CustomEvent('bmj:simulationcommand',{detail:{action:'stop'}})));
@@ -568,10 +570,10 @@ function syncSimulationTransport(state=getState()){
  document.body.classList.toggle('simulation-transport-open',transportOpen);
  q('[data-transport-stage]',bar).textContent=stage;
  q('[data-transport-progress]',bar).value=progress;
- const mode=sim.mode==='stages'?'stages':'continuous',modeSelect=q('[data-transport-mode]',bar);modeSelect.value=mode;
- const play=q('[data-transport-play]',bar);play.textContent=sim.running?'Jeda':sim.active?(mode==='stages'?'Tahap berikutnya':'Lanjutkan'):'Mulai';play.setAttribute('aria-label',play.textContent+' simulasi');
+ const mode=['continuous','stages','training'].includes(sim.mode)?sim.mode:'continuous',modeSelect=q('[data-transport-mode]',bar),machine=MACHINE_REGISTRY_BY_ID.get(state.selectedAsset)||null,modeOptions=simulationModeOptions(machine);if(modeSelect.dataset.asset!==String(state.selectedAsset||'')||modeSelect.options.length!==modeOptions.length){modeSelect.innerHTML=modeOptions.map(option=>`<option value="${option.id}">${option.label}</option>`).join('');modeSelect.dataset.asset=String(state.selectedAsset||'');}modeSelect.value=mode;
+ const play=q('[data-transport-play]',bar);play.textContent=sim.running?'Jeda':sim.active?(['stages','training'].includes(mode)?'Tahap berikutnya':'Lanjutkan'):'Mulai';play.setAttribute('aria-label',play.textContent+' simulasi');
  q('[data-transport-stop]',bar).disabled=!sim.active;
- const speed=String(sim.speed||1),speedSelect=q('[data-transport-speed]',bar);if([...speedSelect.options].some(option=>option.value===speed))speedSelect.value=speed;
+ const speed=String(sim.speed||1),speedSelect=q('[data-transport-speed]',bar);if([...speedSelect.options].some(option=>option.value===speed))speedSelect.value=speed;speedSelect.disabled=mode==='training';speedSelect.title=mode==='training'?'Kecepatan dikunci 0,5× pada Mode Pelatihan':'';
 }
 ensureLayerManager();ensureSimulationTransport();
 
