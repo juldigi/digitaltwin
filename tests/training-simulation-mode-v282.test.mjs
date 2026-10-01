@@ -7,11 +7,13 @@ const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8')
 const shell=readFileSync(new URL('../frontend/src/app-shell-v79.js',import.meta.url),'utf8');
 
 test('V282 engine enforces training preset instead of relying on UI labels',()=>{
- assert.match(engine,/simulationModePreset\(selected\)/);
+ assert.match(engine,/applyPrintingSimulationModePreset\(\)/);
+ assert.match(engine,/const preset=simulationModePreset\(this\.simulationMode\.mode\)/);
  assert.match(engine,/if\(preset\.lockSpeed!==null\)this\.simulation\?\.setSpeed\(preset\.lockSpeed\)/);
  assert.match(engine,/if\(preset\.forcePathVisible\)this\.simulation\?\.setPathVisible\(true\)/);
  assert.match(engine,/setPrintingSimulationSpeed\(value\)\{const preset=simulationModePreset\(this\.simulationMode\.mode\);return this\.simulation\?\.setSpeed\(preset\.lockSpeed\?\?value\);\}/);
  assert.match(engine,/setPrintingSimulationPathVisible\(on\)\{const preset=simulationModePreset\(this\.simulationMode\.mode\);return this\.simulation\?\.setPathVisible\(preset\.forcePathVisible\?true:on\);\}/);
+ assert.match(engine,/startPrintingSimulation\(\)\{this\.simulation\?\.start\(\);this\.simulationMode\.reset\(\);this\.applyPrintingSimulationModePreset\(\);return this\.simulation\?\.state\?\.\(\);\}/);
 });
 
 test('V282 detail simulation panel exposes three modes and explains training behavior',()=>{
