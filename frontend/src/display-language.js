@@ -274,6 +274,29 @@ const SIMULATION_TEXT=Object.freeze({
  'distribute conditioned supply air / return reference while outdoor condenser rejects heat':'Mendistribusikan udara supply terkondisi melalui acuan return sementara outdoor condenser membuang panas'
 });
 
+const SIMULATION_VALUE_TEXT=Object.freeze({
+ NONE:'Belum ada kontak material',
+ ENTRY_TRANSPORT:'Kontak pada transport masuk',
+ REGISTER_STOPS:'Kontak pada register stop',
+ CLAMP_LOAD_POSITION:'Kontak pada posisi load dan clamp',
+ DRUM_SURFACE:'Kontak pada permukaan drum',
+ OUTPUT_GUIDE:'Kontak pada guide keluaran',
+ SUPPLY:'Area supply media',
+ SUPPLY_ROLL:'Kontak pada supply roll',
+ FRONT_SLACK_TENSION:'Front slack dan pengaturan tension',
+ CAPSTAN_NIP_AND_EXPOSURE:'Nip capstan dan area exposure',
+ REAR_SLACK_AND_CUTTER:'Rear slack dan area cutter',
+ OUTPUT_HANDOFF:'Serah terima ke keluaran',
+ RELEASE:'Vacuum dilepas',
+ HOLD:'Vacuum menahan material'
+});
+
+export function readableSimulationValue(value){
+ if(value==null||value==='')return 'Belum tersedia';
+ const raw=String(value);
+ return SIMULATION_VALUE_TEXT[raw]||raw;
+}
+
 export function readableSimulationStage(value){
  if(value==null||value==='')return 'Siap';
  const raw=String(value);
