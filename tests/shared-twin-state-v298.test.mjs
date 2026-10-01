@@ -38,8 +38,9 @@ test('V298 initial boot still starts from baseline when there is no shared state
 });
 
 test('V298 app preserves shared server state only for machine presentation switches while disconnect remains a full reset',()=>{
- assert.match(app,/import \{preserveSharedTwinState\} from '\.\/data\/shared-twin-state\.js'/);
+ assert.match(app,/import \{preserveSharedTwinState,mergeIncomingSharedTwinState\} from '\.\/data\/shared-twin-state\.js'/);
  assert.match(app,/function applyActiveMachineState\(\)\{\n state=preserveSharedTwinState\(state,initialState\);setReferenceFilter\('all'\);/);
  assert.match(app,/on\('#disconnect',[\s\S]*?state=structuredClone\(initialState\)/);
  assert.doesNotMatch(app,/function applyActiveMachineState\(\)\{\n state=structuredClone\(initialState\)/);
+ assert.match(app,/async function acceptState\(next\)\{state=mergeIncomingSharedTwinState\(next,state\)/);
 });
