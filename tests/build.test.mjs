@@ -9,7 +9,7 @@ test('production HTML resolves the complete local module graph at a GitHub Pages
   const root=resolve('dist'), html=readFileSync(resolve(root,'index.html'),'utf8'), distSw=readFileSync(resolve(root,'sw.js'),'utf8');
   assert.match(distSw,/const BUILD_FINGERPRINT='[a-f0-9]{16}'/,'production service worker must carry an automatic frontend fingerprint');
   assert.doesNotMatch(distSw,/const BUILD_FINGERPRINT='SOURCE'/,'source fingerprint placeholder must never ship to production');
-  assert.match(html,/<script type="module" src="\.\/src\/app\.js\?v=222"><\/script>/);
+  assert.match(html,/<script type="module" src="\.\/src\/app\.js\?v=273"><\/script>/);
   const seen=new Set();
   function visit(file){
     assert.ok(existsSync(file),`Missing production module: ${file}`);
