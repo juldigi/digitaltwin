@@ -858,7 +858,7 @@ function ensureMachineInspectionContext(action='Inspeksi'){
 }
 async function switchActiveMachine(route,{historyMode='push'}={}){
  const switchEpoch=++machineSwitchEpoch,isCurrentSwitch=()=>switchEpoch===machineSwitchEpoch,existingBoot=$('#boot');
- document.body.classList.remove('scene-switching');if(existingBoot)existingBoot.hidden=true;
+ engine?.cancelMachineSwitch?.();document.body.classList.remove('scene-switching');if(existingBoot)existingBoot.hidden=true;
  if(!canOpenTechnical3D(route)){
   const record=machineRecordForRoute(route);
   if(record){focusFoundationPlaceholder(record,{historyMode,openDialog:true});return false;}
