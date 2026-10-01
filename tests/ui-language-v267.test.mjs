@@ -110,7 +110,7 @@ test('V267 localizes raw universal evidence status codes in the shared presentat
   'EUROVENT_SECTIONAL_AHU_FUNCTIONAL_REFERENCE',
   'VERIFIED_PROCESS_MODEL','FAMILY_PROCESS_MODEL','BLOCKED'
  ])assert.ok(display.includes("'"+raw+"':"),raw);
- assert.match(display,/const procedural=\/\^\(DEDICATED \)\?PROCEDURAL/);
+ assert.match(display,/const procedural=\/\^\(DEDICATED \|REFERENCE \)\?PROCEDURAL/);
 });
 
 test('V267 keeps DWG audit internals out of the user-facing fidelity popup',()=>{
