@@ -34,6 +34,7 @@ test('V281 factory truth has technical-source context for every registered 3D as
 
 test('V281 factory dialog presents truth and position through readable Indonesian labels',()=>{
  assert.match(app,/pair\('Posisi',readableStatus\(positionVerification\(placement\)\)\)/);
+ assert.match(app,/pair\('Sumber identitas',machine\.source==='USER_CONFIRMED'\?'Konfirmasi pengguna':'Daftar mesin BMJ'\)/);
  assert.match(app,/pair\('Dasar model 3D',readableStatus\(truth\?\.source3D\|\|'UNKNOWN'\)\)/);
  assert.match(app,/pair\('Detail model 3D',readableStatus\(truth\?\.detail3D\|\|'UNKNOWN'\)\)/);
  assert.match(app,/pair\('Keandalan data',readableStatus\(truth\?\.dataConfidence\|\|'UNVERIFIED'\)\)/);
