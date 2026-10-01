@@ -8,7 +8,7 @@ import {normalizePhotoRegistry} from '../frontend/src/data/photo-evidence.js';
 test('V276 registers all four actual BMJ POLAR photographs and keeps them aligned with source provenance',()=>{
  assert.equal(POLAR115_PHOTO_REGISTRY.length,4);
  assert.deepEqual(POLAR115_PHOTO_REGISTRY.map(photo=>photo.filename),['IMG_2488.jpeg','IMG_2489.jpeg','IMG_2490.jpeg','IMG_2491.jpeg']);
- assert.deepEqual(POLAR115_PHOTO_REGISTRY.map(photo=>photo.viewDirection),['Front','Oblique front','Rear drive','Rear feed']);
+ assert.deepEqual(POLAR115_PHOTO_REGISTRY.map(photo=>photo.viewDirection),['Depan','Serong depan','Belakang sisi drive','Belakang sisi feed']);
  assert.ok(POLAR115_PHOTO_REGISTRY.every(photo=>photo.confidence==='VERIFIED_VISUAL'));
  const source=POLAR115_TECHNICAL_SOURCES.find(item=>item.id==='BMJ-POLAR-PHOTOS-2026-09');
  assert.ok(source);
@@ -20,7 +20,7 @@ test('V276 normalizes legacy and current photo-registry field names for the comm
  const normalized=normalizePhotoRegistry(SHEETING_PHOTO_REGISTRY);
  assert.equal(normalized.length,9);
  assert.equal(normalized[0].filename,'IMG_2479.HEIC');
- assert.equal(normalized[0].machineZone,'rollstand-wide');
+ assert.equal(normalized[0].machineZone,'Rollstand · tampak lebar');
  assert.equal(normalized[0].viewDirection,'Sudut aktual BMJ');
  assert.equal(normalized[0].category,'active_geometry_reference');
  assert.equal(normalized[0].confidence,'PRIMARY_ACTUAL');
