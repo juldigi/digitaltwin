@@ -19,6 +19,8 @@ import {APM2_PHOTO_REGISTRY,APM2_TECHNICAL_SOURCES,apm2PhotoStats,APM2_ORIENTATI
 import {APM2_SIMULATION_STAGES,APM2_PROCESS_STEPS} from './simulation-apm2.js';
 import {SHEETING_TAXONOMY,SHEETING_TAXONOMY_BY_ID,sheetingTaxonomyChildren,sheetingTaxonomyStats} from './data/taxonomy-sheeting.js';
 import {SHEETING_PHOTO_REGISTRY,SHEETING_TECHNICAL_SOURCES,sheetingPhotoStats,SHEETING_ORIENTATION} from './data/sources-sheeting.js';
+import {POLAR115_PHOTO_REGISTRY,polar115PhotoStats} from './data/sources-polar115.js';
+import {normalizePhotoRegistry} from './data/photo-evidence.js';
 import {SHEETING_SIMULATION_STAGES,SHEETING_PROCESS_STEPS} from './simulation-sheeting.js';
 import {universalMachineConfig,universalTaxonomy,universalTechnicalSources} from './universal-machine.js';
 import {assetTruth,connectionTruth,layoutTruth,positionVerification,truthStatus} from './data/truth-status.js';
@@ -55,10 +57,10 @@ function configureActiveMachine(requested){
  TAXONOMY_BY_ID=IS_OFFSET10?OFFSET10_TAXONOMY_BY_ID:IS_APM2?APM2_TAXONOMY_BY_ID:IS_SHEETING?SHEETING_TAXONOMY_BY_ID:IS_GENERIC?new Map(GENERIC_TAXONOMY.map(n=>[n.id,n])):OFFSET5_BY_ID;
  taxonomyChildren=IS_OFFSET10?offset10TaxonomyChildren:IS_APM2?apm2TaxonomyChildren:IS_SHEETING?sheetingTaxonomyChildren:IS_GENERIC?(id=>GENERIC_TAXONOMY.filter(n=>n.parentId===id)):offset5Children;
  taxonomyStats=IS_OFFSET10?offset10TaxonomyStats:IS_APM2?apm2TaxonomyStats:IS_SHEETING?sheetingTaxonomyStats:IS_GENERIC?(()=>({total:GENERIC_TAXONOMY.length,byLevel:Object.fromEntries([1,2,3,4,5,6].map(l=>[l,GENERIC_TAXONOMY.filter(n=>n.level===l).length]))})):offset5Stats;
- PHOTO_REGISTRY=IS_OFFSET10?OFFSET10_PHOTO_REGISTRY:IS_APM2?APM2_PHOTO_REGISTRY:IS_SHEETING?SHEETING_PHOTO_REGISTRY:IS_GENERIC?[]:OFFSET5_PHOTOS;
+ {const rawPhotos=IS_OFFSET10?OFFSET10_PHOTO_REGISTRY:IS_APM2?APM2_PHOTO_REGISTRY:IS_SHEETING?SHEETING_PHOTO_REGISTRY:IS_GENERIC&&MACHINE_KEY==='BMJ-MCH-0001'?POLAR115_PHOTO_REGISTRY:IS_GENERIC?[]:OFFSET5_PHOTOS;PHOTO_REGISTRY=normalizePhotoRegistry(rawPhotos);}
  GENERIC_SOURCES=IS_GENERIC?[{id:'BMJ-MACHINE-DATABASE',title:'Database Mesin Packaging Offset BMJ',publisher:'PT Bukit Muria Jaya',type:'USER_PROVIDED',confidence:'VERIFIED'},...universalTechnicalSources(MACHINE_KEY)]:[];
  TECHNICAL_SOURCES=IS_OFFSET10?OFFSET10_TECHNICAL_SOURCES:IS_APM2?APM2_TECHNICAL_SOURCES:IS_SHEETING?SHEETING_TECHNICAL_SOURCES:IS_GENERIC?GENERIC_SOURCES:OFFSET5_SOURCES;
- photoStats=IS_OFFSET10?offset10PhotoStats:IS_APM2?apm2PhotoStats:IS_SHEETING?sheetingPhotoStats:IS_GENERIC?(()=>({unique:0,total:0})):offset5PhotoStats;
+ photoStats=IS_OFFSET10?offset10PhotoStats:IS_APM2?apm2PhotoStats:IS_SHEETING?sheetingPhotoStats:IS_GENERIC&&MACHINE_KEY==='BMJ-MCH-0001'?polar115PhotoStats:IS_GENERIC?(()=>({unique:0,total:0})):offset5PhotoStats;
  ORIENTATION=IS_OFFSET10?OFFSET10_ORIENTATION:IS_APM2?APM2_ORIENTATION:IS_SHEETING?SHEETING_ORIENTATION:IS_GENERIC?{feedDirection:'Mengikuti alur proses keluarga',operatorSide:'Belum terverifikasi',driveSide:'Belum terverifikasi'}:OFFSET5_ORIENTATION;
  PRINTING_SIMULATION_STAGES=IS_OFFSET10?OFFSET10_SIMULATION_STAGES:IS_APM2?APM2_SIMULATION_STAGES:IS_SHEETING?SHEETING_SIMULATION_STAGES:IS_GENERIC?(IS_VERIFIED_REGISTRY_SIM?(GENERIC_CONFIG.profile?.process?.length?GENERIC_CONFIG.profile.process:GENERIC_TAXONOMY.filter(n=>n.level===2).map(n=>n.name)):GENERIC_CONFIG.modules):OFFSET5_SIM_STAGES;
  INK_SIMULATION_SEQUENCE=IS_OFFSET10?OFFSET10_INK_SEQUENCE:IS_APM2?APM2_PROCESS_STEPS:IS_SHEETING?SHEETING_PROCESS_STEPS:IS_GENERIC?(IS_VERIFIED_REGISTRY_SIM?PRINTING_SIMULATION_STAGES:GENERIC_CONFIG.modules.map(x=>`${x} · proses`)):OFFSET5_INK_SEQUENCE;
