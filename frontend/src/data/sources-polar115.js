@@ -1,8 +1,8 @@
 export const POLAR115_PHOTO_REGISTRY=Object.freeze([
- Object.freeze({id:'BMJ-POLAR-IMG-2488',filename:'IMG_2488.jpeg',machineZone:'POLAR 115 EM-MON · instalasi aktual BMJ',viewDirection:'Front',category:'active_geometry_reference',confidence:'VERIFIED_VISUAL'}),
- Object.freeze({id:'BMJ-POLAR-IMG-2489',filename:'IMG_2489.jpeg',machineZone:'POLAR 115 EM-MON · instalasi aktual BMJ',viewDirection:'Oblique front',category:'active_geometry_reference',confidence:'VERIFIED_VISUAL'}),
- Object.freeze({id:'BMJ-POLAR-IMG-2490',filename:'IMG_2490.jpeg',machineZone:'POLAR 115 EM-MON · instalasi aktual BMJ',viewDirection:'Rear drive',category:'active_geometry_reference',confidence:'VERIFIED_VISUAL'}),
- Object.freeze({id:'BMJ-POLAR-IMG-2491',filename:'IMG_2491.jpeg',machineZone:'POLAR 115 EM-MON · instalasi aktual BMJ',viewDirection:'Rear feed',category:'active_geometry_reference',confidence:'VERIFIED_VISUAL'})
+ Object.freeze({id:'BMJ-POLAR-IMG-2488',filename:'IMG_2488.jpeg',machineZone:'POLAR 115 EM-MON · instalasi aktual BMJ',viewDirection:'Depan',category:'active_geometry_reference',confidence:'VERIFIED_VISUAL'}),
+ Object.freeze({id:'BMJ-POLAR-IMG-2489',filename:'IMG_2489.jpeg',machineZone:'POLAR 115 EM-MON · instalasi aktual BMJ',viewDirection:'Serong depan',category:'active_geometry_reference',confidence:'VERIFIED_VISUAL'}),
+ Object.freeze({id:'BMJ-POLAR-IMG-2490',filename:'IMG_2490.jpeg',machineZone:'POLAR 115 EM-MON · instalasi aktual BMJ',viewDirection:'Belakang sisi drive',category:'active_geometry_reference',confidence:'VERIFIED_VISUAL'}),
+ Object.freeze({id:'BMJ-POLAR-IMG-2491',filename:'IMG_2491.jpeg',machineZone:'POLAR 115 EM-MON · instalasi aktual BMJ',viewDirection:'Belakang sisi feed',category:'active_geometry_reference',confidence:'VERIFIED_VISUAL'})
 ]);
 export const polar115PhotoStats=()=>({unique:POLAR115_PHOTO_REGISTRY.length,total:POLAR115_PHOTO_REGISTRY.length});
 
