@@ -35,12 +35,12 @@ test('V257 release manifest records one chronological implementation path with e
  for(const item of RELEASE_MANIFEST_V257.filter(x=>x.status==='merged'))assert.match(item.mergeCommit,/^[a-f0-9]{40}$/);
 });
 
-test('V270 application identity keeps the V257 lineage and rotates the shell for flagship UI',()=>{
- assert.equal(APP_BUILD,'2026.09.30-270');
- assert.match(state,/APP_BUILD='2026\.09\.30-270'/);
- assert.match(sw,/const VERSION='factory-digital-twin-v270-flagship-ui-20260930'/);
- assert.match(sw,/const LEGACY_VERSION='factory-digital-twin-v222-overlay-state-ssot-20260925'/);
- assert.match(sw,/const RELEASE='222'/);
+test('V273 application identity keeps the V257 lineage and rotates the shell after full-fleet state hardening',()=>{
+ assert.equal(APP_BUILD,'2026.10.01-273');
+ assert.match(state,/APP_BUILD='2026\.10\.01-273'/);
+ assert.match(sw,/const VERSION='factory-digital-twin-v273-full-fleet-state-sync-20261001'/);
+ assert.match(sw,/const LEGACY_VERSION='factory-digital-twin-v270-flagship-ui-20260930'/);
+ assert.match(sw,/const RELEASE='273'/);
  assert.match(sw,/const BUILD_FINGERPRINT='SOURCE'/);
 });
 
