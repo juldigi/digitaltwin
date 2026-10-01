@@ -63,7 +63,7 @@ export class MK1060ProcessSimulation{
    strippingActive:this.strippingActive,blankingActive:this.blankingActive,wasteConveyorActive:this.wasteConveyorActive,
    interlocks:{platenDwellRequiresStoppedTransport:this.platenClosed?!this.transportIndexing:true,strippingRequiresStoppedTransport:this.strippingActive?!this.transportIndexing:true,blankingRequiresStoppedTransport:this.blankingActive?!this.transportIndexing:true}};
  }
- start(){this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;for(const s of this.sheets){s.lap=-1;s.mesh.visible=false;}for(const p of this.blankStack)p.visible=false;for(const w of this.wastePieces)w.visible=false;this.resetMechanisms();this.onUpdate?.(this.state());return this.state();}
+ start(){this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;for(const s of this.sheets){s.lap=-1;s.mesh.visible=false;}for(const p of this.blankStack)p.visible=false;for(const w of this.wastePieces)w.visible=false;this.resetMechanisms();this.pathLine.visible=this.pathVisible;this.onUpdate?.(this.state());return this.state();}
  pause(){this.running=false;this.paused=this.active;this.onUpdate?.(this.state());return this.state();}
  resume(){if(this.active){this.running=true;this.paused=false;this.lastNow=null;}this.onUpdate?.(this.state());return this.state();}
  setSpeed(v){this.speed=Math.max(.25,Math.min(4,Number(v)||1));return this.state();}

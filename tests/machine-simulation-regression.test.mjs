@@ -52,6 +52,24 @@ for(const {id,label} of fleet){
  });
 }
 
+for(const {id,label} of fleet){
+ test(`${label} (${id}): process-path preference stays synchronized after stop and fresh start`,()=>{
+  const template=createPolishedMachineTemplate(id),simulation=createMachineSimulation(id,template.root,template);
+  try{
+   const initial=simulation.start();
+   if(initial.blocked){assert.equal(initial.active,false);return;}
+   simulation.setPathVisible?.(true);
+   const pathObject=simulation.pathLine||simulation.path||null;
+   if(pathObject&&typeof pathObject.visible==='boolean')assert.equal(pathObject.visible,true,`${id} path is enabled in state but hidden while active`);
+   simulation.stop();
+   const preference=simulation.state().pathVisible===true;
+   const restarted=simulation.start();
+   assert.equal(restarted.active,true);
+   if(preference&&pathObject&&typeof pathObject.visible==='boolean')assert.equal(pathObject.visible,true,`${id} lost visible path after stop/start while pathVisible stayed true`);
+  }finally{simulation.dispose();template.dispose();}
+ });
+}
+
 test('fleet regression gate covers every registered equipment exactly once',()=>{
  assert.equal(fleet.length,41);
  assert.equal(new Set(fleet.map(item=>item.id)).size,41);
