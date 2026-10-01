@@ -43,7 +43,7 @@ test('V268 makes the mobile explode action understandable',()=>{
 });
 
 test('V268 language behavior remains covered after later internal build/cache rotations',()=>{
- assert.match(state,/APP_BUILD='2026\.09\.30-\d+'/);
- assert.match(sw,/const VERSION='factory-digital-twin-v\d+[-a-z0-9]*-20260930'/);
+ assert.match(state,/APP_BUILD='2026\\.10\\.01-273'/);
+ assert.match(sw,/const VERSION='factory-digital-twin-v273-full-fleet-state-sync-20261001'/);
  assert.match(sw,/const RELEASE='273'/);
 });
