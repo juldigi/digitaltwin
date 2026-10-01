@@ -129,7 +129,7 @@ test('V231 AHU/Sansin overview retains its major non-microdetail section shells'
 test('V231 factory/home still bakes live templates and keeps cache contract stable',()=>{
  assert.match(bake,/const t=createPolishedMachineTemplate\(place\.machineId\)/);
  assert.match(bake,/t\.setLow\?\.\(true\)/);
- assert.match(sw,/shell recache without rotating public query identifiers/);
- assert.match(sw,/factory-digital-twin-v222-overlay-state-ssot-20260925/);
- assert.match(sw,/const RELEASE='222'/);
+ assert.match(sw,/V273 rotates public entrypoint identities/);
+ assert.match(sw,/factory-digital-twin-v273-full-fleet-state-sync-20261001/);
+ assert.match(sw,/const RELEASE='273'/);
 });
