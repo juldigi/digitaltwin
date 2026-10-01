@@ -61,8 +61,8 @@ test('production UI exposes source confidence and explicit truth statuses',()=>{
   assert.match(app,/pair\('Nilai kesehatan mesin',truth\.healthScore\)/);
   assert.match(app,/belum diketahui, belum diverifikasi, perkiraan, atau perlu ditinjau/);
   assert.match(app,/reference-truth-row/);
-  assert.match(app,/truthStatus\(src\.confidence,'UNVERIFIED'\)/);
-  assert.match(app,/truthStatus\(p\.confidence,'UNVERIFIED'\)/);
+  assert.match(app,/readableEvidenceConfidence\(src\.confidence\)/);
+  assert.match(app,/readableEvidenceConfidence\(p\.confidence\)/);
   assert.match(app,/DWG · \$\{readableStatus\(truth\.planGeometry\)\}/);
   assert.match(app,/Skala · \$\{readableStatus\(truth\.scale\)\}/);
   assert.doesNotMatch(app,/\$\('#lod-status'\)\.textContent=view==='factory'\?'Denah siap':'Model siap'/);

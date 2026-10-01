@@ -8,6 +8,43 @@ const STATUS_LABELS=Object.freeze({
  RECONSTRUCTED:'Direkonstruksi dari sumber','PARTIAL':'Sebagian','OFFLINE':'Tidak tersambung',
  'CACHED DATA':'Salinan data di perangkat','MODE LOKAL':'Mode lokal'
 });
+const EVIDENCE_CONFIDENCE_LABELS=Object.freeze({
+ VERIFIED:'Terverifikasi',
+ VERIFIED_VISUAL:'Terverifikasi secara visual',
+ PRIMARY_ACTUAL:'Foto aktual BMJ · sumber utama',
+ VERIFIED_BOUNDARY:'Batas verifikasi terdokumentasi',
+ CORROBORATED:'Dikuatkan oleh sumber pembanding',
+ MODEL_REFERENCE:'Referensi model',
+ FAMILY_REFERENCE:'Referensi keluarga mesin',
+ MODEL_FAMILY_REFERENCE:'Referensi keluarga model',
+ 'HIGH-FAMILY / LOW-EXACT':'Kecocokan keluarga tinggi · ketepatan model spesifik rendah',
+ 'MEDIUM-FAMILY / LOW-EXACT':'Kecocokan keluarga sedang · ketepatan model spesifik rendah',
+ 'MEDIUM-FAMILY':'Kecocokan keluarga sedang',
+ 'LOW-FAMILY / NO-GEOMETRY':'Kecocokan keluarga rendah · bukan sumber geometri',
+ 'LOW-VISUAL-FOR-HSM_CTM7':'Referensi visual lemah untuk HSM-CTM7',
+ 'PROCESS-GENERIC':'Referensi proses umum',
+ 'PROCESS-GENERIC / NOT BMJ CUTTER PROOF':'Referensi proses umum · bukan bukti cutter BMJ',
+ 'USER-CONFIRMED':'Dikonfirmasi oleh pengguna'
+});
+
+const PHOTO_CATEGORY_LABELS=Object.freeze({
+ active_geometry_reference:'Acuan geometri aktif',
+ supplementary_reference:'Referensi tambahan',
+ orientation_reference:'Referensi orientasi',
+ detail_reference:'Referensi detail'
+});
+
+export function readableEvidenceConfidence(value){
+ if(value==null||value==='')return 'Belum tersedia';
+ const raw=String(value);
+ return EVIDENCE_CONFIDENCE_LABELS[raw]||readableStatus(raw);
+}
+
+export function readablePhotoCategory(value){
+ if(value==null||value==='')return 'Foto aktual';
+ return PHOTO_CATEGORY_LABELS[String(value)]||String(value).replace(/[_-]+/g,' ');
+}
+
 export function readableStatus(value){
  if(value==null||value==='')return 'Belum tersedia';
  const raw=String(value);
