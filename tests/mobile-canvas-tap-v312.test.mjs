@@ -23,5 +23,5 @@ test('V312 pointer gesture state is cleared on cancel and before pointer-up sele
 test('V312 tap hardening preserves simulation, gizmo and raycast selection guards',()=>{
  assert.match(engine,/this\.gizmo\.dragging\|\|this\.simulation\?\.active/);
  assert.match(engine,/this\.ray\.setFromCamera/);
- assert.match(engine,/const part=this\.template\.resolvePart\(hit\.object\);if\(part\)this\.onSelect\(part\)/);
+ assert.match(engine,/for\(const hit of hits\)\{const part=this\.template\.resolvePart\(hit\.object\);if\(part\)\{this\.onSelect\(part\);break;\}\}/);
 });
