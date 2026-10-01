@@ -1,3 +1,11 @@
+export const POLAR115_PHOTO_REGISTRY=Object.freeze([
+ Object.freeze({id:'BMJ-POLAR-IMG-2488',filename:'IMG_2488.jpeg',machineZone:'POLAR 115 EM-MON · instalasi aktual BMJ',viewDirection:'Front',category:'active_geometry_reference',confidence:'VERIFIED_VISUAL'}),
+ Object.freeze({id:'BMJ-POLAR-IMG-2489',filename:'IMG_2489.jpeg',machineZone:'POLAR 115 EM-MON · instalasi aktual BMJ',viewDirection:'Oblique front',category:'active_geometry_reference',confidence:'VERIFIED_VISUAL'}),
+ Object.freeze({id:'BMJ-POLAR-IMG-2490',filename:'IMG_2490.jpeg',machineZone:'POLAR 115 EM-MON · instalasi aktual BMJ',viewDirection:'Rear drive',category:'active_geometry_reference',confidence:'VERIFIED_VISUAL'}),
+ Object.freeze({id:'BMJ-POLAR-IMG-2491',filename:'IMG_2491.jpeg',machineZone:'POLAR 115 EM-MON · instalasi aktual BMJ',viewDirection:'Rear feed',category:'active_geometry_reference',confidence:'VERIFIED_VISUAL'})
+]);
+export const polar115PhotoStats=()=>({unique:POLAR115_PHOTO_REGISTRY.length,total:POLAR115_PHOTO_REGISTRY.length});
+
 export const POLAR115_TECHNICAL_SOURCES=Object.freeze([
  {id:'BMJ-POLAR-ID',title:'BMJ Machine Database · GLM-1',publisher:'PT Bukit Muria Jaya',type:'USER_PROVIDED',confidence:'VERIFIED',supports:['model 115 EM MON','serial 5831536','functional location','SAP GLM-1']},
  {id:'POLAR-EM-SPEC-KITMONDO',title:'POLAR 115 EM MONITOR · 115 cm opening, air table, side tables, photocells',publisher:'Kitmondo',url:'https://www.kitmondo.com/polar-115-em-monitor-p241022253/',type:'ARCHIVE_SPECIFICATION',confidence:'CORROBORATED',supports:['115 cm cutting opening','115 cm back-table depth','air table','left/right side tables','photo cells','165 mm published cutting-height reference']},
