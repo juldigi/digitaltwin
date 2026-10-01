@@ -47,8 +47,11 @@ test('training mode pauses at stage boundaries and exposes a deterministic safe 
 
 test('training mode labels adapt to the selected machine family without changing mechanics',()=>{
  assert.match(simulationModeOptions({area:'OFFSET PRINTING',name:'OFFSET - 8 MACHINE'}).find(mode=>mode.id==='training').label,/alur cetak/);
- assert.match(simulationModeOptions({area:'OFFSET CONVERTING',name:'FOLDER GLUER - 1 MACHINE'}).find(mode=>mode.id==='training').label,/alur converting/);
+ assert.match(simulationModeOptions({area:'OFFSET CONVERTING',name:'FOLDER GLUER - 1 MACHINE'}).find(mode=>mode.id==='training').label,/folder gluer/);
  assert.match(simulationModeOptions({area:'PDS',name:'CTP 1'}).find(mode=>mode.id==='training').label,/alur prepress/);
- assert.match(simulationModeOptions({area:'UTILITY',name:'AHU 3'}).find(mode=>mode.id==='training').label,/aliran utilitas/);
+ assert.match(simulationModeOptions({area:'UTILITY',name:'AHU 3'}).find(mode=>mode.id==='training').label,/tata udara/);
  assert.ok(simulationModeOptions({area:'OFFSET CONVERTING',name:'OFFLINE INSPECTION 3 - MK'}).find(mode=>mode.id==='training').label.includes('alur inspeksi'));
+ assert.match(simulationModeOptions({area:'OFFSET PRINTING',name:'SHEETING MACHINE'}).find(mode=>mode.id==='training').label,/sheeting/);
+ assert.match(simulationModeOptions({area:'OFFSET PRINTING',name:'POLAR CUTTER'}).find(mode=>mode.id==='training').label,/pemotongan/);
+ assert.match(simulationModeOptions({area:'UTILITY',name:'COMPRESSOR ATLAS COPCO NO.9'}).find(mode=>mode.id==='training').label,/compressed air/);
 });
