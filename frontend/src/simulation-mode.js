@@ -2,11 +2,20 @@ const MODE_IDS=Object.freeze(['continuous','stages','training']);
 
 const trainingLabel=machine=>{
  const area=String(machine?.area||'').toUpperCase(),name=String(machine?.name||'').toUpperCase();
- if(area==='UTILITY')return 'Pelatihan aliran utilitas';
- if(area.includes('PDS')||name.includes('CTP')||name.includes('CTF')||name.includes('ZUND'))return 'Pelatihan alur prepress';
+ if(name.includes('SHEETING'))return 'Pelatihan alur sheeting';
+ if(name.includes('POLAR'))return 'Pelatihan alur pemotongan';
+ if(name.includes('PILE TURNER'))return 'Pelatihan handling tumpukan';
+ if(name.includes('FOLDER GLUER'))return 'Pelatihan alur folder gluer';
+ if(name.includes('AUTOPLATEN'))return 'Pelatihan alur autoplaten';
  if(name.includes('INSPECTION')||name.includes('INSPEC'))return 'Pelatihan alur inspeksi';
+ if(name.includes('COLLATOR'))return 'Pelatihan alur collator';
+ if(name.includes('INKJET'))return 'Pelatihan alur inkjet';
+ if(area.includes('PDS')||name.includes('CTP')||name.includes('CTF')||name.includes('ZUND'))return 'Pelatihan alur prepress';
+ if(name.includes('COMPRESSOR'))return 'Pelatihan aliran compressed air';
+ if(name.includes('AHU'))return 'Pelatihan aliran tata udara';
  if(name.includes('OFFSET')||area.includes('PRINTING'))return 'Pelatihan alur cetak';
  if(area.includes('CONVERTING'))return 'Pelatihan alur converting';
+ if(area==='UTILITY')return 'Pelatihan aliran utilitas';
  return 'Pelatihan alur proses';
 };
 
