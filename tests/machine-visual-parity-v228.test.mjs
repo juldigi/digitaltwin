@@ -65,10 +65,10 @@ test('V228 realism packs preserve evidence boundaries instead of inventing insta
 });
 
 test('V228 keeps detailed realism lazy-loaded while refreshing the shell cache',()=>{
- assert.match(sw,/shell recache without rotating public query identifiers/);
+ assert.match(sw,/V273 rotates public entrypoint identities/);
  for(const path of ['machine-runtime.js','offset5-realism.js','offset8-realism.js','offset10-realism.js'])assert.doesNotMatch(sw,new RegExp("'\\./src/"+path.replaceAll('.','\\.')+"'"));
- assert.match(sw,/factory-digital-twin-v222-overlay-state-ssot-20260925/);
- assert.match(sw,/const RELEASE='222'/);
+ assert.match(sw,/factory-digital-twin-v273-full-fleet-state-sync-20261001/);
+ assert.match(sw,/const RELEASE='273'/);
 });
 
 test('V228 rebaked fleet keeps headroom inside the existing nine chunk contract',()=>{
