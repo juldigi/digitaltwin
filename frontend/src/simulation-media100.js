@@ -43,7 +43,7 @@ export class Media100ProcessSimulation{
    feedingActive:this.feedingActive,preBreakActive:this.preBreakActive,formingActive:this.formingActive,glueApplying:this.glueApplying,foldingActive:this.foldingActive,compressionActive:this.compressionActive,deliveryActive:this.deliveryActive,
    referenceJobDemoOnly:true,activeByStage:{...this.activeByStage}};
  }
- start(){this.active=true;this.running=true;this.paused=false;this.completed=0;this.elapsed=0;this.lastNow=null;for(const c of this.cartons)c.lap=-1;for(const p of this.exitStack)p.visible=false;this.resetMechanisms();this.onUpdate?.(this.state());return this.state();}
+ start(){this.active=true;this.running=true;this.paused=false;this.completed=0;this.elapsed=0;this.lastNow=null;for(const c of this.cartons)c.lap=-1;for(const p of this.exitStack)p.visible=false;this.resetMechanisms();this.pathLine.visible=this.pathVisible;this.onUpdate?.(this.state());return this.state();}
  pause(){this.running=false;this.paused=this.active;this.onUpdate?.(this.state());return this.state();}
  resume(){if(this.active){this.running=true;this.paused=false;this.lastNow=null;}this.onUpdate?.(this.state());return this.state();}
  setSpeed(v){this.speed=Math.max(.25,Math.min(4,Number(v)||1));return this.state();}
