@@ -8,8 +8,9 @@ const engine=readFileSync(new URL('../frontend/src/engine.js',import.meta.url),'
 test('V319 every machine request invalidates older app and engine switch transactions',()=>{
  assert.match(app,/cachedDataActive=false,machineSwitchEpoch=0/);
  assert.match(app,/const switchEpoch=\+\+machineSwitchEpoch,isCurrentSwitch=\(\)=>switchEpoch===machineSwitchEpoch/);
- assert.match(app,/engine\?\.cancelMachineSwitch\?\.\(\);document\.body\.classList\.remove\('scene-switching'\)/);
+ assert.match(app,/engine\?\.cancelMachineSwitch\?\.\(\);resyncActiveMachineDescriptorFromEngine\(\);document\.body\.classList\.remove\('scene-switching'\)/);
  assert.ok(app.indexOf('engine?.cancelMachineSwitch?.()')<app.indexOf("if(!canOpenTechnical3D(route))"));
+ assert.match(app,/function resyncActiveMachineDescriptorFromEngine\(\)\{[\s\S]*?if\(!engine\|\|MACHINE_KEY===engine\.machineKey\)return false;[\s\S]*?configureActiveMachine\(engine\.machineKey\)[\s\S]*?clearActiveMachineDescriptor\(\)/);
 });
 
 test('V319 stale requests cannot configure or finish the application context after asynchronous waits',()=>{
