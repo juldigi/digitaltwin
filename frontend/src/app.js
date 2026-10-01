@@ -22,6 +22,7 @@ import {SHEETING_PHOTO_REGISTRY,SHEETING_TECHNICAL_SOURCES,sheetingPhotoStats,SH
 import {POLAR115_PHOTO_REGISTRY,polar115PhotoStats} from './data/sources-polar115.js';
 import {normalizePhotoRegistry} from './data/photo-evidence.js';
 import {searchCorpusForMachine} from './data/search-corpus.js';
+import {machineTruthProfile} from './data/machine-truth-profile.js';
 import {SHEETING_SIMULATION_STAGES,SHEETING_PROCESS_STEPS} from './simulation-sheeting.js';
 import {universalMachineConfig,universalTaxonomy,universalTechnicalSources} from './universal-machine.js';
 import {assetTruth,connectionTruth,layoutTruth,positionVerification} from './data/truth-status.js';
@@ -52,7 +53,7 @@ function configureActiveMachine(requested){
  GENERIC_CONFIG=universalMachineConfig(requested);
  if(!['offset5','offset10','apm2','sheeting'].includes(requested)&&!GENERIC_CONFIG)throw new Error(`Model 3D untuk ${requested} belum tersedia.`);
  MACHINE_KEY=requested;
- IS_OFFSET10=MACHINE_KEY==='offset10';IS_APM2=MACHINE_KEY==='apm2';IS_SHEETING=MACHINE_KEY==='sheeting';IS_GENERIC=!!GENERIC_CONFIG;IS_VERIFIED_REGISTRY_SIM=IS_GENERIC&&['VERIFIED_PROCESS_MODEL','FAMILY_PROCESS_MODEL'].includes(GENERIC_CONFIG.evidence.simulation);IS_DEDICATED_REGISTRY_MODEL=IS_GENERIC&&GENERIC_CONFIG.evidence.simulation==='VERIFIED_PROCESS_MODEL';
+ IS_OFFSET10=MACHINE_KEY==='offset10';IS_APM2=MACHINE_KEY==='apm2';IS_SHEETING=MACHINE_KEY==='sheeting';IS_GENERIC=!!GENERIC_CONFIG;{const modelTruth=machineTruthProfile(MACHINE_KEY);IS_VERIFIED_REGISTRY_SIM=IS_GENERIC&&modelTruth.simulationAvailable;IS_DEDICATED_REGISTRY_MODEL=IS_GENERIC&&modelTruth.dedicated;}
  GENERIC_TAXONOMY=IS_GENERIC?universalTaxonomy(MACHINE_KEY):[];GENERIC_ROOT=GENERIC_TAXONOMY[0]?.id;
  ACTIVE_ROOT=IS_OFFSET10?'O10':IS_APM2?'APM2':IS_SHEETING?'SH':IS_GENERIC?GENERIC_ROOT:'O5';
  ACTIVE_TAXONOMY=IS_OFFSET10?OFFSET10_TAXONOMY:IS_APM2?APM2_TAXONOMY:IS_SHEETING?SHEETING_TAXONOMY:IS_GENERIC?GENERIC_TAXONOMY:OFFSET5_TAXONOMY;
@@ -95,13 +96,14 @@ function applyActiveMachineState(){
  }
  const registry=machineRecordForRoute(MACHINE_KEY);
  if(!registry)throw new Error('Identitas mesin aktif tidak ditemukan pada daftar mesin.');
- const registryMaker=registryBrand(registry),verifiedMaker=registryMaker==='Belum teridentifikasi'?null:registryMaker;
+ const registryMaker=registryBrand(registry),verifiedMaker=registryMaker==='Belum teridentifikasi'?null:registryMaker,modelTruth=machineTruthProfile(registry);
  state.asset={...state.asset,asset_id:registry.machineId,asset_code:registry.sapCode||registry.machineId,codename:registry.sapCode||null,model:registry.model||null,description:registry.name,source_description:'Database Mesin BMJ',category:registry.area||null,subcategory:null,manufacturer:verifiedMaker,specification:null,configuration:null,serial_number:registry.serial||null,functional_location:registry.functionalLocation||null,year:registry.year||null,sources:TECHNICAL_SOURCES};
- if(MACHINE_KEY==='offset5')state.asset={...state.asset,manufacturer:'Heidelberg',specification:'Heidelberg Speedmaster CD 102-8+L',configuration:'Feeder · 8 Printing Unit · Coating Unit · Delivery','3d_status':'PROCEDURAL / PHOTO + DOCUMENT GROUNDED',data_confidence:'HIGH CONFIDENCE',discovery_status:'BMJ_ACTUAL_EVIDENCE_AVAILABLE'};
- if(IS_OFFSET10)state.asset={...state.asset,manufacturer:'Heidelberg',specification:'Speedmaster CX 104 · Full UV · FoilStar Gen.3 · X3 delivery',configuration:'CX104-2+LY-8+LY-1+L UV + FoilStar / X3','3d_status':'PROCEDURAL / DOCUMENT-GROUNDED',data_confidence:'HIGH CONFIDENCE',discovery_status:'OFFICIAL_DOCUMENTS_AVAILABLE'};
- if(IS_APM2)state.asset={...state.asset,manufacturer:'BOBST',specification:'Mesin die-cutting flatbed otomatis (automatic flatbed die cutter) · keluarga SP 102 · 1994',configuration:'Feeder · Register dan SideLay · Gripper Chain · Flatbed Platen · Stripping · Delivery','3d_status':'PROCEDURAL / DATABASE + LEGACY FAMILY REFERENCES',data_confidence:'IDENTITY VERIFIED / VARIANT REFERENCE',discovery_status:'SP102_FAMILY_REFERENCE_AVAILABLE'};
- if(IS_SHEETING)state.asset={...state.asset,manufacturer:'LEXUS',specification:'HSM-CTM7 · rekonstruksi foto aktual BMJ · 2014',configuration:'Rollstand hidraulik satu reel → guide masuk rendah → pembawa web di atas (overhead web carrier) dan roller loop → LEXUS cross-cut berpelindung → take-away → overlap/shingling → rack stacker','3d_status':'DEDICATED PROCEDURAL / BMJ PHOTO-GROUNDED RECONSTRUCTION',data_confidence:'IDENTITY VERIFIED / ACTUAL PHOTO GEOMETRY / CUTTER INTERNAL UNRESOLVED',discovery_status:'BMJ_ACTUAL_PHOTOSET_PRIMARY__HSM_FAMILY_PROCESS_SECONDARY'};
- if(IS_GENERIC){const e=GENERIC_CONFIG.evidence,units=GENERIC_TAXONOMY.filter(n=>n.level===2).map(n=>n.name);state.asset={...state.asset,specification:GENERIC_CONFIG.label,configuration:(units.length?units:GENERIC_CONFIG.modules).join(' · '),'3d_status':IS_DEDICATED_REGISTRY_MODEL?'DEDICATED PROCEDURAL / '+e.geometry:IS_VERIFIED_REGISTRY_SIM?'REFERENCE PROCEDURAL / '+e.geometry:'PROCEDURAL / '+e.geometry,data_confidence:e.grade,discovery_status:IS_DEDICATED_REGISTRY_MODEL?'DEDICATED_EVIDENCE_AVAILABLE':IS_VERIFIED_REGISTRY_SIM?'FAMILY_REFERENCE_AVAILABLE':'EVIDENCE_BOUNDED_REFERENCE'};}
+ if(MACHINE_KEY==='offset5')state.asset={...state.asset,manufacturer:'Heidelberg',specification:'Heidelberg Speedmaster CD 102-8+L',configuration:'Feeder · 8 Printing Unit · Coating Unit · Delivery'};
+ if(IS_OFFSET10)state.asset={...state.asset,manufacturer:'Heidelberg',specification:'Speedmaster CX 104 · Full UV · FoilStar Gen.3 · X3 delivery',configuration:'CX104-2+LY-8+LY-1+L UV + FoilStar / X3'};
+ if(IS_APM2)state.asset={...state.asset,manufacturer:'BOBST',specification:'Mesin die-cutting flatbed otomatis (automatic flatbed die cutter) · keluarga SP 102 · 1994',configuration:'Feeder · Register dan SideLay · Gripper Chain · Flatbed Platen · Stripping · Delivery'};
+ if(IS_SHEETING)state.asset={...state.asset,manufacturer:'LEXUS',specification:'HSM-CTM7 · rekonstruksi foto aktual BMJ · 2014',configuration:'Rollstand hidraulik satu reel → guide masuk rendah → pembawa web di atas (overhead web carrier) dan roller loop → LEXUS cross-cut berpelindung → take-away → overlap/shingling → rack stacker'};
+ if(IS_GENERIC){const units=GENERIC_TAXONOMY.filter(n=>n.level===2).map(n=>n.name);state.asset={...state.asset,specification:GENERIC_CONFIG.label,configuration:(units.length?units:GENERIC_CONFIG.modules).join(' · ')};}
+ state.asset={...state.asset,'3d_status':modelTruth.source3D,data_confidence:modelTruth.dataConfidence,discovery_status:modelTruth.discoveryStatus};
 }
 applyActiveMachineState();
 function updateEvidenceStatus(){
@@ -800,20 +802,8 @@ function focusFoundationPlaceholder(machine,{historyMode='push',openDialog=false
  return selectFactoryAssetContext(machine,{historyMode,openDialog,focus:true});
 }
 function factoryMachineTruth(machine,placement){
- const route=machineRoute(machine),corpus=searchCorpusForMachine(machine,route);
- let maturity={asset_id:machine.machineId,'3d_status':'UNKNOWN',data_confidence:'UNVERIFIED',discovery_status:'UNKNOWN'};
- if(route==='offset5')maturity={...maturity,'3d_status':'PROCEDURAL / PHOTO + DOCUMENT GROUNDED',data_confidence:'HIGH CONFIDENCE',discovery_status:'BMJ_ACTUAL_EVIDENCE_AVAILABLE'};
- else if(route==='offset10')maturity={...maturity,'3d_status':'PROCEDURAL / DOCUMENT-GROUNDED',data_confidence:'HIGH CONFIDENCE',discovery_status:'OFFICIAL_DOCUMENTS_AVAILABLE'};
- else if(route==='apm2')maturity={...maturity,'3d_status':'PROCEDURAL / DATABASE + LEGACY FAMILY REFERENCES',data_confidence:'IDENTITY VERIFIED / VARIANT REFERENCE',discovery_status:'SP102_FAMILY_REFERENCE_AVAILABLE'};
- else if(route==='sheeting')maturity={...maturity,'3d_status':'DEDICATED PROCEDURAL / BMJ PHOTO-GROUNDED RECONSTRUCTION',data_confidence:'IDENTITY VERIFIED / ACTUAL PHOTO GEOMETRY / CUTTER INTERNAL UNRESOLVED',discovery_status:'BMJ_ACTUAL_PHOTOSET_PRIMARY__HSM_FAMILY_PROCESS_SECONDARY'};
- else{
-  const cfg=universalMachineConfig(machine.machineId);
-  if(cfg){
-   const dedicated=cfg.evidence.simulation==='VERIFIED_PROCESS_MODEL',runnable=['VERIFIED_PROCESS_MODEL','FAMILY_PROCESS_MODEL'].includes(cfg.evidence.simulation);
-   maturity={...maturity,'3d_status':dedicated?'DEDICATED PROCEDURAL / '+cfg.evidence.geometry:runnable?'REFERENCE PROCEDURAL / '+cfg.evidence.geometry:'PROCEDURAL / '+cfg.evidence.geometry,data_confidence:cfg.evidence.grade,discovery_status:dedicated?'DEDICATED_EVIDENCE_AVAILABLE':runnable?'FAMILY_REFERENCE_AVAILABLE':'EVIDENCE_BOUNDED_REFERENCE'};
-  }
- }
- return assetTruth(maturity,{placement,sourceCount:corpus.sources.length});
+ const route=machineRoute(machine),corpus=searchCorpusForMachine(machine,route),modelTruth=machineTruthProfile(machine);
+ return assetTruth({asset_id:machine.machineId,'3d_status':modelTruth.source3D,data_confidence:modelTruth.dataConfidence,discovery_status:modelTruth.discoveryStatus},{placement,sourceCount:corpus.sources.length});
 }
 function syncFactoryAssetHeading(machine,placement){
  const heading=$('.asset-heading h2'),subtitle=$('.asset-heading p'),summary=$('#evidence-summary'),detail=$('#evidence-detail');
@@ -829,7 +819,7 @@ function machineDetailDialog(machine){
  const copy=primary?'Buka model mesin untuk melihat struktur, simulasi, dan referensi yang tersedia.':'Model 3D belum tersedia untuk mesin atau peralatan ini. Posisi pada denah tetap dapat diperiksa.';
  const truth=primary?factoryMachineTruth(machine,placement):null;
  const summaryData=pair('Area',machine.area)+pair('Model',machine.model||'Belum tersedia')+pair('Tahun',machine.year||'Belum tersedia')+pair('Posisi',readableStatus(truth?.position||positionVerification(placement)));
- const primaryData=primary?pair('ID mesin',machine.machineId)+pair('Area',machine.area)+pair('Model',machine.model)+pair('Nomor seri',machine.serial)+pair('Lokasi fungsional SAP',machine.functionalLocation)+pair('Kode SAP',machine.sapCode)+pair('Tahun',machine.year)+pair('Dasar model 3D',readableStatus(truth?.source3D||'UNKNOWN'))+pair('Detail model 3D',readableStatus(truth?.detail3D||'UNKNOWN'))+pair('Keandalan data',readableStatus(truth?.dataConfidence||'UNVERIFIED'))+pair('Posisi',readableStatus(truth?.position||positionVerification(placement)))+pair('Dasar posisi',positionStatusLabel(policy.positionStatus))+pair('Referensi teknis',truth?.sourceCount?truth.sourceCount+' sumber':'Belum tersedia')+pair('Sumber identitas',machine.source==='USER_CONFIRMED'?'Konfirmasi pengguna':'Daftar mesin'):'';
+ const primaryData=primary?pair('ID mesin',machine.machineId)+pair('Area',machine.area)+pair('Model',machine.model)+pair('Nomor seri',machine.serial)+pair('Lokasi fungsional SAP',machine.functionalLocation)+pair('Kode SAP',machine.sapCode)+pair('Tahun',machine.year)+pair('Dasar model 3D',readableStatus(truth?.source3D||'UNKNOWN'))+pair('Detail model 3D',readableStatus(truth?.detail3D||'UNKNOWN'))+pair('Keandalan data',readableStatus(truth?.dataConfidence||'UNVERIFIED'))+pair('Posisi',readableStatus(truth?.position||positionVerification(placement)))+pair('Dasar posisi',positionStatusLabel(policy.positionStatus))+pair('Referensi teknis',truth?.sourceCount?truth.sourceCount+' sumber':'Belum tersedia')+pair('Sumber identitas',machine.source==='USER_CONFIRMED'?'Konfirmasi pengguna':'Daftar mesin BMJ'):'';
  const placeholderData=pair('ID posisi',machine.machineId)+pair('Area',machine.area)+pair('Dasar model 3D',readableStatus('NOT_IMPLEMENTED · LAYOUT PLACEHOLDER'))+pair('Detail model 3D',readableStatus('NOT_IMPLEMENTED'))+pair('Posisi',readableStatus(positionVerification(placement)))+pair('Dasar posisi',positionStatusLabel(policy.positionStatus))+pair('Status detail','Belum dibuka pada fase fondasi');
  const technicalData=primary?primaryData:placeholderData;
  closeModal();setDomainState({inspectorState:{tab:'overview'}});showPanel();syncFactoryAssetHeading(machine,placement);
