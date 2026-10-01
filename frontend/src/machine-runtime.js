@@ -28,6 +28,7 @@ import {UpgLy300MachineTemplate} from './upg-ly300.js';
 import {UpgLy300ProcessSimulation} from './simulation-upg-ly300.js';
 import {ReferenceMachineTemplate,ReferenceProcessSimulation,isReferenceMachineKey} from './reference-machines.js';
 import {applyMachinePresentationPolish} from './machine-presentation-polish.js';
+import {DEDICATED_MACHINE_IDS,isDedicatedMachineMaturity} from './data/machine-maturity.js';
 
 export const LEGACY_MACHINE_ROUTE=Object.freeze({
  'BMJ-MCH-0002':'sheeting',
@@ -39,12 +40,9 @@ export const normalizeMachineKey=key=>{const raw=String(key??'').trim();return r
 
 export const DEDICATED_MACHINE_KEYS=Object.freeze([
  'offset5','sheeting','offset10','apm2',
- 'BMJ-MCH-0001','BMJ-MCH-0005','BMJ-MCH-0006','BMJ-MCH-0007','BMJ-MCH-0008',
- 'BMJ-MCH-0011','BMJ-MCH-0012','BMJ-MCH-0013','BMJ-MCH-0014','BMJ-MCH-0015',
- 'BMJ-MCH-0016','BMJ-MCH-0018','BMJ-MCH-0019','BMJ-MCH-0020','BMJ-MCH-0022','BMJ-MCH-0024'
+ ...DEDICATED_MACHINE_IDS.filter(id=>!Object.hasOwn(LEGACY_MACHINE_ROUTE,id))
 ]);
-const DEDICATED_SET=new Set(DEDICATED_MACHINE_KEYS);
-export const isDedicatedMachineKey=key=>{const normalized=normalizeMachineKey(key);return Boolean(normalized&&DEDICATED_SET.has(normalized));};
+export const isDedicatedMachineKey=key=>isDedicatedMachineMaturity(key);
 
 export function createMachineTemplate(key){
  const k=normalizeMachineKey(key);
