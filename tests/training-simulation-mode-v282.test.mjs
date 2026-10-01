@@ -14,6 +14,7 @@ test('V282 engine enforces training preset instead of relying on UI labels',()=>
  assert.match(engine,/setPrintingSimulationSpeed\(value\)\{const preset=simulationModePreset\(this\.simulationMode\.mode\);return this\.simulation\?\.setSpeed\(preset\.lockSpeed\?\?value\);\}/);
  assert.match(engine,/setPrintingSimulationPathVisible\(on\)\{const preset=simulationModePreset\(this\.simulationMode\.mode\);return this\.simulation\?\.setPathVisible\(preset\.forcePathVisible\?true:on\);\}/);
  assert.match(engine,/startPrintingSimulation\(\)\{this\.simulation\?\.start\(\);this\.simulationMode\.reset\(\);this\.applyPrintingSimulationModePreset\(\);return this\.simulation\?\.state\?\.\(\);\}/);
+ assert.match(engine,/this\.simulation=nextSimulation;this\.applyPrintingSimulationModePreset\(\);/);
 });
 
 test('V282 detail simulation panel exposes three modes and explains training behavior',()=>{
