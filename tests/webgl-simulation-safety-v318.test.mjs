@@ -9,9 +9,13 @@ test('V318 WebGL fault stops an active simulation before switching the UI to 2D'
  const match=app.match(/function handleEngineError\([^]*?\n\}/);
  assert.ok(match);
  const body=match[0];
- assert.match(body,/if\(engine\?\.isPrintingSimulationActive\?\.\(\)\|\|currentSimulationState\(\)\.active\)stopPrintingSimulation\(\{restoreExterior:true\}\)/);
+ assert.match(body,/const simulationOwnedCutaway=simulationOwnsExterior/);
+ assert.match(body,/if\(engine\?\.isPrintingSimulationActive\?\.\(\)\|\|currentSimulationState\(\)\.active\)stopPrintingSimulation\(\{restoreExterior:false\}\)/);
+ assert.match(body,/if\(simulationOwnedCutaway\)exitExteriorMode\(\{restoreQuality:false\}\)/);
  assert.match(body,/commitSimulationState\(\{\.\.\.currentSimulationState\(\),active:false,running:false,paused:false,stage:null,progress:0\}\)/);
  assert.ok(body.indexOf('stopPrintingSimulation')<body.indexOf("classList.add('workspace-2d','webgl-unavailable')"));
+ assert.match(app,/function exitExteriorMode\(\{restoreQuality=true\}=\{\}\)/);
+ assert.match(app,/if\(restoreQuality&&exteriorPreviousLow!==null\)engine\.applyQualityProfile\(exteriorPreviousLow\)/);
 });
 
 test('V318 WebGL recovery re-enables 3D but never auto-resumes simulation',()=>{
