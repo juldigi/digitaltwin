@@ -30,6 +30,7 @@ import {readableStatus,readableSimulationStage,readableEvidenceConfidence,readab
 import {buildDwgFidelityLedger} from './data/dwg-fidelity.js';
 import {RENDER_PROFILE_INFO,RENDER_PROFILE_ORDER,recommendedProfile} from './render/render-config.js';
 import {simulationModeOptions} from './simulation-mode.js';
+import {publicCacheState,cacheContainsPrivilegedState} from './data/cache-policy.js';
 import {APP_BUILD,getState as getAppState,setDomainState,setSimulation as setAppSimulation,setInspector as setAppInspector,setBoot as setAppBoot,setPreference,readUrlState,buildContextUrl,closeOverlay as closeAppOverlay} from './state/app-state.js';
 const MACHINE_ROUTE_BY_ID=Object.freeze({
  'BMJ-MCH-0002':'sheeting',
@@ -655,7 +656,6 @@ async function request(path,{method='GET',data,base=apiBase,key=token}={}){
  const res=await fetch(base+path,{method,headers,body:data===undefined?undefined:JSON.stringify(data),signal:AbortSignal.timeout(15000)});let result;try{result=await res.json();}catch{throw new Error('Layanan data mengirim respons yang tidak dikenali.');}if(!res.ok)throw new Error(result.error||'Layanan data tidak dapat merespons.');return result;
 }
 const CACHE_DB_NAME='bmj-digitaltwin-cache-v2';
-const cacheSafeState=value=>{const safe=structuredClone(value||{});if(safe&&typeof safe==='object')delete safe.sceneRevisions;return safe;};
 class CacheManager {
  async open(){return new Promise((resolve,reject)=>{const r=indexedDB.open(CACHE_DB_NAME,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains('data'))r.result.createObjectStore('data')};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
  async get(key){const db=await this.open();return new Promise((resolve,reject)=>{const tx=db.transaction('data'),r=tx.objectStore('data').get(key);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);tx.oncomplete=()=>db.close();});}
@@ -669,7 +669,7 @@ function updateConnectionTruth(){
  const el=$('#connection');if(el)el.textContent=label;return label;
 }
 function loadVisibleFactoryLayout(layout){if(!engine)return;engine.loadLayout(layout);syncFactoryLayerVisibility(engine,getAppState().visibleLayers);}
-async function acceptState(next){state=next;loadVisibleFactoryLayout(activeLayout());engine?.applySceneOverrides(next.sceneOverrides||{});if(engine?.view==='factory')engine.setView('factory',state);renderStatus();renderPanel();if(cacheEnabled){try{await cache.set(apiBase,{state:cacheSafeState(state),savedAt:new Date().toISOString()});}catch{toast('Data berhasil dimuat, tetapi salinan di perangkat tidak dapat disimpan.',true);}}}
+async function acceptState(next){state=next;loadVisibleFactoryLayout(activeLayout());engine?.applySceneOverrides(next.sceneOverrides||{});if(engine?.view==='factory')engine.setView('factory',state);renderStatus();renderPanel();if(cacheEnabled){try{await cache.set(apiBase,{state:publicCacheState(state),savedAt:new Date().toISOString()});}catch{toast('Data berhasil dimuat, tetapi salinan di perangkat tidak dapat disimpan.',true);}}}
 function setView(view){
  const l=activeLayout();
  if(view==='factory'&&!l){layoutDialog();return;}
@@ -1411,7 +1411,7 @@ document.addEventListener('fullscreenchange',()=>{
  if(!document.fullscreenElement&&immersiveRoot.classList.contains('immersive-mode')){immersiveRoot.classList.remove('immersive-mode');syncImmersiveButtons();window.dispatchEvent(new Event('resize'));}
 });
 window.addEventListener('offline',()=>{updateConnectionTruth();toast(cachedDataActive?'Koneksi terputus. Aplikasi menggunakan data tersimpan di perangkat.':'Koneksi terputus. Aplikasi tetap tersedia dalam mode lokal.');});window.addEventListener('online',()=>{updateConnectionTruth();if(role)request('/api/state').then(acceptState).then(()=>{cachedDataActive=false;updateConnectionTruth();toast('Data berhasil diperbarui.');}).catch(e=>toast(e.message,true));});
-try{const config=await fetch('./config.json').then(r=>r.json());const savedBase=readConnectionSetting('apiBase','');apiBase=savedBase==='https://digitaltwin.offsetbmj.workers.dev'?config.apiBase:(savedBase||config.apiBase||'');if(savedBase==='https://digitaltwin.offsetbmj.workers.dev')localStorage.setItem(CONNECTION_STORAGE.apiBase,apiBase);if(cacheEnabled&&apiBase){const cached=await cache.get(apiBase);if(cached?.state){const hadPrivileged=Object.prototype.hasOwnProperty.call(cached.state,'sceneRevisions'),safeState=cacheSafeState(cached.state);state=safeState;if(hadPrivileged)await cache.set(apiBase,{...cached,state:safeState});cachedDataActive=true;loadVisibleFactoryLayout(activeLayout());renderStatus();renderPanel();updateConnectionTruth();toast('Menampilkan data tersimpan · '+new Date(cached.savedAt).toLocaleString('id-ID'));}}else updateConnectionTruth();}catch(e){updateConnectionTruth();toast('Data tersimpan tidak dapat dibaca. Mode lokal tetap tersedia.',true);}
+try{const config=await fetch('./config.json').then(r=>r.json());const savedBase=readConnectionSetting('apiBase','');apiBase=savedBase==='https://digitaltwin.offsetbmj.workers.dev'?config.apiBase:(savedBase||config.apiBase||'');if(savedBase==='https://digitaltwin.offsetbmj.workers.dev')localStorage.setItem(CONNECTION_STORAGE.apiBase,apiBase);if(cacheEnabled&&apiBase){const cached=await cache.get(apiBase);if(cached?.state){const hadPrivileged=cacheContainsPrivilegedState(cached.state),safeState=publicCacheState(cached.state);state=safeState;if(hadPrivileged)await cache.set(apiBase,{...cached,state:safeState});cachedDataActive=true;loadVisibleFactoryLayout(activeLayout());renderStatus();renderPanel();updateConnectionTruth();toast('Menampilkan data tersimpan · '+new Date(cached.savedAt).toLocaleString('id-ID'));}}else updateConnectionTruth();}catch(e){updateConnectionTruth();toast('Data tersimpan tidak dapat dibaca. Mode lokal tetap tersedia.',true);}
 on('#dwg-canvas',event=>{
  if(getAppState().viewMode!=='2d'||$('#modal')?.open)return;
  const machineId=pickPlantPlanAsset(event.currentTarget,bundledLayout,event.clientX,event.clientY);
