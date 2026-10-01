@@ -67,9 +67,24 @@ export function createMachineTemplate(key){
  throw new Error(`Model 3D untuk ${k} belum tersedia.`);
 }
 
+function enforceTaxonomyClickContract(template){
+ const mapped=new Set((template.taxonomy||[]).flatMap(node=>node.meshRefs||[]).filter(Boolean));
+ const original=typeof template.resolvePart==='function'?template.resolvePart.bind(template):null;
+ if(!original||!mapped.size)return template;
+ template.resolvePart=object=>{
+  const resolved=original(object);
+  for(let node=resolved;node&&node!==template.root;node=node.parent){
+   const id=node.userData?.nodeId;
+   if(id&&mapped.has(id))return node;
+  }
+  return null;
+ };
+ template.root.userData.clickSelectionPolicy='TAXONOMY_EXACT_OR_ANCESTOR_ONLY';
+ return template;
+}
 export function createPolishedMachineTemplate(key){
  const normalized=normalizeMachineKey(key);
- return applyMachinePresentationPolish(createMachineTemplate(key),normalized);
+ return enforceTaxonomyClickContract(applyMachinePresentationPolish(createMachineTemplate(key),normalized));
 }
 
 export function createMachineSimulation(key,machine,template){
