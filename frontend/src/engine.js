@@ -600,7 +600,7 @@ export class FactoryEngine {
     this.machineKey=requested;
     this.template=nextTemplate;
     this.machine=this.template.root;this.scene.add(this.machine);
-    this.simulation=nextSimulation;
+    this.simulation=nextSimulation;this.applyPrintingSimulationModePreset();
     const label=this.renderer.domElement;label.setAttribute('aria-label',`Model 3D ${this.machine.name||requested}. Gunakan tombol sudut pandang untuk mengatur kamera.`);
     this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);this.isolated=false;this.view='machine';this.syncVisualSystems();this.machine.visible=true;this.applySceneOverrides(this.sceneOverrides||{});this.factory.visible=false;this.template.setLow(this.low);this.shadows.focusBounds(this.machineFocusBounds()||new THREE.Box3().setFromObject(this.machine));this.fit(this.machine);this.resize();return true;
   }
