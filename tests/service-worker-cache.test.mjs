@@ -25,8 +25,8 @@ test('service-worker Phase-1 shell cache references only deployable frontend fil
  for(const path of paths)assert.ok(cacheSourceExists(path),path+' is listed in sw.js but is neither a frontend source nor a build-generated Three.js asset');
 });
 
-test('service-worker cache version advances with the V270 flagship UI release',()=>{
- assert.match(sw,/factory-digital-twin-v270-flagship-ui-20260930/);
+test('service-worker cache version advances with the V273 freshness release',()=>{
+ assert.match(sw,/factory-digital-twin-v273-release-freshness-20261001/);
 });
 
 test('service-worker does not pre-cache technical expansion machine modules',()=>{
@@ -39,8 +39,8 @@ test('service-worker does not pre-cache technical expansion machine modules',()=
 
 
 test('service worker pre-caches cache-busted entrypoints and can fall back across query versions',()=>{
- assert.match(sw,/const LEGACY_VERSION='factory-digital-twin-v222-overlay-state-ssot-20260925'/);
- assert.match(sw,/const RELEASE='222'/);
+ assert.match(sw,/const LEGACY_VERSION='factory-digital-twin-v270-flagship-ui-20260930'/);
+ assert.match(sw,/const RELEASE='273'/);
  assert.match(sw,/const ENTRYPOINTS=\[/);
  assert.match(sw,/ENTRYPOINTS\.map\(path=>path\+'\?v='\+RELEASE\)/);
  assert.match(sw,/caches\.match\(request,\{ignoreSearch:true\}\)/);
