@@ -26,7 +26,7 @@ export function auditMachineGroundingAndMotion(){
    if(staticBox.min.y>.25)problems.push('WHOLE_MACHINE_FLOATING');
    if(staticBox.min.y<-.5)problems.push('WHOLE_MACHINE_SUNK');
    const start=simulation.start();
-   let maxBelow=0,maxOverflow=0,maxGrowth=1;
+   let maxBelow=0,maxOverflow=0,maxGrowth=1,maxOverflowAxis=null,maxOverflowBox=null,maxOverflowFrame=null;
    for(let frame=0;frame<=720;frame++){
     simulation.update(frame*1000/60);
     if(frame%60)continue;
@@ -34,11 +34,12 @@ export function auditMachineGroundingAndMotion(){
     const dynamicBox=new THREE.Box3().setFromObject(root),dynamicSize=dynamicBox.getSize(new THREE.Vector3());
     if(!finiteVec(dynamicBox.min)||!finiteVec(dynamicBox.max)){problems.push('NON_FINITE_DYNAMIC_BOUNDS');break;}
     maxBelow=Math.max(maxBelow,Math.max(0,-dynamicBox.min.y));
-    const overflow=Math.max(
-     0,allowed.min.x-dynamicBox.min.x,allowed.min.y-dynamicBox.min.y,allowed.min.z-dynamicBox.min.z,
-     dynamicBox.max.x-allowed.max.x,dynamicBox.max.y-allowed.max.y,dynamicBox.max.z-allowed.max.z
-    );
-    maxOverflow=Math.max(maxOverflow,overflow);
+    const overflowByAxis={
+     minX:Math.max(0,allowed.min.x-dynamicBox.min.x),minY:Math.max(0,allowed.min.y-dynamicBox.min.y),minZ:Math.max(0,allowed.min.z-dynamicBox.min.z),
+     maxX:Math.max(0,dynamicBox.max.x-allowed.max.x),maxY:Math.max(0,dynamicBox.max.y-allowed.max.y),maxZ:Math.max(0,dynamicBox.max.z-allowed.max.z)
+    };
+    const [overflowAxis,overflow]=Object.entries(overflowByAxis).sort((a,b)=>b[1]-a[1])[0];
+    if(overflow>maxOverflow){maxOverflow=overflow;maxOverflowAxis=overflowAxis;maxOverflowFrame=frame;maxOverflowBox={min:dynamicBox.min.toArray(),max:dynamicBox.max.toArray()};}
     const growth=Math.max(...dynamicSize.toArray().map((v,i)=>baselineSize.getComponent(i)>.05?v/baselineSize.getComponent(i):1));
     maxGrowth=Math.max(maxGrowth,growth);
    }
@@ -50,7 +51,7 @@ export function auditMachineGroundingAndMotion(){
     staticMinY:+staticBox.min.y.toFixed(4),
     staticSize:staticSize.toArray().map(v=>+v.toFixed(3)),
     baselineSize:baselineSize.toArray().map(v=>+v.toFixed(3)),
-    maxBelow:+maxBelow.toFixed(4),maxOverflow:+maxOverflow.toFixed(4),maxGrowth:+maxGrowth.toFixed(4),
+    maxBelow:+maxBelow.toFixed(4),maxOverflow:+maxOverflow.toFixed(4),maxOverflowAxis,maxOverflowFrame,maxOverflowBox,maxGrowth:+maxGrowth.toFixed(4),
     blocked:start?.blocked===true,problems:[...new Set(problems)]
    };
    machines.push(row);if(row.problems.length)failures.push(row);
