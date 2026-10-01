@@ -10,7 +10,7 @@ test('factory home initializes with no machine selected',()=>{
  const end=source.indexOf('\napplyActiveMachineState();',start);
  assert.ok(start>=0&&end>start,'machine state initializer exists');
  const context={
-  structuredClone:value=>JSON.parse(JSON.stringify(value)),preserveSharedTwinState,
+  structuredClone:value=>JSON.parse(JSON.stringify(value)),preserveSharedTwinState,state:undefined,
   initialState:{asset:{manufacturer:'previous machine'}},
   setReferenceFilter:()=>{},setAppSimulation:()=>{},MACHINE_KEY:null,IS_SHEETING:false
  };
