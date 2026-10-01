@@ -42,8 +42,8 @@ test('asset truth never converts unavailable operating or health data into fake 
   const truth=assetTruth({status:'UNKNOWN',health_score:null,data_confidence:'UNVERIFIED',discovery_status:'DOCUMENTATION_REQUIRED'},{placement:{status:'DXF_FOOTPRINT'},sourceCount:8});
   assert.equal(truth.operatingStatus,'UNKNOWN');
   assert.equal(truth.healthScore,'UNKNOWN');
-  assert.equal(truth.source3D,'PROCEDURAL / RECONSTRUCTED');
-  assert.equal(truth.detail3D,'PARTIAL / APPROXIMATE');
+  assert.equal(truth.source3D,'UNKNOWN');
+  assert.equal(truth.detail3D,'DOCUMENTATION_REQUIRED');
   assert.equal(truth.position,'DWG-VERIFIED');
   assert.equal(truth.sourceCount,8);
 });
@@ -55,9 +55,9 @@ test('offline state explicitly distinguishes cached data from local-only mode',(
 });
 
 test('production UI exposes source confidence and explicit truth statuses',()=>{
-  assert.match(app,/pair\('Dasar model 3D',truth\.source3D\)/);
-  assert.match(app,/pair\('Detail model 3D',truth\.detail3D\)/);
-  assert.match(app,/pair\('Keandalan data',truth\.dataConfidence\)/);
+  assert.match(app,/pair\('Dasar model 3D',readableStatus\(truth\.source3D\)\)/);
+  assert.match(app,/pair\('Detail model 3D',readableStatus\(truth\.detail3D\)\)/);
+  assert.match(app,/pair\('Keandalan data',readableStatus\(truth\.dataConfidence\)\)/);
   assert.match(app,/pair\('Nilai kesehatan mesin',truth\.healthScore\)/);
   assert.match(app,/belum diketahui, belum diverifikasi, perkiraan, atau perlu ditinjau/);
   assert.match(app,/reference-truth-row/);
