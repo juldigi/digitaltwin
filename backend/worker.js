@@ -3,10 +3,12 @@ import {validateSceneOverrides} from '../frontend/src/scene-editor-state.js';
 const MAX_BYTES=4*1024*1024;
 const DEFAULT_PASSWORD='superadmin123';
 const PASSWORD_ITERATIONS=100000;
+const LEGACY_PASSWORD_ITERATIONS=150000;
+const MAX_PASSWORD_VERIFY_ITERATIONS=LEGACY_PASSWORD_ITERATIONS;
 const PASSWORD_RECORD_PREFIX='pbkdf2-sha256';
 const digest=async value=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))).map(x=>x.toString(16).padStart(2,'0')).join('');
 async function passwordHash(password,salt,iterations=PASSWORD_ITERATIONS){
-  if(!Number.isInteger(iterations)||iterations<1||iterations>PASSWORD_ITERATIONS)throw new Error('Parameter PBKDF2 tidak didukung runtime.');
+  if(!Number.isInteger(iterations)||iterations<1||iterations>MAX_PASSWORD_VERIFY_ITERATIONS)throw new Error('Parameter PBKDF2 tidak didukung runtime.');
   const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveBits']);
   return Array.from(new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2',salt:new TextEncoder().encode(salt),iterations,hash:'SHA-256'},key,256))).map(x=>x.toString(16).padStart(2,'0')).join('');
 }
@@ -14,13 +16,18 @@ async function passwordRecord(password,salt){return `${PASSWORD_RECORD_PREFIX}:$
 function parsePasswordRecord(record){
   const match=new RegExp('^'+PASSWORD_RECORD_PREFIX+':(\\d+):([a-f0-9]{64})$','i').exec(String(record||''));
   if(match)return {iterations:Number(match[1]),hash:match[2],legacy:false};
-  return /^[a-f0-9]{64}$/i.test(String(record||''))?{iterations:150000,hash:String(record),legacy:true}:null;
+  return /^[a-f0-9]{64}$/i.test(String(record||''))?{iterations:LEGACY_PASSWORD_ITERATIONS,hash:String(record),legacy:true}:null;
 }
 async function verifyPassword(password,account){
   const record=parsePasswordRecord(account?.password_hash);
-  if(!record)return {ok:false,unsupported:false};
-  if(record.iterations>PASSWORD_ITERATIONS)return {ok:false,unsupported:true};
-  return {ok:await same(await passwordHash(password,account.salt,record.iterations),record.hash),unsupported:false};
+  if(!record)return {ok:false,unsupported:false,needsMigration:false};
+  if(record.iterations>MAX_PASSWORD_VERIFY_ITERATIONS)return {ok:false,unsupported:true,needsMigration:false};
+  try{
+    const ok=await same(await passwordHash(password,account.salt,record.iterations),record.hash);
+    return {ok,unsupported:false,needsMigration:ok&&(record.legacy||record.iterations!==PASSWORD_ITERATIONS)};
+  }catch{
+    return {ok:false,unsupported:true,needsMigration:false};
+  }
 }
 async function authStore(db){
   await db.prepare('CREATE TABLE IF NOT EXISTS superadmin_auth (id INTEGER PRIMARY KEY CHECK(id = 1), salt TEXT NOT NULL, password_hash TEXT NOT NULL, generation INTEGER NOT NULL DEFAULT 0)').run();
@@ -76,6 +83,12 @@ export default {async fetch(req,env){
       if(!verification.ok){
         await env.DB.prepare('INSERT INTO superadmin_attempts(client_hash,count,reset_at) VALUES(?,1,?) ON CONFLICT(client_hash) DO UPDATE SET count=CASE WHEN reset_at<? THEN 1 ELSE count+1 END,reset_at=CASE WHEN reset_at<? THEN excluded.reset_at ELSE reset_at END').bind(client,Date.now()+900000,Date.now(),Date.now()).run();
         return json({error:'Kata sandi salah.'},401,cors);
+      }
+      if(verification.needsMigration){
+        const migratedSalt=crypto.randomUUID(),migratedHash=await passwordRecord(data.password,migratedSalt);
+        const migrated=await env.DB.prepare('UPDATE superadmin_auth SET salt=?,password_hash=? WHERE id=1 AND salt=? AND password_hash=?').bind(migratedSalt,migratedHash,account.salt,account.password_hash).run();
+        if(!migrated.meta.changes)return json({error:'Data autentikasi berubah. Silakan masuk kembali.'},409,cors);
+        account={...account,salt:migratedSalt,password_hash:migratedHash};
       }
       await env.DB.prepare('DELETE FROM superadmin_attempts WHERE client_hash=?').bind(client).run();
       const session='sa_'+crypto.randomUUID()+crypto.randomUUID();
