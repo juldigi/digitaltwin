@@ -3,15 +3,14 @@ import {createPolishedMachineTemplate,createMachineSimulation} from '../frontend
 
 const rounded=value=>Number.isFinite(value)?Math.round(value*10000)/10000:null;
 const signature=root=>{
+ root.updateMatrixWorld(true);
  const rows=[];let meshIndex=0;
  root.traverse(object=>{
   if(!object.isMesh)return;
   const material=Array.isArray(object.material)?object.material[0]:object.material;
   rows.push([
    meshIndex++,object.name||object.userData?.semantic||'',
-   rounded(object.position.x),rounded(object.position.y),rounded(object.position.z),
-   rounded(object.quaternion.x),rounded(object.quaternion.y),rounded(object.quaternion.z),rounded(object.quaternion.w),
-   rounded(object.scale.x),rounded(object.scale.y),rounded(object.scale.z),
+   ...object.matrixWorld.elements.map(rounded),
    object.visible!==false,
    material?.color?.getHex?.()??null,rounded(material?.opacity??1)
   ]);
