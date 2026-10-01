@@ -17,6 +17,7 @@ test('only secured Superadmin writes validated scene changes; revisions restore 
  assert.equal(bootstrapSession.role,'superadmin');assert.equal(bootstrapSession.passwordChangeRequired,true);
  assert.equal((await worker.fetch(req('scene',{token:bootstrapToken,method:'PUT',data:{overrides:{'node:0.1':object}}}),env)).status,403);
  assert.equal((await worker.fetch(req('scene/revisions',{token:bootstrapToken}),env)).status,403);
+ const bootstrapState=await (await worker.fetch(req('state',{token:bootstrapToken}),env)).json();assert.equal('sceneRevisions' in bootstrapState,false);
  assert.equal((await worker.fetch(req('superadmin/password',{token:bootstrapToken,method:'POST',data:{currentPassword:BOOTSTRAP_PASSWORD,newPassword:'replacement-strong-password'}}),env)).status,200);
  const securedLogin=await worker.fetch(req('superadmin/login',{method:'POST',data:{password:'replacement-strong-password'}}),env);assert.equal(securedLogin.status,200);const token=(await securedLogin.json()).token;
  assert.equal((await worker.fetch(req('scene',{method:'PUT',data:{overrides:{'node:0.1':object}}}),env)).status,403);
