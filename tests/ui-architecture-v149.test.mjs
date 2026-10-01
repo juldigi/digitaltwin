@@ -101,7 +101,7 @@ test('V194 inspector exposes contextual tabs and keeps Interior only as a direct
 });
 
 test('V149 universal search covers machines areas components systems documents and photos',()=>{
- for(const token of ['universalSearchResults','searchableTaxonomy','searchableSources','searchablePhotos','bmj:searchrequest','bmj:searchselect'])assert.match(app,new RegExp(token));
+ for(const token of ['universalSearchResults','searchCorpusForMachine','bmj:searchrequest','bmj:searchselect'])assert.match(app,new RegExp(token));
  for(const group of ["'MESIN'","'KOMPONEN'","'AREA'","'DOKUMEN'","'FOTO'"])assert.match(app,new RegExp(group));
  assert.doesNotMatch(app,/group:'SISTEM'/);
  assert.match(shell,/universal-search-panel/);
