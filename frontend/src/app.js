@@ -86,8 +86,8 @@ const currentSimulationState=()=>getAppState().simulationState||{};
 const referenceFilter=()=>getAppState().referenceState?.filter||'all';
 const setReferenceFilter=filter=>setDomainState({referenceState:{filter:filter||'all'}});
 const readConnectionSetting=(key,fallback='')=>{try{const current=localStorage.getItem(CONNECTION_STORAGE[key]);if(current!==null)return current;const legacy=localStorage.getItem(LEGACY_CONNECTION_STORAGE[key]);if(legacy!==null){localStorage.setItem(CONNECTION_STORAGE[key],legacy);localStorage.removeItem(LEGACY_CONNECTION_STORAGE[key]);return legacy;}}catch{}return fallback;};
-let state,engine,apiBase='',token='',role=null,superadminPasswordChangeRequired=false,editing=false
-const canMutateSharedData=()=>role==='admin'||role==='superadmin'&&!superadminPasswordChangeRequired;,selectedPart=null,exteriorPreviousLow=null,simulationOwnsExterior=false,toastTimer,bundledLayout=null,cachedDataActive=false;
+let state,engine,apiBase='',token='',role=null,superadminPasswordChangeRequired=false,editing=false,selectedPart=null,exteriorPreviousLow=null,simulationOwnsExterior=false,toastTimer,bundledLayout=null,cachedDataActive=false;
+const canMutateSharedData=()=>role==='admin'||role==='superadmin'&&!superadminPasswordChangeRequired;
 function applyActiveMachineState(){
  state=structuredClone(initialState);setReferenceFilter('all');
  setAppSimulation({available:Boolean(MACHINE_KEY),blocked:false,blockedReason:null,active:false,running:false,speed:1,stage:null,completed:0,progress:0,sheetsVisible:0,pileSheetsVisible:0,rotorCount:0,oscillatorCount:0,mechanismCount:0,inkFlowCount:0,uvLampCount:0,uvActive:false,pathVisible:IS_SHEETING?false:Boolean(MACHINE_KEY),inkFlowVisible:Boolean(MACHINE_KEY)});
