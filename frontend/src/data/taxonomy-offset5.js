@@ -73,7 +73,7 @@ for(let unit=1;unit<=8;unit++){
   ['REGISTER','Register Drives',[`press-${i}-register-drives`]],
   ['WASH','Washup Devices',[`press-${i}-washup`]],
   ['COVER','Covers & Service Access',[`press-${i}-cover`,`press-${i}-drive`,`press-${i}-top-deck`,`press-${i}-service-access`,`press-${i}-operator-details`,`press-${i}-drive-details`,`press-${i}-lubrication`,`press-${i}-pneumatic-service`,`press-${i}-inspection-points`]],
-  ['STEP','Operator / Drive Access',[`press-${i}-steps`,`press-${i}-drive-steps`,`press-${i}-drive`]]
+  ['STEP','Operator / Drive Access',i<7?[`press-${i}-steps`,`press-${i}-drive-steps`,`press-${i}-drive`]:[`press-${i}-steps`,`press-${i}-drive`]]
  ];
  for(const [key,name,refs] of blocks)add(`${pu}.${key}`,pu,4,'Block',name,{meshRefs:refs,sourceRefs:key==='INK'||key==='DAMP'?['SRC-USER-PHOTOS','SRC-CD102-ROLLER-PROCEDURE']:photoManual,confidence:CONFIDENCE.REFERENCE_PLUS_PHOTO,explodeVector:key==='INK'?[0,.60,.10]:key==='DAMP'?[0,.42,-.25]:key==='COVER'?[0,.20,.75]:key==='STEP'?[0,-.18,.85]:[0,.10,-.35]});
 
@@ -124,7 +124,7 @@ for(let unit=1;unit<=8;unit++){
  for(const [key,name,ref] of [['PNEU','Pneumatic Manifold / Valve Bank',`press-${i}-pneumatic-service`],['INSPECT','Oil Sight Glass / Service Marks',`press-${i}-inspection-points`]]){
   const pid=`${pu}.COVER.${key}`;add(pid,`${pu}.COVER`,5,'Part',name,{meshRefs:[ref],sourceRefs:photoManual,confidence:CONFIDENCE.REFERENCE_ONLY,explodeVector:[.08,.08,-.25]});add(`${pid}.S1`,pid,6,'Spesifik Part',`${name} · maintenance wayfinding reference`,{meshRefs:[ref],sourceRefs:manual,confidence:CONFIDENCE.REFERENCE_ONLY,explodeVector:[.05,.05,.08],maintenanceTag:'VISUAL_INSPECTION'});
  }
- for(const [key,name,ref] of [['OP','Operator Access Steps',`press-${i}-steps`],['DRIVE','Drive-side Access Steps',`press-${i}-drive-steps`]]){
+ for(const [key,name,ref] of [['OP','Operator Access Steps',`press-${i}-steps`],['DRIVE',i<7?'Drive-side Access Steps':'Drive-side Service Access',i<7?`press-${i}-drive-steps`:`press-${i}-drive`]]){
   const pid=`${pu}.STEP.${key}`;add(pid,`${pu}.STEP`,5,'Part',name,{meshRefs:[ref],sourceRefs:photo,confidence:CONFIDENCE.PHOTO_VERIFIED,explodeVector:[.12,-.10,key==='DRIVE'?-.30:.30]});add(`${pid}.S1`,pid,6,'Spesifik Part',`${name} · tread / support reference`,{meshRefs:[ref],sourceRefs:photo,confidence:CONFIDENCE.PHOTO_VERIFIED,explodeVector:[.05,.05,.08],maintenanceTag:'VISUAL_INSPECTION'});
   if(i<7){
    add(`${pid}.S2`,pid,6,'Spesifik Part','Lower diamond-plate step',{meshRefs:[ref],sourceRefs:photo,confidence:CONFIDENCE.PHOTO_VERIFIED,explodeVector:[.04,-.06,.12],maintenanceTag:'VISUAL_INSPECTION'});
