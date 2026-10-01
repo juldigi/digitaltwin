@@ -29,11 +29,13 @@ export function auditDedicatedDimensionEnvelopes(){
   try{
    template=createPolishedMachineTemplate(contract.id);template.root.updateMatrixWorld(true);
    const box=new THREE.Box3().setFromObject(template.root),size=box.getSize(new THREE.Vector3());
+   let minZ={value:Infinity,name:null,role:null},maxZ={value:-Infinity,name:null,role:null};
+   template.root.traverse(object=>{if(!object.isMesh||object.visible===false)return;const b=new THREE.Box3().setFromObject(object);if(b.min.z<minZ.value)minZ={value:b.min.z,name:object.name||object.parent?.name||null,role:object.userData?.mechanismRole||object.userData?.role||null};if(b.max.z>maxZ.value)maxZ={value:b.max.z,name:object.name||object.parent?.name||null,role:object.userData?.mechanismRole||object.userData?.role||null};});
    const modeled=[size.x,size.z,size.y],ratios=modeled.map((value,index)=>value/contract.reference[index]);
    const [min,max]=contract.tolerance,problems=[];
    if(ratios.some(r=>!Number.isFinite(r)))problems.push('NON_FINITE_RATIO');
    if(ratios.some(r=>r<min||r>max))problems.push('REFERENCE_ENVELOPE_SCALE_DRIFT');
-   const row={...contract,modeled:modeled.map(v=>+v.toFixed(3)),ratios:ratios.map(v=>+v.toFixed(3)),problems};
+   const row={...contract,modeled:modeled.map(v=>+v.toFixed(3)),ratios:ratios.map(v=>+v.toFixed(3)),zExtremes:{min:{...minZ,value:+minZ.value.toFixed(3)},max:{...maxZ,value:+maxZ.value.toFixed(3)}},problems};
    machines.push(row);if(problems.length)failures.push(row);
   }catch(error){const row={...contract,problems:['EXCEPTION'],error:String(error?.stack||error)};machines.push(row);failures.push(row);}
   finally{template?.dispose?.();}
