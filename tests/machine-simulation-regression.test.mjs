@@ -52,6 +52,23 @@ for(const {id,label} of fleet){
  });
 }
 
+for(const {id,label} of fleet){
+ test(`${label} (${id}): starting an active simulation restarts from a clean cycle`,()=>{
+  const template=createPolishedMachineTemplate(id),simulation=createMachineSimulation(id,template.root,template);
+  try{
+   const initial=simulation.start();
+   if(initial.blocked){assert.equal(initial.active,false);return;}
+   let now=0;for(let f=0;f<=1800;f++){now=f*1000/60;simulation.update(now);}
+   assert.ok(simulation.state().completed>0,`${id} did not produce output before restart`);
+   const restarted=simulation.start();
+   assert.equal(restarted.active,true);
+   assert.equal(restarted.running,true);
+   assert.equal(restarted.completed,0,`${id} did not reset completed output on restart`);
+   assert.equal(simulation.elapsed,0,`${id} did not reset elapsed time on restart`);
+  }finally{simulation.dispose();template.dispose();}
+ });
+}
+
 test('fleet regression gate covers every registered equipment exactly once',()=>{
  assert.equal(fleet.length,41);
  assert.equal(new Set(fleet.map(item=>item.id)).size,41);
