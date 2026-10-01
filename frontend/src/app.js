@@ -819,7 +819,7 @@ function syncFactoryAssetHeading(machine,placement){
  if(heading)heading.textContent=machine.name;
  if(subtitle)subtitle.textContent=[machine.sapCode,machine.model].filter(Boolean).join(' · ')||machine.area||'Mesin atau peralatan pabrik';
  if(summary)summary.textContent='Identitas dan posisi mesin';
- if(detail)detail.innerHTML=pair('Identitas mesin atau peralatan',machine.machineId)+pair('Sumber identitas',machine.source==='USER_CONFIRMED'?'Konfirmasi pengguna':machine.source||'Belum tersedia')+pair('Posisi',readableStatus(positionVerification(placement)));
+ if(detail)detail.innerHTML=pair('Identitas mesin atau peralatan',machine.machineId)+pair('Sumber identitas',machine.source==='USER_CONFIRMED'?'Konfirmasi pengguna':'Daftar mesin BMJ')+pair('Posisi',readableStatus(positionVerification(placement)));
 }
 function machineDetailDialog(machine){
  const placement=placementForMachine(machine.machineId),policy=foundationAssetPolicy(machine,placement),primary=policy.canOpenTechnical3D;
