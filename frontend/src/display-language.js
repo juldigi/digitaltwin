@@ -250,7 +250,28 @@ const SIMULATION_TEXT=Object.freeze({
  'Pelacakan keputusan pass / reject':'Pelacakan keputusan lulus/tolak (pass/reject)',
  'Ejection demo':'Demonstrasi ejection',
  'Delivery accepted / reject recovery':'Delivery hasil diterima dan pemulihan reject',
- 'Unwind · web kontinu':'Pelepasan gulungan · web kontinu'
+ 'Unwind · web kontinu':'Pelepasan gulungan · web kontinu',
+ 'Load / float stock on air table':'Memuat material dan mengapungkan tumpukan di air table',
+ 'Lower hydraulic clamp':'Menurunkan hydraulic clamp',
+ 'load die-cut stack':'Memuat tumpukan hasil die-cut',
+ 'index stack on X/Y servo platform':'Mengindeks tumpukan pada platform servo X/Y',
+ 'stop platform and execute hydraulic blanking stroke':'Menghentikan platform dan menjalankan stroke blanking hidraulik',
+ 'return/index platform and coordinate PLC / safety interlocks':'Mengembalikan dan mengindeks platform serta menyelaraskan PLC dan safety interlock',
+ 'load sheets/signatures into selected bins':'Memuat sheet atau signature ke bin yang dipilih',
+ 'load plate through verified-common manual entry or an unverified model-specific loader':'Memuat plate melalui manual entry yang umum terverifikasi atau loader khusus model yang belum terverifikasi',
+ 'transport plate, confirm register position and stop the drum at load position':'Mengangkut plate, memastikan posisi register, lalu menghentikan drum di posisi load',
+ 'actuate and confirm plate clamp before enabling drum rotation':'Mengaktifkan dan mengonfirmasi plate clamp sebelum drum diizinkan berputar',
+ 'synchronize drum encoder and permit HEIDELBERG thermal-laser exposure only after register/clamp interlocks are true':'Menyinkronkan encoder drum dan mengizinkan exposure thermal-laser HEIDELBERG hanya setelah interlock register dan clamp terpenuhi',
+ 'release clamp, confirm unload permit and hand plate toward processor/stacker while keeping debris and temperature-control systems option-bounded':'Melepas clamp, mengonfirmasi izin unload, lalu meneruskan plate ke processor atau stacker; sistem debris dan temperature-control tetap bergantung opsi mesin',
+ 'load roll media while supply-roll braking establishes controlled web feed':'Memuat roll media sambil supply-roll brake membentuk pengumpanan web yang terkendali',
+ 'stabilize media through front slack, gravity tension regulation and capstan encoder feedback':'Menstabilkan media melalui front slack, pengaturan tension gravitasi, dan feedback encoder capstan',
+ 'load material on flatbed vacuum surface':'Memuat material pada permukaan vacuum flatbed',
+ 'apply vacuum hold-down using model-specific zone/distribution system':'Mengaktifkan vacuum hold-down melalui sistem zona dan distribusi sesuai model',
+ 'control job and release material through the installed handling configuration':'Mengendalikan job dan melepas material melalui konfigurasi handling yang terpasang',
+ 'admit / mix return and outdoor air':'Memasukkan dan mencampur return air dengan outdoor air',
+ 'distribute through supply duct / diffuser reference and close a return-air reference loop':'Mendistribusikan udara melalui acuan supply duct dan diffuser, lalu menutup loop acuan return air',
+ 'return / outdoor air intake':'Intake return air dan outdoor air',
+ 'distribute conditioned supply air / return reference while outdoor condenser rejects heat':'Mendistribusikan udara supply terkondisi melalui acuan return sementara outdoor condenser membuang panas'
 });
 
 export function readableSimulationStage(value){
