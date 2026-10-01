@@ -411,8 +411,13 @@ export class FactoryEngine {
   }
   disposeDetachedFactoryMaterials(materials,root=this.actualFactory?.root){
     if(!materials?.size||!root)return 0;
-    const live=new Set();root.traverse?.(object=>{const list=Array.isArray(object.material)?object.material:[object.material];for(const material of list)if(material)live.add(material);});
-    let disposed=0;for(const material of materials)if(material&&!live.has(material)){material.map?.dispose?.();material.dispose?.();disposed++;}
+    const live=new Set(),liveMaps=new Set();
+    root.traverse?.(object=>{const list=Array.isArray(object.material)?object.material:[object.material];for(const material of list)if(material){live.add(material);if(material.map)liveMaps.add(material.map);}});
+    const disposedMaps=new Set();let disposed=0;
+    for(const material of materials)if(material&&!live.has(material)){
+      if(material.map&&!liveMaps.has(material.map)&&!disposedMaps.has(material.map)){material.map.dispose?.();disposedMaps.add(material.map);}
+      material.dispose?.();disposed++;
+    }
     return disposed;
   }
   focusFactorySelection(mode='iso'){const target=this.currentFactoryTarget();if(target)this.fit(target,mode);return target;}
