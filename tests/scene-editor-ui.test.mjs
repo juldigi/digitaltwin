@@ -323,7 +323,9 @@ test('V265 editor locks asynchronous transactions and rolls back failed machine 
  assert.match(app,/input\.disabled=Boolean\(editorBusy\|\|v\.locked/);
  assert.match(app,/undoButton\.disabled=editorBusy\|\|!undo\.length/);
  assert.match(app,/if\(liveEditorUiFrame\)\{cancelAnimationFrame\(liveEditorUiFrame\);liveEditorUiFrame=0;\}/);
- assert.match(app,/const payload=cloneOverrides\(overrides\);setEditorBusy\(true,'Menyimpan perubahan…'\)/);
+ assert.match(app,/const payload=cloneOverrides\(overrides\),finish=async\(next,message\)=>/);
+ assert.ok(app.indexOf('const payload=cloneOverrides(overrides)')<app.indexOf("setEditorBusy(true,'Menyimpan perubahan…')"),'save payload must be snapshotted before the async transaction lock');
+ assert.match(app,/setEditorBusy\(true,'Menyimpan perubahan…'\)/);
  assert.match(app,/data:\{overrides:payload\}/);
  assert.match(app,/setEditorBusy\(true,'Membuka model bagian mesin…'\)/);
  assert.match(app,/catch\(error\)\{clearActiveMachineDescriptor\(\);applyActiveMachineState\(\);engine\.clearMachineContext\?\.\(\);engine\.setView\('factory',state\)/);
