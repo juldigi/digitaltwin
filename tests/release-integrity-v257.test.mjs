@@ -18,6 +18,7 @@ const state=read('../frontend/src/state/app-state.js');
 const engine=read('../frontend/src/engine.js');
 const sw=read('../frontend/sw.js');
 const building=read('../frontend/src/factory-building.js');
+const simulationMode=read('../frontend/src/simulation-mode.js');
 
 test('V257 release manifest records one chronological implementation path with explicit exceptions',()=>{
  assert.equal(RELEASE_V257.build,'2026.09.29-257');
@@ -52,8 +53,10 @@ test('V240 through V248 controls coexist without parallel UI ownership',()=>{
  assert.match(engine,/mode==='operator'/);
  assert.match(engine,/machineFocusBounds\(\)/);
  assert.match(shell,/data-transport-mode/);
- assert.match(shell,/Proses penuh/);
- assert.match(shell,/Tahap demi tahap/);
+ assert.match(shell,/simulationModeOptions/);
+ assert.match(simulationMode,/Proses penuh · berjalan terus/);
+ assert.match(simulationMode,/Tahap demi tahap · berhenti tiap tahap/);
+ assert.match(simulationMode,/training/);
  assert.match(app,/Pilih kualitas/);
  assert.match(app,/Edit pabrik 3D/);
  assert.match(app,/editorMoveStep=\.01/);
