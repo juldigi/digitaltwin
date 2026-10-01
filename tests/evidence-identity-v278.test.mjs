@@ -17,14 +17,14 @@ test('V278 separates simulation availability from dedicated-model truth',()=>{
  assert.equal(blocked.evidence.simulation,'BLOCKED');
  assert.match(app,/IS_DEDICATED_REGISTRY_MODEL=IS_GENERIC&&GENERIC_CONFIG\.evidence\.simulation==='VERIFIED_PROCESS_MODEL'/);
  assert.match(app,/IS_VERIFIED_REGISTRY_SIM=IS_GENERIC&&\['VERIFIED_PROCESS_MODEL','FAMILY_PROCESS_MODEL'\]\.includes\(GENERIC_CONFIG\.evidence\.simulation\)/);
- assert.match(app,/'3d_status':IS_DEDICATED_REGISTRY_MODEL\?'DEDICATED PROCEDURAL \/ '/);
- assert.match(app,/IS_VERIFIED_REGISTRY_SIM\?'REFERENCE PROCEDURAL \/ '/);
+ assert.match(app,/const modelTruth=machineTruthProfile\(registry\)/);
+ assert.match(app,/'3d_status':modelTruth\.source3D/);
  assert.match(app,/IS_DEDICATED_REGISTRY_MODEL\?'Model khusus berbasis sumber':IS_VERIFIED_REGISTRY_SIM\?'Model acuan proses keluarga'/);
 });
 
 test('V278 keeps family-reference simulations available without presenting them as serial-specific models',()=>{
  assert.match(app,/else if\(IS_GENERIC&&IS_VERIFIED_REGISTRY_SIM\)/);
- assert.match(app,/discovery_status:IS_DEDICATED_REGISTRY_MODEL\?'DEDICATED_EVIDENCE_AVAILABLE':IS_VERIFIED_REGISTRY_SIM\?'FAMILY_REFERENCE_AVAILABLE'/);
+ assert.match(app,/discovery_status:modelTruth\.discoveryStatus/);
 });
 
 test('V278 fills manufacturer only from identifiable registry/model evidence and separates registry identity from actual photos',()=>{
