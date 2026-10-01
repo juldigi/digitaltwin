@@ -42,7 +42,7 @@ test('V175 app redraws the 2D plan when selection state changes',()=>{
 });
 
 test('V175 app and service worker are cache-busted while shell remains V174',()=>{
- assert.match(html,/src\/app\.js\?v=222/);
- assert.match(html,/src\/app-shell-v79\.js\?v=222/);
- assert.match(sw,/factory-digital-twin-v222-overlay-state-ssot-20260925/);
+ assert.match(html,/src\/app\.js\?v=273/);
+ assert.match(html,/src\/app-shell-v79\.js\?v=273/);
+ assert.match(sw,/factory-digital-twin-v273-full-fleet-state-sync-20261001/);
 });
