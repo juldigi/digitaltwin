@@ -297,7 +297,7 @@ export class Offset10MachineTemplate{
     const x3=this.group(g,'o10-delivery-x3','Delivery extension X3',[0,0,0],[.4,.25,0],['O10-FINAL-DRAWING','O10-PROPOSAL']);
     const moduleXs=[-1.28,-.05,1.18];
     moduleXs.forEach((x,i)=>{
-      const hood=this.group(x3,'o10-delivery-x'+(i+1),'X'+(i+1)+' delivery extension',[0,0,0],[.2,.2,0],['O10-FINAL-DRAWING']);
+      const moduleId=i===2?'o10-delivery-x3-module':'o10-delivery-x'+(i+1),hood=this.group(x3,moduleId,'X'+(i+1)+' delivery extension',[0,0,0],[.2,.2,0],['O10-FINAL-DRAWING']);
       this.cover(this.box(hood,[1.02,1.22,.16],[x,2.02,-1.42],'graphite',.05));
       this.cover(this.box(hood,[1.02,1.22,.16],[x,2.02,1.26],'graphite',.05));
       this.cover(this.box(hood,[1.02,.22,2.72],[x,2.57,0],'graphite',.05));
