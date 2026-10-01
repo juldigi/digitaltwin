@@ -746,7 +746,7 @@ function layoutDialog(){
 function foundationStatusDialog({back=null}={}){
  const l=activeLayout(),layoutStatus=layoutTruth(l),fidelity=l?(l.dwgFidelity||buildDwgFidelityLedger(l)):buildDwgFidelityLedger(null);
  const appState=getAppState()||{},selectedMachine=machineRecordForRoute(appState.selectedAsset),placement=selectedMachine?placementForMachine(selectedMachine.machineId):null;
- const assetStatus=selectedMachine?assetTruth(state?.asset,{placement,sourceCount:TECHNICAL_SOURCES.length}):null;
+ const assetStatus=selectedMachine?factoryMachineTruth(selectedMachine,placement):null;
  const placements=Array.isArray(l?.placements)?l.placements:[],mapped=placements.filter(p=>p.status!=='UNIDENTIFIED'),unidentified=placements.filter(p=>p.status==='UNIDENTIFIED');
  const connection=connectionTruth({online:navigator.onLine,cached:cachedDataActive,connected:Boolean(role)});
  const friendly=readableStatus;
