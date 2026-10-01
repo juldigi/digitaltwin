@@ -15,6 +15,9 @@ test('V270 loads one final flagship layer after the canonical shell',()=>{
  const flagshipIndex=html.indexOf('flagship-v270.css?v=273');
  assert.ok(shellIndex>=0,'canonical shell missing');
  assert.ok(flagshipIndex>shellIndex,'flagship layer must load after canonical shell');
+ for(const entry of ['src/app.js','src/ui-v5.js','src/experience-v37.js','src/app-shell-v79.js'])assert.ok(html.includes(entry+'?v=273'),entry+' must use the current public release query');
+ assert.match(html,/bmj-sw-v273-reloaded/);
+ assert.doesNotMatch(html,/\?v=222\b/,'stale V222 public entrypoint query must not return');
  assert.match(html,/<body class="panel-hidden ui-simple light-mode">/);
  assert.match(html,/<meta name="theme-color" content="#f3f7fb">/);
  assert.match(html,/id="theme-bootstrap"/);
