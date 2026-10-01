@@ -55,7 +55,7 @@ export class Offset8PrintingSimulation{
    mechanismCount:this.rotors.length+this.suckers.length+this.emitters.length+this.deliveryBars.length,inkFlowCount:0,uvLampCount:0,uvActive:false,pathVisible:this.pathVisible,inkFlowVisible:false,
    feederSuctionActive:this.feederSuctionActive,coatingActive:this.coatingActive,dryerActive:this.dryerActive,deliveryBrakeActive:this.deliveryBrakeActive,deliveryGripperActive:this.active&&this.running};
  }
- start(){if(this.staticDeliveryStack)this.staticDeliveryStack.visible=false;for(const p of this.stack)p.visible=false;this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;for(const s of this.sheets)s.lap=-1;this.resetMechanisms();this.onUpdate?.(this.state());return this.state();}
+ start(){if(this.staticDeliveryStack)this.staticDeliveryStack.visible=false;for(const p of this.stack)p.visible=false;this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;for(const s of this.sheets)s.lap=-1;this.resetMechanisms();this.pathLine.visible=this.pathVisible;this.onUpdate?.(this.state());return this.state();}
  pause(){this.running=false;this.paused=this.active;this.onUpdate?.(this.state());return this.state();}
  resume(){if(this.active){this.running=true;this.paused=false;this.lastNow=null;}this.onUpdate?.(this.state());return this.state();}
  setSpeed(v){this.speed=Math.max(.25,Math.min(4,Number(v)||1));return this.state();}
