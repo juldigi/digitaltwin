@@ -152,7 +152,9 @@ if(MACHINE_KEY)applyMachineShell();
 const toast=(message,error=false)=>{clearTimeout(toastTimer);const el=$('#toast');if(!el)return;el.textContent=message;el.classList.toggle('error',error);el.setAttribute('role',error?'alert':'status');el.setAttribute('aria-live',error?'assertive':'polite');el.hidden=false;toastTimer=setTimeout(()=>{el.hidden=true;el.setAttribute('aria-live','polite');},error?9000:5000);};
 function handleEngineError(message='Penampil 3D mengalami gangguan.'){
  console.error('[Digital Twin engine]',message);
- if(engine?.isPrintingSimulationActive?.()||currentSimulationState().active)stopPrintingSimulation({restoreExterior:true});
+ const simulationOwnedCutaway=simulationOwnsExterior;
+ if(engine?.isPrintingSimulationActive?.()||currentSimulationState().active)stopPrintingSimulation({restoreExterior:false});
+ if(simulationOwnedCutaway)exitExteriorMode({restoreQuality:false});
  commitSimulationState({...currentSimulationState(),active:false,running:false,paused:false,stage:null,progress:0});
  toast(message,true);
  document.body.classList.add('workspace-2d','webgl-unavailable');
@@ -292,10 +294,10 @@ function enableExteriorOpen({forceDetail=true}={}){
  engine.template.reset();engine.clearPartLabels();setDomainState({inspectionMode:{isolate:false}});engine.isolated=false;if(forceDetail&&!engine.mobileRender)engine.applyQualityProfile(engine.qualityProfile==='hemat'?'seimbang':engine.qualityProfile);engine.template.setExteriorOpen(true);
  selectedPart=null;setExplodeLevel(0);return true;
 }
-function exitExteriorMode(){
+function exitExteriorMode({restoreQuality=true}={}){
  if(isInteriorOpen()&&engine){
   engine.template.setExteriorOpen(false);engine.template.reset();engine.clearPartLabels();engine.isolated=false;
-  if(exteriorPreviousLow!==null)engine.applyQualityProfile(exteriorPreviousLow);
+  if(restoreQuality&&exteriorPreviousLow!==null)engine.applyQualityProfile(exteriorPreviousLow);
  }
  setDomainState({inspectionMode:{interior:false}});exteriorPreviousLow=null;setDomainState({inspectionMode:{interiorFocus:null}});
 }
