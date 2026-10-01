@@ -26,12 +26,25 @@ export class Offset8CX104RealismTemplate extends Offset8MachineTemplate{
   this.root.userData.realismPack=OFFSET8_FINAL_REFINEMENT.id;
   this.root.userData.realismPolicy=OFFSET8_FINAL_REFINEMENT.policy;
   this.root.userData.dryerEnergyTechnology='UNASSERTED';
-  this.refineExistingModel();this.root.updateMatrixWorld(true);
+  this.refineExistingModel();this.addFloorGroundingSupports();this.root.updateMatrixWorld(true);
  }
  tag(mesh,role,{coverMounted=false,service=false,silhouette=false,confidence='HEIDELBERG_CX104_FAMILY'}={}){
   if(!mesh)return mesh;mesh.userData.realismMicroDetail=true;mesh.userData.realismRole=role;
   mesh.userData.coverMountedDetail=coverMounted;mesh.userData.serviceDetail=mesh.userData.serviceDetail||service;
   mesh.userData.confidence=confidence;mesh.userData.detail=true;if(silhouette)mesh.userData.silhouetteCritical=true;this.realismMeshes.push(mesh);return mesh;
+ }
+ addFloorGroundingSupports(){
+  const add=(parent,x,z,w=.54,d=.34)=>{
+   const shoe=this.db(parent,[w,.30,d],[x,.15,z],'graphite',.025,'cx104-floor-support-shoe',{silhouette:true,confidence:'HEIDELBERG_CX104_FAMILY_LOWER_PLINTH_REFERENCE'});
+   shoe.userData.floorInterface=true;shoe.userData.installedFootSpacingVerified=false;
+  };
+  for(const id of ['offset8-pu1','offset8-pu2','offset8-pu3','offset8-pu4','offset8-pu5','offset8-pu6','offset8-pu7','offset8-pu8','offset8-l1','offset8-y1','offset8-y2','offset8-l2']){
+   const g=this.node(id);if(!g)continue;for(const z of [-1.08,1.08])add(g,0,z);
+  }
+  const feeder=this.node('offset8-feeder');if(feeder)for(const x of [-.78,.92])for(const z of [-1.08,1.08])add(feeder,x,z,.46,.32);
+  const delivery=this.node('offset8-delivery');if(delivery)for(const x of [-1.38,1.38])for(const z of [-1.10,1.10])add(delivery,x,z,.48,.32);
+  this.root.userData.floorGroundingRevision='V284_CX104_LOWER_PLINTH_SUPPORTS';
+  this.root.userData.floorSupportBoundary='FAMILY_VISIBLE_LOWER_SUPPORT_REFERENCE__INSTALLED_FOOT_SPACING_NOT_ENGINEERING_VERIFIED';
  }
  db(p,s,x,k='graphite',r=.004,role='micro-detail',opts={}){return this.tag(this.box(p,s,x,k,r),role,opts);}
  dc(p,r,l,x,k='steel',role='micro-detail',axis='z',opts={}){return this.tag(this.cyl(p,r,l,x,k,role,axis),role,opts);}
