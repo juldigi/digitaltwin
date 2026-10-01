@@ -6,14 +6,14 @@ const app=readFileSync('frontend/src/app.js','utf8');
 const body=app.split('function syncFactoryAssetHeading(machine,placement){')[1].split('\n}\n')[0];
 test('factory inspector heading and evidence follow each selected machine',()=>{
  const elements=new Map(['.asset-heading h2','.asset-heading p','#evidence-summary','#evidence-detail'].map(id=>[id,{}]));
- const context={$:id=>elements.get(id),pair:(k,v)=>`${k}:${v};`,positionVerification:p=>p?.verified?'Terverifikasi dari DWG':'Belum terverifikasi'};
+ const context={$:id=>elements.get(id),pair:(k,v)=>`${k}:${v};`,positionVerification:p=>p?.verified?'DWG-VERIFIED':'UNVERIFIED',readableStatus:v=>v==='DWG-VERIFIED'?'Terverifikasi dari DWG':v==='UNVERIFIED'?'Belum diverifikasi':v};
  for(const machine of [{machineId:'a',name:'OFFSET 5',sapCode:'OFU-1',model:'CD102',source:'USER_CONFIRMED'},{machineId:'b',name:'AHU',area:'UTILITAS',source:'Daftar mesin'}]){
   vm.runInNewContext(`(function(machine,placement){${body}})(machine,placement)`,{...context,machine,placement:{verified:machine.machineId==='a'}});
   assert.equal(elements.get('.asset-heading h2').textContent,machine.name);
   assert.equal(elements.get('.asset-heading p').textContent,machine.machineId==='a'?'OFU-1 · CD102':'UTILITAS');
   const evidence=elements.get('#evidence-detail').innerHTML;
   assert.ok(evidence.includes(`Identitas mesin atau peralatan:${machine.machineId}`));
-  assert.ok(evidence.includes(machine.machineId==='a'?'Konfirmasi pengguna':'Daftar mesin'));
+  assert.ok(evidence.includes(machine.machineId==='a'?'Konfirmasi pengguna':'Daftar mesin BMJ'));
   assert.ok(!elements.get('#evidence-summary').textContent.includes('Memeriksa'));
  }
 });

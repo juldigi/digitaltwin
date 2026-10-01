@@ -41,13 +41,13 @@ test('Phase-1 placeholders stay spatial-only while exposing honest implementatio
  assert.ok(!/placeholderData=.*SAP Code/.test(detail));
 });
 
-test('OFFSET 5 contextual detail exposes source detail confidence and verified-position semantics',()=>{
+test('factory contextual detail exposes per-machine source detail confidence and verified-position semantics',()=>{
  const detail=app.slice(app.indexOf('function machineDetailDialog(machine){'),app.indexOf('async function switchActiveMachine',app.indexOf('function machineDetailDialog(machine){')));
- assert.match(detail,/assetTruth\(state\?\.asset,\{placement,sourceCount:TECHNICAL_SOURCES\.length\}\)/);
- assert.match(detail,/pair\('Dasar model 3D',truth\?\.source3D\|\|machine\.source\)/);
- assert.match(detail,/pair\('Detail model 3D',truth\?\.detail3D\|\|'Model berbasis acuan'\)/);
- assert.match(detail,/pair\('Keandalan data',truth\?\.dataConfidence\|\|'Sesuai sumber tersedia'\)/);
- assert.match(detail,/pair\('Posisi',truth\?\.position\|\|positionVerification\(placement\)\)/);
+ assert.match(detail,/const truth=primary\?factoryMachineTruth\(machine,placement\):null/);
+ assert.match(detail,/pair\('Dasar model 3D',readableStatus\(truth\?\.source3D\|\|'UNKNOWN'\)\)/);
+ assert.match(detail,/pair\('Detail model 3D',readableStatus\(truth\?\.detail3D\|\|'UNKNOWN'\)\)/);
+ assert.match(detail,/pair\('Keandalan data',readableStatus\(truth\?\.dataConfidence\|\|'UNVERIFIED'\)\)/);
+ assert.match(detail,/pair\('Posisi',readableStatus\(truth\?\.position\|\|positionVerification\(placement\)\)\)/);
 });
 
 test('returning to factory overview clears selection and restores whole-factory focus',()=>{
