@@ -11,8 +11,8 @@ const app=read('../frontend/src/app.js');
 const sw=read('../frontend/sw.js');
 
 test('V270 loads one final flagship layer after the canonical shell',()=>{
- const shellIndex=html.indexOf('app-shell-v79.css?v=273');
- const flagshipIndex=html.indexOf('flagship-v270.css?v=273');
+ const shellIndex=html.indexOf('app-shell-v79.css?v=222');
+ const flagshipIndex=html.indexOf('flagship-v270.css?v=222');
  assert.ok(shellIndex>=0,'canonical shell missing');
  assert.ok(flagshipIndex>shellIndex,'flagship layer must load after canonical shell');
  assert.match(html,/<body class="panel-hidden ui-simple light-mode">/);
@@ -52,7 +52,7 @@ test('V270 makes touch, focus, motion and contrast preferences first-class',()=>
 });
 
 test('V270 theme preference starts from the visible light shell and preserves stored user choice',()=>{
- assert.match(state,/APP_BUILD='2026\.10\.01-273'/);
+ assert.match(state,/APP_BUILD='2026\.09\.30-270'/);
  assert.match(state,/preferences:\{theme:'light',lowDetail:false,visualQuality:'auto'\}/);
  assert.match(state,/value===null\?fallback:\(value==='light'\?'light':'dark'\)/);
  assert.match(state,/theme:readStoredPreference\('theme','light'\)/);
@@ -78,8 +78,8 @@ test('V270 modal, confirmation and toast interaction states are accessible and p
  assert.match(css,/\.danger-action/);
 });
 
-test('V270 flagship UI is part of the offline shell and public release query uses the current freshness namespace',()=>{
- assert.match(sw,/const VERSION='factory-digital-twin-v273-release-freshness-20261001'/);
+test('V270 flagship UI is part of the offline shell and public release query remains stable',()=>{
+ assert.match(sw,/const VERSION='factory-digital-twin-v270-flagship-ui-20260930'/);
  assert.match(sw,/\.\/flagship-v270\.css/);
- assert.match(sw,/const RELEASE='273'/);
+ assert.match(sw,/const RELEASE='222'/);
 });
