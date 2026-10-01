@@ -131,7 +131,7 @@ test('conditional controls explain requirements rather than failing silently',()
   assert.match(app,/Edit pabrik 3D/);
 });
 test('service worker refreshes the redesigned shell',()=>{
-  assert.match(sw,/factory-digital-twin-v273-release-freshness-20261001/);
+  assert.match(sw,/factory-digital-twin-v222-overlay-state-ssot-20260925/);
   assert.doesNotMatch(sw,/src\/universal-machine\.js/);
   assert.match(app,/engine\.template\.ghost\(false\)/,'selection restores opaque surrounding geometry');
   assert.match(app,/engine\.template\.ghost\(isolated,selectedPart\)/,'isolation alone makes surrounding geometry transparent');
