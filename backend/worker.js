@@ -106,7 +106,7 @@ export default {async fetch(req,env){
     const row=await env.DB.prepare('SELECT data, revision FROM twin_state WHERE id = 1').first();
     let state=row?JSON.parse(row.data):structuredClone(initialState);state.revision=row?.revision??0;
     if(path==='/api/state'&&req.method==='GET'){
-      if(!superadmin){const {sceneRevisions,...publicState}=state;return json(publicState,200,cors);}
+      if(!superadmin||passwordChangeRequired){const {sceneRevisions,...publicState}=state;return json(publicState,200,cors);}
       return json(state,200,cors);
     }
     if(path==='/api/scene/revisions'&&req.method==='GET')return superadmin&&!passwordChangeRequired?json({revisions:state.sceneRevisions||[]},200,cors):json({error:passwordChangeRequired?'Ganti kata sandi awal Superadmin sebelum membuka riwayat scene.':'Riwayat scene hanya untuk Superadmin.'},403,cors);
