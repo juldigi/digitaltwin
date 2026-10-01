@@ -48,7 +48,7 @@ export class Offset9PrintingSimulation{
    feederSuctionActive:this.feederSuctionActive,feederVenturiActive:this.feederVenturiActive,coatingActive:this.coatingActive,chamberBladeActive:this.chamberBladeActive,airGuidanceActive:this.airGuidanceActive,deliveryVenturiInstalledVerified:this.deliveryVenturiInstalledVerified,deliveryBrakeActive:this.deliveryBrakeActive,deliveryGripperActive:this.active&&this.running,
    simulationBoundary:'SX52_4L_PROCESS__OPTIONS_NOT_INFERRED'};
  }
- start(){if(this.staticDeliveryStack)this.staticDeliveryStack.visible=false;for(const p of this.stack)p.visible=false;this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;for(const s of this.sheets)s.lap=-1;this.resetMechanisms();this.onUpdate?.(this.state());return this.state();}
+ start(){if(this.staticDeliveryStack)this.staticDeliveryStack.visible=false;for(const p of this.stack)p.visible=false;this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;for(const s of this.sheets)s.lap=-1;this.resetMechanisms();this.pathLine.visible=this.pathVisible;this.onUpdate?.(this.state());return this.state();}
  pause(){this.running=false;this.paused=this.active;this.onUpdate?.(this.state());return this.state();}
  resume(){if(this.active){this.running=true;this.paused=false;this.lastNow=null;}this.onUpdate?.(this.state());return this.state();}
  setSpeed(value){this.speed=Math.max(.25,Math.min(4,Number(value)||1));return this.state();}
