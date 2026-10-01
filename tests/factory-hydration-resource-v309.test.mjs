@@ -30,3 +30,25 @@ test('V309 keeps the already-merged selected-machine hydration synchronization i
  assert.match(source,/wrapper\.updateWorldMatrix\?\.\(true,true\);this\.factorySelectionHelper\.update\?\.\(\)/);
  assert.match(source,/if\(this\.view==='factory'&&this\.transition&&this\.isObjectVisible\(wrapper\)\)this\.fit\(wrapper,'operator'\)/);
 });
+
+test('V309 distinct detached materials cannot dispose a texture map still used by a live material',()=>{
+ let textureDisposals=0,orphanDisposals=0,liveDisposals=0;
+ const sharedMap={dispose(){textureDisposals++}};
+ const liveMaterial={map:sharedMap,dispose(){liveDisposals++}};
+ const orphanMaterial={map:sharedMap,dispose(){orphanDisposals++}};
+ const root={traverse(fn){fn({material:liveMaterial});}};
+ const disposed=FactoryEngine.prototype.disposeDetachedFactoryMaterials.call({actualFactory:{root}},new Set([orphanMaterial]),root);
+ assert.equal(disposed,1);
+ assert.equal(orphanDisposals,1);
+ assert.equal(liveDisposals,0);
+ assert.equal(textureDisposals,0);
+});
+
+test('V309 shared orphan texture maps are disposed at most once after all live references disappear',()=>{
+ let textureDisposals=0;
+ const sharedMap={dispose(){textureDisposals++}},a={map:sharedMap,dispose(){}},b={map:sharedMap,dispose(){}};
+ const root={traverse(){}};
+ const disposed=FactoryEngine.prototype.disposeDetachedFactoryMaterials.call({actualFactory:{root}},new Set([a,b]),root);
+ assert.equal(disposed,2);
+ assert.equal(textureDisposals,1);
+});
