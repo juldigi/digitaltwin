@@ -5,6 +5,7 @@ import {readFileSync} from 'node:fs';
 const engine=readFileSync(new URL('../frontend/src/engine.js',import.meta.url),'utf8');
 const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
 const shell=readFileSync(new URL('../frontend/src/app-shell-v79.js',import.meta.url),'utf8');
+const css=readFileSync(new URL('../frontend/app-shell-v79.css',import.meta.url),'utf8');
 
 test('V282 engine enforces training preset instead of relying on UI labels',()=>{
  assert.match(engine,/applyPrintingSimulationModePreset\(\)/);
@@ -32,4 +33,10 @@ test('V282 canonical transport uses machine-aware mode labels and locks training
  assert.match(shell,/\['continuous','stages','training'\]\.includes\(sim\.mode\)/);
  assert.match(shell,/\['stages','training'\]\.includes\(mode\)\?'Tahap berikutnya':'Lanjutkan'/);
  assert.match(shell,/speedSelect\.disabled=mode==='training'/);
+});
+
+
+test('V282 training helper and locked controls stay readable on the existing responsive surface',()=>{
+ assert.match(css,/#panel-content \.simulation-mode-field small\{color:var\(--muted\);font-size:11px;font-weight:500;line-height:1\.4\}/);
+ assert.match(css,/#panel-content \.simulation-speed button:disabled,#panel-content #sim-path:disabled\{opacity:\.52;cursor:not-allowed\}/);
 });
