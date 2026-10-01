@@ -151,7 +151,10 @@ function applyMachineShell(){
 if(MACHINE_KEY)applyMachineShell();
 const toast=(message,error=false)=>{clearTimeout(toastTimer);const el=$('#toast');if(!el)return;el.textContent=message;el.classList.toggle('error',error);el.setAttribute('role',error?'alert':'status');el.setAttribute('aria-live',error?'assertive':'polite');el.hidden=false;toastTimer=setTimeout(()=>{el.hidden=true;el.setAttribute('aria-live','polite');},error?9000:5000);};
 function handleEngineError(message='Penampil 3D mengalami gangguan.'){
- console.error('[Digital Twin engine]',message);toast(message,true);
+ console.error('[Digital Twin engine]',message);
+ if(engine?.isPrintingSimulationActive?.()||currentSimulationState().active)stopPrintingSimulation({restoreExterior:true});
+ commitSimulationState({...currentSimulationState(),active:false,running:false,paused:false,stage:null,progress:0});
+ toast(message,true);
  document.body.classList.add('workspace-2d','webgl-unavailable');
  $('#mode-2d')?.classList.add('active');
  const three=$('#mode-3d');if(three){three.classList.remove('active');three.disabled=true;three.title='3D sedang dipulihkan';}
