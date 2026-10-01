@@ -8,7 +8,8 @@ const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8')
 test('machine detail can report an unknown position without a primary truth record',()=>{
   assert.equal(positionVerification(null),'UNKNOWN');
   const detail=app.slice(app.indexOf('function machineDetailDialog(machine){'),app.indexOf("window.addEventListener('bmj:machinecontextrequest'"));
-  assert.match(detail,/pair\('Posisi',truth\?\.position\|\|positionVerification\(placement\)\)/);
+  assert.match(detail,/positionTruth=readableStatus\(positionVerification\(placement\)\)/);
+  assert.match(detail,/pair\('Posisi',positionTruth\)/);
 });
 
 test('asset selection keeps factory context until 3D is explicitly requested',()=>{
