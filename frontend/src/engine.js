@@ -268,16 +268,17 @@ export class FactoryEngine {
       entry.line.setAttribute('x1',String(labelX));entry.line.setAttribute('y1',String(labelY+3));entry.line.setAttribute('x2',String(anchorX));entry.line.setAttribute('y2',String(anchorY));entry.dot.setAttribute('cx',String(anchorX));entry.dot.setAttribute('cy',String(anchorY));
     }
   }
-  startPrintingSimulation(){const state=this.simulation?.start();this.simulationMode.reset();return state;}
+  startPrintingSimulation(){this.simulation?.start();this.simulationMode.reset();this.applyPrintingSimulationModePreset();return this.simulation?.state?.();}
   pausePrintingSimulation(){return this.simulation?.pause();}
   resumePrintingSimulation(){return this.simulation?.resume();}
   stopPrintingSimulation(){this.simulationMode.reset();return this.simulation?.stop();}
-  setPrintingSimulationMode(mode){
-    const selected=this.simulationMode.setMode(mode,this.simulation?.state()),preset=simulationModePreset(selected);
+  applyPrintingSimulationModePreset(){
+    const preset=simulationModePreset(this.simulationMode.mode);
     if(preset.lockSpeed!==null)this.simulation?.setSpeed(preset.lockSpeed);
     if(preset.forcePathVisible)this.simulation?.setPathVisible(true);
-    return selected;
+    return preset;
   }
+  setPrintingSimulationMode(mode){const selected=this.simulationMode.setMode(mode,this.simulation?.state());this.applyPrintingSimulationModePreset();return selected;}
   getPrintingSimulationMode(){return this.simulationMode.mode;}
   setPrintingSimulationSpeed(value){const preset=simulationModePreset(this.simulationMode.mode);return this.simulation?.setSpeed(preset.lockSpeed??value);}
   setPrintingSimulationPathVisible(on){const preset=simulationModePreset(this.simulationMode.mode);return this.simulation?.setPathVisible(preset.forcePathVisible?true:on);}
