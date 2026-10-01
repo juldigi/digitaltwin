@@ -20,6 +20,6 @@ test('V169 preserves keyboard reference interaction after the selector hotfix',(
 });
 
 test('V169 runtime is cache-busted on previously loaded V168 clients',()=>{
- assert.match(html,/src\/app\.js\?v=222/);
- assert.match(sw,/factory-digital-twin-v222-overlay-state-ssot-20260925/);
+ assert.match(html,/src\/app\.js\?v=273/);
+ assert.match(sw,/factory-digital-twin-v273-full-fleet-state-sync-20261001/);
 });
