@@ -6,7 +6,7 @@ import {execFileSync} from 'node:child_process';
 
 test('production HTML resolves the complete local module graph at a GitHub Pages subpath',()=>{
   execFileSync(process.execPath,['scripts/build.mjs']);
-  const root=resolve('dist'), html=readFileSync(resolve(root,'index.html'),'utf8'), distSw=readFileSync(resolve(root,'sw.js'),'utf8');
+  const root=resolve('dist'), html=readFileSync(resolve(root,'index.html'),'utf8'), distSw=readFileSync(resolve(root,'sw.js'),'utf8'), distState=readFileSync(resolve(root,'src/state/app-state.js'),'utf8');
   const fingerprint=/const BUILD_FINGERPRINT='([a-f0-9]{16})'/.exec(distSw)?.[1];
   assert.ok(fingerprint,'production service worker must carry an automatic frontend fingerprint');
   assert.doesNotMatch(distSw,/const BUILD_FINGERPRINT='SOURCE'/,'source fingerprint placeholder must never ship to production');
@@ -15,6 +15,7 @@ test('production HTML resolves the complete local module graph at a GitHub Pages
   assert.match(html,new RegExp(`<script type="module" src="\\.\\/src\\/app\\.js\\?v=${fingerprint}"><\\/script>`));
   assert.match(html,new RegExp(`bmj-sw-${fingerprint}-reloaded`));
   assert.doesNotMatch(html,/\?v=273|\?v=222/,'production entrypoints must use the source fingerprint, not a stale semantic release query');
+  assert.match(distState,new RegExp(`APP_BUILD='2026\\.10\\.01-273-${fingerprint}'`));
   const seen=new Set();
   function visit(file){
     assert.ok(existsSync(file),`Missing production module: ${file}`);
