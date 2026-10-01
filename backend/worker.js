@@ -38,7 +38,7 @@ async function authStore(db){
   }
   return account;
 }
-async function sessionRole(db,token){if(!token?.startsWith('sa_'))return false;const row=await db.prepare('SELECT s.expires FROM superadmin_sessions s JOIN superadmin_auth a ON a.generation=s.generation WHERE s.token_hash=?').bind(await digest(token)).first();return !!row&&row.expires>Date.now();}
+async function sessionInfo(db,token){if(!token?.startsWith('sa_'))return null;const row=await db.prepare('SELECT s.expires,s.generation FROM superadmin_sessions s JOIN superadmin_auth a ON a.generation=s.generation WHERE s.token_hash=?').bind(await digest(token)).first();return row&&row.expires>Date.now()?{expires:row.expires,generation:Number(row.generation)||0}:null;}
 const json=(data,status=200,headers={})=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff',...headers}});
 async function same(a,b){
   if(!a||!b) return false;
@@ -82,7 +82,7 @@ export default {async fetch(req,env){
       await env.DB.prepare('INSERT INTO superadmin_sessions(token_hash,generation,expires) VALUES(?,?,?)').bind(await digest(session),account.generation,Date.now()+8*3600000).run();
       return json({token:session,role:'superadmin',passwordChangeRequired:account.generation===0},200,cors);
     }
-    const superadmin=!!env.DB&&await sessionRole(env.DB,token);
+    const superadminSession=env.DB?await sessionInfo(env.DB,token):null,superadmin=!!superadminSession,superadminReady=superadmin&&superadminSession.generation>0;
     if(path==='/api/superadmin/password'&&req.method==='POST'){
       if(!superadmin)return json({error:'Sesi Superadmin tidak valid. Masuk kembali.'},401,cors);
       const data=await body(req),account=await authStore(env.DB),verification=typeof data.currentPassword==='string'?await verifyPassword(data.currentPassword,account):{ok:false,unsupported:false};
@@ -94,9 +94,9 @@ export default {async fetch(req,env){
       await env.DB.prepare('DELETE FROM superadmin_sessions').run();
       return json({changed:true},200,cors);
     }
-    const admin=superadmin||await same(token,env.ADMIN_TOKEN),viewer=admin||await same(token,env.VIEWER_TOKEN);
+    const admin=superadminReady||await same(token,env.ADMIN_TOKEN),viewer=superadmin||admin||await same(token,env.VIEWER_TOKEN);
     if(!viewer)return json({error:'Autentikasi diperlukan.'},401,cors);
-    if(path==='/api/session'&&req.method==='GET')return json({role:superadmin?'superadmin':admin?'admin':'viewer'},200,cors);
+    if(path==='/api/session'&&req.method==='GET')return json({role:superadmin?'superadmin':admin?'admin':'viewer',passwordChangeRequired:superadmin&&!superadminReady},200,cors);
     if(!env.DB)return json({error:'Database D1 belum terhubung.'},503,cors);
     const row=await env.DB.prepare('SELECT data, revision FROM twin_state WHERE id = 1').first();
     let state=row?JSON.parse(row.data):structuredClone(initialState);state.revision=row?.revision??0;
@@ -106,7 +106,8 @@ export default {async fetch(req,env){
     }
     if(path==='/api/scene/revisions'&&req.method==='GET')return superadmin?json({revisions:state.sceneRevisions||[]},200,cors):json({error:'Riwayat scene hanya untuk Superadmin.'},403,cors);
     if(path==='/api/scene'&&req.method==='GET')return json({overrides:state.sceneOverrides||{},revision:state.revision},200,cors);
-    if(path.startsWith('/api/scene')&&!superadmin)return json({error:'Hanya Superadmin yang dapat mengubah scene.'},403,cors);
+    if(superadmin&&!superadminReady&&req.method!=='GET')return json({error:'Ganti kata sandi Superadmin awal sebelum mengubah data atau scene.',passwordChangeRequired:true},428,cors);
+    if(path.startsWith('/api/scene')&&!superadminReady)return json({error:'Hanya Superadmin dengan kata sandi yang sudah diperbarui yang dapat mengubah scene.'},403,cors);
     if(!admin)return json({error:'Hanya administrator yang dapat mengubah data.'},403,cors);
     if(!['/api/position','/api/layout','/api/scene','/api/scene/restore'].includes(path))return json({error:'Endpoint tidak ditemukan.'},404,cors);
     if(!['PUT','DELETE'].includes(req.method))return json({error:'Metode tidak diizinkan.'},405,cors);
