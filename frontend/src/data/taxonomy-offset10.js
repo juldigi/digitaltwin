@@ -167,7 +167,7 @@ for(const key of OFFSET10_Y_UNIT_KEYS){
 {
  const ext=sub('O10.DELIVERY','X3','X3 Delivery Extension',['o10-delivery-x3'],['O10-FINAL-DRAWING','O10-PROPOSAL'],[.42,.20,0]);
  const eb=block(ext,'MODULES','Three extension modules',['o10-delivery-x3']);
- for(let i=1;i<=3;i++)part(eb,'X'+i,'Extension Module X'+i,['o10-delivery-x'+i],['Side hood','Sheet-guide deck']);
+ for(let i=1;i<=3;i++){const ref=i===3?'o10-delivery-x3-module':'o10-delivery-x'+i;part(eb,'X'+i,'Extension Module X'+i,[ref],['Side hood','Sheet-guide deck']);}
 
  const sheet=sub('O10.DELIVERY','SHEET','Sheet Deceleration & Guidance',['o10-delivery-chain','o10-delivery-sheet-brake','o10-delivery-air'],['O10-PROPOSAL','O10-CX104-OFFICIAL']);
  const sb=block(sheet,'BRAKE','Delivery transport',['o10-delivery-chain','o10-delivery-sheet-brake']);
