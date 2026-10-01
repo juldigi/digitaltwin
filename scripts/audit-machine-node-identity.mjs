@@ -21,7 +21,7 @@ export function auditMachineNodeIdentity(){
     if(typeof id!=='string'||!id.trim())return;
     const list=byId.get(id)||[];list.push(object);byId.set(id,list);
    });
-   const duplicateIds=[...byId.entries()].filter(([,objects])=>objects.length>1).map(([id,objects])=>({id,count:objects.length,names:objects.map(object=>object.name||null)}));
+   const duplicateIds=[...byId.entries()].filter(([,objects])=>objects.length>1).map(([id,objects])=>({id,count:objects.length,names:objects.map(object=>object.name||null),parents:objects.map(object=>({name:object.parent?.name||null,nodeId:object.parent?.userData?.nodeId||null}))}));
    const taxonomy=searchCorpusForMachine(machine,routeFor(machine)).taxonomy;
    const mappedRefs=[...new Set(taxonomy.flatMap(node=>node.meshRefs||[]).filter(Boolean))];
    const ambiguousMappedRefs=mappedRefs.filter(ref=>(byId.get(ref)?.length||0)>1).map(ref=>({ref,count:byId.get(ref).length}));
