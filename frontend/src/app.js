@@ -383,9 +383,8 @@ function activeMachineAssetId(){return machineRecordForRoute(MACHINE_KEY)?.machi
 function choosePart(part){if(!part||!engine||simulationLocksStructure())return;engine.template.reset();setDomainState({inspectionMode:{isolate:false}});engine.isolated=false;setExplodeLevel(0);selectedPart=part;engine.template.highlight(part);engine.template.ghost(false);engine.setPartLabels(part,activeTaxonomyId());engine.fit(part);const meta=taxonomyForPart(part);emitDomainState({selectedAsset:activeMachineAssetId(),selectedNode:meta?.id||part.userData?.nodeId||activeTaxonomyId(),inspectorState:{open:true,tab:'structure'}});}
 function selectPartFromCanvas(part){
  if(!part||!engine||simulationLocksStructure())return;
- const meta=taxonomyForPart(part);if(!meta){choosePart(part);return;}
- const path=taxonomyPath(meta.id),first=path.find(node=>node.level===2)||meta;
- selectTaxonomy(first.id);
+ const meta=taxonomyForPart(part);if(!meta){choosePart(part);showPanel();renderPanel('structure');return;}
+ setActiveTaxonomyId(meta.id);choosePart(part);showPanel();renderPanel('structure');pushMachineContextHistory(meta.id);
 }
 function taxonomyForPart(part){const id=part?.userData?.nodeId;if(!id)return null;return ACTIVE_TAXONOMY.filter(n=>(n.meshRefs||[]).includes(id)).sort((a,b)=>Math.abs(a.level-5)-Math.abs(b.level-5))[0]||null;}
 function taxonomyPath(id=activeTaxonomyId()){
