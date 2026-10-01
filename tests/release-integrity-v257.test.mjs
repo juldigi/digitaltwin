@@ -37,7 +37,7 @@ test('V257 release manifest records one chronological implementation path with e
 
 test('V273 application identity keeps the V257 lineage and rotates the live shell after fleet hardening',()=>{
  assert.equal(APP_BUILD,'2026.10.01-273');
- assert.match(state,/APP_BUILD='2026\.09\.30-270'/);
+ assert.match(state,/APP_BUILD='2026\.10\.01-273'/);
  assert.match(sw,/const VERSION='factory-digital-twin-v273-release-freshness-20261001'/);
  assert.match(sw,/const LEGACY_VERSION='factory-digital-twin-v270-flagship-ui-20260930'/);
  assert.match(sw,/const RELEASE='273'/);
