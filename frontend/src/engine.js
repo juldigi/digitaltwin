@@ -409,6 +409,12 @@ export class FactoryEngine {
     if(this.view==='factory'&&this.transition&&this.isObjectVisible(wrapper))this.fit(wrapper,'operator');
     return true;
   }
+  disposeDetachedFactoryMaterials(materials,root=this.actualFactory?.root){
+    if(!materials?.size||!root)return 0;
+    const live=new Set();root.traverse?.(object=>{const list=Array.isArray(object.material)?object.material:[object.material];for(const material of list)if(material)live.add(material);});
+    let disposed=0;for(const material of materials)if(material&&!live.has(material)){material.map?.dispose?.();material.dispose?.();disposed++;}
+    return disposed;
+  }
   focusFactorySelection(mode='iso'){const target=this.currentFactoryTarget();if(target)this.fit(target,mode);return target;}
   focusFactoryAsset(id,mode='operator'){return this.selectFactoryAsset(id,{focus:true,mode});}
   disposeFactoryMachineTemplates(){
@@ -427,7 +433,7 @@ export class FactoryEngine {
     const generation=++this.factoryDetailHydration;
     const run=(async()=>{
       const {createPolishedMachineTemplate}=await import('./machine-runtime.js');
-      let mounted=0;
+      const detachedMaterials=new Set();let mounted=0;
       for(const record of fleet){
         if(generation!==this.factoryDetailHydration||actual!==this.actualFactory)break;
         const id=record?.placement?.machineId;if(!id||!canOpenTechnical3D(id)||this.factoryMachineTemplates.has(id))continue;
@@ -441,7 +447,7 @@ export class FactoryEngine {
           const proxies=[...wrapper.children];wrapper.add(detail);
           for(const child of proxies){
             wrapper.remove(child);
-            child.traverse?.(object=>{object.geometry?.dispose?.();if(Array.isArray(object.material))object.material.forEach(material=>{material.map?.dispose?.();material.dispose?.();});else{object.material?.map?.dispose?.();object.material?.dispose?.();}});
+            child.traverse?.(object=>{object.geometry?.dispose?.();const list=Array.isArray(object.material)?object.material:[object.material];for(const material of list)if(material)detachedMaterials.add(material);});
           }
           wrapper.userData={...wrapper.userData,renderStatus:'FULL_TECHNICAL_3D_SHARED_TEMPLATE',factoryDetailHydrated:true,factoryDetailSource:'createPolishedMachineTemplate',factoryProxyFallbackRemoved:true};
           this.factoryMachineTemplates.set(id,{template,root:detail});mounted++;
@@ -454,6 +460,7 @@ export class FactoryEngine {
       }
       if(generation===this.factoryDetailHydration&&actual===this.actualFactory){
         actual.root.userData={...actual.root.userData,factoryDetailedMachineCount:this.factoryMachineTemplates.size,factoryMachineGeometryPolicy:'SAME_POLISHED_TEMPLATE_AS_MACHINE_VIEW__PROXY_ONLY_AS_PROGRESSIVE_FALLBACK'};
+        actual.root.userData.factoryDetachedMaterialDisposeCount=this.disposeDetachedFactoryMaterials(detachedMaterials,actual.root);
         if(this.sceneEditing)this.registerSceneObjects();
       }
       return mounted;
