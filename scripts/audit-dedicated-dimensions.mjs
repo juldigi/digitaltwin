@@ -9,6 +9,21 @@ import {DIANA_EYE55_SPEC} from '../frontend/src/data/dimensions-diana-eye55.js';
 import {SHARK_N650_SPEC} from '../frontend/src/data/dimensions-shark-n650.js';
 import {UPG_LY300_SPEC} from '../frontend/src/data/dimensions-upg-ly300.js';
 
+const visibleInHierarchy=object=>{for(let node=object;node;node=node.parent)if(node.visible===false)return false;return true;};
+function visibleEnvelope(root){
+ root.updateMatrixWorld(true);
+ const box=new THREE.Box3(),meshBox=new THREE.Box3();let count=0;
+ root.traverse(object=>{
+  if(!object.isMesh||!visibleInHierarchy(object)||!object.geometry)return;
+  if(!object.geometry.boundingBox)object.geometry.computeBoundingBox();
+  if(!object.geometry.boundingBox)return;
+  meshBox.copy(object.geometry.boundingBox).applyMatrix4(object.matrixWorld);
+  box.union(meshBox);count++;
+ });
+ return {box,count};
+}
+
+
 const contracts=Object.freeze([
  {id:'BMJ-MCH-0001',label:'POLAR 115 EM-MON',reference:POLAR115_SPEC.referenceEnvelopeM,tolerance:[.55,1.65],evidence:'FAMILY_ARCHIVE_REFERENCE'},
  {id:'BMJ-MCH-0007',label:'FZ1200 #1',reference:FZ1200_SPEC.exactModelPublicReference.envelopeM,tolerance:[.55,1.65],evidence:'EXACT_MODEL_PUBLIC_REFERENCE'},
@@ -28,14 +43,14 @@ export function auditDedicatedDimensionEnvelopes(){
   let template;
   try{
    template=createPolishedMachineTemplate(contract.id);template.root.updateMatrixWorld(true);
-   const box=new THREE.Box3().setFromObject(template.root),size=box.getSize(new THREE.Vector3());
+   const visible=visibleEnvelope(template.root),box=visible.box,size=box.getSize(new THREE.Vector3());
    let minZ={value:Infinity,name:null,role:null},maxZ={value:-Infinity,name:null,role:null};
    template.root.traverse(object=>{if(!object.isMesh||object.visible===false)return;const b=new THREE.Box3().setFromObject(object);if(b.min.z<minZ.value)minZ={value:b.min.z,name:object.name||object.parent?.name||null,role:object.userData?.mechanismRole||object.userData?.role||null};if(b.max.z>maxZ.value)maxZ={value:b.max.z,name:object.name||object.parent?.name||null,role:object.userData?.mechanismRole||object.userData?.role||null};});
    const modeled=[size.x,size.z,size.y],ratios=modeled.map((value,index)=>value/contract.reference[index]);
    const [min,max]=contract.tolerance,problems=[];
    if(ratios.some(r=>!Number.isFinite(r)))problems.push('NON_FINITE_RATIO');
    if(ratios.some(r=>r<min||r>max))problems.push('REFERENCE_ENVELOPE_SCALE_DRIFT');
-   const row={...contract,modeled:modeled.map(v=>+v.toFixed(3)),ratios:ratios.map(v=>+v.toFixed(3)),zExtremes:{min:{...minZ,value:+minZ.value.toFixed(3)},max:{...maxZ,value:+maxZ.value.toFixed(3)}},problems};
+   const row={...contract,visibleMeshCount:visible.count,modeled:modeled.map(v=>+v.toFixed(3)),ratios:ratios.map(v=>+v.toFixed(3)),zExtremes:{min:{...minZ,value:+minZ.value.toFixed(3)},max:{...maxZ,value:+maxZ.value.toFixed(3)}},problems};
    machines.push(row);if(problems.length)failures.push(row);
   }catch(error){const row={...contract,problems:['EXCEPTION'],error:String(error?.stack||error)};machines.push(row);failures.push(row);}
   finally{template?.dispose?.();}
