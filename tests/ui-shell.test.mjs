@@ -138,10 +138,10 @@ test('service worker refreshes the redesigned shell',()=>{
   for(const asset of ['app-shell-v79.css','src/app-shell-v79.js','assets/splash-industrial-v79.webp','src/ui-v5.js','src/app.js','src/simulation.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
 });
 
-test('canvas selection frames the highest unit first and only isolation fades other parts',()=>{
+test('canvas selection frames the exact mapped part and only isolation fades other parts',()=>{
  assert.match(engine,/while\(node&&!node\.userData\.machineId\)node=node\.parent/);
- assert.match(app,/const path=taxonomyPath\(meta\.id\),first=path\.find\(node=>node\.level===2\)\|\|meta/);
- assert.match(app,/selectTaxonomy\(first\.id\)/);
+ assert.match(app,/setActiveTaxonomyId\(meta\.id\);choosePart\(part\);showPanel\(\);renderPanel\('structure'\);pushMachineContextHistory\(meta\.id\)/);
+ assert.doesNotMatch(app,/path\.find\(node=>node\.level===2\)\|\|meta/);
  assert.doesNotMatch(app,/openPartFocusPopover|part-focus-popover/,'part selection stays inside the canonical Structure inspector');
  assert.match(app,/engine\.template\.ghost\(false\)/);
  assert.match(app,/engine\.template\.ghost\(isolated,selectedPart\)/);
