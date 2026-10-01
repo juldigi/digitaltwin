@@ -205,7 +205,8 @@ test('V196 modal subflows return to their parent instead of stacking surfaces',(
   assert.match(app,/on\('#modal-back',goModalBack\)/);
   assert.match(app,/foundationStatusDialog\(\{back:settingsDialog\}\)/);
   assert.match(app,/connectionDialog\(\{back:settingsDialog\}\)/);
-  assert.match(app,/\{back:settingsDialog\}\);\$\('#change-password-form'\)/);
+  assert.match(app,/function superadminPasswordDialog\(\{forced=false,back=settingsDialog\}=\{\}\)/);
+  assert.match(app,/on\('#change-superadmin-password',\(\)=>superadminPasswordDialog\(\{forced:superadminPasswordChangeRequired,back:settingsDialog\}\)\)/);
   assert.match(app,/\{back:\(\)=>connectionDialog\(\{back\}\)\}/);
 });
 
