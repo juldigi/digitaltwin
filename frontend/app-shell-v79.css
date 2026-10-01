@@ -1513,12 +1513,59 @@ html.immersive-mode .rail{position:fixed!important;left:0!important;top:var(--he
 html.immersive-mode body.nav-open .rail{transform:translateX(0)!important}
 html.immersive-mode aside#detail-panel{position:fixed!important;z-index:74!important;top:var(--header-h)!important;right:0!important;bottom:0!important;width:min(410px,86vw)!important;max-width:none!important;height:auto!important;transform:translateX(105%)!important;opacity:0!important;pointer-events:none!important}
 html.immersive-mode body:not(.panel-hidden) aside#detail-panel{transform:translateX(0)!important;opacity:1!important;pointer-events:auto!important}
-html.immersive-mode .scene-heading>div,html.immersive-mode .viewport-mode-switch,html.immersive-mode .viewport-zoom,html.immersive-mode .scene-bottom,html.immersive-mode .scene-caption,html.immersive-mode .mobile-nav,html.immersive-mode .canonical-simulation-transport{display:none!important}
+html.immersive-mode .scene-heading>div,html.immersive-mode .viewport-mode-switch,html.immersive-mode .viewport-zoom,html.immersive-mode .scene-bottom,html.immersive-mode .scene-caption,html.immersive-mode .mobile-nav{display:none!important}
 html.immersive-mode .scene-heading{top:12px!important;left:auto!important;right:12px!important;width:auto!important;justify-content:flex-end!important}
 html.immersive-mode .scene-heading #panel-toggle{display:grid!important}
 html.immersive-mode .ui-menu-toggle{display:grid!important}
 html:not(.immersive-mode) #fullscreen-top{display:none!important}
+
 html.immersive-mode .header-actions #fullscreen-top{display:grid!important}
+
+/* V275 immersive simulation — keep a compact transport card without sacrificing the 3D canvas. */
+html.immersive-mode body.simulation-transport-open .canonical-simulation-transport{
+ display:grid!important;position:fixed!important;z-index:82!important;
+ left:50%!important;right:auto!important;bottom:12px!important;transform:translateX(-50%)!important;
+ width:min(560px,calc(100vw - 24px))!important;
+ grid-template-columns:minmax(0,1fr) minmax(112px,auto) 76px!important;
+ grid-template-rows:30px 38px!important;gap:6px!important;padding:7px 9px!important;
+ border-radius:13px!important;box-shadow:0 14px 38px rgba(4,19,34,.18)!important;
+}
+html.immersive-mode body.simulation-transport-open .canonical-simulation-transport .sim-context{
+ grid-column:1!important;grid-row:1!important;order:initial!important;min-width:0!important
+}
+html.immersive-mode body.simulation-transport-open .canonical-simulation-transport .sim-mode-label{
+ grid-column:2!important;grid-row:1!important;order:initial!important;min-width:0!important
+}
+html.immersive-mode body.simulation-transport-open .canonical-simulation-transport label:has([data-transport-speed]){
+ grid-column:3!important;grid-row:1!important;min-width:0!important
+}
+html.immersive-mode body.simulation-transport-open .canonical-simulation-transport [data-transport-play]{
+ grid-column:1!important;grid-row:2!important
+}
+html.immersive-mode body.simulation-transport-open .canonical-simulation-transport [data-transport-stop]{
+ grid-column:2/4!important;grid-row:2!important
+}
+html.immersive-mode body.simulation-transport-open .canonical-simulation-transport progress{display:none!important}
+html.immersive-mode body.simulation-transport-open .canonical-simulation-transport button,
+html.immersive-mode body.simulation-transport-open .canonical-simulation-transport select{
+ height:36px!important;min-height:36px!important;font-size:12px!important
+}
+html.immersive-mode body.simulation-transport-open .canonical-simulation-transport .sim-mode-label select{
+ width:100%!important;max-width:none!important;min-width:0!important;height:30px!important
+}
+html.immersive-mode body.simulation-transport-open .canonical-simulation-transport label:has([data-transport-speed]) select{
+ width:76px!important;min-width:76px!important;height:30px!important
+}
+@media(max-width:767px){
+ html.immersive-mode body.simulation-transport-open .canonical-simulation-transport{
+  left:max(8px,env(safe-area-inset-left))!important;right:max(8px,env(safe-area-inset-right))!important;
+  bottom:max(8px,env(safe-area-inset-bottom))!important;transform:none!important;width:auto!important;
+  grid-template-columns:minmax(0,1fr) minmax(100px,auto) 66px!important
+ }
+ html.immersive-mode body.simulation-transport-open .canonical-simulation-transport label:has([data-transport-speed]) select{
+  width:66px!important;min-width:66px!important
+ }
+}
 
 /* Compact one-level structure navigation inside the canonical inspector. */
 .compact-structure>header h3{margin:4px 0;font-size:17px}.compact-structure>header small{color:#64809a;font-size:9px;font-weight:800}.compact-structure>header p{margin:4px 0 10px;color:#64748b;font-size:11px;line-height:1.4}.compact-part-path{display:flex;gap:5px;overflow-x:auto;max-width:100%;padding:3px 0 9px;scrollbar-width:thin}.compact-part-path button{flex:0 0 auto;max-width:155px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:6px 8px;border:1px solid #dbe7f1;border-radius:8px;background:#fff;color:#526a7e;font-size:10px}.compact-part-path button[aria-current=page]{background:#eaf5ff;border-color:#91c4f2;color:#126cc3}.compact-search-label{display:block;margin:3px 0 5px;font-size:10px;font-weight:700}.compact-structure #part-search{width:100%;min-height:37px;padding:7px 10px;border:1px solid #d6e3ef;border-radius:9px;background:#fff}.compact-structure h4{margin:12px 0 7px;font-size:11px}.compact-part-list{display:grid;gap:5px;max-height:220px;overflow:auto}.compact-part-row{display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;min-height:42px;padding:7px 9px;border:1px solid #e0e8f0;border-radius:9px;background:#fff;color:#1d3448;text-align:left}.compact-part-row>span:first-child{display:grid;gap:2px;min-width:0}.compact-part-row strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}.compact-part-row small{color:#74879a;font-size:9px}.compact-part-row>span:last-child{font-size:19px;color:#3487cd}.compact-part-tools{margin-top:12px;padding:9px;border:1px solid #e0e8f0;border-radius:10px}.compact-part-tools summary{cursor:pointer;font-weight:700;font-size:11px}.compact-part-tools label{display:block;margin-top:10px;font-size:10px}
