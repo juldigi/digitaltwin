@@ -109,7 +109,7 @@ function updateEvidenceStatus(){
  const photos=Array.isArray(PHOTO_REGISTRY)?PHOTO_REGISTRY.length:0,docs=Array.isArray(TECHNICAL_SOURCES)?TECHNICAL_SOURCES.length:0;
  const placement=placementForMachine?.(activeMachineAssetId())||null,truth=assetTruth(state?.asset,{placement,sourceCount:docs});
  summary.textContent=`${readableStatus(truth.dataConfidence)} · ${docs} sumber`;
- detail.innerHTML=`${pair('Identitas mesin atau peralatan',identity||'Belum tersedia')}${pair('Identitas daftar mesin',state?.asset?.asset_id?'Tersedia':'Belum tersedia')}${pair('Status operasi',truth.operatingStatus)}${pair('Nilai kesehatan mesin',truth.healthScore)}${pair('Dasar model 3D',truth.source3D)}${pair('Detail model 3D',truth.detail3D)}${pair('Keandalan data',truth.dataConfidence)}${pair('Posisi',truth.position)}${pair('Foto aktual',photos?photos+' foto':'Belum tersedia')}${pair('Dokumen atau sumber teknis',docs?docs+' sumber':'Belum tersedia')}`;
+ detail.innerHTML=`${pair('Identitas mesin atau peralatan',identity||'Belum tersedia')}${pair('Identitas daftar mesin',state?.asset?.asset_id?'Tersedia':'Belum tersedia')}${pair('Status operasi',readableStatus(truth.operatingStatus))}${pair('Nilai kesehatan mesin',truth.healthScore)}${pair('Dasar model 3D',readableStatus(truth.source3D))}${pair('Detail model 3D',readableStatus(truth.detail3D))}${pair('Keandalan data',readableStatus(truth.dataConfidence))}${pair('Posisi',readableStatus(truth.position))}${pair('Foto aktual',photos?photos+' foto':'Belum tersedia')}${pair('Dokumen atau sumber teknis',docs?docs+' sumber':'Belum tersedia')}`;
 }
 function applyMachineShell(){
  const name=IS_OFFSET10?'OFFSET 10':IS_APM2?'APM 2':IS_SHEETING?'SHEETING LEXUS':IS_GENERIC?GENERIC_CONFIG.machine.name:MACHINE_KEY==='offset5'?'OFFSET 5':'Mesin';
@@ -618,13 +618,13 @@ function renderPanel(tab=activeInspectorTab()){
     ['Functional Location',m?.functionalLocation||a?.functional_location],
     ['Area atau lokasi',m?.area||a?.location],
     ['Spesifikasi',m?.specification||a?.specification],
-    ['Status operasi',truth.operatingStatus],
+    ['Status operasi',readableStatus(truth.operatingStatus)],
     ['Nilai kesehatan',truth.healthScore],
-    ['Sumber model 3D',truth.source3D],
-    ['Detail model 3D',truth.detail3D],
-    ['Keandalan data',truth.dataConfidence],
-    ['Posisi',truth.position],
-    ['Status penelusuran',truth.discoveryStatus],
+    ['Sumber model 3D',readableStatus(truth.source3D)],
+    ['Detail model 3D',readableStatus(truth.detail3D)],
+    ['Keandalan data',readableStatus(truth.dataConfidence)],
+    ['Posisi',readableStatus(truth.position)],
+    ['Status penelusuran',readableStatus(truth.discoveryStatus)],
     ['Komponen terpilih',meta?.name],
     ['Tingkat struktur',meta?.level?('Tingkat '+meta.level):null],
     ['Referensi teknis',truth.sourceCount?truth.sourceCount+' sumber':'Belum diketahui']

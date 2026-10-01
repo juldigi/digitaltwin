@@ -62,9 +62,9 @@ export function assetTruth(asset,{placement=null,sourceCount=0}={}){
   return Object.freeze({
     operatingStatus:truthStatus(a.status,'UNKNOWN'),
     healthScore:Number.isFinite(a.health_score)?String(a.health_score):'UNKNOWN',
-    source3D:'PROCEDURAL / RECONSTRUCTED',
-    detail3D:'PARTIAL / APPROXIMATE',
-    dataConfidence:truthStatus(a.data_confidence,'UNVERIFIED'),
+    source3D:a['3d_status']||'UNKNOWN',
+    detail3D:a.discovery_status||'UNKNOWN',
+    dataConfidence:a.data_confidence||'UNVERIFIED',
     discoveryStatus:a.discovery_status||'UNKNOWN',
     position:positionVerification(placement),
     sourceCount:Number.isFinite(sourceCount)?sourceCount:0
