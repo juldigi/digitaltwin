@@ -65,6 +65,6 @@ test('technical diagnostics live inside Settings System Information and focus is
 test('universal search remains broad including documents and photos',()=>{
   assert.match(app,/group:'DOKUMEN'/);
   assert.match(app,/group:'FOTO'/);
-  assert.match(app,/searchablePhotos/);
+  assert.match(app,/searchCorpusForMachine/);
   assert.match(shell,/dokumen, atau foto/);
 });
