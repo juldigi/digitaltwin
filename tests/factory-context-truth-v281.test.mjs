@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 import {MACHINE_REGISTRY} from '../frontend/src/data/machine-registry.js';
 import {searchCorpusForMachine} from '../frontend/src/data/search-corpus.js';
 import {universalMachineConfig} from '../frontend/src/universal-machine.js';
+import {machineTruthProfile} from '../frontend/src/data/machine-truth-profile.js';
 
 const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
 const routeFor=machine=>({
@@ -42,7 +43,9 @@ test('V281 factory dialog presents truth and position through readable Indonesia
 });
 
 test('V281 family-reference and blocked assets stay distinct in factory truth construction',()=>{
- assert.match(app,/const dedicated=cfg\.evidence\.simulation==='VERIFIED_PROCESS_MODEL',runnable=\['VERIFIED_PROCESS_MODEL','FAMILY_PROCESS_MODEL'\]\.includes\(cfg\.evidence\.simulation\)/);
- assert.match(app,/runnable\?'REFERENCE PROCEDURAL \/ '\+cfg\.evidence\.geometry:'PROCEDURAL \/ '\+cfg\.evidence\.geometry/);
- assert.match(app,/runnable\?'FAMILY_REFERENCE_AVAILABLE':'EVIDENCE_BOUNDED_REFERENCE'/);
+ assert.match(app,/modelTruth=machineTruthProfile\(machine\)/);
+ assert.equal(machineTruthProfile('BMJ-MCH-0017').source3D.startsWith('REFERENCE PROCEDURAL / '),true);
+ assert.equal(machineTruthProfile('BMJ-MCH-0017').discoveryStatus,'FAMILY_REFERENCE_AVAILABLE');
+ assert.equal(machineTruthProfile('BMJ-MCH-0004').simulationAvailable,false);
+ assert.equal(machineTruthProfile('BMJ-MCH-0004').discoveryStatus,'EVIDENCE_BOUNDED_REFERENCE');
 });
