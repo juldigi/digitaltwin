@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
 import {OFFSET5_TAXONOMY,TAXONOMY_BY_ID} from './data/taxonomy-offset5.js';
-import {ORIENTATION,OFFSET5_ACTUAL_ROLLER_DIAGRAM,OFFSET5_INKING_ROLLERS,OFFSET5_INK_DISTRIBUTORS,OFFSET5_DAMPENING_ROLLERS} from './data/sources-offset5.js';
+import {ORIENTATION,OFFSET5_ACTUAL_ROLLER_DIAGRAM,OFFSET5_ROLLER_EVIDENCE_POLICY,OFFSET5_INKING_ROLLERS,OFFSET5_INK_DISTRIBUTORS,OFFSET5_DAMPENING_ROLLERS} from './data/sources-offset5.js';
 import {OFFSET5_DIMENSIONS,OFFSET5_UNIT_CENTERS,offset5DimensionAudit} from './data/dimensions-offset5.js';
 import {V122_SOURCE_STATS} from './data/research-v122.js';
 import {createIndustrialMaterial} from './render/material-library.js';
@@ -28,7 +28,7 @@ const OEM_ROLLER_VISUAL_RADIUS_PER_MM=.00073; // compact Fig.15 topology; nomina
 export class OffsetMachineTemplate {
   constructor(){
     this.root=new THREE.Group();this.root.name='MACHINE-OFFSET5';
-    this.root.userData={assetId:'MACHINE-OFFSET5',...PHOTO_RECONSTRUCTION,orientation:ORIENTATION,taxonomyVersion:'offset5-taxonomy-v18',machineEnvelope:OFFSET5_DIMENSIONS,dimensionAudit:offset5DimensionAudit(),printingUnitReality:OFFSET5_ACTUAL_ROLLER_DIAGRAM,printingUnitExteriorPolicy:'V404_V408_OPEN_UPPER_DECK__ROUNDED_OPERATOR_CABINET__SAME_PHOTO_GROUNDED_SHELL_ALL_EIGHT_PU',photoLockExteriorBaseline:'V404_V405_V408',openUpperDeck:true,solidPrintingUnitTopCover:false};
+    this.root.userData={assetId:'MACHINE-OFFSET5',...PHOTO_RECONSTRUCTION,orientation:ORIENTATION,taxonomyVersion:'offset5-taxonomy-v18',machineEnvelope:OFFSET5_DIMENSIONS,dimensionAudit:offset5DimensionAudit(),printingUnitReality:OFFSET5_ACTUAL_ROLLER_DIAGRAM,rollerEvidencePolicyRevision:OFFSET5_ROLLER_EVIDENCE_POLICY.revision,rollerEvidenceConflictCount:OFFSET5_ROLLER_EVIDENCE_POLICY.knownConflicts.length,rollerEvidenceConflictRule:OFFSET5_ROLLER_EVIDENCE_POLICY.conflictRule,printingUnitExteriorPolicy:'V404_V408_OPEN_UPPER_DECK__ROUNDED_OPERATOR_CABINET__SAME_PHOTO_GROUNDED_SHELL_ALL_EIGHT_PU',photoLockExteriorBaseline:'V404_V405_V408',openUpperDeck:true,solidPrintingUnitTopCover:false};
     this.parts=[];this.nodes=[];this.meshes=[];this.auxVisuals=[];this.geometries=new Map();this.materials=new Map();this.lineMaterials=new Map();this.textures=[];this.ghosted=false;this.exteriorOpen=false;
     this.palette={graphite:0x30383d,black:0x151b20,silver:0xaeb8b8,steel:0x889598,chromium:0xcbd3d5,plastic:0xb9c0bc,light:0xd1d4c9,paper:0xeee9d5,rubber:0x20252a,photoRollerGreen:0x3f6f3b,inkFilmCyan:0x00a9d8,inkFilmMagenta:0xd40072,inkFilmYellow:0xf1c40f,inkFilmBlack:0x161616,inkFilmOrange:0xf07818,inkFilmGreen:0x1f9d55,inkFilmPurple:0x7442a8,inkFilmNeutral:0x4d5660,rollerWhite:0xe8e7df,rollerRed:0xc4473f,rollerYellow:0xe4bf4e,rollerBlue:0x355d91,glass:0x23333a,red:0xb33c32,yellow:0xe2b541,blue:0x243e70};
     this.build();this.alignOperatorSide();this.enrichV122Feeder();this.batchMeshes();this.tagAdaptiveDetails();
