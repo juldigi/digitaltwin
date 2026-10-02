@@ -103,7 +103,7 @@ export function buildLowDetailFactory(layout,fleet){
 export class FactoryEngine {
   constructor(container,onSelect){
     const mobileRender=matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse)').matches;
-    this.container=container;this.onSelect=onSelect;this.onTaxonomySelect=null;this.view='factory';this.layout=null;this.low=mobileRender;this.mobileRender=mobileRender;this.renderFaulted=false;this.labels=true;this.isolated=false;this.partLabelEntries=[];this.factoryLabelSprites=[];this.factoryLabelProbe=new THREE.Vector3();this.factoryMachineTemplates=new Map();this.factoryDetailHydration=0;this.factoryDetailPromise=null;
+    this.container=container;this.onSelect=onSelect;this.onTaxonomySelect=null;this.view='factory';this.layout=null;this.low=mobileRender;this.mobileRender=mobileRender;this.renderFaulted=false;this.labels=true;this.isolated=false;this.partLabelEntries=[];this.factoryLabelSprites=[];this.factoryLabelProbe=new THREE.Vector3();this.factoryMachineTemplates=new Map();this.factoryDetailHydration=0;this.factoryDetailPromise=null;this.machineSwitchGeneration=0;
     {const params=new URLSearchParams(location.search),requested=normalizeFoundationMachineKey(params.get('machine')||params.get('asset'));this.requestedMachineKey=requested;this.machineKey=null;}
     this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance',stencil:false,preserveDrawingBuffer:false});
     {const reportedMemory=Number(navigator.deviceMemory),reportedCores=Number(navigator.hardwareConcurrency);this.capabilities={mobile:mobileRender,memory:Number.isFinite(reportedMemory)&&reportedMemory>0?reportedMemory:4,memoryReported:Number.isFinite(reportedMemory)&&reportedMemory>0?reportedMemory:null,cores:Number.isFinite(reportedCores)&&reportedCores>0?reportedCores:4,coresReported:Number.isFinite(reportedCores)&&reportedCores>0?reportedCores:null,maxTextureSize:this.renderer.capabilities.maxTextureSize};}
@@ -598,7 +598,9 @@ export class FactoryEngine {
   }
   setLow(on){return this.setQualityProfile(on?'hemat':'auto');}
   getRenderDiagnostics(){return renderDiagnostics(this.renderer,this.qualityProfile,this.adaptiveQuality);}
+  cancelMachineSwitch(){this.machineSwitchGeneration++;return this.machineSwitchGeneration;}
   clearMachineContext(){
+    this.cancelMachineSwitch();
     if(this.simulation?.active)this.simulation.stop();
     this.gizmo.detach();this.clearPartLabels();this.simulation?.dispose();this.template?.dispose();if(this.machine)this.scene.remove(this.machine);
     this.machineKey=null;this.template=neutralTemplate();this.machine=this.template.root;this.scene.add(this.machine);this.simulation=neutralSimulation();this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);
@@ -606,12 +608,13 @@ export class FactoryEngine {
     this.applySceneOverrides(this.sceneOverrides||{});if(this.factory?.children?.length)this.fit(this.factory,'iso');this.resize();return true;
   }
   async switchMachine(key){
-    const requested=normalizeFoundationMachineKey(key);
+    const generation=++this.machineSwitchGeneration,requested=normalizeFoundationMachineKey(key);
     if(!requested){this.onError?.('Pilih mesin atau peralatan sebelum membuka model 3D.');return false;}
     if(!canOpenTechnical3D(requested)){this.onError?.('Model 3D untuk mesin atau peralatan ini belum tersedia.');return false;}
     if(this.machineKey===requested)return true;
     if(this.simulation?.active)this.simulation.stop();
     const {createPolishedMachineTemplate,createMachineSimulation}=await import('./machine-runtime.js');
+    if(generation!==this.machineSwitchGeneration)return false;
     const nextTemplate=createPolishedMachineTemplate(requested);
     let nextSimulation;
     try{nextSimulation=createMachineSimulation(requested,nextTemplate.root,nextTemplate);if(this.mobileRender&&['compressor','ahu'].includes(nextTemplate.cfg?.family))nextSimulation.setPathVisible(false);}
@@ -624,5 +627,5 @@ export class FactoryEngine {
     const label=this.renderer.domElement;label.setAttribute('aria-label',`Model 3D ${this.machine.name||requested}. Gunakan tombol sudut pandang untuk mengatur kamera.`);
     this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);this.isolated=false;this.view='machine';this.syncVisualSystems();this.machine.visible=true;this.applySceneOverrides(this.sceneOverrides||{});this.factory.visible=false;this.template.setLow(this.low);this.shadows.focusBounds(this.machineFocusBounds()||new THREE.Box3().setFromObject(this.machine));this.fit(this.machine);this.resize();return true;
   }
-  dispose(){cancelAnimationFrame(this.frame);this.clearPartLabels();this.clearFactorySelection();this.resizeObserver.disconnect();this.controls.dispose();this.gizmo.dispose();this.simulation?.dispose();this.template.dispose();this.clearFactory();this.studio.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});this.environment.dispose();this.postProcessing.dispose();this.lighting.dispose();this.renderer.dispose();}
+  dispose(){this.cancelMachineSwitch();cancelAnimationFrame(this.frame);this.clearPartLabels();this.clearFactorySelection();this.resizeObserver.disconnect();this.controls.dispose();this.gizmo.dispose();this.simulation?.dispose();this.template.dispose();this.clearFactory();this.studio.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});this.environment.dispose();this.postProcessing.dispose();this.lighting.dispose();this.renderer.dispose();}
 }
