@@ -47,7 +47,7 @@ export const OFFSET5_INKING_ROLLERS=freezeRollers([
   {code:'12',designation:'Ink transfer roller',diameterMM:68,colorCode:null,surface:'plastic-coated',materialKind:'plastic',sectionCenter:[.5532,2.4389,0]},
   {code:'13',designation:'4th inking form roller',diameterMM:80,colorCode:'yellow',surface:'rubber-coated',materialKind:'rollerYellow',sectionCenter:[-.0259,2.0031,0]},
   {code:'14',designation:'1st inking form roller',diameterMM:60,colorCode:'white',surface:'rubber-coated',materialKind:'rollerWhite',sectionCenter:[.3421,1.9759,0]},
-  {code:'15',designation:'Ink vibrator',diameterMM:59,colorCode:null,surface:'rubber-coated',materialKind:'rubber',sectionCenter:[.1484,2.5783,0]}
+  {code:'15',designation:'Ink vibrator',diameterMM:59,colorCode:'white',surface:'rubber-coated',materialKind:'rollerWhite',sectionCenter:[.1484,2.5783,0]}
 ]);
 
 export const OFFSET5_INK_DISTRIBUTORS=freezeRollers([
@@ -77,7 +77,7 @@ export const OFFSET5_INKING_CONTACT_PAIRS=Object.freeze([
   Object.freeze(['3','6']),Object.freeze(['6','D']),Object.freeze(['6','7']),Object.freeze(['6','5']),Object.freeze(['7','8']),
   Object.freeze(['8','D']),Object.freeze(['5','4']),Object.freeze(['4','B']),Object.freeze(['4','C']),Object.freeze(['C','14']),
   Object.freeze(['C','9']),Object.freeze(['9','B']),Object.freeze(['9','10']),Object.freeze(['B','11']),Object.freeze(['11','A']),
-  Object.freeze(['11','12']),Object.freeze(['FOUNTAIN','15'])
+  Object.freeze(['11','12']),Object.freeze(['FOUNTAIN','15']),Object.freeze(['15','A'])
 ]);
 export const OFFSET5_INKING_ROTATION_SENSE=Object.freeze({
   PLATE:1,FOUNTAIN:1,'1':-1,'2':-1,'3':1,'4':-1,'5':1,'6':-1,'7':1,'8':-1,'9':-1,'10':1,'11':-1,'12':1,'13':-1,'14':-1,'15':-1,A:1,B:1,C:1,D:1
