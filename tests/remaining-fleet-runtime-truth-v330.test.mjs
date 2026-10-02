@@ -81,7 +81,7 @@ test('V330 QF-100CS stays a close-family blanking reference and never presses wh
   assert.equal(u.familyProcess.safetyInterlock,'PLATFORM_STOP_BEFORE_HYDRAULIC_STROKE');
   assert.equal(template.findNode('qf100-collector-option').userData.installedOptionVerified,false);
   assert.equal(template.findNode('qf100-separation-interface').userData.noInventedForkOrConveyor,true);
-  sim.start();let now=1000;sim.update(now),seenIndex=false,seenPress=false,seenSeparate=false;
+  sim.start();let now=1000,seenIndex=false,seenPress=false,seenSeparate=false;sim.update(now);
   for(let i=0;i<1200;i++){
    now+=20;sim.update(now);const s=sim.state(),audit=validateRemainingFleetSimulation(sim,template,id);
    assert.equal(audit.valid,true,JSON.stringify(audit.errors));
@@ -101,7 +101,7 @@ test('V330 Collator keeps ten bins as cross-family visualization rather than ins
   assert.equal(u.collatorAirArchitecture.installedTopologyVerified,false);
   assert.equal(u.collatorProcessBoundary,'TEN_BIN_DISPLAY_IS_CROSS_FAMILY_REFERENCE_NOT_BMJ_INSTALLED_COUNT');
   assert.equal(template.findNode('collator-downstream-boundary').userData.installedDownstreamFinisherVerified,false);
-  sim.start();let now=1000;sim.update(now),seenFeed=false,seenComplete=false;
+  sim.start();let now=1000,seenFeed=false,seenComplete=false;sim.update(now);
   for(let i=0;i<900;i++){
    now+=20;sim.update(now);const s=sim.state(),audit=validateRemainingFleetSimulation(sim,template,id);
    assert.equal(audit.valid,true,JSON.stringify(audit.errors));
@@ -121,7 +121,7 @@ test('V330 UPG-LY300 preserves print-cure-inspect-decision causality and demo-on
   assert.equal(u.spec.installedCollectionStrapperVerified,false);
   assert.equal(template.findNode('ly300-print-head').userData.installedPrintheadCountVerified,false);
   assert.equal(template.findNode('ly300-collect-strap').userData.installedStrapperVerified,false);
-  sim.start();let now=1000;sim.update(now),seenPrint=false,seenUv=false,seenCamera=false,seenDecision=false;
+  sim.start();let now=1000,seenPrint=false,seenUv=false,seenCamera=false,seenDecision=false;sim.update(now);
   for(let i=0;i<1000;i++){
    now+=20;sim.update(now);const s=sim.state(),audit=validateRemainingFleetSimulation(sim,template,id);
    assert.equal(audit.valid,true,JSON.stringify(audit.errors));
