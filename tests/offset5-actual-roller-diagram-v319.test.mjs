@@ -121,6 +121,8 @@ test('V319 keeps all eight PU exteriors on the photo-verified handedness and rem
    const ductMesh=ductBody.children.find(o=>o.isMesh);
    assert.ok(ductMesh,`PU${i+1} visible green duct roller missing`);
    assert.equal(ductMesh.material.color.getHex(),m.palette.photoRollerGreen,`PU${i+1} duct roller must preserve the photo-locked green surface`);
+   assert.equal(ductMesh.geometry.parameters.radiusTop,.135,`PU${i+1} green duct roller radius regressed from the accepted V408 baseline`);
+   assert.equal(ductMesh.geometry.parameters.height,1.46,`PU${i+1} green duct roller span regressed from the accepted V408 baseline`);
    assert.ok(ductMesh.material.roughness>.8,`PU${i+1} green duct roller must read as rubber/service-roll surface`);
    const coverZ=new THREE.Box3().setFromObject(cover).getCenter(new THREE.Vector3()).z;
    const driveZ=new THREE.Box3().setFromObject(drive).getCenter(new THREE.Vector3()).z;
