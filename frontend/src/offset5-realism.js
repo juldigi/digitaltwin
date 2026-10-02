@@ -787,7 +787,9 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       rotor.sign=sign;
       rotor.rate=this.baseMetersPerSecond/(Math.PI*2*this.sheetCyclesPerSecond*radius);
       rotor.role=`PU${i+1}-${type}-cylinder`;
-      rotor.source='CONTACTING_CYLINDER_SURFACE_SPEED_REFERENCE';
+      rotor.source=type==='transfer'
+        ?'CONTACTING_CYLINDER_SURFACE_SPEED_REFERENCE__TRANSFER_NOT_SHOWN_IN_IMG_2777'
+        :'IMG_2777_PRIMARY_CYLINDER_RELATIVE_ROTATION__VISUAL_DIRECTION_ONLY';
     }
   }
   collectInspectionIllumination(){
@@ -907,6 +909,7 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       dampeningRepresentation:'SUBTLE_ROLLER_FILM_ONLY__NO_FLOATING_WATER_PARTICLES',
       printRepresentation:'PROGRESSIVE_TRANSVERSE_COLOUR_BANDS_PER_PU_DEMO',
       cylinderMotionPolicy:'SAME_STRAIGHT_PRINT_DIRECTION_ALL_PU_CONTACT_PAIRS_COUNTER_ROTATE',
+      primaryCylinderDiagramPolicy:'IMG_2777_PLATE_AND_IMPRESSION_SAME_ROTATION_SENSE__BLANKET_OPPOSITE__NO_TIMING_OR_PHASE_CLAIM',
       sheetVisualPolicy:'NO_EXTERNAL_FULL_WIDTH_DEMO_GRIPPER_BAR',
       deliveryPilePolicy:'START_EMPTY_STACK_TO_CAPACITY_THEN_CLEAR_AND_REPEAT',
       operatorSideMicrodetailPolicy:'WORLD_NEGATIVE_Z_AFTER_TOP_LEVEL_PHOTO_MIRROR',
