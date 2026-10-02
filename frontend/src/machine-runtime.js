@@ -136,7 +136,7 @@ export function validateOffset5PilotSimulation(simulation,template,{throwOnError
   if(state.inkRepresentation!=='THIN_ROLLER_FILM_ONLY_NO_FREE_FLOATING_DROPLETS'||state.inkFlowCount!==0)fail('INK_VISUAL_BOUNDARY',state.inkRepresentation+'|'+state.inkFlowCount);
   if(state.dampeningRepresentation!=='SUBTLE_ROLLER_FILM_ONLY__NO_FLOATING_WATER_PARTICLES')fail('DAMPENING_VISUAL_BOUNDARY',state.dampeningRepresentation);
   if(state.printRepresentation!=='PROGRESSIVE_TRANSVERSE_COLOUR_BANDS_PER_PU_DEMO')fail('PRINT_REPRESENTATION',state.printRepresentation);
-  if(state.openUpperDeckPolicy!==OFFSET5_PILOT_RUNTIME_CONTRACT.openTopPolicy)fail('OPEN_UPPER_DECK_POLICY',state.openUpperDeckPolicy);
+  if(state.openUpperDeckPolicy!=='V404_V408_PHOTO_LOCK__NO_SOLID_PU_TOP__GREEN_DUCT_ROLL_REMAINS_GREEN')fail('OPEN_UPPER_DECK_POLICY',state.openUpperDeckPolicy);
   if(state.nominalSheetsPerHour!==15000)fail('NOMINAL_SPEED_REFERENCE',state.nominalSheetsPerHour);
  }
  const result=Object.freeze({valid:errors.length===0,errors:Object.freeze(errors),contract:OFFSET5_PILOT_RUNTIME_CONTRACT});
