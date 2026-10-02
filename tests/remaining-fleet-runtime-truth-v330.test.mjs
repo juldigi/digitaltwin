@@ -105,7 +105,7 @@ test('V330 Collator keeps ten bins as cross-family visualization rather than ins
   for(let i=0;i<900;i++){
    now+=20;sim.update(now);const s=sim.state(),audit=validateRemainingFleetSimulation(sim,template,id);
    assert.equal(audit.valid,true,JSON.stringify(audit.errors));
-   if(s.activeBinFeeds>0){seenFeed=true;assert.equal(s.doubleFeedCheckActive,true);assert.equal(s.collatorSuctionBlowerActive,true);}
+   if(s.activeBinFeeds>0){seenFeed=true;assert.equal(s.doubleFeedCheckActive,true);assert.equal(s.collatorSuctionBlowerActive,true);assert.ok(s.activeFeedBinIndexes.every(index=>index>=0&&index<10));if(s.activeFeedBinIndexes.length){assert.equal(s.airSeparationActive,true);assert.equal(s.rotorPickupActive,true);assert.equal(s.collatorSeparationAirControlActive,true);}}
    seenComplete||=s.completedSheetsInSet>0;
   }
   assert.equal(seenFeed,true);assert.equal(seenComplete,true);
