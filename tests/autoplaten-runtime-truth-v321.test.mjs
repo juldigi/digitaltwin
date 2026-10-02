@@ -37,7 +37,7 @@ test('V321 autoplaten truth lock rejects stale taxonomy identity and missing cor
   t.root.userData.taxonomyVersion='promatrix106-v1';
   const plate=[];t.root.traverse(o=>{if(o.userData?.identityPlacard)plate.push(o);});
   plate[0].userData.identityPlacard={...plate[0].userData.identityPlacard,serial:'WRONG'};
-  const node=t.findNode('pm106-blanking');node.parent.remove(node);
+  const node=t.findNode('pm106-blanking');node.userData.nodeId='pm106-blanking-stale';
   const audit=validateAutoplatenTemplate(t,'BMJ-MCH-0014');
   assert.equal(audit.valid,false);
   assert.ok(audit.errors.some(e=>e.code==='TAXONOMY_VERSION'));
