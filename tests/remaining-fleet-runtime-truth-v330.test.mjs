@@ -128,7 +128,7 @@ test('V330 UPG-LY300 preserves print-cure-inspect-decision causality and demo-on
    seenPrint||=s.printingActive;seenUv||=s.uvActive;seenCamera||=s.cameraActive;seenDecision||=s.decisionReady;
    if(s.uvActive)assert.equal(s.uvPermit,true);
    if(s.cameraActive)assert.equal(s.cameraTrigger,true);
-   if(s.demoRejectActive)assert.equal(s.rejectPermit,true);
+   if(s.demoRejectActive)assert.equal(s.rejectPermit,true);if(s.rejectConfirmed){assert.equal(s.inspectionComplete,true);assert.equal(s.decisionReady,true);}
    assert.equal(s.demoRejectOnly,true);
   }
   assert.equal(seenPrint,true);assert.equal(seenUv,true);assert.equal(seenCamera,true);assert.equal(seenDecision,true);
