@@ -1,5 +1,18 @@
 # OFFSET 5 — rekonstruksi geometri dari foto
 
+## V319 — actual printing-unit roller diagram (2026-10-02)
+
+Bukti baru `IMG_2777.jpeg` adalah foto **ROLLER DIAGRAM HEIDELBERG CD-102** yang terpasang pada mesin. Revisi V319 menjadikannya single source of truth untuk identitas dan tabel roller pada seluruh PU1–PU8, tanpa mengubah dimensi custom BMJ yang sudah dikunci.
+
+- Inking roller 1–15 memakai designation, diameter nominal, color code dan material/remark yang terbaca pada diagram aktual.
+- Distributor A–D dikoreksi: A = stainless steel; B/C/D = plastic-coated.
+- Dampening dikoreksi: 16/FEAW = rubber-coated; 17/ZW = rubber-coated; 18/T = plastic-coated; 19/DW = rubber-coated + crowned; FR = chromium-plated.
+- Warna identifikasi roller form/transfer pada model dipisahkan dari material struktur, sehingga biru/merah/kuning/putih tetap terlihat sebagai rubber-coated, bukan painted-steel.
+- Urutan sectional `plate cylinder → blanket cylinder → impression cylinder` dinaikkan menjadi bukti foto-diagram. Transfer cylinder tetap reference-only karena tidak ditampilkan pada IMG_2777.
+- Simulasi ink film sekarang mencakup roller 1–15 **dan distributor A–D**; dampening memakai film visual tipis pada 16/17/18/19/FR. Tidak ada droplet tinta/air floating.
+- Arah/timing individual roller tetap simulasi kinematik visual; IMG_2777 tidak digunakan untuk mengarang nip pressure, bearer diameter, timing, phase, stripe setting, atau service setpoint.
+- Exterior delapan PU tetap memakai geometri foto BMJ dan dimensi custom OFU-1; variasi warna sintetis antar-PU di fountain-support dihapus.
+
 ## Perubahan
 
 Model tujuh balok diganti dengan rekonstruksi bentuk luar yang bisa dipilih:
@@ -13,7 +26,7 @@ Model tujuh balok diganti dengan rekonstruksi bentuk luar yang bisa dipilih:
 - Baseline V11 mengoreksi PU1: urutan plate–blanket–impression–transfer dibuat near-nip tanpa penetrasi volume, roller dampening/inking dipisahkan, dan taxonomy cylinder assembly serta jalur lembar diperinci.
 - Baseline V12 memakai foto `IMG_1628(2).jpeg` dari arah feeder menuju delivery untuk mengoreksi PU1 top deck, grille longitudinal, shoulder cover, ink-fountain bridge, dan support arm tanpa mengubah internal non-overlap V11.
 
-Acuan: sembilan foto pengguna. Tidak ada foto asli atau berkas DWG pabrik yang diterbitkan bersama frontend.
+Acuan: foto aktual BMJ yang terdaftar di source registry, termasuk IMG_2777 sebagai internal roller-diagram reference. Tidak ada foto asli atau berkas DWG pabrik yang diterbitkan bersama frontend.
 
 ## Bukti dan batas
 
