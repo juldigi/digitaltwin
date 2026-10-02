@@ -387,6 +387,114 @@ export function validateInspectionSimulation(simulation,template,key,{throwOnErr
  return result;
 }
 
+
+export const PDS_RUNTIME_CONTRACTS=Object.freeze({
+ 'BMJ-MCH-0025':Object.freeze({
+  family:'ctp',brandBoundary:'HEIDELBERG_SUPRASETTER_MULTI_MODEL_FAMILY_REFERENCE',
+  coreNodes:Object.freeze(['ctp-family-envelope','ctp-manual-entry','ctp-transport','ctp-register','ctp-drum','ctp-drum-clamp','ctp-laser-rail','ctp-laser-module','ctp-ids','ctp-unload']),
+  optionNodes:Object.freeze(['ctp-loader-boundary','ctp-punch-option','ctp-processor-boundary','ctp-debris-option','ctp-temp-stabilizer-option']),
+  simulationBoundary:'SUPRASETTER_EXTERNAL_DRUM_LOAD_CLAMP_IMAGE_UNLOAD__MODEL_OPTIONS_NOT_INFERRED'
+ }),
+ 'BMJ-MCH-0026':Object.freeze({
+  family:'ctp',brandBoundary:'HEIDELBERG_SUPRASETTER_MULTI_MODEL_FAMILY_REFERENCE',
+  coreNodes:Object.freeze(['ctp-family-envelope','ctp-manual-entry','ctp-transport','ctp-register','ctp-drum','ctp-drum-clamp','ctp-laser-rail','ctp-laser-module','ctp-ids','ctp-unload']),
+  optionNodes:Object.freeze(['ctp-loader-boundary','ctp-punch-option','ctp-processor-boundary','ctp-debris-option','ctp-temp-stabilizer-option']),
+  simulationBoundary:'SUPRASETTER_EXTERNAL_DRUM_LOAD_CLAMP_IMAGE_UNLOAD__MODEL_OPTIONS_NOT_INFERRED'
+ }),
+ 'BMJ-MCH-0027':Object.freeze({
+  family:'imagesetter',brandBoundary:'SCREEN_FTR_KATANA_MULTI_MODEL_FAMILY_REFERENCE',
+  coreNodes:Object.freeze(['ctf-family-envelope','ctf-media-cassette','ctf-auto-load','ctf-capstan','ctf-front-slack','ctf-gravity-roller','ctf-rear-slack','ctf-polygon-mirror','ctf-polygon-drive','ctf-laser-source','ctf-optics','ctf-laser-modulator','ctf-cutter']),
+  optionNodes:Object.freeze(['ctf-punch-option','ctf-output-cassette','ctf-processor-boundary','ctf-control-boundary']),
+  simulationBoundary:'SCREEN_FTR_KATANA_COMMON_PROCESS_ONLY__PUNCH_PROCESSOR_MODEL_OPTIONS_NOT_INFERRED'
+ }),
+ 'BMJ-MCH-0028':Object.freeze({
+  family:'zund',brandBoundary:'ZUND_G3_S3_MODULAR_PLATFORM_REFERENCE',
+  coreNodes:Object.freeze(['zund-vacuum-bed','zund-vacuum-zones','zund-gantry-guide','zund-gantry-beam','zund-carriage-y','zund-module-slots','zund-control','zund-vacuum-generator']),
+  optionNodes:Object.freeze(['zund-cut-tool-option','zund-crease-option','zund-router-option','zund-arc-option','zund-icc-option','zund-iti-option','zund-handling-option']),
+  simulationBoundary:'ZUND_XY_PLATFORM_MOTION_ONLY__INSTALLED_TOOL_CAMERA_INIT_PACKAGE_NOT_INFERRED'
+ })
+});
+const pdsContractFor=normalized=>PDS_RUNTIME_CONTRACTS[normalized]||null;
+
+export function validatePdsTemplate(template,key,{throwOnError=false}={}){
+ const assetId=normalizeMachineKey(key),contract=PDS_RUNTIME_CONTRACTS[assetId],root=template?.root,errors=[];
+ const fail=(code,detail)=>errors.push({code,detail});
+ if(!contract)return Object.freeze({valid:true,errors:Object.freeze([]),contract:null,assetId:null});
+ if(!root)fail('ROOT_MISSING',assetId);
+ else{
+  const u=root.userData||{};
+  if(u.assetId!==assetId)fail('ASSET_ID',u.assetId);
+  if(u.engineeringDimensions!==false)fail('ENGINEERING_DIMENSION_BOUNDARY',u.engineeringDimensions);
+  if(u.referenceBuilder!=='V139_RESEARCH_GROUNDED_BUILDER')fail('REFERENCE_BUILDER',u.referenceBuilder);
+  if(u.geometryStatus!=='REFERENCE_GROUNDED_FAMILY__NOT_SERIAL_SPECIFIC')fail('GEOMETRY_BOUNDARY',u.geometryStatus);
+  if(template.cfg?.family!==contract.family)fail('FAMILY_ROUTE',template.cfg?.family);
+  if(template.cfg?.evidence?.geometry!==contract.brandBoundary)fail('EVIDENCE_GEOMETRY',template.cfg?.evidence?.geometry);
+  for(const id of contract.coreNodes){
+   const node=template.findNode?.(id);
+   if(!node){fail('CORE_NODE_MISSING',id);continue;}
+   let attached=false;for(let p=node;p;p=p.parent)if(p===root){attached=true;break;}
+   if(!attached)fail('CORE_NODE_DETACHED',id);
+  }
+  const taxonomy=template.taxonomy||[],levels=new Set(taxonomy.map(n=>n.level));
+  for(let level=1;level<=6;level++)if(!levels.has(level))fail('TAXONOMY_LEVEL_MISSING',level);
+  for(const id of contract.optionNodes){
+   const node=template.findNode?.(id);
+   if(!node)fail('OPTION_NODE_MISSING',id);
+   else if(node.userData?.installedOptionVerified!==false)fail('OPTION_BOUNDARY_PROMOTED',id);
+  }
+  if(contract.family==='ctp'){
+   if(u.exactSuprasetterModelVerified!==false)fail('CTP_MODEL_BOUNDARY',u.exactSuprasetterModelVerified);
+   if(u.exactPlateFormatVerified!==false)fail('CTP_FORMAT_BOUNDARY',u.exactPlateFormatVerified);
+   if(u.installedLoaderTypeVerified!==false)fail('CTP_LOADER_BOUNDARY',u.installedLoaderTypeVerified);
+   const module=template.findNode?.('ctp-laser-module'),ids=template.findNode?.('ctp-ids');
+   const laserMeshes=[];module?.traverse?.(o=>{if(o.isMesh&&o.userData?.installedLaserModuleCountVerified===false)laserMeshes.push(o);});
+   if(!laserMeshes.length)fail('CTP_LASER_COUNT_BOUNDARY','missing');
+   if(ids?.userData?.installedDiodeCountVerified!==false)fail('CTP_IDS_COUNT_BOUNDARY',ids?.userData?.installedDiodeCountVerified);
+  }else if(contract.family==='imagesetter'){
+   if(u.exactScreenModelVerified!==false)fail('CTF_MODEL_BOUNDARY',u.exactScreenModelVerified);
+   if(u.exactLaserWavelengthVerified!==false)fail('CTF_WAVELENGTH_BOUNDARY',u.exactLaserWavelengthVerified);
+   if(u.processArchitecture!=='CAPSTAN_FLATBED_SCAN__NOT_IMAGING_DRUM')fail('CTF_PROCESS_ARCHITECTURE',u.processArchitecture);
+   if(u.katanaPolygonReference?.installedApplicabilityVerified!==false)fail('CTF_POLYGON_APPLICABILITY_BOUNDARY',u.katanaPolygonReference?.installedApplicabilityVerified);
+  }else{
+   for(const [field,expected] of [
+    ['exactZundModelVerified',false],['installedToolPackageVerified',false],['installedIccVerified',false],
+    ['installedItiVerified',false],['installedArcVerified',false],['installedMaterialHandlingVerified',false]
+   ])if(u[field]!==expected)fail('ZUND_OPTION_BOUNDARY',field+':'+u[field]);
+   if(u.platformSimulationBoundary!=='XY_CARRIAGE_MOTION_ONLY__NO_TOOL_ACTION_WITHOUT_INSTALLED_TOOL_EVIDENCE')fail('ZUND_SIMULATION_PLATFORM_BOUNDARY',u.platformSimulationBoundary);
+  }
+ }
+ const result=Object.freeze({valid:errors.length===0,errors:Object.freeze(errors),contract,assetId});
+ if(root){root.userData.pdsRuntimeTruthVersion='V324';root.userData.pdsRuntimeTruthLock=result.valid?'PASS':'FAIL';root.userData.pdsRuntimeTruthErrors=errors.map(e=>e.code+':'+e.detail).join('|');}
+ if(throwOnError&&!result.valid)throw new Error('PDS runtime truth-lock failed for '+assetId+': '+root?.userData?.pdsRuntimeTruthErrors);
+ return result;
+}
+
+export function validatePdsSimulation(simulation,template,key,{throwOnError=false}={}){
+ const assetId=normalizeMachineKey(key),contract=PDS_RUNTIME_CONTRACTS[assetId],state=simulation?.state?.(),errors=[];
+ const fail=(code,detail)=>errors.push({code,detail});
+ if(!contract)return Object.freeze({valid:true,errors:Object.freeze([]),contract:null,assetId:null});
+ if(!state||state.available!==true||state.blocked===true)fail('SIMULATION_AVAILABILITY',state?.available);
+ if(state?.simulationBoundary!==contract.simulationBoundary)fail('SIMULATION_BOUNDARY',state?.simulationBoundary);
+ if(contract.family==='ctp'){
+  if(state?.ctpPunchInstalledVerified!==false)fail('CTP_PUNCH_BOUNDARY',state?.ctpPunchInstalledVerified);
+  if(state?.ctpInterlockSafe!==true)fail('CTP_INTERLOCK_STATE',state?.ctpInterlockSafe);
+ }else if(contract.family==='imagesetter'){
+  if(state?.punchInstalledVerified!==false)fail('CTF_PUNCH_BOUNDARY',state?.punchInstalledVerified);
+  if(state?.processorInstalledVerified!==false)fail('CTF_PROCESSOR_BOUNDARY',state?.processorInstalledVerified);
+  if(state?.exactScreenModelVerified!==false)fail('CTF_MODEL_BOUNDARY',state?.exactScreenModelVerified);
+  if(state?.imagesetterInterlockSafe!==true)fail('CTF_INTERLOCK_STATE',state?.imagesetterInterlockSafe);
+ }else{
+  if(state?.installedToolPackageVerified!==false||state?.toolActionEnabled!==false||state?.zundToolActionActive!==false)fail('ZUND_TOOL_ACTION_BOUNDARY',state?.zundToolActionActive);
+  if(state?.registrationCameraInstalledVerified!==false)fail('ZUND_ICC_BOUNDARY',state?.registrationCameraInstalledVerified);
+  if(state?.toolInitializationInstalledVerified!==false)fail('ZUND_ITI_BOUNDARY',state?.toolInitializationInstalledVerified);
+  if(state?.zundAxisPathType!=='SERPENTINE_REFERENCE_ONLY')fail('ZUND_AXIS_PATH_BOUNDARY',state?.zundAxisPathType);
+ }
+ const result=Object.freeze({valid:errors.length===0,errors:Object.freeze(errors),contract,assetId});
+ if(template?.root){template.root.userData.pdsSimulationTruthVersion='V324';template.root.userData.pdsSimulationTruthLock=result.valid?'PASS':'FAIL';template.root.userData.pdsSimulationTruthErrors=errors.map(e=>e.code+':'+e.detail).join('|');}
+ if(throwOnError&&!result.valid)throw new Error('PDS simulation truth-lock failed for '+assetId+': '+template?.root?.userData?.pdsSimulationTruthErrors);
+ return result;
+}
+
 export function createMachineTemplate(key){
  const k=normalizeMachineKey(key);
  if(!k)throw new Error('Identitas mesin belum tersedia.');
@@ -406,6 +514,7 @@ export function createMachineTemplate(key){
  if(k==='BMJ-MCH-0020'){const template=new SharkN650MachineTemplate();validateInspectionTemplate(template,k,{throwOnError:true});return template;}
  if(k==='BMJ-MCH-0024')return new UpgLy300MachineTemplate();
  if(k==='BMJ-MCH-0017'){const template=new ReferenceMachineTemplate(k);validateFolderTemplate(template,k,{throwOnError:true});return template;}
+ if(pdsContractFor(k)){const template=new ReferenceMachineTemplate(k);validatePdsTemplate(template,k,{throwOnError:true});return template;}
  if(isReferenceMachineKey(k))return new ReferenceMachineTemplate(k);
  if(universalMachineConfig(k))return new UniversalMachineTemplate(k);
  throw new Error(`Model 3D untuk ${k} belum tersedia.`);
@@ -432,6 +541,7 @@ export function createPolishedMachineTemplate(key){
  if(autoplatenContractFor(normalized,template))validateAutoplatenTemplate(template,normalized,{throwOnError:true});
  if(folderContractFor(normalized,template))validateFolderTemplate(template,normalized,{throwOnError:true});
  if(inspectionContractFor(normalized))validateInspectionTemplate(template,normalized,{throwOnError:true});
+ if(pdsContractFor(normalized))validatePdsTemplate(template,normalized,{throwOnError:true});
  return template;
 }
 
@@ -454,6 +564,7 @@ export function createMachineSimulation(key,machine,template){
  if(k==='BMJ-MCH-0020'){const sim=new SharkN650ProcessSimulation(machine,template);validateInspectionSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(k==='BMJ-MCH-0024')return new UpgLy300ProcessSimulation(machine,template);
  if(k==='BMJ-MCH-0017'){const sim=new ReferenceProcessSimulation(machine,template);validateFolderSimulation(sim,template,k,{throwOnError:true});return sim;}
+ if(pdsContractFor(k)){const sim=new ReferenceProcessSimulation(machine,template);validatePdsSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(isReferenceMachineKey(k))return new ReferenceProcessSimulation(machine,template);
  if(universalMachineConfig(k))return new UniversalProcessSimulation(machine,template);
  throw new Error(`Simulasi untuk ${k} belum tersedia.`);
