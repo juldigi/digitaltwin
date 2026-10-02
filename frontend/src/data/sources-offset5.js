@@ -31,20 +31,20 @@ export const OFFSET5_ACTUAL_ROLLER_DIAGRAM=Object.freeze({
 const freezeRollers=rows=>Object.freeze(rows.map(row=>Object.freeze({...row,sectionCenter:Object.freeze(row.sectionCenter)})));
 
 export const OFFSET5_INKING_ROLLERS=freezeRollers([
-  {code:'1',designation:'2nd inking form roller',diameterMM:72,colorCode:'blue',surface:'rubber-coated',materialKind:'blue',sectionCenter:[.2336,2.0554,0]},
-  {code:'2',designation:'3rd inking form roller',diameterMM:66,colorCode:'red',surface:'rubber-coated',materialKind:'red',sectionCenter:[.1019,2.0515,0]},
+  {code:'1',designation:'2nd inking form roller',diameterMM:72,colorCode:'blue',surface:'rubber-coated',materialKind:'rollerBlue',sectionCenter:[.2336,2.0554,0]},
+  {code:'2',designation:'3rd inking form roller',diameterMM:66,colorCode:'red',surface:'rubber-coated',materialKind:'rollerRed',sectionCenter:[.1019,2.0515,0]},
   {code:'3',designation:'Ink transfer roller',diameterMM:56,colorCode:null,surface:'plastic-coated',materialKind:'plastic',sectionCenter:[.1639,2.1309,0]},
-  {code:'4',designation:'Ink transfer roller',diameterMM:80,colorCode:'yellow',surface:'rubber-coated',materialKind:'yellow',sectionCenter:[.3111,2.2123,0]},
+  {code:'4',designation:'Ink transfer roller',diameterMM:80,colorCode:'yellow',surface:'rubber-coated',materialKind:'rollerYellow',sectionCenter:[.3111,2.2123,0]},
   {code:'5',designation:'Ink transfer roller',diameterMM:68,colorCode:null,surface:'plastic-coated',materialKind:'plastic',sectionCenter:[.2065,2.2607,0]},
-  {code:'6',designation:'Ink transfer roller',diameterMM:72,colorCode:'blue',surface:'rubber-coated',materialKind:'blue',sectionCenter:[.1019,2.2161,0]},
+  {code:'6',designation:'Ink transfer roller',diameterMM:72,colorCode:'blue',surface:'rubber-coated',materialKind:'rollerBlue',sectionCenter:[.1019,2.2161,0]},
   {code:'7',designation:'Ink transfer roller',diameterMM:56,colorCode:null,surface:'plastic-coated',materialKind:'plastic',sectionCenter:[.0380,2.2955,0]},
-  {code:'8',designation:'Ink transfer roller',diameterMM:60,colorCode:'white',surface:'rubber-coated',materialKind:'white',sectionCenter:[-.0279,2.2355,0]},
-  {code:'9',designation:'Ink transfer roller',diameterMM:66,colorCode:'red',surface:'rubber-coated',materialKind:'red',sectionCenter:[.4467,2.1658,0]},
+  {code:'8',designation:'Ink transfer roller',diameterMM:60,colorCode:'white',surface:'rubber-coated',materialKind:'rollerWhite',sectionCenter:[-.0279,2.2355,0]},
+  {code:'9',designation:'Ink transfer roller',diameterMM:66,colorCode:'red',surface:'rubber-coated',materialKind:'rollerRed',sectionCenter:[.4467,2.1658,0]},
   {code:'10',designation:'Ink transfer roller',diameterMM:56,colorCode:null,surface:'plastic-coated',materialKind:'plastic',sectionCenter:[.5474,2.1696,0]},
-  {code:'11',designation:'Ink transfer roller',diameterMM:80,colorCode:'yellow',surface:'rubber-coated',materialKind:'yellow',sectionCenter:[.4447,2.4040,0]},
+  {code:'11',designation:'Ink transfer roller',diameterMM:80,colorCode:'yellow',surface:'rubber-coated',materialKind:'rollerYellow',sectionCenter:[.4447,2.4040,0]},
   {code:'12',designation:'Ink transfer roller',diameterMM:68,colorCode:null,surface:'plastic-coated',materialKind:'plastic',sectionCenter:[.5532,2.4389,0]},
-  {code:'13',designation:'4th inking form roller',diameterMM:80,colorCode:'yellow',surface:'rubber-coated',materialKind:'yellow',sectionCenter:[-.0259,2.0031,0]},
-  {code:'14',designation:'1st inking form roller',diameterMM:60,colorCode:'white',surface:'rubber-coated',materialKind:'white',sectionCenter:[.3421,1.9759,0]},
+  {code:'13',designation:'4th inking form roller',diameterMM:80,colorCode:'yellow',surface:'rubber-coated',materialKind:'rollerYellow',sectionCenter:[-.0259,2.0031,0]},
+  {code:'14',designation:'1st inking form roller',diameterMM:60,colorCode:'white',surface:'rubber-coated',materialKind:'rollerWhite',sectionCenter:[.3421,1.9759,0]},
   {code:'15',designation:'Ink vibrator',diameterMM:59,colorCode:null,surface:'rubber-coated',materialKind:'rubber',sectionCenter:[.1484,2.5783,0]}
 ]);
 
