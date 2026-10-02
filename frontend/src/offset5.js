@@ -390,7 +390,10 @@ export class OffsetMachineTemplate {
       this.cylinder(top,.036,.10,[-.18,2.61,z],'steel','z');
       this.box(top,[.18,.045,.10],[.10,2.56,z],'black',.008);
     }
-    for(let n=0;n<11;n++)this.box(top,[.018,.024,.76],[.11+n*.024,2.53,.35],'graphite',.003);
+    // The V403-style repeated grille ribs were another closed-top visual cue and cost 88 meshes
+    // across the eight PUs. Keep one attached cable/service guide instead: photo-visible silhouette,
+    // lower cognitive noise, and enough mesh headroom for mobile without deleting process geometry.
+    const guide=this.box(top,[.26,.028,.76],[.23,2.53,.35],'graphite',.006);guide.userData.serviceGuide=true;
     const bridge=this.group(g,`press-${i}-fountain-support`,`PU${i+1} · ink-fountain support bridge`,[0,0,0],[0,.42,-.55],['IMG_1628(2).jpeg','IMG_1970.jpeg','IMG_1971.jpeg'],'Twin end supports and transverse fountain member follow the photographed external arrangement. Internal roller relationships use the OEM roller map.');
     this.box(bridge,[.18,.10,1.56],[-.03,2.49,0],'graphite',.016);
     this.box(bridge,[.10,.045,1.44],[-.10,2.545,0],'steel',.010);
