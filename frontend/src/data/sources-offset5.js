@@ -66,6 +66,28 @@ export const OFFSET5_DAMPENING_ROLLERS=freezeRollers([
 
 export const OFFSET5_FORM_ROLLER_ORDER=Object.freeze(['14','1','2','13']);
 
+// Visual rotation topology for simulation only. Each listed contact pair counter-rotates.
+// The signs are relative senses, not RPM, phase, timing, nip pressure or a maintenance setting.
+// IMG_2777 establishes the numbered/distributor/dampening contact topology; the fountain↔15
+// relation additionally uses the accepted upper-PU photo/OEM fountain-vibrator functional reference.
+export const OFFSET5_INKING_CONTACT_PAIRS=Object.freeze([
+  Object.freeze(['PLATE','13']),Object.freeze(['PLATE','2']),Object.freeze(['PLATE','1']),Object.freeze(['PLATE','14']),
+  Object.freeze(['13','D']),Object.freeze(['2','D']),Object.freeze(['2','3']),Object.freeze(['1','3']),Object.freeze(['1','C']),
+  Object.freeze(['3','6']),Object.freeze(['6','D']),Object.freeze(['6','7']),Object.freeze(['6','5']),Object.freeze(['7','8']),
+  Object.freeze(['8','D']),Object.freeze(['5','4']),Object.freeze(['4','B']),Object.freeze(['4','C']),Object.freeze(['C','14']),
+  Object.freeze(['C','9']),Object.freeze(['9','B']),Object.freeze(['9','10']),Object.freeze(['B','11']),Object.freeze(['11','A']),
+  Object.freeze(['11','12']),Object.freeze(['FOUNTAIN','15'])
+]);
+export const OFFSET5_INKING_ROTATION_SENSE=Object.freeze({
+  PLATE:1,FOUNTAIN:1,'1':-1,'2':-1,'3':1,'4':-1,'5':1,'6':-1,'7':1,'8':-1,'9':-1,'10':1,'11':-1,'12':1,'13':-1,'14':-1,'15':-1,A:1,B:1,C:1,D:1
+});
+
+export const OFFSET5_DAMPENING_CONTACT_PAIRS=Object.freeze([
+  Object.freeze(['PLATE','16']),Object.freeze(['16','17']),Object.freeze(['16','19']),Object.freeze(['16','FR']),Object.freeze(['19','18'])
+]);
+export const OFFSET5_DAMPENING_ROTATION_SENSE=Object.freeze({PLATE:1,'16':-1,'17':1,'19':1,FR:1,'18':-1});
+
+
 export const TECHNICAL_SOURCES=Object.freeze([
   {id:'SRC-O5-ROLLER-DIAGRAM-IMG2777',title:'Offset 5 · on-machine ROLLER DIAGRAM HEIDELBERG CD-102',publisher:'PT Bukit Muria Jaya / installed machine evidence',url:null,type:'USER_PHOTO_OF_ON_MACHINE_DIAGRAM',confidence:CONFIDENCE.PHOTO_VERIFIED,localFile:'IMG_2777.jpeg',supports:['roller codes 1-19, A-D and FR','nominal diameters','roller material/remark table','form-roller color identification','relative inking/dampening topology','plate-blanket-impression sequence','RAKEL / AIR BLOWER / WATER callout zones'],boundary:'Diagram is a schematic and nominal table; it does not provide installed nip pressure, timing, bearer diameter, wear condition or service setting.'},
   {id:'SRC-CD102-SERVICE-MANUAL',title:'Speedmaster CD 102 · electrical/service manual (446 pages)',publisher:'Heidelberger Druckmaschinen AG',url:null,type:'USER_SUPPLIED_OEM_MANUAL',confidence:CONFIDENCE.HIGH,localFile:'pdfcoffee.com_cd102pdf-4-pdf-free.pdf',supports:['feeder pile centering 11M9','pile support adjustment 11M8','suction-head height 11M5','suction-head/format adjustment 11M6','pile stops 11M11/11M12','format wheels 11M4','cover-guide height 1M4','front-lay adjustment 1M2/1M3','printing-pressure adjustment 1...nM5','sheet-arrival and monitoring architecture']},
