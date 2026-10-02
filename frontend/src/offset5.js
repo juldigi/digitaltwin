@@ -102,7 +102,7 @@ export class OffsetMachineTemplate {
     const materialKey=g.userData.nodeId+':'+kind;
     if(!this.lineMaterials.has(materialKey))this.lineMaterials.set(materialKey,new THREE.LineBasicMaterial({color:this.palette[kind]??this.palette.steel,transparent:true,opacity:.92}));
     const line=new THREE.Line(this.geometries.get(geoKey),this.lineMaterials.get(materialKey));
-    line.userData={assetId:'MACHINE-OFFSET5',ownerId:g.userData.nodeId,detail:true,auxiliaryReference:true};
+    line.userData={assetId:'MACHINE-OFFSET5',ownerId:g.userData.nodeId,detail:true,auxiliaryReference:true,baseColor:this.palette[kind]??this.palette.steel};
     g.add(line);this.auxVisuals.push(line);return line;
   }
   // Profile in X/Z extruded vertically: curved front side cover, as in IMG_1627/28.
@@ -957,12 +957,12 @@ export class OffsetMachineTemplate {
   }
   highlight(part){
     for(const m of this.meshes){m.material.emissive.setHex(part&&this.contains(part,m)?0x174b47:0x000000);m.material.emissiveIntensity=.28;}
-    for(const v of this.auxVisuals){v.material.color.setHex(part&&this.contains(part,v)?0x42d7ca:(this.palette.steel));v.material.opacity=(part&&!this.contains(part,v)) ? .34 : .92;}
+    for(const v of this.auxVisuals){v.material.color.setHex(part&&this.contains(part,v)?0x42d7ca:v.userData.baseColor);v.material.opacity=(part&&!this.contains(part,v)) ? .34 : .92;}
   }
   highlightMany(parts=[]){
     const list=(parts||[]).filter(Boolean);
     for(const m of this.meshes){m.material.emissive.setHex(list.some(part=>this.contains(part,m))?0x174b47:0x000000);m.material.emissiveIntensity=.28;}
-    for(const v of this.auxVisuals){const hit=list.some(part=>this.contains(part,v));v.material.color.setHex(hit?0x42d7ca:this.palette.steel);v.material.opacity=(list.length&&!hit) ? .34 : .92;}
+    for(const v of this.auxVisuals){const hit=list.some(part=>this.contains(part,v));v.material.color.setHex(hit?0x42d7ca:v.userData.baseColor);v.material.opacity=(list.length&&!hit) ? .34 : .92;}
   }
   ghost(on,except=null){
     this.ghosted=on;
