@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import * as THREE from 'three';
 import {
   OFFSET5_ACTUAL_ROLLER_DIAGRAM,
   OFFSET5_INKING_ROLLERS,
@@ -97,6 +98,28 @@ test('V319 live geometry repeats corrected PU roller metadata across all eight u
   assert.ok(pu1damp18.material.metalness<.1,'18/T must visually read as plastic-coated');
   assert.ok(pu1damp19.material.roughness>.8,'19/DW must visually read as rubber-coated');
   assert.ok(pu1fr.material.metalness>.8,'FR must visually read as chromium-plated');
+ }finally{m.dispose();}
+});
+
+test('V319 keeps all eight PU exteriors on the photo-verified handedness and removes synthetic unit styling',()=>{
+ const m=new Offset5CD102RealismTemplate();
+ try{
+  m.root.updateMatrixWorld(true);
+  for(let i=0;i<8;i++){
+   const cover=m.findNode(`press-${i}-cover`),drive=m.findNode(`press-${i}-drive`),bridge=m.findNode(`press-${i}-fountain-support`);
+   assert.ok(cover&&drive&&bridge,`PU${i+1} exterior hierarchy incomplete`);
+   const coverZ=new THREE.Box3().setFromObject(cover).getCenter(new THREE.Vector3()).z;
+   const driveZ=new THREE.Box3().setFromObject(drive).getCenter(new THREE.Vector3()).z;
+   assert.ok(coverZ<-.5,`PU${i+1} operator-side cover must remain on world -Z`);
+   assert.ok(driveZ>.5,`PU${i+1} drive-side cover must remain on world +Z`);
+   let syntheticRed=false;
+   bridge.traverse(o=>{if(o.isMesh&&o.material?.color?.getHex?.()===m.palette.red)syntheticRed=true;});
+   assert.equal(syntheticRed,false,`PU${i+1} must not receive synthetic per-unit red exterior styling`);
+  }
+  m.setExteriorOpen(false);
+  for(let i=0;i<8;i++)assert.equal(m.findNode(`press-${i}-cover`).visible,true,`PU${i+1} exterior must be closed by default`);
+  m.setExteriorOpen(true);
+  for(let i=0;i<8;i++)assert.equal(m.findNode(`press-${i}-cover`).visible,false,`PU${i+1} cover must disappear only in cutaway mode`);
  }finally{m.dispose();}
 });
 
