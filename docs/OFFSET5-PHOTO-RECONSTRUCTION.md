@@ -1,5 +1,17 @@
 # OFFSET 5 — rekonstruksi geometri dari foto
 
+## V320 — evidence precedence & cross-system contact guard (2026-10-02)
+
+Deep-dive lanjutan terhadap `IMG_2777.jpeg` dan prosedur OEM `SMCD102_roller_remove_procedure.pdf` menemukan bahwa tabel prosedur generik SM/CD102 **tidak boleh dipakai untuk menimpa kondisi terpasang Offset 5**. Beberapa baris material/color memang berbeda dengan diagram yang terpasang di mesin BMJ.
+
+- Authority kondisi terpasang tetap `IMG_2777.jpeg`: roller 15 = white/rubber-coated; 17/ZW = rubber-coated; 18/T = plastic-coated; 19/DW = rubber-coated + crowned; distributor A = stainless steel.
+- Prosedur OEM tetap dipakai sebagai **REFERENCE_ONLY** untuk removal/installation sequence dan ink-stripe/contact-setting reference, bukan sebagai pengganti visual installed configuration.
+- Konflik sumber dicatat eksplisit di source registry agar build berikutnya tidak kembali mengubah material roller hanya karena tabel OEM generik berbeda.
+- Contact cross-system **roller 14 (white inking form roller 1) ↔ roller 17/ZW** sekarang dicatat eksplisit. Diagram aktual memperlihatkan pasangan ini, dan prosedur OEM memberi reference ink stripe 3 +1 mm.
+- OEM contact references untuk 15↔fountain, 15↔A, form rollers↔C/D, form rollers↔plate, dan 14↔17 disimpan sebagai metadata service-reference dengan `installedSettingVerified=false`.
+- Motion yang sudah ada untuk roller 15 dan distributor A–D sekarang memiliki provenance/boundary jelas: fungsi gerak divisualisasikan, tetapi amplitude, phase, RPM, dan service setpoint tidak diklaim sebagai data serial 550415.
+
+
 ## V319 — actual printing-unit roller diagram (2026-10-02)
 
 Bukti baru `IMG_2777.jpeg` adalah foto **ROLLER DIAGRAM HEIDELBERG CD-102** yang terpasang pada mesin. Revisi V319 menjadikannya single source of truth untuk identitas dan tabel roller pada seluruh PU1–PU8, tanpa mengubah dimensi custom BMJ yang sudah dikunci.
