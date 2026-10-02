@@ -342,7 +342,11 @@ export class OffsetMachineTemplate {
     const isPU1=i===0,frameWidth=isPU1?OFFSET5_DIMENSIONS.layout.pu1FrameWidth:OFFSET5_DIMENSIONS.layout.printingUnitFrameWidth,sidePanelWidth=frameWidth-.12,topBeamWidth=frameWidth-.14,faceX=frameWidth/2-.09,guardX=frameWidth/2-.08,glassX=frameWidth/2-.04;
     this.markExteriorCover(this.box(body,[frameWidth,.4,2.04],[0,.48,0],'black',.035));
     for(const side of [-1,1])this.markExteriorCover(this.box(body,[sidePanelWidth,2.25,.28],[0,1.52,side*1.03],'graphite',.04));
-    this.markExteriorCover(this.box(body,[topBeamWidth,.22,1.98],[0,2.67,0],'graphite',.06));
+    // V319 regression repair: a full-depth top beam re-created the closed hood that
+    // the accepted V404/V408 machine photos explicitly removed. Keep only the two
+    // structural edge lintels so the inking/duct deck stays genuinely open from above.
+    for(const z of [-.93,.93])this.markExteriorCover(this.box(body,[topBeamWidth,.22,.12],[0,2.67,z],'graphite',.035));
+    Object.assign(body.userData,{openUpperFrame:true,fullDepthTopBeam:false,photoLockBaseline:'V404_V408_OPEN_PU_TOP'});
     this.grille(body,[faceX,1.78,0],1.75,.72);
     this.grille(body,[-faceX,1.78,0],1.75,.72);
     this.markExteriorCover(this.cylinder(body,.050,1.78,[guardX,1.23,0],'rubber'));
