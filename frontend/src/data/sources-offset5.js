@@ -30,6 +30,38 @@ export const OFFSET5_ACTUAL_ROLLER_DIAGRAM=Object.freeze({
   boundary:'SCHEMATIC_TOPOLOGY_AND_NOMINAL_TABLE_ONLY__DO_NOT_INFER_NIP_PRESSURE_TIMING_BEARER_DIAMETER_OR_SERVICE_SETTING'
 });
 
+
+
+// V320 — evidence precedence guard.
+// The user-photographed on-machine diagram is the installed-machine authority for what is
+// visibly fitted on BMJ Offset 5. The OEM SM/CD102 procedure remains authoritative for generic
+// procedure/contact-setting references, but must never silently overwrite an installed-machine
+// material/color entry when the two sources disagree.
+export const OFFSET5_ROLLER_EVIDENCE_POLICY=Object.freeze({
+  revision:'offset5-roller-evidence-policy-v320',
+  installedAuthority:'SRC-O5-ROLLER-DIAGRAM-IMG2777',
+  genericProcedureReference:'SRC-CD102-ROLLER-PROCEDURE',
+  precedence:Object.freeze([
+    'USER_PHOTO_OF_ON_MACHINE_DIAGRAM',
+    'USER_PHOTOS_OF_INSTALLED_MACHINE',
+    'USER_SUPPLIED_OEM_PROCEDURE',
+    'MANUFACTURER_FAMILY_REFERENCE'
+  ]),
+  conflictRule:'INSTALLED_DIAGRAM_WINS_FOR_VISIBLE_INSTALLED_ROLLER_MATERIAL_COLOR_AND_TOPOLOGY__OEM_PROCEDURE_REMAINS_REFERENCE_FOR_GENERIC_SERVICE_SEQUENCE_AND_CONTACT_SETTINGS',
+  knownConflicts:Object.freeze([
+    Object.freeze({code:'15',field:'colorCode',installed:'white',oemProcedure:'none',resolution:'installed'}),
+    Object.freeze({code:'17',field:'surface',installed:'rubber-coated',oemProcedure:'Rilsan / plastic-coated',resolution:'installed'}),
+    Object.freeze({code:'18',field:'surface+crown',installed:'plastic-coated / not marked crowned',oemProcedure:'rubber / crowned',resolution:'installed'}),
+    Object.freeze({code:'19',field:'surface+crown',installed:'rubber-coated / crowned',oemProcedure:'stainless steel / not marked crowned',resolution:'installed'}),
+    Object.freeze({code:'A',field:'surface',installed:'stainless steel',oemProcedure:'Rilsan / plastic-coated',resolution:'installed'})
+  ]),
+  compatibleSpecificity:Object.freeze([
+    Object.freeze({codes:['3','5','7','10','12','B','C','D'],installed:'plastic-coated',oemProcedure:'Rilsan',note:'Rilsan is treated as the more specific OEM family coating term, not a reason to override the installed diagram.'}),
+    Object.freeze({code:'FR',installed:'chromium-plated',oemProcedure:'chromium-plated',note:'sources agree'}),
+    Object.freeze({code:'16',installed:'rubber-coated',oemProcedure:'rubber',note:'sources agree'})
+  ])
+});
+
 const freezeRollers=rows=>Object.freeze(rows.map(row=>Object.freeze({...row,sectionCenter:Object.freeze(row.sectionCenter)})));
 
 export const OFFSET5_INKING_ROLLERS=freezeRollers([
@@ -47,7 +79,7 @@ export const OFFSET5_INKING_ROLLERS=freezeRollers([
   {code:'12',designation:'Ink transfer roller',diameterMM:68,colorCode:null,surface:'plastic-coated',materialKind:'plastic',sectionCenter:[.5532,2.4389,0]},
   {code:'13',designation:'4th inking form roller',diameterMM:80,colorCode:'yellow',surface:'rubber-coated',materialKind:'rollerYellow',sectionCenter:[-.0259,2.0031,0]},
   {code:'14',designation:'1st inking form roller',diameterMM:60,colorCode:'white',surface:'rubber-coated',materialKind:'rollerWhite',sectionCenter:[.3421,1.9759,0]},
-  {code:'15',designation:'Ink vibrator',diameterMM:59,colorCode:'white',surface:'rubber-coated',materialKind:'rollerWhite',sectionCenter:[.1484,2.5783,0]}
+  {code:'15',designation:'Ink vibrator',diameterMM:59,colorCode:'white',surface:'rubber-coated',materialKind:'rollerWhite',sectionCenter:[.2835,2.5410,0],sectionPositionPolicy:'IMG_2777_CONTACT_FIT_TO_DISTRIBUTOR_A'}
 ]);
 
 export const OFFSET5_INK_DISTRIBUTORS=freezeRollers([
@@ -88,11 +120,41 @@ export const OFFSET5_DAMPENING_CONTACT_PAIRS=Object.freeze([
 ]);
 export const OFFSET5_DAMPENING_ROTATION_SENSE=Object.freeze({PLATE:1,'16':-1,'17':1,'19':1,FR:1,'18':-1});
 
+// Cross-system contact visible on IMG_2777 and explicitly referenced by the OEM roller-adjustment
+// table: white inking form roller 14 contacts intermediate dampening roller 17/ZW.
+export const OFFSET5_CROSS_SYSTEM_CONTACT_PAIRS=Object.freeze([
+  Object.freeze(['14','17'])
+]);
+
+// OEM family/service reference only. These values come from the supplied SM/CD102 roller
+// procedure and are not promoted to a serial-specific installed setting. They are preserved so
+// maintenance/service views can distinguish a documented reference from reconstructed geometry.
+const stripe=(from,to,targetMM,minusMM,plusMM,note='')=>Object.freeze({
+  from,to,targetMM,minusMM,plusMM,note,
+  sourceId:'SRC-CD102-ROLLER-PROCEDURE',
+  confidence:CONFIDENCE.REFERENCE_ONLY,
+  installedSettingVerified:false
+});
+export const OFFSET5_OEM_CONTACT_SETTING_REFERENCES=Object.freeze([
+  stripe('15','FOUNTAIN',4,.5,.5,'Ink vibrator ↔ ink fountain roller'),
+  stripe('15','A',5,0,2,'Ink vibrator ↔ distributor A; OEM note: for mechanical reasons'),
+  stripe('14','C',4,0,1,'Inking form roller 1, white ↔ distributor C'),
+  stripe('1','C',4,0,1,'Inking form roller 2, blue ↔ distributor C'),
+  stripe('2','D',4,0,1,'Inking form roller 3, red ↔ distributor D'),
+  stripe('13','D',4,0,1,'Inking form roller 4, yellow ↔ distributor D'),
+  stripe('14','PLATE',4,1,0,'Inking form roller 1, white ↔ printing plate'),
+  stripe('1','PLATE',4,1,0,'Inking form roller 2, blue ↔ printing plate'),
+  stripe('2','PLATE',4,1,0,'Inking form roller 3, red ↔ printing plate'),
+  stripe('13','PLATE',4,1,0,'Inking form roller 4, yellow ↔ printing plate'),
+  stripe('14','17',3,0,1,'Inking form roller 1, white ↔ intermediate roller 17/ZW')
+]);
+
+
 
 export const TECHNICAL_SOURCES=Object.freeze([
-  {id:'SRC-O5-ROLLER-DIAGRAM-IMG2777',title:'Offset 5 · on-machine ROLLER DIAGRAM HEIDELBERG CD-102',publisher:'PT Bukit Muria Jaya / installed machine evidence',url:null,type:'USER_PHOTO_OF_ON_MACHINE_DIAGRAM',confidence:CONFIDENCE.PHOTO_VERIFIED,localFile:'IMG_2777.jpeg',supports:['roller codes 1-19, A-D and FR','nominal diameters','roller material/remark table','form-roller color identification','relative inking/dampening topology','plate-blanket-impression sequence','RAKEL / AIR BLOWER / WATER callout zones'],boundary:'Diagram is a schematic and nominal table; it does not provide installed nip pressure, timing, bearer diameter, wear condition or service setting.'},
+  {id:'SRC-O5-ROLLER-DIAGRAM-IMG2777',title:'Offset 5 · on-machine ROLLER DIAGRAM HEIDELBERG CD-102',publisher:'PT Bukit Muria Jaya / installed machine evidence',url:null,type:'USER_PHOTO_OF_ON_MACHINE_DIAGRAM',confidence:CONFIDENCE.PHOTO_VERIFIED,localFile:'IMG_2777.jpeg',supports:['roller codes 1-19, A-D and FR','nominal diameters','installed roller material/remark table','installed color identification including roller 15 white','relative inking/dampening topology','roller 14 ↔ 17/ZW cross-system contact','plate-blanket-impression sequence','RAKEL / AIR BLOWER / WATER / BWD / ICWD callout zones','installed configuration overrides conflicting generic roller-procedure table rows'],boundary:'Installed-machine visual/table authority for the fields it shows. It is still a schematic, not engineering CAD, and does not provide installed nip pressure, timing, bearer diameter, wear condition or service setting.'},
   {id:'SRC-CD102-SERVICE-MANUAL',title:'Speedmaster CD 102 · electrical/service manual (446 pages)',publisher:'Heidelberger Druckmaschinen AG',url:null,type:'USER_SUPPLIED_OEM_MANUAL',confidence:CONFIDENCE.HIGH,localFile:'pdfcoffee.com_cd102pdf-4-pdf-free.pdf',supports:['feeder pile centering 11M9','pile support adjustment 11M8','suction-head height 11M5','suction-head/format adjustment 11M6','pile stops 11M11/11M12','format wheels 11M4','cover-guide height 1M4','front-lay adjustment 1M2/1M3','printing-pressure adjustment 1...nM5','sheet-arrival and monitoring architecture']},
-  {id:'SRC-CD102-ROLLER-PROCEDURE',title:'SM/CD102 · Removing and installing the inking rollers',publisher:'Heidelberger Druckmaschinen AG',url:null,type:'USER_SUPPLIED_OEM_PROCEDURE',confidence:CONFIDENCE.HIGH,localFile:'SMCD102_roller_remove_procedure.pdf',supports:['roller map 1-19','distributor rollers A-D','dampening distributor FR','roller diameters and materials','inking form roller color identification','roller removal sequence','ink-stripe adjustment references']},
+  {id:'SRC-CD102-ROLLER-PROCEDURE',title:'SM/CD102 · Removing and installing the inking rollers',publisher:'Heidelberger Druckmaschinen AG',url:null,type:'USER_SUPPLIED_OEM_PROCEDURE',confidence:CONFIDENCE.HIGH,localFile:'SMCD102_roller_remove_procedure.pdf',supports:['generic SM/CD102 roller map 1-19','distributor rollers A-D','dampening distributor FR','generic roller diameters/material table','inking form roller color identification','roller removal/installation sequence','ink-stripe adjustment references including 14↔17/ZW'],boundary:'OEM family/service procedure, not serial-550415 installed evidence. Where its generic material/color row conflicts with on-machine IMG_2777, IMG_2777 is authoritative for the BMJ installed model. Stripe/adjustment values remain REFERENCE_ONLY unless independently verified on the installed press.'},
   {id:'SRC-HEIDELBERG-CD102',title:'Speedmaster CD 102 · official product information',publisher:'Heidelberger Druckmaschinen AG',url:'https://www.heidelberg.com/global/media/en/global_media/products___sheetfed_offset/2020_20/product_brochures_1/speedmaster-cd-102-product-information.pdf',type:'MANUFACTURER_PRODUCT_INFORMATION',confidence:CONFIDENCE.REFERENCE_ONLY,supports:['Preset Plus feeder','front-lay sheet alignment','sheet arrival monitoring','special gripper systems','AirTransfer sheet transport','inking and Alcolor dampening','ink fountain','chamber-blade coating unit','dryer system','sheet brake','Preset Plus delivery','central lubrication']},
   {id:'SRC-HD-SUCTION-BELT-PATENT',title:'Device for adapting negative pressure in a suction-belt feed table',publisher:'Heidelberger Druckmaschinen AG',url:'https://patents.google.com/patent/US5697606A/en',type:'MANUFACTURER_PATENT',confidence:CONFIDENCE.REFERENCE_ONLY,supports:['suction-belt feed table','negative-pressure chambers','sheet transport','operating-condition adaptation']},
   {id:'SRC-HD-SHEET-ALIGN-PATENT',title:'Device for aligning sheets in a feeder of a sheet-processing machine',publisher:'Heidelberger Druckmaschinen AG',url:'https://patents.google.com/patent/US6681697B2/en',type:'MANUFACTURER_PATENT',confidence:CONFIDENCE.REFERENCE_ONLY,supports:['feed table','sheet alignment','front lay reference','side-pull reference','sheet sensor reference']},

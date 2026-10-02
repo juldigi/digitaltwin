@@ -15,7 +15,7 @@ import * as THREE from 'three';
 import {OffsetMachineTemplate} from './offset5.js';
 import {PrintingSimulation} from './simulation.js';
 import {OFFSET5_DIMENSIONS,OFFSET5_UNIT_CENTERS} from './data/dimensions-offset5.js';
-import {OFFSET5_ACTUAL_ROLLER_DIAGRAM,OFFSET5_INKING_ROLLERS,OFFSET5_INK_DISTRIBUTORS,OFFSET5_DAMPENING_ROLLERS,OFFSET5_INKING_ROTATION_SENSE,OFFSET5_DAMPENING_ROTATION_SENSE} from './data/sources-offset5.js';
+import {OFFSET5_ACTUAL_ROLLER_DIAGRAM,OFFSET5_ROLLER_EVIDENCE_POLICY,OFFSET5_INKING_ROLLERS,OFFSET5_INK_DISTRIBUTORS,OFFSET5_DAMPENING_ROLLERS,OFFSET5_INKING_ROTATION_SENSE,OFFSET5_DAMPENING_ROTATION_SENSE,OFFSET5_CROSS_SYSTEM_CONTACT_PAIRS,OFFSET5_OEM_CONTACT_SETTING_REFERENCES} from './data/sources-offset5.js';
 
 export const OFFSET5_FINAL_REFINEMENT=Object.freeze({
   id:'OFFSET5_CD102_8L_CUSTOM_INSTALLED_REALITY_R6_ACTUAL_PU_DIAGRAM',
@@ -709,6 +709,31 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       if(!this.levers.some(item=>item.object===infeed))this.addLever(infeed,.085,1,.30);
     }
 
+    // V320 evidence tags for the pre-existing PU oscillator motions. The supplied service
+    // material names roller 15 as the ink vibrator / ductor and documents its two contact
+    // references (fountain roller and distributor A). Distributor A-D axial movement remains
+    // a functional visual reference; amplitudes/phases are deliberately not promoted to
+    // serial-specific service settings.
+    for(let i=0;i<8;i++){
+      const vibrator=this.oscillators.find(item=>item.object?.userData?.nodeId===`press-${i}-ink-roller-15`);
+      if(vibrator)Object.assign(vibrator,{
+        role:`PU${i+1}-ink-vibrator-15`,
+        source:'OEM_ROLLER_PROCEDURE_VIBRATOR_FOUNTAIN_AND_A_CONTACT_REFERENCE',
+        contactTargets:['FOUNTAIN','A'],
+        installedAmplitudeVerified:false,
+        installedPhaseVerified:false
+      });
+      for(const code of ['A','B','C','D']){
+        const distributor=this.oscillators.find(item=>item.object?.userData?.nodeId===`press-${i}-ink-distributor-${code}`);
+        if(distributor)Object.assign(distributor,{
+          role:`PU${i+1}-ink-distributor-${code}-axial`,
+          source:'INK_DISTRIBUTOR_FUNCTIONAL_OSCILLATION_REFERENCE',
+          installedAmplitudeVerified:false,
+          installedPhaseVerified:false
+        });
+      }
+    }
+
     // Every straight-printing unit has the same installed handedness. The prior simulator
     // alternated signs by array index, which is not the actual branched roller topology.
     // V319 uses the contact-derived relative rotation senses from IMG_2777. These are visual
@@ -746,6 +771,19 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
         rotor.rate=contactRate(rotor);
         rotor.role=`PU${i+1}-damp-roller-${spec.code}`;
         rotor.source='IMG_2777_DAMPENING_CONTACT_TOPOLOGY_COUNTER_ROTATION_VISUAL_REFERENCE';
+      }
+      const form14=rotorFor(`press-${i}-ink-roller-14-body`);
+      const intermediate17=rotorFor(`press-${i}-damp-roller-17-body`);
+      if(form14&&intermediate17){
+        const metadata={
+          pair:'14<->17/ZW',
+          source:'IMG_2777 + SRC-CD102-ROLLER-PROCEDURE',
+          oemStripeReferenceMM:'3 +1',
+          installedStripeVerified:false,
+          role:'INKING_TO_DAMPENING_INTERMEDIATE_CONTACT'
+        };
+        form14.crossSystemContact={...metadata};
+        intermediate17.crossSystemContact={...metadata};
       }
     }
     // The sheet runs left to right across the upper transfer arc at every bay.
@@ -908,6 +946,10 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       rollerDiagramRevision:OFFSET5_ACTUAL_ROLLER_DIAGRAM.revision,
       rollerDiagramSource:OFFSET5_ACTUAL_ROLLER_DIAGRAM.sourceFile,
       rollerDiagramBoundary:OFFSET5_ACTUAL_ROLLER_DIAGRAM.boundary,
+      rollerEvidencePolicyRevision:OFFSET5_ROLLER_EVIDENCE_POLICY.revision,
+      rollerEvidenceConflictRule:OFFSET5_ROLLER_EVIDENCE_POLICY.conflictRule,
+      crossSystemContactCount:OFFSET5_CROSS_SYSTEM_CONTACT_PAIRS.length,
+      oemContactSettingReferenceCount:OFFSET5_OEM_CONTACT_SETTING_REFERENCES.length,
       motionPolicy:'ROLE_TAGGED_PROCESS_PARTS_ONLY',
       duplicateProcessHardwareAdded:false,
       focusightLocationPolicy:'DOWNSTREAM_AFTER_COATING_DRYING',
@@ -927,6 +969,9 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       cylinderMotionPolicy:'SAME_STRAIGHT_PRINT_DIRECTION_ALL_PU_CONTACT_PAIRS_COUNTER_ROTATE',
       primaryCylinderDiagramPolicy:'IMG_2777_PLATE_AND_IMPRESSION_SAME_ROTATION_SENSE__BLANKET_OPPOSITE__NO_TIMING_OR_PHASE_CLAIM',
       rollerContactMotionPolicy:'IMG_2777_CONTACT_GRAPH_COUNTER_ROTATION__SURFACE_SPEED_VISUAL_REFERENCE__NO_SERVICE_TIMING_PHASE_OR_NIP_CLAIM',
+      crossSystemContactPolicy:'ROLLER14_WHITE_TO_17_ZW_CONFIRMED_BY_IMG2777_AND_OEM_3_PLUS_1_REFERENCE',
+      inkVibratorMotionPolicy:'ROLLER15_PREEXISTING_VISUAL_OSCILLATION_TAGGED_TO_FOUNTAIN_AND_A__AMPLITUDE_PHASE_NOT_INSTALLED_SETTINGS',
+      distributorOscillationPolicy:'A_D_PREEXISTING_AXIAL_VISUAL_OSCILLATION__AMPLITUDE_PHASE_NOT_INSTALLED_SETTINGS',
       sheetVisualPolicy:'NO_EXTERNAL_FULL_WIDTH_DEMO_GRIPPER_BAR',
       deliveryPilePolicy:'START_EMPTY_STACK_TO_CAPACITY_THEN_CLEAR_AND_REPEAT',
       operatorSideMicrodetailPolicy:'WORLD_NEGATIVE_Z_AFTER_TOP_LEVEL_PHOTO_MIRROR',

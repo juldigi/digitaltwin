@@ -7,6 +7,10 @@ Sumbu longitudinal scene memakai **+X dari feeder menuju delivery**. Setelah kor
 Koreksi terhadap v3: `IMG_2312.jpeg` adalah acuan ujung **feeder/pile inlet**, sedangkan `IMG_1624.jpeg` dan `IMG_1625.jpeg` adalah acuan **delivery pile end**. Foto `IMG_1629/1631/1633` mengisi transition/deck delivery; `IMG_1630/1633` mengunci gantry FA-Swan; `IMG_1165/0947` memberi detail roller/gauge/hose di zona akhir line. Penempatan detail terakhir ke coating-service zone adalah **INFERRED_POSITION**, bukan pengukuran engineering.
 
 
+## Evidence precedence V320
+
+Untuk PU1–PU8, taxonomy mengikuti urutan authority berikut: **on-machine installed diagram → actual BMJ machine photos → supplied OEM procedure → family reference**. Bila tabel generic OEM bertentangan dengan `IMG_2777`, node geometry/material tetap mengikuti installed diagram, sedangkan angka service OEM hanya disimpan sebagai reference metadata. Cross-system contact `INK.R14 ↔ DAMP.R17` sekarang menjadi bagian dari topology evidence; setting 3 +1 mm tetap `REFERENCE_ONLY`, bukan nilai terukur pada mesin BMJ.
+
 ## Authority printing unit V319
 
 Taxonomy PU1–PU8 tidak lagi menduplikasi tabel roller secara hard-code. Node roller mengambil data dari source registry yang sama dengan geometry dan simulation. `IMG_2777.jpeg` menjadi bukti `PHOTO_VERIFIED` untuk code/designation, diameter nominal, color code, material/remark serta topology sectional 1–19, A–D dan FR. Journal, bearing, nip, timing, pressure dan setting yang tidak ada pada diagram tetap `REFERENCE_ONLY`.
