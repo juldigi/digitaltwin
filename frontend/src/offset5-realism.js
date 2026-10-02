@@ -665,13 +665,13 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
     const rollerMaterials=new Set(),inkCodes=OFFSET5_INKING_ROLLERS.map(spec=>spec.code),distributorCodes=OFFSET5_INK_DISTRIBUTORS.map(spec=>spec.code);
     for(let i=0;i<8;i++){
       for(const id of [
-        `press-${i}-ink-fountain-roller-body`,
         ...inkCodes.map(code=>`press-${i}-ink-roller-${code}-body`),
         ...distributorCodes.map(code=>`press-${i}-ink-distributor-${code}-body`)
       ])this.template.findNode(id)?.traverse(mesh=>{if(mesh.isMesh&&mesh.material)rollerMaterials.add(mesh.material);});
     }
-    // Ink belongs on the actual inking train and A-D distributors. Do not make plate/blanket
-    // cylinders glow as a proxy for ink, and do not create free-floating ink droplets.
+    // Ink belongs on the actual numbered inking train and A-D distributors. The visible
+    // green fountain/duct service roller is photo-locked green in the open top and must not
+    // be recolored as a per-job proxy. No plate/blanket glow and no floating ink droplets.
     this.inkSurfaces=this.inkSurfaces.filter(surface=>rollerMaterials.has(surface.material));
   }
   collectDampeningSurfaces(){
@@ -906,6 +906,7 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       inkRollerCount:this.inkSurfaces.length,
       dampeningRollerSurfaceCount:this.dampeningSurfaces?.length||0,
       rollerSurfacePolicy:'IMG_2777_ACTUAL_TABLE_FOR_1_19_A_D_FR__NO_GENERIC_RILSAN_STEEL_SWAPS',
+      openUpperDeckPolicy:'V404_V408_PHOTO_LOCK__NO_SOLID_PU_TOP__GREEN_DUCT_ROLL_REMAINS_GREEN',
       dampeningRepresentation:'SUBTLE_ROLLER_FILM_ONLY__NO_FLOATING_WATER_PARTICLES',
       printRepresentation:'PROGRESSIVE_TRANSVERSE_COLOUR_BANDS_PER_PU_DEMO',
       cylinderMotionPolicy:'SAME_STRAIGHT_PRINT_DIRECTION_ALL_PU_CONTACT_PAIRS_COUNTER_ROTATE',
