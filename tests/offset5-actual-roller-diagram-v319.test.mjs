@@ -167,6 +167,11 @@ test('V319 keeps all eight PU exteriors on the photo-verified handedness and rem
    const openFilm=m.findNode(`press-${i}-open-ink-bay`).children.find(o=>o.name==='Visible Ink Film Color'||o.userData?.visibleInkFilm);
    assert.equal(duct.visible,true,`PU${i+1} green duct roller is silhouette-critical and must survive mobile LOD`);
    assert.equal(openFilm?.visible,true,`PU${i+1} open ink film must survive mobile LOD`);
+   for(const id of [`press-${i}-rakel-reference`,`press-${i}-air-blower-ink`,`press-${i}-air-blower-nip`,`press-${i}-water-feed-reference`]){
+    const meshes=[];m.findNode(id)?.traverse(o=>{if(o.isMesh)meshes.push(o);});
+    assert.ok(meshes.length>0,`PU${i+1} ${id} callout geometry missing`);
+    assert.ok(meshes.every(mesh=>mesh.visible===false),`PU${i+1} ${id} microdetail should hide in mobile LOD`);
+   }
   }
   m.setLow(false);
   m.setExteriorOpen(false);
