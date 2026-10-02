@@ -598,16 +598,153 @@ export function validateUtilitySimulation(simulation,template,key,{throwOnError=
  return result;
 }
 
+
+export const PRINTING_RUNTIME_CONTRACTS=Object.freeze({
+ 'BMJ-MCH-0001':Object.freeze({
+  family:'polar',expectedAssetId:'BMJ-MCH-0001',
+  coreNodes:Object.freeze(['polar-frame','polar-feed-center','polar-feed-left','polar-feed-right','polar-feed-rear','polar-gauge','polar-clamp','polar-knife','polar-knife-blade','polar-safety-photo','polar-safety-left-arm','polar-safety-right-arm','polar-safety-twohand','polar-control-crt','polar-control-panel','polar-housing','polar-housing-motor-end','polar-hyd-power','polar-air-blower'])
+ }),
+ 'sheeting':Object.freeze({
+  family:'sheeting',expectedAssetId:'BMJ-MCH-0002',
+  coreNodes:Object.freeze(['sheeting-structure','sheeting-rollstand','sheeting-reel','sheeting-feed','sheeting-feed-frame','sheeting-feed-rollers','sheeting-cutter','sheeting-knife','sheeting-main-rollers','sheeting-delivery','sheeting-overlap','sheeting-layboy','sheeting-stacker-joggers','sheeting-control','sheeting-access'])
+ }),
+ 'BMJ-MCH-0005':Object.freeze({
+  family:'offset8',expectedAssetId:'BMJ-MCH-0005',
+  coreNodes:Object.freeze(['offset8-feeder','offset8-register','offset8-pu1','offset8-pu2','offset8-pu3','offset8-pu4','offset8-pu5','offset8-pu6','offset8-pu7','offset8-pu8','offset8-l1','offset8-y1','offset8-y2','offset8-l2','offset8-delivery','offset8-delivery-chain','offset8-delivery-brake','offset8-delivery-paper-stack'])
+ }),
+ 'BMJ-MCH-0006':Object.freeze({
+  family:'offset9',expectedAssetId:'BMJ-MCH-0006',
+  coreNodes:Object.freeze(['offset9-feeder','offset9-register','offset9-pu1','offset9-pu2','offset9-pu3','offset9-pu4','offset9-l','offset9-delivery','offset9-delivery-grippers','offset9-console'])
+ }),
+ 'offset10':Object.freeze({
+  family:'offset10',expectedAssetId:'MACHINE-OFFSET10',
+  coreNodes:Object.freeze(['o10-feeder','o10-feedboard','o10-pu1','o10-pu2','o10-foilstar','o10-foilstar-rolls','o10-foilstar-superstructure','o10-foilstar-dancer','o10-foilstar-transfer-nip','o10-y1','o10-y1-uv','o10-y2','o10-y2-uv','o10-delivery','o10-delivery-x3','o10-eop-uv','o10-delivery-paper-stack','o10-prinect-center','o10-peripherals'])
+ })
+});
+const printingContractFor=normalized=>PRINTING_RUNTIME_CONTRACTS[normalized]||null;
+
+export function validatePrintingTemplate(template,key,{throwOnError=false}={}){
+ const assetId=normalizeMachineKey(key),contract=PRINTING_RUNTIME_CONTRACTS[assetId],root=template?.root,errors=[];
+ const fail=(code,detail)=>errors.push({code,detail});
+ if(!contract)return Object.freeze({valid:true,errors:Object.freeze([]),contract:null,assetId:null});
+ if(!root)fail('ROOT_MISSING',assetId);
+ else{
+  const u=root.userData||{};
+  if(u.assetId!==contract.expectedAssetId)fail('ASSET_ID',u.assetId);
+  for(const id of contract.coreNodes){
+   const node=template.findNode?.(id);
+   if(!node){fail('CORE_NODE_MISSING',id);continue;}
+   let attached=false;for(let p=node;p;p=p.parent)if(p===root){attached=true;break;}
+   if(!attached)fail('CORE_NODE_DETACHED',id);
+  }
+  const taxonomy=template.taxonomy||[],levels=new Set(taxonomy.map(n=>n.level));
+  for(let level=1;level<=6;level++)if(!levels.has(level))fail('TAXONOMY_LEVEL_MISSING',level);
+
+  if(contract.family==='polar'){
+   if(u.model!=='115 EM MON')fail('POLAR_MODEL',u.model);
+   if(u.serial!=='5831536')fail('POLAR_SERIAL',u.serial);
+   if(u.engineeringDimensions!==false)fail('POLAR_DIMENSION_BOUNDARY',u.engineeringDimensions);
+   if(u.geometryStatus!=='DEDICATED_BMJ_PHOTO_MATCHED__ARCHIVE_DIMENSIONS_NOT_INSTALLATION_CAD')fail('POLAR_GEOMETRY_BOUNDARY',u.geometryStatus);
+   if(u.photoRevision!=='V260_FOUR_BMJ_PHOTO_ANGLES')fail('POLAR_PHOTO_REVISION',u.photoRevision);
+   if(u.actualPhotoEvidence!=='BMJ-POLAR-PHOTOS-2026-09')fail('POLAR_PHOTO_EVIDENCE',u.actualPhotoEvidence);
+   if(u.mainHousingProfile!=='RECTANGULAR_ROUNDED_HEAD__NO_HALF_CYLINDER_ROOF')fail('POLAR_HOUSING_PROFILE',u.mainHousingProfile);
+   if(!String(u.photoOrientation||'').includes('PERFORATED_TABLE_FRONT_RIGHT')||!String(u.photoOrientation||'').includes('DRIVE_REAR_LEFT'))fail('POLAR_HANDEDNESS',u.photoOrientation);
+   const twoHand=template.findNode?.('polar-safety-twohand');
+   if(twoHand?.userData?.simultaneityControlReference!==true||twoHand?.userData?.antiRepeatReference!==true)fail('POLAR_TWO_HAND_SAFETY_REFERENCE','missing');
+  }else if(contract.family==='sheeting'){
+   if(u.model!=='HSM-CTM7')fail('SHEETING_MODEL',u.model);
+   if(u.processDirection!=='RIGHT_TO_LEFT'||u.processFlow?.direction!=='RIGHT_TO_LEFT')fail('SHEETING_DIRECTION',u.processDirection+'|'+u.processFlow?.direction);
+   if(u.researchVersion!=='V197')fail('SHEETING_RESEARCH_REVISION',u.researchVersion);
+   if(u.visualRevision!=='V197_BMJ_MATERIAL_STATE_AND_GEOMETRY_TRUTH')fail('SHEETING_VISUAL_REVISION',u.visualRevision);
+   if(u.primaryVisualEvidence!=='BMJ_USER_PHOTOSET_20260922_IMG_2479_TO_IMG_2487')fail('SHEETING_PHOTO_EVIDENCE',u.primaryVisualEvidence);
+   if(u.processFlow?.unwindArchitecture!=='ONE_LOADED_REEL__LEFT_RIGHT_ARM_PAIR__TWO_SIDE_HYDRAULIC_SUPPORTS__NO_LONGITUDINAL_SECOND_STATION')fail('SHEETING_UNWIND_BOUNDARY',u.processFlow?.unwindArchitecture);
+   if(u.processFlow?.cutterArchitecture!=='HSM56_FLAT_BED_KNIFE_WORDING_ONLY__BMJ_INTERNAL_MECHANISM_NOT_VISIBLE__NO_SPECULATIVE_FLY_KNIFE_GEOMETRY')fail('SHEETING_CUTTER_BOUNDARY',u.processFlow?.cutterArchitecture);
+   if(template.findNode?.('sheeting-knife')?.userData?.visibleKnifeGeometry!==false)fail('SHEETING_VISIBLE_KNIFE_BOUNDARY',template.findNode?.('sheeting-knife')?.userData?.visibleKnifeGeometry);
+   for(const id of ['sheeting-flatbed-cutter-family','sheeting-cut-takeaway-pinch'])if((template.findNode?.(id)?.children?.length||0)!==0)fail('SHEETING_SPECULATIVE_GEOMETRY',id);
+  }else if(contract.family==='offset8'){
+   if(u.taxonomyVersion!=='offset8-v1')fail('OFFSET8_TAXONOMY',u.taxonomyVersion);
+   if(u.spec?.configuration!=='8 PU + L + Y + Y + L')fail('OFFSET8_SEQUENCE',u.spec?.configuration);
+   if(u.realismPack!=='OFFSET8_CX104_8LYYL_FINAL_REFINEMENT_R2')fail('OFFSET8_REALISM_PACK',u.realismPack);
+   if(u.realismPolicy!=='ENRICH_EXISTING_NODES_ONLY__Y_ENERGY_TECH_UNASSERTED')fail('OFFSET8_REALISM_POLICY',u.realismPolicy);
+   if(u.dryerEnergyTechnology!=='UNASSERTED'||u.spec?.dryerEnergyTechnologyVerified!==false)fail('OFFSET8_DRYER_BOUNDARY',u.dryerEnergyTechnology);
+   for(const id of ['offset8-y1','offset8-y2'])if(template.findNode?.(id)?.userData?.energyTechnologyVerified!==false)fail('OFFSET8_Y_ENERGY_PROMOTED',id);
+   for(let i=1;i<=8;i++){
+    if(template.findNode?.('offset8-pu'+i+'-inking')?.userData?.exactRollerCountVerified!==false)fail('OFFSET8_INKING_COUNT_PROMOTED',i);
+    if(template.findNode?.('offset8-pu'+i+'-dampening')?.userData?.exactRollerCountVerified!==false)fail('OFFSET8_DAMP_COUNT_PROMOTED',i);
+   }
+  }else if(contract.family==='offset9'){
+   if(u.taxonomyVersion!=='offset9-v2-oem-mechanics')fail('OFFSET9_TAXONOMY',u.taxonomyVersion);
+   if(u.evidenceGrade!=='OFFICIAL_FAMILY_REFERENCE')fail('OFFSET9_EVIDENCE_GRADE',u.evidenceGrade);
+   if(u.engineeringDimensions!==false)fail('OFFSET9_DIMENSION_BOUNDARY',u.engineeringDimensions);
+   if(u.spec?.serial!=='GS001804'||u.spec?.configuration!=='4 PU + L')fail('OFFSET9_IDENTITY_SEQUENCE',(u.spec?.serial||'')+'|'+(u.spec?.configuration||''));
+   for(const field of ['deliveryPileOptionVerified','dryerInstalledVerified','perfectorInstalledVerified'])if(u.spec?.[field]!==false)fail('OFFSET9_OPTION_PROMOTED',field+':'+u.spec?.[field]);
+   if(template.findNode?.('offset9-delivery')?.userData?.pileHeightOptionVerified!==false)fail('OFFSET9_DELIVERY_OPTION_PROMOTED',template.findNode?.('offset9-delivery')?.userData?.pileHeightOptionVerified);
+  }else{
+   if(u.taxonomyVersion!=='offset10-taxonomy-v1')fail('OFFSET10_TAXONOMY',u.taxonomyVersion);
+   if(u.realismPack!=='OFFSET10_CX104_SPECIAL_FINAL_REFINEMENT_R2')fail('OFFSET10_REALISM_PACK',u.realismPack);
+   if(u.realismPolicy!=='PROJECT_DOCUMENT_FIRST__EXISTING_NODE_ENRICHMENT_ONLY')fail('OFFSET10_REALISM_POLICY',u.realismPolicy);
+   if(u.dimensionAudit?.printingUnits!==11||u.dimensionAudit?.coatingUnits!==3||u.dimensionAudit?.yUnits!==2)fail('OFFSET10_MODULE_COUNTS',JSON.stringify(u.dimensionAudit||{}));
+   for(const id of ['o10-y1-uv','o10-y2-uv','o10-eop-uv']){
+    let lamps=0,beams=0;template.findNode?.(id)?.traverse?.(o=>{if(o.userData?.uvLamp)lamps++;if(o.userData?.uvBeam)beams++;});
+    if(lamps!==3||beams!==3)fail('OFFSET10_UV_COUNT',id+':'+lamps+'/'+beams);
+   }
+   let unwind=0,rewind=0;template.findNode?.('o10-foilstar-rolls')?.traverse?.(o=>{if(o.userData?.foilReel==='unwind')unwind++;if(o.userData?.foilReel==='rewind')rewind++;});
+   if(unwind!==6||rewind!==6)fail('OFFSET10_FOIL_WEB_COUNT',unwind+'/'+rewind);
+  }
+ }
+ const result=Object.freeze({valid:errors.length===0,errors:Object.freeze(errors),contract,assetId});
+ if(root){root.userData.printingRuntimeTruthVersion='V329';root.userData.printingRuntimeTruthLock=result.valid?'PASS':'FAIL';root.userData.printingRuntimeTruthErrors=errors.map(e=>e.code+':'+e.detail).join('|');}
+ if(throwOnError&&!result.valid)throw new Error('Printing runtime truth-lock failed for '+assetId+': '+root?.userData?.printingRuntimeTruthErrors);
+ return result;
+}
+
+export function validatePrintingSimulation(simulation,template,key,{throwOnError=false}={}){
+ const assetId=normalizeMachineKey(key),contract=PRINTING_RUNTIME_CONTRACTS[assetId],state=simulation?.state?.(),errors=[];
+ const fail=(code,detail)=>errors.push({code,detail});
+ if(!contract)return Object.freeze({valid:true,errors:Object.freeze([]),contract:null,assetId:null});
+ if(!state||state.available!==true)fail('SIMULATION_AVAILABILITY',state?.available);
+ if(contract.family==='polar'){
+  if(state?.safetyReference?.twoHandSimultaneity!==true||state?.safetyReference?.antiRepeat!==true||state?.safetyReference?.lightBarrierStopsClampAndKnife!==true)fail('POLAR_SAFETY_REFERENCE','incomplete');
+  if(state?.materialSplit?.conserved!==true)fail('POLAR_MATERIAL_CONSERVATION',state?.materialSplit?.conserved);
+  const expected=!!(state?.interlocks?.lightBarrierClear&&state?.interlocks?.twoHandCommand&&state?.interlocks?.cutCycleLatched&&state?.interlocks?.clampContact);
+  if(state?.interlocks?.knifeDownPermitted!==expected)fail('POLAR_CUT_INTERLOCK',state?.interlocks?.knifeDownPermitted);
+ }else if(contract.family==='sheeting'){
+  if(state?.bladeVisible!==false||state?.bladeCount!==0||state?.visibleKnifeGeometry!==false)fail('SHEETING_BLADE_BOUNDARY',state?.bladeCount);
+  if(state?.cutterMode!=='GUARDED_CROSS_CUT__INTERNAL_MECHANISM_UNRESOLVED')fail('SHEETING_CUTTER_MODE',state?.cutterMode);
+  if(state?.transportMode!=='CONTINUOUS_WEB__FORMING_SHEET__GUARDED_CUT__SMOOTH_TAKEAWAY_ACCEL__SLOW_SHINGLE__STACK_SETTLE')fail('SHEETING_TRANSPORT_MODE',state?.transportMode);
+  if(state?.detachedSheetStartsWithTrailingEdgeAtCutPoint!==true||state?.manualStackGuidesStatic!==true)fail('SHEETING_MATERIAL_STATE_BOUNDARY','invalid');
+ }else if(contract.family==='offset8'){
+  if(state?.realismPack!=='OFFSET8_CX104_8LYYL_FINAL_REFINEMENT_R2')fail('OFFSET8_SIM_REALISM_PACK',state?.realismPack);
+  if(state?.installedSequence!=='8 PU + L + Y + Y + L')fail('OFFSET8_SIM_SEQUENCE',state?.installedSequence);
+  if(state?.dryerEnergyTechnology!=='UNASSERTED'||state?.uvLampCount!==0||state?.uvActive!==false)fail('OFFSET8_SIM_DRYER_BOUNDARY',(state?.dryerEnergyTechnology||'')+'|'+state?.uvLampCount+'|'+state?.uvActive);
+  if(state?.duplicateProcessHardwareAdded!==false)fail('OFFSET8_DUPLICATE_HARDWARE',state?.duplicateProcessHardwareAdded);
+ }else if(contract.family==='offset9'){
+  if(state?.simulationBoundary!=='SX52_4L_PROCESS__OPTIONS_NOT_INFERRED')fail('OFFSET9_SIMULATION_BOUNDARY',state?.simulationBoundary);
+  if(state?.deliveryVenturiInstalledVerified!==false)fail('OFFSET9_VENTURI_PROMOTED',state?.deliveryVenturiInstalledVerified);
+  if(state?.uvLampCount!==0||state?.uvActive!==false)fail('OFFSET9_UV_PROMOTED',state?.uvLampCount+'|'+state?.uvActive);
+ }else{
+  if(state?.realismPack!=='OFFSET10_CX104_SPECIAL_FINAL_REFINEMENT_R2')fail('OFFSET10_SIM_REALISM_PACK',state?.realismPack);
+  if(state?.uvLampCount!==9)fail('OFFSET10_UV_LAMP_COUNT',state?.uvLampCount);
+  if(state?.duplicateProcessHardwareAdded!==false)fail('OFFSET10_DUPLICATE_HARDWARE',state?.duplicateProcessHardwareAdded);
+  if(state?.motionPolicy!=='PROJECT_DOCUMENTED_MOVING_PARTS_ONLY__NO_COVER_OR_SERVICE_MOTION')fail('OFFSET10_MOTION_POLICY',state?.motionPolicy);
+  if(state?.occupancyPolicy!=='FULL_SHEET_LOCAL_PROCESS_OCCUPANCY_FROM_BASE_SIMULATION')fail('OFFSET10_OCCUPANCY_POLICY',state?.occupancyPolicy);
+ }
+ const result=Object.freeze({valid:errors.length===0,errors:Object.freeze(errors),contract,assetId});
+ if(template?.root){template.root.userData.printingSimulationTruthVersion='V329';template.root.userData.printingSimulationTruthLock=result.valid?'PASS':'FAIL';template.root.userData.printingSimulationTruthErrors=errors.map(e=>e.code+':'+e.detail).join('|');}
+ if(throwOnError&&!result.valid)throw new Error('Printing simulation truth-lock failed for '+assetId+': '+template?.root?.userData?.printingSimulationTruthErrors);
+ return result;
+}
+
 export function createMachineTemplate(key){
  const k=normalizeMachineKey(key);
  if(!k)throw new Error('Identitas mesin belum tersedia.');
  if(k==='offset5'){const template=new Offset5CD102RealismTemplate();validateOffset5PilotTemplate(template,{throwOnError:true});return template;}
- if(k==='sheeting')return new SheetingMachineTemplate();
- if(k==='offset10')return new Offset10CX104SpecialRealismTemplate();
+ if(k==='sheeting'){const template=new SheetingMachineTemplate();validatePrintingTemplate(template,k,{throwOnError:true});return template;}
+ if(k==='offset10'){const template=new Offset10CX104SpecialRealismTemplate();validatePrintingTemplate(template,k,{throwOnError:true});return template;}
  if(k==='apm2'){const template=new APM2MachineTemplate();validateAutoplatenTemplate(template,k,{throwOnError:true});return template;}
- if(k==='BMJ-MCH-0001')return new Polar115MachineTemplate();
- if(k==='BMJ-MCH-0005')return new Offset8CX104RealismTemplate();
- if(k==='BMJ-MCH-0006')return new Offset9MachineTemplate();
+ if(k==='BMJ-MCH-0001'){const template=new Polar115MachineTemplate();validatePrintingTemplate(template,k,{throwOnError:true});return template;}
+ if(k==='BMJ-MCH-0005'){const template=new Offset8CX104RealismTemplate();validatePrintingTemplate(template,k,{throwOnError:true});return template;}
+ if(k==='BMJ-MCH-0006'){const template=new Offset9MachineTemplate();validatePrintingTemplate(template,k,{throwOnError:true});return template;}
  if(['BMJ-MCH-0007','BMJ-MCH-0008','BMJ-MCH-0022'].includes(k))return new FZ1200MachineTemplate(k);
  if(['BMJ-MCH-0011','BMJ-MCH-0012'].includes(k)){const template=new MK920MachineTemplate(k);validateAutoplatenTemplate(template,k,{throwOnError:true});return template;}
  if(k==='BMJ-MCH-0013'){const template=new MK1060MachineTemplate();validateAutoplatenTemplate(template,k,{throwOnError:true});return template;}
@@ -647,6 +784,7 @@ export function createPolishedMachineTemplate(key){
  if(inspectionContractFor(normalized))validateInspectionTemplate(template,normalized,{throwOnError:true});
  if(pdsContractFor(normalized))validatePdsTemplate(template,normalized,{throwOnError:true});
  if(utilityContractFor(normalized))validateUtilityTemplate(template,normalized,{throwOnError:true});
+ if(printingContractFor(normalized))validatePrintingTemplate(template,normalized,{throwOnError:true});
  return template;
 }
 
@@ -654,12 +792,12 @@ export function createMachineSimulation(key,machine,template){
  const k=normalizeMachineKey(key);
  if(!k)throw new Error('Identitas mesin belum tersedia.');
  if(k==='offset5')return new Offset5CD102RealismSimulation(machine,template);
- if(k==='sheeting')return new SheetingProcessSimulation(machine,template);
- if(k==='offset10')return new Offset10CX104SpecialRealismSimulation(machine,template);
+ if(k==='sheeting'){const sim=new SheetingProcessSimulation(machine,template);validatePrintingSimulation(sim,template,k,{throwOnError:true});return sim;}
+ if(k==='offset10'){const sim=new Offset10CX104SpecialRealismSimulation(machine,template);validatePrintingSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(k==='apm2'){const sim=new APM2ProcessSimulation(machine,template);validateAutoplatenSimulation(sim,template,k,{throwOnError:true});return sim;}
- if(k==='BMJ-MCH-0001')return new Polar115ProcessSimulation(machine,template);
- if(k==='BMJ-MCH-0005')return new Offset8CX104RealismSimulation(machine,template);
- if(k==='BMJ-MCH-0006')return new Offset9PrintingSimulation(machine,template);
+ if(k==='BMJ-MCH-0001'){const sim=new Polar115ProcessSimulation(machine,template);validatePrintingSimulation(sim,template,k,{throwOnError:true});return sim;}
+ if(k==='BMJ-MCH-0005'){const sim=new Offset8CX104RealismSimulation(machine,template);validatePrintingSimulation(sim,template,k,{throwOnError:true});return sim;}
+ if(k==='BMJ-MCH-0006'){const sim=new Offset9PrintingSimulation(machine,template);validatePrintingSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(['BMJ-MCH-0007','BMJ-MCH-0008','BMJ-MCH-0022'].includes(k))return new FZ1200ProcessSimulation(machine,template);
  if(['BMJ-MCH-0011','BMJ-MCH-0012'].includes(k)){const sim=new MK920StampingSimulation(machine,template);validateAutoplatenSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(k==='BMJ-MCH-0013'){const sim=new MK1060ProcessSimulation(machine,template);validateAutoplatenSimulation(sim,template,k,{throwOnError:true});return sim;}
