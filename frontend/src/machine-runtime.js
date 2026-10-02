@@ -869,7 +869,7 @@ export function validateRemainingFleetSimulation(simulation,template,key,{throwO
    if(state?.uvActive&&!state?.uvPermit)fail('LY300_UV_WITHOUT_PERMIT',state?.stage);
    if(state?.cameraActive&&!state?.cameraTrigger)fail('LY300_CAMERA_WITHOUT_TRIGGER',state?.stage);
    if(state?.demoRejectActive&&!state?.rejectPermit)fail('LY300_REJECT_WITHOUT_PERMIT',state?.stage);
-   if(state?.rejectConfirmed&&!state?.rejectPermit)fail('LY300_REJECT_CONFIRM_CAUSALITY',state?.stage);
+   if(state?.rejectConfirmed&&!(state?.inspectionComplete&&state?.decisionReady))fail('LY300_REJECT_CONFIRM_CAUSALITY',state?.stage);
   }
  }
  const result=Object.freeze({valid:errors.length===0,errors:Object.freeze(errors),contract,assetId});
