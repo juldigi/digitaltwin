@@ -193,6 +193,13 @@ test('V319 live geometry repeats corrected PU roller metadata across all eight u
     assert.ok(n.sourceRefs.includes('SRC-O5-ROLLER-DIAGRAM-IMG2777'));
    }
   }
+  const pu1r15=m.findNode('press-0-ink-roller-15-body').children.find(o=>o.isMesh);
+  const pu1distA=m.findNode('press-0-ink-distributor-A-body').children.find(o=>o.isMesh);
+  const r15Center=pu1r15.getWorldPosition(new THREE.Vector3()),distACenter=pu1distA.getWorldPosition(new THREE.Vector3());
+  const r15ContactDistance=r15Center.distanceTo(distACenter);
+  const r15ContactRadiusSum=pu1r15.geometry.parameters.radiusTop+pu1distA.geometry.parameters.radiusTop;
+  assert.ok(Math.abs(r15ContactDistance-r15ContactRadiusSum)<.004,`roller 15 must visually meet distributor A at the IMG_2777 contact; gap=${(r15ContactDistance-r15ContactRadiusSum).toFixed(4)}`);
+  assert.equal(OFFSET5_INKING_ROLLERS.find(x=>x.code==='15').sectionPositionPolicy,'IMG_2777_CONTACT_FIT_TO_DISTRIBUTOR_A');
   const pu1damp17=m.findNode('press-0-damp-roller-17-body').children.find(o=>o.isMesh);
   const pu1damp18=m.findNode('press-0-damp-roller-18-body').children.find(o=>o.isMesh);
   const pu1damp19=m.findNode('press-0-damp-roller-19-body').children.find(o=>o.isMesh);
