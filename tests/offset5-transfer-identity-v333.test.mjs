@@ -35,3 +35,33 @@ test('V333 Offset 5 transfer gripper simulation retains bay identity without inv
   assert.equal(sim.state().interUnitTransferCausalityPolicy,'SEVEN_BAYS_IDENTIFIED_BY_ADJACENT_PU_PAIR__FORWARD_FLOW__PHASE_REMAINS_VISUAL_REFERENCE');
  }finally{sim.dispose();template.dispose();}
 });
+
+test('V333 Offset 5 print progression waits for the complete sheet to clear each PU and delivery preserves that state',()=>{
+ const template=createMachineTemplate('BMJ-MCH-0003');
+ const sim=createMachineSimulation('BMJ-MCH-0003',template.root,template);
+ try{
+  const sheet=sim.sheets[0];
+  // Find path distances whose leading edge has passed PU1 while the trailing edge has not,
+  // then after the complete sheet clears PU1. This tests sheet causality rather than a hard-coded time.
+  let partial=null,cleared=null;
+  for(let d=sim.sheetLength;d<=sim.pathLength;d+=.01){
+   if(!sim.updateSheet(sheet,d))continue;
+   const lead=sheet.userData.leadPosition.x,trail=sheet.userData.trailPosition.x;
+   const threshold=sim.template.root.userData?.unusedOffset5Threshold??null;
+   if(partial==null&&lead>sheet.userData.trailPosition.x&&sheet.userData.printedUnitsCleared===0&&lead>trail+.2)partial=d;
+   if(sheet.userData.printedUnitsCleared>=1){cleared=d;break;}
+  }
+  assert.ok(partial!=null);
+  assert.ok(cleared!=null);
+  sim.updateSheet(sheet,partial);
+  assert.equal(sheet.userData.printedUnitsCleared,0);
+  sim.updateSheet(sheet,cleared);
+  assert.ok(sheet.userData.printedUnitsCleared>=1);
+  sheet.userData.printedUnitsCleared=7;
+  sim.depositSheet(sheet,123);
+  const delivered=sim.pileSheets.find(item=>item.userData.serial===1);
+  assert.ok(delivered);
+  assert.equal(delivered.userData.printed,7);
+  assert.equal(delivered.userData.printedUnitsCleared,7);
+ }finally{sim.dispose();template.dispose();}
+});
