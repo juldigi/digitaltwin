@@ -62,3 +62,19 @@ test('V320 truth lock detects loss of the photo-locked green duct roller',()=>{
   assert.ok(audit.errors.some(e=>e.code==='PU_GREEN_DUCT_ROLL'&&e.detail===1));
  }finally{t.dispose();}
 });
+
+test('V320 truth lock detects stale PU internal roller geometry metadata on any unit',()=>{
+ const t=createMachineTemplate('offset5');
+ try{
+  const ink=t.findNode('press-4-ink-roller-11-body').children.find(o=>o.isMesh);
+  const damp=t.findNode('press-6-damp-roller-19-body').children.find(o=>o.isMesh);
+  ink.userData.nominalDiameterMM=56;
+  damp.userData.rollerSurface='plastic-coated';
+  delete damp.userData.actualDiagramSource;
+  const audit=validateOffset5PilotTemplate(t);
+  assert.equal(audit.valid,false);
+  assert.ok(audit.errors.some(e=>e.code==='PU_INK_DIAMETER'&&String(e.detail).startsWith('5:11:')));
+  assert.ok(audit.errors.some(e=>e.code==='PU_DAMP_SURFACE'&&String(e.detail).startsWith('7:19:')));
+  assert.ok(audit.errors.some(e=>e.code==='PU_DAMP_SOURCE'&&e.detail==='7:19'));
+ }finally{t.dispose();}
+});
