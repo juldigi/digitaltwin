@@ -73,6 +73,19 @@ export class OffsetMachineTemplate {
   cylinder(g,r,length,pos,kind='steel',axis='z'){
     return this.mesh(g,()=>new THREE.CylinderGeometry(r,r,length,16),'cyl:'+r+':'+length,kind,pos,axis==='z'?[Math.PI/2,0,0]:axis==='x'?[0,0,Math.PI/2]:[0,0,0]);
   }
+  crownedCylinder(g,r,length,pos,kind='rubber',axis='z',crownRatio=.025){
+    const key='crowned-cyl:'+r+':'+length+':'+crownRatio;
+    return this.mesh(g,()=>{
+      const geo=new THREE.CylinderGeometry(r,r,length,24,10,false);
+      const p=geo.attributes.position;
+      for(let i=0;i<p.count;i++){
+        const y=p.getY(i),axial=Math.min(1,Math.abs(y)/(length/2)),bulge=1+crownRatio*(1-axial*axial);
+        p.setXYZ(i,p.getX(i)*bulge,y,p.getZ(i)*bulge);
+      }
+      p.needsUpdate=true;geo.computeVertexNormals();geo.userData={crowned:true,crownRatio};
+      return geo;
+    },key,kind,pos,axis==='z'?[Math.PI/2,0,0]:axis==='x'?[0,0,Math.PI/2]:[0,0,0]);
+  }
   frustum(g,r1,r2,length,pos,kind='rubber',axis='y'){
     return this.mesh(g,()=>new THREE.CylinderGeometry(r1,r2,length,16),'frustum:'+r1+':'+r2+':'+length,kind,pos,axis==='z'?[Math.PI/2,0,0]:axis==='x'?[0,0,Math.PI/2]:[0,0,0]);
   }
@@ -511,8 +524,9 @@ export class OffsetMachineTemplate {
       const roller=this.group(dampForm,`${id}-damp-roller-${code}`,`${label} · ${code}${alias} ${designation}`,[0,0,0],[0,.18,-.24],sourceFiles,`IMG_2777 actual on-machine table: nominal Ø${diameterMM} mm · ${surface}${crowned?' · crowned':''}. Coordinates are sectional visual references, not nip settings.`);
       Object.assign(roller.userData,{diagramCode:code,diagramAlias,nominalDiameterMM:diameterMM,rollerSurface:surface,crowned,actualDiagramSource:'IMG_2777.jpeg',actualDiagramVerified:true});
       const body=this.group(roller,`${id}-damp-roller-${code}-body`,`${label} · ${code} roller body`,[0,0,0],[0,.08,-.10],sourceFiles);
-      const mesh=markDetail(this.cylinder(body,diameterMM*OEM_ROLLER_VISUAL_RADIUS_PER_MM,1.30,pos,materialKind));
-      Object.assign(mesh.userData,{diagramCode:code,nominalDiameterMM:diameterMM,rollerSurface:surface,crowned,actualDiagramSource:'IMG_2777.jpeg'});
+      const radius=diameterMM*OEM_ROLLER_VISUAL_RADIUS_PER_MM;
+      const mesh=markDetail(crowned?this.crownedCylinder(body,radius,1.30,pos,materialKind,'z',.025):this.cylinder(body,radius,1.30,pos,materialKind));
+      Object.assign(mesh.userData,{diagramCode:code,nominalDiameterMM:diameterMM,rollerSurface:surface,crowned,crownRatio:crowned?.025:0,actualDiagramSource:'IMG_2777.jpeg'});
       const journals=this.markServiceDetail(this.group(roller,`${id}-damp-roller-${code}-journals`,`${label} · ${code} journals / locks`,[0,0,0],[0,.06,-.14],['SMCD102_roller_remove_procedure.pdf'],'Journal/lock locations remain available in the hierarchy but are hidden from the open-machine overview so they are not mistaken for extra rollers.'));
       for(const z of [-.69,.69])markDetail(this.cylinder(journals,Math.max(.018,diameterMM*.00026),.10,[pos[0],pos[1],z],'steel','z'));
     }
