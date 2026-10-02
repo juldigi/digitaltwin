@@ -106,10 +106,12 @@ test('V319 keeps all eight PU exteriors on the photo-verified handedness and rem
  try{
   m.root.updateMatrixWorld(true);
   for(let i=0;i<8;i++){
-   const cover=m.findNode(`press-${i}-cover`),drive=m.findNode(`press-${i}-drive`),bridge=m.findNode(`press-${i}-fountain-support`);
+   const frame=m.findNode(`press-${i}-frame`),cover=m.findNode(`press-${i}-cover`),drive=m.findNode(`press-${i}-drive`),bridge=m.findNode(`press-${i}-fountain-support`);
    const top=m.findNode(`press-${i}-top-deck`),inkBay=m.findNode(`press-${i}-ink`),openBay=m.findNode(`press-${i}-open-ink-bay`);
    const ductBody=m.findNode(`press-${i}-ink-fountain-roller-body`),brand=m.findNode(`press-${i}-operator-brand`);
-   assert.ok(cover&&drive&&bridge&&top&&inkBay&&openBay&&ductBody&&brand,`PU${i+1} exterior/open-top hierarchy incomplete`);
+   assert.ok(frame&&cover&&drive&&bridge&&top&&inkBay&&openBay&&ductBody&&brand,`PU${i+1} exterior/open-top hierarchy incomplete`);
+   assert.equal(frame.userData.openUpperFrame,true,`PU${i+1} structural top frame must remain open`);
+   assert.equal(frame.userData.fullDepthTopBeam,false,`PU${i+1} must not regain the full-depth top beam regression`);
    assert.equal(top.userData.openUpperDeck,true,`PU${i+1} top must stay photo-locked OPEN`);
    assert.equal(top.userData.solidTopCover,false,`PU${i+1} must not regain the regressed solid hood`);
    assert.equal(inkBay.userData.openInkBed,true,`PU${i+1} ink bay must stay open`);
