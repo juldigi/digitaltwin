@@ -154,8 +154,8 @@ test('V319 keeps all eight PU exteriors on the photo-verified handedness and rem
    const controls=m.findNode(`press-${i}-ink-fountain-controls`);
    assert.ok(controls,`PU${i+1} fountain controls missing`);
    assert.equal(controls.userData.visibleKeyCount,11,`PU${i+1} visible key rhythm regressed from V408 baseline`);
-   let keyKnobs=0;controls.traverse(o=>{if(o.isMesh&&o.geometry?.type==='CylinderGeometry'&&Math.abs((o.geometry.parameters?.radiusTop||0)-.018)<1e-6)keyKnobs++;});
-   assert.equal(keyKnobs,11,`PU${i+1} must expose eleven visible key knobs`);
+   let keyKnobs=0;controls.traverse(o=>{if(!o.isMesh)return;if(o.userData?.mechanismRole==='ink-key-knob')keyKnobs+=o.userData.elementCount||1;else if(o.userData?.mechanismRoles?.includes?.('ink-key-knob'))keyKnobs+=o.userData.elementCount||1;});
+   assert.equal(keyKnobs,11,`PU${i+1} must expose eleven visible key knobs after geometry batching`);
    const ductMesh=ductBody.children.find(o=>o.isMesh);
    assert.ok(ductMesh,`PU${i+1} visible green duct roller missing`);
    assert.equal(ductMesh.material.color.getHex(),m.palette.photoRollerGreen,`PU${i+1} duct roller must preserve the photo-locked green surface`);
