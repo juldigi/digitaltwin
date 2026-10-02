@@ -6,6 +6,10 @@ import {
   OFFSET5_INKING_ROLLERS,
   OFFSET5_INK_DISTRIBUTORS,
   OFFSET5_DAMPENING_ROLLERS,
+  OFFSET5_INKING_CONTACT_PAIRS,
+  OFFSET5_INKING_ROTATION_SENSE,
+  OFFSET5_DAMPENING_CONTACT_PAIRS,
+  OFFSET5_DAMPENING_ROTATION_SENSE,
   TECHNICAL_SOURCES
 } from '../frontend/src/data/sources-offset5.js';
 import {OFFSET5_DIMENSIONS} from '../frontend/src/data/dimensions-offset5.js';
@@ -40,6 +44,21 @@ test('V319 actual on-machine roller diagram is the SSOT for PU roller table',()=
  for(const spec of OFFSET5_INKING_ROLLERS)assert.deepEqual([spec.diameterMM,spec.surface,spec.colorCode],expectedInk[spec.code],spec.code);
  for(const spec of OFFSET5_INK_DISTRIBUTORS)assert.deepEqual([spec.diameterMM,spec.surface],expectedDist[spec.code],spec.code);
  for(const spec of OFFSET5_DAMPENING_ROLLERS)assert.deepEqual([spec.diameterMM,spec.surface,Boolean(spec.crowned)],expectedDamp[spec.code],spec.code);
+});
+
+test('V319 contact topology yields counter-rotation across the actual roller network',()=>{
+ for(const [a,b] of OFFSET5_INKING_CONTACT_PAIRS){
+  assert.equal(OFFSET5_INKING_ROTATION_SENSE[a],-OFFSET5_INKING_ROTATION_SENSE[b],`inking contact ${a}<->${b} must counter-rotate`);
+ }
+ for(const [a,b] of OFFSET5_DAMPENING_CONTACT_PAIRS){
+  assert.equal(OFFSET5_DAMPENING_ROTATION_SENSE[a],-OFFSET5_DAMPENING_ROTATION_SENSE[b],`dampening contact ${a}<->${b} must counter-rotate`);
+ }
+ assert.equal(OFFSET5_INKING_ROTATION_SENSE['1'],-1);
+ assert.equal(OFFSET5_INKING_ROTATION_SENSE['13'],-1);
+ assert.equal(OFFSET5_INKING_ROTATION_SENSE.A,1);
+ assert.equal(OFFSET5_INKING_ROTATION_SENSE.C,1);
+ assert.equal(OFFSET5_DAMPENING_ROTATION_SENSE['16'],-1);
+ assert.equal(OFFSET5_DAMPENING_ROTATION_SENSE['18'],-1);
 });
 
 test('V319 taxonomy maps every PU to actual roller diagram without the old material swaps',()=>{
@@ -165,6 +184,7 @@ test('V319 simulation uses actual inking/distributor/dampening surfaces while ke
   assert.ok(state.rollerDiagramBoundary.includes('DO_NOT_INFER_NIP_PRESSURE_TIMING'));
   assert.equal(state.primaryCylinderDiagramPolicy,'IMG_2777_PLATE_AND_IMPRESSION_SAME_ROTATION_SENSE__BLANKET_OPPOSITE__NO_TIMING_OR_PHASE_CLAIM');
   assert.equal(state.openUpperDeckPolicy,'V404_V408_PHOTO_LOCK__NO_SOLID_PU_TOP__GREEN_DUCT_ROLL_REMAINS_GREEN');
+  assert.equal(state.rollerContactMotionPolicy,'IMG_2777_CONTACT_GRAPH_COUNTER_ROTATION__SURFACE_SPEED_VISUAL_REFERENCE__NO_SERVICE_TIMING_PHASE_OR_NIP_CLAIM');
   for(let i=1;i<=8;i++){
    const plate=sim.rotors.find(r=>r.role===`PU${i}-plate-cylinder`);
    const blanket=sim.rotors.find(r=>r.role===`PU${i}-blanket-cylinder`);
@@ -177,6 +197,19 @@ test('V319 simulation uses actual inking/distributor/dampening surfaces while ke
    assert.match(blanket.source,/IMG_2777_PRIMARY_CYLINDER_RELATIVE_ROTATION/);
    assert.match(impression.source,/IMG_2777_PRIMARY_CYLINDER_RELATIVE_ROTATION/);
    assert.match(transfer.source,/TRANSFER_NOT_SHOWN_IN_IMG_2777/);
+   for(const [code,sign] of Object.entries(OFFSET5_INKING_ROTATION_SENSE)){
+    if(['PLATE','FOUNTAIN'].includes(code))continue;
+    const role=/^[A-D]$/.test(code)?`PU${i}-ink-distributor-${code}`:`PU${i}-ink-roller-${code}`;
+    const rotor=sim.rotors.find(r=>r.role===role);
+    assert.ok(rotor,`PU${i} missing ${role}`);
+    assert.equal(rotor.sign,sign,`PU${i} ${role} rotation sense disagrees with V319 contact topology`);
+   }
+   for(const [code,sign] of Object.entries(OFFSET5_DAMPENING_ROTATION_SENSE)){
+    if(code==='PLATE')continue;
+    const role=`PU${i}-damp-roller-${code}`,rotor=sim.rotors.find(r=>r.role===role);
+    assert.ok(rotor,`PU${i} missing ${role}`);
+    assert.equal(rotor.sign,sign,`PU${i} ${role} rotation sense disagrees with V319 dampening topology`);
+   }
   }
   const greenBefore=Array.from({length:8},(_,i)=>m.findNode(`press-${i}-ink-fountain-roller-body`).children.find(o=>o.isMesh).material.color.getHex());
   sim.start();
