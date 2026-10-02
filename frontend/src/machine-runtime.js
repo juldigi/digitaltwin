@@ -495,6 +495,109 @@ export function validatePdsSimulation(simulation,template,key,{throwOnError=fals
  return result;
 }
 
+
+const COMPRESSOR_UTILITY_PROFILE=Object.freeze({
+ 'BMJ-MCH-0029':Object.freeze({brand:'ATLAS',brandEvidence:'ATLAS_COPCO',geometry:'ATLAS_COPCO_GA_G_OIL_INJECTED_FAMILY_REFERENCE',prefix:'atlas'}),
+ 'BMJ-MCH-0030':Object.freeze({brand:'ATLAS',brandEvidence:'ATLAS_COPCO',geometry:'ATLAS_COPCO_GA_G_OIL_INJECTED_FAMILY_REFERENCE',prefix:'atlas'}),
+ 'BMJ-MCH-0031':Object.freeze({brand:'KAESER',brandEvidence:'KAESER',geometry:'KAESER_SIGMA_FLUID_COOLED_FAMILY_REFERENCE',prefix:'kaeser'}),
+ 'BMJ-MCH-0032':Object.freeze({brand:'KAESER',brandEvidence:'KAESER',geometry:'KAESER_SIGMA_FLUID_COOLED_FAMILY_REFERENCE',prefix:'kaeser'}),
+ 'BMJ-MCH-0033':Object.freeze({brand:'SWAN',brandEvidence:'SWAN',geometry:'SWAN_TS_AD_TMV_SCREW_FAMILY_REFERENCE',prefix:'swan'}),
+ 'BMJ-MCH-0034':Object.freeze({brand:'KAESER',brandEvidence:'KAESER',geometry:'KAESER_SIGMA_FLUID_COOLED_FAMILY_REFERENCE',prefix:'kaeser'}),
+ 'BMJ-MCH-0035':Object.freeze({brand:'ATLAS',brandEvidence:'ATLAS_COPCO',geometry:'ATLAS_COPCO_GA_G_OIL_INJECTED_FAMILY_REFERENCE',prefix:'atlas'})
+});
+const GENERIC_AHU_IDS=Object.freeze(['BMJ-MCH-0036','BMJ-MCH-0037','BMJ-MCH-0038','BMJ-MCH-0039','BMJ-MCH-0041']);
+export const UTILITY_RUNTIME_CONTRACTS=Object.freeze({
+ ...Object.fromEntries(Object.entries(COMPRESSOR_UTILITY_PROFILE).map(([id,p])=>[id,Object.freeze({
+  family:'compressor',...p,
+  coreNodes:Object.freeze([p.prefix+'-intake-filter-group',p.prefix+'-airend-group','compressor-air-distribution','compressor-discharge-piping','compressor-air-receiver-boundary','compressor-air-treatment-boundary','compressor-ring-main-reference','compressor-condensate-treatment-boundary']),
+  simulationBoundary:'BRAND_FAMILY_OIL_INJECTED_SCREW_AIRFLOW__LOCAL_RING_MAIN_FUNCTIONAL_REFERENCE__PLANT_ROUTE_UNVERIFIED'
+ })])),
+ ...Object.fromEntries(GENERIC_AHU_IDS.map(id=>[id,Object.freeze({
+  family:'ahu',kind:'GENERIC',geometry:'EUROVENT_SECTIONAL_AHU_FUNCTIONAL_REFERENCE',
+  coreNodes:Object.freeze(['ahu-inlet-damper','ahu-filter-bank','ahu-cooling-coil','ahu-drain-pan','ahu-supply-fan','ahu-service-door','ahu-discharge-plenum','ahu-air-distribution','ahu-supply-duct','ahu-return-duct','ahu-outdoor-intake']),
+  simulationBoundary:'EUROVENT_CANONICAL_AHU_AIR_PATH_REFERENCE__SECTION_ORDER_DIRECTION_UNVERIFIED'
+ })])),
+ 'BMJ-MCH-0040':Object.freeze({
+  family:'ahu',kind:'SANSIN',geometry:'SANSIN_NES_YZKJ_INDOOR_OUTDOOR_REFERENCE',
+  coreNodes:Object.freeze(['sansin-inlet-damper','sansin-filter-net','sansin-wet-curtain','sansin-evaporator','sansin-supply-fan','sansin-compressor','sansin-condenser','sansin-outdoor-fan','sansin-refrigerant','sansin-water-circuit','sansin-controller','sansin-electrical','sansin-air-distribution','sansin-supply-duct','sansin-return-duct']),
+  simulationBoundary:'SANSIN_NES_YZKJ_INDOOR_AIR_PATH_FAMILY_REFERENCE__MODEL_CAPACITY_UNVERIFIED'
+ })
+});
+const utilityContractFor=normalized=>UTILITY_RUNTIME_CONTRACTS[normalized]||null;
+
+export function validateUtilityTemplate(template,key,{throwOnError=false}={}){
+ const assetId=normalizeMachineKey(key),contract=UTILITY_RUNTIME_CONTRACTS[assetId],root=template?.root,errors=[];
+ const fail=(code,detail)=>errors.push({code,detail});
+ if(!contract)return Object.freeze({valid:true,errors:Object.freeze([]),contract:null,assetId:null});
+ if(!root)fail('ROOT_MISSING',assetId);
+ else{
+  const u=root.userData||{};
+  if(u.assetId!==assetId)fail('ASSET_ID',u.assetId);
+  if(u.engineeringDimensions!==false)fail('ENGINEERING_DIMENSION_BOUNDARY',u.engineeringDimensions);
+  if(u.referenceBuilder!=='V139_RESEARCH_GROUNDED_BUILDER')fail('REFERENCE_BUILDER',u.referenceBuilder);
+  if(u.geometryStatus!=='REFERENCE_GROUNDED_FAMILY__NOT_SERIAL_SPECIFIC')fail('GEOMETRY_BOUNDARY',u.geometryStatus);
+  if(template.cfg?.family!==contract.family)fail('FAMILY_ROUTE',template.cfg?.family);
+  if(template.cfg?.evidence?.geometry!==contract.geometry)fail('EVIDENCE_GEOMETRY',template.cfg?.evidence?.geometry);
+  for(const id of contract.coreNodes){
+   const node=template.findNode?.(id);
+   if(!node){fail('CORE_NODE_MISSING',id);continue;}
+   let attached=false;for(let p=node;p;p=p.parent)if(p===root){attached=true;break;}
+   if(!attached)fail('CORE_NODE_DETACHED',id);
+  }
+  const taxonomy=template.taxonomy||[],levels=new Set(taxonomy.map(n=>n.level));
+  for(let level=1;level<=6;level++)if(!levels.has(level))fail('TAXONOMY_LEVEL_MISSING',level);
+  if(contract.family==='compressor'){
+   if(u.exactCompressorModelVerified!==false)fail('COMPRESSOR_MODEL_BOUNDARY',u.exactCompressorModelVerified);
+   if(u.unifiedCompressorCabinet!==true)fail('COMPRESSOR_CABINET_POLICY',u.unifiedCompressorCabinet);
+   if(u.brandEvidenceBoundary?.brand!==contract.brandEvidence)fail('COMPRESSOR_BRAND_BOUNDARY',u.brandEvidenceBoundary?.brand);
+   for(const field of ['plantCompressedAirRouteVerified','airReceiverInstalledVerified','airDryerInstalledVerified','lineFilterPackageInstalledVerified','ringMainInstalledVerified'])if(u[field]!==false)fail('COMPRESSED_AIR_INSTALLATION_BOUNDARY',field+':'+u[field]);
+   if(template.findNode?.('compressor-air-receiver-boundary')?.userData?.installedOptionVerified!==false)fail('RECEIVER_BOUNDARY','promoted');
+   if(template.findNode?.('compressor-air-treatment-boundary')?.userData?.installedConfigurationVerified!==false)fail('AIR_TREATMENT_BOUNDARY','promoted');
+   if(template.findNode?.('compressor-ring-main-reference')?.userData?.installedRouteVerified!==false)fail('RING_MAIN_BOUNDARY','promoted');
+   if(template.findNode?.('compressor-condensate-treatment-boundary')?.userData?.installedConfigurationVerified!==false)fail('CONDENSATE_TREATMENT_BOUNDARY','promoted');
+   if(contract.brand==='KAESER'&&u.kaeserDriveType!=='UNVERIFIED_BELT_OR_1_TO_1_DIRECT')fail('KAESER_DRIVE_BOUNDARY',u.kaeserDriveType);
+   if(contract.brand==='SWAN'&&u.installedSwanSeriesVerified!==false)fail('SWAN_SERIES_BOUNDARY',u.installedSwanSeriesVerified);
+  }else if(contract.kind==='GENERIC'){
+   for(const field of ['exactAhuModelVerified','sectionOrderVerified','airflowDirectionVerified','filterClassVerified','coilTypeVerified','fanTypeVerified','plantDuctRouteVerified'])if(u[field]!==false)fail('AHU_CONFIGURATION_BOUNDARY',field+':'+u[field]);
+   if(u.outdoorCondensingUnitAssumed!==false)fail('AHU_OUTDOOR_CONDENSER_BOUNDARY',u.outdoorCondensingUnitAssumed);
+   if(template.findNode?.('ahu-mixing-boundary')?.userData?.installedConfigurationVerified!==false)fail('AHU_MIXING_BOUNDARY','promoted');
+   if(template.findNode?.('ahu-droplet-option')?.userData?.installedOptionVerified!==false)fail('AHU_DROPLET_BOUNDARY','promoted');
+   if(template.findNode?.('ahu-fan-drive')?.userData?.installedDriveTypeVerified!==false)fail('AHU_FAN_DRIVE_BOUNDARY','promoted');
+  }else{
+   if(u.exactSansinModelVerified!==false)fail('SANSIN_MODEL_BOUNDARY',u.exactSansinModelVerified);
+   if(u.installedDuctTypeVerified!==false)fail('SANSIN_DUCT_TYPE_BOUNDARY',u.installedDuctTypeVerified);
+   if(u.plantDuctRouteVerified!==false)fail('SANSIN_DUCT_ROUTE_BOUNDARY',u.plantDuctRouteVerified);
+   if(template.findNode?.('sansin-outdoor-fan')?.userData?.installedFanCountVerified!==false)fail('SANSIN_FAN_COUNT_BOUNDARY','promoted');
+   if(!Array.isArray(u.familyCandidates)||!u.familyCandidates.includes('YZKJ-45N')||!u.familyCandidates.includes('YZKJ-90N'))fail('SANSIN_FAMILY_CANDIDATES',u.familyCandidates);
+  }
+ }
+ const result=Object.freeze({valid:errors.length===0,errors:Object.freeze(errors),contract,assetId});
+ if(root){root.userData.utilityRuntimeTruthVersion='V325';root.userData.utilityRuntimeTruthLock=result.valid?'PASS':'FAIL';root.userData.utilityRuntimeTruthErrors=errors.map(e=>e.code+':'+e.detail).join('|');}
+ if(throwOnError&&!result.valid)throw new Error('Utility runtime truth-lock failed for '+assetId+': '+root?.userData?.utilityRuntimeTruthErrors);
+ return result;
+}
+
+export function validateUtilitySimulation(simulation,template,key,{throwOnError=false}={}){
+ const assetId=normalizeMachineKey(key),contract=UTILITY_RUNTIME_CONTRACTS[assetId],state=simulation?.state?.(),errors=[];
+ const fail=(code,detail)=>errors.push({code,detail});
+ if(!contract)return Object.freeze({valid:true,errors:Object.freeze([]),contract:null,assetId:null});
+ if(!state||state.available!==true||state.blocked===true)fail('SIMULATION_AVAILABILITY',state?.available);
+ if(state?.simulationBoundary!==contract.simulationBoundary)fail('SIMULATION_BOUNDARY',state?.simulationBoundary);
+ if(contract.family==='compressor'){
+  if(state?.compressorBrand!==contract.brand)fail('COMPRESSOR_BRAND_STATE',state?.compressorBrand);
+  for(const field of ['plantCompressedAirRouteVerified','airReceiverInstalledVerified','airDryerInstalledVerified','ringMainInstalledVerified'])if(state?.[field]!==false)fail('COMPRESSOR_SIM_INSTALLATION_BOUNDARY',field+':'+state?.[field]);
+ }else{
+  if(state?.ahuExactModelVerified!==false)fail('AHU_MODEL_STATE',state?.ahuExactModelVerified);
+  if(state?.ahuSectionOrderVerified!==false)fail('AHU_SECTION_ORDER_STATE',state?.ahuSectionOrderVerified);
+  if(state?.plantDuctRouteVerified!==false)fail('AHU_DUCT_ROUTE_STATE',state?.plantDuctRouteVerified);
+  if(contract.kind==='GENERIC'&&state?.outdoorHeatRejectionActive!==false)fail('GENERIC_AHU_OUTDOOR_HEAT_REJECTION',state?.outdoorHeatRejectionActive);
+ }
+ const result=Object.freeze({valid:errors.length===0,errors:Object.freeze(errors),contract,assetId});
+ if(template?.root){template.root.userData.utilitySimulationTruthVersion='V325';template.root.userData.utilitySimulationTruthLock=result.valid?'PASS':'FAIL';template.root.userData.utilitySimulationTruthErrors=errors.map(e=>e.code+':'+e.detail).join('|');}
+ if(throwOnError&&!result.valid)throw new Error('Utility simulation truth-lock failed for '+assetId+': '+template?.root?.userData?.utilitySimulationTruthErrors);
+ return result;
+}
+
 export function createMachineTemplate(key){
  const k=normalizeMachineKey(key);
  if(!k)throw new Error('Identitas mesin belum tersedia.');
@@ -515,6 +618,7 @@ export function createMachineTemplate(key){
  if(k==='BMJ-MCH-0024')return new UpgLy300MachineTemplate();
  if(k==='BMJ-MCH-0017'){const template=new ReferenceMachineTemplate(k);validateFolderTemplate(template,k,{throwOnError:true});return template;}
  if(pdsContractFor(k)){const template=new ReferenceMachineTemplate(k);validatePdsTemplate(template,k,{throwOnError:true});return template;}
+ if(utilityContractFor(k)){const template=new ReferenceMachineTemplate(k);validateUtilityTemplate(template,k,{throwOnError:true});return template;}
  if(isReferenceMachineKey(k))return new ReferenceMachineTemplate(k);
  if(universalMachineConfig(k))return new UniversalMachineTemplate(k);
  throw new Error(`Model 3D untuk ${k} belum tersedia.`);
@@ -542,6 +646,7 @@ export function createPolishedMachineTemplate(key){
  if(folderContractFor(normalized,template))validateFolderTemplate(template,normalized,{throwOnError:true});
  if(inspectionContractFor(normalized))validateInspectionTemplate(template,normalized,{throwOnError:true});
  if(pdsContractFor(normalized))validatePdsTemplate(template,normalized,{throwOnError:true});
+ if(utilityContractFor(normalized))validateUtilityTemplate(template,normalized,{throwOnError:true});
  return template;
 }
 
@@ -565,6 +670,7 @@ export function createMachineSimulation(key,machine,template){
  if(k==='BMJ-MCH-0024')return new UpgLy300ProcessSimulation(machine,template);
  if(k==='BMJ-MCH-0017'){const sim=new ReferenceProcessSimulation(machine,template);validateFolderSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(pdsContractFor(k)){const sim=new ReferenceProcessSimulation(machine,template);validatePdsSimulation(sim,template,k,{throwOnError:true});return sim;}
+ if(utilityContractFor(k)){const sim=new ReferenceProcessSimulation(machine,template);validateUtilitySimulation(sim,template,k,{throwOnError:true});return sim;}
  if(isReferenceMachineKey(k))return new ReferenceProcessSimulation(machine,template);
  if(universalMachineConfig(k))return new UniversalProcessSimulation(machine,template);
  throw new Error(`Simulasi untuk ${k} belum tersedia.`);
