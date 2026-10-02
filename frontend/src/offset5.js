@@ -445,9 +445,10 @@ export class OffsetMachineTemplate {
     const film=this.box(openBay,[.145,.018,1.58],[-.155,2.645,0],filmKinds[i%filmKinds.length],.004);
     film.name='Visible Ink Film Color';Object.assign(film.userData,{visibleInkFilm:true,unit:i+1,jobStateVisualization:true});
     for(const z of [-.72,.72])this.box(openBay,[.08,.12,.08],[-.015,2.64,z],'graphite',.012);
-    const fountainControls=this.group(g,`press-${i}-ink-fountain-controls`,`PU${i+1} · ink fountain keys, guard & ductor interface`,[0,0,0],[0,.46,.42],['IMG_1970.jpeg','IMG_1971.jpeg','IMG_1628(2).jpeg'],'Fountain-key rhythm and guard are visual references from the photographed upper assembly; actual key count, calibration and drive setting are not asserted.');
+    const fountainControls=this.group(g,`press-${i}-ink-fountain-controls`,`PU${i+1} · ink fountain keys, guard & ductor interface`,[0,0,0],[0,.46,.42],['IMG_1970.jpeg','IMG_1971.jpeg','IMG_1628(2).jpeg'],'V408 accepted BMJ upper-PU baseline shows an 11-position visible key rhythm across the open ink bay. This is a photo-reconstruction count for the visible controls, not a calibration/zone setting claim.');
+    Object.assign(fountainControls.userData,{photoLockBaseline:'V408_11_VISIBLE_INK_KEYS',visibleKeyCount:11,calibrationAsserted:false,zoneSettingAsserted:false});
     this.markExteriorCover(this.box(fountainControls,[.12,.16,1.50],[-.34,2.46,0],'graphite',.018));
-    for(let n=0;n<14;n++){const z=-.67+n*.103;this.cylinder(fountainControls,.018,.035,[-.41,2.49,z],n%2?'steel':'black','x');}
+    for(let n=0;n<11;n++){const z=-.65+n*.13;this.cylinder(fountainControls,.018,.035,[-.41,2.49,z],n%2?'steel':'black','x');}
     this.markExteriorCover(this.box(fountainControls,[.045,.20,1.46],[-.39,2.58,0],'light',.012));
     this.printingUnitInternals(g,i);
   }
