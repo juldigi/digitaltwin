@@ -112,6 +112,8 @@ test('V319 live geometry repeats corrected PU roller metadata across all eight u
     const node=m.findNode(id);assert.ok(node,`PU${i+1} actual-diagram callout ${id} missing`);
     assert.equal(node.userData.actualDiagramSource,'IMG_2777.jpeg');
     assert.equal(node.userData.serviceSettingAsserted,false);
+    const refs=[];node.traverse(o=>{if(o.isLine)refs.push(o);});
+    assert.ok(refs.length>0,`PU${i+1} ${id} must use a lightweight schematic line rather than invented installed CAD`);
    }
    for(const suffix of ['INK.RAKEL','INK.AIR_BLOWER','DAMP.WATER','CYL.AIR_BLOWER']){
     const n=TAXONOMY_BY_ID.get(`O5.PRINT.PU${i+1}.${suffix}`);
@@ -175,9 +177,9 @@ test('V319 keeps all eight PU exteriors on the photo-verified handedness and rem
    assert.equal(duct.visible,true,`PU${i+1} green duct roller is silhouette-critical and must survive mobile LOD`);
    assert.equal(openFilm?.visible,true,`PU${i+1} open ink film must survive mobile LOD`);
    for(const id of [`press-${i}-rakel-reference`,`press-${i}-air-blower-ink`,`press-${i}-air-blower-nip`,`press-${i}-water-feed-reference`]){
-    const meshes=[];m.findNode(id)?.traverse(o=>{if(o.isMesh)meshes.push(o);});
-    assert.ok(meshes.length>0,`PU${i+1} ${id} callout geometry missing`);
-    assert.ok(meshes.every(mesh=>mesh.visible===false),`PU${i+1} ${id} microdetail should hide in mobile LOD`);
+    const refs=[];m.findNode(id)?.traverse(o=>{if(o.isLine)refs.push(o);});
+    assert.ok(refs.length>0,`PU${i+1} ${id} schematic callout reference missing`);
+    assert.ok(refs.every(line=>line.visible===false),`PU${i+1} ${id} schematic reference should hide in mobile LOD`);
    }
   }
   m.setLow(false);
