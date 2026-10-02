@@ -132,6 +132,20 @@ test('V319 simulation uses actual inking/distributor/dampening surfaces while ke
   assert.equal(state.inkRollerCount,8*(1+15+4));
   assert.equal(state.dampeningRollerSurfaceCount,8*5);
   assert.ok(state.rollerDiagramBoundary.includes('DO_NOT_INFER_NIP_PRESSURE_TIMING'));
+  assert.equal(state.primaryCylinderDiagramPolicy,'IMG_2777_PLATE_AND_IMPRESSION_SAME_ROTATION_SENSE__BLANKET_OPPOSITE__NO_TIMING_OR_PHASE_CLAIM');
+  for(let i=1;i<=8;i++){
+   const plate=sim.rotors.find(r=>r.role===`PU${i}-plate-cylinder`);
+   const blanket=sim.rotors.find(r=>r.role===`PU${i}-blanket-cylinder`);
+   const impression=sim.rotors.find(r=>r.role===`PU${i}-impression-cylinder`);
+   const transfer=sim.rotors.find(r=>r.role===`PU${i}-transfer-cylinder`);
+   assert.ok(plate&&blanket&&impression&&transfer,`PU${i} primary cylinder motion references missing`);
+   assert.equal(plate.sign,impression.sign,`PU${i} plate and impression must share the diagram rotation sense`);
+   assert.equal(blanket.sign,-plate.sign,`PU${i} blanket must counter-rotate against plate/impression`);
+   assert.match(plate.source,/IMG_2777_PRIMARY_CYLINDER_RELATIVE_ROTATION/);
+   assert.match(blanket.source,/IMG_2777_PRIMARY_CYLINDER_RELATIVE_ROTATION/);
+   assert.match(impression.source,/IMG_2777_PRIMARY_CYLINDER_RELATIVE_ROTATION/);
+   assert.match(transfer.source,/TRANSFER_NOT_SHOWN_IN_IMG_2777/);
+  }
   sim.start();
   assert.equal(sim.active,true);
   for(const item of sim.dampeningSurfaces)assert.equal(item.material.emissiveIntensity,.035);
