@@ -90,7 +90,7 @@ const currentSimulationState=()=>getAppState().simulationState||{};
 const referenceFilter=()=>getAppState().referenceState?.filter||'all';
 const setReferenceFilter=filter=>setDomainState({referenceState:{filter:filter||'all'}});
 const readConnectionSetting=(key,fallback='')=>{try{const current=localStorage.getItem(CONNECTION_STORAGE[key]);if(current!==null)return current;const legacy=localStorage.getItem(LEGACY_CONNECTION_STORAGE[key]);if(legacy!==null){localStorage.setItem(CONNECTION_STORAGE[key],legacy);localStorage.removeItem(LEGACY_CONNECTION_STORAGE[key]);return legacy;}}catch{}return fallback;};
-let state,engine,apiBase='',token='',role=null,superadminPasswordChangeRequired=false,editing=false,selectedPart=null,exteriorPreviousLow=null,simulationOwnsExterior=false,toastTimer,bundledLayout=null,cachedDataActive=false;
+let state,engine,apiBase='',token='',role=null,superadminPasswordChangeRequired=false,editing=false,selectedPart=null,exteriorPreviousLow=null,simulationOwnsExterior=false,toastTimer,bundledLayout=null,cachedDataActive=false,machineSwitchEpoch=0;
 const canMutateSharedData=()=>role==='admin'||role==='superadmin'&&!superadminPasswordChangeRequired;
 function applyActiveMachineState(){
  state=preserveSharedTwinState(state,initialState);setReferenceFilter('all');
@@ -856,7 +856,15 @@ function ensureMachineInspectionContext(action='Inspeksi'){
  dispatchEvent(new CustomEvent('bmj:machinecontextrequest',{detail:{selectedAsset,action}}));
  return false;
 }
+function resyncActiveMachineDescriptorFromEngine(){
+ if(!engine||MACHINE_KEY===engine.machineKey)return false;
+ if(engine.machineKey){configureActiveMachine(engine.machineKey);applyActiveMachineState();setActiveTaxonomyId(ACTIVE_ROOT);applyMachineShell();}
+ else{clearActiveMachineDescriptor();applyActiveMachineState();setActiveTaxonomyId(null);}
+ return true;
+}
 async function switchActiveMachine(route,{historyMode='push'}={}){
+ const switchEpoch=++machineSwitchEpoch,isCurrentSwitch=()=>switchEpoch===machineSwitchEpoch,existingBoot=$('#boot');
+ engine?.cancelMachineSwitch?.();resyncActiveMachineDescriptorFromEngine();document.body.classList.remove('scene-switching');if(existingBoot)existingBoot.hidden=true;
  if(!canOpenTechnical3D(route)){
   const record=machineRecordForRoute(route);
   if(record){focusFoundationPlaceholder(record,{historyMode,openDialog:true});return false;}
@@ -874,28 +882,31 @@ async function switchActiveMachine(route,{historyMode='push'}={}){
   emitDomainState({selectedAsset:assetId,selectedNode:null,activeReference:null,activeSection:'asset',sceneMode:'machine',cameraPreset:'iso',inspectorState:{open:true,tab:'overview'}});return true;
  }
  document.body.classList.add('scene-switching');
- const boot=$('#boot');if(boot){boot.hidden=false;boot.innerHTML='<strong>Menyiapkan '+esc(assetName)+'…</strong><p>Memuat model dan struktur mesin.</p>';}
+ const boot=existingBoot;if(boot){boot.hidden=false;boot.innerHTML='<strong>Menyiapkan '+esc(assetName)+'…</strong><p>Memuat model dan struktur mesin.</p>';}
  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+ if(!isCurrentSwitch())return false;
  const previousRoute=MACHINE_KEY,previousState=state,previousAsset=getAppState().selectedAsset;
  try{
   configureActiveMachine(normalizedRoute);applyActiveMachineState();UNIVERSAL_SEARCH_INDEX=null;setActiveTaxonomyId(ACTIVE_ROOT);
   applyMachineShell();
-  if(engine){if(!await engine.switchMachine(MACHINE_KEY))throw new Error('Model belum dapat dibuka');engine.onTaxonomySelect=id=>selectTaxonomy(id,{revealPanel:true,historyMode:'push'});engine.onSimulationUpdate=next=>updateSimulationPanel(next);engine.onReset=()=>{setDomainState({inspectionMode:{isolate:false}});setExplodeLevel(0);selectedPart=null;setActiveTaxonomyId(ACTIVE_ROOT);renderPanel();};engine.onError=handleEngineError;engine.setView('machine',state);}
+  if(engine){const switched=await engine.switchMachine(MACHINE_KEY);if(!isCurrentSwitch())return false;if(!switched)throw new Error('Model belum dapat dibuka');engine.onTaxonomySelect=id=>selectTaxonomy(id,{revealPanel:true,historyMode:'push'});engine.onSimulationUpdate=next=>updateSimulationPanel(next);engine.onReset=()=>{setDomainState({inspectionMode:{isolate:false}});setExplodeLevel(0);selectedPart=null;setActiveTaxonomyId(ACTIVE_ROOT);renderPanel();};engine.onError=handleEngineError;engine.setView('machine',state);}
   else{qStaticFallbackClear();renderStaticMachineFallback(new Error('Render 3D belum tersedia'));}
   const taxCount=$('#taxonomy-count');if(taxCount)taxCount.textContent=taxonomyStats().total.toLocaleString('id-ID');
   renderStatus();redrawPlantPlan();showPanel();renderPanel('overview');engine?.fit(engine.machine,'iso');$('#engine-status').textContent=assetName+' · model 3D siap';emitDomainState({selectedAsset:assetId,selectedNode:null,activeReference:null,activeSection:'asset',sceneMode:'machine',cameraPreset:'iso',inspectorState:{open:true,tab:'overview'}});return true;
  }catch(error){
+  if(!isCurrentSwitch())return false;
   state=previousState;
   if(previousRoute){
    configureActiveMachine(previousRoute);setActiveTaxonomyId(ACTIVE_ROOT);applyMachineShell();
    if(engine?.machineKey!==previousRoute){try{await engine.switchMachine(previousRoute);}catch{}}
+   if(!isCurrentSwitch())return false;
    if(engine?.machine){engine.setView('machine',state);engine.fit(engine.machine,'iso');}
   }else{
    clearActiveMachineDescriptor();setActiveTaxonomyId(null);engine?.clearMachineContext?.();showHome({historyMode:'none'});
   }
   emitDomainState({selectedAsset:previousAsset||null,selectedNode:null,sceneMode:previousAsset?'machine':'factory',simulationState:{active:false,running:false,stage:null,progress:0}});
   toast('Model '+assetName+' gagal dimuat: '+error.message,true);return false;}
- finally{if(boot)boot.hidden=true;document.body.classList.remove('scene-switching');}
+ finally{if(isCurrentSwitch()){if(boot)boot.hidden=true;document.body.classList.remove('scene-switching');}}
 }
 window.addEventListener('bmj:simulateselectedmachine',async event=>{
  const record=machineRecordForRoute(event.detail?.selectedAsset);
