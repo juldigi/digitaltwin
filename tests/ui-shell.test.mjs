@@ -327,7 +327,7 @@ test('v54 routes APM2 to its dedicated model and evidence-bounded simulation',()
   assert.match(app,/MACHINE_ROUTE_BY_ID/);
   assert.match(runtime,/APM2MachineTemplate/);
   assert.match(runtime,/APM2ProcessSimulation/);
-  assert.match(runtime,/if\(k==='apm2'\)return new APM2MachineTemplate\(\)/);
+  assert.match(runtime,/if\(k==='apm2'\)\{const template=new APM2MachineTemplate\(\);validateAutoplatenTemplate\(template,k,\{throwOnError:true\}\);return template;\}/);
   assert.match(apm2,/MACHINE-APM2/);
   assert.match(apm2,/apm2-register-sidelay/);
   assert.match(apm2,/apm2-gripper-bar-/);
