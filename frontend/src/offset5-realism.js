@@ -772,6 +772,19 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
         rotor.role=`PU${i+1}-damp-roller-${spec.code}`;
         rotor.source='IMG_2777_DAMPENING_CONTACT_TOPOLOGY_COUNTER_ROTATION_VISUAL_REFERENCE';
       }
+      const form14=rotorFor(`press-${i}-ink-roller-14-body`);
+      const intermediate17=rotorFor(`press-${i}-damp-roller-17-body`);
+      if(form14&&intermediate17){
+        const metadata={
+          pair:'14<->17/ZW',
+          source:'IMG_2777 + SRC-CD102-ROLLER-PROCEDURE',
+          oemStripeReferenceMM:'3 +1',
+          installedStripeVerified:false,
+          role:'INKING_TO_DAMPENING_INTERMEDIATE_CONTACT'
+        };
+        form14.crossSystemContact={...metadata};
+        intermediate17.crossSystemContact={...metadata};
+      }
     }
     // The sheet runs left to right across the upper transfer arc at every bay.
     // Both transfer drum and gripper orbit therefore turn clockwise in this view.
