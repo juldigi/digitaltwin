@@ -203,6 +203,92 @@ export function validateAutoplatenSimulation(simulation,template,key,{throwOnErr
  return result;
 }
 
+
+export const FOLDER_RUNTIME_CONTRACTS=Object.freeze({
+ 'BMJ-MCH-0016':Object.freeze({
+  taxonomyVersion:'media100-v2',serial:'0341 06903',geometryBoundary:'INSTALLED_KITS_BOUNDED',identity:'MEDIA100_EXACT_MODEL_FAMILY_PROCESS',
+  coreNodes:Object.freeze(['media100-feeder','media100-prefold','media100-forming','media100-glue','media100-final','media100-compression','media100-drive','media100-access']),
+  unverifiedSpecFlags:Object.freeze(['installedMinWorkingWidthVerified','installedA1A2SuffixVerified','installedGlueHeadCountVerified','installedCornerServoPackageVerified','installedKickerVerified','installedEjectorVerified','installedControlGenerationVerified'])
+ }),
+ 'BMJ-MCH-0017':Object.freeze({
+  serial:null,geometryBoundary:'MULTI_VENDOR_FOLDER_GLUER_PROCESS_REFERENCE__NOT_MEDIA100_IDENTITY',identity:'OEM_MODEL_SERIAL_UNKNOWN__NO_MEDIA100_IDENTITY_ASSUMED',
+  coreNodes:Object.freeze(['fgm2-open-frame','fgm2-feed-table','fgm2-aligner','fgm2-primary-fold','fgm2-glue-supply','fgm2-final-fold','fgm2-compression-belts','fgm2-delivery','fgm2-control']),
+  capabilityNodes:Object.freeze(['fgm2-lockbottom-boundary','fgm2-corner-boundary','fgm2-glue-applicator-boundary','fgm2-glue-detection-boundary','fgm2-counter-boundary','fgm2-downstream-boundary'])
+ }),
+ 'BMJ-MCH-0018':Object.freeze({
+  taxonomyVersion:'media100-v2',serial:'0341 142 07',geometryBoundary:'INSTALLED_KITS_BOUNDED',identity:'MEDIA100_EXACT_MODEL_FAMILY_PROCESS',
+  coreNodes:Object.freeze(['media100-feeder','media100-prefold','media100-forming','media100-glue','media100-final','media100-compression','media100-drive','media100-access']),
+  unverifiedSpecFlags:Object.freeze(['installedMinWorkingWidthVerified','installedA1A2SuffixVerified','installedGlueHeadCountVerified','installedCornerServoPackageVerified','installedKickerVerified','installedEjectorVerified','installedControlGenerationVerified'])
+ })
+});
+const folderContractFor=(normalized,template)=>FOLDER_RUNTIME_CONTRACTS[normalized]||FOLDER_RUNTIME_CONTRACTS[template?.root?.userData?.assetId]||null;
+
+export function validateFolderTemplate(template,key,{throwOnError=false}={}){
+ const normalized=normalizeMachineKey(key),root=template?.root,assetId=normalized,contract=FOLDER_RUNTIME_CONTRACTS[assetId],errors=[];
+ const fail=(code,detail)=>errors.push({code,detail});
+ if(!contract)return Object.freeze({valid:true,errors:Object.freeze([]),contract:null,assetId:null});
+ if(!root)fail('ROOT_MISSING',assetId);
+ else{
+  const u=root.userData||{};
+  if(u.assetId!==assetId)fail('ASSET_ID',u.assetId);
+  if(u.engineeringDimensions!==false)fail('ENGINEERING_DIMENSION_BOUNDARY',u.engineeringDimensions);
+  if(!String(u.geometryStatus||'').includes(contract.geometryBoundary))fail('GEOMETRY_BOUNDARY',u.geometryStatus);
+  if(contract.taxonomyVersion&&u.taxonomyVersion!==contract.taxonomyVersion)fail('TAXONOMY_VERSION',u.taxonomyVersion);
+  for(const id of contract.coreNodes){
+   const node=template.findNode?.(id);
+   if(!node){fail('CORE_NODE_MISSING',id);continue;}
+   let attached=false;for(let p=node;p;p=p.parent)if(p===root){attached=true;break;}
+   if(!attached)fail('CORE_NODE_DETACHED',id);
+  }
+  const taxonomy=template.taxonomy||[],levels=new Set(taxonomy.map(n=>n.level));
+  for(let level=1;level<=6;level++)if(!levels.has(level))fail('TAXONOMY_LEVEL_MISSING',level);
+  if(assetId==='BMJ-MCH-0016'||assetId==='BMJ-MCH-0018'){
+   const plates=[];root.traverse?.(o=>{if(o.userData?.identityPlacard)plates.push(o.userData.identityPlacard);});
+   if(plates.length!==1)fail('IDENTITY_PLACARD_COUNT',plates.length);
+   else if(plates[0].serial!==contract.serial)fail('IDENTITY_SERIAL',plates[0].serial);
+   const spec=u.spec||{};
+   for(const flag of contract.unverifiedSpecFlags)if(spec[flag]!==false)fail('MEDIA100_OPTION_BOUNDARY',flag);
+   for(const id of ['media100-form-servo','media100-final-kicker']){
+    const node=template.findNode?.(id),visible=[];node?.traverse?.(o=>{if(o.isMesh)visible.push(o);});
+    if(!visible.length||visible.some(m=>m.userData.capabilityOnly!==true||m.visible!==false))fail('MEDIA100_CAPABILITY_SILHOUETTE',id);
+   }
+   const heads=[];template.findNode?.('media100-glue-upper')?.traverse?.(o=>{if(o.isMesh&&o.userData.glueHeadPosition)heads.push(o);});
+   if(!heads.length||heads.some(m=>m.userData.capabilityOnly!==true||m.visible!==false))fail('MEDIA100_GLUE_HEAD_BOUNDARY',heads.length);
+  }else{
+   if(u.exactFolderGluerOemVerified!==false)fail('FGM2_OEM_BOUNDARY',u.exactFolderGluerOemVerified);
+   if(u.exactFolderGluerModelVerified!==false)fail('FGM2_MODEL_BOUNDARY',u.exactFolderGluerModelVerified);
+   if(u.installedIdentityBoundary!==contract.identity)fail('FGM2_IDENTITY_BOUNDARY',u.installedIdentityBoundary);
+   if(u.neighborMedia100IdentityProof!==false)fail('FGM2_MEDIA100_IDENTITY_PROOF',u.neighborMedia100IdentityProof);
+   for(const id of contract.capabilityNodes){
+    const node=template.findNode?.(id),meshes=[];node?.traverse?.(o=>{if(o.isMesh)meshes.push(o);});
+    if(!node||node.userData?.installedOptionVerified!==false)fail('FGM2_OPTION_BOUNDARY',id);
+    if(meshes.some(m=>m.userData.capabilityOnly!==true||m.visible!==false))fail('FGM2_OPTION_SILHOUETTE',id);
+   }
+  }
+ }
+ const result=Object.freeze({valid:errors.length===0,errors:Object.freeze(errors),contract,assetId});
+ if(root){root.userData.folderRuntimeTruthLock=result.valid?'PASS':'FAIL';root.userData.folderRuntimeTruthErrors=errors.map(e=>e.code+':'+e.detail).join('|');}
+ if(throwOnError&&!result.valid)throw new Error('Folder Gluer runtime truth-lock failed for '+assetId+': '+root?.userData?.folderRuntimeTruthErrors);
+ return result;
+}
+
+export function validateFolderSimulation(simulation,template,key,{throwOnError=false}={}){
+ const normalized=normalizeMachineKey(key),contract=FOLDER_RUNTIME_CONTRACTS[normalized],errors=[],state=simulation?.state?.();
+ const fail=(code,detail)=>errors.push({code,detail});
+ if(!contract)return Object.freeze({valid:true,errors:Object.freeze([]),contract:null,assetId:null});
+ if(!state||state.available!==true||state.blocked===true)fail('SIMULATION_AVAILABILITY',state?.available);
+ if(normalized==='BMJ-MCH-0016'||normalized==='BMJ-MCH-0018'){
+  if(state?.referenceJobDemoOnly!==true)fail('MEDIA100_DEMO_JOB_BOUNDARY',state?.referenceJobDemoOnly);
+ }else{
+  if(state?.simulationBoundary!=='FGM2_MULTI_VENDOR_COMMON_FOLD_GLUE_PROCESS_ONLY__BOX_STYLE_GLUE_HARDWARE_OPTIONS_NOT_INFERRED')fail('FGM2_SIMULATION_BOUNDARY',state?.simulationBoundary);
+  for(const [name,value] of [['cartonBlankGeometryIsSchematic',true],['crashLockInstalledVerified',false],['fourSixCornerInstalledVerified',false],['glueApplicatorTypeVerified',false]])if(state?.[name]!==value)fail('FGM2_SIMULATION_TRUTH',name+':'+state?.[name]);
+ }
+ const result=Object.freeze({valid:errors.length===0,errors:Object.freeze(errors),contract,assetId:normalized});
+ if(template?.root){template.root.userData.folderSimulationTruthLock=result.valid?'PASS':'FAIL';template.root.userData.folderSimulationTruthErrors=errors.map(e=>e.code+':'+e.detail).join('|');}
+ if(throwOnError&&!result.valid)throw new Error('Folder Gluer simulation truth-lock failed for '+normalized+': '+template?.root?.userData?.folderSimulationTruthErrors);
+ return result;
+}
+
 export function createMachineTemplate(key){
  const k=normalizeMachineKey(key);
  if(!k)throw new Error('Identitas mesin belum tersedia.');
@@ -217,10 +303,11 @@ export function createMachineTemplate(key){
  if(['BMJ-MCH-0011','BMJ-MCH-0012'].includes(k)){const template=new MK920MachineTemplate(k);validateAutoplatenTemplate(template,k,{throwOnError:true});return template;}
  if(k==='BMJ-MCH-0013'){const template=new MK1060MachineTemplate();validateAutoplatenTemplate(template,k,{throwOnError:true});return template;}
  if(['BMJ-MCH-0014','BMJ-MCH-0015'].includes(k)){const template=new Promatrix106MachineTemplate(k);validateAutoplatenTemplate(template,k,{throwOnError:true});return template;}
- if(['BMJ-MCH-0016','BMJ-MCH-0018'].includes(k))return new Media100MachineTemplate(k);
+ if(['BMJ-MCH-0016','BMJ-MCH-0018'].includes(k)){const template=new Media100MachineTemplate(k);validateFolderTemplate(template,k,{throwOnError:true});return template;}
  if(k==='BMJ-MCH-0019')return new DianaEye55MachineTemplate();
  if(k==='BMJ-MCH-0020')return new SharkN650MachineTemplate();
  if(k==='BMJ-MCH-0024')return new UpgLy300MachineTemplate();
+ if(k==='BMJ-MCH-0017'){const template=new ReferenceMachineTemplate(k);validateFolderTemplate(template,k,{throwOnError:true});return template;}
  if(isReferenceMachineKey(k))return new ReferenceMachineTemplate(k);
  if(universalMachineConfig(k))return new UniversalMachineTemplate(k);
  throw new Error(`Model 3D untuk ${k} belum tersedia.`);
@@ -245,6 +332,7 @@ export function createPolishedMachineTemplate(key){
  const normalized=normalizeMachineKey(key),template=enforceTaxonomyClickContract(applyMachinePresentationPolish(createMachineTemplate(key),normalized));
  if(normalized==='offset5')validateOffset5PilotTemplate(template,{throwOnError:true});
  if(autoplatenContractFor(normalized,template))validateAutoplatenTemplate(template,normalized,{throwOnError:true});
+ if(folderContractFor(normalized,template))validateFolderTemplate(template,normalized,{throwOnError:true});
  return template;
 }
 
@@ -262,10 +350,11 @@ export function createMachineSimulation(key,machine,template){
  if(['BMJ-MCH-0011','BMJ-MCH-0012'].includes(k)){const sim=new MK920StampingSimulation(machine,template);validateAutoplatenSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(k==='BMJ-MCH-0013'){const sim=new MK1060ProcessSimulation(machine,template);validateAutoplatenSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(['BMJ-MCH-0014','BMJ-MCH-0015'].includes(k)){const sim=new Promatrix106ProcessSimulation(machine,template);validateAutoplatenSimulation(sim,template,k,{throwOnError:true});return sim;}
- if(['BMJ-MCH-0016','BMJ-MCH-0018'].includes(k))return new Media100ProcessSimulation(machine,template);
+ if(['BMJ-MCH-0016','BMJ-MCH-0018'].includes(k)){const sim=new Media100ProcessSimulation(machine,template);validateFolderSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(k==='BMJ-MCH-0019')return new DianaEye55ProcessSimulation(machine,template);
  if(k==='BMJ-MCH-0020')return new SharkN650ProcessSimulation(machine,template);
  if(k==='BMJ-MCH-0024')return new UpgLy300ProcessSimulation(machine,template);
+ if(k==='BMJ-MCH-0017'){const sim=new ReferenceProcessSimulation(machine,template);validateFolderSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(isReferenceMachineKey(k))return new ReferenceProcessSimulation(machine,template);
  if(universalMachineConfig(k))return new UniversalProcessSimulation(machine,template);
  throw new Error(`Simulasi untuk ${k} belum tersedia.`);
