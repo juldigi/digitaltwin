@@ -605,7 +605,10 @@ export class OffsetMachineTemplate {
     // Washup-device zones are explicitly listed in the supplied service manual.
     const wash=this.group(g,`${id}-washup`,`${label} · washup device references`,[0,0,0],[.10,.12,-.52],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Blanket, inking-roller and impression-cylinder washup devices are represented as service zones. Brush geometry and chemical routing are not used as maintenance dimensions.');
     for(const [name,y,x] of [['blanket',1.47,-.34],['inking',2.28,-.38],['impression',.96,.39]]){
-      const w=this.group(wash,`${id}-wash-${name}`,`${label} · ${name} washup zone`,[0,0,0],[.10,.10,-.18],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf']);
+      const diagramCode=name==='blanket'?'BWD':name==='impression'?'ICWD':null;
+      const sourceFiles=diagramCode?['IMG_2777.jpeg','pdfcoffee.com_cd102pdf-4-pdf-free.pdf']:['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'];
+      const w=this.group(wash,`${id}-wash-${name}`,`${label} · ${name} washup zone`,[0,0,0],[.10,.10,-.18],sourceFiles,diagramCode?`IMG_2777 confirms the ${diagramCode} wash-up callout zone; brush/blade geometry and chemical/service settings remain reference-only.`:'Inking wash-up function is manual-supported; installed geometry remains reference-only.');
+      if(diagramCode)Object.assign(w.userData,{actualDiagramSource:'IMG_2777.jpeg',callout:diagramCode,serviceSettingAsserted:false});
       this.box(w,[.08,.10,1.28],[x,y,0],'graphite',.012).userData.detail=true;
       markDetail(this.cylinder(w,.025,1.20,[x+.05,y-.03,0],'rubber'));
     }
