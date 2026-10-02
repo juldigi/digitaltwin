@@ -12,6 +12,11 @@ Bukti baru `IMG_2777.jpeg` adalah foto **ROLLER DIAGRAM HEIDELBERG CD-102** yang
 - Simulasi ink film sekarang mencakup roller 1–15 **dan distributor A–D**; dampening memakai film visual tipis pada 16/17/18/19/FR. Tidak ada droplet tinta/air floating.
 - Arah/timing individual roller tetap simulasi kinematik visual; IMG_2777 tidak digunakan untuk mengarang nip pressure, bearer diameter, timing, phase, stripe setting, atau service setpoint.
 - Exterior delapan PU tetap memakai geometri foto BMJ dan dimensi custom OFU-1; variasi warna sintetis antar-PU di fountain-support dihapus.
+- Baseline visual yang sebelumnya benar pada V404/V405/V408 dipulihkan: **upper deck setiap PU tetap terbuka**, tidak ada solid hood/top cap, operator-side cabinet tetap melengkung, dan visible green ink-duct/fountain service roller tetap terlihat pada normal view termasuk mobile LOD.
+- Proporsi visible green duct roll dikunci kembali ke baseline V408 (radius visual 0.135 scene-unit, span 1.46 scene-unit). Nilai ini adalah photo-reconstruction visual, bukan diameter OEM/service measurement.
+- Ink-film color di open bay adalah visualisasi job-state per PU; warna tersebut tidak mengubah identitas material roller pada diagram aktual.
+- RAKEL, AIR BLOWER (upper inking + blanket/impression zone), dan WATER dekat 18/T kini memiliki node/taxonomy tersendiri. Diagram mengonfirmasi zona callout saja; angle, pressure, nozzle bore, chemistry, flow dan setpoint tidak diklaim.
+- Arah putar roller tidak lagi dibuat dengan pola ganjil/genap array. Simulasi memakai contact graph dari topology IMG_2777: setiap pasangan kontak counter-rotate, dengan surface-speed visual reference. Timing, phase, nip pressure dan RPM servis tetap tidak diklaim.
 - Regression exterior yang menutup setiap PU dengan solid upper hood/closed ink enclosure dibatalkan. Baseline foto V404/V405/V408 dikembalikan: **upper deck OPEN**, tidak ada full-depth top beam/cap, ink-duct bay tetap terbuka, roller duct/service hijau tetap terlihat, dan operator cabinet mempertahankan identitas HEIDELBERG Speedmaster.
 - Roller hijau yang terlihat di open-top diperlakukan sebagai visible fountain/duct service roller dari foto BMJ dan **tidak** diberi nomor 1–19 dari IMG_2777. Warna hijau tidak ditimpa warna job ketika simulasi berjalan; warna proses ditunjukkan oleh ink film dan roller train yang relevan.
 
