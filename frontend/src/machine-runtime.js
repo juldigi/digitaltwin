@@ -98,6 +98,68 @@ export function validateOffset5PilotTemplate(template,{throwOnError=false}={}){
 }
 
 
+
+export function validateOffset5PilotSimulation(simulation,template,{throwOnError=false}={}){
+ const root=template?.root,state=simulation?.state?.(),errors=[];
+ const fail=(code,detail)=>errors.push({code,detail});
+ if(!state||state.available!==true||state.blocked===true)fail('SIMULATION_AVAILABILITY',state?.available);
+ else{
+  if(state.realismPack!==OFFSET5_PILOT_RUNTIME_CONTRACT.realismPack)fail('REALISM_PACK',state.realismPack);
+  if(state.rollerDiagramRevision!==OFFSET5_PILOT_RUNTIME_CONTRACT.realityRevision)fail('ROLLER_DIAGRAM_REVISION',state.rollerDiagramRevision);
+  if(state.rollerDiagramSource!=='IMG_2777.jpeg')fail('ROLLER_DIAGRAM_SOURCE',state.rollerDiagramSource);
+  if(state.rollerEvidencePolicyRevision!=='offset5-roller-evidence-policy-v320')fail('ROLLER_EVIDENCE_POLICY',state.rollerEvidencePolicyRevision);
+  if(state.rollerEvidenceConflictRule!=='INSTALLED_DIAGRAM_WINS_FOR_VISIBLE_INSTALLED_ROLLER_MATERIAL_COLOR_AND_TOPOLOGY__OEM_PROCEDURE_REMAINS_REFERENCE_FOR_GENERIC_SERVICE_SEQUENCE_AND_CONTACT_SETTINGS')fail('ROLLER_EVIDENCE_PRECEDENCE',state.rollerEvidenceConflictRule);
+  if(state.customMachineDimensionsPreserved!==true)fail('CUSTOM_DIMENSIONS',state.customMachineDimensionsPreserved);
+  if(state.dimensionPolicy!=='USER_CONFIRMED_CUSTOM_INSTALLED_GEOMETRY_OVERRIDES_GENERIC_FAMILY_DIMENSIONS')fail('DIMENSION_POLICY',state.dimensionPolicy);
+  if(state.duplicateProcessHardwareAdded!==false)fail('DUPLICATE_PROCESS_HARDWARE',state.duplicateProcessHardwareAdded);
+  if(state.focusightLocationPolicy!=='DOWNSTREAM_AFTER_COATING_DRYING')fail('FOCUSIGHT_LOCATION',state.focusightLocationPolicy);
+  if(state.motionPolicy!=='ROLE_TAGGED_PROCESS_PARTS_ONLY')fail('MOTION_POLICY',state.motionPolicy);
+  if(state.sheetVisualPolicy!=='NO_EXTERNAL_FULL_WIDTH_DEMO_GRIPPER_BAR')fail('SHEET_GRIPPER_VISUAL_POLICY',state.sheetVisualPolicy);
+  if(state.deliveryReleasePolicy!=='GRIPPER_RELEASE_THEN_FLAT_SHEET_SETTLING_TO_PILE')fail('DELIVERY_RELEASE_POLICY',state.deliveryReleasePolicy);
+  if(state.deliveryPilePolicy!=='START_EMPTY_STACK_TO_CAPACITY_THEN_CLEAR_AND_REPEAT')fail('DELIVERY_PILE_POLICY',state.deliveryPilePolicy);
+  if(state.inkRepresentation!=='THIN_ROLLER_FILM_ONLY_NO_FREE_FLOATING_DROPLETS'||state.inkFlowCount!==0)fail('INK_VISUAL_BOUNDARY',state.inkRepresentation+'|'+state.inkFlowCount);
+  if(state.dampeningRepresentation!=='SUBTLE_ROLLER_FILM_ONLY__NO_FLOATING_WATER_PARTICLES')fail('DAMPENING_VISUAL_BOUNDARY',state.dampeningRepresentation);
+  if(state.printRepresentation!=='PROGRESSIVE_TRANSVERSE_COLOUR_BANDS_PER_PU_DEMO')fail('PRINT_REPRESENTATION',state.printRepresentation);
+  if(state.openUpperDeckPolicy!==OFFSET5_PILOT_RUNTIME_CONTRACT.openTopPolicy)fail('OPEN_UPPER_DECK_POLICY',state.openUpperDeckPolicy);
+  if(state.nominalSheetsPerHour!==15000)fail('NOMINAL_SPEED_REFERENCE',state.nominalSheetsPerHour);
+ }
+ const result=Object.freeze({valid:errors.length===0,errors:Object.freeze(errors),contract:OFFSET5_PILOT_RUNTIME_CONTRACT});
+ if(root){root.userData.offset5SimulationTruthVersion='V331';root.userData.offset5SimulationTruthLock=result.valid?'PASS':'FAIL';root.userData.offset5SimulationTruthErrors=errors.map(e=>e.code+':'+e.detail).join('|');}
+ if(throwOnError&&!result.valid)throw new Error('Offset 5 pilot simulation truth-lock failed: '+root?.userData?.offset5SimulationTruthErrors);
+ return result;
+}
+
+export const RUNTIME_TRUTH_DOMAINS=Object.freeze([
+ Object.freeze({id:'offset5',templateLock:'offset5RuntimeTruthLock',simulationLock:'offset5SimulationTruthLock'}),
+ Object.freeze({id:'autoplaten',templateLock:'autoplatenRuntimeTruthLock',simulationLock:'autoplatenSimulationTruthLock'}),
+ Object.freeze({id:'folder',templateLock:'folderRuntimeTruthLock',simulationLock:'folderSimulationTruthLock'}),
+ Object.freeze({id:'inspection',templateLock:'inspectionRuntimeTruthLock',simulationLock:'inspectionSimulationTruthLock'}),
+ Object.freeze({id:'pds',templateLock:'pdsRuntimeTruthLock',simulationLock:'pdsSimulationTruthLock'}),
+ Object.freeze({id:'utility',templateLock:'utilityRuntimeTruthLock',simulationLock:'utilitySimulationTruthLock'}),
+ Object.freeze({id:'printing',templateLock:'printingRuntimeTruthLock',simulationLock:'printingSimulationTruthLock'}),
+ Object.freeze({id:'remaining-fleet',templateLock:'remainingFleetRuntimeTruthLock',simulationLock:'remainingFleetSimulationTruthLock'})
+]);
+
+export function runtimeTruthOwners(template,{simulation=false}={}){
+ const root=template?.root,field=simulation?'simulationLock':'templateLock';
+ if(!root)return [];
+ return RUNTIME_TRUTH_DOMAINS.filter(domain=>root.userData?.[domain[field]]==='PASS').map(domain=>domain.id);
+}
+
+export function validateRuntimeTruthOwnership(template,key,{simulation=false,throwOnError=false}={}){
+ const root=template?.root,assetId=normalizeMachineKey(key),owners=runtimeTruthOwners(template,{simulation}),errors=[];
+ if(!root)errors.push({code:'ROOT_MISSING',detail:assetId});
+ if(owners.length!==1)errors.push({code:owners.length?'MULTIPLE_TRUTH_OWNERS':'MISSING_TRUTH_OWNER',detail:owners.join(',')||assetId});
+ const result=Object.freeze({valid:errors.length===0,errors:Object.freeze(errors),assetId,owners:Object.freeze([...owners]),simulation});
+ if(root){
+  root.userData.runtimeTruthCoverageVersion='V331';
+  root.userData[simulation?'runtimeSimulationTruthOwner':'runtimeTemplateTruthOwner']=owners.length===1?owners[0]:null;
+  root.userData[simulation?'runtimeSimulationTruthCoverageLock':'runtimeTemplateTruthCoverageLock']=result.valid?'PASS':'FAIL';
+ }
+ if(throwOnError&&!result.valid)throw new Error('Runtime truth coverage failed for '+assetId+': '+errors.map(e=>e.code+':'+e.detail).join('|'));
+ return result;
+}
+
 export const AUTOPLATEN_RUNTIME_CONTRACTS=Object.freeze({
  'BMJ-MCH-0010':Object.freeze({
   route:'apm2',taxonomyVersion:'apm2-taxonomy-v2',serial:'57115506',geometryBoundary:'SUFFIX_UNCONFIRMED',
@@ -930,13 +992,14 @@ export function createPolishedMachineTemplate(key){
  if(utilityContractFor(normalized))validateUtilityTemplate(template,normalized,{throwOnError:true});
  if(printingContractFor(normalized))validatePrintingTemplate(template,normalized,{throwOnError:true});
  if(remainingFleetContractFor(normalized))validateRemainingFleetTemplate(template,normalized,{throwOnError:true});
+ validateRuntimeTruthOwnership(template,normalized,{throwOnError:true});
  return template;
 }
 
 export function createMachineSimulation(key,machine,template){
  const k=normalizeMachineKey(key);
  if(!k)throw new Error('Identitas mesin belum tersedia.');
- if(k==='offset5')return new Offset5CD102RealismSimulation(machine,template);
+ if(k==='offset5'){const sim=new Offset5CD102RealismSimulation(machine,template);validateOffset5PilotSimulation(sim,template,{throwOnError:true});return sim;}
  if(k==='sheeting'){const sim=new SheetingProcessSimulation(machine,template);validatePrintingSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(k==='offset10'){const sim=new Offset10CX104SpecialRealismSimulation(machine,template);validatePrintingSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(k==='apm2'){const sim=new APM2ProcessSimulation(machine,template);validateAutoplatenSimulation(sim,template,k,{throwOnError:true});return sim;}
