@@ -537,7 +537,7 @@ test('Offset 5 feeder suction and register transport share one sheet cycle witho
    assert.equal(a.sign,b.sign,`damp roller ${code} reverses handedness between adjacent identical PUs`);
   }
   assert.equal(sim.state().feederMotionPolicy,'SUCTION_SEPARATOR_LINKAGE_FRONT_LAYS_AND_INFEED_GRIPPER_SHARE_ONE_SHEET_CYCLE');
-  assert.equal(sim.state().rollerHandednessPolicy,'IDENTICAL_STRAIGHT_PRINT_KINEMATIC_SIGN_PATTERN_ACROSS_ALL_EIGHT_PU');
+  assert.equal(sim.state().rollerHandednessPolicy,'IDENTICAL_IMG_2777_CONTACT_GRAPH_ACROSS_ALL_EIGHT_STRAIGHT_PRINTING_UNITS');
  }finally{sim.dispose();m.dispose();}
 });
 
