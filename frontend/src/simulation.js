@@ -477,7 +477,7 @@ export class PrintingSimulation{
       nominalSheetsPerHour:this.nominalSheetsPerHour,sheetPitchMeters:this.sheetPitchMeters,nominalSheetSizeM:[this.sheetLength,this.sheetWidth],nominalLineSpeedMps:this.baseMetersPerSecond,
       printRepresentation:'CUMULATIVE_FULL_SHEET_REFERENCE_TINT_NO_FAKE_BANDS',customMachineDimensionsPreserved:true,
       inspectionTriggerActive:visible.some(s=>Math.abs(s.userData.leadPosition.x-D.inspectionCenterX)<.16),
-      deliveryReleaseActive:visible.some(s=>s.userData.gripperReleased&&s.userData.deliveryDrop>0),deliverySettlingActive:visible.some(s=>s.userData.gripperReleased&&!s.userData.deliverySettled),deliveryDropHeightM:this.deliveryDropHeight
+      deliveryJoggerActive:visible.some(s=>s.userData.gripperReleased),deliveryReleaseActive:visible.some(s=>s.userData.gripperReleased&&s.userData.deliveryDrop>0),deliverySettlingActive:visible.some(s=>s.userData.gripperReleased&&!s.userData.deliverySettled),deliveryDropHeightM:this.deliveryDropHeight
     };
   }
   emit(force=false){
@@ -550,7 +550,8 @@ export class PrintingSimulation{
         const a=phase*item.frequency+item.phase;item.object.position.x=item.initial.x+Math.sin(a)*item.amplitudeX;item.object.position.y=item.initial.y+Math.cos(a)*item.amplitudeY;
       }
     }
-    for(const item of this.joggerMotions)item.object.position.z=item.initial.z+Math.sin(phase*1.05+item.phase)*item.amplitude;
+    const deliveryOccupied=this.sheets.some(s=>s.mesh.visible&&s.userData.gripperReleased);
+    for(const item of this.joggerMotions)item.object.position.z=item.initial.z+(deliveryOccupied?Math.sin(phase*1.05+item.phase)*item.amplitude:0);
 
     if(this.inkFlowVisible){
       for(const flow of this.fluidFlows){
