@@ -397,7 +397,7 @@ export class OffsetMachineTemplate {
     for(const z of [-.70,.70]){
       this.box(top,[.08,.20,.08],[-.24,2.57,z],'graphite',.014);
       this.cylinder(top,.036,.10,[-.18,2.61,z],'steel','z');
-      this.box(top,[.18,.045,.10],[.10,2.56,z],'black',.008);
+      this.box(top,[.18,.045,.10],[.10,2.56,z],'graphite',.008);
     }
     // The V403-style repeated grille ribs were another closed-top visual cue and cost 88 meshes
     // across the eight PUs. Keep one attached cable/service guide instead: photo-visible silhouette,
@@ -409,7 +409,7 @@ export class OffsetMachineTemplate {
     for(const z of [-.73,.73]){
       const arm=this.box(bridge,[.10,.30,.075],[.12,2.35,z],'graphite',.015);arm.rotation.z=-.08;
       this.cylinder(bridge,.046,.080,[.14,2.20,z],'steel','z');
-      this.box(bridge,[.14,.055,.10],[-.02,2.51,z],'black',.009);
+      this.box(bridge,[.14,.055,.10],[-.02,2.51,z],'graphite',.009);
     }
     const stair=this.markExteriorCover(this.group(g,'press-'+i+'-steps',i<7?`PU${i+1} → PU${i+2} · operator access stair & landing`:'PU8 · coater-side access steps',[0,0,0],[0,.12,1.35],[...sources,'IMG_1662.jpeg'],i<7?'Tiga tingkat akses, landing diamond-plate dan guard rail mengikuti IMG_1662. Lebar ditahan di dalam clear bay antar-PU; ukuran tetap photo-derived, bukan dimensi OEM.':'Pijakan sisi PU8 mempertahankan akses menuju coater.'));
     const nextGap=OFFSET5_DIMENSIONS.layout.printingUnitPitch-frameWidth/2-OFFSET5_DIMENSIONS.layout.printingUnitFrameWidth/2;
@@ -448,7 +448,7 @@ export class OffsetMachineTemplate {
     // hiding the actual roller train behind a synthetic solid exterior box.
     for(const z of [-.78,.78]){
       this.box(ink,[frameWidth-.16,.24,.070],[.02,2.36,z],'graphite',.016);
-      this.box(ink,[.12,.18,.10],[.18,2.58,z],'black',.012);
+      this.box(ink,[.12,.18,.10],[.18,2.58,z],'graphite',.012);
     }
     this.box(ink,[.12,.10,1.50],[.42,2.30,0],'graphite',.014);
     const openBay=this.group(g,`press-${i}-open-ink-bay`,`PU${i+1} · visible open ink duct bay`,[0,0,0],[0,.26,.30],['IMG_1970.jpeg','IMG_1971.jpeg','IMG_1628(2).jpeg'],'Previously accepted BMJ photo-lock: open upper ink bay remains visible in normal state; the visible green service/duct roller is not conflated with numbered rollers 1–19 on IMG_2777.');
@@ -463,8 +463,8 @@ export class OffsetMachineTemplate {
     const fountainControls=this.group(g,`press-${i}-ink-fountain-controls`,`PU${i+1} · ink fountain keys, guard & ductor interface`,[0,0,0],[0,.46,.42],['IMG_1970.jpeg','IMG_1971.jpeg','IMG_1628(2).jpeg'],'V408 accepted BMJ upper-PU baseline shows an 11-position visible key rhythm across the open ink bay. This is a photo-reconstruction count for the visible controls, not a calibration/zone setting claim.');
     Object.assign(fountainControls.userData,{photoLockBaseline:'V408_11_VISIBLE_INK_KEYS',visibleKeyCount:11,calibrationAsserted:false,zoneSettingAsserted:false});
     this.markExteriorCover(this.box(fountainControls,[.12,.16,1.50],[-.34,2.46,0],'graphite',.018));
-    for(let n=0;n<11;n++){const z=-.65+n*.13;this.cylinder(fountainControls,.018,.035,[-.41,2.49,z],n%2?'steel':'black','x');}
-    this.markExteriorCover(this.box(fountainControls,[.045,.20,1.46],[-.39,2.58,0],'light',.012));
+    for(let n=0;n<11;n++){const z=-.65+n*.13,key=this.cylinder(fountainControls,.018,.035,[-.41,2.49,z],'steel','x');key.userData.mechanismRole='ink-key-knob';key.userData.photoLockBaseline='V408_11_VISIBLE_INK_KEYS';}
+    this.markExteriorCover(this.box(fountainControls,[.045,.20,1.46],[-.39,2.58,0],'graphite',.012));
     this.printingUnitInternals(g,i);
   }
   printingUnitInternals(g,i){
