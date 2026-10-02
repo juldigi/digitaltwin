@@ -1,4 +1,4 @@
-// V228 shell recache without rotating public query identifiers; V270 consolidated flagship UI remains the stable source-shell identifier; V319 corrects the Offset 5 pilot from the actual on-machine roller diagram. Production builds replace VERSION/RELEASE with the build fingerprint, forcing stale PU geometry/taxonomy out of deployed caches.
+// V237 dedicated machine realism pass; V228 shell recache without rotating public query identifiers; V270 consolidated flagship UI remains the stable source-shell identifier; V319 corrects the Offset 5 pilot from the actual on-machine roller diagram. Production builds replace VERSION/RELEASE with the build fingerprint, forcing stale PU geometry/taxonomy out of deployed caches.
 const LEGACY_VERSION='factory-digital-twin-v222-overlay-state-ssot-20260925';
 const VERSION='factory-digital-twin-v270-flagship-ui-20260930';
 const RELEASE='222';
