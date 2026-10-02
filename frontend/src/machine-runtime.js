@@ -29,6 +29,7 @@ import {UpgLy300ProcessSimulation} from './simulation-upg-ly300.js';
 import {ReferenceMachineTemplate,ReferenceProcessSimulation,isReferenceMachineKey} from './reference-machines.js';
 import {applyMachinePresentationPolish} from './machine-presentation-polish.js';
 import {DEDICATED_MACHINE_IDS,isDedicatedMachineMaturity} from './data/machine-maturity.js';
+import {OFFSET5_INKING_ROLLERS,OFFSET5_INK_DISTRIBUTORS,OFFSET5_DAMPENING_ROLLERS} from './data/sources-offset5.js';
 
 export const LEGACY_MACHINE_ROUTE=Object.freeze({
  'BMJ-MCH-0002':'sheeting',
@@ -78,6 +79,16 @@ export function validateOffset5PilotTemplate(template,{throwOnError=false}={}){
    if(brand.userData?.brandText!=='HEIDELBERG Speedmaster')fail('PU_BRAND',i+1);
    let green=false;duct.traverse?.(o=>{if(o.isMesh&&o.userData?.offset5InkDuctRollPhotoLocked)green=true;});
    if(!green)fail('PU_GREEN_DUCT_ROLL',i+1);
+   const verifyRoller=(nodeId,spec,kind)=>{
+    const node=template.findNode?.(nodeId),mesh=node?.children?.find?.(o=>o.isMesh);
+    if(!node||!mesh){fail('PU_'+kind+'_ROLLER_MISSING',`${i+1}:${spec.code}`);return;}
+    if(mesh.userData?.nominalDiameterMM!==spec.diameterMM)fail('PU_'+kind+'_DIAMETER',`${i+1}:${spec.code}:${mesh.userData?.nominalDiameterMM}`);
+    if(mesh.userData?.rollerSurface!==spec.surface)fail('PU_'+kind+'_SURFACE',`${i+1}:${spec.code}:${mesh.userData?.rollerSurface}`);
+    if(mesh.userData?.actualDiagramSource!=='IMG_2777.jpeg')fail('PU_'+kind+'_SOURCE',`${i+1}:${spec.code}`);
+   };
+   for(const spec of OFFSET5_INKING_ROLLERS)verifyRoller(`${prefix}-ink-roller-${spec.code}-body`,spec,'INK');
+   for(const spec of OFFSET5_INK_DISTRIBUTORS)verifyRoller(`${prefix}-ink-distributor-${spec.code}-body`,spec,'DISTRIBUTOR');
+   for(const spec of OFFSET5_DAMPENING_ROLLERS)verifyRoller(`${prefix}-damp-roller-${spec.code}-body`,spec,'DAMP');
   }
  }
  const result=Object.freeze({valid:errors.length===0,errors:Object.freeze(errors),contract:OFFSET5_PILOT_RUNTIME_CONTRACT});
