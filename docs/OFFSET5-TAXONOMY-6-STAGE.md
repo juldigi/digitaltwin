@@ -11,6 +11,16 @@ Koreksi terhadap v3: `IMG_2312.jpeg` adalah acuan ujung **feeder/pile inlet**, s
 
 Taxonomy PU1–PU8 tidak lagi menduplikasi tabel roller secara hard-code. Node roller mengambil data dari source registry yang sama dengan geometry dan simulation. `IMG_2777.jpeg` menjadi bukti `PHOTO_VERIFIED` untuk code/designation, diameter nominal, color code, material/remark serta topology sectional 1–19, A–D dan FR. Journal, bearing, nip, timing, pressure dan setting yang tidak ada pada diagram tetap `REFERENCE_ONLY`.
 
+Tambahan V319:
+- `INK.FOUNTAIN` = open ink-fountain/duct bay, bukan solid enclosure.
+- `INK.DUCT_ROLL` = visible green service/fountain roller dari baseline foto V408; tidak diberi nomor 1–19.
+- `INK.VISIBLE_FILM` = permukaan ink-film job-state visualization.
+- `INK.RAKEL` dan `INK.AIR_BLOWER` = callout aktual pada diagram.
+- `DAMP.WATER` = WATER callout di area 18/T.
+- `CYL.AIR_BLOWER` = AIR BLOWER callout pada blanket/impression sheet path.
+- `COVER.TOP` = open upper service deck; solid hood dilarang kembali oleh regression test.
+- `COVER.BRAND` = HEIDELBERG Speedmaster operator-door mark pada cover melengkung.
+
 ## Taxonomy 6 stage
 
 | Stage | Label | Contoh node | Aturan explode |
