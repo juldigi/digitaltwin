@@ -130,6 +130,14 @@ test('V319 keeps all eight PU exteriors on the photo-verified handedness and rem
    bridge.traverse(o=>{if(o.isMesh&&o.material?.color?.getHex?.()===m.palette.red)syntheticRed=true;});
    assert.equal(syntheticRed,false,`PU${i+1} must not receive synthetic per-unit red exterior styling`);
   }
+  m.setLow(true);
+  for(let i=0;i<8;i++){
+   const duct=m.findNode(`press-${i}-ink-fountain-roller-body`).children.find(o=>o.isMesh);
+   const openFilm=m.findNode(`press-${i}-open-ink-bay`).children.find(o=>o.name==='Visible Ink Film Color'||o.userData?.visibleInkFilm);
+   assert.equal(duct.visible,true,`PU${i+1} green duct roller is silhouette-critical and must survive mobile LOD`);
+   assert.equal(openFilm?.visible,true,`PU${i+1} open ink film must survive mobile LOD`);
+  }
+  m.setLow(false);
   m.setExteriorOpen(false);
   for(let i=0;i<8;i++){
    assert.equal(m.findNode(`press-${i}-cover`).visible,true,`PU${i+1} exterior cabinet must be present by default`);
