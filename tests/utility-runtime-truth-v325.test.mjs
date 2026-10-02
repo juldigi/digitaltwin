@@ -69,7 +69,7 @@ test('V325 generic AHU twins remain Eurovent-neutral and never invent outdoor re
    assert.equal(template.findNode('ahu-mixing-boundary').userData.installedConfigurationVerified,false,id);
    assert.equal(template.findNode('ahu-droplet-option').userData.installedOptionVerified,false,id);
    assert.equal(template.findNode('ahu-fan-drive').userData.installedDriveTypeVerified,false,id);
-   sim.start();let now=1000;sim.update(now),seenCoil=false;
+   sim.start();let now=1000,seenCoil=false;sim.update(now);
    for(let i=0;i<700;i++){now+=20;sim.update(now);const s=sim.state();seenCoil||=s.genericCoilConditioningActive;assert.equal(s.outdoorHeatRejectionActive,false,id);assert.equal(s.evaporativePrecoolActive,false,id);assert.equal(s.dxEvaporatorActive,false,id);}
    assert.equal(seenCoil,true,id);
   }finally{sim.dispose();template.dispose();}
@@ -82,7 +82,7 @@ test('V325 SANSIN AHU 7 preserves two-stage family cooling and separate outdoor 
   assert.equal(u.exactSansinModelVerified,false);assert.equal(u.installedDuctTypeVerified,false);assert.equal(u.plantDuctRouteVerified,false);
   assert.deepEqual(u.familyCandidates,['YZKJ-45N','YZKJ-90N']);
   assert.equal(template.findNode('sansin-outdoor-fan').userData.installedFanCountVerified,false);
-  sim.start();let now=1000;sim.update(now),seenWet=false,seenDx=false,seenOutdoor=false;
+  sim.start();let now=1000,seenWet=false,seenDx=false,seenOutdoor=false;sim.update(now);
   for(let i=0;i<900;i++){now+=20;sim.update(now);const s=sim.state();seenWet||=s.evaporativePrecoolActive;seenDx||=s.dxEvaporatorActive;seenOutdoor||=s.outdoorHeatRejectionActive;assert.equal(s.genericCoilConditioningActive,false);}
   assert.equal(seenWet,true);assert.equal(seenDx,true);assert.equal(seenOutdoor,true);
   const indoor=template.findNode('universal-module-4').getWorldPosition(new THREE.Vector3());
