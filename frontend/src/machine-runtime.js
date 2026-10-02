@@ -735,6 +735,149 @@ export function validatePrintingSimulation(simulation,template,key,{throwOnError
  return result;
 }
 
+
+export const REMAINING_FLEET_RUNTIME_CONTRACTS=Object.freeze({
+ 'BMJ-MCH-0007':Object.freeze({family:'fz1200',serial:'24RVOFS0920'}),
+ 'BMJ-MCH-0008':Object.freeze({family:'fz1200',serial:'2105080SF34'}),
+ 'BMJ-MCH-0022':Object.freeze({family:'fz1200',serial:'22000320'}),
+ 'BMJ-MCH-0004':Object.freeze({
+  family:'gravure',
+  geometry:'YA1A1A_EXACT_IDENTITY__SHEETFED_GRAVURE_MECHANISM_REFERENCE',
+  simulation:'BLOCKED',
+  coreNodes:Object.freeze(['o7-feeder-suction','o7-feeder-swing-gripper','o7-register-lays','o7-register-transfer','o7-ink-pan','o7-ink-circulation','o7-ink-drop-option','o7-gravure-cylinder','o7-doctor','o7-impression-cylinder','o7-impression-sheet-control','o7-dryer-air','o7-dryer-exhaust','o7-delivery-chain','o7-delivery-pile','o7-main-drive','o7-transmission'])
+ }),
+ 'BMJ-MCH-0021':Object.freeze({
+  family:'blanker',
+  geometry:'QF_LQF_1080_FAMILY_PROCESS_REFERENCE__QF100CS_EXACT_EQUIVALENCE_UNVERIFIED',
+  simulation:'FAMILY_PROCESS_MODEL',
+  coreNodes:Object.freeze(['qf100-platform','qf100-x-axis','qf100-y-axis','qf100-position-sensors','qf100-head-ram','qf100-pin-board','qf100-tooling-pins','qf100-separation-interface','qf100-receiving-tray','qf100-collector-option','qf100-hmi','qf100-hydraulic-unit','qf100-plc-cabinet'])
+ }),
+ 'BMJ-MCH-0023':Object.freeze({
+  family:'collator',
+  geometry:'MULTI_VENDOR_10_BIN_SUCTION_COLLATOR_PROCESS_REFERENCE',
+  simulation:'FAMILY_PROCESS_MODEL',
+  coreNodes:Object.freeze(['collator-bin-trays','collator-suction-feeds','collator-bin-air','collator-vacuum-blower','collator-vacuum-manifold','collator-double-feed','collator-bin-empty','collator-gather-guide','collator-gather-drive','collator-delivery-belt','collator-set-jogger','collator-downstream-boundary','collator-hmi','collator-control-io'])
+ }),
+ 'BMJ-MCH-0024':Object.freeze({
+  family:'inkjet',
+  coreNodes:Object.freeze(['ly300-feeder','ly300-transport','ly300-print','ly300-ink','ly300-uv','ly300-camera','ly300-reject','ly300-collect','ly300-control','ly300-access'])
+ })
+});
+const remainingFleetContractFor=normalized=>REMAINING_FLEET_RUNTIME_CONTRACTS[normalized]||null;
+const FZ1200_CORE_NODES=Object.freeze(['fz1200-base','fz1200-clamp','fz1200-clamp-upper','fz1200-turn','fz1200-turn-yoke','fz1200-turn-lock','fz1200-air','fz1200-air-nozzle','fz1200-jog','fz1200-hydraulic','fz1200-hyd-power','fz1200-control']);
+
+export function validateRemainingFleetTemplate(template,key,{throwOnError=false}={}){
+ const assetId=normalizeMachineKey(key),contract=REMAINING_FLEET_RUNTIME_CONTRACTS[assetId],root=template?.root,errors=[];
+ const fail=(code,detail)=>errors.push({code,detail});
+ if(!contract)return Object.freeze({valid:true,errors:Object.freeze([]),contract:null,assetId:null});
+ if(!root)fail('ROOT_MISSING',assetId);
+ else{
+  const u=root.userData||{},core=contract.family==='fz1200'?FZ1200_CORE_NODES:contract.coreNodes||[];
+  if(u.assetId!==assetId)fail('ASSET_ID',u.assetId);
+  for(const id of core){
+   const node=template.findNode?.(id);
+   if(!node){fail('CORE_NODE_MISSING',id);continue;}
+   let attached=false;for(let p=node;p;p=p.parent)if(p===root){attached=true;break;}
+   if(!attached)fail('CORE_NODE_DETACHED',id);
+  }
+  const taxonomy=template.taxonomy||[],levels=new Set(taxonomy.map(n=>n.level));
+  for(let level=1;level<=6;level++)if(!levels.has(level))fail('TAXONOMY_LEVEL_MISSING',level);
+
+  if(contract.family==='fz1200'){
+   if(u.taxonomyVersion!=='fz1200-v4-drive-hydraulic-interlock')fail('FZ_TAXONOMY',u.taxonomyVersion);
+   if(u.detailPass!=='V140_FZ1200_DRIVE_HYDRAULIC_AIR_INTERLOCK')fail('FZ_DETAIL_PASS',u.detailPass);
+   if(u.evidenceGrade!=='MODEL_IDENTIFIED_EXACT_PUBLIC_REFERENCE__OEM_UNVERIFIED')fail('FZ_EVIDENCE_GRADE',u.evidenceGrade);
+   if(u.geometryStatus!=='FZ1200_EXACT_MODEL_PROCESS_REFERENCE__BMJ_INSTALLED_OEM_AND_DIMENSIONS_BOUNDED')fail('FZ_GEOMETRY_BOUNDARY',u.geometryStatus);
+   if(u.engineeringDimensions!==false||u.exactModelVerifiedFromBMJ!==true||u.installedOemVerified!==false)fail('FZ_INSTALLATION_BOUNDARY','identity/dimension/OEM');
+   if(u.spec?.model!=='FZ 1200'||u.spec?.serial!==contract.serial)fail('FZ_IDENTITY',(u.spec?.model||'')+'|'+(u.spec?.serial||''));
+   for(const field of ['installedOemVerified','installedCapacityVerified','installedOpeningVerified','installedPowerVerified','installedEnvelopeVerified','installedHydraulicPressureVerified','installedOilTankVerified','installedNozzleCountVerified','installedBlowerLayoutVerified','installedCylinderCountVerified'])if(u.spec?.[field]!==false)fail('FZ_INSTALLED_VALUE_PROMOTED',field+':'+u.spec?.[field]);
+  }else if(contract.family==='gravure'){
+   if(template.cfg?.evidence?.geometry!==contract.geometry||template.cfg?.evidence?.simulation!==contract.simulation)fail('GRAVURE_EVIDENCE_BOUNDARY',(template.cfg?.evidence?.geometry||'')+'|'+(template.cfg?.evidence?.simulation||''));
+   if(u.referenceBuilder!=='V139_RESEARCH_GROUNDED_BUILDER'||u.engineeringDimensions!==false)fail('GRAVURE_REFERENCE_BUILDER',u.referenceBuilder);
+   if(u.detailPass!=='V123_R2_YA1A1A_SHEETFED_GRAVURE_COMPONENT_RECONSTRUCTION')fail('GRAVURE_DETAIL_PASS',u.detailPass);
+   if(u.repolishRevision!=='V238')fail('GRAVURE_REPOLISH_REVISION',u.repolishRevision);
+   if(u.simulationStatus!=='BLOCKED_PENDING_YA1A1A_TRANSPORT_DRIVE_VERIFICATION')fail('GRAVURE_SIMULATION_STATUS',u.simulationStatus);
+   if(u.gravureMechanismBoundary?.exactIdentity!=='YA1A1A'||u.gravureMechanismBoundary?.processFamily!=='SHEET_FED_SINGLE_COLOR_GRAVURE')fail('GRAVURE_IDENTITY_PROCESS',JSON.stringify(u.gravureMechanismBoundary||{}));
+   if(u.printingNip?.verifiedGeometry!==false)fail('GRAVURE_NIP_PROMOTED',u.printingNip?.verifiedGeometry);
+   if(template.findNode?.('o7-ink-drop-option')?.userData?.installedOptionVerified!==false)fail('GRAVURE_INK_MODE_PROMOTED',template.findNode?.('o7-ink-drop-option')?.userData?.installedOptionVerified);
+   if(template.findNode?.('universal-module-6-active')?.userData?.installedDryerTechnologyVerified!==false)fail('GRAVURE_DRYER_PROMOTED',template.findNode?.('universal-module-6-active')?.userData?.installedDryerTechnologyVerified);
+   if(template.findNode?.('o7-transmission')?.userData?.installedTopologyVerified!==false)fail('GRAVURE_DRIVE_PROMOTED',template.findNode?.('o7-transmission')?.userData?.installedTopologyVerified);
+  }else if(contract.family==='blanker'){
+   if(template.cfg?.evidence?.geometry!==contract.geometry||template.cfg?.evidence?.simulation!==contract.simulation)fail('BLANKER_EVIDENCE_BOUNDARY',(template.cfg?.evidence?.geometry||'')+'|'+(template.cfg?.evidence?.simulation||''));
+   if(u.referenceBuilder!=='V139_RESEARCH_GROUNDED_BUILDER'||u.engineeringDimensions!==false)fail('BLANKER_REFERENCE_BUILDER',u.referenceBuilder);
+   if(u.detailPass!=='V138_QF100CS_SERVO_HYDRAULIC_CONTROL_CHAIN')fail('BLANKER_DETAIL_PASS',u.detailPass);
+   if(u.exactModelPublicDocumentationFound!==false||u.installedBlankingHeadCountVerified!==false||u.installedCollectorStackerVerified!==false)fail('BLANKER_INSTALLED_OPTION_PROMOTED','model/head/collector');
+   if(u.localSupplierFamilyEvidence?.installationProof!==false||u.localSupplierFamilyEvidence?.exactModelEquivalenceProof!==false)fail('BLANKER_SUPPLIER_PROOF_PROMOTED',JSON.stringify(u.localSupplierFamilyEvidence||{}));
+   if(u.familyProcess?.safetyInterlock!=='PLATFORM_STOP_BEFORE_HYDRAULIC_STROKE'||u.familyProcess?.simulationBoundary!=='FAMILY_PROCESS_ONLY__NOT_SERIAL_SPECIFIC')fail('BLANKER_PROCESS_BOUNDARY',JSON.stringify(u.familyProcess||{}));
+   if(template.findNode?.('qf100-collector-option')?.userData?.installedOptionVerified!==false)fail('BLANKER_COLLECTOR_PROMOTED',template.findNode?.('qf100-collector-option')?.userData?.installedOptionVerified);
+   if(template.findNode?.('qf100-separation-interface')?.userData?.noInventedForkOrConveyor!==true)fail('BLANKER_INVENTED_HANDLING','fork/conveyor boundary lost');
+  }else if(contract.family==='collator'){
+   if(template.cfg?.evidence?.geometry!==contract.geometry||template.cfg?.evidence?.simulation!==contract.simulation)fail('COLLATOR_EVIDENCE_BOUNDARY',(template.cfg?.evidence?.geometry||'')+'|'+(template.cfg?.evidence?.simulation||''));
+   if(u.referenceBuilder!=='V139_RESEARCH_GROUNDED_BUILDER'||u.engineeringDimensions!==false)fail('COLLATOR_REFERENCE_BUILDER',u.referenceBuilder);
+   if(u.detailPass!=='V138_COLLATOR_SUCTION_AND_SEPARATION_AIR_CONTROL_CHAIN')fail('COLLATOR_DETAIL_PASS',u.detailPass);
+   if(u.exactCollatorOemVerified!==false||u.exactCollatorModelVerified!==false||u.installedBinCountVerified!==false)fail('COLLATOR_IDENTITY_PROMOTED','OEM/model/bin count');
+   if(u.modeledReferenceBinCount!==10||u.collatorProcessBoundary!=='TEN_BIN_DISPLAY_IS_CROSS_FAMILY_REFERENCE_NOT_BMJ_INSTALLED_COUNT')fail('COLLATOR_REFERENCE_BIN_BOUNDARY',u.modeledReferenceBinCount+'|'+u.collatorProcessBoundary);
+   if(u.collatorAirArchitecture?.installedTopologyVerified!==false)fail('COLLATOR_AIR_TOPOLOGY_PROMOTED',u.collatorAirArchitecture?.installedTopologyVerified);
+   if(template.findNode?.('collator-downstream-boundary')?.userData?.installedDownstreamFinisherVerified!==false)fail('COLLATOR_DOWNSTREAM_PROMOTED',template.findNode?.('collator-downstream-boundary')?.userData?.installedDownstreamFinisherVerified);
+  }else{
+   if(u.taxonomyVersion!=='ly300-v3-print-cure-inspection-interlock')fail('LY300_TAXONOMY',u.taxonomyVersion);
+   if(u.detailPass!=='V141_LY300_POSITION_PRINT_CURE_INSPECT_REJECT'||u.researchVersion!=='V141')fail('LY300_REVISION',u.detailPass+'|'+u.researchVersion);
+   if(u.evidenceGrade!=='OEM_MODEL_GROUNDED'||u.geometryStatus!=='OEM_MODEL_PROCESS_REFERENCE__ACCESSORIES_BOUNDED'||u.engineeringDimensions!==false)fail('LY300_EVIDENCE_BOUNDARY',u.evidenceGrade+'|'+u.geometryStatus);
+   if(u.spec?.model!=='UPG-LY300')fail('LY300_MODEL',u.spec?.model);
+   for(const field of ['installedPrintheadCountVerified','installedCoronaTreatmentVerified','installedCollectionStrapperVerified','installedAccessoryPlacementVerified'])if(u.spec?.[field]!==false)fail('LY300_OPTION_PROMOTED',field+':'+u.spec?.[field]);
+   if(template.findNode?.('ly300-print-head')?.userData?.installedPrintheadCountVerified!==false)fail('LY300_PRINTHEAD_COUNT_PROMOTED',template.findNode?.('ly300-print-head')?.userData?.installedPrintheadCountVerified);
+   if(template.findNode?.('ly300-collect-strap')?.userData?.installedStrapperVerified!==false)fail('LY300_STRAPPER_PROMOTED',template.findNode?.('ly300-collect-strap')?.userData?.installedStrapperVerified);
+  }
+ }
+ const result=Object.freeze({valid:errors.length===0,errors:Object.freeze(errors),contract,assetId});
+ if(root){root.userData.remainingFleetRuntimeTruthVersion='V330';root.userData.remainingFleetRuntimeTruthLock=result.valid?'PASS':'FAIL';root.userData.remainingFleetRuntimeTruthErrors=errors.map(e=>e.code+':'+e.detail).join('|');}
+ if(throwOnError&&!result.valid)throw new Error('Remaining-fleet runtime truth-lock failed for '+assetId+': '+root?.userData?.remainingFleetRuntimeTruthErrors);
+ return result;
+}
+
+export function validateRemainingFleetSimulation(simulation,template,key,{throwOnError=false}={}){
+ const assetId=normalizeMachineKey(key),contract=REMAINING_FLEET_RUNTIME_CONTRACTS[assetId],state=simulation?.state?.(),errors=[];
+ const fail=(code,detail)=>errors.push({code,detail});
+ if(!contract)return Object.freeze({valid:true,errors:Object.freeze([]),contract:null,assetId:null});
+ if(contract.family==='gravure'){
+  if(!state||state.available!==false||state.blocked!==true)fail('GRAVURE_MUST_REMAIN_BLOCKED',JSON.stringify({available:state?.available,blocked:state?.blocked}));
+  if(state?.geometryStatus!==contract.geometry)fail('GRAVURE_SIM_GEOMETRY_BOUNDARY',state?.geometryStatus);
+  if(state?.stage!=='Simulasi belum tervalidasi')fail('GRAVURE_BLOCKED_STAGE',state?.stage);
+ }else{
+  if(!state||state.available!==true||state.blocked===true)fail('SIMULATION_AVAILABILITY',state?.available);
+  if(contract.family==='fz1200'){
+   if(state?.interlockSafe!==true)fail('FZ_INTERLOCK_STATE',state?.interlockSafe);
+   if(state?.turningActive&&!state?.turnPermitted)fail('FZ_TURN_WITHOUT_PERMIT',state?.stage);
+   if(state?.airingActive&&!state?.airPermitted)fail('FZ_AIR_WITHOUT_PERMIT',state?.stage);
+   if(state?.turnPermitted&&!(state?.clampConfirmed&&state?.liftClearance&&state?.guardInterlockSafe))fail('FZ_TURN_PERMIT_CAUSALITY',state?.stage);
+   if(state?.airPermitted&&!(state?.clampConfirmed&&state?.liftClearance&&state?.turnComplete&&state?.turnLockConfirmed))fail('FZ_AIR_PERMIT_CAUSALITY',state?.stage);
+   if(state?.joggingActive&&!state?.airPressureReady)fail('FZ_JOG_CAUSALITY',state?.stage);
+  }else if(contract.family==='blanker'){
+   if(state?.simulationBoundary!=='QF_LQF_1080_FAMILY_PROCESS_ONLY')fail('BLANKER_SIMULATION_BOUNDARY',state?.simulationBoundary);
+   if(state?.mechanicalInterlockSafe!==true)fail('BLANKER_INTERLOCK_STATE',state?.mechanicalInterlockSafe);
+   if(state?.blankingHeadPressing&&state?.platformIndexing)fail('BLANKER_PRESS_WHILE_INDEXING',state?.stage);
+   if(state?.blankingHeadPressing&&!(state?.blankerPlatformAtPress&&state?.blankerHydraulicPressureActive&&state?.blankerHydraulicPumpActive&&state?.blankerHydraulicValvePressActive))fail('BLANKER_PRESS_CAUSALITY',state?.stage);
+   if(state?.blankerSeparationActive&&!(state?.blankerHydraulicPumpActive&&state?.blankerHydraulicValveReturnActive))fail('BLANKER_SEPARATION_CAUSALITY',state?.stage);
+  }else if(contract.family==='collator'){
+   if(state?.simulationBoundary!=='MULTI_VENDOR_SUCTION_COLLATOR_PROCESS_ONLY__TEN_BIN_REFERENCE_NOT_INSTALLATION_CLAIM')fail('COLLATOR_SIMULATION_BOUNDARY',state?.simulationBoundary);
+   if(state?.modeledBinCount!==10||state?.installedBinCountVerified!==false)fail('COLLATOR_BIN_COUNT_BOUNDARY',state?.modeledBinCount+'|'+state?.installedBinCountVerified);
+   if((state?.activeBinFeeds||0)>0&&!state?.doubleFeedCheckActive)fail('COLLATOR_FEED_SENSOR_CAUSALITY',state?.activeBinFeeds);
+   if((state?.activeFeedBinIndexes?.length||0)>0&&!(state?.airSeparationActive&&state?.rotorPickupActive&&state?.collatorSeparationAirControlActive&&state?.collatorSuctionBlowerActive))fail('COLLATOR_PICKUP_CAUSALITY',JSON.stringify(state?.activeFeedBinIndexes||[]));
+  }else{
+   if(state?.demoRejectOnly!==true||state?.installedPrintheadCountVerified!==false)fail('LY300_DEMO_OPTION_BOUNDARY',state?.demoRejectOnly+'|'+state?.installedPrintheadCountVerified);
+   if(state?.interlockSafe!==true)fail('LY300_INTERLOCK_STATE',state?.interlockSafe);
+   if(state?.uvActive&&!state?.uvPermit)fail('LY300_UV_WITHOUT_PERMIT',state?.stage);
+   if(state?.cameraActive&&!state?.cameraTrigger)fail('LY300_CAMERA_WITHOUT_TRIGGER',state?.stage);
+   if(state?.demoRejectActive&&!state?.rejectPermit)fail('LY300_REJECT_WITHOUT_PERMIT',state?.stage);
+   if(state?.rejectConfirmed&&!(state?.inspectionComplete&&state?.decisionReady))fail('LY300_REJECT_CONFIRM_CAUSALITY',state?.stage);
+  }
+ }
+ const result=Object.freeze({valid:errors.length===0,errors:Object.freeze(errors),contract,assetId});
+ if(template?.root){template.root.userData.remainingFleetSimulationTruthVersion='V330';template.root.userData.remainingFleetSimulationTruthLock=result.valid?'PASS':'FAIL';template.root.userData.remainingFleetSimulationTruthErrors=errors.map(e=>e.code+':'+e.detail).join('|');}
+ if(throwOnError&&!result.valid)throw new Error('Remaining-fleet simulation truth-lock failed for '+assetId+': '+template?.root?.userData?.remainingFleetSimulationTruthErrors);
+ return result;
+}
+
 export function createMachineTemplate(key){
  const k=normalizeMachineKey(key);
  if(!k)throw new Error('Identitas mesin belum tersedia.');
@@ -745,17 +888,18 @@ export function createMachineTemplate(key){
  if(k==='BMJ-MCH-0001'){const template=new Polar115MachineTemplate();validatePrintingTemplate(template,k,{throwOnError:true});return template;}
  if(k==='BMJ-MCH-0005'){const template=new Offset8CX104RealismTemplate();validatePrintingTemplate(template,k,{throwOnError:true});return template;}
  if(k==='BMJ-MCH-0006'){const template=new Offset9MachineTemplate();validatePrintingTemplate(template,k,{throwOnError:true});return template;}
- if(['BMJ-MCH-0007','BMJ-MCH-0008','BMJ-MCH-0022'].includes(k))return new FZ1200MachineTemplate(k);
+ if(['BMJ-MCH-0007','BMJ-MCH-0008','BMJ-MCH-0022'].includes(k)){const template=new FZ1200MachineTemplate(k);validateRemainingFleetTemplate(template,k,{throwOnError:true});return template;}
  if(['BMJ-MCH-0011','BMJ-MCH-0012'].includes(k)){const template=new MK920MachineTemplate(k);validateAutoplatenTemplate(template,k,{throwOnError:true});return template;}
  if(k==='BMJ-MCH-0013'){const template=new MK1060MachineTemplate();validateAutoplatenTemplate(template,k,{throwOnError:true});return template;}
  if(['BMJ-MCH-0014','BMJ-MCH-0015'].includes(k)){const template=new Promatrix106MachineTemplate(k);validateAutoplatenTemplate(template,k,{throwOnError:true});return template;}
  if(['BMJ-MCH-0016','BMJ-MCH-0018'].includes(k)){const template=new Media100MachineTemplate(k);validateFolderTemplate(template,k,{throwOnError:true});return template;}
  if(k==='BMJ-MCH-0019'){const template=new DianaEye55MachineTemplate();validateInspectionTemplate(template,k,{throwOnError:true});return template;}
  if(k==='BMJ-MCH-0020'){const template=new SharkN650MachineTemplate();validateInspectionTemplate(template,k,{throwOnError:true});return template;}
- if(k==='BMJ-MCH-0024')return new UpgLy300MachineTemplate();
+ if(k==='BMJ-MCH-0024'){const template=new UpgLy300MachineTemplate();validateRemainingFleetTemplate(template,k,{throwOnError:true});return template;}
  if(k==='BMJ-MCH-0017'){const template=new ReferenceMachineTemplate(k);validateFolderTemplate(template,k,{throwOnError:true});return template;}
  if(pdsContractFor(k)){const template=new ReferenceMachineTemplate(k);validatePdsTemplate(template,k,{throwOnError:true});return template;}
  if(utilityContractFor(k)){const template=new ReferenceMachineTemplate(k);validateUtilityTemplate(template,k,{throwOnError:true});return template;}
+ if(remainingFleetContractFor(k)){const template=new ReferenceMachineTemplate(k);validateRemainingFleetTemplate(template,k,{throwOnError:true});return template;}
  if(isReferenceMachineKey(k))return new ReferenceMachineTemplate(k);
  if(universalMachineConfig(k))return new UniversalMachineTemplate(k);
  throw new Error(`Model 3D untuk ${k} belum tersedia.`);
@@ -785,6 +929,7 @@ export function createPolishedMachineTemplate(key){
  if(pdsContractFor(normalized))validatePdsTemplate(template,normalized,{throwOnError:true});
  if(utilityContractFor(normalized))validateUtilityTemplate(template,normalized,{throwOnError:true});
  if(printingContractFor(normalized))validatePrintingTemplate(template,normalized,{throwOnError:true});
+ if(remainingFleetContractFor(normalized))validateRemainingFleetTemplate(template,normalized,{throwOnError:true});
  return template;
 }
 
@@ -798,17 +943,18 @@ export function createMachineSimulation(key,machine,template){
  if(k==='BMJ-MCH-0001'){const sim=new Polar115ProcessSimulation(machine,template);validatePrintingSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(k==='BMJ-MCH-0005'){const sim=new Offset8CX104RealismSimulation(machine,template);validatePrintingSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(k==='BMJ-MCH-0006'){const sim=new Offset9PrintingSimulation(machine,template);validatePrintingSimulation(sim,template,k,{throwOnError:true});return sim;}
- if(['BMJ-MCH-0007','BMJ-MCH-0008','BMJ-MCH-0022'].includes(k))return new FZ1200ProcessSimulation(machine,template);
+ if(['BMJ-MCH-0007','BMJ-MCH-0008','BMJ-MCH-0022'].includes(k)){const sim=new FZ1200ProcessSimulation(machine,template);validateRemainingFleetSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(['BMJ-MCH-0011','BMJ-MCH-0012'].includes(k)){const sim=new MK920StampingSimulation(machine,template);validateAutoplatenSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(k==='BMJ-MCH-0013'){const sim=new MK1060ProcessSimulation(machine,template);validateAutoplatenSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(['BMJ-MCH-0014','BMJ-MCH-0015'].includes(k)){const sim=new Promatrix106ProcessSimulation(machine,template);validateAutoplatenSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(['BMJ-MCH-0016','BMJ-MCH-0018'].includes(k)){const sim=new Media100ProcessSimulation(machine,template);validateFolderSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(k==='BMJ-MCH-0019'){const sim=new DianaEye55ProcessSimulation(machine,template);validateInspectionSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(k==='BMJ-MCH-0020'){const sim=new SharkN650ProcessSimulation(machine,template);validateInspectionSimulation(sim,template,k,{throwOnError:true});return sim;}
- if(k==='BMJ-MCH-0024')return new UpgLy300ProcessSimulation(machine,template);
+ if(k==='BMJ-MCH-0024'){const sim=new UpgLy300ProcessSimulation(machine,template);validateRemainingFleetSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(k==='BMJ-MCH-0017'){const sim=new ReferenceProcessSimulation(machine,template);validateFolderSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(pdsContractFor(k)){const sim=new ReferenceProcessSimulation(machine,template);validatePdsSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(utilityContractFor(k)){const sim=new ReferenceProcessSimulation(machine,template);validateUtilitySimulation(sim,template,k,{throwOnError:true});return sim;}
+ if(remainingFleetContractFor(k)){const sim=new ReferenceProcessSimulation(machine,template);validateRemainingFleetSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(isReferenceMachineKey(k))return new ReferenceProcessSimulation(machine,template);
  if(universalMachineConfig(k))return new UniversalProcessSimulation(machine,template);
  throw new Error(`Simulasi untuk ${k} belum tersedia.`);
