@@ -49,7 +49,7 @@ test('V324 CTP exposure and unload cannot outrun register clamp encoder and rele
  for(const id of ['BMJ-MCH-0025','BMJ-MCH-0026']){
   const template=createMachineTemplate(id),sim=createMachineSimulation(id,template.root,template);
   try{
-   sim.start();let now=1000;sim.update(now),seenExposure=false,seenUnload=false;
+   sim.start();let now=1000,seenExposure=false,seenUnload=false;sim.update(now);
    for(let i=0;i<1500;i++){
     now+=20;sim.update(now);const s=sim.state();
     if(s.ctpExposureActive){
@@ -77,7 +77,7 @@ test('V324 SCREEN CTF stays FT-R/Katana family-only and gates exposure/cutter by
   assert.equal(u.processArchitecture,'CAPSTAN_FLATBED_SCAN__NOT_IMAGING_DRUM');
   assert.equal(u.katanaPolygonReference.installedApplicabilityVerified,false);
   for(const optionId of PDS_RUNTIME_CONTRACTS[id].optionNodes)assert.equal(template.findNode(optionId).userData.installedOptionVerified,false,optionId);
-  sim.start();let now=1000;sim.update(now),seenExposure=false,seenCut=false;
+  sim.start();let now=1000,seenExposure=false,seenCut=false;sim.update(now);
   for(let i=0;i<1500;i++){
    now+=20;sim.update(now);const s=sim.state();
    if(s.exposureActive){
@@ -96,7 +96,7 @@ test('V324 Zund moves only bounded vacuum/XY platform reference and never invent
  try{
   for(const field of ['exactZundModelVerified','installedToolPackageVerified','installedIccVerified','installedItiVerified','installedArcVerified','installedMaterialHandlingVerified'])assert.equal(u[field],false,field);
   for(const optionId of PDS_RUNTIME_CONTRACTS[id].optionNodes)assert.equal(template.findNode(optionId).userData.installedOptionVerified,false,optionId);
-  sim.start();let now=1000;sim.update(now),seenVacuum=false,seenAxis=false;
+  sim.start();let now=1000,seenVacuum=false,seenAxis=false;sim.update(now);
   for(let i=0;i<1200;i++){
    now+=20;sim.update(now);const s=sim.state();
    seenVacuum||=s.vacuumHoldActive;seenAxis||=s.zundAxisMotionActive;
