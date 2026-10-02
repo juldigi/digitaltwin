@@ -117,6 +117,29 @@ test('V319 taxonomy maps every PU to actual roller diagram without the old mater
  }
 });
 
+test('V320 taxonomy makes installed evidence precedence visible at the affected PU nodes',()=>{
+ const root=TAXONOMY_BY_ID.get('O5');
+ assert.match(root.description,/INSTALLED_DIAGRAM_WINS/);
+ for(let unit=1;unit<=8;unit++){
+  const p=`O5.PRINT.PU${unit}`;
+  const r15=TAXONOMY_BY_ID.get(`${p}.INK.R15`);
+  const r14=TAXONOMY_BY_ID.get(`${p}.INK.R14`);
+  const r17=TAXONOMY_BY_ID.get(`${p}.DAMP.R17`);
+  const r18=TAXONOMY_BY_ID.get(`${p}.DAMP.R18`);
+  const r19=TAXONOMY_BY_ID.get(`${p}.DAMP.R19`);
+  const a=TAXONOMY_BY_ID.get(`${p}.INK.DIST_A`);
+  assert.match(r15.description,/white rubber-coated/);
+  assert.match(r15.description,/4 ±0\.5 mm/);
+  assert.match(r15.description,/5 \+2 mm/);
+  assert.match(r14.description,/17\/ZW/);
+  assert.match(r14.description,/3 \+1 mm/);
+  assert.match(r17.description,/3 \+1 mm/);
+  assert.match(r18.description,/overrides the conflicting generic OEM row/);
+  assert.match(r19.description,/overrides the conflicting generic OEM row/);
+  assert.match(a.description,/overrides the conflicting generic OEM row/);
+ }
+});
+
 test('V319 live geometry repeats corrected PU roller metadata across all eight units',()=>{
  const m=new Offset5CD102RealismTemplate();
  try{
