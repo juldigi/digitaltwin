@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
 import {OFFSET5_TAXONOMY,TAXONOMY_BY_ID} from './data/taxonomy-offset5.js';
-import {ORIENTATION} from './data/sources-offset5.js';
+import {ORIENTATION,OFFSET5_ACTUAL_ROLLER_DIAGRAM,OFFSET5_INKING_ROLLERS,OFFSET5_INK_DISTRIBUTORS,OFFSET5_DAMPENING_ROLLERS} from './data/sources-offset5.js';
 import {OFFSET5_DIMENSIONS,OFFSET5_UNIT_CENTERS,offset5DimensionAudit} from './data/dimensions-offset5.js';
 import {V122_SOURCE_STATS} from './data/research-v122.js';
 import {createIndustrialMaterial} from './render/material-library.js';
@@ -13,14 +13,14 @@ import {createIndustrialMaterial} from './render/material-library.js';
 // Internal coordinates remain functional/visual unless a supplied OEM document states
 // a value explicitly; no unverified service setting is promoted to engineering truth.
 export const PHOTO_RECONSTRUCTION = {
-  version: 'offset5-photo-pdf-v36',
-  status: 'FULL MACHINE · USER PHOTOS EXTERIOR + OEM PDF FUNCTIONAL TOPOLOGY',
+  version: 'offset5-photo-pdf-v319',
+  status: 'FULL MACHINE · USER PHOTOS EXTERIOR + ACTUAL ON-MACHINE ROLLER DIAGRAM + OEM FUNCTIONAL TOPOLOGY',
   dimensionUnit: 'PHOTO_CORRECTED_INTERUNIT_ACCESS_WITH_DXF_PLACEMENT',
   internalDimensionStatus: 'VISUAL_ONLY_UNLESS_OEM_SPECIFIED',
   installedConfiguration: 'PHOTO_CONFIRMED_CD102_8_PLUS_L',
   repeatedHousings: 8,
-  photos: ['IMG_2312.jpeg','IMG_1970.jpeg','IMG_1971.jpeg','IMG_1656.jpeg','IMG_1624.jpeg','IMG_1625.jpeg','IMG_1626.jpeg','IMG_1627.jpeg','IMG_1628.jpeg','IMG_1628(2).jpeg','IMG_1629.jpeg','IMG_1630.jpeg','IMG_1631.jpeg','IMG_1633.jpeg','IMG_1634.jpeg','IMG_1165.jpeg','IMG_0947.jpeg','IMG_2388(2).jpeg','IMG_2391(1).jpeg','IMG_2392.jpeg','IMG_2389(1).jpeg','IMG_2390(1).jpeg','IMG_2395.jpeg','IMG_1662.jpeg'],
-  sourcePolicy: 'DXF_PLACEMENT_REFERENCE + USER_PHOTOS_EXTERIOR_AND_ACCESS + OEM_PDF_FUNCTIONAL_INTERNALS'
+  photos: ['IMG_2312.jpeg','IMG_1970.jpeg','IMG_1971.jpeg','IMG_1656.jpeg','IMG_1624.jpeg','IMG_1625.jpeg','IMG_1626.jpeg','IMG_1627.jpeg','IMG_1628.jpeg','IMG_1628(2).jpeg','IMG_1629.jpeg','IMG_1630.jpeg','IMG_1631.jpeg','IMG_1633.jpeg','IMG_1634.jpeg','IMG_1165.jpeg','IMG_0947.jpeg','IMG_2388(2).jpeg','IMG_2391(1).jpeg','IMG_2392.jpeg','IMG_2389(1).jpeg','IMG_2390(1).jpeg','IMG_2395.jpeg','IMG_1662.jpeg','IMG_2777.jpeg'],
+  sourcePolicy: 'DXF_PLACEMENT_REFERENCE + USER_PHOTOS_EXTERIOR_AND_ACCESS + IMG_2777_ON_MACHINE_ROLLER_DIAGRAM + OEM_PDF_FUNCTIONAL_INTERNALS'
 };
 const V=(a)=>new THREE.Vector3(...a);
 const OEM_ROLLER_VISUAL_RADIUS_PER_MM=.00073; // compact Fig.15 topology; nominal diameter remains metadata, not service scale
@@ -28,9 +28,9 @@ const OEM_ROLLER_VISUAL_RADIUS_PER_MM=.00073; // compact Fig.15 topology; nomina
 export class OffsetMachineTemplate {
   constructor(){
     this.root=new THREE.Group();this.root.name='MACHINE-OFFSET5';
-    this.root.userData={assetId:'MACHINE-OFFSET5',...PHOTO_RECONSTRUCTION,orientation:ORIENTATION,taxonomyVersion:'offset5-taxonomy-v17',machineEnvelope:OFFSET5_DIMENSIONS,dimensionAudit:offset5DimensionAudit()};
+    this.root.userData={assetId:'MACHINE-OFFSET5',...PHOTO_RECONSTRUCTION,orientation:ORIENTATION,taxonomyVersion:'offset5-taxonomy-v18',machineEnvelope:OFFSET5_DIMENSIONS,dimensionAudit:offset5DimensionAudit(),printingUnitReality:OFFSET5_ACTUAL_ROLLER_DIAGRAM,printingUnitExteriorPolicy:'SAME_PHOTO_GROUNDED_CD102_SHELL_ALL_EIGHT_PU__NO_SYNTHETIC_UNIT_COLOR_VARIATION'};
     this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.ghosted=false;this.exteriorOpen=false;
-    this.palette={graphite:0x30383d,black:0x151b20,silver:0xaeb8b8,steel:0x889598,light:0xd1d4c9,paper:0xeee9d5,rubber:0x20252a,glass:0x23333a,red:0xb33c32,yellow:0xe2b541,blue:0x243e70};
+    this.palette={graphite:0x30383d,black:0x151b20,silver:0xaeb8b8,steel:0x889598,chromium:0xcbd3d5,plastic:0xb9c0bc,light:0xd1d4c9,paper:0xeee9d5,rubber:0x20252a,rollerWhite:0xe8e7df,rollerRed:0xc4473f,rollerYellow:0xe4bf4e,rollerBlue:0x355d91,glass:0x23333a,red:0xb33c32,yellow:0xe2b541,blue:0x243e70};
     this.build();this.alignOperatorSide();this.enrichV122Feeder();this.batchMeshes();this.tagAdaptiveDetails();
     this.taxonomy=OFFSET5_TAXONOMY;this.taxonomyById=TAXONOMY_BY_ID;
     this.original=this.parts.map(p=>p.position.clone());
@@ -52,8 +52,9 @@ export class OffsetMachineTemplate {
   material(kind,owner){
     const key=owner.userData.nodeId+':'+kind;
     if(!this.materials.has(key)){
-      const surface=['silver','steel'].includes(kind)?'stainlessSteel':kind==='rubber'?'rubber':kind==='glass'?'safetyGlass':'paintedSteel';
-      const properties=kind==='paper'?{metalness:0,roughness:.9}:kind==='glass'?{opacity:.65}:['silver','steel'].includes(kind)?{roughness:.42,metalness:.65}:{metalness:.25,roughness:.46};
+      const rollerRubber=['rollerWhite','rollerRed','rollerYellow','rollerBlue'].includes(kind);
+      const surface=['silver','steel','chromium'].includes(kind)?'stainlessSteel':(kind==='rubber'||rollerRubber)?'rubber':kind==='glass'?'safetyGlass':'paintedSteel';
+      const properties=kind==='paper'?{metalness:0,roughness:.9}:kind==='glass'?{opacity:.65}:kind==='chromium'?{roughness:.19,metalness:.9}:kind==='plastic'?{roughness:.58,metalness:.04}:(kind==='rubber'||rollerRubber)?{roughness:.86,metalness:0}:['silver','steel'].includes(kind)?{roughness:.42,metalness:.65}:{metalness:.25,roughness:.46};
       this.materials.set(key,createIndustrialMaterial(surface,{color:this.palette[kind]??this.palette.graphite,...properties}));
     }
     return this.materials.get(key);
@@ -351,7 +352,7 @@ export class OffsetMachineTemplate {
     for(const z of [-.80,.80])this.box(top,[frameWidth-.20,.20,.08],[-.02,2.50,z],'graphite',.014);
     const bridge=this.group(g,`press-${i}-fountain-support`,`PU${i+1} · ink-fountain support bridge`,[0,0,0],[0,.42,-.55],['IMG_1628(2).jpeg','IMG_1970.jpeg','IMG_1971.jpeg'],'Twin end supports and transverse fountain member follow the photographed external arrangement. Internal roller relationships use the OEM roller map.');
     this.box(bridge,[.18,.10,1.56],[-.03,2.49,0],'graphite',.016);
-    this.box(bridge,[.10,.045,1.44],[-.10,2.545,0],i%3===0?'red':'steel',.010);
+    this.box(bridge,[.10,.045,1.44],[-.10,2.545,0],'steel',.010);
     for(const z of [-.73,.73]){
       const arm=this.box(bridge,[.10,.30,.075],[.12,2.35,z],'graphite',.015);arm.rotation.z=-.08;
       this.cylinder(bridge,.046,.080,[.14,2.20,z],'steel','z');
@@ -410,7 +411,7 @@ export class OffsetMachineTemplate {
 
     // Primary cylinder train: functional order only. The service PDF supports the
     // printing-pressure/register functions, while exact installed cylinder CAD is unavailable.
-    const cylinders=this.group(g,`${id}-cylinder-train`,`${label} · plate / blanket / impression / transfer cylinders`,[0,0,0],[0,.12,-.48],photos,'Cylinder order is reconstructed inside the photo-derived housing. Bearer diameters, gear train, pressure setting and angular timing are not engineering dimensions.');
+    const cylinders=this.group(g,`${id}-cylinder-train`,`${label} · plate / blanket / impression + transfer reference`,[0,0,0],[0,.12,-.48],[...photos,'IMG_2777.jpeg'],'IMG_2777 confirms the posted plate → blanket → impression sectional order. The transfer cylinder remains a functional/OEM reference because it is not shown on the supplied roller diagram. Bearer diameters, gear train, pressure setting and angular timing are not engineering dimensions.');
     const cylinderSpec=[
       ['plate cylinder reference',.215,[.16,1.79,0],'steel'],
       ['blanket cylinder reference',.245,[-.12,1.39,0],'rubber'],
@@ -422,8 +423,10 @@ export class OffsetMachineTemplate {
     if(i===0)this.root.userData.pu1CylinderLayout=this.root.userData.printingUnitCylinderLayout.PU1;
     const cylinderIds=['plate','blanket','impression','transfer'];
     cylinderSpec.forEach(([name,r,pos,kind],idx)=>{
-      const cg=this.group(cylinders,`${id}-cylinder-${cylinderIds[idx]}`,`${label} · ${name}`,[0,0,0],[0,.10,-.24],photos,'Cylinder body location is functional/photo-fitted; exact bearer/journal engineering dimensions are not asserted.');
-      const body=this.group(cg,`${id}-cylinder-${cylinderIds[idx]}-body`,`${label} · ${cylinderIds[idx]} cylinder body`,[0,0,0],[0,.06,-.12],photos);
+      const diagramConfirmed=idx<3,sourceFiles=diagramConfirmed?[...photos,'IMG_2777.jpeg']:photos;
+      const cg=this.group(cylinders,`${id}-cylinder-${cylinderIds[idx]}`,`${label} · ${name}`,[0,0,0],[0,.10,-.24],sourceFiles,diagramConfirmed?'Plate/blanket/impression order is confirmed by the actual on-machine roller diagram; displayed radius/center remains sectional visual geometry, not a service dimension.':'Transfer cylinder is retained as a functional/OEM reference; IMG_2777 does not show it.');
+      cg.userData.actualDiagramStatus=diagramConfirmed?'IMG_2777_TOPOLOGY_CONFIRMED':'FUNCTIONAL_REFERENCE_NOT_SHOWN_IN_IMG_2777';
+      const body=this.group(cg,`${id}-cylinder-${cylinderIds[idx]}-body`,`${label} · ${cylinderIds[idx]} cylinder body`,[0,0,0],[0,.06,-.12],sourceFiles);
       const roller=this.cylinder(body,r,1.52,pos,kind);roller.name=name;roller.userData.detail=true;
       const journals=this.group(cg,`${id}-cylinder-${cylinderIds[idx]}-journals`,`${label} · ${cylinderIds[idx]} journals / bearers reference`,[0,0,0],[0,.05,-.18],photos,'Journal/bearer geometry is an inspection reference only.');
       for(const z of [-.79,.79]){const jr=this.cylinder(journals,Math.max(.045,r*.26),.07,[pos[0],pos[1],z],'steel','z');jr.userData.detail=true;this.ring(journals,r*.91,.018,[pos[0],pos[1],z>0?.755:-.755],'steel','z').userData.detail=true;}
@@ -466,19 +469,17 @@ export class OffsetMachineTemplate {
     this.box(dampPan,[.26,.028,1.30],[.72,1.68,0],'glass',.008);
     for(const z of [-.64,.64])this.tube(dampPan,[[.73,1.68,z],[.78,1.57,z],[.72,1.46,z]],.014,z<0?'blue':'rubber');
     const dampForm=this.group(g,`${id}-dampening-form`,`${label} · dampening roller map 16–19 + FR`,[0,0,0],[.26,.46,-.28],[...photos,'SMCD102_roller_remove_procedure.pdf'],'OEM Fig. 15 topology: dampening rollers sit to the right of the plate cylinder. Nominal diameters are preserved; coordinates are sectional visual references.');
-    const dampRollers=[
-      ['17','Intermediate roller ZW',56,[.4273,1.9372,0],'steel'],
-      ['16','Dampening form roller FEAW',78,[.4370,1.8307,0],'rubber'],
-      ['19','Metering roller DW',98,[.5764,1.8597,0],'steel'],
-      ['FR','Dampening distributor FR',85,[.4796,1.7067,0],'steel'],
-      ['18','Water pan roller T',108,[.7082,1.7571,0],'rubber']
-    ];
-    for(const [code,name,diameter,pos,kind] of dampRollers){
-      const roller=this.group(dampForm,`${id}-damp-roller-${code}`,`${label} · ${code} ${name}`,[0,0,0],[0,.18,-.24],[...photos,'SMCD102_roller_remove_procedure.pdf'],`OEM nominal diameter ${diameter} mm; coordinates are sectional visual references.`);
-      const body=this.group(roller,`${id}-damp-roller-${code}-body`,`${label} · ${code} roller body`,[0,0,0],[0,.08,-.10],['SMCD102_roller_remove_procedure.pdf']);
-      markDetail(this.cylinder(body,diameter*OEM_ROLLER_VISUAL_RADIUS_PER_MM,1.30,pos,kind));
+    for(const spec of OFFSET5_DAMPENING_ROLLERS){
+      const {code,designation,diameterMM,sectionCenter:pos,materialKind,surface,diagramAlias,crowned=false}=spec;
+      const alias=diagramAlias&&diagramAlias!==code?` / ${diagramAlias}`:'';
+      const sourceFiles=[...photos,'IMG_2777.jpeg','SMCD102_roller_remove_procedure.pdf'];
+      const roller=this.group(dampForm,`${id}-damp-roller-${code}`,`${label} · ${code}${alias} ${designation}`,[0,0,0],[0,.18,-.24],sourceFiles,`IMG_2777 actual on-machine table: nominal Ø${diameterMM} mm · ${surface}${crowned?' · crowned':''}. Coordinates are sectional visual references, not nip settings.`);
+      Object.assign(roller.userData,{diagramCode:code,diagramAlias,nominalDiameterMM:diameterMM,rollerSurface:surface,crowned,actualDiagramSource:'IMG_2777.jpeg',actualDiagramVerified:true});
+      const body=this.group(roller,`${id}-damp-roller-${code}-body`,`${label} · ${code} roller body`,[0,0,0],[0,.08,-.10],sourceFiles);
+      const mesh=markDetail(this.cylinder(body,diameterMM*OEM_ROLLER_VISUAL_RADIUS_PER_MM,1.30,pos,materialKind));
+      Object.assign(mesh.userData,{diagramCode:code,nominalDiameterMM:diameterMM,rollerSurface:surface,crowned,actualDiagramSource:'IMG_2777.jpeg'});
       const journals=this.markServiceDetail(this.group(roller,`${id}-damp-roller-${code}-journals`,`${label} · ${code} journals / locks`,[0,0,0],[0,.06,-.14],['SMCD102_roller_remove_procedure.pdf'],'Journal/lock locations remain available in the hierarchy but are hidden from the open-machine overview so they are not mistaken for extra rollers.'));
-      for(const z of [-.69,.69])markDetail(this.cylinder(journals,Math.max(.018,diameter*.00026),.10,[pos[0],pos[1],z],'steel','z'));
+      for(const z of [-.69,.69])markDetail(this.cylinder(journals,Math.max(.018,diameterMM*.00026),.10,[pos[0],pos[1],z],'steel','z'));
     }
 
     const plateClamp=this.group(g,`${id}-plate-clamp`,`${label} · plate-cylinder clamp / AutoPlate reference`,[0,0,0],[.12,.18,.42],[...photos,'pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Plate-clamping function is supported by the supplied CD102 manual. Clamp geometry and register setting are not reconstructed as service dimensions.');
@@ -493,24 +494,28 @@ export class OffsetMachineTemplate {
     // Journal geometry intentionally omitted from the overview model; the service node remains available for taxonomy.
     const inking=this.group(g,`${id}-inking-train`,`${label} · inking roller train 1–15`,[0,0,0],[0,.68,.25],[...photos,'SMCD102_roller_remove_procedure.pdf'],'Roller numbers 1–15 and distributor rollers A–D follow the supplied OEM topology. Coordinates are fitted inside the photographed housing without volumetric overlap.');
     // Positions below are redrawn from OEM Fig. 15 connectivity, not distributed as a generic grid.
-    const rollerMap=[
-      ['13','Inking form roller 4',80,[-.0259,2.0031,0],'rubber'],['2','Inking form roller 3',66,[.1019,2.0515,0],'rubber'],['1','Inking form roller 2',72,[.2336,2.0554,0],'rubber'],['14','Inking form roller 1',60,[.3421,1.9759,0],'rubber'],
-      ['3','Ink transfer roller',56,[.1639,2.1309,0],'steel'],['4','Ink transfer roller',80,[.3111,2.2123,0],'rubber'],['5','Ink transfer roller',68,[.2065,2.2607,0],'steel'],['6','Ink transfer roller',72,[.1019,2.2161,0],'rubber'],['7','Ink transfer roller',56,[.0380,2.2955,0],'steel'],['8','Ink transfer roller',60,[-.0279,2.2355,0],'rubber'],['9','Ink transfer roller',66,[.4467,2.1658,0],'rubber'],['10','Ink transfer roller',56,[.5474,2.1696,0],'steel'],['11','Ink transfer roller',80,[.4447,2.4040,0],'rubber'],['12','Ink transfer roller',68,[.5532,2.4389,0],'steel'],['15','Ink vibrator / ductor',59,[.1484,2.5783,0],'rubber']
-    ];
-    for(const [code,name,diameter,pos,kind] of rollerMap){
-      const roller=this.group(inking,`${id}-ink-roller-${code}`,`${label} · ${code} ${name}`,[0,0,0],[0,.22,.20],[...photos,'SMCD102_roller_remove_procedure.pdf'],`OEM nominal diameter ${diameter} mm; visual position follows the supplied roller topology.`);
-      const body=this.group(roller,`${id}-ink-roller-${code}-body`,`${label} · roller ${code} body`,[0,0,0],[0,.08,.10],['SMCD102_roller_remove_procedure.pdf']);
-      markDetail(this.cylinder(body,diameter*OEM_ROLLER_VISUAL_RADIUS_PER_MM,1.30,pos,kind));
+    for(const spec of OFFSET5_INKING_ROLLERS){
+      const {code,designation,diameterMM,sectionCenter:pos,materialKind,surface,colorCode}=spec;
+      const sourceFiles=[...photos,'IMG_2777.jpeg','SMCD102_roller_remove_procedure.pdf'];
+      const roller=this.group(inking,`${id}-ink-roller-${code}`,`${label} · ${code} ${designation}`,[0,0,0],[0,.22,.20],sourceFiles,`IMG_2777 actual on-machine table: nominal Ø${diameterMM} mm · ${surface}${colorCode?` · ${colorCode} identification`:''}. Position follows the posted sectional topology; not a nip-setting coordinate.`);
+      Object.assign(roller.userData,{diagramCode:code,nominalDiameterMM:diameterMM,rollerSurface:surface,rollerColorCode:colorCode,actualDiagramSource:'IMG_2777.jpeg',actualDiagramVerified:true});
+      const body=this.group(roller,`${id}-ink-roller-${code}-body`,`${label} · roller ${code} body`,[0,0,0],[0,.08,.10],sourceFiles);
+      const mesh=markDetail(this.cylinder(body,diameterMM*OEM_ROLLER_VISUAL_RADIUS_PER_MM,1.30,pos,materialKind));
+      Object.assign(mesh.userData,{diagramCode:code,nominalDiameterMM:diameterMM,rollerSurface:surface,rollerColorCode:colorCode,actualDiagramSource:'IMG_2777.jpeg'});
       const journals=this.markServiceDetail(this.group(roller,`${id}-ink-roller-${code}-journals`,`${label} · roller ${code} journals / locks`,[0,0,0],[0,.06,-.12],['SMCD102_roller_remove_procedure.pdf'],'Journal/lock hardware remains selectable in the hierarchy but is hidden in the open-machine overview to avoid a false extra-roller appearance.'));
-      for(const z of [-.69,.69])markDetail(this.cylinder(journals,Math.max(.018,diameter*.00026),.10,[pos[0],pos[1],z],'steel','z'));
+      for(const z of [-.69,.69])markDetail(this.cylinder(journals,Math.max(.018,diameterMM*.00026),.10,[pos[0],pos[1],z],'steel','z'));
     }
     for(const z of [-.75,.75])this.markExteriorCover(this.box(inking,[.48,.42,.055],[.03,2.14,z],'graphite',.018));
 
     const distribution=this.group(g,`${id}-inking-distribution`,`${label} · distributor rollers A–D`,[0,0,0],[0,.62,.22],[...photos,'SMCD102_roller_remove_procedure.pdf'],'A–D are 85 mm nominal distributor rollers. Their relative locations are redrawn from OEM Fig. 15 so contact relationships match the documented roller train.');
-    for(const [code,pos] of [['A',[.3246,2.4447,0]],['B',[.4118,2.2820,0]],['C',[.3479,2.0922,0]],['D',[.0109,2.1290,0]]]){
-      const roller=this.group(distribution,`${id}-ink-distributor-${code}`,`${label} · Distributor ${code}`,[0,0,0],[0,.20,.18],[...photos,'SMCD102_roller_remove_procedure.pdf'],'OEM nominal diameter 85 mm.');
-      const body=this.group(roller,`${id}-ink-distributor-${code}-body`,`${label} · distributor ${code} body`,[0,0,0],[0,.08,.10],['SMCD102_roller_remove_procedure.pdf']);
-      markDetail(this.cylinder(body,85*OEM_ROLLER_VISUAL_RADIUS_PER_MM,1.30,pos,'steel'));
+    for(const spec of OFFSET5_INK_DISTRIBUTORS){
+      const {code,designation,diameterMM,sectionCenter:pos,materialKind,surface}=spec;
+      const sourceFiles=[...photos,'IMG_2777.jpeg','SMCD102_roller_remove_procedure.pdf'];
+      const roller=this.group(distribution,`${id}-ink-distributor-${code}`,`${label} · Distributor ${code}`,[0,0,0],[0,.20,.18],sourceFiles,`IMG_2777 actual on-machine table: nominal Ø${diameterMM} mm · ${surface}.`);
+      Object.assign(roller.userData,{diagramCode:code,designation,nominalDiameterMM:diameterMM,rollerSurface:surface,actualDiagramSource:'IMG_2777.jpeg',actualDiagramVerified:true});
+      const body=this.group(roller,`${id}-ink-distributor-${code}-body`,`${label} · distributor ${code} body`,[0,0,0],[0,.08,.10],sourceFiles);
+      const mesh=markDetail(this.cylinder(body,diameterMM*OEM_ROLLER_VISUAL_RADIUS_PER_MM,1.30,pos,materialKind));
+      Object.assign(mesh.userData,{diagramCode:code,nominalDiameterMM:diameterMM,rollerSurface:surface,actualDiagramSource:'IMG_2777.jpeg'});
       const journals=this.markServiceDetail(this.group(roller,`${id}-ink-distributor-${code}-journals`,`${label} · distributor ${code} journals`,[0,0,0],[0,.06,-.12],['SMCD102_roller_remove_procedure.pdf'],'Bearing/journal hardware is hidden in overview cutaway and retained for hierarchy/service inspection.'));
       for(const z of [-.69,.69])markDetail(this.cylinder(journals,.026,.10,[pos[0],pos[1],z],'steel','z'));
     }
