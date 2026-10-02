@@ -15,9 +15,10 @@ import * as THREE from 'three';
 import {OffsetMachineTemplate} from './offset5.js';
 import {PrintingSimulation} from './simulation.js';
 import {OFFSET5_DIMENSIONS,OFFSET5_UNIT_CENTERS} from './data/dimensions-offset5.js';
+import {OFFSET5_ACTUAL_ROLLER_DIAGRAM,OFFSET5_INKING_ROLLERS,OFFSET5_INK_DISTRIBUTORS,OFFSET5_DAMPENING_ROLLERS} from './data/sources-offset5.js';
 
 export const OFFSET5_FINAL_REFINEMENT=Object.freeze({
-  id:'OFFSET5_CD102_8L_CUSTOM_INSTALLED_REALITY_R5',
+  id:'OFFSET5_CD102_8L_CUSTOM_INSTALLED_REALITY_R6_ACTUAL_PU_DIAGRAM',
   machine:'Heidelberg Speedmaster CD 102-8+L',
   asset:'MACHINE-OFFSET5',
   sap:'OFU-1',
@@ -25,6 +26,7 @@ export const OFFSET5_FINAL_REFINEMENT=Object.freeze({
   policy:'PRESERVE_BMJ_CUSTOM_INSTALLED_DIMENSIONS__ENRICH_EXISTING_NODES_ONLY__NO_DUPLICATE_PROCESS_HARDWARE',
   sourcePriority:[
     'BMJ Offset 5 photos + calibrated DXF',
+    'IMG_2777 actual on-machine Heidelberg CD-102 roller diagram',
     'supplied CD102 OEM service/roller documentation',
     'HEIDELBERG CD102 family product information',
     'USER-CONFIRMED BMJ custom installed dimensions and inter-unit access take precedence over generic family dimensions',
@@ -637,10 +639,10 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       sheet.userData.contactColorRevision=-1;
       this.setSheetColors(sheet,0);
     }
-    return super.start();
+    super.start();this.applyDampeningFilm(true);return this.state();
   }
   stop(){
-    super.stop();
+    super.stop();this.applyDampeningFilm(false);
     for(const sheet of this.sheets){
       sheet.userData.contactRowMasks?.fill(0);
       sheet.userData.contactColorRevision=-1;
@@ -660,13 +662,32 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
   buildFluidFlows(){this.fluidFlows=[];}
   collectInkSurfaces(){
     super.collectInkSurfaces();
-    const rollerMaterials=new Set();
+    const rollerMaterials=new Set(),inkCodes=OFFSET5_INKING_ROLLERS.map(spec=>spec.code),distributorCodes=OFFSET5_INK_DISTRIBUTORS.map(spec=>spec.code);
     for(let i=0;i<8;i++){
-      for(const id of [`press-${i}-ink-fountain-roller-body`,...['13','2','1','14','3','4','5','6','7','8','9','10','11','12','15'].map(code=>`press-${i}-ink-roller-${code}-body`)]){
-        this.template.findNode(id)?.traverse(mesh=>{if(mesh.isMesh&&mesh.material)rollerMaterials.add(mesh.material);});
-      }
+      for(const id of [
+        `press-${i}-ink-fountain-roller-body`,
+        ...inkCodes.map(code=>`press-${i}-ink-roller-${code}-body`),
+        ...distributorCodes.map(code=>`press-${i}-ink-distributor-${code}-body`)
+      ])this.template.findNode(id)?.traverse(mesh=>{if(mesh.isMesh&&mesh.material)rollerMaterials.add(mesh.material);});
     }
+    // Ink belongs on the actual inking train and A-D distributors. Do not make plate/blanket
+    // cylinders glow as a proxy for ink, and do not create free-floating ink droplets.
     this.inkSurfaces=this.inkSurfaces.filter(surface=>rollerMaterials.has(surface.material));
+  }
+  collectDampeningSurfaces(){
+    this.dampeningSurfaces=[];const seen=new Set(),codes=OFFSET5_DAMPENING_ROLLERS.map(spec=>spec.code);
+    for(let i=0;i<8;i++)for(const code of codes)this.template.findNode(`press-${i}-damp-roller-${code}-body`)?.traverse(mesh=>{
+      const material=mesh.isMesh?mesh.material:null;
+      if(!material?.emissive||seen.has(material))return;
+      seen.add(material);this.dampeningSurfaces.push({material,initialEmissive:material.emissive.clone(),initialIntensity:material.emissiveIntensity});
+    });
+  }
+  applyDampeningFilm(on){
+    for(const item of this.dampeningSurfaces||[]){
+      if(on){item.material.emissive.setHex(0x315566);item.material.emissiveIntensity=.035;}
+      else{item.material.emissive.copy(item.initialEmissive);item.material.emissiveIntensity=item.initialIntensity;}
+      item.material.needsUpdate=true;
+    }
   }
   collectMechanicalMotion(){
     super.collectMechanicalMotion();
@@ -691,6 +712,8 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
     // Every straight-printing unit has the same installed handedness. The legacy simulator flipped
     // the ink/dampening train by PU parity, making PU2/4/6/8 visibly run backwards. Preserve the
     // existing relative roller pattern but normalize it identically across all eight PUs.
+    // Rotation remains an explanatory contact-motion reference. IMG_2777 validates identity/topology,
+    // but does not publish service timing or every roller rotation arrow, so no service claim is inferred.
     const inkCodes=['13','2','1','14','3','4','5','6','7','8','9','10','11','12','15'];
     const dampCodes=['16','17','FR','19','18'];
     const rotorFor=id=>this.rotors.find(item=>item.mesh?.userData?.ownerId===id);
@@ -855,6 +878,7 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
     this.joggerMotions=this.joggerMotions.filter(o=>!o.object?.userData?.exteriorCover);
     for(const item of this.gripperMotions)item.initialRotationZ=item.object.rotation.z;
     this.collectInspectionIllumination();
+    this.collectDampeningSurfaces();
     this.deliveryTableMesh=this.template.findNode('delivery-pile')?.children.find(o=>o.isMesh)||null;
     this.deliveryTableInitialY=this.deliveryTableMesh?.position.y;
     this.deliveryTableDrop=0;
@@ -864,6 +888,9 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
     return {
       ...super.state(),
       realismPack:this.realismPack,
+      rollerDiagramRevision:OFFSET5_ACTUAL_ROLLER_DIAGRAM.revision,
+      rollerDiagramSource:OFFSET5_ACTUAL_ROLLER_DIAGRAM.sourceFile,
+      rollerDiagramBoundary:OFFSET5_ACTUAL_ROLLER_DIAGRAM.boundary,
       motionPolicy:'ROLE_TAGGED_PROCESS_PARTS_ONLY',
       duplicateProcessHardwareAdded:false,
       focusightLocationPolicy:'DOWNSTREAM_AFTER_COATING_DRYING',
@@ -875,6 +902,9 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       interUnitAccessPolicy:'BMJ_CUSTOM_BROAD_INTERUNIT_ACCESS_AND_OS_DS_STEPS_PRESERVED',
       inkRepresentation:'THIN_ROLLER_FILM_ONLY_NO_FREE_FLOATING_DROPLETS',
       inkRollerCount:this.inkSurfaces.length,
+      dampeningRollerSurfaceCount:this.dampeningSurfaces?.length||0,
+      rollerSurfacePolicy:'IMG_2777_ACTUAL_TABLE_FOR_1_19_A_D_FR__NO_GENERIC_RILSAN_STEEL_SWAPS',
+      dampeningRepresentation:'SUBTLE_ROLLER_FILM_ONLY__NO_FLOATING_WATER_PARTICLES',
       printRepresentation:'PROGRESSIVE_TRANSVERSE_COLOUR_BANDS_PER_PU_DEMO',
       cylinderMotionPolicy:'SAME_STRAIGHT_PRINT_DIRECTION_ALL_PU_CONTACT_PAIRS_COUNTER_ROTATE',
       sheetVisualPolicy:'NO_EXTERNAL_FULL_WIDTH_DEMO_GRIPPER_BAR',
