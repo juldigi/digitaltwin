@@ -298,6 +298,14 @@ test('V319 simulation uses actual inking/distributor/dampening surfaces while ke
     assert.ok(rotor,`PU${i} missing ${role}`);
     assert.equal(rotor.sign,sign,`PU${i} ${role} rotation sense disagrees with V319 dampening topology`);
    }
+   const form14=sim.rotors.find(r=>r.role===`PU${i}-ink-roller-14`);
+   const intermediate17=sim.rotors.find(r=>r.role===`PU${i}-damp-roller-17`);
+   assert.ok(form14?.crossSystemContact&&intermediate17?.crossSystemContact,`PU${i} 14↔17/ZW cross-system contact metadata missing`);
+   assert.equal(form14.crossSystemContact.pair,'14<->17/ZW');
+   assert.equal(intermediate17.crossSystemContact.pair,'14<->17/ZW');
+   assert.equal(form14.crossSystemContact.oemStripeReferenceMM,'3 +1');
+   assert.equal(form14.crossSystemContact.installedStripeVerified,false);
+   assert.equal(form14.sign,-intermediate17.sign,`PU${i} 14 and 17/ZW must counter-rotate at their cross-system contact`);
   }
   for(let i=1;i<=8;i++){
    const vib=sim.oscillators.find(o=>o.role===`PU${i}-ink-vibrator-15`);
