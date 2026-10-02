@@ -9,13 +9,13 @@ const sw=read('../frontend/sw.js');
 const state=read('../frontend/src/state/app-state.js');
 
 test('V273 derives every production freshness identifier from one frontend fingerprint',()=>{
- assert.match(build,/const RELEASE_LABEL='2026\.10\.01-273'/);
+ assert.match(build,/const RELEASE_LABEL=`2026\.10\.03-\$\{buildFingerprint\}`/);
  assert.match(build,/const buildFingerprint=fingerprint\.digest\('hex'\)\.slice\(0,16\)/);
  assert.match(build,/const VERSION='factory-digital-twin-\$\{buildFingerprint\}'/);
  assert.match(build,/const RELEASE='\$\{buildFingerprint\}'/);
  assert.match(build,/\?v=\$\{buildFingerprint\}/);
  assert.match(build,/bmj-sw-\$\{buildFingerprint\}-reloaded/);
- assert.match(build,/APP_BUILD='\$\{RELEASE_LABEL\}-\$\{buildFingerprint\}'/);
+ assert.match(build,/APP_BUILD='\$\{RELEASE_LABEL\}'/);
 });
 
 test('V273 leaves the historical source release contract intact and fingerprints dist only',()=>{
