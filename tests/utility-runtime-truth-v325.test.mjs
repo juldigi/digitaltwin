@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import * as THREE from 'three';
 import {
  UTILITY_RUNTIME_CONTRACTS,
  createMachineTemplate,
@@ -84,8 +85,8 @@ test('V325 SANSIN AHU 7 preserves two-stage family cooling and separate outdoor 
   sim.start();let now=1000;sim.update(now),seenWet=false,seenDx=false,seenOutdoor=false;
   for(let i=0;i<900;i++){now+=20;sim.update(now);const s=sim.state();seenWet||=s.evaporativePrecoolActive;seenDx||=s.dxEvaporatorActive;seenOutdoor||=s.outdoorHeatRejectionActive;assert.equal(s.genericCoilConditioningActive,false);}
   assert.equal(seenWet,true);assert.equal(seenDx,true);assert.equal(seenOutdoor,true);
-  const indoor=template.findNode('universal-module-4').getWorldPosition(new (await import('three')).Vector3());
-  const outdoor=template.findNode('universal-module-5').getWorldPosition(new (await import('three')).Vector3());
+  const indoor=template.findNode('universal-module-4').getWorldPosition(new THREE.Vector3());
+  const outdoor=template.findNode('universal-module-5').getWorldPosition(new THREE.Vector3());
   assert.ok(outdoor.distanceTo(indoor)>1.2);
  }finally{sim.dispose();template.dispose();}
 });
