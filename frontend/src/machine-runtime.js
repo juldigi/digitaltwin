@@ -356,7 +356,7 @@ export function validateInspectionTemplate(template,key,{throwOnError=false}={})
   }
  }
  const result=Object.freeze({valid:errors.length===0,errors:Object.freeze(errors),contract,assetId});
- if(root){root.userData.inspectionRuntimeTruthLock=result.valid?'PASS':'FAIL';root.userData.inspectionRuntimeTruthErrors=errors.map(e=>e.code+':'+e.detail).join('|');}
+ if(root){root.userData.inspectionRuntimeTruthVersion='V323';root.userData.inspectionRuntimeTruthLock=result.valid?'PASS':'FAIL';root.userData.inspectionRuntimeTruthErrors=errors.map(e=>e.code+':'+e.detail).join('|');}
  if(throwOnError&&!result.valid)throw new Error('Inspection runtime truth-lock failed for '+assetId+': '+root?.userData?.inspectionRuntimeTruthErrors);
  return result;
 }
@@ -382,7 +382,7 @@ export function validateInspectionSimulation(simulation,template,key,{throwOnErr
   if(state?.returnBranchPolicy!=='TRACKED_BLANK_BRANCHES_FROM_DECISION_SPLIT_TO_GOOD_OR_BAD_RETURN_ENTRY')fail('SHARK_TRACKING_POLICY',state?.returnBranchPolicy);
  }
  const result=Object.freeze({valid:errors.length===0,errors:Object.freeze(errors),contract,assetId});
- if(template?.root){template.root.userData.inspectionSimulationTruthLock=result.valid?'PASS':'FAIL';template.root.userData.inspectionSimulationTruthErrors=errors.map(e=>e.code+':'+e.detail).join('|');}
+ if(template?.root){template.root.userData.inspectionSimulationTruthVersion='V323';template.root.userData.inspectionSimulationTruthLock=result.valid?'PASS':'FAIL';template.root.userData.inspectionSimulationTruthErrors=errors.map(e=>e.code+':'+e.detail).join('|');}
  if(throwOnError&&!result.valid)throw new Error('Inspection simulation truth-lock failed for '+assetId+': '+template?.root?.userData?.inspectionSimulationTruthErrors);
  return result;
 }
