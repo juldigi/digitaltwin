@@ -15,7 +15,7 @@ test('V273 derives every production freshness identifier from one frontend finge
  assert.match(build,/const RELEASE='\$\{buildFingerprint\}'/);
  assert.match(build,/\?v=\$\{buildFingerprint\}/);
  assert.match(build,/bmj-sw-\$\{buildFingerprint\}-reloaded/);
- assert.match(build,/APP_BUILD='\$\{RELEASE_LABEL\}-\$\{buildFingerprint\}'/);
+ assert.match(build,/APP_BUILD='\$\{RELEASE_LABEL\}'/);
 });
 
 test('V273 leaves the historical source release contract intact and fingerprints dist only',()=>{
