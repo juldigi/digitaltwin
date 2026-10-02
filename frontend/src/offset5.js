@@ -577,22 +577,19 @@ export class OffsetMachineTemplate {
     const rakel=this.group(g,`${id}-rakel-reference`,`${label} · RAKEL callout reference`,[0,0,0],[.10,.18,.28],['IMG_2777.jpeg'],'IMG_2777 places the RAKEL callout beside the lower-left inking cluster near distributor D / form-roller region. Blade loading and installed adjustment geometry are not asserted.');
     Object.assign(rakel.userData,{actualDiagramSource:'IMG_2777.jpeg',callout:'RAKEL',serviceSettingAsserted:false});
     const rakelBlade=this.box(rakel,[.030,.095,1.12],[-.080,2.125,0],'steel',.005);rakelBlade.rotation.z=-.18;rakelBlade.userData.detail=true;
-    for(const z of [-.58,.58])this.box(rakel,[.075,.060,.050],[-.105,2.13,z],'graphite',.007).userData.detail=true;
+    rakel.userData.visualAbstraction='SINGLE_BLADE_ZONE__END_SUPPORTS_METADATA_ONLY';
 
     const inkAir=this.group(g,`${id}-air-blower-ink`,`${label} · AIR BLOWER · upper inking callout`,[0,0,0],[.14,.16,.34],['IMG_2777.jpeg'],'IMG_2777 shows an AIR BLOWER callout at the right side of the upper inking cluster. No pressure, nozzle size or exact installed manifold specification is inferred.');
-    Object.assign(inkAir.userData,{actualDiagramSource:'IMG_2777.jpeg',callout:'AIR_BLOWER_UPPER_INKING',serviceSettingAsserted:false});
-    for(const z of [-.42,0,.42]){const nozzle=this.cylinder(inkAir,.010,.10,[.625,2.18,z],'steel','x');nozzle.userData.detail=true;}
+    Object.assign(inkAir.userData,{actualDiagramSource:'IMG_2777.jpeg',callout:'AIR_BLOWER_UPPER_INKING',serviceSettingAsserted:false,nozzleCountInstalled:'UNKNOWN',visualAbstraction:'SINGLE_MANIFOLD_ZONE'});
     this.box(inkAir,[.08,.06,1.02],[.67,2.18,0],'graphite',.008).userData.detail=true;
 
     const nipAir=this.group(g,`${id}-air-blower-nip`,`${label} · AIR BLOWER · blanket / impression nip callout`,[0,0,0],[.16,.12,.34],['IMG_2777.jpeg'],'IMG_2777 shows multiple AIR BLOWER arrows near the blanket-to-impression sheet path. The model represents only the callout zone and nozzle direction.');
-    Object.assign(nipAir.userData,{actualDiagramSource:'IMG_2777.jpeg',callout:'AIR_BLOWER_BLANKET_IMPRESSION_ZONE',serviceSettingAsserted:false});
-    for(const z of [-.44,0,.44]){const nozzle=this.cylinder(nipAir,.011,.12,[.36,1.18,z],'steel','x');nozzle.rotation.z=-.20;nozzle.userData.detail=true;}
+    Object.assign(nipAir.userData,{actualDiagramSource:'IMG_2777.jpeg',callout:'AIR_BLOWER_BLANKET_IMPRESSION_ZONE',serviceSettingAsserted:false,nozzleCountInstalled:'UNKNOWN',visualAbstraction:'SINGLE_MANIFOLD_ZONE'});
     this.box(nipAir,[.08,.055,1.06],[.42,1.20,0],'graphite',.008).userData.detail=true;
 
     const waterFeed=this.group(g,`${id}-water-feed-reference`,`${label} · WATER feed callout near roller 18/T`,[0,0,0],[.20,.14,-.30],['IMG_2777.jpeg'],'IMG_2777 labels WATER at the 18/T water-pan-roller zone. Hose routing is illustrative; solution composition, level, pressure and flow are not service data.');
-    Object.assign(waterFeed.userData,{actualDiagramSource:'IMG_2777.jpeg',callout:'WATER_18_T_ZONE',serviceSettingAsserted:false});
+    Object.assign(waterFeed.userData,{actualDiagramSource:'IMG_2777.jpeg',callout:'WATER_18_T_ZONE',serviceSettingAsserted:false,visualAbstraction:'SINGLE_HOSE_ROUTE'});
     this.tube(waterFeed,[[.80,1.50,-.54],[.80,1.64,-.48],[.73,1.75,-.42]],.010,'blue').userData.detail=true;
-    this.box(waterFeed,[.11,.07,.08],[.79,1.50,-.54],'graphite',.008).userData.detail=true;
 
     // Register drives are located on the operator side in the supplied service manual.
     const register=this.group(g,`${id}-register-drives`,`${label} · register adjustment drives`,[0,0,0],[.18,.20,.72],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Diagonal, lateral and circumferential register drives are functionally located on the operator side; housings are simplified visual references.');
