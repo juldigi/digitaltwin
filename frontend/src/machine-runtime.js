@@ -151,7 +151,12 @@ export function validateAutoplatenTemplate(template,key,{throwOnError=false}={})
   if(u.taxonomyVersion!==contract.taxonomyVersion)fail('TAXONOMY_VERSION',u.taxonomyVersion);
   if(u.engineeringDimensions!==false)fail('ENGINEERING_DIMENSION_BOUNDARY',u.engineeringDimensions);
   if(!String(u.geometryStatus||'').includes(contract.geometryBoundary))fail('GEOMETRY_BOUNDARY',u.geometryStatus);
-  for(const id of contract.coreNodes)if(!template.findNode?.(id))fail('CORE_NODE_MISSING',id);
+  for(const id of contract.coreNodes){
+   const node=template.findNode?.(id);
+   if(!node){fail('CORE_NODE_MISSING',id);continue;}
+   let attached=false;for(let p=node;p;p=p.parent)if(p===root){attached=true;break;}
+   if(!attached)fail('CORE_NODE_DETACHED',id);
+  }
   const taxonomy=template.taxonomy||[],levels=new Set(taxonomy.map(n=>n.level));
   for(let level=1;level<=6;level++)if(!levels.has(level))fail('TAXONOMY_LEVEL_MISSING',level);
   const plates=[];root.traverse?.(o=>{if(o.userData?.identityPlacard)plates.push(o.userData.identityPlacard);});
