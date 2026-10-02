@@ -21,7 +21,7 @@ const expectedInk={
  '4':[80,'rubber-coated','yellow'],'5':[68,'plastic-coated',null],'6':[72,'rubber-coated','blue'],
  '7':[56,'plastic-coated',null],'8':[60,'rubber-coated','white'],'9':[66,'rubber-coated','red'],
  '10':[56,'plastic-coated',null],'11':[80,'rubber-coated','yellow'],'12':[68,'plastic-coated',null],
- '13':[80,'rubber-coated','yellow'],'14':[60,'rubber-coated','white'],'15':[59,'rubber-coated',null]
+ '13':[80,'rubber-coated','yellow'],'14':[60,'rubber-coated','white'],'15':[59,'rubber-coated','white']
 };
 const expectedDist={A:[85,'stainless steel'],B:[85,'plastic-coated'],C:[85,'plastic-coated'],D:[85,'plastic-coated']};
 const expectedDamp={
