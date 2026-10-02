@@ -25,8 +25,8 @@ test('service-worker Phase-1 shell cache references only deployable frontend fil
  for(const path of paths)assert.ok(cacheSourceExists(path),path+' is listed in sw.js but is neither a frontend source nor a build-generated Three.js asset');
 });
 
-test('service-worker cache version advances with the V270 flagship UI release',()=>{
- assert.match(sw,/factory-digital-twin-v270-flagship-ui-20260930/);
+test('service-worker cache version advances with the V319 Offset 5 pilot correction',()=>{
+ assert.match(sw,/factory-digital-twin-v319-offset5-actual-pu-20261002/);
 });
 
 test('service-worker does not pre-cache technical expansion machine modules',()=>{
