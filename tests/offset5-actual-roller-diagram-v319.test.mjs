@@ -157,6 +157,9 @@ test('V319 live geometry repeats corrected PU roller metadata across all eight u
  try{
   assert.equal(m.root.userData.taxonomyVersion,'offset5-taxonomy-v18');
   assert.equal(m.root.userData.printingUnitReality.revision,'offset5-print-unit-reality-v319');
+  assert.equal(m.root.userData.rollerEvidencePolicyRevision,'offset5-roller-evidence-policy-v320');
+  assert.equal(m.root.userData.rollerEvidenceConflictCount,5);
+  assert.match(m.root.userData.rollerEvidenceConflictRule,/INSTALLED_DIAGRAM_WINS/);
   for(let i=0;i<8;i++){
    for(const spec of OFFSET5_INKING_ROLLERS){
     const body=m.findNode(`press-${i}-ink-roller-${spec.code}-body`);
