@@ -126,6 +126,8 @@ test('V319 live geometry repeats corrected PU roller metadata across all eight u
   assert.ok(pu1damp17.material.roughness>.8,'17/ZW must visually read as rubber-coated');
   assert.ok(pu1damp18.material.metalness<.1,'18/T must visually read as plastic-coated');
   assert.ok(pu1damp19.material.roughness>.8,'19/DW must visually read as rubber-coated');
+  assert.equal(pu1damp19.geometry.userData.crowned,true,'19/DW must use crowned geometry, not only crowned metadata');
+  assert.equal(pu1damp19.geometry.userData.crownRatio,.025);
   assert.ok(pu1fr.material.metalness>.8,'FR must visually read as chromium-plated');
  }finally{m.dispose();}
 });
