@@ -15,7 +15,7 @@ import * as THREE from 'three';
 import {OffsetMachineTemplate} from './offset5.js';
 import {PrintingSimulation} from './simulation.js';
 import {OFFSET5_DIMENSIONS,OFFSET5_UNIT_CENTERS} from './data/dimensions-offset5.js';
-import {OFFSET5_ACTUAL_ROLLER_DIAGRAM,OFFSET5_INKING_ROLLERS,OFFSET5_INK_DISTRIBUTORS,OFFSET5_DAMPENING_ROLLERS} from './data/sources-offset5.js';
+import {OFFSET5_ACTUAL_ROLLER_DIAGRAM,OFFSET5_INKING_ROLLERS,OFFSET5_INK_DISTRIBUTORS,OFFSET5_DAMPENING_ROLLERS,OFFSET5_INKING_ROTATION_SENSE,OFFSET5_DAMPENING_ROTATION_SENSE} from './data/sources-offset5.js';
 
 export const OFFSET5_FINAL_REFINEMENT=Object.freeze({
   id:'OFFSET5_CD102_8L_CUSTOM_INSTALLED_REALITY_R6_ACTUAL_PU_DIAGRAM',
@@ -709,29 +709,44 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       if(!this.levers.some(item=>item.object===infeed))this.addLever(infeed,.085,1,.30);
     }
 
-    // Every straight-printing unit has the same installed handedness. The legacy simulator flipped
-    // the ink/dampening train by PU parity, making PU2/4/6/8 visibly run backwards. Preserve the
-    // existing relative roller pattern but normalize it identically across all eight PUs.
-    // Rotation remains an explanatory contact-motion reference. IMG_2777 validates identity/topology,
-    // but does not publish service timing or every roller rotation arrow, so no service claim is inferred.
-    const inkCodes=['13','2','1','14','3','4','5','6','7','8','9','10','11','12','15'];
-    const dampCodes=['16','17','FR','19','18'];
+    // Every straight-printing unit has the same installed handedness. The prior simulator
+    // alternated signs by array index, which is not the actual branched roller topology.
+    // V319 uses the contact-derived relative rotation senses from IMG_2777. These are visual
+    // counter-rotation relationships only; no service timing, phase, nip pressure or RPM is asserted.
     const rotorFor=id=>this.rotors.find(item=>item.mesh?.userData?.ownerId===id);
+    const contactRate=rotor=>{
+      const radius=rotor?.mesh?.geometry?.parameters?.radiusTop;
+      return radius?this.baseMetersPerSecond/(Math.PI*2*this.sheetCyclesPerSecond*radius):rotor?.rate||1;
+    };
     for(let i=0;i<8;i++){
       const fountain=rotorFor(`press-${i}-ink-fountain-roller-body`);
-      if(fountain){fountain.sign=1;fountain.role=`PU${i+1}-ink-fountain-roller`;fountain.source='SAME_HANDED_STRAIGHT_PRINT_UNIT_VISUAL_KINEMATICS';}
-      inkCodes.forEach((code,index)=>{
-        const rotor=rotorFor(`press-${i}-ink-roller-${code}-body`);if(!rotor)return;
-        rotor.sign=index%2?-1:1;rotor.role=`PU${i+1}-ink-roller-${code}`;rotor.source='SAME_HANDED_STRAIGHT_PRINT_UNIT_VISUAL_KINEMATICS';
-      });
-      for(const code of ['A','B','C','D']){
-        const rotor=rotorFor(`press-${i}-ink-distributor-${code}-body`);if(!rotor)continue;
-        rotor.sign=code.charCodeAt(0)%2?-1:1;rotor.role=`PU${i+1}-ink-distributor-${code}`;rotor.source='SAME_HANDED_STRAIGHT_PRINT_UNIT_VISUAL_KINEMATICS';
+      if(fountain){
+        fountain.sign=OFFSET5_INKING_ROTATION_SENSE.FOUNTAIN;
+        fountain.rate=contactRate(fountain);
+        fountain.role=`PU${i+1}-ink-fountain-roller`;
+        fountain.source='V408_PHOTO_OEM_FOUNTAIN_VIBRATOR_CONTACT_VISUAL_REFERENCE';
       }
-      dampCodes.forEach((code,index)=>{
-        const rotor=rotorFor(`press-${i}-damp-roller-${code}-body`);if(!rotor)return;
-        rotor.sign=index%2?-1:1;rotor.role=`PU${i+1}-damp-roller-${code}`;rotor.source='SAME_HANDED_STRAIGHT_PRINT_UNIT_VISUAL_KINEMATICS';
-      });
+      for(const spec of OFFSET5_INKING_ROLLERS){
+        const rotor=rotorFor(`press-${i}-ink-roller-${spec.code}-body`);if(!rotor)continue;
+        rotor.sign=OFFSET5_INKING_ROTATION_SENSE[spec.code];
+        rotor.rate=contactRate(rotor);
+        rotor.role=`PU${i+1}-ink-roller-${spec.code}`;
+        rotor.source='IMG_2777_CONTACT_TOPOLOGY_COUNTER_ROTATION_VISUAL_REFERENCE';
+      }
+      for(const spec of OFFSET5_INK_DISTRIBUTORS){
+        const rotor=rotorFor(`press-${i}-ink-distributor-${spec.code}-body`);if(!rotor)continue;
+        rotor.sign=OFFSET5_INKING_ROTATION_SENSE[spec.code];
+        rotor.rate=contactRate(rotor);
+        rotor.role=`PU${i+1}-ink-distributor-${spec.code}`;
+        rotor.source='IMG_2777_CONTACT_TOPOLOGY_COUNTER_ROTATION_VISUAL_REFERENCE';
+      }
+      for(const spec of OFFSET5_DAMPENING_ROLLERS){
+        const rotor=rotorFor(`press-${i}-damp-roller-${spec.code}-body`);if(!rotor)continue;
+        rotor.sign=OFFSET5_DAMPENING_ROTATION_SENSE[spec.code];
+        rotor.rate=contactRate(rotor);
+        rotor.role=`PU${i+1}-damp-roller-${spec.code}`;
+        rotor.source='IMG_2777_DAMPENING_CONTACT_TOPOLOGY_COUNTER_ROTATION_VISUAL_REFERENCE';
+      }
     }
     // The sheet runs left to right across the upper transfer arc at every bay.
     // Both transfer drum and gripper orbit therefore turn clockwise in this view.
@@ -911,6 +926,7 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       printRepresentation:'PROGRESSIVE_TRANSVERSE_COLOUR_BANDS_PER_PU_DEMO',
       cylinderMotionPolicy:'SAME_STRAIGHT_PRINT_DIRECTION_ALL_PU_CONTACT_PAIRS_COUNTER_ROTATE',
       primaryCylinderDiagramPolicy:'IMG_2777_PLATE_AND_IMPRESSION_SAME_ROTATION_SENSE__BLANKET_OPPOSITE__NO_TIMING_OR_PHASE_CLAIM',
+      rollerContactMotionPolicy:'IMG_2777_CONTACT_GRAPH_COUNTER_ROTATION__SURFACE_SPEED_VISUAL_REFERENCE__NO_SERVICE_TIMING_PHASE_OR_NIP_CLAIM',
       sheetVisualPolicy:'NO_EXTERNAL_FULL_WIDTH_DEMO_GRIPPER_BAR',
       deliveryPilePolicy:'START_EMPTY_STACK_TO_CAPACITY_THEN_CLEAR_AND_REPEAT',
       operatorSideMicrodetailPolicy:'WORLD_NEGATIVE_Z_AFTER_TOP_LEVEL_PHOTO_MIRROR',
