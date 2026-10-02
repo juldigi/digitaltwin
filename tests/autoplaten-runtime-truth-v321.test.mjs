@@ -38,11 +38,13 @@ test('V321 autoplaten truth lock rejects stale taxonomy identity and missing cor
   const plate=[];t.root.traverse(o=>{if(o.userData?.identityPlacard)plate.push(o);});
   plate[0].userData.identityPlacard={...plate[0].userData.identityPlacard,serial:'WRONG'};
   const node=t.findNode('pm106-blanking');node.userData.nodeId='pm106-blanking-stale';
+  const detached=t.findNode('pm106-stripping');detached.parent.remove(detached);
   const audit=validateAutoplatenTemplate(t,'BMJ-MCH-0014');
   assert.equal(audit.valid,false);
   assert.ok(audit.errors.some(e=>e.code==='TAXONOMY_VERSION'));
   assert.ok(audit.errors.some(e=>e.code==='IDENTITY_SERIAL'));
   assert.ok(audit.errors.some(e=>e.code==='CORE_NODE_MISSING'&&e.detail==='pm106-blanking'));
+  assert.ok(audit.errors.some(e=>e.code==='CORE_NODE_DETACHED'&&e.detail==='pm106-stripping'));
   assert.throws(()=>validateAutoplatenTemplate(t,'BMJ-MCH-0014',{throwOnError:true}),/Autoplaten runtime truth-lock failed/);
  }finally{t.dispose();}
 });
