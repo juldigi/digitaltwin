@@ -79,7 +79,7 @@ export const OFFSET5_INKING_ROLLERS=freezeRollers([
   {code:'12',designation:'Ink transfer roller',diameterMM:68,colorCode:null,surface:'plastic-coated',materialKind:'plastic',sectionCenter:[.5532,2.4389,0]},
   {code:'13',designation:'4th inking form roller',diameterMM:80,colorCode:'yellow',surface:'rubber-coated',materialKind:'rollerYellow',sectionCenter:[-.0259,2.0031,0]},
   {code:'14',designation:'1st inking form roller',diameterMM:60,colorCode:'white',surface:'rubber-coated',materialKind:'rollerWhite',sectionCenter:[.3421,1.9759,0]},
-  {code:'15',designation:'Ink vibrator',diameterMM:59,colorCode:'white',surface:'rubber-coated',materialKind:'rollerWhite',sectionCenter:[.2840,2.5400,0],sectionPositionPolicy:'IMG_2777_CONTACT_FIT_TO_DISTRIBUTOR_A'}
+  {code:'15',designation:'Ink vibrator',diameterMM:59,colorCode:'white',surface:'rubber-coated',materialKind:'rollerWhite',sectionCenter:[.2835,2.5410,0],sectionPositionPolicy:'IMG_2777_CONTACT_FIT_TO_DISTRIBUTOR_A'}
 ]);
 
 export const OFFSET5_INK_DISTRIBUTORS=freezeRollers([
