@@ -84,9 +84,11 @@ function stageForX(x){
   return 'Delivery';
 }
 
-function printedUnitsForX(x){
+function printedUnitsForSheet(trailX){
+  // A PU is counted only after the trailing edge has cleared its print-contact reference.
+  // This prevents the whole sheet from changing state while its rear section is still entering the same PU.
   let count=0;
-  for(const cx of OFFSET5_UNIT_CENTERS)if(x>cx+.22)count++;
+  for(const cx of OFFSET5_UNIT_CENTERS)if(trailX>cx+.22)count++;
   return Math.min(8,count);
 }
 
@@ -215,7 +217,7 @@ export class PrintingSimulation{
       const mat=this.material({basic:true,vertexColors:true,side:THREE.DoubleSide});
       const mesh=new THREE.Mesh(geo,mat);mesh.name='Flexible printing-test sheet '+(i+1);mesh.visible=false;mesh.renderOrder=6;mesh.frustumCulled=false;this.group.add(mesh);
       const gripper=new THREE.Mesh(gripGeo,gripMat);gripper.name='Leading-edge gripper '+(i+1);gripper.visible=false;gripper.renderOrder=7;gripper.frustumCulled=false;this.group.add(gripper);
-      const sheet={mesh,gripper,paperColor,bandColors,userData:{progress:0,printed:-1,leadPosition:new THREE.Vector3(),trailPosition:new THREE.Vector3(),leadDistance:0,lastDeliveryCycle:-1}};
+      const sheet={mesh,gripper,paperColor,bandColors,userData:{progress:0,printed:-1,printedUnitsCleared:0,leadPosition:new THREE.Vector3(),trailPosition:new THREE.Vector3(),leadDistance:0,lastDeliveryCycle:-1}};
       this.setSheetColors(sheet,0);this.sheets.push(sheet);
     }
   }
@@ -260,7 +262,8 @@ export class PrintingSimulation{
     sheet.userData.lastDeliveryCycle=cycle;this.completed++;
     if(this.completed>1&&(this.completed-1)%this.maxPileSheets===0)this.clearDeliveredSheets();
     const slot=(this.completed-1)%this.maxPileSheets,pileSheet=this.pileSheets[slot];
-    pileSheet.userData.serial=this.completed;this.setSheetColors(pileSheet,8);
+    pileSheet.userData.serial=this.completed;const printed=Math.max(0,Math.min(8,sheet.userData.printedUnitsCleared??sheet.userData.printed??0));
+    this.setSheetColors(pileSheet,printed);pileSheet.userData.printedUnitsCleared=printed;
     this.relayoutPileSheets();
     sheet.mesh.visible=false;sheet.gripper.visible=false;
     return true;
@@ -317,7 +320,9 @@ export class PrintingSimulation{
     if(sheet.gripper.visible){sheet.gripper.position.copy(lead);sheet.gripper.position.y+=.020;sheet.gripper.rotation.set(0,0,angle);}
     sheet.userData.deliveryDrop=deliveryDrop;sheet.userData.gripperReleased=releaseProgress>=.02;
     sheet.userData.progress=leadT;sheet.userData.leadPosition.copy(lead);sheet.userData.trailPosition.copy(trail);sheet.userData.leadDistance=leadDistance;
-    this.setSheetColors(sheet,printedUnitsForX(lead.x));
+    const printed=printedUnitsForSheet(trail.x);
+    this.setSheetColors(sheet,printed);
+    sheet.userData.printedUnitsCleared=printed;
     return true;
   }
   addFlow(curve,{color,type,count,speed,phase,radius=.008,opacity=.34,particleRadius=.018,dropScale=1}){
