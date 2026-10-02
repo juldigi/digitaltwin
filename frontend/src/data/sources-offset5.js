@@ -23,6 +23,7 @@ export const OFFSET5_ACTUAL_ROLLER_DIAGRAM=Object.freeze({
     'nominal roller diameters, color identification and material/remark table',
     'relative sectional topology above the plate cylinder',
     'plate → blanket → impression cylinder order',
+    'plate and impression share the same shown rotation sense while blanket is opposite',
     'RAKEL, AIR BLOWER and WATER callout zones shown on the posted diagram'
   ]),
   boundary:'SCHEMATIC_TOPOLOGY_AND_NOMINAL_TABLE_ONLY__DO_NOT_INFER_NIP_PRESSURE_TIMING_BEARER_DIAMETER_OR_SERVICE_SETTING'
