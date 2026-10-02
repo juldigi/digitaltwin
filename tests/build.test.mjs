@@ -15,7 +15,7 @@ test('production HTML resolves the complete local module graph at a GitHub Pages
   assert.match(html,new RegExp(`<script type="module" src="\\.\\/src\\/app\\.js\\?v=${fingerprint}"><\\/script>`));
   assert.match(html,new RegExp(`bmj-sw-${fingerprint}-reloaded`));
   assert.doesNotMatch(html,/\?v=273|\?v=222/,'production entrypoints must use the source fingerprint, not a stale semantic release query');
-  assert.match(distState,new RegExp(`APP_BUILD='2026\\.10\\.01-273-${fingerprint}'`));
+  assert.match(distState,new RegExp(`APP_BUILD='2026\\.10\\.03-${fingerprint}'`));
   const seen=new Set();
   function visit(file){
     assert.ok(existsSync(file),`Missing production module: ${file}`);
