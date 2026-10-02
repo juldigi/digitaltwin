@@ -289,6 +289,104 @@ export function validateFolderSimulation(simulation,template,key,{throwOnError=f
  return result;
 }
 
+
+export const INSPECTION_RUNTIME_CONTRACTS=Object.freeze({
+ 'BMJ-MCH-0019':Object.freeze({
+  taxonomyVersion:'diana55-v252-oem-flow',serial:'MP.FBA0-00058',model:'DIANA EYE 55',
+  geometryBoundary:'BMJ_INSTALLED_OPTIONS_BOUNDED',modeledMode:'STANDARD_FEEDER_FISH_SCALE_DELIVERY_REFERENCE',
+  coreNodes:Object.freeze(['diana55-access','diana55-feeder','diana55-transport','diana55-inspection','diana55-camera','diana55-light','diana55-processing','diana55-reject','diana55-delivery','diana55-reject-pivot-v260','diana55-reject-recovery-v258']),
+  hiddenNodes:Object.freeze(['diana55-camera-rear','diana55-camera-area','diana55-reject-air','diana55-side-stacker-capability-v254','diana55-process-recipe','diana55-delivery-waste-v254']),
+  unverifiedSpecFlags:Object.freeze(['installedCameraCountVerified','installedCameraMixVerified','installedRejectActuationVerified','installedStackerVerified']),
+  deterministicDefectInjection:'EVERY_5TH_INSPECTED_BLANK_DEMO_ONLY'
+ }),
+ 'BMJ-MCH-0020':Object.freeze({
+  taxonomyVersion:'shark650-v252-n650-offline-flow',serial:'FPS241216001',model:'FS-SHARK-N650-P3N1',
+  geometryBoundary:'P3N1_OPTIONS_UNDECODED',modeledMode:'FISH_SCALE_OFFLINE_REFERENCE',
+  coreNodes:Object.freeze(['shark650-access','shark650-feeder','shark650-transfer','shark650-inspection','shark650-vision','shark650-processing','shark650-reject','shark650-return','shark650-reject-pivot-v260','shark650-return-side-frame-v260']),
+  hiddenNodes:Object.freeze(['shark650-feed-friction','shark650-process-hmi','shark650-access-platform','shark650-reject-air','shark650-return-stack','shark650-dust-integration-capability-v254','shark650-process-recipe']),
+  unverifiedSpecFlags:Object.freeze(['installedMaxInspectionFormatVerified','suffixDecoded','installedFeederModeVerified','installedCameraPackageVerified','installedLightingPackageVerified','installedRejectTypeVerified','installedCollectionModeVerified']),
+  deterministicDefectInjection:'EVERY_6TH_INSPECTED_BLANK_DEMO_ONLY'
+ })
+});
+const inspectionContractFor=normalized=>INSPECTION_RUNTIME_CONTRACTS[normalized]||null;
+
+export function validateInspectionTemplate(template,key,{throwOnError=false}={}){
+ const assetId=normalizeMachineKey(key),contract=INSPECTION_RUNTIME_CONTRACTS[assetId],root=template?.root,errors=[];
+ const fail=(code,detail)=>errors.push({code,detail});
+ if(!contract)return Object.freeze({valid:true,errors:Object.freeze([]),contract:null,assetId:null});
+ if(!root)fail('ROOT_MISSING',assetId);
+ else{
+  const u=root.userData||{},spec=u.spec||{};
+  if(u.assetId!==assetId)fail('ASSET_ID',u.assetId);
+  if(spec.serial!==contract.serial)fail('SERIAL',spec.serial);
+  if(spec.model!==contract.model)fail('MODEL',spec.model);
+  if(u.taxonomyVersion!==contract.taxonomyVersion)fail('TAXONOMY_VERSION',u.taxonomyVersion);
+  if(u.engineeringDimensions!==false)fail('ENGINEERING_DIMENSION_BOUNDARY',u.engineeringDimensions);
+  if(!String(u.geometryStatus||'').includes(contract.geometryBoundary))fail('GEOMETRY_BOUNDARY',u.geometryStatus);
+  const modeledMode=u.modeledEnvelopeMode||u.modeledMode;
+  if(modeledMode!==contract.modeledMode)fail('MODELED_MODE',modeledMode);
+  for(const id of contract.coreNodes){
+   const node=template.findNode?.(id);
+   if(!node){fail('CORE_NODE_MISSING',id);continue;}
+   let attached=false;for(let p=node;p;p=p.parent)if(p===root){attached=true;break;}
+   if(!attached)fail('CORE_NODE_DETACHED',id);
+  }
+  const taxonomy=template.taxonomy||[],levels=new Set(taxonomy.map(n=>n.level));
+  for(let level=1;level<=6;level++)if(!levels.has(level))fail('TAXONOMY_LEVEL_MISSING',level);
+  for(const flag of contract.unverifiedSpecFlags)if(spec[flag]!==false)fail('INSTALLED_OPTION_BOUNDARY',flag+':'+spec[flag]);
+  for(const id of contract.hiddenNodes){
+   const node=template.findNode?.(id);
+   if(!node)fail('HIDDEN_BOUNDARY_NODE_MISSING',id);
+   else if(node.visible!==false)fail('HIDDEN_BOUNDARY_LEAK',id);
+  }
+  if(assetId==='BMJ-MCH-0019'){
+   const cam=template.findNode?.('diana55-camera-top'),area=template.findNode?.('diana55-camera-area'),rear=template.findNode?.('diana55-camera-rear'),reject=template.findNode?.('diana55-reject');
+   if(cam?.userData?.capacity!==4||cam?.userData?.installedCountVerified!==false)fail('DIANA_TOP_CAMERA_BOUNDARY',cam?.userData?.capacity);
+   if(area?.userData?.capacity!==2||area?.userData?.installedCountVerified!==false)fail('DIANA_AREA_CAMERA_BOUNDARY',area?.userData?.capacity);
+   if(rear?.userData?.capacity!==1||rear?.userData?.installedCountVerified!==false)fail('DIANA_REAR_CAMERA_BOUNDARY',rear?.userData?.capacity);
+   if(reject?.userData?.installedRejectActuationVerified!==false)fail('DIANA_REJECT_BOUNDARY',reject?.userData?.installedRejectActuationVerified);
+   if(u.opticalAxisPolicy!=='NEUTRAL_REFERENCE_HEAD_POINTS_DOWN_TO_SUCTION_BELT__INSTALLED_CAMERA_POPULATION_UNVERIFIED')fail('DIANA_OPTICAL_AXIS_BOUNDARY',u.opticalAxisPolicy);
+  }else{
+   if(spec.currentPageFormatDiscrepancyVerified!==true)fail('SHARK_FORMAT_DISCREPANCY_BOUNDARY',spec.currentPageFormatDiscrepancyVerified);
+   if(u.suffixBoundary!=='P3N1_PRESERVED_VERBATIM__NOT_DECODED')fail('SHARK_SUFFIX_BOUNDARY',u.suffixBoundary);
+   const camera=template.findNode?.('shark650-vision-camera'),reject=template.findNode?.('shark650-reject'),ret=template.findNode?.('shark650-return');
+   if(camera?.userData?.installedCameraCountVerified!==false||camera?.userData?.p3SuffixDecoded!==false)fail('SHARK_CAMERA_SUFFIX_BOUNDARY',camera?.userData?.p3SuffixDecoded);
+   if(reject?.userData?.installedRejectTypeVerified!==false)fail('SHARK_REJECT_BOUNDARY',reject?.userData?.installedRejectTypeVerified);
+   if(ret?.userData?.installedCollectionModeVerified!==false||ret?.userData?.officialGoodBadReturnLine!==true)fail('SHARK_RETURN_BOUNDARY',ret?.userData?.installedCollectionModeVerified);
+  }
+ }
+ const result=Object.freeze({valid:errors.length===0,errors:Object.freeze(errors),contract,assetId});
+ if(root){root.userData.inspectionRuntimeTruthLock=result.valid?'PASS':'FAIL';root.userData.inspectionRuntimeTruthErrors=errors.map(e=>e.code+':'+e.detail).join('|');}
+ if(throwOnError&&!result.valid)throw new Error('Inspection runtime truth-lock failed for '+assetId+': '+root?.userData?.inspectionRuntimeTruthErrors);
+ return result;
+}
+
+export function validateInspectionSimulation(simulation,template,key,{throwOnError=false}={}){
+ const assetId=normalizeMachineKey(key),contract=INSPECTION_RUNTIME_CONTRACTS[assetId],state=simulation?.state?.(),errors=[];
+ const fail=(code,detail)=>errors.push({code,detail});
+ if(!contract)return Object.freeze({valid:true,errors:Object.freeze([]),contract:null,assetId:null});
+ if(!state||state.available!==true||state.blocked===true)fail('SIMULATION_AVAILABILITY',state?.available);
+ if(state?.demoRejectOnly!==true)fail('DEMO_REJECT_BOUNDARY',state?.demoRejectOnly);
+ if(state?.interlockSafe!==true)fail('INTERLOCK_STATE',state?.interlockSafe);
+ if(state?.deterministicDefectInjection!==contract.deterministicDefectInjection)fail('DETERMINISTIC_DEMO_POLICY',state?.deterministicDefectInjection);
+ if(assetId==='BMJ-MCH-0019'){
+  if(state?.installedRejectActuationVerified!==false)fail('DIANA_INSTALLED_REJECT_BOUNDARY',state?.installedRejectActuationVerified);
+  if(state?.installedCameraCountVerified!==false||state?.installedCameraPopulationRendered!==false)fail('DIANA_CAMERA_POPULATION_BOUNDARY',state?.installedCameraCountVerified);
+  if(state?.deliveryMode!=='ACCEPTED_FISH_SCALE_PLUS_RECOVERABLE_REJECT_COLLECTION')fail('DIANA_DELIVERY_MODE',state?.deliveryMode);
+  if(state?.rejectBranchPolicy!=='TRACKED_BLANK_BRANCHES_DIRECTLY_FROM_GATE_TO_RECOVERY_TRAY')fail('DIANA_REJECT_TRACKING_POLICY',state?.rejectBranchPolicy);
+  if(state?.acceptedBranchPolicy!=='TRACKED_ACCEPTED_BLANK_BRANCHES_TO_FISH_SCALE_ENTRY_WITHOUT_TELEPORT')fail('DIANA_ACCEPT_TRACKING_POLICY',state?.acceptedBranchPolicy);
+ }else{
+  for(const flag of ['suffixDecoded','installedFeederModeVerified','installedCameraPackageVerified','installedRejectTypeVerified','installedCollectionModeVerified'])if(state?.[flag]!==false)fail('SHARK_SIM_OPTION_BOUNDARY',flag+':'+state?.[flag]);
+  if(state?.goodBadReturnLineOfficial!==true)fail('SHARK_RETURN_LINE_TRUTH',state?.goodBadReturnLineOfficial);
+  if(state?.transportMode!=='NEGATIVE_PITCH_FULL_SUCTION_OFFLINE_DEMO_REFERENCE')fail('SHARK_TRANSPORT_MODE',state?.transportMode);
+  if(state?.returnBranchPolicy!=='TRACKED_BLANK_BRANCHES_FROM_DECISION_SPLIT_TO_GOOD_OR_BAD_RETURN_ENTRY')fail('SHARK_TRACKING_POLICY',state?.returnBranchPolicy);
+ }
+ const result=Object.freeze({valid:errors.length===0,errors:Object.freeze(errors),contract,assetId});
+ if(template?.root){template.root.userData.inspectionSimulationTruthLock=result.valid?'PASS':'FAIL';template.root.userData.inspectionSimulationTruthErrors=errors.map(e=>e.code+':'+e.detail).join('|');}
+ if(throwOnError&&!result.valid)throw new Error('Inspection simulation truth-lock failed for '+assetId+': '+template?.root?.userData?.inspectionSimulationTruthErrors);
+ return result;
+}
+
 export function createMachineTemplate(key){
  const k=normalizeMachineKey(key);
  if(!k)throw new Error('Identitas mesin belum tersedia.');
@@ -304,8 +402,8 @@ export function createMachineTemplate(key){
  if(k==='BMJ-MCH-0013'){const template=new MK1060MachineTemplate();validateAutoplatenTemplate(template,k,{throwOnError:true});return template;}
  if(['BMJ-MCH-0014','BMJ-MCH-0015'].includes(k)){const template=new Promatrix106MachineTemplate(k);validateAutoplatenTemplate(template,k,{throwOnError:true});return template;}
  if(['BMJ-MCH-0016','BMJ-MCH-0018'].includes(k)){const template=new Media100MachineTemplate(k);validateFolderTemplate(template,k,{throwOnError:true});return template;}
- if(k==='BMJ-MCH-0019')return new DianaEye55MachineTemplate();
- if(k==='BMJ-MCH-0020')return new SharkN650MachineTemplate();
+ if(k==='BMJ-MCH-0019'){const template=new DianaEye55MachineTemplate();validateInspectionTemplate(template,k,{throwOnError:true});return template;}
+ if(k==='BMJ-MCH-0020'){const template=new SharkN650MachineTemplate();validateInspectionTemplate(template,k,{throwOnError:true});return template;}
  if(k==='BMJ-MCH-0024')return new UpgLy300MachineTemplate();
  if(k==='BMJ-MCH-0017'){const template=new ReferenceMachineTemplate(k);validateFolderTemplate(template,k,{throwOnError:true});return template;}
  if(isReferenceMachineKey(k))return new ReferenceMachineTemplate(k);
@@ -333,6 +431,7 @@ export function createPolishedMachineTemplate(key){
  if(normalized==='offset5')validateOffset5PilotTemplate(template,{throwOnError:true});
  if(autoplatenContractFor(normalized,template))validateAutoplatenTemplate(template,normalized,{throwOnError:true});
  if(folderContractFor(normalized,template))validateFolderTemplate(template,normalized,{throwOnError:true});
+ if(inspectionContractFor(normalized))validateInspectionTemplate(template,normalized,{throwOnError:true});
  return template;
 }
 
@@ -351,8 +450,8 @@ export function createMachineSimulation(key,machine,template){
  if(k==='BMJ-MCH-0013'){const sim=new MK1060ProcessSimulation(machine,template);validateAutoplatenSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(['BMJ-MCH-0014','BMJ-MCH-0015'].includes(k)){const sim=new Promatrix106ProcessSimulation(machine,template);validateAutoplatenSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(['BMJ-MCH-0016','BMJ-MCH-0018'].includes(k)){const sim=new Media100ProcessSimulation(machine,template);validateFolderSimulation(sim,template,k,{throwOnError:true});return sim;}
- if(k==='BMJ-MCH-0019')return new DianaEye55ProcessSimulation(machine,template);
- if(k==='BMJ-MCH-0020')return new SharkN650ProcessSimulation(machine,template);
+ if(k==='BMJ-MCH-0019'){const sim=new DianaEye55ProcessSimulation(machine,template);validateInspectionSimulation(sim,template,k,{throwOnError:true});return sim;}
+ if(k==='BMJ-MCH-0020'){const sim=new SharkN650ProcessSimulation(machine,template);validateInspectionSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(k==='BMJ-MCH-0024')return new UpgLy300ProcessSimulation(machine,template);
  if(k==='BMJ-MCH-0017'){const sim=new ReferenceProcessSimulation(machine,template);validateFolderSimulation(sim,template,k,{throwOnError:true});return sim;}
  if(isReferenceMachineKey(k))return new ReferenceProcessSimulation(machine,template);
