@@ -107,7 +107,19 @@ test('V319 keeps all eight PU exteriors on the photo-verified handedness and rem
   m.root.updateMatrixWorld(true);
   for(let i=0;i<8;i++){
    const cover=m.findNode(`press-${i}-cover`),drive=m.findNode(`press-${i}-drive`),bridge=m.findNode(`press-${i}-fountain-support`);
-   assert.ok(cover&&drive&&bridge,`PU${i+1} exterior hierarchy incomplete`);
+   const top=m.findNode(`press-${i}-top-deck`),inkBay=m.findNode(`press-${i}-ink`),openBay=m.findNode(`press-${i}-open-ink-bay`);
+   const ductBody=m.findNode(`press-${i}-ink-fountain-roller-body`),brand=m.findNode(`press-${i}-operator-brand`);
+   assert.ok(cover&&drive&&bridge&&top&&inkBay&&openBay&&ductBody&&brand,`PU${i+1} exterior/open-top hierarchy incomplete`);
+   assert.equal(top.userData.openUpperDeck,true,`PU${i+1} top must stay photo-locked OPEN`);
+   assert.equal(top.userData.solidTopCover,false,`PU${i+1} must not regain the regressed solid hood`);
+   assert.equal(inkBay.userData.openInkBed,true,`PU${i+1} ink bay must stay open`);
+   assert.equal(inkBay.userData.solidInkEnclosure,false,`PU${i+1} must not regain the closed ink enclosure`);
+   assert.equal(openBay.userData.normalStateVisible,true,`PU${i+1} open ink bay must be visible in normal state`);
+   assert.equal(brand.userData.brandText,'HEIDELBERG Speedmaster');
+   const ductMesh=ductBody.children.find(o=>o.isMesh);
+   assert.ok(ductMesh,`PU${i+1} visible green duct roller missing`);
+   assert.equal(ductMesh.material.color.getHex(),m.palette.photoRollerGreen,`PU${i+1} duct roller must preserve the photo-locked green surface`);
+   assert.ok(ductMesh.material.roughness>.8,`PU${i+1} green duct roller must read as rubber/service-roll surface`);
    const coverZ=new THREE.Box3().setFromObject(cover).getCenter(new THREE.Vector3()).z;
    const driveZ=new THREE.Box3().setFromObject(drive).getCenter(new THREE.Vector3()).z;
    assert.ok(coverZ<-.5,`PU${i+1} operator-side cover must remain on world -Z`);
@@ -117,9 +129,16 @@ test('V319 keeps all eight PU exteriors on the photo-verified handedness and rem
    assert.equal(syntheticRed,false,`PU${i+1} must not receive synthetic per-unit red exterior styling`);
   }
   m.setExteriorOpen(false);
-  for(let i=0;i<8;i++)assert.equal(m.findNode(`press-${i}-cover`).visible,true,`PU${i+1} exterior must be closed by default`);
+  for(let i=0;i<8;i++){
+   assert.equal(m.findNode(`press-${i}-cover`).visible,true,`PU${i+1} exterior cabinet must be present by default`);
+   assert.equal(m.findNode(`press-${i}-open-ink-bay`).visible,true,`PU${i+1} open ink bay must remain visible in normal state`);
+   assert.equal(m.findNode(`press-${i}-ink-fountain-roller`).visible,true,`PU${i+1} green duct roller must remain visible in normal state`);
+  }
   m.setExteriorOpen(true);
-  for(let i=0;i<8;i++)assert.equal(m.findNode(`press-${i}-cover`).visible,false,`PU${i+1} cover must disappear only in cutaway mode`);
+  for(let i=0;i<8;i++){
+   assert.equal(m.findNode(`press-${i}-cover`).visible,false,`PU${i+1} cabinet cover must disappear only in cutaway mode`);
+   assert.equal(m.findNode(`press-${i}-open-ink-bay`).visible,true,`PU${i+1} actual open-bay process geometry must not disappear with exterior covers`);
+  }
  }finally{m.dispose();}
 });
 
@@ -129,10 +148,11 @@ test('V319 simulation uses actual inking/distributor/dampening surfaces while ke
   const state=sim.state();
   assert.equal(state.rollerDiagramRevision,'offset5-print-unit-reality-v319');
   assert.equal(state.rollerDiagramSource,'IMG_2777.jpeg');
-  assert.equal(state.inkRollerCount,8*(1+15+4));
+  assert.equal(state.inkRollerCount,8*(15+4));
   assert.equal(state.dampeningRollerSurfaceCount,8*5);
   assert.ok(state.rollerDiagramBoundary.includes('DO_NOT_INFER_NIP_PRESSURE_TIMING'));
   assert.equal(state.primaryCylinderDiagramPolicy,'IMG_2777_PLATE_AND_IMPRESSION_SAME_ROTATION_SENSE__BLANKET_OPPOSITE__NO_TIMING_OR_PHASE_CLAIM');
+  assert.equal(state.openUpperDeckPolicy,'V404_V408_PHOTO_LOCK__NO_SOLID_PU_TOP__GREEN_DUCT_ROLL_REMAINS_GREEN');
   for(let i=1;i<=8;i++){
    const plate=sim.rotors.find(r=>r.role===`PU${i}-plate-cylinder`);
    const blanket=sim.rotors.find(r=>r.role===`PU${i}-blanket-cylinder`);
@@ -146,8 +166,13 @@ test('V319 simulation uses actual inking/distributor/dampening surfaces while ke
    assert.match(impression.source,/IMG_2777_PRIMARY_CYLINDER_RELATIVE_ROTATION/);
    assert.match(transfer.source,/TRANSFER_NOT_SHOWN_IN_IMG_2777/);
   }
+  const greenBefore=Array.from({length:8},(_,i)=>m.findNode(`press-${i}-ink-fountain-roller-body`).children.find(o=>o.isMesh).material.color.getHex());
   sim.start();
   assert.equal(sim.active,true);
+  for(let i=0;i<8;i++){
+   const mesh=m.findNode(`press-${i}-ink-fountain-roller-body`).children.find(o=>o.isMesh);
+   assert.equal(mesh.material.color.getHex(),greenBefore[i],`PU${i+1} green duct roller must not be recolored by job-state ink visualization`);
+  }
   for(const item of sim.dampeningSurfaces)assert.equal(item.material.emissiveIntensity,.035);
   sim.stop();
   assert.equal(sim.active,false);
