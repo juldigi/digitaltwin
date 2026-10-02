@@ -259,6 +259,7 @@ export class PrintingSimulation{
   }
   depositSheet(sheet,cycle){
     if(sheet.userData.lastDeliveryCycle===cycle)return false;
+    if(!sheet.userData.gripperReleased||!sheet.userData.deliverySettled)return false;
     sheet.userData.lastDeliveryCycle=cycle;this.completed++;
     if(this.completed>1&&(this.completed-1)%this.maxPileSheets===0)this.clearDeliveredSheets();
     const slot=(this.completed-1)%this.maxPileSheets,pileSheet=this.pileSheets[slot];
@@ -318,7 +319,7 @@ export class PrintingSimulation{
     const t=leadT,tan=this.curve.getTangentAt(t),angle=Math.atan2(tan.y,tan.x);
     sheet.gripper.visible=visible&&releaseProgress<.02;
     if(sheet.gripper.visible){sheet.gripper.position.copy(lead);sheet.gripper.position.y+=.020;sheet.gripper.rotation.set(0,0,angle);}
-    sheet.userData.deliveryDrop=deliveryDrop;sheet.userData.gripperReleased=releaseProgress>=.02;
+    sheet.userData.deliveryDrop=deliveryDrop;sheet.userData.deliveryReleaseProgress=releaseProgress;sheet.userData.deliverySettled=releaseProgress>=.999;sheet.userData.gripperReleased=releaseProgress>=.02;
     sheet.userData.progress=leadT;sheet.userData.leadPosition.copy(lead);sheet.userData.trailPosition.copy(trail);sheet.userData.leadDistance=leadDistance;
     const printed=printedUnitsForSheet(trail.x);
     this.setSheetColors(sheet,printed);
@@ -476,7 +477,7 @@ export class PrintingSimulation{
       nominalSheetsPerHour:this.nominalSheetsPerHour,sheetPitchMeters:this.sheetPitchMeters,nominalSheetSizeM:[this.sheetLength,this.sheetWidth],nominalLineSpeedMps:this.baseMetersPerSecond,
       printRepresentation:'CUMULATIVE_FULL_SHEET_REFERENCE_TINT_NO_FAKE_BANDS',customMachineDimensionsPreserved:true,
       inspectionTriggerActive:visible.some(s=>Math.abs(s.userData.leadPosition.x-D.inspectionCenterX)<.16),
-      deliveryReleaseActive:visible.some(s=>s.userData.gripperReleased&&s.userData.deliveryDrop>0),deliveryDropHeightM:this.deliveryDropHeight
+      deliveryReleaseActive:visible.some(s=>s.userData.gripperReleased&&s.userData.deliveryDrop>0),deliverySettlingActive:visible.some(s=>s.userData.gripperReleased&&!s.userData.deliverySettled),deliveryDropHeightM:this.deliveryDropHeight
     };
   }
   emit(force=false){
@@ -525,7 +526,8 @@ export class PrintingSimulation{
       const cycle=Math.floor(absolute/this.cycleDistance),local=mod(absolute,this.cycleDistance);
       if(local>this.pathLength){
         if(sheet.userData.lastDeliveryCycle!==cycle)this.updateSheet(sheet,this.pathLength);
-        this.depositSheet(sheet,cycle);
+        if(!this.depositSheet(sheet,cycle)){sheet.mesh.visible=true;sheet.gripper.visible=false;}
+
         continue;
       }
       if(!this.updateSheet(sheet,local))continue;
