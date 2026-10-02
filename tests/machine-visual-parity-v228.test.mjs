@@ -17,7 +17,7 @@ test('V228 priority offset detail scenes use the promoted realism templates',()=
  assert.match(runtime,/Offset5CD102RealismTemplate/);
  assert.match(runtime,/Offset8CX104RealismTemplate/);
  assert.match(runtime,/Offset10CX104SpecialRealismTemplate/);
- assert.match(runtime,/if\(k==='offset5'\)return new Offset5CD102RealismTemplate\(\)/);
+ assert.match(runtime,/if\(k==='offset5'\)\{const template=new Offset5CD102RealismTemplate\(\);validateOffset5PilotTemplate\(template,\{throwOnError:true\}\);return template;\}/);
  assert.match(runtime,/if\(k==='BMJ-MCH-0005'\)return new Offset8CX104RealismTemplate\(\)/);
  assert.match(runtime,/if\(k==='offset10'\)return new Offset10CX104SpecialRealismTemplate\(\)/);
  assert.match(runtime,/Offset5CD102RealismSimulation/);
