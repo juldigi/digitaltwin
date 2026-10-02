@@ -66,6 +66,18 @@ test('V320 explicitly keeps installed IMG_2777 roller data above conflicting gen
  assert.equal(a.surface,'stainless steel');
 });
 
+test('V320 source registry prevents generic OEM rows from silently replacing installed BMJ roller evidence',()=>{
+ const installed=TECHNICAL_SOURCES.find(s=>s.id==='SRC-O5-ROLLER-DIAGRAM-IMG2777');
+ const generic=TECHNICAL_SOURCES.find(s=>s.id==='SRC-CD102-ROLLER-PROCEDURE');
+ assert.ok(installed&&generic);
+ assert.match(installed.boundary,/Installed-machine visual\/table authority/);
+ assert.ok(installed.supports.some(x=>/overrides conflicting generic/i.test(x)));
+ assert.ok(installed.supports.some(x=>/14 ↔ 17\/ZW/.test(x)));
+ assert.match(generic.boundary,/not serial-550415 installed evidence/);
+ assert.match(generic.boundary,/IMG_2777 is authoritative/);
+ assert.match(generic.boundary,/REFERENCE_ONLY/);
+});
+
 test('V320 preserves OEM contact-setting values only as unverified service references',()=>{
  assert.equal(OFFSET5_OEM_CONTACT_SETTING_REFERENCES.length,11);
  const byPair=(a,b)=>OFFSET5_OEM_CONTACT_SETTING_REFERENCES.find(x=>x.from===a&&x.to===b);
