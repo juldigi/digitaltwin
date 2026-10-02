@@ -526,7 +526,7 @@ export class OffsetMachineTemplate {
       const body=this.group(roller,`${id}-damp-roller-${code}-body`,`${label} · ${code} roller body`,[0,0,0],[0,.08,-.10],sourceFiles);
       const radius=diameterMM*OEM_ROLLER_VISUAL_RADIUS_PER_MM;
       const mesh=markDetail(crowned?this.crownedCylinder(body,radius,1.30,pos,materialKind,'z',.025):this.cylinder(body,radius,1.30,pos,materialKind));
-      Object.assign(mesh.userData,{diagramCode:code,nominalDiameterMM:diameterMM,rollerSurface:surface,crowned,crownRatio:crowned?.025:0,actualDiagramSource:'IMG_2777.jpeg'});
+      Object.assign(mesh.userData,{diagramCode:code,nominalDiameterMM:diameterMM,rollerSurface:surface,crowned,crownRatio:crowned?0.025:0,actualDiagramSource:'IMG_2777.jpeg'});
       const journals=this.markServiceDetail(this.group(roller,`${id}-damp-roller-${code}-journals`,`${label} · ${code} journals / locks`,[0,0,0],[0,.06,-.14],['SMCD102_roller_remove_procedure.pdf'],'Journal/lock locations remain available in the hierarchy but are hidden from the open-machine overview so they are not mistaken for extra rollers.'));
       for(const z of [-.69,.69])markDetail(this.cylinder(journals,Math.max(.018,diameterMM*.00026),.10,[pos[0],pos[1],z],'steel','z'));
     }
