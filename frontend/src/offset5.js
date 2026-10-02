@@ -29,8 +29,8 @@ export class OffsetMachineTemplate {
   constructor(){
     this.root=new THREE.Group();this.root.name='MACHINE-OFFSET5';
     this.root.userData={assetId:'MACHINE-OFFSET5',...PHOTO_RECONSTRUCTION,orientation:ORIENTATION,taxonomyVersion:'offset5-taxonomy-v18',machineEnvelope:OFFSET5_DIMENSIONS,dimensionAudit:offset5DimensionAudit(),printingUnitReality:OFFSET5_ACTUAL_ROLLER_DIAGRAM,printingUnitExteriorPolicy:'SAME_PHOTO_GROUNDED_CD102_SHELL_ALL_EIGHT_PU__NO_SYNTHETIC_UNIT_COLOR_VARIATION'};
-    this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.ghosted=false;this.exteriorOpen=false;
-    this.palette={graphite:0x30383d,black:0x151b20,silver:0xaeb8b8,steel:0x889598,chromium:0xcbd3d5,plastic:0xb9c0bc,light:0xd1d4c9,paper:0xeee9d5,rubber:0x20252a,rollerWhite:0xe8e7df,rollerRed:0xc4473f,rollerYellow:0xe4bf4e,rollerBlue:0x355d91,glass:0x23333a,red:0xb33c32,yellow:0xe2b541,blue:0x243e70};
+    this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.textures=[];this.ghosted=false;this.exteriorOpen=false;
+    this.palette={graphite:0x30383d,black:0x151b20,silver:0xaeb8b8,steel:0x889598,chromium:0xcbd3d5,plastic:0xb9c0bc,light:0xd1d4c9,paper:0xeee9d5,rubber:0x20252a,photoRollerGreen:0x3f6f3b,inkFilmCyan:0x00a9d8,inkFilmMagenta:0xd40072,inkFilmYellow:0xf1c40f,inkFilmBlack:0x161616,inkFilmOrange:0xf07818,inkFilmGreen:0x1f9d55,inkFilmPurple:0x7442a8,inkFilmNeutral:0x4d5660,rollerWhite:0xe8e7df,rollerRed:0xc4473f,rollerYellow:0xe4bf4e,rollerBlue:0x355d91,glass:0x23333a,red:0xb33c32,yellow:0xe2b541,blue:0x243e70};
     this.build();this.alignOperatorSide();this.enrichV122Feeder();this.batchMeshes();this.tagAdaptiveDetails();
     this.taxonomy=OFFSET5_TAXONOMY;this.taxonomyById=TAXONOMY_BY_ID;
     this.original=this.parts.map(p=>p.position.clone());
@@ -52,9 +52,9 @@ export class OffsetMachineTemplate {
   material(kind,owner){
     const key=owner.userData.nodeId+':'+kind;
     if(!this.materials.has(key)){
-      const rollerRubber=['rollerWhite','rollerRed','rollerYellow','rollerBlue'].includes(kind);
+      const rollerRubber=['rollerWhite','rollerRed','rollerYellow','rollerBlue','photoRollerGreen'].includes(kind),wetInk=kind.startsWith('inkFilm');
       const surface=['silver','steel','chromium'].includes(kind)?'stainlessSteel':(kind==='rubber'||rollerRubber)?'rubber':kind==='glass'?'safetyGlass':'paintedSteel';
-      const properties=kind==='paper'?{metalness:0,roughness:.9}:kind==='glass'?{opacity:.65}:kind==='chromium'?{roughness:.19,metalness:.9}:kind==='plastic'?{roughness:.58,metalness:.04}:(kind==='rubber'||rollerRubber)?{roughness:.86,metalness:0}:['silver','steel'].includes(kind)?{roughness:.42,metalness:.65}:{metalness:.25,roughness:.46};
+      const properties=kind==='paper'?{metalness:0,roughness:.9}:kind==='glass'?{opacity:.65}:kind==='chromium'?{roughness:.19,metalness:.9}:kind==='plastic'?{roughness:.58,metalness:.04}:wetInk?{metalness:.03,roughness:.28}:(kind==='rubber'||rollerRubber)?{roughness:.86,metalness:0}:['silver','steel'].includes(kind)?{roughness:.42,metalness:.65}:{metalness:.25,roughness:.46};
       this.materials.set(key,createIndustrialMaterial(surface,{color:this.palette[kind]??this.palette.graphite,...properties}));
     }
     return this.materials.get(key);
@@ -114,6 +114,22 @@ export class OffsetMachineTemplate {
       this.cylinder(g,.012,span,[x+offset,y,z],'steel','y');
       for(const dy of [-span/2,span/2])this.cylinder(g,.012,offset*2,[x,y+dy,z],'steel','x');
     }
+  }
+  brandDecal(g,pos){
+    g.userData.brandText='HEIDELBERG Speedmaster';g.userData.brandFace='OPERATOR_SIDE_LOCAL_POSITIVE_Z__MIRRORED_TO_WORLD_NEGATIVE_Z';
+    if(typeof document==='undefined')return null;
+    const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=256;
+    const ctx=canvas.getContext('2d');if(!ctx)return null;
+    ctx.clearRect(0,0,canvas.width,canvas.height);ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#30363b';
+    ctx.font='700 92px Arial,Helvetica,sans-serif';ctx.fillText('HEIDELBERG',512,94);
+    ctx.font='600 52px Arial,Helvetica,sans-serif';ctx.fillText('Speedmaster',512,178);
+    const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;texture.needsUpdate=true;this.textures.push(texture);
+    const material=new THREE.MeshBasicMaterial({map:texture,transparent:true,depthWrite:false,side:THREE.DoubleSide,toneMapped:false});
+    const key=g.userData.nodeId+':brand';this.materials.set(key,material);
+    const geoKey='brand:heidelberg-speedmaster:.62:.16';if(!this.geometries.has(geoKey))this.geometries.set(geoKey,new THREE.PlaneGeometry(.62,.16));
+    const mesh=new THREE.Mesh(this.geometries.get(geoKey),material);mesh.position.set(...pos);mesh.renderOrder=20;
+    mesh.userData={assetId:'MACHINE-OFFSET5',ownerId:g.userData.nodeId,exteriorCover:true,brandText:'HEIDELBERG Speedmaster'};
+    g.add(mesh);this.meshes.push(mesh);return mesh;
   }
   fasteners(g,pos,width,height,axis='z'){
     const [x,y,z]=pos;
@@ -339,17 +355,24 @@ export class OffsetMachineTemplate {
     this.controls(cover,[i===0?.28:.32,1.43,1.355]);
     this.box(cover,[i===0?.40:.46,.052,.018],[-.11,1.80,1.36],'graphite',.008);
     this.box(cover,[i===0?.30:.34,.026,.018],[-.11,1.72,1.36],'black',.005);
+    const brand=this.markExteriorCover(this.group(g,`press-${i}-operator-brand`,`PU${i+1} · HEIDELBERG Speedmaster operator-door mark`,[0,0,0],[0,.08,.30],sources,'Photo-locked exterior identity on the rounded operator-side cabinet door; typography is a display decal, not an OEM CAD feature.'));
+    this.brandDecal(brand,[0,1.36,1.374]);
     const operatorDetails=this.markExteriorCover(this.group(g,`press-${i}-operator-details`,`PU${i+1} · operator cover hinges, handle & interlock`,[0,0,0],[0,.14,.82],sources,'Visible cover hardware is reconstructed from the operator-side photographs; interlock internals and switch model remain reference-only.'));
     for(const y of [1.03,1.63])this.box(operatorDetails,[.055,.12,.035],[-.30,y,1.335],'steel',.008);
     this.handle(operatorDetails,[.24,1.31,1.36],'z',.24);
     this.box(operatorDetails,[.075,.095,.035],[-.28,1.87,1.34],'black',.008);
     this.fasteners(operatorDetails,[-.04,1.43,1.365],.48,.72,'z');
-    const top=this.markExteriorCover(this.group(g,`press-${i}-top-deck`,`${i===0?'PU1':'PU'+(i+1)} · photo-derived upper housing & vent deck`,[0,0,0],[0,.30,.72],['IMG_1628(2).jpeg','IMG_1628.jpeg','IMG_1970.jpeg','IMG_1971.jpeg'],'Upper housing follows the actual top/operator-side photos: a low dark deck with a long ventilation field and clear separation from the ink fountain. It is not derived from the roller diagram.'));
-    // Low attached roof cassette: every surface bears on the main side frames.
-    this.box(top,[frameWidth-.16,.14,1.82],[-.04,2.57,0],'graphite',.028);
-    this.box(top,[frameWidth-.28,.035,1.52],[-.08,2.658,0],'black',.010);
-    for(let n=0;n<10;n++)this.box(top,[frameWidth-.36,.014,.032],[-.08,2.682,-.58+n*.129],'steel',.004);
-    for(const z of [-.80,.80])this.box(top,[frameWidth-.20,.20,.08],[-.02,2.50,z],'graphite',.014);
+    const top=this.markExteriorCover(this.group(g,`press-${i}-top-deck`,`${i===0?'PU1':'PU'+(i+1)} · open upper service deck`,[0,0,0],[0,.30,.72],['IMG_1628(2).jpeg','IMG_1628.jpeg','IMG_1970.jpeg','IMG_1971.jpeg'],'V404/V405/V408 actual-photo lock: normal PU state is OPEN on top. No solid hood, roof cassette or closed ink-bed cap is allowed; only attached service rails, pivots and brackets remain.'));
+    Object.assign(top.userData,{openUpperDeck:true,solidTopCover:false,photoLockBaseline:'V404_V405_V408_OPEN_PU_TOP'});
+    // Keep only the photographed attached service mechanism. The former broad solid
+    // top slabs were a regression that hid the ink-fountain/roller area on every PU.
+    this.box(top,[.11,.09,1.46],[-.04,2.61,0],'steel',.018);
+    for(const z of [-.70,.70]){
+      this.box(top,[.08,.20,.08],[-.24,2.57,z],'graphite',.014);
+      this.cylinder(top,.036,.10,[-.18,2.61,z],'steel','z');
+      this.box(top,[.18,.045,.10],[.10,2.56,z],'black',.008);
+    }
+    for(let n=0;n<11;n++)this.box(top,[.018,.024,.76],[.11+n*.024,2.53,.35],'graphite',.003);
     const bridge=this.group(g,`press-${i}-fountain-support`,`PU${i+1} · ink-fountain support bridge`,[0,0,0],[0,.42,-.55],['IMG_1628(2).jpeg','IMG_1970.jpeg','IMG_1971.jpeg'],'Twin end supports and transverse fountain member follow the photographed external arrangement. Internal roller relationships use the OEM roller map.');
     this.box(bridge,[.18,.10,1.56],[-.03,2.49,0],'graphite',.016);
     this.box(bridge,[.10,.045,1.44],[-.10,2.545,0],'steel',.010);
@@ -389,14 +412,21 @@ export class OffsetMachineTemplate {
     this.box(driveDetails,[.18,.28,.05],[-.24,.92,-1.245],'light',.018);
     this.handle(driveDetails,[-.24,.92,-1.28],'z',.14);
     for(let n=0;n<3;n++)this.tube(driveDetails,[[-.30+n*.18,.56,-1.25],[-.20+n*.15,.38,-1.35],[-.28+n*.17,.15,-1.43]],.012,n===2?'red':'rubber');
-    const ink=this.markExteriorCover(this.group(g,'press-'+i+'-ink','Ink fountain exterior enclosure',[0,0,0],[0,.9,0],['IMG_1970.jpeg','IMG_1971.jpeg','IMG_1628.jpeg'],'Normal exterior view shows the closed ink-fountain enclosure. Ink and dampening rollers remain inside the guarded printing unit and are available only through internal-detail selection.'));
-    this.box(ink,[frameWidth-.10,.70,1.72],[.02,2.38,0],'graphite',.032);
-    const lid=this.box(ink,[.34,.075,1.58],[-.29,2.74,0],'light',.018);lid.rotation.z=-.18;
-    this.box(ink,[.12,.58,1.52],[.43,2.36,0],'graphite',.018);
-    for(const z of [-.76,.76]){
-      this.box(ink,[frameWidth-.12,.68,.075],[.02,2.38,z],'graphite',.018);
-      this.box(ink,[.12,.11,.10],[.18,2.68,z],'black',.012);
+    const ink=this.markExteriorCover(this.group(g,'press-'+i+'-ink','Open ink-fountain / duct service bay',[0,0,0],[0,.9,0],['IMG_1970.jpeg','IMG_1971.jpeg','IMG_1628.jpeg'],'Restored V404/V408 actual-photo baseline: the PU top and ink-fountain/duct area remain visibly OPEN in normal state. No large closed rectangular enclosure is allowed.'));
+    Object.assign(ink.userData,{openInkBed:true,solidInkEnclosure:false,photoLockBaseline:'V404_V408_OPEN_INK_DUCT_BAY'});
+    // Small attached end cheeks and support members only; these define the bay without
+    // hiding the actual roller train behind a synthetic solid exterior box.
+    for(const z of [-.78,.78]){
+      this.box(ink,[frameWidth-.16,.24,.070],[.02,2.36,z],'graphite',.016);
+      this.box(ink,[.12,.18,.10],[.18,2.58,z],'black',.012);
     }
+    this.box(ink,[.12,.10,1.50],[.42,2.30,0],'graphite',.014);
+    const openBay=this.group(g,`press-${i}-open-ink-bay`,`PU${i+1} · visible open ink duct bay`,[0,0,0],[0,.26,.30],['IMG_1970.jpeg','IMG_1971.jpeg','IMG_1628(2).jpeg'],'Previously accepted BMJ photo-lock: open upper ink bay remains visible in normal state; the visible green service/duct roller is not conflated with numbered rollers 1–19 on IMG_2777.');
+    Object.assign(openBay.userData,{photoVerified:true,normalStateVisible:true,openUpperDeck:true});
+    const filmKinds=['inkFilmCyan','inkFilmMagenta','inkFilmYellow','inkFilmBlack','inkFilmOrange','inkFilmGreen','inkFilmPurple','inkFilmNeutral'];
+    const film=this.box(openBay,[.18,.018,1.30],[-.17,2.645,0],filmKinds[i%filmKinds.length],.004);
+    film.name='Visible Ink Film Color';Object.assign(film.userData,{visibleInkFilm:true,unit:i+1,jobStateVisualization:true});
+    for(const z of [-.72,.72])this.box(openBay,[.08,.12,.08],[-.015,2.64,z],'graphite',.012);
     const fountainControls=this.group(g,`press-${i}-ink-fountain-controls`,`PU${i+1} · ink fountain keys, guard & ductor interface`,[0,0,0],[0,.46,.42],['IMG_1970.jpeg','IMG_1971.jpeg','IMG_1628(2).jpeg'],'Fountain-key rhythm and guard are visual references from the photographed upper assembly; actual key count, calibration and drive setting are not asserted.');
     this.markExteriorCover(this.box(fountainControls,[.12,.16,1.50],[-.34,2.46,0],'graphite',.018));
     for(let n=0;n<14;n++){const z=-.67+n*.103;this.cylinder(fountainControls,.018,.035,[-.41,2.49,z],n%2?'steel':'black','x');}
@@ -487,9 +517,10 @@ export class OffsetMachineTemplate {
     for(const z of [-.64,.64])markDetail(this.cylinder(plateClamp,.042,.035,[.17,1.99,z],'steel','z'));
 
     // Inking: exact designations/nominal diameters from the supplied OEM roller procedure.
-    const fountainRoller=this.group(g,`${id}-ink-fountain-roller`,`${label} · ink fountain roller`,[0,0,0],[0,.30,.18],[...photos,'pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'The CD102 manual identifies the ink fountain roller upstream of the ink ductor/vibrator. Diameter is visual-reference only.');
-    const fountainBody=this.group(fountainRoller,`${id}-ink-fountain-roller-body`,`${label} · ink fountain roller body`,[0,0,0],[0,.08,.10],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf']);
-    markDetail(this.cylinder(fountainBody,.080,1.30,[-.015,2.68,0],'steel'));
+    const fountainRoller=this.group(g,`${id}-ink-fountain-roller`,`${label} · visible green ink-fountain / duct service roller`,[0,0,0],[0,.30,.18],[...photos,'pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'The previously accepted BMJ upper-PU photo lock shows one clearly visible green longitudinal service/duct roller in the open top. The CD102 manual confirms the fountain-roller function; installed diameter remains visual-reference only.');
+    Object.assign(fountainRoller.userData,{photoLockBaseline:'V408_GREEN_VISIBLE_DUCT_ROLL',normalStateVisible:true,diagramIdentityBoundary:'NOT_NUMBERED_AS_1_TO_19_IN_IMG_2777'});
+    const fountainBody=this.group(fountainRoller,`${id}-ink-fountain-roller-body`,`${label} · visible green duct roller body`,[0,0,0],[0,.08,.10],[...photos,'pdfcoffee.com_cd102pdf-4-pdf-free.pdf']);
+    const visibleDuctRoll=markDetail(this.cylinder(fountainBody,.080,1.30,[-.015,2.68,0],'photoRollerGreen'));visibleDuctRoll.name='Visible Ink Duct Roll';Object.assign(visibleDuctRoll.userData,{offset5InkDuctRollPhotoLocked:true,normalStateVisible:true});
     const fountainJournals=this.markServiceDetail(this.group(fountainRoller,`${id}-ink-fountain-roller-journals`,`${label} · ink fountain roller journals`,[0,0,0],[0,.05,-.12],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Service-level journal hardware is kept out of the open-machine overview.'));
     // Journal geometry intentionally omitted from the overview model; the service node remains available for taxonomy.
     const inking=this.group(g,`${id}-inking-train`,`${label} · inking roller train 1–15`,[0,0,0],[0,.68,.25],[...photos,'SMCD102_roller_remove_procedure.pdf'],'Roller numbers 1–15 and distributor rollers A–D follow the supplied OEM topology. Coordinates are fitted inside the photographed housing without volumetric overlap.');
@@ -896,5 +927,5 @@ export class OffsetMachineTemplate {
   }
   setLow(on){for(const m of this.meshes)if(m.userData.detail)m.visible=!on;}
   reset(){const exteriorOpen=this.exteriorOpen;this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const n of this.nodes)n.quaternion.copy(n.userData.restQuaternion);if(exteriorOpen)this.setExteriorOpen(true);}
-  dispose(){for(const geo of this.geometries.values())geo.dispose();for(const mat of this.materials.values())mat.dispose();for(const m of this.meshes)if(m.isInstancedMesh)m.dispose();}
+  dispose(){for(const geo of this.geometries.values())geo.dispose();for(const mat of this.materials.values())mat.dispose();for(const texture of this.textures)texture.dispose();for(const m of this.meshes)if(m.isInstancedMesh)m.dispose();}
 }
