@@ -27,7 +27,7 @@ test('V253 keeps BMJ OS/DS orientation and broad custom inter-unit access',()=>{
  try{
   assert.equal(m.root.userData.sideAlignment,'PHOTO_VERIFIED_OPERATOR_NEGATIVE_Z');
   assert.equal(m.root.userData.driveSideAlignment,'PHOTO_VERIFIED_DRIVE_POSITIVE_Z');
-  assert.equal(m.root.userData.realismPack,'OFFSET5_CD102_8L_CUSTOM_INSTALLED_REALITY_R5');
+  assert.equal(m.root.userData.realismPack,'OFFSET5_CD102_8L_CUSTOM_INSTALLED_REALITY_R6_ACTUAL_PU_DIAGRAM');
   assert.equal(m.root.userData.dimensionLock,'BMJ_CUSTOM_INSTALLED_DIMENSIONS_DO_NOT_NORMALIZE_TO_GENERIC_CD102');
   for(let i=0;i<7;i++){
    const frameA=new THREE.Box3().setFromObject(m.findNode(`press-${i}-frame`));
