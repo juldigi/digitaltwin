@@ -90,6 +90,18 @@ export function validateOffset5PilotTemplate(template,{throwOnError=false}={}){
    for(const spec of OFFSET5_INK_DISTRIBUTORS)verifyRoller(`${prefix}-ink-distributor-${spec.code}-body`,spec,'DISTRIBUTOR');
    for(const spec of OFFSET5_DAMPENING_ROLLERS)verifyRoller(`${prefix}-damp-roller-${spec.code}-body`,spec,'DAMP');
   }
+  for(let bay=1;bay<contract.printingUnitCount;bay++){
+   const base=`transfer-pu${bay}-pu${bay+1}`,required=[
+    base,`${base}-gripper-a`,`${base}-gripper-b`,`${base}-gripper-shaft`,
+    `${base}-gripper-spring`,`${base}-gripper-cam`,`${base}-guide`
+   ];
+   for(const id of required){
+    const node=template.findNode?.(id);
+    if(!node){fail('TRANSFER_STRUCTURE_MISSING',id);continue;}
+    let attached=false;for(let p=node;p;p=p.parent)if(p===root){attached=true;break;}
+    if(!attached)fail('TRANSFER_STRUCTURE_DETACHED',id);
+   }
+  }
  }
  const result=Object.freeze({valid:errors.length===0,errors:Object.freeze(errors),contract:OFFSET5_PILOT_RUNTIME_CONTRACT});
  if(root)root.userData.offset5RuntimeTruthLock=result.valid?'PASS':'FAIL',root.userData.offset5RuntimeTruthErrors=errors.map(e=>e.code+':'+e.detail).join('|');
