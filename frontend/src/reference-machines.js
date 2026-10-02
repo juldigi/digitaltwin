@@ -536,6 +536,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.root.userData.exactFolderGluerOemVerified=false;
   this.root.userData.exactFolderGluerModelVerified=false;
   this.root.userData.neighborMedia100IdentityProof=false;
+  this.root.userData.installedIdentityBoundary='OEM_MODEL_SERIAL_UNKNOWN__NO_MEDIA100_IDENTITY_ASSUMED';
   this.root.userData.localSupplierFamilyEvidence={source:'Jaya Makmur Mesindo',bmjCustomerAssociation:true,folderGluerCatalogue:true,installationProof:false,modelProof:false};
   this.root.userData.fgm2DriveArchitecture={installedArchitectureVerified:false,reference:'SECTIONAL_DRIVE_CAPABILITY',notes:'Independent/sectional drives are supported by BOBST family references; exact FGM-2 motor/gearbox topology remains unverified.'};
   this.root.userData.fgm2Capabilities={
@@ -1619,6 +1620,14 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  buildFolderGluer(){
   this.palette.body=0xe8e8e3;this.palette.accent=0x3d735d;this.palette.dark=0x273034;this.palette.orange=0xc77732;
   this.base(11.7,1.95);
+  this.root.userData.installedIdentityBoundary='OEM_MODEL_SERIAL_UNKNOWN__NO_MEDIA100_IDENTITY_ASSUMED';
+  const frame=this.group(this.root,'fgm2-open-frame','FGM-2 open conveyor frame',[0,0,0],[0,.16,0]);
+  for(const z of [-.84,.84]){
+   this.box(frame,[11.20,.055,.055],[0,1.27,z],'steel',.006);
+   this.box(frame,[11.35,.12,.08],[0,.38,z],'dark',.010);
+  }
+  for(let x=-5.25;x<=5.25;x+=.75)for(const z of [-.84,.84])this.box(frame,[.055,.50,.055],[x,.84,z],'steel',.006);
+  frame.userData.identityBoundary='PROCESS_CHASSIS_REFERENCE_ONLY__OEM_MODEL_SERIAL_UNKNOWN';
   const xs=[-5.0,-3.45,-1.75,0,1.75,3.55,5.0];
   const widths=[1.32,1.46,1.52,1.40,1.52,1.48,1.26];
   for(let i=1;i<=7;i++){

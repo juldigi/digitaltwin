@@ -23,7 +23,7 @@ test('V231 live reference machines use home/detail parity metadata instead of fa
 });
 
 test('V231 low LOD preserves silhouette-critical meshes while still culling ordinary detail',()=>{
- assert.match(universal,/if\(m\.userData\.detail&&!m\.userData\.silhouetteCritical\)m\.visible=!on/);
+ assert.match(universal,/if\(m\.userData\.detail&&!m\.userData\.silhouetteCritical\)m\.visible=m\.userData\.capabilityOnly\?false:!on/);
  withMachine('BMJ-MCH-0029',m=>{
   const keep=critical(m,/compressor-cabinet-top-panel/);
   const micro=m.meshes.find(x=>x.userData?.detail&&!x.userData?.silhouetteCritical&&x.visible);
