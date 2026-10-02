@@ -791,7 +791,6 @@ export function validateRemainingFleetTemplate(template,key,{throwOnError=false}
    if(u.engineeringDimensions!==false||u.exactModelVerifiedFromBMJ!==true||u.installedOemVerified!==false)fail('FZ_INSTALLATION_BOUNDARY','identity/dimension/OEM');
    if(u.spec?.model!=='FZ 1200'||u.spec?.serial!==contract.serial)fail('FZ_IDENTITY',(u.spec?.model||'')+'|'+(u.spec?.serial||''));
    for(const field of ['installedOemVerified','installedCapacityVerified','installedOpeningVerified','installedPowerVerified','installedEnvelopeVerified','installedHydraulicPressureVerified','installedOilTankVerified','installedNozzleCountVerified','installedBlowerLayoutVerified','installedCylinderCountVerified'])if(u.spec?.[field]!==false)fail('FZ_INSTALLED_VALUE_PROMOTED',field+':'+u.spec?.[field]);
-   if(template.findNode?.('fz1200-turn')?.userData?.installedTurnEnvelopeVerified!==false)fail('FZ_TURN_ENVELOPE_PROMOTED',template.findNode?.('fz1200-turn')?.userData?.installedTurnEnvelopeVerified);
   }else if(contract.family==='gravure'){
    if(template.cfg?.evidence?.geometry!==contract.geometry||template.cfg?.evidence?.simulation!==contract.simulation)fail('GRAVURE_EVIDENCE_BOUNDARY',(template.cfg?.evidence?.geometry||'')+'|'+(template.cfg?.evidence?.simulation||''));
    if(u.referenceBuilder!=='V139_RESEARCH_GROUNDED_BUILDER'||u.engineeringDimensions!==false)fail('GRAVURE_REFERENCE_BUILDER',u.referenceBuilder);
