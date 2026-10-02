@@ -33,7 +33,7 @@ test('geometry is finite, sourced and instanced; visual dimensions remain noneng
 });
 test('photo-aligned geometry preserves orientation and bounded machine envelope',()=>{
  const t=new OffsetMachineTemplate(),box=new THREE.Box3().setFromObject(t.root),size=box.getSize(new THREE.Vector3());
- assert.equal(t.root.userData.version,'offset5-photo-pdf-v36');
+ assert.equal(t.root.userData.version,'offset5-photo-pdf-v319');
  assert.equal(t.root.userData.sideAlignment,'PHOTO_VERIFIED_OPERATOR_NEGATIVE_Z');
  assert.equal(t.root.userData.driveSideAlignment,'PHOTO_VERIFIED_DRIVE_POSITIVE_Z');
  assert.ok(t.findNode('feeder').position.x<t.findNode('delivery').position.x);
@@ -175,16 +175,21 @@ test('PU8 through delivery access geometry is supported and only meets adjacent 
  t.dispose();
 });
 
-test('PU1 top guard remains below the photo-aligned ink-fountain bridge',()=>{
+test('PU1 preserves the photo-locked open upper deck and visible duct roller without a solid hood',()=>{
  const t=new OffsetMachineTemplate();
- const top=new THREE.Box3().setFromObject(t.findNode('press-0-top-deck'));
- const ink=new THREE.Box3().setFromObject(t.findNode('press-0-ink'));
- const bridge=new THREE.Box3().setFromObject(t.findNode('press-0-fountain-support'));
- assert.ok(top.max.y<ink.max.y,'PU1 top guard should not dominate the visible ink-fountain assembly');
- assert.ok(top.min.y<bridge.max.y,'PU1 top deck/bridge relation is invalid');
- assert.ok(bridge.max.y<2.9,'PU1 bridge is vertically exaggerated');
- let exposedRollers=0;t.findNode('press-0-ink').traverse(o=>{if(o.isMesh&&o.geometry?.type==='CylinderGeometry')exposedRollers++;});
- assert.equal(exposedRollers,0,'PU1 exterior still exposes an internal ink roller on top');
+ const top=t.findNode('press-0-top-deck'),ink=t.findNode('press-0-ink'),openBay=t.findNode('press-0-open-ink-bay');
+ const bridge=t.findNode('press-0-fountain-support'),duct=t.findNode('press-0-ink-fountain-roller-body');
+ assert.equal(top.userData.openUpperDeck,true);
+ assert.equal(top.userData.solidTopCover,false);
+ assert.equal(ink.userData.openInkBed,true);
+ assert.equal(ink.userData.solidInkEnclosure,false);
+ assert.equal(openBay.userData.normalStateVisible,true);
+ assert.ok(new THREE.Box3().setFromObject(bridge).max.y<2.9,'PU1 bridge is vertically exaggerated');
+ const visibleDuct=duct.children.find(o=>o.isMesh);
+ assert.ok(visibleDuct,'PU1 visible green duct roller is missing');
+ assert.equal(visibleDuct.material.color.getHex(),t.palette.photoRollerGreen);
+ const body=t.findNode('press-0-frame');
+ assert.equal(body.userData.fullDepthTopBeam,false,'solid full-depth top beam regression returned');
  t.dispose();
 });
 

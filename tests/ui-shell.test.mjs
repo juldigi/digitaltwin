@@ -42,8 +42,8 @@ test('runtime hooks required by the canonical 3D application remain available',(
   for(const retired of ['nav-layout','nav-exterior','nav-sources','edit-position','panel-launcher','engineering-workbench'])assert.doesNotMatch(html,new RegExp(`id="${retired}"`));
   for(const camera of ['iso','top','fit','reset'])assert.match(html,new RegExp(`data-camera="${camera}"`));
 });
-test('geometry baseline remains unchanged while the user interface is rebuilt',()=>{
-  assert.equal(PHOTO_RECONSTRUCTION.version,'offset5-photo-pdf-v36');
+test('Offset 5 geometry baseline reflects the V319 pilot correction while the user interface remains independent',()=>{
+  assert.equal(PHOTO_RECONSTRUCTION.version,'offset5-photo-pdf-v319');
   assert.equal(PHOTO_RECONSTRUCTION.repeatedHousings,8);
 });
 

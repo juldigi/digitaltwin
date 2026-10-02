@@ -1,10 +1,25 @@
-# OFFSET 5 — taxonomy explode 6 stage dan orientasi v4
+# OFFSET 5 — taxonomy explode 6 stage dan orientasi v18
 
 ## Orientasi terkunci
 
-Sumbu longitudinal scene memakai **+X dari feeder menuju delivery**. Sisi dengan walkway/pijakan berulang pada foto diperlakukan sebagai **operator side (+Z)**; sisi berlawanan ditulis *opposite side* sampai drive-side terverifikasi dari dokumen mesin spesifik.
+Sumbu longitudinal scene memakai **+X dari feeder menuju delivery**. Setelah koreksi handedness berdasarkan foto longitudinal BMJ, **operator side = world −Z** dan **drive side = world +Z**. Transform mirror dilakukan pada top-level module agar urutan feeder → delivery tetap +X.
 
 Koreksi terhadap v3: `IMG_2312.jpeg` adalah acuan ujung **feeder/pile inlet**, sedangkan `IMG_1624.jpeg` dan `IMG_1625.jpeg` adalah acuan **delivery pile end**. Foto `IMG_1629/1631/1633` mengisi transition/deck delivery; `IMG_1630/1633` mengunci gantry FA-Swan; `IMG_1165/0947` memberi detail roller/gauge/hose di zona akhir line. Penempatan detail terakhir ke coating-service zone adalah **INFERRED_POSITION**, bukan pengukuran engineering.
+
+
+## Authority printing unit V319
+
+Taxonomy PU1–PU8 tidak lagi menduplikasi tabel roller secara hard-code. Node roller mengambil data dari source registry yang sama dengan geometry dan simulation. `IMG_2777.jpeg` menjadi bukti `PHOTO_VERIFIED` untuk code/designation, diameter nominal, color code, material/remark serta topology sectional 1–19, A–D dan FR. Journal, bearing, nip, timing, pressure dan setting yang tidak ada pada diagram tetap `REFERENCE_ONLY`.
+
+Tambahan V319:
+- `INK.FOUNTAIN` = open ink-fountain/duct bay, bukan solid enclosure.
+- `INK.DUCT_ROLL` = visible green service/fountain roller dari baseline foto V408; tidak diberi nomor 1–19.
+- `INK.VISIBLE_FILM` = permukaan ink-film job-state visualization.
+- `INK.RAKEL` dan `INK.AIR_BLOWER` = callout aktual pada diagram.
+- `DAMP.WATER` = WATER callout di area 18/T.
+- `CYL.AIR_BLOWER` = AIR BLOWER callout pada blanket/impression sheet path.
+- `COVER.TOP` = open upper service deck; solid hood dilarang kembali oleh regression test.
+- `COVER.BRAND` = HEIDELBERG Speedmaster operator-door mark pada cover melengkung.
 
 ## Taxonomy 6 stage
 

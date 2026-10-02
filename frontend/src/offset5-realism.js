@@ -15,9 +15,10 @@ import * as THREE from 'three';
 import {OffsetMachineTemplate} from './offset5.js';
 import {PrintingSimulation} from './simulation.js';
 import {OFFSET5_DIMENSIONS,OFFSET5_UNIT_CENTERS} from './data/dimensions-offset5.js';
+import {OFFSET5_ACTUAL_ROLLER_DIAGRAM,OFFSET5_INKING_ROLLERS,OFFSET5_INK_DISTRIBUTORS,OFFSET5_DAMPENING_ROLLERS,OFFSET5_INKING_ROTATION_SENSE,OFFSET5_DAMPENING_ROTATION_SENSE} from './data/sources-offset5.js';
 
 export const OFFSET5_FINAL_REFINEMENT=Object.freeze({
-  id:'OFFSET5_CD102_8L_CUSTOM_INSTALLED_REALITY_R5',
+  id:'OFFSET5_CD102_8L_CUSTOM_INSTALLED_REALITY_R6_ACTUAL_PU_DIAGRAM',
   machine:'Heidelberg Speedmaster CD 102-8+L',
   asset:'MACHINE-OFFSET5',
   sap:'OFU-1',
@@ -25,6 +26,7 @@ export const OFFSET5_FINAL_REFINEMENT=Object.freeze({
   policy:'PRESERVE_BMJ_CUSTOM_INSTALLED_DIMENSIONS__ENRICH_EXISTING_NODES_ONLY__NO_DUPLICATE_PROCESS_HARDWARE',
   sourcePriority:[
     'BMJ Offset 5 photos + calibrated DXF',
+    'IMG_2777 actual on-machine Heidelberg CD-102 roller diagram',
     'supplied CD102 OEM service/roller documentation',
     'HEIDELBERG CD102 family product information',
     'USER-CONFIRMED BMJ custom installed dimensions and inter-unit access take precedence over generic family dimensions',
@@ -637,10 +639,10 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       sheet.userData.contactColorRevision=-1;
       this.setSheetColors(sheet,0);
     }
-    return super.start();
+    super.start();this.applyDampeningFilm(true);return this.state();
   }
   stop(){
-    super.stop();
+    super.stop();this.applyDampeningFilm(false);
     for(const sheet of this.sheets){
       sheet.userData.contactRowMasks?.fill(0);
       sheet.userData.contactColorRevision=-1;
@@ -660,13 +662,32 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
   buildFluidFlows(){this.fluidFlows=[];}
   collectInkSurfaces(){
     super.collectInkSurfaces();
-    const rollerMaterials=new Set();
+    const rollerMaterials=new Set(),inkCodes=OFFSET5_INKING_ROLLERS.map(spec=>spec.code),distributorCodes=OFFSET5_INK_DISTRIBUTORS.map(spec=>spec.code);
     for(let i=0;i<8;i++){
-      for(const id of [`press-${i}-ink-fountain-roller-body`,...['13','2','1','14','3','4','5','6','7','8','9','10','11','12','15'].map(code=>`press-${i}-ink-roller-${code}-body`)]){
-        this.template.findNode(id)?.traverse(mesh=>{if(mesh.isMesh&&mesh.material)rollerMaterials.add(mesh.material);});
-      }
+      for(const id of [
+        ...inkCodes.map(code=>`press-${i}-ink-roller-${code}-body`),
+        ...distributorCodes.map(code=>`press-${i}-ink-distributor-${code}-body`)
+      ])this.template.findNode(id)?.traverse(mesh=>{if(mesh.isMesh&&mesh.material)rollerMaterials.add(mesh.material);});
     }
+    // Ink belongs on the actual numbered inking train and A-D distributors. The visible
+    // green fountain/duct service roller is photo-locked green in the open top and must not
+    // be recolored as a per-job proxy. No plate/blanket glow and no floating ink droplets.
     this.inkSurfaces=this.inkSurfaces.filter(surface=>rollerMaterials.has(surface.material));
+  }
+  collectDampeningSurfaces(){
+    this.dampeningSurfaces=[];const seen=new Set(),codes=OFFSET5_DAMPENING_ROLLERS.map(spec=>spec.code);
+    for(let i=0;i<8;i++)for(const code of codes)this.template.findNode(`press-${i}-damp-roller-${code}-body`)?.traverse(mesh=>{
+      const material=mesh.isMesh?mesh.material:null;
+      if(!material?.emissive||seen.has(material))return;
+      seen.add(material);this.dampeningSurfaces.push({material,initialEmissive:material.emissive.clone(),initialIntensity:material.emissiveIntensity});
+    });
+  }
+  applyDampeningFilm(on){
+    for(const item of this.dampeningSurfaces||[]){
+      if(on){item.material.emissive.setHex(0x315566);item.material.emissiveIntensity=.035;}
+      else{item.material.emissive.copy(item.initialEmissive);item.material.emissiveIntensity=item.initialIntensity;}
+      item.material.needsUpdate=true;
+    }
   }
   collectMechanicalMotion(){
     super.collectMechanicalMotion();
@@ -688,27 +709,44 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       if(!this.levers.some(item=>item.object===infeed))this.addLever(infeed,.085,1,.30);
     }
 
-    // Every straight-printing unit has the same installed handedness. The legacy simulator flipped
-    // the ink/dampening train by PU parity, making PU2/4/6/8 visibly run backwards. Preserve the
-    // existing relative roller pattern but normalize it identically across all eight PUs.
-    const inkCodes=['13','2','1','14','3','4','5','6','7','8','9','10','11','12','15'];
-    const dampCodes=['16','17','FR','19','18'];
+    // Every straight-printing unit has the same installed handedness. The prior simulator
+    // alternated signs by array index, which is not the actual branched roller topology.
+    // V319 uses the contact-derived relative rotation senses from IMG_2777. These are visual
+    // counter-rotation relationships only; no service timing, phase, nip pressure or RPM is asserted.
     const rotorFor=id=>this.rotors.find(item=>item.mesh?.userData?.ownerId===id);
+    const contactRate=rotor=>{
+      const radius=rotor?.mesh?.geometry?.parameters?.radiusTop;
+      return radius?this.baseMetersPerSecond/(Math.PI*2*this.sheetCyclesPerSecond*radius):rotor?.rate||1;
+    };
     for(let i=0;i<8;i++){
       const fountain=rotorFor(`press-${i}-ink-fountain-roller-body`);
-      if(fountain){fountain.sign=1;fountain.role=`PU${i+1}-ink-fountain-roller`;fountain.source='SAME_HANDED_STRAIGHT_PRINT_UNIT_VISUAL_KINEMATICS';}
-      inkCodes.forEach((code,index)=>{
-        const rotor=rotorFor(`press-${i}-ink-roller-${code}-body`);if(!rotor)return;
-        rotor.sign=index%2?-1:1;rotor.role=`PU${i+1}-ink-roller-${code}`;rotor.source='SAME_HANDED_STRAIGHT_PRINT_UNIT_VISUAL_KINEMATICS';
-      });
-      for(const code of ['A','B','C','D']){
-        const rotor=rotorFor(`press-${i}-ink-distributor-${code}-body`);if(!rotor)continue;
-        rotor.sign=code.charCodeAt(0)%2?-1:1;rotor.role=`PU${i+1}-ink-distributor-${code}`;rotor.source='SAME_HANDED_STRAIGHT_PRINT_UNIT_VISUAL_KINEMATICS';
+      if(fountain){
+        fountain.sign=OFFSET5_INKING_ROTATION_SENSE.FOUNTAIN;
+        fountain.rate=contactRate(fountain);
+        fountain.role=`PU${i+1}-ink-fountain-roller`;
+        fountain.source='V408_PHOTO_OEM_FOUNTAIN_VIBRATOR_CONTACT_VISUAL_REFERENCE';
       }
-      dampCodes.forEach((code,index)=>{
-        const rotor=rotorFor(`press-${i}-damp-roller-${code}-body`);if(!rotor)return;
-        rotor.sign=index%2?-1:1;rotor.role=`PU${i+1}-damp-roller-${code}`;rotor.source='SAME_HANDED_STRAIGHT_PRINT_UNIT_VISUAL_KINEMATICS';
-      });
+      for(const spec of OFFSET5_INKING_ROLLERS){
+        const rotor=rotorFor(`press-${i}-ink-roller-${spec.code}-body`);if(!rotor)continue;
+        rotor.sign=OFFSET5_INKING_ROTATION_SENSE[spec.code];
+        rotor.rate=contactRate(rotor);
+        rotor.role=`PU${i+1}-ink-roller-${spec.code}`;
+        rotor.source='IMG_2777_CONTACT_TOPOLOGY_COUNTER_ROTATION_VISUAL_REFERENCE';
+      }
+      for(const spec of OFFSET5_INK_DISTRIBUTORS){
+        const rotor=rotorFor(`press-${i}-ink-distributor-${spec.code}-body`);if(!rotor)continue;
+        rotor.sign=OFFSET5_INKING_ROTATION_SENSE[spec.code];
+        rotor.rate=contactRate(rotor);
+        rotor.role=`PU${i+1}-ink-distributor-${spec.code}`;
+        rotor.source='IMG_2777_CONTACT_TOPOLOGY_COUNTER_ROTATION_VISUAL_REFERENCE';
+      }
+      for(const spec of OFFSET5_DAMPENING_ROLLERS){
+        const rotor=rotorFor(`press-${i}-damp-roller-${spec.code}-body`);if(!rotor)continue;
+        rotor.sign=OFFSET5_DAMPENING_ROTATION_SENSE[spec.code];
+        rotor.rate=contactRate(rotor);
+        rotor.role=`PU${i+1}-damp-roller-${spec.code}`;
+        rotor.source='IMG_2777_DAMPENING_CONTACT_TOPOLOGY_COUNTER_ROTATION_VISUAL_REFERENCE';
+      }
     }
     // The sheet runs left to right across the upper transfer arc at every bay.
     // Both transfer drum and gripper orbit therefore turn clockwise in this view.
@@ -764,7 +802,9 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       rotor.sign=sign;
       rotor.rate=this.baseMetersPerSecond/(Math.PI*2*this.sheetCyclesPerSecond*radius);
       rotor.role=`PU${i+1}-${type}-cylinder`;
-      rotor.source='CONTACTING_CYLINDER_SURFACE_SPEED_REFERENCE';
+      rotor.source=type==='transfer'
+        ?'CONTACTING_CYLINDER_SURFACE_SPEED_REFERENCE__TRANSFER_NOT_SHOWN_IN_IMG_2777'
+        :'IMG_2777_PRIMARY_CYLINDER_RELATIVE_ROTATION__VISUAL_DIRECTION_ONLY';
     }
   }
   collectInspectionIllumination(){
@@ -855,6 +895,7 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
     this.joggerMotions=this.joggerMotions.filter(o=>!o.object?.userData?.exteriorCover);
     for(const item of this.gripperMotions)item.initialRotationZ=item.object.rotation.z;
     this.collectInspectionIllumination();
+    this.collectDampeningSurfaces();
     this.deliveryTableMesh=this.template.findNode('delivery-pile')?.children.find(o=>o.isMesh)||null;
     this.deliveryTableInitialY=this.deliveryTableMesh?.position.y;
     this.deliveryTableDrop=0;
@@ -864,6 +905,9 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
     return {
       ...super.state(),
       realismPack:this.realismPack,
+      rollerDiagramRevision:OFFSET5_ACTUAL_ROLLER_DIAGRAM.revision,
+      rollerDiagramSource:OFFSET5_ACTUAL_ROLLER_DIAGRAM.sourceFile,
+      rollerDiagramBoundary:OFFSET5_ACTUAL_ROLLER_DIAGRAM.boundary,
       motionPolicy:'ROLE_TAGGED_PROCESS_PARTS_ONLY',
       duplicateProcessHardwareAdded:false,
       focusightLocationPolicy:'DOWNSTREAM_AFTER_COATING_DRYING',
@@ -875,8 +919,14 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       interUnitAccessPolicy:'BMJ_CUSTOM_BROAD_INTERUNIT_ACCESS_AND_OS_DS_STEPS_PRESERVED',
       inkRepresentation:'THIN_ROLLER_FILM_ONLY_NO_FREE_FLOATING_DROPLETS',
       inkRollerCount:this.inkSurfaces.length,
+      dampeningRollerSurfaceCount:this.dampeningSurfaces?.length||0,
+      rollerSurfacePolicy:'IMG_2777_ACTUAL_TABLE_FOR_1_19_A_D_FR__NO_GENERIC_RILSAN_STEEL_SWAPS',
+      openUpperDeckPolicy:'V404_V408_PHOTO_LOCK__NO_SOLID_PU_TOP__GREEN_DUCT_ROLL_REMAINS_GREEN',
+      dampeningRepresentation:'SUBTLE_ROLLER_FILM_ONLY__NO_FLOATING_WATER_PARTICLES',
       printRepresentation:'PROGRESSIVE_TRANSVERSE_COLOUR_BANDS_PER_PU_DEMO',
       cylinderMotionPolicy:'SAME_STRAIGHT_PRINT_DIRECTION_ALL_PU_CONTACT_PAIRS_COUNTER_ROTATE',
+      primaryCylinderDiagramPolicy:'IMG_2777_PLATE_AND_IMPRESSION_SAME_ROTATION_SENSE__BLANKET_OPPOSITE__NO_TIMING_OR_PHASE_CLAIM',
+      rollerContactMotionPolicy:'IMG_2777_CONTACT_GRAPH_COUNTER_ROTATION__SURFACE_SPEED_VISUAL_REFERENCE__NO_SERVICE_TIMING_PHASE_OR_NIP_CLAIM',
       sheetVisualPolicy:'NO_EXTERNAL_FULL_WIDTH_DEMO_GRIPPER_BAR',
       deliveryPilePolicy:'START_EMPTY_STACK_TO_CAPACITY_THEN_CLEAR_AND_REPEAT',
       operatorSideMicrodetailPolicy:'WORLD_NEGATIVE_Z_AFTER_TOP_LEVEL_PHOTO_MIRROR',
@@ -886,7 +936,8 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       feederMotionPolicy:'SUCTION_SEPARATOR_LINKAGE_FRONT_LAYS_AND_INFEED_GRIPPER_SHARE_ONE_SHEET_CYCLE',
       infeedHandoffPolicy:'INFEED_GRIPPER_RECIPROCATES_AND_ROCKS_WITH_ONE_PRESS_CYCLE',
       registerTransportPolicy:'MOBILE_BATCHED_CONTACT_REFERENCE__SHEET_PATH_AND_INFEED_GRIPPER_CARRY_VISIBLE_MOTION',
-      rollerHandednessPolicy:'IDENTICAL_STRAIGHT_PRINT_KINEMATIC_SIGN_PATTERN_ACROSS_ALL_EIGHT_PU',
+      rollerHandednessPolicy:'IDENTICAL_IMG_2777_CONTACT_GRAPH_ACROSS_ALL_EIGHT_STRAIGHT_PRINTING_UNITS',
+      actualDiagramCalloutPolicy:'RAKEL_AIR_BLOWER_WATER_ZONES_STATIC_REFERENCE__NO_PRESSURE_FLOW_OR_SERVICE_SETPOINT',
       interUnitGripperPolicy:'RIGID_FINGER_ASSEMBLY_ROTATES_WITH_TRANSFER_DRUM_ORBIT',
       inspectionIlluminationActive:this.inspectionIlluminationActive,
       inspectionIlluminationPolicy:'SHEET_OCCUPANCY_TRIGGERED_EXISTING_FOCUSIGHT_LIGHTING_ONLY',

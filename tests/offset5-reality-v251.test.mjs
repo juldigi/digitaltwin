@@ -27,7 +27,7 @@ test('V253 keeps BMJ OS/DS orientation and broad custom inter-unit access',()=>{
  try{
   assert.equal(m.root.userData.sideAlignment,'PHOTO_VERIFIED_OPERATOR_NEGATIVE_Z');
   assert.equal(m.root.userData.driveSideAlignment,'PHOTO_VERIFIED_DRIVE_POSITIVE_Z');
-  assert.equal(m.root.userData.realismPack,'OFFSET5_CD102_8L_CUSTOM_INSTALLED_REALITY_R5');
+  assert.equal(m.root.userData.realismPack,'OFFSET5_CD102_8L_CUSTOM_INSTALLED_REALITY_R6_ACTUAL_PU_DIAGRAM');
   assert.equal(m.root.userData.dimensionLock,'BMJ_CUSTOM_INSTALLED_DIMENSIONS_DO_NOT_NORMALIZE_TO_GENERIC_CD102');
   for(let i=0;i<7;i++){
    const frameA=new THREE.Box3().setFromObject(m.findNode(`press-${i}-frame`));
@@ -537,7 +537,7 @@ test('Offset 5 feeder suction and register transport share one sheet cycle witho
    assert.equal(a.sign,b.sign,`damp roller ${code} reverses handedness between adjacent identical PUs`);
   }
   assert.equal(sim.state().feederMotionPolicy,'SUCTION_SEPARATOR_LINKAGE_FRONT_LAYS_AND_INFEED_GRIPPER_SHARE_ONE_SHEET_CYCLE');
-  assert.equal(sim.state().rollerHandednessPolicy,'IDENTICAL_STRAIGHT_PRINT_KINEMATIC_SIGN_PATTERN_ACROSS_ALL_EIGHT_PU');
+  assert.equal(sim.state().rollerHandednessPolicy,'IDENTICAL_IMG_2777_CONTACT_GRAPH_ACROSS_ALL_EIGHT_STRAIGHT_PRINTING_UNITS');
  }finally{sim.dispose();m.dispose();}
 });
 
