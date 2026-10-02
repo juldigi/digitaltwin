@@ -117,7 +117,7 @@ test('V324 PDS truth lock fails closed on promoted option stale evidence route a
  const template=createMachineTemplate('BMJ-MCH-0027');
  try{
   template.findNode('ctf-punch-option').userData.installedOptionVerified=true;
-  template.cfg.evidence.geometry='PLACEHOLDER';
+  template.cfg={...template.cfg,evidence:{...template.cfg.evidence,geometry:'PLACEHOLDER'}};
   const detached=template.findNode('ctf-cutter');detached.parent.remove(detached);
   const audit=validatePdsTemplate(template,'BMJ-MCH-0027');
   assert.equal(audit.valid,false);
