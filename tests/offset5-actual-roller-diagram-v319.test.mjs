@@ -10,6 +10,9 @@ import {
   OFFSET5_INKING_ROTATION_SENSE,
   OFFSET5_DAMPENING_CONTACT_PAIRS,
   OFFSET5_DAMPENING_ROTATION_SENSE,
+  OFFSET5_ROLLER_EVIDENCE_POLICY,
+  OFFSET5_CROSS_SYSTEM_CONTACT_PAIRS,
+  OFFSET5_OEM_CONTACT_SETTING_REFERENCES,
   TECHNICAL_SOURCES
 } from '../frontend/src/data/sources-offset5.js';
 import {OFFSET5_DIMENSIONS} from '../frontend/src/data/dimensions-offset5.js';
@@ -44,6 +47,49 @@ test('V319 actual on-machine roller diagram is the SSOT for PU roller table',()=
  for(const spec of OFFSET5_INKING_ROLLERS)assert.deepEqual([spec.diameterMM,spec.surface,spec.colorCode],expectedInk[spec.code],spec.code);
  for(const spec of OFFSET5_INK_DISTRIBUTORS)assert.deepEqual([spec.diameterMM,spec.surface],expectedDist[spec.code],spec.code);
  for(const spec of OFFSET5_DAMPENING_ROLLERS)assert.deepEqual([spec.diameterMM,spec.surface,Boolean(spec.crowned)],expectedDamp[spec.code],spec.code);
+});
+
+test('V320 explicitly keeps installed IMG_2777 roller data above conflicting generic OEM table rows',()=>{
+ assert.equal(OFFSET5_ROLLER_EVIDENCE_POLICY.installedAuthority,'SRC-O5-ROLLER-DIAGRAM-IMG2777');
+ assert.match(OFFSET5_ROLLER_EVIDENCE_POLICY.conflictRule,/INSTALLED_DIAGRAM_WINS/);
+ const conflictCodes=new Set(OFFSET5_ROLLER_EVIDENCE_POLICY.knownConflicts.map(x=>x.code));
+ for(const code of ['15','17','18','19','A'])assert.ok(conflictCodes.has(code),`missing documented source conflict for ${code}`);
+ const r15=OFFSET5_INKING_ROLLERS.find(x=>x.code==='15');
+ const r17=OFFSET5_DAMPENING_ROLLERS.find(x=>x.code==='17');
+ const r18=OFFSET5_DAMPENING_ROLLERS.find(x=>x.code==='18');
+ const r19=OFFSET5_DAMPENING_ROLLERS.find(x=>x.code==='19');
+ const a=OFFSET5_INK_DISTRIBUTORS.find(x=>x.code==='A');
+ assert.deepEqual([r15.colorCode,r15.surface],['white','rubber-coated']);
+ assert.equal(r17.surface,'rubber-coated');
+ assert.deepEqual([r18.surface,Boolean(r18.crowned)],['plastic-coated',false]);
+ assert.deepEqual([r19.surface,Boolean(r19.crowned)],['rubber-coated',true]);
+ assert.equal(a.surface,'stainless steel');
+});
+
+test('V320 source registry prevents generic OEM rows from silently replacing installed BMJ roller evidence',()=>{
+ const installed=TECHNICAL_SOURCES.find(s=>s.id==='SRC-O5-ROLLER-DIAGRAM-IMG2777');
+ const generic=TECHNICAL_SOURCES.find(s=>s.id==='SRC-CD102-ROLLER-PROCEDURE');
+ assert.ok(installed&&generic);
+ assert.match(installed.boundary,/Installed-machine visual\/table authority/);
+ assert.ok(installed.supports.some(x=>/overrides conflicting generic/i.test(x)));
+ assert.ok(installed.supports.some(x=>/14 ↔ 17\/ZW/.test(x)));
+ assert.match(generic.boundary,/not serial-550415 installed evidence/);
+ assert.match(generic.boundary,/IMG_2777 is authoritative/);
+ assert.match(generic.boundary,/REFERENCE_ONLY/);
+});
+
+test('V320 preserves OEM contact-setting values only as unverified service references',()=>{
+ assert.equal(OFFSET5_OEM_CONTACT_SETTING_REFERENCES.length,11);
+ const byPair=(a,b)=>OFFSET5_OEM_CONTACT_SETTING_REFERENCES.find(x=>x.from===a&&x.to===b);
+ assert.deepEqual([byPair('15','FOUNTAIN').targetMM,byPair('15','FOUNTAIN').minusMM,byPair('15','FOUNTAIN').plusMM],[4,.5,.5]);
+ assert.deepEqual([byPair('15','A').targetMM,byPair('15','A').minusMM,byPair('15','A').plusMM],[5,0,2]);
+ assert.deepEqual([byPair('14','17').targetMM,byPair('14','17').minusMM,byPair('14','17').plusMM],[3,0,1]);
+ for(const ref of OFFSET5_OEM_CONTACT_SETTING_REFERENCES){
+  assert.equal(ref.sourceId,'SRC-CD102-ROLLER-PROCEDURE');
+  assert.equal(ref.installedSettingVerified,false);
+ }
+ assert.deepEqual(OFFSET5_CROSS_SYSTEM_CONTACT_PAIRS.map(x=>[...x]),[['14','17']]);
+ assert.equal(OFFSET5_INKING_ROTATION_SENSE['14'],-OFFSET5_DAMPENING_ROTATION_SENSE['17']);
 });
 
 test('V319 contact topology yields counter-rotation across the actual roller network',()=>{
@@ -83,11 +129,37 @@ test('V319 taxonomy maps every PU to actual roller diagram without the old mater
  }
 });
 
+test('V320 taxonomy makes installed evidence precedence visible at the affected PU nodes',()=>{
+ const root=TAXONOMY_BY_ID.get('O5');
+ assert.match(root.description,/INSTALLED_DIAGRAM_WINS/);
+ for(let unit=1;unit<=8;unit++){
+  const p=`O5.PRINT.PU${unit}`;
+  const r15=TAXONOMY_BY_ID.get(`${p}.INK.R15`);
+  const r14=TAXONOMY_BY_ID.get(`${p}.INK.R14`);
+  const r17=TAXONOMY_BY_ID.get(`${p}.DAMP.R17`);
+  const r18=TAXONOMY_BY_ID.get(`${p}.DAMP.R18`);
+  const r19=TAXONOMY_BY_ID.get(`${p}.DAMP.R19`);
+  const a=TAXONOMY_BY_ID.get(`${p}.INK.DIST_A`);
+  assert.match(r15.description,/white rubber-coated/);
+  assert.match(r15.description,/4 ±0\.5 mm/);
+  assert.match(r15.description,/5 \+2 mm/);
+  assert.match(r14.description,/17\/ZW/);
+  assert.match(r14.description,/3 \+1 mm/);
+  assert.match(r17.description,/3 \+1 mm/);
+  assert.match(r18.description,/overrides the conflicting generic OEM row/);
+  assert.match(r19.description,/overrides the conflicting generic OEM row/);
+  assert.match(a.description,/overrides the conflicting generic OEM row/);
+ }
+});
+
 test('V319 live geometry repeats corrected PU roller metadata across all eight units',()=>{
  const m=new Offset5CD102RealismTemplate();
  try{
   assert.equal(m.root.userData.taxonomyVersion,'offset5-taxonomy-v18');
   assert.equal(m.root.userData.printingUnitReality.revision,'offset5-print-unit-reality-v319');
+  assert.equal(m.root.userData.rollerEvidencePolicyRevision,'offset5-roller-evidence-policy-v320');
+  assert.equal(m.root.userData.rollerEvidenceConflictCount,5);
+  assert.match(m.root.userData.rollerEvidenceConflictRule,/INSTALLED_DIAGRAM_WINS/);
   for(let i=0;i<8;i++){
    for(const spec of OFFSET5_INKING_ROLLERS){
     const body=m.findNode(`press-${i}-ink-roller-${spec.code}-body`);
@@ -121,6 +193,13 @@ test('V319 live geometry repeats corrected PU roller metadata across all eight u
     assert.ok(n.sourceRefs.includes('SRC-O5-ROLLER-DIAGRAM-IMG2777'));
    }
   }
+  const pu1r15=m.findNode('press-0-ink-roller-15-body').children.find(o=>o.isMesh);
+  const pu1distA=m.findNode('press-0-ink-distributor-A-body').children.find(o=>o.isMesh);
+  const r15Center=pu1r15.getWorldPosition(new THREE.Vector3()),distACenter=pu1distA.getWorldPosition(new THREE.Vector3());
+  const r15ContactDistance=r15Center.distanceTo(distACenter);
+  const r15ContactRadiusSum=pu1r15.geometry.parameters.radiusTop+pu1distA.geometry.parameters.radiusTop;
+  assert.ok(Math.abs(r15ContactDistance-r15ContactRadiusSum)<.004,`roller 15 must visually meet distributor A at the IMG_2777 contact; gap=${(r15ContactDistance-r15ContactRadiusSum).toFixed(4)}`);
+  assert.equal(OFFSET5_INKING_ROLLERS.find(x=>x.code==='15').sectionPositionPolicy,'IMG_2777_CONTACT_FIT_TO_DISTRIBUTOR_A');
   const pu1damp17=m.findNode('press-0-damp-roller-17-body').children.find(o=>o.isMesh);
   const pu1damp18=m.findNode('press-0-damp-roller-18-body').children.find(o=>o.isMesh);
   const pu1damp19=m.findNode('press-0-damp-roller-19-body').children.find(o=>o.isMesh);
@@ -209,6 +288,13 @@ test('V319 simulation uses actual inking/distributor/dampening surfaces while ke
   assert.equal(state.primaryCylinderDiagramPolicy,'IMG_2777_PLATE_AND_IMPRESSION_SAME_ROTATION_SENSE__BLANKET_OPPOSITE__NO_TIMING_OR_PHASE_CLAIM');
   assert.equal(state.openUpperDeckPolicy,'V404_V408_PHOTO_LOCK__NO_SOLID_PU_TOP__GREEN_DUCT_ROLL_REMAINS_GREEN');
   assert.equal(state.rollerContactMotionPolicy,'IMG_2777_CONTACT_GRAPH_COUNTER_ROTATION__SURFACE_SPEED_VISUAL_REFERENCE__NO_SERVICE_TIMING_PHASE_OR_NIP_CLAIM');
+  assert.equal(state.rollerEvidencePolicyRevision,'offset5-roller-evidence-policy-v320');
+  assert.match(state.rollerEvidenceConflictRule,/INSTALLED_DIAGRAM_WINS/);
+  assert.equal(state.crossSystemContactCount,1);
+  assert.equal(state.oemContactSettingReferenceCount,11);
+  assert.equal(state.crossSystemContactPolicy,'ROLLER14_WHITE_TO_17_ZW_CONFIRMED_BY_IMG2777_AND_OEM_3_PLUS_1_REFERENCE');
+  assert.match(state.inkVibratorMotionPolicy,/ROLLER15/);
+  assert.match(state.distributorOscillationPolicy,/A_D/);
   for(let i=1;i<=8;i++){
    const plate=sim.rotors.find(r=>r.role===`PU${i}-plate-cylinder`);
    const blanket=sim.rotors.find(r=>r.role===`PU${i}-blanket-cylinder`);
@@ -233,6 +319,27 @@ test('V319 simulation uses actual inking/distributor/dampening surfaces while ke
     const role=`PU${i}-damp-roller-${code}`,rotor=sim.rotors.find(r=>r.role===role);
     assert.ok(rotor,`PU${i} missing ${role}`);
     assert.equal(rotor.sign,sign,`PU${i} ${role} rotation sense disagrees with V319 dampening topology`);
+   }
+   const form14=sim.rotors.find(r=>r.role===`PU${i}-ink-roller-14`);
+   const intermediate17=sim.rotors.find(r=>r.role===`PU${i}-damp-roller-17`);
+   assert.ok(form14?.crossSystemContact&&intermediate17?.crossSystemContact,`PU${i} 14↔17/ZW cross-system contact metadata missing`);
+   assert.equal(form14.crossSystemContact.pair,'14<->17/ZW');
+   assert.equal(intermediate17.crossSystemContact.pair,'14<->17/ZW');
+   assert.equal(form14.crossSystemContact.oemStripeReferenceMM,'3 +1');
+   assert.equal(form14.crossSystemContact.installedStripeVerified,false);
+   assert.equal(form14.sign,-intermediate17.sign,`PU${i} 14 and 17/ZW must counter-rotate at their cross-system contact`);
+  }
+  for(let i=1;i<=8;i++){
+   const vib=sim.oscillators.find(o=>o.role===`PU${i}-ink-vibrator-15`);
+   assert.ok(vib,`PU${i} roller 15 vibrator motion evidence tag missing`);
+   assert.deepEqual(vib.contactTargets,['FOUNTAIN','A']);
+   assert.equal(vib.installedAmplitudeVerified,false);
+   assert.equal(vib.installedPhaseVerified,false);
+   for(const code of ['A','B','C','D']){
+    const dist=sim.oscillators.find(o=>o.role===`PU${i}-ink-distributor-${code}-axial`);
+    assert.ok(dist,`PU${i} distributor ${code} oscillation evidence tag missing`);
+    assert.equal(dist.installedAmplitudeVerified,false);
+    assert.equal(dist.installedPhaseVerified,false);
    }
   }
   const greenBefore=Array.from({length:8},(_,i)=>m.findNode(`press-${i}-ink-fountain-roller-body`).children.find(o=>o.isMesh).material.color.getHex());
