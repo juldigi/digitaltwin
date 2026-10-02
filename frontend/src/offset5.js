@@ -353,6 +353,7 @@ export class OffsetMachineTemplate {
     this.markExteriorCover(this.box(body,[.07,.22,1.8],[guardX,.96,0],'graphite',.025));
     for(const z of [-.62,.62])this.markExteriorCover(this.box(body,[.025,.10,.4],[glassX,.98,z],'glass'));
     const cover=this.markExteriorCover(this.group(g,'press-'+i+'-cover','Cover samping melengkung',[0,0,0],[0,.12,1.1],sources));
+    Object.assign(cover.userData,{photoLockBaseline:'V404_STRONGLY_ROUNDED_LIGHT_GRAY_OPERATOR_DOOR',brandRequired:'HEIDELBERG Speedmaster',blueTrimSuppressed:true});
     // The real photos show a broad silver shoulder cover on PU1; do not replace it with
     // a generated-render style narrow shell. PDF sources do not define this exterior surface.
     this.shell(cover,[0,.48,1.14],frameWidth-.14,2.10,.36,1);
