@@ -862,7 +862,7 @@ export function validateRemainingFleetSimulation(simulation,template,key,{throwO
    if(state?.simulationBoundary!=='MULTI_VENDOR_SUCTION_COLLATOR_PROCESS_ONLY__TEN_BIN_REFERENCE_NOT_INSTALLATION_CLAIM')fail('COLLATOR_SIMULATION_BOUNDARY',state?.simulationBoundary);
    if(state?.modeledBinCount!==10||state?.installedBinCountVerified!==false)fail('COLLATOR_BIN_COUNT_BOUNDARY',state?.modeledBinCount+'|'+state?.installedBinCountVerified);
    if((state?.activeBinFeeds||0)>0&&!state?.doubleFeedCheckActive)fail('COLLATOR_FEED_SENSOR_CAUSALITY',state?.activeBinFeeds);
-   if((state?.activeBinFeedIndexes?.length||0)>0&&!(state?.airSeparationActive&&state?.rotorPickupActive&&state?.collatorSeparationAirControlActive&&state?.collatorSuctionBlowerActive))fail('COLLATOR_PICKUP_CAUSALITY',JSON.stringify(state?.activeBinFeedIndexes||[]));
+   if((state?.activeFeedBinIndexes?.length||0)>0&&!(state?.airSeparationActive&&state?.rotorPickupActive&&state?.collatorSeparationAirControlActive&&state?.collatorSuctionBlowerActive))fail('COLLATOR_PICKUP_CAUSALITY',JSON.stringify(state?.activeFeedBinIndexes||[]));
   }else{
    if(state?.demoRejectOnly!==true||state?.installedPrintheadCountVerified!==false)fail('LY300_DEMO_OPTION_BOUNDARY',state?.demoRejectOnly+'|'+state?.installedPrintheadCountVerified);
    if(state?.interlockSafe!==true)fail('LY300_INTERLOCK_STATE',state?.interlockSafe);
