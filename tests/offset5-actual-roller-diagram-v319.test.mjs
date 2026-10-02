@@ -108,6 +108,16 @@ test('V319 live geometry repeats corrected PU roller metadata across all eight u
     assert.equal(Boolean(mesh?.userData.crowned),Boolean(spec.crowned));
    }
    for(const id of [`press-${i}-frame`,`press-${i}-cover`,`press-${i}-drive`,`press-${i}-top-deck`])assert.ok(m.findNode(id),`PU${i+1} exterior node ${id} missing`);
+   for(const id of [`press-${i}-rakel-reference`,`press-${i}-air-blower-ink`,`press-${i}-air-blower-nip`,`press-${i}-water-feed-reference`]){
+    const node=m.findNode(id);assert.ok(node,`PU${i+1} actual-diagram callout ${id} missing`);
+    assert.equal(node.userData.actualDiagramSource,'IMG_2777.jpeg');
+    assert.equal(node.userData.serviceSettingAsserted,false);
+   }
+   for(const suffix of ['INK.RAKEL','INK.AIR_BLOWER','DAMP.WATER','CYL.AIR_BLOWER']){
+    const n=TAXONOMY_BY_ID.get(`O5.PRINT.PU${i+1}.${suffix}`);
+    assert.ok(n,`PU${i+1} taxonomy callout ${suffix} missing`);
+    assert.ok(n.sourceRefs.includes('SRC-O5-ROLLER-DIAGRAM-IMG2777'));
+   }
   }
   const pu1damp17=m.findNode('press-0-damp-roller-17-body').children.find(o=>o.isMesh);
   const pu1damp18=m.findNode('press-0-damp-roller-18-body').children.find(o=>o.isMesh);
