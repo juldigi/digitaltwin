@@ -29,7 +29,7 @@ export class OffsetMachineTemplate {
   constructor(){
     this.root=new THREE.Group();this.root.name='MACHINE-OFFSET5';
     this.root.userData={assetId:'MACHINE-OFFSET5',...PHOTO_RECONSTRUCTION,orientation:ORIENTATION,taxonomyVersion:'offset5-taxonomy-v18',machineEnvelope:OFFSET5_DIMENSIONS,dimensionAudit:offset5DimensionAudit(),printingUnitReality:OFFSET5_ACTUAL_ROLLER_DIAGRAM,printingUnitExteriorPolicy:'V404_V408_OPEN_UPPER_DECK__ROUNDED_OPERATOR_CABINET__SAME_PHOTO_GROUNDED_SHELL_ALL_EIGHT_PU',photoLockExteriorBaseline:'V404_V405_V408',openUpperDeck:true,solidPrintingUnitTopCover:false};
-    this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.textures=[];this.ghosted=false;this.exteriorOpen=false;
+    this.parts=[];this.nodes=[];this.meshes=[];this.auxVisuals=[];this.geometries=new Map();this.materials=new Map();this.lineMaterials=new Map();this.textures=[];this.ghosted=false;this.exteriorOpen=false;
     this.palette={graphite:0x30383d,black:0x151b20,silver:0xaeb8b8,steel:0x889598,chromium:0xcbd3d5,plastic:0xb9c0bc,light:0xd1d4c9,paper:0xeee9d5,rubber:0x20252a,photoRollerGreen:0x3f6f3b,inkFilmCyan:0x00a9d8,inkFilmMagenta:0xd40072,inkFilmYellow:0xf1c40f,inkFilmBlack:0x161616,inkFilmOrange:0xf07818,inkFilmGreen:0x1f9d55,inkFilmPurple:0x7442a8,inkFilmNeutral:0x4d5660,rollerWhite:0xe8e7df,rollerRed:0xc4473f,rollerYellow:0xe4bf4e,rollerBlue:0x355d91,glass:0x23333a,red:0xb33c32,yellow:0xe2b541,blue:0x243e70};
     this.build();this.alignOperatorSide();this.enrichV122Feeder();this.batchMeshes();this.tagAdaptiveDetails();
     this.taxonomy=OFFSET5_TAXONOMY;this.taxonomyById=TAXONOMY_BY_ID;
@@ -95,6 +95,14 @@ export class OffsetMachineTemplate {
   tube(g,pts,r=.024,kind='rubber'){
     const curve=new THREE.CatmullRomCurve3(pts.map(V));
     return this.mesh(g,()=>new THREE.TubeGeometry(curve,24,r,6,false),'tube:'+JSON.stringify(pts)+':'+r,kind,[0,0,0]);
+  }
+  line(g,pts,kind='steel'){
+    const geoKey='line:'+JSON.stringify(pts);
+    if(!this.geometries.has(geoKey))this.geometries.set(geoKey,new THREE.BufferGeometry().setFromPoints(pts.map(V)));
+    if(!this.lineMaterials.has(kind))this.lineMaterials.set(kind,new THREE.LineBasicMaterial({color:this.palette[kind]??this.palette.steel,transparent:true,opacity:.92}));
+    const line=new THREE.Line(this.geometries.get(geoKey),this.lineMaterials.get(kind));
+    line.userData={assetId:'MACHINE-OFFSET5',ownerId:g.userData.nodeId,detail:true,auxiliaryReference:true};
+    g.add(line);this.auxVisuals.push(line);return line;
   }
   // Profile in X/Z extruded vertically: curved front side cover, as in IMG_1627/28.
   shell(g,center,width,height,depth,side=1){
@@ -447,7 +455,10 @@ export class OffsetMachineTemplate {
     const filmKinds=['inkFilmCyan','inkFilmMagenta','inkFilmYellow','inkFilmBlack','inkFilmOrange','inkFilmGreen','inkFilmPurple','inkFilmNeutral'];
     const film=this.box(openBay,[.145,.018,1.58],[-.155,2.645,0],filmKinds[i%filmKinds.length],.004);
     film.name='Visible Ink Film Color';Object.assign(film.userData,{visibleInkFilm:true,unit:i+1,jobStateVisualization:true});
-    for(const z of [-.72,.72])this.box(openBay,[.08,.12,.08],[-.015,2.64,z],'graphite',.012);
+    // V408 open-bay side brackets belong structurally to the ink shell; keeping them
+    // on the parent lets batching merge them with adjacent supports instead of creating
+    // eight extra standalone meshes while preserving the same visible bracket geometry.
+    for(const z of [-.72,.72])this.box(ink,[.08,.12,.08],[-.015,2.64,z],'graphite',.012);
     const fountainControls=this.group(g,`press-${i}-ink-fountain-controls`,`PU${i+1} · ink fountain keys, guard & ductor interface`,[0,0,0],[0,.46,.42],['IMG_1970.jpeg','IMG_1971.jpeg','IMG_1628(2).jpeg'],'V408 accepted BMJ upper-PU baseline shows an 11-position visible key rhythm across the open ink bay. This is a photo-reconstruction count for the visible controls, not a calibration/zone setting claim.');
     Object.assign(fountainControls.userData,{photoLockBaseline:'V408_11_VISIBLE_INK_KEYS',visibleKeyCount:11,calibrationAsserted:false,zoneSettingAsserted:false});
     this.markExteriorCover(this.box(fountainControls,[.12,.16,1.50],[-.34,2.46,0],'graphite',.018));
@@ -579,21 +590,20 @@ export class OffsetMachineTemplate {
     // compact service references: IMG_2777 confirms the callout zone, not blade angle,
     // air pressure, nozzle bore, water chemistry, flow rate or maintenance setpoint.
     const rakel=this.group(g,`${id}-rakel-reference`,`${label} · RAKEL callout reference`,[0,0,0],[.10,.18,.28],['IMG_2777.jpeg'],'IMG_2777 places the RAKEL callout beside the lower-left inking cluster near distributor D / form-roller region. Blade loading and installed adjustment geometry are not asserted.');
-    Object.assign(rakel.userData,{actualDiagramSource:'IMG_2777.jpeg',callout:'RAKEL',serviceSettingAsserted:false});
-    const rakelBlade=this.box(rakel,[.030,.095,1.12],[-.080,2.125,0],'steel',.005);rakelBlade.rotation.z=-.18;rakelBlade.userData.detail=true;
-    rakel.userData.visualAbstraction='SINGLE_BLADE_ZONE__END_SUPPORTS_METADATA_ONLY';
+    Object.assign(rakel.userData,{actualDiagramSource:'IMG_2777.jpeg',callout:'RAKEL',serviceSettingAsserted:false,visualAbstraction:'SCHEMATIC_LINE_ZONE__NOT_INSTALLED_BLADE_CAD'});
+    this.line(rakel,[[-.10,2.08,-.56],[-.07,2.17,.56]],'steel');
 
     const inkAir=this.group(g,`${id}-air-blower-ink`,`${label} · AIR BLOWER · upper inking callout`,[0,0,0],[.14,.16,.34],['IMG_2777.jpeg'],'IMG_2777 shows an AIR BLOWER callout at the right side of the upper inking cluster. No pressure, nozzle size or exact installed manifold specification is inferred.');
-    Object.assign(inkAir.userData,{actualDiagramSource:'IMG_2777.jpeg',callout:'AIR_BLOWER_UPPER_INKING',serviceSettingAsserted:false,nozzleCountInstalled:'UNKNOWN',visualAbstraction:'SINGLE_MANIFOLD_ZONE'});
-    this.box(inkAir,[.08,.06,1.02],[.67,2.18,0],'graphite',.008).userData.detail=true;
+    Object.assign(inkAir.userData,{actualDiagramSource:'IMG_2777.jpeg',callout:'AIR_BLOWER_UPPER_INKING',serviceSettingAsserted:false,nozzleCountInstalled:'UNKNOWN',visualAbstraction:'SCHEMATIC_LINE_ZONE__NO_MANIFOLD_CAD'});
+    this.line(inkAir,[[.65,2.18,-.50],[.65,2.18,.50]],'steel');
 
     const nipAir=this.group(g,`${id}-air-blower-nip`,`${label} · AIR BLOWER · blanket / impression nip callout`,[0,0,0],[.16,.12,.34],['IMG_2777.jpeg'],'IMG_2777 shows multiple AIR BLOWER arrows near the blanket-to-impression sheet path. The model represents only the callout zone and nozzle direction.');
-    Object.assign(nipAir.userData,{actualDiagramSource:'IMG_2777.jpeg',callout:'AIR_BLOWER_BLANKET_IMPRESSION_ZONE',serviceSettingAsserted:false,nozzleCountInstalled:'UNKNOWN',visualAbstraction:'SINGLE_MANIFOLD_ZONE'});
-    this.box(nipAir,[.08,.055,1.06],[.42,1.20,0],'graphite',.008).userData.detail=true;
+    Object.assign(nipAir.userData,{actualDiagramSource:'IMG_2777.jpeg',callout:'AIR_BLOWER_BLANKET_IMPRESSION_ZONE',serviceSettingAsserted:false,nozzleCountInstalled:'UNKNOWN',visualAbstraction:'SCHEMATIC_LINE_ZONE__NO_MANIFOLD_CAD'});
+    this.line(nipAir,[[.42,1.20,-.52],[.42,1.20,.52]],'steel');
 
     const waterFeed=this.group(g,`${id}-water-feed-reference`,`${label} · WATER feed callout near roller 18/T`,[0,0,0],[.20,.14,-.30],['IMG_2777.jpeg'],'IMG_2777 labels WATER at the 18/T water-pan-roller zone. Hose routing is illustrative; solution composition, level, pressure and flow are not service data.');
-    Object.assign(waterFeed.userData,{actualDiagramSource:'IMG_2777.jpeg',callout:'WATER_18_T_ZONE',serviceSettingAsserted:false,visualAbstraction:'SINGLE_HOSE_ROUTE'});
-    this.tube(waterFeed,[[.80,1.50,-.54],[.80,1.64,-.48],[.73,1.75,-.42]],.010,'blue').userData.detail=true;
+    Object.assign(waterFeed.userData,{actualDiagramSource:'IMG_2777.jpeg',callout:'WATER_18_T_ZONE',serviceSettingAsserted:false,visualAbstraction:'SCHEMATIC_LINE_ROUTE__NO_HOSE_CAD'});
+    this.line(waterFeed,[[.80,1.50,-.54],[.80,1.64,-.48],[.73,1.75,-.42]],'blue');
 
     // Register drives are located on the operator side in the supplied service manual.
     const register=this.group(g,`${id}-register-drives`,`${label} · register adjustment drives`,[0,0,0],[.18,.20,.72],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Diagonal, lateral and circumferential register drives are functionally located on the operator side; housings are simplified visual references.');
@@ -971,7 +981,7 @@ export class OffsetMachineTemplate {
     this.root.userData.serviceDetailHiddenCount=this.exteriorOpen?serviceHidden:0;
     this.root.updateMatrixWorld(true);
   }
-  setLow(on){for(const m of this.meshes)if(m.userData.detail)m.visible=!on;}
+  setLow(on){for(const m of this.meshes)if(m.userData.detail)m.visible=!on;for(const v of this.auxVisuals)if(v.userData.detail)v.visible=!on;}
   reset(){const exteriorOpen=this.exteriorOpen;this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const n of this.nodes)n.quaternion.copy(n.userData.restQuaternion);if(exteriorOpen)this.setExteriorOpen(true);}
-  dispose(){for(const geo of this.geometries.values())geo.dispose();for(const mat of this.materials.values())mat.dispose();for(const texture of this.textures)texture.dispose();for(const m of this.meshes)if(m.isInstancedMesh)m.dispose();}
+  dispose(){for(const geo of this.geometries.values())geo.dispose();for(const mat of this.materials.values())mat.dispose();for(const mat of this.lineMaterials.values())mat.dispose();for(const texture of this.textures)texture.dispose();for(const m of this.meshes)if(m.isInstancedMesh)m.dispose();}
 }
