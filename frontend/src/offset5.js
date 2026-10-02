@@ -99,8 +99,9 @@ export class OffsetMachineTemplate {
   line(g,pts,kind='steel'){
     const geoKey='line:'+JSON.stringify(pts);
     if(!this.geometries.has(geoKey))this.geometries.set(geoKey,new THREE.BufferGeometry().setFromPoints(pts.map(V)));
-    if(!this.lineMaterials.has(kind))this.lineMaterials.set(kind,new THREE.LineBasicMaterial({color:this.palette[kind]??this.palette.steel,transparent:true,opacity:.92}));
-    const line=new THREE.Line(this.geometries.get(geoKey),this.lineMaterials.get(kind));
+    const materialKey=g.userData.nodeId+':'+kind;
+    if(!this.lineMaterials.has(materialKey))this.lineMaterials.set(materialKey,new THREE.LineBasicMaterial({color:this.palette[kind]??this.palette.steel,transparent:true,opacity:.92}));
+    const line=new THREE.Line(this.geometries.get(geoKey),this.lineMaterials.get(materialKey));
     line.userData={assetId:'MACHINE-OFFSET5',ownerId:g.userData.nodeId,detail:true,auxiliaryReference:true};
     g.add(line);this.auxVisuals.push(line);return line;
   }
@@ -956,14 +957,17 @@ export class OffsetMachineTemplate {
   }
   highlight(part){
     for(const m of this.meshes){m.material.emissive.setHex(part&&this.contains(part,m)?0x174b47:0x000000);m.material.emissiveIntensity=.28;}
+    for(const v of this.auxVisuals){v.material.color.setHex(part&&this.contains(part,v)?0x42d7ca:(this.palette.steel));v.material.opacity=part&&!this.contains(part,v)?.34:.92;}
   }
   highlightMany(parts=[]){
     const list=(parts||[]).filter(Boolean);
     for(const m of this.meshes){m.material.emissive.setHex(list.some(part=>this.contains(part,m))?0x174b47:0x000000);m.material.emissiveIntensity=.28;}
+    for(const v of this.auxVisuals){const hit=list.some(part=>this.contains(part,v));v.material.color.setHex(hit?0x42d7ca:this.palette.steel);v.material.opacity=list.length&&!hit?.34:.92;}
   }
   ghost(on,except=null){
     this.ghosted=on;
     for(const m of this.meshes){const faded=on&&(!except||!this.contains(except,m)),glass=m.material.color.getHex()===this.palette.glass;m.material.transparent=faded||glass;m.material.opacity=faded?.17:glass?.65:1;m.material.depthWrite=!faded;m.material.needsUpdate=true;}
+    for(const v of this.auxVisuals){const faded=on&&(!except||!this.contains(except,v));v.material.opacity=faded?.16:.92;v.material.needsUpdate=true;}
   }
   isolate(part,on=true){for(const n of this.nodes)n.visible=!on||!part||this.contains(part,n)||this.contains(n,part);}
   showOnly(parts=[],on=true){
