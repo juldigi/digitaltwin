@@ -58,7 +58,14 @@ test('V333 Offset 5 print progression waits for the complete sheet to clear each
   sim.updateSheet(sheet,cleared);
   assert.ok(sheet.userData.printedUnitsCleared>=1);
   sheet.userData.printedUnitsCleared=7;
-  sim.depositSheet(sheet,123);
+  sheet.userData.gripperReleased=false;sheet.userData.deliverySettled=false;
+  assert.equal(sim.depositSheet(sheet,123),false);
+  assert.equal(sim.completed,0);
+  sheet.userData.gripperReleased=true;sheet.userData.deliverySettled=false;
+  assert.equal(sim.depositSheet(sheet,123),false);
+  assert.equal(sim.completed,0);
+  sheet.userData.deliverySettled=true;
+  assert.equal(sim.depositSheet(sheet,123),true);
   const delivered=sim.pileSheets.find(item=>item.userData.serial===1);
   assert.ok(delivered);
   assert.equal(delivered.userData.printed,7);
