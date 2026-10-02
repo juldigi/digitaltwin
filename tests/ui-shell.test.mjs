@@ -211,7 +211,7 @@ test('v45 exposes contextual process simulation with continuous sheet flow',()=>
   assert.match(app,/engine\.startPrintingSimulation\(\)/);
   assert.match(app,/engine\.pausePrintingSimulation\(\)/);
   assert.match(app,/engine\.stopPrintingSimulation\(\)/);
-  assert.match(runtime,/if\(k==='offset5'\)return new Offset5CD102RealismSimulation\(machine,template\)/);
+  assert.match(runtime,/if\(k==='offset5'\)\{const sim=new Offset5CD102RealismSimulation\(machine,template\);validateOffset5PilotSimulation\(sim,template,\{throwOnError:true\}\);return sim;\}/);
   assert.match(engine,/this\.simulation\?\.update\(now\)/);
   assert.match(simulation,/CatmullRomCurve3/);
   assert.match(simulation,/getPointAt\(t\)/);
