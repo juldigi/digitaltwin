@@ -44,10 +44,52 @@ export const DEDICATED_MACHINE_KEYS=Object.freeze([
 ]);
 export const isDedicatedMachineKey=key=>isDedicatedMachineMaturity(key);
 
+export const OFFSET5_PILOT_RUNTIME_CONTRACT=Object.freeze({
+ version:'offset5-photo-pdf-v319',
+ taxonomyVersion:'offset5-taxonomy-v18',
+ realityRevision:'offset5-print-unit-reality-v319',
+ realismPack:'OFFSET5_CD102_8L_CUSTOM_INSTALLED_REALITY_R6_ACTUAL_PU_DIAGRAM',
+ dimensionLock:'BMJ_CUSTOM_INSTALLED_DIMENSIONS_DO_NOT_NORMALIZE_TO_GENERIC_CD102',
+ printingUnitCount:8,
+ openTopPolicy:'V404_V408_OPEN_UPPER_DECK__ROUNDED_OPERATOR_CABINET__SAME_PHOTO_GROUNDED_SHELL_ALL_EIGHT_PU'
+});
+
+export function validateOffset5PilotTemplate(template,{throwOnError=false}={}){
+ const root=template?.root,errors=[];
+ const fail=(code,detail)=>errors.push({code,detail});
+ if(!root)fail('ROOT_MISSING','Offset 5 root scene is unavailable.');
+ else{
+  const u=root.userData||{},contract=OFFSET5_PILOT_RUNTIME_CONTRACT;
+  if(u.assetId!=='MACHINE-OFFSET5')fail('ASSET_ID',u.assetId);
+  if(u.version!==contract.version)fail('VERSION',u.version);
+  if(u.taxonomyVersion!==contract.taxonomyVersion)fail('TAXONOMY',u.taxonomyVersion);
+  if(u.printingUnitReality?.revision!==contract.realityRevision)fail('ROLLER_REALITY',u.printingUnitReality?.revision);
+  if(u.realismPack!==contract.realismPack)fail('REALISM_PACK',u.realismPack);
+  if(u.dimensionLock!==contract.dimensionLock)fail('DIMENSION_LOCK',u.dimensionLock);
+  if(u.printingUnitExteriorPolicy!==contract.openTopPolicy)fail('EXTERIOR_POLICY',u.printingUnitExteriorPolicy);
+  if(u.openUpperDeck!==true||u.solidPrintingUnitTopCover!==false)fail('OPEN_TOP_ROOT',{openUpperDeck:u.openUpperDeck,solidPrintingUnitTopCover:u.solidPrintingUnitTopCover});
+  for(let i=0;i<contract.printingUnitCount;i++){
+   const prefix=`press-${i}`,frame=template.findNode?.(`${prefix}-frame`),top=template.findNode?.(`${prefix}-top-deck`),ink=template.findNode?.(`${prefix}-ink`),openBay=template.findNode?.(`${prefix}-open-ink-bay`),duct=template.findNode?.(`${prefix}-ink-fountain-roller-body`),brand=template.findNode?.(`${prefix}-operator-brand`);
+   if(!frame||!top||!ink||!openBay||!duct||!brand){fail('PU_STRUCTURE',i+1);continue;}
+   if(frame.userData?.openUpperFrame!==true||frame.userData?.fullDepthTopBeam!==false)fail('PU_FRAME_TOP',i+1);
+   if(top.userData?.openUpperDeck!==true||top.userData?.solidTopCover!==false)fail('PU_TOP',i+1);
+   if(ink.userData?.openInkBed!==true||ink.userData?.solidInkEnclosure!==false)fail('PU_INK_BAY',i+1);
+   if(openBay.userData?.normalStateVisible!==true)fail('PU_OPEN_BAY_VISIBLE',i+1);
+   if(brand.userData?.brandText!=='HEIDELBERG Speedmaster')fail('PU_BRAND',i+1);
+   let green=false;duct.traverse?.(o=>{if(o.isMesh&&o.userData?.offset5InkDuctRollPhotoLocked)green=true;});
+   if(!green)fail('PU_GREEN_DUCT_ROLL',i+1);
+  }
+ }
+ const result=Object.freeze({valid:errors.length===0,errors:Object.freeze(errors),contract:OFFSET5_PILOT_RUNTIME_CONTRACT});
+ if(root)root.userData.offset5RuntimeTruthLock=result.valid?'PASS':'FAIL',root.userData.offset5RuntimeTruthErrors=errors.map(e=>e.code+':'+e.detail).join('|');
+ if(throwOnError&&!result.valid)throw new Error('Offset 5 pilot runtime truth-lock failed: '+root?.userData?.offset5RuntimeTruthErrors);
+ return result;
+}
+
 export function createMachineTemplate(key){
  const k=normalizeMachineKey(key);
  if(!k)throw new Error('Identitas mesin belum tersedia.');
- if(k==='offset5')return new Offset5CD102RealismTemplate();
+ if(k==='offset5'){const template=new Offset5CD102RealismTemplate();validateOffset5PilotTemplate(template,{throwOnError:true});return template;}
  if(k==='sheeting')return new SheetingMachineTemplate();
  if(k==='offset10')return new Offset10CX104SpecialRealismTemplate();
  if(k==='apm2')return new APM2MachineTemplate();
@@ -83,8 +125,9 @@ function enforceTaxonomyClickContract(template){
  return template;
 }
 export function createPolishedMachineTemplate(key){
- const normalized=normalizeMachineKey(key);
- return enforceTaxonomyClickContract(applyMachinePresentationPolish(createMachineTemplate(key),normalized));
+ const normalized=normalizeMachineKey(key),template=enforceTaxonomyClickContract(applyMachinePresentationPolish(createMachineTemplate(key),normalized));
+ if(normalized==='offset5')validateOffset5PilotTemplate(template,{throwOnError:true});
+ return template;
 }
 
 export function createMachineSimulation(key,machine,template){
