@@ -115,6 +115,10 @@ export function validateOffset5PilotSimulation(simulation,template,{throwOnError
   if(state.focusightLocationPolicy!=='DOWNSTREAM_AFTER_COATING_DRYING')fail('FOCUSIGHT_LOCATION',state.focusightLocationPolicy);
   if(state.motionPolicy!=='ROLE_TAGGED_PROCESS_PARTS_ONLY')fail('MOTION_POLICY',state.motionPolicy);
   if(state.sheetVisualPolicy!=='NO_EXTERNAL_FULL_WIDTH_DEMO_GRIPPER_BAR')fail('SHEET_GRIPPER_VISUAL_POLICY',state.sheetVisualPolicy);
+  if(state.interUnitGripperPolicy!=='RIGID_FINGER_ASSEMBLY_ROTATES_WITH_TRANSFER_DRUM_ORBIT')fail('INTERUNIT_GRIPPER_POLICY',state.interUnitGripperPolicy);
+  if(state.cylinderMotionPolicy!=='SAME_STRAIGHT_PRINT_DIRECTION_ALL_PU_CONTACT_PAIRS_COUNTER_ROTATE')fail('CYLINDER_DIRECTION_POLICY',state.cylinderMotionPolicy);
+  if(state.rollerHandednessPolicy!=='IDENTICAL_IMG_2777_CONTACT_GRAPH_ACROSS_ALL_EIGHT_STRAIGHT_PRINTING_UNITS')fail('ROLLER_HANDEDNESS_POLICY',state.rollerHandednessPolicy);
+  if(state.interUnitAccessPolicy!=='BMJ_CUSTOM_BROAD_INTERUNIT_ACCESS_AND_OS_DS_STEPS_PRESERVED')fail('INTERUNIT_ACCESS_POLICY',state.interUnitAccessPolicy);
   if(state.deliveryReleasePolicy!=='GRIPPER_RELEASE_THEN_FLAT_SHEET_SETTLING_TO_PILE')fail('DELIVERY_RELEASE_POLICY',state.deliveryReleasePolicy);
   if(state.deliveryPilePolicy!=='START_EMPTY_STACK_TO_CAPACITY_THEN_CLEAR_AND_REPEAT')fail('DELIVERY_PILE_POLICY',state.deliveryPilePolicy);
   if(state.inkRepresentation!=='THIN_ROLLER_FILM_ONLY_NO_FREE_FLOATING_DROPLETS'||state.inkFlowCount!==0)fail('INK_VISUAL_BOUNDARY',state.inkRepresentation+'|'+state.inkFlowCount);
