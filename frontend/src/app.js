@@ -359,6 +359,8 @@ function startPrintingSimulation(){
   engine.fit(engine.machine);
  }else updateSimulationPanel(engine.resumePrintingSimulation());
  renderPanel('simulation');
+ // Panel visibility changes the portrait canvas aspect after the first fit.
+ requestAnimationFrame(()=>{if(engine?.simulation?.active)engine.fit(engine.machine,'iso',false);});
 }
 function pausePrintingSimulation(){
  if(!engine?.isPrintingSimulationActive())return;
@@ -377,6 +379,7 @@ window.addEventListener('bmj:simulationcommand',event=>{
  const action=event.detail?.action,value=event.detail?.value;
  if(action==='toggle'){if(engine?.isPrintingSimulationActive?.()||currentSimulationState().active)pausePrintingSimulation();else startPrintingSimulation();return;}
  if(action==='stop'){stopPrintingSimulation({restoreExterior:true});return;}
+ if(action==='exterior'&&engine){const interior=!isInteriorOpen();setDomainState({inspectionMode:{interior}});engine.template.setExteriorOpen(interior);requestAnimationFrame(()=>engine?.fit(engine.machine,'iso',false));return;}
  if(action==='mode'){engine?.setPrintingSimulationMode?.(value);updateSimulationPanel(engine?.getPrintingSimulationState?.());return;}
  if(action==='speed')updateSimulationPanel(engine?.setPrintingSimulationSpeed?.(+value)||currentSimulationState());
 });

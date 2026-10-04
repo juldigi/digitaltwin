@@ -46,6 +46,33 @@ function tuneProcessLight(mesh){
  return true;
 }
 
+// Ghost inspection must round-trip the authored material state. Legacy builders
+// left opaque covers in the transparent render queue and enabled depth writes on
+// glass, which can hide mechanisms behind inspection windows after reset.
+function preserveInspectionMaterials(template){
+ if(!template.ghost||template.root.userData.inspectionMaterialsRevision==='V335')return;
+ const rest=new Map();
+ for(const mesh of template.meshes||[]){
+  for(const material of Array.isArray(mesh.material)?mesh.material:[mesh.material]){
+   if(material&&!rest.has(material))rest.set(material,{transparent:material.transparent,opacity:material.opacity,depthWrite:material.depthWrite});
+  }
+ }
+ const original=template.ghost.bind(template);
+ template.ghost=function(on,except=null){
+  const result=original(on,except);
+  for(const mesh of this.meshes||[]){
+   if(on&&(!except||!this.contains(except,mesh)))continue;
+   for(const material of Array.isArray(mesh.material)?mesh.material:[mesh.material]){
+    const state=rest.get(material);if(!state)continue;
+    const recompile=material.transparent!==state.transparent;
+    Object.assign(material,state);if(recompile)material.needsUpdate=true;
+   }
+  }
+  return result;
+ };
+ template.root.userData.inspectionMaterialsRevision='V335';
+}
+
 export function applyMachinePresentationPolish(template,key=''){
  if(!template?.root)return template;
  const root=template.root;
@@ -109,5 +136,6 @@ export function applyMachinePresentationPolish(template,key=''){
  root.userData.presentationPolish='PHYSICALLY_PLAUSIBLE_SURFACE_SHADOW_AND_GLASS_PASS';
  root.userData.presentationGeometryPolicy='NO_GENERIC_GEOMETRY_REPLACEMENT__PRESERVE_MACHINE_SPECIFIC_TEMPLATE';
  root.userData.presentationAudit=Object.freeze(stats);
+ preserveInspectionMaterials(template);
  return template;
 }

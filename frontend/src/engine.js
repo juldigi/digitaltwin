@@ -136,7 +136,7 @@ export class FactoryEngine {
     this.renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();this.renderFaulted=true;this.onError?.('Tampilan 3D terputus. Aplikasi beralih ke denah 2D agar navigasi tetap dapat digunakan.');});
     this.renderer.domElement.addEventListener('webglcontextrestored',()=>{this.renderFaulted=false;this.setQualityProfile(this.requestedQuality);this.resize();this.onRecovered?.();});
   }
-  resize(){const w=this.container.clientWidth,h=this.container.clientHeight;if(!w||!h)return;this.renderer.setSize(w,h);this.postProcessing.resize(w,h);this.camera.aspect=w/h;this.camera.updateProjectionMatrix();}
+  resize(){const w=this.container.clientWidth,h=this.container.clientHeight;if(!w||!h)return;this.renderer.setSize(w,h);this.postProcessing.resize(w,h);this.camera.aspect=w/h;this.camera.updateProjectionMatrix();if(this.simulation?.active&&this.view==='machine')this.fit(this.machine,'iso',false);}
   framingProfile(object=this.machine){const portrait=this.container.clientWidth<=767&&this.container.clientHeight>this.container.clientWidth;const machine=object===this.machine&&this.view==='machine';return {portrait,machine,padding:portrait&&machine?1.06:1.18,targetLift:portrait&&machine?-.08:0};}
   machineFocusBounds(){
     const family=this.template?.cfg?.family;if(!['compressor','ahu'].includes(family))return null;
@@ -625,7 +625,7 @@ export class FactoryEngine {
     this.machine=this.template.root;this.scene.add(this.machine);
     this.simulation=nextSimulation;this.applyPrintingSimulationModePreset();
     const label=this.renderer.domElement;label.setAttribute('aria-label',`Model 3D ${this.machine.name||requested}. Gunakan tombol sudut pandang untuk mengatur kamera.`);
-    this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);this.isolated=false;this.view='machine';this.syncVisualSystems();this.machine.visible=true;this.applySceneOverrides(this.sceneOverrides||{});this.factory.visible=false;this.template.setLow(this.low);this.shadows.focusBounds(this.machineFocusBounds()||new THREE.Box3().setFromObject(this.machine));this.fit(this.machine);this.resize();return true;
+    this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);this.isolated=false;this.view='machine';this.syncVisualSystems();this.machine.visible=true;this.applySceneOverrides(this.sceneOverrides||{});this.factory.visible=false;this.template.setLow(this.low);this.shadows.focusBounds(this.machineFocusBounds()||new THREE.Box3().setFromObject(this.machine));this.resize();this.fit(this.machine);return true;
   }
   dispose(){this.cancelMachineSwitch();cancelAnimationFrame(this.frame);this.clearPartLabels();this.clearFactorySelection();this.resizeObserver.disconnect();this.controls.dispose();this.gizmo.dispose();this.simulation?.dispose();this.template.dispose();this.clearFactory();this.studio.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});this.environment.dispose();this.postProcessing.dispose();this.lighting.dispose();this.renderer.dispose();}
 }
