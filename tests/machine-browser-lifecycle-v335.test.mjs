@@ -50,6 +50,19 @@ test('V335 Offset 5 reset preserves authored alpha and depth settings',()=>canva
  }finally{template.dispose();}
 }));
 
+test('V335 Offset 5 UV beam retains its authored emission after inspection reset',()=>canvasDocument(()=>{
+ const template=createPolishedMachineTemplate('BMJ-MCH-0003');
+ const simulation=createMachineSimulation('BMJ-MCH-0003',template.root,template);
+ try{
+  const colors=simulation.uvBeams.map(({material})=>material.emissive.getHex());
+  assert.ok(colors.length>0&&colors.every(color=>color!==0));
+  template.reset();simulation.start();simulation.setUV(true);
+  assert.deepEqual(simulation.uvBeams.map(({material})=>material.emissive.getHex()),colors);
+  simulation.stop();
+  assert.deepEqual(simulation.uvBeams.map(({material})=>material.emissive.getHex()),colors);
+ }finally{simulation.dispose();template.dispose();}
+}));
+
 test('V335 active machine simulation reframes after portrait canvas resizing',()=>{
  const machine=new THREE.Group(),calls=[];
  const engine=Object.assign(Object.create(FactoryEngine.prototype),{
