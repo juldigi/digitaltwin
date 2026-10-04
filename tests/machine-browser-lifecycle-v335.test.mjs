@@ -20,8 +20,9 @@ test('V335 all 41 browser-created models survive inspection and simulation lifec
   try{
    const rest=new Map();template.root.traverse(node=>{if(node.isMesh)rest.set(node,{position:node.position.clone(),quaternion:node.quaternion.clone(),scale:node.scale.clone()});});
    const materials=new Map();template.root.traverse(node=>{if(node.isMesh)for(const m of Array.isArray(node.material)?node.material:[node.material])if(m)materials.set(m,[m.transparent,m.opacity,m.depthWrite]);});
-   template.reset();template.highlight?.(template.nodes?.[0]||null);template.highlightMany?.(template.nodes?.slice(0,2)||[]);
-   template.ghost?.(true);template.ghost?.(false);template.setExteriorOpen?.(true);template.setLow?.(true);template.setLow?.(false);
+   for(const method of ['reset','highlight','ghost','setExteriorOpen','isolate','explode','setLow','dispose','contains'])assert.equal(typeof template[method],'function',`${asset.machineId}: required app method ${method}`);
+   template.reset();template.highlight(template.nodes?.[0]||null);template.highlightMany?.(template.nodes?.slice(0,2)||[]);
+   template.ghost(true);template.ghost(false);template.setExteriorOpen?.(true);template.setLow?.(true);template.setLow?.(false);
    for(const [m,state] of materials)assert.deepEqual([m.transparent,m.opacity,m.depthWrite],state,`${asset.machineId}: authored alpha/depth round-trip`);
    simulation=createMachineSimulation(asset.machineId,template.root,template);simulation.start();
    for(let frame=0;frame<=180;frame++)simulation.update(frame*1000/60);
@@ -34,6 +35,22 @@ test('V335 all 41 browser-created models survive inspection and simulation lifec
    });
   }finally{simulation?.dispose?.();template.dispose();}
  }
+}));
+
+test('V335 Offset 8 component inspection affects only the selected owner and starts simulation',()=>canvasDocument(()=>{
+ const template=createPolishedMachineTemplate('BMJ-MCH-0005');
+ const simulation=createMachineSimulation('BMJ-MCH-0005',template.root,template);
+ try{
+  const first=template.findNode('offset8-pu1'),second=template.findNode('offset8-pu2');
+  const selected=template.meshes.find(mesh=>template.contains(first,mesh));
+  const other=template.meshes.find(mesh=>template.contains(second,mesh));
+  assert.notEqual(selected.material,other.material,'PU materials must not share component highlighting');
+  template.highlight(first);assert.equal(selected.material.emissive.getHex(),0x17494a);assert.equal(other.material.emissive.getHex(),0);
+  template.ghost(true,first);assert.equal(selected.material.opacity,1);assert.equal(other.material.opacity,.14);
+  template.isolate(first);assert.equal(first.visible,true);assert.equal(second.visible,false);
+  template.reset();assert.equal(second.visible,true);assert.equal(other.material.opacity,1);assert.equal(selected.material.emissive.getHex(),0);
+  template.setExteriorOpen(true);template.ghost(false);simulation.start();simulation.update(1000);simulation.stop();
+ }finally{simulation.dispose();template.dispose();}
 }));
 
 test('V335 Offset 5 reset preserves authored alpha and depth settings',()=>canvasDocument(()=>{
