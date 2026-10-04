@@ -281,6 +281,7 @@ test('Offset 5 clears a full delivery pile before starting a new pile',()=>{
  const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
  try{
   sim.start();const sheet=sim.sheets[0];
+  sim.updateSheet(sheet,sim.pathLength);
   for(let cycle=0;cycle<sim.maxPileSheets;cycle++)sim.depositSheet(sheet,cycle);
   assert.equal(sim.state().pileSheetsVisible,sim.maxPileSheets);
   const first=sim.pileSheets[0].mesh.geometry.attributes.position.getY(0);

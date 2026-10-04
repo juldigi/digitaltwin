@@ -932,6 +932,14 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
     this.gripperMotions=this.gripperMotions.filter(o=>!o.object?.userData?.exteriorCover);
     this.joggerMotions=this.joggerMotions.filter(o=>!o.object?.userData?.exteriorCover);
     for(const item of this.gripperMotions)item.initialRotationZ=item.object.rotation.z;
+    for(const item of this.gripperMotions){
+      const id=item.object?.userData?.nodeId||'';
+      const match=/^transfer-pu(\d+)-pu(\d+)-gripper-([ab])$/.exec(id);
+      if(!match)continue;
+      item.transferFromPU=Number(match[1]);item.transferToPU=Number(match[2]);item.gripperBar=match[3].toUpperCase();
+      item.flowDirection='FEEDER_TO_DELIVERY_POSITIVE_X';
+      item.installedPhaseVerified=false;
+    }
     this.collectInspectionIllumination();
     this.collectDampeningSurfaces();
     this.deliveryTableMesh=this.template.findNode('delivery-pile')?.children.find(o=>o.isMesh)||null;
@@ -984,6 +992,7 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       rollerHandednessPolicy:'IDENTICAL_IMG_2777_CONTACT_GRAPH_ACROSS_ALL_EIGHT_STRAIGHT_PRINTING_UNITS',
       actualDiagramCalloutPolicy:'RAKEL_AIR_BLOWER_WATER_ZONES_STATIC_REFERENCE__NO_PRESSURE_FLOW_OR_SERVICE_SETPOINT',
       interUnitGripperPolicy:'RIGID_FINGER_ASSEMBLY_ROTATES_WITH_TRANSFER_DRUM_ORBIT',
+      interUnitTransferCausalityPolicy:'SEVEN_BAYS_IDENTIFIED_BY_ADJACENT_PU_PAIR__FORWARD_FLOW__PHASE_REMAINS_VISUAL_REFERENCE',
       inspectionIlluminationActive:this.inspectionIlluminationActive,
       inspectionIlluminationPolicy:'SHEET_OCCUPANCY_TRIGGERED_EXISTING_FOCUSIGHT_LIGHTING_ONLY',
       coaterMotionPolicy:'EXISTING_THREE_ROLL_CONTACT_TRAIN_MATCHES_SHEET_SURFACE_SPEED',
