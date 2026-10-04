@@ -444,7 +444,7 @@ export class PrintingSimulation{
     uv?.traverse(mesh=>{
       if(!mesh.isMesh)return;
       if(mesh.userData.uvLamp)this.uvLamps.push({mesh,material:mesh.material,count:mesh.userData.uvElementCount||1,initialEmissive:mesh.material.emissive.clone(),initialIntensity:mesh.material.emissiveIntensity});
-      if(mesh.userData.uvBeam)this.uvBeams.push({mesh,material:mesh.material,count:mesh.userData.uvElementCount||1,initialVisible:mesh.visible,initialOpacity:mesh.material.opacity,initialIntensity:mesh.material.emissiveIntensity});
+      if(mesh.userData.uvBeam)this.uvBeams.push({mesh,material:mesh.material,count:mesh.userData.uvElementCount||1,initialVisible:mesh.visible,initialOpacity:mesh.material.opacity,initialIntensity:mesh.material.emissiveIntensity,initialEmissive:mesh.material.emissive.clone()});
     });
   }
   setUV(active,intensity=1){
@@ -455,6 +455,8 @@ export class PrintingSimulation{
       lamp.material.needsUpdate=true;
     }
     for(const beam of this.uvBeams){
+      // Inspection highlighting can clear emissive color before the first start.
+      beam.material.emissive.copy(beam.initialEmissive);
       beam.mesh.visible=this.uvActive;
       beam.material.opacity=this.uvActive?.15+.09*intensity:beam.initialOpacity;
       beam.material.emissiveIntensity=this.uvActive?1.1*intensity:beam.initialIntensity;
@@ -464,7 +466,7 @@ export class PrintingSimulation{
   restoreUV(){
     this.uvActive=false;
     for(const lamp of this.uvLamps){lamp.material.emissive.copy(lamp.initialEmissive);lamp.material.emissiveIntensity=lamp.initialIntensity;lamp.material.needsUpdate=true;}
-    for(const beam of this.uvBeams){beam.mesh.visible=beam.initialVisible;beam.material.opacity=beam.initialOpacity;beam.material.emissiveIntensity=beam.initialIntensity;beam.material.needsUpdate=true;}
+    for(const beam of this.uvBeams){beam.material.emissive.copy(beam.initialEmissive);beam.mesh.visible=beam.initialVisible;beam.material.opacity=beam.initialOpacity;beam.material.emissiveIntensity=beam.initialIntensity;beam.material.needsUpdate=true;}
   }
   state(){
     const visible=this.sheets.filter(s=>s.mesh.visible),leading=visible.sort((a,b)=>b.userData.progress-a.userData.progress)[0],p=leading?.userData.leadPosition||this.points[0];

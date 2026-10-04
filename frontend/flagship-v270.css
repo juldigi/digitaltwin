@@ -838,3 +838,41 @@ body.ui-performance-lite #viewport{background:var(--f270-bg-2)!important}
  .mobile-nav button small{font-size:8.5px!important;line-height:1.1}
  .tabs button{font-size:10.5px!important}
 }
+
+/* V335: one transport layout; named areas override legacy mobile cell rules. */
+#simulation-transport{
+ grid-template-columns:minmax(100px,1fr) minmax(150px,1.4fr) minmax(100px,auto) 90px minmax(70px,1fr) minmax(90px,auto)!important;
+ grid-template-rows:auto!important;grid-template-areas:"context mode play speed progress stop"!important;
+ align-items:center!important;gap:10px!important;
+}
+#simulation-transport .sim-context{grid-area:context!important;order:initial!important}
+#simulation-transport .sim-mode-label{grid-area:mode!important;order:initial!important}
+#simulation-transport .sim-speed-label{grid-area:speed!important;order:initial!important}
+#simulation-transport [data-transport-play]{grid-area:play!important}
+#simulation-transport [data-transport-stop]{grid-area:stop!important}
+#simulation-transport progress{grid-area:progress!important;order:initial!important}
+#simulation-transport label{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:4px!important;font-size:11px!important;color:var(--f270-text)!important;min-width:0!important}
+#simulation-transport select{box-sizing:border-box!important;width:100%!important;min-width:0!important;max-width:none!important;height:38px!important;padding:0 8px!important;color:var(--f270-text)!important;background:var(--f270-surface-2)!important;border-color:var(--f270-line)!important;font-size:12px!important}
+#simulation-transport button{box-sizing:border-box!important;position:static!important;width:100%!important;min-width:0!important;min-height:44px!important;height:auto!important;padding:9px 12px!important;white-space:normal!important;line-height:1.25!important}
+#simulation-transport button:disabled{opacity:.5!important}
+#simulation-transport .sim-context small{color:var(--f270-muted)!important}
+@media(max-width:767px){
+ #simulation-transport,html.immersive-mode #simulation-transport{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-template-rows:auto auto auto!important;
+  grid-template-areas:"context context context context" "mode mode mode speed" "play play stop stop"!important;
+  gap:8px!important;padding:10px!important;
+ }
+ #simulation-transport .sim-context{flex-direction:row!important;align-items:center!important;justify-content:space-between!important;gap:8px!important}
+ #simulation-transport .sim-context small{flex-shrink:0;font-size:9px!important}
+ #simulation-transport .sim-context strong{min-width:0;font-size:11px!important}
+}
+#simulation-transport [data-transport-exterior]{width:auto!important;min-height:30px!important;padding:5px 8px!important;font-size:11px!important;background:var(--f270-surface-2)!important;color:var(--f270-text)!important;flex-shrink:0}
+#simulation-transport .sim-context strong{min-width:0}
+html.immersive-mode #simulation-transport{
+ grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-template-rows:auto auto auto!important;
+ grid-template-areas:"context context context context" "mode mode mode speed" "play play stop stop"!important;
+ gap:8px!important;padding:10px!important;
+}
+html.immersive-mode #simulation-transport .sim-context{flex-direction:row!important;align-items:center!important;justify-content:space-between!important;gap:8px!important}
+html.immersive-mode #simulation-transport .sim-context small{flex-shrink:0;font-size:9px!important}
+html.immersive-mode #simulation-transport .sim-context strong{min-width:0;font-size:11px!important}

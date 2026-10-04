@@ -968,7 +968,13 @@ export class OffsetMachineTemplate {
   }
   ghost(on,except=null){
     this.ghosted=on;
-    for(const m of this.meshes){const faded=on&&(!except||!this.contains(except,m)),glass=m.material.color.getHex()===this.palette.glass;m.material.transparent=faded||glass;m.material.opacity=faded?.17:glass?.65:1;m.material.depthWrite=!faded;m.material.needsUpdate=true;}
+    for(const m of this.meshes){
+      const material=m.material,faded=on&&(!except||!this.contains(except,m));
+      // Preserve authored alpha/depth settings, including canvas decals and UV beams.
+      const rest=material.userData.inspectionRest??=( {transparent:material.transparent,opacity:material.opacity,depthWrite:material.depthWrite} );
+      material.transparent=faded||rest.transparent;material.opacity=faded?Math.min(.17,rest.opacity):rest.opacity;
+      material.depthWrite=faded?false:rest.depthWrite;material.needsUpdate=true;
+    }
     for(const v of this.auxVisuals){const faded=on&&(!except||!this.contains(except,v));v.material.opacity=faded ? .16 : .92;v.material.needsUpdate=true;}
   }
   isolate(part,on=true){for(const n of this.nodes)n.visible=!on||!part||this.contains(part,n)||this.contains(n,part);}

@@ -8,8 +8,8 @@ const V=a=>new THREE.Vector3(...a);
 export class Offset8MachineTemplate{
  constructor(){this.root=new THREE.Group();this.root.name='CX 104-8+LYYL';this.root.userData={assetId:'BMJ-MCH-0005',nodeId:'offset8-root',spec:OFFSET8_SPEC,sources:OFFSET8_TECHNICAL_SOURCES,orientation:OFFSET8_ORIENTATION,taxonomyVersion:'offset8-v1'};this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.exteriorOpen=false;this.build();this.enrichV123();this.taxonomy=OFFSET8_TAXONOMY;this.taxonomyById=OFFSET8_TAXONOMY_BY_ID;for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}this.root.updateMatrixWorld(true);}
  group(parent,id,name,pos=[0,0,0],explode=[0,0,0]){const g=new THREE.Group();g.name=name;g.position.set(...pos);g.userData={assetId:'BMJ-MCH-0005',nodeId:id,selectable:true,confidence:'DOCUMENT_GROUNDED',explode:V(explode)};parent.add(g);this.nodes.push(g);if(parent===this.root)this.parts.push(g);return g;}
- mat(k){if(!this.materials.has(k)){const c={light:0xe8e8e2,graphite:0x273238,black:0x11181c,steel:0x8d999e,silver:0xc0c8ca,rubber:0x20262a,paper:0xf2ecda,blue:0x2874a6,cyan:0x3fb7c5,amber:0xe2a83c,coat:0xb7d7d0,glass:0x73b7c9}[k]||0x888888;this.materials.set(k,new THREE.MeshStandardMaterial({color:c,metalness:['steel','silver'].includes(k)?.6:.15,roughness:k==='paper'?.9:.48,transparent:k==='glass',opacity:k==='glass'?.35:1}));}return this.materials.get(k);}
- mesh(g,geo,key,k='graphite',pos=[0,0,0],rot=null){if(!this.geometries.has(key))this.geometries.set(key,geo());const m=new THREE.Mesh(this.geometries.get(key),this.mat(k));m.position.set(...pos);if(rot)m.rotation.set(...rot);m.castShadow=k!=='glass';m.receiveShadow=true;m.userData.ownerId=g.userData.nodeId;g.add(m);this.meshes.push(m);return m;}
+ mat(k,owner=null){const key=(owner?.userData.nodeId||'shared')+':'+k;if(!this.materials.has(key)){const c={light:0xe8e8e2,graphite:0x273238,black:0x11181c,steel:0x8d999e,silver:0xc0c8ca,rubber:0x20262a,paper:0xf2ecda,blue:0x2874a6,cyan:0x3fb7c5,amber:0xe2a83c,coat:0xb7d7d0,glass:0x73b7c9}[k]||0x888888;this.materials.set(key,new THREE.MeshStandardMaterial({color:c,metalness:['steel','silver'].includes(k)?.6:.15,roughness:k==='paper'?.9:.48,transparent:k==='glass',opacity:k==='glass'?.35:1}));}return this.materials.get(key);}
+ mesh(g,geo,key,k='graphite',pos=[0,0,0],rot=null){if(!this.geometries.has(key))this.geometries.set(key,geo());const m=new THREE.Mesh(this.geometries.get(key),this.mat(k,g));m.position.set(...pos);if(rot)m.rotation.set(...rot);m.castShadow=k!=='glass';m.receiveShadow=true;m.userData.ownerId=g.userData.nodeId;g.add(m);this.meshes.push(m);return m;}
  box(g,s,p,k='graphite',r=.02){return this.mesh(g,()=>r?new RoundedBoxGeometry(...s,2,r):new THREE.BoxGeometry(...s),'b'+s+r,k,p);}
  cyl(g,r,l,p,k='steel',role='',axis='z'){
   const rot=axis==='z'?[Math.PI/2,0,0]:axis==='x'?[0,0,Math.PI/2]:null;
@@ -81,6 +81,24 @@ export class Offset8MachineTemplate{
  const stack=this.findNode('offset8-delivery-stack');if(stack)for(const z of [-.72,.72])tag(this.box(stack,[.055,.16,.055],[1.48,1.04,z],'blue',.006),'delivery-pile-height-sensor');
  }
  findNode(id){return id==='offset8-root'?this.root:this.nodes.find(n=>n.userData.nodeId===id)||null;} resolvePart(o){for(let p=o;p&&p!==this.root;p=p.parent)if(p.userData?.selectable)return p;return null;}resolveTaxonomyNode(id){const n=this.taxonomyById.get(id);return n?.meshRefs.map(r=>this.findNode(r)).find(Boolean)||null;}
+ contains(part,object){for(let node=object;node;node=node.parent)if(node===part)return true;return false;}
+ highlight(part){this.highlightMany(part?[part]:[]);}
+ highlightMany(parts=[]){for(const mesh of this.meshes){if(!mesh.material.emissive)continue;mesh.material.emissive.setHex(parts.some(part=>this.contains(part,mesh))?0x17494a:0);mesh.material.emissiveIntensity=.3;}}
+ ghost(on,except=null){
+  this.ghosted=!!on;
+  for(const mesh of this.meshes){
+   const material=mesh.material,fade=on&&(!except||!this.contains(except,mesh));
+   const rest=material.userData.inspectionRest??={transparent:material.transparent,opacity:material.opacity,depthWrite:material.depthWrite};
+   material.transparent=fade||rest.transparent;material.opacity=fade?Math.min(.14,rest.opacity):rest.opacity;material.depthWrite=fade?false:rest.depthWrite;material.needsUpdate=true;
+  }
+ }
+ isolate(part,on=true){for(const node of this.nodes)node.visible=!on||!part||this.contains(part,node)||this.contains(node,part);}
+ showOnly(parts=[],on=true){for(const node of this.nodes)node.visible=!on||!parts.length||parts.some(part=>this.contains(part,node)||this.contains(node,part));}
  setExteriorOpen(on){this.exteriorOpen=!!on;let n=0;this.root.traverse(o=>{if(o.isMesh&&o.userData.exteriorCover){o.visible=!on;n++;}});this.root.userData.interiorCutawayVisible=!!on;this.root.userData.exteriorHiddenCount=on?n:0;}
- explode(on){for(const n of this.parts)n.position.copy(n.userData.rest).add(on?n.userData.explode:new THREE.Vector3());} reset(){const open=this.exteriorOpen;this.explode(false);this.setExteriorOpen(open);} setLow(){} dispose(){for(const g of this.geometries.values())g.dispose();for(const m of this.materials.values())m.dispose();}
+ explode(level,part=null){
+  for(const node of this.nodes)if(node.userData.rest)node.position.copy(node.userData.rest);
+  const targets=part?(part.children.some(node=>node.userData.selectable)?part.children.filter(node=>node.userData.selectable):[part]):this.parts;
+  for(const node of targets)node.position.addScaledVector(node.userData.explode||new THREE.Vector3(),THREE.MathUtils.clamp(Number(level)||0,0,1));
+ }
+ reset(){const open=this.exteriorOpen;this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const node of this.nodes)if(node.userData.restQuaternion)node.quaternion.copy(node.userData.restQuaternion);this.setExteriorOpen(open);} setLow(){} dispose(){for(const g of this.geometries.values())g.dispose();for(const m of this.materials.values())m.dispose();}
 }
