@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createMachineTemplate,createMachineSimulation} from '../frontend/src/machine-runtime.js';
+import {OFFSET5_UNIT_CENTERS} from '../frontend/src/data/dimensions-offset5.js';
 
 test('V333 every Offset 5 transfer guide identifies its actual adjacent PU pair and preserves forward flow metadata',()=>{
  const template=createMachineTemplate('BMJ-MCH-0003');
@@ -47,8 +48,8 @@ test('V333 Offset 5 print progression waits for the complete sheet to clear each
   for(let d=sim.sheetLength;d<=sim.pathLength;d+=.01){
    if(!sim.updateSheet(sheet,d))continue;
    const lead=sheet.userData.leadPosition.x,trail=sheet.userData.trailPosition.x;
-   const threshold=sim.template.root.userData?.unusedOffset5Threshold??null;
-   if(partial==null&&lead>sheet.userData.trailPosition.x&&sheet.userData.printedUnitsCleared===0&&lead>trail+.2)partial=d;
+   const threshold=OFFSET5_UNIT_CENTERS[0]+.22;
+   if(partial==null&&lead>threshold&&trail<=threshold&&sheet.userData.printedUnitsCleared===0)partial=d;
    if(sheet.userData.printedUnitsCleared>=1){cleared=d;break;}
   }
   assert.ok(partial!=null);
@@ -70,5 +71,26 @@ test('V333 Offset 5 print progression waits for the complete sheet to clear each
   assert.ok(delivered);
   assert.equal(delivered.userData.printed,7);
   assert.equal(delivered.userData.printedUnitsCleared,7);
+ }finally{sim.dispose();template.dispose();}
+});
+
+test('V333 deposited sheets remain hidden on subsequent frames of the same delivery cycle',()=>{
+ const template=createMachineTemplate('BMJ-MCH-0003');
+ const sim=createMachineSimulation('BMJ-MCH-0003',template.root,template);
+ try{
+  sim.start();
+  sim.elapsed=(sim.pathLength+.10)/sim.baseMetersPerSecond;
+  sim.lastNow=0;
+  sim.update(0);
+  const sheet=sim.sheets[0];
+  assert.equal(sheet.userData.lastDeliveryCycle,0);
+  assert.equal(sim.completed,1);
+  for(let now=16;now<=64;now+=16){
+   sim.update(now);
+   assert.equal(sheet.mesh.visible,false,'already deposited sheet must stay in the pile');
+   assert.equal(sheet.gripper.visible,false);
+   assert.equal(sim.completed,1,'same delivery cycle must not deposit twice');
+  }
+  assert.equal(sim.state().pileSheetsVisible,1);
  }finally{sim.dispose();template.dispose();}
 });

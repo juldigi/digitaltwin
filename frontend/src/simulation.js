@@ -525,6 +525,7 @@ export class PrintingSimulation{
       if(absolute<this.sheetLength){sheet.mesh.visible=false;sheet.gripper.visible=false;continue;}
       const cycle=Math.floor(absolute/this.cycleDistance),local=mod(absolute,this.cycleDistance);
       if(local>this.pathLength){
+        if(sheet.userData.lastDeliveryCycle===cycle){sheet.mesh.visible=false;sheet.gripper.visible=false;continue;}
         if(sheet.userData.lastDeliveryCycle!==cycle)this.updateSheet(sheet,this.pathLength);
         if(!this.depositSheet(sheet,cycle)){sheet.mesh.visible=true;sheet.gripper.visible=false;}
 
