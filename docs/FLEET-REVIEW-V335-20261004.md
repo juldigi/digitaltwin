@@ -32,7 +32,7 @@ Semua audit di bawah dijalankan melalui export fungsi audit, bukan hanya membuka
 | Material round-trip baru | 41 aset | transparent/opacity/depthWrite authored kembali |
 | Offset 5 decal/UV dan portrait resize | regresi khusus | lulus |
 
-Browser pengujian yang tersedia menonaktifkan WebGL. Test browser-created memakai canvas stub untuk menjalankan pembuatan material yang Node biasa lewati; tidak mengklaim pemeriksaan visual GPU. Pemeriksaan panel 2D/CSS dilakukan terpisah dari render 3D. Foto/nameplate/as-built diperlukan untuk menyelesaikan batas installed evidence di bawah.
+Browser pengujian yang tersedia menonaktifkan WebGL. Test browser-created memakai canvas stub untuk menjalankan pembuatan material yang Node biasa lewati; tidak mengklaim pemeriksaan visual GPU. Aturan CSS diperiksa melalui sumber dan cascade; screenshot kontrol mobile di Safari belum terverifikasi karena browser ini tidak dapat menjalankan fixture lokal dan WebGL. Foto/nameplate/as-built diperlukan untuk menyelesaikan batas installed evidence di bawah.
 
 ## Pemeriksaan konfigurasi per aset
 
