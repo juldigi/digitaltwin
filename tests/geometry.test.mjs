@@ -29,7 +29,9 @@ test('geometry is finite, sourced and instanced; visual dimensions remain noneng
  assert.ok(t.meshes.some(m=>m.isInstancedMesh));assert.ok(t.nodes.every(n=>n.userData.sourceFiles.length));
  for(const m of t.meshes){const a=m.geometry.attributes.position.array;assert.ok(a.every(Number.isFinite));}
  const box=new THREE.Box3().setFromObject(t.root);assert.ok(box.min.y>=-.01);assert.ok(box.max.x-box.min.x<27.20);
- t.setLow(true);assert.ok(t.meshes.filter(m=>m.userData.detail).every(m=>!m.visible));t.reset();assert.ok(t.meshes.filter(m=>m.userData.detail).every(m=>!m.visible));t.dispose();
+ t.setLow(true);const detail=t.meshes.filter(m=>m.userData.detail),visibility=detail.map(m=>m.visible);
+ assert.ok(visibility.some(Boolean)&&visibility.some(v=>!v),'low detail retains process mechanisms and removes microdetail');
+ t.reset();assert.deepEqual(detail.map(m=>m.visible),visibility);t.dispose();
 });
 test('photo-aligned geometry preserves orientation and bounded machine envelope',()=>{
  const t=new OffsetMachineTemplate(),box=new THREE.Box3().setFromObject(t.root),size=box.getSize(new THREE.Vector3());
@@ -205,10 +207,10 @@ test('PU1 top exterior follows actual-photo scope and does not depend on generat
  assert.equal(t.root.userData.pu1ExteriorLayout.geometryBasis,'PHOTO_CORRECTED_PU_PITCH + DXF_PLACEMENT_REFERENCE + OEM_PDF_INTERNAL');
  t.dispose();
 });
-test('mobile low-detail mode removes exposed internal PU mechanisms that look detached',()=>{
+test('mobile low-detail mode preserves actual PU mechanisms and the upper exterior',()=>{
  const t=new OffsetMachineTemplate();t.setLow(true);
- for(const id of ['press-0-inking-train','press-0-inking-distribution','press-0-dampening-form','press-0-cylinder-train','press-0-gripper-control']){
-  const n=t.findNode(id);assert.ok(n,`missing ${id}`);assert.ok(n.children.length);n.traverse(o=>{if(o.isMesh)assert.equal(o.visible,false,`${id} remains exposed in mobile mode`);});
+ for(let i=0;i<8;i++)for(const id of [`press-${i}-ink-roller-1-body`,`press-${i}-ink-distributor-A-body`,`press-${i}-damp-roller-16-body`,`press-${i}-cylinder-impression-body`,`press-${i}-gripper-control`]){
+  const n=t.findNode(id);assert.ok(n,`missing ${id}`);assert.ok(n.children.some(o=>o.isMesh&&o.visible),`${id} process body must remain visible`);
  }
  assert.ok(t.findNode('press-0-top-deck').children.some(o=>o.isMesh&&o.visible),'upper exterior must remain visible');
  t.dispose();
@@ -275,12 +277,15 @@ test('feeder-to-delivery functional assemblies are present in process order',()=
  t.dispose();
 });
 
-test('mobile low-detail mode hides deep roller details while preserving exterior and primary cylinders',()=>{
+test('mobile low-detail mode hides optional details while preserving installed rollers and cylinders',()=>{
  const t=new OffsetMachineTemplate();
  const deep=t.meshes.filter(m=>m.userData.detail);
  assert.ok(deep.length>120,'expected deep-detail meshes');
  t.setLow(true);
- assert.ok(deep.every(m=>!m.visible),'deep details must hide in low mode');
+ assert.ok(deep.some(m=>!m.visible),'optional detail must still hide in low mode');
+ const rollers=deep.filter(m=>m.userData.actualDiagramSource==='IMG_2777.jpeg');
+ assert.equal(rollers.length,192);assert.ok(rollers.every(m=>m.visible),'installed rollers must remain visible');
+ for(let i=0;i<8;i++)for(const kind of ['plate','blanket','impression','transfer'])assert.ok(t.findNode(`press-${i}-cylinder-${kind}-body`).children.some(m=>m.isMesh&&m.visible));
  assert.ok(t.findNode('press-0-frame').visible);
  assert.ok(t.findNode('press-0-cylinder-train').visible);
  t.dispose();

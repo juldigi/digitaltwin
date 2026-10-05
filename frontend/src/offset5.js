@@ -993,7 +993,18 @@ export class OffsetMachineTemplate {
     this.root.userData.serviceDetailHiddenCount=this.exteriorOpen?serviceHidden:0;
     this.root.updateMatrixWorld(true);
   }
-  setLow(on){for(const m of this.meshes)if(m.userData.detail)m.visible=!on;for(const v of this.auxVisuals)if(v.userData.detail)v.visible=!on;}
+  setLow(on){
+    for(const m of this.meshes)if(m.userData.detail){
+      // These are the installed process mechanisms, not optional microdetail.
+      // Hiding them leaves the mobile sheet path passing through an empty PU.
+      const owner=m.userData.ownerId||'';
+      const processMechanism=Boolean(m.userData.actualDiagramSource)||
+        /^press-\d+-(?:cylinder-(?:plate|blanket|impression|transfer)-body|gripper-control)$/.test(owner)||
+        owner==='delivery-drive-sprockets';
+      m.visible=!on||processMechanism;
+    }
+    for(const v of this.auxVisuals)if(v.userData.detail)v.visible=!on;
+  }
   reset(){const exteriorOpen=this.exteriorOpen;this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const n of this.nodes)n.quaternion.copy(n.userData.restQuaternion);if(exteriorOpen)this.setExteriorOpen(true);}
   dispose(){for(const geo of this.geometries.values())geo.dispose();for(const mat of this.materials.values())mat.dispose();for(const mat of this.lineMaterials.values())mat.dispose();for(const texture of this.textures)texture.dispose();for(const m of this.meshes)if(m.isInstancedMesh)m.dispose();}
 }
