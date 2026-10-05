@@ -17,17 +17,9 @@ test('V339 vacuum-table receiving throat joins both locked faces at table height
  }finally{t.dispose();}
 });
 
-test('V339 all PU transverse guards cover upper and lower faces without roofing the deck',()=>{
+test('V340 restores the upper PU silhouette while preserving the open service deck',()=>{
  const t=createPolishedMachineTemplate('offset5');
- try{
-  for(let i=0;i<8;i++){
-   const guards=t.findNode(`press-${i}-face-guards`),b=bounds(guards);
-   assert.ok(b.min.y<1.38&&b.max.y>2.60);
-   assert.ok(b.max.z-b.min.z>=1.799);
-   assert.equal(guards.userData.sourcePhoto,'IMG_1628.jpeg');
-   assert.equal(t.findNode(`press-${i}-top-deck`).userData.solidTopCover,false);
-  }
- }finally{t.dispose();}
+ try{for(let i=0;i<8;i++){assert.equal(t.findNode(`press-${i}-face-guards`),null);assert.equal(t.findNode(`press-${i}-top-deck`).userData.solidTopCover,false);}}finally{t.dispose();}
 });
 
 test('V339 normal exterior encloses every inter-PU transfer through quality/reset cycles',()=>{

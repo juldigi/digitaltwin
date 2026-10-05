@@ -383,16 +383,10 @@ export class OffsetMachineTemplate {
     // structural edge lintels so the inking/duct deck stays genuinely open from above.
     for(const z of [-.93,.93])this.markExteriorCover(this.box(body,[topBeamWidth,.22,.12],[0,2.67,z],'graphite',.035));
     Object.assign(body.userData,{openUpperFrame:true,fullDepthTopBeam:false,photoLockBaseline:'V404_V408_OPEN_PU_TOP'});
-    // IMG_1626/1628/1662 show two stacked guarded faces, not a short grille
-    // with a large empty opening above it. The upper service deck stays open.
-    const guards=this.group(body,`press-${i}-face-guards`,`PU${i+1} · stacked transverse protection grilles`,[0,0,0],[0,.12,0],['IMG_1626.jpeg','IMG_1628.jpeg','IMG_1662.jpeg']);
-    for(const xFace of [-faceX,faceX]){
-      this.grille(guards,[xFace,2.23,0],1.75,.55);
-      this.grille(guards,[xFace,1.64,0],1.75,.55);
-      this.markExteriorCover(this.box(guards,[.055,.10,1.80],[xFace,2.57,0],'graphite',.016));
-      this.handle(guards,[xFace,1.66,.73],'x',.25);
-    }
-    guards.userData.sourcePhoto='IMG_1628.jpeg';
+    // Restore the pre-V339 upper-face silhouette; do not extend the transverse
+    // guards into the photographed open service deck.
+    this.grille(body,[faceX,1.78,0],1.75,.72);
+    this.grille(body,[-faceX,1.78,0],1.75,.72);
     this.markExteriorCover(this.cylinder(body,.050,1.78,[guardX,1.23,0],'rubber'));
     this.markExteriorCover(this.box(body,[.07,.22,1.8],[guardX,.96,0],'graphite',.025));
     for(const z of [-.62,.62])this.markExteriorCover(this.box(body,[.025,.10,.4],[glassX,.98,z],'glass'));
