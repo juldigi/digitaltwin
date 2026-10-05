@@ -352,8 +352,12 @@ function startPrintingSimulation(){
  if(!engine.isPrintingSimulationActive()){
   const readiness=engine.getPrintingSimulationState?.()||currentSimulationState();
   if(readiness?.blocked||readiness?.available===false){toast(readiness?.blockedReason||'Simulasi proses untuk mesin atau peralatan ini belum tersedia.',true);updateSimulationPanel(readiness);return;}
-  simulationOwnsExterior=!isInteriorOpen();
-  enableExteriorOpen({forceDetail:false});
+  if(MACHINE_KEY==='offset5'){
+   simulationOwnsExterior=false;engine.template.reset();
+   engine.setPrintingSimulationInkFlowVisible(isInteriorOpen());
+  }else{
+   simulationOwnsExterior=!isInteriorOpen();enableExteriorOpen({forceDetail:false});
+  }
   engine.template.ghost(false);engine.isolated=false;engine.clearPartLabels();selectedPart=null;setActiveTaxonomyId(ACTIVE_ROOT);setExplodeLevel(0);
   updateSimulationPanel(engine.startPrintingSimulation());
   engine.fit(engine.machine);
@@ -379,7 +383,7 @@ window.addEventListener('bmj:simulationcommand',event=>{
  const action=event.detail?.action,value=event.detail?.value;
  if(action==='toggle'){if(engine?.isPrintingSimulationActive?.()||currentSimulationState().active)pausePrintingSimulation();else startPrintingSimulation();return;}
  if(action==='stop'){stopPrintingSimulation({restoreExterior:true});return;}
- if(action==='exterior'&&engine){const interior=!isInteriorOpen();setDomainState({inspectionMode:{interior}});engine.template.setExteriorOpen(interior);requestAnimationFrame(()=>engine?.fit(engine.machine,'iso',false));return;}
+ if(action==='exterior'&&engine){const interior=!isInteriorOpen();setDomainState({inspectionMode:{interior}});engine.template.setExteriorOpen(interior);if(MACHINE_KEY==='offset5')engine.setPrintingSimulationInkFlowVisible(interior);requestAnimationFrame(()=>engine?.fit(engine.machine,'iso',false));return;}
  if(action==='mode'){engine?.setPrintingSimulationMode?.(value);updateSimulationPanel(engine?.getPrintingSimulationState?.());return;}
  if(action==='speed')updateSimulationPanel(engine?.setPrintingSimulationSpeed?.(+value)||currentSimulationState());
 });

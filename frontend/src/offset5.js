@@ -24,6 +24,7 @@ export const PHOTO_RECONSTRUCTION = {
 };
 const V=(a)=>new THREE.Vector3(...a);
 const OEM_ROLLER_VISUAL_RADIUS_PER_MM=.00073; // compact Fig.15 topology; nominal diameter remains metadata, not service scale
+const isPuInteriorMesh=m=>Boolean(m.userData.actualDiagramSource)||/^press-\d+-(?:cylinder-(?:plate|blanket|impression|transfer)-body|gripper-control)$/.test(m.userData.ownerId||'');
 
 export class OffsetMachineTemplate {
   constructor(){
@@ -35,6 +36,7 @@ export class OffsetMachineTemplate {
     this.taxonomy=OFFSET5_TAXONOMY;this.taxonomyById=TAXONOMY_BY_ID;
     this.original=this.parts.map(p=>p.position.clone());
     for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}
+    OffsetMachineTemplate.prototype.setExteriorOpen.call(this,false);
     this.root.updateMatrixWorld(true);
   }
   alignOperatorSide(){
@@ -988,23 +990,26 @@ export class OffsetMachineTemplate {
       if(n.userData.exteriorCover){n.visible=!this.exteriorOpen;if(this.exteriorOpen)hidden++;}
       if(n.userData.serviceDetail){n.visible=!this.exteriorOpen;if(this.exteriorOpen)serviceHidden++;}
     }
-    for(const m of this.meshes)if(m.userData.exteriorCover){m.visible=!this.exteriorOpen;if(this.exteriorOpen)hidden++;}
+    for(const m of this.meshes){
+      if(m.userData.exteriorCover){m.visible=!this.exteriorOpen&&(!this.lowDetail||!m.userData.detail);if(this.exteriorOpen)hidden++;}
+      if(isPuInteriorMesh(m))m.visible=this.exteriorOpen;
+    }
     this.root.userData.exteriorHiddenCount=this.exteriorOpen?hidden:0;
     this.root.userData.serviceDetailHiddenCount=this.exteriorOpen?serviceHidden:0;
     this.root.updateMatrixWorld(true);
   }
   setLow(on){
+    this.lowDetail=!!on;
     for(const m of this.meshes)if(m.userData.detail){
       // These are the installed process mechanisms, not optional microdetail.
       // Hiding them leaves the mobile sheet path passing through an empty PU.
       const owner=m.userData.ownerId||'';
-      const processMechanism=Boolean(m.userData.actualDiagramSource)||
-        /^press-\d+-(?:cylinder-(?:plate|blanket|impression|transfer)-body|gripper-control)$/.test(owner)||
-        owner==='delivery-drive-sprockets';
-      m.visible=!on||processMechanism;
+      const interiorMechanism=isPuInteriorMesh(m);
+      const processMechanism=interiorMechanism||owner==='delivery-drive-sprockets';
+      m.visible=interiorMechanism?this.exteriorOpen:(!on||processMechanism);
     }
     for(const v of this.auxVisuals)if(v.userData.detail)v.visible=!on;
   }
-  reset(){const exteriorOpen=this.exteriorOpen;this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const n of this.nodes)n.quaternion.copy(n.userData.restQuaternion);if(exteriorOpen)this.setExteriorOpen(true);}
+  reset(){const exteriorOpen=this.exteriorOpen;this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const n of this.nodes)n.quaternion.copy(n.userData.restQuaternion);this.setExteriorOpen(exteriorOpen);}
   dispose(){for(const geo of this.geometries.values())geo.dispose();for(const mat of this.materials.values())mat.dispose();for(const mat of this.lineMaterials.values())mat.dispose();for(const texture of this.textures)texture.dispose();for(const m of this.meshes)if(m.isInstancedMesh)m.dispose();}
 }

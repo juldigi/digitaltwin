@@ -208,7 +208,7 @@ test('PU1 top exterior follows actual-photo scope and does not depend on generat
  t.dispose();
 });
 test('mobile low-detail mode preserves actual PU mechanisms and the upper exterior',()=>{
- const t=new OffsetMachineTemplate();t.setLow(true);
+ const t=new OffsetMachineTemplate();t.setLow(true);t.setExteriorOpen(true);
  for(let i=0;i<8;i++)for(const id of [`press-${i}-ink-roller-1-body`,`press-${i}-ink-distributor-A-body`,`press-${i}-damp-roller-16-body`,`press-${i}-cylinder-impression-body`,`press-${i}-gripper-control`]){
   const n=t.findNode(id);assert.ok(n,`missing ${id}`);assert.ok(n.children.some(o=>o.isMesh&&o.visible),`${id} process body must remain visible`);
  }
@@ -281,7 +281,7 @@ test('mobile low-detail mode hides optional details while preserving installed r
  const t=new OffsetMachineTemplate();
  const deep=t.meshes.filter(m=>m.userData.detail);
  assert.ok(deep.length>120,'expected deep-detail meshes');
- t.setLow(true);
+ t.setLow(true);t.setExteriorOpen(true);
  assert.ok(deep.some(m=>!m.visible),'optional detail must still hide in low mode');
  const rollers=deep.filter(m=>m.userData.actualDiagramSource==='IMG_2777.jpeg');
  assert.equal(rollers.length,192);assert.ok(rollers.every(m=>m.visible),'installed rollers must remain visible');
