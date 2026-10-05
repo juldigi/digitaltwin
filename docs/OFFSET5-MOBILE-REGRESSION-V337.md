@@ -27,6 +27,12 @@ cutaway covers and optional detail remain hidden. A second test requires all
 192 installed-diagram rollers in normal low-detail view. Eight focused checks
 passed, including the Offset 5 truth lock and 41-asset quality round-trip.
 
+The full suite exposed three older geometry assertions requiring all deep
+mechanisms to be hidden. These are replaced with explicit checks for the actual
+rollers and main cylinders across all eight units, preserving envelope, reset,
+exterior and optional-detail reduction checks. All 26 geometry/mobile checks
+passed after that correction.
+
 This reproduces a specific visibility fault; mobile Safari visual confirmation
 and confirmation against the user's previously accepted appearance are still
 needed before describing the whole appearance as perfect.
