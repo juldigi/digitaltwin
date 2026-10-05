@@ -43,6 +43,7 @@ test('unverified factory distribution belongs to interior study and round-trips 
   const t=createPolishedMachineTemplate(id);
   try{for(const low of [false,true,false]){
    t.setLow(low);t.setExteriorOpen(false);for(const ref of refs)assert.equal(t.findNode(ref).visible,false,ref);
+   t.isolate(null,false);t.showOnly([],false);t.reset();for(const ref of refs)assert.equal(t.findNode(ref).visible,false,ref+' after selection reset');
    t.setExteriorOpen(true);for(const ref of refs)assert.equal(t.findNode(ref).visible,true,ref);
   }}finally{t.dispose();}
  }

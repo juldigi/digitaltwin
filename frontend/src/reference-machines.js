@@ -69,6 +69,12 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   hydraulic?.traverse(o=>{if(o.isMesh)o.userData.silhouetteCritical=true;});
   this.root.userData.equipmentBoundaryRevision='V341';
  }
+ enforceV341EquipmentBoundary(){
+  if(!this.exteriorOpen)for(const n of this.nodes)if(n.userData.functionalDiagramOnly)n.visible=false;
+ }
+ isolate(part,on=true){super.isolate(part,on);this.enforceV341EquipmentBoundary();}
+ showOnly(parts=[],on=true){super.showOnly(parts,on);this.enforceV341EquipmentBoundary();}
+ reset(){super.reset();this.enforceV341EquipmentBoundary();}
  motion(mesh,type='spin',axis='z',rate=4,amp=.08,phase=0,stage=null){
   mesh.userData.motion={type,axis,rate,amp,phase,stage};
   return this.active(mesh);
