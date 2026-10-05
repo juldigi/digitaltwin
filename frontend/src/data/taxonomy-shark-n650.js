@@ -15,5 +15,14 @@ const branches={
  RETURN:[['GOOD','Belt / drive return produk accepted','shark650-return-good'],['BAD','Belt / drive return produk rejected','shark650-return-bad'],['STACK','Interface konfirmasi good/bad & palletizing','shark650-return-stack']],
  ACCESS:[['FRAME','Base frame mesin','shark650-access-frame'],['PLATFORM','Platform operator','shark650-access-platform'],['GUARD','Cover interlock / guarding','shark650-access-guard']]
 };
-for(const [branch,systems] of Object.entries(branches))for(const [sid,name,ref] of systems){const l3=`SHARKN650.${branch}.${sid}`;add(l3,name,3,`SHARKN650.${branch}`,[ref],'system',['SUCTION','BELT','CAMERA','LIGHT','PLATE','GOOD'].includes(sid));for(const [i,component,part] of [[1,'Support mechanical','Grup bearing / bracket / fastener'],[2,'Assembly adjustment / sensor','Grup setting / sensor / cable'],[3,'Interface kerja','Grup kontak belt / optical / reject']]){const l4=`${l3}.B${i}`;add(l4,component,4,l3,[ref]);const l5=`${l4}.C`;add(l5,`${name} · komponen ${i}`,5,l4,[ref],'component');add(`${l5}.P`,part,6,l5,[ref],'part');}}
+for(const [branch,systems] of Object.entries(branches))for(const [sid,name,ref] of systems){
+ const l3=`SHARKN650.${branch}.${sid}`,logical=sid==='RECIPE',refs=logical?[]:[ref];
+ add(l3,name,3,`SHARKN650.${branch}`,refs,logical?'software':'system',['SUCTION','BELT','CAMERA','LIGHT','PLATE','GOOD'].includes(sid));
+ const details=logical?[[1,'Master inspeksi','Data pembanding','Referensi gambar master'],[2,'Tolerance inspeksi','Parameter keputusan','Batas penerimaan recipe'],[3,'Pemilihan recipe','Identitas pekerjaan','Konfigurasi logis · bukan komponen mekanis']]:[[1,'Support mechanical','Grup bearing / bracket / fastener'],[2,'Assembly adjustment / sensor','Grup setting / sensor / cable'],[3,'Interface kerja','Grup kontak belt / optical / reject']];
+ for(const [i,component,part,specific] of details){
+  const l4=`${l3}.B${i}`;add(l4,component,4,l3,refs,logical?'software':'assembly');
+  const l5=`${l4}.C`;add(l5,logical?part:`${name} · komponen ${i}`,5,l4,refs,logical?'software':'component');
+  add(`${l5}.P`,logical?specific:part,6,l5,refs,logical?'software':'part');
+ }
+}
 export const SHARK_N650_TAXONOMY=Object.freeze(rows);export const SHARK_N650_TAXONOMY_BY_ID=new Map(rows.map(n=>[n.id,n]));export const sharkN650TaxonomyStats=()=>({total:rows.length,byLevel:Object.fromEntries([1,2,3,4,5,6].map(level=>[level,rows.filter(n=>n.level===level).length]))});

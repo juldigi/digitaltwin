@@ -34,8 +34,8 @@ chain(u,'SENSE','Stack sensing','Presence-sensor block','Stack sensor service gr
 
 u=unit('XY','Servo Moving Platform X/Y','universal-module-2','Platform bergerak dua sumbu di bawah blanking head yang tetap.');
 chain(u,'PLATFORM','Moving platform','Platform carriage block','Moving-platform service group','Rigid XY work platform','qf100-platform','Platform membawa stack melalui area kerja; head tetap.');
-chain(u,'X','X-axis drive','X linear-motion block','X-axis service group','X ball screw / linear guides / servo','qf100-x-axis','Servo, ball screw dan straight-line guide didokumentasikan pada keluarga QF/LQF.');
-chain(u,'Y','Y-axis drive','Y linear-motion block','Y-axis service group','Y ball screw / linear guides / servo','qf100-y-axis','Gerak sumbu kedua untuk indexing area blanking.');
+chain(u,'X','X-axis drive','X linear-motion block','X-axis service group','X ball screw / linear guides / servo','qf100-x-axis-detail','Servo, ball screw dan straight-line guide didokumentasikan pada keluarga QF/LQF.');
+chain(u,'Y','Y-axis drive','Y linear-motion block','Y-axis service group','Y ball screw / linear guides / servo','qf100-y-axis-detail','Gerak sumbu kedua untuk indexing area blanking.');
 chain(u,'POS','Position feedback','Position-control block','Position sensing service group','Photoelectric / limit sensors','qf100-position-sensors','Photoelectric device dan position limiter menjaga akurasi keluarga mesin.');
 chain(u,'XTRANS','X Servo Transmission Support','Servo Coupling / Bearing Block','X Transmission Service Group','Coupling / Fixed-Floating Support / Ball-Screw Nut','qf100-x-transmission-service','Close-family QF-1080B/C publishes servo, leadscrew and linear-bearing architecture; installed component brands on BMJ QF-100CS remain unverified.');
 chain(u,'YTRANS','Y Servo Transmission Support','Servo Coupling / Bearing Block','Y Transmission Service Group','Coupling / Fixed-Floating Support / Ball-Screw Nut','qf100-y-transmission-service','Service-level transmission reference for the second platform axis; exact BMJ support-bearing arrangement is unverified.');

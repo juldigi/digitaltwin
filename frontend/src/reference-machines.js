@@ -26,6 +26,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.refineV232PriorityPolish();
   this.refineV236MechanicalRealism();
   this.refineV238PriorityRepolish();
+  this.refineV341EquipmentBoundary();
   for(const n of this.nodes){
    if(!n.userData.rest)n.userData.rest=n.position.clone();
    if(!n.userData.restQuaternion)n.userData.restQuaternion=n.quaternion.clone();
@@ -37,12 +38,14 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  }
  setExteriorOpen(on=true){
   super.setExteriorOpen(on);
+  for(const n of this.nodes)if(n.userData.functionalDiagramOnly)n.visible=!!on;
   for(const mesh of this.meshes)if(mesh.userData.coverMountedDetail)mesh.visible=!this.exteriorOpen;
   if(['PDS','UTILITY'].includes(this.cfg.machine.area))for(const mesh of this.meshes)if(mesh.userData.coverMountedDetail)mesh.visible=!this.exteriorOpen;
   return this;
  }
  setLow(on){
   super.setLow(on);
+  for(const n of this.nodes)if(n.userData.functionalDiagramOnly)n.visible=this.exteriorOpen;
   if(this.exteriorOpen)for(const mesh of this.meshes)if(mesh.userData.coverMountedDetail)mesh.visible=false;
   if(['PDS','UTILITY'].includes(this.cfg.machine.area)){
    // Keep the actual family-process mechanism readable when the shell is opened
@@ -52,6 +55,26 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   }
   return this;
  }
+ refineV341EquipmentBoundary(){
+  // Distribution schematics describe a system, not the installed machine's
+  // physical envelope. Keep their taxonomy selectable for interior study,
+  // without attaching an unverified factory network to every cabinet.
+  for(const id of ['compressor-air-distribution','ahu-supply-duct','ahu-return-duct','ahu-outdoor-intake','sansin-indoor-outdoor-interconnect','sansin-return-duct']){
+   const n=this.findNode(id);if(!n)continue;
+   n.userData.functionalDiagramOnly=true;
+   n.visible=!!this.exteriorOpen;
+   n.traverse(o=>{if(o.isMesh)o.userData.silhouetteCritical=true;});
+  }
+  const hydraulic=this.findNode('qf100-hydraulic-unit');
+  hydraulic?.traverse(o=>{if(o.isMesh)o.userData.silhouetteCritical=true;});
+  this.root.userData.equipmentBoundaryRevision='V341';
+ }
+ enforceV341EquipmentBoundary(){
+  if(!this.exteriorOpen)for(const n of this.nodes)if(n.userData.functionalDiagramOnly)n.visible=false;
+ }
+ isolate(part,on=true){super.isolate(part,on);this.enforceV341EquipmentBoundary();}
+ showOnly(parts=[],on=true){super.showOnly(parts,on);this.enforceV341EquipmentBoundary();}
+ reset(){super.reset();this.enforceV341EquipmentBoundary();}
  motion(mesh,type='spin',axis='z',rate=4,amp=.08,phase=0,stage=null){
   mesh.userData.motion={type,axis,rate,amp,phase,stage};
   return this.active(mesh);
