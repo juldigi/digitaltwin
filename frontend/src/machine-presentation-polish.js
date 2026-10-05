@@ -137,5 +137,34 @@ export function applyMachinePresentationPolish(template,key=''){
  root.userData.presentationGeometryPolicy='NO_GENERIC_GEOMETRY_REPLACEMENT__PRESERVE_MACHINE_SPECIFIC_TEMPLATE';
  root.userData.presentationAudit=Object.freeze(stats);
  preserveInspectionMaterials(template);
+ preserveCutawayQuality(template);
  return template;
+}
+
+// Detail switches and cover switches both write mesh visibility. Compose them
+// so changing quality cannot put a removed cabinet detail back into the cutaway.
+function preserveCutawayQuality(template){
+ if(!template.setLow||!template.setExteriorOpen)return;
+ const setLow=template.setLow.bind(template),setExterior=template.setExteriorOpen.bind(template);
+ let low=false,composing=false;
+ template.setLow=function(on){
+  if(composing)return setLow(on);
+  low=!!on;
+  composing=true;
+  try{
+   const result=setLow(on);
+   const hidden=[];
+   if(low)this.root.traverse(node=>{if(node.isMesh&&!node.visible)hidden.push(node);});
+   setExterior(Boolean(this.exteriorOpen));
+   for(const node of hidden)node.visible=false;
+   return result;
+  }finally{composing=false;}
+ };
+ template.setExteriorOpen=function(on=true){
+  if(composing)return setExterior(on);
+  const result=setExterior(on);
+  if(low)this.setLow(true);
+  return result;
+ };
+ template.root.userData.cutawayQualityRevision='V336';
 }
