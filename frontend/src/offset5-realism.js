@@ -41,6 +41,9 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
     this.root.userData.realismPack=OFFSET5_FINAL_REFINEMENT.id;
     this.root.userData.realismPolicy=OFFSET5_FINAL_REFINEMENT.policy;
     this.refineExistingModel();
+    // Refinements add inspection-only transfer mounts after the base constructor
+    // applies exterior state. Apply that state again before the first render.
+    this.setExteriorOpen(this.exteriorOpen);
     this.root.updateMatrixWorld(true);
   }
 
@@ -529,13 +532,13 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
 
   setExteriorOpen(on=true){
     if(typeof OffsetMachineTemplate.prototype.setExteriorOpen==='function')OffsetMachineTemplate.prototype.setExteriorOpen.call(this,on);
-    for(const m of this.realismMeshes)m.visible=(!this.lowDetail||Boolean(m.userData.silhouetteCritical))&&(!this.exteriorOpen||!m.userData.coverMountedDetail&&!m.userData.serviceDetail);
+    for(const m of this.realismMeshes)m.visible=/^transfer-pu\d+-pu\d+$/.test(m.userData.ownerId||'')?this.exteriorOpen:(!this.lowDetail||Boolean(m.userData.silhouetteCritical))&&(!this.exteriorOpen||!m.userData.coverMountedDetail&&!m.userData.serviceDetail);
     return this;
   }
   setLow(on){
     this.lowDetail=!!on;
     if(typeof OffsetMachineTemplate.prototype.setLow==='function')OffsetMachineTemplate.prototype.setLow.call(this,on);
-    for(const m of this.realismMeshes)m.visible=(!this.lowDetail||Boolean(m.userData.silhouetteCritical))&&(!this.exteriorOpen||!m.userData.coverMountedDetail&&!m.userData.serviceDetail);
+    for(const m of this.realismMeshes)m.visible=/^transfer-pu\d+-pu\d+$/.test(m.userData.ownerId||'')?this.exteriorOpen:(!this.lowDetail||Boolean(m.userData.silhouetteCritical))&&(!this.exteriorOpen||!m.userData.coverMountedDetail&&!m.userData.serviceDetail);
     return this;
   }
 }
