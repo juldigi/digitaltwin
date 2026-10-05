@@ -1560,7 +1560,20 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   }
   if(fanUnit){
    const fan=this.findNode('ahu-supply-fan');
-   if(fan){fan.userData.installedFanTypeVerified=false;const wheel=this.motion(this.cyl(fan,.40,.22,[0,1.05,0],'dark','z'),'spin','z',7,.01,0,null);this.tag(wheel,'supply-fan-wheel-reference','AHU_FUNCTIONAL_REFERENCE');for(let k=0;k<10;k++){const blade=this.box(fan,[.30,.025,.07],[0,1.05,0],'steel',.003);blade.rotation.z=k*Math.PI/5;this.tag(blade,'supply-fan-blade-reference','FUNCTIONAL_REFERENCE');}}
+   if(fan){
+    fan.userData.installedFanTypeVerified=false;
+    // A schematic radial impeller: its rim blades move with the hub, not the casing.
+    const wheel=this.motion(this.cyl(fan,.09,.22,[0,1.05,0],'dark','z'),'spin','z',7,.01,0,null);
+    this.tag(wheel,'supply-fan-wheel-reference','AHU_FUNCTIONAL_REFERENCE');
+    wheel.userData.installedBladeCountVerified=false;
+    wheel.userData.installedBladeProfileVerified=false;
+    // cyl() rotates the hub's local Y onto the shaft Z; build blades in local XZ.
+    for(let k=0;k<10;k++){
+     const a=k*Math.PI/5,blade=this.box(wheel,[.045,.18,.17],[.30*Math.cos(a),0,.30*Math.sin(a)],'steel',.003);
+     blade.rotation.y=-a;
+     this.tag(blade,'supply-fan-blade-reference','FUNCTIONAL_REFERENCE');
+    }
+   }
    const drive=this.findNode('ahu-fan-drive');
    if(drive){drive.userData.installedDriveTypeVerified=false;this.tag(this.cyl(drive,.10,.32,[.34,.75,.55],'dark','x'),'supply-fan-motor-reference','AHU_FUNCTIONAL_REFERENCE');const env=this.box(drive,[.28,.18,.22],[.16,.72,.38],'glass',.008);env.userData.optionReference=true;this.tag(env,'fan-drive-type-boundary','CONFIGURATION_BOUNDARY');}
   }
