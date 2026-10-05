@@ -26,7 +26,7 @@ test('V338 Offset 5 defaults to exterior and reveals interior only on request',(
  }finally{t.dispose();}
 });
 
-test('V338 actual Offset 5 start handler preserves the chosen exterior mode',()=>{
+test('V340 actual Offset 5 start handler opens interior and records restoration ownership',()=>{
  const app=readFileSync('frontend/src/app.js','utf8');
  const body=app.slice(app.indexOf('function startPrintingSimulation(){'),app.indexOf('function pausePrintingSimulation(){'));
  for(const interior of [false,true]){
@@ -37,10 +37,10 @@ test('V338 actual Offset 5 start handler preserves the chosen exterior mode',()=
     getPrintingSimulationState:()=>({available:true}),setPrintingSimulationInkFlowVisible:on=>{inkFlow=on;},
     startPrintingSimulation:()=>({active:true}),fit:noop,clearPartLabels:noop};
    const context={engine,MACHINE_KEY:'offset5',simulationOwnsExterior:true,selectedPart:null,ACTIVE_ROOT:'root',
-    isInteriorOpen:()=>interior,ensureMachineInspectionContext:()=>true,enableExteriorOpen(){throw Error('automatic cutaway forbidden');},
+    isInteriorOpen:()=>interior,ensureMachineInspectionContext:()=>true,enableExteriorOpen(){t.setExteriorOpen(true);},
     updateSimulationPanel:noop,setActiveTaxonomyId:noop,setExplodeLevel:noop,renderPanel:noop,requestAnimationFrame:noop,toast:noop};
    vm.runInNewContext(`${body};startPrintingSimulation();`,context);
-   assert.equal(t.exteriorOpen,interior);assert.equal(inkFlow,interior);assert.equal(context.simulationOwnsExterior,false);
+   assert.equal(t.exteriorOpen,true);assert.equal(inkFlow,true);assert.equal(context.simulationOwnsExterior,!interior);
   }finally{t.dispose();}
  }
 });

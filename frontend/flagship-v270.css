@@ -876,3 +876,23 @@ html.immersive-mode #simulation-transport{
 html.immersive-mode #simulation-transport .sim-context{flex-direction:row!important;align-items:center!important;justify-content:space-between!important;gap:8px!important}
 html.immersive-mode #simulation-transport .sim-context small{flex-shrink:0;font-size:9px!important}
 html.immersive-mode #simulation-transport .sim-context strong{min-width:0;font-size:11px!important}
+
+/* V340: compact portrait transport, including Safari and immersive mode. */
+@media(max-width:767px){
+ #simulation-transport,html.immersive-mode #simulation-transport{
+  grid-template-columns:minmax(0,1fr) 58px 68px 72px!important;
+  grid-template-rows:28px 44px!important;
+  grid-template-areas:"context context context context" "mode speed play stop"!important;
+  grid-auto-rows:auto!important;gap:6px!important;padding:8px!important;
+  min-height:0!important;height:auto!important;max-height:none!important;
+  border-radius:14px!important;align-items:center!important;
+ }
+ #simulation-transport .sim-context{min-height:0!important;height:28px!important;gap:6px!important}
+ #simulation-transport .sim-context small{display:none!important}
+ #simulation-transport .sim-context strong{font-size:11px!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ #simulation-transport label{font-size:0!important;gap:0!important;margin:0!important}
+ #simulation-transport select{height:44px!important;font-size:11px!important;padding:0 5px!important}
+ #simulation-transport button{height:44px!important;min-height:44px!important;padding:5px!important;font-size:11px!important;white-space:nowrap!important}
+ #simulation-transport [data-transport-exterior]{height:28px!important;min-height:28px!important;width:auto!important;padding:3px 7px!important}
+ #simulation-transport progress{display:none!important}
+}
