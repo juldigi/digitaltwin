@@ -24,7 +24,7 @@ export const PHOTO_RECONSTRUCTION = {
 };
 const V=(a)=>new THREE.Vector3(...a);
 const OEM_ROLLER_VISUAL_RADIUS_PER_MM=.00073; // compact Fig.15 topology; nominal diameter remains metadata, not service scale
-const isPuInteriorMesh=m=>Boolean(m.userData.actualDiagramSource)||/^press-\d+-(?:cylinder-(?:plate|blanket|impression|transfer)-body|gripper-control)$/.test(m.userData.ownerId||'');
+const isPuInteriorMesh=m=>Boolean(m.userData.actualDiagramSource)||/^(?:transfer-pu\d+-pu\d+(?:-.*)?|feedboard-infeed-gripper|press-\d+-(?:cylinder-(?:plate|blanket|impression|transfer)-body|gripper-control))$/.test(m.userData.ownerId||'');
 
 export class OffsetMachineTemplate {
   constructor(){
@@ -280,7 +280,9 @@ export class OffsetMachineTemplate {
   }
   tagAdaptiveDetails(){
     const deep=/(-operator-details|-drive-details|-drive-gears|-ink-fountain-controls|-sheet-guides|-dampening-pan|-dampening-form|-inking-train|-inking-distribution|-cylinder-train|-impression-gripper|-gripper-control|-plate-clamp|-register-drives|-washup|-lubrication|-pneumatic-service|-inspection-points|-rakel-reference|-air-blower-ink|-air-blower-nip|-water-feed-reference|feedboard-lay-mechanism|feeder-air-controls|feeder-pallet-lift|feeder-suction-cups|feeder-separator-brushes|gripper-spring|coater-supply|coater-chamber-locks|coater-blade-adjusters|dryer-ventilation|dryer-air-plenum|dryer-monitoring|inspection-cabling|inspection-calibration|inspection-trigger|delivery-chain-path|delivery-drive-sprockets|delivery-chain-tensioners|delivery-pile-lift|delivery-powder-jogger-air|pu8-coater-access|coater-dryer-service-bay|dryer-delivery-access)$/;
-    for(const node of this.nodes)if(deep.test(node.userData.nodeId))node.traverse(object=>{if(object.isMesh)object.userData.detail=true;});
+    // Transition cabinets/decks define the installed silhouette; mobile LOD must
+    // never remove them as optional service detail.
+    for(const node of this.nodes)if(deep.test(node.userData.nodeId)&&!['pu8-coater-access','coater-dryer-service-bay','dryer-delivery-access'].includes(node.userData.nodeId))node.traverse(object=>{if(object.isMesh)object.userData.detail=true;});
   }
   build(){
     const refUnits=['IMG_1627.jpeg','IMG_1628.jpeg','IMG_1662.jpeg'];
@@ -351,6 +353,16 @@ export class OffsetMachineTemplate {
     const infeed=this.group(board,'feedboard-infeed-gripper','Infeed gripper bar reference',[0,0,0],[.32,.22,-.45],['IMG_1626.jpeg'],'Gripper bar menunjukkan serah-terima lembar menuju impression zone PU1; jumlah finger, cam dan phasing tidak diverifikasi.');
     this.box(infeed,[.055,.055,1.36],[.49,1.26,0],'steel',.012);
     for(let n=0;n<7;n++){const z=-.60+n*.20;this.box(infeed,[.10,.025,.055],[.52,1.29,z],'graphite',.008);}
+    // IMG_1626: the table terminates at the guarded PU1 receiving face, rather
+    // than leaving the register/gripper suspended in a daylight gap.
+    const tableEnd=D.feedBoardCenterX+D.feedBoardLength/2;
+    const pu1Face=pu1X-D.pu1FrameWidth/2;
+    const throatLength=pu1Face-tableEnd;
+    const throat=this.group(this.root,'feedboard-pu1-throat','Vacuum table / PU1 attached receiving throat',[(tableEnd+pu1Face)/2,0,0],[0,.18,0],['IMG_1626.jpeg'],'Photo-derived guarded interface. Endpoints follow the locked table and PU1 faces; internal timing and OEM clearances are not asserted.');
+    Object.assign(throat.userData,{upstreamX:tableEnd,downstreamX:pu1Face,deckHeight:1.30,sourcePhoto:'IMG_1626.jpeg'});
+    this.markExteriorCover(this.box(throat,[throatLength,1.00,1.94],[0,.77,0],'graphite',.008));
+    this.markExteriorCover(this.box(throat,[throatLength,.055,1.88],[0,1.30,0],'steel'));
+    for(const z of [-.92,.92])this.markExteriorCover(this.box(throat,[throatLength,.10,.06],[0,1.355,z],'graphite',.006));
     this.coatingUnit(D.coaterCenterX);
     this.dryerExtension(D.dryerCenterX);
     this.inspectionBridge(D.inspectionCenterX);
@@ -371,8 +383,16 @@ export class OffsetMachineTemplate {
     // structural edge lintels so the inking/duct deck stays genuinely open from above.
     for(const z of [-.93,.93])this.markExteriorCover(this.box(body,[topBeamWidth,.22,.12],[0,2.67,z],'graphite',.035));
     Object.assign(body.userData,{openUpperFrame:true,fullDepthTopBeam:false,photoLockBaseline:'V404_V408_OPEN_PU_TOP'});
-    this.grille(body,[faceX,1.78,0],1.75,.72);
-    this.grille(body,[-faceX,1.78,0],1.75,.72);
+    // IMG_1626/1628/1662 show two stacked guarded faces, not a short grille
+    // with a large empty opening above it. The upper service deck stays open.
+    const guards=this.group(body,`press-${i}-face-guards`,`PU${i+1} · stacked transverse protection grilles`,[0,0,0],[0,.12,0],['IMG_1626.jpeg','IMG_1628.jpeg','IMG_1662.jpeg']);
+    for(const xFace of [-faceX,faceX]){
+      this.grille(guards,[xFace,2.23,0],1.75,.55);
+      this.grille(guards,[xFace,1.64,0],1.75,.55);
+      this.markExteriorCover(this.box(guards,[.055,.10,1.80],[xFace,2.57,0],'graphite',.016));
+      this.handle(guards,[xFace,1.66,.73],'x',.25);
+    }
+    guards.userData.sourcePhoto='IMG_1628.jpeg';
     this.markExteriorCover(this.cylinder(body,.050,1.78,[guardX,1.23,0],'rubber'));
     this.markExteriorCover(this.box(body,[.07,.22,1.8],[guardX,.96,0],'graphite',.025));
     for(const z of [-.62,.62])this.markExteriorCover(this.box(body,[.025,.10,.4],[glassX,.98,z],'glass'));
@@ -793,8 +813,10 @@ export class OffsetMachineTemplate {
     const dryerLeft=D.dryerCenterX-D.dryerLength/2;
     const coaterDryerGap=Math.max(.30,dryerLeft-coaterRight);
     const transition=this.group(this.root,'coater-dryer-service-bay','Coater / dryer enclosed transition',[(coaterRight+dryerLeft)/2,0,0],[.18,.14,.62],photos,'The coater-to-dryer gap is a guarded sheet-path transition with continuous side decking, not an open bay crossed by railings.');
-    this.markExteriorCover(this.box(transition,[coaterDryerGap,.72,1.80],[0,1.10,0],'graphite',.026));
-    this.markExteriorCover(this.box(transition,[coaterDryerGap-.04,.14,1.62],[0,1.52,0],'black',.018));
+    this.markExteriorCover(this.box(transition,[coaterDryerGap,.97,2.02],[0,.785,0],'graphite',.010));
+    this.markExteriorCover(this.box(transition,[coaterDryerGap,.065,2.02],[0,1.3025,0],'steel',.008));
+    this.box(transition,[coaterDryerGap,.30,1.90],[0,.15,0],'graphite',.008);
+    Object.assign(transition.userData,{sourcePhoto:'IMG_1630.jpeg',continuousCabinet:true,upstreamX:coaterRight,downstreamX:dryerLeft});
     this.tread(transition,[coaterDryerGap,.10,.82],[0,.53,1.75]);
     this.box(transition,[coaterDryerGap-.04,.48,.74],[0,.25,1.75],'graphite',.016);
 
@@ -802,8 +824,19 @@ export class OffsetMachineTemplate {
     const deliveryLeft=D.deliveryCenterX-D.deliveryBodyLength/2;
     const dryerDeliveryGap=Math.max(.48,deliveryLeft-dryerRight);
     const access=this.group(this.root,'dryer-delivery-access','Dryer / delivery enclosed receiving transition',[(dryerRight+deliveryLeft)/2,0,0],[.28,.18,.78],photos,'The sheet path remains enclosed until the delivery receiving zone. Operator-side checker plate is fully supported and has no floating rail assembly.');
-    this.markExteriorCover(this.box(access,[dryerDeliveryGap,.66,1.82],[0,1.16,0],'graphite',.026));
-    const canopy=this.markExteriorCover(this.box(access,[dryerDeliveryGap,.18,1.92],[0,1.58,0],'light',.022));canopy.rotation.z=-.06;
+    // IMG_1630/2391: a flat checker-plate cabinet deck under the inspection
+    // bridge connects the sloped dryer hood to delivery; no raised white canopy.
+    this.markExteriorCover(this.box(access,[dryerDeliveryGap,.97,2.02],[0,.785,0],'graphite',.010));
+    this.markExteriorCover(this.box(access,[dryerDeliveryGap,.065,2.02],[0,1.3025,0],'steel',.008));
+    this.box(access,[dryerDeliveryGap,.30,1.90],[0,.15,0],'graphite',.008);
+    Object.assign(access.userData,{sourcePhoto:'IMG_2391.jpeg',continuousCabinet:true,upstreamX:dryerRight,downstreamX:deliveryLeft});
+    for(const bay of [transition,access]){
+      for(const z of [-1.02,1.02]){
+        this.markExteriorCover(this.box(bay,[.018,.87,.018],[0,.80,z],'black'));
+        for(const dx of [-.10,.10])this.markExteriorCover(this.box(bay,[.042,.035,.022],[dx,.98,z],'black',.005));
+      }
+      bay.userData.deckHeight=1.335;
+    }
     this.tread(access,[dryerDeliveryGap,.11,.82],[0,.54,1.75]);
     this.box(access,[dryerDeliveryGap-.05,.49,.74],[0,.255,1.75],'graphite',.018);
   }
