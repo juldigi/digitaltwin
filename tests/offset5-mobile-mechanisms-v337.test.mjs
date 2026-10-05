@@ -26,13 +26,16 @@ test('V337 Offset 5 mobile cutaway keeps every process rotor visible during simu
  }finally{simulation.dispose();template.dispose();}
 });
 
-test('V337 Offset 5 normal mobile view preserves the actual PU roller diagram',()=>{
+test('Offset 5 normal mobile view keeps the actual PU roller diagram inside the covers',()=>{
  const template=createPolishedMachineTemplate('offset5');
  try{
   template.setExteriorOpen(false);template.setLow(true);
   const rollers=template.meshes.filter(mesh=>mesh.userData.actualDiagramSource==='IMG_2777.jpeg');
   assert.equal(rollers.length,192);
-  for(const roller of rollers)assert.ok(visibleInTree(roller),`hidden installed roller: ${roller.userData.ownerId}`);
+  for(const roller of rollers)assert.ok(!visibleInTree(roller),`internal roller exposed: ${roller.userData.ownerId}`);
+  template.setExteriorOpen(true);
+  for(const roller of rollers)assert.ok(visibleInTree(roller),`missing interior roller: ${roller.userData.ownerId}`);
+  template.setExteriorOpen(false);
   assert.equal(template.exteriorOpen,false);
  }finally{template.dispose();}
 });
