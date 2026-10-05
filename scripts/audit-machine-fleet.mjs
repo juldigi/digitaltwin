@@ -5,6 +5,16 @@ import {createPolishedMachineTemplate,createMachineSimulation} from '../frontend
 
 const finite=v=>Number.isFinite(v);
 const finiteVec=v=>v&&finite(v.x)&&finite(v.y)&&finite(v.z);
+export function visibleMachineBounds(root){
+ root.updateMatrixWorld(true);
+ const bounds=new THREE.Box3();
+ root.traverseVisible(object=>{
+  if(!object.isMesh||!object.geometry?.attributes?.position)return;
+  if(!object.geometry.boundingBox)object.geometry.computeBoundingBox();
+  bounds.union(object.geometry.boundingBox.clone().applyMatrix4(object.matrixWorld));
+ });
+ return bounds;
+}
 
 export function auditMachineFleet(){
  const machines=[],failures=[];
@@ -13,10 +23,11 @@ export function auditMachineFleet(){
   try{
    template=createPolishedMachineTemplate(asset.machineId);
    const root=template.root;root.updateMatrixWorld(true);
-   const box=new THREE.Box3().setFromObject(root),size=box.getSize(new THREE.Vector3()),fullCenter=box.getCenter(new THREE.Vector3());
+   template.setExteriorOpen?.(false);
+   const box=visibleMachineBounds(root),size=box.getSize(new THREE.Vector3()),fullCenter=box.getCenter(new THREE.Vector3());
    let meshCount=0,visibleBefore=0,invalidVertices=0,invalidMaterials=0,coverMotionConflicts=0;
    root.traverse(o=>{
-    if(!o.isMesh)return;meshCount++;if(o.visible)visibleBefore++;
+    if(!o.isMesh)return;meshCount++;
     const arr=o.geometry?.attributes?.position?.array;
     if(arr)for(let i=0;i<arr.length;i++)if(!finite(arr[i])){invalidVertices++;break;}
     const mats=Array.isArray(o.material)?o.material:[o.material];
@@ -28,9 +39,10 @@ export function auditMachineFleet(){
     if(o.userData?.exteriorCover&&moving)coverMotionConflicts++;
    });
 
+   root.traverseVisible(o=>{if(o.isMesh)visibleBefore++;});
    template.setLow?.(true);template.setExteriorOpen?.(false);root.updateMatrixWorld(true);
-   let lowVisible=0;root.traverse(o=>{if(o.isMesh&&o.visible)lowVisible++;});
-   const lowBox=new THREE.Box3().setFromObject(root),lowSize=lowBox.getSize(new THREE.Vector3()),lowCenter=lowBox.getCenter(new THREE.Vector3());
+   let lowVisible=0;root.traverseVisible(o=>{if(o.isMesh)lowVisible++;});
+   const lowBox=visibleMachineBounds(root),lowSize=lowBox.getSize(new THREE.Vector3()),lowCenter=lowBox.getCenter(new THREE.Vector3());
    const silhouetteRatios=size.toArray().map((v,i)=>v>1e-6?lowSize.getComponent(i)/v:1);
    const silhouetteCenterDrift=fullCenter.distanceTo(lowCenter)/Math.max(...size.toArray(),1e-6);
    const silhouetteParityValid=silhouetteRatios.every(v=>v>=.86&&v<=1.14)&&silhouetteCenterDrift<=.10;

@@ -11,10 +11,19 @@ const branches={
  INSPECT:[['WINDOW','Jendela inspeksi gelap','diana55-inspection-window'],['TUNNEL','Tunnel / enclosure inspeksi','diana55-inspection-tunnel'],['BED','Bed belt inspeksi','diana55-inspection-bed']],
  CAMERA:[['TOP','Mounting camera atas · referensi kapasitas','diana55-camera-top'],['LOWANGLE','Jalur mirror/camera low-angle','diana55-camera-low'],['REAR','Bay camera sisi belakang · referensi capability','diana55-camera-rear'],['AREA','Mounting bay area-camera · referensi kapasitas','diana55-camera-area']],
  LIGHT:[['DOME','Arsitektur light-dome patented / referensi cooling','diana55-light-dome'],['LED','Array LED adjustable','diana55-light-led'],['LOW','Illumination low-angle','diana55-light-low']],
- PROCESS:[['GPU','Kabinet pemrosesan GPU+CPU','diana55-process-compute'],['HMI','Terminal operator','diana55-process-hmi'],['RECIPE','Logic penyimpanan master / tolerance recipe','diana55-process-recipe']],
+ PROCESS:[['GPU','Kabinet pemrosesan GPU+CPU','diana55-process-compute'],['HMI','Terminal operator','diana55-hmi-pedestal-v251'],['RECIPE','Logic penyimpanan master / tolerance recipe','diana55-process-recipe']],
  REJECT:[['GATE','Referensi actuator reject mechanical / home sensing · tipe terpasang belum terverifikasi','diana55-reject-gate'],['AIR','Referensi air-nozzle / solenoid reject · tipe terpasang belum terverifikasi','diana55-reject-air'],['CHUTE','Jalur pengumpulan reject','diana55-reject-chute'],['SENSOR','Sensing konfirmasi reject','diana55-reject-sensor'],['PERMIT','Rantai permissive capture → process → decision → reject','diana55-reject']],
  DELIVERY:[['BELT','Belt produk accepted','diana55-delivery-belt'],['STACK','Delivery stack / buffer interface','diana55-delivery-stack'],['COUNTER','Sensing output / counter','diana55-delivery-counter']],
  ACCESS:[['FRAME','Base frame & side frame mesin','diana55-access-frame'],['GUARD','Guard & panel inspeksi','diana55-access-guard'],['DOOR','Panel service-access','diana55-access-door']]
 };
-for(const [branch,systems] of Object.entries(branches))for(const [sid,name,ref] of systems){const l3=`DIANA55.${branch}.${sid}`;add(l3,name,3,`DIANA55.${branch}`,[ref],'system',['BELT','TOP','DOME','GPU','GATE'].includes(sid));for(const [i,component,part] of [[1,'Assembly drive / support','Grup bearing / bracket / fastener'],[2,'Assembly adjustment / sensing','Grup setting / sensor / cable'],[3,'Interface kerja','Grup kontak optical / belt / eject']]){const l4=`${l3}.B${i}`;add(l4,component,4,l3,[ref]);const l5=`${l4}.C`;add(l5,`${name} · komponen ${i}`,5,l4,[ref],'component');add(`${l5}.P`,part,6,l5,[ref],'part');}}
+for(const [branch,systems] of Object.entries(branches))for(const [sid,name,ref] of systems){
+ const l3=`DIANA55.${branch}.${sid}`,logical=sid==='RECIPE',refs=logical?[]:[ref];
+ add(l3,name,3,`DIANA55.${branch}`,refs,logical?'software':'system',['BELT','TOP','DOME','GPU','GATE'].includes(sid));
+ const details=logical?[[1,'Master inspeksi','Data pembanding','Referensi gambar master'],[2,'Tolerance inspeksi','Parameter keputusan','Batas penerimaan recipe'],[3,'Pemilihan recipe','Identitas pekerjaan','Konfigurasi logis · bukan komponen mekanis']]:[[1,'Assembly drive / support','Grup bearing / bracket / fastener'],[2,'Assembly adjustment / sensing','Grup setting / sensor / cable'],[3,'Interface kerja','Grup kontak optical / belt / eject']];
+ for(const [i,component,part,specific] of details){
+  const l4=`${l3}.B${i}`;add(l4,component,4,l3,refs,logical?'software':'assembly');
+  const l5=`${l4}.C`;add(l5,logical?part:`${name} · komponen ${i}`,5,l4,refs,logical?'software':'component');
+  add(`${l5}.P`,logical?specific:part,6,l5,refs,logical?'software':'part');
+ }
+}
 export const DIANA_EYE55_TAXONOMY=Object.freeze(rows);export const DIANA_EYE55_TAXONOMY_BY_ID=new Map(rows.map(n=>[n.id,n]));export const dianaEye55TaxonomyStats=()=>({total:rows.length,byLevel:Object.fromEntries([1,2,3,4,5,6].map(level=>[level,rows.filter(n=>n.level===level).length]))});

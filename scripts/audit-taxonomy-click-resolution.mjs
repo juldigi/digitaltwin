@@ -21,6 +21,7 @@ export function auditTaxonomyClickResolution(){
    const problems=[];
    for(const node of mappedNodes){
     const actualRefs=node.meshRefs.filter(ref=>template.findNode?.(ref));
+    for(const ref of node.meshRefs)if(!template.findNode?.(ref))problems.push('MISSING_TAXONOMY_MESH_REF:'+node.id+':'+ref);
     const resolved=template.resolveTaxonomyNode?.(node.id)||null;
     if(actualRefs.length){
      resolvable++;

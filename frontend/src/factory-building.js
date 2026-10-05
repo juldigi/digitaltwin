@@ -1570,12 +1570,22 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  // IMG_2519/2523 show yellow open treads climbing around the tank shell;
  // they are distinct from a vertical ladder, which the photographs do not establish.
  const tankStairSteps=11,stairStart=-.28,stairSweep=1.52;
+ let priorStair=null;
  for(let i=0;i<tankStairSteps;i++){
   const a=stairStart+i*stairSweep/(tankStairSteps-1),y=.25+i*.185,r=an.r+.25,x=an.x+Math.cos(a)*r,z=anZ+Math.sin(a)*r;
   const tread=pbox(x,y,z,.49,.045,.39,0xd2a51c,'IPAL_PHOTO_TANK_CURVED_ACCESS_TREAD',-a,1,{photoSource:['IMG_2519','IMG_2523'],openRiser:true});
   tread.userData.stairLevel=i;
   const gx=an.x+Math.cos(a)*(an.r+.52),gz=anZ+Math.sin(a)*(an.r+.52);
   pline([gx,y,gz],[gx,y+.82,gz],.024,0xd2a51c,'IPAL_PHOTO_TANK_STAIR_GUARD_POST');
+  if(priorStair){
+   for(const radius of [an.r+.06,an.r+.44]){
+    const ax=an.x+Math.cos(priorStair.a)*radius,az=anZ+Math.sin(priorStair.a)*radius;
+    const bx=an.x+Math.cos(a)*radius,bz=anZ+Math.sin(a)*radius;
+    pline([ax,priorStair.y-.045,az],[bx,y-.045,bz],.030,0xd2a51c,'IPAL_PHOTO_TANK_STAIR_STRINGER',{photoSource:['IMG_2519','IMG_2523'],detail:'CONTINUOUS_TREAD_SUPPORT'});
+   }
+   pline([priorStair.gx,priorStair.y+.82,priorStair.gz],[gx,y+.82,gz],.024,0xd2a51c,'IPAL_PHOTO_TANK_STAIR_CONTINUOUS_HANDRAIL',{photoSource:['IMG_2519','IMG_2523']});
+  }
+  priorStair={a,y,gx,gz};
  }
  // White external riser bends over the upper shell in IMG_2519/2523; service/direction remain unverified.
  pline([an.x-an.r-.58,.18,anZ-.35],[an.x-an.r-.58,4.05,anZ-.35],.052,0xe4e3da,'IPAL_PHOTO_TANK_EXTERNAL_WHITE_PIPE',{routingConfidence:'PHOTO_DERIVED_VISUAL_ROUTING_NOT_PID'});
@@ -1823,7 +1833,9 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   pbox(x,.16,z,1.25,.20,.72,0x8b9290,'IPAL_PHOTO_PUMP_CONCRETE_PAD');
   const motor=pcyl(x-.28,.48,z,.18,.50,0x56656a,'IPAL_PHOTO_PUMP_MOTOR');motor.rotation.z=Math.PI/2;
   const pump=pcyl(x+.22,.48,z,.20,.34,0x3c7281,'IPAL_PHOTO_TRANSFER_PUMP_BODY');pump.rotation.z=Math.PI/2;
-  pcyl(x+.46,.48,z,.09,.14,0x777f7d,'IPAL_PHOTO_PUMP_FLANGE');
+  const flange=pcyl(x+.46,.48,z,.09,.14,0x777f7d,'IPAL_PHOTO_PUMP_FLANGE');flange.rotation.z=Math.PI/2;
+  for(const xx of [x-.38,x-.18,x+.22])pbox(xx,.285,z,.10,.05,.28,0x56656a,'IPAL_PHOTO_PUMP_MOUNTING_FOOT');
+  const coupling=pcyl(x+.015,.48,z,.075,.09,0x777f7d,'IPAL_PHOTO_PUMP_SHAFT_COUPLING');coupling.rotation.z=Math.PI/2;
   ppipeUnion(x+.54,.48,z,'x',.115,0x707a7c,'IPAL_PHOTO_PUMP_DISCHARGE_UNION');
   ppipeUnion(x+.22,.72,z,'y',.105,0x707a7c,'IPAL_PHOTO_PUMP_TOP_UNION'); 
  }
