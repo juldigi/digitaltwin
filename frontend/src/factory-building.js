@@ -1420,7 +1420,9 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
    const surface=bare.test(semantic)?'galvanizedSteel':painted.test(semantic)?'paintedSteel':concrete.test(semantic)?'factoryConcrete':null;
    if(surface)o.material=surfaceMaterial(o.material.color.getHex(),surface);
   }
-  o.userData={...o.userData,semantic,evidenceLayer:'PHOTO_ACTUAL',accuracy:'PHOTO_ACTUAL_VISUAL_EVIDENCE_RELATIVE_SCALE_NOT_SURVEYED',sourceArchive:'IPAL.zip',sourcePhotoRange:'IMG_2511-IMG_2525',...extra};ipalSurfaceDetails.attach(o);buildingDetailStats.v205IpalPhotoObjects++;return o;
+  o.userData={...o.userData,semantic,evidenceLayer:'PHOTO_ACTUAL',accuracy:'PHOTO_ACTUAL_VISUAL_EVIDENCE_RELATIVE_SCALE_NOT_SURVEYED',sourceArchive:'IPAL.zip',sourcePhotoRange:'IMG_2511-IMG_2525',...extra};ipalSurfaceDetails.attach(o);
+  if(o.isMesh&&o.material&&!o.material.transparent&&o.material.opacity>=.94&&/TANK|VESSEL|FRAME|CANOPY|BUILDING|CABINET|HOPPER|BASIN|STAIR|SUPPORT/.test(semantic))o.castShadow=true;
+  buildingDetailStats.v205IpalPhotoObjects++;return o;
  };
  const pbox=(x,y,z,w,h,d,color,semantic,rot=0,opacity=1,extra={})=>photoTag(box(ipalPhoto,x,y,z,w,h,d,color,rot,opacity),semantic,extra);
  const pline=(a,b,r,color,semantic,extra={})=>photoTag(line(ipalPhoto,new T.Vector3(...a),new T.Vector3(...b),r,color),semantic,extra);

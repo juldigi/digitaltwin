@@ -13,7 +13,7 @@ import {createIndustrialMaterial} from './render/material-library.js';
 import {AdaptiveQuality} from './render/adaptive-quality.js';
 import {EnvironmentSystem,usesIndustrialEnvironment} from './render/environment-system.js';
 import {PostProcessing} from './render/post-processing.js';
-import {ShadowManager} from './render/shadow-manager.js';
+import {ShadowManager,visibleShadowBounds} from './render/shadow-manager.js';
 import {renderDiagnostics} from './render/render-diagnostics.js';
 import {cameraFrame,applyCameraFrame,updateCameraTransition} from './render/camera-director.js';
 
@@ -151,6 +151,7 @@ export class FactoryEngine {
     return box.isEmpty()?null:box;
   }
   fit(object=this.machine,mode='iso',animate=true){
+    this.shadows?.focusBounds((object===this.machine&&this.view==='machine'?this.machineFocusBounds():null)||visibleShadowBounds(object));
     object.updateWorldMatrix(true,true);const box=object===this.machine&&this.view==='machine'?(this.machineFocusBounds()||new THREE.Box3().setFromObject(object)):new THREE.Box3().setFromObject(object);if(box.isEmpty())return;
     const profile=this.framingProfile(object);
     const direction=mode==='operator'?new THREE.Vector3(0,.38,-1).applyQuaternion(object.getWorldQuaternion(new THREE.Quaternion())).setY(.38):null;
