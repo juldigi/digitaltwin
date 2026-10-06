@@ -3,6 +3,8 @@ import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 import {writeFileSync} from 'node:fs';import {gzipSync} from 'node:zlib';
 import {createPolishedMachineTemplate} from '../frontend/src/machine-runtime.js';
 import {MACHINE_PLACEMENTS} from '../frontend/src/data/plant-actual.js';
+import {fleetMaterialDescriptor,bakeIndexedSurface} from './fleet-surface-bake.mjs';
+import {visibleMachineBounds} from './audit-machine-fleet.mjs';
 const result=[];let unknown=0;
 const silhouetteParity=(fullBox,lowBox)=>{
  const fullSize=fullBox.getSize(new THREE.Vector3()),lowSize=lowBox.getSize(new THREE.Vector3());
@@ -13,9 +15,9 @@ const silhouetteParity=(fullBox,lowBox)=>{
 };
 for(const place of MACHINE_PLACEMENTS){
  const t=createPolishedMachineTemplate(place.machineId);t.setExteriorOpen?.(false);t.root.updateMatrixWorld(true);
- const fullBox=new THREE.Box3().setFromObject(t.root);
+ const fullBox=visibleMachineBounds(t.root);
  t.setLow?.(true);t.root.updateMatrixWorld(true);
- const box=new THREE.Box3().setFromObject(t.root),center=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3());
+ const box=visibleMachineBounds(t.root),center=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3());
  const parity=silhouetteParity(fullBox,box);
  if(!parity.valid)throw new Error(`Home/detail silhouette drift for ${place.machineId}: ratios=${parity.ratios.map(v=>v.toFixed(3)).join(',')} centerDrift=${parity.centerDrift.toFixed(3)}`);
  const buckets=new Map();
@@ -27,10 +29,13 @@ for(const place of MACHINE_PLACEMENTS){
   let g=o.geometry.index?o.geometry.toNonIndexed():o.geometry.clone();g.applyMatrix4(o.matrixWorld);g.translate(-center.x,-box.min.y,-center.z);
   for(const name of Object.keys(g.attributes))if(!['position','normal'].includes(name))g.deleteAttribute(name);
   if(!g.attributes.normal)g.computeVertexNormals();
-  const c=o.material.color?.getHex()??0x8b9ba6;
-  if(!buckets.has(c))buckets.set(c,[]);buckets.get(c).push(g);
+  const descriptor=fleetMaterialDescriptor(o.material),key=JSON.stringify(descriptor);
+  if(!buckets.has(key))buckets.set(key,{descriptor,geometries:[]});buckets.get(key).geometries.push(g);
  });
- const meshes=[];for(const [color,gs] of buckets){const g=mergeGeometries(gs);const pos=[],idx=[],lookup=new Map(),arr=g.attributes.position.array;for(let i=0;i<arr.length;i+=9){const tri=[];for(let j=0;j<9;j+=3){const xyz=[0,1,2].map(k=>Math.round(arr[i+j+k]*40)/40),key=xyz.join(',');if(!lookup.has(key)){lookup.set(key,pos.length/3);pos.push(...xyz);}tri.push(lookup.get(key));}if(new Set(tri).size===3)idx.push(...tri);}meshes.push({color,p:pos,i:idx});g.dispose();gs.forEach(g=>g.dispose());}
+ const meshes=[];for(const {descriptor,geometries:gs} of buckets.values()){
+  const g=mergeGeometries(gs);meshes.push({...descriptor,...bakeIndexedSurface(g)});
+  g.dispose();gs.forEach(g=>g.dispose());
+ }
  const placement={...place};if(place.status==='UNIDENTIFIED'){placement.x=112+(unknown%3)*12;placement.y=8+Math.floor(unknown/3)*12;unknown++;}
  result.push({placement,size:size.toArray(),center:center.toArray(),floor:box.min.y,silhouetteParity:{ratios:parity.ratios,centerDrift:parity.centerDrift},meshes});t.dispose();
 }

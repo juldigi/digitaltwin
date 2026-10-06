@@ -17,19 +17,19 @@ export const RENDER_PROFILE_INFO=Object.freeze({
  }),
  seimbang:Object.freeze({
   label:'Seimbang',
-  difference:'Resolusi render hingga 1,35× dengan bayangan lunak 1024 dan respons interaksi normal.',
+  difference:'Resolusi render hingga 1,35×, bayangan lunak 1024, dan refleksi lingkungan ringan untuk membedakan logam, cat, dan karet.',
   pros:'Kompromi terbaik antara detail, kelancaran, konsumsi daya, dan kestabilan untuk mayoritas perangkat.',
   cons:'Tidak setajam mode Tinggi atau Sinematik dan masih memakai GPU lebih besar daripada Hemat.'
  }),
  tinggi:Object.freeze({
   label:'Tinggi',
-  difference:'Resolusi render hingga 1,75×, bayangan 1536, dan environment lighting (pencahayaan lingkungan) aktif saat membuka model mesin.',
+  difference:'Resolusi render hingga 1,75×, bayangan 1536, dan environment lighting (pencahayaan lingkungan) pada model mesin maupun pabrik.',
   pros:'Detail permukaan, tepi geometri, dan bayangan lebih tajam untuk inspeksi visual.',
   cons:'Lebih berat untuk GPU dan baterai; pada ponsel atau perangkat seluler dapat meningkatkan suhu dan menurunkan laju frame (FPS).'
  }),
  engineering:Object.freeze({
   label:'Teknis',
-  difference:'Resolusi render hingga 1,50× dengan bayangan 1024, exposure (tingkat pencahayaan) yang lebih netral, dan perpindahan kamera lebih cepat untuk inspeksi teknis.',
+  difference:'Resolusi render hingga 1,50× dengan bayangan 1024, exposure (tingkat pencahayaan) yang lebih netral, refleksi lingkungan, dan perpindahan kamera lebih cepat untuk inspeksi teknis.',
   pros:'Geometri tetap jelas dan respons navigasi cepat tanpa beban efek visual Sinematik.',
   cons:'Tampilan kurang dramatis dibanding mode Tinggi atau Sinematik dan bukan mode paling ringan.'
  }),

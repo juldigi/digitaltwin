@@ -3,7 +3,7 @@ const LEGACY_VERSION='factory-digital-twin-v222-overlay-state-ssot-20260925';
 const VERSION='factory-digital-twin-v270-flagship-ui-20260930';
 const RELEASE='222';
 const BUILD_FINGERPRINT='SOURCE';
-const FLEET_CHUNK_COUNT=10;
+const FLEET_CHUNK_COUNT=14;
 const ENTRYPOINTS=[
  './app-shell-v79.css','./flagship-v270.css','./src/app.js','./src/ui-v5.js','./src/experience-v37.js','./src/app-shell-v79.js'
 ];

@@ -5,6 +5,7 @@ import {V204_SOURCE_STATS} from './data/research-v204.js';
 import {IPAL_PHOTO_EVIDENCE_V206} from './data/ipal-photo-evidence-v206.js';
 import {canOpenTechnical3D} from './data/foundation-scope.js';
 import {dwgObjectSourceMetadata} from './data/dwg-fidelity.js';
+import {INDUSTRIAL_SURFACES} from './render/material-library.js';
 let fleetPromise;
 export function loadFactoryFleet(){return fleetPromise||(fleetPromise=import('./data/factory-fleet-data.js').then(({FACTORY_FLEET_GZIP})=>decodePlantData(FACTORY_FLEET_GZIP)).catch(error=>{fleetPromise=null;throw error;}));}
 export const MACHINE_SERVICE_CLEARANCE=1.2;
@@ -69,6 +70,14 @@ export function buildActualFactory(layout,fleet){
  layers.roof.visible=false;layers.reference.visible=false;layers.landscape.visible=false;
  for(const name of ['utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors'])layers[name].visible=false;
  const mats=new Map();const material=(color,opacity=1)=>{const k=color+':'+opacity;if(!mats.has(k))mats.set(k,new T.MeshStandardMaterial({color,roughness:.82,metalness:.04,transparent:opacity<1,opacity,depthWrite:opacity===1,side:T.DoubleSide}));return mats.get(k);};
+ const surfaceMaterial=(color,surface,overrides={})=>{
+  const values={...INDUSTRIAL_SURFACES[surface],...overrides},key='surface:'+color+':'+JSON.stringify(values);
+  if(!mats.has(key)){
+   const m=new T.MeshStandardMaterial({color,...values,side:T.DoubleSide});
+   m.userData={industrialSurface:surface,surfaceRevision:'V343'};mats.set(key,m);
+  }
+  return mats.get(key);
+ };
  const lightMaterial=new T.MeshStandardMaterial({color:0xe8eee9,emissive:0xe7f1dd,emissiveIntensity:1.15,roughness:.48,metalness:.02});
  const boxGeo=new T.BoxGeometry(1,1,1);
  const box=(parent,x,y,z,w,h,d,color,rot=0,opacity=1)=>{const o=new T.Mesh(boxGeo,material(color,opacity));o.position.set(x,y,z);o.scale.set(w,h,d);o.rotation.y=rot;o.receiveShadow=true;parent.add(o);return o;};
@@ -1400,7 +1409,17 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  const ipalPhoto=new T.Group();ipalPhoto.name='IPAL_PHOTO_ACTUAL_V206';ipal.add(ipalPhoto);
  const ipalStructure=new T.Group();ipalStructure.name='IPAL_STRUCTURE_FOLLOWS_MAIN_BUILDING';ipalStructure.userData={semantic:'IPAL_CANOPY_STRUCTURE_LAYER_ROOT',layer:'building',followsMainBuildingStructure:true,containsProcessEquipment:false};layers.building.add(ipalStructure);
  ipalPhoto.userData={semantic:'IPAL_PHOTO_ACTUAL_V206',evidenceLayer:'PHOTO_ACTUAL',sourceArchive:IPAL_PHOTO_EVIDENCE_V206.sourceArchive,sourcePhotos:IPAL_PHOTO_EVIDENCE_V206.files,photoCount:IPAL_PHOTO_EVIDENCE_V206.photoCount,accuracy:'PHOTO_DERIVED_RELATIVE_LAYOUT_NOT_SURVEYED'};
- const photoTag=(o,semantic,extra={})=>{if(!o)return o;o.userData={...o.userData,semantic,evidenceLayer:'PHOTO_ACTUAL',accuracy:'PHOTO_ACTUAL_VISUAL_EVIDENCE_RELATIVE_SCALE_NOT_SURVEYED',sourceArchive:'IPAL.zip',sourcePhotoRange:'IMG_2511-IMG_2525',...extra};buildingDetailStats.v205IpalPhotoObjects++;return o;};
+ const photoTag=(o,semantic,extra={})=>{
+  if(!o)return o;
+  if(o.isMesh&&o.material?.isMeshStandardMaterial&&!o.material.transparent){
+   const bare=/IPAL_PHOTO_(?:(?:SECOND_)?HOPPER_(?:CONE_VESSEL|CYLINDER|SHELL_RING|TOP_LID)|TANGKI_AN_AEROBIK|TANK_(?:SHELL|TOP)|(?:CURVED_CANOPY_RAFTER|CANOPY_COLUMN|CANOPY_TIE_ROD|CANOPY_X_BRACE|CORRUGATED_CANOPY_ROOF)|PUMP_(?:FLANGE|SHAFT_COUPLING))/;
+   const painted=/IPAL_PHOTO_(?:.*(?:HANDRAIL|GUARDRAIL|GUARD_POST|STAIR_STRINGER|STAIR_TREAD|TOEBOARD)|CHEMICAL_RACK_|HOPPER_SUPPORT|PUMP_(?:MOTOR|MOUNTING_FOOT)|BLUE_(?:AUXILIARY_VESSEL|COVERED_SERVICE_BASIN)|COVERED_BASIN_(?:METAL_LID|YELLOW_ACCESS_HATCH))/;
+   const concrete=/IPAL_PHOTO_(?:INTERLOCKING_PAVING|.*CONCRETE_(?:PAD|CURB)|ORNAMENTAL_POND_BASIN)/;
+   const surface=bare.test(semantic)?'galvanizedSteel':painted.test(semantic)?'paintedSteel':concrete.test(semantic)?'factoryConcrete':null;
+   if(surface)o.material=surfaceMaterial(o.material.color.getHex(),surface);
+  }
+  o.userData={...o.userData,semantic,evidenceLayer:'PHOTO_ACTUAL',accuracy:'PHOTO_ACTUAL_VISUAL_EVIDENCE_RELATIVE_SCALE_NOT_SURVEYED',sourceArchive:'IPAL.zip',sourcePhotoRange:'IMG_2511-IMG_2525',...extra};buildingDetailStats.v205IpalPhotoObjects++;return o;
+ };
  const pbox=(x,y,z,w,h,d,color,semantic,rot=0,opacity=1,extra={})=>photoTag(box(ipalPhoto,x,y,z,w,h,d,color,rot,opacity),semantic,extra);
  const pline=(a,b,r,color,semantic,extra={})=>photoTag(line(ipalPhoto,new T.Vector3(...a),new T.Vector3(...b),r,color),semantic,extra);
  const pcyl=(x,y,z,r,h,color,semantic,extra={},segments=32,mat=null)=>{
@@ -1947,7 +1966,12 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  // All assets use existing silhouette meshes at unit scale, centred inside their own footprint.
  const assets=new Map();
  for(const f of fleet){const p=f.placement,g=new T.Group(),foundationScope=canOpenTechnical3D(p.machineId)?'TECHNICAL_ASSET':'LAYOUT_PLACEHOLDER';g.name=p.label;g.position.set(p.x,0,-p.y);g.rotation.y=p.rotation*Math.PI/180;g.userData={...dwgObjectSourceMetadata(layout,{semantic:'FACTORY_MACHINE',sourceType:p.status?.startsWith('DXF_')?'DWG':'REGISTERED_ASSET',sourceEntityId:p.machineId,confidence:p.status==='DXF_FOOTPRINT'?'HIGH CONFIDENCE':p.status==='UNIDENTIFIED'?'UNKNOWN':'APPROXIMATE',renderStatus:foundationScope==='TECHNICAL_ASSET'?'3D_SPATIAL_PROXY_WITH_SEPARATE_MODEL':'LAYOUT_PLACEHOLDER'}),machineId:p.machineId,placementStatus:p.status,scaleFitApplied:false,foundationScope,technical3DEnabled:foundationScope==='TECHNICAL_ASSET'};
-  for(const s of f.meshes){const geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(s.p,3));geo.setIndex(s.i);geo.computeVertexNormals();const mesh=new T.Mesh(geo,material(s.color));mesh.userData={machineId:p.machineId,foundationScope};g.add(mesh);}
+  for(const s of f.meshes){
+   const geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(s.p,3));geo.setIndex(s.i);
+   if(s.n?.length===s.p.length)geo.setAttribute('normal',new T.Float32BufferAttribute(s.n,3));else geo.computeVertexNormals();
+   const mat=Number.isFinite(s.roughness)&&Number.isFinite(s.metalness)?surfaceMaterial(s.color,s.surface||'paintedSteel',{roughness:s.roughness,metalness:s.metalness,opacity:s.opacity??1,transparent:(s.opacity??1)<1,depthWrite:(s.opacity??1)>=1}):material(s.color);
+   const mesh=new T.Mesh(geo,mat);mesh.userData={machineId:p.machineId,foundationScope};g.add(mesh);
+  }
   (p.status==='UNIDENTIFIED'?layers.unidentified:layers.machines).add(g);assets.set(p.machineId,g);
   label(p.label,p.x,Math.max(3.3,f.size[1]+.6),-p.y,Math.min(9,4+p.label.length*.08),p.status==='UNIDENTIFIED'?'#8a5921':'#244b5c',p.status==='UNIDENTIFIED'?layers.unidentified:layers.labels,{role:'MACHINE',machineId:p.machineId});
  }

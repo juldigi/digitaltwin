@@ -11,7 +11,7 @@ import {RENDER_PROFILES,recommendedProfile,resolveProfile,configureRenderer} fro
 import {createIndustrialLighting} from './render/lighting-system.js';
 import {createIndustrialMaterial} from './render/material-library.js';
 import {AdaptiveQuality} from './render/adaptive-quality.js';
-import {EnvironmentSystem} from './render/environment-system.js';
+import {EnvironmentSystem,usesIndustrialEnvironment} from './render/environment-system.js';
 import {PostProcessing} from './render/post-processing.js';
 import {ShadowManager} from './render/shadow-manager.js';
 import {renderDiagnostics} from './render/render-diagnostics.js';
@@ -593,7 +593,7 @@ export class FactoryEngine {
   }
   syncVisualSystems(){
     const machineView=this.view==='machine';
-    void this.environment.setEnabled(machineView&&['tinggi','cinematic'].includes(this.qualityProfile));
+    void this.environment.setEnabled(usesIndustrialEnvironment(this.qualityProfile));
     void this.postProcessing.setEnabled(machineView&&this.qualityProfile==='cinematic');
   }
   setLow(on){return this.setQualityProfile(on?'hemat':'auto');}

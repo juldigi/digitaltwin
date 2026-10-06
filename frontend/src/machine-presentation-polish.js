@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {applyAuthoredSurface,authoredSurface} from './render/material-library.js';
 
 const finiteNumber=v=>Number.isFinite(v);
 const finiteVector=v=>v&&finiteNumber(v.x)&&finiteNumber(v.y)&&finiteNumber(v.z);
@@ -79,6 +80,11 @@ export function applyMachinePresentationPolish(template,key=''){
  if(root.userData?.presentationPolishRevision==='V233')return template;
 
  const uniqueMaterials=new Set();
+ const authoredKinds=new Map();
+ if(template.materials instanceof Map)for(const [key,material] of template.materials){
+  const kind=String(key).split(':').at(-1);
+  if(authoredSurface(kind))authoredKinds.set(material,kind);
+ }
  const stats={
   key:String(key||root.userData?.assetId||''),
   meshes:0,opaqueMeshes:0,transparentMeshes:0,processLights:0,
@@ -106,6 +112,7 @@ export function applyMachinePresentationPolish(template,key=''){
    if(!material)continue;
    uniqueMaterials.add(material);
    tuneMaterial(material);
+   applyAuthoredSurface(material,material.userData?.surfaceKind||authoredKinds.get(material));
    if(material.transparent||material.opacity<.94)transparent=true;
   }
   if(transparent){
