@@ -22,7 +22,7 @@ export class Polar115MachineTemplate{
   // Exterior refinement adds selectable nodes after the first rest-pose capture.
   for(const n of this.nodes){n.userData.rest??=n.position.clone();n.userData.restQuaternion??=n.quaternion.clone();}
  }
- mat(kind,transparent=false){const m=new THREE.MeshStandardMaterial({color:this.palette[kind]??this.palette.body,metalness:['steel','table','tableDark'].includes(kind)?.45:.08,roughness:kind==='screen'?.18:kind==='tableDark'?.42:.52,transparent,opacity:transparent?.36:1});m.userData.baseOpacity=m.opacity;this.materials.push(m);return m;}
+ mat(kind,transparent=false){const m=new THREE.MeshStandardMaterial({color:this.palette[kind]??this.palette.body,metalness:['steel','table','tableDark'].includes(kind)?.45:.08,roughness:kind==='screen'?.18:kind==='tableDark'?.42:.52,transparent,opacity:transparent?.36:1});m.userData.baseOpacity=m.opacity;m.userData.surfaceKind=kind;this.materials.push(m);return m;}
  group(parent,id,name,pos=[0,0,0],explode=[0,.18,0]){const g=new THREE.Group();g.name=name;g.position.set(...pos);g.userData={nodeId:id,selectable:true,explode:new THREE.Vector3(...explode)};parent.add(g);this.nodes.push(g);if(parent===this.root)this.parts.push(g);return g;}
  mesh(g,geo,kind,pos=[0,0,0],rot=null,id=null){const x=new THREE.Mesh(geo,this.mat(kind));x.position.set(...pos);if(rot)x.rotation.set(...rot);x.castShadow=!['screen','air'].includes(kind);x.receiveShadow=true;x.userData={ownerId:g.userData.nodeId};if(id)x.name=id;g.add(x);this.meshes.push(x);this.geometries.push(geo);return x;}
  box(g,s,p,k='body',r=.025,id=null){return this.mesh(g,r?new RoundedBoxGeometry(...s,2,r):new THREE.BoxGeometry(...s),k,p,null,id);}
