@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import {applyAuthoredSurface,authoredSurface} from './render/material-library.js';
+import {applyMachineSurfaceDetail} from './render/surface-detail.js';
 
 const finiteNumber=v=>Number.isFinite(v);
 const finiteVector=v=>v&&finiteNumber(v.x)&&finiteNumber(v.y)&&finiteNumber(v.z);
@@ -145,6 +146,7 @@ export function applyMachinePresentationPolish(template,key=''){
  root.userData.presentationAudit=Object.freeze(stats);
  preserveInspectionMaterials(template);
  preserveCutawayQuality(template);
+ applyMachineSurfaceDetail(template);
  return template;
 }
 
