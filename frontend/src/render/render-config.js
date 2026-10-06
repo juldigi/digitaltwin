@@ -35,7 +35,7 @@ export const RENDER_PROFILE_INFO=Object.freeze({
  }),
  cinematic:Object.freeze({
   label:'Sinematik',
-  difference:'Resolusi render hingga 2,0×, bayangan 2048, environment lighting (pencahayaan lingkungan), dan post-processing (pemrosesan akhir visual) saat membuka model mesin.',
+  difference:'Resolusi render hingga 2,0×, bayangan 2048, environment lighting (pencahayaan lingkungan), dan post-processing (pemrosesan akhir visual) untuk mesin, pabrik, serta IPAL. Bayangan kontak halus dan penghalusan tepi memakai batas 2 juta piksel; efek kedalaman dihitung pada setengah resolusi.',
   pros:'Kualitas visual tertinggi untuk presentasi, tangkapan layar, dan pemeriksaan estetika.',
   cons:'Paling berat untuk GPU, memori, baterai, dan suhu perangkat; tidak ideal untuk perangkat dengan performa terbatas.'
  })

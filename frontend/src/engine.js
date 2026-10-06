@@ -595,7 +595,7 @@ export class FactoryEngine {
   syncVisualSystems(){
     const machineView=this.view==='machine';
     void this.environment.setEnabled(usesIndustrialEnvironment(this.qualityProfile));
-    void this.postProcessing.setEnabled(machineView&&this.qualityProfile==='cinematic');
+    void this.postProcessing.setEnabled(this.qualityProfile==='cinematic');
   }
   setLow(on){return this.setQualityProfile(on?'hemat':'auto');}
   getRenderDiagnostics(){return renderDiagnostics(this.renderer,this.qualityProfile,this.adaptiveQuality);}
