@@ -430,7 +430,7 @@ export class FactoryEngine {
     }
     this.factoryMachineTemplates.clear();this.factoryDetailPromise=null;
   }
-  clearFactory(){this.clearFactorySelection();this.disposeFactoryMachineTemplates();this.actualFactory=null;this.factoryLabelSprites=[];this.factory.traverse(o=>{o.geometry?.dispose();if(Array.isArray(o.material))o.material.forEach(m=>{m.map?.dispose();m.dispose();});else{o.material?.map?.dispose();o.material?.dispose();}});this.factory.clear();}
+  clearFactory(){this.clearFactorySelection();this.disposeFactoryMachineTemplates();this.actualFactory?.disposeSurfaceDetails?.();this.actualFactory=null;this.factoryLabelSprites=[];this.factory.traverse(o=>{o.geometry?.dispose();if(Array.isArray(o.material))o.material.forEach(m=>{m.map?.dispose();m.dispose();});else{o.material?.map?.dispose();o.material?.dispose();}});this.factory.clear();}
   getRecommendedQualityProfile(){return recommendedProfile(this.capabilities);}
   getQualityCapabilities(){return {...this.capabilities};}
   async hydrateFactoryDetailedMachines(layout=this.layout,fleet=layout?.fleet){
