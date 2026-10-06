@@ -23,7 +23,7 @@ export const RENDER_PROFILE_INFO=Object.freeze({
  }),
  tinggi:Object.freeze({
   label:'Tinggi',
-  difference:'Resolusi render hingga 1,75×, bayangan 1536, dan pencahayaan lingkungan pada model mesin maupun pabrik.',
+  difference:'Resolusi render hingga 1,75×, bayangan 1536, dan environment lighting (pencahayaan lingkungan) pada model mesin maupun pabrik.',
   pros:'Detail permukaan, tepi geometri, dan bayangan lebih tajam untuk inspeksi visual.',
   cons:'Lebih berat untuk GPU dan baterai; pada ponsel atau perangkat seluler dapat meningkatkan suhu dan menurunkan laju frame (FPS).'
  }),
@@ -35,7 +35,7 @@ export const RENDER_PROFILE_INFO=Object.freeze({
  }),
  cinematic:Object.freeze({
   label:'Sinematik',
-  difference:'Resolusi render hingga 2,0×, bayangan 2048, pencahayaan lingkungan, dan pemrosesan akhir visual saat membuka model mesin.',
+  difference:'Resolusi render hingga 2,0×, bayangan 2048, environment lighting (pencahayaan lingkungan), dan post-processing (pemrosesan akhir visual) saat membuka model mesin.',
   pros:'Kualitas visual tertinggi untuk presentasi, tangkapan layar, dan pemeriksaan estetika.',
   cons:'Paling berat untuk GPU, memori, baterai, dan suhu perangkat; tidak ideal untuk perangkat dengan performa terbatas.'
  })
