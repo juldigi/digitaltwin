@@ -25,7 +25,8 @@ test('V47 sheet centerline is monotonic and clears every primary and inter-unit 
     const p=sim.curve.getPointAt(i/2400);
     assert.ok(Number.isFinite(p.x)&&Number.isFinite(p.y)&&Number.isFinite(p.z));
     assert.ok(p.x>=previous-.018,`sheet path backtracks at sample ${i}: ${p.x} < ${previous}`);
-    assert.ok(p.y>.42&&p.y<1.75,`sheet path leaves transport corridor at sample ${i}: ${p.y}`);
+    const ceiling=p.x<OFFSET5_UNIT_CENTERS[0]-.65?1.90:1.75; // uploaded photos show an inclined receiving table upstream of PU1
+    assert.ok(p.y>.42&&p.y<ceiling,`sheet path leaves transport corridor at sample ${i}: ${p.y}`);
     assert.ok(Math.abs(p.z)<.001,'sheet centerline must remain centered between OS and DS');
     previous=p.x;
     for(let u=0;u<8;u++){

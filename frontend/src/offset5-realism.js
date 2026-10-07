@@ -974,7 +974,7 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       inkRollerCount:this.inkSurfaces.length,
       dampeningRollerSurfaceCount:this.dampeningSurfaces?.length||0,
       rollerSurfacePolicy:'IMG_2777_ACTUAL_TABLE_FOR_1_19_A_D_FR__NO_GENERIC_RILSAN_STEEL_SWAPS',
-      openUpperDeckPolicy:'V404_V408_PHOTO_LOCK__NO_SOLID_PU_TOP__GREEN_DUCT_ROLL_REMAINS_GREEN',
+      openUpperDeckPolicy:'V348_UPLOADED_PHOTOS__RECESSED_DARK_FOUNTAIN__OPEN_ATTACHED_SERVICE_HARDWARE',
       dampeningRepresentation:'SUBTLE_ROLLER_FILM_ONLY__NO_FLOATING_WATER_PARTICLES',
       printRepresentation:'PROGRESSIVE_TRANSVERSE_COLOUR_BANDS_PER_PU_DEMO',
       cylinderMotionPolicy:'SAME_STRAIGHT_PRINT_DIRECTION_ALL_PU_CONTACT_PAIRS_COUNTER_ROTATE',

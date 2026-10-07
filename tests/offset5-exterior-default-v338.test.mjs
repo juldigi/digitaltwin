@@ -14,7 +14,7 @@ test('V338 Offset 5 defaults to exterior and reveals interior only on request',(
    assert.ok(internals.every(m=>m.visible===on));
    for(let i=0;i<8;i++){
     const green=t.findNode(`press-${i}-ink-fountain-roller-body`);
-    assert.ok(green.children.some(m=>m.isMesh&&m.visible),'photo-grounded exterior green roller remains');
+    assert.ok(green.children.some(m=>m.isMesh&&m.visible),'photo-grounded exterior recessed duct roller remains');
    }
   };
   check(false);

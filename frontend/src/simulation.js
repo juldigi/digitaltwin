@@ -21,9 +21,9 @@ function pathPoints(){
   const pts=[
     new THREE.Vector3(D.feederCenterX-.58,1.37,0),
     new THREE.Vector3(D.feederCenterX-.16,1.50,0),
-    new THREE.Vector3(D.feederCenterX+.38,1.49,0),
-    new THREE.Vector3(D.feedBoardCenterX-.48,1.40,0),
-    new THREE.Vector3(D.feedBoardCenterX+.28,1.39,0),
+    new THREE.Vector3(D.feederCenterX+.38,1.78,0),
+    new THREE.Vector3(D.feedBoardCenterX-.48,1.76,0),
+    new THREE.Vector3(D.feedBoardCenterX+.28,1.52,0),
     new THREE.Vector3(OFFSET5_UNIT_CENTERS[0]-.54,1.26,0)
   ];
   OFFSET5_UNIT_CENTERS.forEach((cx,i)=>{

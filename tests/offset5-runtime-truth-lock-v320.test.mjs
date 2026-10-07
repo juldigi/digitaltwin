@@ -52,14 +52,14 @@ test('V320 truth lock fails closed when a stale or regressed Offset 5 PU is inje
  }finally{t.dispose();}
 });
 
-test('V320 truth lock detects loss of the photo-locked green duct roller',()=>{
+test('V320 truth lock detects loss of the photo-derived recessed duct roller',()=>{
  const t=createMachineTemplate('offset5');
  try{
   const duct=t.findNode('press-0-ink-fountain-roller-body');
   duct.traverse(o=>{if(o.isMesh)delete o.userData.offset5InkDuctRollPhotoLocked;});
   const audit=validateOffset5PilotTemplate(t);
   assert.equal(audit.valid,false);
-  assert.ok(audit.errors.some(e=>e.code==='PU_GREEN_DUCT_ROLL'&&e.detail===1));
+  assert.ok(audit.errors.some(e=>e.code==='PU_FOUNTAIN_PHOTO_SHAPE'&&e.detail===1));
  }finally{t.dispose();}
 });
 
