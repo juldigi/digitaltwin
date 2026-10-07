@@ -26,7 +26,7 @@ test('V338 Offset 5 defaults to exterior and reveals interior only on request',(
  }finally{t.dispose();}
 });
 
-test('V340 actual Offset 5 start handler opens interior and records restoration ownership',()=>{
+test('Offset 5 start handler preserves the requested exterior or interior mode',()=>{
  const app=readFileSync('frontend/src/app.js','utf8');
  const body=app.slice(app.indexOf('function startPrintingSimulation(){'),app.indexOf('function pausePrintingSimulation(){'));
  for(const interior of [false,true]){
@@ -40,7 +40,23 @@ test('V340 actual Offset 5 start handler opens interior and records restoration 
     isInteriorOpen:()=>interior,ensureMachineInspectionContext:()=>true,enableExteriorOpen(){t.setExteriorOpen(true);},
     updateSimulationPanel:noop,setActiveTaxonomyId:noop,setExplodeLevel:noop,renderPanel:noop,requestAnimationFrame:noop,toast:noop};
    vm.runInNewContext(`${body};startPrintingSimulation();`,context);
-   assert.equal(t.exteriorOpen,true);assert.equal(inkFlow,true);assert.equal(context.simulationOwnsExterior,!interior);
+   assert.equal(t.exteriorOpen,interior);assert.equal(inkFlow,interior);assert.equal(context.simulationOwnsExterior,false);
   }finally{t.dispose();}
  }
 });
+
+ test('internal trays and washup/clamp references cannot protrude through exterior PU covers',()=>{
+ const t=createPolishedMachineTemplate('offset5');
+ try{
+  const hidden=t.meshes.filter(m=>m.userData.puInteriorOnly);
+  assert.ok(hidden.length>250);
+  for(const low of [true,false])for(const interior of [false,true,false]){
+   t.setLow(low);t.setExteriorOpen(interior);t.reset();
+   assert.ok(hidden.every(m=>m.visible===interior));
+   for(let i=0;i<8;i++)for(const suffix of ['plate-clamp','dampening-pan','washup','sheet-guides']){
+    const meshes=[];t.findNode(`press-${i}-${suffix}`).traverse(m=>{if(m.isMesh)meshes.push(m);});
+    assert.ok(meshes.length&&meshes.every(m=>m.userData.puInteriorOnly&&m.visible===interior));
+   }
+  }
+ }finally{t.dispose();}
+ });
