@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import {applyAuthoredSurface,authoredSurface} from './render/material-library.js';
 import {applyMachineSurfaceDetail} from './render/surface-detail.js';
+import {applyRoundComponentFidelity} from './geometry/round-components.js';
 
 const finiteNumber=v=>Number.isFinite(v);
 const finiteVector=v=>v&&finiteNumber(v.x)&&finiteNumber(v.y)&&finiteNumber(v.z);
@@ -147,6 +148,7 @@ export function applyMachinePresentationPolish(template,key=''){
  preserveInspectionMaterials(template);
  preserveCutawayQuality(template);
  applyMachineSurfaceDetail(template);
+ applyRoundComponentFidelity(template);
  return template;
 }
 
