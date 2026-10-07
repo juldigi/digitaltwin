@@ -52,7 +52,7 @@ export const OFFSET5_PILOT_RUNTIME_CONTRACT=Object.freeze({
  realismPack:'OFFSET5_CD102_8L_CUSTOM_INSTALLED_REALITY_R6_ACTUAL_PU_DIAGRAM',
  dimensionLock:'BMJ_CUSTOM_INSTALLED_DIMENSIONS_DO_NOT_NORMALIZE_TO_GENERIC_CD102',
  printingUnitCount:8,
- openTopPolicy:'V404_V408_OPEN_UPPER_DECK__ROUNDED_OPERATOR_CABINET__SAME_PHOTO_GROUNDED_SHELL_ALL_EIGHT_PU'
+ openTopPolicy:'V348_UPLOADED_PHOTOS__RECESSED_DARK_FOUNTAIN__ROUNDED_CABINET_AND_CLIPPED_TREADS'
 });
 
 export function validateOffset5PilotTemplate(template,{throwOnError=false}={}){
@@ -77,8 +77,8 @@ export function validateOffset5PilotTemplate(template,{throwOnError=false}={}){
    if(ink.userData?.openInkBed!==true||ink.userData?.solidInkEnclosure!==false)fail('PU_INK_BAY',i+1);
    if(openBay.userData?.normalStateVisible!==true)fail('PU_OPEN_BAY_VISIBLE',i+1);
    if(brand.userData?.brandText!=='HEIDELBERG Speedmaster')fail('PU_BRAND',i+1);
-   let green=false;duct.traverse?.(o=>{if(o.isMesh&&o.userData?.offset5InkDuctRollPhotoLocked)green=true;});
-   if(!green)fail('PU_GREEN_DUCT_ROLL',i+1);
+   let photoDuct=false;duct.traverse?.(o=>{if(o.isMesh&&o.userData?.offset5InkDuctRollPhotoLocked&&o.material?.color?.getHex()===template.palette.rubber&&o.position.y<2.55)photoDuct=true;});
+   if(!photoDuct)fail('PU_FOUNTAIN_PHOTO_SHAPE',i+1);
    const verifyRoller=(nodeId,spec,kind)=>{
     const node=template.findNode?.(nodeId),mesh=node?.children?.find?.(o=>o.isMesh);
     if(!node||!mesh){fail('PU_'+kind+'_ROLLER_MISSING',`${i+1}:${spec.code}`);return;}
@@ -136,7 +136,7 @@ export function validateOffset5PilotSimulation(simulation,template,{throwOnError
   if(state.inkRepresentation!=='THIN_ROLLER_FILM_ONLY_NO_FREE_FLOATING_DROPLETS'||state.inkFlowCount!==0)fail('INK_VISUAL_BOUNDARY',state.inkRepresentation+'|'+state.inkFlowCount);
   if(state.dampeningRepresentation!=='SUBTLE_ROLLER_FILM_ONLY__NO_FLOATING_WATER_PARTICLES')fail('DAMPENING_VISUAL_BOUNDARY',state.dampeningRepresentation);
   if(state.printRepresentation!=='PROGRESSIVE_TRANSVERSE_COLOUR_BANDS_PER_PU_DEMO')fail('PRINT_REPRESENTATION',state.printRepresentation);
-  if(state.openUpperDeckPolicy!=='V404_V408_PHOTO_LOCK__NO_SOLID_PU_TOP__GREEN_DUCT_ROLL_REMAINS_GREEN')fail('OPEN_UPPER_DECK_POLICY',state.openUpperDeckPolicy);
+  if(state.openUpperDeckPolicy!=='V348_UPLOADED_PHOTOS__RECESSED_DARK_FOUNTAIN__OPEN_ATTACHED_SERVICE_HARDWARE')fail('OPEN_UPPER_DECK_POLICY',state.openUpperDeckPolicy);
   if(state.nominalSheetsPerHour!==15000)fail('NOMINAL_SPEED_REFERENCE',state.nominalSheetsPerHour);
  }
  const result=Object.freeze({valid:errors.length===0,errors:Object.freeze(errors),contract:OFFSET5_PILOT_RUNTIME_CONTRACT});

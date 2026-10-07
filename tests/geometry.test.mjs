@@ -188,8 +188,8 @@ test('PU1 preserves the photo-locked open upper deck and visible duct roller wit
  assert.equal(openBay.userData.normalStateVisible,true);
  assert.ok(new THREE.Box3().setFromObject(bridge).max.y<2.9,'PU1 bridge is vertically exaggerated');
  const visibleDuct=duct.children.find(o=>o.isMesh);
- assert.ok(visibleDuct,'PU1 visible green duct roller is missing');
- assert.equal(visibleDuct.material.color.getHex(),t.palette.photoRollerGreen);
+ assert.ok(visibleDuct,'PU1 recessed dark duct roller is missing');
+ assert.equal(visibleDuct.material.color.getHex(),t.palette.rubber);
  const body=t.findNode('press-0-frame');
  assert.equal(body.userData.fullDepthTopBeam,false,'solid full-depth top beam regression returned');
  t.dispose();

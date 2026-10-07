@@ -29,15 +29,47 @@ const isPuInteriorMesh=m=>Boolean(m.userData.actualDiagramSource)||/^(?:transfer
 export class OffsetMachineTemplate {
   constructor(){
     this.root=new THREE.Group();this.root.name='MACHINE-OFFSET5';
-    this.root.userData={assetId:'MACHINE-OFFSET5',...PHOTO_RECONSTRUCTION,orientation:ORIENTATION,taxonomyVersion:'offset5-taxonomy-v18',machineEnvelope:OFFSET5_DIMENSIONS,dimensionAudit:offset5DimensionAudit(),printingUnitReality:OFFSET5_ACTUAL_ROLLER_DIAGRAM,rollerEvidencePolicyRevision:OFFSET5_ROLLER_EVIDENCE_POLICY.revision,rollerEvidenceConflictCount:OFFSET5_ROLLER_EVIDENCE_POLICY.knownConflicts.length,rollerEvidenceConflictRule:OFFSET5_ROLLER_EVIDENCE_POLICY.conflictRule,printingUnitExteriorPolicy:'V404_V408_OPEN_UPPER_DECK__ROUNDED_OPERATOR_CABINET__SAME_PHOTO_GROUNDED_SHELL_ALL_EIGHT_PU',photoLockExteriorBaseline:'V404_V405_V408',openUpperDeck:true,solidPrintingUnitTopCover:false};
+    this.root.userData={assetId:'MACHINE-OFFSET5',...PHOTO_RECONSTRUCTION,orientation:ORIENTATION,taxonomyVersion:'offset5-taxonomy-v18',machineEnvelope:OFFSET5_DIMENSIONS,dimensionAudit:offset5DimensionAudit(),printingUnitReality:OFFSET5_ACTUAL_ROLLER_DIAGRAM,rollerEvidencePolicyRevision:OFFSET5_ROLLER_EVIDENCE_POLICY.revision,rollerEvidenceConflictCount:OFFSET5_ROLLER_EVIDENCE_POLICY.knownConflicts.length,rollerEvidenceConflictRule:OFFSET5_ROLLER_EVIDENCE_POLICY.conflictRule,printingUnitExteriorPolicy:'V348_UPLOADED_PHOTOS__RECESSED_DARK_FOUNTAIN__ROUNDED_CABINET_AND_CLIPPED_TREADS',photoLockExteriorBaseline:'V404_V405_V408',openUpperDeck:true,solidPrintingUnitTopCover:false};
     this.parts=[];this.nodes=[];this.meshes=[];this.auxVisuals=[];this.geometries=new Map();this.materials=new Map();this.lineMaterials=new Map();this.textures=[];this.ghosted=false;this.exteriorOpen=false;
     this.palette={graphite:0x30383d,black:0x151b20,silver:0xaeb8b8,steel:0x889598,chromium:0xcbd3d5,plastic:0xb9c0bc,light:0xd1d4c9,paper:0xeee9d5,rubber:0x20252a,photoRollerGreen:0x3f6f3b,inkFilmCyan:0x00a9d8,inkFilmMagenta:0xd40072,inkFilmYellow:0xf1c40f,inkFilmBlack:0x161616,inkFilmOrange:0xf07818,inkFilmGreen:0x1f9d55,inkFilmPurple:0x7442a8,inkFilmNeutral:0x4d5660,rollerWhite:0xe8e7df,rollerRed:0xc4473f,rollerYellow:0xe4bf4e,rollerBlue:0x355d91,glass:0x23333a,red:0xb33c32,yellow:0xe2b541,blue:0x243e70};
-    this.build();this.alignOperatorSide();this.enrichV122Feeder();this.batchMeshes();this.tagAdaptiveDetails();
+    this.build();this.alignOperatorSide();this.enrichV122Feeder();this.refineUploadedPhotosV348();this.batchMeshes();this.tagAdaptiveDetails();
     this.taxonomy=OFFSET5_TAXONOMY;this.taxonomyById=TAXONOMY_BY_ID;
     this.original=this.parts.map(p=>p.position.clone());
     for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}
     OffsetMachineTemplate.prototype.setExteriorOpen.call(this,false);
     this.root.updateMatrixWorld(true);
+  }
+  refineUploadedPhotosV348(){
+    const photos=Array.from({length:16},(_,i)=>`Offset5.zip/IMG_${2463+i}.HEIC`);
+    Object.assign(this.root.userData,{actualPhotoShapeRevision:'V348',actualPhotoShapeSources:photos,photoShapeBoundary:'EXTERIOR_PHOTO_PROPORTIONS__CUSTOM_MODULE_DIMENSIONS_UNCHANGED'});
+    const board=this.findNode('feed-board');
+    this.root.updateMatrixWorld(true);
+    const inverse=new THREE.Matrix4(),point=new THREE.Vector3(),D=OFFSET5_DIMENSIONS.layout;
+    board.traverse(mesh=>{
+      if(!mesh.isMesh||mesh.isInstancedMesh)return;
+      const geo=mesh.geometry.clone(),position=geo.attributes.position;
+      inverse.copy(mesh.matrixWorld).invert();let changed=false;
+      for(let i=0;i<position.count;i++){
+        point.fromBufferAttribute(position,i).applyMatrix4(mesh.matrixWorld);
+        if(point.y<1.20)continue; // move the entire rounded deck shoulder together, avoiding torn fillets
+        const localX=(point.x-D.feedBoardCenterX)/board.scale.x;
+        point.y+=Math.max(0,.42*(.5-localX));
+        point.applyMatrix4(inverse);position.setXYZ(i,point.x,point.y,point.z);changed=true;
+      }
+      if(changed){position.needsUpdate=true;geo.computeVertexNormals();geo.computeBoundingBox();geo.computeBoundingSphere();mesh.geometry=geo;this.geometries.set('v348-ramp:'+mesh.uuid,geo);mesh.userData.photoFeedboardRamp=true;}else geo.dispose();
+    });
+    Object.assign(board.userData,{sourceFiles:['Offset5.zip/IMG_2468.HEIC','Offset5.zip/IMG_2470.HEIC'],photoRampRise:.42,photoRampDirection:'DOWN_TOWARD_PU1',photoRampDownstreamHeight:1.30});
+    for(let i=0;i<8;i++){
+      const top=this.findNode(`press-${i}-top-deck`);
+      top.userData.sourceFiles=['Offset5.zip/IMG_2471.HEIC','Offset5.zip/IMG_2472.HEIC'];
+      // Attached vertical hinge brackets and U handle visible above the open deck.
+      for(const z of [-.70,.70])this.box(top,[.065,.32,.065],[-.32,2.78,z],'graphite',.008);
+      this.cylinder(top,.025,1.46,[-.32,2.64,0],'graphite','z');
+      this.tube(top,[[-.32,2.65,.57],[-.32,2.94,.57],[-.32,3.00,.35],[-.32,2.94,.13],[-.32,2.65,.13]],.018,'black');
+      const duct=this.findNode(`press-${i}-ink-fountain-roller`);duct.userData.sourceFiles=top.userData.sourceFiles;
+      const cover=this.findNode(`press-${i}-cover`);cover.userData.sourceFiles=['Offset5.zip/IMG_2466.HEIC'];
+      cover.userData.photoLockBaseline='V348_BROAD_SILVER_DOOR_DARK_CONTROL_SEAM';
+    }
   }
   alignOperatorSide(){
     // IMG_2388/2391/2392 establish walkway, controls, curved covers and steps on -Z.
@@ -109,9 +141,9 @@ export class OffsetMachineTemplate {
   }
   // Profile in X/Z extruded vertically: curved front side cover, as in IMG_1627/28.
   shell(g,center,width,height,depth,side=1){
-    const s=new THREE.Shape();s.moveTo(-width/2,-depth/2);s.lineTo(width/2,-depth/2);s.lineTo(width/2,depth*.1);s.quadraticCurveTo(width*.38,depth*.8,-width/2,depth*.5);s.closePath();
+    const s=new THREE.Shape();s.moveTo(-width/2,-depth/2);s.lineTo(width/2,-depth/2);s.lineTo(width/2,0);s.quadraticCurveTo(0,depth*.85,-width/2,0);s.closePath();
     const key='shell:'+width+':'+height+':'+depth;
-    return this.markExteriorCover(this.mesh(g,()=>{const geo=new THREE.ExtrudeGeometry(s,{depth:height,steps:1,bevelEnabled:true,bevelSegments:2,bevelSize:.025,bevelThickness:.025,curveSegments:8});geo.rotateX(-Math.PI/2);geo.translate(0,height*0,0);return geo;},key,'silver',center,[0,side===1?Math.PI:0,0]));
+    return this.markExteriorCover(this.mesh(g,()=>{const geo=new THREE.ExtrudeGeometry(s,{depth:height,steps:1,bevelEnabled:true,bevelSegments:2,bevelSize:.025,bevelThickness:.025,curveSegments:24});geo.rotateX(-Math.PI/2);geo.translate(0,height*0,0);return geo;},key,'silver',center,[0,side===1?Math.PI:0,0]));
   }
   grille(g,pos,width,height,axis='x'){
     const [x,y,z]=pos,cover=mesh=>this.markExteriorCover(mesh);
@@ -139,7 +171,7 @@ export class OffsetMachineTemplate {
       for(const dy of [-span/2,span/2])this.cylinder(g,.012,offset*2,[x,y+dy,z],'steel','x');
     }
   }
-  brandDecal(g,pos){
+  brandDecal(g,pos,width,depth){
     g.userData.brandText='HEIDELBERG Speedmaster';g.userData.brandFace='OPERATOR_SIDE_LOCAL_POSITIVE_Z__MIRRORED_TO_WORLD_NEGATIVE_Z';
     if(typeof document==='undefined')return null;
     const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=256;
@@ -150,7 +182,11 @@ export class OffsetMachineTemplate {
     const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;texture.needsUpdate=true;this.textures.push(texture);
     const material=new THREE.MeshBasicMaterial({map:texture,transparent:true,depthWrite:false,side:THREE.DoubleSide,toneMapped:false});
     const key=g.userData.nodeId+':brand';this.materials.set(key,material);
-    const geoKey='brand:heidelberg-speedmaster:.62:.16';if(!this.geometries.has(geoKey))this.geometries.set(geoKey,new THREE.PlaneGeometry(.62,.16));
+    const geoKey='brand:heidelberg-speedmaster:.62:.16:'+width+':'+depth;if(!this.geometries.has(geoKey)){
+      const geometry=new THREE.PlaneGeometry(.62,.16,24,1),p=geometry.attributes.position;
+      for(let i=0;i<p.count;i++){const x=p.getX(i);p.setZ(i,depth*.425*(1-(2*x/width)**2)+.031);}
+      geometry.computeVertexNormals();this.geometries.set(geoKey,geometry);
+    }
     const mesh=new THREE.Mesh(this.geometries.get(geoKey),material);mesh.position.set(...pos);mesh.renderOrder=20;
     mesh.userData={assetId:'MACHINE-OFFSET5',ownerId:g.userData.nodeId,exteriorCover:true,brandText:'HEIDELBERG Speedmaster'};
     g.add(mesh);this.meshes.push(mesh);return mesh;
@@ -169,13 +205,25 @@ export class OffsetMachineTemplate {
     this.box(g,[.30,.34,.08],pos,'light',.018);
     for(let i=0;i<3;i++){const y=pos[1]+.10-i*.10;this.cylinder(g,.039,.014,[pos[0],y,pos[2]+.049],'glass','z');this.box(g,[.006,.027,.006],[pos[0],y,pos[2]+.061],'red');}
   }
-  tread(g,size,pos){
-    this.box(g,size,pos,'steel',.035);
+  tread(g,size,pos,chamfer=false){
+    const cut=chamfer?Math.min(.11,size[0]*.18,size[2]*.18):0;
+    if(cut){
+      const [w,h,d]=size,a=w/2,b=d/2,shape=new THREE.Shape();
+      shape.moveTo(-a+cut,-b);shape.lineTo(a-cut,-b);shape.lineTo(a,-b+cut);shape.lineTo(a,b-cut);shape.lineTo(a-cut,b);shape.lineTo(-a+cut,b);shape.lineTo(-a,b-cut);shape.lineTo(-a,-b+cut);shape.closePath();
+      const plate=this.mesh(g,()=>{const geo=new THREE.ExtrudeGeometry(shape,{depth:h,bevelEnabled:false});geo.rotateX(-Math.PI/2);geo.translate(0,-h/2,0);return geo;},'photo-tread:'+size+':'+cut,'steel',pos);
+      plate.userData.photoTreadChamfer=cut;
+    }else this.box(g,size,pos,'steel',.035);
     // Shared instanced geometry gives actual raised chequer tread without hundreds of draw calls.
     const tileKey='tread-rib';if(!this.geometries.has(tileKey))this.geometries.set(tileKey,new THREE.BoxGeometry(.065,.008,.017));
     const nx=Math.max(1,Math.floor(size[0]/.12)),nz=Math.max(1,Math.floor(size[2]/.12));
-    const m=new THREE.InstancedMesh(this.geometries.get(tileKey),this.material('silver',g),nx*nz),dummy=new THREE.Object3D();let k=0;
-    for(let i=0;i<nx;i++)for(let j=0;j<nz;j++){dummy.position.set(pos[0]-size[0]/2+(i+.5)*size[0]/nx,pos[1]+size[1]/2+.004,pos[2]-size[2]/2+(j+.5)*size[2]/nz);dummy.rotation.y=(i+j)%2?Math.PI/4:-Math.PI/4;dummy.updateMatrix();m.setMatrixAt(k++,dummy.matrix);}
+    const tiles=[];
+    for(let i=0;i<nx;i++)for(let j=0;j<nz;j++){
+      const x=-size[0]/2+(i+.5)*size[0]/nx,z=-size[2]/2+(j+.5)*size[2]/nz;
+      if(cut&&Math.abs(x)+Math.abs(z)>size[0]/2+size[2]/2-cut-.05)continue;
+      tiles.push([x,z,(i+j)%2?Math.PI/4:-Math.PI/4]);
+    }
+    const m=new THREE.InstancedMesh(this.geometries.get(tileKey),this.material('silver',g),tiles.length),dummy=new THREE.Object3D();
+    tiles.forEach(([x,z,r],k)=>{dummy.position.set(pos[0]+x,pos[1]+size[1]/2+.004,pos[2]+z);dummy.rotation.y=r;dummy.updateMatrix();m.setMatrixAt(k,dummy.matrix);});
     m.userData={assetId:'MACHINE-OFFSET5',ownerId:g.userData.nodeId,detail:true};m.receiveShadow=true;g.add(m);this.meshes.push(m);
   }
   batchMeshes(){
@@ -185,7 +233,7 @@ export class OffsetMachineTemplate {
       const batches=new Map();
       for(const mesh of group.children.filter(c=>c.isMesh&&!c.isInstancedMesh&&!c.userData.dynamicRotor)){
         const cover=!!mesh.userData.exteriorCover;
-        const semantic=mesh.userData.dynamicJogger?'dynamicJogger:'+mesh.userData.joggerSide:mesh.userData.uvLamp?'uvLamp':mesh.userData.uvBeam?'uvBeam':mesh.userData.uvWindow?'uvWindow':mesh.userData.uvReflector?'uvReflector':mesh.userData.rotorRoleReference?'rotorRef:'+mesh.userData.rotorRoleReference:'normal';
+        const semantic=mesh.userData.photoTreadChamfer?'photoTreadChamfer':mesh.userData.photoFeedboardRamp?'photoFeedboardRamp':mesh.userData.dynamicJogger?'dynamicJogger:'+mesh.userData.joggerSide:mesh.userData.uvLamp?'uvLamp':mesh.userData.uvBeam?'uvBeam':mesh.userData.uvWindow?'uvWindow':mesh.userData.uvReflector?'uvReflector':mesh.userData.rotorRoleReference?'rotorRef:'+mesh.userData.rotorRoleReference:'normal';
         const key=mesh.material.uuid+':'+(cover?'cover':'structure')+':'+semantic+':'+(mesh.visible?'visible':'hidden');
         if(!batches.has(key))batches.set(key,{material:mesh.material,cover,semantic,visible:mesh.visible,meshes:[]});
         batches.get(key).meshes.push(mesh);
@@ -210,6 +258,7 @@ export class OffsetMachineTemplate {
           mesh.userData.rotorRoleReference=semantic.slice('rotorRef:'.length);mesh.userData.motionBudget='STATIC_REFERENCE_MOBILE';mesh.userData.rotorElementCount=meshes.reduce((sum,m)=>sum+(m.userData.rotorElementCount||1),0);
         }else if(semantic.startsWith('dynamicJogger:')){
           mesh.userData.dynamicJogger=true;mesh.userData.joggerSide=semantic.slice('dynamicJogger:'.length);mesh.userData.joggerElementCount=meshes.length;
+        }else if(semantic==='photoTreadChamfer'){mesh.userData.photoTreadChamfer=Math.min(...meshes.map(m=>m.userData.photoTreadChamfer));mesh.userData.photoTreadCount=meshes.length;
         }else if(semantic!=='normal'){mesh.userData[semantic]=true;mesh.userData.uvElementCount=meshes.reduce((sum,m)=>sum+(m.userData.uvElementCount||1),0);}
         for(const old of meshes){group.remove(old);this.meshes.splice(this.meshes.indexOf(old),1);}group.add(mesh);this.meshes.push(mesh);
       }
@@ -385,8 +434,8 @@ export class OffsetMachineTemplate {
     Object.assign(body.userData,{openUpperFrame:true,fullDepthTopBeam:false,photoLockBaseline:'V404_V408_OPEN_PU_TOP'});
     // Restore the pre-V339 upper-face silhouette; do not extend the transverse
     // guards into the photographed open service deck.
-    this.grille(body,[faceX,1.78,0],1.75,.72);
-    this.grille(body,[-faceX,1.78,0],1.75,.72);
+    this.grille(body,[faceX,2.00,0],1.75,1.04);
+    this.grille(body,[-faceX,2.00,0],1.75,1.04);
     this.markExteriorCover(this.cylinder(body,.050,1.78,[guardX,1.23,0],'rubber'));
     this.markExteriorCover(this.box(body,[.07,.22,1.8],[guardX,.96,0],'graphite',.025));
     for(const z of [-.62,.62])this.markExteriorCover(this.box(body,[.025,.10,.4],[glassX,.98,z],'glass'));
@@ -395,14 +444,14 @@ export class OffsetMachineTemplate {
     // The real photos show a broad silver shoulder cover on PU1; do not replace it with
     // a generated-render style narrow shell. PDF sources do not define this exterior surface.
     this.shell(cover,[0,.48,1.14],frameWidth-.14,2.10,.36,1);
-    this.controls(cover,[i===0?.28:.32,1.43,1.355]);
-    this.box(cover,[i===0?.40:.46,.052,.018],[-.11,1.80,1.36],'graphite',.008);
-    this.box(cover,[i===0?.30:.34,.026,.018],[-.11,1.72,1.36],'black',.005);
+    // IMG_2466: broad silver door face, with controls on the adjacent dark seam.
     const brand=this.markExteriorCover(this.group(g,`press-${i}-operator-brand`,`PU${i+1} · HEIDELBERG Speedmaster operator-door mark`,[0,0,0],[0,.08,.30],sources,'Photo-locked exterior identity on the rounded operator-side cabinet door; typography is a display decal, not an OEM CAD feature.'));
-    this.brandDecal(brand,[0,1.36,1.374]);
+    this.brandDecal(brand,[0,2.04,1.14],frameWidth-.14,.36);
     const operatorDetails=this.markExteriorCover(this.group(g,`press-${i}-operator-details`,`PU${i+1} · operator cover hinges, handle & interlock`,[0,0,0],[0,.14,.82],sources,'Visible cover hardware is reconstructed from the operator-side photographs; interlock internals and switch model remain reference-only.'));
+    this.box(operatorDetails,[.16,.66,.075],[frameWidth/2+.015,1.73,1.11],'graphite',.012);
+    this.controls(operatorDetails,[frameWidth/2+.015,1.73,1.16]);
     for(const y of [1.03,1.63])this.box(operatorDetails,[.055,.12,.035],[-.30,y,1.335],'steel',.008);
-    this.handle(operatorDetails,[.24,1.31,1.36],'z',.24);
+    this.handle(operatorDetails,[-frameWidth/2+.07,1.85,1.30],'z',.58);
     this.box(operatorDetails,[.075,.095,.035],[-.28,1.87,1.34],'black',.008);
     this.fasteners(operatorDetails,[-.04,1.43,1.365],.48,.72,'z');
     const top=this.markExteriorCover(this.group(g,`press-${i}-top-deck`,`${i===0?'PU1':'PU'+(i+1)} · open upper service deck`,[0,0,0],[0,.30,.72],['IMG_1628(2).jpeg','IMG_1628.jpeg','IMG_1970.jpeg','IMG_1971.jpeg'],'V404/V405/V408 actual-photo lock: normal PU state is OPEN on top. No solid hood, roof cassette or closed ink-bed cap is allowed; only attached service rails, pivots and brackets remain.'));
@@ -434,18 +483,18 @@ export class OffsetMachineTemplate {
     if(i<7){
       const clearWidth=Math.max(.48,nextGap-.08);
       // IMG_1662: broad lower approach, compact middle step, then a deep main landing.
-      this.tread(stair,[clearWidth,.10,.72],[stepCenter,.34,1.85]);
+      this.tread(stair,[clearWidth,.10,.72],[stepCenter,.34,1.85],true);
       this.box(stair,[clearWidth-.04,.25,.64],[stepCenter,.165,1.85],'graphite',.018);
-      this.tread(stair,[clearWidth,.10,.48],[stepCenter,.72,1.34]);
+      this.tread(stair,[clearWidth,.10,.48],[stepCenter,.72,1.34],true);
       this.box(stair,[clearWidth-.04,.63,.42],[stepCenter,.355,1.34],'graphite',.018);
       const landing=this.group(stair,`press-${i}-gap-footplate`,`PU${i+1} → PU${i+2} · full-width inter-unit footplate`,[0,0,0],[0,.10,.45],[...sources,'IMG_1662.jpeg'],'Continuous checker-plate landing fills the human access bay. No transverse railing is placed between adjacent printing units.');
       const landingWidth=nextGap;
       this.tread(landing,[landingWidth,.12,2.20],[stepCenter,1.14,0]);
       this.box(landing,[landingWidth-.04,1.08,2.12],[stepCenter,.54,0],'graphite',.020);
       const dsStair=this.markExteriorCover(this.group(g,`press-${i}-drive-steps`,`PU${i+1} → PU${i+2} · drive-side access stair`,[0,0,0],[0,.12,-1.35],[...sources,'IMG_1662.jpeg'],'Drive-side stair mirrors the operator-side lower and middle treads and joins the same full-width landing above the gripper transfer.'));
-      this.tread(dsStair,[clearWidth,.10,.72],[stepCenter,.34,-1.85]);
+      this.tread(dsStair,[clearWidth,.10,.72],[stepCenter,.34,-1.85],true);
       this.box(dsStair,[clearWidth-.04,.25,.64],[stepCenter,.165,-1.85],'graphite',.018);
-      this.tread(dsStair,[clearWidth,.10,.48],[stepCenter,.72,-1.34]);
+      this.tread(dsStair,[clearWidth,.10,.48],[stepCenter,.72,-1.34],true);
       this.box(dsStair,[clearWidth-.04,.63,.42],[stepCenter,.355,-1.34],'graphite',.018);
     }
     const drive=this.markExteriorCover(this.group(g,'press-'+i+'-drive','Drive-side service cover',[0,0,0],[0,.1,-1.15],['IMG_2389(1).jpeg','IMG_2390(1).jpeg','IMG_2395.jpeg'],'Flat service cover and external hose routing are verified from drive-side photographs; the inter-PU stair is modelled separately as a mirror of the operator-side stair.'));
@@ -467,10 +516,10 @@ export class OffsetMachineTemplate {
       this.box(ink,[.12,.18,.10],[.18,2.58,z],'graphite',.012);
     }
     this.box(ink,[.12,.10,1.50],[.42,2.30,0],'graphite',.014);
-    const openBay=this.group(g,`press-${i}-open-ink-bay`,`PU${i+1} · visible open ink duct bay`,[0,0,0],[0,.26,.30],['IMG_1970.jpeg','IMG_1971.jpeg','IMG_1628(2).jpeg'],'Previously accepted BMJ photo-lock: open upper ink bay remains visible in normal state; the visible green service/duct roller is not conflated with numbered rollers 1–19 on IMG_2777.');
+    const openBay=this.group(g,`press-${i}-open-ink-bay`,`PU${i+1} · visible open ink duct bay`,[0,0,0],[0,.26,.30],['IMG_1970.jpeg','IMG_1971.jpeg','IMG_1628(2).jpeg'],'IMG_2471/2472: dark upper fountain and attached guard hardware; the recessed duct roller is distinct from the numbered interior roller diagram.');
     Object.assign(openBay.userData,{photoVerified:true,normalStateVisible:true,openUpperDeck:true});
     const filmKinds=['inkFilmCyan','inkFilmMagenta','inkFilmYellow','inkFilmBlack','inkFilmOrange','inkFilmGreen','inkFilmPurple','inkFilmNeutral'];
-    const film=this.box(openBay,[.145,.018,1.58],[-.155,2.645,0],filmKinds[i%filmKinds.length],.004);
+    const film=this.box(openBay,[.145,.018,1.40],[-.20,2.536,0],filmKinds[i%filmKinds.length],.004);
     film.name='Visible Ink Film Color';Object.assign(film.userData,{visibleInkFilm:true,unit:i+1,jobStateVisualization:true});
     // V408 open-bay side brackets belong structurally to the ink shell; keeping them
     // on the parent lets batching merge them with adjacent supports instead of creating
@@ -568,10 +617,10 @@ export class OffsetMachineTemplate {
     for(const z of [-.64,.64])markDetail(this.cylinder(plateClamp,.042,.035,[.17,1.99,z],'steel','z'));
 
     // Inking: exact designations/nominal diameters from the supplied OEM roller procedure.
-    const fountainRoller=this.group(g,`${id}-ink-fountain-roller`,`${label} · visible green ink-fountain / duct service roller`,[0,0,0],[0,.30,.18],[...photos,'pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'The previously accepted BMJ upper-PU photo lock shows one clearly visible green longitudinal service/duct roller in the open top. The CD102 manual confirms the fountain-roller function; installed diameter remains visual-reference only.');
-    Object.assign(fountainRoller.userData,{photoLockBaseline:'V408_GREEN_VISIBLE_DUCT_ROLL',normalStateVisible:true,diagramIdentityBoundary:'NOT_NUMBERED_AS_1_TO_19_IN_IMG_2777'});
+    const fountainRoller=this.group(g,`${id}-ink-fountain-roller`,`${label} · visible green ink-fountain / duct service roller`,[0,0,0],[0,.30,.18],[...photos,'pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'IMG_2471/2472 supersede the former green exterior proxy: the duct roller is recessed into the dark upper fountain assembly. Colour and dimensions remain photo-derived, not a measured rubber or ink specification.');
+    Object.assign(fountainRoller.userData,{photoLockBaseline:'V348_IMG_2471_2472_RECESSED_DARK_FOUNTAIN',normalStateVisible:true,diagramIdentityBoundary:'NOT_NUMBERED_AS_1_TO_19_IN_IMG_2777'});
     const fountainBody=this.group(fountainRoller,`${id}-ink-fountain-roller-body`,`${label} · visible green duct roller body`,[0,0,0],[0,.08,.10],[...photos,'pdfcoffee.com_cd102pdf-4-pdf-free.pdf']);
-    const visibleDuctRoll=this.cylinder(fountainBody,.135,1.46,[-.015,2.68,0],'photoRollerGreen');visibleDuctRoll.name='Visible Ink Duct Roll';Object.assign(visibleDuctRoll.userData,{offset5InkDuctRollPhotoLocked:true,normalStateVisible:true,silhouetteCritical:true,detail:false});
+    const visibleDuctRoll=this.cylinder(fountainBody,.105,1.46,[-.20,2.43,0],'rubber');visibleDuctRoll.name='Recessed Ink Duct Roll';Object.assign(visibleDuctRoll.userData,{offset5InkDuctRollPhotoLocked:true,normalStateVisible:true,silhouetteCritical:true,detail:false});
     const fountainJournals=this.markServiceDetail(this.group(fountainRoller,`${id}-ink-fountain-roller-journals`,`${label} · ink fountain roller journals`,[0,0,0],[0,.05,-.12],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Service-level journal hardware is kept out of the open-machine overview.'));
     // Journal geometry intentionally omitted from the overview model; the service node remains available for taxonomy.
     const inking=this.group(g,`${id}-inking-train`,`${label} · inking roller train 1–15`,[0,0,0],[0,.68,.25],[...photos,'SMCD102_roller_remove_procedure.pdf'],'Roller numbers 1–15 and distributor rollers A–D follow the supplied OEM topology. Coordinates are fitted inside the photographed housing without volumetric overlap.');
@@ -951,7 +1000,7 @@ export class OffsetMachineTemplate {
     const hood=this.markExteriorCover(this.group(g,'delivery-hood','Delivery upper hood & side enclosure',[0,0,0],[0,.7,0],photos));
     for(const z of [-1.07,1.07])this.box(hood,[1.64,.72,.22],[0,1.95,z],'graphite',.06);
     this.box(hood,[1.62,.16,1.92],[-.02,1.82,0],'graphite',.028);
-    this.box(hood,[1.65,.14,2.28],[0,2.49,0],'light',.03);
+    this.box(hood,[1.65,.14,2.28],[0,2.49,0],'steel',.03);
     this.box(hood,[.18,.80,2.28],[.84,2.00,0],'graphite',.025);
     for(const z of [-.92,.92])this.box(hood,[.065,.71,.41],[.94,2.06,z],'light',.025);
     this.box(hood,[.045,.53,1.40],[.948,2.04,0],'glass',.012);

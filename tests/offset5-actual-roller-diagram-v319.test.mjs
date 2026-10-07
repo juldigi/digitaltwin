@@ -236,11 +236,11 @@ test('V319 keeps all eight PU exteriors on the photo-verified handedness and rem
    let keyKnobs=0;controls.traverse(o=>{if(!o.isMesh)return;if(o.userData?.mechanismRole==='ink-key-knob')keyKnobs+=o.userData.elementCount||1;else if(o.userData?.mechanismRoles?.includes?.('ink-key-knob'))keyKnobs+=o.userData.elementCount||1;});
    assert.equal(keyKnobs,11,`PU${i+1} must expose eleven visible key knobs after geometry batching`);
    const ductMesh=ductBody.children.find(o=>o.isMesh);
-   assert.ok(ductMesh,`PU${i+1} visible green duct roller missing`);
-   assert.equal(ductMesh.material.color.getHex(),m.palette.photoRollerGreen,`PU${i+1} duct roller must preserve the photo-locked green surface`);
-   assert.equal(ductMesh.geometry.parameters.radiusTop,.135,`PU${i+1} green duct roller radius regressed from the accepted V408 baseline`);
-   assert.equal(ductMesh.geometry.parameters.height,1.46,`PU${i+1} green duct roller span regressed from the accepted V408 baseline`);
-   assert.ok(ductMesh.material.roughness>.8,`PU${i+1} green duct roller must read as rubber/service-roll surface`);
+   assert.ok(ductMesh,`PU${i+1} recessed dark duct roller missing`);
+   assert.equal(ductMesh.material.color.getHex(),m.palette.rubber,`PU${i+1} duct roller must follow the uploaded-photo dark fountain`);
+   assert.equal(ductMesh.geometry.parameters.radiusTop,.105,`PU${i+1} recessed duct roller radius regressed from the V348 photo correction`);
+   assert.equal(ductMesh.geometry.parameters.height,1.46,`PU${i+1} recessed duct roller span regressed from the uploaded-photo V348 correction`);
+   assert.ok(ductMesh.material.roughness>.8,`PU${i+1} recessed duct roller must read as rubber/service-roll surface`);
    const coverZ=new THREE.Box3().setFromObject(cover).getCenter(new THREE.Vector3()).z;
    const driveZ=new THREE.Box3().setFromObject(drive).getCenter(new THREE.Vector3()).z;
    assert.ok(coverZ<-.5,`PU${i+1} operator-side cover must remain on world -Z`);
@@ -253,7 +253,7 @@ test('V319 keeps all eight PU exteriors on the photo-verified handedness and rem
   for(let i=0;i<8;i++){
    const duct=m.findNode(`press-${i}-ink-fountain-roller-body`).children.find(o=>o.isMesh);
    const openFilm=m.findNode(`press-${i}-open-ink-bay`).children.find(o=>o.name==='Visible Ink Film Color'||o.userData?.visibleInkFilm);
-   assert.equal(duct.visible,true,`PU${i+1} green duct roller is silhouette-critical and must survive mobile LOD`);
+   assert.equal(duct.visible,true,`PU${i+1} recessed duct roller is silhouette-critical and must survive mobile LOD`);
    assert.equal(openFilm?.visible,true,`PU${i+1} open ink film must survive mobile LOD`);
    for(const id of [`press-${i}-rakel-reference`,`press-${i}-air-blower-ink`,`press-${i}-air-blower-nip`,`press-${i}-water-feed-reference`]){
     const refs=[];m.findNode(id)?.traverse(o=>{if(o.isLine)refs.push(o);});
@@ -266,7 +266,7 @@ test('V319 keeps all eight PU exteriors on the photo-verified handedness and rem
   for(let i=0;i<8;i++){
    assert.equal(m.findNode(`press-${i}-cover`).visible,true,`PU${i+1} exterior cabinet must be present by default`);
    assert.equal(m.findNode(`press-${i}-open-ink-bay`).visible,true,`PU${i+1} open ink bay must remain visible in normal state`);
-   assert.equal(m.findNode(`press-${i}-ink-fountain-roller`).visible,true,`PU${i+1} green duct roller must remain visible in normal state`);
+   assert.equal(m.findNode(`press-${i}-ink-fountain-roller`).visible,true,`PU${i+1} recessed duct roller must remain visible in normal state`);
   }
   m.setExteriorOpen(true);
   for(let i=0;i<8;i++){
@@ -286,7 +286,7 @@ test('V319 simulation uses actual inking/distributor/dampening surfaces while ke
   assert.equal(state.dampeningRollerSurfaceCount,8*5);
   assert.ok(state.rollerDiagramBoundary.includes('DO_NOT_INFER_NIP_PRESSURE_TIMING'));
   assert.equal(state.primaryCylinderDiagramPolicy,'IMG_2777_PLATE_AND_IMPRESSION_SAME_ROTATION_SENSE__BLANKET_OPPOSITE__NO_TIMING_OR_PHASE_CLAIM');
-  assert.equal(state.openUpperDeckPolicy,'V404_V408_PHOTO_LOCK__NO_SOLID_PU_TOP__GREEN_DUCT_ROLL_REMAINS_GREEN');
+  assert.equal(state.openUpperDeckPolicy,'V348_UPLOADED_PHOTOS__RECESSED_DARK_FOUNTAIN__OPEN_ATTACHED_SERVICE_HARDWARE');
   assert.equal(state.rollerContactMotionPolicy,'IMG_2777_CONTACT_GRAPH_COUNTER_ROTATION__SURFACE_SPEED_VISUAL_REFERENCE__NO_SERVICE_TIMING_PHASE_OR_NIP_CLAIM');
   assert.equal(state.rollerEvidencePolicyRevision,'offset5-roller-evidence-policy-v320');
   assert.match(state.rollerEvidenceConflictRule,/INSTALLED_DIAGRAM_WINS/);
@@ -347,7 +347,7 @@ test('V319 simulation uses actual inking/distributor/dampening surfaces while ke
   assert.equal(sim.active,true);
   for(let i=0;i<8;i++){
    const mesh=m.findNode(`press-${i}-ink-fountain-roller-body`).children.find(o=>o.isMesh);
-   assert.equal(mesh.material.color.getHex(),greenBefore[i],`PU${i+1} green duct roller must not be recolored by job-state ink visualization`);
+   assert.equal(mesh.material.color.getHex(),greenBefore[i],`PU${i+1} recessed duct roller must not be recolored by job-state ink visualization`);
   }
   for(const item of sim.dampeningSurfaces)assert.equal(item.material.emissiveIntensity,.035);
   sim.stop();
