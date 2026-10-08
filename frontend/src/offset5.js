@@ -251,6 +251,7 @@ export class OffsetMachineTemplate {
         this.geometries.set('merged:'+group.userData.nodeId+':'+material.uuid+':'+(cover?'cover':'structure')+':'+semantic,merged);
         const mesh=new THREE.Mesh(merged,material);mesh.castShadow=true;mesh.receiveShadow=true;mesh.visible=visible;
         mesh.userData={assetId:'MACHINE-OFFSET5',ownerId:group.userData.nodeId,exteriorCover:cover};
+        const photoUprights=meshes.filter(m=>m.userData.photoCrankedUpright);if(photoUprights.length){mesh.userData.photoCrankedUpright=true;mesh.userData.photoCrankedUprightCount=photoUprights.length;}
         const opticalBarrel=meshes.find(m=>m.userData.inspectionOpticalBarrel);
         if(opticalBarrel){
           mesh.userData.inspectionOpticalBarrel=true;
@@ -527,6 +528,17 @@ export class OffsetMachineTemplate {
     const filmKinds=['inkFilmCyan','inkFilmMagenta','inkFilmYellow','inkFilmBlack','inkFilmOrange','inkFilmGreen','inkFilmPurple','inkFilmNeutral'];
     const film=this.box(openBay,[.145,.018,1.40],[-.20,2.536,0],filmKinds[i%filmKinds.length],.004);
     film.name='Visible Ink Film Color';Object.assign(film.userData,{visibleInkFilm:true,unit:i+1,jobStateVisualization:true});
+    // IMG_1970/1971: the fountain has an inclined metallic liner, not only a
+    // narrow flat colour strip. Keep the liner within the existing PU frame.
+    const liner=this.group(openBay,`press-${i}-fountain-liner`,`${i+1} · inclined fountain liner`,[0,0,0],[0,.10,0],['IMG_1970.jpeg','IMG_1971.jpeg'],'Inclined metallic liner and open fountain are photographed; slope and thickness are photo-derived estimates, not measured OEM dimensions.');
+    const linerPlate=this.box(liner,[.36,.018,1.40],[.015,2.603,0],'chromium',.004);linerPlate.rotation.z=.35;
+    const lip=this.box(liner,[.025,.022,1.40],[-.162,2.549,0],'steel',.004);lip.rotation.z=.35;
+    Object.assign(liner.userData,{geometryEvidence:'PHOTO_OBSERVED__PROPORTIONS_ESTIMATED',sourceFiles:['IMG_1970.jpeg','IMG_1971.jpeg'],normalStateVisible:true});
+    const guard=this.markExteriorCover(this.group(g,`press-${i}-fountain-guard`,`${i+1} · sloped fountain guard and grille`,[0,0,0],[0,.08,0],['IMG_1970.jpeg','IMG_1971.jpeg'],'Photographed dark sloped guard adjacent to the metallic fountain liner; grille rhythm is a visual reconstruction, not a specified slot count.'));
+    const guardPanel=this.markExteriorCover(this.box(guard,[.22,.032,1.46],[.37,2.62,0],'graphite',.012));guardPanel.rotation.z=-.30;
+    // Slots are low-profile lines on the attached guard, never tall floating rails.
+    for(let n=0;n<3;n++){const slot=this.markExteriorCover(this.box(guard,[.009,.007,1.36],[.31+n*.055,2.646-n*.017,0],'black',.002));slot.rotation.z=-.30;}
+    Object.assign(guard.userData,{geometryEvidence:'PHOTO_OBSERVED__PROPORTIONS_ESTIMATED',sourceFiles:['IMG_1970.jpeg','IMG_1971.jpeg'],silhouetteCritical:true});
     // V408 open-bay side brackets belong structurally to the ink shell; keeping them
     // on the parent lets batching merge them with adjacent supports instead of creating
     // eight extra standalone meshes while preserving the same visible bracket geometry.
@@ -928,14 +940,21 @@ export class OffsetMachineTemplate {
     const photos=['IMG_1630.jpeg','IMG_1631.jpeg','IMG_1633.jpeg','IMG_2391(1).jpeg'];
     const g=this.group(this.root,'inspection-bridge','FA-Swan inline inspection bridge',[x,0,0],[.25,.85,0],photos,'Bridge proportions and camera pods follow the actual Focusight/AVT installation visible on Offset 5. Optical specifications and calibration are not inferred.');
     for(const z of [-.86,.86]){
-      this.box(g,[.16,1.48,.18],[0,1.98,z],'light',.025);
+      // IMG_1630: the upright bends upstream at its shoulder, rather than
+      // terminating as a straight square post beneath a horizontal top bar.
+      const upright=this.mesh(g,()=>{
+        const profile=new THREE.Shape();profile.moveTo(-.08,1.24);profile.lineTo(.08,1.24);profile.lineTo(.08,2.40);profile.lineTo(-.16,2.80);profile.lineTo(-.30,2.72);profile.lineTo(-.08,2.36);profile.closePath();
+        const geo=new THREE.ExtrudeGeometry(profile,{depth:.18,bevelEnabled:false,steps:1});geo.translate(0,0,-.09);return geo;
+      },'inspection-photo-cranked-upright','light',[0,0,z]);
+      upright.userData.photoCrankedUpright=true;
       this.box(g,[.23,.12,.28],[0,1.25,z],'graphite',.018);
     }
-    this.box(g,[.18,.16,1.90],[0,2.72,0],'graphite',.024);
-    this.box(g,[.12,.05,1.70],[.01,2.64,0],'light',.014);
+    this.box(g,[.18,.16,1.90],[-.20,2.72,0],'graphite',.024);
+    this.box(g,[.12,.05,1.70],[-.19,2.64,0],'light',.014);
     for(const z of [-.50,.50]){
       const pod=this.group(g,`inspection-camera-${z<0?'a':'b'}`,`Inspection camera pod ${z<0?'A':'B'}`,[0,0,0],[0,.30,z<0?-.45:.45],photos);
-      const box=this.box(pod,[.32,.24,.34],[.05,2.88,z],'graphite',.035);box.rotation.z=-.15;
+      const box=this.box(pod,[.40,.34,.38],[.05,2.88,z],'graphite',.035);box.rotation.z=-.15;
+      this.box(pod,[.24,.065,.16],[-.09,2.745,z],'graphite',.010);
       // IMG_1630 / IMG_1633 show the optical head looking down at the moving sheet.
       // Keep the existing pod position but replace the old horizontal lens proxy with an
       // attached downward barrel + lens. The small Z rotation follows the camera-body pitch.
@@ -945,7 +964,7 @@ export class OffsetMachineTemplate {
       lens.userData.inspectionLens=true;lens.userData.opticalAxis='DOWNWARD_TOWARD_SHEET_PLANE_WITH_SMALL_PROCESS_DIRECTION_TILT';
       lens.userData.sourcePhoto='IMG_1630.jpeg + IMG_1633.jpeg';
       pod.userData.opticalAxisPolicy='PHOTO_VERIFIED_DOWNWARD_TO_SHEET_PLANE';
-      this.box(pod,[.20,.035,.24],[.10,2.98,z],'steel',.008);
+      this.box(pod,[.20,.035,.24],[.10,3.055,z],'steel',.008);
     }
     const lights=this.group(g,'inspection-lighting','Inspection lighting bars',[0,0,0],[0,.25,.45],photos);
     for(const z of [-.42,.42])this.box(lights,[.36,.045,.28],[-.02,2.55,z],'light',.008);
