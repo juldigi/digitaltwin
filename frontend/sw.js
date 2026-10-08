@@ -5,7 +5,7 @@ const RELEASE='222';
 const BUILD_FINGERPRINT='SOURCE';
 const FLEET_CHUNK_COUNT=15;
 const ENTRYPOINTS=[
- './app-shell-v79.css','./flagship-v270.css','./src/app.js','./src/ui-v5.js','./src/experience-v37.js','./src/app-shell-v79.js'
+ './app-shell-v79.css','./flagship-v270.css','./workspace-v354.css','./src/app.js','./src/ui-v5.js','./src/experience-v37.js','./src/app-shell-v79.js'
 ];
 const SHELL=[
  './','./index.html','./config.json','./assets/favicon.svg','./assets/splash-industrial-v79.webp',
@@ -16,7 +16,7 @@ const SHELL=[
  './src/data/foundation-scope.js','./src/data/truth-status.js','./src/data/dwg-fidelity.js',
  './src/data/dimensions-offset5.js','./src/data/confidence.js','./src/data/sources-offset5.js','./src/data/taxonomy-offset5.js',
  './src/data/plant-layout-data.js','./src/data/plant-layout-deep.js','./src/data/plant-actual.js','./src/data/plant-actual-data.js',
- './src/data/machine-registry.js','./src/factory-building.js','./src/utility-routing.js',
+ './src/data/fleet-photo-review-v354.js','./src/data/machine-registry.js','./src/factory-building.js','./src/utility-routing.js',
  './src/data/compressed-air-routes.js','./src/data/ahu-pipe-routes.js','./src/data/ahu-duct-routes.js',
  './src/data/factory-fleet-data.js','./src/data/ipal-photo-evidence-v206.js',
  ...Array.from({length:FLEET_CHUNK_COUNT},(_,i)=>`./src/data/factory-fleet-chunk-${i}.js`),

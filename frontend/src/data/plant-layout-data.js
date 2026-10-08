@@ -61,6 +61,26 @@ export function pickPlantPlanAsset(canvas,layout,clientX,clientY,{radius=16}={})
   }
   return nearest;
 }
+// Declutter text in screen space only. CAD coordinates and hit targets remain
+// authoritative; the selected asset gets its label before lower-priority text.
+export function layoutPlantPlanLabels(rect,layout,{selectedAsset=null,measureText=null}={}){
+  const pt=plantPlanProjection(rect,layout);if(!pt)return [];
+  const size=Math.max(9,Math.min(11,rect.width/95)),labels=[];
+  const place=(text,x,y,selected=false)=>{
+    const fontSize=selected?11:size;
+    const width=Math.min(rect.width-16,measureText?.(text,fontSize)||text.length*fontSize*.56);
+    const left=Math.max(8,Math.min(rect.width-width-8,x)),bottom=Math.max(fontSize+8,Math.min(rect.height-8,y));
+    const box={left:left-3,top:bottom-fontSize-3,right:left+width+3,bottom:bottom+3};
+    if(!selected&&labels.some(label=>box.left<label.box.right&&box.right>label.box.left&&box.top<label.box.bottom&&box.bottom>label.box.top))return;
+    labels.push({text,x:left,y:bottom,fontSize,selected,box});
+  };
+  const selected=(layout.placements||[]).find(asset=>asset.machineId===selectedAsset&&asset.status!=='UNIDENTIFIED');
+  if(selected){const p=pt(selected.x,selected.y);place(String(selected.label||selected.machineId).slice(0,32),p[0]+12,p[1]-8,true);}
+  const priority=text=>/OFFSET|SHEETING|POLAR|AUTOPLATEN|FOLDER|IPAL|RMS|FPS|AHU/i.test(text)?1:0;
+  const source=[...(layout.identifiedLabels||[])].sort((a,b)=>priority(b.text)-priority(a.text));
+  for(const label of source){const p=pt(label.x,label.y),text=String(label.text||'').replace(/\s+/g,' ').trim().slice(0,28);if(text)place(text,p[0]+3,p[1]-3);}
+  return labels;
+}
 export function drawPlantPlan(canvas,layout,{selectedAsset=null}={}){
   if(!canvas||!layout)return;
   const ctx=canvas.getContext?.('2d');if(!ctx)return;
@@ -70,8 +90,9 @@ export function drawPlantPlan(canvas,layout,{selectedAsset=null}={}){
   const pt=plantPlanProjection(rect,layout);if(!pt)return;
   const colors={CAD_REFERENCE:'#315363',WALL:'#91aab5',COLUMN:'#5f8fa5',WINDOW:'#5aa6c8',SECURITY:'#a58d58'};
   for(const batch of layout.referenceBatches){const arr=batch.points;ctx.beginPath();ctx.strokeStyle=colors[batch.semantic]||'#456577';ctx.lineWidth=batch.semantic==='WALL'?1.1:.55;ctx.globalAlpha=batch.semantic==='CAD_REFERENCE'?.48:.9;for(let i=0;i<arr.length;i+=4){const a=pt(arr[i],arr[i+1]),c=pt(arr[i+2],arr[i+3]);ctx.moveTo(a[0],a[1]);ctx.lineTo(c[0],c[1]);}ctx.stroke();}
-  const sourceLabelSize=Math.max(8,Math.min(10.5,rect.width/95));
-  ctx.globalAlpha=1;ctx.font=`${sourceLabelSize}px system-ui`;ctx.fillStyle='#67899a';for(const l of layout.identifiedLabels){const p=pt(l.x,l.y);ctx.fillText(l.text.slice(0,28),p[0]+3,p[1]-3);}
+  const labels=layoutPlantPlanLabels(rect,layout,{selectedAsset,measureText:(text,size)=>{ctx.font=`${size}px system-ui`;return ctx.measureText?.(text)?.width;}});
+  ctx.globalAlpha=1;ctx.fillStyle='#506c7e';
+  for(const label of labels.filter(label=>!label.selected)){ctx.font=`${label.fontSize}px system-ui`;ctx.fillText(label.text,label.x,label.y);}
   if(layout.placements){
     for(const m of layout.placements){
       if(m.status==='UNIDENTIFIED')continue;
@@ -79,7 +100,7 @@ export function drawPlantPlan(canvas,layout,{selectedAsset=null}={}){
       ctx.globalAlpha=1;ctx.fillStyle=selected?'#0b70df':'#147d89';ctx.fillRect?.(p[0]-size/2,p[1]-size/2,size,size);
       if(!selected)continue;
       ctx.beginPath();ctx.arc?.(p[0],p[1],9,0,Math.PI*2);ctx.strokeStyle='#0b70df';ctx.lineWidth=2;ctx.stroke();
-      const label=String(m.label||m.machineId||'Aset terpilih').slice(0,32);ctx.font='700 11px system-ui';ctx.lineWidth=3;ctx.strokeStyle='rgba(255,255,255,.96)';ctx.strokeText?.(label,p[0]+12,p[1]-8);ctx.fillStyle='#0b4f9f';ctx.fillText(label,p[0]+12,p[1]-8);
+      const label=labels.find(label=>label.selected);if(label){ctx.font='700 11px system-ui';ctx.lineWidth=3;ctx.strokeStyle='rgba(255,255,255,.96)';ctx.strokeText?.(label.text,label.x,label.y);ctx.fillStyle='#0b4f9f';ctx.fillText(label.text,label.x,label.y);}
     }
   }
 }

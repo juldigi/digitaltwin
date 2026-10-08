@@ -191,7 +191,29 @@ export const PHOTO_REGISTRY=Object.freeze([
   ['p22','IMG_2395.jpeg','Feeder to printing units','drive-side pile portal, utility cabinet and hose routing','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
   ['p23','IMG_1628(2).jpeg','Printing Unit 1 to downstream units','top view from feeder toward delivery','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
   ['p24','IMG_1662.jpeg','Inter-unit operator access bay','operator side looking through PU gap','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['pzip2463','IMG_2463.HEIC','Offset 5 exterior / access / feed to delivery','Offset5.zip · multi-angle actual view','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['pzip2464','IMG_2464.HEIC','Offset 5 exterior / access / feed to delivery','Offset5.zip · multi-angle actual view','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['pzip2465','IMG_2465.HEIC','Offset 5 exterior / access / feed to delivery','Offset5.zip · multi-angle actual view','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['pzip2466','IMG_2466.HEIC','Offset 5 exterior / access / feed to delivery','Offset5.zip · multi-angle actual view','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['pzip2467','IMG_2467.HEIC','Offset 5 exterior / access / feed to delivery','Offset5.zip · multi-angle actual view','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['pzip2468','IMG_2468.HEIC','Offset 5 exterior / access / feed to delivery','Offset5.zip · multi-angle actual view','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['pzip2469','IMG_2469.HEIC','Offset 5 exterior / access / feed to delivery','Offset5.zip · multi-angle actual view','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['pzip2470','IMG_2470.HEIC','Offset 5 exterior / access / feed to delivery','Offset5.zip · multi-angle actual view','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['pzip2471','IMG_2471.HEIC','Offset 5 exterior / access / feed to delivery','Offset5.zip · multi-angle actual view','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['pzip2472','IMG_2472.HEIC','Offset 5 exterior / access / feed to delivery','Offset5.zip · multi-angle actual view','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['pzip2473','IMG_2473.HEIC','Offset 5 exterior / access / feed to delivery','Offset5.zip · multi-angle actual view','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['pzip2474','IMG_2474.HEIC','Offset 5 exterior / access / feed to delivery','Offset5.zip · multi-angle actual view','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['pzip2475','IMG_2475.HEIC','Offset 5 exterior / access / feed to delivery','Offset5.zip · multi-angle actual view','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['pzip2476','IMG_2476.HEIC','Offset 5 exterior / access / feed to delivery','Offset5.zip · multi-angle actual view','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['pzip2477','IMG_2477.HEIC','Offset 5 exterior / access / feed to delivery','Offset5.zip · multi-angle actual view','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['pzip2478','IMG_2478.HEIC','Offset 5 exterior / access / feed to delivery','Offset5.zip · multi-angle actual view','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['p1657','IMG_1657.jpeg','Drive-side line / feeder / access context','Actual press-room view','orientation_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['p1658','IMG_1658.jpeg','Drive-side line / feeder / access context','Actual press-room view','orientation_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['p1659','IMG_1659.jpeg','Drive-side line / feeder / access context','Actual press-room view','orientation_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['p1660','IMG_1660.jpeg','Drive-side line / feeder / access context','Actual press-room view','orientation_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['p1661','IMG_1661.jpeg','Drive-side line / feeder / access context','Actual press-room view','orientation_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['pwide','E8B95414-5558-4D27-8BDC-A469766E0F9B.jpeg','Press and building context','Longitudinal actual press-room view','orientation_reference',CONFIDENCE.PHOTO_VERIFIED],
   ['p25','IMG_2777.jpeg','Printing Units 1–8','on-machine roller diagram / internal sectional topology','actual_internal_diagram_reference',CONFIDENCE.PHOTO_VERIFIED]
-].map(([id,filename,machineZone,viewDirection,category,confidence])=>Object.freeze({id,filename,machineZone,viewDirection,category,confidence,duplicateOf:null})));
+].map(([id,filename,machineZone,viewDirection,category,confidence])=>Object.freeze({id,filename,machineZone,viewDirection,category,confidence,duplicateOf:filename==='IMG_1628(2).jpeg'?'p09':null})));
 
 export const photoStats=()=>PHOTO_REGISTRY.reduce((s,p)=>{s.uploaded++;if(!p.duplicateOf)s.unique++;s[p.category]=(s[p.category]||0)+1;return s;},{uploaded:0,unique:0,duplicate:0,active_geometry_reference:0,supplementary_reference:0,orientation_reference:0,detail_reference:0});

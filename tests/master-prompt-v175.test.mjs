@@ -30,7 +30,8 @@ test('V175 2D renderer highlights selected asset with larger marker ring and lab
 });
 
 test('V175 2D source labels use readable adaptive text rather than the legacy 6px font',()=>{
- assert.match(renderer,/const sourceLabelSize=Math\.max\(8,Math\.min\(10\.5,rect\.width\/95\)\)/);
+ assert.match(renderer,/const size=Math\.max\(9,Math\.min\(11,rect\.width\/95\)\)/);
+ assert.match(renderer,/layoutPlantPlanLabels\(rect,layout/);
  assert.doesNotMatch(renderer,/ctx\.font='6px system-ui'/);
 });
 

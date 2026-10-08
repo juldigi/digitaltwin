@@ -21,6 +21,6 @@ test('V300 family-reference and blocked notes do not imply serial-specific geome
 
 test('V300 app replaces the generic photo-and-document overclaim with evidence-aware note',()=>{
  const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
- assert.match(app,/machineEvidenceNote\(\{dedicated:genericTruth\.dedicated,simulationAvailable:genericTruth\.simulationAvailable,photoCount:PHOTO_REGISTRY\.length,sourceCount:TECHNICAL_SOURCES\.length\}\)/);
+ assert.match(app,/machineEvidenceNote\(\{dedicated:genericTruth\.dedicated,simulationAvailable:genericTruth\.simulationAvailable,photoCount:photoReviewForObject\(state\?\.asset\?\.asset_id\|\|MACHINE_KEY\)\.uniqueActual,sourceCount:TECHNICAL_SOURCES\.length\}\)/);
  assert.doesNotMatch(app,/'Model dibuat berdasarkan foto dan dokumen mesin yang tersedia\.'/);
 });

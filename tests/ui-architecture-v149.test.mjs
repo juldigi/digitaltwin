@@ -183,7 +183,8 @@ test('V149 evidence status is progressive and source-derived rather than a perma
  assert.doesNotMatch(html,/class="confidence-panel"/);
  assert.match(html,/class="evidence-status"/);
  assert.match(app,/function updateEvidenceStatus/);
- assert.match(app,/Array\.isArray\(PHOTO_REGISTRY\)/);
+ assert.match(app,/const photoReview=photoReviewForObject/);
+ assert.match(app,/const photos=photoReview\.uniqueActual/);
  assert.match(app,/Array\.isArray\(TECHNICAL_SOURCES\)/);
  assert.match(css,/\.evidence-status/);
 });

@@ -22,6 +22,7 @@ import {SHEETING_TAXONOMY,SHEETING_TAXONOMY_BY_ID,sheetingTaxonomyChildren,sheet
 import {SHEETING_PHOTO_REGISTRY,SHEETING_TECHNICAL_SOURCES,sheetingPhotoStats,SHEETING_ORIENTATION} from './data/sources-sheeting.js';
 import {POLAR115_PHOTO_REGISTRY,polar115PhotoStats} from './data/sources-polar115.js';
 import {normalizePhotoRegistry} from './data/photo-evidence.js';
+import {photoReviewForObject} from './data/fleet-photo-review-v354.js';
 import {searchCorpusForMachine} from './data/search-corpus.js';
 import {machineTruthProfile} from './data/machine-truth-profile.js';
 import {machineEvidenceNote} from './data/machine-evidence-note.js';
@@ -114,10 +115,11 @@ applyActiveMachineState();
 function updateEvidenceStatus(){
  const summary=$('#evidence-summary'),detail=$('#evidence-detail');if(!summary||!detail)return;
  const identity=state?.asset?.asset_id||state?.asset?.asset_code||MACHINE_KEY;
- const photos=Array.isArray(PHOTO_REGISTRY)?PHOTO_REGISTRY.length:0,docs=Array.isArray(TECHNICAL_SOURCES)?TECHNICAL_SOURCES.length:0;
+ const photoReview=photoReviewForObject(state?.asset?.asset_id||MACHINE_KEY);
+ const photos=photoReview.uniqueActual,docs=Array.isArray(TECHNICAL_SOURCES)?TECHNICAL_SOURCES.length:0;
  const placement=placementForMachine?.(activeMachineAssetId())||null,truth=assetTruth(state?.asset,{placement,sourceCount:docs});
  summary.textContent=`${readableStatus(truth.dataConfidence)} · ${docs} sumber`;
- detail.innerHTML=`${pair('Identitas mesin atau peralatan',identity||'Belum tersedia')}${pair('Identitas daftar mesin',state?.asset?.asset_id?'Tersedia':'Belum tersedia')}${pair('Status operasi',readableStatus(truth.operatingStatus))}${pair('Nilai kesehatan mesin',truth.healthScore)}${pair('Dasar model 3D',readableStatus(truth.source3D))}${pair('Detail model 3D',readableStatus(truth.detail3D))}${pair('Keandalan data',readableStatus(truth.dataConfidence))}${pair('Posisi',readableStatus(truth.position))}${pair('Foto aktual',photos?photos+' foto':'Belum tersedia')}${pair('Dokumen atau sumber teknis',docs?docs+' sumber':'Belum tersedia')}`;
+ detail.innerHTML=`${pair('Identitas mesin atau peralatan',identity||'Belum tersedia')}${pair('Identitas daftar mesin',state?.asset?.asset_id?'Tersedia':'Belum tersedia')}${pair('Status operasi',readableStatus(truth.operatingStatus))}${pair('Nilai kesehatan mesin',truth.healthScore)}${pair('Dasar model 3D',readableStatus(truth.source3D))}${pair('Detail model 3D',readableStatus(truth.detail3D))}${pair('Keandalan data',readableStatus(truth.dataConfidence))}${pair('Posisi',readableStatus(truth.position))}${pair('Foto aktual',photos?photos+' foto unik':'Belum terpetakan')}${pair('Diagram aktual',photoReview.diagramCount?photoReview.diagramCount+' diagram':'Belum terpetakan')}<p class="photo-review-boundary">${esc(photoReview.boundary)}</p>${pair('Dokumen atau sumber teknis',docs?docs+' sumber':'Belum tersedia')}`;
 }
 function applyMachineShell(){
  const name=IS_OFFSET10?'OFFSET 10':IS_APM2?'APM 2':IS_SHEETING?'SHEETING LEXUS':IS_GENERIC?GENERIC_CONFIG.machine.name:MACHINE_KEY==='offset5'?'OFFSET 5':'Mesin';
@@ -698,7 +700,7 @@ function setView(view){
  const title=$('#notice-title'),note=$('#notice-text');
  if(title&&note){
   title.textContent=view==='factory'?'Informasi denah':'Catatan tampilan';
-  const genericTruth=machineTruthProfile(machineRecordForRoute(MACHINE_KEY)||MACHINE_KEY),genericEvidenceNote=machineEvidenceNote({dedicated:genericTruth.dedicated,simulationAvailable:genericTruth.simulationAvailable,photoCount:PHOTO_REGISTRY.length,sourceCount:TECHNICAL_SOURCES.length});note.textContent=view==='factory'?'Posisi mesin ditampilkan mengikuti denah yang tersedia. Beberapa tinggi bangunan masih berupa perkiraan visual.':(IS_OFFSET10?'Offset 10 direkonstruksi dari dokumen proyek BMJ dan referensi resmi Heidelberg; foto aktual mesin belum tersedia.':IS_APM2?'APM 2 memakai identitas data BMJ dan referensi BOBST SP 102 lama; kode akhiran model dan foto aktual belum tersedia.':IS_SHEETING?'Sheeting mempertahankan acuan visual yang sudah dikoreksi: gulungan (reel) masuk berada di kanan, kertas kontinu (web) bergerak dari kanan ke kiri, lalu melewati unit pemotong (cutter) dan delivery/layboy hingga mencapai tumpukan hasil di kiri.':genericEvidenceNote);
+  const genericTruth=machineTruthProfile(machineRecordForRoute(MACHINE_KEY)||MACHINE_KEY),genericEvidenceNote=machineEvidenceNote({dedicated:genericTruth.dedicated,simulationAvailable:genericTruth.simulationAvailable,photoCount:photoReviewForObject(state?.asset?.asset_id||MACHINE_KEY).uniqueActual,sourceCount:TECHNICAL_SOURCES.length});note.textContent=view==='factory'?'Posisi mesin ditampilkan mengikuti denah yang tersedia. Beberapa tinggi bangunan masih berupa perkiraan visual.':(IS_OFFSET10?'Offset 10 direkonstruksi dari dokumen proyek BMJ dan referensi resmi Heidelberg; foto aktual mesin belum tersedia.':IS_APM2?'APM 2 memakai identitas data BMJ dan referensi BOBST SP 102 lama; kode akhiran model dan foto aktual belum tersedia.':IS_SHEETING?'Sheeting mempertahankan acuan visual yang sudah dikoreksi: gulungan (reel) masuk berada di kanan, kertas kontinu (web) bergerak dari kanan ke kiri, lalu melewati unit pemotong (cutter) dan delivery/layboy hingga mencapai tumpukan hasil di kiri.':genericEvidenceNote);
  }
  renderPanel();redrawPlantPlan();emitDomainState({activeSection:view==='factory'?'factory':'asset',sceneMode:view==='factory'?'factory':'machine'});
 }

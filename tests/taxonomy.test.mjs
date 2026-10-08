@@ -52,7 +52,7 @@ test('coater dryer inspection and delivery are decomposed beyond generic placeho
 });
 
 test('source registry preserves user photos and uses official Heidelberg product information',()=>{
- const stats=photoStats();assert.equal(PHOTO_REGISTRY.length,25);assert.equal(stats.unique,25);assert.equal(stats.actual_internal_diagram_reference,1);
+ const stats=photoStats();assert.equal(PHOTO_REGISTRY.length,47);assert.equal(stats.unique,46);assert.equal(PHOTO_REGISTRY.filter(photo=>photo.duplicateOf).length,1);assert.equal(stats.actual_internal_diagram_reference,1);
  const hd=TECHNICAL_SOURCES.find(s=>s.id==='SRC-HEIDELBERG-CD102');assert.ok(hd);assert.equal(hd.type,'MANUFACTURER_PRODUCT_INFORMATION');assert.match(hd.url,/heidelberg\.com/);
  for(const id of ['SRC-O5-ROLLER-DIAGRAM-IMG2777','SRC-CD102-SERVICE-MANUAL','SRC-CD102-ROLLER-PROCEDURE'])assert.ok(TECHNICAL_SOURCES.some(s=>s.id===id),`missing ${id}`);
  assert.equal(ORIENTATION.feedDirection,'FEEDER_TO_DELIVERY_POSITIVE_X');assert.equal(ORIENTATION.operatorSide,'NEGATIVE_Z');assert.equal(ORIENTATION.driveSide,'POSITIVE_Z');
