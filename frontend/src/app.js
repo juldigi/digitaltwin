@@ -352,8 +352,8 @@ function startPrintingSimulation(){
  if(!engine.isPrintingSimulationActive()){
   const readiness=engine.getPrintingSimulationState?.()||currentSimulationState();
   if(readiness?.blocked||readiness?.available===false){toast(readiness?.blockedReason||'Simulasi proses untuk mesin atau peralatan ini belum tersedia.',true);updateSimulationPanel(readiness);return;}
-  simulationOwnsExterior=MACHINE_KEY!=='offset5'&&!isInteriorOpen();
-  if(MACHINE_KEY!=='offset5')enableExteriorOpen({forceDetail:false});
+  if(MACHINE_KEY==='offset5')simulationOwnsExterior=false;
+  else{simulationOwnsExterior=!isInteriorOpen();enableExteriorOpen({forceDetail:false});}
   engine.setPrintingSimulationInkFlowVisible(MACHINE_KEY!=='offset5'||isInteriorOpen());
   engine.template.ghost(false);engine.isolated=false;engine.clearPartLabels();selectedPart=null;setActiveTaxonomyId(ACTIVE_ROOT);setExplodeLevel(0);
   updateSimulationPanel(engine.startPrintingSimulation());

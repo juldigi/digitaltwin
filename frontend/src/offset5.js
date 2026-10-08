@@ -74,7 +74,7 @@ export class OffsetMachineTemplate {
   tagPrintingInterior(){
     // Interior references must not protrude through the photographed exterior.
     const roots=['cylinder-train','drive-gears','sheet-guides','impression-gripper','gripper-control','dampening','dampening-pan','dampening-form','plate-clamp','inking-train','inking-distribution','register-drives','washup'];
-    for(let i=0;i<8;i++)for(const suffix of roots)this.findNode(`press-${i}-${suffix}`)?.traverse(o=>{if(o.isMesh)o.userData.puInteriorOnly=true;});
+    for(let i=0;i<8;i++)for(const suffix of roots)this.findNode(`press-${i}-${suffix}`)?.traverse(o=>{if(o.isMesh){o.userData.puInteriorOnly=true;delete o.userData.exteriorCover;}});
   }
   alignOperatorSide(){
     // IMG_2388/2391/2392 establish walkway, controls, curved covers and steps on -Z.
