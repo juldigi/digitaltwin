@@ -34,6 +34,10 @@ test('V334 browser-created Offset 5 decals survive component highlighting and re
    assert.ok(mesh.material.isMeshBasicMaterial);
    assert.equal(mesh.material.emissive,undefined);
    assert.ok(mesh.material.map?.isCanvasTexture);
+   const uv=mesh.geometry.attributes.uv,position=mesh.geometry.attributes.position;
+   const left=Array.from({length:position.count},(_,i)=>i).filter(i=>position.getX(i)<-.30);
+   const right=Array.from({length:position.count},(_,i)=>i).filter(i=>position.getX(i)>.30);
+   assert.ok(left.every(i=>uv.getX(i)>.95)&&right.every(i=>uv.getX(i)<.05),'logo UV corrects mirrored operator-side backface');
   }
   const unit=template.findNode('press-0-frame');
   const body=template.meshes.find(mesh=>mesh.material.emissive&&template.contains(unit,mesh));

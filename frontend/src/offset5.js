@@ -24,7 +24,7 @@ export const PHOTO_RECONSTRUCTION = {
 };
 const V=(a)=>new THREE.Vector3(...a);
 const OEM_ROLLER_VISUAL_RADIUS_PER_MM=.00073; // compact Fig.15 topology; nominal diameter remains metadata, not service scale
-const isPuInteriorMesh=m=>Boolean(m.userData.actualDiagramSource)||/^(?:transfer-pu\d+-pu\d+(?:-.*)?|feedboard-infeed-gripper|press-\d+-(?:cylinder-(?:plate|blanket|impression|transfer)-body|gripper-control))$/.test(m.userData.ownerId||'');
+const isPuInteriorMesh=m=>Boolean(m.userData.actualDiagramSource)||Boolean(m.userData.puInteriorOnly)||/^(?:transfer-pu\d+-pu\d+(?:-.*)?|feedboard-infeed-gripper|press-\d+-(?:cylinder-(?:plate|blanket|impression|transfer)-body|gripper-control))$/.test(m.userData.ownerId||'');
 
 export class OffsetMachineTemplate {
   constructor(){
@@ -32,7 +32,7 @@ export class OffsetMachineTemplate {
     this.root.userData={assetId:'MACHINE-OFFSET5',...PHOTO_RECONSTRUCTION,orientation:ORIENTATION,taxonomyVersion:'offset5-taxonomy-v18',machineEnvelope:OFFSET5_DIMENSIONS,dimensionAudit:offset5DimensionAudit(),printingUnitReality:OFFSET5_ACTUAL_ROLLER_DIAGRAM,rollerEvidencePolicyRevision:OFFSET5_ROLLER_EVIDENCE_POLICY.revision,rollerEvidenceConflictCount:OFFSET5_ROLLER_EVIDENCE_POLICY.knownConflicts.length,rollerEvidenceConflictRule:OFFSET5_ROLLER_EVIDENCE_POLICY.conflictRule,printingUnitExteriorPolicy:'V348_UPLOADED_PHOTOS__RECESSED_DARK_FOUNTAIN__ROUNDED_CABINET_AND_CLIPPED_TREADS',photoLockExteriorBaseline:'V404_V405_V408',openUpperDeck:true,solidPrintingUnitTopCover:false};
     this.parts=[];this.nodes=[];this.meshes=[];this.auxVisuals=[];this.geometries=new Map();this.materials=new Map();this.lineMaterials=new Map();this.textures=[];this.ghosted=false;this.exteriorOpen=false;
     this.palette={graphite:0x30383d,black:0x151b20,silver:0xaeb8b8,steel:0x889598,chromium:0xcbd3d5,plastic:0xb9c0bc,light:0xd1d4c9,paper:0xeee9d5,rubber:0x20252a,photoRollerGreen:0x3f6f3b,inkFilmCyan:0x00a9d8,inkFilmMagenta:0xd40072,inkFilmYellow:0xf1c40f,inkFilmBlack:0x161616,inkFilmOrange:0xf07818,inkFilmGreen:0x1f9d55,inkFilmPurple:0x7442a8,inkFilmNeutral:0x4d5660,rollerWhite:0xe8e7df,rollerRed:0xc4473f,rollerYellow:0xe4bf4e,rollerBlue:0x355d91,glass:0x23333a,red:0xb33c32,yellow:0xe2b541,blue:0x243e70};
-    this.build();this.alignOperatorSide();this.enrichV122Feeder();this.refineUploadedPhotosV348();this.batchMeshes();this.tagAdaptiveDetails();
+    this.build();this.alignOperatorSide();this.enrichV122Feeder();this.refineUploadedPhotosV348();this.batchMeshes();this.tagPrintingInterior();this.tagAdaptiveDetails();
     this.taxonomy=OFFSET5_TAXONOMY;this.taxonomyById=TAXONOMY_BY_ID;
     this.original=this.parts.map(p=>p.position.clone());
     for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}
@@ -70,6 +70,11 @@ export class OffsetMachineTemplate {
       const cover=this.findNode(`press-${i}-cover`);cover.userData.sourceFiles=['Offset5.zip/IMG_2466.HEIC'];
       cover.userData.photoLockBaseline='V348_BROAD_SILVER_DOOR_DARK_CONTROL_SEAM';
     }
+  }
+  tagPrintingInterior(){
+    // Interior references must not protrude through the photographed exterior.
+    const roots=['cylinder-train','drive-gears','sheet-guides','impression-gripper','gripper-control','dampening','dampening-pan','dampening-form','plate-clamp','inking-train','inking-distribution','register-drives','washup'];
+    for(let i=0;i<8;i++)for(const suffix of roots)this.findNode(`press-${i}-${suffix}`)?.traverse(o=>{if(o.isMesh){o.userData.puInteriorOnly=true;delete o.userData.exteriorCover;}});
   }
   alignOperatorSide(){
     // IMG_2388/2391/2392 establish walkway, controls, curved covers and steps on -Z.
@@ -185,6 +190,7 @@ export class OffsetMachineTemplate {
     const geoKey='brand:heidelberg-speedmaster:.62:.16:'+width+':'+depth;if(!this.geometries.has(geoKey)){
       const geometry=new THREE.PlaneGeometry(.62,.16,24,1),p=geometry.attributes.position;
       for(let i=0;i<p.count;i++){const x=p.getX(i);p.setZ(i,depth*.425*(1-(2*x/width)**2)+.031);}
+      const uv=geometry.attributes.uv;for(let i=0;i<uv.count;i++)uv.setX(i,1-uv.getX(i));uv.needsUpdate=true;
       geometry.computeVertexNormals();this.geometries.set(geoKey,geometry);
     }
     const mesh=new THREE.Mesh(this.geometries.get(geoKey),material);mesh.position.set(...pos);mesh.renderOrder=20;
@@ -617,9 +623,9 @@ export class OffsetMachineTemplate {
     for(const z of [-.64,.64])markDetail(this.cylinder(plateClamp,.042,.035,[.17,1.99,z],'steel','z'));
 
     // Inking: exact designations/nominal diameters from the supplied OEM roller procedure.
-    const fountainRoller=this.group(g,`${id}-ink-fountain-roller`,`${label} · visible green ink-fountain / duct service roller`,[0,0,0],[0,.30,.18],[...photos,'pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'IMG_2471/2472 supersede the former green exterior proxy: the duct roller is recessed into the dark upper fountain assembly. Colour and dimensions remain photo-derived, not a measured rubber or ink specification.');
+    const fountainRoller=this.group(g,`${id}-ink-fountain-roller`,`${label} · recessed ink-fountain / duct service roller`,[0,0,0],[0,.30,.18],[...photos,'pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'IMG_2471/2472 supersede the former green exterior proxy: the duct roller is recessed into the dark upper fountain assembly. Colour and dimensions remain photo-derived, not a measured rubber or ink specification.');
     Object.assign(fountainRoller.userData,{photoLockBaseline:'V348_IMG_2471_2472_RECESSED_DARK_FOUNTAIN',normalStateVisible:true,diagramIdentityBoundary:'NOT_NUMBERED_AS_1_TO_19_IN_IMG_2777'});
-    const fountainBody=this.group(fountainRoller,`${id}-ink-fountain-roller-body`,`${label} · visible green duct roller body`,[0,0,0],[0,.08,.10],[...photos,'pdfcoffee.com_cd102pdf-4-pdf-free.pdf']);
+    const fountainBody=this.group(fountainRoller,`${id}-ink-fountain-roller-body`,`${label} · recessed duct roller body`,[0,0,0],[0,.08,.10],[...photos,'pdfcoffee.com_cd102pdf-4-pdf-free.pdf']);
     const visibleDuctRoll=this.cylinder(fountainBody,.105,1.46,[-.20,2.43,0],'rubber');visibleDuctRoll.name='Recessed Ink Duct Roll';Object.assign(visibleDuctRoll.userData,{offset5InkDuctRollPhotoLocked:true,normalStateVisible:true,silhouetteCritical:true,detail:false});
     const fountainJournals=this.markServiceDetail(this.group(fountainRoller,`${id}-ink-fountain-roller-journals`,`${label} · ink fountain roller journals`,[0,0,0],[0,.05,-.12],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Service-level journal hardware is kept out of the open-machine overview.'));
     // Journal geometry intentionally omitted from the overview model; the service node remains available for taxonomy.
