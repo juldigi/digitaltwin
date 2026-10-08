@@ -599,10 +599,13 @@ export class OffsetMachineTemplate {
     const damp=this.group(g,`${id}-dampening`,`${label} · Alcolor dampening system`,[0,0,0],[0,.48,-.35],[...photos,...oem],'Roller identities and nominal diameters follow the supplied SM/CD102 roller procedure. Positions are sectional visual coordinates, not nip-setting values.');
     this.markExteriorCover(this.box(damp,[.34,.075,1.50],[-.22,2.06,0],'steel',.025));
     for(const z of [-.72,.72])this.markExteriorCover(this.box(damp,[.18,.28,.06],[-.10,2.17,z],'graphite',.015));
-    const dampPan=this.group(g,`${id}-dampening-pan`,`PU${i+1} · dampening pan, level line & return hose`,[0,0,0],[.34,.24,-.34],[...photos,...oem],'Pan and hose routing are relocated with the OEM Fig. 15 dampening cluster on the right side of the plate cylinder. Chemistry, level and circulation values are not represented.');
-    this.box(dampPan,[.34,.10,1.42],[.72,1.63,0],'steel',.025);
-    this.box(dampPan,[.26,.028,1.30],[.72,1.68,0],'glass',.008);
-    for(const z of [-.64,.64])this.tube(dampPan,[[.73,1.68,z],[.78,1.57,z],[.72,1.46,z]],.014,z<0?'blue':'rubber');
+    const dampPan=this.group(g,`${id}-dampening-pan`,`PU${i+1} · dampening pan functional reference`,[0,0,0],[.34,.24,-.34],[...photos,...oem],'Functional WATER reference only; installed pan shape, mounting and hose routing are not established by the supplied photographs. No proxy geometry is rendered.');
+    // IMG_2777 labels WATER but provides no installed pan shape or hose routing.
+    // The former wide tray projected into the access bay and appeared as a tongue.
+    // Keep the functional taxonomy node; do not fabricate physical CAD from the callout.
+    Object.assign(dampPan.userData,{geometryStatus:'UNVERIFIED_INSTALLED_PAN__NO_PROXY_GEOMETRY',
+      sourceFiles:['IMG_2777.jpeg'],installedShapeVerified:false,
+      note:'WATER callout identifies the function only. Actual pan dimensions, mounting and hose routing are not established by the supplied photographs.'});
     const dampForm=this.group(g,`${id}-dampening-form`,`${label} · dampening roller map 16–19 + FR`,[0,0,0],[.26,.46,-.28],[...photos,'SMCD102_roller_remove_procedure.pdf'],'OEM Fig. 15 topology: dampening rollers sit to the right of the plate cylinder. Nominal diameters are preserved; coordinates are sectional visual references.');
     for(const spec of OFFSET5_DAMPENING_ROLLERS){
       const {code,designation,diameterMM,sectionCenter:pos,materialKind,surface,diagramAlias,crowned=false}=spec;
