@@ -37,7 +37,7 @@ test('V278 fills manufacturer only from identifiable registry/model evidence and
  assert.match(app,/const registryMaker=registryBrand\(registry\),verifiedMaker=registryMaker==='Belum teridentifikasi'\?null:registryMaker/);
  assert.match(app,/manufacturer:verifiedMaker/);
  assert.match(app,/pair\('Identitas daftar mesin',state\?\.asset\?\.asset_id\?'Tersedia':'Belum tersedia'\)/);
- assert.match(app,/pair\('Foto aktual',photos\?photos\+' foto':'Belum tersedia'\)/);
+ assert.match(app,/pair\('Foto aktual',photos\?photos\+' foto unik':'Belum terpetakan'\)/);
  assert.doesNotMatch(app,/Foto aktual atau daftar mesin/);
 });
 

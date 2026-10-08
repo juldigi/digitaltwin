@@ -70,7 +70,7 @@ IMG_2518.HEIC memiliki sebagian hasil decode tidak lengkap. Hanya bagian atap/ta
 
 Inventaris bukti V354 meliputi seluruh 41 ID dengan status eksplisit bila tidak ada foto terpetakan. Inspector membedakan foto unik, diagram, dan batas bukti; angka foto tidak lagi mencampur diagram dan alias. Referensi Offset 5 kini memasukkan 16 foto archive dan enam view tambahan.
 
-Workspace baru memusatkan ruang 3D: header datar, identitas konteks tanpa card besar, rail desktop dan bottom navigation mobile konsisten, inspector dengan area konten scroll, typography/contrast seragam, dialogs/search/layers/editor/cards memakai surface yang sama, transport simulasi dua baris compact pada portrait dan satu baris pada desktop/landscape, safe area iPhone dan reduced motion dipertahankan. Mesin, simulation state, navigation events, permission logic dan data layout tidak diubah.
+Workspace baru memusatkan ruang 3D: header datar, identitas konteks tanpa card besar, rail desktop dan bottom navigation mobile konsisten, inspector dengan area konten scroll, typography/contrast seragam, dialogs/search/layers/editor/cards memakai surface yang sama, transport simulasi dua baris compact pada portrait dan satu baris pada desktop/landscape, safe area iPhone dan reduced motion dipertahankan. Label denah 2D kini ditempatkan dengan collision checks dalam koordinat layar; label objek terpilih mendapat prioritas, CAD coordinates dan click targets tidak berubah. Mesin, simulation state, navigation events, permission logic dan data layout tidak diubah.
 
 ## Validasi
 
