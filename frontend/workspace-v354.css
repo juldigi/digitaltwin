@@ -55,7 +55,7 @@ body:not(.light-mode) .workspace,body:not(.light-mode) #viewport,
 html[data-theme="dark"] .workspace,html[data-theme="dark"] #viewport {background:#101721!important}
 .scene-heading {top:18px!important;left:20px!important;right:20px!important;gap:12px}
 .scene-heading>div {
-  max-width:min(540px,calc(100% - 108px))!important;padding:0!important;
+  max-width:min(540px,calc(100% - 156px))!important;padding:0!important;
   border:0!important;background:transparent!important;box-shadow:none!important;
   backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
 }
@@ -63,7 +63,7 @@ html[data-theme="dark"] .workspace,html[data-theme="dark"] #viewport {background
 .scene-heading p {font-size:11px!important;line-height:1.5!important;color:var(--f270-text-2)!important}
 .scene-heading .eyebrow {font-size:8px!important;letter-spacing:.12em!important}
 .scene-context-line {display:none!important}
-.viewport-mode-switch {top:18px!important;right:20px!important;padding:3px!important;border-radius:11px!important;box-shadow:var(--f270-shadow-1)!important}
+.viewport-mode-switch {top:18px!important;right:74px!important;padding:3px!important;border-radius:11px!important;box-shadow:var(--f270-shadow-1)!important}
 .viewport-mode-switch button {min-height:36px!important;min-width:40px!important;border-radius:8px!important;font-size:11px!important}
 .viewport-mode-switch button.active {box-shadow:none!important;background:var(--f270-blue-strong)!important;color:white!important}
 .viewport-zoom {border-radius:12px!important;box-shadow:var(--f270-shadow-1)!important;overflow:hidden}
@@ -182,11 +182,11 @@ button.primary,.primary {border-radius:10px!important;background:var(--f270-blue
   .header-actions {gap:4px!important}
   .header-actions .icon-btn {width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;border:0!important}
   .scene-heading {top:14px!important;left:14px!important;right:14px!important}
-  .scene-heading>div {max-width:calc(100% - 102px)!important;padding:0!important}
+  .scene-heading>div {max-width:calc(100% - 154px)!important;padding:0!important}
   .scene-heading h1 {font-size:17px!important;line-height:1.25!important;margin:0 0 4px!important}
   .scene-heading p {font-size:10px!important;line-height:1.5!important;max-width:240px}
   .scene-heading .eyebrow {display:none!important}
-  .viewport-mode-switch {top:12px!important;right:12px!important;bottom:auto!important}
+  .viewport-mode-switch {top:12px!important;right:64px!important;bottom:auto!important}
   .viewport-mode-switch button {min-height:38px!important;min-width:37px!important}
   .scene-bottom {left:12px!important;right:12px!important;bottom:12px!important;padding:4px!important}
   .view-switch button {flex:1 0 66px!important;min-width:66px!important;min-height:44px!important;padding:6px!important;font-size:9px!important}
