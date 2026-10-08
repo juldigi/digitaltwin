@@ -953,7 +953,8 @@ export class OffsetMachineTemplate {
     this.box(g,[.12,.05,1.70],[-.19,2.64,0],'light',.014);
     for(const z of [-.50,.50]){
       const pod=this.group(g,`inspection-camera-${z<0?'a':'b'}`,`Inspection camera pod ${z<0?'A':'B'}`,[0,0,0],[0,.30,z<0?-.45:.45],photos);
-      const box=this.box(pod,[.40,.34,.38],[.05,2.88,z],'graphite',.035);box.rotation.z=-.15;
+      const casing=this.group(pod,`inspection-camera-${z<0?'a':'b'}-casing`,'Inspection camera casing',[0,0,0],[0,.08,0],photos,'Photographed camera housing proportions; casing is mounted above its exposed downward optical lens.');
+      const box=this.box(casing,[.40,.34,.38],[.05,2.95,z],'graphite',.035);box.rotation.z=-.15;
       this.box(pod,[.24,.065,.16],[-.09,2.745,z],'graphite',.010);
       // IMG_1630 / IMG_1633 show the optical head looking down at the moving sheet.
       // Keep the existing pod position but replace the old horizontal lens proxy with an
@@ -964,7 +965,7 @@ export class OffsetMachineTemplate {
       lens.userData.inspectionLens=true;lens.userData.opticalAxis='DOWNWARD_TOWARD_SHEET_PLANE_WITH_SMALL_PROCESS_DIRECTION_TILT';
       lens.userData.sourcePhoto='IMG_1630.jpeg + IMG_1633.jpeg';
       pod.userData.opticalAxisPolicy='PHOTO_VERIFIED_DOWNWARD_TO_SHEET_PLANE';
-      this.box(pod,[.20,.035,.24],[.10,3.055,z],'steel',.008);
+      this.box(pod,[.20,.035,.24],[.10,3.125,z],'steel',.008);
     }
     const lights=this.group(g,'inspection-lighting','Inspection lighting bars',[0,0,0],[0,.25,.45],photos);
     for(const z of [-.42,.42])this.box(lights,[.36,.045,.28],[-.02,2.55,z],'light',.008);

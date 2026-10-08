@@ -29,6 +29,11 @@ test('inspection shoulder and part taxonomy follow attached camera hardware rath
  const t=createPolishedMachineTemplate('offset5');
  try{
   let count=0;t.findNode('inspection-bridge').traverse(o=>{if(o.userData.photoCrankedUpright)count+=o.userData.photoCrankedUprightCount||1;});assert.equal(count,2);
+  for(const side of ['a','b']){
+   const pod=t.findNode(`inspection-camera-${side}`),casing=t.findNode(`inspection-camera-${side}-casing`),lens=pod.children.find(o=>o.userData.inspectionLens);
+   const bounds=new THREE.Box3().setFromObject(casing),lensCentre=lens.getWorldPosition(new THREE.Vector3());
+   assert.ok(lensCentre.y<bounds.min.y,'downward lens must not be buried inside the camera casing');
+  }
   const camA=TAXONOMY_BY_ID.get('O5.INSPECTION.CAMERA.B1.P1'),camB=TAXONOMY_BY_ID.get('O5.INSPECTION.CAMERA.B1.P2');
   assert.deepEqual(camA.meshRefs,['inspection-camera-a']);assert.deepEqual(camB.meshRefs,['inspection-camera-b']);
   for(const n of [...TAXONOMY_BY_ID.values()].filter(n=>n.id.startsWith('O5.INSPECTION.'))){
