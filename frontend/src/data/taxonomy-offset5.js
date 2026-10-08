@@ -3,7 +3,17 @@ import {OFFSET5_INKING_ROLLERS,OFFSET5_INK_DISTRIBUTORS,OFFSET5_DAMPENING_ROLLER
 
 const nodes=[];
 const add=(id,parentId,level,levelName,name,{zone=name,meshRefs=[],sourceRefs=['SRC-HEIDELBERG-CD102'],confidence=CONFIDENCE.REFERENCE_ONLY,verified=false,explodeVector=[0,0,0],description='',maintenanceTag=null}={})=>{
-  const n={id,parentId,level,levelName,name,machineZone:zone,meshRefs,sourceRefs,confidence,verified,explodeVector,explodeDistance:level===2?1.4:level===3?.85:level===4?.55:.32,focusCamera:null,description,maintenanceTag};
+  // A manual can establish a function without proving a distinct installed mesh.
+  // Anchor such entries to the nearest assembly explicitly instead of leaving
+  // an empty target that silently jumps to a larger ancestor during selection.
+  const inherited=level>=5&&!meshRefs.length;
+  if(inherited){
+    const parent=nodes.find(n=>n.id===parentId);
+    meshRefs=[...(parent?.meshRefs||[])];
+    confidence=CONFIDENCE.REFERENCE_ONLY;verified=false;
+    description=[description,'Referensi fungsi: geometri detail part ini belum dimodelkan atau diverifikasi tersendiri. Fokus dan isolasi menggunakan assembly induk, bukan bentuk aktual part tersebut.'].filter(Boolean).join(' ');
+  }
+  const n={id,parentId,level,levelName,name,machineZone:zone,meshRefs,sourceRefs,confidence,verified,geometryScope:inherited?'ASSEMBLY_ANCHOR_ONLY':'EXPLICIT_GEOMETRY_REFERENCE',geometryAnchorParentId:inherited?parentId:null,explodeVector,explodeDistance:level===2?1.4:level===3?.85:level===4?.55:.32,focusCamera:null,description,maintenanceTag};
   nodes.push(Object.freeze(n));return id;
 };
 const photo=['SRC-USER-PHOTOS'],manual=['SRC-CD102-SERVICE-MANUAL'],rollerActual=['SRC-O5-ROLLER-DIAGRAM-IMG2777','SRC-CD102-ROLLER-PROCEDURE'],brochure=['SRC-HEIDELBERG-CD102'];
