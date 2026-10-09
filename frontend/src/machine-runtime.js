@@ -1,3 +1,4 @@
+import {attachOffsetProcessMedia} from './offset-process-media.js';
 import {Offset5CD102RealismTemplate,Offset5CD102RealismSimulation} from './offset5-realism.js';
 import {Offset10CX104SpecialRealismTemplate,Offset10CX104SpecialRealismSimulation} from './offset10-realism.js';
 import {APM2MachineTemplate} from './apm2.js';
@@ -1012,7 +1013,7 @@ export function createPolishedMachineTemplate(key){
  return template;
 }
 
-export function createMachineSimulation(key,machine,template){
+function createMachineSimulationBase(key,machine,template){
  const k=normalizeMachineKey(key);
  if(!k)throw new Error('Identitas mesin belum tersedia.');
  if(k==='offset5'){const sim=new Offset5CD102RealismSimulation(machine,template);validateOffset5PilotSimulation(sim,template,{throwOnError:true});return sim;}
@@ -1037,4 +1038,9 @@ export function createMachineSimulation(key,machine,template){
  if(isReferenceMachineKey(k))return new ReferenceProcessSimulation(machine,template);
  if(universalMachineConfig(k))return new UniversalProcessSimulation(machine,template);
  throw new Error(`Simulasi untuk ${k} belum tersedia.`);
+}
+
+export function createMachineSimulation(key,machine,template){
+ const sim=createMachineSimulationBase(key,machine,template);
+ return ['offset5','offset10','BMJ-MCH-0005','BMJ-MCH-0006'].includes(normalizeMachineKey(key))?attachOffsetProcessMedia(sim,template):sim;
 }

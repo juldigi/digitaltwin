@@ -32,7 +32,7 @@ export class OffsetMachineTemplate {
     this.root.userData={assetId:'MACHINE-OFFSET5',...PHOTO_RECONSTRUCTION,orientation:ORIENTATION,taxonomyVersion:'offset5-taxonomy-v18',machineEnvelope:OFFSET5_DIMENSIONS,dimensionAudit:offset5DimensionAudit(),printingUnitReality:OFFSET5_ACTUAL_ROLLER_DIAGRAM,rollerEvidencePolicyRevision:OFFSET5_ROLLER_EVIDENCE_POLICY.revision,rollerEvidenceConflictCount:OFFSET5_ROLLER_EVIDENCE_POLICY.knownConflicts.length,rollerEvidenceConflictRule:OFFSET5_ROLLER_EVIDENCE_POLICY.conflictRule,printingUnitExteriorPolicy:'V348_UPLOADED_PHOTOS__RECESSED_DARK_FOUNTAIN__ROUNDED_CABINET_AND_CLIPPED_TREADS',photoLockExteriorBaseline:'V404_V405_V408',openUpperDeck:true,solidPrintingUnitTopCover:false};
     this.parts=[];this.nodes=[];this.meshes=[];this.auxVisuals=[];this.geometries=new Map();this.materials=new Map();this.lineMaterials=new Map();this.textures=[];this.ghosted=false;this.exteriorOpen=false;
     this.palette={graphite:0x30383d,black:0x151b20,silver:0xaeb8b8,steel:0x889598,chromium:0xcbd3d5,plastic:0xb9c0bc,light:0xd1d4c9,paper:0xeee9d5,rubber:0x20252a,photoRollerGreen:0x3f6f3b,inkFilmCyan:0x00a9d8,inkFilmMagenta:0xd40072,inkFilmYellow:0xf1c40f,inkFilmBlack:0x161616,inkFilmOrange:0xf07818,inkFilmGreen:0x1f9d55,inkFilmPurple:0x7442a8,inkFilmNeutral:0x4d5660,rollerWhite:0xe8e7df,rollerRed:0xc4473f,rollerYellow:0xe4bf4e,rollerBlue:0x355d91,glass:0x23333a,red:0xb33c32,yellow:0xe2b541,blue:0x243e70};
-    this.build();this.alignOperatorSide();this.enrichV122Feeder();this.refineUploadedPhotosV348();this.batchMeshes();this.tagPrintingInterior();this.tagAdaptiveDetails();
+    this.build();this.alignOperatorSide();this.enrichV122Feeder();this.refineUploadedPhotosV348();this.fitUpperRollerSectionsInsidePU();this.batchMeshes();this.tagPrintingInterior();this.tagAdaptiveDetails();
     this.taxonomy=OFFSET5_TAXONOMY;this.taxonomyById=TAXONOMY_BY_ID;
     this.original=this.parts.map(p=>p.position.clone());
     for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}
@@ -69,6 +69,17 @@ export class OffsetMachineTemplate {
       const duct=this.findNode(`press-${i}-ink-fountain-roller`);duct.userData.sourceFiles=top.userData.sourceFiles;
       const cover=this.findNode(`press-${i}-cover`);cover.userData.sourceFiles=['Offset5.zip/IMG_2466.HEIC'];
       cover.userData.photoLockBaseline='V348_BROAD_SILVER_DOOR_DARK_CONTROL_SEAM';
+    }
+  }
+  fitUpperRollerSectionsInsidePU(){
+    // Section coordinates are illustrative: rigidly orient the upper roller map about the
+    // unchanged plate centre, preserving every radius and inter-roller contact distance.
+    const angle=60*Math.PI/180,pivot=new THREE.Vector2(.16,1.79);
+    const rotated=pivot.clone().rotateAround(new THREE.Vector2(),angle);
+    for(let i=0;i<8;i++)for(const suffix of ['inking-train','inking-distribution','dampening-form']){
+      const node=this.findNode(`press-${i}-${suffix}`);if(!node)continue;
+      node.rotation.z=angle;node.position.set(pivot.x-rotated.x,pivot.y-rotated.y,0);
+      Object.assign(node.userData,{sectionPlacement:'RIGID_BODY_ENVELOPE_FIT__VISUAL_NOT_INSTALLATION_CAD',sectionRotationRadians:angle});
     }
   }
   tagPrintingInterior(){
@@ -609,8 +620,7 @@ export class OffsetMachineTemplate {
 
     // Dampening: OEM SM/CD102 roller designations 16–19 and FR.
     const damp=this.group(g,`${id}-dampening`,`${label} · Alcolor dampening system`,[0,0,0],[0,.48,-.35],[...photos,...oem],'Roller identities and nominal diameters follow the supplied SM/CD102 roller procedure. Positions are sectional visual coordinates, not nip-setting values.');
-    this.markExteriorCover(this.box(damp,[.34,.075,1.50],[-.22,2.06,0],'steel',.025));
-    for(const z of [-.72,.72])this.markExteriorCover(this.box(damp,[.18,.28,.06],[-.10,2.17,z],'graphite',.015));
+    damp.userData.geometryStatus='FUNCTIONAL_GROUP__NO_UNVERIFIED_CASING_OR_TRAY';
     const dampPan=this.group(g,`${id}-dampening-pan`,`PU${i+1} · dampening pan functional reference`,[0,0,0],[.34,.24,-.34],[...photos,...oem],'Functional WATER reference only; installed pan shape, mounting and hose routing are not established by the supplied photographs. No proxy geometry is rendered.');
     // IMG_2777 labels WATER but provides no installed pan shape or hose routing.
     // The former wide tray projected into the access bay and appeared as a tongue.
