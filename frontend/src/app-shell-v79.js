@@ -642,6 +642,7 @@ document.addEventListener('keydown',event=>{
   const overlay=getState().overlay;
   const root=overlay==='search'?q('#universal-search-panel'):overlay==='systems'?q('#system-browser'):overlay==='layers'?q('#layer-manager'):overlay==='navigation'?q('.rail'):overlay==='modal'?q('#modal'):null;
   if(root&&trapOverlayFocus(event,root))return;
+  if(!overlay&&getState().inspectorState?.open&&matchMedia('(max-width:767px)').matches&&trapOverlayFocus(event,q('#detail-panel')))return;
  }
  if(event.key!=='Escape')return;
  const tools=q('#scene-tools');
