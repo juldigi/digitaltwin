@@ -152,7 +152,7 @@ test('canvas selection frames the exact mapped part and only isolation fades oth
 test('v41 keeps every right-sidebar taxonomy item clickable after repeated selections',()=>{
   assert.match(app,/document\.querySelectorAll\('\[data-taxonomy\]'\)\.forEach/);
   assert.doesNotMatch(app,/\$\('\[data-taxonomy\]'\)\.forEach/);
-  assert.match(app,/selectTaxonomy\(b\.dataset\.taxonomy\)/);
+  assert.match(app,/selectTaxonomy\(b\.dataset\.taxonomy,\{historyMode:'push'\}\)/);
 });
 
 test('v42 opens removable exterior covers while retaining frame and interior geometry',()=>{
