@@ -5,7 +5,7 @@ const RELEASE='222';
 const BUILD_FINGERPRINT='SOURCE';
 const FLEET_CHUNK_COUNT=15;
 const ENTRYPOINTS=[
- './app-shell-v79.css','./flagship-v270.css','./workspace-v354.css','./src/app.js','./src/ui-v5.js','./src/experience-v37.js','./src/app-shell-v79.js'
+ './app-shell-v79.css','./flagship-v270.css','./workspace-v354.css','./experience-v356.css','./src/app.js','./src/ui-v5.js','./src/experience-v37.js','./src/app-shell-v79.js'
 ];
 const SHELL=[
  './','./index.html','./config.json','./assets/favicon.svg','./assets/splash-industrial-v79.webp',

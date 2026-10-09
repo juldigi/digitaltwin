@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="./app-shell-v79.css?v=222">
 <link rel="stylesheet" href="./flagship-v270.css?v=222">
 <link rel="stylesheet" href="./workspace-v354.css?v=222">
+<link rel="stylesheet" href="./experience-v356.css?v=222">
 <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/addons/"}}</script>
 <script id="sw-bootstrap">
 (()=>{if(!('serviceWorker'in navigator))return;const guard='bmj-sw-v222-reloaded';navigator.serviceWorker.addEventListener('controllerchange',()=>{if(document.documentElement.dataset.appReady==='ready'||sessionStorage.getItem(guard))return;sessionStorage.setItem(guard,'1');location.reload();});navigator.serviceWorker.register('./sw.js').then(reg=>reg.update()).catch(()=>{});addEventListener('load',()=>setTimeout(()=>{if(document.documentElement.dataset.appReady==='ready')sessionStorage.removeItem(guard)},2500),{once:true});})();
@@ -80,10 +81,12 @@
           <button data-camera="iso" class="active camera-tool">3D <span>Isometrik</span></button>
           <button data-camera="top" class="camera-tool">ATAS <span>Tampak atas</span></button>
           <button data-camera="fit" class="camera-tool context-tool">FOKUS <span>Pilihan</span></button>
+          <details class="scene-tools" id="scene-tools"><summary aria-label="Alat tampilan dan inspeksi">Alat <span aria-hidden="true">⌄</span></summary><div class="scene-tools-menu" role="group" aria-label="Alat tampilan dan inspeksi">
           <button id="tool-explode" class="inspect-tool" aria-pressed="false">URAI <span>Komponen</span></button>
           <button id="tool-isolate" class="inspect-tool" aria-pressed="false">HANYA OBJEK INI <span>Pilihan aktif</span></button>
           <button id="tool-interior" class="inspect-tool" aria-pressed="false">BUKA INTERIOR <span>Lihat bagian dalam</span></button>
           <button data-camera="reset" class="camera-tool reset-tool">TAMPILAN AWAL <span>Kembalikan kamera</span></button>
+          </div></details>
         </div>
         <div class="scene-options">
           <button id="labels" class="icon-btn active" title="Label" aria-label="Tampilkan atau sembunyikan label" aria-pressed="true">Aa</button>

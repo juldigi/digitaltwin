@@ -557,7 +557,10 @@ function ensureSimulationTransport(){
  bar.innerHTML=`<div class="sim-context"><small>SIMULASI PROSES</small><strong data-transport-stage>Siap</strong><button type="button" data-transport-exterior aria-label="Lihat bentuk luar mesin">Eksterior</button></div><label class="sim-mode-label">Mode<select data-transport-mode aria-label="Mode simulasi"></select></label><button type="button" data-transport-play class="primary" aria-label="Mulai atau jeda simulasi">Mulai</button><label class="sim-speed-label">Kecepatan<select data-transport-speed aria-label="Kecepatan simulasi"><option value=".5">0,5×</option><option value="1" selected>1×</option><option value="1.5">1,5×</option><option value="2">2×</option></select></label><progress max="100" value="0" data-transport-progress aria-label="Kemajuan simulasi"></progress><button type="button" data-transport-stop>Hentikan</button>`;
  q('.workspace')?.append(bar);
  q('[data-transport-exterior]',bar).addEventListener('click',()=>dispatchEvent(new CustomEvent('bmj:simulationcommand',{detail:{action:'exterior'}})));
- q('[data-transport-play]',bar).addEventListener('click',()=>dispatchEvent(new CustomEvent('bmj:simulationcommand',{detail:{action:'toggle'}})));
+ q('[data-transport-play]',bar).addEventListener('click',()=>{
+  dispatchEvent(new CustomEvent('bmj:simulationcommand',{detail:{action:'toggle'}}));
+  if(matchMedia('(max-width:767px)').matches)closeInspector({restoreFocus:false});
+ });
  q('[data-transport-stop]',bar).addEventListener('click',()=>dispatchEvent(new CustomEvent('bmj:simulationcommand',{detail:{action:'stop'}})));
  q('[data-transport-speed]',bar).addEventListener('change',e=>dispatchEvent(new CustomEvent('bmj:simulationcommand',{detail:{action:'speed',value:e.target.value}})));
  q('[data-transport-mode]',bar).addEventListener('change',e=>dispatchEvent(new CustomEvent('bmj:simulationcommand',{detail:{action:'mode',value:e.target.value}})));
@@ -641,6 +644,8 @@ document.addEventListener('keydown',event=>{
   if(root&&trapOverlayFocus(event,root))return;
  }
  if(event.key!=='Escape')return;
+ const tools=q('#scene-tools');
+ if(tools?.open){tools.open=false;tools.querySelector('summary')?.focus();event.preventDefault();return;}
  const overlay=getState().overlay;
  if(overlay==='search'){closeSearch();return}
  if(overlay==='systems'){closeSystemBrowser();return}
@@ -666,6 +671,8 @@ function syncAccessibleControls(state){
 }
 function syncVisualHierarchy(state){
  const body=document.body,primary=primarySectionFor(state.activeSection);
+ const tools=q('#scene-tools');
+ if(tools&&(state.viewMode==='2d'||state.overlay||state.activeSection==='simulation'))tools.open=false;
  const hasSelection=Boolean(state.selectedAsset||state.selectedNode||state.selectedSystem||state.activeReference);
  body.dataset.sceneMode=state.sceneMode==='machine'?'machine':'factory';
  body.dataset.primarySection=primary;
@@ -710,5 +717,9 @@ function syncPressedTools(state=getState()){
  };
  for(const [id,active] of Object.entries(values)){const el=q('#'+id);if(el){el.classList.toggle('active',active);el.setAttribute('aria-pressed',String(active));}}
 }
+qa('#scene-tools button').forEach(button=>button.addEventListener('click',()=>{
+ const tools=q('#scene-tools');if(tools)tools.open=false;
+ tools?.querySelector('summary')?.focus({preventScroll:true});
+}));
 relabel();const initialState=getState();syncOverlayDom(initialState);applyViewModeDom(initialState);syncSplashFromState(initialState);syncPressedTools(initialState);syncInspectorTabs(initialState);syncMobileFeatureHub(initialState);subscribe(state=>{applyInspectorDom(state);applyViewModeDom(state);markSection(state.activeSection);syncLayerControls();syncAccessibleControls(state);syncPressedTools(state);syncInspectorTabs(state);syncVisualHierarchy(state);syncViewModeContext(state);syncSplashFromState(state);syncSimulationTransport(state);syncMobileFeatureHub(state);syncOverlayDom(state)});
 document.documentElement.dataset.uiArchitecture='v212-ui-ssot';
