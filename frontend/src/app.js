@@ -886,7 +886,7 @@ async function switchActiveMachine(route,{historyMode='push'}={}){
  closeModal();resetMachineInspectionContext();
  if(normalizedRoute===MACHINE_KEY&&engine?.machineKey===normalizedRoute){
   setView('machine');showPanel();renderPanel('overview');engine?.fit(engine.machine,'iso');$('#engine-status').textContent=assetName+' · model 3D siap';
-  emitDomainState({selectedAsset:assetId,selectedNode:null,activeReference:null,activeSection:'asset',sceneMode:'machine',cameraPreset:'iso',inspectorState:{open:true,tab:'overview'}});return true;
+  emitDomainState({selectedAsset:assetId,selectedNode:null,activeReference:null,activeSection:'asset',sceneMode:'machine',cameraPreset:'iso',inspectorState:{open:true,tab:'overview'}});pushMachineContextHistory(null,{replace:true});return true;
  }
  document.body.classList.add('scene-switching');
  const boot=existingBoot;if(boot){boot.hidden=false;boot.innerHTML='<strong>Menyiapkan '+esc(assetName)+'…</strong><p>Memuat model dan struktur mesin.</p>';}
@@ -899,7 +899,7 @@ async function switchActiveMachine(route,{historyMode='push'}={}){
   if(engine){const switched=await engine.switchMachine(MACHINE_KEY);if(!isCurrentSwitch())return false;if(!switched)throw new Error('Model belum dapat dibuka');engine.onTaxonomySelect=id=>selectTaxonomy(id,{revealPanel:true,historyMode:'push'});engine.onSimulationUpdate=next=>updateSimulationPanel(next);engine.onReset=()=>{setDomainState({inspectionMode:{isolate:false}});setExplodeLevel(0);selectedPart=null;setActiveTaxonomyId(ACTIVE_ROOT);renderPanel();};engine.onError=handleEngineError;engine.setView('machine',state);}
   else{qStaticFallbackClear();renderStaticMachineFallback(new Error('Render 3D belum tersedia'));}
   const taxCount=$('#taxonomy-count');if(taxCount)taxCount.textContent=taxonomyStats().total.toLocaleString('id-ID');
-  renderStatus();redrawPlantPlan();showPanel();renderPanel('overview');engine?.fit(engine.machine,'iso');$('#engine-status').textContent=assetName+' · model 3D siap';emitDomainState({selectedAsset:assetId,selectedNode:null,activeReference:null,activeSection:'asset',sceneMode:'machine',cameraPreset:'iso',inspectorState:{open:true,tab:'overview'}});return true;
+  renderStatus();redrawPlantPlan();showPanel();renderPanel('overview');engine?.fit(engine.machine,'iso');$('#engine-status').textContent=assetName+' · model 3D siap';emitDomainState({selectedAsset:assetId,selectedNode:null,activeReference:null,activeSection:'asset',sceneMode:'machine',cameraPreset:'iso',inspectorState:{open:true,tab:'overview'}});pushMachineContextHistory(null,{replace:true});return true;
  }catch(error){
   if(!isCurrentSwitch())return false;
   state=previousState;
