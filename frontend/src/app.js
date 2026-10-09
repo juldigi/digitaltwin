@@ -807,6 +807,7 @@ function applyRestoredCamera(preset='iso'){
 }
 function selectFactoryAssetContext(machine,{historyMode='none',openDialog=false,focus=true}={}){
  if(!machine)return false;
+ setDomainState({inspectorState:{tab:'overview'}});
  if(historyMode==='push')pushContextHistory({asset:machine.machineId,node:null,scene:'factory',view:currentViewMode(),camera:'iso'});
  if(engine?.view!=='factory')setView('factory');
  if(focus)engine?.focusFactoryAsset(machine.machineId);else engine?.selectFactoryAsset(machine.machineId);

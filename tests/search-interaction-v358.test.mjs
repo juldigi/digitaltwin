@@ -37,3 +37,11 @@ test('factory summary cannot select technical tabs until machine context is open
  vm.runInContext('syncInspectorTabs({sceneMode:"machine",inspectorState:{tab:"structure"}})',context);
  assert.ok(tabs.every(tab=>!tab.disabled));assert.equal(tabs[1].attrs['aria-selected'],'true');
 });
+test('changing a factory asset resets a stale structure tab before rendering the factory view',()=>{
+ const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
+ let tab='structure',opened=false;
+ const context=vm.createContext({engine:null,setDomainState(next){tab=next.inspectorState.tab},setView(){assert.equal(tab,'overview')},foundationAssetPolicy(){return {canOpenTechnical3D:true}},placementForMachine(){},$(){return {}},emitDomainState(){},machineDetailDialog(){opened=true}});
+ vm.runInContext(app.slice(app.indexOf('function selectFactoryAssetContext('),app.indexOf('function focusFoundationPlaceholder(')),context);
+ assert.equal(vm.runInContext('selectFactoryAssetContext({machineId:"new",name:"New"},{openDialog:true,focus:false})',context),true);
+ assert.ok(opened);
+});
