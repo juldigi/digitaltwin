@@ -342,6 +342,7 @@ function openSearch(seed=''){
  requestAnimationFrame(()=>input.focus());
 }
 function closeSearch({restoreFocus=true}={}){
+ clearTimeout(searchTimer);searchResults=[];
  const panel=q('#universal-search-panel'),input=q('#universal-search-input',panel||document);if(panel)panel.hidden=true;
  if(input){input.setAttribute('aria-expanded','false');input.removeAttribute('aria-activedescendant')}
  document.body.classList.remove('search-open');
@@ -353,11 +354,18 @@ function closeSearch({restoreFocus=true}={}){
 }
 function requestUniversalSearch(query){
  clearTimeout(searchTimer);
+ searchResults=[];searchActiveIndex=-1;
+ const panel=ensureSearchPalette(),input=q('#universal-search-input',panel),host=q('.universal-search-results',panel);
+ input?.removeAttribute('aria-activedescendant');
+ host.setAttribute('aria-busy',String(Boolean(String(query).trim())));
+ host.innerHTML=String(query).trim()?'<p class="universal-search-empty">Mencari…</p>':'<p class="universal-search-empty">Ketik nama mesin, komponen, area, sistem, dokumen, atau foto.</p>';
  const headerInput=q('#global-search');if(headerInput&&headerInput.value!==query)headerInput.value=query;
  searchTimer=setTimeout(()=>dispatchEvent(new CustomEvent('bmj:searchrequest',{detail:{query}})),120);
 }
 function renderSearchResults(detail={}){
  const panel=ensureSearchPalette(),host=q('.universal-search-results',panel),query=String(detail.query||'').trim();
+ if(getState().overlay!=='search'||query!==String(q('#universal-search-input',panel)?.value||'').trim())return;
+ host.setAttribute('aria-busy','false');
  searchResults=Array.isArray(detail.results)?detail.results:[];searchActiveIndex=searchResults.length?0:-1;
  if(!query){host.innerHTML='<p class="universal-search-empty">Ketik nama mesin, komponen, area, sistem, dokumen, atau foto.</p>';q('#universal-search-input',panel)?.removeAttribute('aria-activedescendant');return}
  if(!searchResults.length){host.innerHTML='<p class="universal-search-empty">Tidak ada hasil yang sesuai.</p>';q('#universal-search-input',panel)?.removeAttribute('aria-activedescendant');return}
@@ -624,12 +632,16 @@ syncViewport();addEventListener('resize',syncViewport,{passive:true});addEventLi
 
 function syncInspectorTabs(state=getState()){
  const tabs=qa('#detail-panel [role="tab"]').filter(tab=>tab.getAttribute('aria-hidden')!=='true'),activeKey=state.inspectorState?.tab||'overview';
- const active=tabs.find(tab=>tab.dataset.tab===activeKey)||tabs[0];
+ tabs.forEach(tab=>{
+  tab.disabled=state.sceneMode!=='machine'&&tab.dataset.tab!=='overview';
+  if(tab.disabled)tab.title='Buka model mesin terlebih dahulu untuk melihat bagian ini.';else tab.removeAttribute('title');
+ });
+ const active=tabs.find(tab=>!tab.disabled&&tab.dataset.tab===activeKey)||tabs.find(tab=>!tab.disabled);
  tabs.forEach(tab=>{const selected=tab===active;tab.setAttribute('aria-controls','panel-content');tab.setAttribute('aria-selected',String(selected));tab.tabIndex=selected?0:-1});
 }
 const inspectorTablist=q('#detail-panel .tabs');
 inspectorTablist?.addEventListener('keydown',event=>{
- const tabs=qa('[role="tab"]',inspectorTablist).filter(tab=>!tab.hidden&&tab.getAttribute('aria-hidden')!=='true');
+ const tabs=qa('[role="tab"]',inspectorTablist).filter(tab=>!tab.hidden&&!tab.disabled&&tab.getAttribute('aria-hidden')!=='true');
  const current=tabs.indexOf(document.activeElement);if(current<0)return;
  let next=current;
  if(event.key==='ArrowRight')next=(current+1)%tabs.length;
@@ -650,7 +662,7 @@ document.addEventListener('keydown',event=>{
  }
  if(event.key!=='Escape')return;
  const tools=q('#scene-tools');
- if(tools?.open){tools.open=false;tools.querySelector('summary')?.focus();event.preventDefault();return;}
+ if(tools?.open){tools.open=false;tools.querySelector('summary')?.focus();event.preventDefault();event.stopImmediatePropagation();return;}
  const overlay=getState().overlay;
  if(overlay==='search'){closeSearch();return}
  if(overlay==='systems'){closeSystemBrowser();return}
@@ -726,5 +738,9 @@ qa('#scene-tools button').forEach(button=>button.addEventListener('click',()=>{
  const tools=q('#scene-tools');if(tools)tools.open=false;
  tools?.querySelector('summary')?.focus({preventScroll:true});
 }));
+document.addEventListener('pointerdown',event=>{
+ const tools=q('#scene-tools');
+ if(tools?.open&&!tools.contains(event.target))tools.open=false;
+});
 relabel();const initialState=getState();syncOverlayDom(initialState);applyViewModeDom(initialState);syncSplashFromState(initialState);syncPressedTools(initialState);syncInspectorTabs(initialState);syncMobileFeatureHub(initialState);subscribe(state=>{applyInspectorDom(state);applyViewModeDom(state);markSection(state.activeSection);syncLayerControls();syncAccessibleControls(state);syncPressedTools(state);syncInspectorTabs(state);syncVisualHierarchy(state);syncViewModeContext(state);syncSplashFromState(state);syncSimulationTransport(state);syncMobileFeatureHub(state);syncOverlayDom(state)});
 document.documentElement.dataset.uiArchitecture='v212-ui-ssot';
