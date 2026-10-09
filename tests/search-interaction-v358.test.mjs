@@ -28,3 +28,12 @@ test('clearing the query removes earlier options and busy state immediately',()=
  assert.equal(vm.runInContext('searchResults.length',h.context),0);
  assert.equal(h.host.attributes['aria-busy'],'false');assert.match(h.host.innerHTML,/Ketik nama/);
 });
+test('factory summary cannot select technical tabs until machine context is open',()=>{
+ const tabs=['overview','structure','simulation','sources'].map(key=>({dataset:{tab:key},attrs:{},getAttribute(k){return this.attrs[k]},setAttribute(k,v){this.attrs[k]=v},removeAttribute(k){delete this.attrs[k]}}));
+ const context=vm.createContext({qa(){return tabs}});
+ vm.runInContext(source.slice(source.indexOf('function syncInspectorTabs('),source.indexOf('const inspectorTablist=')),context);
+ vm.runInContext('syncInspectorTabs({sceneMode:"factory",inspectorState:{tab:"structure"}})',context);
+ assert.equal(tabs[0].attrs['aria-selected'],'true');assert.ok(tabs.slice(1).every(tab=>tab.disabled&&tab.tabIndex===-1));
+ vm.runInContext('syncInspectorTabs({sceneMode:"machine",inspectorState:{tab:"structure"}})',context);
+ assert.ok(tabs.every(tab=>!tab.disabled));assert.equal(tabs[1].attrs['aria-selected'],'true');
+});

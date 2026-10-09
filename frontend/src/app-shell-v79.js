@@ -632,12 +632,16 @@ syncViewport();addEventListener('resize',syncViewport,{passive:true});addEventLi
 
 function syncInspectorTabs(state=getState()){
  const tabs=qa('#detail-panel [role="tab"]').filter(tab=>tab.getAttribute('aria-hidden')!=='true'),activeKey=state.inspectorState?.tab||'overview';
- const active=tabs.find(tab=>tab.dataset.tab===activeKey)||tabs[0];
+ tabs.forEach(tab=>{
+  tab.disabled=state.sceneMode!=='machine'&&tab.dataset.tab!=='overview';
+  if(tab.disabled)tab.title='Buka model mesin terlebih dahulu untuk melihat bagian ini.';else tab.removeAttribute('title');
+ });
+ const active=tabs.find(tab=>!tab.disabled&&tab.dataset.tab===activeKey)||tabs.find(tab=>!tab.disabled);
  tabs.forEach(tab=>{const selected=tab===active;tab.setAttribute('aria-controls','panel-content');tab.setAttribute('aria-selected',String(selected));tab.tabIndex=selected?0:-1});
 }
 const inspectorTablist=q('#detail-panel .tabs');
 inspectorTablist?.addEventListener('keydown',event=>{
- const tabs=qa('[role="tab"]',inspectorTablist).filter(tab=>!tab.hidden&&tab.getAttribute('aria-hidden')!=='true');
+ const tabs=qa('[role="tab"]',inspectorTablist).filter(tab=>!tab.hidden&&!tab.disabled&&tab.getAttribute('aria-hidden')!=='true');
  const current=tabs.indexOf(document.activeElement);if(current<0)return;
  let next=current;
  if(event.key==='ArrowRight')next=(current+1)%tabs.length;
