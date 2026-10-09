@@ -386,7 +386,11 @@ function chooseSearchResult(index){
 const globalSearch=q('#global-search');
 globalSearch?.addEventListener('focus',()=>{if(!suppressSearchFocus)openSearch(globalSearch.value)});
 globalSearch?.addEventListener('click',()=>{if(getState().overlay!=='search')openSearch(globalSearch.value)});
-globalSearch?.addEventListener('input',event=>{if(getState().overlay!=='search')openSearch(event.currentTarget.value);else requestUniversalSearch(event.currentTarget.value)});
+globalSearch?.addEventListener('input',event=>{
+ const query=event.currentTarget.value;
+ if(getState().overlay!=='search')openSearch(query);
+ else{const input=q('#universal-search-input');if(input)input.value=query;requestUniversalSearch(query)}
+});
 globalSearch?.addEventListener('keydown',event=>{if(event.key==='ArrowDown'||event.key==='Enter'){event.preventDefault();openSearch(globalSearch.value)}});
 q('#mobile-search-toggle')?.addEventListener('click',()=>openSearch(''));
 addEventListener('bmj:searchresults',event=>renderSearchResults(event.detail));
@@ -642,6 +646,7 @@ document.addEventListener('keydown',event=>{
   const overlay=getState().overlay;
   const root=overlay==='search'?q('#universal-search-panel'):overlay==='systems'?q('#system-browser'):overlay==='layers'?q('#layer-manager'):overlay==='navigation'?q('.rail'):overlay==='modal'?q('#modal'):null;
   if(root&&trapOverlayFocus(event,root))return;
+  if(!overlay&&getState().inspectorState?.open&&matchMedia('(max-width:767px)').matches&&trapOverlayFocus(event,q('#detail-panel')))return;
  }
  if(event.key!=='Escape')return;
  const tools=q('#scene-tools');
