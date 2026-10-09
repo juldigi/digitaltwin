@@ -16,7 +16,7 @@ export function attachOffsetProcessMedia(sim,template){
   const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.BufferAttribute(new Float32Array(12),3));
   const material=new THREE.PointsMaterial({color,size:kind==='air'?.022:.026,transparent:true,opacity:kind==='air'?.75:.95,depthWrite:false,sizeAttenuation:true});
   const points=new THREE.Points(geometry,material);points.name=`PROCESS-${kind.toUpperCase()}-FLOW`;
-  Object.assign(points.userData,{processMedium:kind,processIndicator:true,installedRoutingVerified:false,unit:index+1});points.visible=false;node.add(points);
+  Object.assign(points.userData,{processMedium:kind,processIndicator:true,installedRoutingVerified:false,unit:index+1});points.visible=false;points.raycast=()=>{};node.add(points);
   flows.push({node,points,center,kind,index});resources.push(geometry,material);
  }
  inkNodes.forEach((n,i)=>add(n,'ink',COLORS[i%8],i));dampNodes.forEach((n,i)=>add(n,'dampening-water',0x43cfff,i));airNodes.forEach((n,i)=>add(n,'air',0xf0f9ff,i));
