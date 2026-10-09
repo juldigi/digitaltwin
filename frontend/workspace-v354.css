@@ -87,6 +87,14 @@ aside#detail-panel {
 .asset-preview {display:none!important}
 .context-breadcrumb {padding:0 18px 8px!important;flex-shrink:0;overflow-x:auto!important;white-space:nowrap}
 .context-breadcrumb button {font-size:10px!important;min-height:32px!important}
+/* Inspector surfaces must inherit the active theme, including the shell's
+   more specific legacy tab rule. */
+aside#detail-panel .context-breadcrumb,
+aside#detail-panel .tabs {
+  background:var(--f270-surface)!important;
+  border-color:var(--f270-line)!important;
+  color:var(--f270-text-2)!important;
+}
 .asset-heading {padding:12px 18px!important;gap:10px!important;flex-shrink:0}
 .asset-heading h2 {font-size:18px!important;font-weight:650!important;line-height:1.25!important}
 .asset-heading p {font-size:11px!important;line-height:1.5!important}
