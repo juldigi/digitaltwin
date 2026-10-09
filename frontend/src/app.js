@@ -573,9 +573,9 @@ function renderPanel(tab=activeInspectorTab()){
   $('#explode').addEventListener('input',e=>{setExplodeLevel(+e.target.value);engine?.template.explode(explodeLevel(),selectedPart);$('#explode-value').textContent=Math.round(explodeLevel()*100)+'%';$('#tool-explode')?.classList.toggle('active',explodeLevel()>0);});
   on('#assemble',()=>{setExplodeLevel(0);selectedPart=null;if(engine){engine.template.reset();engine.clearPartLabels();engine.isolated=false;engine.fit(engine.machine);}renderPanel();});
   on('#isolate',()=>{if(!engine){toast('Tampilan 3D belum tersedia.',true);return;}if(!selectedPart){toast('Pilih bagian mesin terlebih dahulu.');return;}const next=!engine.isolated;setDomainState({inspectionMode:{isolate:next}});engine.isolated=next;engine.template.ghost(next,selectedPart);$('#isolate').classList.toggle('active',next);$('#isolate').setAttribute('aria-pressed',String(next));$('#tool-isolate')?.classList.toggle('active',next);});
-  on('#tree-root',()=>{setActiveTaxonomyId(ACTIVE_ROOT);selectedPart=null;setExplodeLevel(0);engine?.template.reset();if(engine){engine.clearPartLabels();engine.isolated=false;engine.fit(engine.machine);}renderPanel();});
-  document.querySelectorAll('[data-taxonomy]').forEach(b=>b.onclick=()=>selectTaxonomy(b.dataset.taxonomy));
-  $('#part-search').addEventListener('input',event=>{const query=event.target.value.trim().toLocaleLowerCase('id-ID'),results=$('#part-search-results'),current=$('#part-current-children');results.hidden=!query;current.hidden=!!query;if(!query)return;const matches=ACTIVE_TAXONOMY.filter(node=>node.id!==ACTIVE_ROOT&&node.name.toLocaleLowerCase('id-ID').includes(query)).slice(0,12);results.innerHTML=matches.length?`<div class="compact-part-list">${childList(matches)}</div>`:'<p class="subtle">Tidak ada bagian yang cocok.</p>';results.querySelectorAll('[data-taxonomy]').forEach(button=>button.onclick=()=>selectTaxonomy(button.dataset.taxonomy));});
+  on('#tree-root',()=>{setActiveTaxonomyId(ACTIVE_ROOT);selectedPart=null;setExplodeLevel(0);engine?.template.reset();if(engine){engine.clearPartLabels();engine.isolated=false;engine.fit(engine.machine);}emitDomainState({selectedNode:null});pushMachineContextHistory(null);renderPanel();});
+  document.querySelectorAll('[data-taxonomy]').forEach(b=>b.onclick=()=>selectTaxonomy(b.dataset.taxonomy,{historyMode:'push'}));
+  $('#part-search').addEventListener('input',event=>{const query=event.target.value.trim().toLocaleLowerCase('id-ID'),results=$('#part-search-results'),current=$('#part-current-children');results.hidden=!query;current.hidden=!!query;if(!query)return;const matches=ACTIVE_TAXONOMY.filter(node=>node.id!==ACTIVE_ROOT&&node.name.toLocaleLowerCase('id-ID').includes(query)).slice(0,12);results.innerHTML=matches.length?`<div class="compact-part-list">${childList(matches)}</div>`:'<p class="subtle">Tidak ada bagian yang cocok.</p>';results.querySelectorAll('[data-taxonomy]').forEach(button=>button.onclick=()=>selectTaxonomy(button.dataset.taxonomy,{historyMode:'push'}));});
  }else if(tab==='simulation'){
   const s=commitSimulationState(engine?.getPrintingSimulationState?.()||currentSimulationState());
   if(!engine){
@@ -886,7 +886,7 @@ async function switchActiveMachine(route,{historyMode='push'}={}){
  closeModal();resetMachineInspectionContext();
  if(normalizedRoute===MACHINE_KEY&&engine?.machineKey===normalizedRoute){
   setView('machine');showPanel();renderPanel('overview');engine?.fit(engine.machine,'iso');$('#engine-status').textContent=assetName+' · model 3D siap';
-  emitDomainState({selectedAsset:assetId,selectedNode:null,activeReference:null,activeSection:'asset',sceneMode:'machine',cameraPreset:'iso',inspectorState:{open:true,tab:'overview'}});return true;
+  emitDomainState({selectedAsset:assetId,selectedNode:null,activeReference:null,activeSection:'asset',sceneMode:'machine',cameraPreset:'iso',inspectorState:{open:true,tab:'overview'}});pushMachineContextHistory(null,{replace:true});return true;
  }
  document.body.classList.add('scene-switching');
  const boot=existingBoot;if(boot){boot.hidden=false;boot.innerHTML='<strong>Menyiapkan '+esc(assetName)+'…</strong><p>Memuat model dan struktur mesin.</p>';}
@@ -899,7 +899,7 @@ async function switchActiveMachine(route,{historyMode='push'}={}){
   if(engine){const switched=await engine.switchMachine(MACHINE_KEY);if(!isCurrentSwitch())return false;if(!switched)throw new Error('Model belum dapat dibuka');engine.onTaxonomySelect=id=>selectTaxonomy(id,{revealPanel:true,historyMode:'push'});engine.onSimulationUpdate=next=>updateSimulationPanel(next);engine.onReset=()=>{setDomainState({inspectionMode:{isolate:false}});setExplodeLevel(0);selectedPart=null;setActiveTaxonomyId(ACTIVE_ROOT);renderPanel();};engine.onError=handleEngineError;engine.setView('machine',state);}
   else{qStaticFallbackClear();renderStaticMachineFallback(new Error('Render 3D belum tersedia'));}
   const taxCount=$('#taxonomy-count');if(taxCount)taxCount.textContent=taxonomyStats().total.toLocaleString('id-ID');
-  renderStatus();redrawPlantPlan();showPanel();renderPanel('overview');engine?.fit(engine.machine,'iso');$('#engine-status').textContent=assetName+' · model 3D siap';emitDomainState({selectedAsset:assetId,selectedNode:null,activeReference:null,activeSection:'asset',sceneMode:'machine',cameraPreset:'iso',inspectorState:{open:true,tab:'overview'}});return true;
+  renderStatus();redrawPlantPlan();showPanel();renderPanel('overview');engine?.fit(engine.machine,'iso');$('#engine-status').textContent=assetName+' · model 3D siap';emitDomainState({selectedAsset:assetId,selectedNode:null,activeReference:null,activeSection:'asset',sceneMode:'machine',cameraPreset:'iso',inspectorState:{open:true,tab:'overview'}});pushMachineContextHistory(null,{replace:true});return true;
  }catch(error){
   if(!isCurrentSwitch())return false;
   state=previousState;
