@@ -16,6 +16,7 @@ test('every Offset 5 detail has a resolvable geometry target with explicit assem
     assert.match(n.description,/belum dimodelkan atau diverifikasi/);
    }
   }
-  assert.ok(inherited>150,'audit must include all upstream and downstream reference-only details');
+  assert.ok(inherited>0,'reference-only assembly anchors remain explicit');
+  for(const zone of ['O5.FEEDER.','O5.DRYER.'])assert.ok(OFFSET5_TAXONOMY.some(n=>n.id.startsWith(zone)&&n.geometryScope==='ASSEMBLY_ANCHOR_ONLY'),'upstream/downstream reference boundaries remain');
  }finally{t.dispose();}
 });

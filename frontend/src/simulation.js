@@ -1,3 +1,4 @@
+import {OFFSET5_DELIVERY_CONTACT as DELIVERY} from './data/offset5-delivery-contact.js';
 import {OFFSET5_DRYER_CONTACT as DRYER} from './data/offset5-dryer-contact.js';
 import * as THREE from 'three';
 import {OFFSET5_DIMENSIONS,OFFSET5_UNIT_CENTERS} from './data/dimensions-offset5.js';
@@ -70,7 +71,7 @@ function pathPoints(){
     new THREE.Vector3(D.inspectionCenterX,1.34,0),
     new THREE.Vector3(D.deliveryCenterX-1.00,1.58,0),
     new THREE.Vector3(D.deliveryCenterX-.68,1.61,0),
-    new THREE.Vector3(D.deliveryCenterX-.54,1.47,0), // sheet-brake / slowdown zone
+    new THREE.Vector3(D.deliveryCenterX+DELIVERY.brakeX*DELIVERY.scaleX,DELIVERY.brakeY+DELIVERY.brakeRadius+DELIVERY.clearance,0), // sheet-brake / slowdown zone
     new THREE.Vector3(D.deliveryCenterX-.24,1.43,0),
     new THREE.Vector3(D.deliveryCenterX-.06,1.34,0), // gripper release / settling
     new THREE.Vector3(D.deliveryCenterX+.10,1.24,0)
@@ -219,16 +220,30 @@ export class PrintingSimulation{
       const right=D.dryerCenterX+DRYER.rollerXs.at(-1)*DRYER.scaleX+.04;
       if(p.x>=left&&p.x<=right)p.y=DRYER.sheetY;
       else if(p.x>right&&p.x<right+.20){const u=(p.x-right)/.20,w=u*u*(3-2*u);p.y=DRYER.sheetY+(p.y-DRYER.sheetY)*w;}
+      const brakeX=D.deliveryCenterX+DELIVERY.brakeX*DELIVERY.scaleX,dx=p.x-brakeX,br=DELIVERY.brakeRadius+DELIVERY.clearance;
+      if(Math.abs(dx)<br)p.y=Math.max(p.y,DELIVERY.brakeY+Math.sqrt(br*br-dx*dx));
       return p;
     };
     this.pathLength=this.curve.getLength();
+    // Integrate a local visual brake-speed profile, then invert it at runtime.
+    // The short slowdown zone preserves separation before the existing pile settling phase.
+    this.transportProfile=[{timeDistance:0,pathDistance:0}];let timeDistance=0;
+    const brakeStart=D.deliveryCenterX+DELIVERY.brakeX*DELIVERY.scaleX+.10,brakeEnd=D.deliveryCenterX-.15;
+    for(let i=1;i<=1600;i++){
+      const pathDistance=this.pathLength*i/1600,p=this.curve.getPointAt((i-.5)/1600);
+      const fade=Math.max(0,Math.min(1,(p.x-brakeStart)/.06,(brakeEnd-p.x)/.06));
+      const speedRatio=1-.18*fade*fade*(3-2*fade);
+      timeDistance+=(this.pathLength/1600)/speedRatio;
+      this.transportProfile.push({timeDistance,pathDistance});
+    }
+    this.transportTimeLength=timeDistance;
     // CD 102 full-format reference: 720 x 1020 mm sheet, one gripper pitch per press cycle.
     this.sheetLength=.72;this.sheetWidth=1.02;this.sheetLengthSegments=32;this.sheetWidthSegments=8;
     this.nominalSheetsPerHour=15000;this.sheetCyclesPerSecond=this.nominalSheetsPerHour/3600;
     // The 1020 mm dimension is across the press; the 720 mm dimension is the sheet-travel direction.
     // Keep this process pitch independent from the BMJ custom machine-unit spacing.
     this.sheetPitchMeters=.82; // 720 mm sheets with a visible 100 mm gap in the process illustration.
-    this.sheetGapMeters=this.sheetPitchMeters;this.cycleDistance=this.pathLength+this.sheetGapMeters*2;this.sheetCount=Math.max(8,Math.floor(this.cycleDistance/this.sheetGapMeters));
+    this.sheetGapMeters=this.sheetPitchMeters;this.cycleDistance=this.transportTimeLength+this.sheetGapMeters*2;this.sheetCount=Math.max(8,Math.floor(this.cycleDistance/this.sheetGapMeters));
     this.sheets=[];this.pileSheets=[];this.rotors=[];this.oscillators=[];this.levers=[];this.gripperMotions=[];this.joggerMotions=[];this.fluidFlows=[];this.inkSurfaces=[];
     this.uvLamps=[];this.uvBeams=[];this.materials=[];this.geometries=[];
     this.staticDeliveryStack=template.findNode('delivery-paper-stack');this.staticDeliveryVisible=this.staticDeliveryStack?.visible;this.maxPileSheets=32;this.pileSheetThickness=.0035;this.pileAnchor=new THREE.Vector3(D.deliveryCenterX+.10,.25,0);
@@ -454,7 +469,7 @@ export class PrintingSimulation{
     joggers?.traverse(object=>{
       if(!object.isMesh||(!object.userData.dynamicJogger&&object.geometry?.type!=='BoxGeometry'))return;
       const side=object.userData.joggerSide;
-      this.joggerMotions.push({object,initial:object.position.clone(),amplitude:.016,phase:side==='OS'?Math.PI:0});
+      this.joggerMotions.push({object,initial:object.position.clone(),amplitude:DELIVERY.joggerStroke,phase:0,outwardSign:side==='OS'?1:-1});
     });
   }
   collectInkSurfaces(){
@@ -550,6 +565,12 @@ export class PrintingSimulation{
     for(const flow of this.fluidFlows){flow.tube.visible=this.inkFlowVisible;for(const particle of flow.particles)particle.visible=this.inkFlowVisible;}
     this.emit(true);return this.state();
   }
+  transportPathDistance(distance){
+    const p=this.transportProfile;let lo=0,hi=p.length-1;
+    while(hi-lo>1){const mid=(lo+hi)>>1;if(p[mid].timeDistance<distance)lo=mid;else hi=mid;}
+    const a=p[lo],b=p[hi],u=clamp((distance-a.timeDistance)/(b.timeDistance-a.timeDistance),0,1);
+    return a.pathDistance+(b.pathDistance-a.pathDistance)*u;
+  }
   update(now){
     if(!this.active)return;
     if(!this.running){this.lastNow=now;return;}
@@ -564,14 +585,14 @@ export class PrintingSimulation{
       const sheet=this.sheets[i],absolute=travelled-i*this.sheetGapMeters;
       if(absolute<this.sheetLength){sheet.mesh.visible=false;sheet.gripper.visible=false;continue;}
       const cycle=Math.floor(absolute/this.cycleDistance),local=mod(absolute,this.cycleDistance);
-      if(local>this.pathLength){
+      if(local>this.transportTimeLength){
         if(sheet.userData.lastDeliveryCycle===cycle){sheet.mesh.visible=false;sheet.gripper.visible=false;continue;}
         if(sheet.userData.lastDeliveryCycle!==cycle)this.updateSheet(sheet,this.pathLength);
         if(!this.depositSheet(sheet,cycle)){sheet.mesh.visible=true;sheet.gripper.visible=false;}
 
         continue;
       }
-      if(!this.updateSheet(sheet,local))continue;
+      if(!this.updateSheet(sheet,this.transportPathDistance(local)))continue;
       const a=sheet.userData.trailPosition.x,b=sheet.userData.leadPosition.x;
       if(b>=dryerLeft&&a<=dryerRight)dryerOccupied=true;
     }
@@ -600,7 +621,7 @@ export class PrintingSimulation{
       }
     }
     const deliveryOccupied=this.sheets.some(s=>s.mesh.visible&&s.userData.gripperReleased);
-    for(const item of this.joggerMotions)item.object.position.z=item.initial.z+(deliveryOccupied?Math.sin(phase*1.05+item.phase)*item.amplitude:0);
+    for(const item of this.joggerMotions)item.object.position.z=item.initial.z+(deliveryOccupied?item.outwardSign*(.5+.5*Math.sin(phase*1.05+item.phase))*item.amplitude:0);
 
     if(this.inkFlowVisible){
       for(const flow of this.fluidFlows){

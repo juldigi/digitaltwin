@@ -534,6 +534,8 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
   applyPuAuditVisibility(){
     const ids=Array.from({length:8},(_,i)=>`press-${i}-drive-gears`);
     for(let bay=1;bay<=7;bay++)for(const part of ['shaft','spring'])ids.push(`transfer-pu${bay}-pu${bay+1}-gripper-${part}`);
+    ids.push('delivery-gripper-bar-reference');
+    for(const mesh of this.realismMeshes||[])if(['preset-plus-delivery-touch-console','preset-plus-delivery-touch-display','preset-plus-delivery-jogwheel'].includes(mesh.userData.realismRole)){mesh.visible=false;mesh.userData.silhouetteCritical=false;mesh.userData.installedVerified=false;}
     for(const id of ids){
       const node=this.findNode(id);if(!node)continue;
       node.visible=false;
@@ -560,11 +562,13 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
     super.clearDeliveredSheets();
     if(this.deliveryTableMesh&&Number.isFinite(this.deliveryTableInitialY))this.deliveryTableMesh.position.y=this.deliveryTableInitialY;
     this.deliveryTableDrop=0;
+    if(this.deliveryLiftShoes)this.deliveryLiftShoes.position.y=this.deliveryLiftShoesInitialY;
   }
   relayoutPileSheets(){
     const visible=this.pileSheets.filter(sheet=>sheet.userData.serial>=0).sort((a,b)=>a.userData.serial-b.userData.serial);
     const count=visible.length,drop=Math.max(0,count-1)*this.pileSheetThickness;
     this.deliveryTableDrop=drop;
+    if(this.deliveryLiftShoes)this.deliveryLiftShoes.position.y=this.deliveryLiftShoesInitialY-drop;
     if(this.deliveryTableMesh)this.deliveryTableMesh.position.y=this.deliveryTableInitialY-drop;
     visible.forEach((sheet,rank)=>{
       const pos=sheet.mesh.geometry.attributes.position,w=this.sheetWidthSegments,l=this.sheetLengthSegments;
@@ -985,6 +989,8 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
     this.collectDampeningSurfaces();
     this.deliveryTableMesh=this.template.findNode('delivery-pile')?.children.find(o=>o.isMesh)||null;
     this.deliveryTableInitialY=this.deliveryTableMesh?.position.y;
+    this.deliveryLiftShoes=this.template.findNode('delivery-pile-lift-shoes');
+    this.deliveryLiftShoesInitialY=this.deliveryLiftShoes?.position.y||0;
     this.deliveryTableDrop=0;
     this.deliveryJoggerActive=false;
   }
@@ -1025,7 +1031,7 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       deliveryPilePolicy:'START_EMPTY_STACK_TO_CAPACITY_THEN_CLEAR_AND_REPEAT',
       operatorSideMicrodetailPolicy:'WORLD_NEGATIVE_Z_AFTER_TOP_LEVEL_PHOTO_MIRROR',
       presetPlusDeliveryDetailPolicy:'TOUCH_DISPLAY_JOGWHEEL_STATICSTAR_AND_POSITIONABLE_SHEET_BRAKE_REFERENCES',
-      deliveryChainMotionPolicy:'SINGLE_FORWARD_LOOP_SPROCKETS_SHARE_ROTATION_DIRECTION',
+      deliveryChainMotionPolicy:'FORWARD_TANGENT_REFERENCE__INSTALLED_LOOP_UNVERIFIED',
       sheetBrakeMotionPolicy:'CONTROLLED_DECELERATION_VISUAL_REFERENCE_NOT_SERVICE_SETPOINT',
       feederMotionPolicy:'SUCTION_SEPARATOR_LINKAGE_FRONT_LAYS_AND_INFEED_GRIPPER_SHARE_ONE_SHEET_CYCLE',
       infeedHandoffPolicy:'INFEED_GRIPPER_RECIPROCATES_AND_ROCKS_WITH_ONE_PRESS_CYCLE',
@@ -1043,7 +1049,9 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       deliveryPileElevatorPolicy:'TOP_RECEIVING_PLANE_HELD_CONSTANT_WHILE_TABLE_LOWERS_WITH_STACK',
       deliveryTableDropM:this.deliveryTableDrop||0,
       deliveryJoggerActive:this.deliveryJoggerActive,
-      deliveryJoggerPolicy:'ACTIVE_ONLY_WHILE_SHEET_OCCUPIES_RECEIVING_ZONE'
+      deliveryJoggerPolicy:'ACTIVE_ONLY_WHILE_SHEET_OCCUPIES_RECEIVING_ZONE',
+      deliveryPileExchangePolicy:'EXPLICIT_32_SHEET_DEMO_RESET_NOT_INSTALLED_PILE_CHANGE',
+      installedDeliveryChainTopologyVerified:false
     };
   }
 }

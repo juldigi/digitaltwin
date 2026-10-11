@@ -229,7 +229,7 @@ for(const [key,name,refs,parts] of [
 /* DELIVERY */
 for(const [key,name,refs,parts] of [
  ['FRAME','Delivery End Frame',['delivery-frame'],['Main Columns','Upper Control Face','Inspection Window']],
- ['PILE','Main Delivery Pile',['delivery-pile','delivery-pile-lift'],['Pile Table','Sheet Stack','Pile Lift Shaft / Lead-screw / Shoes']],
+ ['PILE','Main Delivery Pile',['delivery-pile','delivery-pile-lift'],['Pile Table','Sheet Stack','Pile Lift Guides / Moving Shoes']],
  ['BRAKE','Sheet Brake / Slowdown',['delivery-sheet-brake'],['Sheet Brake Elements','Slowdown Zone']],
  ['CHAIN','Gripper-chain / Receiving Path',['delivery-chain-path','delivery-drive-sprockets','delivery-chain-tensioners'],['Chain Guide Rails','Drive / Return Sprockets','Chain Tensioners / Gripper Bars','Receiving Path']],
  ['AIR','Powder / Air Conditioning',['delivery-powder-jogger-air'],['Upper Air / Powder Bar','Nozzle References']],
@@ -241,7 +241,7 @@ for(const [key,name,refs,parts] of [
  ['ACCESS','Dryer / Inspection / Delivery Access',['dryer-delivery-access'],['Enclosed Receiving Transition','Supported Service Landing','Approach Step']]
 ]){
  const sid=`O5.DELIVERY.${key}`;add(sid,'O5.DELIVERY',3,'Sub',name,{meshRefs:refs,sourceRefs:photoManual,confidence:CONFIDENCE.REFERENCE_PLUS_PHOTO,explodeVector:[.45,.18,key==='STEP'?.45:0]});
- const bid=`${sid}.B1`;add(bid,sid,4,'Block',name,{meshRefs:refs,sourceRefs:manual,confidence:CONFIDENCE.MEDIUM,explodeVector:[.18,.12,0]});parts.forEach((p,i)=>{const pid=`${bid}.P${i+1}`;add(pid,bid,5,'Part',p,{meshRefs:i===0?refs:[],sourceRefs:manual,confidence:i===0?CONFIDENCE.MEDIUM:CONFIDENCE.HIGH,explodeVector:[.08,.07,(i-1)*.10]});add(`${pid}.S1`,pid,6,'Spesifik Part',`${p} · delivery reference`,{sourceRefs:manual,confidence:CONFIDENCE.HIGH,explodeVector:[.05,.05,.08],maintenanceTag:'OEM_MANUAL_REFERENCE'});});
+ const bid=`${sid}.B1`;add(bid,sid,4,'Block',name,{meshRefs:refs,sourceRefs:manual,confidence:CONFIDENCE.MEDIUM,explodeVector:[.18,.12,0]});parts.forEach((p,i)=>{const pid=`${bid}.P${i+1}`;const mapped=key==='JOG'?[`delivery-jogger-${i===0?'ds':'os'}`]:key==='SENSOR'?[['delivery-sensor-12b65','delivery-sensor-12b69','delivery-sensor-12b129','delivery-sensor-12s34'][i]]:key==='PILE'?[['delivery-pile','delivery-paper-stack','delivery-pile-lift'][i]]:key==='CHAIN'?[['delivery-chain-path','delivery-drive-sprockets','delivery-chain-tensioners','delivery-chain-path'][i]]:key==='BRAKE'?[1,2,3].map(n=>`delivery-brake-roller-${n}`):refs;add(pid,bid,5,'Part',p,{meshRefs:mapped,sourceRefs:manual,confidence:CONFIDENCE.REFERENCE_ONLY,explodeVector:[.08,.07,(i-1)*.10]});add(`${pid}.S1`,pid,6,'Spesifik Part',`${p} · delivery reference`,{meshRefs:mapped,sourceRefs:manual,confidence:CONFIDENCE.REFERENCE_ONLY,explodeVector:[.05,.05,.08],maintenanceTag:'OEM_MANUAL_REFERENCE'});});
 }
 
 /* PLATFORM / AUXILIARY */

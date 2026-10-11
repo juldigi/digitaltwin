@@ -585,7 +585,7 @@ test('Offset 5 delivery chain shares one forward rotation sense and the sheet br
    assert.ok(Math.abs(surface-.82*sim.baseMetersPerSecond)<1e-9);
   }
   const st=sim.state();
-  assert.equal(st.deliveryChainMotionPolicy,'SINGLE_FORWARD_LOOP_SPROCKETS_SHARE_ROTATION_DIRECTION');
+  assert.equal(st.deliveryChainMotionPolicy,'FORWARD_TANGENT_REFERENCE__INSTALLED_LOOP_UNVERIFIED');
   assert.equal(st.sheetBrakeMotionPolicy,'CONTROLLED_DECELERATION_VISUAL_REFERENCE_NOT_SERVICE_SETPOINT');
  }finally{sim.dispose();m.dispose();}
 });

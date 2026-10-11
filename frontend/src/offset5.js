@@ -8,6 +8,7 @@ import {V122_SOURCE_STATS} from './data/research-v122.js';
 import {OFFSET5_FEEDBOARD_SURFACE} from './data/offset5-feedboard-surface.js';
 import {OFFSET5_COATER_CONTACT as COATER} from './data/offset5-coater-contact.js';
 import {OFFSET5_DRYER_CONTACT as DRYER,OFFSET5_INSPECTION_CONTACT as INSPECTION} from './data/offset5-dryer-contact.js';
+import {OFFSET5_DELIVERY_CONTACT as DELIVERY} from './data/offset5-delivery-contact.js';
 import {offset5CylinderSection} from './data/offset5-pu-contact.js';
 import {createIndustrialMaterial} from './render/material-library.js';
 
@@ -1077,10 +1078,11 @@ export class OffsetMachineTemplate {
   delivery(x){
     const photos=['IMG_2312.jpeg','IMG_1656.jpeg','IMG_2388(2).jpeg','IMG_2389(1).jpeg'];
     const g=this.group(this.root,'delivery','Delivery · pile, controls & end frame',[x,0,0],[1.8,0,0],photos,'Exterior silhouette, front control face, vertical pile gate and operator-side steps follow the actual machine photos. Pile-control device names follow the supplied CD102 service manual.');
-    g.scale.x=OFFSET5_DIMENSIONS.layout.deliveryBodyLength/1.995;
+    g.scale.x=DELIVERY.scaleX;
+    Object.assign(g.userData,{installedChainTopologyVerified:false,installedBrakeConfigurationVerified:false,installedLiftMechanismVerified:false});
     const frame=this.group(g,'delivery-frame','Delivery end frame & columns',[0,0,0],[.15,0,-.45],photos);
     for(const x0 of [-.68,.77])for(const z of [-1.06,1.06])this.box(frame,[.22,1.65,.26],[x0,.94,z],'graphite',.025);
-    this.box(frame,[1.90,.16,2.24],[.04,1.61,0],'graphite',.025);
+    this.box(frame,[1.90,.16,2.24],[.04,1.93,0],'graphite',.025);
     this.markExteriorCover(this.box(frame,[1.84,.34,2.20],[.04,2.23,0],'light',.035));
     this.markExteriorCover(this.box(frame,[1.55,.46,.10],[.00,2.07,-1.10],'light',.018));
     this.markExteriorCover(this.box(frame,[1.05,.34,.025],[.10,2.07,-1.165],'glass',.008));
@@ -1096,27 +1098,43 @@ export class OffsetMachineTemplate {
     for(const [name,y,z] of [['12B65',1.18,-.91],['12B69',.98,-.91],['12B129',1.34,.91],['12S34',.26,.91]]){const sn=this.group(pileSensors,`delivery-sensor-${name.toLowerCase()}`,`Delivery sensor ${name}`,[0,0,0],[.08,.08,z<0?-.16:.16],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf']);this.box(sn,[.09,.07,.06],[.66,y,z],'graphite',.010);}
 
     const sheetBrake=this.group(g,'delivery-sheet-brake','Sheet brake / slowdown zone',[0,0,0],[.45,.25,0],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf','IMG_2312.jpeg'],'Delivery sheet slowdown is documented in the supplied manual; sheet-brake placement is a functional visual reference.');
-    for(const z of [-.54,0,.54]){const r=this.cylinder(sheetBrake,.055,.28,[-.54,1.46,z],'rubber','z');Object.assign(r.userData,{dynamicRotor:true,rotorRole:'sheet-brake-roller',rotorSign:1,rotorRate:1.08});this.box(sheetBrake,[.20,.06,.32],[-.50,1.39,z],'graphite',.010);}
+    for(const [i,z] of [-.54,0,.54].entries()){
+      const carrier=this.group(sheetBrake,`delivery-brake-roller-${i+1}`,'Sheet brake roller · reference',[DELIVERY.brakeX,DELIVERY.brakeY,z],[0,.08,0],photos);
+      carrier.scale.x=1/DELIVERY.scaleX;
+      const roller=this.cylinder(carrier,DELIVERY.brakeRadius,.28,[0,0,0],'rubber','z');
+      Object.assign(roller.userData,{dynamicRotor:true,rotorRole:'sheet-brake-roller',rotorSign:1,rotorRate:1.08});
+      this.box(sheetBrake,[.20,.04,.32],[-.50,1.36,z],'graphite',.010);
+    }
     const chainPath=this.group(g,'delivery-chain-path','Delivery gripper-chain rails & sheet receiving path',[0,0,0],[.35,.24,-.30],photos,'Chain rails and receiving path explain the sheet route into the pile. Chain pitch, gripper count and timing remain reference-only.');
     for(const z of [-.78,.78]){this.box(chainPath,[1.46,.06,.06],[-.06,1.61,z],'steel',.010);for(let n=0;n<12;n++)this.cylinder(chainPath,.022,.035,[-.70+n*.125,1.61,z],'graphite','z');}
     const sprockets=this.group(g,'delivery-drive-sprockets','Delivery gripper-chain drive / return sprocket references',[0,0,0],[.30,.22,-.44],photos,'Sprocket locations complete the visible chain route; tooth count, pitch, tension and drive ratio are not asserted.');
-    for(const x0 of [-.68,.68])for(const z of [-.78,.78]){const sign=x0<0?-1:1,key=x0+':'+z,hub=this.cylinder(sprockets,.12,.045,[x0,1.61,z],'graphite','z'),ring=this.ring(sprockets,.092,.012,[x0,1.61,z],'steel','z');Object.assign(hub.userData,{dynamicRotor:true,rotorRole:'delivery-chain-sprocket',rotorSign:sign,rotorRate:.94,rotorPairKey:key});Object.assign(ring.userData,{rotorRoleReference:'delivery-chain-sprocket-ring',motionBudget:'STATIC_REFERENCE_MOBILE',rotorPairKey:key});}
+    for(const [i,x0] of [-.68,.68].entries())for(const [j,z] of [-.78,.78].entries()){
+      const key=x0+':'+z,carrier=this.group(sprockets,`delivery-sprocket-${i+1}-${j+1}`,'Drive / return sprocket · reference',[x0,DELIVERY.sprocketY,z],[0,.08,0],photos);
+      carrier.scale.x=1/DELIVERY.scaleX;
+      const hub=this.cylinder(carrier,DELIVERY.sprocketRadius,.045,[0,0,0],'graphite','z'),ring=this.ring(carrier,.092,.012,[0,0,0],'steel','z');
+      Object.assign(hub.userData,{dynamicRotor:true,rotorRole:'delivery-chain-sprocket',rotorSign:-1,rotorRate:.94,rotorPairKey:key});
+      Object.assign(ring.userData,{rotorRoleReference:'delivery-chain-sprocket-ring',motionBudget:'STATIC_REFERENCE_MOBILE',rotorPairKey:key});
+    }
     const tensioners=this.group(g,'delivery-chain-tensioners','Delivery chain tensioners, guides & gripper bars',[0,0,0],[.28,.20,-.40],photos,'Tensioner and gripper-bar locations complete the receiving path. Chain tension, pitch, gripper count and phasing remain unverified.');
     for(const z of [-.78,.78]){this.box(tensioners,[.22,.10,.055],[-.54,1.48,z],'graphite',.010);const r=this.cylinder(tensioners,.045,.035,[-.43,1.53,z],'steel','z');Object.assign(r.userData,{rotorRoleReference:'delivery-tensioner-idler',motionBudget:'STATIC_REFERENCE_MOBILE'});}
-    for(const x0 of [-.42,.04,.50])this.box(tensioners,[.045,.045,1.48],[x0,1.58,0],'steel',.008);
+    const gripperReference=this.group(tensioners,'delivery-gripper-bar-reference','Unverified installed gripper bars',[0,0,0],[0,.10,0],photos);
+    gripperReference.userData.installedVerified=false;
+    for(const x0 of [-.42,.04,.50])this.box(gripperReference,[.045,.045,1.48],[x0,1.58,0],'steel',.008);
     const powder=this.group(g,'delivery-powder-jogger-air','Powder / air bar and pile-edge conditioning reference',[0,0,0],[.28,.22,.36],photos,'Upper air/powder bar is a functional reference only; installed powder device, dosage and nozzle settings are not asserted.');
     this.cylinder(powder,.028,1.52,[-.38,1.72,0],'steel','z');
     for(const z of [-.60,-.30,0,.30,.60])this.cylinder(powder,.010,.07,[-.38,1.65,z],'glass','y');
     const joggers=this.group(g,'delivery-joggers','Delivery joggers D.S. / O.S.',[0,0,0],[.35,.18,.55],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'12M6 / 12M7 jogger function is represented at the pile sides; exact stroke is not inferred.');
-    for(const z of [-.86,.86]){
+    for(const z of [-DELIVERY.joggerZ,DELIVERY.joggerZ]){
       const side=z<0?'DS':'OS';
-      const face=this.box(joggers,[.18,.34,.07],[.34,.95,z],'graphite',.015);
-      const arm=this.box(joggers,[.34,.05,.10],[.18,.84,z],'graphite',.008);
+      const sideGroup=this.group(joggers,`delivery-jogger-${side.toLowerCase()}`,`Delivery ${side} jogger · reference`,[0,0,0],[0,.05,0],photos);
+      const face=this.box(sideGroup,[.18,.14,.07],[.34,DELIVERY.joggerY,z],'graphite',.015);
+      const arm=this.box(sideGroup,[.34,.025,.07],[.18,.39,z],'graphite',.008);
       Object.assign(face.userData,{dynamicJogger:true,joggerSide:side});
       Object.assign(arm.userData,{dynamicJogger:true,joggerSide:side});
     }
-    const pileLift=this.group(g,'delivery-pile-lift','Delivery pile lift shaft, lead-screw & shoes',[0,0,0],[.26,.12,-.50],photos,'The paired lift elements explain table guidance and elevation. Screw lead, load rating, motor ratio and travel limits must come from the installed-machine documentation.');
-    for(const z of [-.88,.88]){this.cylinder(pileLift,.035,1.28,[.72,.78,z],'steel','y');for(const y of [.26,.54,.82,1.10,1.34])this.ring(pileLift,.046,.006,[.72,y,z],'graphite','y');this.box(pileLift,[.18,.12,.18],[.66,.22,z],'graphite',.014);}
+    const pileLift=this.group(g,'delivery-pile-lift','Delivery pile lift guides & shoes · reference',[0,0,0],[.26,.12,-.50],photos,'The paired lift elements explain table guidance and elevation. Screw lead, load rating, motor ratio and travel limits must come from the installed-machine documentation.');
+    const shoes=this.group(pileLift,'delivery-pile-lift-shoes','Moving table support shoes',[0,0,0],[0,.06,0],photos);
+    for(const z of [-.88,.88]){this.cylinder(pileLift,.035,1.28,[.72,.78,z],'steel','y');for(const y of [.26,.54,.82,1.10,1.34])this.ring(pileLift,.046,.006,[.72,y,z],'graphite','y');this.box(shoes,[.18,.12,.18],[.66,.22,z],'graphite',.014);}
 
     const hood=this.markExteriorCover(this.group(g,'delivery-hood','Delivery upper hood & side enclosure',[0,0,0],[0,.7,0],photos));
     for(const z of [-1.07,1.07])this.box(hood,[1.64,.72,.22],[0,1.95,z],'graphite',.06);
@@ -1202,7 +1220,7 @@ export class OffsetMachineTemplate {
       // Hiding them leaves the mobile sheet path passing through an empty PU.
       const owner=m.userData.ownerId||'';
       const interiorMechanism=isPuInteriorMesh(m);
-      const processMechanism=interiorMechanism||owner==='delivery-drive-sprockets';
+      const processMechanism=interiorMechanism||m.userData.dynamicRotor||owner==='delivery-drive-sprockets'||/^delivery-sprocket-\d+-\d+$/.test(owner);
       m.visible=m.userData.exteriorCover?!this.exteriorOpen&&!on:interiorMechanism?this.exteriorOpen:(!on||processMechanism);
     }
     for(const v of this.auxVisuals)if(v.userData.detail)v.visible=!on;

@@ -1,0 +1,459 @@
+{
+  "version": 1,
+  "repository": "juldigi/digitaltwin",
+  "productionUrl": "https://digitaltwin.juldigi.workers.dev/",
+  "timezone": "Asia/Jakarta",
+  "cadence": "HOURLY",
+  "mode": "AUDIT_ONE_PART_THEN_FIX_VERIFY_DEPLOY",
+  "status": "WAIT_FOR_OFFSET5_DELIVERY_RELEASE",
+  "cursor": {
+    "machineId": "BMJ-MCH-0001",
+    "partIndex": 0
+  },
+  "baselineCommit": "b5e45a82ce1aeaf9094b0a5c3fd8d985b8a9e96f",
+  "machines": [
+    {
+      "machineId": "BMJ-MCH-0001",
+      "name": "GUILOTINE POLAR 115 MACHINE (GLM-1)",
+      "model": "115 EM MON",
+      "area": "OFFSET PRINTING",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0002",
+      "name": "SHEETING LEXUS",
+      "model": "HSM-CTM7",
+      "area": "OFFSET PRINTING",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0003",
+      "name": "OFFSET UV INK - 5 MACHINE + INLINE INS",
+      "model": "CD 102-8+L",
+      "area": "OFFSET PRINTING",
+      "status": "OFFSET5_PILOT_COMPLETE_AFTER_DELIVERY_GATE",
+      "parts": [
+        {
+          "part": "feeder",
+          "status": "COMPLETE",
+          "report": "docs/offset5-feeder-contact-audit.md"
+        },
+        {
+          "part": "vacuum feedboard",
+          "status": "COMPLETE",
+          "report": "docs/offset5-vacuum-table-audit.md"
+        },
+        {
+          "part": "PU1 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset5-pu1-transfer-contact.md"
+        },
+        {
+          "part": "PU2 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset5-pu1-transfer-contact.md"
+        },
+        {
+          "part": "PU3 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset5-pu1-transfer-contact.md"
+        },
+        {
+          "part": "PU4 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset5-pu1-transfer-contact.md"
+        },
+        {
+          "part": "PU5 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset5-pu1-transfer-contact.md"
+        },
+        {
+          "part": "PU6 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset5-pu1-transfer-contact.md"
+        },
+        {
+          "part": "PU7 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset5-pu1-transfer-contact.md"
+        },
+        {
+          "part": "PU8 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset5-pu1-transfer-contact.md"
+        },
+        {
+          "part": "coating",
+          "status": "COMPLETE",
+          "report": "docs/offset5-coater-contact.md"
+        },
+        {
+          "part": "UV and inspection",
+          "status": "COMPLETE",
+          "report": "docs/offset5-dryer-inspection-contact.md"
+        },
+        {
+          "part": "delivery",
+          "status": "RELEASE_PENDING",
+          "report": "docs/offset5-delivery-contact.md"
+        }
+      ],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0004",
+      "name": "OFFSET - 7 MACHINE",
+      "model": "YA1A1A",
+      "area": "OFFSET PRINTING",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0005",
+      "name": "OFFSET - 8 MACHINE",
+      "model": "CX 104-8+LYYL",
+      "area": "OFFSET PRINTING",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0006",
+      "name": "OFFSET - 9 MACHINE",
+      "model": "SX52-4+L",
+      "area": "OFFSET PRINTING",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0007",
+      "name": "PILE TURNER 01",
+      "model": "FZ 1200",
+      "area": "OFFSET PRINTING",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0008",
+      "name": "PILE TURNER 03",
+      "model": "FZ 1200",
+      "area": "OFFSET PRINTING",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0009",
+      "name": "OFFSET - 10 MACHINE",
+      "model": "CX104-2+LY-8+LY-1+L UV + FoilStar",
+      "area": "OFFSET PRINTING",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0010",
+      "name": "AUTOPLATEN - 2 MACHINE",
+      "model": "SP 102",
+      "area": "OFFSET CONVERTING",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0011",
+      "name": "AUTOPLATEN - 5 STAMPING",
+      "model": "MK 920 YMI",
+      "area": "OFFSET CONVERTING",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0012",
+      "name": "AUTOPLATEN - 6 STAMPING",
+      "model": "MK 920 YMI - II",
+      "area": "OFFSET CONVERTING",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0013",
+      "name": "AUTOPLATEN - 7 STRIPPING & BLANKING",
+      "model": "MK 1060 ER",
+      "area": "OFFSET CONVERTING",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0014",
+      "name": "AUTOPLATEN - 8 STRIPPING & BLANKING",
+      "model": "Promatrix 106CSB",
+      "area": "OFFSET CONVERTING",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0015",
+      "name": "AUTOPLATEN - 9 STRIPPING & BLANKING",
+      "model": "Promatrix 106CSB",
+      "area": "OFFSET CONVERTING",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0016",
+      "name": "FOLDER GLUER - 1 MACHINE",
+      "model": "MEDIA 100 II",
+      "area": "OFFSET CONVERTING",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0017",
+      "name": "FOLDER GLUER - 2 MACHINE",
+      "model": null,
+      "area": "OFFSET CONVERTING",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0018",
+      "name": "FOLDER GLUER - 3 MACHINE",
+      "model": "MEDIA 100 II",
+      "area": "OFFSET CONVERTING",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0019",
+      "name": "OFFLINE INSPECTION 3 - MK",
+      "model": "DIANA EYE 55",
+      "area": "OFFSET CONVERTING",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0020",
+      "name": "OFFLINE INSPECTION 4 - FOCUSIGHT",
+      "model": "FS-SHARK-N650-P3N1",
+      "area": "OFFSET CONVERTING",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0021",
+      "name": "AUTOBLANKING MACHINE 2",
+      "model": "QF-100CS",
+      "area": "OFFSET CONVERTING",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0022",
+      "name": "PILE TURNER 2",
+      "model": "FZ 1200",
+      "area": "OFFSET CONVERTING",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0023",
+      "name": "COLLATOR MACHINE",
+      "model": null,
+      "area": "OFFSET CONVERTING",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0024",
+      "name": "DIGITAL INKJET",
+      "model": "UPG-LY300",
+      "area": "OFFSET CONVERTING",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0025",
+      "name": "CTP HEIDELBERG MACHINE",
+      "model": null,
+      "area": "PDS",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0026",
+      "name": "CTP HEIDELBERG MACHINE",
+      "model": null,
+      "area": "PDS",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0027",
+      "name": "CTF IMAGESETTER SCREEN MACHINE",
+      "model": null,
+      "area": "PDS",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0028",
+      "name": "ZUND MACHINE",
+      "model": null,
+      "area": "PDS",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0029",
+      "name": "COMPRESSOR ATLAS COPCO NO.2",
+      "model": null,
+      "area": "UTILITY",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0030",
+      "name": "COMPRESSOR ATLAS COPCO NO.3",
+      "model": null,
+      "area": "UTILITY",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0031",
+      "name": "COMPRESSOR KAESER NO.4",
+      "model": null,
+      "area": "UTILITY",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0032",
+      "name": "COMPRESSOR KAESER NO.6",
+      "model": null,
+      "area": "UTILITY",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0033",
+      "name": "COMPRESSOR SWAN NO.7",
+      "model": null,
+      "area": "UTILITY",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0034",
+      "name": "COMPRESSOR KAESER NO.8",
+      "model": null,
+      "area": "UTILITY",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0035",
+      "name": "COMPRESSOR ATLAS COPCO NO.9",
+      "model": null,
+      "area": "UTILITY",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0036",
+      "name": "AHU 3",
+      "model": null,
+      "area": "UTILITY",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0037",
+      "name": "AHU 4",
+      "model": null,
+      "area": "UTILITY",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0038",
+      "name": "AHU 5",
+      "model": null,
+      "area": "UTILITY",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0039",
+      "name": "AHU 6",
+      "model": null,
+      "area": "UTILITY",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0040",
+      "name": "AHU 7 (SANSIN)",
+      "model": null,
+      "area": "UTILITY",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    },
+    {
+      "machineId": "BMJ-MCH-0041",
+      "name": "AHU 8",
+      "model": null,
+      "area": "UTILITY",
+      "status": "PENDING",
+      "parts": [],
+      "reports": []
+    }
+  ],
+  "history": [
+    {
+      "machineId": "BMJ-MCH-0003",
+      "part": "delivery",
+      "status": "RELEASE_PENDING",
+      "report": "docs/offset5-delivery-contact.md"
+    }
+  ]
+}
