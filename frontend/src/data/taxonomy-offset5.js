@@ -46,8 +46,10 @@ const feederSubs=[
  ['FRAME','Portal & Lift Rails',['feeder-frame'],['Portal Frame','Lift Rails / Chains']]
 ];
 for(const [key,name,refs,parts] of feederSubs){
- const sid=`O5.FEEDER.${key}`;add(sid,'O5.FEEDER',3,'Sub',name,{meshRefs:refs,sourceRefs:photoManual,confidence:CONFIDENCE.REFERENCE_PLUS_PHOTO,explodeVector:[-.55,.22,key==='CONTROL'?.7:0]});
- const bid=`${sid}.B1`;add(bid,sid,4,'Block',name,{meshRefs:refs,sourceRefs:photoManual,confidence:CONFIDENCE.MEDIUM,explodeVector:[-.25,.16,0]});
+ const referenceOnly=['CENTER','NONSTOP','DRIVE'].includes(key);
+ const description=key==='NONSTOP'?'Fungsi non-stop merupakan referensi manual. Konfigurasi rake terpasang belum terverifikasi; batang tidak ditampilkan menembus pile utama.':key==='SEP'?'Sucker mengikuti kontak visual dengan permukaan pile. Jumlah, stroke, dan pembagian sucker aktual belum terverifikasi dari foto.':referenceOnly?'Identitas fungsi menggunakan manual keluarga CD102. Posisi dan bentuk komponen terpasang pada mesin ini belum terverifikasi.':'Bentuk luar menggunakan foto BMJ; proporsi dan gerak merupakan pendekatan visual, bukan ukuran atau setelan servis.';
+ const sid=`O5.FEEDER.${key}`;add(sid,'O5.FEEDER',3,'Sub',name,{meshRefs:refs,sourceRefs:referenceOnly?manual:photoManual,confidence:referenceOnly?CONFIDENCE.REFERENCE_ONLY:CONFIDENCE.REFERENCE_PLUS_PHOTO,description,explodeVector:[-.55,.22,key==='CONTROL'?.7:0]});
+ const bid=`${sid}.B1`;add(bid,sid,4,'Block',name,{meshRefs:refs,sourceRefs:referenceOnly?manual:photoManual,confidence:referenceOnly?CONFIDENCE.REFERENCE_ONLY:CONFIDENCE.MEDIUM,description,explodeVector:[-.25,.16,0]});
  parts.forEach((p,i)=>{const pid=`${bid}.P${i+1}`;add(pid,bid,5,'Part',p,{meshRefs:i===0?refs:[],sourceRefs:manual,confidence:i===0&&refs.length?CONFIDENCE.MEDIUM:CONFIDENCE.HIGH,explodeVector:[0,.10,(i-1)*.15]});add(`${pid}.S1`,pid,6,'Spesifik Part',`${p} · inspection / service reference`,{sourceRefs:manual,confidence:CONFIDENCE.HIGH,explodeVector:[.06,.06,.10],maintenanceTag:'OEM_MANUAL_REFERENCE'});});
 }
 

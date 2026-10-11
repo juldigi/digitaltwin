@@ -791,44 +791,55 @@ export class OffsetMachineTemplate {
     for(const x0 of [-.20,.20])this.cylinder(frame,.048,.018,[x0,2.63,-1.18],'glass','z');
     const feed=this.group(g,'feeder-head','Kepala feeder & selang terlihat',[0,0,0],[0,.8,0],['IMG_1625.jpeg']);
     this.cylinder(feed,.045,1.82,[.1,2.06,0],'steel');
-    this.markExteriorCover(this.box(feed,[.4,.37,.62],[-.15,1.98,0],'light',.025));
+    const headProfile=new THREE.Shape();
+    headProfile.moveTo(-.35,1.795);headProfile.lineTo(.015,1.795);headProfile.lineTo(.05,1.90);headProfile.lineTo(.05,2.165);headProfile.lineTo(-.35,2.165);headProfile.closePath();
+    const headHousing=this.markExteriorCover(this.mesh(feed,()=>new THREE.ExtrudeGeometry(headProfile,{depth:.62,bevelEnabled:false,steps:1}),'feeder-photo-head-profile','light',[0,0,-.31]));
+    Object.assign(headHousing.userData,{photoFeederHeadProfile:true,sourcePhoto:'IMG_1625.jpeg',geometryEvidence:'PHOTO_OBSERVED__PROPORTIONS_ESTIMATED'});
     for(const z of [-.58,-.29,0,.29,.58])this.box(feed,[.38,.055,.045],[.18,1.88,z],'steel',.012);
     for(const z of [-.42,.42]){
-      this.tube(feed,[[-.24,2.16,z],[.03,2.02,z],[.03,1.66,z],[.26,1.62,z]],.032);
-      this.cylinder(feed,.027,.19,[.24,1.60,z],'steel','y');this.cylinder(feed,.065,.025,[.24,1.5,z],'rubber','y');
+      this.tube(feed,[[-.24,2.16,z],[.03,2.02,z],[-.04,1.91,z]],.025);
     }
     const separating=this.group(feed,'feeder-separation','Separating & forwarding suction assemblies',[0,0,0],[-.25,.45,0],['IMG_1625.jpeg'],'Sucker dan carrier luar mengikuti foto; timing, stroke dan setelan tidak dimodelkan.');
-    for(const z of [-.54,-.27,.27,.54]){this.cylinder(separating,.026,.18,[.18,1.72,z],'steel','y');this.cylinder(separating,.055,.025,[.18,1.61,z],'rubber','y');}
     this.box(separating,[.58,.09,1.30],[-.18,1.88,0],'graphite',.018);
     const suctionCups=this.group(feed,'feeder-suction-cups','Separating / forwarding sucker cups & height collars',[0,0,0],[-.18,.32,.20],['IMG_1625.jpeg'],'Cup locations distinguish separating and forwarding functions; installed cup material, bore and stroke are not asserted.');
     for(const [x0,z] of [[.16,-.55],[.16,-.22],[.16,.22],[.16,.55],[-.04,-.42],[-.04,.42]]){
-      this.cylinder(suctionCups,.018,.12,[x0,1.69,z],'steel','y');
-      this.frustum(suctionCups,.052,.024,.045,[x0,1.605,z],'rubber','y');
-      this.ring(suctionCups,.030,.007,[x0,1.645,z],'steel','y');
+      this.cylinder(suctionCups,.018,.44,[x0,1.67,z],'steel','y');
+      this.frustum(suctionCups,.052,.024,.045,[x0,1.4245,z],'rubber','y');
+      this.ring(suctionCups,.030,.007,[x0,1.4645,z],'steel','y');
     }
+    Object.assign(suctionCups.userData,{pileTopY:1.40,contactClearance:.002,pickupLift:.09,installedCupCountVerified:false,geometryEvidence:'FUNCTIONAL_CONTACT_REFERENCE__CUP_COUNT_NOT_CONFIRMED_BY_PHOTO'});
+    Object.assign(separating.userData,{duplicateCupGeometryRemoved:true});
     const brushes=this.group(feed,'feeder-separator-brushes','Rear / side separator brushes and sheet-edge fingers',[0,0,0],[-.20,.30,.44],['IMG_1625.jpeg','pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Brush and finger locations complete the sheet-separation envelope; bristle stiffness, format setting and contact force are not specified.');
     for(const z of [-.66,-.33,.33,.66]){this.box(brushes,[.12,.035,.045],[-.32,1.47,z],'graphite',.006);for(let n=0;n<4;n++)this.cylinder(brushes,.004,.07,[-.39+n*.018,1.42,z],'steel','y');}
     const air=this.group(feed,'feeder-air','Blast-air / sheet-separation bar',[0,0,0],[-.25,.4,-.55],['IMG_1625.jpeg'],'Bar dan hose visible; nozzle flow serta pressure merupakan data UNKNOWN.');
+    air.position.x=-.25;
     this.cylinder(air,.028,1.46,[-.42,1.48,0],'steel','z');
     for(const z of [-.60,-.30,0,.30,.60]){this.tube(air,[[-.42,1.50,z],[-.54,1.38,z],[-.48,1.24,z]],.013);this.cylinder(air,.018,.10,[-.48,1.20,z],'steel','y');}
     const airControls=this.group(g,'feeder-air-controls','Feeder air manifold, valves & gauges',[0,0,0],[-.30,.24,-.64],['IMG_1625.jpeg'],'Valve and gauge arrangement is a visual service reference; pressure values and pneumatic circuit are not inferred.');
     this.box(airControls,[.42,.26,.10],[-.61,1.63,-.88],'graphite',.018);
     for(let n=0;n<4;n++){this.cylinder(airControls,.025,.035,[-.74+n*.085,1.68,-.945],n===0?'red':'steel','z');this.tube(airControls,[[-.74+n*.085,1.55,-.91],[-.60+n*.07,1.38,-1.01]],.009,n%2?'blue':'rubber');}
     const pile=this.group(g,'feeder-pile','Tumpukan lembar & alas',[0,0,0],[-.85,0,0],['IMG_1625.jpeg'],'Tumpukan lembar sebagai isi visual; tinggi bukan jumlah produksi.');
-    this.box(pile,[1.28,.12,1.66],[0,.18,0],'steel');this.box(pile,[1.18,1.16,1.54],[0,.82,0],'paper',.008);
-    for(let i=0;i<28;i++)this.box(pile,[1.184,.006,1.544],[0,.29+i*.040,0],'light');
+    const liftPlatform=this.group(pile,'feeder-pile-platform','Platform pengangkat pile',[0,0,0],[0,.10,0],['IMG_1625.jpeg']);
+    this.box(liftPlatform,[1.28,.12,1.66],[0,.18,0],'steel');
+    const paperStack=this.group(pile,'feeder-paper-stack','Pile kertas feeder',[0,0,0],[0,0,0],['IMG_1625.jpeg']);
+    this.box(paperStack,[1.18,1.16,1.54],[0,.82,0],'paper',.008);
+    for(let i=0;i<28;i++)this.box(paperStack,[1.184,.006,1.544],[0,.29+i*.040,0],'light');
+    Object.assign(paperStack.userData,{pileTopY:1.40,pileBodyHeight:1.16,illustrativeSheetThickness:.00012,thicknessEvidence:'VISUAL_ONLY__ACTUAL_STOCK_THICKNESS_UNKNOWN'});
     const pallet=this.group(g,'feeder-pallet-lift','Pallet forks, lift shoes & pile stop references',[0,0,0],[-.70,.10,0],['IMG_1624.jpeg','IMG_1625.jpeg'],'Fork and lift-shoe geometry clarifies the pile handling zone; load rating, chain pitch and lift travel remain unverified.');
-    for(const z of [-.56,.56]){this.box(pallet,[1.42,.08,.16],[-.04,.11,z],'graphite',.018);this.box(pallet,[.18,.20,.20],[-.70,.21,z],'steel',.018);}
+    const liftForks=this.group(pallet,'feeder-lift-forks','Fork dan sepatu pengangkat',[0,0,0],[0,.10,0],['IMG_1625.jpeg']);
+    for(const z of [-.56,.56]){this.box(liftForks,[1.42,.08,.16],[-.04,.11,z],'graphite',.018);this.box(liftForks,[.18,.20,.20],[-.70,.21,z],'steel',.018);}
     for(const x0 of [-.52,.52])for(const z of [-.72,.72])this.cylinder(pallet,.055,.045,[x0,.07,z],'black','z');
     const pileGuides=this.group(g,'feeder-pile-guides','Pile side/rear guides & sheet retainers',[0,0,0],[-.55,.12,.55],['IMG_1625.jpeg'],'Guide luar dan retainer direkonstruksi dari foto; format setting dan clearance aktual tidak diukur.');
     for(const z of [-.82,.82]){this.box(pileGuides,[.12,1.18,.055],[-.05,.85,z],'steel',.012);this.box(pileGuides,[.34,.055,.12],[-.18,1.38,z],'graphite',.012);}
-    for(const z of [-.58,0,.58])this.box(pileGuides,[.055,.80,.10],[-.58,.88,z],'steel',.01);
+    for(const z of [-.58,0,.58])this.box(pileGuides,[.055,.80,.10],[-.64,.88,z],'steel',.01);
     const headLinkage=this.group(feed,'feeder-head-linkage','Feeding-head carrier, linkage & adjustment reference',[0,0,0],[0,.62,.35],['IMG_1625.jpeg'],'Carrier dan linkage luar mengikuti foto; stroke, phase dan motor/drive setting tidak diverifikasi.');
     this.box(headLinkage,[.78,.08,.15],[-.04,2.18,0],'steel',.016);
     for(const z of [-.48,.48]){this.box(headLinkage,[.08,.42,.08],[-.14,1.99,z],'graphite',.012);this.cylinder(headLinkage,.045,.10,[.10,2.13,z],'steel','z');}
     const rearEdge=this.group(feed,'feeder-rear-edge','Rear-edge separator, foot & air reference',[0,0,0],[-.38,.36,0],['IMG_1625.jpeg'],'Pemisahan tepi belakang didukung fungsi feeder Heidelberg; bentuk luar saja yang direkonstruksi.');
+    rearEdge.position.x=-.20;
     for(const z of [-.52,-.26,0,.26,.52]){this.box(rearEdge,[.18,.035,.05],[-.38,1.42,z],'steel',.008);this.cylinder(rearEdge,.026,.09,[-.46,1.36,z],'rubber','y');}
     const feederDrives=this.group(g,'feeder-adjustment-drives','Feeder preset adjustment drives',[0,0,0],[-.45,.25,-.45],['IMG_1625.jpeg','pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Lokasi fungsional mengikuti manual CD102 dan diletakkan di dalam envelope foto. Housing, coupling dan linkage bukan CAD serial 550415.');
+    feederDrives.userData.installedConfigurationVerified=false;
     for(const [code,pos] of [['11M9',[-.58,.44,-.88]],['11M8',[-.42,.52,.88]],['11M5',[-.25,2.26,-.78]],['11M6',[.04,2.26,.78]],['11M11',[-.50,1.10,-.88]],['11M12',[-.50,1.10,.88]],['11M4',[.30,1.30,-.92]],['1M9',[-.55,1.52,.92]]]){
       const drive=this.group(feederDrives,`feeder-drive-${code.toLowerCase()}`,`Feeder drive ${code}`,[0,0,0],[-.18,.18,pos[2]<0?-.35:.35],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],`${code} diidentifikasi pada manual OEM; geometri housing adalah reference-only.`);
       this.box(drive,[.16,.18,.12],pos,'graphite',.018);this.cylinder(drive,.034,.10,[pos[0]+.10,pos[1],pos[2]],'graphite','x');
@@ -836,12 +847,11 @@ export class OffsetMachineTemplate {
     const centering=this.group(g,'feeder-pile-centering','Pile centering sensor & support reference',[0,0,0],[-.40,.18,.62],['IMG_1625.jpeg','pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'11B10 senses the lateral pile edge and 11M9 corrects pile position. The manual states a required distance of 130 ± 2 mm and sensor position about 25 mm below the upper pile edge; values are metadata, not model scale.');
     this.box(centering,[.12,.22,.08],[-.48,1.24,.80],'graphite',.012);
     this.cylinder(centering,.022,.08,[-.40,1.24,.80],'glass','x');
-    this.box(centering,[1.18,.055,1.58],[0,.20,0],'steel',.010);
+    centering.userData.supportPlateAnchor='feeder-pile-platform';
     const limits=this.group(g,'feeder-pile-limit-sensors','Pile-height / limit sensors',[0,0,0],[-.35,.16,-.55],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Upper main-pile limitation, auxiliary-pile detection and bottom limitation are represented as sensor locations only.');
     for(const [name,y,z] of [['upper',1.30,-.86],['auxiliary',.82,-.86],['bottom',.28,-.86]]){const sn=this.group(limits,`feeder-limit-${name}`,`Feeder ${name} pile sensor`,[0,0,0],[-.12,.08,-.18],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf']);this.box(sn,[.10,.08,.06],[-.60,y,z],'graphite',.010);}
     const nonstop=this.group(g,'feeder-nonstop','Non-stop / auxiliary pile support reference',[0,0,0],[-.55,.15,0],['IMG_1625.jpeg','pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'The supplied manual describes main/auxiliary pile control on NON-STOP feeders. Installed rake configuration is represented conservatively.');
-    for(const z of [-.62,-.31,0,.31,.62])this.box(nonstop,[.55,.035,.035],[-.34,.44,z],'steel',.006);
-    this.box(nonstop,[.08,.44,1.42],[-.64,.57,0],'graphite',.012);
+    Object.assign(nonstop.userData,{installedConfigurationVerified:false,geometryPolicy:'OEM_FUNCTION_METADATA_ONLY__NO_UNVERIFIED_RAKE_INSIDE_MAIN_PILE'});
     const monitoring=this.group(g,'feeder-sheet-monitoring','Sheet arrival & double-sheet monitoring',[0,0,0],[-.15,.28,.52],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Sheet-arrival monitoring and double-sheet detection are explicitly documented. Four detector heads are shown as a functional reference following Heidelberg product information.');
     for(const z of [-.54,-.18,.18,.54]){this.box(monitoring,[.10,.10,.08],[.36,1.56,z],'black',.014);this.cylinder(monitoring,.018,.04,[.42,1.52,z],'glass','x');}
     const panel=this.group(g,'feeder-panel','Meja kontrol feeder',[0,0,0],[0,0,.8],['IMG_1624.jpeg']);

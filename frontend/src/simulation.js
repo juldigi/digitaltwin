@@ -19,7 +19,7 @@ function arcPoint(cx,cy,r,deg){
 
 function pathPoints(){
   const pts=[
-    new THREE.Vector3(D.feederCenterX-.58,1.37,0),
+    new THREE.Vector3(D.feederCenterX-.58,1.402,0),
     new THREE.Vector3(D.feederCenterX-.16,1.50,0),
     new THREE.Vector3(D.feederCenterX+.38,1.78,0),
     new THREE.Vector3(D.feedBoardCenterX-.48,1.76,0),
@@ -542,7 +542,15 @@ export class PrintingSimulation{
     const angular=TAU*this.sheetCyclesPerSecond*scaled;
     for(const rotor of this.rotors)rotor.axis==='z'?rotor.mesh.rotateZ(rotor.sign*rotor.rate*angular*(rotor.mesh.userData.sectionHandedness||1)):rotor.mesh.rotateY(rotor.sign*rotor.rate*angular*(rotor.mesh.userData.sectionHandedness||1));
     const phase=this.elapsed*TAU*this.sheetCyclesPerSecond;
-    for(const item of this.oscillators)item.object.position[item.axis]=item.initial[item.axis]+Math.sin(phase*item.frequency+item.phase)*item.amplitude;
+    for(const item of this.oscillators){
+      // A sucker approaches the pile, lifts, forwards, then returns above the pile.
+      // This is an explanatory contact cycle, not an installed cam/stroke setting.
+      const cycle=mod(this.elapsed*this.sheetCyclesPerSecond,1);
+      const lift=cycle<.15?0:cycle<.35?(cycle-.15)/.20:cycle<.75?1:(1-cycle)/.25;
+      const forward=cycle<.35?0:cycle<.60?(cycle-.35)/.25:cycle<.75?1:(1-cycle)/.25;
+      item.object.position[item.axis]=item.initial[item.axis]+(item.feederContactCycle?lift*item.amplitude:Math.sin(phase*item.frequency+item.phase)*item.amplitude);
+      if(item.feederContactCycle)item.object.position.x=item.initial.x+forward*.07;
+    }
     for(const item of this.levers)item.object.rotation.z=item.initial+Math.sin(phase*item.frequency+item.phase)*item.amplitude;
     for(const item of this.gripperMotions){
       if(item.orbit){

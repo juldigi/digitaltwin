@@ -646,6 +646,7 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
   }
   stop(){
     super.stop();this.applyDampeningFilm(false);
+    this.updateFeederPile(0);
     for(const sheet of this.sheets){
       sheet.userData.contactRowMasks?.fill(0);
       sheet.userData.contactColorRevision=-1;
@@ -705,6 +706,9 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
     // Preserve the conservative amplitudes, but remove the legacy 1.15x phase drift.
     for(const item of this.oscillators){
       if(['feeder-suction-cups','feeder-separation','feeder-head-linkage','feedboard-front-lays'].includes(item.object?.userData?.nodeId))item.frequency=1;
+      if(item.object?.userData?.nodeId==='feeder-suction-cups'){
+        item.feederContactCycle=true;item.amplitude=.09;
+      }
     }
     const infeed=this.template.findNode('feedboard-infeed-gripper');
     if(infeed){
@@ -876,9 +880,21 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       item.material.needsUpdate=true;
     }
   }
+  updateFeederPile(consumed){
+    const pile=this.template.findNode('feeder-paper-stack'),platform=this.template.findNode('feeder-pile-platform');
+    if(!pile||!platform)return;
+    const {pileTopY,pileBodyHeight,illustrativeSheetThickness}=pile.userData;
+    const removed=Math.min(pileBodyHeight-.05,Math.max(0,consumed)*illustrativeSheetThickness);
+    pile.scale.y=1-removed/pileBodyHeight;
+    pile.position.y=pileTopY*(1-pile.scale.y);
+    platform.position.y=removed;
+    const forks=this.template.findNode('feeder-lift-forks');if(forks)forks.position.y=removed;
+    pile.userData.illustrativeSheetsTaken=consumed;
+  }
   update(now){
     super.update(now);
     if(!this.active)return;
+    this.updateFeederPile(Math.floor(this.elapsed*this.sheetCyclesPerSecond));
     // Keep each inter-unit gripper assembly rigidly attached to its drum orbit.
     // The base simulator already moves the bar center around the correct shaft; here we also
     // rotate the merged finger assembly about that bar center so the fingers do not stay
