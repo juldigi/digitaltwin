@@ -386,18 +386,18 @@ test('Offset 5 path clears impression, blanket and inter-unit drums; grippers or
    const box=new THREE.Box3().setFromObject(m.findNode(`press-${unit}-cylinder-${type}-body`));
    const center=box.getCenter(new THREE.Vector3()),radius=box.getSize(new THREE.Vector3()).x/2;
    const clearance=Math.min(...samples.map(p=>Math.hypot(p.x-center.x,p.y-center.y)-radius));
-   assert.ok(clearance>(unit<2?.0009:.005),`PU${unit+1} sheet penetrates ${type} cylinder`);
+   assert.ok(clearance>.0009,`PU${unit+1} sheet penetrates ${type} cylinder`);
   }
   for(let unit=1;unit<8;unit++){
    const drum=m.findNode(`transfer-pu${unit}-pu${unit+1}`).children.find(o=>o.isMesh&&o.geometry.type==='CylinderGeometry');
    const center=drum.getWorldPosition(new THREE.Vector3()),radius=drum.geometry.parameters.radiusTop;
    const clearance=Math.min(...samples.map(p=>Math.hypot(p.x-center.x,p.y-center.y)-radius));
-   assert.ok(clearance>(unit===1?.0019:.012),`PU${unit} to PU${unit+1} sheet intersects transfer drum`);
+   assert.ok(clearance>.0019,`PU${unit} to PU${unit+1} sheet intersects transfer drum`);
    assert.equal(sim.rotors.find(item=>item.role===`PU${unit}-PU${unit+1}-transfer-drum`)?.sign,-1,'transfer surface must move toward delivery above the shaft');
   }
   sim.start();sim.update(0);sim.update(250);
   assert.equal(sim.gripperMotions.filter(item=>item.transferFromPU).length,14);
-  assert.equal(sim.gripperMotions.filter(item=>item.drumX===.16).length,2);
+  assert.equal(sim.gripperMotions.filter(item=>item.drumX===.16).length,8);
   for(const item of sim.gripperMotions){
    const a=item.object.rotation.z,cos=Math.cos(a),sin=Math.sin(a);
    const anchorX=item.object.position.x+cos*item.barX-sin*item.barY;

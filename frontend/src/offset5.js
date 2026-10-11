@@ -620,7 +620,7 @@ export class OffsetMachineTemplate {
       this.ring(driveGears,r*.70,.018,[x,y,.915],'steel','z').userData.detail=true;
       this.cylinder(driveGears,Math.max(.032,r*.19),.065,[x,y,.92],'steel','z').userData.detail=true;
     });
-    if(i<2){driveGears.visible=false;driveGears.userData.geometryPolicy='UNVERIFIED_GEAR_TRAIN__HIDDEN_IN_AUDITED_PU';driveGears.traverse(m=>{if(m.isMesh)m.userData.puAuditHidden=true;});}
+    {driveGears.visible=false;driveGears.userData.geometryPolicy='UNVERIFIED_GEAR_TRAIN__HIDDEN_IN_AUDITED_PU';driveGears.traverse(m=>{if(m.isMesh)m.userData.puAuditHidden=true;});}
     // No invented full-height transparent drive guard: it obscured the cutaway cylinder train.
     driveGears.userData.guardGeometry='UNVERIFIED_INSTALLED_GUARD__NO_SOLID_PROXY';
     // Sheet travel is rendered only by the live Printing Test simulation. No static paper plane is kept inside the PU.
@@ -789,7 +789,7 @@ export class OffsetMachineTemplate {
     this.cylinder(cam,.036,.04,[.16,.80,.82],'steel','z');
     const camLever=this.box(cam,[.22,.040,.050],[.10,.84,.82],'steel',.008);camLever.rotation.z=.62;
     const guide=this.group(transfer,`${base}-guide`,`PU${from} → PU${to} · sheet guide reference`,[0,0,0],[0,.15,.45],photos,'Guide arc menunjukkan lintasan lembar konseptual; clearance aktual terhadap sheet dan drum tidak terukur.');
-    if(index===0){
+    {
       Object.assign(transfer.userData,{installedTopologyVerified:false,geometryStatus:'FUNCTIONAL_TRANSFER_REFERENCE__MISSING_ACTUAL_HANDOFF_TOPOLOGY'});
       for(const node of [shaft,spring]){node.visible=false;node.userData.geometryPolicy='UNVERIFIED_DISCONNECTED_PROXY_REMOVED';node.traverse(m=>{if(m.isMesh)m.userData.puAuditHidden=true;});}
     }

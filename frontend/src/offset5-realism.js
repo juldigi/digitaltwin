@@ -451,7 +451,7 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
           post.userData.frameSide=z<0?'LOCAL_NEGATIVE_Z':'LOCAL_POSITIVE_Z';
         }
         for(const [cylinderType,y] of bearingRows){
-          const rail=this.db(unit,[.76,.085,.11],[.02,i<2?offset5CylinderSection(i).p[cylinderType][1]:y,z],'graphite',.010,'printing-unit-journal-bearing-rail',{service:false,confidence:'OEM_SIDE_FRAME_JOURNAL_TOPOLOGY'});
+          const rail=this.db(unit,[.76,.085,.11],[.02,offset5CylinderSection(i).p[cylinderType][1],z],'graphite',.010,'printing-unit-journal-bearing-rail',{service:false,confidence:'OEM_SIDE_FRAME_JOURNAL_TOPOLOGY'});
           rail.userData.unitIndex=i+1;
           rail.userData.cylinderType=cylinderType;
           rail.userData.structuralCutaway=true;
@@ -531,7 +531,9 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
   }
 
   applyPuAuditVisibility(){
-    for(const id of ['press-0-drive-gears','press-1-drive-gears','transfer-pu1-pu2-gripper-shaft','transfer-pu1-pu2-gripper-spring']){
+    const ids=Array.from({length:8},(_,i)=>`press-${i}-drive-gears`);
+    for(let bay=1;bay<=7;bay++)for(const part of ['shaft','spring'])ids.push(`transfer-pu${bay}-pu${bay+1}-gripper-${part}`);
+    for(const id of ids){
       const node=this.findNode(id);if(!node)continue;
       node.visible=false;
       node.traverse(mesh=>{if(mesh.isMesh){mesh.visible=false;mesh.userData.puAuditHidden=true;}});
