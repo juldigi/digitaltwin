@@ -285,7 +285,7 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
       }
     }
     const lays=this.node('feedboard-front-lays');
-    if(lays){lays.userData.verifiedFrontLayCount=15;lays.userData.source='HEIDELBERG_CD102_PRESET_PLUS_MANUAL';}
+    if(lays){lays.userData.manualFamilyFrontLayCount=15;lays.userData.installedFrontLayCountVerified=false;lays.userData.source='HEIDELBERG_CD102_PRESET_PLUS_MANUAL';}
 
     // Printing-unit exterior/service DNA: compact control strips, guard interlock targets and
     // inspection windows only. The custom BMJ unit spacing and unit height are intentionally untouched.
@@ -701,6 +701,11 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
     // retaining the group oscillation already created by the base simulation.
     const nonRotatingFeederOwners=new Set(['feeder-suction-cups','feeder-separation','feeder-head-linkage']);
     this.rotors=this.rotors.filter(item=>!nonRotatingFeederOwners.has(item.mesh?.userData?.ownerId));
+    this.rotors=this.rotors.filter(item=>item.mesh?.userData?.ownerId!=='vacuum-table'||item.role==='vacuum-table-tape-drive-roller');
+    for(const rotor of this.rotors.filter(item=>item.role==='vacuum-table-tape-drive-roller')){
+      rotor.rate=this.baseMetersPerSecond/(Math.PI*2*this.sheetCyclesPerSecond*.055);
+      rotor.source='PHOTO_FUNCTIONAL_TAPE_ROLLER__SPEED_VISUAL_REFERENCE';
+    }
 
     // Suction head, separator, linkage and front lays all belong to the same sheet cycle.
     // Preserve the conservative amplitudes, but remove the legacy 1.15x phase drift.
@@ -1007,7 +1012,7 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       sheetBrakeMotionPolicy:'CONTROLLED_DECELERATION_VISUAL_REFERENCE_NOT_SERVICE_SETPOINT',
       feederMotionPolicy:'SUCTION_SEPARATOR_LINKAGE_FRONT_LAYS_AND_INFEED_GRIPPER_SHARE_ONE_SHEET_CYCLE',
       infeedHandoffPolicy:'INFEED_GRIPPER_RECIPROCATES_AND_ROCKS_WITH_ONE_PRESS_CYCLE',
-      registerTransportPolicy:'MOBILE_BATCHED_CONTACT_REFERENCE__SHEET_PATH_AND_INFEED_GRIPPER_CARRY_VISIBLE_MOTION',
+      registerTransportPolicy:'CENTRAL_PERFORATED_TAPE_CONTACT__RIGID_ROUND_SUPPORT_ROLLERS__INFEED_REFERENCE',
       rollerHandednessPolicy:'IDENTICAL_IMG_2777_CONTACT_GRAPH_ACROSS_ALL_EIGHT_STRAIGHT_PRINTING_UNITS',
       actualDiagramCalloutPolicy:'RAKEL_AIR_BLOWER_WATER_ZONES_STATIC_REFERENCE__NO_PRESSURE_FLOW_OR_SERVICE_SETPOINT',
       interUnitGripperPolicy:'RIGID_FINGER_ASSEMBLY_ROTATES_WITH_TRANSFER_DRUM_ORBIT',

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import {OFFSET5_DIMENSIONS,OFFSET5_UNIT_CENTERS} from './data/dimensions-offset5.js';
+import {OFFSET5_FEEDBOARD_SURFACE as FEEDBOARD,offset5FeedboardHeightAt} from './data/offset5-feedboard-surface.js';
 
 // Printing-test visualisation for Offset 5.
 // Process order: feeder -> register -> PU1..PU8 -> coater -> UV dryer/inspection -> delivery.
@@ -22,8 +23,10 @@ function pathPoints(){
     new THREE.Vector3(D.feederCenterX-.58,1.402,0),
     new THREE.Vector3(D.feederCenterX-.16,1.50,0),
     new THREE.Vector3(D.feederCenterX+.38,1.78,0),
-    new THREE.Vector3(D.feedBoardCenterX-.48,1.76,0),
-    new THREE.Vector3(D.feedBoardCenterX+.28,1.52,0),
+    new THREE.Vector3(FEEDBOARD.minX,offset5FeedboardHeightAt(FEEDBOARD.minX)+FEEDBOARD.sheetClearance,0),
+    new THREE.Vector3(D.feedBoardCenterX,offset5FeedboardHeightAt(D.feedBoardCenterX)+FEEDBOARD.sheetClearance,0),
+    new THREE.Vector3(FEEDBOARD.maxX,FEEDBOARD.tapeTopY+FEEDBOARD.sheetClearance,0),
+    new THREE.Vector3(FEEDBOARD.throatMaxX,FEEDBOARD.tapeTopY+FEEDBOARD.sheetClearance,0),
     new THREE.Vector3(OFFSET5_UNIT_CENTERS[0]-.54,1.26,0)
   ];
   OFFSET5_UNIT_CENTERS.forEach((cx,i)=>{
@@ -182,7 +185,15 @@ export class PrintingSimulation{
   constructor(machine,template){
     this.machine=machine;this.template=template;
     this.group=new THREE.Group();this.group.name='PRINTING-TEST-SIMULATION';this.group.visible=false;this.machine.add(this.group);
-    this.points=pathPoints();this.curve=new THREE.CatmullRomCurve3(this.points,false,'centripetal',.5);this.pathLength=this.curve.getLength();
+    this.points=pathPoints();this.curve=new THREE.CatmullRomCurve3(this.points,false,'centripetal',.5);
+    const getPoint=this.curve.getPoint.bind(this.curve);
+    this.curve.getPoint=(t,target)=>{
+      const p=getPoint(t,target);
+      if(p.x>=FEEDBOARD.minX&&p.x<=FEEDBOARD.maxX)p.y=offset5FeedboardHeightAt(p.x)+FEEDBOARD.sheetClearance;
+      else if(p.x>FEEDBOARD.maxX&&p.x<=FEEDBOARD.throatMaxX)p.y=FEEDBOARD.tapeTopY+FEEDBOARD.sheetClearance;
+      return p;
+    };
+    this.pathLength=this.curve.getLength();
     // CD 102 full-format reference: 720 x 1020 mm sheet, one gripper pitch per press cycle.
     this.sheetLength=.72;this.sheetWidth=1.02;this.sheetLengthSegments=32;this.sheetWidthSegments=8;
     this.nominalSheetsPerHour=15000;this.sheetCyclesPerSecond=this.nominalSheetsPerHour/3600;

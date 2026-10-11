@@ -5,6 +5,7 @@ import {OFFSET5_TAXONOMY,TAXONOMY_BY_ID} from './data/taxonomy-offset5.js';
 import {ORIENTATION,OFFSET5_ACTUAL_ROLLER_DIAGRAM,OFFSET5_ROLLER_EVIDENCE_POLICY,OFFSET5_INKING_ROLLERS,OFFSET5_INK_DISTRIBUTORS,OFFSET5_DAMPENING_ROLLERS} from './data/sources-offset5.js';
 import {OFFSET5_DIMENSIONS,OFFSET5_UNIT_CENTERS,offset5DimensionAudit} from './data/dimensions-offset5.js';
 import {V122_SOURCE_STATS} from './data/research-v122.js';
+import {OFFSET5_FEEDBOARD_SURFACE} from './data/offset5-feedboard-surface.js';
 import {createIndustrialMaterial} from './render/material-library.js';
 
 // Offset 5 reconstruction.
@@ -45,20 +46,28 @@ export class OffsetMachineTemplate {
     const board=this.findNode('feed-board');
     this.root.updateMatrixWorld(true);
     const inverse=new THREE.Matrix4(),point=new THREE.Vector3(),D=OFFSET5_DIMENSIONS.layout;
+    board.traverse(node=>{
+      if(node.userData.feedboardRigid){node.position.y+=.42*(.5-node.position.x);node.scale.x=1/board.scale.x;}
+    });
+    this.root.updateMatrixWorld(true);
     board.traverse(mesh=>{
       if(!mesh.isMesh||mesh.isInstancedMesh)return;
+      for(let ancestor=mesh.parent;ancestor&&ancestor!==board;ancestor=ancestor.parent)if(ancestor.userData.feedboardRigid||ancestor.userData.photoGaugeFascia)return;
       const geo=mesh.geometry.clone(),position=geo.attributes.position;
       inverse.copy(mesh.matrixWorld).invert();let changed=false;
+      const center=mesh.getWorldPosition(new THREE.Vector3()),rigid=geo.type==='CylinderGeometry';
       for(let i=0;i<position.count;i++){
         point.fromBufferAttribute(position,i).applyMatrix4(mesh.matrixWorld);
         if(point.y<1.20)continue; // move the entire rounded deck shoulder together, avoiding torn fillets
         const localX=(point.x-D.feedBoardCenterX)/board.scale.x;
-        point.y+=Math.max(0,.42*(.5-localX));
+        if(rigid){point.x=center.x+(point.x-center.x)/board.scale.x;point.y+=Math.max(0,.42*(.5-(center.x-D.feedBoardCenterX)/board.scale.x));}
+        else point.y+=Math.max(0,.42*(.5-localX));
         point.applyMatrix4(inverse);position.setXYZ(i,point.x,point.y,point.z);changed=true;
       }
       if(changed){position.needsUpdate=true;geo.computeVertexNormals();geo.computeBoundingBox();geo.computeBoundingSphere();mesh.geometry=geo;this.geometries.set('v348-ramp:'+mesh.uuid,geo);mesh.userData.photoFeedboardRamp=true;}else geo.dispose();
     });
     Object.assign(board.userData,{sourceFiles:['Offset5.zip/IMG_2468.HEIC','Offset5.zip/IMG_2470.HEIC'],photoRampRise:.42,photoRampDirection:'DOWN_TOWARD_PU1',photoRampDownstreamHeight:1.30});
+    board.userData.contactSurface=OFFSET5_FEEDBOARD_SURFACE;
     for(let i=0;i<8;i++){
       const top=this.findNode(`press-${i}-top-deck`);
       top.userData.sourceFiles=['Offset5.zip/IMG_2471.HEIC','Offset5.zip/IMG_2472.HEIC'];
@@ -329,12 +338,7 @@ export class OffsetMachineTemplate {
     if(detection){
       detection.userData.manualOptionRange='1..24 feeler rollers';
       detection.userData.installedFeelerCountUnknown=true;
-      detail(this.box(detection,[.08,.055,1.52],[.32,1.62,0],'steel',.007),'multiple-sheet-detector-crossbar');
-      for(let i=0;i<12;i++){
-        const z=-.66+i*(1.32/11);
-        detail(this.cylinder(detection,.017,.035,[.30,1.565,z],'steel','z'),'multiple-sheet-feeler-reference','CD102_MANUAL_OPTION_1_TO_24');
-      }
-      detail(this.cylinder(detection,.032,.07,[.39,1.62,.78],'graphite','z'),'detector-adjustment-knob');
+      detection.userData.geometryPolicy='SINGLE_DETECTOR_BRIDGE__INSTALLED_FEELER_OPTION_UNKNOWN';
     }
 
     const vacuum=this.findNode('vacuum-table');
@@ -392,39 +396,46 @@ export class OffsetMachineTemplate {
     board.scale.x=D.feedBoardLength/1.0;
     this.markExteriorCover(this.box(board,[1.0,1.00,1.94],[0,.77,0],'graphite',.035));
     this.markExteriorCover(this.box(board,[1.0,.055,1.88],[0,1.30,0],'steel'));
-    for(const z of [-.56,0,.56])this.box(board,[.98,.018,.10],[0,1.337,z],'rubber');
     this.grille(board,[.49,.79,-.48],.78,.67);
     this.grille(board,[.49,.79,.48],.78,.67);
     this.controls(board,[.51,.86,-.91],'x',5);
-    this.gaugePanel(board,[.51,.87,.88]);
+    const gauges=this.group(board,'feedboard-gauge-fascia','Panel tiga gauge pada fascia samping atas',[0,0,0],[0,.12,-.6],['IMG_1626.jpeg','Offset5.zip/IMG_2468.HEIC']);
+    gauges.userData.photoGaugeFascia=true;
+    gauges.scale.x=1/board.scale.x;
+    this.box(gauges,[.35,.15,.08],[.12,1.55,-.94],'graphite',.012);
+    for(const x0 of [0,.12,.24])this.cylinder(gauges,.039,.014,[x0,1.55,-.988],'glass','z');
     for(const z of [.72,.86,.99])this.tube(board,[[.50,.68,z],[.61,.54,z],[.53,.38,z-.05]],.014,'rubber');
     const vacuum=this.group(board,'vacuum-table','Central suction tape / vacuum table',[0,0,0],[-.15,.3,0],['IMG_1626.jpeg'],'Permukaan dan jalur tengah teramati; pembagian chamber internal hanya referensi teknis.');
-    this.box(vacuum,[.88,.026,.40],[0,1.355,0],'black',.012);
-    this.box(vacuum,[.82,.010,.23],[0,1.373,0],'rubber',.006);
-    for(let i=0;i<11;i++)for(const z of [-.07,.07])this.cylinder(vacuum,.009,.006,[-.37+i*.074,1.381,z],'glass','y');
-    for(const x0 of [-.41,.41])this.cylinder(vacuum,.055,.34,[x0,1.35,0],'steel','z');
-    for(const x0 of [-.24,0,.24])this.box(vacuum,[.13,.018,.31],[x0,1.342,0],'graphite',.006);
+    this.box(vacuum,[.88,.018,.40],[0,1.318,0],'black',.012);
+    const tapeShape=new THREE.Shape();tapeShape.moveTo(-.41,-.115);tapeShape.lineTo(.41,-.115);tapeShape.lineTo(.41,.115);tapeShape.lineTo(-.41,.115);tapeShape.closePath();
+    for(let i=0;i<22;i++)for(const z of [-.07,0,.07]){const hole=new THREE.Path();hole.absarc(-.38+i*(.76/21),z,.006,0,Math.PI*2,true);tapeShape.holes.push(hole);}
+    const tape=this.mesh(vacuum,()=>{const geo=new THREE.ExtrudeGeometry(tapeShape,{depth:.006,bevelEnabled:false,curveSegments:8});geo.rotateX(-Math.PI/2);geo.translate(0,-.006,0);return geo;},'offset5-perforated-tape','rubber',[0,OFFSET5_FEEDBOARD_SURFACE.tapeTopY,0]);
+    Object.assign(tape.userData,{actualPerforatedGeometry:true,perforationPatternVerified:false});
+    tape.material.color.setHex(0x496f72);
+    for(const [i,x0] of [-.41,.41].entries()){
+      const rollerY=OFFSET5_FEEDBOARD_SURFACE.tapeTopY-.055*Math.sqrt(1+(OFFSET5_FEEDBOARD_SURFACE.rise/OFFSET5_FEEDBOARD_SURFACE.length)**2);
+      const body=this.group(vacuum,`vacuum-table-roller-${i+1}`,'Suction tape support roller',[x0,rollerY,0],[0,.08,0],['IMG_1626.jpeg']);body.userData.feedboardRigid=true;
+      const roller=this.cylinder(body,.055,.22,[0,0,0],'steel','z');Object.assign(roller.userData,{dynamicRotor:true,rotorRole:'vacuum-table-tape-drive-roller',rotorSign:-1,rotorRate:1});
+    }
     const transport=this.group(board,'feedboard-transport','Suction tape, pressure roller & transport reference',[0,0,0],[-.12,.28,0],['IMG_1626.jpeg'],'Jalur transport luar mengikuti foto dan paten Heidelberg. Pembagian vakum, tekanan nip dan kecepatan tape tidak diverifikasi.');
-    for(const z of [-.34,.34])this.box(transport,[.86,.018,.075],[0,1.395,z],'rubber',.006);
-    for(const x0 of [-.39,.39])for(const z of [-.34,.34])this.cylinder(transport,.034,.09,[x0,1.41,z],'steel','z');
-    for(const z of [-.55,.55])this.cylinder(transport,.028,.78,[.18,1.445,z],'steel','x');
+    transport.userData.geometryPolicy='CENTRAL_SUCTION_TAPE_ONLY__UNVERIFIED_SIDE_BELTS_REMOVED';
     const guides=this.group(board,'feedboard-guides','Feed-table guides & alignment references',[0,0,0],[0,.25,.65],['IMG_1626.jpeg'],'Guide luar terlihat; front lay dan side alignment ditandai sebagai reference-only pada taxonomy.');
     for(const z of [-.72,.72]){this.box(guides,[.82,.035,.035],[0,1.405,z],'steel',.008);this.box(guides,[.08,.12,.08],[.34,1.44,z],'graphite',.012);}
     this.cylinder(guides,.026,1.58,[.40,1.43,0],'steel','z');
     const detection=this.group(board,'feedboard-detection','Sheet-arrival / multiple-sheet detector bridge',[0,0,0],[.2,.45,0],['IMG_1626.jpeg'],'Posisi luar diperkirakan; jenis sensor dan kalibrasi tidak diverifikasi pada mesin terpasang.');
     for(const z of [-.82,.82])this.box(detection,[.07,.28,.07],[.34,1.54,z],'graphite',.012);
-    this.box(detection,[.10,.08,1.70],[.34,1.69,0],'steel',.015);
+    this.box(detection,[.10,.08,1.70],[.34,1.69,0],'steel',.015).userData.mechanismRole='multiple-sheet-detector-crossbar';
     for(const z of [-.34,.34])this.box(detection,[.16,.10,.12],[.34,1.60,z],'black',.018);
     const register=this.group(board,'feedboard-register','Front-lay, side-lay & infeed reference',[0,0,0],[.28,.24,.55],['IMG_1626.jpeg'],'Posisi antarmuka ke PU1 diperkirakan dari foto. Front lay, side lay dan gripper timing tetap referensi fungsional.');
-    for(const z of [-.58,-.20,.20,.58]){this.box(register,[.055,.11,.075],[.47,1.41,z],'steel',.008);this.box(register,[.11,.025,.11],[.43,1.47,z],'graphite',.008);}
+    register.userData.geometryPolicy='SINGLE_MANUAL_FRONT_LAY_FAMILY__NO_DUPLICATE_STOP_FINGERS';
     this.box(register,[.07,.07,1.46],[.48,1.34,0],'steel',.012);
     const frontLays=this.group(register,'feedboard-front-lays','Front lays + 1M2/1M3 print-free-margin drives',[0,0,0],[.24,.18,.50],['IMG_1626.jpeg','pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Manual menempatkan adjustment pada front lays dan menyebut drive D.S./O.S.; cover dan posisi tampak luar mengikuti foto, linkage internal direkonstruksi.');
-    for(const z of [-.42,.42]){this.box(frontLays,[.06,.10,.09],[.45,1.43,z],'steel',.008);this.box(frontLays,[.10,.07,.07],[.38,1.36,z],'graphite',.008);}
+    frontLays.userData.legacyDuplicateFingersRemoved=true;
     const pullLays=this.group(register,'feedboard-pull-lays','Pull-lay / side-lay control reference',[0,0,0],[.20,.16,-.50],['IMG_1626.jpeg','pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Pull-lay sensing/control terkonfirmasi oleh manual; detail mekanik dan sisi aktif mesin terpasang belum diverifikasi.');
     for(const z of [-.70,.70]){this.box(pullLays,[.13,.05,.08],[.30,1.39,z],'graphite',.008);this.cylinder(pullLays,.023,.05,[.37,1.43,z],'steel','z');}
     const layMechanism=this.group(register,'feedboard-lay-mechanism','Front-lay shaft, stops & side-lay carriage',[0,0,0],[.20,.16,.42],['IMG_1626.jpeg','pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'The shaft and stops clarify the alignment mechanism. Cam profile, lay timing and active pull-lay side remain reference-only.');
     this.cylinder(layMechanism,.022,1.42,[.38,1.34,0],'steel','z');
-    for(let n=0;n<8;n++){const z=-.61+n*.175;this.box(layMechanism,[.055,.12,.040],[.40,1.40,z],'graphite',.006);this.frustum(layMechanism,.018,.010,.055,[.43,1.48,z],'steel','y');}
+    layMechanism.userData.installedStopCountVerified=false;
     for(const z of [-.73,.73]){this.box(layMechanism,[.24,.07,.12],[.22,1.35,z],'graphite',.010);this.cylinder(layMechanism,.038,.05,[.32,1.42,z],'steel','z');}
     const coverGuide=this.group(register,'feedboard-cover-guide-drive','PU1 operator-side cover-guide drive 1M4',[0,0,0],[.30,.20,-.62],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Manual menyatakan servo 1M4 berada di operator side PU1 dan mengatur gripper opening transfer gripper 0.1–1.9 mm. Nilai ini metadata servis, bukan skala model.');
     this.box(coverGuide,[.15,.18,.10],[.42,1.20,.82],'graphite',.018);this.cylinder(coverGuide,.035,.12,[.46,1.22,.75],'steel','z');

@@ -62,8 +62,9 @@ for(const [key,name,refs,parts] of [
  ['MONITOR','Sheet Arrival / Double Sheet Monitoring',['feedboard-detection','feeder-sheet-monitoring'],['Sheet-arrival Sensors','Double-sheet Detector Heads','Detector Bridge']],
  ['INFEED','Infeed to PU1',['feedboard-infeed-gripper','feedboard-cover-guide-drive'],['Infeed Gripper Bar','Transfer-gripper Cover Guide 1M4','Sheet Handover Zone']]
 ]){
- const sid=`O5.REGISTER.${key}`;add(sid,'O5.REGISTER',3,'Sub',name,{meshRefs:refs,sourceRefs:photoManual,confidence:CONFIDENCE.REFERENCE_PLUS_PHOTO,explodeVector:[-.30,.20,key==='ALIGN'?.5:0]});
- const bid=`${sid}.B1`;add(bid,sid,4,'Block',name,{meshRefs:refs,sourceRefs:photoManual,confidence:CONFIDENCE.MEDIUM,explodeVector:[-.15,.15,0]});
+ const description=key==='VACUUM'?'Foto BMJ menunjukkan suction tape utama di tengah. Lubang ditampilkan sebagai perforasi; pola lubang, ukuran roller, pembagian vacuum chamber, dan tekanan aktual belum terverifikasi.':key==='MONITOR'||key==='ALIGN'?'Fungsi menggunakan manual CD102. Jumlah dan konfigurasi sensor serta front/side lays pada mesin terpasang belum terverifikasi; bukan data setelan servis.':'Bentuk luar mengikuti foto BMJ. Proporsi dan serah-terima sheet merupakan referensi visual, bukan phasing terukur.';
+ const sid=`O5.REGISTER.${key}`;add(sid,'O5.REGISTER',3,'Sub',name,{meshRefs:refs,sourceRefs:photoManual,confidence:CONFIDENCE.REFERENCE_PLUS_PHOTO,description,explodeVector:[-.30,.20,key==='ALIGN'?.5:0]});
+ const bid=`${sid}.B1`;add(bid,sid,4,'Block',name,{meshRefs:refs,sourceRefs:photoManual,confidence:CONFIDENCE.MEDIUM,description,explodeVector:[-.15,.15,0]});
  parts.forEach((p,i)=>{const pid=`${bid}.P${i+1}`;add(pid,bid,5,'Part',p,{meshRefs:i===0?refs:[],sourceRefs:manual,confidence:i===0?CONFIDENCE.MEDIUM:CONFIDENCE.HIGH,explodeVector:[0,.08,(i-1)*.13]});add(`${pid}.S1`,pid,6,'Spesifik Part',`${p} · functional reference`,{sourceRefs:manual,confidence:CONFIDENCE.HIGH,explodeVector:[.05,.06,.10],maintenanceTag:'OEM_MANUAL_REFERENCE'});});
 }
 

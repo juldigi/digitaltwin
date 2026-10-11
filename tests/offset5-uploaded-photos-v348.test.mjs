@@ -31,8 +31,8 @@ test('photo feedboard slopes toward the unchanged PU1 throat, with simulation ab
   assert.ok(at(left)-at(right)>.35,'inclined receiving table');
   assert.equal(t.findNode('feedboard-pu1-throat').userData.deckHeight,1.30);
   sim=createMachineSimulation('offset5',t.root,t);
-  for(const p of sim.points.filter(p=>p.x>left&&p.x<right))assert.ok(p.y>1.39+.42*(.5-(p.x-D.feedBoardCenterX)/board.scale.x),'sheet clears inclined suction tape');
-  sim.start();for(let i=0;i<120;i++)sim.update(1/60);
+  for(const p of sim.points.filter(p=>p.x>left&&p.x<right))assert.ok(Math.abs(p.y-(1.334+.42*(.5-(p.x-D.feedBoardCenterX)/board.scale.x)+.002))<1e-6,'sheet follows inclined suction tape');
+  sim.start();for(let i=0;i<120;i++)sim.update(1000+i*16);
   assert.ok(t.root.userData.actualPhotoShapeSources.length===16);
  }finally{sim?.dispose();t.dispose();}
 });

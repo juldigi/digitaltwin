@@ -523,8 +523,8 @@ test('Offset 5 feeder suction and register transport share one sheet cycle witho
   assert.equal(infeedRock.amplitude,.085);
   assert.equal(sim.state().infeedHandoffPolicy,'INFEED_GRIPPER_RECIPROCATES_AND_ROCKS_WITH_ONE_PRESS_CYCLE');
   assert.equal(sim.rotors.filter(item=>item.role==='register-pressure-transport-roller').length,0);
-  assert.equal(sim.rotors.filter(item=>item.role==='vacuum-table-tape-drive-roller').length,0);
-  assert.equal(sim.state().registerTransportPolicy,'MOBILE_BATCHED_CONTACT_REFERENCE__SHEET_PATH_AND_INFEED_GRIPPER_CARRY_VISIBLE_MOTION');
+  assert.equal(sim.rotors.filter(item=>item.role==='vacuum-table-tape-drive-roller').length,2);
+  assert.equal(sim.state().registerTransportPolicy,'CENTRAL_PERFORATED_TAPE_CONTACT__RIGID_ROUND_SUPPORT_ROLLERS__INFEED_REFERENCE');
   for(const code of ['13','2','1','14','3','4','5','6','7','8','9','10','11','12','15']){
    const a=sim.rotors.find(item=>item.role===`PU1-ink-roller-${code}`);
    const b=sim.rotors.find(item=>item.role===`PU2-ink-roller-${code}`);
