@@ -12,29 +12,30 @@ export class Polar115ProcessSimulation{
   this.clamp=this.template.findNode('polar-clamp');this.knife=this.template.findNode('polar-knife');this.gauge=this.template.findNode('polar-gauge');
   this.rest={clamp:this.clamp?.position.clone(),knife:this.knife?.position.clone(),gauge:this.gauge?.position.clone()};
   this.stock=null;this.cutPiece=null;this.path=null;this.stockCutGuide=null;this.airIndicators=[];
-  this.stockDepth=.68;this.frontPieceDepth=.42;this.rearPieceDepth=.26;this.stockStartCenterX=.76;this.stockStartCenterZ=-.34;this.stockFinalCenterZ=-.08;this.cutLineZ=0;this.frontPieceCenterZ=-.21;this.rearPieceCenterZ=.13;
-  this.clampStroke=.11;this.knifeStroke=.33;this.resetRuntime();this.build();
+  this.tableSurfaceY=.94;this.stockThickness=.085;this.stockSurfaceClearance=.001;this.stockRestY=this.tableSurfaceY+this.stockSurfaceClearance+this.stockThickness/2;
+  this.stockDepth=.68;this.frontPieceDepth=.42;this.rearPieceDepth=.26;this.stockStartCenterX=.76;this.stockStartCenterZ=-.72;this.stockFinalCenterZ=-.08;this.cutLineZ=0;this.frontPieceCenterZ=-.21;this.rearPieceCenterZ=.13;
+  this.gaugeStroke=.337;this.registrationClearance=.0005;this.clampStroke=.11;this.knifeStroke=.33;this.resetRuntime();this.build();
  }
  build(){
   const mat=new THREE.MeshStandardMaterial({color:0xf0e7d4,roughness:.84,side:THREE.DoubleSide});
-  this.stock=new THREE.Mesh(new THREE.BoxGeometry(1.08,.085,this.stockDepth),mat);this.stock.name='Reference paper pile / rear remainder';this.stock.position.set(this.stockStartCenterX,1.005,this.stockStartCenterZ);
-  this.cutPiece=new THREE.Mesh(new THREE.BoxGeometry(1.08,.088,this.frontPieceDepth),mat.clone());this.cutPiece.name='Front cut piece / offcut reference';this.cutPiece.position.set(0,1.006,this.frontPieceCenterZ);this.cutPiece.visible=false;
+  this.stock=new THREE.Mesh(new THREE.BoxGeometry(1.08,this.stockThickness,this.stockDepth),mat);this.stock.name='Reference paper pile / rear remainder';this.stock.position.set(this.stockStartCenterX,this.stockRestY,this.stockStartCenterZ);
+  this.cutPiece=new THREE.Mesh(new THREE.BoxGeometry(1.08,this.stockThickness,this.frontPieceDepth),mat.clone());this.cutPiece.name='Front cut piece / offcut reference';this.cutPiece.position.set(0,this.stockRestY,this.frontPieceCenterZ);this.cutPiece.visible=false;
   this.stockCutGuide=new THREE.Mesh(new THREE.BoxGeometry(1.05,.002,.009),new THREE.MeshBasicMaterial({color:0xb82d29,depthWrite:false}));
   this.stockCutGuide.name='Optical cut line on positioned paper';this.stockCutGuide.userData={photoReference:'IMG_2488_FRONT_CUT_LINE',notPhysicalBlade:true};this.stockCutGuide.visible=false;
-  const points=[new THREE.Vector3(0,1.06,-.74),new THREE.Vector3(0,1.06,-.34),new THREE.Vector3(0,1.06,-.04)];
+  const points=[new THREE.Vector3(0,this.stockRestY+this.stockThickness/2+.012,-.72),new THREE.Vector3(0,this.stockRestY+this.stockThickness/2+.012,-.34),new THREE.Vector3(0,this.stockRestY+this.stockThickness/2+.012,-.04)];
   const geo=new THREE.BufferGeometry().setFromPoints(points),lineMat=new THREE.LineDashedMaterial({color:0x4e8299,dashSize:.05,gapSize:.035,transparent:true,opacity:.55});
   this.path=new THREE.Line(geo,lineMat);this.path.computeLineDistances();
   for(const x of [-.42,-.14,.14,.42])for(const z of [-.55,-.32,-.09]){const a=new THREE.Mesh(new THREE.CylinderGeometry(.007,.018,.08,10),new THREE.MeshStandardMaterial({color:0x8bbad0,transparent:true,opacity:.55,emissive:0x3d7189,emissiveIntensity:.35}));a.position.set(x,.965,z);a.visible=false;this.group.add(a);this.airIndicators.push(a);}
   this.group.add(this.stock,this.cutPiece,this.stockCutGuide,this.path);this.group.visible=false;
  }
  resetRuntime(){
-  this.airTableActive=false;this.backgaugeMoving=false;this.twoHandCommand=false;this.clampActive=false;this.clampContact=false;this.knifeDownstroke=false;this.knifeUpstroke=false;this.knifeAtCutLine=false;this.cutSeparated=false;this.safetyBlocked=false;this.stockLateralTransfer=false;
+  this.airTableActive=false;this.backgaugeMoving=false;this.backgaugeContact=false;this.registrationGap=null;this.twoHandCommand=false;this.clampActive=false;this.clampContact=false;this.knifeDownstroke=false;this.knifeUpstroke=false;this.knifeAtCutLine=false;this.cutSeparated=false;this.safetyBlocked=false;this.stockLateralTransfer=false;
  }
  phase(){return this.active?(this.elapsed%this.cycleSeconds)/this.cycleSeconds:0;}
  stage(){const p=this.phase();return POLAR115_PROCESS[Math.min(POLAR115_PROCESS.length-1,Math.floor(p*POLAR115_PROCESS.length))];}
  state(){
   return {available:true,blocked:this.safetyBlocked,active:this.active,running:this.running,paused:this.paused,speed:this.speed,stage:this.stage(),completed:this.completed,progress:this.phase(),sheetsVisible:this.active?1+(this.cutPiece?.visible?1:0):0,pileSheetsVisible:0,rotorCount:0,oscillatorCount:0,mechanismCount:5,inkFlowCount:0,uvLampCount:0,uvActive:false,pathVisible:this.pathVisible,inkFlowVisible:false,
-   airTableActive:this.airTableActive,backgaugeMoving:this.backgaugeMoving,clampActive:this.clampActive,clampContact:this.clampContact,knifeDownstroke:this.knifeDownstroke,knifeUpstroke:this.knifeUpstroke,knifeAtCutLine:this.knifeAtCutLine,cutSeparated:this.cutSeparated,stockLateralTransfer:this.stockLateralTransfer,
+   airTableActive:this.airTableActive,backgaugeMoving:this.backgaugeMoving,backgaugeContact:this.backgaugeContact,registrationGap:this.registrationGap,clampActive:this.clampActive,clampContact:this.clampContact,knifeDownstroke:this.knifeDownstroke,knifeUpstroke:this.knifeUpstroke,knifeAtCutLine:this.knifeAtCutLine,cutSeparated:this.cutSeparated,stockLateralTransfer:this.stockLateralTransfer,
    interlocks:{lightBarrierClear:this.lightBarrierClear,twoHandCommand:this.twoHandCommand,cutCycleLatched:this.cutCycleLatched,clampContact:this.clampContact,knifeDownPermitted:this.lightBarrierClear&&this.twoHandCommand&&this.cutCycleLatched&&this.clampContact},
    safetyReference:{twoHandSimultaneity:true,antiRepeat:true,lightBarrierStopsClampAndKnife:true},materialSplit:{fullDepth:this.stockDepth,frontDepth:this.frontPieceDepth,rearDepth:this.rearPieceDepth,conserved:Math.abs(this.frontPieceDepth+this.rearPieceDepth-this.stockDepth)<1e-9}
   };
@@ -51,22 +52,25 @@ export class Polar115ProcessSimulation{
  resetCycle(){
   this.cutCycleLatched=false;this.cutPerformed=false;this.cutCounted=false;this.clampHoldAmount=0;this.knifeHoldAmount=0;this.resetRuntime();
   if(this.clamp&&this.rest.clamp)this.clamp.position.copy(this.rest.clamp);if(this.knife&&this.rest.knife)this.knife.position.copy(this.rest.knife);if(this.gauge&&this.rest.gauge)this.gauge.position.copy(this.rest.gauge);
-  if(this.stock){this.stock.position.set(this.stockStartCenterX,1.005,this.stockStartCenterZ);this.stock.scale.set(1,1,1);this.stock.rotation.set(0,0,0);this.stock.visible=true;}
-  if(this.cutPiece){this.cutPiece.position.set(0,1.006,this.frontPieceCenterZ);this.cutPiece.scale.set(1,1,1);this.cutPiece.visible=false;}
+  if(this.stock){this.stock.position.set(this.stockStartCenterX,this.stockRestY,this.stockStartCenterZ);this.stock.scale.set(1,1,1);this.stock.rotation.set(0,0,0);this.stock.visible=true;}
+  if(this.cutPiece){this.cutPiece.position.set(0,this.stockRestY,this.frontPieceCenterZ);this.cutPiece.scale.set(1,1,1);this.cutPiece.visible=false;}
   if(this.stockCutGuide)this.stockCutGuide.visible=false;
   for(const a of this.airIndicators)a.visible=false;
  }
  updateStock(p){
-  const advance=smooth(p,.12,.32),sideTransfer=smooth(p,.025,.11),air=this.airTableActive,float=air?.006*Math.sin(this.elapsed*5):0;
+  const advance=smooth(p,.12,.32),sideTransfer=smooth(p,.025,.11),air=this.airTableActive,float=air?.006*(.5+.5*Math.sin(this.elapsed*5)):0;
   this.stockLateralTransfer=!this.cutPerformed&&sideTransfer<1;
   if(!this.cutPerformed){
-   this.stock.scale.set(1,1,1);this.stock.position.x=THREE.MathUtils.lerp(this.stockStartCenterX,0,sideTransfer);this.stock.position.z=THREE.MathUtils.lerp(this.stockStartCenterZ,this.stockFinalCenterZ,advance);this.stock.position.y=1.005+float;this.cutPiece.visible=false;
+   this.stock.scale.set(1,1,1);this.stock.position.x=THREE.MathUtils.lerp(this.stockStartCenterX,0,sideTransfer);this.stock.position.z=THREE.MathUtils.lerp(this.stockStartCenterZ,this.stockFinalCenterZ,advance);this.stock.position.y=this.stockRestY+float;this.cutPiece.visible=false;
   }else{
-   this.stock.scale.set(1,1,this.rearPieceDepth/this.stockDepth);this.stock.position.set(0,1.005,this.rearPieceCenterZ);
+   this.stock.scale.set(1,1,this.rearPieceDepth/this.stockDepth);this.stock.position.set(0,this.stockRestY,this.rearPieceCenterZ);
    this.cutPiece.visible=true;const out=smooth(p,.74,.94);this.cutPiece.position.set(0,1.006,THREE.MathUtils.lerp(this.frontPieceCenterZ,-.56,out));
   }
   this.stockCutGuide.visible=!this.cutPerformed&&p>=.32&&p<.64;
   if(this.stockCutGuide)this.stockCutGuide.position.set(this.stock.position.x,this.stock.position.y+.045,this.cutLineZ);
+  const rakeFront=.625-.055/2+this.gauge.position.z;
+  const stockRear=this.stock.position.z+(this.cutPerformed?this.rearPieceDepth:this.stockDepth)/2;
+  this.registrationGap=rakeFront-stockRear;this.backgaugeContact=Math.abs(this.registrationGap-this.registrationClearance)<1e-6;
  }
  update(now){
   if(!this.active||!this.running){this.lastNow=now;return;}if(this.lastNow===null){this.lastNow=now;return;}
@@ -74,7 +78,7 @@ export class Polar115ProcessSimulation{
   const cycleIndex=Math.floor(this.elapsed/this.cycleSeconds);if(cycleIndex!==this.cycleIndex){this.cycleIndex=cycleIndex;this.resetCycle();}
   const p=this.phase();this.resetRuntime();
   this.airTableActive=p<.34||p>.86;this.backgaugeMoving=p>=.10&&p<.30;this.twoHandCommand=this.twoHandEnabled&&p>=.38&&p<.67;
-  if(this.gauge&&this.rest.gauge){this.gauge.position.copy(this.rest.gauge);this.gauge.position.z=this.rest.gauge.z-.26*smooth(p,.10,.28);}
+  if(this.gauge&&this.rest.gauge){this.gauge.position.copy(this.rest.gauge);this.gauge.position.z=this.rest.gauge.z-this.gaugeStroke*smooth(p,.10,.28);}
   if(p>=.38&&p<.56&&this.lightBarrierClear&&this.twoHandCommand)this.cutCycleLatched=true;
   const clampDesired=this.cutCycleLatched?smooth(p,.43,.50)*(1-smooth(p,.76,.84)):0;
   // A broken safety beam aborts the simulated stroke and returns the pressure bar.

@@ -8,7 +8,7 @@
   "status": "RELEASE_PENDING",
   "cursor": {
     "machineId": "BMJ-MCH-0001",
-    "partIndex": 0
+    "partIndex": 1
   },
   "baselineCommit": "b5e45a82ce1aeaf9094b0a5c3fd8d985b8a9e96f",
   "machines": [
@@ -21,12 +21,19 @@
       "parts": [
         {
           "part": "input tables and air-port grid",
-          "status": "RELEASE_PENDING",
-          "report": "docs/polar115-input-table-audit.md"
+          "status": "COMPLETE",
+          "report": "docs/polar115-input-table-audit.md",
+          "releaseEvidence": {
+            "commit": "2a803bb37f071adec70c3217d9213e7ee002affa",
+            "workflow": 38170714910,
+            "conclusion": "success",
+            "tests": 1543
+          }
         },
         {
           "part": "stock transport and backgauge registration",
-          "status": "PENDING"
+          "status": "RELEASE_PENDING",
+          "report": "docs/polar115-transport-registration-audit.md"
         },
         {
           "part": "safety arms and cut interlocks",
@@ -54,7 +61,8 @@
         }
       ],
       "reports": [
-        "docs/polar115-input-table-audit.md"
+        "docs/polar115-input-table-audit.md",
+        "docs/polar115-transport-registration-audit.md"
       ]
     },
     {
@@ -499,11 +507,25 @@
     {
       "machineId": "BMJ-MCH-0001",
       "part": "input tables and air-port grid",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "report": "docs/polar115-input-table-audit.md",
       "nextPartIndex": 1,
-      "parentCommit": "ccdf5d0e37e6752e22de07f46938e2aa06473112"
+      "parentCommit": "ccdf5d0e37e6752e22de07f46938e2aa06473112",
+      "releaseEvidence": {
+        "commit": "2a803bb37f071adec70c3217d9213e7ee002affa",
+        "workflow": 38170714910,
+        "conclusion": "success",
+        "tests": 1543
+      }
+    },
+    {
+      "machineId": "BMJ-MCH-0001",
+      "part": "stock transport and backgauge registration",
+      "status": "RELEASE_PENDING",
+      "report": "docs/polar115-transport-registration-audit.md",
+      "nextPartIndex": 2,
+      "parentCommit": "2a803bb37f071adec70c3217d9213e7ee002affa"
     }
   ],
-  "updatedAt": "2026-10-11T20:00:00Z"
+  "updatedAt": "2026-10-11T21:00:00Z"
 }
