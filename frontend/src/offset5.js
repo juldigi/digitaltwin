@@ -72,20 +72,31 @@ export class OffsetMachineTemplate {
     }
   }
   fitUpperRollerSectionsInsidePU(){
-    // Section coordinates are illustrative: rigidly orient the upper roller map about the
-    // unchanged plate centre, preserving every radius and inter-roller contact distance.
-    const angle=60*Math.PI/180,pivot=new THREE.Vector2(.16,1.79);
-    const rotated=pivot.clone().rotateAround(new THREE.Vector2(),angle);
-    for(let i=0;i<8;i++)for(const suffix of ['inking-train','inking-distribution','dampening-form']){
-      const node=this.findNode(`press-${i}-${suffix}`);if(!node)continue;
-      node.rotation.z=angle;node.position.set(pivot.x-rotated.x,pivot.y-rotated.y,0);
-      Object.assign(node.userData,{sectionPlacement:'RIGID_BODY_ENVELOPE_FIT__VISUAL_NOT_INSTALLATION_CAD',sectionRotationRadians:angle});
+    // IMG_2777 is a sectional view. Embed its handedness in the operator-side view:
+    // reflect about the existing plate axis instead of tilting the roller train by 60°.
+    // This is an isometry: radii, distances and plate/form contact topology stay fixed.
+    const plateX=.16;
+    for(let i=0;i<8;i++){
+      for(const suffix of ['inking-train','inking-distribution','dampening-form','rakel-reference','air-blower-ink','water-feed-reference']){
+        const node=this.findNode(`press-${i}-${suffix}`);if(!node)continue;
+        node.rotation.z=0;node.scale.x=-1;node.position.x=2*plateX;
+        node.traverse(o=>{if(o.isMesh)o.userData.sectionHandedness=-1;});
+        Object.assign(node.userData,{sectionPlacement:'OPERATOR_VIEW_REFLECTION_ABOUT_PLATE__VISUAL_NOT_INSTALLATION_CAD',sectionRotationRadians:0});
+      }
+      // Keep the photographed upper service assembly on the opposite side of the
+      // reflected internal cluster, with no independent floating/repeated parts.
+      for(const suffix of ['top-deck','ink','open-ink-bay','fountain-guard','ink-fountain-controls','ink-fountain-roller']){
+        const node=this.findNode(`press-${i}-${suffix}`);if(!node)continue;
+        node.scale.x=-1;
+        node.traverse(o=>{if(o.isMesh)o.userData.sectionHandedness=-1;});
+        node.userData.placementEvidence='PHOTO_UPPER_ASSEMBLY__OPERATOR_VIEW_HANDEDNESS__PROPORTIONS_ESTIMATED';
+      }
     }
   }
   tagPrintingInterior(){
     // Interior references must not protrude through the photographed exterior.
     const roots=['cylinder-train','drive-gears','sheet-guides','impression-gripper','gripper-control','dampening','dampening-pan','dampening-form','plate-clamp','inking-train','inking-distribution','register-drives','washup'];
-    for(let i=0;i<8;i++)for(const suffix of roots)this.findNode(`press-${i}-${suffix}`)?.traverse(o=>{if(o.isMesh){o.userData.puInteriorOnly=true;delete o.userData.exteriorCover;}});
+    for(let i=0;i<8;i++)for(const suffix of roots)this.findNode(`press-${i}-${suffix}`)?.traverse(o=>{if(o.isMesh&&!o.userData.exteriorCover)o.userData.puInteriorOnly=true;});
   }
   alignOperatorSide(){
     // IMG_2388/2391/2392 establish walkway, controls, curved covers and steps on -Z.
@@ -476,7 +487,8 @@ export class OffsetMachineTemplate {
     Object.assign(top.userData,{openUpperDeck:true,solidTopCover:false,photoLockBaseline:'V404_V405_V408_OPEN_PU_TOP'});
     // Keep only the photographed attached service mechanism. The former broad solid
     // top slabs were a regression that hid the ink-fountain/roller area on every PU.
-    this.box(top,[.11,.09,1.46],[-.04,2.61,0],'steel',.018);
+    // The attached hinge rod added from IMG_2471 already spans the fountain.
+    // Do not duplicate it with a solid crossbar through the inclined liner.
     for(const z of [-.70,.70]){
       this.box(top,[.08,.20,.08],[-.24,2.57,z],'graphite',.014);
       this.cylinder(top,.036,.10,[-.18,2.61,z],'steel','z');
@@ -487,8 +499,8 @@ export class OffsetMachineTemplate {
     // lower cognitive noise, and enough mesh headroom for mobile without deleting process geometry.
     const guide=this.box(top,[.26,.028,.76],[.23,2.53,.35],'graphite',.006);guide.userData.serviceGuide=true;
     const bridge=this.group(g,`press-${i}-fountain-support`,`PU${i+1} · ink-fountain support bridge`,[0,0,0],[0,.42,-.55],['IMG_1628(2).jpeg','IMG_1970.jpeg','IMG_1971.jpeg'],'Twin end supports and transverse fountain member follow the photographed external arrangement. Internal roller relationships use the OEM roller map.');
-    this.box(bridge,[.18,.10,1.56],[-.03,2.49,0],'graphite',.016);
-    this.box(bridge,[.10,.045,1.44],[-.10,2.545,0],'steel',.010);
+    // Retain photo-observed end arms; the old central beams intersected distributor A.
+    bridge.userData.supportGeometry='END_ARMS_AND_PIVOTS__NO_DUPLICATE_TRANSVERSE_PROXY';
     for(const z of [-.73,.73]){
       const arm=this.box(bridge,[.10,.30,.075],[.12,2.35,z],'graphite',.015);arm.rotation.z=-.08;
       this.cylinder(bridge,.046,.080,[.14,2.20,z],'steel','z');
@@ -542,7 +554,7 @@ export class OffsetMachineTemplate {
     // IMG_1970/1971: the fountain has an inclined metallic liner, not only a
     // narrow flat colour strip. Keep the liner within the existing PU frame.
     const liner=this.group(openBay,`press-${i}-fountain-liner`,`${i+1} · inclined fountain liner`,[0,0,0],[0,.10,0],['IMG_1970.jpeg','IMG_1971.jpeg'],'Inclined metallic liner and open fountain are photographed; slope and thickness are photo-derived estimates, not measured OEM dimensions.');
-    const linerPlate=this.box(liner,[.36,.018,1.40],[.015,2.603,0],'chromium',.004);linerPlate.rotation.z=.35;
+    const linerPlate=this.box(liner,[.36,.018,1.40],[.015,2.628,0],'chromium',.004);linerPlate.rotation.z=.35;
     const lip=this.box(liner,[.025,.022,1.40],[-.162,2.549,0],'steel',.004);lip.rotation.z=.35;
     Object.assign(liner.userData,{geometryEvidence:'PHOTO_OBSERVED__PROPORTIONS_ESTIMATED',sourceFiles:['IMG_1970.jpeg','IMG_1971.jpeg'],normalStateVisible:true});
     const guard=this.markExteriorCover(this.group(g,`press-${i}-fountain-guard`,`${i+1} · sloped fountain guard and grille`,[0,0,0],[0,.08,0],['IMG_1970.jpeg','IMG_1971.jpeg'],'Photographed dark sloped guard adjacent to the metallic fountain liner; grille rhythm is a visual reconstruction, not a specified slot count.'));
@@ -595,7 +607,8 @@ export class OffsetMachineTemplate {
       this.ring(driveGears,r*.70,.018,[x,y,.915],'steel','z').userData.detail=true;
       this.cylinder(driveGears,Math.max(.032,r*.19),.065,[x,y,.92],'steel','z').userData.detail=true;
     });
-    this.box(driveGears,[.66,1.42,.025],[.02,1.20,.955],'glass',.018).userData.detail=true;
+    // No invented full-height transparent drive guard: it obscured the cutaway cylinder train.
+    driveGears.userData.guardGeometry='UNVERIFIED_INSTALLED_GUARD__NO_SOLID_PROXY';
     // Sheet travel is rendered only by the live Printing Test simulation. No static paper plane is kept inside the PU.
     const guides=this.group(g,`${id}-sheet-guides`,`${label} · sheet guide, air bar & anti-marking reference`,[0,0,0],[0,.12,.40],photos,'Guide surfaces follow the functional sheet path. Air pressure, nozzle pattern, coating and anti-marking specification remain unverified.');
     for(const z of [-.62,.62]){
@@ -964,7 +977,16 @@ export class OffsetMachineTemplate {
     for(const z of [-.50,.50]){
       const pod=this.group(g,`inspection-camera-${z<0?'a':'b'}`,`Inspection camera pod ${z<0?'A':'B'}`,[0,0,0],[0,.30,z<0?-.45:.45],photos);
       const casing=this.group(pod,`inspection-camera-${z<0?'a':'b'}-casing`,'Inspection camera casing',[0,0,0],[0,.08,0],photos,'Photographed camera housing proportions; casing is mounted above its exposed downward optical lens.');
-      const box=this.box(casing,[.40,.34,.38],[.05,2.95,z],'graphite',.035);box.rotation.z=-.15;
+      // IMG_2473: the camera pod has an inclined upstream face, not a tipped cuboid.
+      const housing=this.mesh(casing,()=>{
+        const profile=new THREE.Shape();profile.moveTo(-.15,2.80);profile.lineTo(.25,2.80);profile.lineTo(.25,3.125);profile.lineTo(.04,3.125);profile.closePath();
+        const geo=new THREE.ExtrudeGeometry(profile,{depth:.38,bevelEnabled:false,steps:1});geo.translate(0,0,-.19);return geo;
+      },'inspection-photo-angled-casing','graphite',[0,0,z]);
+      Object.assign(housing.userData,{photoAngledCameraCasing:true,sourcePhoto:'Offset5.zip/IMG_2473.HEIC',geometryEvidence:'PHOTO_OBSERVED__PROPORTIONS_ESTIMATED'});
+      const faceAngle=-Math.atan(.19/.325);
+      const bezel=this.box(casing,[.024,.30,.31],[-.065,2.968,z],'steel',.005);bezel.rotation.z=faceAngle;
+      const face=this.box(casing,[.012,.235,.25],[-.081,2.977,z],'glass',.003);face.rotation.z=faceAngle;
+      face.userData.photoInclinedCameraFace=true;
       this.box(pod,[.24,.065,.16],[-.09,2.745,z],'graphite',.010);
       // IMG_1630 / IMG_1633 show the optical head looking down at the moving sheet.
       // Keep the existing pod position but replace the old horizontal lens proxy with an
@@ -1107,7 +1129,7 @@ export class OffsetMachineTemplate {
     }
     for(const m of this.meshes){
       if(m.userData.exteriorCover){m.visible=!this.exteriorOpen&&(!this.lowDetail||!m.userData.detail);if(this.exteriorOpen)hidden++;}
-      if(isPuInteriorMesh(m))m.visible=this.exteriorOpen;
+      if(!m.userData.exteriorCover&&isPuInteriorMesh(m))m.visible=this.exteriorOpen;
     }
     this.root.userData.exteriorHiddenCount=this.exteriorOpen?hidden:0;
     this.root.userData.serviceDetailHiddenCount=this.exteriorOpen?serviceHidden:0;
@@ -1121,7 +1143,7 @@ export class OffsetMachineTemplate {
       const owner=m.userData.ownerId||'';
       const interiorMechanism=isPuInteriorMesh(m);
       const processMechanism=interiorMechanism||owner==='delivery-drive-sprockets';
-      m.visible=interiorMechanism?this.exteriorOpen:(!on||processMechanism);
+      m.visible=m.userData.exteriorCover?!this.exteriorOpen&&!on:interiorMechanism?this.exteriorOpen:(!on||processMechanism);
     }
     for(const v of this.auxVisuals)if(v.userData.detail)v.visible=!on;
   }

@@ -540,7 +540,7 @@ export class PrintingSimulation{
 
     // One press cycle per sheet at nominal speed. Rotor-specific rate multipliers preserve double-size / auxiliary visual differences.
     const angular=TAU*this.sheetCyclesPerSecond*scaled;
-    for(const rotor of this.rotors)rotor.axis==='z'?rotor.mesh.rotateZ(rotor.sign*rotor.rate*angular):rotor.mesh.rotateY(rotor.sign*rotor.rate*angular);
+    for(const rotor of this.rotors)rotor.axis==='z'?rotor.mesh.rotateZ(rotor.sign*rotor.rate*angular*(rotor.mesh.userData.sectionHandedness||1)):rotor.mesh.rotateY(rotor.sign*rotor.rate*angular*(rotor.mesh.userData.sectionHandedness||1));
     const phase=this.elapsed*TAU*this.sheetCyclesPerSecond;
     for(const item of this.oscillators)item.object.position[item.axis]=item.initial[item.axis]+Math.sin(phase*item.frequency+item.phase)*item.amplitude;
     for(const item of this.levers)item.object.rotation.z=item.initial+Math.sin(phase*item.frequency+item.phase)*item.amplitude;
