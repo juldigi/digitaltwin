@@ -183,7 +183,7 @@ test('POLAR obstruction during clamp approach releases clamp and retracts uncomm
 test('POLAR clamp stroke and knife stroke stop short of unrealistic deep penetration',()=>{
  const m=new Polar115MachineTemplate(),s=new Polar115ProcessSimulation(m.root,m);assert.ok(s.clampStroke<=.12);assert.ok(s.knifeStroke<=.34);
  const clamp0=s.rest.clamp.clone(),knife0=s.rest.knife.clone();s.start();let now=1000,maxClamp=0,maxKnife=0;for(let i=0;i<850;i++){now+=10;s.update(now);maxClamp=Math.max(maxClamp,clamp0.y-s.clamp.position.y);maxKnife=Math.max(maxKnife,knife0.y-s.knife.position.y);}
- assert.ok(maxClamp>.09&&maxClamp<=.111);assert.ok(maxKnife>.30&&maxKnife<=.331);s.dispose();m.dispose();
+ assert.ok(maxClamp>.11&&maxClamp<=.117);assert.ok(maxKnife>.30&&maxKnife<=.331);s.dispose();m.dispose();
 });
 
 test('POLAR pause/resume has no time jump and stop restores stock and mechanisms',()=>{

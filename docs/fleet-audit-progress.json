@@ -8,7 +8,7 @@
   "status": "RELEASE_PENDING",
   "cursor": {
     "machineId": "BMJ-MCH-0001",
-    "partIndex": 2
+    "partIndex": 3
   },
   "baselineCommit": "b5e45a82ce1aeaf9094b0a5c3fd8d985b8a9e96f",
   "machines": [
@@ -43,12 +43,19 @@
         },
         {
           "part": "safety arms and cut interlocks",
-          "status": "RELEASE_PENDING",
-          "report": "docs/polar115-safety-interlock-audit.md"
+          "status": "COMPLETE",
+          "report": "docs/polar115-safety-interlock-audit.md",
+          "releaseEvidence": {
+            "commit": "b899b73bffe4b31f41723fcc3082ffc1234bfc12",
+            "workflow": 38179063842,
+            "conclusion": "success",
+            "tests": 1548
+          }
         },
         {
           "part": "clamp and pressure contact",
-          "status": "PENDING"
+          "status": "RELEASE_PENDING",
+          "report": "docs/polar115-clamp-contact-audit.md"
         },
         {
           "part": "knife and cutting stick",
@@ -70,7 +77,8 @@
       "reports": [
         "docs/polar115-input-table-audit.md",
         "docs/polar115-transport-registration-audit.md",
-        "docs/polar115-safety-interlock-audit.md"
+        "docs/polar115-safety-interlock-audit.md",
+        "docs/polar115-clamp-contact-audit.md"
       ]
     },
     {
@@ -543,11 +551,25 @@
     {
       "machineId": "BMJ-MCH-0001",
       "part": "safety arms and cut interlocks",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "report": "docs/polar115-safety-interlock-audit.md",
       "nextPartIndex": 3,
-      "parentCommit": "c30d946c6bbce49715428705ec77249fa6e5a525"
+      "parentCommit": "c30d946c6bbce49715428705ec77249fa6e5a525",
+      "releaseEvidence": {
+        "commit": "b899b73bffe4b31f41723fcc3082ffc1234bfc12",
+        "workflow": 38179063842,
+        "conclusion": "success",
+        "tests": 1548
+      }
+    },
+    {
+      "machineId": "BMJ-MCH-0001",
+      "part": "clamp and pressure contact",
+      "status": "RELEASE_PENDING",
+      "report": "docs/polar115-clamp-contact-audit.md",
+      "nextPartIndex": 4,
+      "parentCommit": "b899b73bffe4b31f41723fcc3082ffc1234bfc12"
     }
   ],
-  "updatedAt": "2026-10-11T22:00:00Z"
+  "updatedAt": "2026-10-11T23:00:00Z"
 }
