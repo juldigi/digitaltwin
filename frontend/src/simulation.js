@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import {OFFSET5_DIMENSIONS,OFFSET5_UNIT_CENTERS} from './data/dimensions-offset5.js';
 import {OFFSET5_FEEDBOARD_SURFACE as FEEDBOARD,offset5FeedboardHeightAt} from './data/offset5-feedboard-surface.js';
 
+import {OFFSET5_COATER_CONTACT as COATER} from './data/offset5-coater-contact.js';
 import {offset5CylinderSection,OFFSET5_TRANSFER_CONTACT} from './data/offset5-pu-contact.js';
 
 // Printing-test visualisation for Offset 5.
@@ -47,8 +48,8 @@ function pathPoints(){
   // round in world space. Route the sheet around the impression-cylinder surface toward the
   // coating nip instead of cutting through the cylinder core.
   const coaterScaleX=D.coaterLength/1.15;
-  const impression={x:D.coaterCenterX-.08*coaterScaleX,y:1.03,r:.255};
-  const coating={x:D.coaterCenterX+.10*coaterScaleX,y:1.48,r:.235};
+  const impression={x:D.coaterCenterX+COATER.impression.x*coaterScaleX,y:COATER.impression.y,r:COATER.impression.r};
+  const coating={x:D.coaterCenterX+COATER.coating.x*coaterScaleX,y:COATER.coating.y,r:COATER.coating.r};
   const dx=coating.x-impression.x,dy=coating.y-impression.y,centerDistance=Math.hypot(dx,dy);
   const nipGap=Math.max(0,centerDistance-impression.r-coating.r);
   const sheetRadius=impression.r+nipGap/2+.001;
@@ -193,6 +194,7 @@ export class PrintingSimulation{
       const section=offset5CylinderSection(i);
       return ['impression','blanket'].map(type=>({x:cx+section.p[type][0],y:section.p[type][1],r:section.r[type]+.001}));
     });
+    for(const c of [COATER.impression,COATER.coating])contactCylinders.push({x:D.coaterCenterX+c.x*COATER.scaleX,y:c.y,r:c.r+COATER.sheetClearance});
     const transferCenters=OFFSET5_UNIT_CENTERS.slice(0,-1).map((cx,i)=>(cx+OFFSET5_UNIT_CENTERS[i+1])/2);
     this.curve.getPoint=(t,target)=>{
       const p=getPoint(t,target);

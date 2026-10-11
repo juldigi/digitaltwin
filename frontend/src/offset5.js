@@ -6,6 +6,7 @@ import {ORIENTATION,OFFSET5_ACTUAL_ROLLER_DIAGRAM,OFFSET5_ROLLER_EVIDENCE_POLICY
 import {OFFSET5_DIMENSIONS,OFFSET5_UNIT_CENTERS,offset5DimensionAudit} from './data/dimensions-offset5.js';
 import {V122_SOURCE_STATS} from './data/research-v122.js';
 import {OFFSET5_FEEDBOARD_SURFACE} from './data/offset5-feedboard-surface.js';
+import {OFFSET5_COATER_CONTACT as COATER} from './data/offset5-coater-contact.js';
 import {offset5CylinderSection} from './data/offset5-pu-contact.js';
 import {createIndustrialMaterial} from './render/material-library.js';
 
@@ -891,19 +892,30 @@ export class OffsetMachineTemplate {
     this.tread(op,[.32,.09,.46],[.35,.77,1.42]);
     this.tread(op,[.30,.09,.37],[.35,1.03,1.34]);
     const chamber=this.group(g,'coater-chamber','Chamber blade & coating roller functional reference',[0,0,0],[0,.62,-.20],['IMG_1629.jpeg','pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'The chamber-blade system is supported by Heidelberg product information. Geometry is functional/sectional only.');
-    this.box(chamber,[.38,.12,1.55],[-.14,2.02,0],'graphite',.018);
-    {const r=this.cylinder(chamber,.115,1.46,[-.02,1.80,0],'steel');r.scale.x=1/coaterScaleX;Object.assign(r.userData,{dynamicRotor:true,rotorRole:'coater-process-roller',coaterRole:'anilox-metering',rotorSign:1,rotorRate:.82,roundnessCompensated:true});}
-    {const r=this.cylinder(chamber,.235,1.48,[.10,1.48,0],'rubber');r.scale.x=1/coaterScaleX;Object.assign(r.userData,{dynamicRotor:true,rotorRole:'coater-process-roller',coaterRole:'coating-cylinder',rotorSign:-1,rotorRate:.78,roundnessCompensated:true});}
-    {const r=this.cylinder(chamber,.255,1.50,[-.08,1.03,0],'steel');r.scale.x=1/coaterScaleX;Object.assign(r.userData,{dynamicRotor:true,rotorRole:'coater-process-roller',coaterRole:'impression-cylinder',rotorSign:1,rotorRate:.74,roundnessCompensated:true});}
-    const blade=this.box(chamber,[.11,.06,1.48],[-.20,1.90,0],'light',.012);blade.rotation.z=-.18;
+    const {anilox,coating,impression}=COATER;
+    this.box(chamber,[.24/coaterScaleX,.14,1.46],[COATER.bladeX-.123/coaterScaleX,anilox.y,0],'graphite',.012);
+    for(const [key,section,length,kind,role,sign] of [
+      ['anilox',anilox,1.46,'steel','anilox-metering',1],
+      ['coating',coating,1.48,'rubber','coating-cylinder',-1],
+      ['impression',impression,1.50,'steel','impression-cylinder',1]
+    ]){
+      const carrier=this.group(chamber,`coater-roller-${key}`,`Coater ${key} roller · visual reference`,[section.x,section.y,0],[0,0,0],photos,'Roller identity is functional; radius, installed bearing and gripper timing are not OEM service data.');
+      carrier.scale.x=1/coaterScaleX;
+      const roller=this.cylinder(carrier,section.r,length,[0,0,0],kind);
+      Object.assign(roller.userData,{dynamicRotor:true,rotorRole:'coater-process-roller',coaterRole:role,rotorSign:sign,rotorRate:1,roundnessCompensated:true,rigidCarrier:true});
+    }
+    const bladeNode=this.group(chamber,'coater-doctor-blade','Doctor blade · functional contact reference',[0,0,0],[0,0,0],photos,'Blade contact is a visual constraint, not a measured blade angle or pressure.');
+    this.box(bladeNode,[.006/coaterScaleX,.10,1.46],[COATER.bladeX,anilox.y,0],'light',.001);
+    Object.assign(g.userData,{installedTransferVerified:false,installedGripperVerified:false,transferGeometryPolicy:'ACTUAL_HANDOFF_CONFIGURATION_UNKNOWN__NO_INVENTED_GRIPPER'});
     const locks=this.group(g,'coater-chamber-locks','Chamber end locks, bearing collars & blade clamps',[0,0,0],[.14,.40,-.58],photos,'End hardware is an inspection-oriented functional reference; clamp force, blade angle and bearing specification are not asserted.');
-    for(const z of [-.77,.77]){this.cylinder(locks,.075,.055,[-.02,1.80,z],'graphite','z');this.ring(locks,.060,.010,[-.02,1.80,z],'steel','z');this.handle(locks,[-.19,1.94,z],'z',.11);}
-    for(const z of [-.62,-.20,.20,.62])this.box(locks,[.08,.055,.055],[-.22,1.94,z],'steel',.009);
+    for(const z of [-.77,.77]){this.cylinder(locks,.075,.055,[anilox.x,anilox.y,z],'graphite','z');this.ring(locks,.060,.010,[anilox.x,anilox.y,z],'steel','z');this.handle(locks,[COATER.bladeX-.07/coaterScaleX,anilox.y+.06,z],'z',.11);}
+    for(const z of [-.62,-.20,.20,.62])this.box(locks,[.08,.055,.055],[COATER.bladeX-.055/coaterScaleX,anilox.y+.06,z],'steel',.009);
     const adjusters=this.group(g,'coater-blade-adjusters','Chamber-blade adjusters, end seals & drain reference',[0,0,0],[.16,.38,-.62],photos,'Adjustment and drain hardware is represented for inspection access; blade loading, seal material and drain capacity are not asserted.');
-    for(const z of [-.68,.68]){this.cylinder(adjusters,.035,.065,[-.28,1.98,z],'steel','z');this.box(adjusters,[.12,.045,.07],[-.24,1.91,z],'graphite',.008);}
-    this.tube(adjusters,[[-.18,1.90,-.62],[-.34,1.55,-.74],[-.30,1.10,-.82]],.012,'rubber');
+    for(const z of [-.68,.68]){this.cylinder(adjusters,.035,.065,[COATER.bladeX-.10/coaterScaleX,anilox.y+.07,z],'steel','z');this.box(adjusters,[.12,.045,.07],[COATER.bladeX-.08/coaterScaleX,anilox.y,z],'graphite',.008);}
+    this.tube(adjusters,[[-.18,anilox.y+.05,-.62],[-.34,1.13,-.74],[-.30,.767,-.74]],.012,'rubber');
     const coatingSupply=this.group(g,'coater-supply','Coating circulation, tray & chamber connections',[0,0,0],[.12,.30,-.52],photos,'Hoses, drip tray and chamber connectors are shown as functional service references; pump type, viscosity and pressure are not asserted.');
-    this.box(coatingSupply,[.72,.10,1.58],[-.02,.78,0],'steel',.022);
+    const catchTray=this.group(coatingSupply,'coater-catch-tray','Coating catch tray · clearance reference',[0,0,0],[0,0,0],photos,'Functional tray shape, not installed CAD. Clears impression and the lower frame.');
+    this.box(catchTray,[.72,.04,1.58],[-.02,.735,0],'steel',.010);
     for(const z of [-.66,.66]){this.cylinder(coatingSupply,.035,.08,[-.18,1.86,z],'steel','z');this.tube(coatingSupply,[[-.18,1.86,z],[-.38,1.52,z],[-.34,1.05,z]],.018,z<0?'blue':'rubber');}
     this.box(coatingSupply,[.28,.42,.18],[-.38,.98,-.88],'graphite',.024);
     this.gaugePanel(coatingSupply,[-.38,1.22,-.99]);
@@ -917,7 +929,7 @@ export class OffsetMachineTemplate {
     const pu8Right=OFFSET5_UNIT_CENTERS.at(-1)+D.printingUnitFrameWidth/2;
     const coaterLeft=D.coaterCenterX-D.coaterLength/2;
     const puCoaterGap=Math.max(.34,coaterLeft-pu8Right);
-    const puCoater=this.group(this.root,'pu8-coater-access','PU8 / coater enclosed transfer and operator landing',[(pu8Right+coaterLeft)/2,0,0],[.15,.16,.68],photos,'PU8 hands the sheet into the coating unit through a guarded central transfer. The checker-plate landing remains on the operator side without a transverse fence.');
+    const puCoater=this.group(this.root,'pu8-coater-access','PU8 / coater enclosed transfer and operator landing',[(pu8Right+coaterLeft)/2,0,0],[.15,.16,.68],photos,'The photographed PU8/coater transition remains enclosed. Installed handoff drum count, shaft centers and gripper timing are unverified; no mechanical reconstruction is claimed.');
     this.markExteriorCover(this.box(puCoater,[puCoaterGap,.58,1.72],[0,1.12,0],'graphite',.024));
     this.markExteriorCover(this.box(puCoater,[puCoaterGap-.05,.10,1.56],[0,1.44,0],'black',.016));
     // V48: no standalone operator step between PU8 and coater. The global gallery already

@@ -179,7 +179,7 @@ test('V259 keeps coater rollers round and routes the sheet through the coating n
 
   m.root.updateMatrixWorld(true);
   const chamber=m.findNode('coater-chamber');
-  const rollers=chamber.children.filter(o=>o.isMesh&&o.userData.coaterRole);
+  const rollers=[];chamber.traverse(o=>{if(o.isMesh&&o.userData.coaterRole)rollers.push(o);});
   assert.equal(rollers.length,3);
   for(const roller of rollers){
    const size=new THREE.Box3().setFromObject(roller).getSize(new THREE.Vector3());
@@ -474,7 +474,7 @@ test('Offset 5 dryer keeps transport rollers batched while sheet and UV carry vi
 test('Offset 5 coater contact train counter-rotates at sheet surface speed',()=>{
  const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
  try{
-  const roles=['coater-impression-cylinder','coater-transfer-cylinder','coater-chamber-metering-roller'];
+  const roles=['coater-impression-cylinder','coater-coating-cylinder','coater-chamber-metering-roller'];
   const rotors=roles.map(role=>sim.rotors.find(item=>item.role===role));
   assert.ok(rotors.every(Boolean),'coater process rotors must remain available');
   assert.deepEqual(rotors.map(r=>r.sign),[1,-1,1]);

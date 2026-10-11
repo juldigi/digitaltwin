@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {OFFSET5_COATER_CONTACT as COATER} from './data/offset5-coater-contact.js';
 import {offset5CylinderSection} from './data/offset5-pu-contact.js';
 // DigitalTwin BMJ — Offset 5 final realism refinement
 // Target: HEIDELBERG Speedmaster CD 102-8+L / OFU-1 / serial 550415
@@ -303,8 +304,8 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
     const chamber=this.node('coater-chamber');
     if(chamber){
       for(const z of [-.70,.70]){
-        this.dc(chamber,.048,.032,[-.20,1.90,z],'steel','z','coater-chamber-end-seal-reference',{service:true});
-        this.db(chamber,[.075,.045,.055],[-.25,1.84,z],'graphite',.008,'coater-chamber-clamp-reference',{service:true});
+        this.dc(chamber,.048,.032,[COATER.bladeX-.055/COATER.scaleX,COATER.anilox.y,z],'steel','z','coater-chamber-end-seal-reference',{service:true});
+        this.db(chamber,[.075,.045,.055],[COATER.bladeX-.08/COATER.scaleX,COATER.anilox.y-.06,z],'graphite',.008,'coater-chamber-clamp-reference',{service:true});
       }
     }
     const supply=this.node('coater-supply');
@@ -469,9 +470,9 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
     this.root.userData.coaterFramePolicy='SUPPORT_EXISTING_THREE_ROLL_CONTACT_TRAIN_ONLY__NO_SECOND_COATER__NO_DIMENSION_CHANGE';
     const chamber=this.node('coater-chamber');if(!chamber)return;
     const rows=[
-      ['metering',-.02,1.80],
-      ['coating', .10,1.48],
-      ['impression',-.08,1.03]
+      ['metering',COATER.anilox.x,COATER.anilox.y],
+      ['coating',COATER.coating.x,COATER.coating.y],
+      ['impression',COATER.impression.x,COATER.impression.y]
     ];
     for(const z of [-.90,.90]){
       const spine=this.db(chamber,[.14,1.18,.12],[.02,1.45,z],'graphite',.014,'coater-open-side-frame-spine',{confidence:'PHOTO_OEM_FUNCTIONAL_REFERENCE'});
@@ -499,21 +500,21 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
     const chamber=this.node('coater-chamber');if(!chamber)return;
 
     const driveZ=-.86,roundnessScale=1/(this.node('coater')?.scale.x||1);
-    const hub=this.dc(chamber,.082,.070,[-.02,1.80,driveZ],'graphite','z','coater-anilox-drive-hub',{service:true,confidence:'HEIDELBERG_CD102_SERVICE_REFERENCE'});
+    const hub=this.dc(chamber,.082,.070,[COATER.anilox.x,COATER.anilox.y,driveZ],'graphite','z','coater-anilox-drive-hub',{service:true,confidence:'HEIDELBERG_CD102_SERVICE_REFERENCE'});
     hub.scale.x=roundnessScale;hub.userData.roundnessCompensated=true;
     hub.userData.coaterRollerFunction='ANILOX_METERING_REFERENCE';
     hub.userData.driveSideOnly=true;
 
-    const shaft=this.dc(chamber,.038,.145,[-.02,1.80,-.925],'steel','z','coater-anilox-drive-shaft-ds',{service:true,confidence:'HEIDELBERG_CD102_SERVICE_REFERENCE'});
+    const shaft=this.dc(chamber,.038,.145,[COATER.anilox.x,COATER.anilox.y,-.925],'steel','z','coater-anilox-drive-shaft-ds',{service:true,confidence:'HEIDELBERG_CD102_SERVICE_REFERENCE'});
     shaft.scale.x=roundnessScale;shaft.userData.roundnessCompensated=true;
     shaft.userData.coaterRollerFunction='ANILOX_METERING_REFERENCE';
     shaft.userData.driveSideOnly=true;
 
-    const lock=this.db(chamber,[.15,.13,.055],[-.11,1.80,-.82],'graphite',.010,'coater-anilox-lock-reference',{service:true,confidence:'HEIDELBERG_CD102_SERVICE_REFERENCE'});
+    const lock=this.db(chamber,[.15,.13,.055],[-.11,COATER.anilox.y,-.82],'graphite',.010,'coater-anilox-lock-reference',{service:true,confidence:'HEIDELBERG_CD102_SERVICE_REFERENCE'});
     lock.userData.lockFunction='ANILOX_ROLLER_POSITION_RETENTION_REFERENCE';
     lock.userData.serviceSettingAsserted=false;
 
-    const retainer=this.db(chamber,[.09,.055,.06],[.08,1.80,-.82],'steel',.008,'coater-anilox-drive-retainer',{service:true,confidence:'HEIDELBERG_CD102_SERVICE_REFERENCE'});
+    const retainer=this.db(chamber,[.09,.055,.06],[.08,COATER.anilox.y,-.82],'steel',.008,'coater-anilox-drive-retainer',{service:true,confidence:'HEIDELBERG_CD102_SERVICE_REFERENCE'});
     retainer.userData.driveSideOnly=true;
 
     this.root.userData.dimensionLock='BMJ_CUSTOM_INSTALLED_DIMENSIONS_DO_NOT_NORMALIZE_TO_GENERIC_CD102';
@@ -838,14 +839,13 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
     // Coating contact train: keep the existing chamber/coating/impression hardware,
     // but drive each contact surface at the same sheet surface speed. This removes the
     // legacy arbitrary RPM multipliers while preserving the documented counter-rotation.
-    const coaterRotors=this.rotors.filter(item=>item.role==='coater-process-roller')
-      .sort((a,b)=>(a.mesh.position.y||0)-(b.mesh.position.y||0));
-    const coaterRoles=['coater-impression-cylinder','coater-transfer-cylinder','coater-chamber-metering-roller'];
+    const coaterRotors=this.rotors.filter(item=>item.role==='coater-process-roller');
+    const coaterRoles={'impression-cylinder':'coater-impression-cylinder','coating-cylinder':'coater-coating-cylinder','anilox-metering':'coater-chamber-metering-roller'};
     for(let i=0;i<coaterRotors.length;i++){
       const rotor=coaterRotors[i],radius=rotor.mesh?.geometry?.parameters?.radiusTop;
       if(!radius)continue;
       rotor.rate=this.baseMetersPerSecond/(Math.PI*2*this.sheetCyclesPerSecond*radius);
-      rotor.role=coaterRoles[i]||`coater-process-roller-${i+1}`;
+      rotor.role=coaterRoles[rotor.mesh.userData.coaterRole]||`coater-process-roller-${i+1}`;
       rotor.source='COATER_CONTACT_SURFACE_SPEED_MATCHED_TO_SHEET_REFERENCE';
       rotor.visualSpeedRatio=1;
     }

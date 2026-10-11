@@ -194,13 +194,14 @@ for(let n=1;n<=7;n++){
 /* COATING */
 for(const [key,name,refs,parts] of [
  ['FRAME','Coating Unit Housing',['coater-frame','coater-operator-cover'],['Side Frames','Operator-side Cover']],
- ['CHAMBER','Chamber Blade System',['coater-chamber','coater-chamber-locks','coater-blade-adjusters'],['Chamber Blade Reference','Coating Roller','End Locks / Bearing Collars','Blade Adjusters / End Seals / Drain']],
+ ['CHAMBER','Chamber Blade System',['coater-chamber','coater-chamber-locks','coater-blade-adjusters'],['Chamber Blade Reference','Doctor Blade','End Locks / Bearing Collars','Blade Adjusters / End Seals / Drain']],
+ ['ROLLERS','Coating Process Rollers',['coater-roller-anilox','coater-roller-coating','coater-roller-impression'],['Anilox Metering Roller','Coating Cylinder','Impression Cylinder']],
  ['SUPPLY','Coating Circulation & Tray',['coater-supply'],['Drip / Catch Tray','Chamber Connections','Circulation Hose / Gauge Reference']],
- ['ACCESS','PU8 / Coater Operator Access',['pu8-coater-access'],['Enclosed Sheet Transfer','Supported Checker-plate Landing','Lower Access Step']],
+ ['ACCESS','PU8 / Coater Operator Access',['pu8-coater-access'],['Enclosed Sheet Transfer Reference','Supported Checker-plate Landing','Lower Machine Plinth']],
  ['SERVICE','Coater Service Side',['coater-service'],['Drive-side Service Panel','Vent / Hose Reference']]
 ]){
  const sid=`O5.COATER.${key}`;add(sid,'O5.COATER',3,'Sub',name,{meshRefs:refs,sourceRefs:['SRC-USER-PHOTOS','SRC-HEIDELBERG-CD102'],confidence:CONFIDENCE.REFERENCE_PLUS_PHOTO,explodeVector:[.35,.22,key==='SERVICE'?-.45:.25]});
- const bid=`${sid}.B1`;add(bid,sid,4,'Block',name,{meshRefs:refs,sourceRefs:brochure,confidence:CONFIDENCE.MEDIUM,explodeVector:[.18,.14,0]});parts.forEach((p,i)=>{const pid=`${bid}.P${i+1}`;add(pid,bid,5,'Part',p,{meshRefs:i===0?refs:[],sourceRefs:brochure,confidence:CONFIDENCE.MEDIUM,explodeVector:[.08,.08,(i-1)*.12]});add(`${pid}.S1`,pid,6,'Spesifik Part',`${p} · coating functional reference`,{sourceRefs:brochure,confidence:CONFIDENCE.REFERENCE_ONLY,explodeVector:[.05,.05,.08]});});
+ const bid=`${sid}.B1`;add(bid,sid,4,'Block',name,{meshRefs:refs,sourceRefs:brochure,confidence:CONFIDENCE.MEDIUM,explodeVector:[.18,.14,0]});parts.forEach((p,i)=>{const pid=`${bid}.P${i+1}`;add(pid,bid,5,'Part',p,{meshRefs:key==='SUPPLY'&&i===0?['coater-catch-tray']:key==='ROLLERS'?[refs[i]]:key==='CHAMBER'&&i===1?['coater-doctor-blade']:i===0?refs:[],sourceRefs:brochure,confidence:key==='ROLLERS'?CONFIDENCE.REFERENCE_ONLY:CONFIDENCE.MEDIUM,explodeVector:[.08,.08,(i-1)*.12]});add(`${pid}.S1`,pid,6,'Spesifik Part',`${p} · coating functional reference`,{sourceRefs:brochure,confidence:CONFIDENCE.REFERENCE_ONLY,explodeVector:[.05,.05,.08]});});
 }
 
 /* DRYER / EXTENSION */
