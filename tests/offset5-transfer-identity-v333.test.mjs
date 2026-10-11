@@ -23,7 +23,8 @@ test('V333 Offset 5 transfer gripper simulation retains bay identity without inv
  const template=createMachineTemplate('BMJ-MCH-0003');
  const sim=createMachineSimulation('BMJ-MCH-0003',template.root,template);
  try{
-  assert.equal(sim.gripperMotions.length,14);
+  assert.equal(sim.gripperMotions.filter(item=>item.transferFromPU).length,14);
+  assert.equal(sim.gripperMotions.filter(item=>item.drumX===.16).length,2);
   for(let bay=1;bay<=7;bay++){
    const motions=sim.gripperMotions.filter(item=>item.transferFromPU===bay&&item.transferToPU===bay+1);
    assert.equal(motions.length,2,`PU${bay}→PU${bay+1}`);
