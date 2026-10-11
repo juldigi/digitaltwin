@@ -324,6 +324,8 @@ function commitSimulationState(next=currentSimulationState()){
 function updateSimulationPanel(next=currentSimulationState()){
  const simulation=commitSimulationState(next),running=simulation.running,active=simulation.active,progress=Math.round(simulation.progress*100);
  const status=$('#sim-status'),stage=$('#sim-stage'),count=$('#sim-completed'),visible=$('#sim-visible'),pile=$('#sim-pile'),bar=$('#sim-progress-bar'),pause=$('#sim-pause'),start=$('#sim-start'),uv=$('#sim-uv-state'),uvCount=$('#sim-uv-count'),uvIndicator=$('#sim-uv-indicator');
+ const mediaEnabled=engine?.simulation?.processMedia?.enabled;
+ if(typeof mediaEnabled==='boolean')for(const id of ['sim-process-media','sim-ink-flow']){const input=$('#'+id);if(input)input.checked=mediaEnabled;}
  const overview=document.querySelector('#panel-content .simulation-overview');
  if(overview&&!overview.querySelector('#sim-mode')){
   const field=document.createElement('label');field.className='simulation-mode-field';
@@ -356,7 +358,7 @@ function startPrintingSimulation(){
   if(readiness?.blocked||readiness?.available===false){toast(readiness?.blockedReason||'Simulasi proses untuk mesin atau peralatan ini belum tersedia.',true);updateSimulationPanel(readiness);return;}
   if(MACHINE_KEY==='offset5')simulationOwnsExterior=false;
   else{simulationOwnsExterior=!isInteriorOpen();enableExteriorOpen({forceDetail:false});}
-  engine.setPrintingSimulationInkFlowVisible(MACHINE_KEY!=='offset5'||isInteriorOpen());
+  if(!engine.simulation?.processMedia)engine.setPrintingSimulationInkFlowVisible(MACHINE_KEY!=='offset5'||isInteriorOpen());
   engine.template.ghost(false);engine.isolated=false;engine.clearPartLabels();selectedPart=null;setActiveTaxonomyId(ACTIVE_ROOT);setExplodeLevel(0);
   updateSimulationPanel(engine.startPrintingSimulation());
   engine.fit(engine.machine);
@@ -382,7 +384,7 @@ window.addEventListener('bmj:simulationcommand',event=>{
  const action=event.detail?.action,value=event.detail?.value;
  if(action==='toggle'){if(engine?.isPrintingSimulationActive?.()||currentSimulationState().active)pausePrintingSimulation();else startPrintingSimulation();return;}
  if(action==='stop'){stopPrintingSimulation({restoreExterior:true});return;}
- if(action==='exterior'&&engine){const interior=!isInteriorOpen();setDomainState({inspectionMode:{interior}});engine.template.setExteriorOpen(interior);if(MACHINE_KEY==='offset5')engine.setPrintingSimulationInkFlowVisible(interior);requestAnimationFrame(()=>engine?.fit(engine.machine,'iso',false));return;}
+ if(action==='exterior'&&engine){const interior=!isInteriorOpen();setDomainState({inspectionMode:{interior}});engine.template.setExteriorOpen(interior);if(MACHINE_KEY==='offset5'&&!engine.simulation?.processMedia)engine.setPrintingSimulationInkFlowVisible(interior);updateSimulationPanel(engine.getPrintingSimulationState());requestAnimationFrame(()=>engine?.fit(engine.machine,'iso',false));return;}
  if(action==='mode'){engine?.setPrintingSimulationMode?.(value);updateSimulationPanel(engine?.getPrintingSimulationState?.());return;}
  if(action==='speed')updateSimulationPanel(engine?.setPrintingSimulationSpeed?.(+value)||currentSimulationState());
 });
@@ -539,7 +541,7 @@ function renderFactoryPanel(){
 function renderOffsetProcessMediaControls(){
 if(engine?.simulation?.processMedia){
    $('#panel-content').insertAdjacentHTML('beforeend',`<div class="card"><h4>Aliran proses</h4><label class="check"><input id="sim-process-media" type="checkbox" ${engine.simulation.processMedia.enabled?'checked':''}> Tampilkan tinta, air dampening, dan udara</label><p>Tinta mengikuti warna unit; air dampening ditandai biru muda dan compressed air putih. Indikator bergerak menempel pada komponen saat simulasi berjalan. Buka interior untuk melihat air dan udara pada PU. Jalur ini merupakan ilustrasi proses.</p></div>`);
-   $('#sim-process-media').onchange=e=>engine.setPrintingSimulationInkFlowVisible(e.target.checked);
+   $('#sim-process-media').onchange=e=>updateSimulationPanel(engine.setPrintingSimulationInkFlowVisible(e.target.checked));
   }
 }
 function renderPanel(tab=activeInspectorTab()){

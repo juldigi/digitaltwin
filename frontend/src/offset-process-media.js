@@ -11,13 +11,18 @@ export function attachOffsetProcessMedia(sim,template){
  const dampNodes=nodes.filter(n=>/^(press-\d+-damp-roller-18-body|o10-pu\d+-dampening|offset[89]-pu\d+-dampening)$/.test(n.userData.nodeId||''));
  const airNodes=nodes.filter(n=>/^(press-\d+-air-blower-nip|o10-pu\d+-cylinders|offset[89]-pu\d+-cylinders)$/.test(n.userData.nodeId||''));
  function add(node,kind,color,index){
-  const box=new THREE.Box3().setFromObject(node);if(box.isEmpty())return;
-  const center=node.worldToLocal(box.getCenter(new THREE.Vector3()));
+  const box=new THREE.Box3(),inverse=node.matrixWorld.clone().invert();
+  node.traverse(part=>{if(!(part.isMesh||part.isLine)||!part.geometry)return;part.geometry.computeBoundingBox();box.union(part.geometry.boundingBox.clone().applyMatrix4(inverse.clone().multiply(part.matrixWorld)));});
+  if(box.isEmpty())return;
+  // AIR BLOWER line callouts define a process zone, not a physical nozzle housing.
+  if(kind==='air'){box.min.x-=.045;box.max.x+=.045;}
+  const center=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3());
+  const travel=Math.min(.09,(kind==='air'?size.x:size.y)*.8),spread=Math.min(.6,size.z*.8);
   const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.BufferAttribute(new Float32Array(12),3));
   const material=new THREE.PointsMaterial({color,size:kind==='air'?.022:.026,transparent:true,opacity:kind==='air'?.75:.95,depthWrite:false,sizeAttenuation:true});
   const points=new THREE.Points(geometry,material);points.name=`PROCESS-${kind.toUpperCase()}-FLOW`;
   Object.assign(points.userData,{processMedium:kind,processIndicator:true,installedRoutingVerified:false,unit:index+1});points.visible=false;points.raycast=()=>{};node.add(points);
-  flows.push({node,points,center,kind,index});resources.push(geometry,material);
+  flows.push({node,points,center,kind,index,box,travel,spread});resources.push(geometry,material);
  }
  inkNodes.forEach((n,i)=>add(n,'ink',COLORS[i%8],i));dampNodes.forEach((n,i)=>add(n,'dampening-water',0x43cfff,i));airNodes.forEach((n,i)=>add(n,'air',0xf0f9ff,i));
  function sync(now){
@@ -28,7 +33,7 @@ export function attachOffsetProcessMedia(sim,template){
    for(let j=0;j<4;j++){
     const t=(elapsed*.65+j/4+flow.index*.13)%1,c=flow.center;
     // Stay within 90 mm of the identified component; no tray, hose or remote fluid source is created.
-    a.setXYZ(j,c.x+(flow.kind==='air'?.09*t:0),c.y+(flow.kind==='air'?0:.045-.09*t),c.z-.30+j*.20);
+    a.setXYZ(j,c.x+(flow.kind==='air'?flow.travel*(t-.5):0),c.y+(flow.kind==='air'?0:flow.travel*(.5-t)),c.z+flow.spread*(j/3-.5));
    }
    a.needsUpdate=true;flow.points.geometry.computeBoundingBox();flow.points.geometry.computeBoundingSphere();
   }
