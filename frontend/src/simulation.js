@@ -1,3 +1,4 @@
+import {OFFSET5_DRYER_CONTACT as DRYER} from './data/offset5-dryer-contact.js';
 import * as THREE from 'three';
 import {OFFSET5_DIMENSIONS,OFFSET5_UNIT_CENTERS} from './data/dimensions-offset5.js';
 import {OFFSET5_FEEDBOARD_SURFACE as FEEDBOARD,offset5FeedboardHeightAt} from './data/offset5-feedboard-surface.js';
@@ -213,6 +214,11 @@ export class PrintingSimulation{
         if(Math.abs(dx)<.22)p.y=OFFSET5_TRANSFER_CONTACT.axisY+Math.sqrt(tr*tr-dx*dx);
         else {const dy=p.y-OFFSET5_TRANSFER_CONTACT.axisY,d=Math.hypot(dx,dy);if(d<tr){p.x=tx+dx*tr/d;p.y=OFFSET5_TRANSFER_CONTACT.axisY+dy*tr/d;}}
       }
+      // Level reference bed through all six supports; ease into the existing delivery rise.
+      const left=D.dryerCenterX+DRYER.rollerXs[0]*DRYER.scaleX-.04;
+      const right=D.dryerCenterX+DRYER.rollerXs.at(-1)*DRYER.scaleX+.04;
+      if(p.x>=left&&p.x<=right)p.y=DRYER.sheetY;
+      else if(p.x>right&&p.x<right+.20){const u=(p.x-right)/.20,w=u*u*(3-2*u);p.y=DRYER.sheetY+(p.y-DRYER.sheetY)*w;}
       return p;
     };
     this.pathLength=this.curve.getLength();
@@ -608,7 +614,8 @@ export class PrintingSimulation{
       }
     }
 
-    const uvPulse=.82+.18*Math.sin(phase*1.8);
+    // Steady occupancy cue, not an invented lamp power modulation or curing dose.
+    const uvPulse=1;
     this.setUV(dryerOccupied,uvPulse);
     this.emit(false);
   }

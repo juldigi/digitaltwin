@@ -59,7 +59,7 @@ test('both inspection pods use the photographed inclined face without moving the
  const t=createPolishedMachineTemplate('offset5');try{
  for(const side of ['a','b']){
   const casing=t.findNode(`inspection-camera-${side}-casing`),pod=t.findNode(`inspection-camera-${side}`);let housing,face;casing.traverse(m=>{if(m.userData.photoAngledCameraCasing)housing=m;if(m.userData.photoInclinedCameraFace)face=m;});
-  assert.ok(housing&&face);assert.equal(housing.geometry.type,'ExtrudeGeometry');assert.ok(Math.abs(face.rotation.z)>.4);const bounds=new THREE.Box3().setFromObject(casing),lens=pod.children.find(m=>m.userData.inspectionLens);assert.ok(center(lens).y<bounds.min.y,'lens remains exposed below the supported housing');
+  assert.ok(housing&&face);assert.equal(housing.geometry.type,'ExtrudeGeometry');assert.ok(Math.abs(face.rotation.z)>.4);const bounds=new THREE.Box3().setFromObject(casing),lens=t.findNode(`inspection-camera-${side}-lens`).children.find(m=>m.userData.inspectionLens);assert.ok(center(lens).y<bounds.min.y,'lens remains exposed below the supported housing');
  }
  }finally{t.dispose();}
 });

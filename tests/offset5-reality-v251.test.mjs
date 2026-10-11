@@ -312,9 +312,9 @@ test('Offset 5 Focusight optical heads are attached and face the sheet plane',()
   for(const side of ['a','b']){
    const pod=m.findNode(`inspection-camera-${side}`);
    assert.ok(pod,`missing Focusight camera pod ${side}`);
-   assert.equal(pod.userData.opticalAxisPolicy,'PHOTO_VERIFIED_DOWNWARD_TO_SHEET_PLANE');
+   assert.equal(pod.userData.opticalAxisPolicy,'PHOTO_OBSERVED_DOWNWARD__TILT_ESTIMATED_CLEAR_OF_LIGHTING');
    const barrel=pod.children.find(o=>o.isMesh&&o.userData.inspectionOpticalBarrel);
-   const lens=pod.children.find(o=>o.isMesh&&o.userData.inspectionLens);
+   let lens;pod.traverse(o=>{if(o.isMesh&&o.userData.inspectionLens)lens=o;});
    assert.ok(barrel&&lens,`camera pod ${side} is missing attached optical barrel/lens`);
    assert.equal(lens.userData.opticalAxis,'DOWNWARD_TOWARD_SHEET_PLANE_WITH_SMALL_PROCESS_DIRECTION_TILT');
    const barrelY=barrel.userData.opticalBarrelCenter?.[1]??barrel.position.y;
@@ -459,15 +459,11 @@ test('Offset 5 inks each section only after that section passes the PU nip',()=>
  }finally{sim.dispose();m.dispose();}
 });
 
-test('Offset 5 dryer keeps transport rollers batched while sheet and UV carry visible process motion',()=>{
+test('Offset 5 dryer supports rotate with the sheet while installed transport remains unverified',()=>{
  const m=new Offset5CD102RealismTemplate(),sim=new Offset5CD102RealismSimulation(m.root,m);
  try{
-  assert.equal(sim.rotors.filter(item=>item.role==='dryer-sheet-transport-roller').length,0);
-  const ref=m.findNode('dryer-sheet-path');
-  const referenceMeshes=[];
-  ref?.traverse(o=>{if(o.isMesh&&o.userData.rotorRoleReference==='dryer-transport-roller')referenceMeshes.push(o);});
-  assert.ok(referenceMeshes.reduce((sum,o)=>sum+(o.userData.rotorElementCount||1),0)>=6);
-  assert.equal(sim.state().dryerTransportPolicy,'MOBILE_BATCHED_STATIC_REFERENCE__UV_AND_SHEET_PATH_CARRY_VISIBLE_DRYER_MOTION');
+  assert.equal(sim.rotors.filter(item=>item.role==='dryer-sheet-transport-roller').length,6);
+  assert.equal(sim.state().dryerTransportPolicy,'ROUND_SUPPORT_ROLLERS_SURFACE_SPEED_MATCHED__INSTALLED_TRANSPORT_UNVERIFIED');
  }finally{sim.dispose();m.dispose();}
 });
 

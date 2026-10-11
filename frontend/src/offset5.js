@@ -7,6 +7,7 @@ import {OFFSET5_DIMENSIONS,OFFSET5_UNIT_CENTERS,offset5DimensionAudit} from './d
 import {V122_SOURCE_STATS} from './data/research-v122.js';
 import {OFFSET5_FEEDBOARD_SURFACE} from './data/offset5-feedboard-surface.js';
 import {OFFSET5_COATER_CONTACT as COATER} from './data/offset5-coater-contact.js';
+import {OFFSET5_DRYER_CONTACT as DRYER,OFFSET5_INSPECTION_CONTACT as INSPECTION} from './data/offset5-dryer-contact.js';
 import {offset5CylinderSection} from './data/offset5-pu-contact.js';
 import {createIndustrialMaterial} from './render/material-library.js';
 
@@ -970,22 +971,25 @@ export class OffsetMachineTemplate {
   dryerExtension(x){
     const photos=['IMG_1629.jpeg','IMG_1631.jpeg','IMG_1633.jpeg'];
     const g=this.group(this.root,'dryer-extension','Dryer / extension deck',[x,0,0],[.8,.25,0],photos,'The sloped hood and long checker-plate deck are taken from the actual machine photos. Dryer internals are represented only as functional zones; lamp type and installed configuration are not asserted.');
-    g.scale.x=OFFSET5_DIMENSIONS.layout.dryerLength/1.62;
+    g.scale.x=DRYER.scaleX;
+    Object.assign(g.userData,{installedLampCountVerified:false,installedTransportVerified:false,coolingTopologyVerified:false});
     this.markExteriorCover(this.box(g,[1.55,.92,2.02],[0,.72,0],'graphite',.035));
     const uvSupport=this.group(g,'dryer-uv-support-frame','UV module structural support frame',[0,0,0],[0,.20,0],photos,'Low-profile rails and crossmembers support the UV cassette zone; this is machine structure, not an operator footstep.');
     for(const z of [-.66,.66])this.box(uvSupport,[1.46,.07,.10],[0,1.205,z],'graphite',.010);
     for(const x0 of [-.50,0,.50])this.box(uvSupport,[.10,.07,1.42],[x0,1.205,0],'steel',.008);
     const hood=this.markExteriorCover(this.group(g,'dryer-hood','Sloped dryer / extension hood',[0,0,0],[.35,.55,0],photos));
-    const h1=this.box(hood,[1.24,.18,1.92],[-.12,1.64,0],'graphite',.028);h1.rotation.z=-.36;
-    const h2=this.box(hood,[.78,.16,1.92],[.46,1.86,0],'graphite',.025);h2.rotation.z=-.12;
+    const h1=this.box(hood,[1.08,.18,1.92],[-.12,1.90,0],'graphite',.028);h1.rotation.z=-.36;
+    const h2=this.box(hood,[.40,.16,1.92],[.16,1.86,0],'graphite',.025);h2.rotation.z=-.12;
     for(const z of [-.78,0,.78])this.box(hood,[.32,.035,.22],[.08,1.84,z],'black',.008);
     const lamps=this.group(g,'dryer-modules','Dryer / UV curing modules',[0,0,0],[0,.58,-.25],photos,'Installed UV drying is user-confirmed. The cassette arrangement is a functional visual reconstruction; exact lamp count, wavelength, power and cassette model remain installation-specific.');
-    const uv=this.group(lamps,'dryer-uv-system','UV curing system · lamp cassettes, reflector & cooling gap',[0,0,0],[0,.34,-.18],photos,'Heidelberg DryStar UV uses short-distance UV cassettes, reflectors and temperature management. Geometry is fitted inside the photographed dryer hood; electrical ratings are not asserted.');
-    for(const x0 of [-.42,0,.42]){
-      this.box(uv,[.30,.11,1.44],[x0,1.50,0],'graphite',.014);
-      const reflector=this.box(uv,[.24,.035,1.34],[x0,1.435,0],'steel',.008);reflector.userData.uvReflector=true;
-      const lamp=this.box(uv,[.13,.025,1.26],[x0,1.405,0],'light',.006);lamp.userData.uvLamp=true;lamp.material.emissive.setHex(0x5d36ff);lamp.material.emissiveIntensity=.08;
-      const window=this.box(uv,[.22,.018,1.30],[x0,1.382,0],'glass',.004);window.userData.uvWindow=true;
+    const uv=this.group(lamps,'dryer-uv-system','UV curing system · lamp cassettes, reflector & cooling gap',[0,0,0],[0,.34,-.18],photos,'Functional UV cassette, reflector and window references fitted inside the photographed hood; installed lamp technology, quantity, cooling topology and electrical ratings are unverified.');
+    for(const [i,x0] of [-.42,0,.42].entries()){
+      const cassette=this.group(uv,`dryer-uv-cassette-${i+1}`,'UV cassette · functional reference',[0,0,0],[0,.12,0],photos);
+      const optics=this.group(cassette,`dryer-uv-optics-${i+1}`,'Reflector and window · functional reference',[0,0,0],[0,.04,0],photos);
+      this.box(cassette,[.30,.11,1.44],[x0,1.50,0],'graphite',.014);
+      const reflector=this.box(optics,[.24,.035,1.34],[x0,1.435,0],'steel',.008);reflector.userData.uvReflector=true;
+      const lamp=this.box(cassette,[.13,.025,1.26],[x0,1.405,0],'light',.006);lamp.userData.uvLamp=true;lamp.material.emissive.setHex(0x5d36ff);lamp.material.emissiveIntensity=.08;
+      const window=this.box(optics,[.22,.018,1.30],[x0,1.382,0],'glass',.004);window.userData.uvWindow=true;
       const beam=this.box(uv,[.20,.17,1.26],[x0,1.29,0],'blue',.004);beam.userData.uvBeam=true;beam.material.color.setHex(0x6f4bff);beam.material.emissive.setHex(0x5a2cff);beam.material.emissiveIntensity=.7;beam.material.opacity=.18;beam.material.transparent=true;beam.material.depthWrite=false;beam.visible=false;
     }
     const ventilation=this.group(g,'dryer-ventilation','Dryer extraction ducts, fans & access latches',[0,0,0],[.10,.42,-.45],photos,'External extraction and access details are visual references. Airflow rate, temperature and installed lamp technology are intentionally unspecified.');
@@ -997,7 +1001,12 @@ export class OffsetMachineTemplate {
     const monitoring=this.group(g,'dryer-monitoring','Dryer temperature / airflow monitoring points',[0,0,0],[.12,.30,-.46],photos,'Sensor heads are service-location references only; sensor type, alarm threshold and control-loop behavior are not inferred.');
     for(const x0 of [-.36,.36]){this.box(monitoring,[.10,.08,.06],[x0,1.52,-.99],'graphite',.010);this.cylinder(monitoring,.012,.11,[x0,1.47,-.91],'steel','z');}
     const path=this.group(g,'dryer-sheet-path','Sheet transport through extension',[0,0,0],[.35,.20,0],photos);
-    for(const x0 of [-.60,-.36,-.12,.12,.36,.60]){const r=this.cylinder(path,.035,1.42,[x0,1.29,0],'steel');Object.assign(r.userData,{rotorRoleReference:'dryer-transport-roller',motionBudget:'STATIC_REFERENCE_MOBILE'});}
+    for(const [i,x0] of DRYER.rollerXs.entries()){
+      const carrier=this.group(path,`dryer-transport-roller-${i+1}`,'Dryer support roller · functional reference',[x0,DRYER.rollerAxisY,0],[0,.06,0],photos);
+      carrier.scale.x=1/DRYER.scaleX;
+      const roller=this.cylinder(carrier,DRYER.rollerRadius,1.42,[0,0,0],'steel');
+      Object.assign(roller.userData,{dynamicRotor:true,rotorRole:'dryer-sheet-transport-roller',rotorSign:1,rotorRate:1,installedTransportVerified:false});
+    }
   }
   inspectionBridge(x){
     const photos=['IMG_1630.jpeg','IMG_1631.jpeg','IMG_1633.jpeg','IMG_2391(1).jpeg'];
@@ -1010,7 +1019,7 @@ export class OffsetMachineTemplate {
         const geo=new THREE.ExtrudeGeometry(profile,{depth:.18,bevelEnabled:false,steps:1});geo.translate(0,0,-.09);return geo;
       },'inspection-photo-cranked-upright','light',[0,0,z]);
       upright.userData.photoCrankedUpright=true;
-      this.box(g,[.23,.12,.28],[0,1.25,z],'graphite',.018);
+      this.box(g,[.23,.12,.28],[0,1.24,z],'graphite',.018);
     }
     this.box(g,[.18,.16,1.90],[-.20,2.72,0],'graphite',.024);
     this.box(g,[.12,.05,1.70],[-.19,2.64,0],'light',.014);
@@ -1033,23 +1042,34 @@ export class OffsetMachineTemplate {
       // attached downward barrel + lens. The small Z rotation follows the camera-body pitch.
       const barrel=this.cylinder(pod,.078,.060,[.012,2.775,z],'graphite','y');barrel.rotation.z=-.15;
       barrel.userData.inspectionOpticalBarrel=true;barrel.userData.opticalBarrelCenter=[.012,2.775,z];barrel.userData.opticalTiltZ=-.15;barrel.userData.sourcePhoto='IMG_1630.jpeg + IMG_1633.jpeg';
-      const lens=this.cylinder(pod,.062,.018,[.018,2.742,z],'glass','y');lens.rotation.z=-.15;
+      const lensNode=this.group(pod,`inspection-camera-${z<0?'a':'b'}-lens`,'Downward optical lens · tilt estimated',[0,0,0],[0,.04,0],photos);
+      const lens=this.cylinder(lensNode,.062,.018,[.018,2.742,z],'glass','y');lens.rotation.z=-.15;
       lens.userData.inspectionLens=true;lens.userData.opticalAxis='DOWNWARD_TOWARD_SHEET_PLANE_WITH_SMALL_PROCESS_DIRECTION_TILT';
       lens.userData.sourcePhoto='IMG_1630.jpeg + IMG_1633.jpeg';
-      pod.userData.opticalAxisPolicy='PHOTO_VERIFIED_DOWNWARD_TO_SHEET_PLANE';
+      pod.userData.opticalAxisPolicy='PHOTO_OBSERVED_DOWNWARD__TILT_ESTIMATED_CLEAR_OF_LIGHTING';
+      pod.userData.installedOpticalTiltVerified=false;
       this.box(pod,[.20,.035,.24],[.10,3.125,z],'steel',.008);
     }
     const lights=this.group(g,'inspection-lighting','Inspection lighting bars',[0,0,0],[0,.25,.45],photos);
-    for(const z of [-.42,.42])this.box(lights,[.36,.045,.28],[-.02,2.55,z],'light',.008);
+    for(const [i,z] of [-.42,.42].entries()){
+      const bar=this.group(lights,`inspection-lighting-${i===0?'a':'b'}`,'Inspection light bar',[0,0,0],[0,.08,0],photos);
+      this.box(bar,[.36,.045,.28],[INSPECTION.lightX,INSPECTION.lightY,z],'light',.008);
+    }
+    const mounts=this.group(g,'inspection-light-mounts','Attached lighting supports',[0,0,0],[0,.08,0],photos,'Functional support geometry; installed bracket design is unverified.');
+    for(const z of [-.75,.75])this.box(mounts,[.47,.045,.045],[.035,2.62,z],'graphite',.008);
+    this.box(mounts,[.045,.045,1.55],[INSPECTION.lightX,2.62,0],'graphite',.008);
+    for(const z of [-.52,.52])this.box(mounts,[.045,.095,.06],[INSPECTION.lightX,2.585,z],'steel',.005);
     const control=this.group(g,'inspection-control','Inspection support / control enclosure',[0,0,0],[.20,.18,.55],photos);
     this.box(control,[.44,.48,.34],[.42,1.78,.78],'graphite',.025);
+    this.box(control,[.12,.205,.08],[.42,1.4375,.78],'steel',.006);
+    control.userData.installedMountVerified=false;
     const cabling=this.group(g,'inspection-cabling','Inspection camera cable chain & protected routing',[0,0,0],[.12,.24,-.50],photos,'Visible protected routing is represented for orientation. Cable type, signal topology and optical calibration remain outside the verified data set.');
-    for(const z of [-.56,.56])this.tube(cabling,[[.02,2.82,z],[.30,2.62,z],[.38,2.08,z],[.42,1.96,z]],.014,'rubber');
+    for(const z of [-.56,.56])this.tube(cabling,[[.02,2.82,z],[.30,2.62,z],[.38,2.08,z],[.42,2.08,.64],[.42,1.96,.64]],.014,'rubber');
     this.box(cabling,[.16,.10,1.34],[.34,2.58,0],'graphite',.018);
     const calibration=this.group(g,'inspection-calibration','Inspection calibration target & illuminator mounts',[0,0,0],[-.18,.42,.52],photos,'A removable reference target and adjustable light mounts are shown to communicate calibration access. Target pattern, optical scale and calibration procedure are not verified.');
     this.box(calibration,[.025,.30,.42],[-.20,2.42,0],'light',.006);
     for(const y of [2.34,2.42,2.50])for(const z of [-.14,0,.14])this.box(calibration,[.004,.055,.055],[-.216,y,z],(Math.round(y*100)+Math.round(z*100))%2?'black':'graphite',.002);
-    for(const z of [-.52,.52]){this.cylinder(calibration,.025,.12,[-.08,2.55,z],'steel','z');this.box(calibration,[.14,.035,.06],[-.02,2.55,z],'graphite',.006);}
+    for(const z of [-.52,.52]){this.cylinder(calibration,.025,.12,[INSPECTION.lightX,2.55,z],'steel','z');this.box(calibration,[.14,.035,.06],[INSPECTION.lightX,2.55,z],'graphite',.006);}
     const trigger=this.group(g,'inspection-trigger','Inspection encoder / sheet-trigger reference',[0,0,0],[.20,.26,-.48],photos,'The trigger path explains synchronization between sheet travel and image capture; encoder resolution and trigger timing are not specified.');
     this.cylinder(trigger,.070,.045,[.32,1.48,-.78],'graphite','z');this.ring(trigger,.052,.008,[.32,1.48,-.81],'steel','z');this.box(trigger,[.10,.08,.06],[.20,1.52,-.82],'black',.010);
     this.tube(trigger,[[.20,1.52,-.82],[.34,1.82,-.86],[.40,2.18,-.78]],.009,'rubber');

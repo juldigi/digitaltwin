@@ -183,14 +183,14 @@ test('simulation dryer zone corresponds to installed extension dimensions',()=>{
 test('V115 Offset5 prioritizes high-value downstream rotor animation within the mobile mesh budget',()=>{
   const machine=new OffsetMachineTemplate();
   const dynamic=machine.meshes.filter(m=>m.userData.dynamicRotor),byRole=role=>dynamic.filter(m=>m.userData.rotorRole===role);
-  assert.equal(dynamic.filter(m=>m.userData.rotorRole!=='vacuum-table-tape-drive-roller').length,10,'unexpected prioritized downstream dynamic rotor count');
+  assert.equal(dynamic.filter(m=>m.userData.rotorRole!=='vacuum-table-tape-drive-roller').length,16,'unexpected prioritized downstream dynamic rotor count');
   assert.equal(byRole('vacuum-table-tape-drive-roller').length,2);
   assert.equal(byRole('coater-process-roller').length,3);
   assert.equal(byRole('sheet-brake-roller').length,3);
   assert.equal(byRole('delivery-chain-sprocket').length,4);
   const references=machine.meshes.filter(m=>m.userData.motionBudget==='STATIC_REFERENCE_MOBILE');
   const referenceCount=role=>references.filter(m=>m.userData.rotorRoleReference===role).reduce((sum,m)=>sum+(m.userData.rotorElementCount||1),0);
-  assert.equal(referenceCount('dryer-transport-roller'),6);
+  assert.equal(byRole('dryer-sheet-transport-roller').length,6);
   assert.equal(referenceCount('delivery-chain-sprocket-ring'),4);
   assert.equal(referenceCount('delivery-tensioner-idler'),2);
 
@@ -200,7 +200,7 @@ test('V115 Offset5 prioritizes high-value downstream rotor animation within the 
   const sprockets=byRole('delivery-chain-sprocket');assert.equal(new Set(sprockets.map(m=>m.userData.rotorPairKey)).size,4);
   const staticMeshes=references.map(mesh=>({mesh,q:mesh.quaternion.clone()}));
   const sim=new PrintingSimulation(machine.root,machine),taggedRotors=sim.rotors.filter(r=>r.source==='geometry-role-tag');
-  assert.equal(taggedRotors.length,12);assert.equal(new Set(taggedRotors.map(r=>r.role)).size,4);
+  assert.equal(taggedRotors.length,18);assert.equal(new Set(taggedRotors.map(r=>r.role)).size,5);
   const before=taggedRotors.map(r=>r.mesh.quaternion.clone());run(sim,5000);
   assert.ok(taggedRotors.some((r,i)=>r.mesh.quaternion.angleTo(before[i])>.001),'tagged downstream rotors never moved');
   assert.equal(staticMeshes.every(x=>x.mesh.quaternion.angleTo(x.q)<1e-10),true,'mobile-budget reference rotor unexpectedly moved');

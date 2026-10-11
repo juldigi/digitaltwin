@@ -836,6 +836,12 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       }
     }
 
+    for(const rotor of this.rotors.filter(r=>r.role==='dryer-sheet-transport-roller')){
+      const radius=rotor.mesh.geometry.parameters.radiusTop;
+      rotor.sign=1;rotor.rate=this.baseMetersPerSecond/(Math.PI*2*this.sheetCyclesPerSecond*radius);
+      rotor.source='VISUAL_DRYER_SUPPORT_SURFACE_SPEED_MATCHED';rotor.visualSpeedRatio=1;
+    }
+
     // Coating contact train: keep the existing chamber/coating/impression hardware,
     // but drive each contact surface at the same sheet surface speed. This removes the
     // legacy arbitrary RPM multipliers while preserving the documented counter-rotation.
@@ -1033,7 +1039,7 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       coaterMotionPolicy:'EXISTING_THREE_ROLL_CONTACT_TRAIN_MATCHES_SHEET_SURFACE_SPEED',
       coaterRoundnessPolicy:this.template.root.userData.coaterRoundnessPolicy,
       coaterNipPathPolicy:this.template.root.userData.coaterNipPathPolicy,
-      dryerTransportPolicy:'MOBILE_BATCHED_STATIC_REFERENCE__UV_AND_SHEET_PATH_CARRY_VISIBLE_DRYER_MOTION',
+      dryerTransportPolicy:'ROUND_SUPPORT_ROLLERS_SURFACE_SPEED_MATCHED__INSTALLED_TRANSPORT_UNVERIFIED',
       deliveryPileElevatorPolicy:'TOP_RECEIVING_PLANE_HELD_CONSTANT_WHILE_TABLE_LOWERS_WITH_STACK',
       deliveryTableDropM:this.deliveryTableDrop||0,
       deliveryJoggerActive:this.deliveryJoggerActive,

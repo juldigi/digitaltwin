@@ -12,7 +12,7 @@ test('V337 Offset 5 mobile cutaway keeps every process rotor visible during simu
  const simulation=createMachineSimulation('offset5',template.root,template);
  try{
   template.setLow(true);template.setExteriorOpen(true);
-  assert.equal(simulation.rotors.filter(r=>r.role!=='vacuum-table-tape-drive-roller').length,264);
+  assert.equal(simulation.rotors.filter(r=>r.role!=='vacuum-table-tape-drive-roller').length,270);
   assert.equal(simulation.rotors.filter(r=>r.role==='vacuum-table-tape-drive-roller').length,2);
   const check=()=>{
    for(const rotor of simulation.rotors)assert.ok(visibleInTree(rotor.mesh),`hidden process rotor: ${rotor.mesh.userData.ownerId}`);
