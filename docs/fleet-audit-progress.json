@@ -8,7 +8,7 @@
   "status": "RELEASE_PENDING",
   "cursor": {
     "machineId": "BMJ-MCH-0001",
-    "partIndex": 1
+    "partIndex": 2
   },
   "baselineCommit": "b5e45a82ce1aeaf9094b0a5c3fd8d985b8a9e96f",
   "machines": [
@@ -32,12 +32,19 @@
         },
         {
           "part": "stock transport and backgauge registration",
-          "status": "RELEASE_PENDING",
-          "report": "docs/polar115-transport-registration-audit.md"
+          "status": "COMPLETE",
+          "report": "docs/polar115-transport-registration-audit.md",
+          "releaseEvidence": {
+            "commit": "c30d946c6bbce49715428705ec77249fa6e5a525",
+            "workflow": 38174974280,
+            "conclusion": "success",
+            "tests": 1545
+          }
         },
         {
           "part": "safety arms and cut interlocks",
-          "status": "PENDING"
+          "status": "RELEASE_PENDING",
+          "report": "docs/polar115-safety-interlock-audit.md"
         },
         {
           "part": "clamp and pressure contact",
@@ -62,7 +69,8 @@
       ],
       "reports": [
         "docs/polar115-input-table-audit.md",
-        "docs/polar115-transport-registration-audit.md"
+        "docs/polar115-transport-registration-audit.md",
+        "docs/polar115-safety-interlock-audit.md"
       ]
     },
     {
@@ -521,11 +529,25 @@
     {
       "machineId": "BMJ-MCH-0001",
       "part": "stock transport and backgauge registration",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "report": "docs/polar115-transport-registration-audit.md",
       "nextPartIndex": 2,
-      "parentCommit": "2a803bb37f071adec70c3217d9213e7ee002affa"
+      "parentCommit": "2a803bb37f071adec70c3217d9213e7ee002affa",
+      "releaseEvidence": {
+        "commit": "c30d946c6bbce49715428705ec77249fa6e5a525",
+        "workflow": 38174974280,
+        "conclusion": "success",
+        "tests": 1545
+      }
+    },
+    {
+      "machineId": "BMJ-MCH-0001",
+      "part": "safety arms and cut interlocks",
+      "status": "RELEASE_PENDING",
+      "report": "docs/polar115-safety-interlock-audit.md",
+      "nextPartIndex": 3,
+      "parentCommit": "c30d946c6bbce49715428705ec77249fa6e5a525"
     }
   ],
-  "updatedAt": "2026-10-11T21:00:00Z"
+  "updatedAt": "2026-10-11T22:00:00Z"
 }

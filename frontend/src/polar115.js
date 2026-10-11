@@ -110,8 +110,11 @@ export class Polar115MachineTemplate{
   const rightArm=this.group(photo,'polar-safety-right-arm','Front-right drilled safety arm');
   const ra=this.box(rightArm,[.24,.19,.72],[.76,1.08,-.39],'body',.055);ra.rotation.x=.045;ra.userData.evidence=photoEvidence;
   for(let i=0;i<4;i++){const aperture=this.cyl(rightArm,.025,.015,[.885,1.09,-.68+i*.13],'black','x');aperture.userData.detail=true;aperture.userData.photoCell=true;aperture.userData.evidence=photoEvidence;}
-  const twohand=this.group(safety,'polar-safety-twohand','Two-hand cut control reference');twohand.userData.simultaneityControlReference=true;twohand.userData.antiRepeatReference=true;
-  for(const x of [-.76,.76]){const base=this.cyl(twohand,.035,.018,[x,1.185,-.65],'warning','y');base.userData.detail=true;const button=this.cyl(twohand,.022,.020,[x,1.202,-.65],'red','y');button.userData.twoHandButton=true;}
+  const twohand=this.group(safety,'polar-safety-twohand','Two-hand cut control reference');twohand.userData.simultaneityControlReference=true;twohand.userData.antiRepeatReference=true;twohand.userData.installedActuatorLocationVerified=false;
+  // The family operating manuals verify a two-hand command, but the supplied BMJ
+  // angles do not establish two separate actuator locations. Retain the logical
+  // node without showing a guessed pair of exterior buttons.
+  for(const x of [-.76,.76]){const base=this.cyl(twohand,.035,.018,[x,1.185,-.65],'warning','y');base.userData.detail=true;base.userData.suppressedUnverifiedInstalledLocation=true;base.visible=false;const button=this.cyl(twohand,.022,.020,[x,1.202,-.65],'red','y');button.userData.twoHandButton=true;button.userData.detail=true;button.userData.suppressedUnverifiedInstalledLocation=true;button.visible=false;}
   const estop=this.group(safety,'polar-safety-estop','Front-left mushroom safety button');
   const estopBase=this.cyl(estop,.040,.018,[-.76,1.184,-.57],'warning','y');estopBase.userData.evidence=photoEvidence;
   const estopButton=this.cyl(estop,.027,.022,[-.76,1.204,-.57],'red','y');estopButton.userData.evidence=photoEvidence;
@@ -307,7 +310,7 @@ export class Polar115MachineTemplate{
  }
  isRemovableCover(mesh){return Boolean(mesh.userData.exteriorCover||this.contains(this.findNode('polar-control'),mesh));}
  setExteriorOpen(on=true){this.exteriorOpen=!!on;let hidden=0;for(const m of this.meshes)if(this.isRemovableCover(m)){m.visible=!on;if(on)hidden++;}this.root.userData.interiorCutawayVisible=!!on;this.root.userData.exteriorHiddenCount=on?hidden:0;}
- setLow(on){for(const m of this.meshes)if(m.userData.detail)m.visible=(!on||Boolean(m.userData.silhouetteCritical))&&(!this.exteriorOpen||!this.isRemovableCover(m));}
+ setLow(on){for(const m of this.meshes)if(m.userData.detail)m.visible=!m.userData.suppressedUnverifiedInstalledLocation&&(!on||Boolean(m.userData.silhouetteCritical))&&(!this.exteriorOpen||!this.isRemovableCover(m));}
  reset(){this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const n of this.nodes)n.quaternion.copy(n.userData.restQuaternion);if(this.exteriorOpen)this.setExteriorOpen(true);}
  dispose(){this.geometries.forEach(g=>g.dispose());this.materials.forEach(m=>m.dispose());}
 }

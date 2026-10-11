@@ -8,7 +8,7 @@ export class Polar115ProcessSimulation{
  constructor(machine,template){
   this.machine=machine;this.template=template;this.group=new THREE.Group();this.group.name='POLAR-115-SAFETY-INTERLOCKED-CUT-CYCLE';(template.photoFrame||machine).add(this.group);
   this.active=false;this.running=false;this.paused=false;this.speed=1;this.elapsed=0;this.lastNow=null;this.completed=0;this.pathVisible=true;this.inkFlowVisible=false;this.onUpdate=null;
-  this.cycleSeconds=9;this.cycleIndex=0;this.lightBarrierClear=true;this.twoHandEnabled=true;this.cutCycleLatched=false;this.cutPerformed=false;this.cutCounted=false;this.clampHoldAmount=0;this.knifeHoldAmount=0;
+  this.cycleSeconds=9;this.cycleIndex=0;this.lightBarrierClear=true;this.twoHandEnabled=true;this.autoTwoHand=true;this.leftHandInput=false;this.rightHandInput=false;this.leftHandPressedAt=null;this.rightHandPressedAt=null;this.twoHandSimultaneityWindow=.5;this.twoHandSimultaneityValid=false;this.rawTwoHandCommand=false;this.twoHandArmed=true;this.cutCycleLatched=false;this.cutPerformed=false;this.cutCounted=false;this.clampHoldAmount=0;this.knifeHoldAmount=0;
   this.clamp=this.template.findNode('polar-clamp');this.knife=this.template.findNode('polar-knife');this.gauge=this.template.findNode('polar-gauge');
   this.rest={clamp:this.clamp?.position.clone(),knife:this.knife?.position.clone(),gauge:this.gauge?.position.clone()};
   this.stock=null;this.cutPiece=null;this.path=null;this.stockCutGuide=null;this.airIndicators=[];
@@ -36,16 +36,21 @@ export class Polar115ProcessSimulation{
  state(){
   return {available:true,blocked:this.safetyBlocked,active:this.active,running:this.running,paused:this.paused,speed:this.speed,stage:this.stage(),completed:this.completed,progress:this.phase(),sheetsVisible:this.active?1+(this.cutPiece?.visible?1:0):0,pileSheetsVisible:0,rotorCount:0,oscillatorCount:0,mechanismCount:5,inkFlowCount:0,uvLampCount:0,uvActive:false,pathVisible:this.pathVisible,inkFlowVisible:false,
    airTableActive:this.airTableActive,backgaugeMoving:this.backgaugeMoving,backgaugeContact:this.backgaugeContact,registrationGap:this.registrationGap,clampActive:this.clampActive,clampContact:this.clampContact,knifeDownstroke:this.knifeDownstroke,knifeUpstroke:this.knifeUpstroke,knifeAtCutLine:this.knifeAtCutLine,cutSeparated:this.cutSeparated,stockLateralTransfer:this.stockLateralTransfer,
-   interlocks:{lightBarrierClear:this.lightBarrierClear,twoHandCommand:this.twoHandCommand,cutCycleLatched:this.cutCycleLatched,clampContact:this.clampContact,knifeDownPermitted:this.lightBarrierClear&&this.twoHandCommand&&this.cutCycleLatched&&this.clampContact},
-   safetyReference:{twoHandSimultaneity:true,antiRepeat:true,lightBarrierStopsClampAndKnife:true},materialSplit:{fullDepth:this.stockDepth,frontDepth:this.frontPieceDepth,rearDepth:this.rearPieceDepth,conserved:Math.abs(this.frontPieceDepth+this.rearPieceDepth-this.stockDepth)<1e-9}
+   interlocks:{lightBarrierClear:this.lightBarrierClear,leftHandInput:this.leftHandInput,rightHandInput:this.rightHandInput,twoHandSimultaneityValid:this.twoHandSimultaneityValid,twoHandCommand:this.twoHandCommand,antiRepeatArmed:this.twoHandArmed,cutCycleLatched:this.cutCycleLatched,clampContact:this.clampContact,knifeDownPermitted:this.lightBarrierClear&&this.twoHandCommand&&this.cutCycleLatched&&this.clampContact},
+   safetyReference:{twoHandSimultaneity:true,simultaneityWindowSeconds:this.twoHandSimultaneityWindow,antiRepeat:true,lightBarrierStopsClampAndKnife:true,installedActuatorLocationVerified:false},materialSplit:{fullDepth:this.stockDepth,frontDepth:this.frontPieceDepth,rearDepth:this.rearPieceDepth,conserved:Math.abs(this.frontPieceDepth+this.rearPieceDepth-this.stockDepth)<1e-9}
   };
  }
  setLightBarrierClear(v){this.lightBarrierClear=!!v;return this.state();}
  setTwoHandEnabled(v){this.twoHandEnabled=!!v;return this.state();}
- start(){this.active=true;this.running=true;this.paused=false;this.lastNow=null;this.group.visible=true;this.elapsed=0;this.completed=0;this.cycleIndex=0;this.lightBarrierClear=true;this.twoHandEnabled=true;this.resetCycle();this.onUpdate?.(this.state());return this.state();}
+ setTwoHandInputs(left,right,at=this.elapsed){
+  this.autoTwoHand=false;left=!!left;right=!!right;
+  if(left&&!this.leftHandInput)this.leftHandPressedAt=at;if(right&&!this.rightHandInput)this.rightHandPressedAt=at;
+  this.leftHandInput=left;this.rightHandInput=right;return this.state();
+ }
+ start(){this.active=true;this.running=true;this.paused=false;this.lastNow=null;this.group.visible=true;this.elapsed=0;this.completed=0;this.cycleIndex=0;this.lightBarrierClear=true;this.twoHandEnabled=true;this.autoTwoHand=true;this.leftHandInput=false;this.rightHandInput=false;this.leftHandPressedAt=null;this.rightHandPressedAt=null;this.twoHandSimultaneityValid=false;this.rawTwoHandCommand=false;this.twoHandArmed=true;this.resetCycle();this.onUpdate?.(this.state());return this.state();}
  pause(){this.running=false;this.paused=this.active;this.lastNow=null;this.onUpdate?.(this.state());return this.state();}
  resume(){if(this.active){this.running=true;this.paused=false;this.lastNow=null;}this.onUpdate?.(this.state());return this.state();}
- stop(){this.active=false;this.running=false;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;this.cycleIndex=0;this.group.visible=false;this.lightBarrierClear=true;this.twoHandEnabled=true;this.resetCycle();this.onUpdate?.(this.state());return this.state();}
+ stop(){this.active=false;this.running=false;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;this.cycleIndex=0;this.group.visible=false;this.lightBarrierClear=true;this.twoHandEnabled=true;this.autoTwoHand=true;this.leftHandInput=false;this.rightHandInput=false;this.leftHandPressedAt=null;this.rightHandPressedAt=null;this.twoHandSimultaneityValid=false;this.rawTwoHandCommand=false;this.twoHandArmed=true;this.resetCycle();this.onUpdate?.(this.state());return this.state();}
  setSpeed(v){this.speed=Math.max(.35,Math.min(2,+v||1));return this.state();}
  setPathVisible(on){this.pathVisible=!!on;if(this.path)this.path.visible=this.pathVisible;return this.state();}
  setInkFlowVisible(){return this.state();}
@@ -77,13 +82,18 @@ export class Polar115ProcessSimulation{
   const dt=Math.min(.1,Math.max(0,(now-this.lastNow)/1000))*this.speed;this.lastNow=now;this.elapsed+=dt;
   const cycleIndex=Math.floor(this.elapsed/this.cycleSeconds);if(cycleIndex!==this.cycleIndex){this.cycleIndex=cycleIndex;this.resetCycle();}
   const p=this.phase();this.resetRuntime();
-  this.airTableActive=p<.34||p>.86;this.backgaugeMoving=p>=.10&&p<.30;this.twoHandCommand=this.twoHandEnabled&&p>=.38&&p<.67;
+  this.airTableActive=p<.34||p>.86;this.backgaugeMoving=p>=.10&&p<.30;
+  const commandWindow=p>=.38&&p<.67;
+  if(this.autoTwoHand){this.leftHandInput=this.twoHandEnabled&&commandWindow;this.rightHandInput=this.twoHandEnabled&&commandWindow;this.twoHandSimultaneityValid=this.leftHandInput&&this.rightHandInput;}
+  else this.twoHandSimultaneityValid=this.leftHandInput&&this.rightHandInput&&this.leftHandPressedAt!==null&&this.rightHandPressedAt!==null&&Math.abs(this.leftHandPressedAt-this.rightHandPressedAt)<=this.twoHandSimultaneityWindow;
+  this.rawTwoHandCommand=this.twoHandEnabled&&this.twoHandSimultaneityValid;this.twoHandCommand=this.rawTwoHandCommand&&commandWindow;
+  if(!this.rawTwoHandCommand)this.twoHandArmed=true;
   if(this.gauge&&this.rest.gauge){this.gauge.position.copy(this.rest.gauge);this.gauge.position.z=this.rest.gauge.z-this.gaugeStroke*smooth(p,.10,.28);}
-  if(p>=.38&&p<.56&&this.lightBarrierClear&&this.twoHandCommand)this.cutCycleLatched=true;
+  if(p>=.38&&p<.56&&this.lightBarrierClear&&this.twoHandCommand&&this.twoHandArmed){this.cutCycleLatched=true;this.twoHandArmed=false;}
   const clampDesired=this.cutCycleLatched?smooth(p,.43,.50)*(1-smooth(p,.76,.84)):0;
   // A broken safety beam aborts the simulated stroke and returns the pressure bar.
   // Do not leave the clamp frozen against the paper after an obstruction.
-  this.clampHoldAmount=this.lightBarrierClear?clampDesired:0;
+  this.clampHoldAmount=this.lightBarrierClear&&(this.cutPerformed||this.twoHandCommand)?clampDesired:0;
   this.clampActive=this.clampHoldAmount>.02;this.clampContact=this.clampHoldAmount>.90;
   if(this.clamp&&this.rest.clamp){this.clamp.position.copy(this.rest.clamp);this.clamp.position.y-=this.clampStroke*this.clampHoldAmount;}
   const downWindow=p>=.56&&p<.64,knifePermission=this.lightBarrierClear&&this.twoHandCommand&&this.cutCycleLatched&&this.clampContact;
@@ -92,13 +102,13 @@ export class Polar115ProcessSimulation{
    this.knifeDownstroke=downWindow&&knifePermission&&this.knifeHoldAmount>0;
    if(this.knifeHoldAmount>.97){this.cutPerformed=true;this.knifeAtCutLine=true;if(!this.cutCounted){this.completed++;this.cutCounted=true;}}
   }
-  if(!this.lightBarrierClear&&!this.cutPerformed)this.knifeHoldAmount=0;
+  if((!this.lightBarrierClear||!this.twoHandCommand)&&!this.cutPerformed)this.knifeHoldAmount=0;
   if(this.cutPerformed){
    if(p>=.64&&p<.74){this.knifeUpstroke=true;this.knifeHoldAmount=1-smooth(p,.64,.74);}
    else if(p>=.74)this.knifeHoldAmount=0;
   }
   if(this.knife&&this.rest.knife){this.knife.position.copy(this.rest.knife);this.knife.position.y-=this.knifeStroke*this.knifeHoldAmount;}
-  this.cutSeparated=this.cutPerformed;this.safetyBlocked=p>=.38&&p<.64&&(!this.lightBarrierClear||!this.twoHandEnabled);
+  this.cutSeparated=this.cutPerformed;this.safetyBlocked=p>=.38&&p<.64&&(!this.lightBarrierClear||!this.twoHandCommand);
   for(const [i,a] of this.airIndicators.entries()){a.visible=this.airTableActive;a.scale.y=.55+.45*Math.sin(this.elapsed*8+i*.6)**2;}
   this.updateStock(p);this.onUpdate?.(this.state());
  }
