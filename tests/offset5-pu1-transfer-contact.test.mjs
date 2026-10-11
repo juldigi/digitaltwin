@@ -16,7 +16,7 @@ test('PU1 and PU2 primary cylinders meet without overlap and bearing caps are co
 test('PU1 impression gripper follows the cylinder orbit, and unsupported transfer proxies stay hidden',()=>{
  const t=createPolishedMachineTemplate('offset5'),s=createMachineSimulation('offset5',t.root,t);try{
  s.start();for(let frame=0;frame<35;frame++){s.update(1000+frame*35);t.root.updateMatrixWorld(true);const g=t.findNode('press-0-impression-gripper'),p=g.localToWorld(new T.Vector3(.13,1.21,0)),c=body(t,0,'impression').getWorldPosition(new T.Vector3());assert.ok(Math.abs(Math.hypot(p.x-c.x,p.y-c.y)-.26)<1e-7);}
- for(const low of [true,false]){t.setExteriorOpen(true);t.setLow(low);t.reset();t.root.traverse(m=>{if(m.userData.puAuditHidden)assert.equal(m.visible,false);});}
+ for(const low of [true,false]){t.setExteriorOpen(true);t.setLow(low);t.reset();t.root.traverse(m=>{if(m.userData.puAuditHidden)assert.equal(m.visible,false);});for(const id of ['press-0-drive-gears','press-1-drive-gears','transfer-pu1-pu2-gripper-shaft','transfer-pu1-pu2-gripper-spring']){const node=t.findNode(id);let meshes=0;node.traverse(m=>{if(m.isMesh){meshes++;let visible=true;for(let p=m;p;p=p.parent)visible=visible&&p.visible;assert.equal(visible,false,`${id} must stay hidden after batching and reset`);}});assert.ok(meshes>0);}}
  assert.equal(t.findNode('transfer-pu1-pu2').userData.installedTopologyVerified,false);
  s.stop();assert.equal(t.findNode('press-0-impression-gripper').rotation.z,0);
  }finally{s.dispose();t.dispose();}

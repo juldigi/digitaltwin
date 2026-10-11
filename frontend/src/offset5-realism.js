@@ -530,17 +530,24 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
     this.root.userData.dimensionLock='BMJ_CUSTOM_INSTALLED_DIMENSIONS_DO_NOT_NORMALIZE_TO_GENERIC_CD102';
   }
 
+  applyPuAuditVisibility(){
+    for(const id of ['press-0-drive-gears','press-1-drive-gears','transfer-pu1-pu2-gripper-shaft','transfer-pu1-pu2-gripper-spring']){
+      const node=this.findNode(id);if(!node)continue;
+      node.visible=false;
+      node.traverse(mesh=>{if(mesh.isMesh){mesh.visible=false;mesh.userData.puAuditHidden=true;}});
+    }
+  }
   setExteriorOpen(on=true){
     if(typeof OffsetMachineTemplate.prototype.setExteriorOpen==='function')OffsetMachineTemplate.prototype.setExteriorOpen.call(this,on);
     for(const m of this.realismMeshes)m.visible=/^transfer-pu\d+-pu\d+$/.test(m.userData.ownerId||'')?this.exteriorOpen:(!this.lowDetail||Boolean(m.userData.silhouetteCritical))&&(!this.exteriorOpen||!m.userData.coverMountedDetail&&!m.userData.serviceDetail);
-    this.root.traverse(m=>{if(m.userData.puAuditHidden)m.visible=false;});
+    this.applyPuAuditVisibility();
     return this;
   }
   setLow(on){
     this.lowDetail=!!on;
     if(typeof OffsetMachineTemplate.prototype.setLow==='function')OffsetMachineTemplate.prototype.setLow.call(this,on);
     for(const m of this.realismMeshes)m.visible=/^transfer-pu\d+-pu\d+$/.test(m.userData.ownerId||'')?this.exteriorOpen:(!this.lowDetail||Boolean(m.userData.silhouetteCritical))&&(!this.exteriorOpen||!m.userData.coverMountedDetail&&!m.userData.serviceDetail);
-    this.root.traverse(m=>{if(m.userData.puAuditHidden)m.visible=false;});
+    this.applyPuAuditVisibility();
     return this;
   }
 }
