@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {offset5CylinderSection} from './data/offset5-pu-contact.js';
 // DigitalTwin BMJ — Offset 5 final realism refinement
 // Target: HEIDELBERG Speedmaster CD 102-8+L / OFU-1 / serial 550415
 //
@@ -155,8 +156,7 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
         const cyl=this.node(`press-${i}-cylinder-${slug}`);
         if(!cyl)continue;
         for(const z of [-.73,.73]){
-          this.dc(cyl,.040,.018,[slug==='transfer'?.34:slug==='impression'?.16:slug==='blanket'?.11:.17,
-            slug==='plate'?1.995:slug==='blanket'?1.55:slug==='impression'?1.04:.70,z],
+          this.dc(cyl,.040,.018,[...offset5CylinderSection(i).p[slug].slice(0,2),z],
             'graphite','z',`${slug}-bearing-cap-reference`,{service:true,confidence:'OEM_FUNCTIONAL_REFERENCE'});
         }
       }
@@ -451,7 +451,7 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
           post.userData.frameSide=z<0?'LOCAL_NEGATIVE_Z':'LOCAL_POSITIVE_Z';
         }
         for(const [cylinderType,y] of bearingRows){
-          const rail=this.db(unit,[.76,.085,.11],[.02,y,z],'graphite',.010,'printing-unit-journal-bearing-rail',{service:false,confidence:'OEM_SIDE_FRAME_JOURNAL_TOPOLOGY'});
+          const rail=this.db(unit,[.76,.085,.11],[.02,i<2?offset5CylinderSection(i).p[cylinderType][1]:y,z],'graphite',.010,'printing-unit-journal-bearing-rail',{service:false,confidence:'OEM_SIDE_FRAME_JOURNAL_TOPOLOGY'});
           rail.userData.unitIndex=i+1;
           rail.userData.cylinderType=cylinderType;
           rail.userData.structuralCutaway=true;
@@ -533,12 +533,14 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
   setExteriorOpen(on=true){
     if(typeof OffsetMachineTemplate.prototype.setExteriorOpen==='function')OffsetMachineTemplate.prototype.setExteriorOpen.call(this,on);
     for(const m of this.realismMeshes)m.visible=/^transfer-pu\d+-pu\d+$/.test(m.userData.ownerId||'')?this.exteriorOpen:(!this.lowDetail||Boolean(m.userData.silhouetteCritical))&&(!this.exteriorOpen||!m.userData.coverMountedDetail&&!m.userData.serviceDetail);
+    this.root.traverse(m=>{if(m.userData.puAuditHidden)m.visible=false;});
     return this;
   }
   setLow(on){
     this.lowDetail=!!on;
     if(typeof OffsetMachineTemplate.prototype.setLow==='function')OffsetMachineTemplate.prototype.setLow.call(this,on);
     for(const m of this.realismMeshes)m.visible=/^transfer-pu\d+-pu\d+$/.test(m.userData.ownerId||'')?this.exteriorOpen:(!this.lowDetail||Boolean(m.userData.silhouetteCritical))&&(!this.exteriorOpen||!m.userData.coverMountedDetail&&!m.userData.serviceDetail);
+    this.root.traverse(m=>{if(m.userData.puAuditHidden)m.visible=false;});
     return this;
   }
 }
@@ -911,7 +913,7 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
       const localX=item.barX,localY=item.barY;
       const rotatedX=cos*localX-sin*localY,rotatedY=sin*localX+cos*localY;
       item.object.rotation.z=angle;
-      item.object.position.x=item.radius*cos-rotatedX;
+      item.object.position.x=(item.drumX||0)+item.radius*cos-rotatedX;
       item.object.position.y=item.drumY+item.radius*sin-rotatedY;
       item.currentOrbitAngle=angle;
     }
@@ -950,7 +952,7 @@ export class Offset5CD102RealismSimulation extends PrintingSimulation{
     this.realismPack=OFFSET5_FINAL_REFINEMENT.id;
     // Hard rule: covers, guards and service-only decorative meshes must never enter
     // the moving mechanism collections.
-    this.rotors=this.rotors.filter(r=>!r.mesh?.userData?.exteriorCover&&!r.mesh?.userData?.coverMountedDetail&&!r.mesh?.userData?.serviceDetail);
+    this.rotors=this.rotors.filter(r=>!r.mesh?.userData?.puAuditHidden&&!r.mesh?.userData?.exteriorCover&&!r.mesh?.userData?.coverMountedDetail&&!r.mesh?.userData?.serviceDetail);
     this.oscillators=this.oscillators.filter(o=>!o.object?.userData?.exteriorCover&&!o.object?.userData?.coverMountedDetail);
     this.levers=this.levers.filter(o=>!o.object?.userData?.exteriorCover&&!o.object?.userData?.coverMountedDetail);
     this.gripperMotions=this.gripperMotions.filter(o=>!o.object?.userData?.exteriorCover);

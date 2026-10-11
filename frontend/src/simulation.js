@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import {OFFSET5_DIMENSIONS,OFFSET5_UNIT_CENTERS} from './data/dimensions-offset5.js';
 import {OFFSET5_FEEDBOARD_SURFACE as FEEDBOARD,offset5FeedboardHeightAt} from './data/offset5-feedboard-surface.js';
 
+import {offset5CylinderSection,OFFSET5_TRANSFER_CONTACT} from './data/offset5-pu-contact.js';
+
 // Printing-test visualisation for Offset 5.
 // Process order: feeder -> register -> PU1..PU8 -> coater -> UV dryer/inspection -> delivery.
 // Mechanical phasing, oscillator stroke, ink-flow timing and UV intensity are explanatory
@@ -30,11 +32,11 @@ function pathPoints(){
     new THREE.Vector3(OFFSET5_UNIT_CENTERS[0]-.54,1.26,0)
   ];
   OFFSET5_UNIT_CENTERS.forEach((cx,i)=>{
-    const icx=cx+.16,icy=.95,r=.270;
+    const icx=cx+.16,icy=.95,r=i<2?offset5CylinderSection(i).r.impression+.002:.270;
     // Dense tangent samples prevent Catmull-Rom interpolation from cutting inside the impression cylinder.
     for(const deg of [170,155,140,125,110,95,80,65,50,35,20,5])pts.push(arcPoint(icx,icy,r,deg));
     if(i<OFFSET5_UNIT_CENTERS.length-1){
-      const next=OFFSET5_UNIT_CENTERS[i+1],tx=(cx+next)/2,ty=.722,tr=.252;
+      const next=OFFSET5_UNIT_CENTERS[i+1],tx=(cx+next)/2,ty=i===0?OFFSET5_TRANSFER_CONTACT.axisY:.722,tr=i===0?OFFSET5_TRANSFER_CONTACT.radius+OFFSET5_TRANSFER_CONTACT.sheetClearance:.252;
       for(const deg of [165,145,125,105,85,65,45,25,10])pts.push(arcPoint(tx,ty,tr,deg));
     }
   });
@@ -191,6 +193,18 @@ export class PrintingSimulation{
       const p=getPoint(t,target);
       if(p.x>=FEEDBOARD.minX&&p.x<=FEEDBOARD.maxX)p.y=offset5FeedboardHeightAt(p.x)+FEEDBOARD.sheetClearance;
       else if(p.x>FEEDBOARD.maxX&&p.x<=FEEDBOARD.throatMaxX)p.y=FEEDBOARD.tapeTopY+FEEDBOARD.sheetClearance;
+      // Constrain the audited sheet centerline to actual cylinder surfaces. A narrow
+      // visual nip admits the sheet; Catmull-Rom must not cut through either body.
+      for(let iteration=0;iteration<3;iteration++)for(let unit=0;unit<2;unit++){
+        const section=offset5CylinderSection(unit);
+        for(const type of ['impression','blanket']){
+          const [x,y]=section.p[type],cx=OFFSET5_UNIT_CENTERS[unit]+x,dx=p.x-cx,dy=p.y-y,d=Math.hypot(dx,dy),r=section.r[type]+.001;
+          if(d<r&&d>1e-8){p.x=cx+dx*r/d;p.y=y+dy*r/d;}
+        }
+      }
+      const tx=(OFFSET5_UNIT_CENTERS[0]+OFFSET5_UNIT_CENTERS[1])/2,dx=p.x-tx,tr=OFFSET5_TRANSFER_CONTACT.radius+OFFSET5_TRANSFER_CONTACT.sheetClearance;
+      if(Math.abs(dx)<.22)p.y=OFFSET5_TRANSFER_CONTACT.axisY+Math.sqrt(tr*tr-dx*dx);
+      else {const dy=p.y-OFFSET5_TRANSFER_CONTACT.axisY,d=Math.hypot(dx,dy);if(d<tr){p.x=tx+dx*tr/d;p.y=OFFSET5_TRANSFER_CONTACT.axisY+dy*tr/d;}}
       return p;
     };
     this.pathLength=this.curve.getLength();
@@ -401,12 +415,13 @@ export class PrintingSimulation{
       inkCodes.forEach((code,index)=>this.addRotor(largestCylinder(this.template.findNode(`press-${i}-ink-roller-${code}-body`)),index%2?-unitSign:unitSign,1.08));
       for(const code of ['A','B','C','D'])this.addRotor(largestCylinder(this.template.findNode(`press-${i}-ink-distributor-${code}-body`)),code.charCodeAt(0)%2?-unitSign:unitSign,.92);
       dampCodes.forEach((code,index)=>this.addRotor(largestCylinder(this.template.findNode(`press-${i}-damp-roller-${code}-body`)),index%2?-unitSign:unitSign,1.02));
-      this.addNodeRotors(`press-${i}-impression-gripper`,unitSign,.90,{torus:false});
+      if(i>=2)this.addNodeRotors(`press-${i}-impression-gripper`,unitSign,.90,{torus:false});
       this.addNodeRotors(`press-${i}-gripper-control`,-unitSign,.82,{torus:false});
       for(const code of ['A','B','C','D'])this.addOscillator(this.template.findNode(`press-${i}-ink-distributor-${code}`),'z',.045,.72,code.charCodeAt(0)*.37+i*.21);
       this.addOscillator(this.template.findNode(`press-${i}-ink-roller-15`),'x',.038,.92,i*.27);
       this.addOscillator(this.template.findNode(`press-${i}-damp-roller-FR`),'z',.028,.64,i*.31+.6);
-      this.addOscillator(this.template.findNode(`press-${i}-impression-gripper`),'x',.010,1.12,i*.19);
+      if(i>=2)this.addOscillator(this.template.findNode(`press-${i}-impression-gripper`),'x',.010,1.12,i*.19);
+      else {const object=this.template.findNode(`press-${i}-impression-gripper`);this.gripperMotions.push({object,initial:object.position.clone(),orbit:true,barX:.13,barY:1.21,drumX:.16,drumY:.95,radius:.26,phase:Math.atan2(.26,-.03),installedPhaseVerified:false});}
       this.addLever(firstLever(this.template.findNode(`press-${i}-gripper-control`)),.10,1.12,i*.19);
     }
 

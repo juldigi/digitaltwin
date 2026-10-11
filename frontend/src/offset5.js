@@ -6,6 +6,7 @@ import {ORIENTATION,OFFSET5_ACTUAL_ROLLER_DIAGRAM,OFFSET5_ROLLER_EVIDENCE_POLICY
 import {OFFSET5_DIMENSIONS,OFFSET5_UNIT_CENTERS,offset5DimensionAudit} from './data/dimensions-offset5.js';
 import {V122_SOURCE_STATS} from './data/research-v122.js';
 import {OFFSET5_FEEDBOARD_SURFACE} from './data/offset5-feedboard-surface.js';
+import {offset5CylinderSection} from './data/offset5-pu-contact.js';
 import {createIndustrialMaterial} from './render/material-library.js';
 
 // Offset 5 reconstruction.
@@ -593,11 +594,12 @@ export class OffsetMachineTemplate {
     // Primary cylinder train: functional order only. The service PDF supports the
     // printing-pressure/register functions, while exact installed cylinder CAD is unavailable.
     const cylinders=this.group(g,`${id}-cylinder-train`,`${label} · plate / blanket / impression + transfer reference`,[0,0,0],[0,.12,-.48],[...photos,'IMG_2777.jpeg'],'IMG_2777 confirms the posted plate → blanket → impression sectional order. The transfer cylinder remains a functional/OEM reference because it is not shown on the supplied roller diagram. Bearer diameters, gear train, pressure setting and angular timing are not engineering dimensions.');
+    const section=offset5CylinderSection(i);
     const cylinderSpec=[
-      ['plate cylinder reference',.215,[.16,1.79,0],'steel'],
-      ['blanket cylinder reference',.245,[-.12,1.39,0],'rubber'],
-      ['impression cylinder reference',.255,[.16,.95,0],'steel'],
-      ['transfer cylinder reference',.225,[-.12,.55,0],'graphite']
+      ['plate cylinder reference',section.r.plate,section.p.plate,'steel'],
+      ['blanket cylinder reference',section.r.blanket,section.p.blanket,'rubber'],
+      ['impression cylinder reference',section.r.impression,section.p.impression,'steel'],
+      ['transfer cylinder reference',section.r.transfer,section.p.transfer,'graphite']
     ];
     if(!this.root.userData.printingUnitCylinderLayout)this.root.userData.printingUnitCylinderLayout={};
     this.root.userData.printingUnitCylinderLayout[`PU${i+1}`]=Object.freeze(cylinderSpec.map(([name,r,[x,y,z]])=>Object.freeze({name,radius:r,center:Object.freeze([x,y,z])})));
@@ -618,6 +620,7 @@ export class OffsetMachineTemplate {
       this.ring(driveGears,r*.70,.018,[x,y,.915],'steel','z').userData.detail=true;
       this.cylinder(driveGears,Math.max(.032,r*.19),.065,[x,y,.92],'steel','z').userData.detail=true;
     });
+    if(i<2){driveGears.visible=false;driveGears.userData.geometryPolicy='UNVERIFIED_GEAR_TRAIN__HIDDEN_IN_AUDITED_PU';driveGears.traverse(m=>{if(m.isMesh)m.userData.puAuditHidden=true;});}
     // No invented full-height transparent drive guard: it obscured the cutaway cylinder train.
     driveGears.userData.guardGeometry='UNVERIFIED_INSTALLED_GUARD__NO_SOLID_PROXY';
     // Sheet travel is rendered only by the live Printing Test simulation. No static paper plane is kept inside the PU.
@@ -786,6 +789,10 @@ export class OffsetMachineTemplate {
     this.cylinder(cam,.036,.04,[.16,.80,.82],'steel','z');
     const camLever=this.box(cam,[.22,.040,.050],[.10,.84,.82],'steel',.008);camLever.rotation.z=.62;
     const guide=this.group(transfer,`${base}-guide`,`PU${from} → PU${to} · sheet guide reference`,[0,0,0],[0,.15,.45],photos,'Guide arc menunjukkan lintasan lembar konseptual; clearance aktual terhadap sheet dan drum tidak terukur.');
+    if(index===0){
+      Object.assign(transfer.userData,{installedTopologyVerified:false,geometryStatus:'FUNCTIONAL_TRANSFER_REFERENCE__MISSING_ACTUAL_HANDOFF_TOPOLOGY'});
+      for(const node of [shaft,spring]){node.visible=false;node.userData.geometryPolicy='UNVERIFIED_DISCONNECTED_PROXY_REMOVED';node.traverse(m=>{if(m.isMesh)m.userData.puAuditHidden=true;});}
+    }
     Object.assign(guide.userData,{transferFromPU:from,transferToPU:to,flowDirection:'FEEDER_TO_DELIVERY_POSITIVE_X',installedClearanceVerified:false});
     const arc=new THREE.CatmullRomCurve3([[-.42,.78,-.66],[-.18,.96,-.66],[.18,.96,-.66],[.42,.78,-.66]].map(V));
     this.mesh(guide,()=>new THREE.TubeGeometry(arc,20,.018,6,false),`interunit-guide-arc-${index}`,'steel',[0,0,0]);
