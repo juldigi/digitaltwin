@@ -36,7 +36,8 @@ test('V339 normal exterior encloses every inter-PU transfer through quality/rese
     assert.ok(meshes.length&&meshes.every(m=>m.visible),`${id} disappears at low=${low}`);
    }
    t.setExteriorOpen(true);
-   assert.ok(transfers.every(m=>m.visible));
+   assert.ok(transfers.every(m=>m.visible===!m.userData.puAuditHidden));
+   assert.ok(transfers.some(m=>m.userData.puAuditHidden),'unsupported first-bay shaft/spring proxies stay hidden');
    t.setExteriorOpen(false);
   }
  }finally{t.dispose();}
