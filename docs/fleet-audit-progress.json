@@ -5,7 +5,7 @@
   "timezone": "Asia/Jakarta",
   "cadence": "HOURLY",
   "mode": "AUDIT_ONE_PART_THEN_FIX_VERIFY_DEPLOY",
-  "status": "WAIT_FOR_OFFSET5_DELIVERY_RELEASE",
+  "status": "RELEASE_PENDING",
   "cursor": {
     "machineId": "BMJ-MCH-0001",
     "partIndex": 0
@@ -17,9 +17,45 @@
       "name": "GUILOTINE POLAR 115 MACHINE (GLM-1)",
       "model": "115 EM MON",
       "area": "OFFSET PRINTING",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "IN_PROGRESS",
+      "parts": [
+        {
+          "part": "input tables and air-port grid",
+          "status": "RELEASE_PENDING",
+          "report": "docs/polar115-input-table-audit.md"
+        },
+        {
+          "part": "stock transport and backgauge registration",
+          "status": "PENDING"
+        },
+        {
+          "part": "safety arms and cut interlocks",
+          "status": "PENDING"
+        },
+        {
+          "part": "clamp and pressure contact",
+          "status": "PENDING"
+        },
+        {
+          "part": "knife and cutting stick",
+          "status": "PENDING"
+        },
+        {
+          "part": "stock removal and output",
+          "status": "PENDING"
+        },
+        {
+          "part": "housing and control",
+          "status": "PENDING"
+        },
+        {
+          "part": "hydraulic and air utility",
+          "status": "PENDING"
+        }
+      ],
+      "reports": [
+        "docs/polar115-input-table-audit.md"
+      ]
     },
     {
       "machineId": "BMJ-MCH-0002",
@@ -35,7 +71,7 @@
       "name": "OFFSET UV INK - 5 MACHINE + INLINE INS",
       "model": "CD 102-8+L",
       "area": "OFFSET PRINTING",
-      "status": "OFFSET5_PILOT_COMPLETE_AFTER_DELIVERY_GATE",
+      "status": "COMPLETE",
       "parts": [
         {
           "part": "feeder",
@@ -99,8 +135,13 @@
         },
         {
           "part": "delivery",
-          "status": "RELEASE_PENDING",
-          "report": "docs/offset5-delivery-contact.md"
+          "status": "COMPLETE",
+          "report": "docs/offset5-delivery-contact.md",
+          "releaseEvidence": {
+            "commit": "ccdf5d0e37e6752e22de07f46938e2aa06473112",
+            "workflow": 38165983237,
+            "conclusion": "success"
+          }
         }
       ],
       "reports": []
@@ -452,8 +493,17 @@
     {
       "machineId": "BMJ-MCH-0003",
       "part": "delivery",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "report": "docs/offset5-delivery-contact.md"
+    },
+    {
+      "machineId": "BMJ-MCH-0001",
+      "part": "input tables and air-port grid",
+      "status": "RELEASE_PENDING",
+      "report": "docs/polar115-input-table-audit.md",
+      "nextPartIndex": 1,
+      "parentCommit": "ccdf5d0e37e6752e22de07f46938e2aa06473112"
     }
-  ]
+  ],
+  "updatedAt": "2026-10-11T20:00:00Z"
 }

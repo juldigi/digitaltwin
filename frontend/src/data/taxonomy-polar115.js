@@ -1,7 +1,7 @@
 const LEVELS=['Mesin','Unit Utama','Sub','Block','Part','Spesifik Part'];
 const units=[
  ['FEED','Cutting Table & Material Handling',[
-  ['CENTER','Main dark cutting table','polar-feed-center'],['LEFT','Left perforated air-float side table','polar-feed-left'],['RIGHT','Right perforated air-float side table','polar-feed-right'],
+  ['CENTER','Main dark cutting table','polar-feed-center'],['LEFT','Plain dark side extension','polar-feed-left'],['RIGHT','Single perforated air-float side table','polar-feed-right'],
   ['GRID','Air-nozzle grid','polar-feed-grid-polar-feed-right'],['BLOWER','Air-table blower reference','polar-air-blower']
  ]],
  ['GAUGE','Backgauge Positioning',[

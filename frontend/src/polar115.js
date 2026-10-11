@@ -28,7 +28,7 @@ export class Polar115MachineTemplate{
  box(g,s,p,k='body',r=.025,id=null){return this.mesh(g,r?new RoundedBoxGeometry(...s,2,r):new THREE.BoxGeometry(...s),k,p,null,id);}
  cyl(g,r,l,p,k='steel',axis='z',id=null){return this.mesh(g,new THREE.CylinderGeometry(r,r,l,24),k,p,axis==='z'?[Math.PI/2,0,0]:axis==='x'?[0,0,Math.PI/2]:null,id);}
  cover(m){m.userData.exteriorCover=true;return m;}active(m,role=''){m.userData.activeElement=true;m.userData.mechanismRole=role;this.activeMeshes.push(m);return m;}
- holes(group,width,depth,y,zCenter,countX,countZ){const grid=this.group(group,'polar-feed-grid-'+group.userData.nodeId,'Air-nozzle grid');for(let ix=0;ix<countX;ix++)for(let iz=0;iz<countZ;iz++){const x=-width*.42+(width*.84)*(ix/Math.max(1,countX-1)),z=zCenter-depth*.38+(depth*.76)*(iz/Math.max(1,countZ-1));const h=this.cyl(grid,.009,.006,[x,y+.064,z],'black','y');h.userData.detail=true;h.userData.airNozzle=true;}return grid;}
+ holes(group,width,depth,y,zCenter,countX,countZ,xCenter=0){const grid=this.group(group,'polar-feed-grid-'+group.userData.nodeId,'Air-nozzle grid');for(let ix=0;ix<countX;ix++)for(let iz=0;iz<countZ;iz++){const x=xCenter-width*.42+(width*.84)*(ix/Math.max(1,countX-1)),z=zCenter-depth*.38+(depth*.76)*(iz/Math.max(1,countZ-1));const h=this.cyl(grid,.009,.006,[x,y+.031,z],'black','y');h.userData.detail=true;h.userData.airNozzle=true;}return grid;}
  build(){
   const photoEvidence='BMJ-POLAR-PHOTOS-2026-09';
 
@@ -54,7 +54,7 @@ export class Polar115MachineTemplate{
   const leftDeck=this.box(left,[.60,.06,.72],[0,.90,-.36],'tableDark',.018);leftDeck.userData.evidence='IMG_2488_FRONT_LEFT_DARK_EXTENSION';
   const leftApron=this.box(left,[.60,.16,.045],[0,.795,-.73],'bodyDark',.008);leftApron.userData.evidence='IMG_2488_LEFT_TABLE_THICK_FRONT_EDGE';
   const right=this.group(feed,'polar-feed-right','Single perforated air-float side table',[1.015,0,0]);
-  const rightDeck=this.box(right,[.88,.06,1.30],[.11,.90,-.65],'table',.018);rightDeck.userData.evidence='IMG_2488_2489_FRONT_RIGHT_WHITE_PERFORATED';this.holes(right,.88,1.30,.90,-.65,8,11);
+  const rightDeck=this.box(right,[.88,.06,1.30],[.11,.90,-.65],'table',.018);rightDeck.userData.evidence='IMG_2488_2489_FRONT_RIGHT_WHITE_PERFORATED';this.holes(right,.88,1.30,.90,-.65,8,11,.11);
   const rightBackstop=this.box(right,[.86,.17,.035],[.11,1.015,-.035],'body',.012);rightBackstop.userData.evidence='IMG_2489_FRONT_RIGHT_AIR_TABLE_BACKSTOP';
   for(const x of [-.22,.44])for(const z of [-1.16,-.16]){
    const leg=this.box(right,[.028,.86,.028],[x,.45,z],'dark',.006);leg.userData.evidence='IMG_2488_2489_AIR_TABLE_CORNER_LEGS';
