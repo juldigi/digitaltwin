@@ -374,7 +374,7 @@ export class PrintingSimulation{
   addNodeRotors(id,sign=1,rate=1,{torus=true}={}){
     const node=this.template.findNode(id);if(!node)return;
     let index=0;node.traverse(mesh=>{
-      if(!mesh.isMesh)return;
+      if(!mesh.isMesh||mesh.userData.dynamicRotor)return; // Explicit tagged rotors are registered once by addTaggedRotors.
       const type=mesh.geometry?.type;if(type!=='CylinderGeometry'&&!(torus&&type==='TorusGeometry'))return;
       this.addRotor(mesh,index++%2?-sign:sign,rate*(1+(index%3)*.04));
     });
