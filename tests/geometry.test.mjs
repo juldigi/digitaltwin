@@ -67,7 +67,7 @@ test('PU1 OEM roller map is complete, finite and non-overlapping',()=>{
  for(let i=0;i<rollers.length;i++)for(let j=i+1;j<rollers.length;j++){const a=rollers[i],b=rollers[j],distance=Math.hypot(a.p.x-b.p.x,a.p.y-b.p.y);assert.ok(distance>=a.r+b.r-.001,`${a.id} overlaps ${b.id}`);}
  t.dispose();
 });
-test('V47 cutaway shows only functional roller bodies and relocates dampening to the OEM side',()=>{
+test('cutaway shows functional roller bodies and embeds dampening on the operator-view diagram side',()=>{
  const t=new OffsetMachineTemplate();
  for(const id of ['press-0-ink-fountain-roller','press-0-ink-fountain-roller-body','press-0-damp-roller-18-body','dryer-uv-system'])assert.ok(t.findNode(id),`missing ${id}`);
  const journal=t.findNode('press-0-ink-roller-1-journals'),body=t.findNode('press-0-ink-roller-1-body');
@@ -78,7 +78,7 @@ test('V47 cutaway shows only functional roller bodies and relocates dampening to
  assert.ok(t.root.userData.serviceDetailHiddenCount>0);
  const center=node=>{let mesh=null;node.traverse(o=>{if(!mesh&&o.isMesh&&o.geometry?.type==='CylinderGeometry')mesh=o;});const p=new THREE.Vector3();mesh.getWorldPosition(p);return p;};
  const plate=center(t.findNode('press-0-cylinder-plate-body'));
- for(const code of ['16','17','FR','19','18'])assert.ok(center(t.findNode(`press-0-damp-roller-${code}-body`)).x>plate.x,`dampening roller ${code} is not on the corrected OEM side of plate cylinder`);
+ for(const code of ['16','17','FR','19','18'])assert.ok(center(t.findNode(`press-0-damp-roller-${code}-body`)).x<plate.x,`dampening roller ${code} must be on viewer right from the operator side (negative machine X)`);
  t.dispose();
 });
 

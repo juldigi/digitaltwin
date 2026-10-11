@@ -63,3 +63,17 @@ test('both inspection pods use the photographed inclined face without moving the
  }
  }finally{t.dispose();}
 });
+
+
+test('oscillating ink vibrator remains clear of the liner over complete simulation cycles',()=>{
+ const t=createPolishedMachineTemplate('offset5'),s=createMachineSimulation('offset5',t.root,t);try{
+ const m=body(t,'press-0-ink-roller-15-body'),linerMeshes=[];t.findNode('press-0-fountain-liner').traverse(o=>{if(o.isMesh)linerMeshes.push(o);});s.start();
+ for(let frame=0;frame<150;frame++){s.update(1000+frame*40);t.root.updateMatrixWorld(true);const p=center(m);
+  for(const liner of linerMeshes){const g=liner.geometry,a=g.attributes.position,idx=g.index,tri=new THREE.Triangle(),closest=new THREE.Vector3();let distance=Infinity;
+   for(let j=0;j<(idx?.count||a.count);j+=3){[tri.a,tri.b,tri.c].forEach((v,k)=>v.fromBufferAttribute(a,idx?idx.getX(j+k):j+k).applyMatrix4(liner.matrixWorld));tri.closestPointToPoint(p,closest);distance=Math.min(distance,p.distanceTo(closest));}
+   assert.ok(distance-m.geometry.parameters.radiusTop>.008,`moving vibrator intersects liner at frame ${frame}`);
+  }
+ }
+ assert.ok(s.elapsed>5,'test must advance simulation time rather than repeat a static timestamp');
+ }finally{s.dispose();t.dispose();}
+});

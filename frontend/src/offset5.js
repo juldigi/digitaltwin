@@ -554,7 +554,7 @@ export class OffsetMachineTemplate {
     // IMG_1970/1971: the fountain has an inclined metallic liner, not only a
     // narrow flat colour strip. Keep the liner within the existing PU frame.
     const liner=this.group(openBay,`press-${i}-fountain-liner`,`${i+1} · inclined fountain liner`,[0,0,0],[0,.10,0],['IMG_1970.jpeg','IMG_1971.jpeg'],'Inclined metallic liner and open fountain are photographed; slope and thickness are photo-derived estimates, not measured OEM dimensions.');
-    const linerPlate=this.box(liner,[.36,.018,1.40],[.015,2.628,0],'chromium',.004);linerPlate.rotation.z=.35;
+    const linerPlate=this.box(liner,[.36,.018,1.40],[.015,2.648,0],'chromium',.004);linerPlate.rotation.z=.35;
     const lip=this.box(liner,[.025,.022,1.40],[-.162,2.549,0],'steel',.004);lip.rotation.z=.35;
     Object.assign(liner.userData,{geometryEvidence:'PHOTO_OBSERVED__PROPORTIONS_ESTIMATED',sourceFiles:['IMG_1970.jpeg','IMG_1971.jpeg'],normalStateVisible:true});
     const guard=this.markExteriorCover(this.group(g,`press-${i}-fountain-guard`,`${i+1} · sloped fountain guard and grille`,[0,0,0],[0,.08,0],['IMG_1970.jpeg','IMG_1971.jpeg'],'Photographed dark sloped guard adjacent to the metallic fountain liner; grille rhythm is a visual reconstruction, not a specified slot count.'));
