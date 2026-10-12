@@ -5,10 +5,10 @@
   "timezone": "Asia/Jakarta",
   "cadence": "HOURLY",
   "mode": "AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY",
-  "status": "RELEASE_PENDING",
+  "status": "READY",
   "cursor": {
-    "machineId": "BMJ-MCH-0002",
-    "partIndex": 7
+    "machineId": "BMJ-MCH-0004",
+    "partIndex": 0
   },
   "baselineCommit": "b5e45a82ce1aeaf9094b0a5c3fd8d985b8a9e96f",
   "machines": [
@@ -124,15 +124,15 @@
       "name": "SHEETING LEXUS",
       "model": "HSM-CTM7",
       "area": "OFFSET PRINTING",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "parts": [
-        {"part": "hydraulic unwind and reel input", "status": "RELEASE_PENDING", "report": "docs/sheeting-lexus-whole-machine-audit.md"},
-        {"part": "web carrier, guide and tension path", "status": "RELEASE_PENDING", "report": "docs/sheeting-lexus-whole-machine-audit.md"},
-        {"part": "draw roll and guarded cross-cut zone", "status": "RELEASE_PENDING", "report": "docs/sheeting-lexus-whole-machine-audit.md"},
-        {"part": "high-speed take-away transfer", "status": "RELEASE_PENDING", "report": "docs/sheeting-lexus-whole-machine-audit.md"},
-        {"part": "slow-speed overlap and shingling", "status": "RELEASE_PENDING", "report": "docs/sheeting-lexus-whole-machine-audit.md"},
-        {"part": "stack and lay table output", "status": "RELEASE_PENDING", "report": "docs/sheeting-lexus-whole-machine-audit.md"},
-        {"part": "operator controls, housing and access", "status": "RELEASE_PENDING", "report": "docs/sheeting-lexus-whole-machine-audit.md"}
+        {"part": "hydraulic unwind and reel input", "status": "COMPLETE", "report": "docs/sheeting-lexus-whole-machine-audit.md", "releaseEvidence": {"commit": "1ab7a879ebd003ff9a972cd2da9b89b84b4ca3a3", "workflow": 38198942950, "conclusion": "success", "tests": 1559}},
+        {"part": "web carrier, guide and tension path", "status": "COMPLETE", "report": "docs/sheeting-lexus-whole-machine-audit.md", "releaseEvidence": {"commit": "1ab7a879ebd003ff9a972cd2da9b89b84b4ca3a3", "workflow": 38198942950, "conclusion": "success", "tests": 1559}},
+        {"part": "draw roll and guarded cross-cut zone", "status": "COMPLETE", "report": "docs/sheeting-lexus-whole-machine-audit.md", "releaseEvidence": {"commit": "1ab7a879ebd003ff9a972cd2da9b89b84b4ca3a3", "workflow": 38198942950, "conclusion": "success", "tests": 1559}},
+        {"part": "high-speed take-away transfer", "status": "COMPLETE", "report": "docs/sheeting-lexus-whole-machine-audit.md", "releaseEvidence": {"commit": "1ab7a879ebd003ff9a972cd2da9b89b84b4ca3a3", "workflow": 38198942950, "conclusion": "success", "tests": 1559}},
+        {"part": "slow-speed overlap and shingling", "status": "COMPLETE", "report": "docs/sheeting-lexus-whole-machine-audit.md", "releaseEvidence": {"commit": "1ab7a879ebd003ff9a972cd2da9b89b84b4ca3a3", "workflow": 38198942950, "conclusion": "success", "tests": 1559}},
+        {"part": "stack and lay table output", "status": "COMPLETE", "report": "docs/sheeting-lexus-whole-machine-audit.md", "releaseEvidence": {"commit": "1ab7a879ebd003ff9a972cd2da9b89b84b4ca3a3", "workflow": 38198942950, "conclusion": "success", "tests": 1559}},
+        {"part": "operator controls, housing and access", "status": "COMPLETE", "report": "docs/sheeting-lexus-whole-machine-audit.md", "releaseEvidence": {"commit": "1ab7a879ebd003ff9a972cd2da9b89b84b4ca3a3", "workflow": 38198942950, "conclusion": "success", "tests": 1559}}
       ],
       "reports": ["docs/sheeting-lexus-whole-machine-audit.md"]
     },
@@ -671,11 +671,12 @@
     {
       "machineId": "BMJ-MCH-0002",
       "part": "whole machine: unwind through stack output",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "report": "docs/sheeting-lexus-whole-machine-audit.md",
       "nextMachineId": "BMJ-MCH-0004",
-      "parentCommit": "3c2b2d178dfa889207d4491cc565679261de60d2"
+      "parentCommit": "3c2b2d178dfa889207d4491cc565679261de60d2",
+      "releaseEvidence": {"commit": "1ab7a879ebd003ff9a972cd2da9b89b84b4ca3a3", "workflow": 38198942950, "conclusion": "success", "tests": 1559}
     }
   ],
-  "updatedAt": "2026-10-12T03:00:00Z"
+  "updatedAt": "2026-10-12T03:23:00Z"
 }
