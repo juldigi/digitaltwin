@@ -7,6 +7,7 @@ export const FZ1200_SIMULATION_STAGES=Object.freeze([
 const Y_AXIS=new THREE.Vector3(0,1,0),Z_AXIS=new THREE.Vector3(0,0,1);
 const clamp01=v=>Math.max(0,Math.min(1,v));
 const smooth=(v,a,b)=>THREE.MathUtils.smoothstep(v,a,b);
+const CLAMP_CONTACT_STROKE=.498;
 
 export class FZ1200ProcessSimulation{
  constructor(root,template){
@@ -17,7 +18,7 @@ export class FZ1200ProcessSimulation{
   this.rest={
    clampPosition:this.clamp?.position.clone(),clampQuaternion:this.clamp?.quaternion.clone(),
    yokePosition:this.yoke?.position.clone(),yokeQuaternion:this.yoke?.quaternion.clone(),
-   upperPosition:this.upper?.position.clone(),
+   upperPosition:this.upper?.position.clone(),pilePosition:this.pile?.position.clone(),
    rotorQuaternion:this.rotors.map(r=>r.quaternion.clone()),
    joggerPosition:this.joggers.map(j=>j.position.clone()),
    paperLayerPosition:this.paperLayers.map(p=>p.position.clone()),
@@ -29,7 +30,7 @@ export class FZ1200ProcessSimulation{
  buildAirJets(){
   this.airJetGroup=new THREE.Group();this.airJetGroup.name='FZ1200-AIR-JETS-REFERENCE';this.root.add(this.airJetGroup);this.airJets=[];
   this.jetGeometry=new THREE.ConeGeometry(.035,.46,12,1,true);this.jetMaterial=new THREE.MeshStandardMaterial({color:0x7ac5df,emissive:0x3d7e96,emissiveIntensity:.4,transparent:true,opacity:.26,depthWrite:false});
-  for(const z of [-.44,-.22,0,.22,.44]){const jet=new THREE.Mesh(this.jetGeometry,this.jetMaterial.clone());jet.rotation.z=-Math.PI/2;jet.position.set(-.48,1.28,z);jet.visible=false;jet.userData.processReference='air-separation';this.airJetGroup.add(jet);this.airJets.push(jet);}
+  for(const z of [-.44,-.22,0,.22,.44]){const jet=new THREE.Mesh(this.jetGeometry,this.jetMaterial.clone());jet.rotation.z=-Math.PI/2;jet.position.set(-.48,1.75,z);jet.visible=false;jet.userData.processReference='air-separation';jet.userData.functionalHeightBasis='turned modeled pile envelope';this.airJetGroup.add(jet);this.airJets.push(jet);}
  }
  state(){
   const progress=this.active?(this.elapsed%14)/14:0,index=Math.min(FZ1200_SIMULATION_STAGES.length-1,Math.floor(progress*FZ1200_SIMULATION_STAGES.length));
@@ -48,6 +49,7 @@ export class FZ1200ProcessSimulation{
   if(this.clamp){this.clamp.position.copy(this.rest.clampPosition);this.clamp.quaternion.copy(this.rest.clampQuaternion);}
   if(this.yoke){this.yoke.position.copy(this.rest.yokePosition);this.yoke.quaternion.copy(this.rest.yokeQuaternion);}
   if(this.upper)this.upper.position.copy(this.rest.upperPosition);
+  if(this.pile)this.pile.position.copy(this.rest.pilePosition);
   this.rotors.forEach((r,i)=>r.quaternion.copy(this.rest.rotorQuaternion[i]));this.joggers.forEach((j,i)=>j.position.copy(this.rest.joggerPosition[i]));this.paperLayers.forEach((p,i)=>p.position.copy(this.rest.paperLayerPosition[i]));if(this.turnLockPin&&this.rest.turnLockPinPosition)this.turnLockPin.position.copy(this.rest.turnLockPinPosition);
   for(const jet of this.airJets){jet.visible=false;jet.material.opacity=.26;}
   this.turnAngleDeg=0;this.pileLoaded=false;this.clamped=false;this.clampCommand=false;this.clampConfirmed=false;this.liftActive=false;this.liftClearance=false;this.turnPermitted=false;this.turningActive=false;this.turnComplete=false;this.turnLockCommand=false;this.turnLockConfirmed=false;this.airPermitted=false;this.airPressureReady=false;this.airingActive=false;this.joggingActive=false;this.alignmentComplete=false;this.loweringActive=false;this.releasePermit=false;this.unloadReady=false;this.guardInterlockSafe=true;this.interlockSafe=true;this.hydraulicActive=false;
@@ -67,7 +69,7 @@ export class FZ1200ProcessSimulation{
   const cycle=14,cycleIndex=Math.floor(this.elapsed/cycle),phase=(this.elapsed%cycle)/cycle;
   const pileLoaded=phase>=.02;
   const clampProfile=smooth(phase,.08,.17)*(1-smooth(phase,.94,.985));
-  const clampCommand=phase>=.08&&phase<.985,clampConfirmed=clampProfile>.94;
+  const clampCommand=phase>=.08&&phase<.985,clampConfirmed=CLAMP_CONTACT_STROKE*clampProfile>=CLAMP_CONTACT_STROKE-.001;
   const liftUp=smooth(phase,.18,.28),liftDown=smooth(phase,.85,.94),lift=liftUp*(1-liftDown);
   const liftClearance=lift>.82,guardSafe=true,turnPermitted=clampConfirmed&&liftClearance&&guardSafe;
   const requestedTurn=smooth(phase,.29,.48),turn=phase>=.48?1:(turnPermitted?requestedTurn:0),turnComplete=turn>.985;
@@ -79,13 +81,16 @@ export class FZ1200ProcessSimulation{
   const releasePermit=alignmentComplete&&phase>=.94&&lift<.08&&!turnLockCommand,unloadReady=releasePermit&&phase>=.975;
   const hyd=clampCommand||lift>.02||(turn>0&&turn<.999)||lowering;
   const totalTurn=(cycleIndex+turn)*Math.PI,qTurn=new THREE.Quaternion().setFromAxisAngle(Z_AXIS,totalTurn);
-  if(this.upper)this.upper.position.y=this.rest.upperPosition.y-.47*clampProfile;
+  if(this.upper)this.upper.position.y=this.rest.upperPosition.y-CLAMP_CONTACT_STROKE*clampProfile;
+  // After the 180-degree turn, gravity keeps the released pile on the former
+  // upper pressure plate instead of leaving it suspended in world space.
+  if(this.pile){this.pile.position.copy(this.rest.pilePosition);if(turnComplete&&phase>=.94)this.pile.position.y+=CLAMP_CONTACT_STROKE*(1-clampProfile);}
   if(this.clamp){this.clamp.position.copy(this.rest.clampPosition);this.clamp.position.y+=.15*lift;this.clamp.quaternion.copy(this.rest.clampQuaternion).multiply(qTurn);}
   if(this.yoke){this.yoke.position.copy(this.rest.yokePosition);this.yoke.position.y+=.15*lift;this.yoke.quaternion.copy(this.rest.yokeQuaternion).multiply(qTurn);}
   if(this.turnLockPin&&this.rest.turnLockPinPosition){this.turnLockPin.position.copy(this.rest.turnLockPinPosition);if(turnLockConfirmed)this.turnLockPin.position.x+=.09;}
   const pulse=(Math.sin(this.elapsed*24)+1)*.5*.025;
   this.joggers.forEach((j,i)=>{const r=this.rest.joggerPosition[i];j.position.copy(r);if(jog){if(j.userData.jogAxis==='z')j.position.z=r.z-Math.sign(r.z||1)*pulse;else j.position.x=r.x-Math.sign(r.x||1)*pulse;}});
-  this.paperLayers.forEach((layer,i)=>{const r=this.rest.paperLayerPosition[i];layer.position.copy(r);if(airPressureReady){const centered=i-(this.paperLayers.length-1)/2,gap=centered*.0019*(air?1:.35),flutter=air?Math.sin(this.elapsed*10+i*.65)*.004:0;layer.position.y=r.y+gap;layer.position.z=r.z+flutter;}if(jog)layer.position.x=r.x+Math.sin(this.elapsed*23+i*.3)*.0025;});
+  this.paperLayers.forEach((layer,i)=>{const r=this.rest.paperLayerPosition[i];layer.position.copy(r);if(airPressureReady){const fromTurnedSupport=i-(this.paperLayers.length-1),gap=fromTurnedSupport*.0019*(air?1:.35),flutter=air?Math.sin(this.elapsed*10+i*.65)*.004:0;layer.position.y=r.y+gap;layer.position.z=r.z+flutter;}if(jog)layer.position.x=r.x+Math.sin(this.elapsed*23+i*.3)*.0025;});
   for(const [i,jet] of this.airJets.entries()){jet.visible=airPressureReady&&air;if(jet.visible)jet.material.opacity=.18+.16*(.5+.5*Math.sin(this.elapsed*11+i*.7));}
   this.spinActiveRotors(dt,phase,air,jog,hyd);
   const interlockSafe=(!(turn>0&&turn<.999)||turnPermitted)&&(!air||airPermitted)&&(!jog||airPressureReady)&&(!releasePermit||(!turnLockCommand&&lift<.08));

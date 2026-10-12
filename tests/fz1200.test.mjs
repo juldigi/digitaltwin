@@ -54,6 +54,19 @@ test('FZ1200 clamps first, reaches lift clearance, then permits the pivot-correc
  sim.dispose();model.dispose();
 });
 
+test('FZ1200 contact chain has no false clamp confirmation, support penetration, or floating unload',()=>{
+ const model=new FZ1200MachineTemplate(),sim=new FZ1200ProcessSimulation(model.root,model);
+ const bounds=id=>{model.root.updateMatrixWorld(true);return new THREE.Box3().setFromObject(model.findNode(id));};
+ let platform=bounds('fz1200-base-pallet'),lower=bounds('fz1200-clamp-lower');
+ assert.ok(Math.abs(lower.min.y-platform.max.y)<1e-9,'lower clamp plate must sit on the input platform without penetration');
+ sim.start();let now=1000;const advanceTo=t=>{while(sim.elapsed<t){now+=10;sim.update(now);}};
+ advanceTo(2.4);assert.equal(sim.state().clampConfirmed,true);assert.ok(Math.abs(bounds('fz1200-clamp-upper').min.y-bounds('fz1200-pile').max.y)<.0011,'clamp confirmation requires pressure-face contact');
+ advanceTo(8);let pile=bounds('fz1200-pile'),upper=bounds('fz1200-clamp-upper');assert.ok(Math.abs(pile.min.y-upper.max.y)<.0011,'turned pile must remain supported during airing');
+ const side=bounds('fz1200-jog-side');assert.ok(side.min.y<=pile.min.y+.04&&side.max.y>=pile.max.y-.05,'jog plates must span the turned pile working height');
+ advanceTo(13.8);pile=bounds('fz1200-pile');upper=bounds('fz1200-clamp-upper');assert.ok(Math.abs(pile.min.y-upper.max.y)<.0011,'released pile must follow its lower support instead of floating');
+ sim.dispose();model.dispose();
+});
+
 test('FZ1200 airing and jogging use jets and opposing plate motion instead of spinning static hardware',()=>{
  const model=new FZ1200MachineTemplate(),sim=new FZ1200ProcessSimulation(model.root,model);sim.start();let now=1000,air=false,jog=false,jet=false;const jog0=sim.joggers.map(j=>j.position.clone());
  for(let i=0;i<500;i++){now+=20;sim.update(now);const s=sim.state();air||=s.airingActive;jog||=s.joggingActive;jet||=s.airJetCount>0;}
