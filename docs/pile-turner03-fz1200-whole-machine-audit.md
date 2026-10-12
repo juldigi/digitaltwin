@@ -1,6 +1,6 @@
 # BMJ-MCH-0008 · PILE TURNER 03 · FZ 1200 whole-machine audit
 
-Status: `RELEASE_PENDING`  
+Status: `COMPLETE`  
 Audit mode: `AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY`  
 Identity: BMJ registry `PILE TURNER 03`, model `FZ 1200`, serial `2105080SF34`, year 2022, SAP `PLT-3`.
 
@@ -39,7 +39,10 @@ The second pass repeated the full load→clamp→lift→turn→lock→air→jog�
 ## Validation
 
 - Focused FZ1200 plus lifecycle/cutaway/taxonomy/simulation regressions: 145/145 passed.
-- Full release suite and workflow evidence will be recorded after deployment completes.
+- Full release suite: 1,566/1,566 passed; build completed for all 41 assets.
+- Release commit: `abc8e471f294e7dd12f850975c508eab5724b5b5`.
+- Workflows: CI `38248606897`, frontend verification `38248606822`, Cloudflare `38248607428`; all completed successfully.
+- Production returned HTTP 200 after deployment.
 
 ## Remaining blockers
 
