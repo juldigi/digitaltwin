@@ -5,9 +5,9 @@
   "timezone": "Asia/Jakarta",
   "cadence": "HOURLY",
   "mode": "AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY",
-  "status": "RELEASE_PENDING",
+  "status": "READY",
   "cursor": {
-    "machineId": "BMJ-MCH-0012",
+    "machineId": "BMJ-MCH-0013",
     "partIndex": 0
   },
   "baselineCommit": "b5e45a82ce1aeaf9094b0a5c3fd8d985b8a9e96f",
@@ -1047,7 +1047,7 @@
       "name": "AUTOPLATEN - 6 STAMPING",
       "model": "MK 920 YMI - II",
       "area": "OFFSET CONVERTING",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "parts": [
         {"part": "pile feeder, lift and suction pickup", "status": "NO_CHANGE_REQUIRED", "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"},
         {"part": "registration table and lays", "status": "NO_CHANGE_REQUIRED", "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"},
@@ -1058,7 +1058,15 @@
         {"part": "drive, controls, guarding and access", "status": "BLOCKED_EVIDENCE", "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"},
         {"part": "simulation, fallback, display modes and taxonomy", "status": "COMPLETE", "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"}
       ],
-      "reports": ["docs/apm6-mk920ymiii-whole-machine-audit.md"]
+      "reports": ["docs/apm6-mk920ymiii-whole-machine-audit.md"],
+      "releaseEvidence": {
+        "commit": "05a4e3a2336cfbeb930ae958a9e6b1a3109fb667",
+        "workflows": [38321389898, 38321389810, 38321389771],
+        "conclusion": "success",
+        "tests": 1576,
+        "productionHttp": 200,
+        "visualFallbackVerified": true
+      }
     },
     {
       "machineId": "BMJ-MCH-0013",
@@ -1510,11 +1518,19 @@
     {
       "machineId": "BMJ-MCH-0012",
       "part": "whole machine: pile feeder through hot-foil stamping and delivery",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "report": "docs/apm6-mk920ymiii-whole-machine-audit.md",
       "nextMachineId": "BMJ-MCH-0013",
-      "parentCommit": "19f23edd7971a17080c4db420db98f3d1d576c8c"
+      "parentCommit": "19f23edd7971a17080c4db420db98f3d1d576c8c",
+      "releaseEvidence": {
+        "commit": "05a4e3a2336cfbeb930ae958a9e6b1a3109fb667",
+        "workflows": [38321389898, 38321389810, 38321389771],
+        "conclusion": "success",
+        "tests": 1576,
+        "productionHttp": 200,
+        "visualFallbackVerified": true
+      }
     }
   ],
-  "updatedAt": "2026-10-12T23:22:00Z"
+  "updatedAt": "2026-10-12T23:24:42Z"
 }
