@@ -5,7 +5,7 @@
   "timezone": "Asia/Jakarta",
   "cadence": "HOURLY",
   "mode": "AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY",
-  "status": "READY",
+  "status": "RELEASE_PENDING",
   "cursor": {
     "machineId": "BMJ-MCH-0006",
     "partIndex": 0
@@ -272,9 +272,20 @@
       "name": "OFFSET - 9 MACHINE",
       "model": "SX52-4+L",
       "area": "OFFSET PRINTING",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {"part":"feeder and input","status":"COMPLETE","report":"docs/offset9-sx52-whole-machine-audit.md"},
+        {"part":"central suction tape and register","status":"NO_CHANGE_REQUIRED","report":"docs/offset9-sx52-whole-machine-audit.md"},
+        {"part":"PU1 and downstream transfer","status":"COMPLETE","report":"docs/offset9-sx52-whole-machine-audit.md"},
+        {"part":"PU2 and downstream transfer","status":"COMPLETE","report":"docs/offset9-sx52-whole-machine-audit.md"},
+        {"part":"PU3 and downstream transfer","status":"COMPLETE","report":"docs/offset9-sx52-whole-machine-audit.md"},
+        {"part":"PU4 and downstream transfer","status":"COMPLETE","report":"docs/offset9-sx52-whole-machine-audit.md"},
+        {"part":"inline coating unit","status":"BLOCKED_EVIDENCE","report":"docs/offset9-sx52-whole-machine-audit.md"},
+        {"part":"delivery transport and sheet brake","status":"BLOCKED_EVIDENCE","report":"docs/offset9-sx52-whole-machine-audit.md"},
+        {"part":"delivery pile and output","status":"COMPLETE","report":"docs/offset9-sx52-whole-machine-audit.md"},
+        {"part":"housing, control, access and utilities","status":"BLOCKED_EVIDENCE","report":"docs/offset9-sx52-whole-machine-audit.md"}
+      ],
+      "reports": ["docs/offset9-sx52-whole-machine-audit.md"]
     },
     {
       "machineId": "BMJ-MCH-0007",

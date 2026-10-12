@@ -47,6 +47,22 @@ test('Offset 9 taxonomy is a contiguous six-level tree mapped to real geometry',
 test('Offset 9 process cycle drives feeder coating Venturi brake grippers and stacked delivery',()=>{
  const model=new Offset9MachineTemplate(),sim=new Offset9PrintingSimulation(model.root,model);assert.ok(OFFSET9_SIMULATION_STAGES.includes('Printing Unit 4'));assert.ok(OFFSET9_SIMULATION_STAGES.includes('Inline Coating Unit'));
  sim.start();let now=1000,feed=false,coat=false,air=false,brake=false,grip=false;for(let i=0;i<1800;i++){now+=10;sim.update(now);const state=sim.state();feed||=state.feederSuctionActive;coat||=state.coatingActive;air||=state.airGuidanceActive;brake||=state.deliveryBrakeActive;grip||=state.deliveryGripperActive;}
- const state=sim.state();assert.ok(feed&&coat&&brake&&grip);assert.equal(air,false,'high-pile delivery Venturi must remain inactive until BMJ option is verified');assert.ok(state.sheetsVisible>0);assert.ok(state.completed>0);assert.ok(state.pileSheetsVisible>0);assert.ok(sim.stack.filter(x=>x.visible).every(x=>x.position.y>=.505));
+ const state=sim.state();assert.ok(feed&&coat&&brake&&grip);assert.equal(air,false,'high-pile delivery Venturi must remain inactive until BMJ option is verified');assert.ok(state.sheetsVisible>0);assert.ok(state.completed>0);assert.ok(state.pileSheetsVisible>0);assert.ok(sim.stack.filter(x=>x.visible).every(x=>x.position.y>=.498));
  sim.stop();sim.dispose();model.dispose();
+});
+
+test('Offset 9 feeder and delivery piles sit on their support planes and suction reaches the official pile height',()=>{
+ const model=new Offset9MachineTemplate(),sim=new Offset9PrintingSimulation(model.root,model);model.root.updateMatrixWorld(true);
+ const stock=model.findNode('offset9-feeder-pile').children.find(o=>o.userData.nominalPileHeight===OFFSET9_SPEC.feederPile),stockBox=new THREE.Box3().setFromObject(stock);
+ assert.ok(Math.abs(stockBox.min.y-.525)<1e-6);assert.ok(Math.abs((stockBox.max.y-stockBox.min.y)-OFFSET9_SPEC.feederPile)<1e-6);
+ sim.start();sim.update(1000);sim.elapsed=(12/sim.sheets.length)*.17;sim.updateFeeder();model.root.updateMatrixWorld(true);
+ for(const cup of sim.suckers){const cupBox=new THREE.Box3().setFromObject(cup);assert.ok(Math.abs(cupBox.min.y-stockBox.max.y)<1e-6);}
+ const deliveryBox=new THREE.Box3().setFromObject(model.findNode('offset9-delivery-paper-stack'));assert.ok(Math.abs(deliveryBox.min.y-.495)<1e-6);
+ sim.dispose();model.dispose();
+});
+
+test('Offset 9 chamber doctor edges are tangent to the anilox instead of penetrating or floating',()=>{
+ const model=new Offset9MachineTemplate();model.root.updateMatrixWorld(true);const anilox=model.findNode('offset9-l-meter').children.find(o=>o.userData.rollerRole==='anilox'),center=new THREE.Vector3();anilox.getWorldPosition(center);
+ for(const role of ['doctor-blade-metering-edge','doctor-blade-sealing-edge']){let blade;model.root.traverse(o=>{if(o.userData.mechanismRole===role)blade=o;});const local=center.clone().applyMatrix4(blade.matrixWorld.clone().invert());blade.geometry.computeBoundingBox();const closest=local.clone().clamp(blade.geometry.boundingBox.min,blade.geometry.boundingBox.max),distance=local.distanceTo(closest);assert.ok(Math.abs(distance-anilox.userData.radius)<.001,`${role} tangent error ${distance-anilox.userData.radius}`);}
+ model.dispose();
 });

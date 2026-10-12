@@ -78,7 +78,7 @@ export class Offset9PrintingSimulation{
   for(const sheet of this.sheets){const raw=this.elapsed/12+sheet.phase,t=raw%1,pos=this.curve.getPointAt(t),next=this.curve.getPointAt(Math.min(.9999,t+.0025));sheet.mesh.visible=this.active;sheet.mesh.position.copy(pos);sheet.mesh.rotation.set(-Math.PI/2,0,-Math.atan2(next.y-pos.y,Math.max(.001,next.x-pos.x)));
    if(Math.abs(pos.x-coatX)<.48){coat=true;sheet.mesh.material.roughness=.70;}else sheet.mesh.material.roughness=.88;
    if(this.deliveryVenturiInstalledVerified&&pos.x>4.05&&pos.x<5.25)air=true;if(pos.x>5.18&&pos.x<5.62)brake=true;
-   const lap=Math.floor(raw);if(lap>sheet.lap){if(sheet.lap>=0){this.completed++;const pile=this.stack[(this.completed-1)%this.stack.length];pile.visible=true;pile.position.set(5.39,.505+((this.completed-1)%this.stack.length)*.0065,0);}sheet.lap=lap;}
+   const lap=Math.floor(raw);if(lap>sheet.lap){if(sheet.lap>=0){this.completed++;const pile=this.stack[(this.completed-1)%this.stack.length];pile.visible=true;pile.position.set(5.39,.498+((this.completed-1)%this.stack.length)*.0065,0);}sheet.lap=lap;}
   }
   this.coatingActive=coat;this.chamberBladeActive=coat;this.airGuidanceActive=air;this.deliveryBrakeActive=brake;
   for(const e of this.coatingElements){e.material.emissive?.setHex(coat?0x365b2f:0);e.material.emissiveIntensity=coat?.48:0;}
