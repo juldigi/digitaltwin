@@ -5,9 +5,9 @@
   "timezone": "Asia/Jakarta",
   "cadence": "HOURLY",
   "mode": "AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY",
-  "status": "RELEASE_PENDING",
+  "status": "READY",
   "cursor": {
-    "machineId": "BMJ-MCH-0009",
+    "machineId": "BMJ-MCH-0010",
     "partIndex": 0
   },
   "baselineCommit": "b5e45a82ce1aeaf9094b0a5c3fd8d985b8a9e96f",
@@ -705,7 +705,7 @@
       "name": "OFFSET - 10 MACHINE",
       "model": "CX104-2+LY-8+LY-1+L UV + FoilStar",
       "area": "OFFSET PRINTING",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "parts": [
         {
           "part": "Preset Plus feeder and input",
@@ -815,7 +815,18 @@
       ],
       "reports": [
         "docs/offset10-cx104-whole-machine-audit.md"
-      ]
+      ],
+      "releaseEvidence": {
+        "commit": "b69f67cb18dadbc675730a61d8a0dad320938ce8",
+        "workflows": [
+          38283542466,
+          38283542479,
+          38283542695
+        ],
+        "conclusion": "success",
+        "tests": 1569,
+        "productionHttp": 200
+      }
     },
     {
       "machineId": "BMJ-MCH-0010",
