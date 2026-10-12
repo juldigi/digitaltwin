@@ -10,11 +10,11 @@ const smooth=(v,a,b)=>THREE.MathUtils.smoothstep(v,a,b);
 const lerp=(a,b,t)=>THREE.MathUtils.lerp(a,b,Math.max(0,Math.min(1,t)));
 
 function transportProgress(p){
- if(p<.18)return lerp(0,.18,p/.18);
- if(p<.30)return lerp(.18,.42,(p-.18)/.12);
- if(p<.70)return .42;
- if(p<.90)return lerp(.42,.86,(p-.70)/.20);
- return lerp(.86,1,(p-.90)/.10);
+ if(p<.18)return lerp(0,.20,p/.18);
+ if(p<.30)return lerp(.20,.55,(p-.18)/.12);
+ if(p<.70)return .55;
+ if(p<.90)return lerp(.55,.90,(p-.70)/.20);
+ return lerp(.90,1,(p-.90)/.10);
 }
 function transportIsIndexing(p){return p<.30||(p>=.70&&p<.90)||p>=.90;}
 function gripperLoopPosition(t){
@@ -80,15 +80,16 @@ export class MK920StampingSimulation{
    if(move)this.spin(r,dt,rate);
   }
  }
- updateFeeder(p){const active=p<.18,local=Math.min(1,p/.18);this.feederSuctionActive=active;if(this.feederHead&&this.headRest){this.feederHead.position.copy(this.headRest);if(active){this.feederHead.position.y-=.04*Math.sin(Math.PI*local);this.feederHead.position.x+=.03*Math.sin(Math.PI*local);}}this.suckers.forEach((s,i)=>{s.position.copy(this.suckerRest[i]);if(active)s.position.y-=.016*Math.sin(Math.PI*local);});}
+ updateFeeder(p){const active=p<.18,local=Math.min(1,p/.18);this.feederSuctionActive=active;if(this.feederHead&&this.headRest){this.feederHead.position.copy(this.headRest);if(active){this.feederHead.position.y-=.30*Math.sin(Math.PI*local);this.feederHead.position.x+=.03*Math.sin(Math.PI*local);}}this.suckers.forEach((s,i)=>{s.position.copy(this.suckerRest[i]);if(active)s.position.y-=.035*Math.sin(Math.PI*local);});}
  updateGrippers(globalTransport){for(const bar of this.gripperBars){const q=gripperLoopPosition(globalTransport/this.gripperBars.length+(bar.userData.barPhase||0));bar.position.set(q.x,q.y,0);}}
  outputSheet(){this.completed++;const index=(this.completed-1)%this.stack.length;if(index===0&&this.completed>1)for(const sheet of this.stack)sheet.visible=false;const p=this.stack[index];p.visible=true;p.position.set(2.99,.466+index*.007,0);p.material.color.setHex(0xe9d9a8);}
- updateSheets(cycleIndex,transport){
+ updateSheets(cycleIndex,transport,platenAmount){
   const global=cycleIndex+transport;
   for(const s of this.sheets){const raw=global-s.phase;if(raw<0){s.mesh.visible=false;continue;}const lap=Math.floor(raw),t=Math.min(.999,raw-lap);
    if(lap>s.lap){if(s.lap>=0)this.outputSheet();s.lap=lap;}
    s.mesh.visible=true;s.mesh.position.copy(this.curve.getPointAt(t));s.mesh.rotation.set(-Math.PI/2,0,0);
-   if(this.stampingContact&&t>=.40&&t<=.44)s.stampedLap=lap;
+   if(t>=.53&&t<=.57)s.mesh.position.y=lerp(s.mesh.position.y,1.58,platenAmount);
+   if(this.stampingContact&&t>=.53&&t<=.57)s.stampedLap=lap;
    s.foil.visible=s.stampedLap===lap;s.mesh.material.color.setHex(s.foil.visible?0xead9a8:0xf1ead7);
   }
  }
@@ -98,9 +99,9 @@ export class MK920StampingSimulation{
   const cycle=10,cycleIndex=Math.floor(this.elapsed/cycle),p=(this.elapsed%cycle)/cycle;
   const close=smooth(p,.30,.39),open=smooth(p,.61,.70),platenAmount=Math.max(0,close-open),dwell=p>=.39&&p<=.61;
   const indexing=transportIsIndexing(p),transport=transportProgress(p),foilAdvance=p>.72&&p<.88,platenMotion=(p>.30&&p<.39)||(p>.61&&p<.70);
-  if(this.lower&&this.lowerRest)this.lower.position.y=this.lowerRest.y+platenAmount*.25;
+  if(this.lower&&this.lowerRest)this.lower.position.y=this.lowerRest.y+platenAmount*.18;
   this.transportIndexing=indexing;this.transportStopped=!indexing;this.platenClosing=p>.30&&p<.39;this.platenClosed=platenAmount>.92;this.pressureDwell=dwell;this.platenOpening=p>.61&&p<.70;this.heaterReady=true;this.stampingContact=dwell&&this.platenClosed;this.foilAdvancing=foilAdvance;this.wasteRewinding=foilAdvance;this.gripperReleaseActive=p>.88;
-  this.updateHeaters();this.updateRotors(dt,p,indexing,platenMotion,foilAdvance);this.updateFeeder(p);this.updateGrippers(transport);this.updateSheets(cycleIndex,transport);this.onUpdate?.(this.state());
+  this.updateHeaters();this.updateRotors(dt,p,indexing,platenMotion,foilAdvance);this.updateFeeder(p);this.updateGrippers(transport);this.updateSheets(cycleIndex,transport,platenAmount);this.onUpdate?.(this.state());
  }
  stop(){this.active=false;this.running=false;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;this.heaterReady=false;this.resetMechanisms();for(const s of this.sheets){s.mesh.visible=false;s.foil.visible=false;s.lap=-1;s.stampedLap=-1;}for(const p of this.stack)p.visible=false;this.pathLine.visible=false;if(this.staticDeliveryStack)this.staticDeliveryStack.visible=this.staticDeliveryVisible;this.onUpdate?.(this.state());return this.state();}
  dispose(){this.stop();for(const s of this.sheets){this.root.remove(s.mesh);s.mesh.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});}for(const p of this.stack){this.root.remove(p);p.geometry.dispose();p.material.dispose();}this.root.remove(this.pathLine);this.pathLine.geometry.dispose();this.pathLine.material.dispose();}

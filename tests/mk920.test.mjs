@@ -96,3 +96,30 @@ test('MK920 taxonomy remains a valid six-level tree for APM5 and APM6',()=>{
 test('MK920 stage list explicitly separates platen pressure from foil advance',()=>{
  assert.deepEqual(MK920_SIMULATION_STAGES,['Pile separation','Feed-table registration','Intermittent gripper index to platen','Platen close','Pressure / hot-foil dwell','Platen open','Foil advance + waste rewind','Gripper index to delivery','Gripper release','Delivery pile']);
 });
+
+test('MK920 suction cups contact the represented pile and reset without penetration',()=>{
+ const model=new MK920MachineTemplate(),sim=new MK920StampingSimulation(model.root,model),pile=model.findNode('mk920-feeder-pile');
+ const cupBottom=()=>Math.min(...sim.suckers.map(c=>new THREE.Box3().setFromObject(c).min.y)),pileTop=()=>new THREE.Box3().setFromObject(pile).max.y;
+ sim.start();let now=1000;while(sim.elapsed<.90){now+=20;sim.update(now);}model.root.updateMatrixWorld(true);
+ assert.ok(Math.abs(cupBottom()-pileTop())<.008,'vertical suction cups meet the top sheet');
+ assert.ok(cupBottom()>=pileTop()-.008,'suction cups do not pass through the pile');
+ sim.stop();model.root.updateMatrixWorld(true);assert.ok(cupBottom()>pileTop()+.30,'stop restores pickup clearance');sim.dispose();model.dispose();
+});
+
+test('MK920 platen dwell carries the registered sheet to the chase without overtravel',()=>{
+ const model=new MK920MachineTemplate(),sim=new MK920StampingSimulation(model.root,model),lower=model.findNode('mk920-platen-lower'),chase=model.findNode('mk920-platen-chase');
+ sim.start();let now=1000;while(sim.elapsed<4.5){now+=20;sim.update(now);}model.root.updateMatrixWorld(true);
+ const lowerTop=new THREE.Box3().setFromObject(lower).max.y,chaseBottom=new THREE.Box3().setFromObject(chase).min.y,active=sim.sheets.find(s=>s.foil.visible);
+ assert.ok(active,'one registered blank receives the foil imprint');assert.ok(Math.abs(active.mesh.position.x-.05)<.12,'stamping occurs inside the platen station');
+ assert.ok(Math.abs(lowerTop-chaseBottom)<.002);assert.ok(Math.abs(active.mesh.position.y-chaseBottom)<.002,'sheet is carried to the tool contact plane');
+ sim.dispose();model.dispose();
+});
+
+test('MK920 inspection scopes material state and preserves the selected subtree',()=>{
+ const model=new MK920MachineTemplate(),feeder=model.findNode('mk920-feeder'),head=model.findNode('mk920-feeder-head'),delivery=model.findNode('mk920-delivery');
+ const feederMesh=feeder.children.find(o=>o.isMesh),deliveryMesh=delivery.children.find(o=>o.isMesh);assert.notEqual(feederMesh.material,deliveryMesh.material);
+ model.highlight(feeder);assert.notEqual(feederMesh.material.emissive.getHex(),0);assert.equal(deliveryMesh.material.emissive.getHex(),0);
+ model.ghost(true,feeder);assert.equal(feederMesh.material.opacity,1);assert.equal(deliveryMesh.material.opacity,.14);model.ghost(false);
+ model.showOnly([feeder],true);assert.equal(feeder.visible,true);assert.equal(head.visible,true);assert.equal(delivery.visible,false);
+ model.showOnly([],false);assert.equal(model.nodes.every(n=>n.visible),true);model.dispose();
+});

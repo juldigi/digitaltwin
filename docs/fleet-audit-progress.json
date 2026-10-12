@@ -5,7 +5,7 @@
   "timezone": "Asia/Jakarta",
   "cadence": "HOURLY",
   "mode": "AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY",
-  "status": "READY",
+  "status": "RELEASE_PENDING",
   "cursor": {
     "machineId": "BMJ-MCH-0011",
     "partIndex": 0
@@ -984,9 +984,52 @@
       "name": "AUTOPLATEN - 5 STAMPING",
       "model": "MK 920 YMI",
       "area": "OFFSET CONVERTING",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {
+          "part": "pile feeder, lift and suction pickup",
+          "status": "COMPLETE",
+          "report": "docs/apm5-mk920-whole-machine-audit.md"
+        },
+        {
+          "part": "registration table and lays",
+          "status": "NO_CHANGE_REQUIRED",
+          "report": "docs/apm5-mk920-whole-machine-audit.md"
+        },
+        {
+          "part": "intermittent gripper transport",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/apm5-mk920-whole-machine-audit.md"
+        },
+        {
+          "part": "heated platen and chase contact",
+          "status": "COMPLETE",
+          "report": "docs/apm5-mk920-whole-machine-audit.md"
+        },
+        {
+          "part": "hot-foil unwind, pull and waste rewind",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/apm5-mk920-whole-machine-audit.md"
+        },
+        {
+          "part": "gripper release and delivery pile",
+          "status": "NO_CHANGE_REQUIRED",
+          "report": "docs/apm5-mk920-whole-machine-audit.md"
+        },
+        {
+          "part": "drive, controls, guarding and access",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/apm5-mk920-whole-machine-audit.md"
+        },
+        {
+          "part": "simulation lifecycle, display modes and taxonomy",
+          "status": "COMPLETE",
+          "report": "docs/apm5-mk920-whole-machine-audit.md"
+        }
+      ],
+      "reports": [
+        "docs/apm5-mk920-whole-machine-audit.md"
+      ]
     },
     {
       "machineId": "BMJ-MCH-0012",
@@ -1424,7 +1467,15 @@
         "tests": 1572,
         "productionHttp": 200
       }
+    },
+    {
+      "machineId": "BMJ-MCH-0011",
+      "part": "whole machine: pile feeder through hot-foil stamping and delivery",
+      "status": "RELEASE_PENDING",
+      "report": "docs/apm5-mk920-whole-machine-audit.md",
+      "nextMachineId": "BMJ-MCH-0012",
+      "parentCommit": "f371e9fd8fe9ac7f3744200d17a22262bba20c59"
     }
   ],
-  "updatedAt": "2026-10-12T18:20:35Z"
+  "updatedAt": "2026-10-12T20:03:58Z"
 }
