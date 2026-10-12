@@ -7,8 +7,8 @@
   "mode": "AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY",
   "status": "RELEASE_PENDING",
   "cursor": {
-    "machineId": "BMJ-MCH-0001",
-    "partIndex": 8
+    "machineId": "BMJ-MCH-0002",
+    "partIndex": 7
   },
   "baselineCommit": "b5e45a82ce1aeaf9094b0a5c3fd8d985b8a9e96f",
   "machines": [
@@ -17,7 +17,7 @@
       "name": "GUILOTINE POLAR 115 MACHINE (GLM-1)",
       "model": "115 EM MON",
       "area": "OFFSET PRINTING",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "parts": [
         {
           "part": "input tables and air-port grid",
@@ -87,13 +87,25 @@
         },
         {
           "part": "housing and control",
-          "status": "RELEASE_PENDING",
-          "report": "docs/polar115-housing-control-audit.md"
+          "status": "COMPLETE",
+          "report": "docs/polar115-housing-control-audit.md",
+          "releaseEvidence": {
+            "commit": "3c2b2d178dfa889207d4491cc565679261de60d2",
+            "workflow": 38194802399,
+            "conclusion": "success",
+            "tests": 1557
+          }
         },
         {
           "part": "hydraulic and air utility",
-          "status": "RELEASE_PENDING",
-          "report": "docs/polar115-utility-audit.md"
+          "status": "COMPLETE",
+          "report": "docs/polar115-utility-audit.md",
+          "releaseEvidence": {
+            "commit": "3c2b2d178dfa889207d4491cc565679261de60d2",
+            "workflow": 38194802399,
+            "conclusion": "success",
+            "tests": 1557
+          }
         }
       ],
       "reports": [
@@ -112,9 +124,17 @@
       "name": "SHEETING LEXUS",
       "model": "HSM-CTM7",
       "area": "OFFSET PRINTING",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {"part": "hydraulic unwind and reel input", "status": "RELEASE_PENDING", "report": "docs/sheeting-lexus-whole-machine-audit.md"},
+        {"part": "web carrier, guide and tension path", "status": "RELEASE_PENDING", "report": "docs/sheeting-lexus-whole-machine-audit.md"},
+        {"part": "draw roll and guarded cross-cut zone", "status": "RELEASE_PENDING", "report": "docs/sheeting-lexus-whole-machine-audit.md"},
+        {"part": "high-speed take-away transfer", "status": "RELEASE_PENDING", "report": "docs/sheeting-lexus-whole-machine-audit.md"},
+        {"part": "slow-speed overlap and shingling", "status": "RELEASE_PENDING", "report": "docs/sheeting-lexus-whole-machine-audit.md"},
+        {"part": "stack and lay table output", "status": "RELEASE_PENDING", "report": "docs/sheeting-lexus-whole-machine-audit.md"},
+        {"part": "operator controls, housing and access", "status": "RELEASE_PENDING", "report": "docs/sheeting-lexus-whole-machine-audit.md"}
+      ],
+      "reports": ["docs/sheeting-lexus-whole-machine-audit.md"]
     },
     {
       "machineId": "BMJ-MCH-0003",
@@ -633,19 +653,29 @@
     {
       "machineId": "BMJ-MCH-0001",
       "part": "housing and control",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "report": "docs/polar115-housing-control-audit.md",
       "nextPartIndex": 7,
-      "parentCommit": "6fe9f6c15688a3a4175c7bc08bf6029566c47016"
+      "parentCommit": "6fe9f6c15688a3a4175c7bc08bf6029566c47016",
+      "releaseEvidence": {"commit": "3c2b2d178dfa889207d4491cc565679261de60d2", "workflow": 38194802399, "conclusion": "success", "tests": 1557}
     },
     {
       "machineId": "BMJ-MCH-0001",
       "part": "hydraulic and air utility",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "report": "docs/polar115-utility-audit.md",
       "nextPartIndex": 8,
-      "parentCommit": "6fe9f6c15688a3a4175c7bc08bf6029566c47016"
+      "parentCommit": "6fe9f6c15688a3a4175c7bc08bf6029566c47016",
+      "releaseEvidence": {"commit": "3c2b2d178dfa889207d4491cc565679261de60d2", "workflow": 38194802399, "conclusion": "success", "tests": 1557}
+    },
+    {
+      "machineId": "BMJ-MCH-0002",
+      "part": "whole machine: unwind through stack output",
+      "status": "RELEASE_PENDING",
+      "report": "docs/sheeting-lexus-whole-machine-audit.md",
+      "nextMachineId": "BMJ-MCH-0004",
+      "parentCommit": "3c2b2d178dfa889207d4491cc565679261de60d2"
     }
   ],
-  "updatedAt": "2026-10-12T02:00:00Z"
+  "updatedAt": "2026-10-12T03:00:00Z"
 }

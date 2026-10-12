@@ -389,8 +389,8 @@ export class SheetingMachineTemplate{
     const control=this.group(this.root,'sheeting-control','BMJ Delivery Operator Console',[0,0,0],[.18,.24,-.26],'VERIFIED_VISUAL');
     // Console stands on the diamond-plate catwalk (top surface ~y=.525) and is pulled
     // toward the machine/front edge, preserving the walking lane beside the outer handrail.
-    this.box(control,[1.92,.58,.54],[-.72,.815,-1.61],'light',.020,{cover:true,role:'operator-console-base',sourceAnchor:photo});
-    this.box(control,[1.82,.075,.48],[-.72,1.135,-1.70],'steel',.006,{cover:true,role:'operator-console-face',sourceAnchor:photo},[-.40,0,0]);
+    this.box(control,[1.92,.58,.54],[-.72,.815,-1.61],'light',.020,{role:'operator-console-base',sourceAnchor:photo});
+    this.box(control,[1.82,.075,.48],[-.72,1.135,-1.70],'steel',.006,{role:'operator-console-face',sourceAnchor:photo},[-.40,0,0]);
     this.box(control,[1.95,.055,.28],[-.72,.755,-1.87],'steel',.004,{detail:true,role:'operator-console-stainless-lip',sourceAnchor:photo});
     this.box(control,[.36,.038,.24],[-.45,1.175,-1.94],'dark',.003,{detail:true,role:'operator-hmi-display',sourceAnchor:photo},[-.40,0,0]);
     const controlKinds=['green','black','black','red','black','green','black','black','green','black','red','black','black','green','black','black','red','black'];
@@ -1423,16 +1423,16 @@ export class SheetingMachineTemplate{
 
     // Main sheeter head: visible panel rhythm and access hardware around the real operator aperture.
     for(const x of [1.62,2.65,3.68]){
-      const seam=this.box(g,[.012,1.12,.020],[x,1.33,-1.695],'bodyDark',.001,{detail:true,role:'main-head-service-panel-seam',sourceAnchor:photo});
+      const seam=this.box(g,[.012,1.12,.020],[x,1.33,-1.695],'bodyDark',.001,{cover:true,detail:true,role:'main-head-service-panel-seam',sourceAnchor:photo});
       seam.userData.silhouetteCritical=false;
     }
     for(const [x,y] of [[1.86,.86],[3.42,.86],[1.86,1.86],[3.42,1.86]]){
-      const handle=this.box(g,[.028,.22,.025],[x,y,-1.725],'dark',.004,{detail:true,role:'main-head-service-door-handle',sourceAnchor:photo});
+      const handle=this.box(g,[.028,.22,.025],[x,y,-1.725],'dark',.004,{cover:true,detail:true,role:'main-head-service-door-handle',sourceAnchor:photo});
       handle.userData.serviceDetail=true;
     }
     for(const x of [1.52,3.78]){
-      const hingeTop=this.cyl(g,.014,.10,[x,1.76,-1.720],'steel','y',{detail:true,role:'main-head-service-door-hinge',sourceAnchor:photo});
-      const hingeLow=this.cyl(g,.014,.10,[x,.88,-1.720],'steel','y',{detail:true,role:'main-head-service-door-hinge',sourceAnchor:photo});
+      const hingeTop=this.cyl(g,.014,.10,[x,1.76,-1.720],'steel','y',{cover:true,detail:true,role:'main-head-service-door-hinge',sourceAnchor:photo});
+      const hingeLow=this.cyl(g,.014,.10,[x,.88,-1.720],'steel','y',{cover:true,detail:true,role:'main-head-service-door-hinge',sourceAnchor:photo});
       hingeTop.userData.serviceDetail=hingeLow.userData.serviceDetail=true;
     }
 
@@ -1457,9 +1457,14 @@ export class SheetingMachineTemplate{
     // Delivery console: photo-visible bezel and emergency-stop collar.
     const control=this.findNode('sheeting-control');
     if(control){
-      const bezel=this.box(control,[.42,.30,.025],[-.45,1.175,-1.960],'black',.018,{detail:true,role:'operator-hmi-bezel-v237',sourceAnchor:photo});
-      bezel.userData.silhouetteCritical=true;
-      const collar=this.cyl(control,.055,.018,[-1.44,1.195,-1.970],'warning','z',{detail:true,role:'operator-estop-collar-v237',sourceAnchor:photo});
+      const hmiFrame=[
+        this.box(control,[.030,.30,.025],[-.645,1.175,-1.960],'black',.004,{detail:true,role:'operator-hmi-bezel-v237',sourceAnchor:photo},[-.40,0,0]),
+        this.box(control,[.030,.30,.025],[-.255,1.175,-1.960],'black',.004,{detail:true,role:'operator-hmi-bezel-v237',sourceAnchor:photo},[-.40,0,0]),
+        this.box(control,[.36,.030,.025],[-.45,1.040,-1.960],'black',.004,{detail:true,role:'operator-hmi-bezel-v237',sourceAnchor:photo},[-.40,0,0]),
+        this.box(control,[.36,.030,.025],[-.45,1.310,-1.960],'black',.004,{detail:true,role:'operator-hmi-bezel-v237',sourceAnchor:photo},[-.40,0,0])
+      ];
+      for(const piece of hmiFrame)piece.userData.silhouetteCritical=true;
+      const collar=this.torus(control,.055,.012,[-.90,1.195,-1.970],'warning',{detail:true,role:'operator-estop-collar-v237',sourceAnchor:photo});
       collar.userData.silhouetteCritical=true;
     }
 
@@ -1493,7 +1498,7 @@ export class SheetingMachineTemplate{
       'delivery-crossbar-support','stack-side-rail','stack-end-crossbeam','lift-table','pallet',
       'reference-paper-block','stacker-column','stacker-front-header','stacker-side-cabinet','stacker-base-rail',
       'stack-white-guide-panel','stack-green-guide-head','stack-guide-handwheel','diamond-plate-catwalk',
-      'access-landing','control-console-base'
+      'access-landing','control-console-base','operator-hmi-display','operator-hmi-bezel-v237','operator-estop-collar-v237'
     ]);
     let kept=0;
     for(const m of this.meshes){

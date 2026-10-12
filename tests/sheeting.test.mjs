@@ -108,6 +108,32 @@ test('V197 deepens photo-visible cutter, delivery and stack structures without a
   m.dispose();
 });
 
+test('SHEETING control face remains mounted and its open frames do not occlude HMI or emergency stop',()=>{
+  const m=new SheetingMachineTemplate();m.root.updateMatrixWorld(true);
+  const base=roleMeshes(m,'operator-console-base')[0],face=roleMeshes(m,'operator-console-face')[0];
+  const hmi=roleMeshes(m,'operator-hmi-display')[0],bezel=roleMeshes(m,'operator-hmi-bezel-v237');
+  const collar=roleMeshes(m,'operator-estop-collar-v237')[0];
+  const estop=roleMeshes(m,'operator-button-selector').find(button=>button.position.distanceTo(new THREE.Vector3(-.90,1.195,-1.945))<.001);
+  assert.ok(base&&face&&hmi&&estop&&collar);assert.equal(bezel.length,4);
+  assert.equal(base.userData.exteriorCover,false);assert.equal(face.userData.exteriorCover,false);
+  const hmiCenter=hmi.getWorldPosition(new THREE.Vector3());
+  assert.ok(bezel.every(piece=>!boxOf(piece).containsPoint(hmiCenter)),'solid bezel covers the HMI center');
+  assert.equal(collar.geometry.type,'TorusGeometry','emergency-stop collar must be a ring, not an occluding disc');
+  assert.ok(Math.abs(collar.position.x-estop.position.x)<.001&&Math.abs(collar.position.y-estop.position.y)<.001,'emergency-stop collar is not concentric with the red control');
+  m.setExteriorOpen(true);
+  for(const mesh of [base,face,hmi,estop,collar,...bezel])assert.equal(mesh.visible,true,mesh.userData.role);
+  m.setLow(true);assert.equal(base.visible,true);assert.equal(hmi.visible,true);
+  m.dispose();
+});
+
+test('SHEETING cutter cover service hardware leaves with its panel in interior mode',()=>{
+  const m=new SheetingMachineTemplate();
+  const attached=['main-head-service-panel-seam','main-head-service-door-handle','main-head-service-door-hinge'].flatMap(role=>roleMeshes(m,role));
+  assert.ok(attached.length>=9);assert.ok(attached.every(mesh=>mesh.userData.exteriorCover));
+  m.setExteriorOpen(true);assert.ok(attached.every(mesh=>!mesh.visible),'cover fittings float after cutter covers open');
+  m.setExteriorOpen(false);assert.ok(attached.every(mesh=>mesh.visible));m.dispose();
+});
+
 test('V197 taxonomy remains six levels without invented blade-part nodes',()=>{
   assert.deepEqual([...new Set(SHEETING_TAXONOMY.map(n=>n.level))].sort(),[1,2,3,4,5,6]);
   assert.equal(new Set(SHEETING_TAXONOMY.map(n=>n.id)).size,SHEETING_TAXONOMY.length);
