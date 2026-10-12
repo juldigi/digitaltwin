@@ -1,6 +1,6 @@
 # BMJ-MCH-0007 · PILE TURNER 01 · FZ 1200 whole-machine audit
 
-Status: `RELEASE_PENDING`  
+Status: `COMPLETE`  
 Audit mode: `AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY`  
 Asset identity: BMJ registry `PILE TURNER 01`, model `FZ 1200`, serial `24RVOFS0920`, year 2020, SAP `PLT-1`.
 
@@ -33,7 +33,10 @@ The second pass measured world-space AABBs at rest, clamp contact, lift clearanc
 
 - Focused FZ1200 suite: 11/11 passed.
 - Runtime, simulation reset, cutaway, and visual parity regressions: 179/179 passed.
-- Full-suite and production workflow evidence will be added after release gates complete.
+- Full release suite: 1,565/1,565 passed; build completed for all 41 assets.
+- Release commit: `9c0718374c5704239abb9913fbfb451ca1404ddf`.
+- Workflows: CI `38240782281`, frontend verification `38240782217`, Cloudflare `38240782415`; all completed successfully.
+- Production: `https://digitaltwin.juldigi.workers.dev/` returned HTTP 200 after deployment.
 
 ## Remaining blockers
 

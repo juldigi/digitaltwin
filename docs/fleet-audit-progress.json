@@ -5,9 +5,9 @@
   "timezone": "Asia/Jakarta",
   "cadence": "HOURLY",
   "mode": "AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY",
-  "status": "RELEASE_PENDING",
+  "status": "READY",
   "cursor": {
-    "machineId": "BMJ-MCH-0007",
+    "machineId": "BMJ-MCH-0008",
     "partIndex": 0
   },
   "baselineCommit": "b5e45a82ce1aeaf9094b0a5c3fd8d985b8a9e96f",
@@ -299,7 +299,7 @@
       "name": "PILE TURNER 01",
       "model": "FZ 1200",
       "area": "OFFSET PRINTING",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "parts": [
         {"part":"load platform and lower support","status":"COMPLETE","report":"docs/pile-turner01-fz1200-whole-machine-audit.md"},
         {"part":"pile clamp and pressure contact","status":"COMPLETE","report":"docs/pile-turner01-fz1200-whole-machine-audit.md"},
@@ -311,7 +311,14 @@
         {"part":"hydraulic and air utility","status":"BLOCKED_EVIDENCE","report":"docs/pile-turner01-fz1200-whole-machine-audit.md"},
         {"part":"controls, guards, display modes and taxonomy","status":"BLOCKED_EVIDENCE","report":"docs/pile-turner01-fz1200-whole-machine-audit.md"}
       ],
-      "reports": ["docs/pile-turner01-fz1200-whole-machine-audit.md"]
+      "reports": ["docs/pile-turner01-fz1200-whole-machine-audit.md"],
+      "releaseEvidence": {
+        "commit": "9c0718374c5704239abb9913fbfb451ca1404ddf",
+        "workflows": [38240782281, 38240782217, 38240782415],
+        "conclusion": "success",
+        "tests": 1565,
+        "productionHttp": 200
+      }
     },
     {
       "machineId": "BMJ-MCH-0008",
