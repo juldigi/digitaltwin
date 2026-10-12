@@ -4,11 +4,11 @@
   "productionUrl": "https://digitaltwin.juldigi.workers.dev/",
   "timezone": "Asia/Jakarta",
   "cadence": "HOURLY",
-  "mode": "AUDIT_ONE_PART_THEN_FIX_VERIFY_DEPLOY",
+  "mode": "AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY",
   "status": "RELEASE_PENDING",
   "cursor": {
     "machineId": "BMJ-MCH-0001",
-    "partIndex": 5
+    "partIndex": 8
   },
   "baselineCommit": "b5e45a82ce1aeaf9094b0a5c3fd8d985b8a9e96f",
   "machines": [
@@ -17,7 +17,7 @@
       "name": "GUILOTINE POLAR 115 MACHINE (GLM-1)",
       "model": "115 EM MON",
       "area": "OFFSET PRINTING",
-      "status": "IN_PROGRESS",
+      "status": "RELEASE_PENDING",
       "parts": [
         {
           "part": "input tables and air-port grid",
@@ -76,16 +76,24 @@
         },
         {
           "part": "stock removal and output",
-          "status": "RELEASE_PENDING",
-          "report": "docs/polar115-output-audit.md"
+          "status": "COMPLETE",
+          "report": "docs/polar115-output-audit.md",
+          "releaseEvidence": {
+            "commit": "6fe9f6c15688a3a4175c7bc08bf6029566c47016",
+            "workflow": 38191333625,
+            "conclusion": "success",
+            "tests": 1555
+          }
         },
         {
           "part": "housing and control",
-          "status": "PENDING"
+          "status": "RELEASE_PENDING",
+          "report": "docs/polar115-housing-control-audit.md"
         },
         {
           "part": "hydraulic and air utility",
-          "status": "PENDING"
+          "status": "RELEASE_PENDING",
+          "report": "docs/polar115-utility-audit.md"
         }
       ],
       "reports": [
@@ -94,7 +102,9 @@
         "docs/polar115-safety-interlock-audit.md",
         "docs/polar115-clamp-contact-audit.md",
         "docs/polar115-knife-stick-audit.md",
-        "docs/polar115-output-audit.md"
+        "docs/polar115-output-audit.md",
+        "docs/polar115-housing-control-audit.md",
+        "docs/polar115-utility-audit.md"
       ]
     },
     {
@@ -609,11 +619,33 @@
     {
       "machineId": "BMJ-MCH-0001",
       "part": "stock removal and output",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "report": "docs/polar115-output-audit.md",
       "nextPartIndex": 6,
-      "parentCommit": "d29cff7090793489a9c9ab940e93a3355ac12cf5"
+      "parentCommit": "d29cff7090793489a9c9ab940e93a3355ac12cf5",
+      "releaseEvidence": {
+        "commit": "6fe9f6c15688a3a4175c7bc08bf6029566c47016",
+        "workflow": 38191333625,
+        "conclusion": "success",
+        "tests": 1555
+      }
+    },
+    {
+      "machineId": "BMJ-MCH-0001",
+      "part": "housing and control",
+      "status": "RELEASE_PENDING",
+      "report": "docs/polar115-housing-control-audit.md",
+      "nextPartIndex": 7,
+      "parentCommit": "6fe9f6c15688a3a4175c7bc08bf6029566c47016"
+    },
+    {
+      "machineId": "BMJ-MCH-0001",
+      "part": "hydraulic and air utility",
+      "status": "RELEASE_PENDING",
+      "report": "docs/polar115-utility-audit.md",
+      "nextPartIndex": 8,
+      "parentCommit": "6fe9f6c15688a3a4175c7bc08bf6029566c47016"
     }
   ],
-  "updatedAt": "2026-10-12T01:00:00Z"
+  "updatedAt": "2026-10-12T02:00:00Z"
 }

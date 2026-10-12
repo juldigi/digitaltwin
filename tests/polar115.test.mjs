@@ -87,7 +87,7 @@ test('POLAR geometry uses a vertical knife blade and keeps safety hardware expli
  const blade=m.meshes.find(x=>x.userData.knifeBlade);assert.ok(blade);blade.geometry.computeBoundingBox();const size=blade.geometry.boundingBox.getSize(new THREE.Vector3());assert.ok(size.y>size.z*3,'knife should be a vertical thin blade, not a horizontal plate');
  assert.equal(m.findNode('polar-safety-twohand').userData.simultaneityControlReference,true);assert.equal(m.findNode('polar-safety-twohand').userData.antiRepeatReference,true);
  const box=new THREE.Box3().setFromObject(m.root),envelope=box.getSize(new THREE.Vector3());assert.ok(box.min.y>=-0.01);assert.ok(envelope.x>=2.55&&envelope.x<=2.9);assert.ok(envelope.z>=1.7&&envelope.z<=2.8);assert.ok(envelope.y>=1.55&&envelope.y<=1.85);
- m.setExteriorOpen(true);assert.ok(m.root.userData.exteriorHiddenCount>=6);m.dispose();
+ m.setExteriorOpen(true);assert.equal(m.root.userData.exteriorHiddenCount,1,'only the explicitly tagged cutter-head service cover opens');m.dispose();
 });
 
 test('front console faces the operator while the blade remains inside the cutter throat',()=>{
@@ -98,6 +98,33 @@ test('front console faces the operator while the blade remains inside the cutter
  assert.ok(controlZ<knifeZ-.1,'display must be operator-side of the knife, not behind it');
  assert.ok(display.getWorldPosition(new THREE.Vector3()).y>blade.getWorldPosition(new THREE.Vector3()).y,'display sits above the cutting aperture');
  assert.equal(m.findNode('polar-housing').children.filter(x=>x.isMesh&&x.userData.evidence==='IMG_2490_2491_OPEN_REAR_JAMB').length,0,'rear shell has no freestanding end pillars');
+ m.dispose();
+});
+
+test('POLAR legacy controls remain mounted and unobstructed in normal, interior and low-detail modes',()=>{
+ const m=new Polar115MachineTemplate(),control=m.findNode('polar-control');m.root.updateMatrixWorld(true);
+ const screen=m.findNode('polar-control-crt').children.find(x=>x.name==='Program Display');
+ const keys=m.findNode('polar-control-keypad').children.filter(x=>x.isMesh);
+ const bezel=m.meshes.filter(x=>x.userData.mechanismRole==='polar-em-monitor-display-bezel');
+ const surround=m.meshes.filter(x=>x.userData.mechanismRole==='polar-em-monitor-keypad-surround');
+ assert.equal(bezel.length,4);assert.equal(surround.length,4);
+ const screenCenter=screen.getWorldPosition(new THREE.Vector3());
+ assert.ok(bezel.every(x=>!new THREE.Box3().setFromObject(x).containsPoint(screenCenter)),'display bezel must be an open frame, not an occluding plate');
+ const keyCenters=keys.map(x=>x.getWorldPosition(new THREE.Vector3()));
+ assert.ok(surround.every(frame=>keyCenters.every(p=>!new THREE.Box3().setFromObject(frame).containsPoint(p))),'keypad surround must not cover a key center');
+ m.setExteriorOpen(true);assert.equal(screen.visible,true);assert.ok(keys.every(x=>x.visible),'interior mode must not detach the operator controls');
+ m.setLow(true);assert.equal(control.visible,true);assert.equal(screen.visible,true,'critical legacy display remains identifiable at low detail');
+ m.dispose();
+});
+
+test('POLAR family-reference hydraulic and air utility stays inside the base cabinet envelope',()=>{
+ const m=new Polar115MachineTemplate();m.root.updateMatrixWorld(true);
+ const cabinet=m.findNode('polar-frame').children.find(x=>x.isMesh&&x.userData.evidence==='IMG_2488_FRONT_CABINET_BELOW_TABLE_WITH_OPEN_RECESS');
+ const utility=m.findNode('polar-utility'),cabinetBox=new THREE.Box3().setFromObject(cabinet),utilityBox=new THREE.Box3().setFromObject(utility);
+ assert.ok(utilityBox.min.x>=cabinetBox.min.x-.01&&utilityBox.max.x<=cabinetBox.max.x+.01,'utility reference protrudes through a cabinet side');
+ assert.ok(utilityBox.min.z>=cabinetBox.min.z-.01&&utilityBox.max.z<=cabinetBox.max.z+.01,'utility reference protrudes through the cabinet front or rear');
+ assert.ok(utilityBox.min.y>=cabinetBox.min.y-.01&&utilityBox.max.y<=cabinetBox.max.y+.01,'utility reference protrudes through the cabinet floor or table');
+ for(const id of ['polar-hyd-power','polar-hyd-valve','polar-air-blower','polar-air-duct'])assert.ok(m.resolveTaxonomyNode(`P115.UTILITY.${id==='polar-hyd-power'?'HYD':id==='polar-hyd-valve'?'VALVE':id==='polar-air-blower'?'AIR':'DUCT'}`).visible,id);
  m.dispose();
 });
 

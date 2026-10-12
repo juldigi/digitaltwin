@@ -123,14 +123,14 @@ export class Polar115MachineTemplate{
   // Actual control face: small square display, keypad/controls and taped operating sheets.
   const control=this.group(this.root,'polar-control','EM-MONITOR Control',[0,0,-.28],[0,.24,-.20]);control.userData.evidence=photoEvidence;
   const panel=this.group(control,'polar-control-panel','Program / dimension console');
-  const panelFace=this.cover(this.box(panel,[1.30,.30,.045],[0,1.47,.125],'bodyDark',.035));panelFace.userData.evidence=photoEvidence;
+  const panelFace=this.box(panel,[1.30,.30,.045],[0,1.47,.125],'bodyDark',.035);panelFace.userData.evidence=photoEvidence;
   const crt=this.group(control,'polar-control-crt','Industrial program display');
   const crtBody=this.box(crt,[.26,.22,.038],[.02,1.51,.090],'black',.012);crtBody.userData.evidence=photoEvidence;
   const crtScreen=this.box(crt,[.20,.16,.008],[.02,1.51,.066],'screen',.006,'Program Display');crtScreen.userData.evidence=photoEvidence;
   const keypad=this.group(control,'polar-control-keypad','Numeric / function keypad');
   for(let i=0;i<18;i++){const col=i%6,row=Math.floor(i/6);const key=this.box(keypad,[.030,.026,.010],[-.33+col*.045,1.39-row*.040,.064],i%6===5?'warning':'body',.003);key.userData.detail=true;}
   const keyswitch=this.group(control,'polar-control-keyswitch','Key-operated mode-select sub-panel');
-  const keyPlate=this.cover(this.box(keyswitch,[.21,.28,.045],[.52,1.47,.125],'body',.025));keyPlate.userData.evidence=photoEvidence;
+  const keyPlate=this.box(keyswitch,[.21,.28,.045],[.52,1.47,.125],'body',.025);keyPlate.userData.evidence=photoEvidence;
   this.cyl(keyswitch,.034,.026,[.52,1.51,.064],'black','z');this.cyl(keyswitch,.016,.045,[.46,1.40,.064],'dark','z');
   const papers=this.group(control,'polar-control-papers','Laminated instruction sheets on console');papers.userData.detail=true;papers.userData.evidence=photoEvidence;
   this.box(papers,[.28,.22,.006],[-.45,1.51,.060],'paper',0);this.box(papers,[.24,.20,.006],[.28,1.51,.060],'paper',0);
@@ -138,7 +138,7 @@ export class Polar115MachineTemplate{
   const corr=this.group(control,'polar-control-correction','Correction / pressure controls');for(const [x,k] of [[.45,'body'],[.58,'body'],[.70,'warning']])this.cyl(corr,.032,.020,[x,1.36,.062],k,'z');
   const pressure=this.group(control,'polar-control-pressure','Clamp-pressure control interface');this.cyl(pressure,.055,.030,[.77,1.28,.078],'dark','z');
 
-  const utility=this.group(this.root,'polar-utility','Hydraulic & Air Utility',[-.55,0,.48],[-.32,.18,.30]);
+  const utility=this.group(this.root,'polar-utility','Hydraulic & Air Utility',[-.55,0,.30],[-.32,.18,.30]);
   const hyd=this.group(utility,'polar-hyd-power','Hydraulic power-unit reference');this.active(this.box(hyd,[.48,.38,.38],[-.20,.37,.55],'accent',.035),'hydraulic-power');
   const valve=this.group(utility,'polar-hyd-valve','Valve / manifold reference');this.box(valve,[.30,.18,.24],[.25,.45,.55],'steel',.018);
   const blower=this.group(utility,'polar-air-blower','Air blower');this.active(this.cyl(blower,.14,.30,[.50,.32,.56],'dark','x'),'air-blower');
@@ -264,10 +264,18 @@ export class Polar115MachineTemplate{
   // Physical EM-MON console bezel / keypad surround; keep square display identity.
   const ctrl=this.findNode('polar-control');
   if(ctrl){
-   const bezel=tag(this.box(ctrl,[.31,.27,.014],[.02,1.51,.052],'black',.012),'polar-em-monitor-display-bezel',true);
-   bezel.userData.modernTouchscreen=false;
-   const keypadFrame=tag(this.box(ctrl,[.34,.19,.012],[-.22,1.35,.050],'bodyDark',.010),'polar-em-monitor-keypad-surround',true);
-   keypadFrame.userData.legacyKeypad=true;
+   const frame=(cx,cy,w,h,t,role,material)=>{
+    const pieces=[
+     this.box(ctrl,[t,h,.014],[cx-(w-t)/2,cy,.052],material,.004),this.box(ctrl,[t,h,.014],[cx+(w-t)/2,cy,.052],material,.004),
+     this.box(ctrl,[w-2*t,t,.014],[cx,cy-(h-t)/2,.052],material,.004),this.box(ctrl,[w-2*t,t,.014],[cx,cy+(h-t)/2,.052],material,.004)
+    ];
+    for(const piece of pieces)tag(piece,role,true);
+    return pieces;
+   };
+   const bezel=frame(.02,1.51,.31,.27,.025,'polar-em-monitor-display-bezel','black');
+   for(const piece of bezel)piece.userData.modernTouchscreen=false;
+   const keypadFrame=frame(-.22,1.35,.34,.19,.020,'polar-em-monitor-keypad-surround','bodyDark');
+   for(const piece of keypadFrame)piece.userData.legacyKeypad=true;
    for(const x of [.43,.55,.67,.79])tag(this.cyl(ctrl,.020,.012,[x,1.34,.045],x===.79?'warning':'body','z'),'polar-em-monitor-function-button');
   }
 
@@ -308,7 +316,7 @@ export class Polar115MachineTemplate{
    modernizationBoundary:'KEEP_115_EM_MONITOR_SQUARE_DISPLAY_KEYPAD__DO_NOT_SUBSTITUTE_CURRENT_N115_TOUCHSCREEN'
   };
  }
- isRemovableCover(mesh){return Boolean(mesh.userData.exteriorCover||this.contains(this.findNode('polar-control'),mesh));}
+ isRemovableCover(mesh){return Boolean(mesh.userData.exteriorCover);}
  setExteriorOpen(on=true){this.exteriorOpen=!!on;let hidden=0;for(const m of this.meshes)if(this.isRemovableCover(m)){m.visible=!on;if(on)hidden++;}this.root.userData.interiorCutawayVisible=!!on;this.root.userData.exteriorHiddenCount=on?hidden:0;}
  setLow(on){for(const m of this.meshes)if(m.userData.detail)m.visible=!m.userData.suppressedUnverifiedInstalledLocation&&(!on||Boolean(m.userData.silhouetteCritical))&&(!this.exteriorOpen||!this.isRemovableCover(m));}
  reset(){this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const n of this.nodes)n.quaternion.copy(n.userData.restQuaternion);if(this.exteriorOpen)this.setExteriorOpen(true);}
