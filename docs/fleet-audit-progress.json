@@ -8,7 +8,7 @@
   "status": "RELEASE_PENDING",
   "cursor": {
     "machineId": "BMJ-MCH-0001",
-    "partIndex": 3
+    "partIndex": 4
   },
   "baselineCommit": "b5e45a82ce1aeaf9094b0a5c3fd8d985b8a9e96f",
   "machines": [
@@ -54,12 +54,19 @@
         },
         {
           "part": "clamp and pressure contact",
-          "status": "RELEASE_PENDING",
-          "report": "docs/polar115-clamp-contact-audit.md"
+          "status": "COMPLETE",
+          "report": "docs/polar115-clamp-contact-audit.md",
+          "releaseEvidence": {
+            "commit": "97ecd59159d47e6d42d2822a3437fcb761167682",
+            "workflow": 38182983140,
+            "conclusion": "success",
+            "tests": 1550
+          }
         },
         {
           "part": "knife and cutting stick",
-          "status": "PENDING"
+          "status": "RELEASE_PENDING",
+          "report": "docs/polar115-knife-stick-audit.md"
         },
         {
           "part": "stock removal and output",
@@ -78,7 +85,8 @@
         "docs/polar115-input-table-audit.md",
         "docs/polar115-transport-registration-audit.md",
         "docs/polar115-safety-interlock-audit.md",
-        "docs/polar115-clamp-contact-audit.md"
+        "docs/polar115-clamp-contact-audit.md",
+        "docs/polar115-knife-stick-audit.md"
       ]
     },
     {
@@ -565,11 +573,25 @@
     {
       "machineId": "BMJ-MCH-0001",
       "part": "clamp and pressure contact",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "report": "docs/polar115-clamp-contact-audit.md",
       "nextPartIndex": 4,
-      "parentCommit": "b899b73bffe4b31f41723fcc3082ffc1234bfc12"
+      "parentCommit": "b899b73bffe4b31f41723fcc3082ffc1234bfc12",
+      "releaseEvidence": {
+        "commit": "97ecd59159d47e6d42d2822a3437fcb761167682",
+        "workflow": 38182983140,
+        "conclusion": "success",
+        "tests": 1550
+      }
+    },
+    {
+      "machineId": "BMJ-MCH-0001",
+      "part": "knife and cutting stick",
+      "status": "RELEASE_PENDING",
+      "report": "docs/polar115-knife-stick-audit.md",
+      "nextPartIndex": 5,
+      "parentCommit": "97ecd59159d47e6d42d2822a3437fcb761167682"
     }
   ],
-  "updatedAt": "2026-10-11T23:00:00Z"
+  "updatedAt": "2026-10-12T00:00:00Z"
 }

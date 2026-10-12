@@ -88,9 +88,9 @@ export class Polar115MachineTemplate{
   const contact=this.group(clamp,'polar-clamp-contact','Stock-contact face');this.box(contact,[1.23,.025,.10],[0,1.155,-.16],'dark',.004);
 
   const knife=this.group(this.root,'polar-knife','Knife Cutting System',[0,0,0],[0,.42,0]);
-  const carrier=this.group(knife,'polar-knife-carrier','Knife carrier');this.active(this.box(carrier,[1.34,.18,.13],[0,1.47,.035],'dark',.014,'Knife Carrier'),'knife-carrier');
+  const carrier=this.group(knife,'polar-knife-carrier','Knife carrier');const carrierBody=this.active(this.box(carrier,[1.34,.18,.13],[0,1.49,.035],'dark',.014,'Knife Carrier'),'knife-carrier');carrierBody.userData.contactClearanceDerived=true;
   const bladeGroup=this.group(knife,'polar-knife-blade','1150 mm knife');const blade=this.active(this.box(bladeGroup,[1.18,.13,.025],[0,1.37,-.005],'steel',.003,'1150 mm Knife'),'knife');blade.rotation.z=-.012;blade.userData.knifeBlade=true;blade.userData.geometryReference='VERTICAL_BLADE__EXACT_BEVEL_UNVERIFIED';
-  const stick=this.group(knife,'polar-knife-stick','Cutting stick');this.box(stick,[1.20,.025,.055],[0,.965,-.018],'warning',.003,'Cutting Stick');
+  const stick=this.group(knife,'polar-knife-stick','Cutting stick');const stickBody=this.box(stick,[1.20,.025,.055],[0,.9275,-.018],'warning',.003,'Cutting Stick');stickBody.userData.flushWithTableReference=true;
   const knifeDrive=this.group(knife,'polar-knife-drive','Hydraulic knife-drive interface');for(const x of [-.56,.56]){this.active(this.cyl(knifeDrive,.085,.13,[x,1.57,.08],'accent','z'),'knife-drive');this.box(knifeDrive,[.07,.30,.065],[x,1.42,.08],'steel',.008);}
   const topSense=this.group(knife,'polar-knife-top-sense','Top-position / cut-cycle sensing reference');this.box(topSense,[.08,.12,.06],[.68,1.50,.07],'red',.010);
 

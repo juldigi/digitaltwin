@@ -9,14 +9,20 @@ export class Polar115ProcessSimulation{
   this.machine=machine;this.template=template;this.group=new THREE.Group();this.group.name='POLAR-115-SAFETY-INTERLOCKED-CUT-CYCLE';(template.photoFrame||machine).add(this.group);
   this.active=false;this.running=false;this.paused=false;this.speed=1;this.elapsed=0;this.lastNow=null;this.completed=0;this.pathVisible=true;this.inkFlowVisible=false;this.onUpdate=null;
   this.cycleSeconds=9;this.cycleIndex=0;this.lightBarrierClear=true;this.twoHandEnabled=true;this.autoTwoHand=true;this.leftHandInput=false;this.rightHandInput=false;this.leftHandPressedAt=null;this.rightHandPressedAt=null;this.twoHandSimultaneityWindow=.5;this.twoHandSimultaneityValid=false;this.rawTwoHandCommand=false;this.twoHandArmed=true;this.cutCycleLatched=false;this.cutPerformed=false;this.cutCounted=false;this.clampHoldAmount=0;this.knifeHoldAmount=0;
-  this.clampAssembly=this.template.findNode('polar-clamp');this.clamp=this.template.findNode('polar-clamp-beam');this.clampFace=this.template.findNode('polar-clamp-contact');this.clampCylinders=this.template.findNode('polar-clamp-cylinders');this.knife=this.template.findNode('polar-knife');this.gauge=this.template.findNode('polar-gauge');
-  this.rest={clamp:this.clamp?.position.clone(),clampFace:this.clampFace?.position.clone(),clampCylinders:this.clampCylinders?.position.clone(),knife:this.knife?.position.clone(),gauge:this.gauge?.position.clone()};
+  this.clampAssembly=this.template.findNode('polar-clamp');this.clamp=this.template.findNode('polar-clamp-beam');this.clampFace=this.template.findNode('polar-clamp-contact');this.clampCylinders=this.template.findNode('polar-clamp-cylinders');this.knifeAssembly=this.template.findNode('polar-knife');this.knifeCarrier=this.template.findNode('polar-knife-carrier');this.knife=this.template.findNode('polar-knife-blade');this.knifeStick=this.template.findNode('polar-knife-stick');this.knifeDrive=this.template.findNode('polar-knife-drive');this.knifeTopSense=this.template.findNode('polar-knife-top-sense');this.gauge=this.template.findNode('polar-gauge');
+  this.rest={clamp:this.clamp?.position.clone(),clampFace:this.clampFace?.position.clone(),clampCylinders:this.clampCylinders?.position.clone(),knifeAssembly:this.knifeAssembly?.position.clone(),knifeCarrier:this.knifeCarrier?.position.clone(),knife:this.knife?.position.clone(),knifeStick:this.knifeStick?.position.clone(),knifeDrive:this.knifeDrive?.position.clone(),knifeTopSense:this.knifeTopSense?.position.clone(),gauge:this.gauge?.position.clone()};
   this.stock=null;this.cutPiece=null;this.path=null;this.stockCutGuide=null;this.airIndicators=[];
   this.tableSurfaceY=.94;this.stockThickness=.085;this.stockSurfaceClearance=.001;this.stockRestY=this.tableSurfaceY+this.stockSurfaceClearance+this.stockThickness/2;
   this.stockDepth=.68;this.frontPieceDepth=.42;this.rearPieceDepth=.26;this.stockStartCenterX=.76;this.stockStartCenterZ=-.72;this.stockFinalCenterZ=-.08;this.cutLineZ=0;this.frontPieceCenterZ=-.21;this.rearPieceCenterZ=.13;
   const clampFaceMesh=this.clampFace?.children.find(o=>o.isMesh);clampFaceMesh?.geometry.computeBoundingBox();
   this.clampFaceBottomRest=clampFaceMesh?clampFaceMesh.position.y+clampFaceMesh.geometry.boundingBox.min.y:1.1425;
-  this.clampContactTolerance=.0005;this.gaugeStroke=.337;this.registrationClearance=.0005;this.clampStroke=Math.max(0,this.clampFaceBottomRest-(this.stockRestY+this.stockThickness/2));this.knifeStroke=.33;this.resetRuntime();this.build();
+  const bladeMesh=this.knife?.children.find(o=>o.isMesh),stickMesh=this.knifeStick?.children.find(o=>o.isMesh);bladeMesh?.geometry.computeBoundingBox();stickMesh?.geometry.computeBoundingBox();
+  const bladeBox=bladeMesh?.geometry.boundingBox,bladeRotation=bladeMesh?.rotation.z||0,bladeBottomY=bladeBox?bladeBox.min.y:0,bladeEdges=bladeBox?[
+   bladeMesh.position.y+bladeBox.min.x*Math.sin(bladeRotation)+bladeBottomY*Math.cos(bladeRotation),
+   bladeMesh.position.y+bladeBox.max.x*Math.sin(bladeRotation)+bladeBottomY*Math.cos(bladeRotation)
+  ]:[1.37,1.37];
+  this.bladeTrailingBottomRest=Math.max(...bladeEdges);this.knifeStickTop=stickMesh?stickMesh.position.y+stickMesh.geometry.boundingBox.max.y:this.tableSurfaceY;this.knifeContactTolerance=.0005;
+  this.clampContactTolerance=.0005;this.gaugeStroke=.337;this.registrationClearance=.0005;this.clampStroke=Math.max(0,this.clampFaceBottomRest-(this.stockRestY+this.stockThickness/2));this.knifeStroke=Math.max(0,this.bladeTrailingBottomRest-this.knifeStickTop);this.resetRuntime();this.build();
  }
  build(){
   const mat=new THREE.MeshStandardMaterial({color:0xf0e7d4,roughness:.84,side:THREE.DoubleSide});
@@ -31,13 +37,13 @@ export class Polar115ProcessSimulation{
   this.group.add(this.stock,this.cutPiece,this.stockCutGuide,this.path);this.group.visible=false;
  }
  resetRuntime(){
-  this.airTableActive=false;this.backgaugeMoving=false;this.backgaugeContact=false;this.registrationGap=null;this.twoHandCommand=false;this.clampActive=false;this.clampContact=false;this.clampGap=null;this.knifeDownstroke=false;this.knifeUpstroke=false;this.knifeAtCutLine=false;this.cutSeparated=false;this.safetyBlocked=false;this.stockLateralTransfer=false;
+  this.airTableActive=false;this.backgaugeMoving=false;this.backgaugeContact=false;this.registrationGap=null;this.twoHandCommand=false;this.clampActive=false;this.clampContact=false;this.clampGap=null;this.knifeDownstroke=false;this.knifeUpstroke=false;this.knifeAtCutLine=false;this.knifeGap=this.bladeTrailingBottomRest-this.knifeStickTop;this.cutSeparated=false;this.safetyBlocked=false;this.stockLateralTransfer=false;
  }
  phase(){return this.active?(this.elapsed%this.cycleSeconds)/this.cycleSeconds:0;}
  stage(){const p=this.phase();return POLAR115_PROCESS[Math.min(POLAR115_PROCESS.length-1,Math.floor(p*POLAR115_PROCESS.length))];}
  state(){
   return {available:true,blocked:this.safetyBlocked,active:this.active,running:this.running,paused:this.paused,speed:this.speed,stage:this.stage(),completed:this.completed,progress:this.phase(),sheetsVisible:this.active?1+(this.cutPiece?.visible?1:0):0,pileSheetsVisible:0,rotorCount:0,oscillatorCount:0,mechanismCount:5,inkFlowCount:0,uvLampCount:0,uvActive:false,pathVisible:this.pathVisible,inkFlowVisible:false,
-   airTableActive:this.airTableActive,backgaugeMoving:this.backgaugeMoving,backgaugeContact:this.backgaugeContact,registrationGap:this.registrationGap,clampActive:this.clampActive,clampContact:this.clampContact,clampGap:this.clampGap,knifeDownstroke:this.knifeDownstroke,knifeUpstroke:this.knifeUpstroke,knifeAtCutLine:this.knifeAtCutLine,cutSeparated:this.cutSeparated,stockLateralTransfer:this.stockLateralTransfer,
+   airTableActive:this.airTableActive,backgaugeMoving:this.backgaugeMoving,backgaugeContact:this.backgaugeContact,registrationGap:this.registrationGap,clampActive:this.clampActive,clampContact:this.clampContact,clampGap:this.clampGap,knifeDownstroke:this.knifeDownstroke,knifeUpstroke:this.knifeUpstroke,knifeAtCutLine:this.knifeAtCutLine,knifeGap:this.knifeGap,cutSeparated:this.cutSeparated,stockLateralTransfer:this.stockLateralTransfer,
    interlocks:{lightBarrierClear:this.lightBarrierClear,leftHandInput:this.leftHandInput,rightHandInput:this.rightHandInput,twoHandSimultaneityValid:this.twoHandSimultaneityValid,twoHandCommand:this.twoHandCommand,antiRepeatArmed:this.twoHandArmed,cutCycleLatched:this.cutCycleLatched,clampContact:this.clampContact,knifeDownPermitted:this.lightBarrierClear&&this.twoHandCommand&&this.cutCycleLatched&&this.clampContact},
    safetyReference:{twoHandSimultaneity:true,simultaneityWindowSeconds:this.twoHandSimultaneityWindow,antiRepeat:true,lightBarrierStopsClampAndKnife:true,installedActuatorLocationVerified:false},materialSplit:{fullDepth:this.stockDepth,frontDepth:this.frontPieceDepth,rearDepth:this.rearPieceDepth,conserved:Math.abs(this.frontPieceDepth+this.rearPieceDepth-this.stockDepth)<1e-9}
   };
@@ -58,7 +64,7 @@ export class Polar115ProcessSimulation{
  setInkFlowVisible(){return this.state();}
  resetCycle(){
   this.cutCycleLatched=false;this.cutPerformed=false;this.cutCounted=false;this.clampHoldAmount=0;this.knifeHoldAmount=0;this.resetRuntime();
-  if(this.clamp&&this.rest.clamp)this.clamp.position.copy(this.rest.clamp);if(this.clampFace&&this.rest.clampFace)this.clampFace.position.copy(this.rest.clampFace);if(this.knife&&this.rest.knife)this.knife.position.copy(this.rest.knife);if(this.gauge&&this.rest.gauge)this.gauge.position.copy(this.rest.gauge);
+  if(this.clamp&&this.rest.clamp)this.clamp.position.copy(this.rest.clamp);if(this.clampFace&&this.rest.clampFace)this.clampFace.position.copy(this.rest.clampFace);if(this.knifeCarrier&&this.rest.knifeCarrier)this.knifeCarrier.position.copy(this.rest.knifeCarrier);if(this.knife&&this.rest.knife)this.knife.position.copy(this.rest.knife);if(this.gauge&&this.rest.gauge)this.gauge.position.copy(this.rest.gauge);
   if(this.stock){this.stock.position.set(this.stockStartCenterX,this.stockRestY,this.stockStartCenterZ);this.stock.scale.set(1,1,1);this.stock.rotation.set(0,0,0);this.stock.visible=true;}
   if(this.cutPiece){this.cutPiece.position.set(0,this.stockRestY,this.frontPieceCenterZ);this.cutPiece.scale.set(1,1,1);this.cutPiece.visible=false;}
   if(this.stockCutGuide)this.stockCutGuide.visible=false;
@@ -105,14 +111,16 @@ export class Polar115ProcessSimulation{
   if(!this.cutPerformed){
    if(downWindow&&knifePermission)this.knifeHoldAmount=smooth(p,.56,.64);
    this.knifeDownstroke=downWindow&&knifePermission&&this.knifeHoldAmount>0;
-   if(this.knifeHoldAmount>.97){this.cutPerformed=true;this.knifeAtCutLine=true;if(!this.cutCounted){this.completed++;this.cutCounted=true;}}
   }
   if((!this.lightBarrierClear||!this.twoHandCommand)&&!this.cutPerformed)this.knifeHoldAmount=0;
   if(this.cutPerformed){
    if(p>=.64&&p<.74){this.knifeUpstroke=true;this.knifeHoldAmount=1-smooth(p,.64,.74);}
    else if(p>=.74)this.knifeHoldAmount=0;
   }
+  if(this.knifeCarrier&&this.rest.knifeCarrier){this.knifeCarrier.position.copy(this.rest.knifeCarrier);this.knifeCarrier.position.y-=this.knifeStroke*this.knifeHoldAmount;}
   if(this.knife&&this.rest.knife){this.knife.position.copy(this.rest.knife);this.knife.position.y-=this.knifeStroke*this.knifeHoldAmount;}
+  this.knifeGap=this.bladeTrailingBottomRest-this.knifeStroke*this.knifeHoldAmount-this.knifeStickTop;this.knifeAtCutLine=this.knifeGap<=this.knifeContactTolerance;
+  if(!this.cutPerformed&&this.knifeAtCutLine&&knifePermission){this.cutPerformed=true;if(!this.cutCounted){this.completed++;this.cutCounted=true;}}
   this.cutSeparated=this.cutPerformed;this.safetyBlocked=p>=.38&&p<.64&&(!this.lightBarrierClear||!this.twoHandCommand);
   for(const [i,a] of this.airIndicators.entries()){a.visible=this.airTableActive;a.scale.y=.55+.45*Math.sin(this.elapsed*8+i*.6)**2;}
   this.updateStock(p);this.onUpdate?.(this.state());
