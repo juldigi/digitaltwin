@@ -115,9 +115,11 @@ export class APM2ProcessSimulation{
   this.transportIndexing=transportIsIndexing(p);this.transportStopped=!this.transportIndexing;
   const platenStroke=smooth(p,.34,.41)*(1-smooth(p,.56,.66)),stripStroke=smooth(p,.36,.43)*(1-smooth(p,.56,.66));
   this.platenClosing=p>=.34&&p<.41;this.platenClosed=platenStroke>.90;this.pressureDwell=p>=.41&&p<.56;this.strippingActive=stripStroke>.25;this.deliveryReleaseActive=p>=.66&&p<.79;
-  if(this.feederHead&&this.rest.head){this.feederHead.position.copy(this.rest.head);if(this.feederSuctionActive){const q=p/.11;this.feederHead.position.y-=.05*Math.sin(Math.PI*q);this.feederHead.position.x+=.035*Math.sin(Math.PI*q);}}
+  if(this.feederHead&&this.rest.head){this.feederHead.position.copy(this.rest.head);if(this.feederSuctionActive){const q=p/.11;this.feederHead.position.y-=.09*Math.sin(Math.PI*q);this.feederHead.position.x+=.035*Math.sin(Math.PI*q);}}
   if(this.sideLay&&this.rest.side){this.sideLay.position.copy(this.rest.side);if(this.sideLayActive){const q=(p-.11)/.11;this.sideLay.position.z-=.025*Math.sin(Math.PI*clamp(q));}}
-  if(this.platen&&this.rest.platen){this.platen.position.copy(this.rest.platen);this.platen.position.y+=.085*platenStroke;}
+  // The reconstructed tool face rests 13 mm below the shared sheet plane. Close exactly that
+  // clearance: the previous 85 mm demo stroke visibly drove the tooling through the sheet.
+  if(this.platen&&this.rest.platen){this.platen.position.copy(this.rest.platen);this.platen.position.y+=.013*platenStroke;}
   // The toggle links are what actually drives the platen assembly per their label ("Toggle /
   // Eccentric Pressure Drive"); previously they never moved even while platenStroke animated the
   // platen itself, so the named actuator had no visible connection to the motion it supposedly

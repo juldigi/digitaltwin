@@ -20,7 +20,7 @@ export class APM2MachineTemplate{
       sources:APM2_TECHNICAL_SOURCES,
       bmjAssetId:'BMJ-MCH-0010',geometryStatus:'LEGACY_SP102_FAMILY_PROCESS_REFERENCE__SUFFIX_UNCONFIRMED',engineeringDimensions:false
     };
-    this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.exteriorOpen=false;this.ghosted=false;
+    this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.exteriorOpen=false;this.lowDetail=false;this.ghosted=false;
     this.palette={
       graphite:0x343a3d,dark:0x22282b,black:0x101416,light:0xe7e5dd,cream:0xe9e6db,
       steel:0x8b9598,silver:0xbac1c0,green:0x3a774a,orange:0xc96f43,paper:0xf2ecda,
@@ -231,7 +231,10 @@ export class APM2MachineTemplate{
     this.cover(this.box(housing,[.92,.26,1.86],[0,1.96,0],'cream',.03));
     this.cover(this.box(housing,[.88,.16,.18],[0,.68,-1.00],'green',.018));
 
-    const upper=this.group(g,'apm2-stripping-upper','Upper Stripping Frame',[0,0,0],[0,.28,0]);
+    // Keep the family-reference tool clear of the sheet at rest. Its pin tips stop above the
+    // shared sheet plane and reach it only during the reference stroke; the former position
+    // buried the pins through the support board before the cycle had even started.
+    const upper=this.group(g,'apm2-stripping-upper','Upper Stripping Frame',[0,.22,0],[0,.28,0]);
     this.box(upper,[.76,.055,1.18],[0,1.48,0],'steel',.006).userData.stripUpper=true;
     for(const x of [-.28,0,.28])for(const z of [-.42,0,.42])this.cylinder(upper,.010,.10,[x,1.41,z],'steel','y');
     // Raised (+.08) to preserve its original .12 gap to the stripping board now that the board
@@ -239,11 +242,9 @@ export class APM2MachineTemplate{
     // the board instead of the .12 its pins/needle-relief geometry was originally spaced for.
     const lower=this.group(g,'apm2-stripping-lower','Lower Stripping Frame',[0,.08,0],[0,.18,0]);
     this.box(lower,[.76,.055,1.18],[0,1.18,0],'steel',.006).userData.stripLower=true;
-    // Raised (+.08) so the board sits just under the upper stripping frame's needle tips at
-    // rest (pins at local y=1.41 vs. plate at 1.48) instead of ~24cm below — close enough that
-    // the sheet it supports is in plausible reach of the needles once the upper frame strokes
-    // down, without the board clipping through the needles at rest.
-    const board=this.group(g,'apm2-stripping-board','Central Stripping Board',[0,.08,0],[0,.16,0]);
+    // Place the reference board's top on the shared sheet plane. This keeps the represented
+    // sheet supported and gives the raised pins a small approach clearance at rest.
+    const board=this.group(g,'apm2-stripping-board','Central Stripping Board',[0,.2175,0],[0,.16,0]);
     this.box(board,[.70,.035,1.10],[0,1.30,0],'dark',.004);
     const chute=this.group(g,'apm2-waste-chute','Waste Chute / Curtain',[0,0,0],[.15,.1,.15]);
     this.box(chute,[.64,.52,1.04],[.05,.72,0],'graphite',.018);
@@ -417,16 +418,19 @@ export class APM2MachineTemplate{
   highlightMany(parts=[]){for(const m of this.meshes){const on=parts.some(part=>this.contains(part,m));m.material.emissive?.setHex(on?0x18494a:0);if(m.material.emissive)m.material.emissiveIntensity=.28;}}
   ghost(on,except=null){this.ghosted=on;for(const m of this.meshes){const faded=on&&(!except||!this.contains(except,m)),glass=m.material.color?.getHex()===this.palette.glass;m.material.transparent=faded||glass;m.material.opacity=faded?.14:glass?.34:1;m.material.depthWrite=!faded;m.material.needsUpdate=true;}}
   isolate(part,on=true){for(const n of this.nodes)n.visible=!on||!part||this.contains(part,n)||this.contains(n,part);}
-  showOnly(parts=[],on=true){for(const n of this.nodes)n.visible=!on||!parts.length||parts.some(part=>n===part||this.contains(n,part));}
+  showOnly(parts=[],on=true){for(const n of this.nodes)n.visible=!on||!parts.length||parts.some(part=>n===part||this.contains(n,part)||this.contains(part,n));}
   setExteriorOpen(on=true){
     this.exteriorOpen=!!on;let hidden=0;
     for(const n of this.nodes)if(n.userData.exteriorCover){n.visible=!this.exteriorOpen;if(this.exteriorOpen)hidden++;}
-    for(const m of this.meshes)if(m.userData.exteriorCover){m.visible=!this.exteriorOpen;if(this.exteriorOpen)hidden++;}
+    for(const m of this.meshes)if(m.userData.exteriorCover||m.userData.detail){
+      if(m.userData.exteriorCover&&this.exteriorOpen)hidden++;
+      m.visible=(!this.exteriorOpen||!m.userData.exteriorCover)&&(!this.lowDetail||!m.userData.detail||Boolean(m.userData.silhouetteCritical));
+    }
     this.root.userData.exteriorHiddenCount=this.exteriorOpen?hidden:0;
     this.root.userData.interiorCutawayVisible=this.exteriorOpen;
     this.root.updateMatrixWorld(true);
   }
-  setLow(on){for(const m of this.meshes)if(m.userData.detail)m.visible=!on||Boolean(m.userData.silhouetteCritical);}
-  reset(){const open=this.exteriorOpen;this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const n of this.nodes)n.quaternion.copy(n.userData.restQuaternion);if(open)this.setExteriorOpen(true);}
+  setLow(on){this.lowDetail=!!on;this.setExteriorOpen(this.exteriorOpen);this.root.userData.lowDetail=this.lowDetail;}
+  reset(){const open=this.exteriorOpen,low=this.lowDetail;this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const n of this.nodes)n.quaternion.copy(n.userData.restQuaternion);this.lowDetail=low;this.setExteriorOpen(open);}
   dispose(){disposeMachineIdentityPlacards(this.root);this.geometries.forEach(g=>g.dispose());this.materials.forEach(m=>m.dispose());this.geometries.clear();this.materials.clear();}
 }

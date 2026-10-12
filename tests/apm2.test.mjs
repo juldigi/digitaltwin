@@ -75,6 +75,32 @@ test('APM2 process sequence explicitly separates one-pitch index and stopped mul
  assert.equal(APM2_PROCESS_STEPS.length,8);assert.deepEqual(APM2_PROCESS_SEQUENCE.map(x=>x.key),['FEEDER','REGISTER','TRANSPORT','PLATEN','STRIP','DELIVERY']);
 });
 
+test('APM2 navigation keeps selected ancestors and the complete selected subtree visible',()=>{
+ const machine=new APM2MachineTemplate(),feeder=machine.findNode('apm2-feeder'),head=machine.findNode('apm2-feeder-head'),delivery=machine.findNode('apm2-delivery');
+ machine.showOnly([feeder],true);assert.equal(feeder.visible,true);assert.equal(head.visible,true);assert.equal(delivery.visible,false);
+ machine.showOnly([head],true);assert.equal(feeder.visible,true);assert.equal(head.visible,true);assert.equal(machine.findNode('apm2-feeder-lift-suckers').visible,true);assert.equal(delivery.visible,false);
+ machine.showOnly([],false);assert.equal(machine.nodes.every(n=>n.visible),true);machine.dispose();
+});
+
+test('APM2 contact reconstruction closes to the sheet plane without penetrating it',()=>{
+ const machine=new APM2MachineTemplate(),sim=new APM2ProcessSimulation(machine.root,machine);machine.root.updateMatrixWorld(true);
+ const top=id=>new THREE.Box3().setFromObject(machine.findNode(id)).max.y,bottom=id=>new THREE.Box3().setFromObject(machine.findNode(id)).min.y;
+ assert.ok(Math.abs(top('apm2-register-table')-APM2_DIMENSIONS.layout.sheetPlaneY)<.01);
+ sim.start();let now=1000;while(sim.elapsed<.46){now+=20;sim.update(now);}machine.root.updateMatrixWorld(true);
+ assert.ok(bottom('apm2-feeder-lift-suckers')<=top('apm2-feeder-pile-table')+.005,'lifting cups reach the represented top sheet');
+ while(sim.elapsed<3.55){now+=20;sim.update(now);}machine.root.updateMatrixWorld(true);
+ assert.ok(Math.abs(top('apm2-cutting-chase')-(APM2_DIMENSIONS.layout.sheetPlaneY+.015))<.003,'tool face reaches animated sheet underside without overtravel');
+ assert.ok(bottom('apm2-stripping-upper')>top('apm2-stripping-board')-.02,'reference stripping tools do not begin deeply interpenetrating');
+ sim.dispose();machine.dispose();
+});
+
+test('APM2 interior and LOD toggles compose in either order and reset preserves both modes',()=>{
+ const machine=new APM2MachineTemplate(),cover=machine.meshes.find(m=>m.userData.exteriorCover),detail=machine.meshes.find(m=>m.userData.detail)||machine.meshes[0];detail.userData.detail=true;
+ machine.setExteriorOpen(true);machine.setLow(true);assert.equal(cover.visible,false);assert.equal(detail.visible,false);
+ machine.setLow(false);machine.setExteriorOpen(false);machine.setLow(true);machine.setExteriorOpen(true);assert.equal(cover.visible,false);assert.equal(detail.visible,false);
+ machine.reset();assert.equal(machine.exteriorOpen,true);assert.equal(machine.lowDetail,true);assert.equal(cover.visible,false);assert.equal(detail.visible,false);machine.dispose();
+});
+
 test('APM2 fourteen gripper bars advance only one chain pitch per machine cycle',()=>{
  const machine=new APM2MachineTemplate(),sim=new APM2ProcessSimulation(machine.root,machine);sim.start();let now=1000;const advance=t=>{while(sim.elapsed<t){now+=20;sim.update(now);}};
  const b=sim.gripperBars[0],p0=b.position.clone();advance(3.05);const afterIndex=b.position.clone();assert.ok(afterIndex.distanceTo(p0)>.01);assert.ok(afterIndex.distanceTo(p0)<1.5);
