@@ -8,7 +8,7 @@
   "status": "RELEASE_PENDING",
   "cursor": {
     "machineId": "BMJ-MCH-0001",
-    "partIndex": 4
+    "partIndex": 5
   },
   "baselineCommit": "b5e45a82ce1aeaf9094b0a5c3fd8d985b8a9e96f",
   "machines": [
@@ -65,12 +65,19 @@
         },
         {
           "part": "knife and cutting stick",
-          "status": "RELEASE_PENDING",
-          "report": "docs/polar115-knife-stick-audit.md"
+          "status": "COMPLETE",
+          "report": "docs/polar115-knife-stick-audit.md",
+          "releaseEvidence": {
+            "commit": "d29cff7090793489a9c9ab940e93a3355ac12cf5",
+            "workflow": 38187275382,
+            "conclusion": "success",
+            "tests": 1552
+          }
         },
         {
           "part": "stock removal and output",
-          "status": "PENDING"
+          "status": "RELEASE_PENDING",
+          "report": "docs/polar115-output-audit.md"
         },
         {
           "part": "housing and control",
@@ -86,7 +93,8 @@
         "docs/polar115-transport-registration-audit.md",
         "docs/polar115-safety-interlock-audit.md",
         "docs/polar115-clamp-contact-audit.md",
-        "docs/polar115-knife-stick-audit.md"
+        "docs/polar115-knife-stick-audit.md",
+        "docs/polar115-output-audit.md"
       ]
     },
     {
@@ -587,11 +595,25 @@
     {
       "machineId": "BMJ-MCH-0001",
       "part": "knife and cutting stick",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "report": "docs/polar115-knife-stick-audit.md",
       "nextPartIndex": 5,
-      "parentCommit": "97ecd59159d47e6d42d2822a3437fcb761167682"
+      "parentCommit": "97ecd59159d47e6d42d2822a3437fcb761167682",
+      "releaseEvidence": {
+        "commit": "d29cff7090793489a9c9ab940e93a3355ac12cf5",
+        "workflow": 38187275382,
+        "conclusion": "success",
+        "tests": 1552
+      }
+    },
+    {
+      "machineId": "BMJ-MCH-0001",
+      "part": "stock removal and output",
+      "status": "RELEASE_PENDING",
+      "report": "docs/polar115-output-audit.md",
+      "nextPartIndex": 6,
+      "parentCommit": "d29cff7090793489a9c9ab940e93a3355ac12cf5"
     }
   ],
-  "updatedAt": "2026-10-12T00:00:00Z"
+  "updatedAt": "2026-10-12T01:00:00Z"
 }
