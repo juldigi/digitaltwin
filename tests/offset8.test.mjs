@@ -19,6 +19,14 @@ test('simulation rotates only real process rollers and restores every local-axis
  s.dispose();m.dispose();
 });
 test('official CX104 limits are recorded without inventing installed roller counts or dryer energy technology',()=>{assert.deepEqual(OFFSET8_SPEC.maxSheet,[.720,1.040]);assert.deepEqual(OFFSET8_SPEC.maxPrint,[.710,1.020]);assert.equal(OFFSET8_SPEC.speedStandard,15000);assert.equal(OFFSET8_SPEC.speedOption,16500);assert.equal(OFFSET8_SPEC.feederPile,1.320);assert.equal(OFFSET8_SPEC.inkingRollerCountVerified,false);assert.equal(OFFSET8_SPEC.dampeningRollerCountVerified,false);assert.equal(OFFSET8_SPEC.dryerEnergyTechnologyVerified,false);});
+test('feeder pile is seated at official height and suction reaches its top contact plane',()=>{
+ const m=new Offset8MachineTemplate(),s=new Offset8PrintingSimulation(m.root,m),pile=m.findNode('offset8-feeder-pile');m.root.updateMatrixWorld(true);
+ const paper=pile.children.find(o=>o.isMesh&&o.userData.nominalPileHeight===OFFSET8_SPEC.feederPile),paperBox=new THREE.Box3().setFromObject(paper);
+ assert.ok(Math.abs(paperBox.min.y-.65)<1e-6);assert.ok(Math.abs((paperBox.max.y-paperBox.min.y)-OFFSET8_SPEC.feederPile)<1e-6);
+ s.start();s.update(1000);s.elapsed=(15/s.sheets.length)*.17;s.updateFeeder();m.root.updateMatrixWorld(true);
+ for(const cup of s.suckers){const cupBox=new THREE.Box3().setFromObject(cup);assert.ok(Math.abs(cupBox.min.y-paperBox.max.y)<.001,`cup/pile contact gap ${cupBox.min.y-paperBox.max.y}`);}
+ s.dispose();m.dispose();
+});
 test('OFFSET 8 app evidence routing matches its dedicated engine runtime',()=>{
  const cfg=universalMachineConfig('BMJ-MCH-0005');
  assert.equal(cfg.evidence.simulation,'VERIFIED_PROCESS_MODEL');
@@ -39,7 +47,7 @@ test('V99 sheet centerline visits offset/coating nips without crossing cylinder 
 });
 
 test('V99 delivery stack accumulates on the represented pile surface and dryer/coater states are occupancy-driven',()=>{
- const m=new Offset8MachineTemplate(),s=new Offset8PrintingSimulation(m.root,m);s.start();let now=1000,coat=false,dry=false,brake=false;
+ const m=new Offset8MachineTemplate(),s=new Offset8PrintingSimulation(m.root,m);m.root.updateMatrixWorld(true);const staticPaper=m.findNode('offset8-delivery-paper-stack'),staticBox=new THREE.Box3().setFromObject(staticPaper);assert.ok(Math.abs(staticBox.min.y-.65)<1e-6);s.start();let now=1000,coat=false,dry=false,brake=false;
  for(let i=0;i<2400;i++){now+=10;s.update(now);const st=s.state();coat||=st.coatingActive;dry||=st.dryerActive;brake||=st.deliveryBrakeActive;}
  assert.ok(coat&&dry&&brake);assert.equal(s.staticDeliveryStack.visible,false);assert.ok(s.completed>0);const visible=s.stack.filter(x=>x.visible);assert.ok(visible.length>0);assert.ok(visible.every(x=>x.position.y>=.654));
  s.dispose();m.dispose();

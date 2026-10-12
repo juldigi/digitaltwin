@@ -13,5 +13,4 @@ import c10 from './factory-fleet-chunk-10.js';
 import c11 from './factory-fleet-chunk-11.js';
 import c12 from './factory-fleet-chunk-12.js';
 import c13 from './factory-fleet-chunk-13.js';
-import c14 from './factory-fleet-chunk-14.js';
-export const FACTORY_FLEET_GZIP=[c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13,c14].join('');
+export const FACTORY_FLEET_GZIP=[c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13].join('');

@@ -86,7 +86,9 @@ export class Offset8PrintingSimulation{
    const lift=Math.sin(Math.PI*clamp(phase/.34))*-.055,advance=phase<.34?smooth(phase,0,.34)*.055:(1-smooth(phase,.34,1))*.055;
    this.feederHead.position.copy(this.feederHeadRest);this.feederHead.position.y+=lift;this.feederHead.position.x+=advance;
   }
-  this.suckers.forEach((s,i)=>{s.position.copy(this.suckerRest[i]);if(pick)s.position.y-=.018*Math.sin(Math.PI*clamp(phase/.34));});
+  // The 15 mm cup stroke plus the 55 mm head stroke lands on the official
+  // 1.320 m high pile surface without crossing it.
+  this.suckers.forEach((s,i)=>{s.position.copy(this.suckerRest[i]);if(pick)s.position.y-=.015*Math.sin(Math.PI*clamp(phase/.34));});
  }
  sheetProgress(sheet){return (this.elapsed/15+sheet.phase)%1;}
  updateSheets(){

@@ -31,7 +31,8 @@ export class Offset8MachineTemplate{
  for(const z of [-1.37,1.37])this.cover(this.box(g,[2.30,1.78,.16],[0,1.48,z],'light',.075));
  this.cover(this.box(g,[2.30,.28,2.90],[0,2.26,0],'graphite',.055));
  for(const z of [-1.37,1.37])this.cover(this.box(g,[.24,.34,.18],[-1.02,.73,z],'graphite',.035));
- const pile=this.group(g,'offset8-feeder-pile','Pile lift');this.box(pile,[1.35,.08,1.78],[-.62,.61,0],'steel');this.box(pile,[1.30,1.02,1.72],[-.62,1.16,0],'paper');
+ const pile=this.group(g,'offset8-feeder-pile','Pile lift');const lift=this.box(pile,[1.35,.08,1.78],[-.62,.61,0],'steel');lift.userData.supportSurfaceY=.65;
+ const stock=this.box(pile,[1.30,OFFSET8_SPEC.feederPile,1.72],[-.62,.65+OFFSET8_SPEC.feederPile/2,0],'paper');stock.userData.nominalPileHeight=OFFSET8_SPEC.feederPile;stock.userData.supportSurfaceY=.65;
  const head=this.group(g,'offset8-feeder-head','Suction head');this.box(head,[.74,.30,1.65],[.28,2.34,0],'graphite');for(const z of [-.58,-.2,.2,.58]){this.cyl(head,.032,.18,[.45,2.13,z],'rubber','sucker','y');this.box(head,[.04,.26,.04],[.45,2.23,z],'steel');}
  const reg=this.group(g,'offset8-register','Stream feeder and register',[1.55,0,0]);this.box(reg,[1.45,.56,2.42],[0,1.03,0],'graphite',.05);this.box(reg,[1.4,.035,2.2],[0,1.34,0],'steel');for(const z of [-.62,0,.62])this.cyl(reg,.028,1.24,[0,1.40,z],'rubber','feed-wheel');for(const z of [-.73,.73])this.box(reg,[.12,.10,.12],[.58,1.43,z],'silver');}
  side(g){
@@ -68,7 +69,8 @@ export class Offset8MachineTemplate{
  const chain=this.group(g,'offset8-delivery-chain','Gripper-chain delivery');for(const z of [-1.02,1.02]){this.cyl(chain,.24,.10,[-1.35,1.72,z],'steel','chain-sprocket');this.cyl(chain,.24,.10,[1.28,1.72,z],'steel','chain-sprocket');this.box(chain,[2.63,.045,.045],[0,1.94,z],'black');}
  const grippers=this.group(g,'offset8-delivery-grippers','Delivery gripper bars · loop reference');for(let i=0;i<8;i++){const bar=this.group(grippers,'offset8-delivery-gripper-'+(i+1),'Delivery gripper bar '+(i+1),[-1.35+i*(2.63/7),1.72,0]);bar.userData.deliveryGripperBar=true;bar.userData.barPhase=i/8;this.box(bar,[.045,.045,2.10],[0,0,0],'steel',.008);for(const z of [-.84,-.56,-.28,0,.28,.56,.84])this.box(bar,[.06,.045,.035],[.025,-.04,z],'dark',.004);}
  const brake=this.group(g,'offset8-delivery-brake','Dynamic sheet brake');const brakeBed=this.box(brake,[.56,.055,1.92],[1.03,1.13,0],'graphite',.018);brakeBed.userData.dynamicBrakeBed=true;for(const z of [-.68,-.23,.23,.68])this.cyl(brake,.065,.18,[1.03,1.22,z],'rubber','sheet-brake');
- const stack=this.group(g,'offset8-delivery-stack','Delivery pile');this.box(stack,[1.34,.08,1.78],[.82,.61,0],'steel');const paper=this.group(stack,'offset8-delivery-paper-stack','Printed sheet receiving stack');this.box(paper,[1.30,.65,1.72],[.82,.96,0],'paper');}
+ const stack=this.group(g,'offset8-delivery-stack','Delivery pile');const table=this.box(stack,[1.34,.08,1.78],[.82,.61,0],'steel');table.userData.supportSurfaceY=.65;
+ const paper=this.group(stack,'offset8-delivery-paper-stack','Printed sheet receiving stack');const sheets=this.box(paper,[1.30,.65,1.72],[.82,.975,0],'paper');sheets.userData.supportSurfaceY=.65;}
  enrichV123(){this.root.userData.researchVersion='V123';this.root.userData.researchSourceCount=V123_SOURCE_STATS.total;this.root.userData.detailPass='V123_CX104_LYYL_OEM_PROCESS_DETAIL';
  const tag=(m,role,evidence='HEIDELBERG_CX104_OEM')=>{if(m){m.userData.mechanismRole=role;m.userData.evidence=evidence;m.userData.detail=true;}return m;};
  for(const key of ['L1','L2']){const id='offset8-'+key.toLowerCase(),ch=this.findNode(id+'-chamber'),an=this.findNode(id+'-anilox'),drip=this.findNode(id+'-drip');

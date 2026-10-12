@@ -5,7 +5,7 @@
   "timezone": "Asia/Jakarta",
   "cadence": "HOURLY",
   "mode": "AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY",
-  "status": "READY",
+  "status": "RELEASE_PENDING",
   "cursor": {
     "machineId": "BMJ-MCH-0005",
     "partIndex": 0
@@ -239,9 +239,26 @@
       "name": "OFFSET - 8 MACHINE",
       "model": "CX 104-8+LYYL",
       "area": "OFFSET PRINTING",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {"part":"feeder and input","status":"COMPLETE","report":"docs/offset8-cx104-whole-machine-audit.md"},
+        {"part":"stream feeder and register","status":"NO_CHANGE_REQUIRED","report":"docs/offset8-cx104-whole-machine-audit.md"},
+        {"part":"PU1 and downstream transfer","status":"COMPLETE","report":"docs/offset8-cx104-whole-machine-audit.md"},
+        {"part":"PU2 and downstream transfer","status":"COMPLETE","report":"docs/offset8-cx104-whole-machine-audit.md"},
+        {"part":"PU3 and downstream transfer","status":"COMPLETE","report":"docs/offset8-cx104-whole-machine-audit.md"},
+        {"part":"PU4 and downstream transfer","status":"COMPLETE","report":"docs/offset8-cx104-whole-machine-audit.md"},
+        {"part":"PU5 and downstream transfer","status":"COMPLETE","report":"docs/offset8-cx104-whole-machine-audit.md"},
+        {"part":"PU6 and downstream transfer","status":"COMPLETE","report":"docs/offset8-cx104-whole-machine-audit.md"},
+        {"part":"PU7 and downstream transfer","status":"COMPLETE","report":"docs/offset8-cx104-whole-machine-audit.md"},
+        {"part":"PU8 and downstream transfer","status":"COMPLETE","report":"docs/offset8-cx104-whole-machine-audit.md"},
+        {"part":"L1 coating unit","status":"BLOCKED_EVIDENCE","report":"docs/offset8-cx104-whole-machine-audit.md"},
+        {"part":"Y1 dryer section","status":"BLOCKED_EVIDENCE","report":"docs/offset8-cx104-whole-machine-audit.md"},
+        {"part":"Y2 dryer section","status":"BLOCKED_EVIDENCE","report":"docs/offset8-cx104-whole-machine-audit.md"},
+        {"part":"L2 coating unit","status":"BLOCKED_EVIDENCE","report":"docs/offset8-cx104-whole-machine-audit.md"},
+        {"part":"delivery and output","status":"COMPLETE","report":"docs/offset8-cx104-whole-machine-audit.md"},
+        {"part":"housing, control, access and utilities","status":"BLOCKED_EVIDENCE","report":"docs/offset8-cx104-whole-machine-audit.md"}
+      ],
+      "reports": ["docs/offset8-cx104-whole-machine-audit.md"]
     },
     {
       "machineId": "BMJ-MCH-0006",
