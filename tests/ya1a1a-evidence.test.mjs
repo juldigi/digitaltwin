@@ -5,6 +5,7 @@ import {mechanicalProfile} from '../frontend/src/data/mechanical-profiles.js';
 import {universalMachineConfig,universalTechnicalSources,universalTaxonomy} from '../frontend/src/universal-machine.js';
 import {createMachineTemplate,createMachineSimulation} from '../frontend/src/machine-runtime.js';
 import {ReferenceMachineTemplate,ReferenceProcessSimulation} from '../frontend/src/reference-machines.js';
+import * as THREE from 'three';
 
 test('YA1A1A keeps the BMJ master name but uses sheet-fed gravure rather than offset mechanics',()=>{
  const m=MACHINE_REGISTRY_BY_ID.get('BMJ-MCH-0004'),cfg=universalMachineConfig(m.machineId),profile=mechanicalProfile(m.no);
@@ -42,4 +43,30 @@ test('YA1A1A reference simulation uses only tagged gravure-family mechanisms and
  const before=sim.state();assert.equal(before.available,false);assert.equal(before.blocked,true);
  const started=sim.start();assert.equal(started.active,false);assert.equal(started.progress,0);assert.match(started.blockedReason||'',/YA1A1A|transport|drive|dryer/i);
  sim.dispose();model.dispose();
+});
+
+test('YA1A1A doctor edge reaches the gravure surface without entering the cylinder core',()=>{
+ const model=createMachineTemplate('BMJ-MCH-0004');model.root.updateMatrixWorld(true);
+ const grav=model.meshes.find(x=>x.userData?.mechanismRole==='engraved-gravure-cylinder');
+ const blade=model.meshes.find(x=>x.userData?.mechanismRole==='doctor-blade-edge');
+ assert.ok(grav&&blade);
+ const gp=new THREE.Vector3(),bp=new THREE.Vector3();grav.getWorldPosition(gp);blade.getWorldPosition(bp);
+ const radial=Math.hypot(bp.x-gp.x,bp.y-gp.y);
+ assert.ok(radial>=.278&&radial<=.292,`doctor radial contact ${radial}`);
+ assert.equal(blade.userData.contactRelation,'TANGENT_TO_GRAVURE_CYLINDER__FAMILY_REFERENCE');
+ model.dispose();
+});
+
+test('YA1A1A fixed controls remain mounted while cover details leave in interior mode',()=>{
+ const model=createMachineTemplate('BMJ-MCH-0004');
+ const console=model.meshes.find(x=>x.userData?.mechanismRole==='gravure-operator-console-family-reference');
+ const display=model.meshes.find(x=>x.userData?.mechanismRole==='gravure-operator-display-family-reference');
+ const seam=model.meshes.find(x=>x.userData?.mechanismRole==='gravure-service-door-seam-reference');
+ assert.ok(console&&display&&seam);
+ assert.notEqual(console.userData.exteriorCover,true);assert.notEqual(display.userData.exteriorCover,true);
+ model.setExteriorOpen(true);
+ assert.equal(console.visible,true);assert.equal(display.visible,true);assert.equal(seam.visible,false);
+ assert.equal(model.meshes.some(x=>x.userData?.mechanismRole==='gravure-service-door-handle-reference'),false);
+ model.setLow(true);assert.equal(console.visible,true);assert.equal(display.visible,true);
+ model.dispose();
 });

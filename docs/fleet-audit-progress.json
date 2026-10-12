@@ -5,10 +5,10 @@
   "timezone": "Asia/Jakarta",
   "cadence": "HOURLY",
   "mode": "AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY",
-  "status": "READY",
+  "status": "RELEASE_PENDING",
   "cursor": {
     "machineId": "BMJ-MCH-0004",
-    "partIndex": 0
+    "partIndex": 8
   },
   "baselineCommit": "b5e45a82ce1aeaf9094b0a5c3fd8d985b8a9e96f",
   "machines": [
@@ -221,9 +221,18 @@
       "name": "OFFSET - 7 MACHINE",
       "model": "YA1A1A",
       "area": "OFFSET PRINTING",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {"part": "sheet feeder and input", "status": "RELEASE_PENDING", "report": "docs/offset7-ya1a1a-whole-machine-audit.md"},
+        {"part": "register and sheet transfer", "status": "RELEASE_PENDING", "report": "docs/offset7-ya1a1a-whole-machine-audit.md"},
+        {"part": "ink supply and circulation", "status": "RELEASE_PENDING", "report": "docs/offset7-ya1a1a-whole-machine-audit.md"},
+        {"part": "gravure cylinder and doctor", "status": "RELEASE_PENDING", "report": "docs/offset7-ya1a1a-whole-machine-audit.md"},
+        {"part": "impression cylinder and sheet control", "status": "RELEASE_PENDING", "report": "docs/offset7-ya1a1a-whole-machine-audit.md"},
+        {"part": "drying and exhaust", "status": "RELEASE_PENDING", "report": "docs/offset7-ya1a1a-whole-machine-audit.md"},
+        {"part": "high-pile delivery and output", "status": "RELEASE_PENDING", "report": "docs/offset7-ya1a1a-whole-machine-audit.md"},
+        {"part": "drive, control, housing and access", "status": "RELEASE_PENDING", "report": "docs/offset7-ya1a1a-whole-machine-audit.md"}
+      ],
+      "reports": ["docs/offset7-ya1a1a-whole-machine-audit.md"]
     },
     {
       "machineId": "BMJ-MCH-0005",
@@ -676,7 +685,15 @@
       "nextMachineId": "BMJ-MCH-0004",
       "parentCommit": "3c2b2d178dfa889207d4491cc565679261de60d2",
       "releaseEvidence": {"commit": "1ab7a879ebd003ff9a972cd2da9b89b84b4ca3a3", "workflow": 38198942950, "conclusion": "success", "tests": 1559}
+    },
+    {
+      "machineId": "BMJ-MCH-0004",
+      "part": "whole machine: sheet feeder through high-pile delivery",
+      "status": "RELEASE_PENDING",
+      "report": "docs/offset7-ya1a1a-whole-machine-audit.md",
+      "nextMachineId": "BMJ-MCH-0005",
+      "parentCommit": "56d3ee77b05fec2bb644edb852089bf9323a1f9b"
     }
   ],
-  "updatedAt": "2026-10-12T03:23:00Z"
+  "updatedAt": "2026-10-12T05:20:00Z"
 }
