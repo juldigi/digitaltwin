@@ -41,6 +41,7 @@ export const OFFSET10_DIMENSIONS=Object.freeze({
     maxSheetWidth:1.040,
     maxSheetLength:.720,
     maxSpeedSph:15000,
+    feederPileHeight:1.320,
     baseReferenceLength:27.749,
     serviceEnvelopeLength:34.293,
     serviceEnvelopeWidth:9.044,

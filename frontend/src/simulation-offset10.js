@@ -7,8 +7,8 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),mod=(v,m)=>((v%m)+m)%m;
 
 function pathPoints(){
   const pts=[
-    new THREE.Vector3(D.feederCenterX-1.45,1.73,0),
-    new THREE.Vector3(D.feederCenterX-.55,1.76,0),
+    new THREE.Vector3(D.feederCenterX-1.45,2.035,0),
+    new THREE.Vector3(D.feederCenterX-.55,2.035,0),
     new THREE.Vector3(D.feederCenterX+.62,1.60,0),
     new THREE.Vector3(OFFSET10_MODULE_CENTERS.PU1-.52,1.40,0)
   ];

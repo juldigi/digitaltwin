@@ -5,7 +5,7 @@
   "timezone": "Asia/Jakarta",
   "cadence": "HOURLY",
   "mode": "AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY",
-  "status": "READY",
+  "status": "RELEASE_PENDING",
   "cursor": {
     "machineId": "BMJ-MCH-0009",
     "partIndex": 0
@@ -126,15 +126,87 @@
       "area": "OFFSET PRINTING",
       "status": "COMPLETE",
       "parts": [
-        {"part": "hydraulic unwind and reel input", "status": "COMPLETE", "report": "docs/sheeting-lexus-whole-machine-audit.md", "releaseEvidence": {"commit": "1ab7a879ebd003ff9a972cd2da9b89b84b4ca3a3", "workflow": 38198942950, "conclusion": "success", "tests": 1559}},
-        {"part": "web carrier, guide and tension path", "status": "COMPLETE", "report": "docs/sheeting-lexus-whole-machine-audit.md", "releaseEvidence": {"commit": "1ab7a879ebd003ff9a972cd2da9b89b84b4ca3a3", "workflow": 38198942950, "conclusion": "success", "tests": 1559}},
-        {"part": "draw roll and guarded cross-cut zone", "status": "COMPLETE", "report": "docs/sheeting-lexus-whole-machine-audit.md", "releaseEvidence": {"commit": "1ab7a879ebd003ff9a972cd2da9b89b84b4ca3a3", "workflow": 38198942950, "conclusion": "success", "tests": 1559}},
-        {"part": "high-speed take-away transfer", "status": "COMPLETE", "report": "docs/sheeting-lexus-whole-machine-audit.md", "releaseEvidence": {"commit": "1ab7a879ebd003ff9a972cd2da9b89b84b4ca3a3", "workflow": 38198942950, "conclusion": "success", "tests": 1559}},
-        {"part": "slow-speed overlap and shingling", "status": "COMPLETE", "report": "docs/sheeting-lexus-whole-machine-audit.md", "releaseEvidence": {"commit": "1ab7a879ebd003ff9a972cd2da9b89b84b4ca3a3", "workflow": 38198942950, "conclusion": "success", "tests": 1559}},
-        {"part": "stack and lay table output", "status": "COMPLETE", "report": "docs/sheeting-lexus-whole-machine-audit.md", "releaseEvidence": {"commit": "1ab7a879ebd003ff9a972cd2da9b89b84b4ca3a3", "workflow": 38198942950, "conclusion": "success", "tests": 1559}},
-        {"part": "operator controls, housing and access", "status": "COMPLETE", "report": "docs/sheeting-lexus-whole-machine-audit.md", "releaseEvidence": {"commit": "1ab7a879ebd003ff9a972cd2da9b89b84b4ca3a3", "workflow": 38198942950, "conclusion": "success", "tests": 1559}}
+        {
+          "part": "hydraulic unwind and reel input",
+          "status": "COMPLETE",
+          "report": "docs/sheeting-lexus-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "1ab7a879ebd003ff9a972cd2da9b89b84b4ca3a3",
+            "workflow": 38198942950,
+            "conclusion": "success",
+            "tests": 1559
+          }
+        },
+        {
+          "part": "web carrier, guide and tension path",
+          "status": "COMPLETE",
+          "report": "docs/sheeting-lexus-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "1ab7a879ebd003ff9a972cd2da9b89b84b4ca3a3",
+            "workflow": 38198942950,
+            "conclusion": "success",
+            "tests": 1559
+          }
+        },
+        {
+          "part": "draw roll and guarded cross-cut zone",
+          "status": "COMPLETE",
+          "report": "docs/sheeting-lexus-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "1ab7a879ebd003ff9a972cd2da9b89b84b4ca3a3",
+            "workflow": 38198942950,
+            "conclusion": "success",
+            "tests": 1559
+          }
+        },
+        {
+          "part": "high-speed take-away transfer",
+          "status": "COMPLETE",
+          "report": "docs/sheeting-lexus-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "1ab7a879ebd003ff9a972cd2da9b89b84b4ca3a3",
+            "workflow": 38198942950,
+            "conclusion": "success",
+            "tests": 1559
+          }
+        },
+        {
+          "part": "slow-speed overlap and shingling",
+          "status": "COMPLETE",
+          "report": "docs/sheeting-lexus-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "1ab7a879ebd003ff9a972cd2da9b89b84b4ca3a3",
+            "workflow": 38198942950,
+            "conclusion": "success",
+            "tests": 1559
+          }
+        },
+        {
+          "part": "stack and lay table output",
+          "status": "COMPLETE",
+          "report": "docs/sheeting-lexus-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "1ab7a879ebd003ff9a972cd2da9b89b84b4ca3a3",
+            "workflow": 38198942950,
+            "conclusion": "success",
+            "tests": 1559
+          }
+        },
+        {
+          "part": "operator controls, housing and access",
+          "status": "COMPLETE",
+          "report": "docs/sheeting-lexus-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "1ab7a879ebd003ff9a972cd2da9b89b84b4ca3a3",
+            "workflow": 38198942950,
+            "conclusion": "success",
+            "tests": 1559
+          }
+        }
       ],
-      "reports": ["docs/sheeting-lexus-whole-machine-audit.md"]
+      "reports": [
+        "docs/sheeting-lexus-whole-machine-audit.md"
+      ]
     },
     {
       "machineId": "BMJ-MCH-0003",
@@ -223,16 +295,98 @@
       "area": "OFFSET PRINTING",
       "status": "COMPLETE",
       "parts": [
-        {"part": "sheet feeder and input", "status": "COMPLETE", "report": "docs/offset7-ya1a1a-whole-machine-audit.md", "releaseEvidence": {"commit": "488f5f71d3c2471bc54d86a9a8c8f70763d746f9", "workflow": 38207158608, "conclusion": "success", "tests": 1561}},
-        {"part": "register and sheet transfer", "status": "COMPLETE", "report": "docs/offset7-ya1a1a-whole-machine-audit.md", "releaseEvidence": {"commit": "488f5f71d3c2471bc54d86a9a8c8f70763d746f9", "workflow": 38207158608, "conclusion": "success", "tests": 1561}},
-        {"part": "ink supply and circulation", "status": "COMPLETE", "report": "docs/offset7-ya1a1a-whole-machine-audit.md", "releaseEvidence": {"commit": "488f5f71d3c2471bc54d86a9a8c8f70763d746f9", "workflow": 38207158608, "conclusion": "success", "tests": 1561}},
-        {"part": "gravure cylinder and doctor", "status": "COMPLETE", "report": "docs/offset7-ya1a1a-whole-machine-audit.md", "releaseEvidence": {"commit": "488f5f71d3c2471bc54d86a9a8c8f70763d746f9", "workflow": 38207158608, "conclusion": "success", "tests": 1561}},
-        {"part": "impression cylinder and sheet control", "status": "COMPLETE", "report": "docs/offset7-ya1a1a-whole-machine-audit.md", "releaseEvidence": {"commit": "488f5f71d3c2471bc54d86a9a8c8f70763d746f9", "workflow": 38207158608, "conclusion": "success", "tests": 1561}},
-        {"part": "drying and exhaust", "status": "COMPLETE", "report": "docs/offset7-ya1a1a-whole-machine-audit.md", "releaseEvidence": {"commit": "488f5f71d3c2471bc54d86a9a8c8f70763d746f9", "workflow": 38207158608, "conclusion": "success", "tests": 1561}},
-        {"part": "high-pile delivery and output", "status": "COMPLETE", "report": "docs/offset7-ya1a1a-whole-machine-audit.md", "releaseEvidence": {"commit": "488f5f71d3c2471bc54d86a9a8c8f70763d746f9", "workflow": 38207158608, "conclusion": "success", "tests": 1561}},
-        {"part": "drive, control, housing and access", "status": "COMPLETE", "report": "docs/offset7-ya1a1a-whole-machine-audit.md", "releaseEvidence": {"commit": "488f5f71d3c2471bc54d86a9a8c8f70763d746f9", "workflow": 38207158608, "conclusion": "success", "tests": 1561}}
+        {
+          "part": "sheet feeder and input",
+          "status": "COMPLETE",
+          "report": "docs/offset7-ya1a1a-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "488f5f71d3c2471bc54d86a9a8c8f70763d746f9",
+            "workflow": 38207158608,
+            "conclusion": "success",
+            "tests": 1561
+          }
+        },
+        {
+          "part": "register and sheet transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset7-ya1a1a-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "488f5f71d3c2471bc54d86a9a8c8f70763d746f9",
+            "workflow": 38207158608,
+            "conclusion": "success",
+            "tests": 1561
+          }
+        },
+        {
+          "part": "ink supply and circulation",
+          "status": "COMPLETE",
+          "report": "docs/offset7-ya1a1a-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "488f5f71d3c2471bc54d86a9a8c8f70763d746f9",
+            "workflow": 38207158608,
+            "conclusion": "success",
+            "tests": 1561
+          }
+        },
+        {
+          "part": "gravure cylinder and doctor",
+          "status": "COMPLETE",
+          "report": "docs/offset7-ya1a1a-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "488f5f71d3c2471bc54d86a9a8c8f70763d746f9",
+            "workflow": 38207158608,
+            "conclusion": "success",
+            "tests": 1561
+          }
+        },
+        {
+          "part": "impression cylinder and sheet control",
+          "status": "COMPLETE",
+          "report": "docs/offset7-ya1a1a-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "488f5f71d3c2471bc54d86a9a8c8f70763d746f9",
+            "workflow": 38207158608,
+            "conclusion": "success",
+            "tests": 1561
+          }
+        },
+        {
+          "part": "drying and exhaust",
+          "status": "COMPLETE",
+          "report": "docs/offset7-ya1a1a-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "488f5f71d3c2471bc54d86a9a8c8f70763d746f9",
+            "workflow": 38207158608,
+            "conclusion": "success",
+            "tests": 1561
+          }
+        },
+        {
+          "part": "high-pile delivery and output",
+          "status": "COMPLETE",
+          "report": "docs/offset7-ya1a1a-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "488f5f71d3c2471bc54d86a9a8c8f70763d746f9",
+            "workflow": 38207158608,
+            "conclusion": "success",
+            "tests": 1561
+          }
+        },
+        {
+          "part": "drive, control, housing and access",
+          "status": "COMPLETE",
+          "report": "docs/offset7-ya1a1a-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "488f5f71d3c2471bc54d86a9a8c8f70763d746f9",
+            "workflow": 38207158608,
+            "conclusion": "success",
+            "tests": 1561
+          }
+        }
       ],
-      "reports": ["docs/offset7-ya1a1a-whole-machine-audit.md"]
+      "reports": [
+        "docs/offset7-ya1a1a-whole-machine-audit.md"
+      ]
     },
     {
       "machineId": "BMJ-MCH-0005",
@@ -241,27 +395,97 @@
       "area": "OFFSET PRINTING",
       "status": "COMPLETE",
       "parts": [
-        {"part":"feeder and input","status":"COMPLETE","report":"docs/offset8-cx104-whole-machine-audit.md"},
-        {"part":"stream feeder and register","status":"NO_CHANGE_REQUIRED","report":"docs/offset8-cx104-whole-machine-audit.md"},
-        {"part":"PU1 and downstream transfer","status":"COMPLETE","report":"docs/offset8-cx104-whole-machine-audit.md"},
-        {"part":"PU2 and downstream transfer","status":"COMPLETE","report":"docs/offset8-cx104-whole-machine-audit.md"},
-        {"part":"PU3 and downstream transfer","status":"COMPLETE","report":"docs/offset8-cx104-whole-machine-audit.md"},
-        {"part":"PU4 and downstream transfer","status":"COMPLETE","report":"docs/offset8-cx104-whole-machine-audit.md"},
-        {"part":"PU5 and downstream transfer","status":"COMPLETE","report":"docs/offset8-cx104-whole-machine-audit.md"},
-        {"part":"PU6 and downstream transfer","status":"COMPLETE","report":"docs/offset8-cx104-whole-machine-audit.md"},
-        {"part":"PU7 and downstream transfer","status":"COMPLETE","report":"docs/offset8-cx104-whole-machine-audit.md"},
-        {"part":"PU8 and downstream transfer","status":"COMPLETE","report":"docs/offset8-cx104-whole-machine-audit.md"},
-        {"part":"L1 coating unit","status":"BLOCKED_EVIDENCE","report":"docs/offset8-cx104-whole-machine-audit.md"},
-        {"part":"Y1 dryer section","status":"BLOCKED_EVIDENCE","report":"docs/offset8-cx104-whole-machine-audit.md"},
-        {"part":"Y2 dryer section","status":"BLOCKED_EVIDENCE","report":"docs/offset8-cx104-whole-machine-audit.md"},
-        {"part":"L2 coating unit","status":"BLOCKED_EVIDENCE","report":"docs/offset8-cx104-whole-machine-audit.md"},
-        {"part":"delivery and output","status":"COMPLETE","report":"docs/offset8-cx104-whole-machine-audit.md"},
-        {"part":"housing, control, access and utilities","status":"BLOCKED_EVIDENCE","report":"docs/offset8-cx104-whole-machine-audit.md"}
+        {
+          "part": "feeder and input",
+          "status": "COMPLETE",
+          "report": "docs/offset8-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "stream feeder and register",
+          "status": "NO_CHANGE_REQUIRED",
+          "report": "docs/offset8-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "PU1 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset8-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "PU2 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset8-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "PU3 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset8-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "PU4 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset8-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "PU5 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset8-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "PU6 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset8-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "PU7 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset8-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "PU8 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset8-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "L1 coating unit",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/offset8-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "Y1 dryer section",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/offset8-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "Y2 dryer section",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/offset8-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "L2 coating unit",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/offset8-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "delivery and output",
+          "status": "COMPLETE",
+          "report": "docs/offset8-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "housing, control, access and utilities",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/offset8-cx104-whole-machine-audit.md"
+        }
       ],
-      "reports": ["docs/offset8-cx104-whole-machine-audit.md"],
+      "reports": [
+        "docs/offset8-cx104-whole-machine-audit.md"
+      ],
       "releaseEvidence": {
         "commit": "5fc5fb10c3ef5616bbd204858a09d616186fd50f",
-        "workflows": [38212189769, 38212189869, 38212189715],
+        "workflows": [
+          38212189769,
+          38212189869,
+          38212189715
+        ],
         "conclusion": "success",
         "tests": 1562,
         "productionHttp": 200
@@ -274,21 +498,67 @@
       "area": "OFFSET PRINTING",
       "status": "COMPLETE",
       "parts": [
-        {"part":"feeder and input","status":"COMPLETE","report":"docs/offset9-sx52-whole-machine-audit.md"},
-        {"part":"central suction tape and register","status":"NO_CHANGE_REQUIRED","report":"docs/offset9-sx52-whole-machine-audit.md"},
-        {"part":"PU1 and downstream transfer","status":"COMPLETE","report":"docs/offset9-sx52-whole-machine-audit.md"},
-        {"part":"PU2 and downstream transfer","status":"COMPLETE","report":"docs/offset9-sx52-whole-machine-audit.md"},
-        {"part":"PU3 and downstream transfer","status":"COMPLETE","report":"docs/offset9-sx52-whole-machine-audit.md"},
-        {"part":"PU4 and downstream transfer","status":"COMPLETE","report":"docs/offset9-sx52-whole-machine-audit.md"},
-        {"part":"inline coating unit","status":"BLOCKED_EVIDENCE","report":"docs/offset9-sx52-whole-machine-audit.md"},
-        {"part":"delivery transport and sheet brake","status":"BLOCKED_EVIDENCE","report":"docs/offset9-sx52-whole-machine-audit.md"},
-        {"part":"delivery pile and output","status":"COMPLETE","report":"docs/offset9-sx52-whole-machine-audit.md"},
-        {"part":"housing, control, access and utilities","status":"BLOCKED_EVIDENCE","report":"docs/offset9-sx52-whole-machine-audit.md"}
+        {
+          "part": "feeder and input",
+          "status": "COMPLETE",
+          "report": "docs/offset9-sx52-whole-machine-audit.md"
+        },
+        {
+          "part": "central suction tape and register",
+          "status": "NO_CHANGE_REQUIRED",
+          "report": "docs/offset9-sx52-whole-machine-audit.md"
+        },
+        {
+          "part": "PU1 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset9-sx52-whole-machine-audit.md"
+        },
+        {
+          "part": "PU2 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset9-sx52-whole-machine-audit.md"
+        },
+        {
+          "part": "PU3 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset9-sx52-whole-machine-audit.md"
+        },
+        {
+          "part": "PU4 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset9-sx52-whole-machine-audit.md"
+        },
+        {
+          "part": "inline coating unit",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/offset9-sx52-whole-machine-audit.md"
+        },
+        {
+          "part": "delivery transport and sheet brake",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/offset9-sx52-whole-machine-audit.md"
+        },
+        {
+          "part": "delivery pile and output",
+          "status": "COMPLETE",
+          "report": "docs/offset9-sx52-whole-machine-audit.md"
+        },
+        {
+          "part": "housing, control, access and utilities",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/offset9-sx52-whole-machine-audit.md"
+        }
       ],
-      "reports": ["docs/offset9-sx52-whole-machine-audit.md"],
+      "reports": [
+        "docs/offset9-sx52-whole-machine-audit.md"
+      ],
       "releaseEvidence": {
         "commit": "ee154a5115b13f94c5f1efbe9249f968444d6504",
-        "workflows": [38222145259, 38222145275, 38222145485],
+        "workflows": [
+          38222145259,
+          38222145275,
+          38222145485
+        ],
         "conclusion": "success",
         "tests": 1564,
         "productionHttp": 200
@@ -301,20 +571,62 @@
       "area": "OFFSET PRINTING",
       "status": "COMPLETE",
       "parts": [
-        {"part":"load platform and lower support","status":"COMPLETE","report":"docs/pile-turner01-fz1200-whole-machine-audit.md"},
-        {"part":"pile clamp and pressure contact","status":"COMPLETE","report":"docs/pile-turner01-fz1200-whole-machine-audit.md"},
-        {"part":"vertical lift and turning clearance","status":"NO_CHANGE_REQUIRED","report":"docs/pile-turner01-fz1200-whole-machine-audit.md"},
-        {"part":"turning yoke, trunnion and position lock","status":"NO_CHANGE_REQUIRED","report":"docs/pile-turner01-fz1200-whole-machine-audit.md"},
-        {"part":"air separation and dust-removal path","status":"COMPLETE","report":"docs/pile-turner01-fz1200-whole-machine-audit.md"},
-        {"part":"jogging and alignment","status":"COMPLETE","report":"docs/pile-turner01-fz1200-whole-machine-audit.md"},
-        {"part":"lower, release and unload","status":"COMPLETE","report":"docs/pile-turner01-fz1200-whole-machine-audit.md"},
-        {"part":"hydraulic and air utility","status":"BLOCKED_EVIDENCE","report":"docs/pile-turner01-fz1200-whole-machine-audit.md"},
-        {"part":"controls, guards, display modes and taxonomy","status":"BLOCKED_EVIDENCE","report":"docs/pile-turner01-fz1200-whole-machine-audit.md"}
+        {
+          "part": "load platform and lower support",
+          "status": "COMPLETE",
+          "report": "docs/pile-turner01-fz1200-whole-machine-audit.md"
+        },
+        {
+          "part": "pile clamp and pressure contact",
+          "status": "COMPLETE",
+          "report": "docs/pile-turner01-fz1200-whole-machine-audit.md"
+        },
+        {
+          "part": "vertical lift and turning clearance",
+          "status": "NO_CHANGE_REQUIRED",
+          "report": "docs/pile-turner01-fz1200-whole-machine-audit.md"
+        },
+        {
+          "part": "turning yoke, trunnion and position lock",
+          "status": "NO_CHANGE_REQUIRED",
+          "report": "docs/pile-turner01-fz1200-whole-machine-audit.md"
+        },
+        {
+          "part": "air separation and dust-removal path",
+          "status": "COMPLETE",
+          "report": "docs/pile-turner01-fz1200-whole-machine-audit.md"
+        },
+        {
+          "part": "jogging and alignment",
+          "status": "COMPLETE",
+          "report": "docs/pile-turner01-fz1200-whole-machine-audit.md"
+        },
+        {
+          "part": "lower, release and unload",
+          "status": "COMPLETE",
+          "report": "docs/pile-turner01-fz1200-whole-machine-audit.md"
+        },
+        {
+          "part": "hydraulic and air utility",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/pile-turner01-fz1200-whole-machine-audit.md"
+        },
+        {
+          "part": "controls, guards, display modes and taxonomy",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/pile-turner01-fz1200-whole-machine-audit.md"
+        }
       ],
-      "reports": ["docs/pile-turner01-fz1200-whole-machine-audit.md"],
+      "reports": [
+        "docs/pile-turner01-fz1200-whole-machine-audit.md"
+      ],
       "releaseEvidence": {
         "commit": "9c0718374c5704239abb9913fbfb451ca1404ddf",
-        "workflows": [38240782281, 38240782217, 38240782415],
+        "workflows": [
+          38240782281,
+          38240782217,
+          38240782415
+        ],
         "conclusion": "success",
         "tests": 1565,
         "productionHttp": 200
@@ -327,20 +639,62 @@
       "area": "OFFSET PRINTING",
       "status": "COMPLETE",
       "parts": [
-        {"part":"load platform and lower support","status":"COMPLETE","report":"docs/pile-turner03-fz1200-whole-machine-audit.md"},
-        {"part":"pile clamp and pressure contact","status":"COMPLETE","report":"docs/pile-turner03-fz1200-whole-machine-audit.md"},
-        {"part":"vertical lift and turning clearance","status":"NO_CHANGE_REQUIRED","report":"docs/pile-turner03-fz1200-whole-machine-audit.md"},
-        {"part":"turning yoke, trunnion and position lock","status":"NO_CHANGE_REQUIRED","report":"docs/pile-turner03-fz1200-whole-machine-audit.md"},
-        {"part":"air separation and dust-removal path","status":"COMPLETE","report":"docs/pile-turner03-fz1200-whole-machine-audit.md"},
-        {"part":"jogging and alignment","status":"COMPLETE","report":"docs/pile-turner03-fz1200-whole-machine-audit.md"},
-        {"part":"lower, release and unload","status":"COMPLETE","report":"docs/pile-turner03-fz1200-whole-machine-audit.md"},
-        {"part":"hydraulic and air utility","status":"BLOCKED_EVIDENCE","report":"docs/pile-turner03-fz1200-whole-machine-audit.md"},
-        {"part":"controls, guards, display modes and taxonomy","status":"COMPLETE","report":"docs/pile-turner03-fz1200-whole-machine-audit.md"}
+        {
+          "part": "load platform and lower support",
+          "status": "COMPLETE",
+          "report": "docs/pile-turner03-fz1200-whole-machine-audit.md"
+        },
+        {
+          "part": "pile clamp and pressure contact",
+          "status": "COMPLETE",
+          "report": "docs/pile-turner03-fz1200-whole-machine-audit.md"
+        },
+        {
+          "part": "vertical lift and turning clearance",
+          "status": "NO_CHANGE_REQUIRED",
+          "report": "docs/pile-turner03-fz1200-whole-machine-audit.md"
+        },
+        {
+          "part": "turning yoke, trunnion and position lock",
+          "status": "NO_CHANGE_REQUIRED",
+          "report": "docs/pile-turner03-fz1200-whole-machine-audit.md"
+        },
+        {
+          "part": "air separation and dust-removal path",
+          "status": "COMPLETE",
+          "report": "docs/pile-turner03-fz1200-whole-machine-audit.md"
+        },
+        {
+          "part": "jogging and alignment",
+          "status": "COMPLETE",
+          "report": "docs/pile-turner03-fz1200-whole-machine-audit.md"
+        },
+        {
+          "part": "lower, release and unload",
+          "status": "COMPLETE",
+          "report": "docs/pile-turner03-fz1200-whole-machine-audit.md"
+        },
+        {
+          "part": "hydraulic and air utility",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/pile-turner03-fz1200-whole-machine-audit.md"
+        },
+        {
+          "part": "controls, guards, display modes and taxonomy",
+          "status": "COMPLETE",
+          "report": "docs/pile-turner03-fz1200-whole-machine-audit.md"
+        }
       ],
-      "reports": ["docs/pile-turner03-fz1200-whole-machine-audit.md"],
+      "reports": [
+        "docs/pile-turner03-fz1200-whole-machine-audit.md"
+      ],
       "releaseEvidence": {
         "commit": "abc8e471f294e7dd12f850975c508eab5724b5b5",
-        "workflows": [38248606897, 38248606822, 38248607428],
+        "workflows": [
+          38248606897,
+          38248606822,
+          38248607428
+        ],
         "conclusion": "success",
         "tests": 1566,
         "productionHttp": 200
@@ -351,9 +705,117 @@
       "name": "OFFSET - 10 MACHINE",
       "model": "CX104-2+LY-8+LY-1+L UV + FoilStar",
       "area": "OFFSET PRINTING",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {
+          "part": "Preset Plus feeder and input",
+          "status": "COMPLETE",
+          "report": "docs/offset10-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "feed table and register",
+          "status": "NO_CHANGE_REQUIRED",
+          "report": "docs/offset10-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "PU1 adhesive and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset10-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "PU2 FoilStar transfer and downstream handoff",
+          "status": "COMPLETE",
+          "report": "docs/offset10-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "CU1 coating and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset10-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "Y1 interdeck UV and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset10-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "PU4 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset10-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "PU5 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset10-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "PU6 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset10-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "PU7 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset10-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "PU8 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset10-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "PU9 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset10-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "PU10 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset10-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "PU11 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset10-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "CU2 coating and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset10-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "Y2 interdeck UV and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset10-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "PU14 and downstream transfer",
+          "status": "COMPLETE",
+          "report": "docs/offset10-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "CUF final coating",
+          "status": "COMPLETE",
+          "report": "docs/offset10-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "X3 drying and delivery transport",
+          "status": "COMPLETE",
+          "report": "docs/offset10-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "delivery pile and output",
+          "status": "COMPLETE",
+          "report": "docs/offset10-cx104-whole-machine-audit.md"
+        },
+        {
+          "part": "housing, controls, access and utilities",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/offset10-cx104-whole-machine-audit.md"
+        }
+      ],
+      "reports": [
+        "docs/offset10-cx104-whole-machine-audit.md"
+      ]
     },
     {
       "machineId": "BMJ-MCH-0010",
@@ -742,7 +1204,12 @@
       "report": "docs/polar115-housing-control-audit.md",
       "nextPartIndex": 7,
       "parentCommit": "6fe9f6c15688a3a4175c7bc08bf6029566c47016",
-      "releaseEvidence": {"commit": "3c2b2d178dfa889207d4491cc565679261de60d2", "workflow": 38194802399, "conclusion": "success", "tests": 1557}
+      "releaseEvidence": {
+        "commit": "3c2b2d178dfa889207d4491cc565679261de60d2",
+        "workflow": 38194802399,
+        "conclusion": "success",
+        "tests": 1557
+      }
     },
     {
       "machineId": "BMJ-MCH-0001",
@@ -751,7 +1218,12 @@
       "report": "docs/polar115-utility-audit.md",
       "nextPartIndex": 8,
       "parentCommit": "6fe9f6c15688a3a4175c7bc08bf6029566c47016",
-      "releaseEvidence": {"commit": "3c2b2d178dfa889207d4491cc565679261de60d2", "workflow": 38194802399, "conclusion": "success", "tests": 1557}
+      "releaseEvidence": {
+        "commit": "3c2b2d178dfa889207d4491cc565679261de60d2",
+        "workflow": 38194802399,
+        "conclusion": "success",
+        "tests": 1557
+      }
     },
     {
       "machineId": "BMJ-MCH-0002",
@@ -760,7 +1232,12 @@
       "report": "docs/sheeting-lexus-whole-machine-audit.md",
       "nextMachineId": "BMJ-MCH-0004",
       "parentCommit": "3c2b2d178dfa889207d4491cc565679261de60d2",
-      "releaseEvidence": {"commit": "1ab7a879ebd003ff9a972cd2da9b89b84b4ca3a3", "workflow": 38198942950, "conclusion": "success", "tests": 1559}
+      "releaseEvidence": {
+        "commit": "1ab7a879ebd003ff9a972cd2da9b89b84b4ca3a3",
+        "workflow": 38198942950,
+        "conclusion": "success",
+        "tests": 1559
+      }
     },
     {
       "machineId": "BMJ-MCH-0004",
@@ -769,7 +1246,12 @@
       "report": "docs/offset7-ya1a1a-whole-machine-audit.md",
       "nextMachineId": "BMJ-MCH-0005",
       "parentCommit": "56d3ee77b05fec2bb644edb852089bf9323a1f9b",
-      "releaseEvidence": {"commit": "488f5f71d3c2471bc54d86a9a8c8f70763d746f9", "workflow": 38207158608, "conclusion": "success", "tests": 1561}
+      "releaseEvidence": {
+        "commit": "488f5f71d3c2471bc54d86a9a8c8f70763d746f9",
+        "workflow": 38207158608,
+        "conclusion": "success",
+        "tests": 1561
+      }
     }
   ],
   "updatedAt": "2026-10-12T05:43:00Z"

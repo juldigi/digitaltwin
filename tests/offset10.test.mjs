@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import {Offset10MachineTemplate} from '../frontend/src/offset10.js';
+import {Offset10CX104SpecialRealismTemplate} from '../frontend/src/offset10-realism.js';
 import {Offset10PrintingSimulation,OFFSET10_SIMULATION_STAGES} from '../frontend/src/simulation-offset10.js';
 import {OFFSET10_DIMENSIONS,OFFSET10_MODULE_SEQUENCE,OFFSET10_MODULE_CENTERS,OFFSET10_PRINTING_UNIT_KEYS,OFFSET10_COATING_UNIT_KEYS,OFFSET10_Y_UNIT_KEYS} from '../frontend/src/data/dimensions-offset10.js';
 import {OFFSET10_TAXONOMY,OFFSET10_TAXONOMY_BY_ID,offset10TaxonomyStats} from '../frontend/src/data/taxonomy-offset10.js';
@@ -18,11 +19,26 @@ test('Offset 10 configuration matches the BMJ final drawing module sequence',()=
   assert.equal(OFFSET10_DIMENSIONS.verified.deliveryExtensionModules,3);
   assert.equal(OFFSET10_DIMENSIONS.verified.pressElevation,.564);
   assert.equal(OFFSET10_DIMENSIONS.verified.maxSpeedSph,15000);
+  assert.equal(OFFSET10_DIMENSIONS.verified.feederPileHeight,1.320);
   assert.equal(OFFSET10_DIMENSIONS.verified.maxSheetWidth,1.040);
   assert.equal(OFFSET10_DIMENSIONS.verified.modulePitch,1.225);
   assert.equal(OFFSET10_DIMENSIONS.verified.baseReferenceLength,27.749);
   assert.equal(OFFSET10_DIMENSIONS.verified.machineOnlyWeightKg,98995);
   assert.equal(OFFSET10_DIMENSIONS.verified.overallPressWeightKg,110181);
+});
+
+test('Offset 10 feeder pile is supported and suction cups meet its top surface',()=>{
+  const machine=new Offset10MachineTemplate(),pile=machine.findNode('o10-feeder-pile');
+  machine.root.updateMatrixWorld(true);
+  const paper=pile.children.find(o=>o.isMesh&&o.material.color.getHex()===machine.palette.paper);
+  const table=pile.children.find(o=>o.isMesh&&o.material.color.getHex()===machine.palette.steel);
+  const cups=[];machine.findNode('o10-feeder-head').traverse(o=>{if(o.userData?.feederSuctionCup)cups.push(o);});
+  const paperBox=new THREE.Box3().setFromObject(paper),tableBox=new THREE.Box3().setFromObject(table);
+  assert.ok(Math.abs(paperBox.min.y-tableBox.max.y)<.002,'paper pile is unsupported or penetrates the lift table');
+  assert.ok(Math.abs((paperBox.max.y-paperBox.min.y)-1.320)<.002,'feeder pile height diverges from CX 104 family data');
+  assert.equal(cups.length,4);
+  for(const cup of cups){const box=new THREE.Box3().setFromObject(cup);assert.ok(Math.abs(box.min.y-paperBox.max.y)<.003,'suction cup does not contact the pile surface');}
+  machine.dispose();
 });
 
 test('Offset 10 builds all document-grounded physical modules and no CD102 roller numbering',()=>{
@@ -174,6 +190,39 @@ test('Offset 10 cutaway exposes complete press interior like Offset 5 while reta
   machine.setExteriorOpen(false);
   assert.ok(removable.every(m=>m.visible),'closed exterior did not restore covers/access');
   assert.equal(machine.root.userData.interiorCutawayVisible,false);
+  machine.dispose();
+});
+
+test('Offset 10 showOnly retains selected ancestors and the complete selected subtree',()=>{
+  const machine=new Offset10MachineTemplate(),selected=machine.findNode('o10-pu2-inking');
+  const child=machine.findNode('o10-pu2-ink-form'),ancestor=machine.findNode('o10-pu2');
+  const unrelated=machine.findNode('o10-pu1-inking');
+  machine.showOnly([selected],true);
+  assert.equal(selected.visible,true);
+  assert.equal(child.visible,true,'selected component descendant disappeared');
+  assert.equal(ancestor.visible,true,'selected component ancestor disappeared');
+  assert.equal(unrelated.visible,false,'unrelated component remained visible');
+  machine.showOnly([],false);
+  assert.equal(machine.nodes.every(n=>n.visible),true);
+  machine.dispose();
+});
+
+test('Offset 10 interior and LOD visibility is stable in both toggle orders',()=>{
+  const machine=new Offset10CX104SpecialRealismTemplate();
+  const cover=machine.realismMeshes.find(m=>m.userData.coverMountedDetail&&m.userData.silhouetteCritical);
+  const service=machine.realismMeshes.find(m=>m.userData.serviceDetail&&!m.userData.silhouetteCritical);
+  assert.ok(cover&&service,'realism visibility fixtures missing');
+
+  machine.setExteriorOpen(true);machine.setLow(true);machine.setLow(false);
+  assert.equal(cover.visible,false,'LOD restore reopened a cover during interior mode');
+  assert.equal(service.visible,false,'LOD restore exposed service detail during interior mode');
+
+  machine.setExteriorOpen(false);machine.setLow(true);machine.setExteriorOpen(true);
+  assert.equal(cover.visible,false,'interior toggle exposed a cover while LOD was active');
+  assert.equal(service.visible,false,'interior toggle exposed service detail while LOD was active');
+
+  machine.setExteriorOpen(false);machine.setLow(false);
+  assert.equal(cover.visible,true);assert.equal(service.visible,true);
   machine.dispose();
 });
 

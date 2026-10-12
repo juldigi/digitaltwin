@@ -35,7 +35,7 @@ export const OFFSET10_FINAL_REFINEMENT=Object.freeze({
 
 export class Offset10CX104SpecialRealismTemplate extends Offset10MachineTemplate{
  constructor(){
-  super();this.realismMeshes=[];
+  super();this.realismMeshes=[];this.lowDetail=false;
   this.root.userData.realismPack=OFFSET10_FINAL_REFINEMENT.id;
   this.root.userData.realismPolicy=OFFSET10_FINAL_REFINEMENT.policy;
   this.refineExistingModel();this.root.updateMatrixWorld(true);
@@ -191,11 +191,22 @@ export class Offset10CX104SpecialRealismTemplate extends Offset10MachineTemplate
  }
  setExteriorOpen(on=true){
   if(typeof Offset10MachineTemplate.prototype.setExteriorOpen==='function')Offset10MachineTemplate.prototype.setExteriorOpen.call(this,on);
-  for(const m of this.realismMeshes)if(m.userData.coverMountedDetail)m.visible=!on;return this;
+  for(const m of this.realismMeshes){
+   const hiddenByCutaway=Boolean(on&&(m.userData.coverMountedDetail||m.userData.serviceDetail));
+   const hiddenByLod=Boolean(this.lowDetail&&!m.userData.silhouetteCritical);
+   m.visible=!hiddenByCutaway&&!hiddenByLod;
+  }
+  return this;
  }
  setLow(on){
+  this.lowDetail=Boolean(on);
   if(typeof Offset10MachineTemplate.prototype.setLow==='function')Offset10MachineTemplate.prototype.setLow.call(this,on);
-  for(const m of this.realismMeshes)m.visible=!on||Boolean(m.userData.silhouetteCritical);return this;
+  for(const m of this.realismMeshes){
+   const hiddenByCutaway=Boolean(this.exteriorOpen&&(m.userData.coverMountedDetail||m.userData.serviceDetail));
+   const hiddenByLod=Boolean(this.lowDetail&&!m.userData.silhouetteCritical);
+   m.visible=!hiddenByCutaway&&!hiddenByLod;
+  }
+  return this;
  }
 }
 

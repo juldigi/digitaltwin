@@ -100,11 +100,11 @@ export class Offset10MachineTemplate{
     this.cover(this.box(frame,[1.08,.56,2.80],[-1.42,2.30,0],'graphite',.10));
     const pile=this.group(g,'o10-feeder-pile','Main / non-stop feeder pile',[0,0,0],[-.5,.1,0],['O10-PROPOSAL']);
     this.box(pile,[1.30,.10,1.72],[-1.12,.66,0],'steel',.018);
-    this.box(pile,[1.22,1.10,1.62],[-1.12,1.23,0],'paper',.012);
+    this.box(pile,[1.22,OFFSET10_DIMENSIONS.verified.feederPileHeight,1.62],[-1.12,1.37,0],'paper',.012);
     for(const z of [-.90,.90])this.cylinder(pile,.035,1.20,[-1.48,1.25,z],'steel','y');
     const head=this.group(g,'o10-feeder-head','Preset Plus feeding head',[0,0,0],[-.3,.35,0],['O10-PROPOSAL']);
     this.box(head,[.82,.30,1.72],[-.28,2.40,0],'graphite',.045);
-    for(const z of [-.56,-.20,.20,.56]){this.cylinder(head,.035,.26,[-.03,2.20,z],'rubber','y');this.cylinder(head,.020,.18,[.18,2.13,z],'steel','y');}
+    for(const z of [-.56,-.20,.20,.56]){const cup=this.cylinder(head,.035,.26,[-.03,2.16,z],'rubber','y');cup.userData.feederSuctionCup=true;this.cylinder(head,.020,.18,[.18,2.13,z],'steel','y');}
     const air=this.group(g,'o10-feeder-air','Feeder air manifold',[0,0,0],[-.2,.3,.3],['O10-PROPOSAL']);
     this.cylinder(air,.038,1.58,[.26,2.28,0],'steel','z');for(const z of [-.60,-.30,0,.30,.60])this.tube(air,[[.26,2.28,z],[.42,2.10,z],[.55,1.93,z]],.010,'blue');
     const board=this.group(g,'o10-feedboard','Feed table / register',[1.66,0,0],[-.3,.2,0],['O10-PROPOSAL','O10-FINAL-DRAWING']);
@@ -418,7 +418,7 @@ export class Offset10MachineTemplate{
   highlightMany(parts=[]){for(const m of this.meshes){const on=parts.some(part=>this.contains(part,m));m.material.emissive?.setHex(on?0x174b47:0);if(m.material.emissive)m.material.emissiveIntensity=.28;}}
   ghost(on,except=null){this.ghosted=on;for(const m of this.meshes){const faded=on&&(!except||!this.contains(except,m)),glass=m.material.color?.getHex()===this.palette.glass;m.material.transparent=faded||glass;m.material.opacity=faded?.14:glass?.38:1;m.material.depthWrite=!faded;m.material.needsUpdate=true;}}
   isolate(part,on=true){for(const n of this.nodes)n.visible=!on||!part||this.contains(part,n)||this.contains(n,part);}
-  showOnly(parts=[],on=true){for(const n of this.nodes)n.visible=!on||!parts.length||parts.some(part=>n===part||this.contains(n,part));}
+  showOnly(parts=[],on=true){for(const n of this.nodes)n.visible=!on||!parts.length||parts.some(part=>n===part||this.contains(n,part)||this.contains(part,n));}
   setExteriorOpen(on=true){
     this.exteriorOpen=!!on;let hidden=0,serviceHidden=0;
     for(const n of this.nodes){
