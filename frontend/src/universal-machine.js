@@ -48,7 +48,7 @@ const MODULES={
  gravure:['Substrate Infeed','Register / Transport','Ink Pan / Circulation','Gravure Cylinder','Doctor Blade','Impression Cylinder','Drying / Exhaust','Delivery / Rewind'],
  offset:['Preset Feeder','Feedboard / Register','Printing Units','Coating / Dryer','Delivery','Drive & Control'],
  pileturner:['Base & Lift','Pile Clamp Assembly','Turning Yoke / Trunnion','Air Separation / Dust Removal','Jogging / Alignment','Hydraulic Drive','Safety & Control'],
- hotfoil:['Feeder','Register','Foil Unwind','Heating / Stamping Platen','Foil Advance','Stripping','Delivery','Drive & Control'],
+ hotfoil:['Feeder','Register','Foil Unwind','Heating / Stamping Platen','Foil Advance / Waste Rewind','Delivery','Drive & Control'],
  diecutter:['Feeder','Register','Gripper Transport','Die-Cutting Platen','Stripping','Blanking','Delivery','Drive & Control'],
  folder:['Blank Feeder & Separation','Alignment & Prebreaking','Primary Folding / Box-Style Capabilities','Glue Application Boundary','Final Folding & Squaring','Compression Section','Delivery & Control'],
  inspection:['Feeder','Alignment','Camera / Lighting','Image Processing','Reject Gate','Delivery','Control'],

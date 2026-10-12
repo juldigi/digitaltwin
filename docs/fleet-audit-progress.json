@@ -5,7 +5,7 @@
   "timezone": "Asia/Jakarta",
   "cadence": "HOURLY",
   "mode": "AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY",
-  "status": "READY",
+  "status": "RELEASE_PENDING",
   "cursor": {
     "machineId": "BMJ-MCH-0012",
     "partIndex": 0
@@ -1047,9 +1047,18 @@
       "name": "AUTOPLATEN - 6 STAMPING",
       "model": "MK 920 YMI - II",
       "area": "OFFSET CONVERTING",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {"part": "pile feeder, lift and suction pickup", "status": "NO_CHANGE_REQUIRED", "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"},
+        {"part": "registration table and lays", "status": "NO_CHANGE_REQUIRED", "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"},
+        {"part": "intermittent gripper transport", "status": "BLOCKED_EVIDENCE", "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"},
+        {"part": "heated platen and chase contact", "status": "NO_CHANGE_REQUIRED", "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"},
+        {"part": "foil unwind, advance and waste rewind", "status": "BLOCKED_EVIDENCE", "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"},
+        {"part": "gripper release and delivery pile", "status": "NO_CHANGE_REQUIRED", "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"},
+        {"part": "drive, controls, guarding and access", "status": "BLOCKED_EVIDENCE", "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"},
+        {"part": "simulation, fallback, display modes and taxonomy", "status": "COMPLETE", "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"}
+      ],
+      "reports": ["docs/apm6-mk920ymiii-whole-machine-audit.md"]
     },
     {
       "machineId": "BMJ-MCH-0013",
@@ -1497,7 +1506,15 @@
         "tests": 1575,
         "productionHttp": 200
       }
+    },
+    {
+      "machineId": "BMJ-MCH-0012",
+      "part": "whole machine: pile feeder through hot-foil stamping and delivery",
+      "status": "RELEASE_PENDING",
+      "report": "docs/apm6-mk920ymiii-whole-machine-audit.md",
+      "nextMachineId": "BMJ-MCH-0013",
+      "parentCommit": "19f23edd7971a17080c4db420db98f3d1d576c8c"
     }
   ],
-  "updatedAt": "2026-10-12T22:20:16Z"
+  "updatedAt": "2026-10-12T23:22:00Z"
 }

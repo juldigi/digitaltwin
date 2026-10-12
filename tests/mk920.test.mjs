@@ -6,6 +6,7 @@ import {MK920StampingSimulation,MK920_SIMULATION_STAGES} from '../frontend/src/s
 import {MK920_SPEC,MK920_SPEC_APM6} from '../frontend/src/data/dimensions-mk920.js';
 import {mk920TaxonomyFor} from '../frontend/src/data/taxonomy-mk920.js';
 import {MK920_TECHNICAL_SOURCES} from '../frontend/src/data/sources-mk920.js';
+import {universalMachineConfig} from '../frontend/src/universal-machine.js';
 
 test('MK920 foil imprint appears only after heated platen contact and resets for the next sheet cycle',()=>{
  const model=new MK920MachineTemplate(),sim=new MK920StampingSimulation(model.root,model);
@@ -95,6 +96,15 @@ test('MK920 taxonomy remains a valid six-level tree for APM5 and APM6',()=>{
 
 test('MK920 stage list explicitly separates platen pressure from foil advance',()=>{
  assert.deepEqual(MK920_SIMULATION_STAGES,['Pile separation','Feed-table registration','Intermittent gripper index to platen','Platen close','Pressure / hot-foil dwell','Platen open','Foil advance + waste rewind','Gripper index to delivery','Gripper release','Delivery pile']);
+});
+
+test('APM6 fallback and profile do not invent a stripping station for the stamping-only evidence set',()=>{
+ const cfg=universalMachineConfig('BMJ-MCH-0012');
+ assert.deepEqual(cfg.modules,['Feeder','Register','Foil Unwind','Heating / Stamping Platen','Foil Advance / Waste Rewind','Delivery','Drive & Control']);
+ assert.equal(cfg.modules.some(x=>/stripping/i.test(x)),false);
+ assert.equal(cfg.profile.architecture.some(x=>/stripping/i.test(x)),false);
+ assert.equal(cfg.profile.process.some(x=>/strip waste/i.test(x)),false);
+ assert.deepEqual(cfg.profile.process,['feed sheet','register','gripper index to platen','close platen','heat-pressure foil transfer','open platen','index foil and rewind waste','gripper index to delivery','release and stack']);
 });
 
 test('MK920 suction cups contact the represented pile and reset without penetration',()=>{
