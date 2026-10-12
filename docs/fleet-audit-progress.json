@@ -5,7 +5,7 @@
   "timezone": "Asia/Jakarta",
   "cadence": "HOURLY",
   "mode": "AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY",
-  "status": "READY",
+  "status": "RELEASE_PENDING",
   "cursor": {
     "machineId": "BMJ-MCH-0008",
     "partIndex": 0
@@ -325,9 +325,19 @@
       "name": "PILE TURNER 03",
       "model": "FZ 1200",
       "area": "OFFSET PRINTING",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {"part":"load platform and lower support","status":"COMPLETE","report":"docs/pile-turner03-fz1200-whole-machine-audit.md"},
+        {"part":"pile clamp and pressure contact","status":"COMPLETE","report":"docs/pile-turner03-fz1200-whole-machine-audit.md"},
+        {"part":"vertical lift and turning clearance","status":"NO_CHANGE_REQUIRED","report":"docs/pile-turner03-fz1200-whole-machine-audit.md"},
+        {"part":"turning yoke, trunnion and position lock","status":"NO_CHANGE_REQUIRED","report":"docs/pile-turner03-fz1200-whole-machine-audit.md"},
+        {"part":"air separation and dust-removal path","status":"COMPLETE","report":"docs/pile-turner03-fz1200-whole-machine-audit.md"},
+        {"part":"jogging and alignment","status":"COMPLETE","report":"docs/pile-turner03-fz1200-whole-machine-audit.md"},
+        {"part":"lower, release and unload","status":"COMPLETE","report":"docs/pile-turner03-fz1200-whole-machine-audit.md"},
+        {"part":"hydraulic and air utility","status":"BLOCKED_EVIDENCE","report":"docs/pile-turner03-fz1200-whole-machine-audit.md"},
+        {"part":"controls, guards, display modes and taxonomy","status":"COMPLETE","report":"docs/pile-turner03-fz1200-whole-machine-audit.md"}
+      ],
+      "reports": ["docs/pile-turner03-fz1200-whole-machine-audit.md"]
     },
     {
       "machineId": "BMJ-MCH-0009",

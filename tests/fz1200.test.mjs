@@ -31,6 +31,18 @@ test('FZ1200 keeps all three BMJ identities and supplier numbers remain referenc
  assert.ok(FZ1200_TECHNICAL_SOURCES.some(s=>s.id==='FZ1200-EVIDENCE-BOUNDARY'));
 });
 
+test('PILE TURNER 03 keeps component highlight, ghost and showOnly state node-scoped',()=>{
+ const model=new FZ1200MachineTemplate('BMJ-MCH-0008'),selected=model.findNode('fz1200-control-hmi'),other=model.findNode('fz1200-base-frame');
+ try{
+  assert.equal(model.root.userData.assetId,'BMJ-MCH-0008');assert.equal(model.spec.serial,'2105080SF34');assert.equal(model.root.name,'PILE TURNER 03 · FZ 1200');
+  const selectedMesh=model.meshes.find(m=>model.contains(selected,m)),otherMesh=model.meshes.find(m=>model.contains(other,m));assert.ok(selectedMesh&&otherMesh);assert.notEqual(selectedMesh.material,otherMesh.material);
+  model.highlight(selected);assert.equal(selectedMesh.material.emissive.getHex(),0x17494a);assert.equal(otherMesh.material.emissive.getHex(),0);
+  model.ghost(true,selected);assert.equal(selectedMesh.material.opacity,1);assert.equal(otherMesh.material.opacity,.14);model.ghost(false);
+  model.showOnly([selected],true);assert.equal(selected.visible,true);assert.equal(selected.children.every(c=>c.visible),true);assert.equal(other.visible,false);
+  model.showOnly([],false);model.setLow(true);model.setExteriorOpen(true);model.setExteriorOpen(false);model.setLow(false);assert.equal(selected.visible,true);assert.equal(other.visible,true);
+ }finally{model.dispose();}
+});
+
 test('each FZ1200 asset instantiates pivot-correct clamp turn air jog hydraulic geometry',()=>{
  for(const assetId of Object.keys(FZ1200_ASSET_PROFILES)){const model=new FZ1200MachineTemplate(assetId),box=new THREE.Box3().setFromObject(model.root);assert.equal(model.root.userData.assetId,assetId);assert.equal(model.root.userData.engineeringDimensions,false);assert.ok(!box.isEmpty());assert.ok(box.min.y>=-0.01);
   for(const id of ['fz1200-base','fz1200-clamp','fz1200-turn','fz1200-turn-yoke','fz1200-air','fz1200-jog','fz1200-hydraulic','fz1200-control'])assert.ok(model.findNode(id),id);
