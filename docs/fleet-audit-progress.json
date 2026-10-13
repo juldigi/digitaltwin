@@ -5,9 +5,9 @@
   "timezone": "Asia/Jakarta",
   "cadence": "HOURLY",
   "mode": "AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY",
-  "status": "RELEASE_PENDING",
+  "status": "IN_PROGRESS",
   "cursor": {
-    "machineId": "BMJ-MCH-0014",
+    "machineId": "BMJ-MCH-0015",
     "partIndex": 0
   },
   "baselineCommit": "b5e45a82ce1aeaf9094b0a5c3fd8d985b8a9e96f",
@@ -1180,7 +1180,7 @@
       "name": "AUTOPLATEN - 8 STRIPPING & BLANKING",
       "model": "Promatrix 106CSB",
       "area": "OFFSET CONVERTING",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "parts": [
         {
           "part": "non-stop feeder and suction pickup",
@@ -1232,12 +1232,16 @@
         "docs/apm8-promatrix106csb-whole-machine-audit.md"
       ],
       "releaseEvidence": {
-        "commit": null,
-        "workflows": [],
-        "conclusion": "pending",
+        "commit": "bd953c577f18614a949912667df8444fe50622ad",
+        "workflows": [
+          38360757655,
+          38360757793,
+          38360757874
+        ],
+        "conclusion": "success",
         "tests": 1584,
-        "productionHttp": null,
-        "visualFallbackVerified": false
+        "productionHttp": 200,
+        "visualFallbackVerified": true
       }
     },
     {
@@ -1712,19 +1716,23 @@
     {
       "machineId": "BMJ-MCH-0014",
       "part": "whole machine: non-stop feeder through cutting, stripping, blanking and delivery",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "report": "docs/apm8-promatrix106csb-whole-machine-audit.md",
       "nextMachineId": "BMJ-MCH-0015",
       "parentCommit": "ade5ce5e3711ae933a244488356a6de4c7b55496",
       "releaseEvidence": {
-        "commit": null,
-        "workflows": [],
-        "conclusion": "pending",
+        "commit": "bd953c577f18614a949912667df8444fe50622ad",
+        "workflows": [
+          38360757655,
+          38360757793,
+          38360757874
+        ],
+        "conclusion": "success",
         "tests": 1584,
-        "productionHttp": null,
-        "visualFallbackVerified": false
+        "productionHttp": 200,
+        "visualFallbackVerified": true
       }
     }
   ],
-  "updatedAt": "2026-10-13T07:31:00Z"
+  "updatedAt": "2026-10-13T07:15:00Z"
 }
