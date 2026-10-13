@@ -5,9 +5,9 @@
   "timezone": "Asia/Jakarta",
   "cadence": "HOURLY",
   "mode": "AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY",
-  "status": "RELEASE_PENDING",
+  "status": "READY",
   "cursor": {
-    "machineId": "BMJ-MCH-0013",
+    "machineId": "BMJ-MCH-0014",
     "partIndex": 0
   },
   "baselineCommit": "b5e45a82ce1aeaf9094b0a5c3fd8d985b8a9e96f",
@@ -1111,7 +1111,7 @@
       "name": "AUTOPLATEN - 7 STRIPPING & BLANKING",
       "model": "MK 1060 ER",
       "area": "OFFSET CONVERTING",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "parts": [
         {
           "part": "non-stop pile feeder and suction pickup",
@@ -1163,12 +1163,16 @@
         "docs/apm7-mk1060er-whole-machine-audit.md"
       ],
       "releaseEvidence": {
-        "commit": null,
-        "workflows": [],
-        "conclusion": "pending",
+        "commit": "2a2b77708af94a346f474f858e976c89483e664f",
+        "workflows": [
+          38326438643,
+          38326438641,
+          38326438662
+        ],
+        "conclusion": "success",
         "tests": 1580,
-        "build": "success",
-        "productionHttp": null
+        "productionHttp": 200,
+        "visualFallbackVerified": true
       }
     },
     {
@@ -1632,19 +1636,23 @@
     {
       "machineId": "BMJ-MCH-0013",
       "part": "whole machine: pile feeder through stripping, blanking and separated delivery",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "report": "docs/apm7-mk1060er-whole-machine-audit.md",
       "nextMachineId": "BMJ-MCH-0014",
       "parentCommit": "ec3261d529bdd85f74237af31fde9d990fed609f",
       "releaseEvidence": {
-        "commit": null,
-        "workflows": [],
-        "conclusion": "pending",
+        "commit": "2a2b77708af94a346f474f858e976c89483e664f",
+        "workflows": [
+          38326438643,
+          38326438641,
+          38326438662
+        ],
+        "conclusion": "success",
         "tests": 1580,
-        "build": "success",
-        "productionHttp": null
+        "productionHttp": 200,
+        "visualFallbackVerified": true
       }
     }
   ],
-  "updatedAt": "2026-10-13T00:15:53Z"
+  "updatedAt": "2026-10-13T00:23:38Z"
 }
