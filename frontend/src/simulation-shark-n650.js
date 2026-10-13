@@ -20,8 +20,14 @@ export class SharkN650ProcessSimulation{
   this.scanWindows=template.meshes.filter(m=>m.userData.scanWindow);
   this.scanWindowRest=this.scanWindows.map(m=>({emissive:m.material.emissive?.clone(),intensity:m.material.emissiveIntensity||0}));
   this.rotorRest=this.rotors.map(r=>r.quaternion.clone());this.suckerRest=this.suckers.map(s=>s.position.clone());
-  this.points=[[-3.32,.75,0],[-2.72,.73,0],[-1.82,.73,0],[-.78,.73,0],[.20,.73,0],[1.38,.71,0],[2.25,.71,0],[3.36,.71,0]].map(p=>new THREE.Vector3(...p));
-  this.curve=new THREE.CatmullRomCurve3(this.points,false,'centripetal');
+  // The blank starts on the represented pile, rises with the suction pickup,
+  // then rests on each real belt working face instead of penetrating it.
+  this.points=[[-3.32,.4645,0],[-2.90,.4645,0],[-2.72,.794,0],[-1.82,.794,0],[-.78,.793,0],[.20,.793,0],[1.38,.744,0],[2.25,.744,0],[3.36,.744,0]].map(p=>new THREE.Vector3(...p));
+  // Piecewise-linear contact path is intentional: a Catmull-Rom spline
+  // overshoots the measured belt faces between stations and makes the blank
+  // float. Each segment now preserves the stated contact elevation exactly.
+  this.curve=new THREE.CurvePath();
+  for(let i=1;i<this.points.length;i++)this.curve.add(new THREE.LineCurve3(this.points[i-1],this.points[i]));
   this.visualTransportMps=this.curve.getLength()/7.2;
   this.scanStart=progressAtX(this.curve,-.12-.54/2);
   this.scanEnd=progressAtX(this.curve,-.12+.54/2);
@@ -29,8 +35,8 @@ export class SharkN650ProcessSimulation{
   this.returnBranchStartT=.70;
   this.returnBranchEndT=.92;
   this.returnBranchStart=this.curve.getPointAt(this.returnBranchStartT).clone();
-  this.goodLaneEntry=new THREE.Vector3(2.48,.755,-.18);
-  this.badLaneEntry=new THREE.Vector3(2.48,.585,.52);
+  this.goodLaneEntry=new THREE.Vector3(2.48,.7445,-.18);
+  this.badLaneEntry=new THREE.Vector3(2.48,.5745,.52);
   this.staticDeliveryReferences=template.meshes.filter(m=>m.userData.returnReference);
   this.staticDeliveryVisibility=this.staticDeliveryReferences.map(m=>m.visible);
   const pathGeo=new THREE.BufferGeometry().setFromPoints(this.curve.getPoints(210)),pathMat=new THREE.LineDashedMaterial({color:0x3d84a6,dashSize:.055,gapSize:.035,transparent:true,opacity:.54});
@@ -54,7 +60,7 @@ export class SharkN650ProcessSimulation{
    sheetsVisible:this.blanks.filter(b=>b.mesh.visible).length,pileSheetsVisible:this.goodStack.filter(p=>p.visible).length,rejectSheetsVisible:this.badStack.filter(p=>p.visible).length,
    rotorCount:this.rotors.length,oscillatorCount:this.suckers.length,mechanismCount:this.rotors.length+this.suckers.length+this.lights.length+1,pathVisible:this.pathVisible,inkFlowVisible:false,inkFlowCount:0,uvLampCount:0,uvActive:false,
    feederSuctionActive:this.feederSuctionActive,feederPickupPhase:this.feederPickupPhase,feederPickupStrokeM:this.feederPickupStroke,feederSuctionReferenceOnly:this.feederSuctionReferenceOnly,transferDriveActive:this.transferDriveActive,goodReturnDriveActive:this.goodReturnDriveActive,badReturnDriveActive:this.badReturnDriveActive,transferVacuumReady:this.transferVacuumReady,transportEncoderActive:this.transportEncoderActive,blankPresenceTrigger:this.blankPresenceTrigger,lightingProgramReady:this.lightingProgramReady,cameraTriggerActive:this.cameraTriggerActive,captureComplete:this.captureComplete,scanActive:this.scanActive,processingActive:this.processingActive,processingComplete:this.processingComplete,decisionReady:this.decisionReady,rejectPermit:this.rejectPermit,rejectConfirmed:this.rejectConfirmed,goodReturnConfirmed:this.goodReturnConfirmed,badReturnConfirmed:this.badReturnConfirmed,negativePitchCapabilityReference:this.negativePitchCapabilityReference,negativePitchActive:this.negativePitchActive,negativePitchOverlapReference:this.negativePitchOverlapReference,negativePitchPublishedCapacityGainPercent:this.negativePitchPublishedCapacityGainPercent,transportMode:'NEGATIVE_PITCH_FULL_SUCTION_OFFLINE_DEMO_REFERENCE',goodBadReturnLineOfficial:true,interlockSafe:this.interlockSafe,rejectTrackingActive:this.rejectTrackingActive,demoRejectActive:this.demoRejectActive,goodRoutingActive:this.goodRoutingActive,badRoutingActive:this.badRoutingActive,
-   demoRejectOnly:true,demoRejectActuator:this.demoRejectActuator,suffixDecoded:false,installedFeederModeVerified:false,installedCameraPackageVerified:false,installedRejectTypeVerified:false,installedCollectionModeVerified:false,deterministicDefectInjection:'EVERY_6TH_INSPECTED_BLANK_DEMO_ONLY',scanWindow:[this.scanStart,this.scanEnd],scanPositionPolicy:'BLANK_OCCUPIES_OPTICAL_TOWER',scanWindowActive:this.scanActive,scanWindowPolicy:'DARK_TOWER_WINDOW_SUBTLE_OCCUPANCY_GLOW_ONLY',rejectGateMotionPolicy:'ROTATE_PIVOT_ONLY__SOLENOID_AND_FRAME_REMAIN_STATIC',returnBranchPolicy:'TRACKED_BLANK_BRANCHES_FROM_DECISION_SPLIT_TO_GOOD_OR_BAD_RETURN_ENTRY',returnStackPolicy:'BOUNDED_FISH_SCALE_9_SLOTS_THEN_VERTICAL_LAYER',visualTransportMps:this.visualTransportMps,transportSurfaceSpeedPolicy:'CONTACT_PULLEYS_MATCH_SIMULATED_BLANK_LINEAR_SPEED__NOT_INSTALLED_RPM',
+   demoRejectOnly:true,demoRejectActuator:this.demoRejectActuator,suffixDecoded:false,installedFeederModeVerified:false,installedCameraPackageVerified:false,installedRejectTypeVerified:false,installedCollectionModeVerified:false,deterministicDefectInjection:'EVERY_6TH_INSPECTED_BLANK_DEMO_ONLY',scanWindow:[this.scanStart,this.scanEnd],scanPositionPolicy:'BLANK_RESTS_ON_INSPECTION_BELT_WORKING_FACE',scanWindowActive:this.scanActive,scanWindowPolicy:'DARK_TOWER_WINDOW_SUBTLE_OCCUPANCY_GLOW_ONLY',rejectGateMotionPolicy:'ROTATE_PIVOT_ONLY__SOLENOID_AND_FRAME_REMAIN_STATIC',returnBranchPolicy:'TRACKED_BLANK_BRANCHES_FROM_DECISION_SPLIT_TO_GOOD_OR_BAD_RETURN_ENTRY',returnStackPolicy:'BOUNDED_FISH_SCALE_9_SLOTS_THEN_VERTICAL_LAYER',visualTransportMps:this.visualTransportMps,transportSurfaceSpeedPolicy:'CONTACT_PULLEYS_MATCH_SIMULATED_BLANK_LINEAR_SPEED__NOT_INSTALLED_RPM',pileContactElevationM:.4645,transferContactElevationM:.794,inspectionContactElevationM:.793,goodReturnContactElevationM:.7445,badReturnContactElevationM:.5745,
    activeRejectTrackingIds:[...this.activeRejectTrackingIds],activePassTrackingIds:[...this.activePassTrackingIds],trackedResults:{pass:this.blanks.filter(b=>b.result==='PASS_DEMO').length,reject:this.blanks.filter(b=>b.result==='REJECT_DEMO').length,pending:this.blanks.filter(b=>!b.result).length}};
  }
  start(){this.active=true;this.running=true;this.paused=false;this.completed=0;this.rejected=0;this.inspectedDemoCount=0;this.elapsed=0;this.lastNow=null;for(const b of this.blanks){b.lap=-1;b.result=null;b.captured=false;b.processed=false;b.decisionReady=false;b.outputDeposited=false;b.inspectedLap=-1;b.lastT=0;b.trackingId=null;b.decisionSequence=null;b.mesh.visible=false;}this.resetMechanisms();this.staticDeliveryReferences.forEach(m=>m.visible=false);this.onUpdate?.(this.state());return this.state();}

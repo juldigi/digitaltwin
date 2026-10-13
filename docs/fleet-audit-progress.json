@@ -1373,9 +1373,18 @@
       "name": "OFFLINE INSPECTION 4 - FOCUSIGHT",
       "model": "FS-SHARK-N650-P3N1",
       "area": "OFFSET CONVERTING",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {"part": "pile input and suction pickup", "status": "COMPLETE", "report": "docs/shark-n650-whole-machine-audit.md"},
+        {"part": "negative-pitch full-suction transfer", "status": "COMPLETE", "report": "docs/shark-n650-whole-machine-audit.md"},
+        {"part": "inspection tower camera and controlled lighting", "status": "BLOCKED_EVIDENCE", "report": "docs/shark-n650-whole-machine-audit.md"},
+        {"part": "vision processing and recipe logic", "status": "NO_CHANGE_REQUIRED", "report": "docs/shark-n650-whole-machine-audit.md"},
+        {"part": "reject decision separation and tracking", "status": "BLOCKED_EVIDENCE", "report": "docs/shark-n650-whole-machine-audit.md"},
+        {"part": "good and bad return collection", "status": "COMPLETE", "report": "docs/shark-n650-whole-machine-audit.md"},
+        {"part": "frame guarding access and HMI", "status": "BLOCKED_EVIDENCE", "report": "docs/shark-n650-whole-machine-audit.md"},
+        {"part": "identity evidence display simulation and taxonomy", "status": "COMPLETE", "report": "docs/shark-n650-whole-machine-audit.md"}
+      ],
+      "reports": ["docs/shark-n650-whole-machine-audit.md"]
     },
     {
       "machineId": "BMJ-MCH-0021",
@@ -1913,5 +1922,5 @@
       }
     }
   ],
-  "updatedAt": "2026-10-13T17:25:00Z"
+  "updatedAt": "2026-10-13T18:20:00Z"
 }

@@ -48,7 +48,9 @@ export class SharkN650MachineTemplate{
   const stack=this.group(g,'shark650-feed-stack','Input blank support');this.box(stack,[.92,.07,1.08],[-.24,.32,0],'steel');for(let i=0;i<9;i++)this.box(stack,[.58,.009,.82],[-.30,.38+i*.010,0],'paper',.001);
   const suction=this.group(g,'shark650-feed-suction','Automatic suction pickup reference');suction.userData.feederModeReference='AUTOMATIC_SUCTION_PICKUP_REFERENCE';suction.userData.installedModeVerified=false;
   this.box(suction,[.62,.18,.96],[.18,1.04,0],'dark',.026);
-  for(const z of [-.36,-.12,.12,.36]){const cup=this.cyl(suction,.030,.13,[.38,.89,z],'rubber','suction-cup','y');cup.userData.reciprocator=true;cup.userData.pickupAxis='NEGATIVE_Y_TOWARD_BLANK';this.box(suction,[.030,.18,.030],[.38,1.00,z],'steel');}
+  // Rest 28 mm above the represented pile; the demo pickup stroke closes that
+  // exact gap. Keep the stems attached to the upper suction carrier.
+  for(const z of [-.36,-.12,.12,.36]){const cup=this.cyl(suction,.030,.13,[.38,.5575,z],'rubber','suction-cup','y');cup.userData.reciprocator=true;cup.userData.pickupAxis='NEGATIVE_Y_TOWARD_BLANK';cup.userData.pickupClearanceM=.028;const stem=this.box(suction,[.030,.3275,.030],[.38,.78625,z],'steel');stem.userData.suctionStem=true;stem.userData.reciprocator=true;}
   const manifold=this.cyl(suction,.022,.90,[.14,1.08,0],'steel','feeder-vacuum-manifold','z');manifold.userData.mechanismRole='feeder-vacuum-manifold';
   const friction=this.group(g,'shark650-feed-friction','Alternate feeder capability reference');friction.userData.feederModeReference='ALTERNATE_FAMILY_OPTION';friction.userData.installedModeVerified=false;friction.userData.capabilityOnly=true;friction.visible=false;for(const z of [-.36,-.12,.12,.36])this.box(friction,[.82,.022,.09],[.34,.72,z],'rubber',.004);
   const separate=this.group(g,'shark650-feed-separate','Blank separation / spacing control');for(const z of [-.42,0,.42]){const p=this.box(separate,[.07,.17,.045],[-.42,.86,z],'blue',.010);p.userData.negativePitchSpacingReference=true;}
@@ -85,10 +87,10 @@ export class SharkN650MachineTemplate{
  buildReturn(){
   const g=this.group(this.root,'shark650-return','Good/bad product return and collection',[2.58,0,0],[.68,.16,0]);g.userData.installedCollectionModeVerified=false;g.userData.officialGoodBadReturnLine=true;
   const good=this.group(g,'shark650-return-good','Accepted-product return / fish-scale lane');
-  for(const z of [-.38,-.12,.12,.38]){this.box(good,[1.72,.023,.09],[0,.73,z-.18],'rubber',.004);for(const x of [-.72,.72])this.cyl(good,.050,.13,[x,.72,z-.18],'steel','good-return','z');}
+  for(const z of [-.38,-.12,.12,.38]){const lane=this.box(good,[1.72,.023,.09],[0,.73,z-.18],'rubber',.004);lane.userData.goodReturnBelt=true;for(const x of [-.72,.72])this.cyl(good,.050,.13,[x,.72,z-.18],'steel','good-return','z');}
   const gm=this.cyl(good,.085,.20,[-.76,.48,-.66],'dark','good-return-motor','x');gm.userData.rotor=true;gm.userData.rotorAxis='x';gm.userData.spinDirection=1;
   const bad=this.group(g,'shark650-return-bad','Rejected-product return lane');
-  for(const z of [.38,.58]){this.box(bad,[1.48,.023,.10],[-.04,.56,z],'rubber',.004);for(const x of [-.62,.62])this.cyl(bad,.048,.13,[x,.55,z],'steel','bad-return','z');}
+  for(const z of [.38,.58]){const lane=this.box(bad,[1.48,.023,.10],[-.04,.56,z],'rubber',.004);lane.userData.badReturnBelt=true;for(const x of [-.62,.62])this.cyl(bad,.048,.13,[x,.55,z],'steel','bad-return','z');}
   const bm=this.cyl(bad,.082,.20,[-.68,.36,.66],'dark','bad-return-motor','x');bm.userData.rotor=true;bm.userData.rotorAxis='x';bm.userData.spinDirection=1;
   const stack=this.group(g,'shark650-return-stack','Vertical-palletizing capability reference');this.box(stack,[.72,.07,.72],[.92,.37,-.18],'steel');this.box(stack,[.64,.07,.52],[.78,.29,.52],'steel');stack.userData.verticalPalletizingCapability=true;stack.userData.installedVerticalPalletizerVerified=false;stack.userData.capabilityOnly=true;stack.visible=false;
   for(const z of [-.18,.52]){const sensor=this.box(stack,[.045,.065,.045],[.52,.62,z],'green',.004);sensor.userData.mechanismRole=z<0?'good-return-confirm-sensor-reference':'bad-return-confirm-sensor-reference';}
