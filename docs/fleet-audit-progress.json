@@ -1355,9 +1355,18 @@
       "name": "OFFLINE INSPECTION 3 - MK",
       "model": "DIANA EYE 55",
       "area": "OFFSET CONVERTING",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {"part": "blank feeder and alignment", "status": "COMPLETE", "report": "docs/diana-eye55-whole-machine-audit.md"},
+        {"part": "suction-belt transport", "status": "COMPLETE", "report": "docs/diana-eye55-whole-machine-audit.md"},
+        {"part": "inspection cell camera and LED", "status": "COMPLETE", "report": "docs/diana-eye55-whole-machine-audit.md"},
+        {"part": "image processing and recipe logic", "status": "NO_CHANGE_REQUIRED", "report": "docs/diana-eye55-whole-machine-audit.md"},
+        {"part": "reject decision ejection and recovery", "status": "BLOCKED_EVIDENCE", "report": "docs/diana-eye55-whole-machine-audit.md"},
+        {"part": "accepted fish-scale delivery", "status": "COMPLETE", "report": "docs/diana-eye55-whole-machine-audit.md"},
+        {"part": "frame guarding access and HMI", "status": "BLOCKED_EVIDENCE", "report": "docs/diana-eye55-whole-machine-audit.md"},
+        {"part": "identity evidence display simulation and taxonomy", "status": "COMPLETE", "report": "docs/diana-eye55-whole-machine-audit.md"}
+      ],
+      "reports": ["docs/diana-eye55-whole-machine-audit.md"]
     },
     {
       "machineId": "BMJ-MCH-0020",
@@ -1884,5 +1893,5 @@
       }
     }
   ],
-  "updatedAt": "2026-10-13T13:21:18Z"
+  "updatedAt": "2026-10-13T17:22:00Z"
 }

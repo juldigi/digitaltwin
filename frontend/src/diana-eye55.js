@@ -87,7 +87,7 @@ export class DianaEye55MachineTemplate{
  buildDelivery(){
   const g=this.group(this.root,'diana55-delivery','Fish-scale accepted/waste delivery',[2.78,0,0],[.72,.16,0]);
   const belt=this.group(g,'diana55-delivery-belt','Fish-scale delivery belts');
-  for(const z of [-.42,-.14,.14,.42]){this.box(belt,[2.02,.023,.09],[.15,.70,z],'green',.004);for(const x of [-.78,.92])this.cyl(belt,.052,.13,[x,.69,z],'steel','delivery-pulley','z');}
+  for(const z of [-.42,-.14,.14,.42]){const lane=this.box(belt,[2.02,.023,.09],[.15,.70,z],'green',.004);lane.userData.deliveryBelt=true;for(const x of [-.78,.92])this.cyl(belt,.052,.13,[x,.69,z],'steel','delivery-pulley','z');}
   const stack=this.group(g,'diana55-delivery-stack','Fish-scale delivery / buffer interface');stack.userData.deliveryMode='FISH_SCALE_STANDARD_REFERENCE';
   for(let i=0;i<9;i++){const sheet=this.box(stack,[.46,.006,.34],[.20+i*.12,.75+i*.006,0],'paper',.001);sheet.rotation.y=0;sheet.userData.fishScaleReference=true;}
   const press=this.cyl(stack,.07,1.02,[.30,.88,0],'amber','delivery-pulley','z');press.userData.pressureRollReference=true;
