@@ -7,7 +7,7 @@
   "mode": "AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY",
   "status": "IN_PROGRESS",
   "cursor": {
-    "machineId": "BMJ-MCH-0017",
+    "machineId": "BMJ-MCH-0018",
     "partIndex": 0
   },
   "baselineCommit": "b5e45a82ce1aeaf9094b0a5c3fd8d985b8a9e96f",
@@ -1315,7 +1315,7 @@
       "name": "FOLDER GLUER - 2 MACHINE",
       "model": null,
       "area": "OFFSET CONVERTING",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "parts": [
         {"part": "blank feeder and separation", "status": "COMPLETE", "report": "docs/fgm2-whole-machine-audit.md"},
         {"part": "alignment and prebreak", "status": "COMPLETE", "report": "docs/fgm2-whole-machine-audit.md"},
@@ -1836,11 +1836,23 @@
     {
       "machineId": "BMJ-MCH-0017",
       "part": "whole machine: blank feeder through folding, adhesive boundary, compression and delivery",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "report": "docs/fgm2-whole-machine-audit.md",
-      "nextMachineId": "BMJ-MCH-0017",
-      "parentCommit": "ff7da0381c39524da294b389d8f34a1bbb2b0be7"
+      "nextMachineId": "BMJ-MCH-0018",
+      "parentCommit": "ff7da0381c39524da294b389d8f34a1bbb2b0be7",
+      "releaseEvidence": {
+        "commit": "1a3459e2ec4260f8bbd203464bdafd528e9b5001",
+        "workflows": [
+          38395647335,
+          38395647319,
+          38395647368
+        ],
+        "conclusion": "success",
+        "tests": 1589,
+        "productionHttp": 200,
+        "visualFallbackVerified": true
+      }
     }
   ],
-  "updatedAt": "2026-10-13T12:04:39Z"
+  "updatedAt": "2026-10-13T12:20:01Z"
 }

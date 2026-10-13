@@ -41,4 +41,6 @@ Foto aktual nameplate dan seluruh sisi mesin; OEM/model/serial/tahun; teknologi 
 - Tes fokus folder/runtime/mechanical/research: 70/70 lulus.
 - Pemeriksaan geometri kontak baru: 7/7 zona didukung tanpa gap atau penetrasi; upper final/compression tidak menembus karton.
 - Gate lokal lulus: `npm test` 1.589/1.589 dan `npm run build` menghasilkan 41 mesin, 19 unidentified, serta bundle 2.918.524 byte.
-- Status saat laporan dibuat: `RELEASE_PENDING`; cursor tetap pada `BMJ-MCH-0017` sampai workflow dan produksi terverifikasi.
+- Rilis `1a3459e2ec4260f8bbd203464bdafd528e9b5001` terverifikasi sukses pada CI `38395647335`, deploy Cloudflare `38395647319`, dan verify frontend `38395647368`.
+- Produksi HTTP 200 dan fallback visual memuat identitas `BMJ-MCH-0017 / FGM-2`, tujuh zona proses hulu–hilir, serta batas bukti tanpa mengklaim MEDIA 100 II atau opsi adhesive/packer yang belum terbukti.
+- Status mesin `COMPLETE`; cursor berikutnya `BMJ-MCH-0018`.
