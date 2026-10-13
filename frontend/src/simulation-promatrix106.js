@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 
 export const PROMATRIX106_SIMULATION_STAGES=Object.freeze([
- 'Pile separation','Suction-belt feed / registration','Registered gripper index to cutting',
- 'Cutting pressure dwell','Index to stripping','Stripping action',
- 'Index to blanking','Blanking / tie-sheet demo','Index to delivery','Auto-Non-Stop delivery'
+ 'Pemisahan tumpukan','Meja isap / register','Indeks gripper terdaftar ke pemotongan',
+ 'Dwell tekanan pemotongan','Indeks menuju stripping','Proses stripping',
+ 'Indeks menuju pemotongan pola','Pemotongan pola / demo lembar pemisah','Indeks menuju delivery','Delivery Auto-Non-Stop'
 ]);
 const Y_AXIS=new THREE.Vector3(0,1,0);
 const smooth=(v,a,b)=>THREE.MathUtils.smoothstep(v,a,b);
@@ -31,6 +31,7 @@ function gripperLoopPosition(t){
 export class Promatrix106ProcessSimulation{
  constructor(root,template){
   this.root=root;this.template=template;this.active=false;this.running=false;this.paused=false;this.speed=1;this.completed=0;this.wasteCompleted=0;this.elapsed=0;this.lastNow=null;this.onUpdate=null;
+  this.assetIdentity=Object.freeze({assetId:template.spec.assetId,sap:template.spec.sap,serial:template.spec.serial,year:template.spec.year});
   this.rotors=[];this.suckers=[];this.gripperBars=[];this.sheets=[];this.productStack=[];this.waste=[];this.tieSheets=[];
   this.cutPlate=template.findNode('pm106-cut-plate');this.stripTop=template.findNode('pm106-strip-top');this.stripMiddle=template.findNode('pm106-strip-middle');this.stripBottom=template.findNode('pm106-strip-bottom');
   this.staticDeliveryStack=template.findNode('pm106-delivery-product-stack');this.staticDeliveryVisible=this.staticDeliveryStack?.visible;this.blankTop=template.findNode('pm106-blank-top');this.blankBottom=template.findNode('pm106-blank-bottom');this.rake=template.findNode('pm106-delivery-rake');this.feederHead=template.findNode('pm106-feeder-head');
@@ -59,7 +60,7 @@ export class Promatrix106ProcessSimulation{
  resetStateFlags(){this.transportIndexing=false;this.transportStopped=false;this.feederSuctionActive=false;this.cuttingActive=false;this.pressureDwell=false;this.strippingActive=false;this.blankingActive=false;this.deliveryRakeActive=false;this.tieSheetActive=false;}
  state(){
   const p=this.active?(this.elapsed%10.8)/10.8:0,index=Math.min(PROMATRIX106_SIMULATION_STAGES.length-1,Math.floor(p*PROMATRIX106_SIMULATION_STAGES.length));
-  return {available:true,blocked:false,active:this.active,running:this.running,paused:this.paused,speed:this.speed,stage:PROMATRIX106_SIMULATION_STAGES[index],completed:this.completed,progress:p,
+  return {available:true,blocked:false,...this.assetIdentity,active:this.active,running:this.running,paused:this.paused,speed:this.speed,stage:PROMATRIX106_SIMULATION_STAGES[index],completed:this.completed,progress:p,
    sheetsVisible:this.sheets.filter(s=>s.mesh.visible).length,pileSheetsVisible:this.productStack.filter(s=>s.visible).length,wastePiecesVisible:this.waste.filter(s=>s.visible).length,
    rotorCount:this.rotors.length,oscillatorCount:this.suckers.length,mechanismCount:this.rotors.length+this.suckers.length+this.gripperBars.length+7,pathVisible:this.pathVisible,inkFlowVisible:false,inkFlowCount:0,uvLampCount:0,uvActive:false,
    transportIndexing:this.transportIndexing,transportStopped:this.transportStopped,feederSuctionActive:this.feederSuctionActive,cuttingActive:this.cuttingActive,pressureDwell:this.pressureDwell,

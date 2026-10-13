@@ -5,7 +5,7 @@
   "timezone": "Asia/Jakarta",
   "cadence": "HOURLY",
   "mode": "AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY",
-  "status": "IN_PROGRESS",
+  "status": "RELEASE_PENDING",
   "cursor": {
     "machineId": "BMJ-MCH-0015",
     "partIndex": 0
@@ -1249,9 +1249,29 @@
       "name": "AUTOPLATEN - 9 STRIPPING & BLANKING",
       "model": "Promatrix 106CSB",
       "area": "OFFSET CONVERTING",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {"part": "non-stop feeder and suction pickup", "status": "COMPLETE", "report": "docs/apm9-promatrix106csb-whole-machine-audit.md"},
+        {"part": "suction-belt table and register", "status": "BLOCKED_EVIDENCE", "report": "docs/apm9-promatrix106csb-whole-machine-audit.md"},
+        {"part": "seven-bar registered gripper transport", "status": "COMPLETE", "report": "docs/apm9-promatrix106csb-whole-machine-audit.md"},
+        {"part": "cutting and creasing station", "status": "COMPLETE", "report": "docs/apm9-promatrix106csb-whole-machine-audit.md"},
+        {"part": "three-tool stripping station", "status": "COMPLETE", "report": "docs/apm9-promatrix106csb-whole-machine-audit.md"},
+        {"part": "blanking and tie-sheet process", "status": "COMPLETE", "report": "docs/apm9-promatrix106csb-whole-machine-audit.md"},
+        {"part": "non-stop delivery and output", "status": "BLOCKED_EVIDENCE", "report": "docs/apm9-promatrix106csb-whole-machine-audit.md"},
+        {"part": "drive, pneumatics, controls, guards and access", "status": "BLOCKED_EVIDENCE", "report": "docs/apm9-promatrix106csb-whole-machine-audit.md"},
+        {"part": "simulation, display modes and taxonomy", "status": "COMPLETE", "report": "docs/apm9-promatrix106csb-whole-machine-audit.md"}
+      ],
+      "reports": [
+        "docs/apm9-promatrix106csb-whole-machine-audit.md"
+      ],
+      "releaseEvidence": {
+        "commit": null,
+        "workflows": [],
+        "conclusion": "pending",
+        "tests": 1585,
+        "productionHttp": null,
+        "visualFallbackVerified": false
+      }
     },
     {
       "machineId": "BMJ-MCH-0016",
@@ -1732,7 +1752,23 @@
         "productionHttp": 200,
         "visualFallbackVerified": true
       }
+    },
+    {
+      "machineId": "BMJ-MCH-0015",
+      "part": "whole machine: non-stop feeder through cutting, stripping, blanking and delivery",
+      "status": "RELEASE_PENDING",
+      "report": "docs/apm9-promatrix106csb-whole-machine-audit.md",
+      "nextMachineId": "BMJ-MCH-0016",
+      "parentCommit": "05501e9dac8685186fc2440b44cf8efb762ced05",
+      "releaseEvidence": {
+        "commit": null,
+        "workflows": [],
+        "conclusion": "pending",
+        "tests": 1585,
+        "productionHttp": null,
+        "visualFallbackVerified": false
+      }
     }
   ],
-  "updatedAt": "2026-10-13T07:15:00Z"
+  "updatedAt": "2026-10-13T08:16:00Z"
 }

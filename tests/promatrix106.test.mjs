@@ -109,11 +109,11 @@ test('Promatrix taxonomy is a six-level mapped tree for APM 8 and APM 9',()=>{
 });
 
 test('Promatrix stage sequence makes index and dwell phases explicit',()=>{
- assert.deepEqual(PROMATRIX106_SIMULATION_STAGES,['Pile separation','Suction-belt feed / registration','Registered gripper index to cutting','Cutting pressure dwell','Index to stripping','Stripping action','Index to blanking','Blanking / tie-sheet demo','Index to delivery','Auto-Non-Stop delivery']);
+ assert.deepEqual(PROMATRIX106_SIMULATION_STAGES,['Pemisahan tumpukan','Meja isap / register','Indeks gripper terdaftar ke pemotongan','Dwell tekanan pemotongan','Indeks menuju stripping','Proses stripping','Indeks menuju pemotongan pola','Pemotongan pola / demo lembar pemisah','Indeks menuju delivery','Delivery Auto-Non-Stop']);
 });
 
 test('Promatrix feeder cups descend vertically to the pile surface and reset',()=>{
- const model=new Promatrix106MachineTemplate(),sim=new Promatrix106ProcessSimulation(model.root,model),pile=model.findNode('pm106-feeder-pile'),cups=sim.suckers;
+ const model=new Promatrix106MachineTemplate('BMJ-MCH-0015'),sim=new Promatrix106ProcessSimulation(model.root,model),pile=model.findNode('pm106-feeder-pile'),cups=sim.suckers;
  assert.equal(cups.every(c=>c.userData.rotorAxis==='y'),true);model.root.updateMatrixWorld(true);
  const pileTop=new THREE.Box3().setFromObject(pile).max.y,rest=cups.map(c=>c.getWorldPosition(new THREE.Vector3()).y-.085);
  sim.start();let now=1000;sim.update(now);while(sim.elapsed<1.08){now+=10;sim.update(now);}model.root.updateMatrixWorld(true);
@@ -122,20 +122,26 @@ test('Promatrix feeder cups descend vertically to the pile surface and reset',()
 });
 
 test('Promatrix cutting stripping and blanking strokes close represented contact surfaces',()=>{
- const model=new Promatrix106MachineTemplate(),sim=new Promatrix106ProcessSimulation(model.root,model);sim.start();let now=1000;sim.update(now);const advanceTo=t=>{while(sim.elapsed<t){now+=10;sim.update(now);}};
+ const model=new Promatrix106MachineTemplate('BMJ-MCH-0015'),sim=new Promatrix106ProcessSimulation(model.root,model);sim.start();let now=1000;sim.update(now);const advanceTo=t=>{while(sim.elapsed<t){now+=10;sim.update(now);}};
  advanceTo(4.20);assert.ok(Math.abs((sim.cutPlate.position.y-sim.rest.cut.y)-.2925)<.001);const cut=sim.sheets.find(s=>s.blanks.visible);assert.ok(cut);assert.ok(Math.abs(cut.mesh.position.y-sim.curve.getPointAt(.34).y-.1825)<.003);
  advanceTo(6.70);assert.ok(Math.abs((sim.rest.st.y-sim.stripTop.position.y)-.055)<.001);assert.ok(Math.abs((sim.stripMiddle.position.y-sim.rest.sm.y)-.035)<.001);assert.ok(Math.abs((sim.stripBottom.position.y-sim.rest.sb.y)-.235)<.001);
  advanceTo(9.05);assert.ok(Math.abs((sim.rest.bt.y-sim.blankTop.position.y)-.20)<.001);assert.ok(Math.abs((sim.blankBottom.position.y-sim.rest.bb.y)-.20)<.001);sim.dispose();model.dispose();
 });
 
 test('Promatrix cut and stripping output require their actual process dwells',()=>{
- const model=new Promatrix106MachineTemplate(),sim=new Promatrix106ProcessSimulation(model.root,model);sim.start();let now=1000;sim.update(now);const advanceTo=t=>{while(sim.elapsed<t){now+=10;sim.update(now);}};
+ const model=new Promatrix106MachineTemplate('BMJ-MCH-0015'),sim=new Promatrix106ProcessSimulation(model.root,model);sim.start();let now=1000;sim.update(now);const advanceTo=t=>{while(sim.elapsed<t){now+=10;sim.update(now);}};
  advanceTo(3.15);assert.equal(sim.sheets.some(s=>s.blanks.visible),false);assert.equal(sim.wasteCompleted,0);advanceTo(4.20);assert.equal(sim.sheets.some(s=>s.blanks.visible),true);advanceTo(5.95);assert.equal(sim.wasteCompleted,0);advanceTo(6.70);assert.ok(sim.wasteCompleted>0);
  sim.stop();assert.equal(sim.sheets.some(s=>s.blanks.visible||s.cutLap>=0||s.stripLap>=0),false);sim.dispose();model.dispose();
 });
 
 test('Promatrix navigation preserves selected descendants and material state is assembly-scoped',()=>{
- const model=new Promatrix106MachineTemplate(),feeder=model.findNode('pm106-feeder'),head=model.findNode('pm106-feeder-head'),delivery=model.findNode('pm106-delivery');
+ const model=new Promatrix106MachineTemplate('BMJ-MCH-0015'),feeder=model.findNode('pm106-feeder'),head=model.findNode('pm106-feeder-head'),delivery=model.findNode('pm106-delivery');
  model.showOnly([feeder],true);assert.equal(head.visible,true);assert.equal(delivery.visible,false);model.showOnly([],false);
  const a=model.meshes.find(m=>model.contains(head,m)),b=model.meshes.find(m=>!model.contains(head,m)&&m.material.color.getHex()===a.material.color.getHex());assert.ok(a&&b);assert.notEqual(a.material,b.material);model.highlight(head);assert.ok(a.material.emissive.getHex()>0);assert.equal(b.material.emissive.getHex(),0);model.dispose();
+});
+
+test('APM 9 simulation state preserves its installed asset identity',()=>{
+ const model=new Promatrix106MachineTemplate('BMJ-MCH-0015'),sim=new Promatrix106ProcessSimulation(model.root,model),state=sim.state();
+ assert.deepEqual({assetId:state.assetId,sap:state.sap,serial:state.serial,year:state.year},{assetId:'BMJ-MCH-0015',sap:'APM-9',serial:'MP.DBE0-00115',year:2024});
+ sim.dispose();model.dispose();
 });
