@@ -8,6 +8,7 @@ import {
  validateFolderSimulation,
  FOLDER_RUNTIME_CONTRACTS
 } from '../frontend/src/machine-runtime.js';
+import * as THREE from 'three';
 
 const folders=['BMJ-MCH-0016','BMJ-MCH-0017','BMJ-MCH-0018'];
 
@@ -106,6 +107,48 @@ test('V322 FGM2 remains an unknown-identity multi-vendor process twin, never a p
    assert.equal(state.glueApplicatorTypeVerified,false);
    assert.equal(state.simulationBoundary,'FGM2_MULTI_VENDOR_COMMON_FOLD_GLUE_PROCESS_ONLY__BOX_STYLE_GLUE_HARDWARE_OPTIONS_NOT_INFERRED');
   }finally{sim.dispose();}
+ }finally{t.dispose();}
+});
+
+test('V345 FGM2 blank remains supported from feeder through delivery without final-fold or compression penetration',()=>{
+ const id='BMJ-MCH-0017',t=createMachineTemplate(id),sim=createMachineSimulation(id,t.root,t);
+ try{
+  sim.start();t.root.updateMatrixWorld(true);
+  const boundsFor=role=>{const boxes=[];t.root.traverse(o=>{if(o.isMesh&&o.userData.mechanismRole===role)boxes.push(new THREE.Box3().setFromObject(o));});return boxes;};
+  const lowerRoles=['feeder-transport-belt','aligner-transport-roller','primary-fold-transport-belt','glue-zone-transport-belt','lower-final-fold-belt','lower-compression-belt','delivery-transport-belt'];
+  const phases=[.05,.20,.38,.52,.68,.83,.95];
+  for(let i=0;i<phases.length;i++){
+   sim.elapsed=sim.cycle*phases[i];sim.updateFolder();t.root.updateMatrixWorld(true);
+   const blank=new THREE.Box3().setFromObject(sim.folderBlank),surfaces=boundsFor(lowerRoles[i]);
+   assert.ok(surfaces.length>0,lowerRoles[i]);
+   const contactTop=Math.max(...surfaces.map(b=>b.max.y));
+   assert.ok(Math.abs(blank.min.y-contactTop)<=.004,`${lowerRoles[i]} contact gap ${blank.min.y-contactTop}`);
+  }
+  for(const [p,role] of [[.68,'upper-final-fold-belt'],[.83,'upper-compression-belt']]){
+   sim.elapsed=sim.cycle*p;sim.updateFolder();t.root.updateMatrixWorld(true);
+   const blank=new THREE.Box3().setFromObject(sim.folderBlank),upper=boundsFor(role);
+   const lowerSurface=Math.min(...upper.map(b=>b.min.y));
+   assert.ok(lowerSurface>=blank.max.y-.002,`${role} penetrates carton by ${blank.max.y-lowerSurface}`);
+   assert.ok(lowerSurface-blank.max.y<=.022,`${role} contact gap ${lowerSurface-blank.max.y}`);
+  }
+ }finally{sim.dispose();t.dispose();}
+});
+
+test('V345 FGM2 interaction materials and capability visibility remain assembly-local across both toggle orders',()=>{
+ const t=createMachineTemplate('BMJ-MCH-0017');
+ try{
+  const feed=t.findNode('fgm2-feed-table'),delivery=t.findNode('fgm2-delivery');
+  const fm=t.meshes.find(m=>t.contains(feed,m)),dm=t.meshes.find(m=>t.contains(delivery,m));
+  assert.ok(fm&&dm);assert.notEqual(fm.material,dm.material);
+  t.highlight(feed);assert.notEqual(fm.material.emissive?.getHex(),0);assert.equal(dm.material.emissive?.getHex()||0,0);
+  t.ghost(true,feed);assert.equal(fm.material.opacity,1);assert.equal(dm.material.opacity,.14);
+  t.ghost(false);t.highlight(null);
+  const capabilityIds=FOLDER_RUNTIME_CONTRACTS['BMJ-MCH-0017'].capabilityNodes;
+  const assertCapabilitiesHidden=()=>{for(const nodeId of capabilityIds){const meshes=[];t.findNode(nodeId).traverse(o=>{if(o.isMesh)meshes.push(o);});assert.ok(meshes.every(m=>m.visible===false),nodeId);}};
+  t.setLow(true);t.setExteriorOpen(true);t.setLow(false);t.setExteriorOpen(false);assertCapabilitiesHidden();
+  t.setExteriorOpen(true);t.setLow(true);t.setExteriorOpen(false);t.setLow(false);assertCapabilitiesHidden();
+  t.showOnly([feed],true);assertCapabilitiesHidden();t.showOnly([],false);assertCapabilitiesHidden();
+  t.reset();assertCapabilitiesHidden();
  }finally{t.dispose();}
 });
 

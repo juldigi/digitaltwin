@@ -1315,9 +1315,21 @@
       "name": "FOLDER GLUER - 2 MACHINE",
       "model": null,
       "area": "OFFSET CONVERTING",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {"part": "blank feeder and separation", "status": "COMPLETE", "report": "docs/fgm2-whole-machine-audit.md"},
+        {"part": "alignment and prebreak", "status": "COMPLETE", "report": "docs/fgm2-whole-machine-audit.md"},
+        {"part": "primary folding", "status": "COMPLETE", "report": "docs/fgm2-whole-machine-audit.md"},
+        {"part": "adhesive application boundary", "status": "BLOCKED_EVIDENCE", "report": "docs/fgm2-whole-machine-audit.md"},
+        {"part": "final folding and squaring", "status": "COMPLETE", "report": "docs/fgm2-whole-machine-audit.md"},
+        {"part": "compression", "status": "COMPLETE", "report": "docs/fgm2-whole-machine-audit.md"},
+        {"part": "delivery and output", "status": "COMPLETE", "report": "docs/fgm2-whole-machine-audit.md"},
+        {"part": "drive, control, frame and access", "status": "BLOCKED_EVIDENCE", "report": "docs/fgm2-whole-machine-audit.md"},
+        {"part": "simulation, display modes and taxonomy", "status": "COMPLETE", "report": "docs/fgm2-whole-machine-audit.md"}
+      ],
+      "reports": [
+        "docs/fgm2-whole-machine-audit.md"
+      ]
     },
     {
       "machineId": "BMJ-MCH-0018",
@@ -1820,7 +1832,15 @@
         "productionHttp": 200,
         "visualFallbackVerified": true
       }
+    },
+    {
+      "machineId": "BMJ-MCH-0017",
+      "part": "whole machine: blank feeder through folding, adhesive boundary, compression and delivery",
+      "status": "RELEASE_PENDING",
+      "report": "docs/fgm2-whole-machine-audit.md",
+      "nextMachineId": "BMJ-MCH-0017",
+      "parentCommit": "ff7da0381c39524da294b389d8f34a1bbb2b0be7"
     }
   ],
-  "updatedAt": "2026-10-13T11:23:26Z"
+  "updatedAt": "2026-10-13T12:04:39Z"
 }

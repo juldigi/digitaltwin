@@ -14,6 +14,17 @@ export const isReferenceMachineKey=key=>REFERENCE_SET.has(key);
 export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  constructor(machineId){
   super(machineId);
+  // Reference templates used shared palette materials. Interactive highlight,
+  // ghost and depth-write changes must be local to one mesh; otherwise
+  // selecting a part mutates visually unrelated assemblies that share it.
+  this.referenceDynamicMaterials=[];
+  for(const mesh of this.meshes){
+   if(!mesh.isMesh||!mesh.material)continue;
+   const source=mesh.material,cloned=source.clone();
+   cloned.userData={...(source.userData||{})};
+   mesh.material=cloned;this.referenceDynamicMaterials.push(cloned);
+   mesh.userData.restVisible=mesh.visible;
+  }
   this.root.name=this.cfg.machine.name+' · REFERENCE-GROUNDED';
   this.root.userData.referenceBuilder='V139_RESEARCH_GROUNDED_BUILDER';
   this.root.userData.engineeringDimensions=false;
@@ -72,9 +83,13 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  enforceV341EquipmentBoundary(){
   if(!this.exteriorOpen)for(const n of this.nodes)if(n.userData.functionalDiagramOnly)n.visible=false;
  }
- isolate(part,on=true){super.isolate(part,on);this.enforceV341EquipmentBoundary();}
- showOnly(parts=[],on=true){super.showOnly(parts,on);this.enforceV341EquipmentBoundary();}
+ restoreReferenceVisibility(){
+  for(const mesh of this.meshes)if(mesh.userData.restVisible===false)mesh.visible=false;
+ }
+ isolate(part,on=true){super.isolate(part,on);this.restoreReferenceVisibility();this.enforceV341EquipmentBoundary();}
+ showOnly(parts=[],on=true){super.showOnly(parts,on);this.restoreReferenceVisibility();this.enforceV341EquipmentBoundary();}
  reset(){super.reset();this.enforceV341EquipmentBoundary();}
+ dispose(){super.dispose();this.referenceDynamicMaterials?.forEach(m=>m.dispose());}
  motion(mesh,type='spin',axis='z',rate=4,amp=.08,phase=0,stage=null){
   mesh.userData.motion={type,axis,rate,amp,phase,stage};
   return this.active(mesh);
@@ -582,12 +597,12 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    if(table){
     this.tag(this.box(table,[1.22,.04,1.42],[0,.61,0],'steel',.006),'blank-feed-table','MULTI_VENDOR_FOLDER_GLUER_PROCESS');
     for(const z of [-.64,.64])this.tag(this.box(table,[1.08,.18,.035],[-.05,.72,z],'steel',.004),'blank-side-guide','MULTI_VENDOR_FOLDER_GLUER_PROCESS');
-    const stack=this.box(table,[.78,.035,1.14],[-.18,.68,0],'paper',.003);this.tag(stack,'carton-blank-stack-reference','PROCESS_WORKPIECE_REFERENCE');
+    const stack=this.box(table,[.78,.035,1.14],[-.18,.7935,0],'paper',.003);this.tag(stack,'carton-blank-stack-reference','PROCESS_WORKPIECE_REFERENCE');
    }
    const drive=this.findNode('fgm2-feed-drive');
    if(drive){
-    for(const z of [-.45,-.15,.15,.45]){const belt=this.box(drive,[1.12,.025,.07],[.03,.75,z],'dark',.004);this.tag(belt,'feeder-transport-belt','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
-    for(const x of [-.49,.49])for(const z of [-.45,-.15,.15,.45]){const r=this.motion(this.cyl(drive,.045,.07,[x,.75,z],'dark','z'),'spin','z',7,.01,z,0);this.tag(r,'feeder-drive-roller','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+    for(const z of [-.45,-.15,.15,.45]){const belt=this.box(drive,[1.12,.025,.07],[.03,.7985,z],'dark',.004);this.tag(belt,'feeder-transport-belt','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+    for(const x of [-.49,.49])for(const z of [-.45,-.15,.15,.45]){const r=this.motion(this.cyl(drive,.045,.07,[x,.766,z],'dark','z'),'spin','z',7,.01,z,0);this.tag(r,'feeder-drive-roller','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
     const motor=this.active(this.cyl(drive,.090,.22,[-.61,.56,.57],'dark','x'));this.tag(motor,'fgm-feeder-section-motor-reference','FOLDER_GLUER_SECTIONAL_DRIVE_REFERENCE');
     const pulley=this.cyl(drive,.070,.055,[-.49,.75,.57],'accent','z');this.tag(pulley,'fgm-feeder-drive-pulley-reference','FOLDER_GLUER_SECTIONAL_DRIVE_REFERENCE');
    }
@@ -602,7 +617,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    const a=this.findNode('fgm2-aligner');
    if(a){
     for(const z of [-.56,.56]){const rail=this.box(a,[1.32,.045,.045],[0,.91,z],'steel',.005);rail.rotation.z=z<0?.035:-.035;this.tag(rail,'blank-aligner-rail','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
-    for(const x of [-.48,0,.48]){const r=this.motion(this.cyl(a,.040,.10,[x,.76,-.43],'dark','z'),'spin','z',6,.01,x,1);this.tag(r,'aligner-transport-roller','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+    for(const x of [-.48,0,.48]){const r=this.motion(this.cyl(a,.040,.10,[x,.771,-.43],'dark','z'),'spin','z',6,.01,x,1);this.tag(r,'aligner-transport-roller','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
    }
    const pre=this.findNode('fgm2-prebreaker');
    if(pre){
@@ -614,7 +629,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   if(fold1){
    const belts=this.findNode('fgm2-primary-fold');
    if(belts){
-    for(const z of [-.52,-.20,.20,.52]){const b=this.box(belts,[1.40,.025,.075],[0,.77,z],'dark',.004);this.tag(b,'primary-fold-transport-belt','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+    for(const z of [-.52,-.20,.20,.52]){const b=this.box(belts,[1.40,.025,.075],[0,.7985,z],'dark',.004);this.tag(b,'primary-fold-transport-belt','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
     for(const z of [-.58,.58]){const guide=this.box(belts,[1.32,.035,.045],[0,1.04,z],'steel',.004);guide.rotation.z=z<0?.18:-.18;guide.rotation.x=z<0?.18:-.18;this.tag(guide,'primary-fold-guide','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
     for(const z of [-.52,.52]){const idler=this.cyl(belts,.050,.085,[.56,.82,z],'steel','z');this.tag(idler,'primary-fold-belt-idler-reference','BOBST_BELT_SERVICE_REFERENCE');const tension=this.cyl(belts,.038,.085,[-.58,.92,z],'dark','z');this.tag(tension,'primary-fold-belt-tensioner-reference','BOBST_BELT_SERVICE_REFERENCE');for(const x of [-.58,.56]){const brg=this.box(belts,[.10,.10,.10],[x,.82,z],'dark',.008);this.tag(brg,'folder-gluer-bearing-block-reference','BOBST_BEARING_SERVICE_REFERENCE');}}
     const motor=this.active(this.cyl(belts,.095,.24,[-.66,.59,.64],'dark','x'));this.tag(motor,'fgm-primary-fold-section-motor-reference','FOLDER_GLUER_SECTIONAL_DRIVE_REFERENCE');
@@ -629,6 +644,10 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   }
 
   if(glue){
+   // A neutral conveyor is the only installed-process claim here. The actual
+   // adhesive chemistry and applicator architecture remain option-bounded.
+   const transport=this.group(glue,'fgm2-glue-transport','Glue-zone transport reference',[0,0,0],[0,.08,0]);
+   for(const z of [-.45,-.15,.15,.45])this.tag(this.box(transport,[1.30,.025,.07],[0,.7985,z],'dark',.004),'glue-zone-transport-belt','MULTI_VENDOR_FOLDER_GLUER_PROCESS');
    const supply=this.findNode('fgm2-glue-supply');
    if(supply){
     this.tag(this.box(supply,[.38,.48,.36],[.43,.50,.64],'accent',.022),'glue-reservoir-reference','MULTI_VENDOR_FOLDER_GLUER_PROCESS');
@@ -649,7 +668,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   if(fold2){
    const belts=this.findNode('fgm2-final-fold');
    if(belts){
-    for(const y of [.75,.98])for(const z of [-.46,-.15,.15,.46]){const b=this.box(belts,[1.48,.025,.07],[0,y,z],'dark',.004);this.tag(b,y>.8?'upper-final-fold-belt':'lower-final-fold-belt','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+    for(const y of [.7985,1.0455])for(const z of [-.46,-.15,.15,.46]){const b=this.box(belts,[1.48,.025,.07],[0,y,z],'dark',.004);this.tag(b,y>.9?'upper-final-fold-belt':'lower-final-fold-belt','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
     for(const z of [-.56,.56]){const rail=this.box(belts,[1.34,.035,.045],[0,1.10,z],'steel',.004);rail.rotation.z=z<0?.12:-.12;this.tag(rail,'final-fold-guide-rail','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
     for(const z of [-.46,.46]){const upper=this.cyl(belts,.046,.085,[.58,1.00,z],'dark','z');this.tag(upper,'final-fold-upper-belt-idler-reference','BOBST_BELT_SERVICE_REFERENCE');const lower=this.cyl(belts,.046,.085,[-.58,.76,z],'steel','z');this.tag(lower,'final-fold-lower-belt-idler-reference','BOBST_BELT_SERVICE_REFERENCE');}
    }
@@ -660,7 +679,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   if(press){
    const belts=this.findNode('fgm2-compression-belts');
    if(belts){
-    for(const y of [.74,1.02])for(const z of [-.48,-.16,.16,.48]){const b=this.box(belts,[1.42,.035,.08],[0,y,z],'dark',.004);this.tag(b,y>.8?'upper-compression-belt':'lower-compression-belt','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+    for(const y of [.7935,1.0505])for(const z of [-.48,-.16,.16,.48]){const b=this.box(belts,[1.42,.035,.08],[0,y,z],'dark',.004);this.tag(b,y>.9?'upper-compression-belt':'lower-compression-belt','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
     for(const x of [-.56,.56])for(const z of [-.48,.48]){const r=this.motion(this.cyl(belts,.052,.08,[x,.88,z],'dark','z'),'spin','z',6,.01,z,5);this.tag(r,'compression-belt-drive-roller','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
     for(const x of [-.42,-.14,.14,.42])for(const z of [-.48,.48]){const pr=this.cyl(belts,.034,.08,[x,1.01,z],'steel','z');this.tag(pr,'compression-pressure-roller-reference','BOBST_DELIVERY_PRESSURE_REFERENCE');}
     for(const z of [-.48,.48]){const t=this.cyl(belts,.038,.08,[.63,.90,z],'dark','z');this.tag(t,'compression-belt-tensioner-reference','BOBST_BELT_SERVICE_REFERENCE');}
@@ -677,8 +696,8 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   if(out){
    const delivery=this.findNode('fgm2-delivery');
    if(delivery){
-    for(const z of [-.46,-.15,.15,.46]){const belt=this.box(delivery,[1.16,.028,.075],[-.04,.74,z],'dark',.004);this.tag(belt,'delivery-transport-belt','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
-    for(const x of [-.46,.46])for(const z of [-.46,-.15,.15,.46]){const r=this.motion(this.cyl(delivery,.048,.075,[x,.74,z],'dark','z'),'spin','z',6,.01,z,6);this.tag(r,'delivery-drive-roller','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+    for(const z of [-.46,-.15,.15,.46]){const belt=this.box(delivery,[1.16,.028,.075],[-.04,.797,z],'dark',.004);this.tag(belt,'delivery-transport-belt','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
+    for(const x of [-.46,.46])for(const z of [-.46,-.15,.15,.46]){const r=this.motion(this.cyl(delivery,.048,.075,[x,.763,z],'dark','z'),'spin','z',6,.01,z,6);this.tag(r,'delivery-drive-roller','MULTI_VENDOR_FOLDER_GLUER_PROCESS');}
     const motor=this.active(this.cyl(delivery,.090,.22,[-.58,.56,.58],'dark','x'));this.tag(motor,'fgm-delivery-section-motor-reference','BOBST_INDEPENDENT_DELIVERY_DRIVE_REFERENCE');
     const coupling=this.cyl(delivery,.045,.10,[-.47,.56,.58],'accent','x');this.tag(coupling,'fgm-delivery-drive-coupling-reference','FOLDER_GLUER_SECTIONAL_DRIVE_REFERENCE');
    }
