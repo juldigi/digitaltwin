@@ -7,7 +7,7 @@
   "mode": "AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY",
   "status": "IN_PROGRESS",
   "cursor": {
-    "machineId": "BMJ-MCH-0020",
+    "machineId": "BMJ-MCH-0021",
     "partIndex": 0
   },
   "baselineCommit": "b5e45a82ce1aeaf9094b0a5c3fd8d985b8a9e96f",
@@ -1373,7 +1373,7 @@
       "name": "OFFLINE INSPECTION 4 - FOCUSIGHT",
       "model": "FS-SHARK-N650-P3N1",
       "area": "OFFSET CONVERTING",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "parts": [
         {"part": "pile input and suction pickup", "status": "COMPLETE", "report": "docs/shark-n650-whole-machine-audit.md"},
         {"part": "negative-pitch full-suction transfer", "status": "COMPLETE", "report": "docs/shark-n650-whole-machine-audit.md"},
@@ -1920,7 +1920,27 @@
         "productionHttp": 200,
         "visualFallbackVerified": true
       }
+    },
+    {
+      "machineId": "BMJ-MCH-0020",
+      "part": "whole machine: pile input through suction transfer inspection decision and good/bad return collection",
+      "status": "COMPLETE",
+      "report": "docs/shark-n650-whole-machine-audit.md",
+      "nextMachineId": "BMJ-MCH-0021",
+      "parentCommit": "913a34f0252975d5324f1f4913c2d9508e1b7263",
+      "releaseEvidence": {
+        "commit": "c532d87e80c449215e79d253d390c556f808d690",
+        "workflows": [
+          38444629772,
+          38444629684,
+          38444629688
+        ],
+        "conclusion": "success",
+        "tests": 1595,
+        "productionHttp": 200,
+        "visualFallbackVerified": true
+      }
     }
   ],
-  "updatedAt": "2026-10-13T18:20:00Z"
+  "updatedAt": "2026-10-13T18:19:00Z"
 }

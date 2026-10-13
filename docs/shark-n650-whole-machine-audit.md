@@ -35,5 +35,6 @@ Urutan fungsi: pile input → suction pickup → negative-pitch full-suction tra
 
 - Tes fokus SHARK/inspection: 41/41 lulus.
 - Gate lokal lulus: `npm test` 1.595/1.595 dan `npm run build` menghasilkan 41 mesin, 19 unidentified, serta bundle 2.918.524 byte.
-- Pipeline dan produksi akan dicatat setelah deployment terverifikasi.
-- Status sementara `RELEASE_PENDING`; cursor tetap `BMJ-MCH-0020` sampai gate rilis selesai.
+- Rilis `c532d87e80c449215e79d253d390c556f808d690` lulus CI `38444629772`, deploy Cloudflare `38444629684`, dan verify frontend `38444629688`.
+- Produksi memuat identitas `BMJ-MCH-0020 / IPM-4 / FPS241216001`, model FS-SHARK-N650-P3N1, delapan sumber, dan batas bukti P3N1/camera/feeder/reject. Browser tanpa WebGL turun aman ke 2D tanpa layar putih.
+- Status mesin `COMPLETE`; cursor berikutnya `BMJ-MCH-0021`.
