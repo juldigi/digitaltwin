@@ -7,7 +7,7 @@
   "mode": "AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY",
   "status": "IN_PROGRESS",
   "cursor": {
-    "machineId": "BMJ-MCH-0019",
+    "machineId": "BMJ-MCH-0020",
     "partIndex": 0
   },
   "baselineCommit": "b5e45a82ce1aeaf9094b0a5c3fd8d985b8a9e96f",
@@ -1355,7 +1355,7 @@
       "name": "OFFLINE INSPECTION 3 - MK",
       "model": "DIANA EYE 55",
       "area": "OFFSET CONVERTING",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "parts": [
         {"part": "blank feeder and alignment", "status": "COMPLETE", "report": "docs/diana-eye55-whole-machine-audit.md"},
         {"part": "suction-belt transport", "status": "COMPLETE", "report": "docs/diana-eye55-whole-machine-audit.md"},
@@ -1891,7 +1891,27 @@
         "productionHttp": 200,
         "visualFallbackVerified": true
       }
+    },
+    {
+      "machineId": "BMJ-MCH-0019",
+      "part": "whole machine: blank feeder through inspection decision reject recovery and accepted fish-scale delivery",
+      "status": "COMPLETE",
+      "report": "docs/diana-eye55-whole-machine-audit.md",
+      "nextMachineId": "BMJ-MCH-0020",
+      "parentCommit": "5665aeaac28d1b42ff8a50444e373892ee294b27",
+      "releaseEvidence": {
+        "commit": "a9e35167e00eda6ca49eeacd760a0b8ee7b8987a",
+        "workflows": [
+          38437409680,
+          38437409973,
+          38437409979
+        ],
+        "conclusion": "success",
+        "tests": 1592,
+        "productionHttp": 200,
+        "visualFallbackVerified": true
+      }
     }
   ],
-  "updatedAt": "2026-10-13T17:22:00Z"
+  "updatedAt": "2026-10-13T17:25:00Z"
 }

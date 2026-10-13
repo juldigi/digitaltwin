@@ -34,5 +34,6 @@ Urutan fungsi: blank feeder/alignment → suction-belt transport → inspection 
 
 - Tes fokus Diana/inspection: 44/44 lulus.
 - Gate lokal lulus: `npm test` 1.592/1.592 dan `npm run build` menghasilkan 41 mesin, 19 unidentified, serta bundle 2.918.524 byte.
-- Pipeline Cloudflare, produksi dan verifikasi visual dicatat setelah rilis berhasil.
-- Status saat laporan dibuat: `RELEASE_PENDING`; cursor tetap `BMJ-MCH-0019` sampai semua gate rilis terverifikasi.
+- Rilis `a9e35167e00eda6ca49eeacd760a0b8ee7b8987a` lulus CI `38437409680`, deploy Cloudflare `38437409973`, dan verify frontend `38437409979`.
+- Produksi memuat identitas `BMJ-MCH-0019 / IPM-3 / MP.FBA0-00058`, model Diana Eye 55, delapan sumber, nol foto aktual, dan batas opsi camera/reject/stacker. Browser tanpa WebGL turun aman ke 2D tanpa layar putih.
+- Status mesin `COMPLETE`; cursor berikutnya `BMJ-MCH-0020`.
