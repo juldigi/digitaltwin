@@ -1282,9 +1282,21 @@
       "name": "FOLDER GLUER - 1 MACHINE",
       "model": "MEDIA 100 II",
       "area": "OFFSET CONVERTING",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {"part": "blank feeder and input", "status": "COMPLETE", "report": "docs/fgm1-media100ii-whole-machine-audit.md"},
+        {"part": "alignment and pre-break", "status": "COMPLETE", "report": "docs/fgm1-media100ii-whole-machine-audit.md"},
+        {"part": "forming and conversion", "status": "BLOCKED_EVIDENCE", "report": "docs/fgm1-media100ii-whole-machine-audit.md"},
+        {"part": "glue application", "status": "BLOCKED_EVIDENCE", "report": "docs/fgm1-media100ii-whole-machine-audit.md"},
+        {"part": "final fold and trombone", "status": "COMPLETE", "report": "docs/fgm1-media100ii-whole-machine-audit.md"},
+        {"part": "compression", "status": "COMPLETE", "report": "docs/fgm1-media100ii-whole-machine-audit.md"},
+        {"part": "delivery and output", "status": "COMPLETE", "report": "docs/fgm1-media100ii-whole-machine-audit.md"},
+        {"part": "drive, control, frame and access", "status": "BLOCKED_EVIDENCE", "report": "docs/fgm1-media100ii-whole-machine-audit.md"},
+        {"part": "simulation, display modes and taxonomy", "status": "COMPLETE", "report": "docs/fgm1-media100ii-whole-machine-audit.md"}
+      ],
+      "reports": [
+        "docs/fgm1-media100ii-whole-machine-audit.md"
+      ]
     },
     {
       "machineId": "BMJ-MCH-0017",
@@ -1776,7 +1788,15 @@
         "productionHttp": 200,
         "visualFallbackVerified": true
       }
+    },
+    {
+      "machineId": "BMJ-MCH-0016",
+      "part": "whole machine: blank feeder through folding, glue, compression and delivery",
+      "status": "RELEASE_PENDING",
+      "report": "docs/fgm1-media100ii-whole-machine-audit.md",
+      "nextMachineId": "BMJ-MCH-0016",
+      "parentCommit": "f0764e9a9807193b0b0b4db9e55a887f5c9a8df6"
     }
   ],
-  "updatedAt": "2026-10-13T08:21:56Z"
+  "updatedAt": "2026-10-13T08:36:10Z"
 }

@@ -23,9 +23,33 @@ test('both MEDIA100 BMJ assets instantiate the family process train without clai
 });
 
 test('unverified MEDIA100 conversion hardware stays out of the installed silhouette',()=>{
- const model=new Media100MachineTemplate();for(const id of ['media100-form-servo','media100-final-kicker'])model.findNode(id).traverse(o=>{if(o.isMesh){assert.equal(o.visible,false,id);assert.equal(o.userData.capabilityOnly,true,id);}});
+ const model=new Media100MachineTemplate();for(const id of ['media100-form-servo','media100-form-bottom','media100-glue-lower','media100-glue-pump','media100-final-kicker'])model.findNode(id).traverse(o=>{if(o.isMesh){assert.equal(o.visible,false,id);assert.equal(o.userData.capabilityOnly,true,id);}});
  const upper=model.findNode('media100-glue-upper'),heads=upper.children.filter(o=>o.userData.glueHeadPosition);assert.equal(heads.length,3);assert.ok(heads.every(o=>!o.visible&&o.userData.capabilityOnly));
  model.reset();assert.ok(heads.every(o=>!o.visible));model.dispose();
+});
+
+test('MEDIA100 selection effects are mesh-local and preserve capability-hidden hardware',()=>{
+ const model=new Media100MachineTemplate(),feed=model.findNode('media100-feeder'),press=model.findNode('media100-compression');
+ assert.equal(new Set(model.meshes.map(m=>m.material)).size,model.meshes.length,'mutable display materials must not leak between parts');
+ model.highlight(feed);const feedMesh=model.meshes.find(m=>model.contains(feed,m)),pressMesh=model.meshes.find(m=>model.contains(press,m));
+ assert.ok(feedMesh.material.emissiveIntensity>0);assert.equal(pressMesh.material.emissiveIntensity,0);
+ model.ghost(true,feed);assert.equal(feedMesh.material.opacity,1);assert.equal(pressMesh.material.opacity,.14);model.ghost(false);
+ model.isolate(feed,true);assert.equal(feed.visible,true);assert.equal(press.visible,false);model.isolate(null,false);
+ model.setLow(true);model.setExteriorOpen(true);model.setLow(false);model.setExteriorOpen(false);
+ for(const id of ['media100-form-bottom','media100-glue-lower','media100-glue-pump'])model.findNode(id).traverse(o=>{if(o.isMesh)assert.equal(o.visible,false,id);});
+ model.dispose();
+});
+
+test('MEDIA100 carton route maintains functional contact from pile through belts, compression and exit',()=>{
+ const model=new Media100MachineTemplate(),sim=new Media100ProcessSimulation(model.root,model);
+ assert.ok(sim.points[0].y<=.76&&sim.points[1].y<.80,'pickup route must not float above the feeder pile and belt');
+ for(const i of [2,3,4])assert.ok(sim.points[i].y>=.782&&sim.points[i].y<=.795,`belt contact ${i}`);
+ const lower=[],upper=[],upperNode=model.findNode('media100-press-upper');model.findNode('media100-press-belts').traverse(o=>{if(o.isMesh&&o.userData.compressionBelt)(model.contains(upperNode,o)?upper:lower).push(o);});
+ const lowerTop=Math.max(...lower.map(m=>new THREE.Box3().setFromObject(m).max.y)),upperBottom=Math.min(...upper.map(m=>new THREE.Box3().setFromObject(m).min.y));
+ assert.ok(sim.points[6].y-.009<=lowerTop+.006,'carton bottom must meet lower compression belt');
+ assert.ok(sim.points[6].y+.009>=upperBottom-.006,'carton top must meet upper compression belt');
+ assert.ok(sim.points[7].y>=.93&&sim.points[7].y<=.95,'exit route must follow exit roller crown');
+ sim.dispose();model.dispose();
 });
 
 test('MEDIA100 rotor whitelist excludes static crossbars servo housings pressure cylinders and buttons',()=>{
@@ -54,9 +78,9 @@ test('MEDIA100 glue stays on the blank after application and can be hidden indep
 });
 
 test('MEDIA100 delivers cartons at the exit level and pause/resume does not jump time',()=>{
- const model=new Media100MachineTemplate(),sim=new Media100ProcessSimulation(model.root,model);sim.start();let now=1000;for(let i=0;i<520;i++){now+=20;sim.update(now);}assert.ok(sim.completed>0);assert.ok(sim.exitStack.some(p=>p.visible));assert.ok(sim.exitStack.filter(p=>p.visible).every(p=>p.position.y>=.83));
+ const model=new Media100MachineTemplate(),sim=new Media100ProcessSimulation(model.root,model);sim.start();let now=1000;for(let i=0;i<520;i++){now+=20;sim.update(now);}assert.ok(sim.completed>0);assert.ok(sim.exitStack.some(p=>p.visible));assert.ok(sim.exitStack.filter(p=>p.visible).every(p=>p.position.y>=.945));
  const t=sim.elapsed;sim.pause();sim.update(20000);sim.resume();sim.update(30000);assert.equal(sim.elapsed,t);sim.update(30020);assert.ok(sim.elapsed-t<.03);
- assert.ok(sim.exitStack.filter(p=>p.visible).every(p=>p.position.y<=1.04),'completed cartons should stay in compact delivery lanes');
+ assert.ok(sim.exitStack.filter(p=>p.visible).every(p=>p.position.y<=1.15),'completed cartons should stay in compact delivery lanes');
  sim.stop();assert.equal(sim.exitStack.every(p=>!p.visible),true);sim.dispose();model.dispose();
 });
 
