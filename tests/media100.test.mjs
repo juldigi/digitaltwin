@@ -5,7 +5,7 @@ import {Media100MachineTemplate} from '../frontend/src/media100.js';
 import {Media100ProcessSimulation,MEDIA100_SIMULATION_STAGES} from '../frontend/src/simulation-media100.js';
 import {MEDIA100_SPEC,MEDIA100_SPEC_FGM3} from '../frontend/src/data/dimensions-media100.js';
 import {media100TaxonomyFor} from '../frontend/src/data/taxonomy-media100.js';
-import {MEDIA100_TECHNICAL_SOURCES} from '../frontend/src/data/sources-media100.js';
+import {MEDIA100_TECHNICAL_SOURCES,media100TechnicalSourcesFor} from '../frontend/src/data/sources-media100.js';
 
 test('MEDIA100 keeps BMJ identities separate and optional kits evidence bounded',()=>{
  assert.equal(MEDIA100_SPEC.assetId,'BMJ-MCH-0016');assert.equal(MEDIA100_SPEC.serial,'0341 06903');assert.equal(MEDIA100_SPEC_FGM3.assetId,'BMJ-MCH-0018');assert.equal(MEDIA100_SPEC_FGM3.serial,'0341 142 07');
@@ -13,6 +13,16 @@ test('MEDIA100 keeps BMJ identities separate and optional kits evidence bounded'
  assert.deepEqual(MEDIA100_SPEC.marketMinWorkingWidthReferencesM,[.056,.126]);assert.equal(MEDIA100_SPEC.installedMinWorkingWidthVerified,false);assert.equal(MEDIA100_SPEC.installedA1A2SuffixVerified,false);
  assert.equal(MEDIA100_SPEC.installedGlueHeadCountVerified,false);assert.equal(MEDIA100_SPEC.installedCornerServoPackageVerified,false);assert.equal(MEDIA100_SPEC.installedKickerVerified,false);assert.equal(MEDIA100_SPEC.installedEjectorVerified,false);assert.equal(MEDIA100_SPEC.installedControlGenerationVerified,false);
  assert.ok(MEDIA100_TECHNICAL_SOURCES.some(s=>s.authority==='primary-archive'));assert.ok(MEDIA100_TECHNICAL_SOURCES.some(s=>s.id==='MEDIA100-EVIDENCE-BOUNDARY'));
+});
+
+test('MEDIA100 BMJ site records stay isolated to the selected asset',()=>{
+ for(const [assetId,expected,rejected] of [['BMJ-MCH-0016','BMJ-ASSET-REGISTRY-FGM1','BMJ-ASSET-REGISTRY-FGM3'],['BMJ-MCH-0018','BMJ-ASSET-REGISTRY-FGM3','BMJ-ASSET-REGISTRY-FGM1']]){
+  const sources=media100TechnicalSourcesFor(assetId),model=new Media100MachineTemplate(assetId);
+  assert.ok(sources.some(source=>source.id===expected),assetId);
+  assert.equal(sources.some(source=>source.id===rejected),false,assetId);
+  assert.deepEqual(model.root.userData.sources,sources,assetId);
+  model.dispose();
+ }
 });
 
 test('both MEDIA100 BMJ assets instantiate the family process train without claiming installation CAD',()=>{

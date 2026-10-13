@@ -1336,9 +1336,19 @@
       "name": "FOLDER GLUER - 3 MACHINE",
       "model": "MEDIA 100 II",
       "area": "OFFSET CONVERTING",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {"part": "blank feeder and separation", "status": "COMPLETE", "report": "docs/fgm3-media100ii-whole-machine-audit.md"},
+        {"part": "alignment and prebreak", "status": "NO_CHANGE_REQUIRED", "report": "docs/fgm3-media100ii-whole-machine-audit.md"},
+        {"part": "forming and conversion boundary", "status": "BLOCKED_EVIDENCE", "report": "docs/fgm3-media100ii-whole-machine-audit.md"},
+        {"part": "adhesive application boundary", "status": "BLOCKED_EVIDENCE", "report": "docs/fgm3-media100ii-whole-machine-audit.md"},
+        {"part": "final folding and trombone", "status": "COMPLETE", "report": "docs/fgm3-media100ii-whole-machine-audit.md"},
+        {"part": "compression", "status": "COMPLETE", "report": "docs/fgm3-media100ii-whole-machine-audit.md"},
+        {"part": "delivery and output", "status": "COMPLETE", "report": "docs/fgm3-media100ii-whole-machine-audit.md"},
+        {"part": "drive control frame and access", "status": "BLOCKED_EVIDENCE", "report": "docs/fgm3-media100ii-whole-machine-audit.md"},
+        {"part": "identity evidence display simulation and taxonomy", "status": "COMPLETE", "report": "docs/fgm3-media100ii-whole-machine-audit.md"}
+      ],
+      "reports": ["docs/fgm3-media100ii-whole-machine-audit.md"]
     },
     {
       "machineId": "BMJ-MCH-0019",
@@ -1852,7 +1862,15 @@
         "productionHttp": 200,
         "visualFallbackVerified": true
       }
+    },
+    {
+      "machineId": "BMJ-MCH-0018",
+      "part": "whole machine: blank feeder through forming, adhesive boundary, compression and delivery",
+      "status": "RELEASE_PENDING",
+      "report": "docs/fgm3-media100ii-whole-machine-audit.md",
+      "nextMachineId": "BMJ-MCH-0018",
+      "parentCommit": "d280df062ad8acd1f4e127cb8034008ad597b7a2"
     }
   ],
-  "updatedAt": "2026-10-13T12:20:01Z"
+  "updatedAt": "2026-10-13T13:19:00Z"
 }

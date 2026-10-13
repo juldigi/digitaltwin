@@ -8,3 +8,8 @@ export const MEDIA100_TECHNICAL_SOURCES=Object.freeze([
  {id:'BMJ-ASSET-REGISTRY-FGM3',authority:'site-record',title:'BMJ machine registry · BMJ-MCH-0018',supports:['MEDIA 100 II model','serial 0341 142 07','SAP FGM-3']},
  {id:'MEDIA100-EVIDENCE-BOUNDARY',authority:'engineering-control',title:'Installed-option evidence boundary',supports:['A1/A2 suffix, configuration-dependent minimum blank width, exact envelope, glue-head count/type, control generation, barcode/glue inspection, 4/6-corner servo equipment, insert feeder, ejector, kicker and delivery configuration remain unverified for each BMJ serial. Simulation uses one explicitly demo-only carton job and does not assert those optional kits as installed.']}
 ]);
+
+export function media100TechnicalSourcesFor(assetId='BMJ-MCH-0016'){
+ const registryId=assetId==='BMJ-MCH-0018'?'BMJ-ASSET-REGISTRY-FGM3':'BMJ-ASSET-REGISTRY-FGM1';
+ return MEDIA100_TECHNICAL_SOURCES.filter(source=>source.authority!=='site-record'||source.id===registryId);
+}
