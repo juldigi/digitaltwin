@@ -37,6 +37,8 @@ Envelope family-reference sesudah perbaikan adalah sekitar 11,500 × 1,593 × 2,
 ## Validasi
 
 - Tes fokus: 46/46 lulus (`tests/media100.test.mjs` + `tests/machine-runtime.test.mjs`).
-- Tes penuh dan build dicatat pada release gate commit ini.
-- Status saat laporan dibuat: `RELEASE_PENDING`; cursor tidak dipindah sampai workflow dan produksi terverifikasi.
+- Tes penuh: 1587/1587 lulus; build produksi berhasil untuk 41 aset.
+- Commit rilis `c59fe884b9ed6f8023513acd3a1183e44aa9c37c` lulus Digital Twin CI `38389007930`, deploy Cloudflare `38389007761`, dan Verify frontend `38389008063`.
+- Produksi merespons HTTP 200. Tampilan cadangan runtime terverifikasi memuat identitas BMJ-MCH-0016, serial `0341 06903`, tujuh zona proses berurutan, serta batas bukti yang benar ketika akselerasi grafis 3D tidak tersedia.
+- Status akhir: `COMPLETE`; cursor dipindah ke `BMJ-MCH-0017`.
 

@@ -7,7 +7,7 @@
   "mode": "AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY",
   "status": "IN_PROGRESS",
   "cursor": {
-    "machineId": "BMJ-MCH-0016",
+    "machineId": "BMJ-MCH-0017",
     "partIndex": 0
   },
   "baselineCommit": "b5e45a82ce1aeaf9094b0a5c3fd8d985b8a9e96f",
@@ -1282,7 +1282,7 @@
       "name": "FOLDER GLUER - 1 MACHINE",
       "model": "MEDIA 100 II",
       "area": "OFFSET CONVERTING",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "parts": [
         {"part": "blank feeder and input", "status": "COMPLETE", "report": "docs/fgm1-media100ii-whole-machine-audit.md"},
         {"part": "alignment and pre-break", "status": "COMPLETE", "report": "docs/fgm1-media100ii-whole-machine-audit.md"},
@@ -1296,7 +1296,19 @@
       ],
       "reports": [
         "docs/fgm1-media100ii-whole-machine-audit.md"
-      ]
+      ],
+      "releaseEvidence": {
+        "commit": "c59fe884b9ed6f8023513acd3a1183e44aa9c37c",
+        "workflows": [
+          38389007930,
+          38389007761,
+          38389008063
+        ],
+        "conclusion": "success",
+        "tests": 1587,
+        "productionHttp": 200,
+        "visualFallbackVerified": true
+      }
     },
     {
       "machineId": "BMJ-MCH-0017",
@@ -1792,11 +1804,23 @@
     {
       "machineId": "BMJ-MCH-0016",
       "part": "whole machine: blank feeder through folding, glue, compression and delivery",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "report": "docs/fgm1-media100ii-whole-machine-audit.md",
-      "nextMachineId": "BMJ-MCH-0016",
-      "parentCommit": "f0764e9a9807193b0b0b4db9e55a887f5c9a8df6"
+      "nextMachineId": "BMJ-MCH-0017",
+      "parentCommit": "f0764e9a9807193b0b0b4db9e55a887f5c9a8df6",
+      "releaseEvidence": {
+        "commit": "c59fe884b9ed6f8023513acd3a1183e44aa9c37c",
+        "workflows": [
+          38389007930,
+          38389007761,
+          38389008063
+        ],
+        "conclusion": "success",
+        "tests": 1587,
+        "productionHttp": 200,
+        "visualFallbackVerified": true
+      }
     }
   ],
-  "updatedAt": "2026-10-13T08:36:10Z"
+  "updatedAt": "2026-10-13T11:23:26Z"
 }
