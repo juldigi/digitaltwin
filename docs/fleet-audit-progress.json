@@ -7,7 +7,7 @@
   "mode": "AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY",
   "status": "IN_PROGRESS",
   "cursor": {
-    "machineId": "BMJ-MCH-0018",
+    "machineId": "BMJ-MCH-0019",
     "partIndex": 0
   },
   "baselineCommit": "b5e45a82ce1aeaf9094b0a5c3fd8d985b8a9e96f",
@@ -1336,7 +1336,7 @@
       "name": "FOLDER GLUER - 3 MACHINE",
       "model": "MEDIA 100 II",
       "area": "OFFSET CONVERTING",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "parts": [
         {"part": "blank feeder and separation", "status": "COMPLETE", "report": "docs/fgm3-media100ii-whole-machine-audit.md"},
         {"part": "alignment and prebreak", "status": "NO_CHANGE_REQUIRED", "report": "docs/fgm3-media100ii-whole-machine-audit.md"},
@@ -1866,11 +1866,23 @@
     {
       "machineId": "BMJ-MCH-0018",
       "part": "whole machine: blank feeder through forming, adhesive boundary, compression and delivery",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "report": "docs/fgm3-media100ii-whole-machine-audit.md",
-      "nextMachineId": "BMJ-MCH-0018",
-      "parentCommit": "d280df062ad8acd1f4e127cb8034008ad597b7a2"
+      "nextMachineId": "BMJ-MCH-0019",
+      "parentCommit": "d280df062ad8acd1f4e127cb8034008ad597b7a2",
+      "releaseEvidence": {
+        "commit": "40b4c0182241c4462e1463ef813e4e02252baa8d",
+        "workflows": [
+          38403342403,
+          38403342438,
+          38403342440
+        ],
+        "conclusion": "success",
+        "tests": 1590,
+        "productionHttp": 200,
+        "visualFallbackVerified": true
+      }
     }
   ],
-  "updatedAt": "2026-10-13T13:19:00Z"
+  "updatedAt": "2026-10-13T13:21:18Z"
 }

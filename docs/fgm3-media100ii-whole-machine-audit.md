@@ -37,5 +37,7 @@ Urutan fungsi: blank feeder → alignment/pre-break → forming → glue boundar
 
 - Tes fokus MEDIA 100, folder truth, runtime dan identity: 61/61 lulus.
 - Gate lokal lulus: `npm test` 1.590/1.590 dan `npm run build` menghasilkan 41 mesin, 19 unidentified, serta bundle 2.918.524 byte.
-- Status: `RELEASE_PENDING`; cursor tetap `BMJ-MCH-0018` sampai workflow dan produksi terverifikasi.
+- Rilis `40b4c0182241c4462e1463ef813e4e02252baa8d` lulus CI `38403342403`, deploy Cloudflare `38403342438`, dan verify frontend `38403342440`.
+- Produksi HTTP 200; fallback visual memuat identitas `BMJ-MCH-0018 / FGM-3 / 0341 142 07`, tujuh sumber dengan hanya site-record FGM-3, urutan proses, serta batas A1/A2 dan aksesori yang belum terbukti.
+- Status mesin `COMPLETE`; cursor berikutnya `BMJ-MCH-0019`.
 
