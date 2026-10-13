@@ -5,7 +5,7 @@
   "timezone": "Asia/Jakarta",
   "cadence": "HOURLY",
   "mode": "AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY",
-  "status": "READY",
+  "status": "RELEASE_PENDING",
   "cursor": {
     "machineId": "BMJ-MCH-0013",
     "partIndex": 0
@@ -1049,19 +1049,57 @@
       "area": "OFFSET CONVERTING",
       "status": "COMPLETE",
       "parts": [
-        {"part": "pile feeder, lift and suction pickup", "status": "NO_CHANGE_REQUIRED", "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"},
-        {"part": "registration table and lays", "status": "NO_CHANGE_REQUIRED", "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"},
-        {"part": "intermittent gripper transport", "status": "BLOCKED_EVIDENCE", "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"},
-        {"part": "heated platen and chase contact", "status": "NO_CHANGE_REQUIRED", "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"},
-        {"part": "foil unwind, advance and waste rewind", "status": "BLOCKED_EVIDENCE", "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"},
-        {"part": "gripper release and delivery pile", "status": "NO_CHANGE_REQUIRED", "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"},
-        {"part": "drive, controls, guarding and access", "status": "BLOCKED_EVIDENCE", "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"},
-        {"part": "simulation, fallback, display modes and taxonomy", "status": "COMPLETE", "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"}
+        {
+          "part": "pile feeder, lift and suction pickup",
+          "status": "NO_CHANGE_REQUIRED",
+          "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"
+        },
+        {
+          "part": "registration table and lays",
+          "status": "NO_CHANGE_REQUIRED",
+          "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"
+        },
+        {
+          "part": "intermittent gripper transport",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"
+        },
+        {
+          "part": "heated platen and chase contact",
+          "status": "NO_CHANGE_REQUIRED",
+          "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"
+        },
+        {
+          "part": "foil unwind, advance and waste rewind",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"
+        },
+        {
+          "part": "gripper release and delivery pile",
+          "status": "NO_CHANGE_REQUIRED",
+          "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"
+        },
+        {
+          "part": "drive, controls, guarding and access",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"
+        },
+        {
+          "part": "simulation, fallback, display modes and taxonomy",
+          "status": "COMPLETE",
+          "report": "docs/apm6-mk920ymiii-whole-machine-audit.md"
+        }
       ],
-      "reports": ["docs/apm6-mk920ymiii-whole-machine-audit.md"],
+      "reports": [
+        "docs/apm6-mk920ymiii-whole-machine-audit.md"
+      ],
       "releaseEvidence": {
         "commit": "05a4e3a2336cfbeb930ae958a9e6b1a3109fb667",
-        "workflows": [38321389898, 38321389810, 38321389771],
+        "workflows": [
+          38321389898,
+          38321389810,
+          38321389771
+        ],
         "conclusion": "success",
         "tests": 1576,
         "productionHttp": 200,
@@ -1073,9 +1111,65 @@
       "name": "AUTOPLATEN - 7 STRIPPING & BLANKING",
       "model": "MK 1060 ER",
       "area": "OFFSET CONVERTING",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {
+          "part": "non-stop pile feeder and suction pickup",
+          "status": "COMPLETE",
+          "report": "docs/apm7-mk1060er-whole-machine-audit.md"
+        },
+        {
+          "part": "feed table and registration",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/apm7-mk1060er-whole-machine-audit.md"
+        },
+        {
+          "part": "intermittent gripper-chain transport",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/apm7-mk1060er-whole-machine-audit.md"
+        },
+        {
+          "part": "flatbed platen and chase contact",
+          "status": "COMPLETE",
+          "report": "docs/apm7-mk1060er-whole-machine-audit.md"
+        },
+        {
+          "part": "double-action stripping",
+          "status": "COMPLETE",
+          "report": "docs/apm7-mk1060er-whole-machine-audit.md"
+        },
+        {
+          "part": "blanking and product separation",
+          "status": "COMPLETE",
+          "report": "docs/apm7-mk1060er-whole-machine-audit.md"
+        },
+        {
+          "part": "edge-waste and product delivery",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/apm7-mk1060er-whole-machine-audit.md"
+        },
+        {
+          "part": "drive, lubrication, controls, guards and access",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/apm7-mk1060er-whole-machine-audit.md"
+        },
+        {
+          "part": "simulation, display modes and taxonomy",
+          "status": "COMPLETE",
+          "report": "docs/apm7-mk1060er-whole-machine-audit.md"
+        }
+      ],
+      "reports": [
+        "docs/apm7-mk1060er-whole-machine-audit.md"
+      ],
+      "releaseEvidence": {
+        "commit": null,
+        "workflows": [],
+        "conclusion": "pending",
+        "tests": 1580,
+        "build": "success",
+        "productionHttp": null
+      }
     },
     {
       "machineId": "BMJ-MCH-0014",
@@ -1524,13 +1618,33 @@
       "parentCommit": "19f23edd7971a17080c4db420db98f3d1d576c8c",
       "releaseEvidence": {
         "commit": "05a4e3a2336cfbeb930ae958a9e6b1a3109fb667",
-        "workflows": [38321389898, 38321389810, 38321389771],
+        "workflows": [
+          38321389898,
+          38321389810,
+          38321389771
+        ],
         "conclusion": "success",
         "tests": 1576,
         "productionHttp": 200,
         "visualFallbackVerified": true
       }
+    },
+    {
+      "machineId": "BMJ-MCH-0013",
+      "part": "whole machine: pile feeder through stripping, blanking and separated delivery",
+      "status": "RELEASE_PENDING",
+      "report": "docs/apm7-mk1060er-whole-machine-audit.md",
+      "nextMachineId": "BMJ-MCH-0014",
+      "parentCommit": "ec3261d529bdd85f74237af31fde9d990fed609f",
+      "releaseEvidence": {
+        "commit": null,
+        "workflows": [],
+        "conclusion": "pending",
+        "tests": 1580,
+        "build": "success",
+        "productionHttp": null
+      }
     }
   ],
-  "updatedAt": "2026-10-12T23:24:42Z"
+  "updatedAt": "2026-10-13T00:15:53Z"
 }

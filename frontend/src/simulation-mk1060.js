@@ -46,7 +46,7 @@ export class MK1060ProcessSimulation{
    const mesh=new THREE.Mesh(new THREE.PlaneGeometry(1.02,.72),mat.clone());mesh.rotation.x=-Math.PI/2;mesh.visible=false;root.add(mesh);
    const cutMarks=new THREE.Group();cutMarks.name='MK1060-DIE-CUT-CREASE-REFERENCE';cutMarks.visible=false;
    for(const x of [-.25,.25]){const pts=[[-.20,-.25],[.20,-.25],[.20,.25],[-.20,.25]].map(([a,b])=>new THREE.Vector3(x+a*.55,b,.004));const line=new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:0x927357,transparent:true,opacity:.72}));cutMarks.add(line);}
-   mesh.add(cutMarks);this.sheets.push({mesh,cutMarks,phase:i/7,lap:-1});
+   mesh.add(cutMarks);this.sheets.push({mesh,cutMarks,phase:i/7,lap:-1,processedLap:-1});
   }
   for(let i=0;i<20;i++){const blank=new THREE.Mesh(new THREE.BoxGeometry(.50,.006,.30),mat.clone());blank.visible=false;root.add(blank);this.blankStack.push(blank);const waste=new THREE.Mesh(new THREE.BoxGeometry(.98,.012,.07),new THREE.MeshStandardMaterial({color:0xb4966d,roughness:.9}));waste.visible=false;root.add(waste);this.wastePieces.push(waste);}
   this.productSupport=template.findNode('mk1060-product-delivery')?.children.filter(o=>o.isMesh&&o.geometry?.parameters?.height===.045);
@@ -63,7 +63,7 @@ export class MK1060ProcessSimulation{
    strippingActive:this.strippingActive,blankingActive:this.blankingActive,wasteConveyorActive:this.wasteConveyorActive,
    interlocks:{platenDwellRequiresStoppedTransport:this.platenClosed?!this.transportIndexing:true,strippingRequiresStoppedTransport:this.strippingActive?!this.transportIndexing:true,blankingRequiresStoppedTransport:this.blankingActive?!this.transportIndexing:true}};
  }
- start(){this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;for(const s of this.sheets){s.lap=-1;s.mesh.visible=false;}for(const p of this.blankStack)p.visible=false;for(const w of this.wastePieces)w.visible=false;this.resetMechanisms();this.pathLine.visible=this.pathVisible;this.onUpdate?.(this.state());return this.state();}
+ start(){this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;for(const s of this.sheets){s.lap=-1;s.processedLap=-1;s.mesh.visible=false;s.cutMarks.visible=false;}for(const p of this.blankStack)p.visible=false;for(const w of this.wastePieces)w.visible=false;this.resetMechanisms();this.pathLine.visible=this.pathVisible;this.onUpdate?.(this.state());return this.state();}
  pause(){this.running=false;this.paused=this.active;this.onUpdate?.(this.state());return this.state();}
  resume(){if(this.active){this.running=true;this.paused=false;this.lastNow=null;}this.onUpdate?.(this.state());return this.state();}
  setSpeed(v){this.speed=Math.max(.25,Math.min(4,Number(v)||1));return this.state();}
@@ -83,8 +83,8 @@ export class MK1060ProcessSimulation{
  }
  updateFeeder(p){
   const active=p<.20,local=Math.min(1,p/.20);this.feederSuctionActive=active;
-  if(this.feederHead&&this.headRest){this.feederHead.position.copy(this.headRest);if(active){this.feederHead.position.y-=.045*Math.sin(Math.PI*local);this.feederHead.position.x+=.035*Math.sin(Math.PI*local);}}
-  this.suckers.forEach((s,i)=>{s.position.copy(this.suckerRest[i]);if(active)s.position.y-=.018*Math.sin(Math.PI*local);});
+  if(this.feederHead&&this.headRest){this.feederHead.position.copy(this.headRest);if(active){this.feederHead.position.y-=.415*Math.sin(Math.PI*local);this.feederHead.position.x+=.035*Math.sin(Math.PI*local);}}
+  this.suckers.forEach((s,i)=>{s.position.copy(this.suckerRest[i]);if(active)s.position.y-=.035*Math.sin(Math.PI*local);});
  }
  updateGrippers(globalTransport){
   for(const bar of this.gripperBars){const q=gripperLoopPosition(globalTransport/this.gripperBars.length+(bar.userData.barPhase||0));bar.position.set(q.x,q.y,0);}
@@ -100,7 +100,7 @@ export class MK1060ProcessSimulation{
  }
  updateSheets(cycleIndex,transport){
   const global=cycleIndex+transport;
-  for(const s of this.sheets){const raw=global-s.phase;if(raw<0){s.mesh.visible=false;continue;}const lap=Math.floor(raw),t=Math.min(.999,raw-lap);s.mesh.visible=true;s.mesh.position.copy(this.curve.getPointAt(t));s.mesh.rotation.set(-Math.PI/2,0,0);s.cutMarks.visible=t>=.34;
+  for(const s of this.sheets){const raw=global-s.phase;if(raw<0){s.mesh.visible=false;continue;}const lap=Math.floor(raw),t=Math.min(.999,raw-lap);s.mesh.visible=true;s.mesh.position.copy(this.curve.getPointAt(t));s.mesh.rotation.set(-Math.PI/2,0,0);if(this.platenClosed&&Math.abs(t-.34)<.012)s.processedLap=lap;s.cutMarks.visible=s.processedLap===lap;if(this.platenClosed&&Math.abs(t-.34)<.012)s.mesh.position.y+=.1725;
    if(t>.52&&t<.72)s.mesh.material.color.setHex(this.strippingActive?0xd6c29b:0xe9dfc7);else if(t>.72)s.mesh.material.color.setHex(0xdcc79e);else s.mesh.material.color.setHex(0xefe8d3);
    if(lap>s.lap){if(s.lap>=0){this.completed++;const idx=(this.completed-1)%this.blankStack.length;if(idx===0){for(const blank of this.blankStack)blank.visible=false;for(const waste of this.wastePieces)waste.visible=false;}const b=this.blankStack[idx],w=this.wastePieces[idx];b.visible=true;b.position.copy(this.deliveryPosition(this.productSupport,.006,-.24,new THREE.Vector3(3.04,.8055,-.24)));b.position.y+=idx*.007;w.visible=true;w.position.copy(this.deliveryPosition(this.wasteSupport,.012,0,new THREE.Vector3(2.33,.7385,.56)));w.position.y+=idx*.012;}s.lap=lap;}
   }
@@ -111,11 +111,11 @@ export class MK1060ProcessSimulation{
   const cycle=11.5,cycleIndex=Math.floor(this.elapsed/cycle),p=(this.elapsed%cycle)/cycle;
   const cut=smooth(p,.31,.37)*(1-smooth(p,.43,.48)),strip=smooth(p,.57,.61)*(1-smooth(p,.67,.71)),blank=smooth(p,.79,.83)*(1-smooth(p,.89,.93));
   const indexing=transportIsIndexing(p),transport=transportProgress(p),waste=p>.93||p<.08,dwell=p>=.37&&p<=.43;
-  if(this.lower)this.lower.position.y=this.restY.lower+cut*.25;if(this.stripUpper)this.stripUpper.position.y=this.restY.su-strip*.12;if(this.stripLower)this.stripLower.position.y=this.restY.sl+strip*.10;
-  if(this.blankUpper)this.blankUpper.position.y=this.restY.bu-blank*.14;if(this.blankLower)this.blankLower.position.y=this.restY.bl+blank*.08;
+  if(this.lower)this.lower.position.y=this.restY.lower+cut*.2625;if(this.stripUpper)this.stripUpper.position.y=this.restY.su-strip*.0525;if(this.stripLower)this.stripLower.position.y=this.restY.sl+strip*.0475;
+  if(this.blankUpper)this.blankUpper.position.y=this.restY.bu-blank*.15;if(this.blankLower)this.blankLower.position.y=this.restY.bl+blank*.08;
   this.transportIndexing=indexing;this.transportStopped=!indexing;this.platenClosed=cut>.82;this.pressureDwell=dwell;this.strippingActive=strip>.32;this.blankingActive=blank>.32;this.wasteConveyorActive=waste;
   this.updateRotors(dt,p,indexing,cut,strip,waste);this.updateFeeder(p);this.updateGrippers(transport);this.updateSheets(cycleIndex,transport);this.onUpdate?.(this.state());
  }
- stop(){this.active=false;this.running=false;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;this.resetMechanisms();for(const s of this.sheets){s.mesh.visible=false;s.lap=-1;}for(const b of this.blankStack)b.visible=false;for(const w of this.wastePieces)w.visible=false;this.pathLine.visible=false;this.onUpdate?.(this.state());return this.state();}
+ stop(){this.active=false;this.running=false;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;this.resetMechanisms();for(const s of this.sheets){s.mesh.visible=false;s.lap=-1;s.processedLap=-1;s.cutMarks.visible=false;}for(const b of this.blankStack)b.visible=false;for(const w of this.wastePieces)w.visible=false;this.pathLine.visible=false;this.onUpdate?.(this.state());return this.state();}
  dispose(){this.stop();for(const s of this.sheets){this.root.remove(s.mesh);s.mesh.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});}for(const b of this.blankStack){this.root.remove(b);b.geometry.dispose();b.material.dispose();}for(const w of this.wastePieces){this.root.remove(w);w.geometry.dispose();w.material.dispose();}this.root.remove(this.pathLine);this.pathLine.geometry.dispose();this.pathLine.material.dispose();}
 }

@@ -63,3 +63,36 @@ test('MK1060ER taxonomy remains a complete six-level tree mapped to real geometr
 test('MK1060ER stage list explicitly separates index and dwell operations',()=>{
  assert.deepEqual(MK1060_SIMULATION_STAGES,['Pile separation','Feed table / registration','Intermittent gripper index to platen','Platen close and pressure dwell','Index to stripping','Double-action stripping','Index to blanking','Blank separation','Index to delivery','Edge-waste / product delivery']);
 });
+
+test('MK1060ER feeder suction cups descend vertically to the pile surface and reset',()=>{
+ const model=new MK1060MachineTemplate(),sim=new MK1060ProcessSimulation(model.root,model),pile=model.findNode('mk1060-feeder-pile'),cups=sim.suckers;
+ assert.equal(cups.every(c=>c.userData.rotorAxis==='y'),true);model.root.updateMatrixWorld(true);
+ const pileTop=new THREE.Box3().setFromObject(pile).max.y,rest=cups.map(c=>c.getWorldPosition(new THREE.Vector3()).y-.08);
+ sim.start();let now=1000;sim.update(now);while(sim.elapsed<1.15){now+=10;sim.update(now);}model.root.updateMatrixWorld(true);
+ const activeBottom=cups.map(c=>c.getWorldPosition(new THREE.Vector3()).y-.08);
+ assert.ok(activeBottom.every(y=>Math.abs(y-pileTop)<.002),`${activeBottom} must contact pile ${pileTop}`);
+ sim.stop();model.root.updateMatrixWorld(true);assert.equal(cups.every((c,i)=>Math.abs(c.getWorldPosition(new THREE.Vector3()).y-.08-rest[i])<1e-9),true);
+ sim.dispose();model.dispose();
+});
+
+test('MK1060ER active strokes close platen, stripping and blanking surfaces without penetration',()=>{
+ const model=new MK1060MachineTemplate(),sim=new MK1060ProcessSimulation(model.root,model);sim.start();let now=1000;sim.update(now);const advanceTo=t=>{while(sim.elapsed<t){now+=10;sim.update(now);}};
+ advanceTo(4.60);assert.ok(Math.abs((sim.lower.position.y-sim.restY.lower)-.2625)<.001);const carried=sim.sheets.find(s=>s.cutMarks.visible);assert.ok(carried);assert.ok(Math.abs(carried.mesh.position.y-sim.curve.getPointAt(.34).y-.1725)<.003);
+ advanceTo(7.35);assert.ok(Math.abs((sim.restY.su-sim.stripUpper.position.y)-.0525)<.001);assert.ok(Math.abs((sim.stripLower.position.y-sim.restY.sl)-.0475)<.001);
+ advanceTo(9.95);assert.ok(Math.abs((sim.restY.bu-sim.blankUpper.position.y)-.15)<.001);assert.ok(Math.abs((sim.blankLower.position.y-sim.restY.bl)-.08)<.001);
+ sim.dispose();model.dispose();
+});
+
+test('MK1060ER cut marks appear only after pressure dwell and reset cleanly',()=>{
+ const model=new MK1060MachineTemplate(),sim=new MK1060ProcessSimulation(model.root,model);sim.start();let now=1000;sim.update(now);const advanceTo=t=>{while(sim.elapsed<t){now+=10;sim.update(now);}};
+ advanceTo(3.30);assert.equal(sim.sheets.some(s=>s.cutMarks.visible),false);advanceTo(4.60);assert.equal(sim.sheets.some(s=>s.cutMarks.visible),true);
+ sim.stop();assert.equal(sim.sheets.some(s=>s.cutMarks.visible||s.processedLap>=0),false);sim.dispose();model.dispose();
+});
+
+test('MK1060ER navigation keeps descendant geometry and scopes visual material state',()=>{
+ const model=new MK1060MachineTemplate(),feeder=model.findNode('mk1060-feeder'),head=model.findNode('mk1060-feeder-head'),waste=model.findNode('mk1060-waste');
+ model.showOnly([feeder],true);assert.equal(head.visible,true);assert.equal(waste.visible,false);model.showOnly([],false);
+ const headMesh=model.meshes.find(m=>model.contains(head,m)),wasteMesh=model.meshes.find(m=>model.contains(waste,m)&&m.material.color.getHex()===headMesh.material.color.getHex());
+ assert.ok(headMesh&&wasteMesh);assert.notEqual(headMesh.material,wasteMesh.material);model.highlight(head);assert.ok(headMesh.material.emissive.getHex()>0);assert.equal(wasteMesh.material.emissive.getHex(),0);
+ model.dispose();
+});
