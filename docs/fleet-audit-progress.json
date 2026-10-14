@@ -11,8 +11,8 @@
     "BMJ-MCH-0034",
     "BMJ-MCH-0035"
   ],
-  "batchStatus": "RELEASE_PENDING",
-  "batchReleaseStatus": "RELEASE_PENDING",
+  "batchStatus": "COMPLETE",
+  "batchReleaseStatus": "VERIFIED",
   "batchReleaseReport": "docs/batch33-release.md",
   "batchValidation": {
     "focusedTests": 23,
@@ -25,11 +25,12 @@
       "failed": 1,
       "total": 1620
     },
-    "finalFullStatus": "IN_PROGRESS"
+    "finalFullStatus": "PASS",
+    "fullTests": 1620
   },
-  "status": "RELEASE_PENDING",
+  "status": "IN_PROGRESS",
   "cursor": {
-    "machineId": "BMJ-MCH-0033",
+    "machineId": "BMJ-MCH-0036",
     "partIndex": 0
   },
   "baselineCommit": "b5e45a82ce1aeaf9094b0a5c3fd8d985b8a9e96f",
@@ -2467,7 +2468,7 @@
       "name": "COMPRESSOR SWAN NO.7",
       "model": null,
       "area": "UTILITY",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "parts": [
         {
           "part": "Intake filter and inlet",
@@ -2532,8 +2533,22 @@
       "auditProcessed": true,
       "secondPass": "PASS_WITH_BLOCKED_EVIDENCE",
       "releaseEvidence": {
-        "status": "RELEASE_PENDING",
-        "report": "docs/batch33-release.md"
+        "commit": "55d47140157bc1dcf007a118342bd9ac351136e9",
+        "workflows": [
+          38596111628,
+          38596111839,
+          38596111360
+        ],
+        "conclusion": "success",
+        "tests": 1620,
+        "productionSourceHashesMatched": true,
+        "referenceModuleSHA256": "0c26766c221b1a6fc89a1e92261dac20b8ade85041e3393f8b4b690b06dd08d4",
+        "factoryChunkSHA256": {
+          "12": "9af7a3ccb52675dbea67e6f118d13e42725bc364a9e498e3da9d1888a36efcac",
+          "13": "a785d6e7b913323251919fbf3e172af5c3d81eb47560211bda2115ee8ea4005c"
+        },
+        "visualFallbackVerified": true,
+        "visual3DVerified": false
       }
     },
     {
@@ -2541,7 +2556,7 @@
       "name": "COMPRESSOR KAESER NO.8",
       "model": null,
       "area": "UTILITY",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "parts": [
         {
           "part": "Intake filter and inlet",
@@ -2606,8 +2621,22 @@
       "auditProcessed": true,
       "secondPass": "PASS_WITH_BLOCKED_EVIDENCE",
       "releaseEvidence": {
-        "status": "RELEASE_PENDING",
-        "report": "docs/batch33-release.md"
+        "commit": "55d47140157bc1dcf007a118342bd9ac351136e9",
+        "workflows": [
+          38596111628,
+          38596111839,
+          38596111360
+        ],
+        "conclusion": "success",
+        "tests": 1620,
+        "productionSourceHashesMatched": true,
+        "referenceModuleSHA256": "0c26766c221b1a6fc89a1e92261dac20b8ade85041e3393f8b4b690b06dd08d4",
+        "factoryChunkSHA256": {
+          "12": "9af7a3ccb52675dbea67e6f118d13e42725bc364a9e498e3da9d1888a36efcac",
+          "13": "a785d6e7b913323251919fbf3e172af5c3d81eb47560211bda2115ee8ea4005c"
+        },
+        "visualFallbackVerified": true,
+        "visual3DVerified": false
       }
     },
     {
@@ -2615,7 +2644,7 @@
       "name": "COMPRESSOR ATLAS COPCO NO.9",
       "model": null,
       "area": "UTILITY",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "parts": [
         {
           "part": "Intake filter and inlet",
@@ -2680,8 +2709,22 @@
       "auditProcessed": true,
       "secondPass": "PASS_WITH_BLOCKED_EVIDENCE",
       "releaseEvidence": {
-        "status": "RELEASE_PENDING",
-        "report": "docs/batch33-release.md"
+        "commit": "55d47140157bc1dcf007a118342bd9ac351136e9",
+        "workflows": [
+          38596111628,
+          38596111839,
+          38596111360
+        ],
+        "conclusion": "success",
+        "tests": 1620,
+        "productionSourceHashesMatched": true,
+        "referenceModuleSHA256": "0c26766c221b1a6fc89a1e92261dac20b8ade85041e3393f8b4b690b06dd08d4",
+        "factoryChunkSHA256": {
+          "12": "9af7a3ccb52675dbea67e6f118d13e42725bc364a9e498e3da9d1888a36efcac",
+          "13": "a785d6e7b913323251919fbf3e172af5c3d81eb47560211bda2115ee8ea4005c"
+        },
+        "visualFallbackVerified": true,
+        "visual3DVerified": false
       }
     },
     {
@@ -3178,43 +3221,129 @@
         "visual3DVerified": false
       },
       "nextMachineId": "BMJ-MCH-0033"
+    },
+    {
+      "machineId": "BMJ-MCH-0033",
+      "part": "whole machine: intake drive airend separation fluid cooling controls through discharge/distribution boundary",
+      "status": "COMPLETE",
+      "report": "docs/swan7-whole-machine-audit.md",
+      "releaseEvidence": {
+        "commit": "55d47140157bc1dcf007a118342bd9ac351136e9",
+        "workflows": [
+          38596111628,
+          38596111839,
+          38596111360
+        ],
+        "conclusion": "success",
+        "tests": 1620,
+        "productionSourceHashesMatched": true,
+        "referenceModuleSHA256": "0c26766c221b1a6fc89a1e92261dac20b8ade85041e3393f8b4b690b06dd08d4",
+        "factoryChunkSHA256": {
+          "12": "9af7a3ccb52675dbea67e6f118d13e42725bc364a9e498e3da9d1888a36efcac",
+          "13": "a785d6e7b913323251919fbf3e172af5c3d81eb47560211bda2115ee8ea4005c"
+        },
+        "visualFallbackVerified": true,
+        "visual3DVerified": false
+      },
+      "nextMachineId": "BMJ-MCH-0034"
+    },
+    {
+      "machineId": "BMJ-MCH-0034",
+      "part": "whole machine: intake drive airend separation fluid cooling controls through discharge/distribution boundary",
+      "status": "COMPLETE",
+      "report": "docs/kaeser8-whole-machine-audit.md",
+      "releaseEvidence": {
+        "commit": "55d47140157bc1dcf007a118342bd9ac351136e9",
+        "workflows": [
+          38596111628,
+          38596111839,
+          38596111360
+        ],
+        "conclusion": "success",
+        "tests": 1620,
+        "productionSourceHashesMatched": true,
+        "referenceModuleSHA256": "0c26766c221b1a6fc89a1e92261dac20b8ade85041e3393f8b4b690b06dd08d4",
+        "factoryChunkSHA256": {
+          "12": "9af7a3ccb52675dbea67e6f118d13e42725bc364a9e498e3da9d1888a36efcac",
+          "13": "a785d6e7b913323251919fbf3e172af5c3d81eb47560211bda2115ee8ea4005c"
+        },
+        "visualFallbackVerified": true,
+        "visual3DVerified": false
+      },
+      "nextMachineId": "BMJ-MCH-0035"
+    },
+    {
+      "machineId": "BMJ-MCH-0035",
+      "part": "whole machine: intake drive airend separation fluid cooling controls through discharge/distribution boundary",
+      "status": "COMPLETE",
+      "report": "docs/atlas9-whole-machine-audit.md",
+      "releaseEvidence": {
+        "commit": "55d47140157bc1dcf007a118342bd9ac351136e9",
+        "workflows": [
+          38596111628,
+          38596111839,
+          38596111360
+        ],
+        "conclusion": "success",
+        "tests": 1620,
+        "productionSourceHashesMatched": true,
+        "referenceModuleSHA256": "0c26766c221b1a6fc89a1e92261dac20b8ade85041e3393f8b4b690b06dd08d4",
+        "factoryChunkSHA256": {
+          "12": "9af7a3ccb52675dbea67e6f118d13e42725bc364a9e498e3da9d1888a36efcac",
+          "13": "a785d6e7b913323251919fbf3e172af5c3d81eb47560211bda2115ee8ea4005c"
+        },
+        "visualFallbackVerified": true,
+        "visual3DVerified": false
+      },
+      "nextMachineId": "BMJ-MCH-0036"
     }
   ],
-  "updatedAt": "2026-10-14T16:04:23.963Z",
+  "updatedAt": "2026-10-14T16:22:22.223Z",
   "lastAuditRelease": {
-    "commit": "08f2df9612e21315d17f23945b0e425edd1e3b7f",
+    "commit": "55d47140157bc1dcf007a118342bd9ac351136e9",
     "workflows": [
-      38571127127,
-      38571126963,
-      38571126734
+      38596111628,
+      38596111839,
+      38596111360
     ],
     "conclusion": "success",
-    "tests": 1617,
+    "tests": 1620,
     "productionSourceHashesMatched": true,
-    "referenceModuleSHA256": "dca8b90d6305d2ffff2186c61657c413b4462392bd839046ea7123c3c070c903",
+    "referenceModuleSHA256": "0c26766c221b1a6fc89a1e92261dac20b8ade85041e3393f8b4b690b06dd08d4",
     "factoryChunkSHA256": {
-      "12": "acc619e2b5d521884ea1fcfc6ebeaedf5c4dd2e878f25978d65b40f5e3f9f9a1",
-      "13": "3690a3d266612ac2f8003657956f61cb8a67c4e771fd80228c5952ea86dea094"
+      "12": "9af7a3ccb52675dbea67e6f118d13e42725bc364a9e498e3da9d1888a36efcac",
+      "13": "a785d6e7b913323251919fbf3e172af5c3d81eb47560211bda2115ee8ea4005c"
     },
     "visualFallbackVerified": true,
     "visual3DVerified": false,
     "machineIds": [
-      "BMJ-MCH-0030",
-      "BMJ-MCH-0031",
-      "BMJ-MCH-0032"
+      "BMJ-MCH-0033",
+      "BMJ-MCH-0034",
+      "BMJ-MCH-0035"
     ],
-    "nextMachineId": "BMJ-MCH-0033"
+    "nextMachineId": "BMJ-MCH-0036"
   },
-  "batchRemainingWork": [
-    "Full regression result, implementation pipeline and production source hashes must pass before cursor advances"
-  ],
+  "batchRemainingWork": [],
   "batchReleaseEvidence": {
-    "status": "RELEASE_PENDING",
-    "baseCommit": "cab67dc8a3a85f218263acd982eb362d4a4ff476",
-    "report": "docs/batch33-release.md"
+    "commit": "55d47140157bc1dcf007a118342bd9ac351136e9",
+    "workflows": [
+      38596111628,
+      38596111839,
+      38596111360
+    ],
+    "conclusion": "success",
+    "tests": 1620,
+    "productionSourceHashesMatched": true,
+    "referenceModuleSHA256": "0c26766c221b1a6fc89a1e92261dac20b8ade85041e3393f8b4b690b06dd08d4",
+    "factoryChunkSHA256": {
+      "12": "9af7a3ccb52675dbea67e6f118d13e42725bc364a9e498e3da9d1888a36efcac",
+      "13": "a785d6e7b913323251919fbf3e172af5c3d81eb47560211bda2115ee8ea4005c"
+    },
+    "visualFallbackVerified": true,
+    "visual3DVerified": false
   },
-  "ledgerGatePending": false,
-  "ledgerGateInstruction": "Verify current closure ledger workflow gates before starting batch 0033–0035. Implementation release 08f2df9612e21315d17f23945b0e425edd1e3b7f and production hashes verified.",
+  "ledgerGatePending": true,
+  "ledgerGateInstruction": "Verify current closure ledger workflow gates before starting AHU batch0036–0038; implementation 55d47140157bc1dcf007a118342bd9ac351136e9 and production module/baked hashes verified.",
   "previousBatchReleaseEvidence": {
     "commit": "08f2df9612e21315d17f23945b0e425edd1e3b7f",
     "workflows": [
