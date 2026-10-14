@@ -11,12 +11,12 @@
     "BMJ-MCH-0025",
     "BMJ-MCH-0026"
   ],
-  "batchStatus": "IN_PROGRESS",
-  "batchReleaseStatus": "VERIFIED",
+  "batchStatus": "RELEASE_PENDING",
+  "batchReleaseStatus": "RELEASE_PENDING",
   "batchReleaseReport": "docs/batch24-final-release.md",
   "batchValidation": {
     "focusedTests": 48,
-    "fullTests": 1608,
+    "fullTests": 1609,
     "buildMachines": 41,
     "bundleBytes": 2918300,
     "surfaceRegressionTests": 12,
@@ -1804,7 +1804,7 @@
       "name": "DIGITAL INKJET",
       "model": "UPG-LY300",
       "area": "OFFSET CONVERTING",
-      "status": "IN_PROGRESS",
+      "status": "RELEASE_PENDING",
       "parts": [
         {
           "part": "paging and registration",
@@ -2479,7 +2479,7 @@
       }
     }
   ],
-  "updatedAt": "2026-10-14T10:07:55.493Z",
+  "updatedAt": "2026-10-14T11:22:05.033Z",
   "lastAuditRelease": {
     "machineId": "BMJ-MCH-0023",
     "commit": "0f1f673c8945c99895ff930494c98af6f2e5474e",
@@ -2495,7 +2495,7 @@
     "visual3DVerified": false
   },
   "batchRemainingWork": [
-    "Align LY300 pathLine overlay with deterministic material route and add regression; release and verify before cursor advancement"
+    "Verify LY300 overlay follow-up commit workflows and production before closing batch"
   ],
   "batchReleaseEvidence": {
     "commit": "39037b7d9c4db7a1d55b758545fac4a7a400ca15",

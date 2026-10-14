@@ -6,6 +6,7 @@ export const UPG_LY300_SIMULATION_STAGES=Object.freeze([
 ]);
 const Y_AXIS=new THREE.Vector3(0,1,0);
 const clamp=v=>Math.max(0,Math.min(1,v));
+const MATERIAL_ROUTE=Object.freeze([[0,-1.86,.5125],[.18,-1.48,.6235],[.30,-.35,.6235],[.45,.15,.6235],[.57,.65,.6235],[.70,1.12,.6235],[.76,1.34,.6235],[.92,1.78,.6235],[1,1.78,.6235]].map(Object.freeze));
 
 export class UpgLy300ProcessSimulation{
  constructor(root,template){
@@ -14,9 +15,11 @@ export class UpgLy300ProcessSimulation{
   this.reject=template.findNode('ly300-reject-plate');this.rejectRest=this.reject?.rotation.z||0;
   root.traverse(o=>{if(o.isMesh&&o.userData.rotor)this.rotors.push(o);if(o.isMesh&&o.userData.uvLamp)this.uvLamps.push(o);if(o.isMesh&&o.userData.inspectionLight)this.inspectionLights.push(o);});
   this.rotorRest=this.rotors.map(r=>r.quaternion.clone());
-  this.points=[[-1.95,.66,0],[-1.55,.62,0],[-.95,.62,0],[-.25,.62,0],[.48,.62,0],[.95,.62,0],[1.34,.62,0],[1.90,.62,0]].map(p=>new THREE.Vector3(...p));
-  this.curve=new THREE.CatmullRomCurve3(this.points,false,'centripetal');
-  const pathGeo=new THREE.BufferGeometry().setFromPoints(this.curve.getPoints(190)),pathMat=new THREE.LineDashedMaterial({color:0x3e86a7,dashSize:.045,gapSize:.03,transparent:true,opacity:.56});
+  // Primary-route overlay shares the exact piecewise-linear station path.
+  // The final segment shows landing on the first accepted sheet, not a
+  // smoothed extrapolation beyond the output tray or an installed reject route.
+  this.points=MATERIAL_ROUTE.map(([phase,x,y])=>new THREE.Vector3(x,phase===1?.421:y,0));
+  const pathGeo=new THREE.BufferGeometry().setFromPoints(this.points),pathMat=new THREE.LineDashedMaterial({color:0x3e86a7,dashSize:.045,gapSize:.03,transparent:true,opacity:.56});
   this.pathLine=new THREE.Line(pathGeo,pathMat);this.pathLine.computeLineDistances();this.pathLine.visible=false;this.pathLine.name='LY300-CAUSAL-PRINT-CURE-INSPECT-PATH';root.add(this.pathLine);
   for(let i=0;i<7;i++)this.items.push(this.createItem(i,i/7));
   for(let i=0;i<16;i++){for(const [arr,z] of [[this.goodStack,0],[this.badStack,.34]]){const m=new THREE.Mesh(new THREE.BoxGeometry(.34,.012,.22),new THREE.MeshStandardMaterial({color:0xe0cba2,roughness:.9}));m.visible=false;root.add(m);arr.push(m);}}
@@ -56,7 +59,7 @@ export class UpgLy300ProcessSimulation{
    item.group.visible=this.active;
    // Process windows are station positions, not uniform arc length. Keep the
    // sheet lower face on the transport support and land on its output stack.
-   const keys=[[0,-1.86,.5125],[.18,-1.48,.6235],[.30,-.35,.6235],[.45,.15,.6235],[.57,.65,.6235],[.70,1.12,.6235],[.76,1.34,.6235],[.92,1.78,.6235],[1,1.78,.6235]];
+   const keys=MATERIAL_ROUTE;
    let j=1;while(j<keys.length-1&&t>keys[j][0])j++;
    const a=keys[j-1],b=keys[j],q=clamp((t-a[0])/(b[0]-a[0]));
    item.group.position.set(THREE.MathUtils.lerp(a[1],b[1],q),THREE.MathUtils.lerp(a[2],b[2],q),0);
