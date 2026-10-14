@@ -438,17 +438,20 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   }else if(no>=29&&no<=35){
    const atlas=[29,30,35].includes(no),kaeser=[31,32,34].includes(no),swan=no===33;
    this.root.userData.visualRefinement=atlas?'V236_ATLAS_GA_G_EXTERIOR_SERVICE_REALISM':kaeser?'V236_KAESER_SIGMA_EXTERIOR_SERVICE_REALISM':'V236_SWAN_SCREW_EXTERIOR_SERVICE_REALISM';
-   const g=this.group(this.root,`compressor-service-v236-${no}`,'Rotary screw compressor exterior service realism');
+   const g=this.group(this.findNode('compressor-package-cabinet')||this.root,`compressor-service-v236-${no}`,'Rotary screw compressor exterior service realism',[0,0,0],[0,0,0]);
    g.userData.exactModelVerified=false;
    const w=2.42;
    const accent=atlas?'blue':kaeser?'yellow':'blue';
    serviceDoor(g,-.52,.88,-.84,.92,1.02,'body','compressor-main-service-door');
    serviceDoor(g,.52,.88,-.84,.84,1.02,'body','compressor-control-service-door');
-   for(let y=.48;y<=1.28;y+=.10){const l=this.box(g,[.64,.022,.038],[-.58,y,.84],'dark',.002);mark(l,'compressor-intake-louvre-reference','BRAND_FAMILY_VISUAL');l.userData.coverMountedDetail=true;}
+   // The unified cabinet already supplies its service panels and handles.
+   // Retain old semantic meshes, but never render a second floating door skin.
+   for(const m of g.children){m.visible=false;m.userData.restVisible=false;m.userData.replacedByUnifiedCabinet=true;}
+   for(let y=.48;y<=1.28;y+=.10){const l=this.box(g,[.64,.022,.038],[-.58,y,.694],'dark',.002);mark(l,'compressor-intake-louvre-reference','BRAND_FAMILY_VISUAL');l.userData.coverMountedDetail=true;}
    for(let x=-.45;x<=.45;x+=.11){const l=this.box(g,[.045,.022,.60],[x,1.6335,.08],'dark',.002);mark(l,'compressor-top-exhaust-grille-reference','BRAND_FAMILY_VISUAL');l.userData.coverMountedDetail=true;}
-   const stripe=this.cover(this.box(g,[.08,1.20,.025],[.16,.92,-.87],accent,.006));mark(stripe,'compressor-brand-family-accent-reference','BRAND_FAMILY_VISUAL',true);
-   const ctrl=this.cover(this.box(g,[.34,.28,.030],[.70,1.13,-.88],'dark',.012));mark(ctrl,'compressor-controller-bezel-reference','BRAND_FAMILY_VISUAL',true);
-   const display=this.cover(this.box(g,[.23,.13,.014],[.70,1.16,-.90],'glass',.008));mark(display,'compressor-controller-display-reference','BRAND_FAMILY_VISUAL');
+   const stripe=this.cover(this.box(g,[.08,1.20,.025],[.16,.92,-.685],accent,.006));mark(stripe,'compressor-brand-family-accent-reference','BRAND_FAMILY_VISUAL',true);
+   const ctrl=this.cover(this.box(g,[.34,.28,.030],[.70,1.13,-.6875],'dark',.012));mark(ctrl,'compressor-controller-bezel-reference','BRAND_FAMILY_VISUAL',true);
+   const display=this.cover(this.box(g,[.23,.13,.014],[.70,1.16,-.7095],'glass',.008));mark(display,'compressor-controller-display-reference','BRAND_FAMILY_VISUAL');
    for(const x of [-w*.40,w*.40])for(const z of [-.60,.60])foot(g,x,z);
    this.root.userData.brandFamilyVisual=atlas?'ATLAS_COPCO_GA_G':kaeser?'KAESER_SIGMA':swan?'SWAN_TS_AD_TMV':'ROTARY_SCREW';
   }else if(no>=36&&no<=41){

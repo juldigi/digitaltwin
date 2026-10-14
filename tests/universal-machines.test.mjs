@@ -72,7 +72,7 @@ test('all utility reference covers remove attached exterior fittings without hid
    const core=model.activeMeshes.filter(mesh=>!mesh.userData.referencePlaceholder&&mesh.userData.simulationEnabled!==false);
    assert.ok(core.every(mesh=>mesh.visible),`${id} hides its working internals`);
    model.setLow(false);assert.ok(fittings.every(mesh=>!mesh.visible));
-   model.setExteriorOpen(false);assert.ok(fittings.every(mesh=>mesh.visible));
+   model.setExteriorOpen(false);assert.ok(fittings.every(mesh=>mesh.visible===(mesh.userData.restVisible!==false)));
   }finally{model.dispose();}
  }
 });

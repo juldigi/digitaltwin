@@ -17,7 +17,7 @@ test('batch30 exhaust grille rests on actual cabinet top triangles without resiz
 test('batch30 replaced compressor covers stay retired through modes and simulation inspection',()=>{
  for(const id of ids){const t=createPolishedMachineTemplate(id),s=createMachineSimulation(id,t.root,t);
   try{
-   const retired=t.meshes.filter(m=>m.userData.replacedByUnifiedCabinet);assert.equal(retired.length,7);
+   const retired=t.meshes.filter(m=>m.userData.replacedByUnifiedCabinet);assert.equal(retired.length,13);
    const check=()=>assert.ok(retired.every(m=>!visible(m)),id);
    for(const order of [0,1]){s.start();if(order){t.setLow(true);t.setExteriorOpen(true);}else{t.setExteriorOpen(true);t.setLow(true);}check();t.setExteriorOpen(false);t.setLow(false);check();t.isolate(t.findNode('universal-module-1'));t.showOnly([],false);t.explode(.4);t.ghost(true);t.reset();check();s.pause();const time=s.elapsed;s.update(200);assert.equal(s.elapsed,time);s.resume();s.update(300);s.update(400);check();s.stop();s.start();check();s.stop();}
    for(const n of t.taxonomy)for(const ref of n.meshRefs||[])assert.ok(t.findNode(ref),id+':'+ref);

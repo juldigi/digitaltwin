@@ -1,0 +1,22 @@
+# BMJ-MCH-0034 KAESER No.8: whole-machine audit
+
+2026-10-14. Base main cab67dc8a3a85f218263acd982eb362d4a4ff476; prior closure gates 38572394070 / 38572394349 / 38572394258 SUCCESS before changes. Mode AUDIT_THREE_MACHINES_THEN_FIX_VERIFY_DEPLOY; target3. Identity, orientation, cabinet dimensions and existing motion rates preserved.
+
+Evidence: current registry, mechanical-profiles.js, taxonomy-compressors.js and reference-machines.js; docs/fleet-photo-workspace-audit-v354.md reports zero identified installed photographs for this asset. Library utility-asset-registry-v3.js (libfile_06fb00d5f7c88191b99d012bed2fbbf2) read in full: asBuilt=false, exactModelVerified=false. Its visualVariant is not an installed photo. Fresh OEM family page https://id.kaeser.com/products/rotary-screw-compressors/rotary-screw-compressors-with-fluid-cooling/ supports only KAESER SIGMA family architecture. Belt versus 1:1 direct drive, SIGMA CONTROL generation, ETM and dryer options remain unresolved; do not infer installed specification from siblings.
+
+| Functional section | Audit / measured result | Status and unknown |
+| --- | --- | --- |
+| Intake filter / inlet | Filter and inlet semantic nodes, inherited air handoffs checked; no additional valve/hardware introduced | BLOCKED_EVIDENCE: installed filter/valve layout, opening and load-unload thresholds |
+| Motor / drive interface | Existing spin axes/rates, rest quaternions and reset retained; no drive type selected | BLOCKED_EVIDENCE: actual coupling, drive ratio, shaft alignment/support and speed |
+| Screw airend / bearings / injection | Rotor service hierarchy resolves. Schematic cylinder proxies have nominal 13 mm radial overlap; explicitly non-engineering rotor profile, not arbitrarily resized | BLOCKED_EVIDENCE: real lobe profile, bearing package, oil-injection count and full-cycle meshing clearance |
+| Separation / pressure boundary | Family separator/element nodes and normalized downstream pressure ordering inspected; exact pressure not assigned | BLOCKED_EVIDENCE: actual vessel stages, scavenge route, MPV/check and safety setpoints |
+| Oil/fluid circuit | Inherited .25/.50/.75 handoffs remain continuous for every oil marker, below 0.01 mm at tested boundaries; circuit filter/temperature family references retained | BLOCKED_EVIDENCE: installed pipes, thermostatic/bypass/ETM configuration and flow |
+| Cooler / fan / aftercooler / drain / discharge | Fan motion and rest state checked; inherited air handoffs .12/.28/.45/.58/.70 continuous. No cooling arrangement or outlet diameter inferred | BLOCKED_EVIDENCE: fan swept clearance, actual mounting, discharge connectivity and condensate routing |
+| Cabinet / support / controller | Six duplicate floating door-skin meshes retired (151.5 mm gap to unified door); total retired covers/details 7→13. Bezel gap192.5 mm removed, louvre gap146 mm removed; stripe gap185 mm removed; display's 2 mm overlap with bezel removed. All component sizes unchanged | BLOCKED_EVIDENCE: installed panel layout, cabinet support and electrical configuration; independent digital mounting defects corrected |
+| Receiver / treatment / ring / service drop / condensate | All distribution branches retain ring parent and unsupported pre-ring route stays hidden even after toggle. Existing pipe/option taxonomy retained; no new plant pipe added | BLOCKED_EVIDENCE: actual receiver/dryer/filter/condensate treatment and route/diameter |
+
+Second pass: actual support-triangle raycasts confirm controller→door, display→bezel, stripe→door, all rear louvres→rear panel and grille→top panel within 1 micrometre at explode0/.3/1. Service detail group now belongs to cabinet with zero independent explode vector, eliminating up to10 mm relative drift. Both normal/interior/LOD orders, start/pause/resume/stop/restart/reset, isolate/highlight/ghost/showOnly and every taxonomy descendant checked. Shared fixes justify regression of previously processed compressors but do not redo their whole audits.
+
+Validation: 23 focused tests PASS. Full regression/build/release verification pending. Factory bake rebuilt for source parity (41 assets,19 unidentified,2842596 bytes). Numerical geometry and HTTP/source checks are not visual3D proof. Runtime requested3D returned2D in this browser; visual3DVerified=false until a real rendered view is inspected.
+
+Status IN_PROGRESS until final validation; RELEASE_PENDING after implementation publish. Cursor must not pass0033 before the combined release is verified. See batch33-release.md for release evidence and remaining work.

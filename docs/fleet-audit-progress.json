@@ -7,22 +7,27 @@
   "mode": "AUDIT_THREE_MACHINES_THEN_FIX_VERIFY_DEPLOY",
   "batchTargetMachines": 3,
   "batchMachineIds": [
-    "BMJ-MCH-0030",
-    "BMJ-MCH-0031",
-    "BMJ-MCH-0032"
+    "BMJ-MCH-0033",
+    "BMJ-MCH-0034",
+    "BMJ-MCH-0035"
   ],
-  "batchStatus": "COMPLETE",
-  "batchReleaseStatus": "VERIFIED",
-  "batchReleaseReport": "docs/batch30-release.md",
+  "batchStatus": "RELEASE_PENDING",
+  "batchReleaseStatus": "RELEASE_PENDING",
+  "batchReleaseReport": "docs/batch33-release.md",
   "batchValidation": {
-    "initialFocusedTests": 48,
-    "finalFocusedTests": 4,
-    "fullTests": 1617,
+    "focusedTests": 23,
     "buildMachines": 41,
-    "bundleBytes": 2851404,
-    "visual3DVerified": false
+    "bundleBytes": 2842596,
+    "visual3DVerified": false,
+    "finalFocusedTests": 17,
+    "firstFullTests": {
+      "passed": 1619,
+      "failed": 1,
+      "total": 1620
+    },
+    "finalFullStatus": "IN_PROGRESS"
   },
-  "status": "IN_PROGRESS",
+  "status": "RELEASE_PENDING",
   "cursor": {
     "machineId": "BMJ-MCH-0033",
     "partIndex": 0
@@ -2462,27 +2467,222 @@
       "name": "COMPRESSOR SWAN NO.7",
       "model": null,
       "area": "UTILITY",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {
+          "part": "Intake filter and inlet",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/swan7-whole-machine-audit.md",
+          "unknown": "Installed dimensions/options/rotor clearance/actual fluid routes not verified; independent digital defects corrected"
+        },
+        {
+          "part": "Drive motor and interface",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/swan7-whole-machine-audit.md",
+          "unknown": "Installed dimensions/options/rotor clearance/actual fluid routes not verified; independent digital defects corrected"
+        },
+        {
+          "part": "Screw airend rotors bearings oil injection",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/swan7-whole-machine-audit.md",
+          "unknown": "Installed dimensions/options/rotor clearance/actual fluid routes not verified; independent digital defects corrected"
+        },
+        {
+          "part": "Air/oil separation and minimum-pressure boundary",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/swan7-whole-machine-audit.md",
+          "unknown": "Installed dimensions/options/rotor clearance/actual fluid routes not verified; independent digital defects corrected"
+        },
+        {
+          "part": "Oil/fluid circuit and temperature control",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/swan7-whole-machine-audit.md",
+          "unknown": "Installed dimensions/options/rotor clearance/actual fluid routes not verified; independent digital defects corrected"
+        },
+        {
+          "part": "Cooler fan aftercooler condensate and discharge",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/swan7-whole-machine-audit.md",
+          "unknown": "Installed dimensions/options/rotor clearance/actual fluid routes not verified; independent digital defects corrected"
+        },
+        {
+          "part": "Cabinet support controller and electrical inspection",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/swan7-whole-machine-audit.md",
+          "unknown": "Installed dimensions/options/rotor clearance/actual fluid routes not verified; independent digital defects corrected"
+        },
+        {
+          "part": "Receiver treatment ring service drop and condensate boundary",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/swan7-whole-machine-audit.md",
+          "unknown": "Installed dimensions/options/rotor clearance/actual fluid routes not verified; independent digital defects corrected"
+        }
+      ],
+      "reports": [
+        "docs/swan7-whole-machine-audit.md"
+      ],
+      "auditProcessed": true,
+      "secondPass": "PASS_WITH_BLOCKED_EVIDENCE",
+      "releaseEvidence": {
+        "status": "RELEASE_PENDING",
+        "report": "docs/batch33-release.md"
+      }
     },
     {
       "machineId": "BMJ-MCH-0034",
       "name": "COMPRESSOR KAESER NO.8",
       "model": null,
       "area": "UTILITY",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {
+          "part": "Intake filter and inlet",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/kaeser8-whole-machine-audit.md",
+          "unknown": "Installed dimensions/options/rotor clearance/actual fluid routes not verified; independent digital defects corrected"
+        },
+        {
+          "part": "Drive motor and interface",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/kaeser8-whole-machine-audit.md",
+          "unknown": "Installed dimensions/options/rotor clearance/actual fluid routes not verified; independent digital defects corrected"
+        },
+        {
+          "part": "Screw airend rotors bearings oil injection",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/kaeser8-whole-machine-audit.md",
+          "unknown": "Installed dimensions/options/rotor clearance/actual fluid routes not verified; independent digital defects corrected"
+        },
+        {
+          "part": "Air/oil separation and minimum-pressure boundary",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/kaeser8-whole-machine-audit.md",
+          "unknown": "Installed dimensions/options/rotor clearance/actual fluid routes not verified; independent digital defects corrected"
+        },
+        {
+          "part": "Oil/fluid circuit and temperature control",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/kaeser8-whole-machine-audit.md",
+          "unknown": "Installed dimensions/options/rotor clearance/actual fluid routes not verified; independent digital defects corrected"
+        },
+        {
+          "part": "Cooler fan aftercooler condensate and discharge",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/kaeser8-whole-machine-audit.md",
+          "unknown": "Installed dimensions/options/rotor clearance/actual fluid routes not verified; independent digital defects corrected"
+        },
+        {
+          "part": "Cabinet support controller and electrical inspection",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/kaeser8-whole-machine-audit.md",
+          "unknown": "Installed dimensions/options/rotor clearance/actual fluid routes not verified; independent digital defects corrected"
+        },
+        {
+          "part": "Receiver treatment ring service drop and condensate boundary",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/kaeser8-whole-machine-audit.md",
+          "unknown": "Installed dimensions/options/rotor clearance/actual fluid routes not verified; independent digital defects corrected"
+        }
+      ],
+      "reports": [
+        "docs/kaeser8-whole-machine-audit.md"
+      ],
+      "auditProcessed": true,
+      "secondPass": "PASS_WITH_BLOCKED_EVIDENCE",
+      "releaseEvidence": {
+        "status": "RELEASE_PENDING",
+        "report": "docs/batch33-release.md"
+      }
     },
     {
       "machineId": "BMJ-MCH-0035",
       "name": "COMPRESSOR ATLAS COPCO NO.9",
       "model": null,
       "area": "UTILITY",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {
+          "part": "Intake filter and inlet",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/atlas9-whole-machine-audit.md",
+          "unknown": "Installed dimensions/options/rotor clearance/actual fluid routes not verified; independent digital defects corrected"
+        },
+        {
+          "part": "Drive motor and interface",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/atlas9-whole-machine-audit.md",
+          "unknown": "Installed dimensions/options/rotor clearance/actual fluid routes not verified; independent digital defects corrected"
+        },
+        {
+          "part": "Screw airend rotors bearings oil injection",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/atlas9-whole-machine-audit.md",
+          "unknown": "Installed dimensions/options/rotor clearance/actual fluid routes not verified; independent digital defects corrected"
+        },
+        {
+          "part": "Air/oil separation and minimum-pressure boundary",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/atlas9-whole-machine-audit.md",
+          "unknown": "Installed dimensions/options/rotor clearance/actual fluid routes not verified; independent digital defects corrected"
+        },
+        {
+          "part": "Oil/fluid circuit and temperature control",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/atlas9-whole-machine-audit.md",
+          "unknown": "Installed dimensions/options/rotor clearance/actual fluid routes not verified; independent digital defects corrected"
+        },
+        {
+          "part": "Cooler fan aftercooler condensate and discharge",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/atlas9-whole-machine-audit.md",
+          "unknown": "Installed dimensions/options/rotor clearance/actual fluid routes not verified; independent digital defects corrected"
+        },
+        {
+          "part": "Cabinet support controller and electrical inspection",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/atlas9-whole-machine-audit.md",
+          "unknown": "Installed dimensions/options/rotor clearance/actual fluid routes not verified; independent digital defects corrected"
+        },
+        {
+          "part": "Receiver treatment ring service drop and condensate boundary",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/atlas9-whole-machine-audit.md",
+          "unknown": "Installed dimensions/options/rotor clearance/actual fluid routes not verified; independent digital defects corrected"
+        }
+      ],
+      "reports": [
+        "docs/atlas9-whole-machine-audit.md"
+      ],
+      "auditProcessed": true,
+      "secondPass": "PASS_WITH_BLOCKED_EVIDENCE",
+      "releaseEvidence": {
+        "status": "RELEASE_PENDING",
+        "report": "docs/batch33-release.md"
+      }
     },
     {
       "machineId": "BMJ-MCH-0036",
@@ -2980,7 +3180,7 @@
       "nextMachineId": "BMJ-MCH-0033"
     }
   ],
-  "updatedAt": "2026-10-14T13:29:53.896Z",
+  "updatedAt": "2026-10-14T16:04:23.963Z",
   "lastAuditRelease": {
     "commit": "08f2df9612e21315d17f23945b0e425edd1e3b7f",
     "workflows": [
@@ -3005,8 +3205,17 @@
     ],
     "nextMachineId": "BMJ-MCH-0033"
   },
-  "batchRemainingWork": [],
+  "batchRemainingWork": [
+    "Full regression result, implementation pipeline and production source hashes must pass before cursor advances"
+  ],
   "batchReleaseEvidence": {
+    "status": "RELEASE_PENDING",
+    "baseCommit": "cab67dc8a3a85f218263acd982eb362d4a4ff476",
+    "report": "docs/batch33-release.md"
+  },
+  "ledgerGatePending": false,
+  "ledgerGateInstruction": "Verify current closure ledger workflow gates before starting batch 0033–0035. Implementation release 08f2df9612e21315d17f23945b0e425edd1e3b7f and production hashes verified.",
+  "previousBatchReleaseEvidence": {
     "commit": "08f2df9612e21315d17f23945b0e425edd1e3b7f",
     "workflows": [
       38571127127,
@@ -3021,22 +3230,6 @@
       "12": "acc619e2b5d521884ea1fcfc6ebeaedf5c4dd2e878f25978d65b40f5e3f9f9a1",
       "13": "3690a3d266612ac2f8003657956f61cb8a67c4e771fd80228c5952ea86dea094"
     },
-    "visualFallbackVerified": true,
-    "visual3DVerified": false
-  },
-  "ledgerGatePending": true,
-  "ledgerGateInstruction": "Verify current closure ledger workflow gates before starting batch 0033–0035. Implementation release 08f2df9612e21315d17f23945b0e425edd1e3b7f and production hashes verified.",
-  "previousBatchReleaseEvidence": {
-    "commit": "fe6a453d04a535c30eb96d806878c7a2f9eff128",
-    "workflows": [
-      38561263159,
-      38561263346,
-      38561263438
-    ],
-    "conclusion": "success",
-    "tests": 1613,
-    "productionSourceHashesMatched": true,
-    "referenceModuleSHA256": "d26dd8ac30fb3f7c49b8243f6df98663eba8442b7ea7da04968cf8c0a83f4793",
     "visualFallbackVerified": true,
     "visual3DVerified": false
   }
