@@ -7,9 +7,10 @@
   "mode": "AUDIT_THREE_MACHINES_THEN_FIX_VERIFY_DEPLOY",
   "batchTargetMachines": 3,
   "batchMachineIds": ["BMJ-MCH-0024", "BMJ-MCH-0025", "BMJ-MCH-0026"],
-  "batchStatus": "IN_PROGRESS",
+  "batchStatus": "RELEASE_PENDING",
   "batchReleaseStatus": "RELEASE_PENDING",
-  "batchReleaseReport": "docs/batch24-release-checkpoint.md",
+  "batchReleaseReport": "docs/batch24-final-release.md",
+  "batchValidation": {"focusedTests":48,"fullTests":1608,"buildMachines":41,"bundleBytes":2918300,"surfaceRegressionTests":12,"visual3DVerified":false},
   "status": "IN_PROGRESS",
   "cursor": {
     "machineId": "BMJ-MCH-0024",
@@ -1511,27 +1512,33 @@
       "name": "DIGITAL INKJET",
       "model": "UPG-LY300",
       "area": "OFFSET CONVERTING",
-      "status": "IN_PROGRESS",
-      "parts": [{"part":"paging and registration","status":"IN_PROGRESS"},{"part":"transport print and ink pressure","status":"IN_PROGRESS"},{"part":"UV cure and camera inspection","status":"IN_PROGRESS"},{"part":"reject and collection support","status":"COMPLETE"},{"part":"controls utility modes and second pass","status":"IN_PROGRESS"}],
-      "reports": ["docs/batch24-inkjet-checkpoint.md"]
+      "status": "RELEASE_PENDING",
+      "parts": [{"part":"paging and registration","status":"COMPLETE"},{"part":"servo transport contact","status":"COMPLETE"},{"part":"print gap and installed ink pressure routing","status":"BLOCKED_EVIDENCE"},{"part":"UV cure and camera inspection logic","status":"COMPLETE"},{"part":"installed UV and optical geometry","status":"BLOCKED_EVIDENCE"},{"part":"reject and collection support","status":"COMPLETE"},{"part":"installed reject and strapping transfer","status":"BLOCKED_EVIDENCE"},{"part":"controls modes taxonomy and second pass","status":"COMPLETE"},{"part":"installed utility guard and sensor layout","status":"BLOCKED_EVIDENCE"}],
+      "reports": ["docs/batch24-inkjet-checkpoint.md", "docs/inkjet-ly300-whole-machine-audit.md"],
+      "auditProcessed": true,
+      "secondPass": "PASS_WITH_BLOCKED_EVIDENCE"
     },
     {
       "machineId": "BMJ-MCH-0025",
       "name": "CTP HEIDELBERG MACHINE",
       "model": null,
       "area": "PDS",
-      "status": "IN_PROGRESS",
-      "parts": [{"part":"plate input register and clamp","status":"IN_PROGRESS"},{"part":"drum axis and angular synchronization","status":"COMPLETE"},{"part":"plate triangle contact and laser traverse","status":"IN_PROGRESS"},{"part":"release unload and output","status":"IN_PROGRESS"},{"part":"installed options controls utilities and second pass","status":"IN_PROGRESS"}],
-      "reports": ["docs/batch24-ctp1-checkpoint.md"]
+      "status": "RELEASE_PENDING",
+      "parts": [{"part":"plate input and output bed contact","status":"COMPLETE"},{"part":"installed loading bending and unloading handoff","status":"BLOCKED_EVIDENCE"},{"part":"register transport and exposure interlocks","status":"COMPLETE"},{"part":"drum triangle contact and angular synchronization","status":"COMPLETE"},{"part":"laser diagram and traverse geometry","status":"COMPLETE"},{"part":"installed clamp optics and options","status":"BLOCKED_EVIDENCE"},{"part":"installed controls utilities guarding","status":"BLOCKED_EVIDENCE"},{"part":"modes taxonomy lifecycle and second pass","status":"COMPLETE"}],
+      "reports": ["docs/batch24-ctp1-checkpoint.md", "docs/ctp1-whole-machine-audit.md"],
+      "auditProcessed": true,
+      "secondPass": "PASS_WITH_BLOCKED_EVIDENCE"
     },
     {
       "machineId": "BMJ-MCH-0026",
       "name": "CTP HEIDELBERG MACHINE",
       "model": null,
       "area": "PDS",
-      "status": "IN_PROGRESS",
-      "parts": [{"part":"plate input register and clamp","status":"IN_PROGRESS"},{"part":"drum axis and angular synchronization","status":"COMPLETE"},{"part":"plate triangle contact and laser traverse","status":"IN_PROGRESS"},{"part":"release unload and output","status":"IN_PROGRESS"},{"part":"installed options controls utilities and second pass","status":"IN_PROGRESS"}],
-      "reports": ["docs/batch24-ctp2-checkpoint.md"]
+      "status": "RELEASE_PENDING",
+      "parts": [{"part":"plate input and output bed contact","status":"COMPLETE"},{"part":"installed loading bending and unloading handoff","status":"BLOCKED_EVIDENCE"},{"part":"register transport and exposure interlocks","status":"COMPLETE"},{"part":"drum triangle contact and angular synchronization","status":"COMPLETE"},{"part":"laser diagram and traverse geometry","status":"COMPLETE"},{"part":"installed clamp optics and options","status":"BLOCKED_EVIDENCE"},{"part":"installed controls utilities guarding","status":"BLOCKED_EVIDENCE"},{"part":"modes taxonomy lifecycle and second pass","status":"COMPLETE"}],
+      "reports": ["docs/batch24-ctp2-checkpoint.md", "docs/ctp2-whole-machine-audit.md"],
+      "auditProcessed": true,
+      "secondPass": "PASS_WITH_BLOCKED_EVIDENCE"
     },
     {
       "machineId": "BMJ-MCH-0027",

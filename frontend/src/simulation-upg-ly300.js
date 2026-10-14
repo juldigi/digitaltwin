@@ -37,7 +37,7 @@ export class UpgLy300ProcessSimulation{
    feederDriveActive:this.feederDriveActive,transportDriveActive:this.transportDriveActive,negativePumpActive:this.negativePumpActive,pagingActive:this.pagingActive,materialPresent:this.materialPresent,doubleSheetClear:this.doubleSheetClear,positioningActive:this.positioningActive,encoderSync:this.encoderSync,printTrigger:this.printTrigger,negativePressureReady:this.negativePressureReady,printPermit:this.printPermit,printingActive:this.printingActive,printComplete:this.printComplete,uvPowerReady:this.uvPowerReady,uvPermit:this.uvPermit,uvActive:this.uvActive,cureComplete:this.cureComplete,cameraTrigger:this.cameraTrigger,cameraActive:this.cameraActive,processingActive:this.processingActive,inspectionComplete:this.inspectionComplete,decisionReady:this.decisionReady,rejectPermit:this.rejectPermit,rejectConfirmed:this.rejectConfirmed,collectionDetected:this.collectionDetected,interlockSafe:this.interlockSafe,rejectTrackingActive:this.rejectTrackingActive,demoRejectActive:this.demoRejectActive,acceptRoutingActive:this.acceptRoutingActive,
    demoRejectOnly:true,installedPrintheadCountVerified:false,trackedResults:{pass:this.items.filter(i=>i.result==='PASS_DEMO').length,reject:this.items.filter(i=>i.result==='REJECT_DEMO').length,pending:this.items.filter(i=>!i.result).length}};
  }
- start(){this.active=true;this.running=true;this.paused=false;this.completed=0;this.rejected=0;this.printedDemoCount=0;this.curedDemoCount=0;this.inspectedDemoCount=0;this.elapsed=0;this.lastNow=null;for(const i of this.items){i.lap=-1;i.positioned=i.printed=i.cured=i.inspected=false;i.result=null;i.inspectionLap=-1;}this.resetMechanisms();this.pathLine.visible=this.pathVisible;this.onUpdate?.(this.state());return this.state();}
+ start(){this.active=true;this.running=true;this.paused=false;this.completed=0;this.rejected=0;this.printedDemoCount=0;this.curedDemoCount=0;this.inspectedDemoCount=0;this.elapsed=0;this.lastNow=null;for(const i of this.items){i.lap=-1;i.positioned=i.printed=i.cured=i.inspected=false;i.result=null;i.inspectionLap=-1;}for(const m of [...this.goodStack,...this.badStack])m.visible=false;this.resetMechanisms();this.pathLine.visible=this.pathVisible;this.onUpdate?.(this.state());return this.state();}
  pause(){this.running=false;this.paused=this.active;this.onUpdate?.(this.state());return this.state();}
  resume(){if(this.active){this.running=true;this.paused=false;this.lastNow=null;}this.onUpdate?.(this.state());return this.state();}
  setSpeed(v){this.speed=Math.max(.25,Math.min(4,Number(v)||1));return this.state();}
@@ -53,7 +53,13 @@ export class UpgLy300ProcessSimulation{
   let paging=false,material=false,positioning=false,encoder=false,printTrig=false,printing=false,printed=false,uv=false,cured=false,camera=false,processing=false,inspected=false,decision=false,rejectTracked=false,rejectAtGate=false,rejectConfirmed=false,acceptRoute=false,collection=false,transportDemand=false,negativeDemand=false;const base=this.elapsed/6.8;
   for(const item of this.items){
    const raw=base+item.phase,lap=Math.floor(raw),t=((raw%1)+1)%1;if(lap>item.lap){if(item.lap>=0)this.outputPrevious(item);item.lap=lap;this.resetItemCycle(item);}
-   item.group.visible=this.active;item.group.position.copy(this.curve.getPointAt(Math.min(.999,t)));
+   item.group.visible=this.active;
+   // Process windows are station positions, not uniform arc length. Keep the
+   // sheet lower face on the transport support and land on its output stack.
+   const keys=[[0,-1.86,.5125],[.18,-1.48,.6235],[.30,-.35,.6235],[.45,.15,.6235],[.57,.65,.6235],[.70,1.12,.6235],[.76,1.34,.6235],[.92,1.78,.6235],[1,1.78,.6235]];
+   let j=1;while(j<keys.length-1&&t>keys[j][0])j++;
+   const a=keys[j-1],b=keys[j],q=clamp((t-a[0])/(b[0]-a[0]));
+   item.group.position.set(THREE.MathUtils.lerp(a[1],b[1],q),THREE.MathUtils.lerp(a[2],b[2],q),0);
    if(t<.18){paging=true;material=true;}
    if(t>=.18&&t<.30){positioning=true;material=true;encoder=true;if(t>=.26)item.positioned=true;}
    if(t>=.14&&t<.96)transportDemand=true;
@@ -68,7 +74,7 @@ export class UpgLy300ProcessSimulation{
    const itemCameraPermit=t>=.57&&t<.70&&item.cured;
    if(itemCameraPermit){camera=true;processing=true;if(t>=.66&&(!item.inspected||item.inspectionLap!==lap))this.assignResult(item,lap);}
    if(item.inspected){inspected=true;decision=true;}
-   if(t>=.76&&item.result){const q=clamp((t-.76)/.15);if(item.result==='REJECT_DEMO'){item.group.position.z=THREE.MathUtils.lerp(0,.34,q);rejectTracked=true;if(t>=.80&&t<.91)rejectAtGate=true;if(t>=.88)rejectConfirmed=true;}else{acceptRoute=true;if(t>=.92)collection=true;}}
+   if(t>=.76&&item.result){const q=clamp((t-.76)/.24);if(item.result==='REJECT_DEMO'){item.group.position.set(THREE.MathUtils.lerp(1.34,1.62,q),THREE.MathUtils.lerp(.6235,.416+(this.rejected%this.badStack.length)*.012,q),THREE.MathUtils.lerp(0,.26,q));rejectTracked=true;if(t>=.80&&t<.91)rejectAtGate=true;if(t>=.88)rejectConfirmed=true;}else{acceptRoute=true;if(t>=.92){collection=true;const land=clamp((t-.92)/.08);item.group.position.y=THREE.MathUtils.lerp(.6235,.421+(this.completed%this.goodStack.length)*.012,land);}}}
   }
   this.feederDriveActive=paging;this.transportDriveActive=transportDemand;this.negativePumpActive=negativeDemand;this.pagingActive=paging;this.materialPresent=material;this.doubleSheetClear=true;this.positioningActive=positioning;this.encoderSync=encoder;this.printTrigger=printTrig;this.negativePressureReady=negativeDemand;this.printPermit=printing&&this.negativePressureReady;this.printingActive=printing&&this.printPermit;this.printComplete=printed;this.uvPowerReady=this.active;this.uvPermit=uv&&printed&&this.uvPowerReady;this.uvActive=uv&&this.uvPermit;this.cureComplete=cured;this.cameraTrigger=camera&&cured;this.cameraActive=camera&&cured;this.processingActive=processing&&cured;this.inspectionComplete=inspected;this.decisionReady=decision;this.rejectPermit=rejectAtGate&&decision;this.rejectConfirmed=rejectConfirmed;this.collectionDetected=collection;this.rejectTrackingActive=rejectTracked;this.demoRejectActive=this.rejectPermit;this.acceptRoutingActive=acceptRoute;this.interlockSafe=(!this.printingActive||this.printPermit)&&(!this.uvActive||this.uvPermit)&&(!this.cameraActive||this.cureComplete)&&(!this.demoRejectActive||this.rejectPermit);
   this.updateLights(this.uvActive,this.cameraActive);if(this.reject)this.reject.rotation.z=this.rejectRest+(this.rejectPermit?.72:0);

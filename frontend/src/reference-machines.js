@@ -38,6 +38,11 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.refineV236MechanicalRealism();
   this.refineV238PriorityRepolish();
   this.refineV341EquipmentBoundary();
+  if(this.cfg.family==='ctp'){
+   const clamp=this.findNode('ctp-drum-clamp');
+   clamp.userData.installedMountVerified=false;
+   clamp.traverse(m=>{if(m.isMesh){m.visible=false;m.userData.restVisible=false;m.userData.ctpUnverifiedMount=true;}});
+  }
   for(const n of this.nodes){
    if(!n.userData.rest)n.userData.rest=n.position.clone();
    if(!n.userData.restQuaternion)n.userData.restQuaternion=n.quaternion.clone();
@@ -52,6 +57,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   for(const n of this.nodes)if(n.userData.functionalDiagramOnly)n.visible=!!on;
   for(const mesh of this.meshes)if(mesh.userData.coverMountedDetail)mesh.visible=!this.exteriorOpen;
   if(['PDS','UTILITY'].includes(this.cfg.machine.area))for(const mesh of this.meshes)if(mesh.userData.coverMountedDetail)mesh.visible=!this.exteriorOpen;
+  this.restoreReferenceVisibility();
   return this;
  }
  setLow(on){
@@ -64,7 +70,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    for(const mesh of this.activeMeshes)if(!mesh.userData.referencePlaceholder&&mesh.userData.simulationEnabled!==false)mesh.visible=true;
    if(this.exteriorOpen)for(const mesh of this.meshes)if(mesh.userData.coverMountedDetail)mesh.visible=false;
   }
-  return this;
+  this.restoreReferenceVisibility();return this;
  }
  refineV341EquipmentBoundary(){
   // Distribution schematics describe a system, not the installed machine's
@@ -88,7 +94,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  }
  isolate(part,on=true){super.isolate(part,on);this.restoreReferenceVisibility();this.enforceV341EquipmentBoundary();}
  showOnly(parts=[],on=true){super.showOnly(parts,on);this.restoreReferenceVisibility();this.enforceV341EquipmentBoundary();}
- reset(){super.reset();this.enforceV341EquipmentBoundary();}
+ reset(){super.reset();this.restoreReferenceVisibility();this.enforceV341EquipmentBoundary();}
  dispose(){super.dispose();this.referenceDynamicMaterials?.forEach(m=>m.dispose());}
  motion(mesh,type='spin',axis='z',rate=4,amp=.08,phase=0,stage=null){
   mesh.userData.motion={type,axis,rate,amp,phase,stage};
@@ -1878,6 +1884,8 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.group(m3.a,'ctp-drum-clamp','Plate clamp system',[0,0,0],[0,.14,.16]);
 
   const m4=this.mod(4,[.08,0,0],[0,.30,.25]);
+  // Keep the represented laser carriage clear of the drum crown.
+  m4.g.position.y=.05;
   this.group(m4.a,'ctp-laser-rail','Laser carriage rail',[0,0,0],[0,.16,.20]);
   this.group(m4.a,'ctp-laser-module','HEIDELBERG laser module family',[0,0,0],[0,.18,.22]);
   this.group(m4.a,'ctp-ids','Intelligent Diode System',[0,0,0],[0,.18,.22]);
@@ -2219,15 +2227,20 @@ export class ReferenceProcessSimulation{
   this.ctpPlateMaterial=new THREE.MeshStandardMaterial({color:0xbac1c4,roughness:.38,metalness:.22,side:THREE.DoubleSide});
   this.ctpFlatGeometry=new THREE.BoxGeometry(.78,.012,1.00);
   this.ctpFlatPlate=new THREE.Mesh(this.ctpFlatGeometry,this.ctpPlateMaterial);this.ctpFlatPlate.name='SUPRASETTER-FLAT-PLATE-REFERENCE';this.ctpFlatPlate.visible=false;this.root.add(this.ctpFlatPlate);
-  const seg=28,r=.355,w=1.00,a0=-Math.PI*.72,a1=Math.PI*.72,verts=[],idx=[];
-  for(let i=0;i<=seg;i++){const a=THREE.MathUtils.lerp(a0,a1,i/seg),x=Math.cos(a)*r,y=Math.sin(a)*r;verts.push(x,y,-w/2,x,y,w/2);}
+  // Match the actual drum polygon faces, including every facet boundary.
+  // A smooth larger arc floated above this 18-sided runtime surface.
+  const r=this.ctp.drum?.geometry.parameters.radiusTop||.34,w=1.00,a0=-Math.PI*.72,a1=Math.PI*.72,verts=[],idx=[];
+  const step=2*Math.PI/(this.ctp.drum?.geometry.parameters.radialSegments||18),angles=[a0];
+  for(let k=-18;k<=18;k++){const a=-Math.PI/2+k*step;if(a>a0&&a<a1)angles.push(a);}
+  angles.push(a1);const seg=angles.length-1;
+  for(const a of angles){const face=-Math.PI/2+(Math.floor((a+Math.PI/2)/step)+.5)*step,rf=r*Math.cos(step/2)/Math.cos(a-face);verts.push(Math.cos(a)*rf,Math.sin(a)*rf,-w/2,Math.cos(a)*rf,Math.sin(a)*rf,w/2);}
   for(let i=0;i<seg;i++){const j=i*2;idx.push(j,j+2,j+1,j+2,j+3,j+1);}
   this.ctpWrappedGeometry=new THREE.BufferGeometry();this.ctpWrappedGeometry.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));this.ctpWrappedGeometry.setIndex(idx);this.ctpWrappedGeometry.computeVertexNormals();
   this.ctpWrappedGroup=new THREE.Group();this.ctpWrappedGroup.position.set(.08,.82,0);this.root.add(this.ctpWrappedGroup);
   this.ctpWrappedPlate=new THREE.Mesh(this.ctpWrappedGeometry,this.ctpPlateMaterial);this.ctpWrappedPlate.name='SUPRASETTER-WRAPPED-PLATE-REFERENCE';this.ctpWrappedPlate.visible=false;this.ctpWrappedGroup.add(this.ctpWrappedPlate);
   this.ctpLaserBeamGeometry=new THREE.BoxGeometry(.012,.14,.012);this.ctpLaserBeamMaterial=new THREE.MeshStandardMaterial({color:0xb82323,emissive:0x8a1515,emissiveIntensity:1.1,roughness:.2,transparent:true,opacity:.88});
   this.ctpLaserBeam=new THREE.Mesh(this.ctpLaserBeamGeometry,this.ctpLaserBeamMaterial);this.ctpLaserBeam.name='SUPRASETTER-LASER-BEAM-REFERENCE';this.ctpLaserBeam.visible=false;this.ctpLaserBeam.position.set(0,1.18,0);this.root.add(this.ctpLaserBeam);
-  this.ctpLaserSpotGeometry=new THREE.SphereGeometry(.020,10,8);this.ctpLaserSpot=new THREE.Mesh(this.ctpLaserSpotGeometry,this.ctpLaserBeamMaterial);this.ctpLaserSpot.name='SUPRASETTER-LASER-SPOT-REFERENCE';this.ctpLaserSpot.visible=false;this.ctpLaserSpot.position.set(0,1.155,0);this.root.add(this.ctpLaserSpot);
+  this.ctpLaserSpotGeometry=new THREE.SphereGeometry(.002,10,8);this.ctpLaserSpot=new THREE.Mesh(this.ctpLaserSpotGeometry,this.ctpLaserBeamMaterial);this.ctpLaserSpot.name='SUPRASETTER-LASER-SPOT-REFERENCE';this.ctpLaserSpot.visible=false;this.ctpLaserSpot.position.set(.08,1.162,0);this.root.add(this.ctpLaserSpot);
  }
  ctpStatus(){
   const p=this.active?(this.elapsed%this.cycle)/this.cycle:0;
@@ -2246,20 +2259,34 @@ export class ReferenceProcessSimulation{
   if(!this.ctp)return;
   const s=this.ctpStatus(),smooth=v=>{v=THREE.MathUtils.clamp(v,0,1);return v*v*(3-2*v);},lerp=THREE.MathUtils.lerp;
   const flat=this.ctpFlatPlate,wrap=this.ctpWrappedPlate,group=this.ctpWrappedGroup;
+  this.template.root.userData.ctpPlateHandoffBoundary='STAGED_SUPPORT_REFERENCE__INSTALLED_BENDING_LOAD_UNLOAD_PATH_BLOCKED_EVIDENCE';
+  const drumAngle=s.exposure?this.elapsed*5.2:(s.p>=.76&&s.p<.80?this.cycle*.76*5.2:0);
   if(s.p<.29){
-   const t=smooth(s.p/.29);flat.visible=this.active;wrap.visible=false;flat.position.set(lerp(-1.10,-.26,t),lerp(.68,.84,t),0);flat.rotation.set(0,0,lerp(0,.14,t));
+   // The installed bending/loader trajectory is unknown. Keep the flat plate
+   // seated on its entry bed instead of driving it through the drum core.
+   flat.visible=this.active;wrap.visible=false;flat.position.set(-.96,.7235,0);flat.rotation.set(0,0,0);
   }else if(s.p<.80){
-   flat.visible=false;wrap.visible=this.active;group.rotation.z=s.exposure?this.elapsed*5.2:0;
+   flat.visible=false;wrap.visible=this.active;group.rotation.z=drumAngle;
   }else{
-   const t=smooth((s.p-.80)/.20);flat.visible=this.active;wrap.visible=false;flat.position.set(lerp(.28,1.06,t),lerp(.84,.66,t),0);flat.rotation.set(0,0,lerp(-.12,0,t));
+   flat.visible=this.active;wrap.visible=false;flat.position.set(.98,.7085,0);flat.rotation.set(0,0,0);
   }
   // CylinderGeometry is built along local Y; the mesh's rest quaternion maps it
   // to the installed X/Z shaft. Spin in local Y so that mapping stays fixed.
-  if(this.ctp.drum){this.ctp.drum.quaternion.copy(this.ctp.drumRestQuaternion||this.ctp.drum.userData.ctpRestQuaternion);if(s.exposure)this.ctp.drum.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(AXIS.y,this.elapsed*5.2));}
+  if(this.ctp.drum){this.ctp.drum.quaternion.copy(this.ctp.drumRestQuaternion||this.ctp.drum.userData.ctpRestQuaternion);if(drumAngle)this.ctp.drum.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(AXIS.y,drumAngle));}
   const spinDrive=(obj,on,rate=7)=>{if(!obj)return;obj.quaternion.copy(obj.userData.ctpRestQuaternion||new THREE.Quaternion());if(on)obj.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(AXIS.y,this.elapsed*rate));};
   spinDrive(this.ctp.transportMotor,s.loading||s.unloading,6.2);spinDrive(this.ctp.drumMotor,s.exposure,5.2);
+  for(const m of this.template.activeMeshes)if(m.userData.mechanismRole==='plate-transport-roller'){
+   m.quaternion.copy(m.userData.motionRestQuaternion);if(s.loading||s.unloading)m.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(AXIS.y,this.elapsed*6.2));
+  }
   let laserZ=0;if(this.ctp.laser){this.ctp.laser.position.copy(this.ctp.laserRestPosition);if(s.exposure){laserZ=THREE.MathUtils.lerp(-.38,.38,(Math.sin(this.elapsed*1.45)+1)/2);this.ctp.laser.position.z+=laserZ;}}
-  if(this.ctpLaserBeam){this.ctpLaserBeam.visible=this.active&&s.exposure;this.ctpLaserBeam.position.z=laserZ;}if(this.ctpLaserSpot){this.ctpLaserSpot.visible=this.active&&s.exposure;this.ctpLaserSpot.position.z=laserZ;}
+  if(this.ctpLaserBeam&&this.ctpLaserSpot){
+   this.root.updateMatrixWorld(true);
+   const source=this.ctp.laser?this.root.worldToLocal(this.ctp.laser.getWorldPosition(new THREE.Vector3())).add(new THREE.Vector3(0,-.085,0)):new THREE.Vector3(.08,1.195,laserZ);
+   const worldSource=this.root.localToWorld(source.clone()),direction=new THREE.Vector3(0,-1,0).transformDirection(this.root.matrixWorld);
+   const hit=this.ctp.drum?new THREE.Raycaster(worldSource,direction).intersectObject(this.ctp.drum,false)[0]:null;
+   this.ctpLaserBeam.visible=this.ctpLaserSpot.visible=Boolean(this.active&&s.exposure&&hit);
+   if(hit){const target=this.root.worldToLocal(hit.point.clone());this.ctpLaserBeam.position.copy(source).add(target).multiplyScalar(.5);this.ctpLaserBeam.scale.y=Math.max(0,source.y-target.y)/.14;this.ctpLaserSpot.position.copy(target);this.ctpLaserSpot.position.y+=.002;}
+  }
   if(this.ctp.laser?.material?.emissive){this.ctp.laser.material.emissive.setHex(s.exposure?0x4c1515:0);this.ctp.laser.material.emissiveIntensity=s.exposure?.65:0;}
   this.ctp.plateLoaded=s.platePresent;this.ctp.platePresent=s.platePresent;this.ctp.registerConfirmed=s.registerConfirmed;this.ctp.drumAtLoadPosition=s.drumAtLoadPosition;this.ctp.plateClamped=s.clamped;this.ctp.clampConfirmed=s.clampConfirmed;this.ctp.transportDriveActive=s.loading||s.unloading;this.ctp.drumDriveActive=s.exposure;this.ctp.drumEncoderSync=s.drumEncoderSync;this.ctp.exposurePermit=s.exposurePermit;this.ctp.exposureActive=s.exposure;this.ctp.laserTraverseActive=s.laserTraverse;this.ctp.unloadPermit=s.unloadPermit;this.ctp.outputDetected=s.p>=.92;this.ctp.interlockSafe=!s.exposure||s.exposurePermit;this.ctp.laserBeamVisible=this.ctpLaserBeam?.visible===true;this.ctp.materialContact=s.exposure?'DRUM_SURFACE':s.registering?'REGISTER_STOPS':s.clamping?'CLAMP_LOAD_POSITION':s.loading?'ENTRY_TRANSPORT':s.unloading?'OUTPUT_GUIDE':'NONE';
  }
@@ -2572,7 +2599,7 @@ export class ReferenceProcessSimulation{
    cartonBlankGeometryIsSchematic:this.family==='folder'?(this.folder?.cartonBlankGeometryIsSchematic??true):null,alignmentActive:this.family==='folder'?(this.folder?.alignmentActive??false):false,preBreakActive:this.family==='folder'?(this.folder?.prebreakActive??false):false,foldingActive:folderState?.folding??false,glueZoneActive:folderState?.gluing??false,finalFoldActive:this.family==='folder'?(this.folder?.finalFoldActive??false):false,compressionActive:folderState?.compressing??false,folderDeliveryActive:this.family==='folder'?(this.folder?.deliveryActive??false):false,folderFeederDriveActive:this.family==='folder'?(this.folder?.feederDriveActive??false):false,folderFoldDriveActive:this.family==='folder'?(this.folder?.foldDriveActive??false):false,folderCompressionDriveActive:this.family==='folder'?(this.folder?.compressionDriveActive??false):false,folderDeliveryDriveActive:this.family==='folder'?(this.folder?.deliveryDriveActive??false):false,folderBeltContactActive:this.family==='folder'?(this.folder?.beltContactActive??false):false,folderMaterialContactZone:this.family==='folder'?(this.folder?.materialContactZone??null):null,crashLockInstalledVerified:this.family==='folder'?(this.folder?.installedCrashLockVerified??false):null,fourSixCornerInstalledVerified:this.family==='folder'?(this.folder?.installedFourSixCornerVerified??false):null,glueApplicatorTypeVerified:this.family==='folder'?(this.folder?.glueApplicatorTypeVerified??false):null,
    simulationBoundary:this.family==='blanker'?'QF_LQF_1080_FAMILY_PROCESS_ONLY':this.family==='collator'?'MULTI_VENDOR_SUCTION_COLLATOR_PROCESS_ONLY__TEN_BIN_REFERENCE_NOT_INSTALLATION_CLAIM':this.family==='ctp'?'SUPRASETTER_EXTERNAL_DRUM_LOAD_CLAMP_IMAGE_UNLOAD__MODEL_OPTIONS_NOT_INFERRED':this.family==='imagesetter'?'SCREEN_FTR_KATANA_COMMON_PROCESS_ONLY__PUNCH_PROCESSOR_MODEL_OPTIONS_NOT_INFERRED':this.family==='zund'?'ZUND_XY_PLATFORM_MOTION_ONLY__INSTALLED_TOOL_CAMERA_INIT_PACKAGE_NOT_INFERRED':this.family==='compressor'?'BRAND_FAMILY_OIL_INJECTED_SCREW_AIRFLOW__LOCAL_RING_MAIN_FUNCTIONAL_REFERENCE__PLANT_ROUTE_UNVERIFIED':this.family==='ahu'?(this.ahu?.sansin?'SANSIN_NES_YZKJ_INDOOR_AIR_PATH_FAMILY_REFERENCE__MODEL_CAPACITY_UNVERIFIED':'EUROVENT_CANONICAL_AHU_AIR_PATH_REFERENCE__SECTION_ORDER_DIRECTION_UNVERIFIED'):this.family==='folder'?'FGM2_MULTI_VENDOR_COMMON_FOLD_GLUE_PROCESS_ONLY__BOX_STYLE_GLUE_HARDWARE_OPTIONS_NOT_INFERRED':null,referenceBoundary:this.template.cfg.profile?.unknowns||[]};
  }
- start(){if(this.blocked){this.active=false;this.running=false;this.paused=false;this.onUpdate?.(this.state());return this.state();}this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;if(this.processPiece)this.processPiece.visible=true;for(const s of this.collatorSheets)s.mesh.visible=false;if(this.imagesetterMedia)this.imagesetterMedia.visible=true;if(this.ctpFlatPlate)this.ctpFlatPlate.visible=true;if(this.ctpWrappedPlate)this.ctpWrappedPlate.visible=false;if(this.zundMaterial)this.zundMaterial.visible=true;for(const p of this.compressorParticles)p.mesh.visible=p.kind!=='distribution'||this.pathVisible;for(const p of this.ahuParticles)p.mesh.visible=p.kind!=='return'||this.pathVisible;if(this.folderBlank)this.folderBlank.visible=true;this.resetMotion();for(const s of this.collatorSheets)s.mesh.visible=false;this.onUpdate?.(this.state());return this.state();}
+ start(){if(this.blocked){this.active=false;this.running=false;this.paused=false;this.onUpdate?.(this.state());return this.state();}this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;if(this.processPiece)this.processPiece.visible=true;for(const s of this.collatorSheets)s.mesh.visible=false;if(this.imagesetterMedia)this.imagesetterMedia.visible=true;if(this.ctpFlatPlate)this.ctpFlatPlate.visible=true;if(this.ctpWrappedPlate)this.ctpWrappedPlate.visible=false;if(this.zundMaterial)this.zundMaterial.visible=true;for(const p of this.compressorParticles)p.mesh.visible=p.kind!=='distribution'||this.pathVisible;for(const p of this.ahuParticles)p.mesh.visible=p.kind!=='return'||this.pathVisible;if(this.folderBlank)this.folderBlank.visible=true;this.resetMotion();if(this.family==='ctp')this.updateCTP();for(const s of this.collatorSheets)s.mesh.visible=false;this.onUpdate?.(this.state());return this.state();}
  pause(){this.running=false;this.paused=this.active;this.onUpdate?.(this.state());return this.state();}
  resume(){if(this.active){this.running=true;this.paused=false;this.lastNow=null;}this.onUpdate?.(this.state());return this.state();}
  setSpeed(v){this.speed=Math.max(.25,Math.min(3,Number(v)||1));return this.state();}
