@@ -1452,9 +1452,19 @@
       "name": "PILE TURNER 2",
       "model": "FZ 1200",
       "area": "OFFSET CONVERTING",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {"part": "loading and lower support", "status": "COMPLETE"},
+        {"part": "clamp pressure contact", "status": "COMPLETE"},
+        {"part": "lift turning clearance", "status": "NO_CHANGE_REQUIRED"},
+        {"part": "turn and position lock", "status": "NO_CHANGE_REQUIRED"},
+        {"part": "air separation dust removal", "status": "BLOCKED_EVIDENCE"},
+        {"part": "jog alignment settling", "status": "COMPLETE"},
+        {"part": "lower release and unload", "status": "COMPLETE"},
+        {"part": "hydraulic air utility and guard control", "status": "BLOCKED_EVIDENCE"},
+        {"part": "display taxonomy and simulation stages", "status": "COMPLETE"}
+      ],
+      "reports": ["docs/pile-turner02-fz1200-whole-machine-audit.md"]
     },
     {
       "machineId": "BMJ-MCH-0023",

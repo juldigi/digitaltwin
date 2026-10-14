@@ -33,7 +33,19 @@ export class FZ1200ProcessSimulation{
   for(const z of [-.44,-.22,0,.22,.44]){const jet=new THREE.Mesh(this.jetGeometry,this.jetMaterial.clone());jet.rotation.z=-Math.PI/2;jet.position.set(-.48,1.75,z);jet.visible=false;jet.userData.processReference='air-separation';jet.userData.functionalHeightBasis='turned modeled pile envelope';this.airJetGroup.add(jet);this.airJets.push(jet);}
  }
  state(){
-  const progress=this.active?(this.elapsed%14)/14:0,index=Math.min(FZ1200_SIMULATION_STAGES.length-1,Math.floor(progress*FZ1200_SIMULATION_STAGES.length));
+  const progress=this.active?(this.elapsed%14)/14:0;
+  // Stages have unequal durations and airing overlaps jogging. Present the
+  // actual downstream mechanism, not equal subdivisions of the cycle clock.
+  let index=0;
+  if(this.active){
+   if(this.loweringActive||this.releasePermit||progress>=.85)index=7;
+   else if(this.alignmentComplete||progress>=.78)index=6;
+   else if(this.joggingActive)index=5;
+   else if(this.airingActive)index=4;
+   else if(this.turningActive||this.turnComplete)index=3;
+   else if(this.liftActive)index=2;
+   else if(this.clampCommand)index=1;
+  }
   return {available:true,blocked:false,active:this.active,running:this.running,paused:this.paused,speed:this.speed,stage:FZ1200_SIMULATION_STAGES[index],completed:this.completed,progress,
    mechanismCount:this.rotors.length+this.joggers.length+this.airJets.length+3,rotorCount:this.rotors.length,oscillatorCount:this.joggers.length,airJetCount:this.airJets.filter(j=>j.visible).length,
    pileLoaded:this.pileLoaded,clamped:this.clamped,clampCommand:this.clampCommand,clampConfirmed:this.clampConfirmed,liftActive:this.liftActive,liftClearance:this.liftClearance,turnPermitted:this.turnPermitted,turningActive:this.turningActive,turnComplete:this.turnComplete,turnAngleDeg:this.turnAngleDeg,turnLockCommand:this.turnLockCommand,turnLockConfirmed:this.turnLockConfirmed,airPermitted:this.airPermitted,airPressureReady:this.airPressureReady,airingActive:this.airingActive,joggingActive:this.joggingActive,alignmentComplete:this.alignmentComplete,loweringActive:this.loweringActive,releasePermit:this.releasePermit,unloadReady:this.unloadReady,guardInterlockSafe:this.guardInterlockSafe,interlockSafe:this.interlockSafe,hydraulicActive:this.hydraulicActive,interlocks:{clampSecured:!!this.clampConfirmed,liftClearance:!!this.liftClearance,turnPermitted:!!this.turnPermitted,turnLocked:!!this.turnLockConfirmed,airPermitted:!!this.airPermitted,releasePermitted:!!this.releasePermit},
