@@ -31,3 +31,7 @@ Tahap UI sebelumnya dihitung dari delapan pembagian waktu sama besar, padahal wi
 ## Pass kedua / validasi
 
 Tes fokus FZ/Pile02/runtime truth 22/22 lulus. Contact upper/pile, lower/platform dan turned-pile/support diukur kembali; interlock tidak gagal selama sweep. Dua urutan interior/LOD, show-only dan stop/reset mempertahankan identitas 22000320 serta posisi rest. Geometri dan dimensi custom tidak diubah. Suite penuh 1.600/1.600 lulus; build 41 mesin, 19 unidentified dan bundle 2.918.520 byte berhasil. Cursor tetap BMJ-MCH-0022 sampai deployment terverifikasi.
+
+## Rilis terverifikasi
+
+Commit `7f906b9657669e689d0dbba7c1c1a70b1bff972e` lulus frontend 38505109282, CI 38505109283 dan Cloudflare 38505109332. Produksi selesai memuat PILE TURNER 2/FZ1200, serial 22000320, tahun 2020 dan delapan sumber. WebGL tidak tersedia di browser pemeriksaan; fallback 2D terverifikasi, visual 3D belum terverifikasi. Audit semua bagian selesai diproses dengan blocker instalasi tetap terbuka. Cursor berikutnya BMJ-MCH-0023; gate ledger final wajib diperiksa sebelum audit baru.

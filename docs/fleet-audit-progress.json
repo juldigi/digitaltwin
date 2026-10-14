@@ -7,7 +7,7 @@
   "mode": "AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY",
   "status": "IN_PROGRESS",
   "cursor": {
-    "machineId": "BMJ-MCH-0022",
+    "machineId": "BMJ-MCH-0023",
     "partIndex": 0
   },
   "baselineCommit": "b5e45a82ce1aeaf9094b0a5c3fd8d985b8a9e96f",
@@ -1452,7 +1452,15 @@
       "name": "PILE TURNER 2",
       "model": "FZ 1200",
       "area": "OFFSET CONVERTING",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
+      "releaseEvidence": {
+        "commit": "7f906b9657669e689d0dbba7c1c1a70b1bff972e",
+        "workflows": [38505109283,38505109332,38505109282],
+        "conclusion": "success",
+        "tests": 1600,
+        "visualFallbackVerified": true,
+        "visual3DVerified": false
+      },
       "parts": [
         {"part": "loading and lower support", "status": "COMPLETE"},
         {"part": "clamp pressure contact", "status": "COMPLETE"},
