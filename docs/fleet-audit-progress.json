@@ -7,28 +7,22 @@
   "mode": "AUDIT_THREE_MACHINES_THEN_FIX_VERIFY_DEPLOY",
   "batchTargetMachines": 3,
   "batchMachineIds": [
-    "BMJ-MCH-0033",
-    "BMJ-MCH-0034",
-    "BMJ-MCH-0035"
+    "BMJ-MCH-0036",
+    "BMJ-MCH-0037",
+    "BMJ-MCH-0038"
   ],
-  "batchStatus": "COMPLETE",
-  "batchReleaseStatus": "VERIFIED",
-  "batchReleaseReport": "docs/batch33-release.md",
+  "batchStatus": "RELEASE_PENDING",
+  "batchReleaseStatus": "RELEASE_PENDING",
+  "batchReleaseReport": "docs/batch36-release.md",
   "batchValidation": {
-    "focusedTests": 23,
+    "focusedTests": 43,
+    "fullTestsStatus": "PASS",
     "buildMachines": 41,
     "bundleBytes": 2842596,
     "visual3DVerified": false,
-    "finalFocusedTests": 17,
-    "firstFullTests": {
-      "passed": 1619,
-      "failed": 1,
-      "total": 1620
-    },
-    "finalFullStatus": "PASS",
-    "fullTests": 1620
+    "fullTests": 1622
   },
-  "status": "IN_PROGRESS",
+  "status": "RELEASE_PENDING",
   "cursor": {
     "machineId": "BMJ-MCH-0036",
     "partIndex": 0
@@ -2732,27 +2726,222 @@
       "name": "AHU 3",
       "model": null,
       "area": "UTILITY",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {
+          "part": "Intake and mixing boundary",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/ahu3-whole-machine-audit.md",
+          "auditProcessed": true,
+          "unknown": "OEM/model, actual section arrangement, coil fluid, fan/mounts/control/interlocks and installed duct route remain unverified; supported schematic flow corrections documented"
+        },
+        {
+          "part": "Filtration and differential pressure",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/ahu3-whole-machine-audit.md",
+          "auditProcessed": true,
+          "unknown": "OEM/model, actual section arrangement, coil fluid, fan/mounts/control/interlocks and installed duct route remain unverified; supported schematic flow corrections documented"
+        },
+        {
+          "part": "Thermal coil and headers",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/ahu3-whole-machine-audit.md",
+          "auditProcessed": true,
+          "unknown": "OEM/model, actual section arrangement, coil fluid, fan/mounts/control/interlocks and installed duct route remain unverified; supported schematic flow corrections documented"
+        },
+        {
+          "part": "Condensate pan trap and droplet boundary",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/ahu3-whole-machine-audit.md",
+          "auditProcessed": true,
+          "unknown": "OEM/model, actual section arrangement, coil fluid, fan/mounts/control/interlocks and installed duct route remain unverified; supported schematic flow corrections documented"
+        },
+        {
+          "part": "Supply fan and drive",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/ahu3-whole-machine-audit.md",
+          "auditProcessed": true,
+          "unknown": "OEM/model, actual section arrangement, coil fluid, fan/mounts/control/interlocks and installed duct route remain unverified; supported schematic flow corrections documented"
+        },
+        {
+          "part": "Service housing and support",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/ahu3-whole-machine-audit.md",
+          "auditProcessed": true,
+          "unknown": "OEM/model, actual section arrangement, coil fluid, fan/mounts/control/interlocks and installed duct route remain unverified; supported schematic flow corrections documented"
+        },
+        {
+          "part": "Discharge control and sensors",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/ahu3-whole-machine-audit.md",
+          "auditProcessed": true,
+          "unknown": "OEM/model, actual section arrangement, coil fluid, fan/mounts/control/interlocks and installed duct route remain unverified; supported schematic flow corrections documented"
+        },
+        {
+          "part": "Supply return and outdoor duct boundary",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/ahu3-whole-machine-audit.md",
+          "auditProcessed": true,
+          "unknown": "OEM/model, actual section arrangement, coil fluid, fan/mounts/control/interlocks and installed duct route remain unverified; supported schematic flow corrections documented"
+        }
+      ],
+      "reports": [
+        "docs/ahu3-whole-machine-audit.md"
+      ],
+      "auditProcessed": true,
+      "secondPass": "PASS_WITH_BLOCKED_EVIDENCE",
+      "releaseEvidence": {
+        "status": "RELEASE_PENDING",
+        "report": "docs/batch36-release.md"
+      }
     },
     {
       "machineId": "BMJ-MCH-0037",
       "name": "AHU 4",
       "model": null,
       "area": "UTILITY",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {
+          "part": "Intake and mixing boundary",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/ahu4-whole-machine-audit.md",
+          "auditProcessed": true,
+          "unknown": "OEM/model, actual section arrangement, coil fluid, fan/mounts/control/interlocks and installed duct route remain unverified; supported schematic flow corrections documented"
+        },
+        {
+          "part": "Filtration and differential pressure",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/ahu4-whole-machine-audit.md",
+          "auditProcessed": true,
+          "unknown": "OEM/model, actual section arrangement, coil fluid, fan/mounts/control/interlocks and installed duct route remain unverified; supported schematic flow corrections documented"
+        },
+        {
+          "part": "Thermal coil and headers",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/ahu4-whole-machine-audit.md",
+          "auditProcessed": true,
+          "unknown": "OEM/model, actual section arrangement, coil fluid, fan/mounts/control/interlocks and installed duct route remain unverified; supported schematic flow corrections documented"
+        },
+        {
+          "part": "Condensate pan trap and droplet boundary",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/ahu4-whole-machine-audit.md",
+          "auditProcessed": true,
+          "unknown": "OEM/model, actual section arrangement, coil fluid, fan/mounts/control/interlocks and installed duct route remain unverified; supported schematic flow corrections documented"
+        },
+        {
+          "part": "Supply fan and drive",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/ahu4-whole-machine-audit.md",
+          "auditProcessed": true,
+          "unknown": "OEM/model, actual section arrangement, coil fluid, fan/mounts/control/interlocks and installed duct route remain unverified; supported schematic flow corrections documented"
+        },
+        {
+          "part": "Service housing and support",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/ahu4-whole-machine-audit.md",
+          "auditProcessed": true,
+          "unknown": "OEM/model, actual section arrangement, coil fluid, fan/mounts/control/interlocks and installed duct route remain unverified; supported schematic flow corrections documented"
+        },
+        {
+          "part": "Discharge control and sensors",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/ahu4-whole-machine-audit.md",
+          "auditProcessed": true,
+          "unknown": "OEM/model, actual section arrangement, coil fluid, fan/mounts/control/interlocks and installed duct route remain unverified; supported schematic flow corrections documented"
+        },
+        {
+          "part": "Supply return and outdoor duct boundary",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/ahu4-whole-machine-audit.md",
+          "auditProcessed": true,
+          "unknown": "OEM/model, actual section arrangement, coil fluid, fan/mounts/control/interlocks and installed duct route remain unverified; supported schematic flow corrections documented"
+        }
+      ],
+      "reports": [
+        "docs/ahu4-whole-machine-audit.md"
+      ],
+      "auditProcessed": true,
+      "secondPass": "PASS_WITH_BLOCKED_EVIDENCE",
+      "releaseEvidence": {
+        "status": "RELEASE_PENDING",
+        "report": "docs/batch36-release.md"
+      }
     },
     {
       "machineId": "BMJ-MCH-0038",
       "name": "AHU 5",
       "model": null,
       "area": "UTILITY",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {
+          "part": "Intake and mixing boundary",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/ahu5-whole-machine-audit.md",
+          "auditProcessed": true,
+          "unknown": "OEM/model, actual section arrangement, coil fluid, fan/mounts/control/interlocks and installed duct route remain unverified; supported schematic flow corrections documented"
+        },
+        {
+          "part": "Filtration and differential pressure",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/ahu5-whole-machine-audit.md",
+          "auditProcessed": true,
+          "unknown": "OEM/model, actual section arrangement, coil fluid, fan/mounts/control/interlocks and installed duct route remain unverified; supported schematic flow corrections documented"
+        },
+        {
+          "part": "Thermal coil and headers",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/ahu5-whole-machine-audit.md",
+          "auditProcessed": true,
+          "unknown": "OEM/model, actual section arrangement, coil fluid, fan/mounts/control/interlocks and installed duct route remain unverified; supported schematic flow corrections documented"
+        },
+        {
+          "part": "Condensate pan trap and droplet boundary",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/ahu5-whole-machine-audit.md",
+          "auditProcessed": true,
+          "unknown": "OEM/model, actual section arrangement, coil fluid, fan/mounts/control/interlocks and installed duct route remain unverified; supported schematic flow corrections documented"
+        },
+        {
+          "part": "Supply fan and drive",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/ahu5-whole-machine-audit.md",
+          "auditProcessed": true,
+          "unknown": "OEM/model, actual section arrangement, coil fluid, fan/mounts/control/interlocks and installed duct route remain unverified; supported schematic flow corrections documented"
+        },
+        {
+          "part": "Service housing and support",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/ahu5-whole-machine-audit.md",
+          "auditProcessed": true,
+          "unknown": "OEM/model, actual section arrangement, coil fluid, fan/mounts/control/interlocks and installed duct route remain unverified; supported schematic flow corrections documented"
+        },
+        {
+          "part": "Discharge control and sensors",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/ahu5-whole-machine-audit.md",
+          "auditProcessed": true,
+          "unknown": "OEM/model, actual section arrangement, coil fluid, fan/mounts/control/interlocks and installed duct route remain unverified; supported schematic flow corrections documented"
+        },
+        {
+          "part": "Supply return and outdoor duct boundary",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/ahu5-whole-machine-audit.md",
+          "auditProcessed": true,
+          "unknown": "OEM/model, actual section arrangement, coil fluid, fan/mounts/control/interlocks and installed duct route remain unverified; supported schematic flow corrections documented"
+        }
+      ],
+      "reports": [
+        "docs/ahu5-whole-machine-audit.md"
+      ],
+      "auditProcessed": true,
+      "secondPass": "PASS_WITH_BLOCKED_EVIDENCE",
+      "releaseEvidence": {
+        "status": "RELEASE_PENDING",
+        "report": "docs/batch36-release.md"
+      }
     },
     {
       "machineId": "BMJ-MCH-0039",
@@ -3298,7 +3487,7 @@
       "nextMachineId": "BMJ-MCH-0036"
     }
   ],
-  "updatedAt": "2026-10-14T16:22:22.223Z",
+  "updatedAt": "2026-10-14T17:17:17.490Z",
   "lastAuditRelease": {
     "commit": "55d47140157bc1dcf007a118342bd9ac351136e9",
     "workflows": [
@@ -3323,8 +3512,17 @@
     ],
     "nextMachineId": "BMJ-MCH-0036"
   },
-  "batchRemainingWork": [],
+  "batchRemainingWork": [
+    "Final full regression and implementation pipeline/production verification"
+  ],
   "batchReleaseEvidence": {
+    "status": "RELEASE_PENDING",
+    "baseCommit": "3498fad81781faf133eeeb1877d594118edfefbc",
+    "report": "docs/batch36-release.md"
+  },
+  "ledgerGatePending": false,
+  "ledgerGateInstruction": "Verify current closure ledger workflow gates before starting AHU batch0036–0038; implementation 55d47140157bc1dcf007a118342bd9ac351136e9 and production module/baked hashes verified.",
+  "previousBatchReleaseEvidence": {
     "commit": "55d47140157bc1dcf007a118342bd9ac351136e9",
     "workflows": [
       38596111628,
@@ -3338,26 +3536,6 @@
     "factoryChunkSHA256": {
       "12": "9af7a3ccb52675dbea67e6f118d13e42725bc364a9e498e3da9d1888a36efcac",
       "13": "a785d6e7b913323251919fbf3e172af5c3d81eb47560211bda2115ee8ea4005c"
-    },
-    "visualFallbackVerified": true,
-    "visual3DVerified": false
-  },
-  "ledgerGatePending": true,
-  "ledgerGateInstruction": "Verify current closure ledger workflow gates before starting AHU batch0036–0038; implementation 55d47140157bc1dcf007a118342bd9ac351136e9 and production module/baked hashes verified.",
-  "previousBatchReleaseEvidence": {
-    "commit": "08f2df9612e21315d17f23945b0e425edd1e3b7f",
-    "workflows": [
-      38571127127,
-      38571126963,
-      38571126734
-    ],
-    "conclusion": "success",
-    "tests": 1617,
-    "productionSourceHashesMatched": true,
-    "referenceModuleSHA256": "dca8b90d6305d2ffff2186c61657c413b4462392bd839046ea7123c3c070c903",
-    "factoryChunkSHA256": {
-      "12": "acc619e2b5d521884ea1fcfc6ebeaedf5c4dd2e878f25978d65b40f5e3f9f9a1",
-      "13": "3690a3d266612ac2f8003657956f61cb8a67c4e771fd80228c5952ea86dea094"
     },
     "visualFallbackVerified": true,
     "visual3DVerified": false

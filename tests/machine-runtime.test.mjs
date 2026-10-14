@@ -83,10 +83,11 @@ test('V132 AHU twins expose indoor/outdoor duct interfaces and separate supply r
   assert.ok(nodes.has(id==='BMJ-MCH-0040'?'sansin-return-duct':'ahu-return-duct'),id);
   assert.ok(roles.has(id==='BMJ-MCH-0040'?'sansin-supply-duct-trunk-reference':'ahu-supply-duct-trunk-reference'),id);
   const taxonomy=universalTaxonomy(id);assert.ok(taxonomy.some(n=>/Duct|Air Distribution/i.test(n.name)&&n.level===2),id+' duct taxonomy missing');
+  template.setExteriorOpen(true);
   const sim=createMachineSimulation(id,template.root,template),started=sim.start();
-  assert.ok(started.airflowParticleCount>=28,id);
+  assert.ok(started.airflowParticleCount>=25,id);
   assert.equal(started.supplyAirflowParticleCount,18,id);
-  assert.equal(started.returnAirflowParticleCount,10,id);
+  assert.equal(started.returnAirflowParticleCount,id==='BMJ-MCH-0040'?10:7,id);
   if(id==='BMJ-MCH-0040'){
    assert.equal(started.outdoorAirflowParticleCount,8,id);
    const indoor=template.findNode('universal-module-4'),outdoor=template.findNode('universal-module-5');
