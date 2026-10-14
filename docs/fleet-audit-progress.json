@@ -11,8 +11,8 @@
     "BMJ-MCH-0028",
     "BMJ-MCH-0029"
   ],
-  "batchStatus": "RELEASE_PENDING",
-  "batchReleaseStatus": "RELEASE_PENDING",
+  "batchStatus": "COMPLETE",
+  "batchReleaseStatus": "VERIFIED",
   "batchReleaseReport": "docs/batch27-release.md",
   "batchValidation": {
     "focusedTests": 51,
@@ -23,7 +23,7 @@
   },
   "status": "IN_PROGRESS",
   "cursor": {
-    "machineId": "BMJ-MCH-0027",
+    "machineId": "BMJ-MCH-0030",
     "partIndex": 0
   },
   "baselineCommit": "b5e45a82ce1aeaf9094b0a5c3fd8d985b8a9e96f",
@@ -1987,7 +1987,7 @@
       "name": "CTF IMAGESETTER SCREEN MACHINE",
       "model": null,
       "area": "PDS",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "parts": [
         {
           "part": "Media cassette and loading",
@@ -2044,14 +2044,27 @@
       ],
       "auditProcessed": true,
       "secondPass": "PASS_WITH_BLOCKED_EVIDENCE",
-      "pendingReleaseReport": "docs/batch27-release.md"
+      "releaseEvidence": {
+        "commit": "fe6a453d04a535c30eb96d806878c7a2f9eff128",
+        "workflows": [
+          38561263159,
+          38561263346,
+          38561263438
+        ],
+        "conclusion": "success",
+        "tests": 1613,
+        "productionSourceHashesMatched": true,
+        "referenceModuleSHA256": "d26dd8ac30fb3f7c49b8243f6df98663eba8442b7ea7da04968cf8c0a83f4793",
+        "visualFallbackVerified": true,
+        "visual3DVerified": false
+      }
     },
     {
       "machineId": "BMJ-MCH-0028",
       "name": "ZUND MACHINE",
       "model": null,
       "area": "PDS",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "parts": [
         {
           "part": "Material placement and vacuum bed",
@@ -2108,14 +2121,27 @@
       ],
       "auditProcessed": true,
       "secondPass": "PASS_WITH_BLOCKED_EVIDENCE",
-      "pendingReleaseReport": "docs/batch27-release.md"
+      "releaseEvidence": {
+        "commit": "fe6a453d04a535c30eb96d806878c7a2f9eff128",
+        "workflows": [
+          38561263159,
+          38561263346,
+          38561263438
+        ],
+        "conclusion": "success",
+        "tests": 1613,
+        "productionSourceHashesMatched": true,
+        "referenceModuleSHA256": "d26dd8ac30fb3f7c49b8243f6df98663eba8442b7ea7da04968cf8c0a83f4793",
+        "visualFallbackVerified": true,
+        "visual3DVerified": false
+      }
     },
     {
       "machineId": "BMJ-MCH-0029",
       "name": "COMPRESSOR ATLAS COPCO NO.2",
       "model": null,
       "area": "UTILITY",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "parts": [
         {
           "part": "Intake filter and load/unload valve",
@@ -2172,7 +2198,20 @@
       ],
       "auditProcessed": true,
       "secondPass": "PASS_WITH_BLOCKED_EVIDENCE",
-      "pendingReleaseReport": "docs/batch27-release.md"
+      "releaseEvidence": {
+        "commit": "fe6a453d04a535c30eb96d806878c7a2f9eff128",
+        "workflows": [
+          38561263159,
+          38561263346,
+          38561263438
+        ],
+        "conclusion": "success",
+        "tests": 1613,
+        "productionSourceHashesMatched": true,
+        "referenceModuleSHA256": "d26dd8ac30fb3f7c49b8243f6df98663eba8442b7ea7da04968cf8c0a83f4793",
+        "visualFallbackVerified": true,
+        "visual3DVerified": false
+      }
     },
     {
       "machineId": "BMJ-MCH-0030",
@@ -2649,36 +2688,44 @@
       }
     }
   ],
-  "updatedAt": "2026-10-14T11:47:34.875Z",
+  "updatedAt": "2026-10-14T12:12:23.365Z",
   "lastAuditRelease": {
-    "commit": "142554f404804d1e7ee111daf238e22bfd12bc01",
+    "commit": "fe6a453d04a535c30eb96d806878c7a2f9eff128",
     "workflows": [
-      38556107735,
-      38556107804,
-      38556108158
+      38561263159,
+      38561263346,
+      38561263438
     ],
     "conclusion": "success",
-    "tests": 1609,
+    "tests": 1613,
     "productionSourceHashesMatched": true,
-    "simulationModuleSHA256": "7fa0f6cfa4f04e970d265ad4a02ce1aa2710442ec06f3b1c70109a6c064dccdd",
+    "referenceModuleSHA256": "d26dd8ac30fb3f7c49b8243f6df98663eba8442b7ea7da04968cf8c0a83f4793",
+    "visualFallbackVerified": true,
     "visual3DVerified": false,
     "machineIds": [
-      "BMJ-MCH-0024",
-      "BMJ-MCH-0025",
-      "BMJ-MCH-0026"
+      "BMJ-MCH-0027",
+      "BMJ-MCH-0028",
+      "BMJ-MCH-0029"
     ],
-    "nextMachineId": "BMJ-MCH-0027"
+    "nextMachineId": "BMJ-MCH-0030"
   },
-  "batchRemainingWork": [
-    "Complete full-suite gate and verify batch27 release workflows and production; retain installed evidence blockers"
-  ],
+  "batchRemainingWork": [],
   "batchReleaseEvidence": {
-    "status": "RELEASE_PENDING",
-    "baseCommit": "05efd91b7140edda0767b8c7454dba91e273a4d8",
-    "report": "docs/batch27-release.md"
+    "commit": "fe6a453d04a535c30eb96d806878c7a2f9eff128",
+    "workflows": [
+      38561263159,
+      38561263346,
+      38561263438
+    ],
+    "conclusion": "success",
+    "tests": 1613,
+    "productionSourceHashesMatched": true,
+    "referenceModuleSHA256": "d26dd8ac30fb3f7c49b8243f6df98663eba8442b7ea7da04968cf8c0a83f4793",
+    "visualFallbackVerified": true,
+    "visual3DVerified": false
   },
-  "ledgerGatePending": false,
-  "ledgerGateInstruction": "Previous closure ledger gates verified before batch27.",
+  "ledgerGatePending": true,
+  "ledgerGateInstruction": "Verify workflow gates of the current closure ledger commit before starting batch 0030–0032. Code release fe6a453 already verified.",
   "previousBatchReleaseEvidence": {
     "commit": "142554f404804d1e7ee111daf238e22bfd12bc01",
     "workflows": [
