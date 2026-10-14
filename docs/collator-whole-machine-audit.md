@@ -27,6 +27,6 @@ World-space bounds diukur pada geometry runtime. Delivery belt berada pada y=0,5
 
 Tes fokus Collator dan regresi keluarga: 85/85 lulus. Suite penuh 1.603/1.603 lulus; build menghasilkan 41 mesin, 19 unidentified dan bundle 2.918.520 byte. Pemeriksaan visual produksi dilakukan setelah deployment; browser tanpa WebGL hanya dapat memverifikasi fallback, sehingga visual 3D tidak akan diklaim tanpa render aktual.
 
-## Rilis
+## Rilis terverifikasi
 
-Status sementara `RELEASE_PENDING` sampai commit implementasi, seluruh workflow dan produksi terverifikasi. Cursor tidak berpindah sebelum gate tersebut selesai.
+Commit implementasi `0f1f673c8945c99895ff930494c98af6f2e5474e` lulus Digital Twin CI 38510971370, Verify frontend 38510971253 dan Deploy Cloudflare Workers 38510971248. Produksi memuat identitas BMJ-MCH-0023, area OFFSET CONVERTING, status referensi multi-vendor dan batas sepuluh-bin dengan benar. Browser pemeriksaan tidak menyediakan WebGL sehingga berpindah ke fallback 2D; fallback terverifikasi, visual 3D belum terverifikasi.
