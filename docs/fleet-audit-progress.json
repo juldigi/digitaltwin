@@ -1393,6 +1393,13 @@
       "area": "OFFSET CONVERTING",
       "status": "RELEASE_PENDING",
       "auditStatus": "IN_PROGRESS",
+      "verifiedPreviousRelease": {
+        "commit": "32f78ba364fe7d8c772d54fa652ddc815905205a",
+        "workflows": [38488879229, 38488879368, 38488879230],
+        "conclusion": "success",
+        "visualFallbackVerified": true,
+        "visual3DVerified": false
+      },
       "parts": [
         {
           "part": "stack staging and loading",
@@ -1401,7 +1408,7 @@
         },
         {
           "part": "X/Y platform indexing and material support",
-          "status": "IN_PROGRESS",
+          "status": "COMPLETE",
           "report": "docs/qf100cs-whole-machine-audit.md"
         },
         {
@@ -1986,5 +1993,5 @@
       }
     }
   ],
-  "updatedAt": "2026-10-14T00:10:00Z"
+  "updatedAt": "2026-10-14T01:20:00Z"
 }

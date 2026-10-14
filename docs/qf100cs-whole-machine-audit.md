@@ -12,7 +12,7 @@ Sumber repository: `taxonomy-qf100cs.js`, `research-v123.js`, profile/runtime QF
 | Bagian nyata | Pengukuran / temuan | Status |
 |---|---|---|
 | Stack staging / loading | Table top 0,590 m; workpiece center 0,810 m dengan tebal 55 mm, sehingga bottom 0,7825 m belum didukung saat loading. | IN_PROGRESS |
-| X/Y moving platform | Working face 0,770 m; workpiece bottom 0,7825 m, gap 12,5 mm. Pada awal indexing platform center 0 sementara piece center −0,55; half width platform 0,825 dan piece 0,36 menyebabkan overhang 85 mm. | IN_PROGRESS |
+| X/Y moving platform | Working face 0,770 m; gap awal 12,5 mm dihilangkan dengan center workpiece 0,7975 m. Carriage rest disejajarkan −0,55 m terhadap workpiece; overhang awal 85 mm hilang. Sapuan 101 posisi indexing/registration membuktikan seluruh footprint ditopang carriage. | COMPLETE untuk indexing/registration; loading dan separation tetap terbuka. |
 | Fixed hydraulic head | Housing, rod dan plate sebelumnya bergerak sebagai satu group sebesar 160 mm; housing kehilangan mounting gantry. | Housing kini fixed; rod/plate stroke bersamaan. COMPLETE untuk koreksi mounting; contact masih IN_PROGRESS. |
 | Pin-board / tooling | Board bottom 0,8325 m, top 0,9175 m; pressure plate rest bottom 0,930 m. Stroke 160 mm masih perlu direkonstruksi bersama pin-board dan stock agar tidak menembus tooling. | IN_PROGRESS; pola instalasi BLOCKED_EVIDENCE |
 | Separation / waste support | Interface stock reference 0,7125–0,7475 m. Dinamika drop workpiece dan support aktual perlu ditelusuri sebelum klaim kontak. | IN_PROGRESS |
@@ -25,3 +25,12 @@ Sumber repository: `taxonomy-qf100cs.js`, `research-v123.js`, profile/runtime QF
 Fixed housing tetap pada gantry sepanjang press; hanya `hydraulic-ram-reference` dan `blanking-pressure-plate` bergerak. Posisi rest disimpan per mesh dan dipulihkan pada stop/restart. Tes memastikan housing diam, rod/plate stroke sama, pause tidak mengubah posisi, dan reset tepat.
 
 Tes fokus: 9/9 lulus. Suite penuh: 1.596/1.596 lulus. Build 41 mesin berhasil. Rilis koreksi mounting menunggu pipeline dan verifikasi produksi. Audit mesin belum selesai; cursor harus tetap BMJ-MCH-0021. Lanjutkan reconstruction contact loading/platform/tooling/separation/output sebelum mesin berikutnya; jangan menganggap interlock logis sebagai validasi kontak fisik.
+
+## Lanjutan 14 Oktober — carriage contact
+
+- Rilis housing `32f78ba364fe7d8c772d54fa652ddc815905205a` terverifikasi sukses: CI 38488879229, Cloudflare 38488879368, frontend 38488879230.
+- Produksi memuat BMJ-MCH-0021, ABM-2, serial 2103072CGB05, tahun 2022, delapan sumber dan batas kesetaraan keluarga QF/LQF. Browser pemeriksaan tidak menyediakan WebGL dan beralih ke 2D; ini memverifikasi fallback/identitas, bukan kualitas visual kontak 3D.
+- Center workpiece 0,810 → 0,7975 m; gap terhadap platform 12,5 → 0 mm. Center rest carriage 0 → −0,55 m; overhang 85 → 0 mm. Center saat press kembali 0 m sehingga mounting head tidak bergeser.
+- Tes kontak memeriksa world bounds dan containment sepanjang 101 posisi indexing/registration serta restart. Tes fokus gabungan 10/10 lulus.
+- Pass kedua mempertahankan housing diam, rod/plate bergerak bersama dan reset tepat. Loading, board/pin stroke, drop separation dan physical receiving tetap IN_PROGRESS; parameter ini tidak diganti dengan tebakan konfigurasi BMJ.
+- Gate penuh 1.597/1.597 lulus; build 41 mesin berhasil. Kedua urutan interior/LOD, pause dan stop/reset diperiksa kembali dan carriage kembali tepat ke −0,55 m. Rilis lanjutan menunggu pipeline; cursor tidak berpindah.

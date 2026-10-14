@@ -1754,7 +1754,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   for(const z of [-.46,.46])this.box(ss,[.055,.10,.055],[.34,.72,z],'blue',.006);
 
   const m2=this.mod(2,[0,0,0],[0,.22,.20]);
-  const platform=this.group(m2.a,'qf100-platform','X/Y moving work platform',[0,0,0],[0,.12,.12]);
+  const platform=this.group(m2.a,'qf100-platform','X/Y moving work platform',[-.55,0,0],[0,.12,.12]);
   const platformPlate=this.active(this.box(platform,[1.65,.10,1.28],[0,.72,0],'steel',.012));platformPlate.userData.servoPlatform=true;
   for(const z of [-.56,.56])this.box(platform,[1.55,.055,.055],[0,.63,z],'dark',.005);
   const xAxis=this.group(m2.a,'qf100-x-axis','X-axis drive',[0,0,0],[.12,.08,.10]);
@@ -2089,7 +2089,7 @@ export class ReferenceProcessSimulation{
    xAxis:find('qf100-x-axis'),yAxis:find('qf100-y-axis'),hydraulicUnit:find('qf100-hydraulic-unit'),
    platformRest:platform?.position.clone()||new THREE.Vector3(),ramRest:ram?.position.clone()||new THREE.Vector3(),
    xServoActive:false,yServoActive:false,hydraulicPumpActive:false,hydraulicValvePressActive:false,hydraulicValveReturnActive:false,positionFeedbackActive:false};
-  if(this.processPiece){this.processPiece.position.set(-.55,.81,0);this.processPiece.userData.blankerRest=this.processPiece.position.clone();}
+  if(this.processPiece){this.processPiece.position.set(-.55,.7975,0);this.processPiece.userData.blankerRest=this.processPiece.position.clone();}
  }
  blankerStatus(){
   const p=this.active?(this.elapsed%this.cycle)/this.cycle:0;
@@ -2129,7 +2129,7 @@ export class ReferenceProcessSimulation{
   }
   if(this.processPiece){
    this.processPiece.visible=this.active;
-   this.processPiece.position.set(pieceX,.81-sepDrop,pieceZ);
+   this.processPiece.position.set(pieceX,.7975-sepDrop,pieceZ);
    this.processPiece.userData.loadingToPlatform=loading;
   }
   const spin=this.elapsed*10;
