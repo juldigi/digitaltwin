@@ -1,4 +1,4 @@
-# BMJ-MCH-0021 QF-100CS — audit mesin utuh berjalan
+# BMJ-MCH-0021 QF-100CS — audit mesin utuh selesai diproses dengan blocker bukti
 
 Tanggal: 14 Oktober 2026. Mode `AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY`.
 Identitas registry: ABM-2, serial 2103072CGB05, tahun 2022.
@@ -45,3 +45,7 @@ Tes fokus: 9/9 lulus. Suite penuh: 1.596/1.596 lulus. Build 41 mesin berhasil. R
 - Drop separation 45 → 0 mm menghilangkan penetrasi stock terhadap carriage padat. Extraction opening, waste/product separation fixture, serta transfer ke receiving tray tidak terverifikasi; physical output tetap BLOCKED_EVIDENCE. Counter siklus tidak membuktikan produk diterima tray.
 - Pass kedua menyapu 401 posisi siklus: stock/support tetap kontak, board/plate tetap mounted dan pin tidak menembus stock. Kedua urutan interior/LOD, pause/resume/stop/reset serta show-only tidak memunculkan solid hole references. Tes fokus 11/11 lulus.
 - Semua bagian telah ditelusuri; unknown input handoff, separation/extraction, actual receiving, utility/control/guarding as-built dan visual 3D tetap dicatat sebagai BLOCKED_EVIDENCE. Cursor tetap QF sampai rilis terbaru diverifikasi. Gate penuh 1.598/1.598 lulus; build 41 mesin, 19 unidentified, bundle 2.918.520 byte berhasil.
+
+## Penutupan rilis
+
+Rilis `c5ed058372e42595ec27504cf7de6b4c5c819937` lulus CI 38499543770, Cloudflare 38499543754, dan frontend 38499543739. Produksi setelah reload mempertahankan identitas QF-100CS/ABM-2/2103072CGB05 dan delapan sumber pada fallback 2D. Visual 3D belum terverifikasi. Status COMPLETE berarti semua bagian telah diproses dan seluruh perbaikan yang didukung bukti diterbitkan; handoff/extraction/receiving dan konfigurasi instalasi tetap BLOCKED_EVIDENCE, bukan mekanisme yang dinyatakan selesai direkonstruksi. Cursor berikutnya BMJ-MCH-0022; gate ledger final harus diperiksa sebelum perubahan baru.

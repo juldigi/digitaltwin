@@ -7,7 +7,7 @@
   "mode": "AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY",
   "status": "IN_PROGRESS",
   "cursor": {
-    "machineId": "BMJ-MCH-0021",
+    "machineId": "BMJ-MCH-0022",
     "partIndex": 0
   },
   "baselineCommit": "b5e45a82ce1aeaf9094b0a5c3fd8d985b8a9e96f",
@@ -1391,12 +1391,12 @@
       "name": "AUTOBLANKING MACHINE 2",
       "model": "QF-100CS",
       "area": "OFFSET CONVERTING",
-      "status": "RELEASE_PENDING",
-      "auditStatus": "IN_PROGRESS",
-      "pendingAuditCompletion": true,
+      "status": "COMPLETE",
+      "auditStatus": "COMPLETE_WITH_BLOCKED_EVIDENCE",
+      "pendingAuditCompletion": false,
       "verifiedPreviousRelease": {
-        "commit": "af769a8568828aacd6869be6e6efbe63aa2ab07f",
-        "workflows": [38494741746, 38494741844, 38494742036],
+        "commit": "c5ed058372e42595ec27504cf7de6b4c5c819937",
+        "workflows": [38499543770, 38499543754, 38499543739],
         "conclusion": "success",
         "visualFallbackVerified": true,
         "visual3DVerified": false
@@ -1994,5 +1994,15 @@
       }
     }
   ],
-  "updatedAt": "2026-10-14T02:20:00Z"
+  "updatedAt": "2026-10-14T02:20:00Z",
+  "lastAuditRelease": {
+    "machineId": "BMJ-MCH-0021",
+    "commit": "c5ed058372e42595ec27504cf7de6b4c5c819937",
+    "workflows": [38499543770, 38499543754, 38499543739],
+    "conclusion": "success",
+    "tests": 1598,
+    "nextMachineId": "BMJ-MCH-0022",
+    "visualFallbackVerified": true,
+    "visual3DVerified": false
+  }
 }
