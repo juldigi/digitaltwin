@@ -11,8 +11,8 @@
     "BMJ-MCH-0037",
     "BMJ-MCH-0038"
   ],
-  "batchStatus": "RELEASE_PENDING",
-  "batchReleaseStatus": "RELEASE_PENDING",
+  "batchStatus": "COMPLETE",
+  "batchReleaseStatus": "VERIFIED",
   "batchReleaseReport": "docs/batch36-release.md",
   "batchValidation": {
     "focusedTests": 43,
@@ -22,9 +22,9 @@
     "visual3DVerified": false,
     "fullTests": 1622
   },
-  "status": "RELEASE_PENDING",
+  "status": "IN_PROGRESS",
   "cursor": {
-    "machineId": "BMJ-MCH-0036",
+    "machineId": "BMJ-MCH-0039",
     "partIndex": 0
   },
   "baselineCommit": "b5e45a82ce1aeaf9094b0a5c3fd8d985b8a9e96f",
@@ -2726,7 +2726,7 @@
       "name": "AHU 3",
       "model": null,
       "area": "UTILITY",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "parts": [
         {
           "part": "Intake and mixing boundary",
@@ -2791,8 +2791,18 @@
       "auditProcessed": true,
       "secondPass": "PASS_WITH_BLOCKED_EVIDENCE",
       "releaseEvidence": {
-        "status": "RELEASE_PENDING",
-        "report": "docs/batch36-release.md"
+        "commit": "95ce2790519a540c61a9355dadc4c9301c2fb67a",
+        "workflows": [
+          38605490594,
+          38605490590,
+          38605490600
+        ],
+        "conclusion": "success",
+        "tests": 1622,
+        "productionSourceHashesMatched": true,
+        "referenceModuleSHA256": "78402c780b9473b75b2e2aad1ab4cabc137396126cfa522a44745a1905aad854",
+        "visualFallbackVerified": true,
+        "visual3DVerified": false
       }
     },
     {
@@ -2800,7 +2810,7 @@
       "name": "AHU 4",
       "model": null,
       "area": "UTILITY",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "parts": [
         {
           "part": "Intake and mixing boundary",
@@ -2865,8 +2875,18 @@
       "auditProcessed": true,
       "secondPass": "PASS_WITH_BLOCKED_EVIDENCE",
       "releaseEvidence": {
-        "status": "RELEASE_PENDING",
-        "report": "docs/batch36-release.md"
+        "commit": "95ce2790519a540c61a9355dadc4c9301c2fb67a",
+        "workflows": [
+          38605490594,
+          38605490590,
+          38605490600
+        ],
+        "conclusion": "success",
+        "tests": 1622,
+        "productionSourceHashesMatched": true,
+        "referenceModuleSHA256": "78402c780b9473b75b2e2aad1ab4cabc137396126cfa522a44745a1905aad854",
+        "visualFallbackVerified": true,
+        "visual3DVerified": false
       }
     },
     {
@@ -2874,7 +2894,7 @@
       "name": "AHU 5",
       "model": null,
       "area": "UTILITY",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "parts": [
         {
           "part": "Intake and mixing boundary",
@@ -2939,8 +2959,18 @@
       "auditProcessed": true,
       "secondPass": "PASS_WITH_BLOCKED_EVIDENCE",
       "releaseEvidence": {
-        "status": "RELEASE_PENDING",
-        "report": "docs/batch36-release.md"
+        "commit": "95ce2790519a540c61a9355dadc4c9301c2fb67a",
+        "workflows": [
+          38605490594,
+          38605490590,
+          38605490600
+        ],
+        "conclusion": "success",
+        "tests": 1622,
+        "productionSourceHashesMatched": true,
+        "referenceModuleSHA256": "78402c780b9473b75b2e2aad1ab4cabc137396126cfa522a44745a1905aad854",
+        "visualFallbackVerified": true,
+        "visual3DVerified": false
       }
     },
     {
@@ -3485,43 +3515,109 @@
         "visual3DVerified": false
       },
       "nextMachineId": "BMJ-MCH-0036"
+    },
+    {
+      "machineId": "BMJ-MCH-0036",
+      "part": "whole machine: inlet/filter/coil/condensate/fan/service/control through supply return outdoor duct boundary",
+      "status": "COMPLETE",
+      "report": "docs/ahu3-whole-machine-audit.md",
+      "releaseEvidence": {
+        "commit": "95ce2790519a540c61a9355dadc4c9301c2fb67a",
+        "workflows": [
+          38605490594,
+          38605490590,
+          38605490600
+        ],
+        "conclusion": "success",
+        "tests": 1622,
+        "productionSourceHashesMatched": true,
+        "referenceModuleSHA256": "78402c780b9473b75b2e2aad1ab4cabc137396126cfa522a44745a1905aad854",
+        "visualFallbackVerified": true,
+        "visual3DVerified": false
+      },
+      "nextMachineId": "BMJ-MCH-0037"
+    },
+    {
+      "machineId": "BMJ-MCH-0037",
+      "part": "whole machine: inlet/filter/coil/condensate/fan/service/control through supply return outdoor duct boundary",
+      "status": "COMPLETE",
+      "report": "docs/ahu4-whole-machine-audit.md",
+      "releaseEvidence": {
+        "commit": "95ce2790519a540c61a9355dadc4c9301c2fb67a",
+        "workflows": [
+          38605490594,
+          38605490590,
+          38605490600
+        ],
+        "conclusion": "success",
+        "tests": 1622,
+        "productionSourceHashesMatched": true,
+        "referenceModuleSHA256": "78402c780b9473b75b2e2aad1ab4cabc137396126cfa522a44745a1905aad854",
+        "visualFallbackVerified": true,
+        "visual3DVerified": false
+      },
+      "nextMachineId": "BMJ-MCH-0038"
+    },
+    {
+      "machineId": "BMJ-MCH-0038",
+      "part": "whole machine: inlet/filter/coil/condensate/fan/service/control through supply return outdoor duct boundary",
+      "status": "COMPLETE",
+      "report": "docs/ahu5-whole-machine-audit.md",
+      "releaseEvidence": {
+        "commit": "95ce2790519a540c61a9355dadc4c9301c2fb67a",
+        "workflows": [
+          38605490594,
+          38605490590,
+          38605490600
+        ],
+        "conclusion": "success",
+        "tests": 1622,
+        "productionSourceHashesMatched": true,
+        "referenceModuleSHA256": "78402c780b9473b75b2e2aad1ab4cabc137396126cfa522a44745a1905aad854",
+        "visualFallbackVerified": true,
+        "visual3DVerified": false
+      },
+      "nextMachineId": "BMJ-MCH-0039"
     }
   ],
-  "updatedAt": "2026-10-14T17:17:17.490Z",
+  "updatedAt": "2026-10-14T17:25:04.943Z",
   "lastAuditRelease": {
-    "commit": "55d47140157bc1dcf007a118342bd9ac351136e9",
+    "commit": "95ce2790519a540c61a9355dadc4c9301c2fb67a",
     "workflows": [
-      38596111628,
-      38596111839,
-      38596111360
+      38605490594,
+      38605490590,
+      38605490600
     ],
     "conclusion": "success",
-    "tests": 1620,
+    "tests": 1622,
     "productionSourceHashesMatched": true,
-    "referenceModuleSHA256": "0c26766c221b1a6fc89a1e92261dac20b8ade85041e3393f8b4b690b06dd08d4",
-    "factoryChunkSHA256": {
-      "12": "9af7a3ccb52675dbea67e6f118d13e42725bc364a9e498e3da9d1888a36efcac",
-      "13": "a785d6e7b913323251919fbf3e172af5c3d81eb47560211bda2115ee8ea4005c"
-    },
+    "referenceModuleSHA256": "78402c780b9473b75b2e2aad1ab4cabc137396126cfa522a44745a1905aad854",
     "visualFallbackVerified": true,
     "visual3DVerified": false,
     "machineIds": [
-      "BMJ-MCH-0033",
-      "BMJ-MCH-0034",
-      "BMJ-MCH-0035"
+      "BMJ-MCH-0036",
+      "BMJ-MCH-0037",
+      "BMJ-MCH-0038"
     ],
-    "nextMachineId": "BMJ-MCH-0036"
+    "nextMachineId": "BMJ-MCH-0039"
   },
-  "batchRemainingWork": [
-    "Final full regression and implementation pipeline/production verification"
-  ],
+  "batchRemainingWork": [],
   "batchReleaseEvidence": {
-    "status": "RELEASE_PENDING",
-    "baseCommit": "3498fad81781faf133eeeb1877d594118edfefbc",
-    "report": "docs/batch36-release.md"
+    "commit": "95ce2790519a540c61a9355dadc4c9301c2fb67a",
+    "workflows": [
+      38605490594,
+      38605490590,
+      38605490600
+    ],
+    "conclusion": "success",
+    "tests": 1622,
+    "productionSourceHashesMatched": true,
+    "referenceModuleSHA256": "78402c780b9473b75b2e2aad1ab4cabc137396126cfa522a44745a1905aad854",
+    "visualFallbackVerified": true,
+    "visual3DVerified": false
   },
-  "ledgerGatePending": false,
-  "ledgerGateInstruction": "Verify current closure ledger workflow gates before starting AHU batch0036–0038; implementation 55d47140157bc1dcf007a118342bd9ac351136e9 and production module/baked hashes verified.",
+  "ledgerGatePending": true,
+  "ledgerGateInstruction": "Verify current closure ledger gates before starting final AHU6/SANSIN7/AHU8 batch0039–0041. Implementation 95ce2790519a540c61a9355dadc4c9301c2fb67a verified with production source hash.",
   "previousBatchReleaseEvidence": {
     "commit": "55d47140157bc1dcf007a118342bd9ac351136e9",
     "workflows": [

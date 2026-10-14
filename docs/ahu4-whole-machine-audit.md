@@ -1,5 +1,7 @@
 # BMJ-MCH-0037 AHU 4: whole-machine audit
 
+Closure COMPLETE: all eight parts and second pass processed with BLOCKED_EVIDENCE retained. Release 95ce2790519a540c61a9355dadc4c9301c2fb67a,1622/1622 final tests PASS,build PASS,all three workflows SUCCESS and production source hash matched. This supersedes pending statements below, not an installation/CFD/visual3D certificate. See batch36-release.md.
+
 2026-10-15. Base 3498fad81781faf133eeeb1877d594118edfefbc; prior ledger gates38597596486/38597596801/38597597450 SUCCESS before changes. Identity/orientation and authored dimensions retained. Eight ordered parts persisted before fixes. No inference that AHU4 matches the other selected AHUs.
 
 Evidence: current registry/mechanical profile/taxonomy-ahu.js/reference-machines.js; repository photo manifest has no identified installed view. Library utility-asset-registry-v3.js libfile_06fb00d5f7c88191b99d012bed2fbbf2 was read in full: asBuilt=false/exactModelVerified=false. Its visual variants do not establish actual section layout or dimensions. Eurovent6/18 primary guidance https://www.eurovent.eu/publications/eurovent-6-18-2022-quality-criteria-for-air-handling-units-first-edition/ describes AHU quality generally, not a manufacturer/model identification or BMJ installation certificate.
