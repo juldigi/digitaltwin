@@ -6,11 +6,22 @@
   "cadence": "HOURLY",
   "mode": "AUDIT_THREE_MACHINES_THEN_FIX_VERIFY_DEPLOY",
   "batchTargetMachines": 3,
-  "batchMachineIds": ["BMJ-MCH-0024", "BMJ-MCH-0025", "BMJ-MCH-0026"],
-  "batchStatus": "RELEASE_PENDING",
-  "batchReleaseStatus": "RELEASE_PENDING",
+  "batchMachineIds": [
+    "BMJ-MCH-0024",
+    "BMJ-MCH-0025",
+    "BMJ-MCH-0026"
+  ],
+  "batchStatus": "IN_PROGRESS",
+  "batchReleaseStatus": "VERIFIED",
   "batchReleaseReport": "docs/batch24-final-release.md",
-  "batchValidation": {"focusedTests":48,"fullTests":1608,"buildMachines":41,"bundleBytes":2918300,"surfaceRegressionTests":12,"visual3DVerified":false},
+  "batchValidation": {
+    "focusedTests": 48,
+    "fullTests": 1608,
+    "buildMachines": 41,
+    "bundleBytes": 2918300,
+    "surfaceRegressionTests": 12,
+    "visual3DVerified": false
+  },
   "status": "IN_PROGRESS",
   "cursor": {
     "machineId": "BMJ-MCH-0024",
@@ -1257,15 +1268,51 @@
       "area": "OFFSET CONVERTING",
       "status": "COMPLETE",
       "parts": [
-        {"part": "non-stop feeder and suction pickup", "status": "COMPLETE", "report": "docs/apm9-promatrix106csb-whole-machine-audit.md"},
-        {"part": "suction-belt table and register", "status": "BLOCKED_EVIDENCE", "report": "docs/apm9-promatrix106csb-whole-machine-audit.md"},
-        {"part": "seven-bar registered gripper transport", "status": "COMPLETE", "report": "docs/apm9-promatrix106csb-whole-machine-audit.md"},
-        {"part": "cutting and creasing station", "status": "COMPLETE", "report": "docs/apm9-promatrix106csb-whole-machine-audit.md"},
-        {"part": "three-tool stripping station", "status": "COMPLETE", "report": "docs/apm9-promatrix106csb-whole-machine-audit.md"},
-        {"part": "blanking and tie-sheet process", "status": "COMPLETE", "report": "docs/apm9-promatrix106csb-whole-machine-audit.md"},
-        {"part": "non-stop delivery and output", "status": "BLOCKED_EVIDENCE", "report": "docs/apm9-promatrix106csb-whole-machine-audit.md"},
-        {"part": "drive, pneumatics, controls, guards and access", "status": "BLOCKED_EVIDENCE", "report": "docs/apm9-promatrix106csb-whole-machine-audit.md"},
-        {"part": "simulation, display modes and taxonomy", "status": "COMPLETE", "report": "docs/apm9-promatrix106csb-whole-machine-audit.md"}
+        {
+          "part": "non-stop feeder and suction pickup",
+          "status": "COMPLETE",
+          "report": "docs/apm9-promatrix106csb-whole-machine-audit.md"
+        },
+        {
+          "part": "suction-belt table and register",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/apm9-promatrix106csb-whole-machine-audit.md"
+        },
+        {
+          "part": "seven-bar registered gripper transport",
+          "status": "COMPLETE",
+          "report": "docs/apm9-promatrix106csb-whole-machine-audit.md"
+        },
+        {
+          "part": "cutting and creasing station",
+          "status": "COMPLETE",
+          "report": "docs/apm9-promatrix106csb-whole-machine-audit.md"
+        },
+        {
+          "part": "three-tool stripping station",
+          "status": "COMPLETE",
+          "report": "docs/apm9-promatrix106csb-whole-machine-audit.md"
+        },
+        {
+          "part": "blanking and tie-sheet process",
+          "status": "COMPLETE",
+          "report": "docs/apm9-promatrix106csb-whole-machine-audit.md"
+        },
+        {
+          "part": "non-stop delivery and output",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/apm9-promatrix106csb-whole-machine-audit.md"
+        },
+        {
+          "part": "drive, pneumatics, controls, guards and access",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/apm9-promatrix106csb-whole-machine-audit.md"
+        },
+        {
+          "part": "simulation, display modes and taxonomy",
+          "status": "COMPLETE",
+          "report": "docs/apm9-promatrix106csb-whole-machine-audit.md"
+        }
       ],
       "reports": [
         "docs/apm9-promatrix106csb-whole-machine-audit.md"
@@ -1290,15 +1337,51 @@
       "area": "OFFSET CONVERTING",
       "status": "COMPLETE",
       "parts": [
-        {"part": "blank feeder and input", "status": "COMPLETE", "report": "docs/fgm1-media100ii-whole-machine-audit.md"},
-        {"part": "alignment and pre-break", "status": "COMPLETE", "report": "docs/fgm1-media100ii-whole-machine-audit.md"},
-        {"part": "forming and conversion", "status": "BLOCKED_EVIDENCE", "report": "docs/fgm1-media100ii-whole-machine-audit.md"},
-        {"part": "glue application", "status": "BLOCKED_EVIDENCE", "report": "docs/fgm1-media100ii-whole-machine-audit.md"},
-        {"part": "final fold and trombone", "status": "COMPLETE", "report": "docs/fgm1-media100ii-whole-machine-audit.md"},
-        {"part": "compression", "status": "COMPLETE", "report": "docs/fgm1-media100ii-whole-machine-audit.md"},
-        {"part": "delivery and output", "status": "COMPLETE", "report": "docs/fgm1-media100ii-whole-machine-audit.md"},
-        {"part": "drive, control, frame and access", "status": "BLOCKED_EVIDENCE", "report": "docs/fgm1-media100ii-whole-machine-audit.md"},
-        {"part": "simulation, display modes and taxonomy", "status": "COMPLETE", "report": "docs/fgm1-media100ii-whole-machine-audit.md"}
+        {
+          "part": "blank feeder and input",
+          "status": "COMPLETE",
+          "report": "docs/fgm1-media100ii-whole-machine-audit.md"
+        },
+        {
+          "part": "alignment and pre-break",
+          "status": "COMPLETE",
+          "report": "docs/fgm1-media100ii-whole-machine-audit.md"
+        },
+        {
+          "part": "forming and conversion",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/fgm1-media100ii-whole-machine-audit.md"
+        },
+        {
+          "part": "glue application",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/fgm1-media100ii-whole-machine-audit.md"
+        },
+        {
+          "part": "final fold and trombone",
+          "status": "COMPLETE",
+          "report": "docs/fgm1-media100ii-whole-machine-audit.md"
+        },
+        {
+          "part": "compression",
+          "status": "COMPLETE",
+          "report": "docs/fgm1-media100ii-whole-machine-audit.md"
+        },
+        {
+          "part": "delivery and output",
+          "status": "COMPLETE",
+          "report": "docs/fgm1-media100ii-whole-machine-audit.md"
+        },
+        {
+          "part": "drive, control, frame and access",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/fgm1-media100ii-whole-machine-audit.md"
+        },
+        {
+          "part": "simulation, display modes and taxonomy",
+          "status": "COMPLETE",
+          "report": "docs/fgm1-media100ii-whole-machine-audit.md"
+        }
       ],
       "reports": [
         "docs/fgm1-media100ii-whole-machine-audit.md"
@@ -1323,15 +1406,51 @@
       "area": "OFFSET CONVERTING",
       "status": "COMPLETE",
       "parts": [
-        {"part": "blank feeder and separation", "status": "COMPLETE", "report": "docs/fgm2-whole-machine-audit.md"},
-        {"part": "alignment and prebreak", "status": "COMPLETE", "report": "docs/fgm2-whole-machine-audit.md"},
-        {"part": "primary folding", "status": "COMPLETE", "report": "docs/fgm2-whole-machine-audit.md"},
-        {"part": "adhesive application boundary", "status": "BLOCKED_EVIDENCE", "report": "docs/fgm2-whole-machine-audit.md"},
-        {"part": "final folding and squaring", "status": "COMPLETE", "report": "docs/fgm2-whole-machine-audit.md"},
-        {"part": "compression", "status": "COMPLETE", "report": "docs/fgm2-whole-machine-audit.md"},
-        {"part": "delivery and output", "status": "COMPLETE", "report": "docs/fgm2-whole-machine-audit.md"},
-        {"part": "drive, control, frame and access", "status": "BLOCKED_EVIDENCE", "report": "docs/fgm2-whole-machine-audit.md"},
-        {"part": "simulation, display modes and taxonomy", "status": "COMPLETE", "report": "docs/fgm2-whole-machine-audit.md"}
+        {
+          "part": "blank feeder and separation",
+          "status": "COMPLETE",
+          "report": "docs/fgm2-whole-machine-audit.md"
+        },
+        {
+          "part": "alignment and prebreak",
+          "status": "COMPLETE",
+          "report": "docs/fgm2-whole-machine-audit.md"
+        },
+        {
+          "part": "primary folding",
+          "status": "COMPLETE",
+          "report": "docs/fgm2-whole-machine-audit.md"
+        },
+        {
+          "part": "adhesive application boundary",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/fgm2-whole-machine-audit.md"
+        },
+        {
+          "part": "final folding and squaring",
+          "status": "COMPLETE",
+          "report": "docs/fgm2-whole-machine-audit.md"
+        },
+        {
+          "part": "compression",
+          "status": "COMPLETE",
+          "report": "docs/fgm2-whole-machine-audit.md"
+        },
+        {
+          "part": "delivery and output",
+          "status": "COMPLETE",
+          "report": "docs/fgm2-whole-machine-audit.md"
+        },
+        {
+          "part": "drive, control, frame and access",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/fgm2-whole-machine-audit.md"
+        },
+        {
+          "part": "simulation, display modes and taxonomy",
+          "status": "COMPLETE",
+          "report": "docs/fgm2-whole-machine-audit.md"
+        }
       ],
       "reports": [
         "docs/fgm2-whole-machine-audit.md"
@@ -1344,17 +1463,55 @@
       "area": "OFFSET CONVERTING",
       "status": "COMPLETE",
       "parts": [
-        {"part": "blank feeder and separation", "status": "COMPLETE", "report": "docs/fgm3-media100ii-whole-machine-audit.md"},
-        {"part": "alignment and prebreak", "status": "NO_CHANGE_REQUIRED", "report": "docs/fgm3-media100ii-whole-machine-audit.md"},
-        {"part": "forming and conversion boundary", "status": "BLOCKED_EVIDENCE", "report": "docs/fgm3-media100ii-whole-machine-audit.md"},
-        {"part": "adhesive application boundary", "status": "BLOCKED_EVIDENCE", "report": "docs/fgm3-media100ii-whole-machine-audit.md"},
-        {"part": "final folding and trombone", "status": "COMPLETE", "report": "docs/fgm3-media100ii-whole-machine-audit.md"},
-        {"part": "compression", "status": "COMPLETE", "report": "docs/fgm3-media100ii-whole-machine-audit.md"},
-        {"part": "delivery and output", "status": "COMPLETE", "report": "docs/fgm3-media100ii-whole-machine-audit.md"},
-        {"part": "drive control frame and access", "status": "BLOCKED_EVIDENCE", "report": "docs/fgm3-media100ii-whole-machine-audit.md"},
-        {"part": "identity evidence display simulation and taxonomy", "status": "COMPLETE", "report": "docs/fgm3-media100ii-whole-machine-audit.md"}
+        {
+          "part": "blank feeder and separation",
+          "status": "COMPLETE",
+          "report": "docs/fgm3-media100ii-whole-machine-audit.md"
+        },
+        {
+          "part": "alignment and prebreak",
+          "status": "NO_CHANGE_REQUIRED",
+          "report": "docs/fgm3-media100ii-whole-machine-audit.md"
+        },
+        {
+          "part": "forming and conversion boundary",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/fgm3-media100ii-whole-machine-audit.md"
+        },
+        {
+          "part": "adhesive application boundary",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/fgm3-media100ii-whole-machine-audit.md"
+        },
+        {
+          "part": "final folding and trombone",
+          "status": "COMPLETE",
+          "report": "docs/fgm3-media100ii-whole-machine-audit.md"
+        },
+        {
+          "part": "compression",
+          "status": "COMPLETE",
+          "report": "docs/fgm3-media100ii-whole-machine-audit.md"
+        },
+        {
+          "part": "delivery and output",
+          "status": "COMPLETE",
+          "report": "docs/fgm3-media100ii-whole-machine-audit.md"
+        },
+        {
+          "part": "drive control frame and access",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/fgm3-media100ii-whole-machine-audit.md"
+        },
+        {
+          "part": "identity evidence display simulation and taxonomy",
+          "status": "COMPLETE",
+          "report": "docs/fgm3-media100ii-whole-machine-audit.md"
+        }
       ],
-      "reports": ["docs/fgm3-media100ii-whole-machine-audit.md"]
+      "reports": [
+        "docs/fgm3-media100ii-whole-machine-audit.md"
+      ]
     },
     {
       "machineId": "BMJ-MCH-0019",
@@ -1363,16 +1520,50 @@
       "area": "OFFSET CONVERTING",
       "status": "COMPLETE",
       "parts": [
-        {"part": "blank feeder and alignment", "status": "COMPLETE", "report": "docs/diana-eye55-whole-machine-audit.md"},
-        {"part": "suction-belt transport", "status": "COMPLETE", "report": "docs/diana-eye55-whole-machine-audit.md"},
-        {"part": "inspection cell camera and LED", "status": "COMPLETE", "report": "docs/diana-eye55-whole-machine-audit.md"},
-        {"part": "image processing and recipe logic", "status": "NO_CHANGE_REQUIRED", "report": "docs/diana-eye55-whole-machine-audit.md"},
-        {"part": "reject decision ejection and recovery", "status": "BLOCKED_EVIDENCE", "report": "docs/diana-eye55-whole-machine-audit.md"},
-        {"part": "accepted fish-scale delivery", "status": "COMPLETE", "report": "docs/diana-eye55-whole-machine-audit.md"},
-        {"part": "frame guarding access and HMI", "status": "BLOCKED_EVIDENCE", "report": "docs/diana-eye55-whole-machine-audit.md"},
-        {"part": "identity evidence display simulation and taxonomy", "status": "COMPLETE", "report": "docs/diana-eye55-whole-machine-audit.md"}
+        {
+          "part": "blank feeder and alignment",
+          "status": "COMPLETE",
+          "report": "docs/diana-eye55-whole-machine-audit.md"
+        },
+        {
+          "part": "suction-belt transport",
+          "status": "COMPLETE",
+          "report": "docs/diana-eye55-whole-machine-audit.md"
+        },
+        {
+          "part": "inspection cell camera and LED",
+          "status": "COMPLETE",
+          "report": "docs/diana-eye55-whole-machine-audit.md"
+        },
+        {
+          "part": "image processing and recipe logic",
+          "status": "NO_CHANGE_REQUIRED",
+          "report": "docs/diana-eye55-whole-machine-audit.md"
+        },
+        {
+          "part": "reject decision ejection and recovery",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/diana-eye55-whole-machine-audit.md"
+        },
+        {
+          "part": "accepted fish-scale delivery",
+          "status": "COMPLETE",
+          "report": "docs/diana-eye55-whole-machine-audit.md"
+        },
+        {
+          "part": "frame guarding access and HMI",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/diana-eye55-whole-machine-audit.md"
+        },
+        {
+          "part": "identity evidence display simulation and taxonomy",
+          "status": "COMPLETE",
+          "report": "docs/diana-eye55-whole-machine-audit.md"
+        }
       ],
-      "reports": ["docs/diana-eye55-whole-machine-audit.md"]
+      "reports": [
+        "docs/diana-eye55-whole-machine-audit.md"
+      ]
     },
     {
       "machineId": "BMJ-MCH-0020",
@@ -1381,16 +1572,50 @@
       "area": "OFFSET CONVERTING",
       "status": "COMPLETE",
       "parts": [
-        {"part": "pile input and suction pickup", "status": "COMPLETE", "report": "docs/shark-n650-whole-machine-audit.md"},
-        {"part": "negative-pitch full-suction transfer", "status": "COMPLETE", "report": "docs/shark-n650-whole-machine-audit.md"},
-        {"part": "inspection tower camera and controlled lighting", "status": "BLOCKED_EVIDENCE", "report": "docs/shark-n650-whole-machine-audit.md"},
-        {"part": "vision processing and recipe logic", "status": "NO_CHANGE_REQUIRED", "report": "docs/shark-n650-whole-machine-audit.md"},
-        {"part": "reject decision separation and tracking", "status": "BLOCKED_EVIDENCE", "report": "docs/shark-n650-whole-machine-audit.md"},
-        {"part": "good and bad return collection", "status": "COMPLETE", "report": "docs/shark-n650-whole-machine-audit.md"},
-        {"part": "frame guarding access and HMI", "status": "BLOCKED_EVIDENCE", "report": "docs/shark-n650-whole-machine-audit.md"},
-        {"part": "identity evidence display simulation and taxonomy", "status": "COMPLETE", "report": "docs/shark-n650-whole-machine-audit.md"}
+        {
+          "part": "pile input and suction pickup",
+          "status": "COMPLETE",
+          "report": "docs/shark-n650-whole-machine-audit.md"
+        },
+        {
+          "part": "negative-pitch full-suction transfer",
+          "status": "COMPLETE",
+          "report": "docs/shark-n650-whole-machine-audit.md"
+        },
+        {
+          "part": "inspection tower camera and controlled lighting",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/shark-n650-whole-machine-audit.md"
+        },
+        {
+          "part": "vision processing and recipe logic",
+          "status": "NO_CHANGE_REQUIRED",
+          "report": "docs/shark-n650-whole-machine-audit.md"
+        },
+        {
+          "part": "reject decision separation and tracking",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/shark-n650-whole-machine-audit.md"
+        },
+        {
+          "part": "good and bad return collection",
+          "status": "COMPLETE",
+          "report": "docs/shark-n650-whole-machine-audit.md"
+        },
+        {
+          "part": "frame guarding access and HMI",
+          "status": "BLOCKED_EVIDENCE",
+          "report": "docs/shark-n650-whole-machine-audit.md"
+        },
+        {
+          "part": "identity evidence display simulation and taxonomy",
+          "status": "COMPLETE",
+          "report": "docs/shark-n650-whole-machine-audit.md"
+        }
       ],
-      "reports": ["docs/shark-n650-whole-machine-audit.md"]
+      "reports": [
+        "docs/shark-n650-whole-machine-audit.md"
+      ]
     },
     {
       "machineId": "BMJ-MCH-0021",
@@ -1402,7 +1627,11 @@
       "pendingAuditCompletion": false,
       "verifiedPreviousRelease": {
         "commit": "c5ed058372e42595ec27504cf7de6b4c5c819937",
-        "workflows": [38499543770, 38499543754, 38499543739],
+        "workflows": [
+          38499543770,
+          38499543754,
+          38499543739
+        ],
         "conclusion": "success",
         "visualFallbackVerified": true,
         "visual3DVerified": false
@@ -1461,24 +1690,57 @@
       "status": "COMPLETE",
       "releaseEvidence": {
         "commit": "7f906b9657669e689d0dbba7c1c1a70b1bff972e",
-        "workflows": [38505109283,38505109332,38505109282],
+        "workflows": [
+          38505109283,
+          38505109332,
+          38505109282
+        ],
         "conclusion": "success",
         "tests": 1600,
         "visualFallbackVerified": true,
         "visual3DVerified": false
       },
       "parts": [
-        {"part": "loading and lower support", "status": "COMPLETE"},
-        {"part": "clamp pressure contact", "status": "COMPLETE"},
-        {"part": "lift turning clearance", "status": "NO_CHANGE_REQUIRED"},
-        {"part": "turn and position lock", "status": "NO_CHANGE_REQUIRED"},
-        {"part": "air separation dust removal", "status": "BLOCKED_EVIDENCE"},
-        {"part": "jog alignment settling", "status": "COMPLETE"},
-        {"part": "lower release and unload", "status": "COMPLETE"},
-        {"part": "hydraulic air utility and guard control", "status": "BLOCKED_EVIDENCE"},
-        {"part": "display taxonomy and simulation stages", "status": "COMPLETE"}
+        {
+          "part": "loading and lower support",
+          "status": "COMPLETE"
+        },
+        {
+          "part": "clamp pressure contact",
+          "status": "COMPLETE"
+        },
+        {
+          "part": "lift turning clearance",
+          "status": "NO_CHANGE_REQUIRED"
+        },
+        {
+          "part": "turn and position lock",
+          "status": "NO_CHANGE_REQUIRED"
+        },
+        {
+          "part": "air separation dust removal",
+          "status": "BLOCKED_EVIDENCE"
+        },
+        {
+          "part": "jog alignment settling",
+          "status": "COMPLETE"
+        },
+        {
+          "part": "lower release and unload",
+          "status": "COMPLETE"
+        },
+        {
+          "part": "hydraulic air utility and guard control",
+          "status": "BLOCKED_EVIDENCE"
+        },
+        {
+          "part": "display taxonomy and simulation stages",
+          "status": "COMPLETE"
+        }
       ],
-      "reports": ["docs/pile-turner02-fz1200-whole-machine-audit.md"]
+      "reports": [
+        "docs/pile-turner02-fz1200-whole-machine-audit.md"
+      ]
     },
     {
       "machineId": "BMJ-MCH-0023",
@@ -1488,7 +1750,11 @@
       "status": "COMPLETE_WITH_BLOCKED_EVIDENCE",
       "releaseEvidence": {
         "commit": "0f1f673c8945c99895ff930494c98af6f2e5474e",
-        "workflows": [38510971370, 38510971253, 38510971248],
+        "workflows": [
+          38510971370,
+          38510971253,
+          38510971248
+        ],
         "conclusion": "success",
         "tests": 1603,
         "productionHttp": 200,
@@ -1496,27 +1762,104 @@
         "visual3DVerified": false
       },
       "parts": [
-        {"part": "feed-bin tower and sheet stacks", "status": "COMPLETE"},
-        {"part": "per-bin air separation and suction rotor", "status": "BLOCKED_EVIDENCE"},
-        {"part": "feed integrity and bin sensing", "status": "BLOCKED_EVIDENCE"},
-        {"part": "vertical gathering transport", "status": "COMPLETE"},
-        {"part": "set delivery conveyor and jog", "status": "COMPLETE"},
-        {"part": "downstream finisher handoff", "status": "BLOCKED_EVIDENCE"},
-        {"part": "HMI bin I-O guard and installed interlocks", "status": "BLOCKED_EVIDENCE"},
-        {"part": "display taxonomy lifecycle interior and LOD", "status": "COMPLETE"}
+        {
+          "part": "feed-bin tower and sheet stacks",
+          "status": "COMPLETE"
+        },
+        {
+          "part": "per-bin air separation and suction rotor",
+          "status": "BLOCKED_EVIDENCE"
+        },
+        {
+          "part": "feed integrity and bin sensing",
+          "status": "BLOCKED_EVIDENCE"
+        },
+        {
+          "part": "vertical gathering transport",
+          "status": "COMPLETE"
+        },
+        {
+          "part": "set delivery conveyor and jog",
+          "status": "COMPLETE"
+        },
+        {
+          "part": "downstream finisher handoff",
+          "status": "BLOCKED_EVIDENCE"
+        },
+        {
+          "part": "HMI bin I-O guard and installed interlocks",
+          "status": "BLOCKED_EVIDENCE"
+        },
+        {
+          "part": "display taxonomy lifecycle interior and LOD",
+          "status": "COMPLETE"
+        }
       ],
-      "reports": ["docs/collator-whole-machine-audit.md"]
+      "reports": [
+        "docs/collator-whole-machine-audit.md"
+      ]
     },
     {
       "machineId": "BMJ-MCH-0024",
       "name": "DIGITAL INKJET",
       "model": "UPG-LY300",
       "area": "OFFSET CONVERTING",
-      "status": "RELEASE_PENDING",
-      "parts": [{"part":"paging and registration","status":"COMPLETE"},{"part":"servo transport contact","status":"COMPLETE"},{"part":"print gap and installed ink pressure routing","status":"BLOCKED_EVIDENCE"},{"part":"UV cure and camera inspection logic","status":"COMPLETE"},{"part":"installed UV and optical geometry","status":"BLOCKED_EVIDENCE"},{"part":"reject and collection support","status":"COMPLETE"},{"part":"installed reject and strapping transfer","status":"BLOCKED_EVIDENCE"},{"part":"controls modes taxonomy and second pass","status":"COMPLETE"},{"part":"installed utility guard and sensor layout","status":"BLOCKED_EVIDENCE"}],
-      "reports": ["docs/batch24-inkjet-checkpoint.md", "docs/inkjet-ly300-whole-machine-audit.md"],
+      "status": "IN_PROGRESS",
+      "parts": [
+        {
+          "part": "paging and registration",
+          "status": "COMPLETE"
+        },
+        {
+          "part": "servo transport contact",
+          "status": "COMPLETE"
+        },
+        {
+          "part": "print gap and installed ink pressure routing",
+          "status": "BLOCKED_EVIDENCE"
+        },
+        {
+          "part": "UV cure and camera inspection logic",
+          "status": "COMPLETE"
+        },
+        {
+          "part": "installed UV and optical geometry",
+          "status": "BLOCKED_EVIDENCE"
+        },
+        {
+          "part": "reject and collection support",
+          "status": "COMPLETE"
+        },
+        {
+          "part": "installed reject and strapping transfer",
+          "status": "BLOCKED_EVIDENCE"
+        },
+        {
+          "part": "controls modes taxonomy and second pass",
+          "status": "COMPLETE"
+        },
+        {
+          "part": "installed utility guard and sensor layout",
+          "status": "BLOCKED_EVIDENCE"
+        }
+      ],
+      "reports": [
+        "docs/batch24-inkjet-checkpoint.md",
+        "docs/inkjet-ly300-whole-machine-audit.md"
+      ],
       "auditProcessed": true,
-      "secondPass": "PASS_WITH_BLOCKED_EVIDENCE"
+      "secondPass": "PASS_WITH_BLOCKED_EVIDENCE",
+      "releaseEvidence": {
+        "commit": "39037b7d9c4db7a1d55b758545fac4a7a400ca15",
+        "workflows": [
+          38521908259,
+          38521908260,
+          38521908266
+        ],
+        "conclusion": "success",
+        "productionSourceHashesMatched": true,
+        "visual3DVerified": false
+      }
     },
     {
       "machineId": "BMJ-MCH-0025",
@@ -1524,10 +1867,57 @@
       "model": null,
       "area": "PDS",
       "status": "RELEASE_PENDING",
-      "parts": [{"part":"plate input and output bed contact","status":"COMPLETE"},{"part":"installed loading bending and unloading handoff","status":"BLOCKED_EVIDENCE"},{"part":"register transport and exposure interlocks","status":"COMPLETE"},{"part":"drum triangle contact and angular synchronization","status":"COMPLETE"},{"part":"laser diagram and traverse geometry","status":"COMPLETE"},{"part":"installed clamp optics and options","status":"BLOCKED_EVIDENCE"},{"part":"installed controls utilities guarding","status":"BLOCKED_EVIDENCE"},{"part":"modes taxonomy lifecycle and second pass","status":"COMPLETE"}],
-      "reports": ["docs/batch24-ctp1-checkpoint.md", "docs/ctp1-whole-machine-audit.md"],
+      "parts": [
+        {
+          "part": "plate input and output bed contact",
+          "status": "COMPLETE"
+        },
+        {
+          "part": "installed loading bending and unloading handoff",
+          "status": "BLOCKED_EVIDENCE"
+        },
+        {
+          "part": "register transport and exposure interlocks",
+          "status": "COMPLETE"
+        },
+        {
+          "part": "drum triangle contact and angular synchronization",
+          "status": "COMPLETE"
+        },
+        {
+          "part": "laser diagram and traverse geometry",
+          "status": "COMPLETE"
+        },
+        {
+          "part": "installed clamp optics and options",
+          "status": "BLOCKED_EVIDENCE"
+        },
+        {
+          "part": "installed controls utilities guarding",
+          "status": "BLOCKED_EVIDENCE"
+        },
+        {
+          "part": "modes taxonomy lifecycle and second pass",
+          "status": "COMPLETE"
+        }
+      ],
+      "reports": [
+        "docs/batch24-ctp1-checkpoint.md",
+        "docs/ctp1-whole-machine-audit.md"
+      ],
       "auditProcessed": true,
-      "secondPass": "PASS_WITH_BLOCKED_EVIDENCE"
+      "secondPass": "PASS_WITH_BLOCKED_EVIDENCE",
+      "releaseEvidence": {
+        "commit": "39037b7d9c4db7a1d55b758545fac4a7a400ca15",
+        "workflows": [
+          38521908259,
+          38521908260,
+          38521908266
+        ],
+        "conclusion": "success",
+        "productionSourceHashesMatched": true,
+        "visual3DVerified": false
+      }
     },
     {
       "machineId": "BMJ-MCH-0026",
@@ -1535,10 +1925,57 @@
       "model": null,
       "area": "PDS",
       "status": "RELEASE_PENDING",
-      "parts": [{"part":"plate input and output bed contact","status":"COMPLETE"},{"part":"installed loading bending and unloading handoff","status":"BLOCKED_EVIDENCE"},{"part":"register transport and exposure interlocks","status":"COMPLETE"},{"part":"drum triangle contact and angular synchronization","status":"COMPLETE"},{"part":"laser diagram and traverse geometry","status":"COMPLETE"},{"part":"installed clamp optics and options","status":"BLOCKED_EVIDENCE"},{"part":"installed controls utilities guarding","status":"BLOCKED_EVIDENCE"},{"part":"modes taxonomy lifecycle and second pass","status":"COMPLETE"}],
-      "reports": ["docs/batch24-ctp2-checkpoint.md", "docs/ctp2-whole-machine-audit.md"],
+      "parts": [
+        {
+          "part": "plate input and output bed contact",
+          "status": "COMPLETE"
+        },
+        {
+          "part": "installed loading bending and unloading handoff",
+          "status": "BLOCKED_EVIDENCE"
+        },
+        {
+          "part": "register transport and exposure interlocks",
+          "status": "COMPLETE"
+        },
+        {
+          "part": "drum triangle contact and angular synchronization",
+          "status": "COMPLETE"
+        },
+        {
+          "part": "laser diagram and traverse geometry",
+          "status": "COMPLETE"
+        },
+        {
+          "part": "installed clamp optics and options",
+          "status": "BLOCKED_EVIDENCE"
+        },
+        {
+          "part": "installed controls utilities guarding",
+          "status": "BLOCKED_EVIDENCE"
+        },
+        {
+          "part": "modes taxonomy lifecycle and second pass",
+          "status": "COMPLETE"
+        }
+      ],
+      "reports": [
+        "docs/batch24-ctp2-checkpoint.md",
+        "docs/ctp2-whole-machine-audit.md"
+      ],
       "auditProcessed": true,
-      "secondPass": "PASS_WITH_BLOCKED_EVIDENCE"
+      "secondPass": "PASS_WITH_BLOCKED_EVIDENCE",
+      "releaseEvidence": {
+        "commit": "39037b7d9c4db7a1d55b758545fac4a7a400ca15",
+        "workflows": [
+          38521908259,
+          38521908260,
+          38521908266
+        ],
+        "conclusion": "success",
+        "productionSourceHashesMatched": true,
+        "visual3DVerified": false
+      }
     },
     {
       "machineId": "BMJ-MCH-0027",
@@ -2042,15 +2479,33 @@
       }
     }
   ],
-  "updatedAt": "2026-10-14T04:04:00Z",
+  "updatedAt": "2026-10-14T10:07:55.493Z",
   "lastAuditRelease": {
     "machineId": "BMJ-MCH-0023",
     "commit": "0f1f673c8945c99895ff930494c98af6f2e5474e",
-    "workflows": [38510971370, 38510971253, 38510971248],
+    "workflows": [
+      38510971370,
+      38510971253,
+      38510971248
+    ],
     "conclusion": "success",
     "tests": 1603,
     "nextMachineId": "BMJ-MCH-0024",
     "visualFallbackVerified": true,
+    "visual3DVerified": false
+  },
+  "batchRemainingWork": [
+    "Align LY300 pathLine overlay with deterministic material route and add regression; release and verify before cursor advancement"
+  ],
+  "batchReleaseEvidence": {
+    "commit": "39037b7d9c4db7a1d55b758545fac4a7a400ca15",
+    "workflows": [
+      38521908259,
+      38521908260,
+      38521908266
+    ],
+    "conclusion": "success",
+    "productionSourceHashesMatched": true,
     "visual3DVerified": false
   }
 }
