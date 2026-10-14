@@ -2223,7 +2223,7 @@ export class ReferenceProcessSimulation{
   for(let i=0;i<=seg;i++){const a=THREE.MathUtils.lerp(a0,a1,i/seg),x=Math.cos(a)*r,y=Math.sin(a)*r;verts.push(x,y,-w/2,x,y,w/2);}
   for(let i=0;i<seg;i++){const j=i*2;idx.push(j,j+2,j+1,j+2,j+3,j+1);}
   this.ctpWrappedGeometry=new THREE.BufferGeometry();this.ctpWrappedGeometry.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));this.ctpWrappedGeometry.setIndex(idx);this.ctpWrappedGeometry.computeVertexNormals();
-  this.ctpWrappedGroup=new THREE.Group();this.ctpWrappedGroup.position.set(0,.82,0);this.root.add(this.ctpWrappedGroup);
+  this.ctpWrappedGroup=new THREE.Group();this.ctpWrappedGroup.position.set(.08,.82,0);this.root.add(this.ctpWrappedGroup);
   this.ctpWrappedPlate=new THREE.Mesh(this.ctpWrappedGeometry,this.ctpPlateMaterial);this.ctpWrappedPlate.name='SUPRASETTER-WRAPPED-PLATE-REFERENCE';this.ctpWrappedPlate.visible=false;this.ctpWrappedGroup.add(this.ctpWrappedPlate);
   this.ctpLaserBeamGeometry=new THREE.BoxGeometry(.012,.14,.012);this.ctpLaserBeamMaterial=new THREE.MeshStandardMaterial({color:0xb82323,emissive:0x8a1515,emissiveIntensity:1.1,roughness:.2,transparent:true,opacity:.88});
   this.ctpLaserBeam=new THREE.Mesh(this.ctpLaserBeamGeometry,this.ctpLaserBeamMaterial);this.ctpLaserBeam.name='SUPRASETTER-LASER-BEAM-REFERENCE';this.ctpLaserBeam.visible=false;this.ctpLaserBeam.position.set(0,1.18,0);this.root.add(this.ctpLaserBeam);
@@ -2249,7 +2249,7 @@ export class ReferenceProcessSimulation{
   if(s.p<.29){
    const t=smooth(s.p/.29);flat.visible=this.active;wrap.visible=false;flat.position.set(lerp(-1.10,-.26,t),lerp(.68,.84,t),0);flat.rotation.set(0,0,lerp(0,.14,t));
   }else if(s.p<.80){
-   flat.visible=false;wrap.visible=this.active;const t=THREE.MathUtils.clamp((s.p-.33)/.43,0,1);group.rotation.z=s.exposure?t*Math.PI*5.6:0;
+   flat.visible=false;wrap.visible=this.active;group.rotation.z=s.exposure?this.elapsed*5.2:0;
   }else{
    const t=smooth((s.p-.80)/.20);flat.visible=this.active;wrap.visible=false;flat.position.set(lerp(.28,1.06,t),lerp(.84,.66,t),0);flat.rotation.set(0,0,lerp(-.12,0,t));
   }

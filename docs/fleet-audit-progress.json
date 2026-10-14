@@ -4,7 +4,12 @@
   "productionUrl": "https://digitaltwin.juldigi.workers.dev/",
   "timezone": "Asia/Jakarta",
   "cadence": "HOURLY",
-  "mode": "AUDIT_ONE_MACHINE_THEN_FIX_VERIFY_DEPLOY",
+  "mode": "AUDIT_THREE_MACHINES_THEN_FIX_VERIFY_DEPLOY",
+  "batchTargetMachines": 3,
+  "batchMachineIds": ["BMJ-MCH-0024", "BMJ-MCH-0025", "BMJ-MCH-0026"],
+  "batchStatus": "IN_PROGRESS",
+  "batchReleaseStatus": "RELEASE_PENDING",
+  "batchReleaseReport": "docs/batch24-release-checkpoint.md",
   "status": "IN_PROGRESS",
   "cursor": {
     "machineId": "BMJ-MCH-0024",
@@ -1506,27 +1511,27 @@
       "name": "DIGITAL INKJET",
       "model": "UPG-LY300",
       "area": "OFFSET CONVERTING",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "IN_PROGRESS",
+      "parts": [{"part":"paging and registration","status":"IN_PROGRESS"},{"part":"transport print and ink pressure","status":"IN_PROGRESS"},{"part":"UV cure and camera inspection","status":"IN_PROGRESS"},{"part":"reject and collection support","status":"COMPLETE"},{"part":"controls utility modes and second pass","status":"IN_PROGRESS"}],
+      "reports": ["docs/batch24-inkjet-checkpoint.md"]
     },
     {
       "machineId": "BMJ-MCH-0025",
       "name": "CTP HEIDELBERG MACHINE",
       "model": null,
       "area": "PDS",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "IN_PROGRESS",
+      "parts": [{"part":"plate input register and clamp","status":"IN_PROGRESS"},{"part":"drum axis and angular synchronization","status":"COMPLETE"},{"part":"plate triangle contact and laser traverse","status":"IN_PROGRESS"},{"part":"release unload and output","status":"IN_PROGRESS"},{"part":"installed options controls utilities and second pass","status":"IN_PROGRESS"}],
+      "reports": ["docs/batch24-ctp1-checkpoint.md"]
     },
     {
       "machineId": "BMJ-MCH-0026",
       "name": "CTP HEIDELBERG MACHINE",
       "model": null,
       "area": "PDS",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "IN_PROGRESS",
+      "parts": [{"part":"plate input register and clamp","status":"IN_PROGRESS"},{"part":"drum axis and angular synchronization","status":"COMPLETE"},{"part":"plate triangle contact and laser traverse","status":"IN_PROGRESS"},{"part":"release unload and output","status":"IN_PROGRESS"},{"part":"installed options controls utilities and second pass","status":"IN_PROGRESS"}],
+      "reports": ["docs/batch24-ctp2-checkpoint.md"]
     },
     {
       "machineId": "BMJ-MCH-0027",
