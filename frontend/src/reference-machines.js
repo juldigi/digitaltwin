@@ -773,8 +773,8 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    const ram=this.findNode('qf100-head-ram');
    if(ram){
     this.tag(this.cyl(ram,.105,.56,[0,1.53,0],'dark','y'),'main-hydraulic-cylinder-reference','QF_LQF_FAMILY_PRIMARY');
-    this.tag(this.cyl(ram,.047,.48,[0,1.24,0],'steel','y'),'hydraulic-ram-reference','QF_LQF_FAMILY_PRIMARY');
-    const plate=this.active(this.box(ram,[.64,.10,1.02],[0,.98,0],'steel',.01));this.tag(plate,'blanking-pressure-plate','QF_LQF_FAMILY_PRIMARY');
+    this.tag(this.cyl(ram,.047,.48,[0,1.44,0],'steel','y'),'hydraulic-ram-reference','QF_LQF_FAMILY_PRIMARY');
+    const plate=this.active(this.box(ram,[.64,.10,1.02],[0,1.18,0],'steel',.01));this.tag(plate,'blanking-pressure-plate','QF_LQF_FAMILY_PRIMARY');
    }
    const guides=this.findNode('qf100-head-guides');
    if(guides)for(const x0 of [-.27,.27]){this.tag(this.cyl(guides,.032,.58,[x0,1.24,0],'steel','y'),'ram-guide-post','CLOSE_FAMILY_MECHANISM');this.tag(this.cyl(guides,.052,.12,[x0,1.03,0],'dark','y'),'ram-guide-bushing','CLOSE_FAMILY_MECHANISM');}
@@ -783,13 +783,15 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   if(tool){
    const board=this.findNode('qf100-pin-board');
    if(board){
-    this.tag(this.box(board,[.70,.055,1.08],[0,.86,0],'steel',.006),'honeycomb-pin-board','QF_FAMILY_TECHNICAL_ARTICLE');
-    for(let x0=-.28;x0<=.28;x0+=.14)for(let z=-.42;z<=.42;z+=.14)this.tag(this.cyl(board,.008,.035,[x0,.90,z],'dark','y'),'honeycomb-hole-reference','QF_FAMILY_TECHNICAL_ARTICLE');
+    this.tag(this.box(board,[.70,.055,1.08],[0,1.1025,0],'steel',.006),'honeycomb-pin-board','QF_FAMILY_TECHNICAL_ARTICLE');
+    // A hole is not a solid cylinder. Retain semantic hole references without
+    // rendering protruding plugs through the pressure plate.
+    for(let x0=-.28;x0<=.28;x0+=.14)for(let z=-.42;z<=.42;z+=.14){const hole=this.tag(this.cyl(board,.008,.035,[x0,1.1025,z],'dark','y'),'honeycomb-hole-reference','QF_FAMILY_TECHNICAL_ARTICLE');hole.visible=false;hole.userData.capabilityOnly=true;hole.userData.restVisible=false;}
    }
    const pins=this.findNode('qf100-tooling-pins');
-   if(pins)for(const [x0,z] of [[-.21,-.28],[0,-.28],[.21,-.28],[-.21,0],[.21,0],[-.21,.28],[0,.28],[.21,.28]])this.tag(this.cyl(pins,.012,.18,[x0,.79,z],'accent','y'),'blanking-tool-pin','QF_FAMILY_TECHNICAL_ARTICLE');
+   if(pins)for(const [x0,z] of [[-.21,-.28],[0,-.28],[.21,-.28],[-.21,0],[.21,0],[-.21,.28],[0,.28],[.21,.28]])this.tag(this.cyl(pins,.012,.18,[x0,1.015,z],'accent','y'),'blanking-tool-pin','QF_FAMILY_TECHNICAL_ARTICLE');
    const lock=this.findNode('qf100-tooling-lock');
-   if(lock)for(const z of [-.48,.48])this.tag(this.box(lock,[.12,.08,.08],[.31,.84,z],'dark',.006),'pin-board-locator-reference','CLOSE_FAMILY_MECHANISM');
+   if(lock)for(const z of [-.48,.48])this.tag(this.box(lock,[.12,.08,.08],[.31,1.0825,z],'dark',.006),'pin-board-locator-reference','CLOSE_FAMILY_MECHANISM');
   }
 
   if(sep){
@@ -2101,20 +2103,29 @@ export class ReferenceProcessSimulation{
   else if(p<.72){idx=3;pressing=true;platformAtPress=true;hydraulicPressure=true;hydraulicPump=true;valvePress=true;}
   else if(p<.84){idx=4;platformAtPress=true;separating=true;hydraulicPump=true;valveReturn=true;}
   else {idx=6;indexing=true;xIndexing=true;returning=true;positionFeedback=true;}
-  return {p,idx,indexing,xIndexing,yIndexing,pressing,loading,separating,returning,platformAtPress,hydraulicPressure,hydraulicPump,valvePress,valveReturn,positionFeedback,interlockSafe:!(indexing&&pressing)};
+  return {p,idx,indexing,xIndexing,yIndexing,pressing,loading,separating,returning,platformAtPress,hydraulicPressure,hydraulicPump,valvePress,valveReturn,positionFeedback,loadingMotionPolicy:'STOCK_ALREADY_SEATED__MANUAL_HANDOFF_UNVERIFIED',separationMotionPolicy:'NO_STOCK_DROP_THROUGH_SOLID_PLATFORM__EXTRACTION_UNVERIFIED',physicalOutputVerified:false,interlockSafe:!(indexing&&pressing)};
  }
  updateBlanker(){
   if(!this.blanker)return;
   const {p,indexing,xIndexing,yIndexing,pressing,loading,separating,hydraulicPump,valvePress,valveReturn,positionFeedback}=this.blankerStatus(),b=this.blanker;
   const smooth=t=>{t=THREE.MathUtils.clamp(t,0,1);return t*t*(3-2*t);};
   let x=-.55,z=0,ramDrop=0,sepDrop=0,pieceX=-.55,pieceZ=0;
-  if(p<.15){const t=smooth(p/.15);pieceX=THREE.MathUtils.lerp(-1.48,-.55,t);}
+  // Manual loading is an evidence boundary; start with stock already seated
+  // on the carriage rather than floating it from an unsupported staging path.
+  if(p<.15){pieceX=-.55;}
   else if(p<.32){const t=smooth((p-.15)/.17);x=THREE.MathUtils.lerp(-.55,0,t);pieceX=x;}
   else if(p<.48){const t=smooth((p-.32)/.16);x=0;z=THREE.MathUtils.lerp(0,.18,t);pieceX=x;pieceZ=z;}
   else if(p<.84){x=0;z=.18;pieceX=x;pieceZ=z;}
   else {const t=smooth((p-.84)/.16);x=THREE.MathUtils.lerp(0,-.55,t);z=THREE.MathUtils.lerp(.18,0,t);pieceX=x;pieceZ=z;}
-  if(pressing){const t=(p-.58)/.14;ramDrop=Math.sin(Math.PI*THREE.MathUtils.clamp(t,0,1))*.16;}
-  if(separating)sepDrop=.045*smooth((p-.72)/.12);
+  if(pressing){const t=(p-.58)/.14;ramDrop=Math.sin(Math.PI*THREE.MathUtils.clamp(t,0,1))*.10;}
+  // The represented platform has no verified extraction opening. Do not sink
+  // the entire stock into a solid support to suggest unverified separation.
+  sepDrop=0;
+  for(const id of ['qf100-pin-board','qf100-tooling-pins','qf100-tooling-lock']){
+   const tooling=this.template.findNode(id);if(!tooling)continue;
+   if(!tooling.userData.blankerStrokeRest)tooling.userData.blankerStrokeRest=tooling.position.clone();
+   tooling.position.copy(tooling.userData.blankerStrokeRest);tooling.position.y-=ramDrop;
+  }
   if(b.platform){b.platform.position.copy(b.platformRest);b.platform.position.x+=x+.55;b.platform.position.z+=z;}
   // The cylinder barrel is mounted to the fixed gantry. Only the piston rod
   // and pressure plate reciprocate; translating the whole ram group moved
@@ -2570,6 +2581,7 @@ export class ReferenceProcessSimulation{
  }
  setInkFlowVisible(){this.inkFlowVisible=false;return this.state();}
  resetMotion(){
+  if(this.blanker)for(const id of ['qf100-pin-board','qf100-tooling-pins','qf100-tooling-lock']){const n=this.template.findNode(id);if(n?.userData.blankerStrokeRest)n.position.copy(n.userData.blankerStrokeRest);}
   if(this.blanker?.ram)this.blanker.ram.traverse(m=>{if(m.userData.blankerStrokeRest)m.position.copy(m.userData.blankerStrokeRest);});
   if(this.blanker)for(const mesh of this.template.activeMeshes)if(mesh.userData.motionRestQuaternion)mesh.quaternion.copy(mesh.userData.motionRestQuaternion);
   for(const obj of [this.ctp?.drum,this.ctp?.transportMotor,this.ctp?.drumMotor])if(obj?.userData.ctpRestQuaternion)obj.quaternion.copy(obj.userData.ctpRestQuaternion);

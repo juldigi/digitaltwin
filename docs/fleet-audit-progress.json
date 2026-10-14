@@ -1393,9 +1393,10 @@
       "area": "OFFSET CONVERTING",
       "status": "RELEASE_PENDING",
       "auditStatus": "IN_PROGRESS",
+      "pendingAuditCompletion": true,
       "verifiedPreviousRelease": {
-        "commit": "32f78ba364fe7d8c772d54fa652ddc815905205a",
-        "workflows": [38488879229, 38488879368, 38488879230],
+        "commit": "af769a8568828aacd6869be6e6efbe63aa2ab07f",
+        "workflows": [38494741746, 38494741844, 38494742036],
         "conclusion": "success",
         "visualFallbackVerified": true,
         "visual3DVerified": false
@@ -1403,7 +1404,7 @@
       "parts": [
         {
           "part": "stack staging and loading",
-          "status": "IN_PROGRESS",
+          "status": "BLOCKED_EVIDENCE",
           "report": "docs/qf100cs-whole-machine-audit.md"
         },
         {
@@ -1413,32 +1414,32 @@
         },
         {
           "part": "fixed hydraulic head and contact stroke",
-          "status": "IN_PROGRESS",
+          "status": "COMPLETE",
           "report": "docs/qf100cs-whole-machine-audit.md"
         },
         {
           "part": "honeycomb board pins and tooling retention",
-          "status": "IN_PROGRESS",
+          "status": "COMPLETE",
           "report": "docs/qf100cs-whole-machine-audit.md"
         },
         {
           "part": "separation and waste support",
-          "status": "IN_PROGRESS",
+          "status": "BLOCKED_EVIDENCE",
           "report": "docs/qf100cs-whole-machine-audit.md"
         },
         {
           "part": "product receiving and collector boundary",
-          "status": "IN_PROGRESS",
+          "status": "BLOCKED_EVIDENCE",
           "report": "docs/qf100cs-whole-machine-audit.md"
         },
         {
           "part": "hydraulic control guarding and utility",
-          "status": "IN_PROGRESS",
+          "status": "BLOCKED_EVIDENCE",
           "report": "docs/qf100cs-whole-machine-audit.md"
         },
         {
           "part": "display taxonomy and factory parity",
-          "status": "IN_PROGRESS",
+          "status": "BLOCKED_EVIDENCE",
           "report": "docs/qf100cs-whole-machine-audit.md"
         }
       ],
@@ -1993,5 +1994,5 @@
       }
     }
   ],
-  "updatedAt": "2026-10-14T01:20:00Z"
+  "updatedAt": "2026-10-14T02:20:00Z"
 }

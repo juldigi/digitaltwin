@@ -34,3 +34,14 @@ Tes fokus: 9/9 lulus. Suite penuh: 1.596/1.596 lulus. Build 41 mesin berhasil. R
 - Tes kontak memeriksa world bounds dan containment sepanjang 101 posisi indexing/registration serta restart. Tes fokus gabungan 10/10 lulus.
 - Pass kedua mempertahankan housing diam, rod/plate bergerak bersama dan reset tepat. Loading, board/pin stroke, drop separation dan physical receiving tetap IN_PROGRESS; parameter ini tidak diganti dengan tebakan konfigurasi BMJ.
 - Gate penuh 1.597/1.597 lulus; build 41 mesin berhasil. Kedua urutan interior/LOD, pause dan stop/reset diperiksa kembali dan carriage kembali tepat ke −0,55 m. Rilis lanjutan menunggu pipeline; cursor tidak berpindah.
+
+## Lanjutan 14 Oktober — tooling, loading dan separation
+
+- Rilis carriage `af769a8568828aacd6869be6e6efbe63aa2ab07f` terverifikasi sukses: CI 38494741746, frontend 38494742036, Cloudflare 38494741844.
+- Pressure plate center 0,980 → 1,180 m; rod center 1,240 → 1,440 m. Board body center 0,860 → 1,1025 m; pin center 0,790 → 1,015 m. Posisi ini adalah rekonstruksi kontak model keluarga, bukan dimensi aktual serial BMJ.
+- Board top 1,130 m bertemu plate bottom 1,130 m. Pin tip rest 0,925 m; stroke 160 → 100 mm menutup tepat ke stock top 0,825 m. Board, pin dan locator sekarang mengikuti rod/plate; barrel tetap diam pada gantry.
+- Solid cylinders yang sebelumnya diberi label hole kini menjadi semantic reference tersembunyi; tidak dirender sebagai plug yang menonjol melalui board/plate.
+- Gerak loading yang sebelumnya melayangkan stock dari staging dihapus. Demo dimulai dengan stock sudah duduk pada carriage; manual handoff tetap BLOCKED_EVIDENCE.
+- Drop separation 45 → 0 mm menghilangkan penetrasi stock terhadap carriage padat. Extraction opening, waste/product separation fixture, serta transfer ke receiving tray tidak terverifikasi; physical output tetap BLOCKED_EVIDENCE. Counter siklus tidak membuktikan produk diterima tray.
+- Pass kedua menyapu 401 posisi siklus: stock/support tetap kontak, board/plate tetap mounted dan pin tidak menembus stock. Kedua urutan interior/LOD, pause/resume/stop/reset serta show-only tidak memunculkan solid hole references. Tes fokus 11/11 lulus.
+- Semua bagian telah ditelusuri; unknown input handoff, separation/extraction, actual receiving, utility/control/guarding as-built dan visual 3D tetap dicatat sebagai BLOCKED_EVIDENCE. Cursor tetap QF sampai rilis terbaru diverifikasi. Gate penuh 1.598/1.598 lulus; build 41 mesin, 19 unidentified, bundle 2.918.520 byte berhasil.
