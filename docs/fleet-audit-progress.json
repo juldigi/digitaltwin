@@ -7,19 +7,18 @@
   "mode": "AUDIT_THREE_MACHINES_THEN_FIX_VERIFY_DEPLOY",
   "batchTargetMachines": 3,
   "batchMachineIds": [
-    "BMJ-MCH-0024",
-    "BMJ-MCH-0025",
-    "BMJ-MCH-0026"
+    "BMJ-MCH-0027",
+    "BMJ-MCH-0028",
+    "BMJ-MCH-0029"
   ],
-  "batchStatus": "COMPLETE",
-  "batchReleaseStatus": "VERIFIED",
-  "batchReleaseReport": "docs/batch24-final-release.md",
+  "batchStatus": "RELEASE_PENDING",
+  "batchReleaseStatus": "RELEASE_PENDING",
+  "batchReleaseReport": "docs/batch27-release.md",
   "batchValidation": {
-    "focusedTests": 48,
-    "fullTests": 1609,
+    "focusedTests": 51,
+    "fullTests": 1613,
     "buildMachines": 41,
     "bundleBytes": 2918300,
-    "surfaceRegressionTests": 12,
     "visual3DVerified": false
   },
   "status": "IN_PROGRESS",
@@ -1988,27 +1987,192 @@
       "name": "CTF IMAGESETTER SCREEN MACHINE",
       "model": null,
       "area": "PDS",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {
+          "part": "Media cassette and loading",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/ctf-screen-whole-machine-audit.md",
+          "unknown": "Installed dimensions/configuration/routes not verified; independent supported corrections documented"
+        },
+        {
+          "part": "Capstan front/rear slack and gravity tension",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/ctf-screen-whole-machine-audit.md",
+          "unknown": "Installed dimensions/configuration/routes not verified; independent supported corrections documented"
+        },
+        {
+          "part": "Polygon scanner drive",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/ctf-screen-whole-machine-audit.md",
+          "unknown": "Installed dimensions/configuration/routes not verified; independent supported corrections documented"
+        },
+        {
+          "part": "Laser optics and modulation",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/ctf-screen-whole-machine-audit.md",
+          "unknown": "Installed dimensions/configuration/routes not verified; independent supported corrections documented"
+        },
+        {
+          "part": "Cutter and punch boundary",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/ctf-screen-whole-machine-audit.md",
+          "unknown": "Installed dimensions/configuration/routes not verified; independent supported corrections documented"
+        },
+        {
+          "part": "Output cassette and processor interface",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/ctf-screen-whole-machine-audit.md",
+          "unknown": "Installed dimensions/configuration/routes not verified; independent supported corrections documented"
+        },
+        {
+          "part": "Housing control taxonomy and inspection",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/ctf-screen-whole-machine-audit.md",
+          "unknown": "Installed dimensions/configuration/routes not verified; independent supported corrections documented"
+        }
+      ],
+      "reports": [
+        "docs/ctf-screen-whole-machine-audit.md"
+      ],
+      "auditProcessed": true,
+      "secondPass": "PASS_WITH_BLOCKED_EVIDENCE",
+      "pendingReleaseReport": "docs/batch27-release.md"
     },
     {
       "machineId": "BMJ-MCH-0028",
       "name": "ZUND MACHINE",
       "model": null,
       "area": "PDS",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {
+          "part": "Material placement and vacuum bed",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/zund-whole-machine-audit.md",
+          "unknown": "Installed dimensions/configuration/routes not verified; independent supported corrections documented"
+        },
+        {
+          "part": "X gantry guides and rack",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/zund-whole-machine-audit.md",
+          "unknown": "Installed dimensions/configuration/routes not verified; independent supported corrections documented"
+        },
+        {
+          "part": "Y/Z carriage and module carrier",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/zund-whole-machine-audit.md",
+          "unknown": "Installed dimensions/configuration/routes not verified; independent supported corrections documented"
+        },
+        {
+          "part": "Installed tool capability boundaries",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/zund-whole-machine-audit.md",
+          "unknown": "Installed dimensions/configuration/routes not verified; independent supported corrections documented"
+        },
+        {
+          "part": "Registration and initialization boundaries",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/zund-whole-machine-audit.md",
+          "unknown": "Installed dimensions/configuration/routes not verified; independent supported corrections documented"
+        },
+        {
+          "part": "Controls vacuum interface and unload",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/zund-whole-machine-audit.md",
+          "unknown": "Installed dimensions/configuration/routes not verified; independent supported corrections documented"
+        },
+        {
+          "part": "Housing taxonomy and inspection",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/zund-whole-machine-audit.md",
+          "unknown": "Installed dimensions/configuration/routes not verified; independent supported corrections documented"
+        }
+      ],
+      "reports": [
+        "docs/zund-whole-machine-audit.md"
+      ],
+      "auditProcessed": true,
+      "secondPass": "PASS_WITH_BLOCKED_EVIDENCE",
+      "pendingReleaseReport": "docs/batch27-release.md"
     },
     {
       "machineId": "BMJ-MCH-0029",
       "name": "COMPRESSOR ATLAS COPCO NO.2",
       "model": null,
       "area": "UTILITY",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {
+          "part": "Intake filter and load/unload valve",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/atlas2-whole-machine-audit.md",
+          "unknown": "Installed dimensions/configuration/routes not verified; independent supported corrections documented"
+        },
+        {
+          "part": "Motor coupling and airend",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/atlas2-whole-machine-audit.md",
+          "unknown": "Installed dimensions/configuration/routes not verified; independent supported corrections documented"
+        },
+        {
+          "part": "Separation and pressure/check interface",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/atlas2-whole-machine-audit.md",
+          "unknown": "Installed dimensions/configuration/routes not verified; independent supported corrections documented"
+        },
+        {
+          "part": "Oil circuit and cooling",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/atlas2-whole-machine-audit.md",
+          "unknown": "Installed dimensions/configuration/routes not verified; independent supported corrections documented"
+        },
+        {
+          "part": "Aftercooler condensate and discharge",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/atlas2-whole-machine-audit.md",
+          "unknown": "Installed dimensions/configuration/routes not verified; independent supported corrections documented"
+        },
+        {
+          "part": "Receiver treatment and distribution boundary",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/atlas2-whole-machine-audit.md",
+          "unknown": "Installed dimensions/configuration/routes not verified; independent supported corrections documented"
+        },
+        {
+          "part": "Cabinet mounting controls and taxonomy",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/atlas2-whole-machine-audit.md",
+          "unknown": "Installed dimensions/configuration/routes not verified; independent supported corrections documented"
+        }
+      ],
+      "reports": [
+        "docs/atlas2-whole-machine-audit.md"
+      ],
+      "auditProcessed": true,
+      "secondPass": "PASS_WITH_BLOCKED_EVIDENCE",
+      "pendingReleaseReport": "docs/batch27-release.md"
     },
     {
       "machineId": "BMJ-MCH-0030",
@@ -2485,7 +2649,7 @@
       }
     }
   ],
-  "updatedAt": "2026-10-14T11:29:19.242Z",
+  "updatedAt": "2026-10-14T11:47:34.875Z",
   "lastAuditRelease": {
     "commit": "142554f404804d1e7ee111daf238e22bfd12bc01",
     "workflows": [
@@ -2505,8 +2669,17 @@
     ],
     "nextMachineId": "BMJ-MCH-0027"
   },
-  "batchRemainingWork": [],
+  "batchRemainingWork": [
+    "Complete full-suite gate and verify batch27 release workflows and production; retain installed evidence blockers"
+  ],
   "batchReleaseEvidence": {
+    "status": "RELEASE_PENDING",
+    "baseCommit": "05efd91b7140edda0767b8c7454dba91e273a4d8",
+    "report": "docs/batch27-release.md"
+  },
+  "ledgerGatePending": false,
+  "ledgerGateInstruction": "Previous closure ledger gates verified before batch27.",
+  "previousBatchReleaseEvidence": {
     "commit": "142554f404804d1e7ee111daf238e22bfd12bc01",
     "workflows": [
       38556107735,
@@ -2518,7 +2691,5 @@
     "productionSourceHashesMatched": true,
     "simulationModuleSHA256": "7fa0f6cfa4f04e970d265ad4a02ce1aa2710442ec06f3b1c70109a6c064dccdd",
     "visual3DVerified": false
-  },
-  "ledgerGatePending": true,
-  "ledgerGateInstruction": "Verify workflows of current ledger main before starting batch 0027–0029; implementation release already verified."
+  }
 }

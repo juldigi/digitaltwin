@@ -140,6 +140,7 @@ test('V133 compressor twins expose detailed package flow and distribution piping
   assert.equal(template.root.userData.distributionDesignReference.ringMainPreferred,true,id);
   assert.equal(template.root.userData.distributionDesignReference.installedPressureDropMeasured,false,id);
   const taxonomy=universalTaxonomy(id);assert.ok(taxonomy.some(n=>n.level===2&&n.name==='Compressed-Air Discharge / Distribution'),id+' missing distribution taxonomy');
+  template.setExteriorOpen(true);
   const sim=createMachineSimulation(id,template.root,template),started=sim.start();
   assert.equal(started.compressedAirParticleCount,26,id);
   assert.equal(started.distributionAirParticleCount,18,id);
@@ -183,7 +184,8 @@ test('V134 compressor airflow exposes twin-screw internals swan-neck drops press
   assert.ok(p.service[0]>p.service[1]&&p.service[1]>p.service[2],id);
   sim.setPathVisible(false);assert.equal(sim.state().pathVisible,false,id);
   assert.equal(template.findNode('compressor-air-distribution').visible,false,id);
-  sim.setPathVisible(true);assert.equal(template.findNode('compressor-air-distribution').visible,true,id);
+  sim.setPathVisible(true);assert.equal(template.findNode('compressor-air-distribution').visible,false,id);
+  template.setExteriorOpen(true);sim.setPathVisible(true);assert.equal(template.findNode('compressor-air-distribution').visible,true,id);
   sim.dispose();template.dispose();
  }
 });

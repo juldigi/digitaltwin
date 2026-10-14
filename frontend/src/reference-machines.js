@@ -38,6 +38,16 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.refineV236MechanicalRealism();
   this.refineV238PriorityRepolish();
   this.refineV341EquipmentBoundary();
+  // Enrichment runs after the original palette isolation. Its new meshes
+  // also need independent materials for specific-part highlight/ghost.
+  const materialOwners=new Set();
+  for(const mesh of this.meshes){
+   if(!mesh.isMesh||!mesh.material)continue;
+   if(materialOwners.has(mesh.material)){
+    mesh.material=mesh.material.clone();this.referenceDynamicMaterials.push(mesh.material);
+   }
+   materialOwners.add(mesh.material);
+  }
   if(this.cfg.family==='ctp'){
    const clamp=this.findNode('ctp-drum-clamp');
    clamp.userData.installedMountVerified=false;
@@ -54,7 +64,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  }
  setExteriorOpen(on=true){
   super.setExteriorOpen(on);
-  for(const n of this.nodes)if(n.userData.functionalDiagramOnly)n.visible=!!on;
+  for(const n of this.nodes)if(n.userData.functionalDiagramOnly)n.visible=!!on&&n.userData.diagramEnabled!==false;
   for(const mesh of this.meshes)if(mesh.userData.coverMountedDetail)mesh.visible=!this.exteriorOpen;
   if(['PDS','UTILITY'].includes(this.cfg.machine.area))for(const mesh of this.meshes)if(mesh.userData.coverMountedDetail)mesh.visible=!this.exteriorOpen;
   this.restoreReferenceVisibility();
@@ -62,7 +72,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  }
  setLow(on){
   super.setLow(on);
-  for(const n of this.nodes)if(n.userData.functionalDiagramOnly)n.visible=this.exteriorOpen;
+  for(const n of this.nodes)if(n.userData.functionalDiagramOnly)n.visible=this.exteriorOpen&&n.userData.diagramEnabled!==false;
   if(this.exteriorOpen)for(const mesh of this.meshes)if(mesh.userData.coverMountedDetail)mesh.visible=false;
   if(['PDS','UTILITY'].includes(this.cfg.machine.area)){
    // Keep the actual family-process mechanism readable when the shell is opened
@@ -87,13 +97,13 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   this.root.userData.equipmentBoundaryRevision='V341';
  }
  enforceV341EquipmentBoundary(){
-  if(!this.exteriorOpen)for(const n of this.nodes)if(n.userData.functionalDiagramOnly)n.visible=false;
+  for(const n of this.nodes)if(n.userData.functionalDiagramOnly&&(!this.exteriorOpen||n.userData.diagramEnabled===false))n.visible=false;
  }
  restoreReferenceVisibility(){
   for(const mesh of this.meshes)if(mesh.userData.restVisible===false)mesh.visible=false;
  }
  isolate(part,on=true){super.isolate(part,on);this.restoreReferenceVisibility();this.enforceV341EquipmentBoundary();}
- showOnly(parts=[],on=true){super.showOnly(parts,on);this.restoreReferenceVisibility();this.enforceV341EquipmentBoundary();}
+ showOnly(parts=[],on=true){for(const n of this.nodes)n.visible=!on||!parts.length||parts.some(p=>this.contains(p,n)||this.contains(n,p));this.restoreReferenceVisibility();this.enforceV341EquipmentBoundary();}
  reset(){super.reset();this.restoreReferenceVisibility();this.enforceV341EquipmentBoundary();}
  dispose(){super.dispose();this.referenceDynamicMaterials?.forEach(m=>m.dispose());}
  motion(mesh,type='spin',axis='z',rate=4,amp=.08,phase=0,stage=null){
@@ -1135,12 +1145,12 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    const bed=this.findNode('zund-vacuum-bed');
    if(bed){
     this.tag(this.box(bed,[5.18,.055,2.30],[0,.62,0],'body',.006),'vacuum-cutting-surface','ZUND_G3_S3_FAMILY');
-    for(let x=-2.25;x<=2.25;x+=.45)for(let z=-.90;z<=.90;z+=.45){const port=this.cyl(bed,.010,.015,[x,.655,z],'dark','y');this.tag(port,'vacuum-port-reference','ZUND_G3_S3_FAMILY');}
+    for(let x=-2.25;x<=2.25;x+=.45)for(let z=-.90;z<=.90;z+=.45){const port=this.cyl(bed,.010,.015,[x,.640,z],'dark','y');this.tag(port,'vacuum-port-reference','ZUND_G3_S3_FAMILY');}
    }
    const zones=this.findNode('zund-vacuum-zones');
    if(zones){
     zones.userData.individualZoneTopologyVerified=false;
-    for(const x of [-1.75,-.85,0,.85,1.75])this.tag(this.box(zones,[.015,.018,2.15],[x,.65,0],'accent',.001),'vacuum-zone-divider-reference','ZUND_FAMILY_REFERENCE');
+    for(const x of [-1.75,-.85,0,.85,1.75])this.tag(this.box(zones,[.015,.002,2.15],[x,.6465,0],'accent',.001),'vacuum-zone-divider-reference','ZUND_FAMILY_REFERENCE');
     for(const x of [-1.45,-.48,.48,1.45]){const valve=this.box(zones,[.08,.08,.12],[x,.46,1.04],'accent',.006);this.tag(valve,'vacuum-zone-valve-reference','ZUND_FAMILY_REFERENCE');valve.userData.installedZoneTopologyVerified=false;}
     const manifold=this.cyl(zones,.035,3.70,[0,.40,1.05],'steel','x');this.tag(manifold,'zund-vacuum-distribution-manifold-reference','ZUND_VACUUM_FUNCTIONAL_REFERENCE');
     for(const x of [-1.45,-.48,.48,1.45]){const branch=this.cyl(zones,.014,.40,[x,.47,.86],'steel','z');this.tag(branch,'zund-vacuum-zone-branch-reference','ZUND_VACUUM_FUNCTIONAL_REFERENCE');}
@@ -2341,8 +2351,12 @@ export class ReferenceProcessSimulation{
   else if(p<.40){const t=smooth((p-.16)/.24);x=lerp(-.48,-.12,t);y=.78-.22*Math.sin(Math.PI*t);rz=.08*Math.sin(Math.PI*t);}
   else if(p<.72){const t=smooth((p-.40)/.32);x=lerp(-.12,.34,t);y=.80;}
   else if(p<.86){const t=smooth((p-.72)/.14);x=lerp(.34,.58,t);y=.78-.16*Math.sin(Math.PI*t);rz=-.07*Math.sin(Math.PI*t);}
-  else {const t=smooth((p-.86)/.14);x=lerp(.58,.90,t);y=lerp(.76,.56,t);}
-  m.position.set(x,y,0);m.rotation.set(0,0,rz);m.visible=this.active;
+  else {const t=smooth((p-.86)/.10);x=lerp(.58,.90,t);y=lerp(.76,.527,t);}
+  // A rigid rectangle passing through the supply roll is not a verified
+  // flexible film path. Show only the cut-output handoff reference; retain
+  // semantic loading/exposure interlocks without inventing bend geometry.
+  m.position.set(x,y,0);m.rotation.set(0,0,rz);m.visible=this.active&&p>=.86;
+  m.userData.loadingPathBoundary='BLOCKED_EVIDENCE__FLEXIBLE_FILM_ROUTE_NOT_RECONSTRUCTED';
   const spin=(obj,rate,on)=>{if(!obj)return;obj.quaternion.copy(obj.userData.imagesetterRestQuaternion||new THREE.Quaternion());if(on)obj.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(AXIS.y,this.elapsed*rate));};
   spin(i.supplyRoll,2.1,p<.86);spin(i.capstan,6.2,s.capstanEncoder);spin(i.gravityRoller,4.4,p>=.16&&p<.80);spin(i.capstanMotor,6.2,s.capstanEncoder);
   if(i.polygon){i.polygon.quaternion.copy(i.polygon.userData.imagesetterRestQuaternion||new THREE.Quaternion());if(s.polygonAtSpeed||s.exposure)i.polygon.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(AXIS.y,this.elapsed*18));}
@@ -2356,6 +2370,8 @@ export class ReferenceProcessSimulation{
    beam,carriage,
    beamRest:beam?.position.clone()||new THREE.Vector3(),
    carriageRest:carriage?.position.clone()||new THREE.Vector3(),
+   slots:this.template.findNode('zund-module-slots'),
+   slotsRest:this.template.findNode('zund-module-slots')?.position.clone()||new THREE.Vector3(),
    installedToolPackageVerified:this.template.root.userData.installedToolPackageVerified===true,
    installedIccVerified:this.template.root.userData.installedIccVerified===true,
    installedItiVerified:this.template.root.userData.installedItiVerified===true,
@@ -2380,10 +2396,11 @@ export class ReferenceProcessSimulation{
  updateZund(){
   if(!this.zund)return;
   const s=this.zundStatus(),z=this.zund;
-  if(z.beam)z.beam.position.copy(z.beamRest);if(z.carriage)z.carriage.position.copy(z.carriageRest);
+  if(z.beam)z.beam.position.copy(z.beamRest);if(z.carriage)z.carriage.position.copy(z.carriageRest);if(z.slots)z.slots.position.copy(z.slotsRest);
   if(s.axisMotion){
    const q=THREE.MathUtils.clamp((s.p-.22)/.60,0,1),pts=z.pathPoints,n=pts.length-1,scaled=q*n,k=Math.min(n-1,Math.floor(scaled)),t=scaled-k,a=pts[k],b=pts[k+1],x=THREE.MathUtils.lerp(a[0],b[0],t),zz=THREE.MathUtils.lerp(a[1],b[1],t);
    if(z.beam)z.beam.position.x+=x;if(z.carriage){z.carriage.position.x+=x;z.carriage.position.z+=zz;}
+   if(z.slots){z.slots.position.x+=x;z.slots.position.z+=zz;}
   }
   if(this.zundMaterial){this.zundMaterial.visible=this.active;this.zundMaterial.position.y=this.zundMaterialRestY;}
   z.vacuumHoldActive=s.vacuumHold;z.vacuumControlActive=s.vacuumHold;z.vacuumMode=s.vacuumHold?'HOLD':'RELEASE';z.vacuumContactActive=s.vacuumHold;z.toolActionActive=s.axisMotion&&z.installedToolPackageVerified===true;z.toolClearanceMaintained=!z.toolActionActive;
@@ -2397,7 +2414,9 @@ export class ReferenceProcessSimulation{
   this.compressorOilMaterial=new THREE.MeshStandardMaterial({color:0xc18b47,roughness:.42,metalness:0,transparent:true,opacity:.80});
   this.compressorCondensateMaterial=new THREE.MeshStandardMaterial({color:0x68a9bf,roughness:.24,metalness:0,transparent:true,opacity:.76});
   const particle=(kind,i,count,material)=>{
-   const mesh=new THREE.Mesh(this.compressorParticleGeometry,material);mesh.name='COMPRESSOR-'+kind.toUpperCase()+'-PARTICLE-'+(i+1);mesh.visible=false;mesh.userData={flowReference:true,flowKind:kind,installedRouteVerified:false};this.root.add(mesh);
+   const mesh=new THREE.Mesh(this.compressorParticleGeometry,material);mesh.name='COMPRESSOR-'+kind.toUpperCase()+'-PARTICLE-'+(i+1);mesh.visible=false;mesh.userData={flowReference:true,flowKind:kind,installedRouteVerified:false};
+   const site=this.template.findNode('compressor-air-distribution');
+   ((kind==='distribution'||kind==='condensate'&&i%3!==1)?site||this.root:this.root).add(mesh);
    this.compressorParticles.push({mesh,kind,phase:i/count,lane:(i%3)-1,branch:i%3});
   };
   for(let i=0;i<26;i++)particle('air',i,26,i<6?this.compressorAmbientMaterial:this.compressorAirMaterial);
@@ -2409,12 +2428,15 @@ export class ReferenceProcessSimulation{
   const p=this.active?(this.elapsed%this.cycle)/this.cycle:0,idx=Math.min(this.stages.length-1,Math.floor(p*this.stages.length));
   return {p,idx};
  }
+ compressorParticleVisible(item){for(let n=item.mesh;n;n=n.parent)if(!n.visible)return false;return true;}
  updateCompressor(){
   if(!this.compressor)return;
   const c=this.compressor,s=this.compressorStatus(),lerp=THREE.MathUtils.lerp,smooth=v=>{v=THREE.MathUtils.clamp(v,0,1);return v*v*(3-2*v);};
   for(const item of this.compressorParticles){
    const q=(s.p+item.phase)%1,m=item.mesh,lane=item.lane*.07;
    if(item.kind==='air'){
+    const parent=q>=.58?this.template.findNode('compressor-air-distribution')||this.root:this.root;
+    if(m.parent!==parent)parent.add(m);
     m.material=q<.12?this.compressorAmbientMaterial:this.compressorAirMaterial;
     if(q<.12){const t=smooth(q/.12);m.position.set(lerp(-1.42,-1.02,t),.78+lane,0);}
     else if(q<.28){const t=smooth((q-.12)/.16),spin=t*Math.PI*5+item.phase*Math.PI*2;m.position.set(lerp(-1.02,-.28,t),.74+Math.sin(spin)*.085+lane*.35,Math.cos(spin)*.105);}
@@ -2588,7 +2610,7 @@ export class ReferenceProcessSimulation{
   const progress=this.active?(this.elapsed%this.cycle)/this.cycle:0,blankerState=this.family==='blanker'?this.blankerStatus():null,collatorState=this.family==='collator'?this.collatorStatus():null,imagesetterState=this.family==='imagesetter'?this.imagesetterStatus():null,zundState=this.family==='zund'?this.zundStatus():null,ctpState=this.family==='ctp'?this.ctpStatus():null,compressorState=this.family==='compressor'?this.compressorStatus():null,ahuState=this.family==='ahu'?this.ahuStatus():null,folderState=this.family==='folder'?this.folderStatus():null,idx=blankerState?.idx??collatorState?.idx??imagesetterState?.idx??zundState?.idx??ctpState?.idx??compressorState?.idx??ahuState?.idx??folderState?.idx??this.stageIndex();
   return {available:!this.blocked,blocked:this.blocked,blockedReason:this.blockedReason,referenceModel:true,evidenceGrade:this.template.cfg.evidence.grade,geometryStatus:this.template.cfg.evidence.geometry,
    active:this.active,running:this.running,paused:this.paused,speed:this.speed,stage:this.blocked?'Simulasi belum tervalidasi':(this.stages[idx]||'Reference process'),completed:this.completed,progress,
-   sheetsVisible:this.family==='collator'?this.collatorSheets.filter(s=>s.mesh.visible).length:this.family==='imagesetter'?(this.imagesetterMedia?.visible?1:0):this.family==='ctp'?((this.ctpFlatPlate?.visible||this.ctpWrappedPlate?.visible)?1:0):this.family==='zund'?(this.zundMaterial?.visible?1:0):this.family==='folder'?(this.folderBlank?.visible?1:0):(this.processPiece?.visible?1:0),pileSheetsVisible:0,airflowParticleCount:this.family==='ahu'?this.ahuParticles.filter(p=>p.mesh.visible).length:this.family==='compressor'?this.compressorParticles.filter(p=>['air','distribution'].includes(p.kind)&&p.mesh.visible).length:0,supplyAirflowParticleCount:this.family==='ahu'?this.ahuParticles.filter(p=>p.kind==='supply'&&p.mesh.visible).length:0,returnAirflowParticleCount:this.family==='ahu'?this.ahuParticles.filter(p=>p.kind==='return'&&p.mesh.visible).length:0,outdoorAirflowParticleCount:this.family==='ahu'?this.ahuParticles.filter(p=>p.kind==='outdoor'&&p.mesh.visible).length:0,compressedAirParticleCount:this.family==='compressor'?this.compressorParticles.filter(p=>p.kind==='air'&&p.mesh.visible).length:0,distributionAirParticleCount:this.family==='compressor'?this.compressorParticles.filter(p=>p.kind==='distribution'&&p.mesh.visible).length:0,oilFlowParticleCount:this.family==='compressor'?this.compressorParticles.filter(p=>p.kind==='oil'&&p.mesh.visible).length:0,condensateParticleCount:this.family==='compressor'?this.compressorParticles.filter(p=>p.kind==='condensate'&&p.mesh.visible).length:0,rotorCount:this.motions.filter(x=>x.motion.type==='spin').length,
+   sheetsVisible:this.family==='collator'?this.collatorSheets.filter(s=>s.mesh.visible).length:this.family==='imagesetter'?(this.imagesetterMedia?.visible?1:0):this.family==='ctp'?((this.ctpFlatPlate?.visible||this.ctpWrappedPlate?.visible)?1:0):this.family==='zund'?(this.zundMaterial?.visible?1:0):this.family==='folder'?(this.folderBlank?.visible?1:0):(this.processPiece?.visible?1:0),pileSheetsVisible:0,airflowParticleCount:this.family==='ahu'?this.ahuParticles.filter(p=>p.mesh.visible).length:this.family==='compressor'?this.compressorParticles.filter(p=>['air','distribution'].includes(p.kind)&&this.compressorParticleVisible(p)).length:0,supplyAirflowParticleCount:this.family==='ahu'?this.ahuParticles.filter(p=>p.kind==='supply'&&p.mesh.visible).length:0,returnAirflowParticleCount:this.family==='ahu'?this.ahuParticles.filter(p=>p.kind==='return'&&p.mesh.visible).length:0,outdoorAirflowParticleCount:this.family==='ahu'?this.ahuParticles.filter(p=>p.kind==='outdoor'&&p.mesh.visible).length:0,compressedAirParticleCount:this.family==='compressor'?this.compressorParticles.filter(p=>p.kind==='air'&&this.compressorParticleVisible(p)).length:0,distributionAirParticleCount:this.family==='compressor'?this.compressorParticles.filter(p=>p.kind==='distribution'&&this.compressorParticleVisible(p)).length:0,oilFlowParticleCount:this.family==='compressor'?this.compressorParticles.filter(p=>p.kind==='oil'&&this.compressorParticleVisible(p)).length:0,condensateParticleCount:this.family==='compressor'?this.compressorParticles.filter(p=>p.kind==='condensate'&&this.compressorParticleVisible(p)).length:0,rotorCount:this.motions.filter(x=>x.motion.type==='spin').length,
    oscillatorCount:this.motions.filter(x=>x.motion.type!=='spin').length,mechanismCount:this.family==='blanker'?this.template.activeMeshes.length:this.family==='zund'?2:this.motions.length,inkFlowCount:0,uvLampCount:0,uvActive:false,pathVisible:this.pathVisible,inkFlowVisible:this.inkFlowVisible,
    platformIndexing:blankerState?.indexing??false,blankerXServoActive:this.family==='blanker'?(this.blanker?.xServoActive??false):false,blankerYServoActive:this.family==='blanker'?(this.blanker?.yServoActive??false):false,blankerHydraulicPumpActive:this.family==='blanker'?(this.blanker?.hydraulicPumpActive??false):false,blankerHydraulicValvePressActive:this.family==='blanker'?(this.blanker?.hydraulicValvePressActive??false):false,blankerHydraulicValveReturnActive:this.family==='blanker'?(this.blanker?.hydraulicValveReturnActive??false):false,blankerPositionFeedbackActive:this.family==='blanker'?(this.blanker?.positionFeedbackActive??false):false,blankerLoading:blankerState?.loading??false,blankerPlatformAtPress:blankerState?.platformAtPress??false,blankerHydraulicPressureActive:blankerState?.hydraulicPressure??false,blankerSeparationActive:blankerState?.separating??false,blankerReturning:blankerState?.returning??false,blankingHeadPressing:blankerState?.pressing??false,mechanicalInterlockSafe:blankerState?.interlockSafe??true,
    modeledBinCount:collatorState?.modeledBinCount??null,installedBinCountVerified:collatorState?.installedBinCountVerified??null,activeBinFeeds:this.collator?.activeFeedCount??0,activeFeedBinIndexes:this.collator?.activeFeedBins??[],collatorSuctionBlowerActive:this.family==='collator'?(this.collator?.suctionBlowerActive??false):false,collatorSeparationAirControlActive:this.family==='collator'?(this.collator?.separationAirControlActive??false):false,airSeparationActive:this.family==='collator'?(this.collator?.airSeparationActive??false):false,rotorPickupActive:this.family==='collator'?(this.collator?.rotorPickupActive??false):false,doubleFeedCheckActive:this.family==='collator'?(this.collator?.doubleFeedCheckActive??false):false,gatherTransportActive:this.family==='collator'?(this.collator?.gatherTransportActive??false):false,completedSheetsInSet:this.collator?.completedSheetsInSet??0,
@@ -2599,13 +2621,13 @@ export class ReferenceProcessSimulation{
    cartonBlankGeometryIsSchematic:this.family==='folder'?(this.folder?.cartonBlankGeometryIsSchematic??true):null,alignmentActive:this.family==='folder'?(this.folder?.alignmentActive??false):false,preBreakActive:this.family==='folder'?(this.folder?.prebreakActive??false):false,foldingActive:folderState?.folding??false,glueZoneActive:folderState?.gluing??false,finalFoldActive:this.family==='folder'?(this.folder?.finalFoldActive??false):false,compressionActive:folderState?.compressing??false,folderDeliveryActive:this.family==='folder'?(this.folder?.deliveryActive??false):false,folderFeederDriveActive:this.family==='folder'?(this.folder?.feederDriveActive??false):false,folderFoldDriveActive:this.family==='folder'?(this.folder?.foldDriveActive??false):false,folderCompressionDriveActive:this.family==='folder'?(this.folder?.compressionDriveActive??false):false,folderDeliveryDriveActive:this.family==='folder'?(this.folder?.deliveryDriveActive??false):false,folderBeltContactActive:this.family==='folder'?(this.folder?.beltContactActive??false):false,folderMaterialContactZone:this.family==='folder'?(this.folder?.materialContactZone??null):null,crashLockInstalledVerified:this.family==='folder'?(this.folder?.installedCrashLockVerified??false):null,fourSixCornerInstalledVerified:this.family==='folder'?(this.folder?.installedFourSixCornerVerified??false):null,glueApplicatorTypeVerified:this.family==='folder'?(this.folder?.glueApplicatorTypeVerified??false):null,
    simulationBoundary:this.family==='blanker'?'QF_LQF_1080_FAMILY_PROCESS_ONLY':this.family==='collator'?'MULTI_VENDOR_SUCTION_COLLATOR_PROCESS_ONLY__TEN_BIN_REFERENCE_NOT_INSTALLATION_CLAIM':this.family==='ctp'?'SUPRASETTER_EXTERNAL_DRUM_LOAD_CLAMP_IMAGE_UNLOAD__MODEL_OPTIONS_NOT_INFERRED':this.family==='imagesetter'?'SCREEN_FTR_KATANA_COMMON_PROCESS_ONLY__PUNCH_PROCESSOR_MODEL_OPTIONS_NOT_INFERRED':this.family==='zund'?'ZUND_XY_PLATFORM_MOTION_ONLY__INSTALLED_TOOL_CAMERA_INIT_PACKAGE_NOT_INFERRED':this.family==='compressor'?'BRAND_FAMILY_OIL_INJECTED_SCREW_AIRFLOW__LOCAL_RING_MAIN_FUNCTIONAL_REFERENCE__PLANT_ROUTE_UNVERIFIED':this.family==='ahu'?(this.ahu?.sansin?'SANSIN_NES_YZKJ_INDOOR_AIR_PATH_FAMILY_REFERENCE__MODEL_CAPACITY_UNVERIFIED':'EUROVENT_CANONICAL_AHU_AIR_PATH_REFERENCE__SECTION_ORDER_DIRECTION_UNVERIFIED'):this.family==='folder'?'FGM2_MULTI_VENDOR_COMMON_FOLD_GLUE_PROCESS_ONLY__BOX_STYLE_GLUE_HARDWARE_OPTIONS_NOT_INFERRED':null,referenceBoundary:this.template.cfg.profile?.unknowns||[]};
  }
- start(){if(this.blocked){this.active=false;this.running=false;this.paused=false;this.onUpdate?.(this.state());return this.state();}this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;if(this.processPiece)this.processPiece.visible=true;for(const s of this.collatorSheets)s.mesh.visible=false;if(this.imagesetterMedia)this.imagesetterMedia.visible=true;if(this.ctpFlatPlate)this.ctpFlatPlate.visible=true;if(this.ctpWrappedPlate)this.ctpWrappedPlate.visible=false;if(this.zundMaterial)this.zundMaterial.visible=true;for(const p of this.compressorParticles)p.mesh.visible=p.kind!=='distribution'||this.pathVisible;for(const p of this.ahuParticles)p.mesh.visible=p.kind!=='return'||this.pathVisible;if(this.folderBlank)this.folderBlank.visible=true;this.resetMotion();if(this.family==='ctp')this.updateCTP();for(const s of this.collatorSheets)s.mesh.visible=false;this.onUpdate?.(this.state());return this.state();}
+ start(){if(this.blocked){this.active=false;this.running=false;this.paused=false;this.onUpdate?.(this.state());return this.state();}this.active=true;this.running=true;this.paused=false;this.elapsed=0;this.lastNow=null;this.completed=0;if(this.processPiece)this.processPiece.visible=true;for(const s of this.collatorSheets)s.mesh.visible=false;if(this.imagesetterMedia)this.imagesetterMedia.visible=true;if(this.ctpFlatPlate)this.ctpFlatPlate.visible=true;if(this.ctpWrappedPlate)this.ctpWrappedPlate.visible=false;if(this.zundMaterial)this.zundMaterial.visible=true;for(const p of this.compressorParticles)p.mesh.visible=p.kind!=='distribution'||this.pathVisible;for(const p of this.ahuParticles)p.mesh.visible=p.kind!=='return'||this.pathVisible;if(this.folderBlank)this.folderBlank.visible=true;this.resetMotion();if(this.family==='ctp')this.updateCTP();if(this.family==='imagesetter')this.updateImagesetter();if(this.family==='compressor')this.updateCompressor();for(const s of this.collatorSheets)s.mesh.visible=false;this.onUpdate?.(this.state());return this.state();}
  pause(){this.running=false;this.paused=this.active;this.onUpdate?.(this.state());return this.state();}
  resume(){if(this.active){this.running=true;this.paused=false;this.lastNow=null;}this.onUpdate?.(this.state());return this.state();}
  setSpeed(v){this.speed=Math.max(.25,Math.min(3,Number(v)||1));return this.state();}
  setPathVisible(v){
   this.pathVisible=!!v;
-  if(this.family==='compressor'){const g=this.template.findNode('compressor-air-distribution');if(g)g.visible=this.pathVisible;}
+  if(this.family==='compressor'){const g=this.template.findNode('compressor-air-distribution');if(g){g.userData.diagramEnabled=this.pathVisible;g.visible=this.pathVisible&&this.template.exteriorOpen;}}
   if(this.family==='ahu'){const g=this.template.findNode(this.ahu?.sansin?'sansin-air-distribution':'ahu-air-distribution');if(g)g.visible=this.pathVisible;}
   for(const item of this.compressorParticles)if(item.kind==='distribution')item.mesh.visible=this.active&&this.pathVisible;
   for(const item of this.ahuParticles)if(item.kind==='return')item.mesh.visible=this.active&&this.pathVisible;
@@ -2613,6 +2635,7 @@ export class ReferenceProcessSimulation{
  }
  setInkFlowVisible(){this.inkFlowVisible=false;return this.state();}
  resetMotion(){
+  if(this.zund?.slots)this.zund.slots.position.copy(this.zund.slotsRest);
   if(this.blanker)for(const id of ['qf100-pin-board','qf100-tooling-pins','qf100-tooling-lock']){const n=this.template.findNode(id);if(n?.userData.blankerStrokeRest)n.position.copy(n.userData.blankerStrokeRest);}
   if(this.blanker?.ram)this.blanker.ram.traverse(m=>{if(m.userData.blankerStrokeRest)m.position.copy(m.userData.blankerStrokeRest);});
   if(this.blanker)for(const mesh of this.template.activeMeshes)if(mesh.userData.motionRestQuaternion)mesh.quaternion.copy(mesh.userData.motionRestQuaternion);
