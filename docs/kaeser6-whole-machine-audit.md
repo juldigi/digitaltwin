@@ -1,5 +1,7 @@
 # BMJ-MCH-0032 KAESER No.6 audit
 
+Closure: COMPLETE (audit processed with BLOCKED_EVIDENCE retained). Implementation 08f2df9612e21315d17f23945b0e425edd1e3b7f passed 1617 tests/build and all three workflow gates; production module/chunk hashes match. See batch30-release.md for workflow/hash evidence. This supersedes RELEASE_PENDING below; installed configuration and visual3D remain unverified.
+
 2026-10-14; base main 04927784da4b3b7a985f6e19a69c4c7c0f78a8cc, closure gates SUCCESS. No.6 audited as a separate registry asset, not declared the same installation as No.4/No.8.
 
 Evidence: registry row 0032, taxonomy and family model source, photo manifest (zero identified installed photos). Library utility registry read: exactModelVerified=false/asBuilt=false; TALL_SERVICE_CABINET variant does not verify installed geometry. OEM belt/direct-drive sources reviewed as family-only: https://id.kaeser.com/products/rotary-screw-compressors/rotary-screw-compressors-with-fluid-cooling/ and https://id.kaeser.com/products/rotary-screw-compressors/rotary-screw-compressors-with-fluid-cooling/with-1-to-1-direct-drive/.

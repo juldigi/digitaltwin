@@ -1,5 +1,7 @@
 # BMJ-MCH-0030 Atlas Copco No.3 audit
 
+Closure: COMPLETE (audit processed with BLOCKED_EVIDENCE retained). Implementation 08f2df9612e21315d17f23945b0e425edd1e3b7f passed 1617 tests/build and all three workflow gates; production module/chunk hashes match. See batch30-release.md for workflow/hash evidence. This supersedes RELEASE_PENDING below; installed configuration and visual3D remain unverified.
+
 2026-10-14. Base main 04927784da4b3b7a985f6e19a69c4c7c0f78a8cc; closure gates 38562094456 / 38562094756 / 38562094669 SUCCESS before new edits. Machine identity and transforms preserved; exact model/kW/VSD/Full Feature remain unverified. No dimensions or hardware assigned from another Atlas machine.
 
 Evidence: registry row 0030, taxonomy-compressors.js, mechanical-profiles.js, reference-machines.js; fleet photo manifest has zero identified installed photos. Library utility-asset-registry-v3.js (libfile_06fb00d5f7c88191b99d012bed2fbbf2) was read: asBuilt=false and exactModelVerified=false; its visualVariant is not field evidence. Fresh OEM family reference: https://www.atlascopco.com/en-us/compressors/products/air-compressor/rotary-screw-compressor/ga-series. Family oil-flow explanation: https://www.atlascopco.com/content/dam/atlas-copco/local-countries/japan/documents/ct-brochures/product-catalogues/vsd-plus/%E6%B5%B7%E5%A4%96%E5%90%91%E3%81%91%20GA%20180-315%20%28VSD%2B%29_%E8%8B%B1%E8%AA%9E_.pdf. Neither identifies No.3's installed configuration.

@@ -1,5 +1,7 @@
 # BMJ-MCH-0031 KAESER No.4 audit
 
+Closure: COMPLETE (audit processed with BLOCKED_EVIDENCE retained). Implementation 08f2df9612e21315d17f23945b0e425edd1e3b7f passed 1617 tests/build and all three workflow gates; production module/chunk hashes match. See batch30-release.md for workflow/hash evidence. This supersedes RELEASE_PENDING below; installed configuration and visual3D remain unverified.
+
 2026-10-14; base main 04927784da4b3b7a985f6e19a69c4c7c0f78a8cc, previous ledger gates SUCCESS. No.4 retains its own asset/brand/taxonomy and orientation; not assumed identical to No.6 or No.8.
 
 Evidence: registry, taxonomy-compressors.js, reference-machines.js and photo manifest (zero identity-matched installed images). Library utility-asset-registry-v3.js read, exactModelVerified=false/asBuilt=false; its named facade variant is a reference, not a photo/manual. Fresh OEM sources reviewed: https://id.kaeser.com/products/rotary-screw-compressors/rotary-screw-compressors-with-fluid-cooling/ and https://id.kaeser.com/products/rotary-screw-compressors/rotary-screw-compressors-with-fluid-cooling/with-1-to-1-direct-drive/. These distinguish belt and 1:1 direct families; no drive choice or controller generation assigned to No.4.
