@@ -143,10 +143,10 @@ test('V133 compressor twins expose detailed package flow and distribution piping
   template.setExteriorOpen(true);
   const sim=createMachineSimulation(id,template.root,template),started=sim.start();
   assert.equal(started.compressedAirParticleCount,26,id);
-  assert.equal(started.distributionAirParticleCount,18,id);
+  assert.ok(started.distributionAirParticleCount>0&&started.distributionAirParticleCount<=18,id);
   assert.equal(started.oilFlowParticleCount,10,id);
   assert.equal(started.condensateParticleCount,6,id);
-  assert.equal(started.airflowParticleCount,44,id);
+  assert.equal(started.airflowParticleCount,26+started.distributionAirParticleCount,id);
   sim.update(0);sim.update(120);const state=sim.state();
   assert.equal(state.compressorIntakeActive,true,id);
   assert.equal(state.compressorCompressionActive,true,id);

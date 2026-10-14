@@ -1,0 +1,13 @@
+# Batch 0030–0032 audit / release ledger
+
+2026-10-14. Base main 04927784da4b3b7a985f6e19a69c4c7c0f78a8cc. Previous closure workflows 38562094456, 38562094756 and 38562094669 successful before changes. Isolated checkout; mode AUDIT_THREE_MACHINES_THEN_FIX_VERIFY_DEPLOY / target3; no force push or competing update.
+
+Separate whole-machine reports: atlas3-whole-machine-audit.md, kaeser4-whole-machine-audit.md, kaeser6-whole-machine-audit.md. Every real functional section inspected in order; independent supported defects fixed. Unknown installed model/configuration/dimensions/routes and rotor-profile clearance remain BLOCKED_EVIDENCE. No new hardware, no installed drive choice, no power/pressure rating inferred.
+
+Pass1: retired cover resurrection (7 per machine), oil-route 100 mm jump, diagonal/off-centre distribution paths. Pass2: remaining package air handoff continuity, unsupported upstream connectors, ring/receiver parent/explode consistency, material/descendant inspection, both mode orders and lifecycle/taxonomy checks. Source fixes shared across seven compressors; full audits only selected 0030/0031/0032. Prior machines retained, with shared regression coverage.
+
+Validation: 48 initial focused tests pass; first full suite 1616/1616 pass. Further second-pass finding: nine grille bars per selected machine floated 26.5 mm; moved to contact the existing top-panel triangles without resizing bars/cabinet, 4 final focused tests pass. Full final-source regression repeated for this justified code delta. Actual pipe triangle raycasts test 24 mm-radius markers with >1 mm clearance on sampled straight segments. Oil/air handoff error below 0.01 mm at tested non-recycling boundaries. Final factory bake: 41 assets / 19 unidentified / 2851404 bytes (previous2918300; duplicate covers retired and grille mounts corrected, not machine resizing). Only bake chunks12/13 changed; factory/detail source parity retained. Visual 3D not verified; fallback/runtime identity checks do not prove pixels.
+
+RELEASE_PENDING / IN_PROGRESS until tests/build/pipeline/production verification. Cursor stays0030. Next batch after closure: 0033 SWAN No.7 / 0034 KAESER No.8 / 0035 Atlas Copco No.9. Verify closure ledger's own gate before new audit.
+
+Final-source validation: 1617/1617 tests PASS, zero failures/skips (292928 ms). Build PASS, 41 machines / 19 unidentified / 2851404 bytes. git diff --check PASS. Production browser identity check confirms 0030 Atlas No.3 and 0031 KAESER No.4; requested 3D fell back to 2D in this browser, so visual3DVerified=false. No pixel-level clearance approval inferred. Implementation release remains pending pipeline and production source verification.

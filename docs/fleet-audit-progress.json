@@ -7,21 +7,22 @@
   "mode": "AUDIT_THREE_MACHINES_THEN_FIX_VERIFY_DEPLOY",
   "batchTargetMachines": 3,
   "batchMachineIds": [
-    "BMJ-MCH-0027",
-    "BMJ-MCH-0028",
-    "BMJ-MCH-0029"
+    "BMJ-MCH-0030",
+    "BMJ-MCH-0031",
+    "BMJ-MCH-0032"
   ],
-  "batchStatus": "COMPLETE",
-  "batchReleaseStatus": "VERIFIED",
-  "batchReleaseReport": "docs/batch27-release.md",
+  "batchStatus": "RELEASE_PENDING",
+  "batchReleaseStatus": "RELEASE_PENDING",
+  "batchReleaseReport": "docs/batch30-release.md",
   "batchValidation": {
-    "focusedTests": 51,
-    "fullTests": 1613,
+    "initialFocusedTests": 48,
+    "finalFocusedTests": 4,
+    "fullTests": 1617,
     "buildMachines": 41,
-    "bundleBytes": 2918300,
+    "bundleBytes": 2851404,
     "visual3DVerified": false
   },
-  "status": "IN_PROGRESS",
+  "status": "RELEASE_PENDING",
   "cursor": {
     "machineId": "BMJ-MCH-0030",
     "partIndex": 0
@@ -2218,27 +2219,201 @@
       "name": "COMPRESSOR ATLAS COPCO NO.3",
       "model": null,
       "area": "UTILITY",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {
+          "part": "Intake filter and inlet load-unload",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/atlas3-whole-machine-audit.md",
+          "unknown": "Installed model/options/dimensions, rotor profile and actual fluid routes not verified; independent supported corrections and second pass documented"
+        },
+        {
+          "part": "Motor coupling and airend",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/atlas3-whole-machine-audit.md",
+          "unknown": "Installed model/options/dimensions, rotor profile and actual fluid routes not verified; independent supported corrections and second pass documented"
+        },
+        {
+          "part": "Air/oil separation and MPV/check",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/atlas3-whole-machine-audit.md",
+          "unknown": "Installed model/options/dimensions, rotor profile and actual fluid routes not verified; independent supported corrections and second pass documented"
+        },
+        {
+          "part": "Oil circuit and cooling",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/atlas3-whole-machine-audit.md",
+          "unknown": "Installed model/options/dimensions, rotor profile and actual fluid routes not verified; independent supported corrections and second pass documented"
+        },
+        {
+          "part": "Aftercooler condensate and discharge",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/atlas3-whole-machine-audit.md",
+          "unknown": "Installed model/options/dimensions, rotor profile and actual fluid routes not verified; independent supported corrections and second pass documented"
+        },
+        {
+          "part": "Receiver treatment and ring distribution",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/atlas3-whole-machine-audit.md",
+          "unknown": "Installed model/options/dimensions, rotor profile and actual fluid routes not verified; independent supported corrections and second pass documented"
+        },
+        {
+          "part": "Cabinet mounting control and inspection",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/atlas3-whole-machine-audit.md",
+          "unknown": "Installed model/options/dimensions, rotor profile and actual fluid routes not verified; independent supported corrections and second pass documented"
+        }
+      ],
+      "reports": [
+        "docs/atlas3-whole-machine-audit.md"
+      ],
+      "auditProcessed": true,
+      "secondPass": "PASS_WITH_BLOCKED_EVIDENCE",
+      "releaseEvidence": {
+        "status": "RELEASE_PENDING",
+        "report": "docs/batch30-release.md"
+      }
     },
     {
       "machineId": "BMJ-MCH-0031",
       "name": "COMPRESSOR KAESER NO.4",
       "model": null,
       "area": "UTILITY",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {
+          "part": "Intake filter and inlet load-unload",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/kaeser4-whole-machine-audit.md",
+          "unknown": "Installed model/options/dimensions, rotor profile and actual fluid routes not verified; independent supported corrections and second pass documented"
+        },
+        {
+          "part": "Motor coupling and airend",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/kaeser4-whole-machine-audit.md",
+          "unknown": "Installed model/options/dimensions, rotor profile and actual fluid routes not verified; independent supported corrections and second pass documented"
+        },
+        {
+          "part": "Air/oil separation and MPV/check",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/kaeser4-whole-machine-audit.md",
+          "unknown": "Installed model/options/dimensions, rotor profile and actual fluid routes not verified; independent supported corrections and second pass documented"
+        },
+        {
+          "part": "Oil circuit and cooling",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/kaeser4-whole-machine-audit.md",
+          "unknown": "Installed model/options/dimensions, rotor profile and actual fluid routes not verified; independent supported corrections and second pass documented"
+        },
+        {
+          "part": "Aftercooler condensate and discharge",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/kaeser4-whole-machine-audit.md",
+          "unknown": "Installed model/options/dimensions, rotor profile and actual fluid routes not verified; independent supported corrections and second pass documented"
+        },
+        {
+          "part": "Receiver treatment and ring distribution",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/kaeser4-whole-machine-audit.md",
+          "unknown": "Installed model/options/dimensions, rotor profile and actual fluid routes not verified; independent supported corrections and second pass documented"
+        },
+        {
+          "part": "Cabinet mounting control and inspection",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/kaeser4-whole-machine-audit.md",
+          "unknown": "Installed model/options/dimensions, rotor profile and actual fluid routes not verified; independent supported corrections and second pass documented"
+        }
+      ],
+      "reports": [
+        "docs/kaeser4-whole-machine-audit.md"
+      ],
+      "auditProcessed": true,
+      "secondPass": "PASS_WITH_BLOCKED_EVIDENCE",
+      "releaseEvidence": {
+        "status": "RELEASE_PENDING",
+        "report": "docs/batch30-release.md"
+      }
     },
     {
       "machineId": "BMJ-MCH-0032",
       "name": "COMPRESSOR KAESER NO.6",
       "model": null,
       "area": "UTILITY",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {
+          "part": "Intake filter and inlet load-unload",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/kaeser6-whole-machine-audit.md",
+          "unknown": "Installed model/options/dimensions, rotor profile and actual fluid routes not verified; independent supported corrections and second pass documented"
+        },
+        {
+          "part": "Motor coupling and airend",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/kaeser6-whole-machine-audit.md",
+          "unknown": "Installed model/options/dimensions, rotor profile and actual fluid routes not verified; independent supported corrections and second pass documented"
+        },
+        {
+          "part": "Air/oil separation and MPV/check",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/kaeser6-whole-machine-audit.md",
+          "unknown": "Installed model/options/dimensions, rotor profile and actual fluid routes not verified; independent supported corrections and second pass documented"
+        },
+        {
+          "part": "Oil circuit and cooling",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/kaeser6-whole-machine-audit.md",
+          "unknown": "Installed model/options/dimensions, rotor profile and actual fluid routes not verified; independent supported corrections and second pass documented"
+        },
+        {
+          "part": "Aftercooler condensate and discharge",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/kaeser6-whole-machine-audit.md",
+          "unknown": "Installed model/options/dimensions, rotor profile and actual fluid routes not verified; independent supported corrections and second pass documented"
+        },
+        {
+          "part": "Receiver treatment and ring distribution",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/kaeser6-whole-machine-audit.md",
+          "unknown": "Installed model/options/dimensions, rotor profile and actual fluid routes not verified; independent supported corrections and second pass documented"
+        },
+        {
+          "part": "Cabinet mounting control and inspection",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/kaeser6-whole-machine-audit.md",
+          "unknown": "Installed model/options/dimensions, rotor profile and actual fluid routes not verified; independent supported corrections and second pass documented"
+        }
+      ],
+      "reports": [
+        "docs/kaeser6-whole-machine-audit.md"
+      ],
+      "auditProcessed": true,
+      "secondPass": "PASS_WITH_BLOCKED_EVIDENCE",
+      "releaseEvidence": {
+        "status": "RELEASE_PENDING",
+        "report": "docs/batch30-release.md"
+      }
     },
     {
       "machineId": "BMJ-MCH-0033",
@@ -2688,7 +2863,7 @@
       }
     }
   ],
-  "updatedAt": "2026-10-14T12:12:23.365Z",
+  "updatedAt": "2026-10-14T13:21:12.009Z",
   "lastAuditRelease": {
     "commit": "fe6a453d04a535c30eb96d806878c7a2f9eff128",
     "workflows": [
@@ -2709,8 +2884,18 @@
     ],
     "nextMachineId": "BMJ-MCH-0030"
   },
-  "batchRemainingWork": [],
+  "batchRemainingWork": [
+    "Verify implementation CI/frontend/Cloudflare and production source + baked chunks before advancing cursor",
+    "Visual 3D unavailable in browser; installed evidence unknowns retained"
+  ],
   "batchReleaseEvidence": {
+    "status": "RELEASE_PENDING",
+    "baseCommit": "04927784da4b3b7a985f6e19a69c4c7c0f78a8cc",
+    "report": "docs/batch30-release.md"
+  },
+  "ledgerGatePending": false,
+  "ledgerGateInstruction": "Verify workflow gates of the current closure ledger commit before starting batch 0030–0032. Code release fe6a453 already verified.",
+  "previousBatchReleaseEvidence": {
     "commit": "fe6a453d04a535c30eb96d806878c7a2f9eff128",
     "workflows": [
       38561263159,
@@ -2722,21 +2907,6 @@
     "productionSourceHashesMatched": true,
     "referenceModuleSHA256": "d26dd8ac30fb3f7c49b8243f6df98663eba8442b7ea7da04968cf8c0a83f4793",
     "visualFallbackVerified": true,
-    "visual3DVerified": false
-  },
-  "ledgerGatePending": true,
-  "ledgerGateInstruction": "Verify workflow gates of the current closure ledger commit before starting batch 0030–0032. Code release fe6a453 already verified.",
-  "previousBatchReleaseEvidence": {
-    "commit": "142554f404804d1e7ee111daf238e22bfd12bc01",
-    "workflows": [
-      38556107735,
-      38556107804,
-      38556108158
-    ],
-    "conclusion": "success",
-    "tests": 1609,
-    "productionSourceHashesMatched": true,
-    "simulationModuleSHA256": "7fa0f6cfa4f04e970d265ad4a02ce1aa2710442ec06f3b1c70109a6c064dccdd",
     "visual3DVerified": false
   }
 }

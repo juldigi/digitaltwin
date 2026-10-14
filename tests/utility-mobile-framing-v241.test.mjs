@@ -30,7 +30,8 @@ for(const [id,family,hiddenKind,localKind,maxWidth] of [
       assert.ok(particles.filter(part=>part.kind===hiddenKind).every(part=>!part.mesh.visible));
       assert.ok(particles.some(part=>part.kind===localKind&&part.mesh.visible));
       simulation.setPathVisible(true);
-      assert.ok(particles.filter(part=>part.kind===hiddenKind).every(part=>part.mesh.visible));
+      if(family==='compressor')assert.ok(particles.filter(part=>part.kind===hiddenKind).every(part=>part.mesh.visible===((simulation.compressorStatus().p+part.phase)%1>=.32)));
+      else assert.ok(particles.filter(part=>part.kind===hiddenKind).every(part=>part.mesh.visible));
     }finally{simulation.dispose();template.dispose();}
   });
 }

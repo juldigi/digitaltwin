@@ -445,7 +445,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
    serviceDoor(g,-.52,.88,-.84,.92,1.02,'body','compressor-main-service-door');
    serviceDoor(g,.52,.88,-.84,.84,1.02,'body','compressor-control-service-door');
    for(let y=.48;y<=1.28;y+=.10){const l=this.box(g,[.64,.022,.038],[-.58,y,.84],'dark',.002);mark(l,'compressor-intake-louvre-reference','BRAND_FAMILY_VISUAL');l.userData.coverMountedDetail=true;}
-   for(let x=-.45;x<=.45;x+=.11){const l=this.box(g,[.045,.022,.60],[x,1.66,.08],'dark',.002);mark(l,'compressor-top-exhaust-grille-reference','BRAND_FAMILY_VISUAL');l.userData.coverMountedDetail=true;}
+   for(let x=-.45;x<=.45;x+=.11){const l=this.box(g,[.045,.022,.60],[x,1.6335,.08],'dark',.002);mark(l,'compressor-top-exhaust-grille-reference','BRAND_FAMILY_VISUAL');l.userData.coverMountedDetail=true;}
    const stripe=this.cover(this.box(g,[.08,1.20,.025],[.16,.92,-.87],accent,.006));mark(stripe,'compressor-brand-family-accent-reference','BRAND_FAMILY_VISUAL',true);
    const ctrl=this.cover(this.box(g,[.34,.28,.030],[.70,1.13,-.88],'dark',.012));mark(ctrl,'compressor-controller-bezel-reference','BRAND_FAMILY_VISUAL',true);
    const display=this.cover(this.box(g,[.23,.13,.014],[.70,1.16,-.90],'glass',.008));mark(display,'compressor-controller-display-reference','BRAND_FAMILY_VISUAL');
@@ -1237,7 +1237,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
  }
  enrichCompressorCabinet(){
   const no=this.cfg.machine.no,swan=no===33,L=swan?2.10:2.55,H=1.48,D=1.30;
-  for(let i=1;i<=7;i++){const g=this.findNode('universal-module-'+i);if(g)for(const child of g.children)if(child.isMesh&&child.userData.exteriorCover){child.visible=false;child.userData.replacedByUnifiedCabinet=true;}}
+  for(let i=1;i<=7;i++){const g=this.findNode('universal-module-'+i);if(g)for(const child of g.children)if(child.isMesh&&child.userData.exteriorCover){child.visible=false;child.userData.restVisible=false;child.userData.replacedByUnifiedCabinet=true;}}
   const cab=this.group(this.root,'compressor-package-cabinet','Unified Compressor Cabinet',[0,0,0],[0,.16,0]);cab.userData.familyExteriorReference=true;
   const plinth=this.box(cab,[L+.12,.18,D+.08],[0,.12,0],'dark',.025);this.tag(plinth,'compressor-cabinet-plinth-reference','BRAND_FAMILY_VISUAL_REFERENCE');
   for(const x of [-L*.30,L*.30]){const pocket=this.box(cab,[.34,.09,D+.12],[x,.11,0],'dark',.006);this.tag(pocket,'compressor-fork-pocket-reference','INSTALLATION_VISUAL_REFERENCE');}
@@ -2416,7 +2416,8 @@ export class ReferenceProcessSimulation{
   const particle=(kind,i,count,material)=>{
    const mesh=new THREE.Mesh(this.compressorParticleGeometry,material);mesh.name='COMPRESSOR-'+kind.toUpperCase()+'-PARTICLE-'+(i+1);mesh.visible=false;mesh.userData={flowReference:true,flowKind:kind,installedRouteVerified:false};
    const site=this.template.findNode('compressor-air-distribution');
-   ((kind==='distribution'||kind==='condensate'&&i%3!==1)?site||this.root:this.root).add(mesh);
+   const diagramParent=kind==='distribution'?this.template.findNode('compressor-ring-main-reference'):kind==='condensate'&&i%3!==1?this.template.findNode('compressor-air-receiver-boundary'):null;
+   (diagramParent||((kind==='distribution'||kind==='condensate'&&i%3!==1)?site||this.root:this.root)).add(mesh);
    this.compressorParticles.push({mesh,kind,phase:i/count,lane:(i%3)-1,branch:i%3});
   };
   for(let i=0;i<26;i++)particle('air',i,26,i<6?this.compressorAmbientMaterial:this.compressorAirMaterial);
@@ -2439,32 +2440,36 @@ export class ReferenceProcessSimulation{
     if(m.parent!==parent)parent.add(m);
     m.material=q<.12?this.compressorAmbientMaterial:this.compressorAirMaterial;
     if(q<.12){const t=smooth(q/.12);m.position.set(lerp(-1.42,-1.02,t),.78+lane,0);}
-    else if(q<.28){const t=smooth((q-.12)/.16),spin=t*Math.PI*5+item.phase*Math.PI*2;m.position.set(lerp(-1.02,-.28,t),.74+Math.sin(spin)*.085+lane*.35,Math.cos(spin)*.105);}
-    else if(q<.45){const t=smooth((q-.28)/.17),spin=t*Math.PI*4+item.phase*Math.PI*2;m.position.set(lerp(-.28,.18,t),lerp(.74,.92,t)+Math.sin(spin)*.055+lane*.25,.10+Math.cos(spin)*.12);}
+    else if(q<.28){const t=smooth((q-.12)/.16),spin=t*Math.PI*5+item.phase*Math.PI*2,envelope=4*t*(1-t);m.position.set(lerp(-1.02,-.28,t),lerp(.78,.74,t)+lane+Math.sin(spin)*.085*envelope,Math.cos(spin)*.105*envelope);}
+    else if(q<.45){const t=smooth((q-.28)/.17),spin=t*Math.PI*4+item.phase*Math.PI*2,envelope=4*t*(1-t);m.position.set(lerp(-.28,.18,t),lerp(.74,.90,t)+lane+Math.sin(spin)*.055*envelope,lerp(0,.04,t)+Math.cos(spin)*.12*envelope);}
     else if(q<.58){const t=smooth((q-.45)/.13);m.position.set(lerp(.18,.88,t),.90+lane,lerp(.04,.22,t));}
     else if(q<.70){const t=smooth((q-.58)/.12);m.position.set(lerp(.88,1.84,t),lerp(.90,.80,t)+lane,lerp(.22,0,t));}
     else {const t=smooth((q-.70)/.30);m.position.set(lerp(1.84,2.48,t),lerp(.80,.98,t)+lane,0);}
    }else if(item.kind==='distribution'){
     if(q<.18){const t=smooth(q/.18);m.position.set(lerp(2.48,3.60,t),lerp(.98,.78,t)+lane,0);}
     else if(q<.32){const t=smooth((q-.18)/.14);m.position.set(lerp(3.60,4.15,t),lerp(.78,1.48,t)+lane,0);}
-    else if(q<.66){const t=smooth((q-.32)/.34),z=item.branch===1?1.10:-1.10;m.position.set(lerp(4.15,6.72,t),1.48+lane,lerp(0,z,t));}
-    else if(q<.84){const t=smooth((q-.66)/.18),x=[4.65,5.60,6.55][item.branch],z=item.branch===1?1.10:-1.10;m.position.set(lerp(6.72,x,t),1.48+lane,z);}
+    else if(q<.40){const t=smooth((q-.32)/.08),z=item.branch===1?1.10:-1.10;m.position.set(4.15,1.48,lerp(0,z,t));}
+    else if(q<.66){const t=smooth((q-.40)/.26),z=item.branch===1?1.10:-1.10;m.position.set(lerp(4.15,6.72,t),1.48,z);}
+    else if(q<.84){const t=smooth((q-.66)/.18),x=[4.65,5.60,6.55][item.branch],z=item.branch===1?1.10:-1.10;m.position.set(lerp(6.72,x,t),1.48,z);}
     else {
      const x=[4.65,5.60,6.55][item.branch],z=item.branch===1?1.10:-1.10,dropX=x+.32;
-     if(q<.89){const t=smooth((q-.84)/.05);m.position.set(x,lerp(1.48,1.82,t)+lane,z);}
-     else if(q<.94){const t=smooth((q-.89)/.05);m.position.set(lerp(x,dropX,t),1.82+lane,z);}
-     else {const t=smooth((q-.94)/.06);m.position.set(lerp(dropX,dropX+.21,t),lerp(1.82,.46,t)+lane,z);}
+     if(q<.89){const t=smooth((q-.84)/.05);m.position.set(x,lerp(1.48,1.82,t),z);}
+     else if(q<.94){const t=smooth((q-.89)/.05);m.position.set(lerp(x,dropX,t),1.82,z);}
+     else if(q<.985){const t=smooth((q-.94)/.045);m.position.set(dropX,lerp(1.82,.46,t),z);}
+     else {const t=smooth((q-.985)/.015);m.position.set(lerp(dropX,dropX+.42,t),.46,z);}
     }
    }else if(item.kind==='oil'){
     if(q<.25){const t=smooth(q/.25);m.position.set(lerp(.18,.92,t),lerp(.68,.82,t),-.30);}
     else if(q<.50){const t=smooth((q-.25)/.25);m.position.set(lerp(.92,.45,t),lerp(.82,.58,t),-.30);}
-    else if(q<.75){const t=smooth((q-.50)/.25);m.position.set(lerp(.45,-.28,t),lerp(.58,.64,t),-.20);}
+    else if(q<.75){const t=smooth((q-.50)/.25);m.position.set(lerp(.45,-.28,t),lerp(.58,.64,t),lerp(-.30,-.20,t));}
     else {const t=smooth((q-.75)/.25);m.position.set(lerp(-.28,.18,t),lerp(.64,.68,t),lerp(-.20,-.30,t));}
    }else{
     const atReceiver=item.branch%2===0,x=atReceiver?2.48:.95,startY=atReceiver?.42:.58,endY=atReceiver?.04:.18;
     m.position.set(x,lerp(startY,endY,smooth(q)),atReceiver?0:.34+lane); 
    }
-   m.visible=this.active&&(item.kind!=='distribution'||this.pathVisible);
+   // Receiver/treatment-to-ring connectivity is not represented by continuous
+   // pipe geometry. Do not animate a fictional diagonal connection.
+   m.visible=this.active&&(item.kind!=='distribution'||this.pathVisible&&q>=.32);
   }
   c.intakeActive=this.active;c.compressionActive=this.active;c.separationActive=this.active;c.aftercoolingActive=this.active;c.distributionActive=this.active;c.oilCircuitActive=this.active;c.condensateDrainActive=this.active;
   const pulse=this.active?Math.sin(this.elapsed*.8):0,base=this.active?100:0;
@@ -2629,7 +2634,7 @@ export class ReferenceProcessSimulation{
   this.pathVisible=!!v;
   if(this.family==='compressor'){const g=this.template.findNode('compressor-air-distribution');if(g){g.userData.diagramEnabled=this.pathVisible;g.visible=this.pathVisible&&this.template.exteriorOpen;}}
   if(this.family==='ahu'){const g=this.template.findNode(this.ahu?.sansin?'sansin-air-distribution':'ahu-air-distribution');if(g)g.visible=this.pathVisible;}
-  for(const item of this.compressorParticles)if(item.kind==='distribution')item.mesh.visible=this.active&&this.pathVisible;
+  for(const item of this.compressorParticles)if(item.kind==='distribution')item.mesh.visible=this.active&&this.pathVisible&&(this.compressorStatus().p+item.phase)%1>=.32;
   for(const item of this.ahuParticles)if(item.kind==='return')item.mesh.visible=this.active&&this.pathVisible;
   return this.state();
  }

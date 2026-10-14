@@ -44,7 +44,7 @@ test('Compressor distribution toggle cannot reveal an unverified plant network i
    s.start();s.elapsed=.6*s.cycle;s.updateCompressor();
    assert.equal(s.state().distributionAirParticleCount,0);
    assert.ok(s.compressorParticles.filter(p=>p.kind==='distribution').every(p=>!s.compressorParticleVisible(p)));
-   t.setExteriorOpen(true);assert.equal(g.visible,true);assert.equal(s.state().distributionAirParticleCount,18);
+   t.setExteriorOpen(true);assert.equal(g.visible,true);assert.equal(s.state().distributionAirParticleCount,s.compressorParticles.filter(p=>p.kind==='distribution'&&p.mesh.visible).length);
    s.setPathVisible(false);t.setLow(true);t.setExteriorOpen(false);t.setExteriorOpen(true);assert.equal(g.visible,false);
    s.setPathVisible(true);t.setLow(false);assert.equal(g.visible,true);
    t.setExteriorOpen(false);s.setPathVisible(true);assert.equal(g.visible,false);
