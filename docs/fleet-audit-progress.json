@@ -1479,9 +1479,18 @@
       "name": "COLLATOR MACHINE",
       "model": null,
       "area": "OFFSET CONVERTING",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {"part": "feed-bin tower and sheet stacks", "status": "COMPLETE"},
+        {"part": "per-bin air separation and suction rotor", "status": "BLOCKED_EVIDENCE"},
+        {"part": "feed integrity and bin sensing", "status": "BLOCKED_EVIDENCE"},
+        {"part": "vertical gathering transport", "status": "COMPLETE"},
+        {"part": "set delivery conveyor and jog", "status": "COMPLETE"},
+        {"part": "downstream finisher handoff", "status": "BLOCKED_EVIDENCE"},
+        {"part": "HMI bin I-O guard and installed interlocks", "status": "BLOCKED_EVIDENCE"},
+        {"part": "display taxonomy lifecycle interior and LOD", "status": "COMPLETE"}
+      ],
+      "reports": ["docs/collator-whole-machine-audit.md"]
     },
     {
       "machineId": "BMJ-MCH-0024",
