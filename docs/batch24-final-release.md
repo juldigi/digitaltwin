@@ -17,3 +17,9 @@ The remaining second-pass defect was the LY300 path overlay: old smoothed contro
 Added regression checks every station, intermediate accepted-route phases, first-sheet landing and overlay pause/resume/stop visibility. Existing triangle-contact, modes and three-machine lifecycle regressions remain required. Cursor remains 0024 until this follow-up release is verified.
 
 Follow-up validation: 4 targeted tests and full suite 1609/1609 pass; build 41 machines, 19 unidentified, bundle 2918300 bytes. Follow-up release remains RELEASE_PENDING until workflows and production are verified.
+
+## Verified follow-up and batch closure
+
+Follow-up commit 142554f404804d1e7ee111daf238e22bfd12bc01 verified: Digital Twin CI 38556107735, Verify frontend 38556107804 and Cloudflare deployment 38556108158 all success. Production simulation-upg-ly300.js SHA-256 is 7fa0f6cfa4f04e970d265ad4a02ce1aa2710442ec06f3b1c70109a6c064dccdd, identical to the tested build. Production fallback correctly identifies BMJ-MCH-0024 / UPG-LY300. No 3D visual verification claim.
+
+All three audits and second passes processed; evidence blockers listed above remain open, not fabricated or erased. Cursor advances to BMJ-MCH-0027 only after verified implementation. Next batch: 0027 CTF SCREEN, 0028 Zund, 0029 Atlas Copco Compressor. Before new audit, verify workflow gates of this closure ledger commit. The historical RELEASE_PENDING paragraphs describe prior checkpoints, superseded by this closure.

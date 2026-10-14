@@ -11,8 +11,8 @@
     "BMJ-MCH-0025",
     "BMJ-MCH-0026"
   ],
-  "batchStatus": "RELEASE_PENDING",
-  "batchReleaseStatus": "RELEASE_PENDING",
+  "batchStatus": "COMPLETE",
+  "batchReleaseStatus": "VERIFIED",
   "batchReleaseReport": "docs/batch24-final-release.md",
   "batchValidation": {
     "focusedTests": 48,
@@ -24,7 +24,7 @@
   },
   "status": "IN_PROGRESS",
   "cursor": {
-    "machineId": "BMJ-MCH-0024",
+    "machineId": "BMJ-MCH-0027",
     "partIndex": 0
   },
   "baselineCommit": "b5e45a82ce1aeaf9094b0a5c3fd8d985b8a9e96f",
@@ -1804,7 +1804,7 @@
       "name": "DIGITAL INKJET",
       "model": "UPG-LY300",
       "area": "OFFSET CONVERTING",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "parts": [
         {
           "part": "paging and registration",
@@ -1850,14 +1850,16 @@
       "auditProcessed": true,
       "secondPass": "PASS_WITH_BLOCKED_EVIDENCE",
       "releaseEvidence": {
-        "commit": "39037b7d9c4db7a1d55b758545fac4a7a400ca15",
+        "commit": "142554f404804d1e7ee111daf238e22bfd12bc01",
         "workflows": [
-          38521908259,
-          38521908260,
-          38521908266
+          38556107735,
+          38556107804,
+          38556108158
         ],
         "conclusion": "success",
+        "tests": 1609,
         "productionSourceHashesMatched": true,
+        "simulationModuleSHA256": "7fa0f6cfa4f04e970d265ad4a02ce1aa2710442ec06f3b1c70109a6c064dccdd",
         "visual3DVerified": false
       }
     },
@@ -1866,7 +1868,7 @@
       "name": "CTP HEIDELBERG MACHINE",
       "model": null,
       "area": "PDS",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "parts": [
         {
           "part": "plate input and output bed contact",
@@ -1908,14 +1910,16 @@
       "auditProcessed": true,
       "secondPass": "PASS_WITH_BLOCKED_EVIDENCE",
       "releaseEvidence": {
-        "commit": "39037b7d9c4db7a1d55b758545fac4a7a400ca15",
+        "commit": "142554f404804d1e7ee111daf238e22bfd12bc01",
         "workflows": [
-          38521908259,
-          38521908260,
-          38521908266
+          38556107735,
+          38556107804,
+          38556108158
         ],
         "conclusion": "success",
+        "tests": 1609,
         "productionSourceHashesMatched": true,
+        "simulationModuleSHA256": "7fa0f6cfa4f04e970d265ad4a02ce1aa2710442ec06f3b1c70109a6c064dccdd",
         "visual3DVerified": false
       }
     },
@@ -1924,7 +1928,7 @@
       "name": "CTP HEIDELBERG MACHINE",
       "model": null,
       "area": "PDS",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "parts": [
         {
           "part": "plate input and output bed contact",
@@ -1966,14 +1970,16 @@
       "auditProcessed": true,
       "secondPass": "PASS_WITH_BLOCKED_EVIDENCE",
       "releaseEvidence": {
-        "commit": "39037b7d9c4db7a1d55b758545fac4a7a400ca15",
+        "commit": "142554f404804d1e7ee111daf238e22bfd12bc01",
         "workflows": [
-          38521908259,
-          38521908260,
-          38521908266
+          38556107735,
+          38556107804,
+          38556108158
         ],
         "conclusion": "success",
+        "tests": 1609,
         "productionSourceHashesMatched": true,
+        "simulationModuleSHA256": "7fa0f6cfa4f04e970d265ad4a02ce1aa2710442ec06f3b1c70109a6c064dccdd",
         "visual3DVerified": false
       }
     },
@@ -2479,33 +2485,40 @@
       }
     }
   ],
-  "updatedAt": "2026-10-14T11:22:05.033Z",
+  "updatedAt": "2026-10-14T11:29:19.242Z",
   "lastAuditRelease": {
-    "machineId": "BMJ-MCH-0023",
-    "commit": "0f1f673c8945c99895ff930494c98af6f2e5474e",
+    "commit": "142554f404804d1e7ee111daf238e22bfd12bc01",
     "workflows": [
-      38510971370,
-      38510971253,
-      38510971248
+      38556107735,
+      38556107804,
+      38556108158
     ],
     "conclusion": "success",
-    "tests": 1603,
-    "nextMachineId": "BMJ-MCH-0024",
-    "visualFallbackVerified": true,
+    "tests": 1609,
+    "productionSourceHashesMatched": true,
+    "simulationModuleSHA256": "7fa0f6cfa4f04e970d265ad4a02ce1aa2710442ec06f3b1c70109a6c064dccdd",
+    "visual3DVerified": false,
+    "machineIds": [
+      "BMJ-MCH-0024",
+      "BMJ-MCH-0025",
+      "BMJ-MCH-0026"
+    ],
+    "nextMachineId": "BMJ-MCH-0027"
+  },
+  "batchRemainingWork": [],
+  "batchReleaseEvidence": {
+    "commit": "142554f404804d1e7ee111daf238e22bfd12bc01",
+    "workflows": [
+      38556107735,
+      38556107804,
+      38556108158
+    ],
+    "conclusion": "success",
+    "tests": 1609,
+    "productionSourceHashesMatched": true,
+    "simulationModuleSHA256": "7fa0f6cfa4f04e970d265ad4a02ce1aa2710442ec06f3b1c70109a6c064dccdd",
     "visual3DVerified": false
   },
-  "batchRemainingWork": [
-    "Verify LY300 overlay follow-up commit workflows and production before closing batch"
-  ],
-  "batchReleaseEvidence": {
-    "commit": "39037b7d9c4db7a1d55b758545fac4a7a400ca15",
-    "workflows": [
-      38521908259,
-      38521908260,
-      38521908266
-    ],
-    "conclusion": "success",
-    "productionSourceHashesMatched": true,
-    "visual3DVerified": false
-  }
+  "ledgerGatePending": true,
+  "ledgerGateInstruction": "Verify workflows of current ledger main before starting batch 0027–0029; implementation release already verified."
 }
