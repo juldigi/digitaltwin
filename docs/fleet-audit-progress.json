@@ -1391,9 +1391,53 @@
       "name": "AUTOBLANKING MACHINE 2",
       "model": "QF-100CS",
       "area": "OFFSET CONVERTING",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "auditStatus": "IN_PROGRESS",
+      "parts": [
+        {
+          "part": "stack staging and loading",
+          "status": "IN_PROGRESS",
+          "report": "docs/qf100cs-whole-machine-audit.md"
+        },
+        {
+          "part": "X/Y platform indexing and material support",
+          "status": "IN_PROGRESS",
+          "report": "docs/qf100cs-whole-machine-audit.md"
+        },
+        {
+          "part": "fixed hydraulic head and contact stroke",
+          "status": "IN_PROGRESS",
+          "report": "docs/qf100cs-whole-machine-audit.md"
+        },
+        {
+          "part": "honeycomb board pins and tooling retention",
+          "status": "IN_PROGRESS",
+          "report": "docs/qf100cs-whole-machine-audit.md"
+        },
+        {
+          "part": "separation and waste support",
+          "status": "IN_PROGRESS",
+          "report": "docs/qf100cs-whole-machine-audit.md"
+        },
+        {
+          "part": "product receiving and collector boundary",
+          "status": "IN_PROGRESS",
+          "report": "docs/qf100cs-whole-machine-audit.md"
+        },
+        {
+          "part": "hydraulic control guarding and utility",
+          "status": "IN_PROGRESS",
+          "report": "docs/qf100cs-whole-machine-audit.md"
+        },
+        {
+          "part": "display taxonomy and factory parity",
+          "status": "IN_PROGRESS",
+          "report": "docs/qf100cs-whole-machine-audit.md"
+        }
+      ],
+      "reports": [
+        "docs/qf100cs-whole-machine-audit.md"
+      ]
     },
     {
       "machineId": "BMJ-MCH-0022",
@@ -1942,5 +1986,5 @@
       }
     }
   ],
-  "updatedAt": "2026-10-13T18:19:00Z"
+  "updatedAt": "2026-10-14T00:10:00Z"
 }

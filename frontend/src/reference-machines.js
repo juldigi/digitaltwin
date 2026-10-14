@@ -2116,7 +2116,17 @@ export class ReferenceProcessSimulation{
   if(pressing){const t=(p-.58)/.14;ramDrop=Math.sin(Math.PI*THREE.MathUtils.clamp(t,0,1))*.16;}
   if(separating)sepDrop=.045*smooth((p-.72)/.12);
   if(b.platform){b.platform.position.copy(b.platformRest);b.platform.position.x+=x+.55;b.platform.position.z+=z;}
-  if(b.ram){b.ram.position.copy(b.ramRest);b.ram.position.y-=ramDrop;}
+  // The cylinder barrel is mounted to the fixed gantry. Only the piston rod
+  // and pressure plate reciprocate; translating the whole ram group moved
+  // the hydraulic housing off its mount.
+  if(b.ram){
+   b.ram.position.copy(b.ramRest);
+   b.ram.traverse(m=>{
+    if(!m.isMesh||!['hydraulic-ram-reference','blanking-pressure-plate'].includes(m.userData.mechanismRole))return;
+    if(!m.userData.blankerStrokeRest)m.userData.blankerStrokeRest=m.position.clone();
+    m.position.copy(m.userData.blankerStrokeRest);m.position.y-=ramDrop;
+   });
+  }
   if(this.processPiece){
    this.processPiece.visible=this.active;
    this.processPiece.position.set(pieceX,.81-sepDrop,pieceZ);
@@ -2560,6 +2570,7 @@ export class ReferenceProcessSimulation{
  }
  setInkFlowVisible(){this.inkFlowVisible=false;return this.state();}
  resetMotion(){
+  if(this.blanker?.ram)this.blanker.ram.traverse(m=>{if(m.userData.blankerStrokeRest)m.position.copy(m.userData.blankerStrokeRest);});
   if(this.blanker)for(const mesh of this.template.activeMeshes)if(mesh.userData.motionRestQuaternion)mesh.quaternion.copy(mesh.userData.motionRestQuaternion);
   for(const obj of [this.ctp?.drum,this.ctp?.transportMotor,this.ctp?.drumMotor])if(obj?.userData.ctpRestQuaternion)obj.quaternion.copy(obj.userData.ctpRestQuaternion);
   if(this.ctp?.laser&&this.ctp.laserRestPosition)this.ctp.laser.position.copy(this.ctp.laserRestPosition);
