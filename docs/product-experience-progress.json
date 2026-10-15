@@ -1,21 +1,70 @@
 {
   "status": "IN_PROGRESS",
-  "releaseStatus": "RELEASE_PENDING",
+  "releaseStatus": "VERIFIED",
   "baseCommit": "c29a47991e99f30717baf6c50de1c15a394875e7",
   "report": "docs/product-experience-20261015.md",
-  "desktopBaseline": {"viewportWidth":1363,"viewportHeight":936,"availableWorkingHeight":868,"sceneHeight":361,"unintendedSecondRow":507},
-  "fixed": ["closed inspector auto-placement creates a second grid row", "generic machine thumbnails", "duplicated model text in catalogue", "overly tall catalogue introduction"],
-  "previews": {"count":41,"width":640,"height":320,"bytes":292656,"source":"existing baked fleet triangles","generatedDuringBuild":true},
+  "desktopBaseline": {
+    "viewportWidth": 1363,
+    "viewportHeight": 936,
+    "availableWorkingHeight": 868,
+    "sceneHeight": 361,
+    "unintendedSecondRow": 507
+  },
+  "fixed": [
+    "closed inspector auto-placement creates a second grid row",
+    "generic machine thumbnails",
+    "duplicated model text in catalogue",
+    "overly tall catalogue introduction"
+  ],
+  "previews": {
+    "count": 41,
+    "width": 640,
+    "height": 320,
+    "bytes": 292656,
+    "source": "existing baked fleet triangles",
+    "generatedDuringBuild": true
+  },
   "targetedTests": "89 PASS",
   "build": "PASS",
-  "localFullRegression": "FINAL_RERUN_IN_PROGRESS",
-  "previousFullRun": {"passed":1636,"failed":1,"reason":"outdated literal chooser-copy assertion; updated and all 18 language tests passed"},
+  "localFullRegression": "Final local log incomplete; full npm test release gate PASS in all three GitHub workflows",
+  "previousFullRun": {
+    "passed": 1636,
+    "failed": 1,
+    "reason": "outdated literal chooser-copy assertion; updated and all 18 language tests passed"
+  },
   "appSourceSHA256": "90e150f0b552aabe04cbcfe345206420b58539e1a0c8e3dad46b6145edba9cac",
   "cssSourceSHA256": "d5e0293d130ccea4097d1d9a0aef47605fd142a76f0a6036d5fcfbc44774d3ee",
-  "desktopVisualVerified": false,
+  "desktopVisualVerified": true,
   "mobilePixelVerified": false,
   "visual3DVerified": false,
-  "remaining": ["post-release desktop composition/search/selection/panel checks", "physical iPhone visual QA", "visually verified Offset 5 inspection/simulation and render direction"],
+  "remaining": [
+    "physical iPhone visual QA",
+    "visually verified Offset 5 inspection/simulation and render direction"
+  ],
   "machineGeometryChanged": false,
-  "machineCursorChanged": false
+  "machineCursorChanged": false,
+  "releaseCommit": "1b37ab599b323b1f4c2d09dd4a358d9cf01d9661",
+  "desktopAfter": {
+    "viewportWidth": 1363,
+    "viewportHeight": 936,
+    "sceneHeight": 868,
+    "gridRows": "868px",
+    "closedPanelSceneHeight": 868
+  },
+  "workflowRuns": {
+    "frontend": 38743919260,
+    "ci": 38743919241,
+    "cloudflare": 38743919526
+  },
+  "workflowConclusion": "ALL_SUCCESS",
+  "productionChecks": [
+    "new fingerprint 9d2b8c3d94d427fb loaded",
+    "single 868px workspace row visually verified",
+    "three-column gallery screenshot verified",
+    "first six preview images decoded at 640px",
+    "OFU-1 search returns BMJ-MCH-0003",
+    "selection opens correct factory-context identity",
+    "closing detail preserves 868px scene"
+  ],
+  "productionHashCheck": "Shell HTTP403; not verified by byte comparison"
 }

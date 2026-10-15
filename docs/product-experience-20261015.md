@@ -25,3 +25,12 @@ The local server cannot be reached by the separate browser environment (`ERR_CON
 The production browser currently exposes 2D with 3D disabled. No visual 3D material, camera or cinematic-quality claim is made. Responsive CSS is retained and adjusted, but no physical iPhone pixel verification is claimed. Remaining product work includes a visually verified complete Offset 5 inspection/simulation experience, render/material direction and device-specific visual QA.
 
 Release status and verification results: `product-experience-progress.json`.
+
+
+## Production verification — 2026-10-15
+
+Release `1b37ab599b323b1f4c2d09dd4a358d9cf01d9661` passed Verify frontend (38743919260), Digital Twin CI (38743919241), and Deploy Cloudflare Workers (38743919526). Cloudflare build, complete npm test release gate, D1 migration and deployment all succeeded. The final local full-run log did not contain a final summary, so the complete-regression pass is attributed to the GitHub gates, not that incomplete local log.
+
+Actual production browser at 1363×936 loaded fingerprint `9d2b8c3d94d427fb`. Workspace/main/canvas all measured 868px; grid has one 868px row, compared with the prior 361px scene plus 507px unintended row. Closing the selected-machine inspector preserved 868px. Screenshot inspection confirmed full-height 2D composition and the three-column image gallery. First six visible preview images decoded at natural width 640px. Searching OFU-1 returned only Offset 5, and selection opened BMJ-MCH-0003 in factory context with OFU-1 / CD 102-8+L identity.
+
+Shell production-byte comparison returned HTTP403; no hash-match claim is made. Browser rendered the deployed CSS, gallery and previews successfully. This browser reports WebGL unavailable; 3D visual realism and physical iPhone visual quality remain unverified. This is the first product-composition improvement, not completion of every flagship-quality objective. Machine geometry and fleet cursor are unchanged.
