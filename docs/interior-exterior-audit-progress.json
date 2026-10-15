@@ -1,6 +1,6 @@
 {
   "status": "IN_PROGRESS",
-  "releaseStatus": "RELEASE_PENDING",
+  "releaseStatus": "VERIFIED",
   "baseCommit": "887937a8f939709162667704c8d4b860d0034a13",
   "report": "docs/interior-exterior-deep-audit-20261015.md",
   "inventory": "docs/interior-exterior-audit-after-20261015.json",
@@ -199,5 +199,13 @@
   "machineCursorChanged": false,
   "automationChanged": false,
   "fullTests": 1636,
-  "fullDurationMs": 275972.737347
+  "fullDurationMs": 275972.737347,
+  "releaseCommit": "40c5c14fbeb83796d7f26a00c742e826811966a3",
+  "releaseWorkflows": [
+    38730525885,
+    38730525909,
+    38730525890
+  ],
+  "releaseConclusion": "SUCCESS",
+  "productionSourceHashMatched": true
 }

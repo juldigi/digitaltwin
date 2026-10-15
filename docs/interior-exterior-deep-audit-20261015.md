@@ -65,4 +65,8 @@ Foto aktual IPAL telah pulih; blocker ini tidak lagi dicatat sebagai arsip hilan
 
 ## Hasil pengujian lokal kode final
 
-Full regression: **1.636/1.636 PASS**, tanpa gagal/skip, 275.972,737 ms. Build PASS. Source dan dist `factory-building.js` cocok: SHA256 `1d17f428178a2dc6adcc1eae249dd3eabd83c5f3d0ddbcbe01505088f23506aa`. Rilis menunggu gate pipeline; audit visual/as-built tetap IN_PROGRESS.
+Full regression: **1.636/1.636 PASS**, tanpa gagal/skip, 275.972,737 ms. Build PASS. Source dan dist `factory-building.js` cocok: SHA256 `1d17f428178a2dc6adcc1eae249dd3eabd83c5f3d0ddbcbe01505088f23506aa`. Rilis kode telah terverifikasi; audit visual/as-built tetap IN_PROGRESS.
+
+## Rilis koreksi terverifikasi
+
+Commit `40c5c14fbeb83796d7f26a00c742e826811966a3`. Digital Twin CI `38730525885`, Verify frontend `38730525909`, Deploy Cloudflare Workers `38730525890`: semuanya SUCCESS. Gate rilis, validasi credential, koneksi D1, migrasi dan publish berhasil. Hash kode produksi cocok dengan source/build final: `1d17f428178a2dc6adcc1eae249dd3eabd83c5f3d0ddbcbe01505088f23506aa`. Publish menggunakan expected-head protection tanpa force push. Status rilis VERIFIED, sedangkan audit visual/as-built tetap IN_PROGRESS dengan sisa pemeriksaan di atas.
