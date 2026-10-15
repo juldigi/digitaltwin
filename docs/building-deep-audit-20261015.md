@@ -1,5 +1,7 @@
 # Building deep audit — 2026-10-15
 
+Release VERIFIED: edbb91785eeccaee2a638ebf1ea49ee02335bc1d. Digital Twin CI38721747987, Verify frontend38721748011 and Cloudflare38721747951 all SUCCESS. Production factory-building.js SHA2563d23133a5f1fa9ca361c4b2461bb97bc664a3458e43b160b4631403633817a62 matches tested source/dist. Post-deploy UI loads factory2D;3D is disabled in this browser. Code audit processing COMPLETE_WITH_BLOCKED_EVIDENCE. This supersedes pending statements below. Closure changes documentation only and retains existing machine audit/automation state.
+
 Final-source local validation:1630/1630 tests PASS,0fail/skip/cancelled,duration268028.077ms;14focused tests PASS;build PASS. This supersedes running statements below. Release workflows and production verification pending.
 
 Base main ab4824b1f8bab6afe8ae7dec3533bda2ee5bab1c. Isolated building-audit checkout; earlier dirty worktrees and completed41-machine ledger retained. Scope is the live factory-building.js runtime, not archived alternate V3/V4 assembly files. Code review, transformed geometry and second-pass audit; not a structural/load/fire/egress/as-built certificate.

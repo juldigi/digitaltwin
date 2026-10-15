@@ -1,5 +1,9 @@
 {
-  "status": "RELEASE_PENDING",
+  "status": "COMPLETE_WITH_BLOCKED_EVIDENCE",
+  "releaseCommit": "edbb91785eeccaee2a638ebf1ea49ee02335bc1d",
+  "releaseWorkflows": [38721747987, 38721748011, 38721747951],
+  "releaseConclusion": "SUCCESS",
+  "productionSourceHashMatched": true,
   "baseCommit": "ab4824b1f8bab6afe8ae7dec3533bda2ee5bab1c",
   "report": "docs/building-deep-audit-20261015.md",
   "codeAuditProcessed": true,
@@ -12,5 +16,5 @@
   "sourceSHA256": "3d23133a5f1fa9ca361c4b2461bb97bc664a3458e43b160b4631403633817a62",
   "visual3DVerified": false,
   "blockers": ["fresh original building/IPAL photo recovery", "as-built structural/MEP/room dimensions and installed options", "visual3D unavailable in current browser"],
-  "remaining": ["release workflows", "production verification"]
+  "remaining": []
 }
