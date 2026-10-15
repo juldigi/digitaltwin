@@ -3,3 +3,6 @@ node_modules/
 .dev.vars
 test-results/
 dist/
+
+# Deterministic previews generated from the baked fleet during build.
+frontend/assets/machines/

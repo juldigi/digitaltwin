@@ -116,7 +116,7 @@ test('V266 uses machine or equipment wording across chooser status and fallbacks
   'Mesin atau peralatan pabrik',
   'Mesin atau peralatan pada tautan ini tidak ditemukan.',
   'Simulasi proses untuk mesin atau peralatan ini belum tersedia.',
-  'Pilih mesin atau peralatan untuk menyorot posisinya di pabrik.',
+  'Temukan mesin, lihat posisi, lalu buka detailnya.',
   'model 3D tersedia',
   'Kategori mesin atau peralatan',
   'Nama mesin atau peralatan',

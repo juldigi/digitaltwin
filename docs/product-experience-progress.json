@@ -1,0 +1,21 @@
+{
+  "status": "IN_PROGRESS",
+  "releaseStatus": "RELEASE_PENDING",
+  "baseCommit": "c29a47991e99f30717baf6c50de1c15a394875e7",
+  "report": "docs/product-experience-20261015.md",
+  "desktopBaseline": {"viewportWidth":1363,"viewportHeight":936,"availableWorkingHeight":868,"sceneHeight":361,"unintendedSecondRow":507},
+  "fixed": ["closed inspector auto-placement creates a second grid row", "generic machine thumbnails", "duplicated model text in catalogue", "overly tall catalogue introduction"],
+  "previews": {"count":41,"width":640,"height":320,"bytes":292656,"source":"existing baked fleet triangles","generatedDuringBuild":true},
+  "targetedTests": "89 PASS",
+  "build": "PASS",
+  "localFullRegression": "FINAL_RERUN_IN_PROGRESS",
+  "previousFullRun": {"passed":1636,"failed":1,"reason":"outdated literal chooser-copy assertion; updated and all 18 language tests passed"},
+  "appSourceSHA256": "90e150f0b552aabe04cbcfe345206420b58539e1a0c8e3dad46b6145edba9cac",
+  "cssSourceSHA256": "d5e0293d130ccea4097d1d9a0aef47605fd142a76f0a6036d5fcfbc44774d3ee",
+  "desktopVisualVerified": false,
+  "mobilePixelVerified": false,
+  "visual3DVerified": false,
+  "remaining": ["post-release desktop composition/search/selection/panel checks", "physical iPhone visual QA", "visually verified Offset 5 inspection/simulation and render direction"],
+  "machineGeometryChanged": false,
+  "machineCursorChanged": false
+}

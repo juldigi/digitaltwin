@@ -1,5 +1,6 @@
 import {execFileSync} from 'node:child_process';
 execFileSync(process.execPath,['scripts/bake-factory-fleet.mjs'],{stdio:'inherit'});
+execFileSync(process.execPath,['scripts/bake-asset-previews.mjs'],{stdio:'inherit'});
 import {cpSync,mkdirSync,readFileSync,writeFileSync,rmSync,readdirSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {join,relative} from 'node:path';
