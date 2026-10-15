@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import {createPolishedMachineTemplate} from '../frontend/src/machine-runtime.js';
+import {shouldAutoOpenInteriorForSimulation} from '../frontend/src/simulation-visibility-policy.js';
 
 test('V338 Offset 5 defaults to exterior and reveals interior only on request',()=>{
  const t=createPolishedMachineTemplate('offset5');
@@ -36,7 +37,7 @@ test('Offset 5 start handler preserves the requested exterior or interior mode',
    const engine={template:t,machine:t.root,simulation:{active:false},isPrintingSimulationActive:()=>false,
     getPrintingSimulationState:()=>({available:true}),setPrintingSimulationInkFlowVisible:on=>{inkFlow=on;},
     startPrintingSimulation:()=>({active:true}),fit:noop,clearPartLabels:noop};
-   const context={engine,MACHINE_KEY:'offset5',simulationOwnsExterior:true,selectedPart:null,ACTIVE_ROOT:'root',
+   const context={engine,MACHINE_KEY:'offset5',shouldAutoOpenInteriorForSimulation,simulationOwnsExterior:true,selectedPart:null,ACTIVE_ROOT:'root',
     isInteriorOpen:()=>interior,ensureMachineInspectionContext:()=>true,enableExteriorOpen(){t.setExteriorOpen(true);},
     updateSimulationPanel:noop,setActiveTaxonomyId:noop,setExplodeLevel:noop,renderPanel:noop,requestAnimationFrame:noop,toast:noop};
    vm.runInNewContext(`${body};startPrintingSimulation();`,context);

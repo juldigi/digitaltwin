@@ -128,9 +128,9 @@ test('POLAR family-reference hydraulic and air utility stays inside the base cab
  m.dispose();
 });
 
-test('Polar simulation opens covers while leaving structural supports and the rear tongue attached',()=>{
+test('POLAR cutaway opens only on explicit inspection while supports and rear tongue remain attached',()=>{
  const source=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
- assert.match(source,/simulationOwnsExterior=!isInteriorOpen\(\);\s*enableExteriorOpen\(\{forceDetail:false\}\)/);
+ assert.match(source,/simulationOwnsExterior=shouldAutoOpenInteriorForSimulation\(MACHINE_KEY,isInteriorOpen\(\)\)/);
  const m=new Polar115MachineTemplate(),housing=m.findNode('polar-housing');
  const brow=housing.children.filter(x=>x.isMesh&&x.userData.consoleBrow);
  assert.equal(brow.length,1,'upper shell is one continuous head, not several rounded roof bars');
