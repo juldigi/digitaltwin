@@ -27,7 +27,8 @@ test('OFFSET 5: the first sheet enters visibly without drawing the un-fed tail',
 
     // After a full sheet length, the first sheet is not clipped; the
     // second one appears as a partial sheet after one nominal pitch.
-    sim.update(300);
+    // The engine caps frame deltas at 50 ms; advance in actual animation frames.
+    for(let ms=32;ms<=320;ms+=16)sim.update(ms);
     const full=sim.sheets[0].mesh.geometry.drawRange;
     assert.equal(full.start,0);
     assert.equal(full.count,sim.sheetLengthSegments*sim.sheetWidthSegments*6);
