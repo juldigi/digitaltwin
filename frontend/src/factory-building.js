@@ -407,6 +407,8 @@ export function buildActualFactory(layout,fleet){
  const roofSections=[[51,90,-51,90,'MAIN_HALL'],[47.5,51,-99.5,7,'NORTH_WING'],[.5,11,-33,44,'WEST_WING']];
  for(const [x,w,z,d,roofId] of roofSections){
   const half=w/2,rise=2.5,slope=Math.atan2(rise,half),len=Math.hypot(half,rise),roofY=rx=>6.93-rise*Math.abs(rx)/half;
+  // Upper triangle surface of the authored 160 mm sloping roof slab.
+  const roofSurfaceY=rx=>7-rise*Math.abs(rx)/half+.08/Math.cos(slope);
   for(const sign of [-1,1]){
    const roof=box(layers.roof,x+sign*w/4,5.75,z,len,.16,d,0x6e8790);roof.rotation.z=-sign*slope;roof.userData={semantic:'ROOF_PANEL',roofId,eavesHeight:4.5,ridgeHeight:7,heightEvidence:'USER_APPROXIMATE_MEASUREMENT'};
    const blanket=box(layers.roof,x+sign*w/4,5.68,z,len-.10,.035,d-.35,0xd8d3c6,0,.78);blanket.rotation.z=-sign*slope;blanket.userData={semantic:'ROOF_INSULATION_BLANKET_REFERENCE',roofId,accuracy:'INDUSTRIAL_ROOF_BUILDUP_REFERENCE_NOT_AS_BUILT',researchVersion:'V204'};buildingDetailStats.roofInsulationBlankets++;
@@ -431,12 +433,12 @@ export function buildActualFactory(layout,fleet){
   if(d>10)for(const zz of [z-d/2+4.5,z+d/2-4.5]){const a1=new T.Vector3(x-half*.72,roofY(-half*.72)-.16,zz-2.2),a2=new T.Vector3(x+half*.72,roofY(half*.72)-.16,zz+2.2),a3=new T.Vector3(x+half*.72,roofY(half*.72)-.16,zz-2.2),a4=new T.Vector3(x-half*.72,roofY(-half*.72)-.16,zz+2.2);detail(line(layers.roof,a1,a2,.018,0x72858a),'ROOF_X_BRACING_REFERENCE');detail(line(layers.roof,a3,a4,.018,0x72858a),'ROOF_X_BRACING_REFERENCE');buildingDetailStats.roofBracing+=2;}
   // Eave gutters and approximate downpipe spacing are reference-only until facade photos/as-built MEP are supplied.
   for(const sign of [-1,1]){const ex=x+sign*half;const gutter=line(layers.roof,new T.Vector3(ex,4.43,z-d/2),new T.Vector3(ex,4.43,z+d/2),.042,0x536b73);detail(gutter,'MAIN_ROOF_GUTTER_REFERENCE');buildingDetailStats.roofGutters++;
-   for(let zz=z-d/2+4;zz<z+d/2-2;zz+=18){const down=line(b,new T.Vector3(ex,4.40,zz),new T.Vector3(ex,.16,zz),.035,0x536b73);detail(down,'MAIN_ROOF_DOWNPIPE_REFERENCE');buildingDetailStats.roofDownpipes++;const shoe=line(b,new T.Vector3(ex,.16,zz),new T.Vector3(ex-sign*.38,.08,zz),.04,0x536b73);detail(shoe,'DOWNPIPE_SHOE_REFERENCE');buildingDetailStats.downpipeShoes++;}}
+   for(let zz=z-d/2+4;zz<z+d/2-2;zz+=18){const down=line(b,new T.Vector3(ex,4.43,zz),new T.Vector3(ex,.16,zz),.035,0x536b73);detail(down,'MAIN_ROOF_DOWNPIPE_REFERENCE');buildingDetailStats.roofDownpipes++;const shoe=line(b,new T.Vector3(ex,.16,zz),new T.Vector3(ex+sign*.38,.08,zz),.04,0x536b73);detail(shoe,'DOWNPIPE_SHOE_REFERENCE');shoe.userData.roofCenterX=x;buildingDetailStats.downpipeShoes++;}}
   // Visual rooftop equipment stays within the main hall and clear of ridge, eaves and daylight strips.
   // Positions and electrical/airflow connections are intentionally not asserted as installed equipment.
   if(roofId==='MAIN_HALL'){
    for(const sign of [-1,1])for(const zz of [-80,-62,-44,-26])for(let col=0;col<3;col++){
-    const rx=sign*(half*.36+col*2.15),px=x+rx,py=roofY(rx)+.18;
+    const rx=sign*(half*.36+col*2.15),px=x+rx,py=roofSurfaceY(rx)+(.065/2+.025)/Math.cos(slope);
     const module=box(layers.roof,px,py,zz,1.82,.065,4.5,0x183b53);
     module.rotation.z=-sign*slope;
     module.userData={semantic:'ROOF_SOLAR_MODULE_REFERENCE',roofId,accuracy:'DESIGN_REFERENCE_NOT_AS_BUILT',operationalStatus:'NOT_CONNECTED'};
@@ -445,11 +447,16 @@ export function buildActualFactory(layout,fleet){
     buildingDetailStats.roofSolarModules++;
    }
    for(const zz of [-76,-40]){
-    const fan=new T.Group();fan.position.set(x+8,roofY(8)+.01,zz);layers.roof.add(fan);
+    const fan=new T.Group();fan.position.set(x+8,roofSurfaceY(8),zz);layers.roof.add(fan);
     fan.userData={semantic:'ROOF_EXHAUST_FAN_REFERENCE',roofId,accuracy:'DESIGN_REFERENCE_NOT_AS_BUILT',operationalStatus:'STATIC'};
-    box(fan,0,.08,0,1.2,.28,1.2,0x657b83);
-    const cowl=new T.Mesh(new T.CylinderGeometry(.7,.54,.22,12),material(0x889da4));cowl.position.y=.32;fan.add(cowl);
-    for(const dx of [-.42,.42])for(const dz of [-.42,.42])line(fan,new T.Vector3(dx,.02,dz),new T.Vector3(dx,.21,dz),.025,0x455c65);
+    // Same curb footprint, sloped underside and level cowl seat. A flat box
+    // previously buried its entire underside 167–233 mm inside the roof.
+    const curbGeo=new T.BufferGeometry(),vertices=[];
+    for(const top of [false,true])for(const [dx,dz] of [[-.6,-.6],[.6,-.6],[.6,.6],[-.6,.6]])vertices.push(dx,top?.28:-rise/half*dx,dz);
+    curbGeo.setAttribute('position',new T.Float32BufferAttribute(vertices,3));curbGeo.setIndex([0,1,2,0,2,3,4,6,5,4,7,6,0,5,1,0,4,5,1,6,2,1,5,6,2,7,3,2,6,7,3,4,0,3,7,4]);curbGeo.computeVertexNormals();
+    const curb=new T.Mesh(curbGeo,material(0x657b83));curb.userData={semantic:'ROOF_EXHAUST_CURB_REFERENCE',accuracy:'DESIGN_REFERENCE_NOT_AS_BUILT'};fan.add(curb);
+    const cowl=new T.Mesh(new T.CylinderGeometry(.7,.54,.22,12),material(0x889da4));cowl.position.y=.39;fan.add(cowl);
+    for(const dx of [-.42,.42])for(const dz of [-.42,.42])line(fan,new T.Vector3(dx,-rise/half*dx+.03,dz),new T.Vector3(dx,.28,dz),.025,0x455c65);
     buildingDetailStats.roofExhaustFans++;
    }
   }
@@ -778,7 +785,10 @@ export function buildActualFactory(layout,fleet){
  };
  const productionAisleArrow=(x,y,rotation=0)=>{
   const g=new T.Group();g.position.set(x,.015,-y);g.rotation.y=rotation;b.add(g);g.userData={semantic:'PRODUCTION_AISLE_DIRECTION_ARROW_REFERENCE',accuracy:'FLOOR_VISUAL_MANAGEMENT_REFERENCE_NOT_TRAFFIC_PLAN',researchVersion:'V204',functionalReferenceVisible:true};
-  box(g,0,0,0,.18,.018,.62,0xd6ad2f);const head=new T.Mesh(new T.ConeGeometry(.24,.38,3),material(0xd6ad2f));head.rotation.x=Math.PI/2;head.position.set(0,.012,-.44);g.add(head);buildingDetailStats.productionAisleArrows++;return g;
+  box(g,0,0,0,.18,.018,.62,0xd6ad2f);
+  // Floor paint is a planar arrow, not a cone passing through the slab.
+  const headGeo=new T.BufferGeometry();headGeo.setAttribute('position',new T.Float32BufferAttribute([-.24,0,-.25,.24,0,-.25,0,0,-.63],3));headGeo.computeVertexNormals();
+  const head=new T.Mesh(headGeo,material(0xd6ad2f));head.position.y=.009;head.userData={semantic:'PRODUCTION_DIRECTION_PAINT_HEAD_REFERENCE',accuracy:'FLOOR_VISUAL_MANAGEMENT_REFERENCE_NOT_TRAFFIC_PLAN'};g.add(head);buildingDetailStats.productionAisleArrows++;return g;
  };
  const addPalletCornerProtectors=(parent,w,d,h,tag)=>{
   for(const sx of [-w/2,w/2])for(const sz of [-d/2,d/2]){const p=box(parent,sx,h/2,sz,.045,h,.045,0xd7c59b);p.userData={semantic:tag+'_CORNER_PROTECTOR_REFERENCE',accuracy:'PACKAGING_LOAD_PROTECTION_REFERENCE_NOT_INVENTORY',researchVersion:'V204'};buildingDetailStats.palletCornerProtectors++;}
@@ -1282,7 +1292,7 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   const spot=candidates.find(([x,y])=>x>7&&x<94&&y>8&&y<94&&!insideService(x,y,1.25,1.05)&&!intersectsMachine([x-.65,y-.55],[x+.65,y+.55]));
   if(!spot)continue;const [x,y]=spot;
   const pallet=fixture(x,y,1.05,.12,.82,0x386aa8,'PRODUCTION_WIP_PALLET_BASE',false,.06);if(!pallet)continue;
-  for(const dz of [-.29,.29])fixture(x,y,1.03,.045,.09,0x285487,'PRODUCTION_WIP_PLASTIC_PALLET_RUNNER',true,.035);
+  for(const dz of [-.29,.29])fixture(x,y+dz,1.03,.045,.09,0x285487,'PRODUCTION_WIP_PLASTIC_PALLET_RUNNER',true,.035);
   for(let layer=0;layer<12;layer++)fixture(x,y,.96,.052,.74,layer%3?0xe8e5dc:0xdad8ce,'PRODUCTION_WIP_SHEET_LAYER',true,.16+layer*.052);
   const wipWrap=box(b,x,.445,-y,1.0,.64,.78,0xe7efed,0,.16);wipWrap.userData={semantic:'PRODUCTION_WIP_STRETCH_WRAP_REFERENCE',accuracy:'PHOTO_VISIBLE_WRAPPED_SHEET_STACK_NOT_INVENTORY'};
   for(const dx of [-.48,.48]){const band=box(b,x+dx,.45,-y,.018,.65,.78,0x7893a0);band.userData={semantic:'PRODUCTION_WIP_VERTICAL_BAND_REFERENCE',accuracy:'PHOTO_VISIBLE_LOAD_SECUREMENT_REFERENCE'};}
@@ -2037,7 +2047,7 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  for(const origin of [b,layers.furniture])origin.traverse(o=>{
   if(o===origin||o.parent===layers.doors||o.parent===layers.air_curtain)return;
   const s=String(o.userData?.semantic||'');let target=null;
-  if(/(?:^|_)FLOOR(?:_|$)|FLOOR_CONTROL_JOINT|FLOOR_SERVICE_CLEARANCE|WAREHOUSE_FORK_WHEEL_SCUFF|(?:^|_)AISLE_(?:BOUNDARY|ARROW|MARKING)|(?:^|_)STAGING_BOUNDARY|V204_(?:ROOM_DOOR_APPROACH_ZONE|CERAMIC_GROUT|VINYL_SEAM|ROOM_CONCRETE_CONTROL_JOINT)|^PHOTO_(?:GREEN_EPOXY_WORK_ZONE|YELLOW_AISLE_EDGE)/.test(s))target=layers.floor;
+  if(/(?:^|_)FLOOR(?:_|$)|FLOOR_CONTROL_JOINT|FLOOR_SERVICE_CLEARANCE|WAREHOUSE_FORK_WHEEL_SCUFF|PRODUCTION_AISLE_DIRECTION_ARROW_REFERENCE|(?:^|_)AISLE_(?:BOUNDARY|ARROW|MARKING)|(?:^|_)STAGING_BOUNDARY|V204_(?:ROOM_DOOR_APPROACH_ZONE|CERAMIC_GROUT|VINYL_SEAM|ROOM_CONCRETE_CONTROL_JOINT)|^PHOTO_(?:GREEN_EPOXY_WORK_ZONE|YELLOW_AISLE_EDGE)/.test(s))target=layers.floor;
   else if(origin===b&&/PRESS_ROOM_UPPER_GLAZING|PRESS_ROOM_GLAZING|IPAL_PHOTO_OPERATOR_ROOM_.*WINDOW|^(?:ROOM|EXTERIOR)_.*WINDOW/.test(s))target=layers.windows;
   else if(/V204_ROOM_DOOR_(?:OPEN_LEAF|SWING_ARC)|IPAL_PHOTO_OPERATOR_ROOM_.*DOOR/.test(s))target=layers.doors;
   else if(origin===b&&/^(?:RMS_|FG_|WRAPPED_PAPERBOARD|PRODUCTION_(?:WIP|MOBILE|HOUSEKEEPING|MATERIAL_STATUS|WASTE)|PACKAGING_)/.test(s))target=layers.furniture;

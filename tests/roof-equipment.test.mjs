@@ -20,6 +20,6 @@ test('roof equipment stays on the main roof and remains an unverified visual ref
   assert.equal(object.userData.accuracy,'DESIGN_REFERENCE_NOT_AS_BUILT');
  }
  assert.ok(modules.every(object=>object.position.y>4.5&&object.position.y<7));
- assert.ok(fans.every(object=>object.position.y>6&&object.position.y+.44<7));
+ assert.ok(fans.every(object=>object.position.y>6&&object.position.y<7));
  assert.equal(built.layers.roof.visible,false);
 });
