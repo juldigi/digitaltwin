@@ -347,7 +347,15 @@ export class PrintingSimulation{
     attr.needsUpdate=true;sheet.userData.printed=printed;sheet.userData.printRepresentation='CUMULATIVE_FULL_SHEET_REFERENCE_TINT_NO_FAKE_BANDS';
   }
   updateSheet(sheet,leadDistance){
-    const visible=leadDistance>=this.sheetLength&&leadDistance<=this.pathLength;
+    // A sheet becomes visible at its first forward motion, not only after the
+    // entire 720 mm length has left the feeder. Clip un-fed rows with the indexed
+    // geometry draw range instead of bunching them at the path origin.
+    const visible=leadDistance>0&&leadDistance<=this.pathLength;
+    const firstVisibleRow=Math.max(0,Math.min(this.sheetLengthSegments,
+      Math.floor((this.sheetLength-leadDistance)/this.sheetLength*this.sheetLengthSegments)));
+    const trianglesPerRow=this.sheetWidthSegments*6;
+    sheet.mesh.geometry.setDrawRange(firstVisibleRow*trianglesPerRow,
+      (this.sheetLengthSegments-firstVisibleRow)*trianglesPerRow);
     sheet.mesh.visible=visible;sheet.gripper.visible=visible;
     if(!visible)return false;
     const pos=sheet.mesh.geometry.attributes.position,w=this.sheetWidthSegments,l=this.sheetLengthSegments;
@@ -583,7 +591,9 @@ export class PrintingSimulation{
     const dryerLeft=D.dryerCenterX-D.dryerLength/2-.12,dryerRight=D.dryerCenterX+D.dryerLength/2+.12;
     for(let i=0;i<this.sheets.length;i++){
       const sheet=this.sheets[i],absolute=travelled-i*this.sheetGapMeters;
-      if(absolute<this.sheetLength){sheet.mesh.visible=false;sheet.gripper.visible=false;continue;}
+      // A sheet is not present until its leading edge reaches the feeder path.
+      // Once positive, render its exposed portion instead of hiding the first 720 mm.
+      if(absolute<=0){sheet.mesh.visible=false;sheet.gripper.visible=false;continue;}
       const cycle=Math.floor(absolute/this.cycleDistance),local=mod(absolute,this.cycleDistance);
       if(local>this.transportTimeLength){
         if(sheet.userData.lastDeliveryCycle===cycle){sheet.mesh.visible=false;sheet.gripper.visible=false;continue;}
