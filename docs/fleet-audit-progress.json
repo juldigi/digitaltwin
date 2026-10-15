@@ -11,8 +11,8 @@
     "BMJ-MCH-0040",
     "BMJ-MCH-0041"
   ],
-  "batchStatus": "RELEASE_PENDING",
-  "batchReleaseStatus": "RELEASE_PENDING",
+  "batchStatus": "COMPLETE",
+  "batchReleaseStatus": "VERIFIED",
   "batchReleaseReport": "docs/batch39-release.md",
   "batchValidation": {
     "focusedTests": 46,
@@ -22,10 +22,11 @@
     "visual3DVerified": false,
     "fullTests": 1625
   },
-  "status": "IN_PROGRESS",
+  "status": "COMPLETE",
   "cursor": {
-    "machineId": "BMJ-MCH-0039",
-    "partIndex": 0
+    "machineId": null,
+    "partIndex": 0,
+    "exhausted": true
   },
   "baselineCommit": "b5e45a82ce1aeaf9094b0a5c3fd8d985b8a9e96f",
   "machines": [
@@ -2978,55 +2979,199 @@
       "name": "AHU 6",
       "model": null,
       "area": "UTILITY",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "parts": [
         {
           "part": "intake damper mixing",
           "status": "BLOCKED_EVIDENCE",
           "auditProcessed": true,
-          "report": "docs/ahu6-whole-machine-audit.md"
+          "report": "docs/ahu6-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+            "workflows": [
+              38696293499,
+              38696293510,
+              38696293562
+            ],
+            "conclusion": "success",
+            "tests": 1625,
+            "focusedTests": 46,
+            "productionSourceHashesMatched": true,
+            "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+            "factoryChunkSHA256": {
+              "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+            },
+            "visualFallbackVerified": true,
+            "visual3DVerified": false
+          }
         },
         {
           "part": "filters differential pressure",
           "status": "BLOCKED_EVIDENCE",
           "auditProcessed": true,
-          "report": "docs/ahu6-whole-machine-audit.md"
+          "report": "docs/ahu6-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+            "workflows": [
+              38696293499,
+              38696293510,
+              38696293562
+            ],
+            "conclusion": "success",
+            "tests": 1625,
+            "focusedTests": 46,
+            "productionSourceHashesMatched": true,
+            "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+            "factoryChunkSHA256": {
+              "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+            },
+            "visualFallbackVerified": true,
+            "visual3DVerified": false
+          }
         },
         {
           "part": "coil headers",
           "status": "BLOCKED_EVIDENCE",
           "auditProcessed": true,
-          "report": "docs/ahu6-whole-machine-audit.md"
+          "report": "docs/ahu6-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+            "workflows": [
+              38696293499,
+              38696293510,
+              38696293562
+            ],
+            "conclusion": "success",
+            "tests": 1625,
+            "focusedTests": 46,
+            "productionSourceHashesMatched": true,
+            "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+            "factoryChunkSHA256": {
+              "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+            },
+            "visualFallbackVerified": true,
+            "visual3DVerified": false
+          }
         },
         {
           "part": "condensate pan trap",
           "status": "BLOCKED_EVIDENCE",
           "auditProcessed": true,
-          "report": "docs/ahu6-whole-machine-audit.md"
+          "report": "docs/ahu6-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+            "workflows": [
+              38696293499,
+              38696293510,
+              38696293562
+            ],
+            "conclusion": "success",
+            "tests": 1625,
+            "focusedTests": 46,
+            "productionSourceHashesMatched": true,
+            "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+            "factoryChunkSHA256": {
+              "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+            },
+            "visualFallbackVerified": true,
+            "visual3DVerified": false
+          }
         },
         {
           "part": "supply fan drive",
           "status": "BLOCKED_EVIDENCE",
           "auditProcessed": true,
-          "report": "docs/ahu6-whole-machine-audit.md"
+          "report": "docs/ahu6-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+            "workflows": [
+              38696293499,
+              38696293510,
+              38696293562
+            ],
+            "conclusion": "success",
+            "tests": 1625,
+            "focusedTests": 46,
+            "productionSourceHashesMatched": true,
+            "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+            "factoryChunkSHA256": {
+              "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+            },
+            "visualFallbackVerified": true,
+            "visual3DVerified": false
+          }
         },
         {
           "part": "service casing supports",
           "status": "BLOCKED_EVIDENCE",
           "auditProcessed": true,
-          "report": "docs/ahu6-whole-machine-audit.md"
+          "report": "docs/ahu6-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+            "workflows": [
+              38696293499,
+              38696293510,
+              38696293562
+            ],
+            "conclusion": "success",
+            "tests": 1625,
+            "focusedTests": 46,
+            "productionSourceHashesMatched": true,
+            "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+            "factoryChunkSHA256": {
+              "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+            },
+            "visualFallbackVerified": true,
+            "visual3DVerified": false
+          }
         },
         {
           "part": "discharge controller sensors",
           "status": "BLOCKED_EVIDENCE",
           "auditProcessed": true,
-          "report": "docs/ahu6-whole-machine-audit.md"
+          "report": "docs/ahu6-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+            "workflows": [
+              38696293499,
+              38696293510,
+              38696293562
+            ],
+            "conclusion": "success",
+            "tests": 1625,
+            "focusedTests": 46,
+            "productionSourceHashesMatched": true,
+            "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+            "factoryChunkSHA256": {
+              "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+            },
+            "visualFallbackVerified": true,
+            "visual3DVerified": false
+          }
         },
         {
           "part": "supply return outdoor duct",
           "status": "BLOCKED_EVIDENCE",
           "auditProcessed": true,
-          "report": "docs/ahu6-whole-machine-audit.md"
+          "report": "docs/ahu6-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+            "workflows": [
+              38696293499,
+              38696293510,
+              38696293562
+            ],
+            "conclusion": "success",
+            "tests": 1625,
+            "focusedTests": 46,
+            "productionSourceHashesMatched": true,
+            "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+            "factoryChunkSHA256": {
+              "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+            },
+            "visualFallbackVerified": true,
+            "visual3DVerified": false
+          }
         }
       ],
       "reports": [
@@ -3040,62 +3185,224 @@
         "coil/pan mounting and drain design",
         "fan profile/support/rating and interlocks",
         "plant ducts/mounting/control and visual3D"
-      ]
+      ],
+      "releaseEvidence": {
+        "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+        "workflows": [
+          38696293499,
+          38696293510,
+          38696293562
+        ],
+        "conclusion": "success",
+        "tests": 1625,
+        "focusedTests": 46,
+        "productionSourceHashesMatched": true,
+        "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+        "factoryChunkSHA256": {
+          "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+        },
+        "visualFallbackVerified": true,
+        "visual3DVerified": false
+      }
     },
     {
       "machineId": "BMJ-MCH-0040",
       "name": "AHU 7 (SANSIN)",
       "model": null,
       "area": "UTILITY",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "parts": [
         {
           "part": "indoor inlet damper",
           "status": "BLOCKED_EVIDENCE",
           "auditProcessed": true,
-          "report": "docs/sansin7-whole-machine-audit.md"
+          "report": "docs/sansin7-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+            "workflows": [
+              38696293499,
+              38696293510,
+              38696293562
+            ],
+            "conclusion": "success",
+            "tests": 1625,
+            "focusedTests": 46,
+            "productionSourceHashesMatched": true,
+            "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+            "factoryChunkSHA256": {
+              "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+            },
+            "visualFallbackVerified": true,
+            "visual3DVerified": false
+          }
         },
         {
           "part": "filter mixing",
           "status": "BLOCKED_EVIDENCE",
           "auditProcessed": true,
-          "report": "docs/sansin7-whole-machine-audit.md"
+          "report": "docs/sansin7-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+            "workflows": [
+              38696293499,
+              38696293510,
+              38696293562
+            ],
+            "conclusion": "success",
+            "tests": 1625,
+            "focusedTests": 46,
+            "productionSourceHashesMatched": true,
+            "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+            "factoryChunkSHA256": {
+              "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+            },
+            "visualFallbackVerified": true,
+            "visual3DVerified": false
+          }
         },
         {
           "part": "wet curtain evaporator",
           "status": "BLOCKED_EVIDENCE",
           "auditProcessed": true,
-          "report": "docs/sansin7-whole-machine-audit.md"
+          "report": "docs/sansin7-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+            "workflows": [
+              38696293499,
+              38696293510,
+              38696293562
+            ],
+            "conclusion": "success",
+            "tests": 1625,
+            "focusedTests": 46,
+            "productionSourceHashesMatched": true,
+            "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+            "factoryChunkSHA256": {
+              "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+            },
+            "visualFallbackVerified": true,
+            "visual3DVerified": false
+          }
         },
         {
           "part": "indoor fan plenum",
           "status": "BLOCKED_EVIDENCE",
           "auditProcessed": true,
-          "report": "docs/sansin7-whole-machine-audit.md"
+          "report": "docs/sansin7-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+            "workflows": [
+              38696293499,
+              38696293510,
+              38696293562
+            ],
+            "conclusion": "success",
+            "tests": 1625,
+            "focusedTests": 46,
+            "productionSourceHashesMatched": true,
+            "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+            "factoryChunkSHA256": {
+              "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+            },
+            "visualFallbackVerified": true,
+            "visual3DVerified": false
+          }
         },
         {
           "part": "outdoor compressor condenser fan",
           "status": "BLOCKED_EVIDENCE",
           "auditProcessed": true,
-          "report": "docs/sansin7-whole-machine-audit.md"
+          "report": "docs/sansin7-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+            "workflows": [
+              38696293499,
+              38696293510,
+              38696293562
+            ],
+            "conclusion": "success",
+            "tests": 1625,
+            "focusedTests": 46,
+            "productionSourceHashesMatched": true,
+            "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+            "factoryChunkSHA256": {
+              "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+            },
+            "visualFallbackVerified": true,
+            "visual3DVerified": false
+          }
         },
         {
           "part": "water refrigerant interconnect",
           "status": "BLOCKED_EVIDENCE",
           "auditProcessed": true,
-          "report": "docs/sansin7-whole-machine-audit.md"
+          "report": "docs/sansin7-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+            "workflows": [
+              38696293499,
+              38696293510,
+              38696293562
+            ],
+            "conclusion": "success",
+            "tests": 1625,
+            "focusedTests": 46,
+            "productionSourceHashesMatched": true,
+            "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+            "factoryChunkSHA256": {
+              "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+            },
+            "visualFallbackVerified": true,
+            "visual3DVerified": false
+          }
         },
         {
           "part": "controller electrical supports",
           "status": "BLOCKED_EVIDENCE",
           "auditProcessed": true,
-          "report": "docs/sansin7-whole-machine-audit.md"
+          "report": "docs/sansin7-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+            "workflows": [
+              38696293499,
+              38696293510,
+              38696293562
+            ],
+            "conclusion": "success",
+            "tests": 1625,
+            "focusedTests": 46,
+            "productionSourceHashesMatched": true,
+            "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+            "factoryChunkSHA256": {
+              "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+            },
+            "visualFallbackVerified": true,
+            "visual3DVerified": false
+          }
         },
         {
           "part": "supply return outdoor airflow",
           "status": "BLOCKED_EVIDENCE",
           "auditProcessed": true,
-          "report": "docs/sansin7-whole-machine-audit.md"
+          "report": "docs/sansin7-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+            "workflows": [
+              38696293499,
+              38696293510,
+              38696293562
+            ],
+            "conclusion": "success",
+            "tests": 1625,
+            "focusedTests": 46,
+            "productionSourceHashesMatched": true,
+            "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+            "factoryChunkSHA256": {
+              "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+            },
+            "visualFallbackVerified": true,
+            "visual3DVerified": false
+          }
         }
       ],
       "reports": [
@@ -3109,62 +3416,224 @@
         "installed water/refrigerant P&ID and mounting",
         "duct connectors/routes and CFD",
         "actual control/interlocks and visual3D"
-      ]
+      ],
+      "releaseEvidence": {
+        "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+        "workflows": [
+          38696293499,
+          38696293510,
+          38696293562
+        ],
+        "conclusion": "success",
+        "tests": 1625,
+        "focusedTests": 46,
+        "productionSourceHashesMatched": true,
+        "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+        "factoryChunkSHA256": {
+          "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+        },
+        "visualFallbackVerified": true,
+        "visual3DVerified": false
+      }
     },
     {
       "machineId": "BMJ-MCH-0041",
       "name": "AHU 8",
       "model": null,
       "area": "UTILITY",
-      "status": "RELEASE_PENDING",
+      "status": "COMPLETE",
       "parts": [
         {
           "part": "intake damper mixing",
           "status": "BLOCKED_EVIDENCE",
           "auditProcessed": true,
-          "report": "docs/ahu8-whole-machine-audit.md"
+          "report": "docs/ahu8-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+            "workflows": [
+              38696293499,
+              38696293510,
+              38696293562
+            ],
+            "conclusion": "success",
+            "tests": 1625,
+            "focusedTests": 46,
+            "productionSourceHashesMatched": true,
+            "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+            "factoryChunkSHA256": {
+              "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+            },
+            "visualFallbackVerified": true,
+            "visual3DVerified": false
+          }
         },
         {
           "part": "filters differential pressure",
           "status": "BLOCKED_EVIDENCE",
           "auditProcessed": true,
-          "report": "docs/ahu8-whole-machine-audit.md"
+          "report": "docs/ahu8-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+            "workflows": [
+              38696293499,
+              38696293510,
+              38696293562
+            ],
+            "conclusion": "success",
+            "tests": 1625,
+            "focusedTests": 46,
+            "productionSourceHashesMatched": true,
+            "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+            "factoryChunkSHA256": {
+              "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+            },
+            "visualFallbackVerified": true,
+            "visual3DVerified": false
+          }
         },
         {
           "part": "coil headers",
           "status": "BLOCKED_EVIDENCE",
           "auditProcessed": true,
-          "report": "docs/ahu8-whole-machine-audit.md"
+          "report": "docs/ahu8-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+            "workflows": [
+              38696293499,
+              38696293510,
+              38696293562
+            ],
+            "conclusion": "success",
+            "tests": 1625,
+            "focusedTests": 46,
+            "productionSourceHashesMatched": true,
+            "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+            "factoryChunkSHA256": {
+              "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+            },
+            "visualFallbackVerified": true,
+            "visual3DVerified": false
+          }
         },
         {
           "part": "condensate pan trap",
           "status": "BLOCKED_EVIDENCE",
           "auditProcessed": true,
-          "report": "docs/ahu8-whole-machine-audit.md"
+          "report": "docs/ahu8-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+            "workflows": [
+              38696293499,
+              38696293510,
+              38696293562
+            ],
+            "conclusion": "success",
+            "tests": 1625,
+            "focusedTests": 46,
+            "productionSourceHashesMatched": true,
+            "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+            "factoryChunkSHA256": {
+              "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+            },
+            "visualFallbackVerified": true,
+            "visual3DVerified": false
+          }
         },
         {
           "part": "supply fan drive",
           "status": "BLOCKED_EVIDENCE",
           "auditProcessed": true,
-          "report": "docs/ahu8-whole-machine-audit.md"
+          "report": "docs/ahu8-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+            "workflows": [
+              38696293499,
+              38696293510,
+              38696293562
+            ],
+            "conclusion": "success",
+            "tests": 1625,
+            "focusedTests": 46,
+            "productionSourceHashesMatched": true,
+            "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+            "factoryChunkSHA256": {
+              "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+            },
+            "visualFallbackVerified": true,
+            "visual3DVerified": false
+          }
         },
         {
           "part": "service casing supports",
           "status": "BLOCKED_EVIDENCE",
           "auditProcessed": true,
-          "report": "docs/ahu8-whole-machine-audit.md"
+          "report": "docs/ahu8-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+            "workflows": [
+              38696293499,
+              38696293510,
+              38696293562
+            ],
+            "conclusion": "success",
+            "tests": 1625,
+            "focusedTests": 46,
+            "productionSourceHashesMatched": true,
+            "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+            "factoryChunkSHA256": {
+              "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+            },
+            "visualFallbackVerified": true,
+            "visual3DVerified": false
+          }
         },
         {
           "part": "discharge controller sensors",
           "status": "BLOCKED_EVIDENCE",
           "auditProcessed": true,
-          "report": "docs/ahu8-whole-machine-audit.md"
+          "report": "docs/ahu8-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+            "workflows": [
+              38696293499,
+              38696293510,
+              38696293562
+            ],
+            "conclusion": "success",
+            "tests": 1625,
+            "focusedTests": 46,
+            "productionSourceHashesMatched": true,
+            "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+            "factoryChunkSHA256": {
+              "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+            },
+            "visualFallbackVerified": true,
+            "visual3DVerified": false
+          }
         },
         {
           "part": "supply return outdoor duct",
           "status": "BLOCKED_EVIDENCE",
           "auditProcessed": true,
-          "report": "docs/ahu8-whole-machine-audit.md"
+          "report": "docs/ahu8-whole-machine-audit.md",
+          "releaseEvidence": {
+            "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+            "workflows": [
+              38696293499,
+              38696293510,
+              38696293562
+            ],
+            "conclusion": "success",
+            "tests": 1625,
+            "focusedTests": 46,
+            "productionSourceHashesMatched": true,
+            "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+            "factoryChunkSHA256": {
+              "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+            },
+            "visualFallbackVerified": true,
+            "visual3DVerified": false
+          }
         }
       ],
       "reports": [
@@ -3178,7 +3647,25 @@
         "coil/pan mounting and drain design",
         "fan profile/support/rating and interlocks",
         "plant ducts/mounting/control and visual3D"
-      ]
+      ],
+      "releaseEvidence": {
+        "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+        "workflows": [
+          38696293499,
+          38696293510,
+          38696293562
+        ],
+        "conclusion": "success",
+        "tests": 1625,
+        "focusedTests": 46,
+        "productionSourceHashesMatched": true,
+        "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+        "factoryChunkSHA256": {
+          "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+        },
+        "visualFallbackVerified": true,
+        "visual3DVerified": false
+      }
     }
   ],
   "history": [
@@ -3758,46 +4245,129 @@
         "visual3DVerified": false
       },
       "nextMachineId": "BMJ-MCH-0039"
+    },
+    {
+      "machineId": "BMJ-MCH-0039",
+      "part": "whole machine: all eight functional parts and second pass, with BLOCKED_EVIDENCE retained",
+      "status": "COMPLETE",
+      "report": "docs/ahu6-whole-machine-audit.md",
+      "releaseEvidence": {
+        "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+        "workflows": [
+          38696293499,
+          38696293510,
+          38696293562
+        ],
+        "conclusion": "success",
+        "tests": 1625,
+        "focusedTests": 46,
+        "productionSourceHashesMatched": true,
+        "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+        "factoryChunkSHA256": {
+          "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+        },
+        "visualFallbackVerified": true,
+        "visual3DVerified": false
+      },
+      "nextMachineId": "BMJ-MCH-0040"
+    },
+    {
+      "machineId": "BMJ-MCH-0040",
+      "part": "whole machine: all eight functional parts and second pass, with BLOCKED_EVIDENCE retained",
+      "status": "COMPLETE",
+      "report": "docs/sansin7-whole-machine-audit.md",
+      "releaseEvidence": {
+        "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+        "workflows": [
+          38696293499,
+          38696293510,
+          38696293562
+        ],
+        "conclusion": "success",
+        "tests": 1625,
+        "focusedTests": 46,
+        "productionSourceHashesMatched": true,
+        "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+        "factoryChunkSHA256": {
+          "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+        },
+        "visualFallbackVerified": true,
+        "visual3DVerified": false
+      },
+      "nextMachineId": "BMJ-MCH-0041"
+    },
+    {
+      "machineId": "BMJ-MCH-0041",
+      "part": "whole machine: all eight functional parts and second pass, with BLOCKED_EVIDENCE retained",
+      "status": "COMPLETE",
+      "report": "docs/ahu8-whole-machine-audit.md",
+      "releaseEvidence": {
+        "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+        "workflows": [
+          38696293499,
+          38696293510,
+          38696293562
+        ],
+        "conclusion": "success",
+        "tests": 1625,
+        "focusedTests": 46,
+        "productionSourceHashesMatched": true,
+        "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+        "factoryChunkSHA256": {
+          "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+        },
+        "visualFallbackVerified": true,
+        "visual3DVerified": false
+      },
+      "nextMachineId": null
     }
   ],
-  "updatedAt": "2026-10-15T07:02:59.270Z",
+  "updatedAt": "2026-10-15T07:12:07.141Z",
   "lastAuditRelease": {
-    "commit": "95ce2790519a540c61a9355dadc4c9301c2fb67a",
+    "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
     "workflows": [
-      38605490594,
-      38605490590,
-      38605490600
+      38696293499,
+      38696293510,
+      38696293562
     ],
     "conclusion": "success",
-    "tests": 1622,
-    "productionSourceHashesMatched": true,
-    "referenceModuleSHA256": "78402c780b9473b75b2e2aad1ab4cabc137396126cfa522a44745a1905aad854",
-    "visualFallbackVerified": true,
-    "visual3DVerified": false,
-    "machineIds": [
-      "BMJ-MCH-0036",
-      "BMJ-MCH-0037",
-      "BMJ-MCH-0038"
-    ],
-    "nextMachineId": "BMJ-MCH-0039"
-  },
-  "batchRemainingWork": [
-    "All release workflows",
-    "Production source/bake hash and runtime verification",
-    "Final ledger gates and automation closure"
-  ],
-  "batchReleaseEvidence": {
-    "status": "RELEASE_PENDING",
     "tests": 1625,
     "focusedTests": 46,
+    "productionSourceHashesMatched": true,
     "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
     "factoryChunkSHA256": {
       "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
     },
+    "visualFallbackVerified": true,
+    "visual3DVerified": false,
+    "machineIds": [
+      "BMJ-MCH-0039",
+      "BMJ-MCH-0040",
+      "BMJ-MCH-0041"
+    ],
+    "nextMachineId": null
+  },
+  "batchRemainingWork": [],
+  "batchReleaseEvidence": {
+    "commit": "3e738468ffaa586824852d413646ceb8bbc3e837",
+    "workflows": [
+      38696293499,
+      38696293510,
+      38696293562
+    ],
+    "conclusion": "success",
+    "tests": 1625,
+    "focusedTests": 46,
+    "productionSourceHashesMatched": true,
+    "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+    "factoryChunkSHA256": {
+      "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+    },
+    "visualFallbackVerified": true,
     "visual3DVerified": false
   },
   "ledgerGatePending": false,
-  "ledgerGateInstruction": "Prior closure gates verified; resume final batch release before any new asset.",
+  "ledgerGateInstruction": "Prior ledger and implementation release verified. No next machine. Verify this final closure commit's CI/frontend/Cloudflare workflows before disabling current Audit dan perbaiki mesin automation. Do not create recursive self-SHA-only commits.",
   "previousBatchReleaseEvidence": {
     "commit": "95ce2790519a540c61a9355dadc4c9301c2fb67a",
     "workflows": [
@@ -3820,5 +4390,13 @@
       38606569994
     ],
     "conclusion": "success"
+  },
+  "processedMachineCount": 41,
+  "completionBoundary": "All41 audit entries processed; installed engineering/CFD/visual3D and section-specific evidence blockers remain unresolved. Not an as-built certificate.",
+  "finalReport": "docs/fleet-audit-final.md",
+  "automationClosure": {
+    "automationId": "6acbdd68b24c81919fe0078b8f84784a",
+    "action": "DISABLE_AFTER_THIS_CLOSURE_GATES_SUCCEED",
+    "reason": "All41 registry assets processed; remaining evidence blockers are explicit, no automatic restart."
   }
 }
