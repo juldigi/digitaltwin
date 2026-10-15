@@ -773,7 +773,7 @@ export function buildActualFactory(layout,fleet){
  const roomWasteBin=(x,y,tag='ROOM')=>{const o=fixture(x,y,.34,.48,.34,0x4d6269,tag+'_WASTE_BIN',false,.24);if(o){fixture(x,y,.30,.025,.30,0x29383e,tag+'_WASTE_BIN_RIM',true,.49);buildingDetailStats.roomWasteBins++;}return o;};
  const wallClock=(x,y,tag='ROOM')=>{const g=new T.Group();g.position.set(x,2.16,-y);b.add(g);const face=new T.Mesh(new T.CylinderGeometry(.16,.16,.026,24),material(0xf0eee5));face.rotation.x=Math.PI/2;face.userData={semantic:tag+'_WALL_CLOCK',accuracy:'ROOM_SUPPORT_REFERENCE_NOT_AS_BUILT',researchVersion:'V204'};g.add(face);line(g,new T.Vector3(0,.015,-.02),new T.Vector3(.06,.015,-.02),.006,0x313b3f);line(g,new T.Vector3(0,.015,-.02),new T.Vector3(0,.085,-.02),.006,0x313b3f);buildingDetailStats.wallClocks++;};
  const emptyPalletStack=(x,y,count=3,tag='PACKAGING')=>{if(!reserveFurnitureFootprint(x,y,1.40,1.10,tag+'_EMPTY_PALLET_STACK_FOOTPRINT'))return false;const g=new T.Group();g.position.set(x,0,-y);b.add(g);g.userData={semantic:tag+'_EMPTY_PALLET_STACK_REFERENCE',accuracy:'PACKAGING_MATERIAL_HANDLING_REFERENCE_NOT_INVENTORY',researchVersion:'V204'};for(let n=0;n<count;n++){for(const z of [-.38,0,.38])box(g,0,.055+n*.15,z,.98,.09,.11,0x967953);for(const xx of [-.36,.36])box(g,xx,.105+n*.15,0,.10,.07,.82,0x806543);}buildingDetailStats.emptyPalletStacks++;buildingDetailStats.packagingSupportObjects++;return true;};
- const mobilePaperTrolley=(x,y,tag='PRODUCTION')=>{if(!reserveFurnitureFootprint(x,y,1.35,.95,tag+'_MOBILE_PAPER_TROLLEY_FOOTPRINT'))return false;const g=new T.Group();g.position.set(x,0,-y);b.add(g);g.userData={semantic:tag+'_MOBILE_PAPER_TROLLEY_REFERENCE',accuracy:'PACKAGING_MATERIAL_HANDLING_REFERENCE_NOT_AS_BUILT',researchVersion:'V204'};box(g,0,.26,0,1.15,.10,.72,0x687e86);for(const sx of [-.50,.50])for(const sz of [-.27,.27]){const wh=new T.Mesh(new T.CylinderGeometry(.065,.065,.055,12),material(0x343d41));wh.rotation.z=Math.PI/2;wh.position.set(sx,.07,sz);g.add(wh);}for(const sx of [-.52,.52])line(g,new T.Vector3(sx,.30,.31),new T.Vector3(sx,1.02,.31),.025,0x4e6269);line(g,new T.Vector3(-.52,1.02,.31),new T.Vector3(.52,1.02,.31),.025,0x4e6269);for(let i=0;i<5;i++)box(g,0,.34+i*.035,0,.98,.025,.62,i%2?0xe9e3d6:0xf0eadf);buildingDetailStats.mobilePaperTrolleys++;buildingDetailStats.packagingSupportObjects++;return true;};
+ const mobilePaperTrolley=(x,y,tag='PRODUCTION')=>{if(!reserveFurnitureFootprint(x,y,1.35,.95,tag+'_MOBILE_PAPER_TROLLEY_FOOTPRINT'))return false;const g=new T.Group();g.position.set(x,0,-y);b.add(g);g.userData={semantic:tag+'_MOBILE_PAPER_TROLLEY_REFERENCE',accuracy:'PACKAGING_MATERIAL_HANDLING_REFERENCE_NOT_AS_BUILT',researchVersion:'V204'};box(g,0,.26,0,1.15,.10,.72,0x687e86);for(const sx of [-.50,.50])for(const sz of [-.27,.27]){const wh=new T.Mesh(new T.CylinderGeometry(.065,.065,.055,12),material(0x343d41));wh.rotation.z=Math.PI/2;wh.position.set(sx,.07,sz);g.add(wh);}for(const sx of [-.52,.52])line(g,new T.Vector3(sx,.30,.31),new T.Vector3(sx,1.02,.31),.025,0x4e6269);line(g,new T.Vector3(-.52,1.02,.31),new T.Vector3(.52,1.02,.31),.025,0x4e6269);for(let i=0;i<5;i++)box(g,0,.3225+i*.025,0,.98,.025,.62,i%2?0xe9e3d6:0xf0eadf);buildingDetailStats.mobilePaperTrolleys++;buildingDetailStats.packagingSupportObjects++;return true;};
  const floorScale=(x,y,tag='WAREHOUSE')=>{const o=fixture(x,y,1.05,.08,.95,0x77888c,tag+'_FLOOR_SCALE_REFERENCE',false,.04);if(!o)return false;fixture(x+.62,y,.07,1.05,.07,0x596b72,tag+'_FLOOR_SCALE_POST',true,.525);fixture(x+.62,y,.20,.34,.12,0x26363d,tag+'_FLOOR_SCALE_DISPLAY',true,1.02);buildingDetailStats.floorScaleReferences++;buildingDetailStats.packagingSupportObjects++;return true;};
  const stretchWrapStation=(x,y,tag='FG')=>{const base=fixture(x,y,1.20,.08,1.20,0x687b82,tag+'_STRETCH_WRAP_TURNTABLE_REFERENCE',false,.04);if(!base)return false;const disc=new T.Mesh(new T.CylinderGeometry(.48,.48,.06,28),material(0x566970));disc.position.set(x,.10,-y);disc.userData={semantic:tag+'_STRETCH_WRAP_TURNTABLE_DISC_REFERENCE',accuracy:'PACKAGING_DISPATCH_REFERENCE_NOT_AS_BUILT',researchVersion:'V204'};b.add(disc);fixture(x+.58,y,.10,1.55,.10,0x4f636a,tag+'_STRETCH_WRAP_MAST_REFERENCE',true,.775);fixture(x+.58,y-.10,.18,.38,.14,0x32434a,tag+'_STRETCH_WRAP_FILM_CARRIAGE_REFERENCE',true,.82);buildingDetailStats.stretchWrapStations++;buildingDetailStats.packagingSupportObjects++;return true;};
  const operationalReferenceAudit=[];
@@ -834,7 +834,7 @@ export function buildActualFactory(layout,fleet){
   if(!reserveFurnitureFootprint(x,y,1.02,.48,tag+'_PROOF_RACK_FOOTPRINT'))return false;const g=new T.Group();g.position.set(x,0,-y);b.add(g);
   g.userData={semantic:tag+'_PROOF_SAMPLE_RACK_REFERENCE',accuracy:'PRINTING_SAMPLE_HANDLING_REFERENCE_NOT_AS_BUILT',researchVersion:'V204',functionalReferenceVisible:true};
   for(const sx of [-.46,.46])line(g,new T.Vector3(sx,.06,-.18),new T.Vector3(sx,1.46,-.18),.024,0x61747c);
-  for(let i=0;i<6;i++){const py=.26+i*.20;box(g,0,py,0,.90,.022,.40,0x84969a);const sheet=box(g,(i%2-.5)*.08,py+.04,-.01,.76,.012,.32,i%2?0xe9e2d3:0xf2ecdf);sheet.rotation.y=(i%3-1)*.025;}
+  for(let i=0;i<6;i++){const py=.26+i*.20;box(g,0,py,0,.90,.022,.40,0x84969a);const sheet=box(g,(i%2-.5)*.08,py+.017,-.01,.76,.012,.32,i%2?0xe9e2d3:0xf2ecdf);sheet.rotation.y=(i%3-1)*.025;}
   box(g,0,1.52,-.18,.88,.18,.035,0xe9e7dc);buildingDetailStats.printingProofRacks++;return true;
  };
  const closedConsumablesCabinet=(x,y,tag='PRINTING')=>{
@@ -847,7 +847,7 @@ export function buildActualFactory(layout,fleet){
  const cutSheetHandlingTrolley=(x,y,tag='SHEET')=>{
   if(!reserveFurnitureFootprint(x,y,1.28,.82,tag+'_SHEET_TROLLEY_FOOTPRINT'))return false;const g=new T.Group();g.position.set(x,0,-y);b.add(g);
   g.userData={semantic:tag+'_CUT_SHEET_HANDLING_TROLLEY_REFERENCE',accuracy:'SHEET_HANDLING_REFERENCE_NOT_AS_BUILT',researchVersion:'V204',functionalReferenceVisible:true};
-  box(g,0,.22,0,1.16,.08,.70,0x697e85);for(let i=0;i<9;i++)box(g,0,.31+i*.025,0,1.03,.018,.60,i%3?0xeee8dc:0xe1dbc9);
+  box(g,0,.22,0,1.16,.08,.70,0x697e85);for(let i=0;i<9;i++)box(g,0,.269+i*.018,0,1.03,.018,.60,i%3?0xeee8dc:0xe1dbc9);
   for(const sx of [-.50,.50])for(const sz of [-.26,.26]){const wh=new T.Mesh(new T.CylinderGeometry(.055,.055,.05,10),material(0x343e42));wh.rotation.z=Math.PI/2;wh.position.set(sx,.06,sz);g.add(wh);}
   buildingDetailStats.sheetHandlingTrolleys++;return true;
  };
@@ -867,7 +867,7 @@ export function buildActualFactory(layout,fleet){
  const cartonBlankTrolley=(x,y,tag='FOLDER')=>{
   if(!reserveFurnitureFootprint(x,y,1.18,.76,tag+'_BLANK_TROLLEY_FOOTPRINT'))return false;const g=new T.Group();g.position.set(x,0,-y);b.add(g);
   g.userData={semantic:tag+'_CARTON_BLANK_TROLLEY_REFERENCE',accuracy:'FOLDER_GLUER_MATERIAL_HANDLING_REFERENCE_NOT_AS_BUILT',researchVersion:'V204',functionalReferenceVisible:true};
-  box(g,0,.18,0,1.08,.08,.64,0x677d84);for(let i=0;i<12;i++){const s=box(g,0,.27+i*.022,0,.96,.015,.52,i%2?0xcdb68f:0xd8c29b);s.rotation.y=(i%3-1)*.012;}
+  box(g,0,.18,0,1.08,.08,.64,0x677d84);for(let i=0;i<12;i++){const s=box(g,0,.2275+i*.015,0,.96,.015,.52,i%2?0xcdb68f:0xd8c29b);s.rotation.y=(i%3-1)*.012;}
   for(const sx of [-.46,.46])line(g,new T.Vector3(sx,.22,.25),new T.Vector3(sx,1.05,.25),.022,0x52676e);buildingDetailStats.cartonBlankTrolleys++;return true;
  };
  const palletJack=(x,y,rotation=0,tag='WAREHOUSE')=>{
@@ -958,9 +958,9 @@ export function buildActualFactory(layout,fleet){
   rb(cg,0,.75,-.22,.46,.50,.06,0x526a75,tag+'_CHAIR_BACK');
   if(task){
    const stem=new T.Mesh(new T.CylinderGeometry(.035,.045,.34,10),material(0x4d5c62));stem.position.set(0,.27,0);stem.userData={semantic:'V202_'+tag+'_CHAIR_GAS_LIFT',researchVersion:'V204'};cg.add(stem);
-   for(const sx of [-.29,.29]){rb(cg,sx,.64,0,.045,.30,.045,0x4f626a,tag+'_CHAIR_ARM_POST');rb(cg,sx,.80,-.03,.07,.035,.25,0x697d85,tag+'_CHAIR_ARM_PAD');}
+   for(const sx of [-.24,.24]){rb(cg,sx,.64,0,.045,.30,.045,0x4f626a,tag+'_CHAIR_ARM_POST');rb(cg,sx,.80,-.03,.07,.035,.25,0x697d85,tag+'_CHAIR_ARM_PAD');}
    for(let a=0;a<Math.PI*2;a+=Math.PI*2/5){const ex=Math.cos(a)*.28,ez=Math.sin(a)*.28;rl(cg,new T.Vector3(0,.10,0),new T.Vector3(ex,.07,ez),.016,0x4b5960,tag+'_CHAIR_BASE');const wh=new T.Mesh(new T.CylinderGeometry(.032,.032,.026,10),material(0x303a3f));wh.rotation.z=Math.PI/2;wh.position.set(ex,.045,ez);wh.userData={semantic:'V203_'+tag+'_CHAIR_CASTER',accuracy:'ERGONOMIC_FURNITURE_REFERENCE_NOT_AS_BUILT',researchVersion:'V204',functionalReferenceVisible:true};cg.add(wh);buildingDetailStats.v203ChairCasters++;}
-  }else{for(const sx of [-.17,.17])for(const sz of [-.15,.15])rb(cg,sx,.21,sz,.035,.42,.035,0x52646b,tag+'_CHAIR_LEG');}
+  }else{for(const sx of [-.17,.17])for(const sz of [-.15,.15])rb(cg,sx,.215,sz,.035,.43,.035,0x52646b,tag+'_CHAIR_LEG');}
   const fl=Math.hypot(dx,dz)||1,fx=Math.sin(theta),fz=Math.cos(theta),txv=dx/fl,tzv=dz/fl,dot=Math.max(-1,Math.min(1,fx*txv+fz*tzv)),errorDeg=T.MathUtils.radToDeg(Math.acos(dot));
   v202ChairFacingAudit.push({tag,x:+x.toFixed(3),z:+z.toFixed(3),targetX:+tx.toFixed(3),targetZ:+tz.toFixed(3),rotation:+theta.toFixed(6),errorDeg:+errorDeg.toFixed(6)});
   if(errorDeg>.05)buildingDetailStats.furnitureOrientationErrors++;
@@ -1086,7 +1086,7 @@ export function buildActualFactory(layout,fleet){
    case 'INCOMING_QC':{
     const deskX=-mirror*Math.min(Math.max(.78,w*.26),Math.max(.78,w/2-.62)),inspectX=mirror*.35,inspectZ=Math.min(-.28,workZ+.78),stoolX=inspectX,stoolZ=inspectZ-.65;
     localDesk(g,deskX,workZ+.22,1.15,ctx.program+'_DESK');localTable(g,inspectX,inspectZ,1.34,.74,ctx.program+'_INSPECTION');
-    for(let i=0;i<4;i++){rb(g,inspectX+(i-1.5)*.15,.79,inspectZ+(i%2?.08:-.08),.22,.012,.16,i%2?0xe8e2d3:0xd9d3c5,ctx.program+'_SAMPLE_SHEET');buildingDetailStats.v203QcSampleDetails++;}
+    for(let i=0;i<4;i++){rb(g,inspectX+(i-1.5)*.15,.7835,inspectZ+(i%2?.08:-.08),.22,.012,.16,i%2?0xe8e2d3:0xd9d3c5,ctx.program+'_SAMPLE_SHEET');buildingDetailStats.v203QcSampleDetails++;}
     rb(g,inspectX+mirror*.34,.81,inspectZ-.12,.26,.025,.08,0x5a6870,ctx.program+'_INSPECTION_SCALE_REFERENCE');buildingDetailStats.v203QcSampleDetails++;
     localChair(g,stoolX,stoolZ,inspectX,inspectZ,ctx.program+'_STOOL',false);localCabinet(g,mirror*(sideX-.22),-.18,.42,1.65,.34,ctx.program+'_SAMPLE_STORAGE');break;
    }
@@ -1109,7 +1109,7 @@ export function buildActualFactory(layout,fleet){
      const pivot=new T.Group();pivot.position.set(sx-stallSpan*.21,0,workZ+.74);pivot.rotation.y=-.40;g.add(pivot);
      rb(pivot,stallSpan*.21,1.02,0,stallSpan*.42,1.90,.035,0xe0e4df,'TOILET_STALL_DOOR');rb(pivot,stallSpan*.36,1.04,.041,.025,.11,.025,0x61737a,'TOILET_STALL_LATCH_REFERENCE');
     }
-    localBlock(g,0,.34,1.10,.82,.42,0xcbd5d4,'TOILET_BASIN_COUNTER',.84);
+    localBlock(g,0,.34,1.10,.82,.42,0xcbd5d4,'TOILET_BASIN_COUNTER',.41);
     const basin=new T.Mesh(new T.SphereGeometry(1,16,10),material(0xf1f3ef));basin.position.set(0,.87,.34);basin.scale.set(.36,.09,.25);basin.userData={semantic:'V202_TOILET_BASIN_BOWL_REFERENCE',accuracy:'ROOM_FUNCTION_LAYOUT_REFERENCE_NOT_AS_BUILT'};g.add(basin);
     rb(g,0,1.09,.14,.035,.33,.035,0x798b90,'TOILET_FAUCET_STEM_REFERENCE');rb(g,0,1.24,.22,.035,.035,.22,0x798b90,'TOILET_FAUCET_SPOUT_REFERENCE');
     rb(g,0,1.38,.14,.84,.48,.035,0xb9d1d3,'TOILET_MIRROR');rb(g,.56,1.23,.17,.14,.26,.10,0xd9dedd,'TOILET_SOAP_DISPENSER_REFERENCE');
@@ -1137,7 +1137,7 @@ export function buildActualFactory(layout,fleet){
     }
     for(const [sx,zz] of [[-sideX+.20,.86],[sideX-.20,.86],[-sideX+.20,-1.02],[sideX-.20,-1.02]]){
      rb(g,sx,.34,zz,.29,.26,.33,0xc2ad8b,'SPAREPART_CLOSED_CARTON_REFERENCE');
-     rb(g,sx,.49,zz,.28,.014,.32,0x9f886c,'SPAREPART_CARTON_LID_REFERENCE');
+     rb(g,sx,.477,zz,.28,.014,.32,0x9f886c,'SPAREPART_CARTON_LID_REFERENCE');
     }
     localBlock(g,0,.18,.72,.55,.46,0x6d8189,'SPAREPART_PICKING_TROLLEY',.30);break;
    }
@@ -1145,7 +1145,7 @@ export function buildActualFactory(layout,fleet){
    case 'MAINTENANCE':{
     localTable(g,0,workZ+.20,Math.min(2.25,w-.85),.76,ctx.program+'_WORKBENCH');
     rb(g,0,1.34,-d/2+.08,Math.min(2.2,w-.55),.78,.06,0x63777f,ctx.program+'_TOOL_BOARD');
-    localBlock(g,Math.min(.72,w*.24),workZ-.05,.28,.18,.24,0x596d75,ctx.program+'_BENCH_VISE',.92,false);
+    localBlock(g,Math.min(.72,w*.24),workZ-.05,.28,.18,.24,0x596d75,ctx.program+'_BENCH_VISE',.8675,false);
     for(const tx of [-.56,-.28,0,.28,.56]){rl(g,new T.Vector3(tx,1.08,-d/2+.025),new T.Vector3(tx+(tx<0?.08:-.08),1.46,-d/2+.025),.012,0x394950,ctx.program+'_HANGING_TOOL');buildingDetailStats.v203WorkshopToolDetails++;}
     localChair(g,0,workZ+1.02,0,workZ+.20,ctx.program+'_STOOL',false);localCabinet(g,mirror*(sideX-.22),.22,.42,1.72,.36,ctx.program+'_TOOL_LOCKER');break;
    }
@@ -1157,7 +1157,7 @@ export function buildActualFactory(layout,fleet){
     localTable(g,0,.18,1.30,.76,'PANTRY_BREAK');for(const [x,z] of [[-.78,.18],[.78,.18],[0,-.48]])localChair(g,x,z,0,.18,'PANTRY',false);break;
    }
    case 'LOCKER_CHANGE':{
-    localLockerBank(g,-sideX+.20,-.15,.38,1.85,d-1.90,'LOCKER_LEFT');localLockerBank(g,sideX-.20,-.15,.38,1.85,d-1.90,'LOCKER_RIGHT');localBlock(g,0,.05,1.25,.42,.36,0x8b765c,'LOCKER_BENCH',.34);break;
+    localLockerBank(g,-sideX+.20,-.15,.38,1.85,d-1.90,'LOCKER_LEFT');localLockerBank(g,sideX-.20,-.15,.38,1.85,d-1.90,'LOCKER_RIGHT');localBlock(g,0,.05,1.25,.42,.36,0x8b765c,'LOCKER_BENCH',.21);break;
    }
    case 'PRAYER_ROOM':{
     const rackX=-sideX+.18,rackZ=doorLimit-.20;localRack(g,rackX,rackZ,.34,1.15,.32,'PRAYER_SHOE_RACK');
@@ -1249,8 +1249,8 @@ export function buildActualFactory(layout,fleet){
   const g=new T.Group();g.position.set(x,0,-y);rms.add(g);g.userData={semantic:'RMS_CUT_SHEET_STACK_REFERENCE',accuracy:'PAPER_SHEET_STORAGE_REFERENCE_NOT_AS_BUILT',researchVersion:'V204'};
   for(const z of [-.55,0,.55])box(g,0,.055,z,1.42,.11,.12,0x315a94).userData={semantic:'RMS_BLUE_PLASTIC_PALLET_RUNNER_REFERENCE',accuracy:'PHOTO_VISUAL_REFERENCE_NOT_AS_BUILT'};
   box(g,0,.12,0,1.44,.025,1.14,0x3869aa).userData={semantic:'RMS_BLUE_PLASTIC_PALLET_DECK_REFERENCE',accuracy:'PHOTO_VISUAL_REFERENCE_NOT_AS_BUILT'};
-  for(let i=0;i<layersCount;i++){const p=box(g,0,.14+i*.026,0,1.34,.024,.92,i%3===0?0xe7e0d0:0xeee9dd);p.userData={semantic:'RMS_PAPER_SHEET_LAYER_REFERENCE',accuracy:'PAPER_STACK_VISUAL_REFERENCE_NOT_INVENTORY'};}
-  const cap=box(g,0,.17+layersCount*.026,0,1.38,.025,.96,0xd6cbb8);cap.userData={semantic:'RMS_REAM_TOP_PROTECTOR_REFERENCE'};addPalletCornerProtectors(g,1.30,.88,.42,'RMS_CUT_SHEET');
+  for(let i=0;i<layersCount;i++){const p=box(g,0,.1445+i*.024,0,1.34,.024,.92,i%3===0?0xe7e0d0:0xeee9dd);p.userData={semantic:'RMS_PAPER_SHEET_LAYER_REFERENCE',accuracy:'PAPER_STACK_VISUAL_REFERENCE_NOT_INVENTORY'};}
+  const cap=box(g,0,.145+layersCount*.024,0,1.38,.025,.96,0xd6cbb8);cap.userData={semantic:'RMS_REAM_TOP_PROTECTOR_REFERENCE'};addPalletCornerProtectors(g,1.30,.88,.42,'RMS_CUT_SHEET');
   for(const sx of [-.42,.42])box(g,sx,.30,0,.025,.48,.98,0x617788).userData={semantic:'RMS_SHEET_STACK_STRAP_REFERENCE'};
   buildingDetailStats.rmsCutSheetStacks++;
  };
@@ -1823,22 +1823,34 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  pbox(westX-.72,.045,sideDoorZ,1.30,.08,2.05,0xc7c1b5,'IPAL_PHOTO_OPERATOR_SIDE_ENTRANCE_TILE');
  buildingDetailStats.v206OperatorFacadeCorrections++;
  // Secondary canopy is the narrow weathered side-walkway awning visible in IMG_2514/2524.
- const secW=2.35,secD=or.d+2.05,secCenterX=westX-secW/2+.02,secCenterZ=orZ;
+ const secW=2.35,secD=or.d+2.05,secCenterX=westX-secW/2+.02,secCenterZ=orZ,secSlope=.055,secThickness=.055;
+ // One underside plane for existing roof/supports; retain the photo-based footprint.
+ const secondaryUnderY=x=>2.98+Math.tan(secSlope)*(x-secCenterX)-secThickness/2/Math.cos(secSlope);
+ const secondarySupportY=(x,r)=>secondaryUnderY(x)-r/Math.cos(secSlope);
+ const secondaryTubeBounds=o=>{o.updateMatrix();const bb=new T.Box3(),a=o.geometry.attributes.position;for(let i=0;i<a.count;i++)bb.expandByPoint(new T.Vector3().fromBufferAttribute(a,i).applyMatrix4(o.matrix));return bb;};
+ const seatSecondaryTube=o=>{o.updateMatrix();let excess=-Infinity;const a=o.geometry.attributes.position;for(let i=0;i<a.count;i++){const v=new T.Vector3().fromBufferAttribute(a,i).applyMatrix4(o.matrix);excess=Math.max(excess,v.y-secondaryUnderY(v.x));}o.position.y-=excess;return o;};
  for(let i=0;i<8;i++){
   const z=secCenterZ-secD/2+(i+.5)*secD/8;
-  const panel=pbox(secCenterX,2.98,z,secW+.04,.055,secD/8+.035,i%3===0?0xc8c9a8:0xaeb3a5,'IPAL_PHOTO_SECONDARY_CANOPY_CORRUGATED_PANEL',0,i%3===0?.64:.86,{weathering:'AGED_TRANSLUCENT_OR_CORRUGATED_PANEL',roofForm:'SIDE_WALKWAY_AWNING'});
-  panel.rotation.z=-.055;
+  const panel=pbox(secCenterX,2.98,z,secW+.04,secThickness,secD/8+.035,i%3===0?0xc8c9a8:0xaeb3a5,'IPAL_PHOTO_SECONDARY_CANOPY_CORRUGATED_PANEL',0,i%3===0?.64:.86,{weathering:'AGED_TRANSLUCENT_OR_CORRUGATED_PANEL',roofForm:'SIDE_WALKWAY_AWNING'});
+  panel.rotation.z=secSlope;
  }
- const outerX=secCenterX-secW/2+.16;
- for(const pz of [secCenterZ-secD/2+.42,secCenterZ+secD/2-.42]){
+ const outerX=secCenterX-secW/2+.16,postZs=[secCenterZ-secD/2+.42,secCenterZ+secD/2-.42],purlinZs=[];
+ for(let z=secCenterZ-secD/2+.30;z<=secCenterZ+secD/2-.30;z+=.72)purlinZs.push(z);
+ // End purlins meet the existing columns, retaining the same member count.
+ purlinZs[0]=postZs[0];purlinZs[purlinZs.length-1]=postZs[1];
+ const secondaryPurlins=purlinZs.map(z=>seatSecondaryTube(pline([outerX,secondarySupportY(outerX,.022),z],[westX,secondarySupportY(westX,.022),z],.022,0x777a6c,'IPAL_PHOTO_SECONDARY_CANOPY_PURLIN')));
+ for(const [i,pz] of postZs.entries()){
   pfoot(outerX,pz,'IPAL_PHOTO_SECONDARY_CANOPY_SUPPORT',0x6d786f);
-  pbox(outerX,1.48,pz,.11,2.96,.11,0x64866b,'IPAL_PHOTO_SECONDARY_CANOPY_GREEN_COLUMN');
-  pline([outerX,2.26,pz],[westX-.06,3.00,pz],.025,0x777a6c,'IPAL_PHOTO_SECONDARY_CANOPY_KNEE_BRACE');
+  const postTop=secondaryTubeBounds(secondaryPurlins[i===0?0:secondaryPurlins.length-1]).min.y;
+  pbox(outerX,postTop/2,pz,.11,postTop,.11,0x64866b,'IPAL_PHOTO_SECONDARY_CANOPY_GREEN_COLUMN');
+  seatSecondaryTube(pline([outerX,2.26,pz],[westX-.06,secondarySupportY(westX-.06,.025),pz],.025,0x777a6c,'IPAL_PHOTO_SECONDARY_CANOPY_KNEE_BRACE'));
  }
- for(let z=secCenterZ-secD/2+.30;z<=secCenterZ+secD/2-.30;z+=.72)pline([outerX,2.88,z],[westX,3.06,z],.022,0x777a6c,'IPAL_PHOTO_SECONDARY_CANOPY_PURLIN');
- pbox(secCenterX,2.78,secCenterZ,.08,.08,1.25,0xe5e5cf,'IPAL_PHOTO_SECONDARY_CANOPY_LINEAR_LIGHT',0,1,{fixture:'PHOTO_VISIBLE'});
- pline([outerX,2.86,secCenterZ-secD/2],[outerX,2.86,secCenterZ+secD/2],.035,0x626b64,'IPAL_PHOTO_SECONDARY_CANOPY_GUTTER',{coreProcess:false});
- pline([outerX,2.86,secCenterZ+secD/2-.15],[outerX,.12,secCenterZ+secD/2-.15],.030,0x626b64,'IPAL_PHOTO_SECONDARY_CANOPY_DOWNPIPE',{coreProcess:false});
+ // Six-sided tube faces, rather than the nominal circular radius, determine contact.
+ const lightTop=secondaryUnderY(secCenterX-.04)-.022*Math.sqrt(3)/Math.cos(secSlope);
+ pbox(secCenterX,lightTop-.04,secCenterZ,.08,.08,1.25,0xe5e5cf,'IPAL_PHOTO_SECONDARY_CANOPY_LINEAR_LIGHT',0,1,{fixture:'PHOTO_VISIBLE'});
+ const secondaryGutterX=secCenterX-(secW+.04)/2*Math.cos(secSlope),secondaryGutterY=secondarySupportY(secondaryGutterX,.035);
+ const secondaryGutter=seatSecondaryTube(pline([secondaryGutterX,secondaryGutterY,secCenterZ-secD/2],[secondaryGutterX,secondaryGutterY,secCenterZ+secD/2],.035,0x626b64,'IPAL_PHOTO_SECONDARY_CANOPY_GUTTER',{coreProcess:false}));
+ pline([secondaryGutterX,secondaryGutter.position.y,secCenterZ+secD/2-.15],[secondaryGutterX,.12,secCenterZ+secD/2-.15],.030,0x626b64,'IPAL_PHOTO_SECONDARY_CANOPY_DOWNPIPE',{coreProcess:false});
  pcyl(westX-.34,.74,sideDoorZ-.72,.11,.52,0xc23b35,'IPAL_PHOTO_FIRE_EXTINGUISHER',{safetyEquipment:'PHOTO_VISIBLE'});buildingDetailStats.v205IpalSafetyDetails++;
  // Small exhaust fan, waste bin and wall services make the operator room match IMG_2514/2524.
  const fanRing=new T.Mesh(new T.TorusGeometry(.20,.025,8,24),material(0x3b474a));fanRing.position.set(or.x+or.w/2+.082,2.42,orZ-.72);fanRing.rotation.y=Math.PI/2;ipalPhoto.add(fanRing);photoTag(fanRing,'IPAL_PHOTO_OPERATOR_EXHAUST_FAN_RING',{coreProcess:false});
@@ -1998,8 +2010,8 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
  // Landscape is a visual assumption outside the measured building, explicitly recorded in metadata.
  for(let i=0;i<10;i++){const x=-13.1,z=-8-i*10;box(layers.landscape,x,.08,z,2.4,.22,4,0x69846b);line(layers.landscape,new T.Vector3(x,0,z),new T.Vector3(x,2,z),.13,0x87745c);for(const [dx,dy,dz] of [[0,3,0],[-.65,2.65,.2],[.65,2.6,-.2]]){const crown=new T.Mesh(new T.IcosahedronGeometry(1.1,1),material(0x4f785b));crown.position.set(x+dx,dy,z+dz);layers.landscape.add(crown);}}
  for(let i=0;i<12;i++){box(layers.landscape,26+i*4,.18,8,3,.35,1.6,0x879b87);const shrub=new T.Mesh(new T.IcosahedronGeometry(.65,1),material(0x50775d));shrub.position.set(26+i*4,.85,8);layers.landscape.add(shrub);}
- for(const z of [-61,-68])box(layers.landscape,-9,1.2,z,.45,2.4,.45,0x71878d);
- box(layers.landscape,-9,1.15,-64.5,.09,2.1,5,0x617b86,0,.55);label('GERBANG',-9,3.7,-64.5,6,'#244b5c');
+ for(const z of [-61,-68]){const post=box(layers.landscape,-9,1.2,z,.45,2.4,.45,0x71878d);post.userData={semantic:'EXTERIOR_GATE_POST_REFERENCE',accuracy:'LANDSCAPE_REFERENCE_NOT_AS_BUILT',functionalReferenceVisible:true};}
+ const gate=box(layers.landscape,-9,1.15,-64.5,.09,2.1,7-.45,0x617b86,0,.55);gate.userData={semantic:'EXTERIOR_GATE_LEAF_REFERENCE',accuracy:'LANDSCAPE_REFERENCE_NOT_AS_BUILT',functionalReferenceVisible:true};label('GERBANG',-9,3.7,-64.5,6,'#244b5c');
  // All assets use existing silhouette meshes at unit scale, centred inside their own footprint.
  const assets=new Map();
  for(const f of fleet){const p=f.placement,g=new T.Group(),foundationScope=canOpenTechnical3D(p.machineId)?'TECHNICAL_ASSET':'LAYOUT_PLACEHOLDER';g.name=p.label;g.position.set(p.x,0,-p.y);g.rotation.y=p.rotation*Math.PI/180;g.userData={...dwgObjectSourceMetadata(layout,{semantic:'FACTORY_MACHINE',sourceType:p.status?.startsWith('DXF_')?'DWG':'REGISTERED_ASSET',sourceEntityId:p.machineId,confidence:p.status==='DXF_FOOTPRINT'?'HIGH CONFIDENCE':p.status==='UNIDENTIFIED'?'UNKNOWN':'APPROXIMATE',renderStatus:foundationScope==='TECHNICAL_ASSET'?'3D_SPATIAL_PROXY_WITH_SEPARATE_MODEL':'LAYOUT_PLACEHOLDER'}),machineId:p.machineId,placementStatus:p.status,scaleFitApplied:false,foundationScope,technical3DEnabled:foundationScope==='TECHNICAL_ASSET'};
@@ -2076,7 +2088,8 @@ emptyPalletStack(93.2,84.8,4,'RMS');mobilePaperTrolley(92.9,76.8,'RMS');floorSca
   else if(origin===b&&/^(?:RMS_|FG_|WRAPPED_PAPERBOARD|PRODUCTION_(?:WIP|MOBILE|HOUSEKEEPING|MATERIAL_STATUS|WASTE)|PACKAGING_)/.test(s))target=layers.furniture;
   if(target&&o.parent!==target)routed.push([o,target]);
  });
- for(const [part,target] of routed)target.attach(part);
+ // Parent routes precede children. Retain assemblies already inside their destination layer.
+ for(const [part,target] of routed){let inherited=false;for(let p=part.parent;p;p=p.parent)if(p===target){inherited=true;break;}if(!inherited)target.attach(part);}
  root.userData={baselineId:layout.baselineId,dwgFidelity:layout.dwgFidelity||null,buildingDetailPass:'V204_CIRCULATION_FINISH_AND_FURNITURE_COLLISION_HARDENING',researchVersion:'V204',researchSourceCount:V204_SOURCE_STATS.total,uniqueResearchUrls:V204_SOURCE_STATS.uniqueUrls,buildingDetailStats,utilityRouting,
   architecturalEvidenceBoundary:{
    sourceGrounded:['PLANT_OUTLINE','DXF_WALL_SEGMENTS','DXF_COLUMN_POSITIONS','SOURCE_DOORS_AND_CURTAINS','MACHINE_PLACEMENTS','USER_APPROX_ROOF_4_5_TO_7M'],

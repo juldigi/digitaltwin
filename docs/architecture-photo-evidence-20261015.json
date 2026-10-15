@@ -1,0 +1,99 @@
+{
+  "archive": "IPAL.zip",
+  "archiveBytes": 38154187,
+  "archiveSHA256": "dcff07115ff7a93ca71529589e38ceb42c5eb505bf865502d85f22a90138c47f",
+  "source": "User uploaded originals recovered from connected Library on 2026-10-15",
+  "photos": [
+    {
+      "file": "IPAL/IMG_2511.HEIC",
+      "bytes": 3059223,
+      "sha256": "64a41bee35a3c8a63b1790d05d7b61c0f950f1a43baef7a6d7ba22f3f8a902ba",
+      "review": "CONTACT_SHEET_REVIEWED; IMG_2516 and IMG_2524 additionally reviewed at full resolution"
+    },
+    {
+      "file": "IPAL/IMG_2512.HEIC",
+      "bytes": 2922993,
+      "sha256": "dd260b787730615b03a8d2fc67f7359c1d8a4489c7d846eee1aed0f07835a7d0",
+      "review": "CONTACT_SHEET_REVIEWED; IMG_2516 and IMG_2524 additionally reviewed at full resolution"
+    },
+    {
+      "file": "IPAL/IMG_2513.HEIC",
+      "bytes": 2796134,
+      "sha256": "9f2149d032993c75823187227340263aba1be8f2b4ea4113f73b2ba2257cb86a",
+      "review": "CONTACT_SHEET_REVIEWED; IMG_2516 and IMG_2524 additionally reviewed at full resolution"
+    },
+    {
+      "file": "IPAL/IMG_2514.HEIC",
+      "bytes": 2874650,
+      "sha256": "b914a896a69bb77bfc82e637eb4d76617a6e30d38169d082a854dcb3fff20d20",
+      "review": "CONTACT_SHEET_REVIEWED; IMG_2516 and IMG_2524 additionally reviewed at full resolution"
+    },
+    {
+      "file": "IPAL/IMG_2515.HEIC",
+      "bytes": 3248979,
+      "sha256": "5d1075ed96b7c46d1309f0cc80350eb4c7670e0f81bf8cca0a66a0ba9018ec64",
+      "review": "CONTACT_SHEET_REVIEWED; IMG_2516 and IMG_2524 additionally reviewed at full resolution"
+    },
+    {
+      "file": "IPAL/IMG_2516.HEIC",
+      "bytes": 3226915,
+      "sha256": "a5b99e108a09ad05c4480a8dea37cd78d57bfec0d42e18fb07be99367ac294b9",
+      "review": "CONTACT_SHEET_REVIEWED; IMG_2516 and IMG_2524 additionally reviewed at full resolution"
+    },
+    {
+      "file": "IPAL/IMG_2517.HEIC",
+      "bytes": 2805682,
+      "sha256": "bdf9433d286be25948699c30ab7fae11563dfa82902925e5f3d67dcbc7bf9dfa",
+      "review": "CONTACT_SHEET_REVIEWED; IMG_2516 and IMG_2524 additionally reviewed at full resolution"
+    },
+    {
+      "file": "IPAL/IMG_2518.HEIC",
+      "bytes": 3419599,
+      "sha256": "505e8e4fb0d978779df22a607abdf47fa90d5095d1b9cd23c98bd7d7ff6513b0",
+      "review": "CONTACT_SHEET_REVIEWED; IMG_2516 and IMG_2524 additionally reviewed at full resolution"
+    },
+    {
+      "file": "IPAL/IMG_2519.HEIC",
+      "bytes": 2091711,
+      "sha256": "6e653b4e0f9d304405e37698c683a759210d4ca8c80069f114d487aef703521c",
+      "review": "CONTACT_SHEET_REVIEWED; IMG_2516 and IMG_2524 additionally reviewed at full resolution"
+    },
+    {
+      "file": "IPAL/IMG_2520.HEIC",
+      "bytes": 1901645,
+      "sha256": "898e8486fa1fcbcc8ea5fd77702780cdea386d81c4a2bc01130b56ba15e3182b",
+      "review": "CONTACT_SHEET_REVIEWED; IMG_2516 and IMG_2524 additionally reviewed at full resolution"
+    },
+    {
+      "file": "IPAL/IMG_2521.HEIC",
+      "bytes": 1703533,
+      "sha256": "f58cb49b69e301c9a6c7ccf3e9a4ef9525e860b68ce918e04721b811c0e51728",
+      "review": "CONTACT_SHEET_REVIEWED; IMG_2516 and IMG_2524 additionally reviewed at full resolution"
+    },
+    {
+      "file": "IPAL/IMG_2522.HEIC",
+      "bytes": 1642923,
+      "sha256": "701a10be6e2006b3051f357205f117ddd9333fc847ea8cba4f6ad22c36b94b6e",
+      "review": "CONTACT_SHEET_REVIEWED; IMG_2516 and IMG_2524 additionally reviewed at full resolution"
+    },
+    {
+      "file": "IPAL/IMG_2523.HEIC",
+      "bytes": 2410801,
+      "sha256": "07bdf7b3e3d4dfd418771ab9a7bbd7ac47c89eeefc77194999e7c3d85bf40574",
+      "review": "CONTACT_SHEET_REVIEWED; IMG_2516 and IMG_2524 additionally reviewed at full resolution"
+    },
+    {
+      "file": "IPAL/IMG_2524.HEIC",
+      "bytes": 2028631,
+      "sha256": "29b65ff71279021f53a4dea5b64d84dfaa08a5ccc2e2dffa0ffaef435fc41c33",
+      "review": "CONTACT_SHEET_REVIEWED; IMG_2516 and IMG_2524 additionally reviewed at full resolution"
+    },
+    {
+      "file": "IPAL/IMG_2525.HEIC",
+      "bytes": 2301357,
+      "sha256": "c66432a226e869df7bf6605591187c984b9db34aae43e760af8736221a49d476",
+      "review": "CONTACT_SHEET_REVIEWED; IMG_2516 and IMG_2524 additionally reviewed at full resolution"
+    }
+  ],
+  "scope": "IPAL canopy, operator-room exterior, garden, paving and adjacent utility context; no general office/toilet/warehouse interior certification"
+}

@@ -1,0 +1,203 @@
+{
+  "status": "IN_PROGRESS",
+  "releaseStatus": "RELEASE_PENDING",
+  "baseCommit": "887937a8f939709162667704c8d4b860d0034a13",
+  "report": "docs/interior-exterior-deep-audit-20261015.md",
+  "inventory": "docs/interior-exterior-audit-after-20261015.json",
+  "baselineMeasurements": "docs/interior-exterior-audit-before-20261015.json",
+  "photos": "docs/architecture-photo-evidence-20261015.json",
+  "meshes": 10927,
+  "trianglesIncludingInstances": 261459,
+  "roomsProcessed": 20,
+  "contactChecks": 249,
+  "remainingSelectedContactViolations": 0,
+  "canopyPurlinsTriangleContact": 7,
+  "nonfiniteVertices": 0,
+  "build": "PASS",
+  "fullRegression": "PASS",
+  "visual3DVerified": false,
+  "sourceSHA256": "1d17f428178a2dc6adcc1eae249dd3eabd83c5f3d0ddbcbe01505088f23506aa",
+  "secondPass": "PROCESSED; added actual triangle canopy support correction after recovering photos",
+  "originalIpalPhotosRecovered": 15,
+  "roomStates": [
+    {
+      "index": 1,
+      "label": "Toilet",
+      "program": "TOILET",
+      "geometry": "PROCESSED",
+      "installedEvidence": "BLOCKED_EVIDENCE",
+      "visual3D": "PENDING"
+    },
+    {
+      "index": 2,
+      "label": "WH Spareparts",
+      "program": "SPAREPART_WAREHOUSE",
+      "geometry": "PROCESSED",
+      "installedEvidence": "BLOCKED_EVIDENCE",
+      "visual3D": "PENDING"
+    },
+    {
+      "index": 3,
+      "label": "Meeting",
+      "program": "MEETING",
+      "geometry": "PROCESSED",
+      "installedEvidence": "BLOCKED_EVIDENCE",
+      "visual3D": "PENDING"
+    },
+    {
+      "index": 4,
+      "label": "Electric room",
+      "program": "ELECTRICAL",
+      "geometry": "PROCESSED",
+      "installedEvidence": "BLOCKED_EVIDENCE",
+      "visual3D": "PENDING"
+    },
+    {
+      "index": 5,
+      "label": "R.INCOMING QC",
+      "program": "INCOMING_QC",
+      "geometry": "PROCESSED",
+      "installedEvidence": "BLOCKED_EVIDENCE",
+      "visual3D": "PENDING"
+    },
+    {
+      "index": 6,
+      "label": "Loading Dock",
+      "program": "DISPATCH_LOADING",
+      "geometry": "PROCESSED",
+      "installedEvidence": "BLOCKED_EVIDENCE",
+      "visual3D": "PENDING"
+    },
+    {
+      "index": 7,
+      "label": "Workshop",
+      "program": "WORKSHOP",
+      "geometry": "PROCESSED",
+      "installedEvidence": "BLOCKED_EVIDENCE",
+      "visual3D": "PENDING"
+    },
+    {
+      "index": 8,
+      "label": "Adm Room",
+      "program": "ADMIN_OFFICE",
+      "geometry": "PROCESSED",
+      "installedEvidence": "BLOCKED_EVIDENCE",
+      "visual3D": "PENDING"
+    },
+    {
+      "index": 9,
+      "label": "R.BROKE",
+      "program": "BROKE_WASTE_ROOM",
+      "geometry": "PROCESSED",
+      "installedEvidence": "BLOCKED_EVIDENCE",
+      "visual3D": "PENDING"
+    },
+    {
+      "index": 10,
+      "label": "Workshop",
+      "program": "WORKSHOP",
+      "geometry": "PROCESSED",
+      "installedEvidence": "BLOCKED_EVIDENCE",
+      "visual3D": "PENDING"
+    },
+    {
+      "index": 11,
+      "label": "R.PDS",
+      "program": "PDS_PREPRESS_OFFICE",
+      "geometry": "PROCESSED",
+      "installedEvidence": "BLOCKED_EVIDENCE",
+      "visual3D": "PENDING"
+    },
+    {
+      "index": 12,
+      "label": "QC Sample",
+      "program": "QC_SAMPLE",
+      "geometry": "PROCESSED",
+      "installedEvidence": "BLOCKED_EVIDENCE",
+      "visual3D": "PENDING"
+    },
+    {
+      "index": 13,
+      "label": "R.Sample",
+      "program": "QC_SAMPLE",
+      "geometry": "PROCESSED",
+      "installedEvidence": "BLOCKED_EVIDENCE",
+      "visual3D": "PENDING"
+    },
+    {
+      "index": 14,
+      "label": "CTP",
+      "program": "PREPRESS",
+      "geometry": "PROCESSED",
+      "installedEvidence": "BLOCKED_EVIDENCE",
+      "visual3D": "PENDING"
+    },
+    {
+      "index": 15,
+      "label": "CTF",
+      "program": "PREPRESS",
+      "geometry": "PROCESSED",
+      "installedEvidence": "BLOCKED_EVIDENCE",
+      "visual3D": "PENDING"
+    },
+    {
+      "index": 16,
+      "label": "Mushola",
+      "program": "PRAYER_ROOM",
+      "geometry": "PROCESSED",
+      "installedEvidence": "BLOCKED_EVIDENCE",
+      "visual3D": "PENDING"
+    },
+    {
+      "index": 17,
+      "label": "R.FPS",
+      "program": "FIRE_PUMP_ROOM",
+      "geometry": "PROCESSED",
+      "installedEvidence": "BLOCKED_EVIDENCE",
+      "visual3D": "PENDING"
+    },
+    {
+      "index": 18,
+      "label": "PPIC",
+      "program": "PPIC_OFFICE",
+      "geometry": "PROCESSED",
+      "installedEvidence": "BLOCKED_EVIDENCE",
+      "visual3D": "PENDING"
+    },
+    {
+      "index": 19,
+      "label": "Meeting",
+      "program": "MEETING",
+      "geometry": "PROCESSED",
+      "installedEvidence": "BLOCKED_EVIDENCE",
+      "visual3D": "PENDING"
+    },
+    {
+      "index": 20,
+      "label": "LOKER",
+      "program": "LOCKER_CHANGE",
+      "geometry": "PROCESSED",
+      "installedEvidence": "BLOCKED_EVIDENCE",
+      "visual3D": "PENDING"
+    }
+  ],
+  "exteriorStates": {
+    "perimeter": "CODE_GEOMETRY_PROCESSED; INSTALLED_HEIGHTS_BLOCKED_EVIDENCE",
+    "mainRoof": "REGRESSION_PROCESSED; INSTALLED_EQUIPMENT_BLOCKED_EVIDENCE",
+    "secondaryIpalCanopy": "PHOTO_REVIEW_AND_TRIANGLE_CONTACT_CORRECTED",
+    "operatorRoomRoofGable": "IN_PROGRESS_RECONCILIATION_REQUIRED",
+    "gardenPaving": "PHOTO_CONTEXT_REVIEWED; NO_SURVEY_DIMENSION_CLAIM",
+    "genericGate": "GEOMETRY_CORRECTED_REFERENCE_NOT_AS_BUILT",
+    "loadingDock": "GEOMETRY_PROCESSED; INSTALLED_LAYOUT_AND_DRAIN_OUTLET_BLOCKED_EVIDENCE"
+  },
+  "remaining": [
+    "Visual 3D walk-through and all toggle orders",
+    "Installed interior inventory/dimensions and wall/eave evidence",
+    "Reconcile operator-room own roof/gable upper closure",
+    "Resolve incomplete reference trolley caster mounts/blank-cart bottom supports without inventing installed hardware"
+  ],
+  "machineCursorChanged": false,
+  "automationChanged": false,
+  "fullTests": 1636,
+  "fullDurationMs": 275972.737347
+}
