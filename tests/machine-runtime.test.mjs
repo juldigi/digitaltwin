@@ -86,8 +86,8 @@ test('V132 AHU twins expose indoor/outdoor duct interfaces and separate supply r
   template.setExteriorOpen(true);
   const sim=createMachineSimulation(id,template.root,template),started=sim.start();
   assert.ok(started.airflowParticleCount>=25,id);
-  assert.equal(started.supplyAirflowParticleCount,18,id);
-  assert.equal(started.returnAirflowParticleCount,id==='BMJ-MCH-0040'?10:7,id);
+  assert.equal(started.supplyAirflowParticleCount,id==='BMJ-MCH-0040'?17:18,id);
+  assert.equal(started.returnAirflowParticleCount,7,id);
   if(id==='BMJ-MCH-0040'){
    assert.equal(started.outdoorAirflowParticleCount,8,id);
    const indoor=template.findNode('universal-module-4'),outdoor=template.findNode('universal-module-5');

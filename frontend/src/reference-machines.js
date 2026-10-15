@@ -86,7 +86,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   // Distribution schematics describe a system, not the installed machine's
   // physical envelope. Keep their taxonomy selectable for interior study,
   // without attaching an unverified factory network to every cabinet.
-  for(const id of ['compressor-air-distribution','ahu-supply-duct','ahu-return-duct','ahu-outdoor-intake','sansin-indoor-outdoor-interconnect','sansin-return-duct']){
+  for(const id of ['compressor-air-distribution','ahu-supply-duct','ahu-return-duct','ahu-outdoor-intake','sansin-indoor-outdoor-interconnect','sansin-supply-duct','sansin-return-duct']){
    const n=this.findNode(id);if(!n)continue;
    n.userData.functionalDiagramOnly=true;
    n.visible=!!this.exteriorOpen;
@@ -1509,7 +1509,7 @@ export class ReferenceMachineTemplate extends UniversalMachineTemplate{
   }
   if(supply){
    const fan=this.findNode('sansin-supply-fan');
-   if(fan){const wheel=this.motion(this.cyl(fan,.40,.22,[0,1.12,0],'dark','z'),'spin','z',7,.01,0,null);this.tag(wheel,'sansin-indoor-supply-fan','NES_YZKJ_FAMILY');wheel.userData.installedFanGeometryVerified=false;for(let k=0;k<8;k++){const b=this.box(fan,[.30,.025,.07],[0,1.12,0],'steel',.003);b.rotation.z=k*Math.PI/4;this.tag(b,'sansin-supply-fan-blade-reference','FUNCTIONAL_REFERENCE');}}
+   if(fan){const wheel=this.motion(this.cyl(fan,.40,.22,[0,1.12,0],'dark','z'),'spin','z',7,.01,0,null);this.tag(wheel,'sansin-indoor-supply-fan','NES_YZKJ_FAMILY');wheel.userData.installedFanGeometryVerified=false;for(let k=0;k<8;k++){const b=this.box(fan,[.30,.025,.07],[0,1.12,0],'steel',.003);b.rotation.z=k*Math.PI/4;this.tag(b,'sansin-supply-fan-blade-reference','FUNCTIONAL_REFERENCE');wheel.attach(b);}}
    const plenum=this.findNode('sansin-supply-plenum');
    if(plenum)this.tag(this.box(plenum,[.48,1.35,1.30],[.18,1.08,0],'accent',.015),'sansin-conditioned-air-plenum','NES_YZKJ_FAMILY');
   }
@@ -2508,7 +2508,7 @@ export class ReferenceProcessSimulation{
   const particle=(kind,i,count,material)=>{
    const mesh=new THREE.Mesh(this.ahuParticleGeometry,material);mesh.name='AHU-'+kind.toUpperCase()+'-AIR-PARTICLE-'+(i+1);mesh.visible=false;
    mesh.userData={airflowReference:true,airflowKind:kind,installedRouteVerified:false};
-   ((!sansin&&kind==='return'?this.template.findNode('ahu-return-duct'):null)||this.root).add(mesh);
+   ((kind==='return'?this.template.findNode(sansin?'sansin-return-duct':'ahu-return-duct'):sansin&&kind==='outdoor'?this.template.findNode('sansin-outdoor-interface'):null)||this.root).add(mesh);
    this.ahuParticles.push({mesh,kind,phase:i/count,branch:i%2?-1:1,lane:(i%3)-1});
   };
   for(let i=0;i<18;i++)particle('supply',i,18,this.ahuParticleMaterial);
@@ -2534,9 +2534,12 @@ export class ReferenceProcessSimulation{
      else if(q<.92){const t=smooth((q-.80)/.12);m.position.set(6.32,1.68,lerp(lane,item.branch*.86,t));}
      else {const t=smooth((q-.92)/.08);m.position.set(6.32,lerp(1.68,1.25,t),item.branch*.86);}
     }else{
+     const parent=q>=.62?this.template.findNode('sansin-supply-duct'):this.root;if(parent&&m.parent!==parent)parent.add(m);
      if(q<.62){const t=smooth(q/.62);m.position.set(lerp(a.flowStart,a.flowEnd,t),1.02+lane*.20,-.25+lane);}
-     else if(q<.82){const t=smooth((q-.62)/.20);m.position.set(lerp(a.flowEnd,3.42,t),lerp(1.08,1.68,t),-.25+lane);}
-     else {const t=smooth((q-.82)/.18);m.position.set(lerp(3.42,3.56,t),lerp(1.68,1.28,t),lerp(-.25,item.branch>0?.50:-1.00,t));}
+     else if(q<.66){const t=smooth((q-.62)/.04);m.position.set(lerp(a.flowEnd,.76,t),1.02+lane*.20,-.25+lane);}
+     else if(q<.72){const t=smooth((q-.66)/.06);m.position.set(.76,lerp(1.02+lane*.20,1.68,t),-.25+lane);}
+     else if(q<.84){const t=smooth((q-.72)/.12);m.position.set(lerp(.76,3.46,t),1.68,-.25+lane);}
+     else {const t=smooth((q-.84)/.10);m.position.set(3.46,1.68,lerp(-.25+lane,item.branch>0?.50:-1.00,t));}
     }
    }else if(item.kind==='return'){
     if(!a.sansin){
@@ -2547,13 +2550,15 @@ export class ReferenceProcessSimulation{
     }else{
      if(q<.28){const t=smooth(q/.28);m.position.set(lerp(3.35,3.10,t),lerp(1.72,2.25,t),lerp(item.branch>.0?.50:-1.00,1.52,t));}
      else if(q<.82){const t=smooth((q-.28)/.54);m.position.set(lerp(3.10,-2.18,t),2.25,1.52+lane*.18);}
-     else {const t=smooth((q-.82)/.18);m.position.set(-2.18,lerp(2.25,1.10,t),lerp(1.52,-.15,t));}
+     else if(q<.92){const t=smooth((q-.82)/.10);m.position.set(-2.18,lerp(2.25,1.12,t),1.52+lane*.18);}
+     else {const t=smooth((q-.92)/.08);m.position.set(-2.18,1.12,lerp(1.52+lane*.18,-.15,t));}
     }
    }else{
     const t=smooth(q);m.position.set(1.45+Math.sin(q*Math.PI*2+item.phase*4)*.16,lerp(.38,1.78,t),1.45+Math.cos(q*Math.PI*2+item.phase*4)*.16);
    }
-   // No grille-to-return-trunk connector is represented for generic AHUs.
-   m.visible=this.active&&(item.kind!=='return'||this.pathVisible&&(a.sansin||q>=.24));
+   // Neither reference models a grille-to-return-trunk connector. SANSIN
+   // also has no branch-to-diffuser drop: do not animate air across empty space.
+   m.visible=this.active&&(item.kind!=='return'||this.pathVisible&&q>=(a.sansin?.28:.24))&&!(a.sansin&&item.kind==='supply'&&q>=.94);
   }
   a.supplyAirActive=this.active;
   a.returnAirReferenceActive=this.active;
@@ -2645,8 +2650,8 @@ start(){if(this.blocked){this.active=false;this.running=false;this.paused=false;
   if(this.family==='compressor'){const g=this.template.findNode('compressor-air-distribution');if(g){g.userData.diagramEnabled=this.pathVisible;g.visible=this.pathVisible&&this.template.exteriorOpen;}}
   if(this.family==='ahu'){const g=this.template.findNode(this.ahu?.sansin?'sansin-air-distribution':'ahu-air-distribution');if(g)g.visible=this.pathVisible;}
   for(const item of this.compressorParticles)if(item.kind==='distribution')item.mesh.visible=this.active&&this.pathVisible&&(this.compressorStatus().p+item.phase)%1>=.32;
-  if(this.family==='ahu'&&!this.ahu?.sansin)for(const id of ['ahu-supply-duct','ahu-return-duct']){const n=this.template.findNode(id);if(n){n.userData.diagramEnabled=this.pathVisible;n.visible=this.pathVisible&&this.template.exteriorOpen;}}
-  for(const item of this.ahuParticles)if(item.kind==='return')item.mesh.visible=this.active&&this.pathVisible&&(this.ahu?.sansin||(this.ahuStatus().p+item.phase)%1>=.24);
+  if(this.family==='ahu')for(const id of this.ahu?.sansin?['sansin-supply-duct','sansin-return-duct']:['ahu-supply-duct','ahu-return-duct']){const n=this.template.findNode(id);if(n){n.userData.diagramEnabled=this.pathVisible;n.visible=this.pathVisible&&this.template.exteriorOpen;}}
+  for(const item of this.ahuParticles)if(item.kind==='return')item.mesh.visible=this.active&&this.pathVisible&&(this.ahuStatus().p+item.phase)%1>=(this.ahu?.sansin?.28:.24);
   return this.state();
  }
  setInkFlowVisible(){this.inkFlowVisible=false;return this.state();}

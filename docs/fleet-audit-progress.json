@@ -7,20 +7,20 @@
   "mode": "AUDIT_THREE_MACHINES_THEN_FIX_VERIFY_DEPLOY",
   "batchTargetMachines": 3,
   "batchMachineIds": [
-    "BMJ-MCH-0036",
-    "BMJ-MCH-0037",
-    "BMJ-MCH-0038"
+    "BMJ-MCH-0039",
+    "BMJ-MCH-0040",
+    "BMJ-MCH-0041"
   ],
-  "batchStatus": "COMPLETE",
-  "batchReleaseStatus": "VERIFIED",
-  "batchReleaseReport": "docs/batch36-release.md",
+  "batchStatus": "RELEASE_PENDING",
+  "batchReleaseStatus": "RELEASE_PENDING",
+  "batchReleaseReport": "docs/batch39-release.md",
   "batchValidation": {
-    "focusedTests": 43,
+    "focusedTests": 46,
     "fullTestsStatus": "PASS",
     "buildMachines": 41,
-    "bundleBytes": 2842596,
+    "bundleBytes": 2842584,
     "visual3DVerified": false,
-    "fullTests": 1622
+    "fullTests": 1625
   },
   "status": "IN_PROGRESS",
   "cursor": {
@@ -2978,27 +2978,207 @@
       "name": "AHU 6",
       "model": null,
       "area": "UTILITY",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {
+          "part": "intake damper mixing",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/ahu6-whole-machine-audit.md"
+        },
+        {
+          "part": "filters differential pressure",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/ahu6-whole-machine-audit.md"
+        },
+        {
+          "part": "coil headers",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/ahu6-whole-machine-audit.md"
+        },
+        {
+          "part": "condensate pan trap",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/ahu6-whole-machine-audit.md"
+        },
+        {
+          "part": "supply fan drive",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/ahu6-whole-machine-audit.md"
+        },
+        {
+          "part": "service casing supports",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/ahu6-whole-machine-audit.md"
+        },
+        {
+          "part": "discharge controller sensors",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/ahu6-whole-machine-audit.md"
+        },
+        {
+          "part": "supply return outdoor duct",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/ahu6-whole-machine-audit.md"
+        }
+      ],
+      "reports": [
+        "docs/ahu6-whole-machine-audit.md"
+      ],
+      "auditProcessed": true,
+      "secondPassProcessed": true,
+      "remainingUnknowns": [
+        "OEM/model/installed photos",
+        "actual section order and direction",
+        "coil/pan mounting and drain design",
+        "fan profile/support/rating and interlocks",
+        "plant ducts/mounting/control and visual3D"
+      ]
     },
     {
       "machineId": "BMJ-MCH-0040",
       "name": "AHU 7 (SANSIN)",
       "model": null,
       "area": "UTILITY",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {
+          "part": "indoor inlet damper",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/sansin7-whole-machine-audit.md"
+        },
+        {
+          "part": "filter mixing",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/sansin7-whole-machine-audit.md"
+        },
+        {
+          "part": "wet curtain evaporator",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/sansin7-whole-machine-audit.md"
+        },
+        {
+          "part": "indoor fan plenum",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/sansin7-whole-machine-audit.md"
+        },
+        {
+          "part": "outdoor compressor condenser fan",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/sansin7-whole-machine-audit.md"
+        },
+        {
+          "part": "water refrigerant interconnect",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/sansin7-whole-machine-audit.md"
+        },
+        {
+          "part": "controller electrical supports",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/sansin7-whole-machine-audit.md"
+        },
+        {
+          "part": "supply return outdoor airflow",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/sansin7-whole-machine-audit.md"
+        }
+      ],
+      "reports": [
+        "docs/sansin7-whole-machine-audit.md"
+      ],
+      "auditProcessed": true,
+      "secondPassProcessed": true,
+      "remainingUnknowns": [
+        "exact model/capacity and installed photos",
+        "fan/casing70mm schematic interference",
+        "installed water/refrigerant P&ID and mounting",
+        "duct connectors/routes and CFD",
+        "actual control/interlocks and visual3D"
+      ]
     },
     {
       "machineId": "BMJ-MCH-0041",
       "name": "AHU 8",
       "model": null,
       "area": "UTILITY",
-      "status": "PENDING",
-      "parts": [],
-      "reports": []
+      "status": "RELEASE_PENDING",
+      "parts": [
+        {
+          "part": "intake damper mixing",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/ahu8-whole-machine-audit.md"
+        },
+        {
+          "part": "filters differential pressure",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/ahu8-whole-machine-audit.md"
+        },
+        {
+          "part": "coil headers",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/ahu8-whole-machine-audit.md"
+        },
+        {
+          "part": "condensate pan trap",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/ahu8-whole-machine-audit.md"
+        },
+        {
+          "part": "supply fan drive",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/ahu8-whole-machine-audit.md"
+        },
+        {
+          "part": "service casing supports",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/ahu8-whole-machine-audit.md"
+        },
+        {
+          "part": "discharge controller sensors",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/ahu8-whole-machine-audit.md"
+        },
+        {
+          "part": "supply return outdoor duct",
+          "status": "BLOCKED_EVIDENCE",
+          "auditProcessed": true,
+          "report": "docs/ahu8-whole-machine-audit.md"
+        }
+      ],
+      "reports": [
+        "docs/ahu8-whole-machine-audit.md"
+      ],
+      "auditProcessed": true,
+      "secondPassProcessed": true,
+      "remainingUnknowns": [
+        "OEM/model/installed photos",
+        "actual section order and direction",
+        "coil/pan mounting and drain design",
+        "fan profile/support/rating and interlocks",
+        "plant ducts/mounting/control and visual3D"
+      ]
     }
   ],
   "history": [
@@ -3580,7 +3760,7 @@
       "nextMachineId": "BMJ-MCH-0039"
     }
   ],
-  "updatedAt": "2026-10-14T17:25:04.943Z",
+  "updatedAt": "2026-10-15T07:02:59.270Z",
   "lastAuditRelease": {
     "commit": "95ce2790519a540c61a9355dadc4c9301c2fb67a",
     "workflows": [
@@ -3601,8 +3781,24 @@
     ],
     "nextMachineId": "BMJ-MCH-0039"
   },
-  "batchRemainingWork": [],
+  "batchRemainingWork": [
+    "All release workflows",
+    "Production source/bake hash and runtime verification",
+    "Final ledger gates and automation closure"
+  ],
   "batchReleaseEvidence": {
+    "status": "RELEASE_PENDING",
+    "tests": 1625,
+    "focusedTests": 46,
+    "referenceModuleSHA256": "d3027f32ffa07079d295b88fa2b5c43a4dc2941f65552d516746fde7e0ea6050",
+    "factoryChunkSHA256": {
+      "13": "f8f61af85f76c3251843e6552c5fe5c2b938eb1052a4b5aeed99910021767490"
+    },
+    "visual3DVerified": false
+  },
+  "ledgerGatePending": false,
+  "ledgerGateInstruction": "Prior closure gates verified; resume final batch release before any new asset.",
+  "previousBatchReleaseEvidence": {
     "commit": "95ce2790519a540c61a9355dadc4c9301c2fb67a",
     "workflows": [
       38605490594,
@@ -3616,24 +3812,13 @@
     "visualFallbackVerified": true,
     "visual3DVerified": false
   },
-  "ledgerGatePending": true,
-  "ledgerGateInstruction": "Verify current closure ledger gates before starting final AHU6/SANSIN7/AHU8 batch0039–0041. Implementation 95ce2790519a540c61a9355dadc4c9301c2fb67a verified with production source hash.",
-  "previousBatchReleaseEvidence": {
-    "commit": "55d47140157bc1dcf007a118342bd9ac351136e9",
+  "ledgerGateEvidence": {
+    "commit": "3da192fd3877b2083dab0aff82d9dc20c735f871",
     "workflows": [
-      38596111628,
-      38596111839,
-      38596111360
+      38606569674,
+      38606569564,
+      38606569994
     ],
-    "conclusion": "success",
-    "tests": 1620,
-    "productionSourceHashesMatched": true,
-    "referenceModuleSHA256": "0c26766c221b1a6fc89a1e92261dac20b8ade85041e3393f8b4b690b06dd08d4",
-    "factoryChunkSHA256": {
-      "12": "9af7a3ccb52675dbea67e6f118d13e42725bc364a9e498e3da9d1888a36efcac",
-      "13": "a785d6e7b913323251919fbf3e172af5c3d81eb47560211bda2115ee8ea4005c"
-    },
-    "visualFallbackVerified": true,
-    "visual3DVerified": false
+    "conclusion": "success"
   }
 }

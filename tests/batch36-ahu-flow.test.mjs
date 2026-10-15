@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as T from 'three';
 import {createPolishedMachineTemplate,createMachineSimulation} from '../frontend/src/machine-runtime.js';
-const ids=['BMJ-MCH-0036','BMJ-MCH-0037','BMJ-MCH-0038'];
+const ids=['BMJ-MCH-0036','BMJ-MCH-0037','BMJ-MCH-0038','BMJ-MCH-0039','BMJ-MCH-0041'];
 const visible=o=>{for(let p=o;p;p=p.parent)if(!p.visible)return false;return true;};
 test('batch36 AHU route handoffs follow existing rectangular duct surfaces rather than diagonal shortcuts',()=>{
  for(const id of ids){const t=createPolishedMachineTemplate(id),s=createMachineSimulation(id,t.root,t);
