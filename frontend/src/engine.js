@@ -136,7 +136,18 @@ export class FactoryEngine {
     this.renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();this.renderFaulted=true;this.onError?.('Tampilan 3D terputus. Aplikasi beralih ke denah 2D agar navigasi tetap dapat digunakan.');});
     this.renderer.domElement.addEventListener('webglcontextrestored',()=>{this.renderFaulted=false;this.setQualityProfile(this.requestedQuality);this.resize();this.onRecovered?.();});
   }
-  resize(){const w=this.container.clientWidth,h=this.container.clientHeight;if(!w||!h)return;this.renderer.setSize(w,h);this.postProcessing.resize(w,h);this.camera.aspect=w/h;this.camera.updateProjectionMatrix();if(this.simulation?.active&&this.view==='machine')this.fit(this.machine,'iso',false);}
+  resize(){
+    const w=this.container.clientWidth,h=this.container.clientHeight;
+    if(!w||!h)return;
+    this.renderer.setSize(w,h);
+    this.postProcessing.resize(w,h);
+    this.camera.aspect=w/h;
+    this.camera.updateProjectionMatrix();
+    // Resizing the viewport must not reset a live simulation's user-selected
+    // operating-side camera, orbit target, component focus, or zoom to ISO.
+    // Initial machine framing is owned by switchMachine/setView, and explicit
+    // camera controls are the only way to request another viewpoint.
+  }
   framingProfile(object=this.machine){const portrait=this.container.clientWidth<=767&&this.container.clientHeight>this.container.clientWidth;const machine=object===this.machine&&this.view==='machine';return {portrait,machine,padding:portrait&&machine?1.06:1.18,targetLift:portrait&&machine?-.08:0};}
   machineFocusBounds(){
     const family=this.template?.cfg?.family;if(!['compressor','ahu'].includes(family))return null;

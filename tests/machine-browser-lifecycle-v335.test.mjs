@@ -80,13 +80,20 @@ test('V335 Offset 5 UV beam retains its authored emission after inspection reset
  }finally{simulation.dispose();template.dispose();}
 }));
 
-test('V335 active machine simulation reframes after portrait canvas resizing',()=>{
+test('V335 active machine simulation preserves the user camera after portrait canvas resizing',()=>{
  const machine=new THREE.Group(),calls=[];
+ const camera=new THREE.PerspectiveCamera(38,1.5);
+ camera.position.set(4,3,10);
+ const originalCamera=camera.position.clone();
  const engine=Object.assign(Object.create(FactoryEngine.prototype),{
   container:{clientWidth:390,clientHeight:844},renderer:{setSize(w,h){calls.push(['renderer',w,h]);}},
-  postProcessing:{resize(w,h){calls.push(['post',w,h]);}},camera:new THREE.PerspectiveCamera(38,1.5),
-  machine,view:'machine',simulation:{active:true},fit(object,mode,animate){calls.push(['fit',object,mode,animate,this.camera.aspect]);}
+  postProcessing:{resize(w,h){calls.push(['post',w,h]);}},camera,
+  machine,view:'machine',simulation:{active:true},fit(){throw Error('Live inspection camera must not reset to ISO');}
  });
- engine.resize();assert.deepEqual(calls.at(-1),['fit',machine,'iso',false,390/844]);
- engine.simulation.active=false;calls.length=0;engine.resize();assert.equal(calls.length,2,'idle resize retains user camera');
+ engine.resize();assert.deepEqual(calls,[['renderer',390,844],['post',390,844]]);
+ assert.equal(camera.aspect,390/844);
+ assert.ok(camera.position.equals(originalCamera));
+ engine.simulation.active=false;calls.length=0;engine.resize();
+ assert.equal(calls.length,2,'idle resize retains user camera');
+ assert.ok(camera.position.equals(originalCamera));
 });
