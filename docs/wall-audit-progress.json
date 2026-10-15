@@ -1,0 +1,22 @@
+{
+  "status": "IN_PROGRESS",
+  "releaseStatus": "RELEASE_PENDING",
+  "baseCommit": "d480f2ceff3b316c50a6c7f09431d97bd4f0a669",
+  "report": "docs/wall-deep-audit-20261015.md",
+  "inventory": "docs/wall-audit-inventory-20261015.json",
+  "sourceWalls": 355,
+  "auditedMeshes": 2949,
+  "triangles": 36324,
+  "fixed": {"redundantIntervals":9,"redundantLengthM":15.67665,"doorFinishHeaders":17,"wallLayerPanels":81},
+  "secondPass": {"remainingExactSourceOverlaps":0,"nonfiniteVertices":0,"visibleExactGeometryDuplicates":0,"visibleWallMinY":0},
+  "targetedTests": 26,
+  "fullRegression": "PASS",
+  "fullTests": 1632,
+  "fullDurationMs": 279821.434427,
+  "build": "PASS",
+  "sourceSHA256": "b5093770d39e8237062b447dfae29cbd81a37016fd4bfc08084e36efa630c5c2",
+  "visual3DVerified": false,
+  "blockers": ["BLOCKED_EVIDENCE: actual wall heights, thickness/materials, room partitions and exterior wall/eave closures", "BLOCKED_EVIDENCE: installed lintel and source wall shift survey", "3D mode disabled in current production browser"],
+  "remaining": ["Visual 3D inspection of all wall faces, corners, openings and toggle orders", "Resolve installed construction evidence before changing estimated heights or source-driven geometry"],
+  "machineCursorChanged": false
+}
