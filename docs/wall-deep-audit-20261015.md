@@ -37,3 +37,7 @@ Full regression/build and release status are recorded in `wall-audit-progress.js
 - The audit does not certify structural adequacy, fire resistance, building-code compliance or that every inferred partition exists on site.
 
 The supported defects are repaired, but the broader “all walls realistic” validation remains **IN_PROGRESS** until visual inspection and the listed installed evidence are available.
+
+## Verified correction release
+
+Commit `ede5f35cc971da7ae1df9b7e11265898903ce858`: all 1,632 local regressions PASS, zero skips/failures; build PASS. GitHub Digital Twin CI `38724724565`, Verify frontend `38724724734`, Cloudflare Workers `38724724523` all SUCCESS. Cloudflare release gate, credential validation, D1 connection/migrations and deploy all succeeded. Production `src/factory-building.js` SHA256 matches source/build: `b5093770d39e8237062b447dfae29cbd81a37016fd4bfc08084e36efa630c5c2`. Expected-head update preserved concurrent-change protection. This verifies the correction release, not the unresolved visual/as-built checks.
