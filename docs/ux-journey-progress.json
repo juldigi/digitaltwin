@@ -11,14 +11,14 @@
   "fullRegression": "IN_PROGRESS",
   "productionVisualVerified": true,
   "remaining": [
-    "final regression gates and cancellation round-trip",
+    "final disclosure release gates and visual verification",
     "physical iPhone and novice-user usability validation"
   ],
-  "previousVerifiedRelease": "ffccef2d85c21b1559d90aa6692510fb9e4aba6f",
+  "previousVerifiedRelease": "cc51e2c3c1856e448e0452799044be7e5da66373",
   "previousReleaseWorkflows": [
-    38846754172,
-    38846753917,
-    38846754076
+    38848356382,
+    38848356376,
+    38848356357
   ],
   "productionChecks": [
     "factory entry opens 41 assets",
@@ -28,9 +28,13 @@
     "change-machine reopens catalogue",
     "factory navigation clears asset route"
   ],
-  "secondPassFinding": "Cancel change-machine picker hid previous detail; restoration guard implemented",
+  "secondPassFinding": "Cancellation restoration verified; internal notes moved into technical details and factory-only unavailable tabs hidden",
   "finalFocusedTests": {
-    "passed": 68,
+    "passed": 76,
+    "failed": 0
+  },
+  "previousCompleteRegression": {
+    "passed": 1649,
     "failed": 0
   }
 }

@@ -265,3 +265,6 @@ button:disabled {cursor:default!important}
 .asset-browser-results>.empty button {min-height:44px;margin-top:12px}
 .asset-category-tabs button {flex:1 0 auto!important}
 @media(max-width:767px) {#choose-machine {min-height:44px;margin-top:8px;padding:8px 12px;font-size:12px}}
+
+/* Factory selection offers an overview and next action; part tabs belong to machine context. */
+body[data-scene-mode="factory"] aside#detail-panel>.tabs {display:none!important}
