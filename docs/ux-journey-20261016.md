@@ -18,3 +18,8 @@ The factory opened without a visible starting action. The catalogue started with
 
 ## Scope and limits
 No geometry, simulation engine, dimensions, machine identity or evidence was changed. This addresses the starting/discovery/selection/recovery journey. A formal usability study with novice operators and physical iPhone validation remain outstanding; this is not a claim of perfect UX.
+
+## Production pass and cancellation follow-up
+Release ffccef2d85c21b1559d90aa6692510fb9e4aba6f passed CI 38846754172, frontend 38846753917 and Cloudflare 38846754076. Production fingerprint ce8a7e0e37cdadd2 was observed. Actual browser checks: factory entry opens all 41 assets; AHU search finds 6 utilities without category changes; empty-state recovery restores 41 results and search focus; OFU-1 selects BMJ-MCH-0003; primary actions appear before technical information; changing machine opens the catalogue; factory navigation clears the selected route. Screenshots confirmed the entry action and readable selected-machine panel.
+
+A second pass found cancelling the change-machine picker hid the prior detail. The chooser now restores that detail on close only when selection is uncommitted and the same asset remains selected in factory context. It cannot overwrite a newer selection. 68 chooser/context/language tests and build pass after this fix; final release gates and cancellation round-trip remain pending. Physical phone and novice-user validation remain outstanding.

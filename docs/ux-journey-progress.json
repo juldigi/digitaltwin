@@ -9,10 +9,28 @@
   },
   "build": "PASS",
   "fullRegression": "IN_PROGRESS",
-  "productionVisualVerified": false,
+  "productionVisualVerified": true,
   "remaining": [
-    "complete regression gates",
-    "production journey verification",
+    "final regression gates and cancellation round-trip",
     "physical iPhone and novice-user usability validation"
-  ]
+  ],
+  "previousVerifiedRelease": "ffccef2d85c21b1559d90aa6692510fb9e4aba6f",
+  "previousReleaseWorkflows": [
+    38846754172,
+    38846753917,
+    38846754076
+  ],
+  "productionChecks": [
+    "factory entry opens 41 assets",
+    "AHU search finds six utilities",
+    "empty recovery restores all assets and focus",
+    "Offset 5 identity and actions precede technical details",
+    "change-machine reopens catalogue",
+    "factory navigation clears asset route"
+  ],
+  "secondPassFinding": "Cancel change-machine picker hid previous detail; restoration guard implemented",
+  "finalFocusedTests": {
+    "passed": 68,
+    "failed": 0
+  }
 }

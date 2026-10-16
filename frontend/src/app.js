@@ -870,7 +870,7 @@ function machineDetailDialog(machine){
  $('#panel-content').innerHTML=`<section class="context-summary"><div class="context-summary-head"><small>MESIN ATAU PERALATAN TERPILIH</small><h3>${esc(machine.name)}</h3><p>${esc([machine.sapCode,machine.model].filter(Boolean).join(' · ')||'Identitas belum tercatat')}</p></div><div class="card accent context-status-card"><h4>${esc(status)}</h4><p>${esc(copy)}</p></div><div class="actions context-primary-actions"><button id="${modelAvailable?'open-machine-3d':'focus-layout-asset'}" class="primary">${modelAvailable?'Buka detail mesin':'Lihat posisi di pabrik'}</button><button id="change-context-machine" class="secondary">Pilih mesin lain</button></div><dl class="data-list context-summary-data">${summaryData}</dl>${primary&&machine.note?`<div class="card context-note"><h4>Catatan</h4><p>${esc(machine.note)}</p></div>`:''}<details class="technical-details"><summary>Informasi teknis</summary><div class="technical-details-body"><dl class="data-list">${technicalData}</dl></div></details></section>`;
  emitDomainState({selectedAsset:machine.machineId,selectedArea:machine.area||null,selectedNode:null,activeReference:null,activeSection:'asset',sceneMode:'factory',cameraPreset:'iso',inspectorState:{open:true,tab:'overview'}});
  renderContextBreadcrumb();
- on('#change-context-machine',()=>assetDialog());
+ on('#change-context-machine',()=>assetDialog('',{returnToMachine:machine}));
  if(modelAvailable)on('#open-machine-3d',()=>switchActiveMachine(machineRoute(machine)));
  else on('#focus-layout-asset',()=>selectFactoryAssetContext(machine,{historyMode:'none',openDialog:false,focus:true}));
  return true;
@@ -1079,7 +1079,8 @@ function foundationAssetMatches(machine,query){
  const fields=primary?[machine.name,machine.machineId,machine.area,machine.sapCode,machine.functionalLocation,machine.model,machine.serial]:[machine.name,machine.machineId,machine.area];
  return normalizeSearchText(fields.filter(Boolean).join(' ')).includes(q);
 }
-function assetDialog(initialQuery='',{intent='browse'}={}){
+function assetDialog(initialQuery='',{intent='browse',returnToMachine=null}={}){
+ let selectionCommitted=false;
  const simulationIntent=intent==='simulation';
  const chooserTitle=simulationIntent?'Pilih mesin untuk simulasi':'Pilih mesin atau peralatan';
  const chooserCopy=simulationIntent?'Pilih mesin untuk membuka simulasi prosesnya.':'Temukan mesin, lihat posisi, lalu buka detailnya.';
@@ -1092,7 +1093,7 @@ function assetDialog(initialQuery='',{intent='browse'}={}){
   const raw=String(query||'').trim().toLowerCase(),nodes=ACTIVE_TAXONOMY.filter(node=>node.id!==ACTIVE_ROOT&&(!raw||[node.name,node.description,node.id,node.levelName].some(v=>String(v||'').toLowerCase().includes(raw)))).slice(0,100);
   $('#asset-result-summary').textContent=nodes.length+' komponen '+activeMachine.name+' ditampilkan';
   $('#asset-results').innerHTML=nodes.length?nodes.map(node=>`<button type="button" data-component-id="${esc(node.id)}" class="asset-browser-row component-row"><span class="asset-thumbnail"><b>L${node.level}</b><small>${esc(node.levelName||'Struktur')}</small></span><span class="asset-browser-copy"><strong>${esc(node.name)}</strong><small>${esc(activeMachine.name)}</small><span>${esc(node.description||'Komponen mesin')}</span></span><em class="asset-data-badge">${engine?.template.resolveTaxonomyNode(node.id)?'Tersedia':'Referensi'}</em></button>`).join(''):'<p class="empty">Tidak ada komponen yang sesuai.</p>';
-  $$('[data-component-id]').forEach(button=>button.onclick=()=>{closeModal();switchActiveMachine(componentRoute,{historyMode:'push'}).then(opened=>{if(!opened)return;setView('machine');selectTaxonomy(button.dataset.componentId,{revealPanel:true,historyMode:'push'});emitDomainState({selectedAsset:activeMachine.machineId,selectedNode:button.dataset.componentId,activeSection:'asset'});});});
+  $$('[data-component-id]').forEach(button=>button.onclick=()=>{selectionCommitted=true;closeModal();switchActiveMachine(componentRoute,{historyMode:'push'}).then(opened=>{if(!opened)return;setView('machine');selectTaxonomy(button.dataset.componentId,{revealPanel:true,historyMode:'push'});emitDomainState({selectedAsset:activeMachine.machineId,selectedNode:button.dataset.componentId,activeSection:'asset'});});});
  };
  const render=()=>{
   const query=$('#asset-search').value,area=$('#asset-area').value;
@@ -1107,12 +1108,15 @@ function assetDialog(initialQuery='',{intent='browse'}={}){
    return`<button type="button" data-machine-id="${machine.machineId}" class="asset-browser-row"><span class="asset-thumbnail"><img src="./assets/machines/${machine.machineId}.png" alt="" width="320" height="160" loading="lazy" decoding="async"></span><span class="asset-browser-copy"><strong>${esc(machine.name)}</strong><small>${esc([machine.sapCode,machine.model].filter(Boolean).join(' · ')||'Identitas belum tercatat')}</small><span>${esc(copy)}</span></span><em class="asset-data-badge">${simulationIntent?'Buka simulasi':'Lihat detail'} <span aria-hidden="true">↗</span></em></button>`;
   }).join(''):'<div class="empty"><p>Tidak ada hasil yang cocok dengan pencarian dan area ini.</p><button id="reset-asset-filters" type="button" class="secondary">Tampilkan semua mesin</button></div>';
  on('#reset-asset-filters',()=>{$('#asset-search').value='';$('#asset-area').value='';assetCategory='all';syncCategoryButtons();render();$('#asset-search').focus();});
- $$('[data-machine-id]').forEach(button=>button.onclick=async()=>{const machine=MACHINE_REGISTRY_BY_ID.get(button.dataset.machineId);if(machine){closeModal();if(simulationIntent){dispatchEvent(new CustomEvent('bmj:simulateselectedmachine',{detail:{selectedAsset:machine.machineId}}));return;}await openAssetContext(machine);}});
+ $$('[data-machine-id]').forEach(button=>button.onclick=async()=>{const machine=MACHINE_REGISTRY_BY_ID.get(button.dataset.machineId);if(machine){selectionCommitted=true;closeModal();if(simulationIntent){dispatchEvent(new CustomEvent('bmj:simulateselectedmachine',{detail:{selectedAsset:machine.machineId}}));return;}await openAssetContext(machine);}});
  };
  $('#asset-search').value=initialQuery;
  const syncCategoryButtons=()=>$$('[data-asset-category]').forEach(button=>{const active=button.dataset.assetCategory===assetCategory;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));});
  $$('[data-asset-category]').forEach(button=>button.onclick=()=>{assetCategory=button.dataset.assetCategory;syncCategoryButtons();render();});
  for(const id of ['#asset-search','#asset-area']){$(id).oninput=render;$(id).onchange=render;}render();
+ if(returnToMachine)$('#modal').addEventListener('close',()=>{
+  if(!selectionCommitted&&!$('#modal').open&&getAppState().sceneMode==='factory'&&getAppState().selectedAsset===returnToMachine.machineId){machineDetailDialog(returnToMachine);$('#change-context-machine')?.focus();}
+ },{once:true});
 }
 function openSceneEditor(){
  if(role==='superadmin'&&superadminPasswordChangeRequired){superadminPasswordDialog({forced:true});return toast('Ganti kata sandi awal sebelum menggunakan editor pabrik 3D.',true);}
