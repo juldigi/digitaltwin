@@ -106,7 +106,7 @@ test('V266 replaces generic asset jargon with object and machine wording',()=>{
   'Identitas mesin atau peralatan','Posisi mesin dan peralatan','Penanda posisi mesin dan peralatan','Nama area, mesin, dan peralatan',
   'Sejajarkan dengan objek lain','Pilih objek acuan',
   'posisi mesin atau peralatan pada denah',
-  'Mesin atau peralatan ini belum memiliki posisi tata letak yang dapat dibuka.','Model 3D belum tersedia untuk mesin atau peralatan ini.'
+  'Mesin atau peralatan ini belum memiliki posisi tata letak yang dapat dibuka.','Identitas dan posisi pada denah dapat diperiksa.'
  ])assert.ok(runtime.includes(copy),copy);
 });
 
@@ -120,7 +120,7 @@ test('V266 uses machine or equipment wording across chooser status and fallbacks
   'model 3D tersedia',
   'Kategori mesin atau peralatan',
   'Nama mesin atau peralatan',
-  'Profil penutup dan jalur mekanisme','MESIN ATAU PERALATAN TERPILIH','Buka model 3D','Pusatkan di pabrik'
+  'Profil penutup dan jalur mekanisme','MESIN ATAU PERALATAN TERPILIH','Buka model 3D','Lihat posisi di pabrik'
  ])assert.ok(app.includes(copy),copy);
 });
 
