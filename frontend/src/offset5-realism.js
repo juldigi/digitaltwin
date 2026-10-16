@@ -84,6 +84,42 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
     this.refineCoaterFrameSupportsV257();
     this.refineCoaterAniloxDriveV258();
     this.refineCoaterNipPathV259();
+    this.refineSurfaceFinishV354();
+  }
+
+  refineSurfaceFinishV354(){
+    // Material-only pass: improve the read of painted steel, exposed metal and glass
+    // without changing the calibrated geometry, module placement, colours or motion.
+    this.root.userData.visualRefinement='V354_SURFACE_FINISH_MATERIAL_PASS';
+    this.root.userData.surfaceFinishPolicy='MATERIAL_ONLY__NO_GEOMETRY_OR_DIMENSION_CHANGE__SOURCE_COLOUR_PRESERVED';
+    const classify=(mesh)=>{
+      const id=[mesh.name,mesh.userData?.nodeId,mesh.userData?.ownerId,mesh.userData?.realismRole].filter(Boolean).join(' ').toLowerCase();
+      if(/display|inspection-glass|window-glass|glass-panel/.test(id))return {kind:'glass',roughness:.24,metalness:.12};
+      if(/cylinder|roller|anilox|drum|shaft|gripper-finger|gripper-bar/.test(id))return {kind:'exposed-process-metal',roughness:.31,metalness:.72};
+      if(/bearing|hinge|fastener|bracket|rail|frame|chain|saddle|retainer/.test(id))return {kind:'structural-metal',roughness:.43,metalness:.66};
+      if(/press-|feeder|delivery|coater|hood|guard|cover|housing|service-door|fascia|panel/.test(id))return {kind:'painted-machine-surface',roughness:.67,metalness:.20};
+      return null;
+    };
+    let treated=0;
+    this.root.traverse(mesh=>{
+      if(!mesh.isMesh||!mesh.material||mesh.userData.surfaceFinishV354) return;
+      const finish=classify(mesh);
+      if(!finish)return;
+      const apply=(material)=>{
+        if(!material||!('roughness' in material)||material.transparent||material.opacity<1)return material;
+        const copy=material.clone();
+        copy.roughness=finish.roughness;
+        copy.metalness=finish.metalness;
+        copy.needsUpdate=true;
+        return copy;
+      };
+      if(Array.isArray(mesh.material))mesh.material=mesh.material.map(apply);
+      else mesh.material=apply(mesh.material);
+      mesh.userData.surfaceFinishV354=finish.kind;
+      treated++;
+    });
+    this.root.userData.surfaceFinishMeshCount=treated;
+    this.root.userData.surfaceFinishColourPolicy='ORIGINAL_MATERIAL_COLOURS_AND_TEXTURES_PRESERVED';
   }
 
   refineExteriorIdentityV237(){
