@@ -9,7 +9,7 @@ const index=readFileSync(new URL('../frontend/index.html',import.meta.url),'utf8
 const sw=readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 
 test('simulation asset picker continues directly into the selected machine simulation',()=>{
- assert.match(app,/function assetDialog\(initialQuery='',\{intent='browse'\}=\{\}\)/);
+ assert.match(app,/function assetDialog\(initialQuery='',\{intent='browse',returnToMachine=null\}=\{\}\)/);
  assert.match(app,/const simulationIntent=intent==='simulation'/);
  assert.match(app,/if\(!record\)\{assetDialog\('',\{intent:'simulation'\}\);return;\}/);
  assert.match(app,/if\(simulationIntent\)\{dispatchEvent\(new CustomEvent\('bmj:simulateselectedmachine'/);
