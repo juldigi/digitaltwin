@@ -1,6 +1,6 @@
 {
   "status": "IN_PROGRESS",
-  "releaseStatus": "RELEASE_PENDING",
+  "releaseStatus": "VERIFIED",
   "baseCommit": "d824b82c7544931f41ef054e1db1cc42e9b7656f",
   "report": "docs/ux-journey-20261016.md",
   "targetedTests": {
@@ -8,11 +8,14 @@
     "failed": 0
   },
   "build": "PASS",
-  "fullRegression": "IN_PROGRESS",
+  "fullRegression": {
+    "passed": 1649,
+    "failed": 0
+  },
   "productionVisualVerified": true,
   "remaining": [
-    "final disclosure release gates and visual verification",
-    "physical iPhone and novice-user usability validation"
+    "physical iPhone and novice-user usability validation",
+    "continue simplifying dense machine overview and secondary workspaces"
   ],
   "previousVerifiedRelease": "cc51e2c3c1856e448e0452799044be7e5da66373",
   "previousReleaseWorkflows": [
@@ -36,5 +39,16 @@
   "previousCompleteRegression": {
     "passed": 1649,
     "failed": 0
-  }
+  },
+  "releaseCommit": "6b2f764ccc65c2fe80ae3e7ea3600a44d77fee1f",
+  "workflowRuns": {
+    "ci": 38849219027,
+    "frontend": 38849218875,
+    "cloudflare": 38849218907
+  },
+  "productionFingerprint": "8ce5faa5a226376f",
+  "cancellationVerified": true,
+  "keyboardFocusRestored": true,
+  "progressiveDisclosureVerified": true,
+  "machineContextTabsVerified": true
 }
