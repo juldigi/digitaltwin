@@ -49,3 +49,9 @@ test('ambiguous SAP codes cannot override a unique full machine name', () => {
   assert.match(embed, /owners\?\.size===1&&owners\.has\(machineId\)/);
   assert.match(embed, /Duplicate SAP codes \(for example PLT-1\)/);
 });
+
+test('the camera is fitted only when the scene root changes, never by a repeating timer', () => {
+  assert.match(embed, /if\(rootChanged\)\{/);
+  assert.doesNotMatch(embed, /now-state\.lastPolicyAt>900/);
+  assert.doesNotMatch(embed, /lastPolicyAt/);
+});
