@@ -175,7 +175,7 @@ function paintLabels(force=false){
   card.className='machine-status-card '+cardClass(item.status.key);
   const nameEl=card.querySelector('.machine-name'),statusEl=card.querySelector('.machine-status');
   nameEl.textContent=item.label;
-  statusEl.textContent=item.status.key==='none'?'Belum ada data':item.status.statusLabel;
+  statusEl.textContent=item.status.statusLabel||'Belum ada data';
   card.title=[item.record?.name||item.record?.code||item.record?.description,item.status.sourceLabel,item.status.description].filter(Boolean).join(' · ');
   const p=projectMachine(item.object,rect);
   if(!p){card.hidden=true;continue;}
