@@ -27,6 +27,26 @@ test('embedded overview disables machine-detail selection and avoids repeated po
   assert.match(embed, /if\(firstAuthorization\)state\.policyApplied=false/);
 });
 
+
+test('ambiguous SAP codes require a unique exact machine-name match', () => {
+  assert.match(embed, /const sameCodePeers\s*=\s*code\?state\.registry\.filter/);
+  assert.match(embed, /const payloadCodeRows\s*=\s*code\?state\.records\.filter/);
+  assert.match(embed, /const codeIsUnique\s*=\s*sameCodePeers\.length===1&&payloadCodeRows\.length===1/);
+  assert.match(embed, /exactCodePeers\.length===1&&exactCodePeers\[0\]\.machineId===machine\.machineId/);
+  assert.match(embed, /An explicit different code must never be overridden by a fuzzy name match/);
+});
+
+test('leading-zero machine names compare consistently', () => {
+  assert.match(embed, /function machineNameKey/);
+  assert.match(embed, /machineNameKey\(row\.name\)/);
+});
+
+test('viewer READY is sent only after assets and status anchors exist', () => {
+  assert.match(embed, /engine\.actualFactory\.assets\.size>0&&state\.anchors\.size>0/);
+  assert.match(embed, /state\.parentOrigin&&ALLOWED_PARENT_ORIGINS\.has\(state\.parentOrigin\)/);
+  assert.doesNotMatch(embed, /event\.source\.postMessage\(\{type:'OMODOS_FACTORY_STATUS_READY',version:1\},event\.origin\)/);
+});
+
 test('every visible registry machine gets a status card and ambiguous codes do not map silently', () => {
   assert.match(embed, /for\(const machine of state\.registry\)/);
   assert.match(embed, /const card=ensureCard\(entry\.machine\)/);
