@@ -16,6 +16,8 @@ test('OMODOS status viewer is opt-in and only accepts the authenticated OMODOS p
 test('embedded overview hides roof, walls, building envelope, and IPAL structure', () => {
   assert.match(embed, /const policy=\{building:false,ipal:false,floor:true,walls:false,doors:false,windows:false,air_curtain:false,furniture:false,roof:false/);
   assert.match(embed, /engine\.setFactoryLayer\(key,visible\)/);
+  assert.match(embed, /const assetRoots=new Set\(\[\.\.\.engine\.actualFactory\.assets\.values\(\)\]\)/);
+  assert.match(embed, /if\(!assetRoots\.has\(child\)\)child\.visible=false/);
 });
 
 test('embedded overview disables machine-detail selection and avoids repeated policy writes', () => {
