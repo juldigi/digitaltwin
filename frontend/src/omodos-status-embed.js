@@ -3,7 +3,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
   // No extra imports or UI for regular DigitalTwin sessions.
 } else {
   const ALLOWED_PARENT_ORIGINS = new Set(['https://omodos.juldigi.workers.dev']);
-  const state = {authorized:false,readySent:false,records:[],recordsVersion:0,registry:[],engine:null,layer:null,cards:new Map(),anchors:new Map(),lastAnchorAt:0,lastPolicyAt:0};
+  const state = {authorized:false,readySent:false,records:[],recordsVersion:0,registry:[],registryAliasOwners:new Map(),registryNameCounts:new Map(),engine:null,layer:null,cards:new Map(),anchors:new Map(),lastAnchorAt:0,lastPolicyAt:0};
   document.documentElement.classList.add('omodos-status-embed');
   const css = [
     'html.omodos-status-embed,html.omodos-status-embed body{width:100%!important;height:100%!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#edf2f5!important}',
@@ -56,19 +56,34 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     return s.slice(0,17).trim()+'…';
   }
   function toneFor(status){
-    const s=normalize(status);if(!s||s==='belum ada catatan'||s.includes('belum diisi'))return 'unknown';
-    if(/(rusak|breakdown|gangguan|gagal|abnormal|emergency|darurat|critical)/.test(s))return 'critical';
+    const s=normalize(status);if(!s||s==='belum ada catatan'||s==='belum ada data'||s==='belum diketahui'||s==='belum tersedia'||s.includes('belum diisi'))return 'unknown';
+    if(/(rusak|breakdown|gangguan|gagal|abnormal|emergency|darurat|critical|kritikal)/.test(s))return 'critical';
     if(/(perlu|masalah|pending|menunggu|belum|proses|ongoing|open|perbaikan|tidak normal|follow up)/.test(s))return 'attention';
     if(/(selesai|completed|closed|normal|baik|aman|running|operasi|operasional|ok\b)/.test(s))return 'good';
     return 'unknown';
   }
   function formatDate(value){if(!value)return '';const d=new Date(value);if(Number.isNaN(d.getTime()))return '';return d.toLocaleDateString('id-ID',{day:'2-digit',month:'short'}).replace(/\./g,'');}
   function bestRecord(machine){
-    const aliases=aliasesFor(machine);let winner=null,winnerScore=0,winnerTime=-Infinity;
+    const aliases=aliasesFor(machine),machineId=machine.machineId,nameKey=normalize(machine.name);
+    const nameIsUnique=Boolean(nameKey&&state.registryNameCounts.get(nameKey)===1);
+    const short=normalize(shortName(machine));
+    let winner=null,winnerScore=0,winnerTime=-Infinity;
     for(const row of state.records){
       const code=normalize(row.code),name=normalize(row.name);let score=0;
-      if(code&&aliases.includes(code))score=130;if(name&&aliases.includes(name))score=Math.max(score,100);
-      const short=normalize(shortName(machine));if(name&&short&&name===short)score=Math.max(score,110);if(name&&short&&name.startsWith(short+' '))score=Math.max(score,90);
+      // Duplicate SAP codes (for example PLT-1) are not unique machine IDs.
+      // Prefer an unambiguous full machine name, and only use codes/aliases
+      // that resolve to exactly one registry asset.
+      if(name&&nameIsUnique&&name===nameKey)score=170;
+      if(code&&aliases.includes(code)){
+        const owners=state.registryAliasOwners.get(code);
+        if(owners?.size===1&&owners.has(machineId))score=Math.max(score,150);
+      }
+      if(name&&aliases.includes(name)){
+        const owners=state.registryAliasOwners.get(name);
+        if(owners?.size===1&&owners.has(machineId))score=Math.max(score,140);
+      }
+      if(name&&short&&name===short&&state.registryAliasOwners.get(short)?.size===1)score=Math.max(score,120);
+      if(name&&short&&name.startsWith(short+' ')&&state.registryAliasOwners.get(short)?.size===1)score=Math.max(score,90);
       const time=Date.parse(row.date||'')||row.index||0;
       if(score&&(time>winnerTime||(time===winnerTime&&score>winnerScore))){winner=row;winnerScore=score;winnerTime=time;}
     }
@@ -115,8 +130,16 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
   async function startViewer(){
     try{
       const [THREE,registryModule]=await Promise.all([import('three'),import('./data/machine-registry.js')]);state.registry=registryModule.MACHINE_REGISTRY||[];
+      state.registryAliasOwners=new Map();state.registryNameCounts=new Map();
+      for(const machine of state.registry){
+        const name=normalize(machine.name);if(name)state.registryNameCounts.set(name,(state.registryNameCounts.get(name)||0)+1);
+        for(const alias of aliasesFor(machine)){
+          if(!state.registryAliasOwners.has(alias))state.registryAliasOwners.set(alias,new Set());
+          state.registryAliasOwners.get(alias).add(machine.machineId);
+        }
+      }
       const viewport=document.getElementById('viewport');if(!viewport)throw new Error('Viewport pabrik tidak ditemukan.');
-      const layer=document.createElement('div');layer.id='omodos-status-overlay';layer.innerHTML='<div id="omodos-status-badge"><strong>BMJ · Factory Status</strong><span>Status logbook terakhir · bukan telemetry real-time</span></div>';viewport.appendChild(layer);state.layer=layer;
+      const layer=document.createElement('div');layer.id='omodos-status-overlay';layer.innerHTML='<div id="omodos-status-badge"><strong>BMJ · Factory Status</strong><span>Status terbaru Logbook/Patrol · bukan telemetry real-time</span></div>';viewport.appendChild(layer);state.layer=layer;
       let rootSignature='';
       setInterval(()=>{
         const engine=window.__BMJ_FACTORY_ENGINE__;if(!engine?.actualFactory?.assets||!engine.factory)return;state.engine=engine;
