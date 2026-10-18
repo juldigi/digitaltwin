@@ -37,6 +37,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
   gate.innerHTML = '<div class="gate-card"><strong>Beranda Superadmin OMODOS</strong>Viewer ini hanya dapat ditampilkan melalui sesi Superadmin OMODOS yang sah.</div>';
   document.body.appendChild(gate);
   function normalize(value){return String(value==null?'':value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ');}
+  function machineNameKey(value){return normalize(value).replace(/(^|\\s)0+(\\d+)/g,(_,prefix,digits)=>prefix+String(Number(digits)));}
   function shortName(machine){
     const raw=String(machine?.name||machine?.sapCode||'Mesin');const offset=raw.match(/offset[^0-9]{0,24}(\d+)/i);if(offset)return 'Offset '+offset[1];
     const match=raw.match(/\b(APM|FGM|AHU|CTP|CTF|FZG|OFS|OFU|GLM|PDS|RMS)\s*[-# ]?\s*(\d+)\b/i);if(match)return match[1].toUpperCase()+' '+match[2];
@@ -65,8 +66,8 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
   function formatDate(value){if(!value)return '';const d=new Date(value);if(Number.isNaN(d.getTime()))return '';return d.toLocaleDateString('id-ID',{day:'2-digit',month:'short'}).replace(/\./g,'');}
   function bestRecord(machine){
     const code=normalize(machine.sapCode);
-    const machineName=normalize(machine.name);
-    const short=normalize(shortName(machine));
+    const machineName=machineNameKey(machine.name);
+    const short=machineNameKey(shortName(machine));
     const sameCodePeers=code?state.registry.filter(peer=>normalize(peer.sapCode)===code):[];
     const payloadCodeRows=code?state.records.filter(row=>normalize(row.code)===code):[];
     const codeIsUnique=sameCodePeers.length===1&&payloadCodeRows.length===1;
@@ -83,7 +84,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
         continue;
       }else if(name&&(name===machineName||name===short)){
         const exactPeers=state.registry.filter(peer=>{
-          const peerName=normalize(peer.name),peerShort=normalize(shortName(peer));
+          const peerName=machineNameKey(peer.name),peerShort=machineNameKey(shortName(peer));
           return peerName===name||peerShort===name;
         });
         if(exactPeers.length===1&&exactPeers[0].machineId===machine.machineId)score=100;
