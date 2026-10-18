@@ -73,7 +73,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     const codeIsUnique=sameCodePeers.length===1&&payloadCodeRows.length===1;
     let winner=null,winnerScore=0,winnerTime=-Infinity;
     for(const row of state.records){
-      const rowCode=normalize(row.code),name=normalize(row.name);
+      const rowCode=normalize(row.code),name=machineNameKey(row.name);
       let score=0;
       if(code&&rowCode===code){
         if(codeIsUnique)score=130;
