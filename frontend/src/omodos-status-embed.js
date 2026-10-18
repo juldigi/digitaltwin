@@ -3,7 +3,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
   // No extra imports or UI for regular DigitalTwin sessions.
 } else {
   const ALLOWED_PARENT_ORIGINS = new Set(['https://omodos.juldigi.workers.dev']);
-  const state = {authorized:false,records:[],recordsVersion:0,registry:[],engine:null,layer:null,cards:new Map(),anchors:new Map(),lastAnchorAt:0,lastPolicyAt:0};
+  const state = {authorized:false,readySent:false,records:[],recordsVersion:0,registry:[],engine:null,layer:null,cards:new Map(),anchors:new Map(),lastAnchorAt:0,lastPolicyAt:0};
   document.documentElement.classList.add('omodos-status-embed');
   const css = [
     'html.omodos-status-embed,html.omodos-status-embed body{width:100%!important;height:100%!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#edf2f5!important}',
@@ -138,6 +138,6 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     const payload=event.data;if(!payload||payload.type!=='OMODOS_FACTORY_STATUS'||payload.version!==1||!Array.isArray(payload.records))return;
     state.records=payload.records.slice(0,1200).map((row,index)=>({code:String(row?.code||'').trim(),name:String(row?.name||'').trim(),status:String(row?.status||'').trim(),date:String(row?.date||'').trim(),index:Number(row?.index)||index}));state.recordsVersion++;
     state.authorized=true;document.documentElement.classList.add('omodos-status-authorized');gate.remove();state.lastAnchorAt=0;
-    event.source.postMessage({type:'OMODOS_FACTORY_STATUS_READY',version:1},event.origin);startViewerOnce();
+    if(!state.readySent){state.readySent=true;event.source.postMessage({type:'OMODOS_FACTORY_STATUS_READY',version:1},event.origin);}startViewerOnce();
   });
 }
