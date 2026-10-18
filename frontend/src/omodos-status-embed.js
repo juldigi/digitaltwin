@@ -3,7 +3,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
   // No extra imports or UI for regular DigitalTwin sessions.
 } else {
   const ALLOWED_PARENT_ORIGINS = new Set(['https://omodos.juldigi.workers.dev']);
-  const state = {authorized:false,readySent:false,records:[],recordsVersion:0,registry:[],engine:null,layer:null,cards:new Map(),anchors:new Map(),lastAnchorAt:0,lastPolicyAt:0};
+  const state = {authorized:false,readySent:false,records:[],recordsVersion:0,registry:[],engine:null,layer:null,cards:new Map(),anchors:new Map(),lastAnchorAt:0,lastPolicyAt:0,policyApplied:false};
   document.documentElement.classList.add('omodos-status-embed');
   const css = [
     'html.omodos-status-embed,html.omodos-status-embed body{width:100%!important;height:100%!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#edf2f5!important}',
@@ -56,20 +56,34 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     return s.slice(0,17).trim()+'…';
   }
   function toneFor(status){
-    const s=normalize(status);if(!s||s==='belum ada catatan'||s.includes('belum diisi'))return 'unknown';
-    if(/(rusak|breakdown|gangguan|gagal|abnormal|emergency|darurat|critical)/.test(s))return 'critical';
+    const s=normalize(status);if(!s||s==='belum ada catatan'||s==='belum ada data'||s.includes('belum diisi'))return 'unknown';
+    if(/(rusak|breakdown|gangguan|gagal|abnormal|emergency|darurat|critical|kritikal)/.test(s))return 'critical';
     if(/(perlu|masalah|pending|menunggu|belum|proses|ongoing|open|perbaikan|tidak normal|follow up)/.test(s))return 'attention';
     if(/(selesai|completed|closed|normal|baik|aman|running|operasi|operasional|ok\b)/.test(s))return 'good';
     return 'unknown';
   }
   function formatDate(value){if(!value)return '';const d=new Date(value);if(Number.isNaN(d.getTime()))return '';return d.toLocaleDateString('id-ID',{day:'2-digit',month:'short'}).replace(/\./g,'');}
   function bestRecord(machine){
-    const aliases=aliasesFor(machine);let winner=null,winnerScore=0,winnerTime=-Infinity;
+    let winner=null,winnerScore=0,winnerTime=-Infinity;
     for(const row of state.records){
       const code=normalize(row.code),name=normalize(row.name);let score=0;
-      if(code&&aliases.includes(code))score=130;if(name&&aliases.includes(name))score=Math.max(score,100);
-      const short=normalize(shortName(machine));if(name&&short&&name===short)score=Math.max(score,110);if(name&&short&&name.startsWith(short+' '))score=Math.max(score,90);
-      const time=Date.parse(row.date||'')||row.index||0;
+      if(code){
+        const codeTargets=state.registry.filter(r=>[r.machineId,r.sapCode,r.functionalLocation].some(value=>normalize(value)===code));
+        if(codeTargets.length===1&&codeTargets[0].machineId===machine.machineId)score=150;
+        else if(codeTargets.length>1&&name){
+          const exactTargets=codeTargets.filter(r=>normalize(r.name)===name||normalize(shortName(r))===name);
+          if(exactTargets.length===1&&exactTargets[0].machineId===machine.machineId)score=145;
+        }
+      }
+      if(!score&&name){
+        const nameTargets=state.registry.filter(r=>aliasesFor(r).includes(name));
+        if(nameTargets.length===1&&nameTargets[0].machineId===machine.machineId)score=100;
+        else if(nameTargets.length>1){
+          const exactTargets=nameTargets.filter(r=>normalize(r.name)===name);
+          if(exactTargets.length===1&&exactTargets[0].machineId===machine.machineId)score=110;
+        }
+      }
+      const time=Date.parse(row.date||'')||Number(row.index)||0;
       if(score&&(time>winnerTime||(time===winnerTime&&score>winnerScore))){winner=row;winnerScore=score;winnerTime=time;}
     }
     return winner;
@@ -121,12 +135,12 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
       setInterval(()=>{
         const engine=window.__BMJ_FACTORY_ENGINE__;if(!engine?.actualFactory?.assets||!engine.factory)return;state.engine=engine;
         const signature=String(engine.actualFactory.root?.uuid||'')+':'+String(engine.actualFactory.assets.size||0),rootChanged=signature!==rootSignature,now=performance.now();
-        if(rootChanged||now-state.lastPolicyAt>900){
-          rootSignature=signature;state.lastPolicyAt=now;
-          const policy={building:false,ipal:true,floor:true,walls:false,doors:false,windows:false,air_curtain:false,furniture:false,roof:false,machines:true,labels:false,landscape:false,reference:false,unidentified:true,utility_compressed_air:false,utility_ahu_piping:false,utility_ahu_ducting:false,utility_anchors:false};
+        if(rootChanged||!state.policyApplied){
+          rootSignature=signature;state.lastPolicyAt=now;state.policyApplied=true;
+          const policy={building:false,ipal:false,floor:true,walls:false,doors:false,windows:false,air_curtain:false,furniture:false,roof:false,machines:true,labels:false,landscape:false,reference:false,unidentified:true,utility_compressed_air:false,utility_ahu_piping:false,utility_ahu_ducting:false,utility_anchors:false};
           for(const [key,visible] of Object.entries(policy))engine.setFactoryLayer(key,visible);
           engine.onFactorySelect=()=>{};engine.onTaxonomySelect=()=>{};engine.renderer.domElement.style.touchAction='none';engine.renderer.domElement.setAttribute('aria-label','Tampilan 3D status mesin BMJ; objek tidak membuka detail.');
-          if(state.authorized&&engine.actualFactory.assets.size){const fitObjects=[...engine.actualFactory.assets.values(),...visibleMeshesUnder(engine.actualFactory.layers.ipal)];engine.fitObjects(fitObjects,'iso',false);}
+          if(state.authorized&&engine.actualFactory.assets.size){const fitObjects=[...engine.actualFactory.assets.values()];engine.fitObjects(fitObjects,'iso',false);}
         }
         if(now-state.lastAnchorAt>1400||rootChanged)rebuildAnchors(THREE,engine);
       },350);
@@ -138,7 +152,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     if(window.parent===window||event.source!==window.parent||!ALLOWED_PARENT_ORIGINS.has(event.origin))return;
     const payload=event.data;if(!payload||payload.type!=='OMODOS_FACTORY_STATUS'||payload.version!==1||!Array.isArray(payload.records))return;
     state.records=payload.records.slice(0,1200).map((row,index)=>({code:String(row?.code||'').trim(),name:String(row?.name||'').trim(),status:String(row?.status||'').trim(),date:String(row?.date||'').trim(),index:Number(row?.index)||index}));state.recordsVersion++;
-    state.authorized=true;const activeEngine=window.__BMJ_FACTORY_ENGINE__;if(activeEngine){activeEngine.onFactorySelect=()=>{};activeEngine.onTaxonomySelect=()=>{};}document.documentElement.classList.add('omodos-status-authorized');gate.remove();state.lastAnchorAt=0;
+    const firstAuthorization=!state.authorized;state.authorized=true;if(firstAuthorization)state.policyApplied=false;const activeEngine=window.__BMJ_FACTORY_ENGINE__;if(activeEngine){activeEngine.onFactorySelect=()=>{};activeEngine.onTaxonomySelect=()=>{};}document.documentElement.classList.add('omodos-status-authorized');gate.remove();state.lastAnchorAt=0;
     if(!state.readySent){state.readySent=true;event.source.postMessage({type:'OMODOS_FACTORY_STATUS_READY',version:1},event.origin);}startViewerOnce();
   });
 }
