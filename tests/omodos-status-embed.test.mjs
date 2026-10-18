@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 
 const html = readFileSync(new URL('../frontend/index.html', import.meta.url), 'utf8');
 const embed = readFileSync(new URL('../frontend/src/omodos-status-embed.js', import.meta.url), 'utf8');
+const building = readFileSync(new URL('../frontend/src/factory-building.js', import.meta.url), 'utf8');
 
 test('OMODOS status viewer is opt-in and only accepts the authenticated OMODOS parent origin', () => {
   assert.match(html, /src="\.\/src\/omodos-status-embed\.js\?v=1"/);
@@ -14,10 +15,21 @@ test('OMODOS status viewer is opt-in and only accepts the authenticated OMODOS p
 });
 
 test('embedded overview hides roof, walls, building envelope, and IPAL structure', () => {
-  assert.match(embed, /const policy=\{building:false,ipal:false,floor:true,walls:false,doors:false,windows:false,air_curtain:false,furniture:false,roof:false/);
+  assert.match(embed, /const policy=\{building:false,ipal:true,floor:true,walls:false,doors:false,windows:false,air_curtain:false,furniture:false,roof:false/);
   assert.match(embed, /engine\.setFactoryLayer\(key,visible\)/);
   assert.match(embed, /const assetRoots=new Set\(\[\.\.\.engine\.actualFactory\.assets\.values\(\)\]\)/);
   assert.match(embed, /if\(!assetRoots\.has\(child\)\)child\.visible=false/);
+});
+
+test('IPAL process equipment remains visible while canopy/frame is selectively hidden', () => {
+  assert.match(embed, /building:false,ipal:true/);
+  for (const semantic of ['IPAL_OPEN_FRAME_COLUMN','IPAL_OPEN_FRAME_BASE','IPAL_CANOPY_RAFTER','IPAL_CANOPY_ROOF','IPAL_X_BRACE_REFERENCE']) {
+    assert.ok(embed.includes(semantic), 'missing IPAL structural filter: ' + semantic);
+  }
+  assert.match(embed, /\.\.\.visibleMeshesUnder\(engine\.actualFactory\.layers\.ipal\)/);
+  assert.match(building, /semantic:'IPAL_CANOPY_ROOF'/);
+  assert.match(building, /semantic:'IPAL_CANOPY_RAFTER'/);
+  assert.match(building, /semantic:'IPAL_OPEN_FRAME_BASE'/);
 });
 
 test('embedded overview disables machine-detail selection and avoids repeated policy writes', () => {
