@@ -139,7 +139,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
         }
       }
       const viewport=document.getElementById('viewport');if(!viewport)throw new Error('Viewport pabrik tidak ditemukan.');
-      const layer=document.createElement('div');layer.id='omodos-status-overlay';layer.innerHTML='<div id="omodos-status-badge"><strong>BMJ · Factory Status</strong><span>Status logbook terakhir · bukan telemetry real-time</span></div>';viewport.appendChild(layer);state.layer=layer;
+      const layer=document.createElement('div');layer.id='omodos-status-overlay';layer.innerHTML='<div id="omodos-status-badge"><strong>BMJ · Factory Status</strong><span>Status terbaru Logbook/Patrol · bukan telemetry real-time</span></div>';viewport.appendChild(layer);state.layer=layer;
       let rootSignature='';
       setInterval(()=>{
         const engine=window.__BMJ_FACTORY_ENGINE__;if(!engine?.actualFactory?.assets||!engine.factory)return;state.engine=engine;
