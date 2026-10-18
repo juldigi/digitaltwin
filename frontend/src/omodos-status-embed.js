@@ -57,18 +57,40 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
   }
   function toneFor(status){
     const s=normalize(status);if(!s||s==='belum ada catatan'||s.includes('belum diisi'))return 'unknown';
-    if(/(rusak|breakdown|gangguan|gagal|abnormal|emergency|darurat|critical)/.test(s))return 'critical';
+    if(/(rusak|breakdown|gangguan|gagal|abnormal|emergency|darurat|critical|kritikal)/.test(s))return 'critical';
     if(/(perlu|masalah|pending|menunggu|belum|proses|ongoing|open|perbaikan|tidak normal|follow up)/.test(s))return 'attention';
     if(/(selesai|completed|closed|normal|baik|aman|running|operasi|operasional|ok\b)/.test(s))return 'good';
     return 'unknown';
   }
   function formatDate(value){if(!value)return '';const d=new Date(value);if(Number.isNaN(d.getTime()))return '';return d.toLocaleDateString('id-ID',{day:'2-digit',month:'short'}).replace(/\./g,'');}
   function bestRecord(machine){
-    const aliases=aliasesFor(machine);let winner=null,winnerScore=0,winnerTime=-Infinity;
+    const code=normalize(machine.sapCode);
+    const machineName=normalize(machine.name);
+    const short=normalize(shortName(machine));
+    const sameCodePeers=code?state.registry.filter(peer=>normalize(peer.sapCode)===code):[];
+    const payloadCodeRows=code?state.records.filter(row=>normalize(row.code)===code):[];
+    const codeIsUnique=sameCodePeers.length===1&&payloadCodeRows.length===1;
+    let winner=null,winnerScore=0,winnerTime=-Infinity;
     for(const row of state.records){
-      const code=normalize(row.code),name=normalize(row.name);let score=0;
-      if(code&&aliases.includes(code))score=130;if(name&&aliases.includes(name))score=Math.max(score,100);
-      const short=normalize(shortName(machine));if(name&&short&&name===short)score=Math.max(score,110);if(name&&short&&name.startsWith(short+' '))score=Math.max(score,90);
+      const rowCode=normalize(row.code),name=normalize(row.name);
+      let score=0;
+      if(code&&rowCode===code){
+        if(codeIsUnique)score=130;
+        else if(name&&(name===machineName||name===short))score=160;
+        else continue;
+      }else if(rowCode&&code&&rowCode!==code){
+        // An explicit different code must never be overridden by a fuzzy name match.
+        continue;
+      }else if(name&&(name===machineName||name===short)){
+        const exactPeers=state.registry.filter(peer=>{
+          const peerName=normalize(peer.name),peerShort=normalize(shortName(peer));
+          return peerName===name||peerShort===name;
+        });
+        if(exactPeers.length===1&&exactPeers[0].machineId===machine.machineId)score=100;
+        else continue;
+      }else{
+        continue;
+      }
       const time=Date.parse(row.date||'')||row.index||0;
       if(score&&(time>winnerTime||(time===winnerTime&&score>winnerScore))){winner=row;winnerScore=score;winnerTime=time;}
     }
