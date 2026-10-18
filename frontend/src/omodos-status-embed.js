@@ -139,6 +139,15 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
           rootSignature=signature;state.lastPolicyAt=now;state.policyApplied=true;
           const policy={building:false,ipal:false,floor:true,walls:false,doors:false,windows:false,air_curtain:false,furniture:false,roof:false,machines:true,labels:false,landscape:false,reference:false,unidentified:true,utility_compressed_air:false,utility_ahu_piping:false,utility_ahu_ducting:false,utility_anchors:false};
           for(const [key,visible] of Object.entries(policy))engine.setFactoryLayer(key,visible);
+          // Keep genuinely placed unidentified machines, but remove the
+          // unrelated large context marker/label from the same layer.
+          const assetRoots=new Set([...engine.actualFactory.assets.values()]);
+          const unidentifiedLayer=engine.actualFactory.layers.unidentified;
+          if(unidentifiedLayer?.children){
+            for(const child of unidentifiedLayer.children){
+              if(!assetRoots.has(child))child.visible=false;
+            }
+          }
           engine.onFactorySelect=()=>{};engine.onTaxonomySelect=()=>{};engine.renderer.domElement.style.touchAction='none';engine.renderer.domElement.setAttribute('aria-label','Tampilan 3D status mesin BMJ; objek tidak membuka detail.');
           if(state.authorized&&engine.actualFactory.assets.size){const fitObjects=[...engine.actualFactory.assets.values()];engine.fitObjects(fitObjects,'iso',false);}
         }
