@@ -31,7 +31,14 @@ function rejectAccess(){
  records=[];
  renderToken++;
  if(engine){
-  try{cancelAnimationFrame(engine.frame);engine.resizeObserver?.disconnect();engine.renderer?.dispose();}catch{}
+  try{
+   cancelAnimationFrame(engine.frame);
+   engine.resizeObserver?.disconnect();
+   engine.controls?.dispose?.();
+   engine.clearFactory?.();
+   engine.renderer?.renderLists?.dispose?.();
+   engine.renderer?.dispose();
+  }catch{}
   engine=null;
  }
  if(viewport){viewport.querySelectorAll('canvas').forEach(node=>node.remove());}
