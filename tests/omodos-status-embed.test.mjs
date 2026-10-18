@@ -11,6 +11,11 @@ test('ambiguous SAP machine codes require an exact machine-name match', () => {
   assert.match(source, /else if\(name&&\(name===machineName\|\|name===short\)\)score=160/);
 });
 
+test('leading-zero variants of machine numbers compare consistently', () => {
+  assert.match(source, /function machineNameKey/);
+  assert.match(source, /machineNameKey\(row\.name\)/);
+});
+
 test('a conflicting explicit code cannot be overridden by a name alias', () => {
   assert.match(source, /An explicit different code must never be overridden by a fuzzy name match/);
   assert.match(source, /else if\(rowCode&&code&&rowCode!==code\)\{\s*\/\/ An explicit different code must never be overridden by a fuzzy name match\.\s*continue;/);
