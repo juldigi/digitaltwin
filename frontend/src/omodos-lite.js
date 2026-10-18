@@ -12,12 +12,11 @@ const statusLayer=document.getElementById('machine-status-layer');
 const leaders=document.getElementById('machine-status-leaders');
 const syncText=document.getElementById('lite-sync-state');
 const loading=document.getElementById('lite-loading');
-const engine=new FactoryEngine(viewport,()=>{});
-// This scene is a read-only overview: selecting any object never opens a technical panel.
-engine.onFactorySelect=()=>{};
-engine.onTaxonomySelect=()=>{};
-engine.onError=message=>{syncText.textContent=String(message||'Tampilan 3D perlu dimuat ulang.');};
-engine.onRecovered=()=>{syncText.textContent='Tampilan 3D pulih.';};
+let engine=null;
+let authorized=false;
+let booting=false;
+let authRequestTimer=0;
+let syncTimer=0;
 
 let layout=null;
 let fleet=[];
@@ -182,7 +181,14 @@ function projectCards(now){
 function receiveParentMessage(event){
   if(event.source!==window.parent||event.origin!==TRUSTED_PARENT_ORIGIN)return;
   const data=event.data;
-  if(!data||data.type!==STATUS_MESSAGE||!Array.isArray(data.items))return;
+  if(data?.type==='BMJ_TWIN_LITE_AUTHORIZED_V1'){
+    if(authorized)return;
+    authorized=true;
+    if(authRequestTimer)clearInterval(authRequestTimer);
+    void boot();
+    return;
+  }
+  if(!authorized||!data||data.type!==STATUS_MESSAGE||!Array.isArray(data.items))return;
   incomingStatuses=data.items.slice(0,200).map(item=>({
     code:safeText(item?.code,''),
     name:safeText(item?.name,''),
@@ -194,14 +200,38 @@ function receiveParentMessage(event){
   syncText.textContent='Status Logbook/Patrol tersinkron · '+new Date(lastStatusSync).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
 }
 window.addEventListener('message',receiveParentMessage);
+function requestAuthorization(){
+  if(window.parent===window){
+    loading.innerHTML='<strong>Halaman ini hanya dapat dibuka dari beranda Superadmin OMODOS</strong><small>Silakan kembali ke OMODOS dan buka beranda dengan akun Superadmin.</small>';
+    syncText.textContent='Menunggu otorisasi OMODOS';
+    return;
+  }
+  window.parent.postMessage({type:'BMJ_TWIN_LITE_AUTH_REQUEST_V1'},TRUSTED_PARENT_ORIGIN);
+}
 function requestStatuses(){
-  if(window.parent===window)return;
+  if(window.parent===window||!authorized)return;
   window.parent.postMessage({type:'BMJ_TWIN_LITE_READY_V1'},TRUSTED_PARENT_ORIGIN);
 }
-window.addEventListener('pagehide',()=>{window.removeEventListener('message',receiveParentMessage);engine.dispose();},{once:true});
+window.addEventListener('pagehide',()=>{
+  window.removeEventListener('message',receiveParentMessage);
+  if(authRequestTimer)clearInterval(authRequestTimer);
+  if(syncTimer)clearInterval(syncTimer);
+  if(engine)engine.dispose();
+},{once:true});
+requestAuthorization();
+authRequestTimer=window.setInterval(()=>{if(!authorized)requestAuthorization();},1200);
 
 async function boot(){
-  const [bundled,fleetData]=await Promise.all([loadBundledPlantLayout(),loadFactoryFleet()]);
+  if(booting||!authorized)return;
+  booting=true;
+  try{
+    engine=new FactoryEngine(viewport,()=>{});
+    // Read-only overview: selection never opens a machine/component detail panel.
+    engine.onFactorySelect=()=>{};
+    engine.onTaxonomySelect=()=>{};
+    engine.onError=message=>{syncText.textContent=String(message||'Tampilan 3D perlu dimuat ulang.');};
+    engine.onRecovered=()=>{syncText.textContent='Tampilan 3D pulih.';};
+    const [bundled,fleetData]=await Promise.all([loadBundledPlantLayout(),loadFactoryFleet()]);
   layout=bundled;fleet=fleetData;
   layout.fleet=fleet;
   for(const p of [...(layout.placements||[]),...fleet.map(record=>record?.placement).filter(Boolean)]){
@@ -219,21 +249,21 @@ async function boot(){
   syncCardElements();
   loading.hidden=true;
   requestStatuses();
-  const syncTimer=window.setInterval(()=>{
-    if(Date.now()-lastStatusSync>30000)syncText.textContent='Menunggu sinkronisasi status OMODOS · bukan data PLC real-time';
-    requestStatuses();
-  },5000);
-  void syncTimer;
-  const animate=(now)=>{
-    if(document.hidden)return requestAnimationFrame(animate);
-    if(now-lastProjection>120){lastProjection=now;syncCardElements();projectCards(now);}
+    syncTimer=window.setInterval(()=>{
+      if(Date.now()-lastStatusSync>30000)syncText.textContent='Menunggu sinkronisasi status OMODOS · bukan data PLC real-time';
+      requestStatuses();
+    },5000);
+    const animate=(now)=>{
+      if(document.hidden)return requestAnimationFrame(animate);
+      if(now-lastProjection>120){lastProjection=now;syncCardElements();projectCards(now);}
+      requestAnimationFrame(animate);
+    };
     requestAnimationFrame(animate);
-  };
-  requestAnimationFrame(animate);
-  window.BMJ_OMODOS_TWIN_LITE={ready:true,engine,updateStatuses(items){if(Array.isArray(items)){incomingStatuses=items;lastStatusSync=Date.now();applyStatuses();}}};
+    window.BMJ_OMODOS_TWIN_LITE={ready:true,engine,updateStatuses(items){if(Array.isArray(items)){incomingStatuses=items;lastStatusSync=Date.now();applyStatuses();}}};
+  }catch(error){
+    console.error('[OMODOS DigitalTwin Lite]',error);
+    if(engine){try{engine.dispose();}catch(_){}engine=null;}
+    loading.innerHTML='<strong>Tampilan 3D belum berhasil dimuat</strong><small>Model pabrik tidak dimuat. Silakan gunakan beranda OMODOS biasa atau muat ulang halaman.</small>';
+    syncText.textContent='Gagal memuat model 3D';
+  }
 }
-boot().catch(error=>{
-  console.error('[OMODOS DigitalTwin Lite]',error);
-  loading.innerHTML='<strong>Tampilan 3D belum berhasil dimuat</strong><small>Model pabrik tidak dimuat. Silakan gunakan beranda OMODOS biasa atau muat ulang halaman.</small>';
-  syncText.textContent='Gagal memuat model 3D';
-});
