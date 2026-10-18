@@ -114,11 +114,13 @@ function statusForMachine(machineId){
 function machineRows(){
  const actual=engine?.actualFactory;
  if(!actual?.assets)return [];
+ const fleetById=new Map((fleet||[]).map(row=>[row?.placement?.machineId,row]));
  const rows=[];
  for(const [machineId,object] of actual.assets){
   const record=registryById.get(machineId)||{};
+  const placement=fleetById.get(machineId)?.placement;
   const status=statusForMachine(machineId);
-  rows.push({machineId,object,record,status,label:record.sapCode||record.codename||record.name||machineId});
+  rows.push({machineId,object,record,status,label:placement?.label||record.sapCode||record.codename||record.name||machineId});
  }
  return rows;
 }
@@ -219,6 +221,10 @@ async function boot(){
   engine.onRecovered=()=>{if(authorized){loading.hidden=true;renderSummary();paintLabels(true);}};
   engine.setQualityProfile(quality);
   engine.loadLayout(layout);
+  // Keep DigitalTwin's existing distant-view machine assets, but cancel the
+  // interactive/detail-model hydration used by the full engineering viewer.
+  // This Superadmin monitor is intentionally static and has no machine-detail route.
+  engine.factoryDetailHydration++;
   syncLayers();
   engine.setView('factory',getState());
   engine.fit(engine.factory,mode,false);
