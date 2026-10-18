@@ -90,10 +90,15 @@ export class Offset5CD102RealismTemplate extends OffsetMachineTemplate{
   refineSurfaceFinishV354(){
     // Material-only pass: improve the read of painted steel, exposed metal and glass
     // without changing the calibrated geometry, module placement, colours or motion.
-    this.root.userData.visualRefinement='V354_SURFACE_FINISH_MATERIAL_PASS';
+    this.root.userData.surfaceFinishRevision='V354_SURFACE_FINISH_MATERIAL_PASS';
     this.root.userData.surfaceFinishPolicy='MATERIAL_ONLY__NO_GEOMETRY_OR_DIMENSION_CHANGE__SOURCE_COLOUR_PRESERVED';
     const classify=(mesh)=>{
       const id=[mesh.name,mesh.userData?.nodeId,mesh.userData?.ownerId,mesh.userData?.realismRole].filter(Boolean).join(' ').toLowerCase();
+      const surface=String(mesh.userData?.rollerSurface||'').toLowerCase();
+      // Installed roller coating is authoritative over generic name-based metal heuristics.
+      if(/rubber[- ]coated/.test(surface)||/ink-fountain-roller-body/.test(id))return {kind:'rubber-coated-process-surface',roughness:.88,metalness:.04};
+      if(/plastic[- ]coated/.test(surface))return {kind:'plastic-coated-process-surface',roughness:.58,metalness:.05};
+      if(/chromium[- ]plated|stainless steel/.test(surface))return {kind:'hard-plated-process-metal',roughness:.31,metalness:.88};
       if(/display|inspection-glass|window-glass|glass-panel/.test(id))return {kind:'glass',roughness:.24,metalness:.12};
       if(/cylinder|roller|anilox|drum|shaft|gripper-finger|gripper-bar/.test(id))return {kind:'exposed-process-metal',roughness:.31,metalness:.72};
       if(/bearing|hinge|fastener|bracket|rail|frame|chain|saddle|retainer/.test(id))return {kind:'structural-metal',roughness:.43,metalness:.66};
