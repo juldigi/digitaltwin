@@ -28,7 +28,7 @@ test('monitor excludes roof, walls, furniture, doors and machine-detail actions'
 
 test('machine cards derive status from OMODOS messages and never claim sensor real-time status',()=>{
   assert.match(js,/OMODOS_FACTORY_MONITOR_INIT/);
-  assert.match(js,/statuses:event\.data\.statuses/);
+  assert.match(js,/records=sanitizeRecords\(event\.data\.statuses\)/);
   assert.match(html,/status terakhir dari Logbook\/Patrol/);
   assert.match(html,/bukan telemetri sensor real-time/);
   assert.match(css,/\.machine-status-card\.critical/);
