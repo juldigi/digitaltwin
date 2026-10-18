@@ -50,8 +50,10 @@ test('viewer READY is sent only after assets and status anchors exist', () => {
 test('every visible registry machine gets a status card and ambiguous codes do not map silently', () => {
   assert.match(embed, /for\(const machine of state\.registry\)/);
   assert.match(embed, /const card=ensureCard\(entry\.machine\)/);
-  assert.match(embed, /codeTargets\.length===1&&codeTargets\[0\]\.machineId===machine\.machineId/);
-  assert.match(embed, /exactTargets\.length===1&&exactTargets\[0\]\.machineId===machine\.machineId/);
+  assert.match(embed, /const exactCodePeers=sameCodePeers\.filter/);
+  assert.match(embed, /exactCodePeers\.length===1&&exactCodePeers\[0\]\.machineId===machine\.machineId/);
+  assert.match(embed, /const exactPeers=state\.registry\.filter/);
+  assert.match(embed, /exactPeers\.length===1&&exactPeers\[0\]\.machineId===machine\.machineId/);
   assert.match(embed, /critical\|kritikal/);
   assert.match(embed, /s==='belum ada data'.*return 'unknown'/);
 });
