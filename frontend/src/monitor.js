@@ -58,20 +58,18 @@ function sanitizeRecords(value){
  }).filter(Boolean);
 }
 function acceptStatusMessage(event){
- if(!authorized||event.origin!==OMODOS_ORIGIN||event.source!==window.parent)return;
- if(event.data?.type===TYPE_STATUS_REQUEST){
-  window.parent.postMessage({type:TYPE_INIT,authorized:true,role:'Superadmin',statuses:records},OMODOS_ORIGIN);
-  return;
- }
+ if(event.origin!==OMODOS_ORIGIN||event.source!==window.parent)return;
  if(event.data?.type===TYPE_REVOKE){
   rejectAccess();
   return;
  }
- if(event.data?.type!==TYPE_INIT||event.data?.authorized!==true||event.data?.role!=='Superadmin'){
+ if(event.data?.type===TYPE_STATUS_REQUEST){
+  if(authorized)window.parent.postMessage({type:TYPE_INIT,authorized:true,role:'Superadmin',statuses:records},OMODOS_ORIGIN);
   return;
  }
+ if(event.data?.type!==TYPE_INIT||event.data?.authorized!==true||event.data?.role!=='Superadmin')return;
  records=sanitizeRecords(event.data.statuses);
- if(!app.hidden&&engine){renderSummary();paintLabels(true);return;}
+ if(authorized&&!app.hidden&&engine){renderSummary();paintLabels(true);return;}
  authorized=true;
  if(gate)gate.hidden=true;
  if(app)app.hidden=false;
