@@ -151,7 +151,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
         const signature=String(engine.actualFactory.root?.uuid||'')+':'+String(engine.actualFactory.assets.size||0),rootChanged=signature!==rootSignature,now=performance.now();
         if(rootChanged||!state.policyApplied){
           rootSignature=signature;state.lastPolicyAt=now;state.policyApplied=true;
-          const policy={building:false,ipal:false,floor:true,walls:false,doors:false,windows:false,air_curtain:false,furniture:false,roof:false,machines:true,labels:false,landscape:false,reference:false,unidentified:true,utility_compressed_air:false,utility_ahu_piping:false,utility_ahu_ducting:false,utility_anchors:false};
+          const policy={building:false,ipal:true,floor:true,walls:false,doors:false,windows:false,air_curtain:false,furniture:false,roof:false,machines:true,labels:false,landscape:false,reference:false,unidentified:true,utility_compressed_air:false,utility_ahu_piping:false,utility_ahu_ducting:false,utility_anchors:false};
           for(const [key,visible] of Object.entries(policy))engine.setFactoryLayer(key,visible);
           // Keep genuinely placed unidentified machines, but remove the
           // unrelated large context marker/label from the same layer.
@@ -162,8 +162,17 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
               if(!assetRoots.has(child))child.visible=false;
             }
           }
+          // Retain the IPAL water-treatment equipment but hide its canopy/frame
+          // only in this embed route. Full DigitalTwin visibility preferences remain unchanged.
+          const hiddenIpalStructure=new Set(['IPAL_OPEN_FRAME_COLUMN','IPAL_OPEN_FRAME_BASE','IPAL_CANOPY_RAFTER','IPAL_CANOPY_ROOF','IPAL_X_BRACE_REFERENCE']);
+          const hideIpalStructure=node=>{
+            if(!node)return;
+            if(hiddenIpalStructure.has(node.userData?.semantic))node.visible=false;
+            for(const child of node.children||[])hideIpalStructure(child);
+          };
+          hideIpalStructure(engine.actualFactory.layers.ipal);
           engine.onFactorySelect=()=>{};engine.onTaxonomySelect=()=>{};engine.renderer.domElement.style.touchAction='none';engine.renderer.domElement.setAttribute('aria-label','Tampilan 3D status mesin BMJ; objek tidak membuka detail.');
-          if(state.authorized&&engine.actualFactory.assets.size){const fitObjects=[...engine.actualFactory.assets.values()];engine.fitObjects(fitObjects,'iso',false);}
+          if(state.authorized&&engine.actualFactory.assets.size){const fitObjects=[...engine.actualFactory.assets.values(),...visibleMeshesUnder(engine.actualFactory.layers.ipal)];engine.fitObjects(fitObjects,'iso',false);}
         }
         if(now-state.lastAnchorAt>1400||rootChanged)rebuildAnchors(THREE,engine);
         // Tell OMODOS the viewer is ready only after the engine, visible assets,
