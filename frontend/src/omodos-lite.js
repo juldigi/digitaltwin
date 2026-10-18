@@ -43,6 +43,7 @@ if (params.get('mode') === 'omodos-lite') {
   let engine = null;
   let lastWidth = 0;
   let lastHeight = 0;
+  let readySent = false;
 
   const normalize = value => String(value == null ? '' : value)
     .normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
@@ -282,6 +283,10 @@ if (params.get('mode') === 'omodos-lite') {
         createOverlay();
         syncCards(engine);
         projectCards();
+        if (!readySent && engine.actualFactory?.assets?.size) {
+          readySent = true;
+          window.parent.postMessage({ type: 'OMODOS_LITE_READY_V1' }, 'https://omodos.juldigi.workers.dev');
+        }
       }
     }
     requestAnimationFrame(frame);
