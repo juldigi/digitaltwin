@@ -113,12 +113,21 @@ function syncCardElements(){
 function boxesOverlap(a,b,gap=3){
   return a.left < b.right+gap && a.right > b.left-gap && a.top < b.bottom+gap && a.bottom > b.top-gap;
 }
-const CANDIDATE_OFFSETS=[
-  [0,0],[-42,0],[42,0],[-82,0],[82,0],
-  [0,-28],[-42,-28],[42,-28],[-82,-28],[82,-28],
-  [0,-56],[-42,-56],[42,-56],[-82,-56],[82,-56],
-  [0,-84],[-42,-84],[42,-84]
-];
+const CANDIDATE_OFFSETS=(()=>{
+  const points=[[0,0]],seen=new Set(['0,0']);
+  const push=(x,y)=>{const key=x+','+y;if(!seen.has(key)){seen.add(key);points.push([x,y]);}};
+  // Try nearby positions first, then expand above/around dense machine clusters.
+  for(let ring=1;ring<=12;ring++){
+    const dx=ring*54,dy=ring*27;
+    push(-dx,0);push(dx,0);push(0,-dy);push(-dx,-dy);push(dx,-dy);
+    push(0,dy);push(-dx,dy);push(dx,dy);
+    for(let col=1;col<ring;col++){
+      const x=col*54;
+      push(-x,-dy);push(x,-dy);push(-x,dy);push(x,dy);
+    }
+  }
+  return points;
+})();
 function projectCards(now){
   if(!engine.actualFactory?.assets||engine.view!=='factory')return;
   const rect=viewport.getBoundingClientRect();
@@ -165,8 +174,12 @@ function projectCards(now){
       placed=seek(width,height,CANDIDATE_OFFSETS);
     }
     if(!placed){
-      // Keep dense clusters intelligible; the full status remains available after zooming/rotating.
-      card.style.display='none';entry.line.style.display='none';continue;
+      // Last-resort compact tile so a machine's status is never silently omitted.
+      card.classList.add('compact');width=card.offsetWidth||66;height=card.offsetHeight||21;
+      const columns=Math.max(1,Math.floor((rect.width-6)/(width+3)));
+      const slot=occupied.length,row=Math.floor(slot/columns),column=slot%columns;
+      const left=3+column*(width+3),top=Math.max(3,rect.height-height-3-row*(height+3));
+      placed={box:{left,top,right:left+width,bottom:top+height},left,top,width,height};
     }
     const {box,left,top}=placed;
     occupied.push(box);
@@ -218,8 +231,12 @@ window.addEventListener('pagehide',()=>{
   if(syncTimer)clearInterval(syncTimer);
   if(engine)engine.dispose();
 },{once:true});
-requestAuthorization();
-authRequestTimer=window.setInterval(()=>{if(!authorized)requestAuthorization();},1200);
+if(window.parent===window){
+  requestAuthorization();
+}else{
+  requestAuthorization();
+  authRequestTimer=window.setInterval(()=>{if(!authorized)requestAuthorization();},1200);
+}
 
 async function boot(){
   if(booting||!authorized)return;
@@ -239,6 +256,15 @@ async function boot(){
   }
   engine.setQualityProfile(engine.getQualityCapabilities().mobile?'hemat':'seimbang');
   engine.loadLayout(layout);
+  // Machine templates hydrate progressively. Refit after the final detailed models
+  // replace the initial lightweight proxies, without holding the first render.
+  const hydration=engine.factoryDetailPromise;
+  if(hydration)void hydration.then(()=>{
+    if(authorized&&engine&&engine.actualFactory?.assets?.size){
+      engine.fit(engine.factory,'iso',false);
+      syncCardElements();
+    }
+  }).catch(error=>console.warn('[OMODOS DigitalTwin Lite] Progressive model hydration:',error));
   const hiddenLayers=['building','ipal','floor','walls','doors','windows','air_curtain','furniture','roof','labels','landscape','reference','utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors'];
   for(const layer of hiddenLayers)engine.setFactoryLayer(layer,false);
   engine.setFactoryLayer('machines',true);
