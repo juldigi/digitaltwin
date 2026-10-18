@@ -712,7 +712,7 @@ const OMODOS_LITE_READY_TYPE = 'BMJ_DTW_LITE_READY_V1';
 const OMODOS_LITE_MAPPING_TYPE = 'BMJ_DTW_LITE_MAPPING_V1';
 const OMODOS_LITE_LAYER_POLICY = Object.freeze({
   building:false, ipal:true, floor:true, walls:false, doors:false, windows:false,
-  air_curtain:false, furniture:false, roof:false, machines:true, labels:false,
+  airCurtain:false, furniture:false, roof:false, machines:true, labels:false,
   landscape:false, reference:false, unidentified:false, compressedAir:false,
   ahuPiping:false, ducting:false, utilityAnchors:false
 });
@@ -722,6 +722,7 @@ let omodosLiteCards = new Map();
 let omodosLiteLastStatusSignature = '';
 let omodosLiteLastFactory = null;
 let omodosLiteMappingReport = '';
+let omodosLiteProjectionFrame = 0;
 let omodosLiteLayer = null;
 let omodosLiteCardsLayer = null;
 let omodosLiteNotice = null;
@@ -769,8 +770,8 @@ function setupOmodosLiteView_(){
  omodosLiteLayer.append(omodosLiteNotice,omodosLiteCardsLayer);
  viewport.appendChild(omodosLiteLayer);
  window.addEventListener('message',onOmodosLiteMessage_);
- window.addEventListener('resize',positionOmodosLiteCards_);
- requestAnimationFrame(positionOmodosLiteCards_);
+ window.addEventListener('resize',scheduleOmodosLiteProjection_);
+ scheduleOmodosLiteProjection_();
 }
 
 function normalizeOmodosLiteKey_(value){
@@ -785,9 +786,8 @@ function applyOmodosLiteLayers_(){
  engine.labels=false;
  engine.studio.visible=false;
  engine.factory.visible=true;
- for(const [name,visible] of Object.entries(OMODOS_LITE_LAYER_POLICY)){
-  try{engine.setFactoryLayer(name,visible);}catch{}
- }
+ try{syncFactoryLayerVisibility(engine,OMODOS_LITE_LAYER_POLICY);}catch{}
+ try{engine.setFactoryLayer('utility_compressed_air',false);engine.setFactoryLayer('utility_ahu_piping',false);engine.setFactoryLayer('utility_ahu_ducting',false);engine.setFactoryLayer('utility_anchors',false);}catch{}
 }
 function mapOmodosLiteStatuses_(){
  const registry=Array.isArray(MACHINE_REGISTRY)?MACHINE_REGISTRY:[];
@@ -865,9 +865,13 @@ function rebuildOmodosLiteCards_(){
  reportOmodosLiteMapping_(omodosLiteMapped,result.unmapped);
  positionOmodosLiteCards_();
 }
+function scheduleOmodosLiteProjection_(){
+ if(!OMODOS_LITE_MODE||omodosLiteProjectionFrame)return;
+ omodosLiteProjectionFrame=requestAnimationFrame(()=>{omodosLiteProjectionFrame=0;positionOmodosLiteCards_();});
+}
 function positionOmodosLiteCards_(){
  if(!OMODOS_LITE_MODE||!engine||!omodosLiteCardsLayer)return;
- requestAnimationFrame(positionOmodosLiteCards_);
+ scheduleOmodosLiteProjection_();
  if(document.hidden||engine.view!=='factory'||!engine.actualFactory?.assets?.size)return;
  applyOmodosLiteLayers_();
  engine.factory.updateWorldMatrix(true,true);
@@ -932,7 +936,7 @@ function onOmodosLiteMessage_(event){
 }
 setupOmodosLiteView_();
 
-function loadVisibleFactoryLayout(layout){if(!engine)return;engine.loadLayout(layout);syncFactoryLayerVisibility(engine,getAppState().visibleLayers);if(OMODOS_LITE_MODE)applyOmodosLiteLayers_();}
+function loadVisibleFactoryLayout(layout){if(!engine)return;engine.loadLayout(layout);syncFactoryLayerVisibility(engine,getAppState().visibleLayers);if(OMODOS_LITE_MODE){applyOmodosLiteLayers_();rebuildOmodosLiteCards_();scheduleOmodosLiteProjection_();}}
 async function acceptState(next){state=mergeIncomingSharedTwinState(next,state);loadVisibleFactoryLayout(activeLayout());engine?.applySceneOverrides(next.sceneOverrides||{});if(engine?.view==='factory')engine.setView('factory',state);renderStatus();renderPanel();if(cacheEnabled){try{await cache.set(apiBase,{state:publicCacheState(next),savedAt:new Date().toISOString()});}catch{toast('Data berhasil dimuat, tetapi salinan di perangkat tidak dapat disimpan.',true);}}}
 function setView(view){
  const chooser=$('#choose-machine');if(chooser)chooser.hidden=view!=='factory';
@@ -1623,9 +1627,10 @@ try{
  bundledLayout=await loadBundledPlantLayout();loadVisibleFactoryLayout(activeLayout());engine?.applySceneOverrides(state?.sceneOverrides||{});
  if(engine&&!OMODOS_LITE_MODE)engine.onFactorySelect=id=>{const m=MACHINE_REGISTRY.find(m=>m.machineId===id);if(m){selectFactoryAssetContext(m,{historyMode:'push',openDialog:false,focus:true});machineDetailDialog(m);}};
  renderStatus();redrawPlantPlan();
- if(!OMODOS_LITE_MODE)await restoreHistoryContext(); else { applyOmodosLiteLayers_(); engine?.setView('factory',state); }
+ if(!OMODOS_LITE_MODE)await restoreHistoryContext(); else { engine?.setView('factory',state); applyOmodosLiteLayers_(); scheduleOmodosLiteProjection_(); }
  const boot=$('#boot');if(boot)boot.hidden=true;$('#engine-status').textContent=engine?'Denah siap · detail 3D dimuat':'Denah tersedia · tampilan 3D belum siap';
  signalAppReady('ready');
+ if(OMODOS_LITE_MODE){try{window.parent.postMessage({type:OMODOS_LITE_READY_TYPE,version:1},OMODOS_LITE_PARENT_ORIGIN);}catch{};scheduleOmodosLiteProjection_();}
  // The complete fleet is a large compressed payload. Keep initial navigation
  // usable even when decoding or constructing the detailed factory fails.
  setTimeout(async()=>{
