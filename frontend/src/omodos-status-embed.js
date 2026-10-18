@@ -3,7 +3,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
   // No extra imports or UI for regular DigitalTwin sessions.
 } else {
   const ALLOWED_PARENT_ORIGINS = new Set(['https://omodos.juldigi.workers.dev']);
-  const state = {authorized:false,readySent:false,records:[],recordsVersion:0,registry:[],engine:null,layer:null,cards:new Map(),anchors:new Map(),lastAnchorAt:0,lastPolicyAt:0,policyApplied:false};
+  const state = {authorized:false,readySent:false,parentOrigin:null,records:[],recordsVersion:0,registry:[],engine:null,layer:null,cards:new Map(),anchors:new Map(),lastAnchorAt:0,lastPolicyAt:0,policyApplied:false};
   document.documentElement.classList.add('omodos-status-embed');
   const css = [
     'html.omodos-status-embed,html.omodos-status-embed body{width:100%!important;height:100%!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#edf2f5!important}',
@@ -37,6 +37,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
   gate.innerHTML = '<div class="gate-card"><strong>Beranda Superadmin OMODOS</strong>Viewer ini hanya dapat ditampilkan melalui sesi Superadmin OMODOS yang sah.</div>';
   document.body.appendChild(gate);
   function normalize(value){return String(value==null?'':value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ');}
+  function machineNameKey(value){return normalize(value).replace(/(^|\s)0+(\d+)/g,(_,prefix,digits)=>prefix+String(Number(digits)));}
   function shortName(machine){
     const raw=String(machine?.name||machine?.sapCode||'Mesin');const offset=raw.match(/offset[^0-9]{0,24}(\d+)/i);if(offset)return 'Offset '+offset[1];
     const match=raw.match(/\b(APM|FGM|AHU|CTP|CTF|FZG|OFS|OFU|GLM|PDS|RMS)\s*[-# ]?\s*(\d+)\b/i);if(match)return match[1].toUpperCase()+' '+match[2];
@@ -64,24 +65,31 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
   }
   function formatDate(value){if(!value)return '';const d=new Date(value);if(Number.isNaN(d.getTime()))return '';return d.toLocaleDateString('id-ID',{day:'2-digit',month:'short'}).replace(/\./g,'');}
   function bestRecord(machine){
+    const code=normalize(machine.sapCode);
+    const machineName=machineNameKey(machine.name);
+    const short=machineNameKey(shortName(machine));
+    const sameCodePeers=code?state.registry.filter(peer=>normalize(peer.sapCode)===code):[];
+    const payloadCodeRows=code?state.records.filter(row=>normalize(row.code)===code):[];
+    const codeIsUnique=sameCodePeers.length===1&&payloadCodeRows.length===1;
     let winner=null,winnerScore=0,winnerTime=-Infinity;
     for(const row of state.records){
-      const code=normalize(row.code),name=normalize(row.name);let score=0;
-      if(code){
-        const codeTargets=state.registry.filter(r=>[r.machineId,r.sapCode,r.functionalLocation].some(value=>normalize(value)===code));
-        if(codeTargets.length===1&&codeTargets[0].machineId===machine.machineId)score=150;
-        else if(codeTargets.length>1&&name){
-          const exactTargets=codeTargets.filter(r=>normalize(r.name)===name||normalize(shortName(r))===name);
-          if(exactTargets.length===1&&exactTargets[0].machineId===machine.machineId)score=145;
-        }
-      }
-      if(!score&&name){
-        const nameTargets=state.registry.filter(r=>aliasesFor(r).includes(name));
-        if(nameTargets.length===1&&nameTargets[0].machineId===machine.machineId)score=100;
-        else if(nameTargets.length>1){
-          const exactTargets=nameTargets.filter(r=>normalize(r.name)===name);
-          if(exactTargets.length===1&&exactTargets[0].machineId===machine.machineId)score=110;
-        }
+      const rowCode=normalize(row.code),name=machineNameKey(row.name);let score=0;
+      if(code&&rowCode===code){
+        if(codeIsUnique)score=130;
+        else if(name&&(name===machineName||name===short))score=160;
+        else continue;
+      }else if(rowCode&&code&&rowCode!==code){
+        // An explicit different code must never be overridden by a fuzzy name match.
+        continue;
+      }else if(name&&(name===machineName||name===short)){
+        const exactPeers=state.registry.filter(peer=>{
+          const peerName=machineNameKey(peer.name),peerShort=machineNameKey(shortName(peer));
+          return peerName===name||peerShort===name;
+        });
+        if(exactPeers.length===1&&exactPeers[0].machineId===machine.machineId)score=100;
+        else continue;
+      }else{
+        continue;
       }
       const time=Date.parse(row.date||'')||Number(row.index)||0;
       if(score&&(time>winnerTime||(time===winnerTime&&score>winnerScore))){winner=row;winnerScore=score;winnerTime=time;}
@@ -130,7 +138,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     try{
       const [THREE,registryModule]=await Promise.all([import('three'),import('./data/machine-registry.js')]);state.registry=registryModule.MACHINE_REGISTRY||[];
       const viewport=document.getElementById('viewport');if(!viewport)throw new Error('Viewport pabrik tidak ditemukan.');
-      const layer=document.createElement('div');layer.id='omodos-status-overlay';layer.innerHTML='<div id="omodos-status-badge"><strong>BMJ · Factory Status</strong><span>Status logbook terakhir · bukan telemetry real-time</span></div>';viewport.appendChild(layer);state.layer=layer;
+      const layer=document.createElement('div');layer.id='omodos-status-overlay';layer.innerHTML='<div id="omodos-status-badge"><strong>BMJ · Factory Status</strong><span>Status terbaru Logbook/Patrol · bukan telemetry real-time</span></div>';viewport.appendChild(layer);state.layer=layer;
       let rootSignature='';
       setInterval(()=>{
         const engine=window.__BMJ_FACTORY_ENGINE__;if(!engine?.actualFactory?.assets||!engine.factory)return;state.engine=engine;
@@ -152,6 +160,12 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
           if(state.authorized&&engine.actualFactory.assets.size){const fitObjects=[...engine.actualFactory.assets.values()];engine.fitObjects(fitObjects,'iso',false);}
         }
         if(now-state.lastAnchorAt>1400||rootChanged)rebuildAnchors(THREE,engine);
+        // Tell OMODOS the viewer is ready only after the engine, visible assets,
+        // and the status-card anchors exist. The parent then sends fresh records.
+        if(state.authorized&&!state.readySent&&engine.actualFactory.assets.size>0&&state.anchors.size>0&&state.parentOrigin&&ALLOWED_PARENT_ORIGINS.has(state.parentOrigin)){
+          state.readySent=true;
+          window.parent.postMessage({type:'OMODOS_FACTORY_STATUS_READY',version:1},state.parentOrigin);
+        }
       },350);
       const projectLoop=()=>{if(state.authorized&&state.engine)projectCards(THREE,state.engine);requestAnimationFrame(projectLoop);};requestAnimationFrame(projectLoop);
     }catch(error){console.error('[OMODOS status twin]',error);const card=gate.querySelector('.gate-card');if(card)card.innerHTML='<strong>Viewer 3D tidak tersedia</strong>Komponen tampilan tidak berhasil dimuat. Beranda OMODOS tetap dapat digunakan.';}
@@ -161,7 +175,6 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     if(window.parent===window||event.source!==window.parent||!ALLOWED_PARENT_ORIGINS.has(event.origin))return;
     const payload=event.data;if(!payload||payload.type!=='OMODOS_FACTORY_STATUS'||payload.version!==1||!Array.isArray(payload.records))return;
     state.records=payload.records.slice(0,1200).map((row,index)=>({code:String(row?.code||'').trim(),name:String(row?.name||'').trim(),status:String(row?.status||'').trim(),date:String(row?.date||'').trim(),index:Number(row?.index)||index}));state.recordsVersion++;
-    const firstAuthorization=!state.authorized;state.authorized=true;if(firstAuthorization)state.policyApplied=false;const activeEngine=window.__BMJ_FACTORY_ENGINE__;if(activeEngine){activeEngine.onFactorySelect=()=>{};activeEngine.onTaxonomySelect=()=>{};}document.documentElement.classList.add('omodos-status-authorized');gate.remove();state.lastAnchorAt=0;
-    if(!state.readySent){state.readySent=true;event.source.postMessage({type:'OMODOS_FACTORY_STATUS_READY',version:1},event.origin);}startViewerOnce();
+    const firstAuthorization=!state.authorized;state.authorized=true;state.parentOrigin=event.origin;if(firstAuthorization)state.policyApplied=false;const activeEngine=window.__BMJ_FACTORY_ENGINE__;if(activeEngine){activeEngine.onFactorySelect=()=>{};activeEngine.onTaxonomySelect=()=>{};}document.documentElement.classList.add('omodos-status-authorized');gate.remove();state.lastAnchorAt=0;startViewerOnce();
   });
 }
