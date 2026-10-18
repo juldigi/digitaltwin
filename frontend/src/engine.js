@@ -102,6 +102,7 @@ export function buildLowDetailFactory(layout,fleet){
 
 export class FactoryEngine {
   constructor(container,onSelect){
+    if(new URLSearchParams(location.search).get('mode')==='omodos-lite')globalThis.__BMJ_OMODOS_LITE_ENGINE__=this;
     const mobileRender=matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse)').matches;
     this.container=container;this.onSelect=onSelect;this.onTaxonomySelect=null;this.view='factory';this.layout=null;this.low=mobileRender;this.mobileRender=mobileRender;this.renderFaulted=false;this.labels=true;this.isolated=false;this.partLabelEntries=[];this.factoryLabelSprites=[];this.factoryLabelProbe=new THREE.Vector3();this.factoryMachineTemplates=new Map();this.factoryDetailHydration=0;this.factoryDetailPromise=null;this.machineSwitchGeneration=0;
     {const params=new URLSearchParams(location.search),requested=normalizeFoundationMachineKey(params.get('machine')||params.get('asset'));this.requestedMachineKey=requested;this.machineKey=null;}
