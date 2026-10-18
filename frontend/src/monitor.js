@@ -87,12 +87,12 @@ function statusForMachine(machineId){
  const targetNames=[machine.name,machine.codename,machine.model,machine.functionalLocation].map(normalize).filter(Boolean);
  const candidates=statusRecords.map(item=>{
   const code=normalize(item.row.code);
-  const name=normalize(item.row.name).replace(/\\b0+(\\d+)\\b/g,'$1');
+  const name=normalize(item.row.name).replace(/\b0+(\d+)\b/g,'$1');
   let codeScore=targetCode&&code===targetCode?100:0;
   let nameScore=0;
-  if(name&&targetNames.some(target=>target.replace(/\\b0+(\\d+)\\b/g,'$1')===name))nameScore=95;
+  if(name&&targetNames.some(target=>target.replace(/\b0+(\d+)\b/g,'$1')===name))nameScore=95;
   for(const rawTarget of targetNames){
-   const target=rawTarget.replace(/\\b0+(\\d+)\\b/g,'$1');
+   const target=rawTarget.replace(/\b0+(\d+)\b/g,'$1');
    if(!target||!name)continue;
    const targetTokens=new Set(target.split(' ').filter(t=>t.length>1));
    const tokens=name.split(' ').filter(t=>t.length>1);
