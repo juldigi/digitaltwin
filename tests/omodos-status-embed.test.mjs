@@ -24,3 +24,16 @@ test('a conflicting explicit code cannot be overridden by a name alias', () => {
 test('critical OMODOS label is styled as critical, not unknown', () => {
   assert.match(source, /critical\|kritikal/);
 });
+
+
+test('viewer handshake waits until machine anchors exist', () => {
+  assert.match(source, /state\.authorized&&!state\.readySent&&engine\.actualFactory\.assets\.size>0&&state\.anchors\.size>0/);
+  assert.match(source, /state\.parentOrigin=event\.origin/);
+  assert.doesNotMatch(source, /if\(!state\.readySent\)\{state\.readySent=true;event\.source\.postMessage/);
+});
+
+test('viewer is restricted to a parent on the production OMODOS origin', () => {
+  assert.match(source, /https:\/\/omodos\.juldigi\.workers\.dev/);
+  assert.match(source, /event\.source!==window\.parent/);
+  assert.match(source, /ALLOWED_PARENT_ORIGINS\.has\(event\.origin\)/);
+});
