@@ -723,6 +723,7 @@ let omodosLiteLastStatusSignature = '';
 let omodosLiteLastFactory = null;
 let omodosLiteMappingReport = '';
 let omodosLiteProjectionFrame = 0;
+let omodosLiteLastProjectionAt = 0;
 let omodosLiteLayer = null;
 let omodosLiteCardsLayer = null;
 let omodosLiteNotice = null;
@@ -824,16 +825,18 @@ function mapOmodosLiteStatuses_(){
 function reportOmodosLiteMapping_(mapped,unmapped){
  const total=omodosLiteStatuses.length;
  if(!total){if(omodosLiteNotice)omodosLiteNotice.textContent='Menunggu data status mesin dari OMODOS…';return;}
- const visible=mapped.filter(x=>engine?.isObjectVisible?.(x.asset)).length;
- const signature=[total,visible,mapped.map(x=>x.machineId).join(','),unmapped.length,unmapped.map(x=>x.code+':'+x.name).join('|')].join('::');
+ const hidden=mapped.filter(x=>!engine?.isObjectVisible?.(x.asset)).map(x=>({code:x.item.code||'',name:x.item.name||x.record.name,reason:'Model 3D belum ditampilkan karena geometri aset belum terverifikasi pada tampilan ringkas'}));
+ const missing=unmapped.concat(hidden);
+ const visible=total-missing.length;
+ const signature=[total,visible,mapped.map(x=>x.machineId).join(','),missing.length,missing.map(x=>x.code+':'+x.name).join('|')].join('::');
  if(signature===omodosLiteMappingReport)return;
  omodosLiteMappingReport=signature;
  if(omodosLiteNotice){
-  omodosLiteNotice.textContent='Status terpasang: '+visible+'/'+total+' mesin. '+(unmapped.length?unmapped.length+' belum cocok; kartu tidak ditempelkan secara spekulatif.':'Semua kode mesin terpetakan.');
-  omodosLiteNotice.title=unmapped.slice(0,16).map(x=>(x.code||'-')+' — '+x.name+': '+x.reason).join('\n');
+  omodosLiteNotice.textContent='Status terpasang: '+visible+'/'+total+' mesin. '+(missing.length?missing.length+' belum tampil/terpetakan; status tidak ditempelkan secara spekulatif.':'Semua kode mesin terpetakan dan terlihat.');
+  omodosLiteNotice.title=missing.slice(0,16).map(x=>(x.code||'-')+' — '+x.name+': '+x.reason).join('\n');
  }
  try{
-  window.parent.postMessage({type:OMODOS_LITE_MAPPING_TYPE,version:1,total,mapped:visible,unmapped:unmapped.slice(0,16).map(x=>({code:x.code||'',name:x.name||'',reason:x.reason}))},OMODOS_LITE_PARENT_ORIGIN);
+  window.parent.postMessage({type:OMODOS_LITE_MAPPING_TYPE,version:1,total,mapped:visible,unmapped:missing.slice(0,16).map(x=>({code:x.code||'',name:x.name||'',reason:x.reason}))},OMODOS_LITE_PARENT_ORIGIN);
  }catch{}
 }
 function rebuildOmodosLiteCards_(){
@@ -874,6 +877,7 @@ function positionOmodosLiteCards_(){
  if(!OMODOS_LITE_MODE||!engine||!omodosLiteCardsLayer)return;
  scheduleOmodosLiteProjection_();
  if(document.hidden||engine.view!=='factory'||!engine.actualFactory?.assets?.size)return;
+ const now=performance.now();if(now-omodosLiteLastProjectionAt<75)return;omodosLiteLastProjectionAt=now;
  engine.factory.updateWorldMatrix(true,true);
  engine.camera.updateMatrixWorld(true);
  const viewport=document.getElementById('viewport');
