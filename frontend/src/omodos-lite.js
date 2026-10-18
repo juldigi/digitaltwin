@@ -265,7 +265,7 @@ async function boot(){
       syncCardElements();
     }
   }).catch(error=>console.warn('[OMODOS DigitalTwin Lite] Progressive model hydration:',error));
-  const hiddenLayers=['building','ipal','floor','walls','doors','windows','air_curtain','furniture','roof','labels','landscape','reference','utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors'];
+  const hiddenLayers=['building','floor','walls','doors','windows','air_curtain','furniture','roof','labels','landscape','reference','utility_compressed_air','utility_ahu_piping','utility_ahu_ducting','utility_anchors'];
   for(const layer of hiddenLayers)engine.setFactoryLayer(layer,false);
   engine.setFactoryLayer('machines',true);
   engine.setFactoryLayer('unidentified',true);
