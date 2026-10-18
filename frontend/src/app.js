@@ -823,8 +823,9 @@ function mapOmodosLiteStatuses_(){
 }
 function reportOmodosLiteMapping_(mapped,unmapped){
  const total=omodosLiteStatuses.length;
+ if(!total){if(omodosLiteNotice)omodosLiteNotice.textContent='Menunggu data status mesin dari OMODOS…';return;}
  const visible=mapped.filter(x=>engine?.isObjectVisible?.(x.asset)).length;
- const signature=[total,visible,unmapped.length,unmapped.map(x=>x.code+':'+x.name).join('|')].join('::');
+ const signature=[total,visible,mapped.map(x=>x.machineId).join(','),unmapped.length,unmapped.map(x=>x.code+':'+x.name).join('|')].join('::');
  if(signature===omodosLiteMappingReport)return;
  omodosLiteMappingReport=signature;
  if(omodosLiteNotice){
@@ -873,7 +874,6 @@ function positionOmodosLiteCards_(){
  if(!OMODOS_LITE_MODE||!engine||!omodosLiteCardsLayer)return;
  scheduleOmodosLiteProjection_();
  if(document.hidden||engine.view!=='factory'||!engine.actualFactory?.assets?.size)return;
- applyOmodosLiteLayers_();
  engine.factory.updateWorldMatrix(true,true);
  engine.camera.updateMatrixWorld(true);
  const viewport=document.getElementById('viewport');
