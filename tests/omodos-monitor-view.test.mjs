@@ -22,7 +22,7 @@ test('monitor excludes roof, walls, furniture, doors and machine-detail actions'
   assert.match(js,/roof:false/);
   assert.match(js,/furniture:false/);
   assert.match(js,/machines:true/);
-  assert.match(js,/engine\.onFactorySelect=\(\)=>\{\}/);
+  assert.match(js,/engine\.onFactorySelect=\(\)=>\{\}/);\n  assert.match(js,/engine\.factoryDetailHydration\+\+/);\n  assert.match(js,/placement\?\.label/);
   assert.doesNotMatch(js,/machineDetailDialog|selectFactoryAssetContext/);
 });
 
