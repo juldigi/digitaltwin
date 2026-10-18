@@ -76,8 +76,14 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
       const rowCode=normalize(row.code),name=machineNameKey(row.name);let score=0;
       if(code&&rowCode===code){
         if(codeIsUnique)score=130;
-        else if(name&&(name===machineName||name===short))score=160;
-        else continue;
+        else if(name){
+          const exactCodePeers=sameCodePeers.filter(peer=>{
+            const peerName=machineNameKey(peer.name),peerShort=machineNameKey(shortName(peer));
+            return peerName===name||peerShort===name;
+          });
+          if(exactCodePeers.length===1&&exactCodePeers[0].machineId===machine.machineId)score=160;
+          else continue;
+        }else continue;
       }else if(rowCode&&code&&rowCode!==code){
         // An explicit different code must never be overridden by a fuzzy name match.
         continue;
