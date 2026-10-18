@@ -37,6 +37,11 @@ test('Indonesian dashboard severity "Kritikal" receives the critical style', () 
   assert.match(embed, /critical\|kritikal/);
 });
 
+test('missing or unavailable machine status remains neutral', () => {
+  assert.match(embed, /s==='belum ada data'/);
+  assert.match(embed, /s==='belum tersedia'/);
+});
+
 test('duplicate machine codes require unique registry identity or an exact unique machine name', () => {
   assert.match(registry, /sapCode/);
   assert.match(embed, /registryAliasOwners/);
