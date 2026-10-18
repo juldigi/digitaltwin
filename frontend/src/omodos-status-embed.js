@@ -111,6 +111,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     }
     for(const [id,card] of state.cards)if(!state.anchors.has(id))card.hidden=true;
   }
+  function visibleMeshesUnder(layer){const found=[];if(!layer)return found;const visit=(node,parentVisible)=>{const visible=parentVisible&&node.visible!==false;if(!visible)return;if(node.isMesh)found.push(node);for(const child of node.children||[])visit(child,visible);};visit(layer,true);return found;}
   async function startViewer(){
     try{
       const [THREE,registryModule]=await Promise.all([import('three'),import('./data/machine-registry.js')]);state.registry=registryModule.MACHINE_REGISTRY||[];
@@ -122,10 +123,10 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
         const signature=String(engine.actualFactory.root?.uuid||'')+':'+String(engine.actualFactory.assets.size||0),rootChanged=signature!==rootSignature,now=performance.now();
         if(rootChanged||now-state.lastPolicyAt>900){
           rootSignature=signature;state.lastPolicyAt=now;
-          const policy={building:false,ipal:true,floor:true,walls:false,doors:false,windows:false,airCurtain:false,furniture:false,roof:false,machines:true,labels:false,landscape:false,reference:false,unidentified:true,compressedAir:false,ahuPiping:false,ducting:false,utilityAnchors:false};
+          const policy={building:false,ipal:true,floor:true,walls:false,doors:false,windows:false,air_curtain:false,furniture:false,roof:false,machines:true,labels:false,landscape:false,reference:false,unidentified:true,utility_compressed_air:false,utility_ahu_piping:false,utility_ahu_ducting:false,utility_anchors:false};
           for(const [key,visible] of Object.entries(policy))engine.setFactoryLayer(key,visible);
           engine.onFactorySelect=()=>{};engine.onTaxonomySelect=()=>{};engine.renderer.domElement.style.touchAction='none';engine.renderer.domElement.setAttribute('aria-label','Tampilan 3D status mesin BMJ; objek tidak membuka detail.');
-          if(state.authorized&&engine.actualFactory.assets.size)engine.fitObjects([...engine.actualFactory.assets.values()],'iso',false);
+          if(state.authorized&&engine.actualFactory.assets.size){const fitObjects=[...engine.actualFactory.assets.values(),...visibleMeshesUnder(engine.actualFactory.layers.ipal)];engine.fitObjects(fitObjects,'iso',false);}
         }
         if(now-state.lastAnchorAt>1400||rootChanged)rebuildAnchors(THREE,engine);
       },350);
@@ -137,7 +138,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     if(window.parent===window||event.source!==window.parent||!ALLOWED_PARENT_ORIGINS.has(event.origin))return;
     const payload=event.data;if(!payload||payload.type!=='OMODOS_FACTORY_STATUS'||payload.version!==1||!Array.isArray(payload.records))return;
     state.records=payload.records.slice(0,1200).map((row,index)=>({code:String(row?.code||'').trim(),name:String(row?.name||'').trim(),status:String(row?.status||'').trim(),date:String(row?.date||'').trim(),index:Number(row?.index)||index}));state.recordsVersion++;
-    state.authorized=true;document.documentElement.classList.add('omodos-status-authorized');gate.remove();state.lastAnchorAt=0;
+    state.authorized=true;const activeEngine=window.__BMJ_FACTORY_ENGINE__;if(activeEngine){activeEngine.onFactorySelect=()=>{};activeEngine.onTaxonomySelect=()=>{};}document.documentElement.classList.add('omodos-status-authorized');gate.remove();state.lastAnchorAt=0;
     if(!state.readySent){state.readySent=true;event.source.postMessage({type:'OMODOS_FACTORY_STATUS_READY',version:1},event.origin);}startViewerOnce();
   });
 }
