@@ -84,28 +84,28 @@ function statusForMachine(machineId){
  const machine=registryById.get(machineId)||{};
  const statusRecords=records.map(row=>({row,score:0}));
  const targetCode=normalize(machine.sapCode||'');
- const targetNames=[machine.name,machine.codename,machine.functionalLocation].map(normalize).filter(Boolean);
+ const targetNames=[machine.name,machine.codename,machine.model,machine.functionalLocation].map(normalize).filter(Boolean);
  const candidates=statusRecords.map(item=>{
   const code=normalize(item.row.code);
-  const name=normalize(item.row.name);
-  let score=0;
-  if(targetCode&&code===targetCode)score+=100;
-  if(name&&targetNames.includes(name))score+=90;
-  for(const target of targetNames){
+  const name=normalize(item.row.name).replace(/\\b0+(\\d+)\\b/g,'$1');
+  let codeScore=targetCode&&code===targetCode?100:0;
+  let nameScore=0;
+  if(name&&targetNames.some(target=>target.replace(/\\b0+(\\d+)\\b/g,'$1')===name))nameScore=95;
+  for(const rawTarget of targetNames){
+   const target=rawTarget.replace(/\\b0+(\\d+)\\b/g,'$1');
    if(!target||!name)continue;
-   const targetTokens=new Set(target.split(' '));
+   const targetTokens=new Set(target.split(' ').filter(t=>t.length>1));
    const tokens=name.split(' ').filter(t=>t.length>1);
    const shared=tokens.filter(t=>targetTokens.has(t)).length;
-   if(shared)score=Math.max(score,Math.round(55*shared/Math.max(1,tokens.length)));
-   if(name.includes(target)||target.includes(name))score=Math.max(score,70);
+   if(shared)nameScore=Math.max(nameScore,Math.round(75*shared/Math.max(1,tokens.length)));
+   if(name.includes(target)||target.includes(name))nameScore=Math.max(nameScore,80);
   }
-  if(item.row.code&&targetCode&&code===targetCode)score+=5;
-  return {...item,score};
+  return {...item,score:codeScore+nameScore};
  }).filter(item=>item.score>0).sort((a,b)=>b.score-a.score||a.row.name.localeCompare(b.row.name,'id'));
  if(!candidates.length)return {key:'none',statusLabel:'Belum ada data',sourceLabel:'Belum ada sumber',updatedAt:'',code:machine.sapCode||'',name:machine.name||machineId};
  const first=candidates[0],second=candidates[1];
- // Duplicate SAP codes are deliberately disambiguated by name. When a tie remains,
- // do not assert another machine's status; mark this card as needing a mapping.
+ // Duplicate SAP codes are disambiguated by model/name similarity. If identity still ties,
+ // do not assert another machine's status.
  if(second&&first.score===second.score&&normalize(first.row.name)!==normalize(second.row.name)){
   return {key:'none',statusLabel:'Perlu pemetaan',sourceLabel:'Identitas belum cocok',updatedAt:'',code:first.row.code||machine.sapCode||'',name:machine.name||machineId};
  }
