@@ -56,7 +56,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     return s.slice(0,17).trim()+'…';
   }
   function toneFor(status){
-    const s=normalize(status);if(!s||s==='belum ada catatan'||s.includes('belum diisi'))return 'unknown';
+    const s=normalize(status);if(!s||s==='belum ada catatan'||s==='belum ada data'||s==='belum diketahui'||s==='belum tersedia'||s.includes('belum diisi'))return 'unknown';
     if(/(rusak|breakdown|gangguan|gagal|abnormal|emergency|darurat|critical|kritikal)/.test(s))return 'critical';
     if(/(perlu|masalah|pending|menunggu|belum|proses|ongoing|open|perbaikan|tidak normal|follow up)/.test(s))return 'attention';
     if(/(selesai|completed|closed|normal|baik|aman|running|operasi|operasional|ok\b)/.test(s))return 'good';
