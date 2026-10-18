@@ -3,7 +3,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
   // No extra imports or UI for regular DigitalTwin sessions.
 } else {
   const ALLOWED_PARENT_ORIGINS = new Set(['https://omodos.juldigi.workers.dev']);
-  const state = {authorized:false,readySent:false,records:[],recordsVersion:0,registry:[],registryAliasOwners:new Map(),registryNameCounts:new Map(),engine:null,layer:null,cards:new Map(),anchors:new Map(),lastAnchorAt:0,lastPolicyAt:0};
+  const state = {authorized:false,readySent:false,records:[],recordsVersion:0,registry:[],registryAliasOwners:new Map(),registryNameCounts:new Map(),engine:null,layer:null,cards:new Map(),anchors:new Map(),lastAnchorAt:0};
   document.documentElement.classList.add('omodos-status-embed');
   const css = [
     'html.omodos-status-embed,html.omodos-status-embed body{width:100%!important;height:100%!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#edf2f5!important}',
@@ -144,8 +144,8 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
       setInterval(()=>{
         const engine=window.__BMJ_FACTORY_ENGINE__;if(!engine?.actualFactory?.assets||!engine.factory)return;state.engine=engine;
         const signature=String(engine.actualFactory.root?.uuid||'')+':'+String(engine.actualFactory.assets.size||0),rootChanged=signature!==rootSignature,now=performance.now();
-        if(rootChanged||now-state.lastPolicyAt>900){
-          rootSignature=signature;state.lastPolicyAt=now;
+        if(rootChanged){
+          rootSignature=signature;
           const policy={building:false,ipal:true,floor:true,walls:false,doors:false,windows:false,air_curtain:false,furniture:false,roof:false,machines:true,labels:false,landscape:false,reference:false,unidentified:true,utility_compressed_air:false,utility_ahu_piping:false,utility_ahu_ducting:false,utility_anchors:false};
           for(const [key,visible] of Object.entries(policy))engine.setFactoryLayer(key,visible);
           engine.onFactorySelect=()=>{};engine.onTaxonomySelect=()=>{};engine.renderer.domElement.style.touchAction='none';engine.renderer.domElement.setAttribute('aria-label','Tampilan 3D status mesin BMJ; objek tidak membuka detail.');
