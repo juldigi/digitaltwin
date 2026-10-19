@@ -149,7 +149,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     if(!viewport)return;
     const width=viewport.clientWidth,height=viewport.clientHeight;
     if(width<10||height<10)return;
-    const mobile=matchMedia('(max-width:700px)').matches;
+    const mobile=matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse)').matches;
     // The mobile viewport cannot label every asset at once. Prioritize important
     // statuses near the current camera and let users rotate/zoom to other areas.
     const cardWidth=mobile?116:122,cardHeight=mobile?52:50;
