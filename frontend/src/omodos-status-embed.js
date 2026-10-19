@@ -192,7 +192,6 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
       const card=entry.card;
       const labelEl=card.querySelector('.machine-label');
       if(labelEl)labelEl.textContent=shortName(entry.machine);
-      card.title=String(entry.machine.name||shortName(entry.machine))+' · '+(state.records.find(row=>normalize(row.code)===normalize(entry.machine.sapCode))?.status||'Belum ada catatan');
       const x=Math.max(cardWidth/2+3,Math.min(width-cardWidth/2-3,entry.x));
       const y=Math.max(cardHeight+4,Math.min(height-4,entry.y));
       let chosen=null;
