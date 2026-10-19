@@ -156,6 +156,8 @@ test('OMODOS preview disposes hidden building layers and builds static anchors o
   assert.match(embed, /function disposePreviewSubtree_\(/);
   assert.match(embed, /state\.previewPrunedRoot!==signature/);
   assert.match(embed, /if\(!state\.lastAnchorAt\|\|rootChanged\)rebuildAnchors\(THREE,engine\)/);
+  assert.match(embed, /if\(firstAuthorization\)\{state\.policyApplied=false;state\.lastAnchorAt=0;\}/);
+  assert.doesNotMatch(embed, /gate\.remove\(\);state\.lastAnchorAt=0;startViewerOnce\(\)/);
   assert.match(embed, /const mobileLimit=mobile\?2:8/);
   assert.match(embed, /overlayMobile\?125:90/);
   assert.match(embed, /state\.summary=\{critical:/);
