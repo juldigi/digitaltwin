@@ -39,9 +39,34 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
   function normalize(value){return String(value==null?'':value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ');}
   function machineNameKey(value){return normalize(value).replace(/(^|\s)0+(\d+)/g,(_,prefix,digits)=>prefix+String(Number(digits)));}
   function shortName(machine){
-    const raw=String(machine?.name||machine?.sapCode||'Mesin');const offset=raw.match(/offset[^0-9]{0,24}(\d+)/i);if(offset)return 'Offset '+offset[1];
-    const match=raw.match(/\b(APM|FGM|AHU|CTP|CTF|FZG|OFS|OFU|GLM|PDS|RMS)\s*[-# ]?\s*(\d+)\b/i);if(match)return match[1].toUpperCase()+' '+match[2];
-    if(/polar\s*115/i.test(raw))return 'Polar 115';if(/sheeting/i.test(raw))return 'Sheeting';if(/compressor/i.test(raw))return 'Compressor';if(/collator/i.test(raw))return 'Collator';if(/ipal/i.test(raw))return 'IPAL';
+    const raw=String(machine?.name||machine?.sapCode||'Mesin').trim();
+    const offset=raw.match(/offset[^0-9]{0,24}(\d+)/i);if(offset)return 'Offset '+Number(offset[1]);
+    const numbered=raw.match(/\b(AHU|APM|FGM|CTP|CTF|OFS|OFU|GLM|PDS|RMS)\s*[-# ]?\s*(\d+)\b/i);
+    if(numbered)return numbered[1].toUpperCase()+' '+Number(numbered[2]);
+    const platen=raw.match(/\bAUTOPLATEN\s*[-# ]*(\d+)\b/i);if(platen)return 'Autoplaten '+Number(platen[1]);
+    const folder=raw.match(/\bFOLDER\s+GLUER\s*[-# ]*(\d+)\b/i);if(folder)return 'Folder Gluer '+Number(folder[1]);
+    const pile=raw.match(/\bPILE\s+TURNER\s*[-# ]*(\d+)\b/i);if(pile)return 'Pile Turner '+Number(pile[1]);
+    const inspection=raw.match(/\bOFFLINE\s+INSPECTION\s*(\d+)\s*[- ]*\s*(MK|FOCUSIGHT)?/i);
+    if(inspection)return 'Inspection '+Number(inspection[1])+(inspection[2]?' · '+inspection[2].toUpperCase():'');
+    const blanking=raw.match(/\bAUTOBLANKING(?:\s+MACHINE)?\s*[-# ]*(\d+)\b/i);if(blanking)return 'Autoblanking '+Number(blanking[1]);
+    if(/polar\s*115/i.test(raw))return 'Polar 115';
+    if(/sheeting/i.test(raw))return 'Sheeting Lexus';
+    const compressor=raw.match(/\bCOMPRESSOR\s+(ATLAS\s+COPCO|KAESER|SWAN)\s+NO\.?\s*(\d+)\b/i);
+    if(compressor){
+      const brand=compressor[1].replace(/\s+/g,' ').replace(/\b[A-Z]/g,c=>c.toUpperCase());
+      return brand+' '+Number(compressor[2]);
+    }
+    if(/\bCOMPRESSOR\b/i.test(raw))return raw.length>20?raw.slice(0,20).trim():raw;
+    if(/\bCOLLATOR\b/i.test(raw))return 'Collator';
+    if(/\bDIGITAL\s+INKJET\b/i.test(raw))return 'Digital Inkjet';
+    if(/\bCTP\s+HEIDELBERG\b/i.test(raw)){
+      if(String(machine?.machineId||'').endsWith('0025'))return 'CTP Heidelberg 1';
+      if(String(machine?.machineId||'').endsWith('0026'))return 'CTP Heidelberg 2';
+      return 'CTP Heidelberg';
+    }
+    if(/\bCTF\s+IMAGESETTER\b/i.test(raw))return 'CTF Imagesetter';
+    if(/\bZUND\b/i.test(raw))return 'Zünd';
+    if(/\bIPAL\b/i.test(raw))return 'IPAL';
     return raw.length>22?raw.slice(0,21).trim()+'…':raw;
   }
   function aliasesFor(machine){
