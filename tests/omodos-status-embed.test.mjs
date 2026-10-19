@@ -71,7 +71,8 @@ test('every visible registry machine gets a status card and ambiguous codes do n
 });
 
 test('mobile status callouts stay readable without overlapping the factory view', () => {
-  assert.match(embed, /const mobileLimit=mobile\?Math\.max\(4,Math\.min\(5,/);
+  assert.match(embed, /const mobileLimit=mobile\?3:Infinity/);
+  assert.match(embed, /const mobile=matchMedia\('\(max-width:767px\)'\)\.matches\|\|matchMedia\('\(pointer:coarse\)'\)\.matches/);
   assert.match(embed, /entries\.sort\(\(a,b\)=>a\.statusPriority-b\.statusPriority\|\|a\.distance-b\.distance/);
   assert.match(embed, /if\(!chosen\)continue;/);
   assert.doesNotMatch(embed, /bestOverlap|if\(overlap<bestOverlap\)/);
@@ -82,7 +83,8 @@ test('mobile status callouts stay readable without overlapping the factory view'
 test('every displayed status card visibly labels the machine before showing its status', () => {
   assert.match(embed, /card\.innerHTML='<span class="machine-label"><\/span><span class="machine-state">/);
   assert.match(embed, /card\.querySelector\('\.machine-label'\)\.textContent=shortName\(machine\)/);
-  assert.match(embed, /\.omodos-machine-status-card \.machine-label\{display:block!important/);
+  assert.match(embed, /#omodos-status-overlay \.omodos-machine-status-card \.machine-label\{display:block!important/);
+  assert.match(embed, /if\(labelEl\)labelEl\.textContent=shortName\(entry\.machine\)/);
   assert.match(embed, /\.omodos-machine-status-card \.machine-state\{display:block!important/);
 });
 
@@ -95,8 +97,8 @@ test('compact labels remain distinct for repeated machine families', () => {
   assert.match(embed, /card\.title=String\(machine\.name\|\|shortName\(machine\)\)/);
 });
 
-test('mobile overview caps simultaneous status callouts at five and gives machine names priority', () => {
-  assert.match(embed, /const cardWidth=mobile\?112:122,cardHeight=mobile\?48:50/);
+test('mobile overview caps simultaneous status callouts at three and gives machine names priority', () => {
+  assert.match(embed, /const cardWidth=mobile\?116:122,cardHeight=mobile\?52:50/);
   assert.match(embed, /font-size:10px!important;font-weight:850!important;line-height:1\.25!important;color:#203c4f!important/);
   assert.match(embed, /card\.querySelector\('\.machine-label'\)\.textContent=shortName\(machine\)/);
   assert.match(embed, /\.machine-state\{display:block!important;visibility:visible!important;opacity:1!important/);
