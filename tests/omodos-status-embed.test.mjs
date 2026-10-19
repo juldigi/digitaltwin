@@ -7,7 +7,7 @@ const embed = readFileSync(new URL('../frontend/src/omodos-status-embed.js', imp
 const building = readFileSync(new URL('../frontend/src/factory-building.js', import.meta.url), 'utf8');
 
 test('OMODOS status viewer is opt-in and only accepts the authenticated OMODOS parent origin', () => {
-  assert.match(html, /src="\.\/src\/omodos-status-embed\.js\?v=1"/);
+  assert.match(html, /src="\.\/src\/omodos-status-embed\.js\?v=2"/);
   assert.match(embed, /new URLSearchParams\(location\.search\)\.get\('embed'\) !== EMBED_KEY/);
   assert.match(embed, /ALLOWED_PARENT_ORIGINS = new Set\(\['https:\/\/omodos\.juldigi\.workers\.dev'\]\)/);
   assert.match(embed, /ALLOWED_PARENT_ORIGINS\.has\(event\.origin\)/);
@@ -98,7 +98,7 @@ test('compact labels remain distinct for repeated machine families', () => {
 });
 
 test('mobile overview caps simultaneous status callouts at three and gives machine names priority', () => {
-  assert.match(embed, /const cardWidth=mobile\?104:122,cardHeight=mobile\?48:50/);
+  assert.match(embed, /const cardWidth=mobile\?124:122,cardHeight=mobile\?64:60/);
   assert.match(embed, /font-size:9px!important;font-weight:850!important;line-height:1\.2!important;color:#203c4f!important/);
   assert.match(embed, /card\.querySelector\('\.machine-label'\)\.textContent=shortName\(machine\)/);
   assert.match(embed, /\.machine-state\{display:block!important;visibility:visible!important;opacity:1!important/);
@@ -121,7 +121,7 @@ test('compact status cards always carry a live leader connector to their machine
 });
 
 test('mobile status callouts use a compact name, status and date hierarchy', () => {
-  assert.ok(embed.includes('.omodos-machine-status-card{width:104px;min-height:48px;padding:4px 5px 5px'));
+  assert.ok(embed.includes('.omodos-machine-status-card{box-sizing:border-box;width:124px;height:64px;min-height:64px;padding:4px 5px 5px'));
   assert.ok(embed.includes("card.querySelector('.machine-label').textContent=shortName(machine)"));
   assert.ok(embed.includes("card.querySelector('.machine-state').textContent=compactStatus(status)"));
   assert.ok(embed.includes("card.querySelector('.machine-date').textContent=row?.date?formatDate(row.date):''"));
@@ -138,4 +138,22 @@ test('status cards are visible, keyboard/touch activatable, and report the machi
   assert.match(embed, /if\(!chosen&&mobile\)/);
   assert.ok(embed.includes('const margin=5,gap=7,columns=Math.max(1,Math.floor((width-2*margin+gap)/(cardWidth+gap)));'));
   assert.match(embed, /card\.dataset\.machineLabel=machineLabel/);
+});
+
+
+test('status cards use border-box dimensions matching the non-overlap placement grid', () => {
+  assert.match(embed, /box-sizing:border-box;display:flex;flex-direction:column/);
+  assert.match(embed, /card\.style\.height=cardHeight\+'px'/);
+  assert.match(embed, /const cardWidth=mobile\?124:122,cardHeight=mobile\?64:60/);
+});
+
+test('mobile status labels wrap to two lines and preserve distinct machine identities', () => {
+  assert.match(embed, /-webkit-line-clamp:2/);
+  assert.ok(embed.includes("return 'Autoplaten '+Number(stripping[1])"));
+  assert.ok(embed.includes("return 'Inspection '+Number(inspectionMachine[1])"));
+});
+
+test('mobile factory framing gets a modest portrait-only zoom after fitting the full factory', () => {
+  assert.match(embed, /engine\.fitObjects\(fitObjects,'iso',false\);if\(viewport\.clientWidth<=767/);
+  assert.match(embed, /multiplyScalar\(\.9\)/);
 });
