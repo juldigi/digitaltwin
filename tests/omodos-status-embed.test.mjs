@@ -98,7 +98,7 @@ test('compact labels remain distinct for repeated machine families', () => {
 });
 
 test('mobile overview caps simultaneous status callouts at three and gives machine names priority', () => {
-  assert.match(embed, /const cardWidth=mobile\?100:122,cardHeight=mobile\?44:50/);
+  assert.match(embed, /const cardWidth=mobile\?104:122,cardHeight=mobile\?48:50/);
   assert.match(embed, /font-size:9px!important;font-weight:850!important;line-height:1\.2!important;color:#203c4f!important/);
   assert.match(embed, /card\.querySelector\('\.machine-label'\)\.textContent=shortName\(machine\)/);
   assert.match(embed, /\.machine-state\{display:block!important;visibility:visible!important;opacity:1!important/);
@@ -121,9 +121,21 @@ test('compact status cards always carry a live leader connector to their machine
 });
 
 test('mobile status callouts use a compact name, status and date hierarchy', () => {
-  assert.ok(embed.includes('.omodos-machine-status-card{width:100px;min-height:44px;padding:4px 5px 5px'));
+  assert.ok(embed.includes('.omodos-machine-status-card{width:104px;min-height:48px;padding:4px 5px 5px'));
   assert.ok(embed.includes("card.querySelector('.machine-label').textContent=shortName(machine)"));
   assert.ok(embed.includes("card.querySelector('.machine-state').textContent=compactStatus(status)"));
   assert.ok(embed.includes("card.querySelector('.machine-date').textContent=row?.date?formatDate(row.date):''"));
   assert.ok(embed.includes('const mobileLimit=mobile?3:Infinity'));
+});
+
+
+test('status cards are visible, keyboard/touch activatable, and report the machine identity to OMODOS', () => {
+  assert.match(embed, /pointer-events:auto;cursor:pointer;touch-action:manipulation/);
+  assert.match(embed, /card\.setAttribute\('role','button'\);card\.tabIndex=0/);
+  assert.match(embed, /card\.addEventListener\('click',activate\)/);
+  assert.match(embed, /event\.key==='Enter'\|\|event\.key===' '/);
+  assert.match(embed, /type:'OMODOS_FACTORY_STATUS_CARD_CLICK',version:1,code,name/);
+  assert.match(embed, /if\(!chosen&&mobile\)/);
+  assert.match(embed, /const columns=Math\.max\(1,Math\.floor\(\(width-2\*margin\+gap\)\/\(cardWidth\+gap\)\)\)/);
+  assert.match(embed, /card\.dataset\.machineLabel=machineLabel/);
 });
