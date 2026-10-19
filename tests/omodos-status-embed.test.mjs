@@ -7,7 +7,7 @@ const embed = readFileSync(new URL('../frontend/src/omodos-status-embed.js', imp
 const building = readFileSync(new URL('../frontend/src/factory-building.js', import.meta.url), 'utf8');
 
 test('OMODOS status viewer is opt-in and only accepts the authenticated OMODOS parent origin', () => {
-  assert.match(html, /src="\.\/src\/omodos-status-embed\.js\?v=1"/);
+  assert.match(html, /src="\.\/src\/omodos-status-embed\\.js\\?v=2"/);
   assert.match(embed, /new URLSearchParams\(location\.search\)\.get\('embed'\) !== EMBED_KEY/);
   assert.match(embed, /ALLOWED_PARENT_ORIGINS = new Set\(\['https:\/\/omodos\.juldigi\.workers\.dev'\]\)/);
   assert.match(embed, /ALLOWED_PARENT_ORIGINS\.has\(event\.origin\)/);
@@ -95,3 +95,10 @@ test('compact labels remain distinct for repeated machine families', () => {
   assert.match(embed, /card\.title=String\(machine\.name\|\|shortName\(machine\)\)/);
 });
 
+test('mobile status cards stay sparse and keep machine names ahead of state', () => {
+  assert.match(embed, /\.machine-label\{display:block!important;position:relative;visibility:visible!important;opacity:1!important;order:0/);
+  assert.match(embed, /card\.querySelector\('\.machine-label'\)\.textContent=shortName\(machine\)/);
+  assert.match(embed, /const mobileLimit=mobile\?Math\.max\(4,Math\.min\(5,/);
+  assert.match(embed, /state\.anchors\.size\+' mesin di model/);
+  assert.match(embed, /Never fall back to a partially overlapping placement/);
+});
