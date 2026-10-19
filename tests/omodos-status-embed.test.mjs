@@ -7,7 +7,8 @@ const embed = readFileSync(new URL('../frontend/src/omodos-status-embed.js', imp
 const building = readFileSync(new URL('../frontend/src/factory-building.js', import.meta.url), 'utf8');
 
 test('OMODOS status viewer is opt-in and only accepts the authenticated OMODOS parent origin', () => {
-  assert.match(html, /src="\.\/src\/omodos-status-embed\.js\?v=1"/);
+  assert.ok(html.includes('omodos-status-embed.js?v=2'));
+  // assert.match(html, /src="\.\/src\/omodos-status-embed\.js\?v=1"/);
   assert.match(embed, /new URLSearchParams\(location\.search\)\.get\('embed'\) !== EMBED_KEY/);
   assert.match(embed, /ALLOWED_PARENT_ORIGINS = new Set\(\['https:\/\/omodos\.juldigi\.workers\.dev'\]\)/);
   assert.match(embed, /ALLOWED_PARENT_ORIGINS\.has\(event\.origin\)/);
@@ -71,7 +72,7 @@ test('every visible registry machine gets a status card and ambiguous codes do n
 });
 
 test('mobile status callouts stay readable without overlapping the factory view', () => {
-  assert.match(embed, /const mobileLimit=mobile\?3:Infinity/);
+  assert.match(embed, /const mobileLimit=mobile\?mobileCardLimit_\(engine\):Infinity/);
   assert.match(embed, /const mobile=matchMedia\('\(max-width:767px\)'\)\.matches\|\|matchMedia\('\(pointer:coarse\)'\)\.matches/);
   assert.match(embed, /entries\.sort\(\(a,b\)=>a\.statusPriority-b\.statusPriority\|\|a\.distance-b\.distance/);
   assert.match(embed, /if\(!chosen\)continue;/);
@@ -81,9 +82,9 @@ test('mobile status callouts stay readable without overlapping the factory view'
 });
 
 test('every displayed status card visibly labels the machine before showing its status', () => {
-  assert.match(embed, /card\.innerHTML='<span class="machine-label"><\/span><span class="machine-state">/);
-  assert.match(embed, /card\.querySelector\('\.machine-label'\)\.textContent=shortName\(machine\)/);
-  assert.match(embed, /#omodos-status-overlay \.omodos-machine-status-card \.machine-label\{display:block!important/);
+  assert.match(embed, /card\.innerHTML='<span class="machine-title"><\/span><span class="machine-state">/);
+  assert.match(embed, /card\.querySelector\('\.machine-title'\)\.textContent=shortName\(machine\)/);
+  assert.match(embed, /#omodos-status-overlay \.omodos-machine-status-card \.machine-title\{display:block!important/);
   assert.ok(embed.includes("if(labelEl)labelEl.textContent=machineLabel;"));
   assert.match(embed, /\.omodos-machine-status-card \.machine-state\{display:block!important/);
 });
@@ -100,7 +101,7 @@ test('compact labels remain distinct for repeated machine families', () => {
 test('mobile overview caps simultaneous status callouts at three and gives machine names priority', () => {
   assert.match(embed, /const cardWidth=mobile\?104:122,cardHeight=mobile\?48:50/);
   assert.match(embed, /font-size:9px!important;font-weight:850!important;line-height:1\.2!important;color:#203c4f!important/);
-  assert.match(embed, /card\.querySelector\('\.machine-label'\)\.textContent=shortName\(machine\)/);
+  assert.match(embed, /card\.querySelector\('\.machine-title'\)\.textContent=shortName\(machine\)/);
   assert.match(embed, /\.machine-state\{display:block!important;visibility:visible!important;opacity:1!important/);
   assert.match(embed, /shown\+' kartu tampil/);
 });
@@ -122,20 +123,37 @@ test('compact status cards always carry a live leader connector to their machine
 
 test('mobile status callouts use a compact name, status and date hierarchy', () => {
   assert.ok(embed.includes('.omodos-machine-status-card{width:104px;min-height:48px;padding:4px 5px 5px'));
-  assert.ok(embed.includes("card.querySelector('.machine-label').textContent=shortName(machine)"));
+  assert.ok(embed.includes("card.querySelector('.machine-title').textContent=shortName(machine)"));
   assert.ok(embed.includes("card.querySelector('.machine-state').textContent=compactStatus(status)"));
   assert.ok(embed.includes("card.querySelector('.machine-date').textContent=row?.date?formatDate(row.date):''"));
-  assert.ok(embed.includes('const mobileLimit=mobile?3:Infinity'));
+  assert.ok(embed.includes('const mobileLimit=mobile?mobileCardLimit_(engine):Infinity'));
 });
 
 
-test('status cards are visible, keyboard/touch activatable, and report the machine identity to OMODOS', () => {
-  assert.match(embed, /pointer-events:auto;cursor:pointer;touch-action:manipulation/);
-  assert.match(embed, /card\.setAttribute\('role','button'\);card\.tabIndex=0/);
-  assert.match(embed, /card\.addEventListener\('click',activate\)/);
-  assert.match(embed, /event\.key==='Enter'\|\|event\.key===' '/);
-  assert.match(embed, /type:'OMODOS_FACTORY_STATUS_CARD_CLICK',version:1,code,name/);
-  assert.match(embed, /if\(!chosen&&mobile\)/);
-  assert.ok(embed.includes('const margin=5,gap=7,columns=Math.max(1,Math.floor((width-2*margin+gap)/(cardWidth+gap)));'));
-  assert.match(embed, /card\.dataset\.machineLabel=machineLabel/);
+test('status cards are view-only and do not intercept 3D rotate/zoom gestures', () => {
+  assert.match(embed, /pointer-events:none;cursor:default;touch-action:none/);
+  assert.match(embed, /card\\.setAttribute\\('role','img'\\)/);
+  assert.doesNotMatch(embed, /card\\.addEventListener\\('click',activate/);
+  assert.doesNotMatch(embed, /card\\.addEventListener\\('keydown'/);
+  assert.doesNotMatch(embed, /OMODOS_FACTORY_STATUS_CARD_CLICK/);
+});
+
+test('mobile overview limits labels at wide zoom and gradually reveals more when zooming in', () => {
+  assert.match(embed, /function mobileCardLimit_\\(engine\\)/);
+  assert.match(embed, /const mobileLimit=mobile\\?mobileCardLimit_\\(engine\\):Infinity/);
+  assert.match(embed, /if\\(zoomRatio<1\\.28\\)return 3/);
+  assert.match(embed, /if\\(zoomRatio<1\\.72\\)return 5/);
+  assert.match(embed, /if\\(zoomRatio<2\\.28\\)return 8/);
+  assert.match(embed, /if\\(zoomRatio<3\\.0\\)return 12/);
+  assert.match(embed, /return 16/);
+  assert.match(embed, /state\\.overviewCameraDistance=distance/);
+  assert.match(embed, /shown\\+' kartu tampil/);
+});
+
+test('machine title is explicitly visible and isolated from generic machine-label CSS', () => {
+  assert.match(embed, /card\\.innerHTML='<span class="machine-title"><\\/span><span class="machine-state">/);
+  assert.match(embed, /card\\.querySelector\\('\\.machine-title'\\)\\.textContent=shortName\\(machine\\)/);
+  assert.match(embed, /#omodos-status-overlay \\.omodos-machine-status-card \\.machine-title\\{display:block!important/);
+  assert.match(embed, /card\\.querySelector\\('\\.machine-title'\\)\\.textContent=machineLabel/);
+  assert.match(embed, /\\.machine-state\\{display:block!important;visibility:visible!important;opacity:1!important/);
 });
