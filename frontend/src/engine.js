@@ -102,12 +102,13 @@ export function buildLowDetailFactory(layout,fleet){
 
 export class FactoryEngine {
   constructor(container,onSelect){
+    this.omodosStatusEmbed=new URLSearchParams(location.search).get('embed')==='omodos-status';
     const mobileRender=matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse)').matches;
-    this.container=container;this.onSelect=onSelect;this.onTaxonomySelect=null;this.view='factory';this.layout=null;this.low=mobileRender;this.mobileRender=mobileRender;this.renderFaulted=false;this.labels=true;this.isolated=false;this.partLabelEntries=[];this.factoryLabelSprites=[];this.factoryLabelProbe=new THREE.Vector3();this.factoryMachineTemplates=new Map();this.factoryDetailHydration=0;this.factoryDetailPromise=null;this.machineSwitchGeneration=0;
+    this.container=container;this.onSelect=onSelect;this.onTaxonomySelect=null;this.view='factory';this.layout=null;this.low=this.omodosStatusEmbed||mobileRender;this.mobileRender=mobileRender;this.renderFaulted=false;this.labels=true;this.isolated=false;this.partLabelEntries=[];this.factoryLabelSprites=[];this.factoryLabelProbe=new THREE.Vector3();this.factoryMachineTemplates=new Map();this.factoryDetailHydration=0;this.factoryDetailPromise=null;this.machineSwitchGeneration=0;
     {const params=new URLSearchParams(location.search),requested=normalizeFoundationMachineKey(params.get('machine')||params.get('asset'));this.requestedMachineKey=requested;this.machineKey=null;}
-    this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance',stencil:false,preserveDrawingBuffer:false});
+    this.renderer=new THREE.WebGLRenderer({antialias:!this.omodosStatusEmbed,alpha:false,powerPreference:this.omodosStatusEmbed?'low-power':'high-performance',stencil:false,preserveDrawingBuffer:false});
     {const reportedMemory=Number(navigator.deviceMemory),reportedCores=Number(navigator.hardwareConcurrency);this.capabilities={mobile:mobileRender,memory:Number.isFinite(reportedMemory)&&reportedMemory>0?reportedMemory:4,memoryReported:Number.isFinite(reportedMemory)&&reportedMemory>0?reportedMemory:null,cores:Number.isFinite(reportedCores)&&reportedCores>0?reportedCores:4,coresReported:Number.isFinite(reportedCores)&&reportedCores>0?reportedCores:null,maxTextureSize:this.renderer.capabilities.maxTextureSize};}
-    this.requestedQuality='auto';this.qualityProfile=resolveProfile('auto',this.capabilities);
+    this.requestedQuality=this.omodosStatusEmbed?'hemat':'auto';this.qualityProfile=resolveProfile(this.requestedQuality,this.capabilities);
     this.adaptiveQuality=new AdaptiveQuality(()=>{if(this.requestedQuality==='auto'&&this.qualityProfile!=='hemat')this.applyQualityProfile('hemat');});
     configureRenderer(this.renderer,{profile:this.qualityProfile,devicePixelRatio});
     container.appendChild(this.renderer.domElement);this.renderer.domElement.setAttribute('aria-label','Tampilan 3D pabrik Packaging Offset. Pilih mesin untuk membuka model 3D secara detail.');this.renderer.domElement.setAttribute('tabindex','0');
@@ -132,7 +133,7 @@ export class FactoryEngine {
     this.renderer.domElement.addEventListener('pointercancel',()=>{this.down=null;});
     this.renderer.domElement.addEventListener('pointerup',e=>{const down=this.down;this.down=null;if(!down||!e.isPrimary||e.pointerId!==down.pointerId||Math.hypot(e.clientX-down.x,e.clientY-down.y)>(down.pointerType==='touch'?12:6)||this.gizmo.dragging||this.simulation?.active)return;const r=this.renderer.domElement.getBoundingClientRect();this.ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),this.camera);if(this.sceneEditing){const hit=this.ray.intersectObject(this.view==='machine'?this.machine:this.factory,true).find(h=>this.isObjectVisible(h.object));if(hit){let node=hit.object;while(node&&!this.sceneObjectIds?.has(node))node=node.parent;if(node)this.selectSceneObject(this.sceneObjectIds.get(node));}return;}if(this.view==='factory'&&this.actualFactory){const hit=this.ray.intersectObjects([...this.actualFactory.assets.values()],true).find(h=>{for(let p=h.object;p;p=p.parent)if(!p.visible)return false;return true;});if(hit){let node=hit.object;while(node&&!node.userData.machineId)node=node.parent;if(node)this.onFactorySelect?.(node.userData.machineId);}return;}const hits=this.ray.intersectObject(this.machine,true).filter(h=>{for(let p=h.object;p;p=p.parent)if(!p.visible)return false;return true;});if(this.machine.visible){for(const hit of hits){const part=this.template.resolvePart(hit.object);if(part){this.onSelect(part);break;}}}});
     this.resizeObserver=new ResizeObserver(()=>this.resize());this.resizeObserver.observe(container);
-    this.last=0;this.render=this.render.bind(this);this.studio.visible=false;this.resize();this.frame=requestAnimationFrame(this.render);
+    this.last=0;this.render=this.render.bind(this);this.studio.visible=false;this.resize();this.frame=this.omodosStatusEmbed?setTimeout(()=>this.render(performance.now()),48):requestAnimationFrame(this.render);
     this.renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();this.renderFaulted=true;this.onError?.('Tampilan 3D terputus. Aplikasi beralih ke denah 2D agar navigasi tetap dapat digunakan.');});
     this.renderer.domElement.addEventListener('webglcontextrestored',()=>{this.renderFaulted=false;this.setQualityProfile(this.requestedQuality);this.resize();this.onRecovered?.();});
   }
@@ -175,13 +176,12 @@ export class FactoryEngine {
     const profile=this.framingProfile(list.length===1?list[0]:null);
     this.transition=applyCameraFrame(this.camera,this.controls,cameraFrame(this.camera,box,{mode,...profile,minDistance:this.controls.minDistance,maxDistance:this.controls.maxDistance}),{animate,reduceMotion:matchMedia('(prefers-reduced-motion: reduce)').matches});
   }
-  render(now){this.frame=requestAnimationFrame(this.render);if(this.renderFaulted||document.hidden||now-this.last<RENDER_PROFILES[this.qualityProfile].frameInterval)return;this.last=now;
+  render(now){const frameInterval=this.omodosStatusEmbed?48:RENDER_PROFILES[this.qualityProfile].frameInterval;if(this.omodosStatusEmbed)this.frame=setTimeout(()=>this.render(performance.now()),document.hidden?1000:frameInterval);else this.frame=requestAnimationFrame(this.render);if(this.renderFaulted||document.hidden||now-this.last<frameInterval)return;this.last=now;
     try{
-      this.simulation?.update(now);
-      this.simulationMode.observe(this.simulation);
-      if(this.view==='factory')this.actualFactory?.update?.(now);
+      if(!this.omodosStatusEmbed){this.simulation?.update(now);this.simulationMode.observe(this.simulation);}
+      if(this.view==='factory'&&!this.omodosStatusEmbed)this.actualFactory?.update?.(now);
       this.transition=updateCameraTransition(this.camera,this.controls,this.transition,now,RENDER_PROFILES[this.qualityProfile].cameraMs);
-      this.controls.update();if(this.view==='factory')this.updateFactoryLabels();if(!this.postProcessing.render())this.renderer.render(this.scene,this.camera);if(this.requestedQuality==='auto'&&!document.hidden)this.adaptiveQuality.frame(now);this.updateLabel();if(!this.low){try{this.updatePartLabels();}catch(error){console.warn('[Digital Twin labels disabled after overlay error]',error);this.clearPartLabels();}}
+      this.controls.update();if(this.view==='factory'&&!this.omodosStatusEmbed)this.updateFactoryLabels();if(!this.postProcessing.render())this.renderer.render(this.scene,this.camera);if(this.requestedQuality==='auto'&&!this.omodosStatusEmbed&&!document.hidden)this.adaptiveQuality.frame(now);if(!this.omodosStatusEmbed)this.updateLabel();if(!this.low){try{this.updatePartLabels();}catch(error){console.warn('[Digital Twin labels disabled after overlay error]',error);this.clearPartLabels();}}
     }catch(error){this.renderFaulted=true;console.error('[Digital Twin renderer]',error);this.onError?.('Render 3D terhenti. Aplikasi beralih ke denah 2D agar menu tetap dapat digunakan.');}
   }
   updateLabel(){const el=document.getElementById('machine-label');if(!el)return;el.hidden=!this.labels||!this.machine.visible;if(el.hidden)return;this.machine.updateWorldMatrix(true,true);const p=new THREE.Vector3(0,2.9,0).applyMatrix4(this.machine.matrixWorld);const distance=p.distanceTo(this.camera.position);p.project(this.camera);if(p.z>1||p.z< -1||Math.abs(p.x)>.97||Math.abs(p.y)>.94){el.hidden=true;return;}el.style.left=((p.x*.5+.5)*this.container.clientWidth)+'px';el.style.top=((-p.y*.5+.5)*this.container.clientHeight)+'px';document.getElementById('label-detail').hidden=distance>80;}
@@ -310,9 +310,15 @@ export class FactoryEngine {
     if(l.baselineId&&l.fleet){
       // Keep the proven lightweight building context only on severely memory-limited devices.
       // Machine wrappers are still progressively replaced by the same polished templates used by "Buka model 3D".
-      this.actualFactory=this.capabilities?.memory<=2?buildLowDetailFactory(l,l.fleet):buildActualFactory(l,l.fleet);
+      if(this.omodosStatusEmbed){
+        this.actualFactory=buildActualFactory(l,l.fleet);
+      }else{
+        this.actualFactory=this.capabilities?.memory<=2?buildLowDetailFactory(l,l.fleet):buildActualFactory(l,l.fleet);
+      }
       this.factory.add(this.actualFactory.root);this.captureFactoryLabels?.();this.loadedFleet=l.fleet;this.layoutStats={total:l.source.entityCount,rendered:l.actual.walls.length,unimplemented:0};
-      void this.hydrateFactoryDetailedMachines?.(l,l.fleet);
+      // OMODOS embeds only the baked exterior silhouettes from the fleet. The full
+      // detailed machine templates and interior hydration remain in DigitalTwin proper.
+      if(!this.omodosStatusEmbed)void this.hydrateFactoryDetailedMachines?.(l,l.fleet);
       return;
     }
     if(Array.isArray(l.referenceBatches)){
@@ -592,6 +598,7 @@ export class FactoryEngine {
   }
   edit(on){if(on&&this.view==='factory'&&this.layout){this.machine.visible=true;this.gizmo.attach(this.machine);}else this.gizmo.detach();}
   setQualityProfile(requested='auto'){
+    if(this.omodosStatusEmbed)requested='hemat';
     this.requestedQuality=requested;
     this.adaptiveQuality.reset();
     return this.applyQualityProfile(resolveProfile(requested,this.capabilities));
@@ -639,5 +646,5 @@ export class FactoryEngine {
     const label=this.renderer.domElement;label.setAttribute('aria-label',`Model 3D ${this.machine.name||requested}. Gunakan tombol sudut pandang untuk mengatur kamera.`);
     this.simulation.onUpdate=state=>this.onSimulationUpdate?.(state);this.isolated=false;this.view='machine';this.syncVisualSystems();this.machine.visible=true;this.applySceneOverrides(this.sceneOverrides||{});this.factory.visible=false;this.template.setLow(this.low);this.shadows.focusBounds(this.machineFocusBounds()||new THREE.Box3().setFromObject(this.machine));this.resize();this.fit(this.machine);return true;
   }
-  dispose(){this.cancelMachineSwitch();cancelAnimationFrame(this.frame);this.clearPartLabels();this.clearFactorySelection();this.resizeObserver.disconnect();this.controls.dispose();this.gizmo.dispose();this.simulation?.dispose();this.template.dispose();this.clearFactory();this.studio.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});this.environment.dispose();this.postProcessing.dispose();this.lighting.dispose();this.renderer.dispose();}
+  dispose(){this.cancelMachineSwitch();if(this.omodosStatusEmbed)clearTimeout(this.frame);else cancelAnimationFrame(this.frame);this.clearPartLabels();this.clearFactorySelection();this.resizeObserver.disconnect();this.controls.dispose();this.gizmo.dispose();this.simulation?.dispose();this.template.dispose();this.clearFactory();this.studio.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});this.environment.dispose();this.postProcessing.dispose();this.lighting.dispose();this.renderer.dispose();}
 }

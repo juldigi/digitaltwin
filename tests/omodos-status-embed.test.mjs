@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 const html = readFileSync(new URL('../frontend/index.html', import.meta.url), 'utf8');
 const embed = readFileSync(new URL('../frontend/src/omodos-status-embed.js', import.meta.url), 'utf8');
 const building = readFileSync(new URL('../frontend/src/factory-building.js', import.meta.url), 'utf8');
+const engine = readFileSync(new URL('../frontend/src/engine.js', import.meta.url), 'utf8');
 
 test('OMODOS status viewer is opt-in and only accepts the authenticated OMODOS parent origin', () => {
   assert.match(html, /src="\.\/src\/omodos-status-embed\.js\?v=1"/);
@@ -36,7 +37,7 @@ test('embedded overview disables machine-detail selection and avoids repeated po
   assert.match(embed, /engine\.onFactorySelect=\(\)=>\{\}/);
   assert.match(embed, /if\(rootChanged\|\|!state\.policyApplied\)/);
   assert.doesNotMatch(embed, /if\(rootChanged\|\|now-state\.lastPolicyAt>900\)/);
-  assert.match(embed, /if\(firstAuthorization\)state\.policyApplied=false/);
+  assert.match(embed, /if\(firstAuthorization\)\{state\.policyApplied=false;state\.lastAnchorAt=0;\}/);
 });
 
 
@@ -70,8 +71,8 @@ test('every visible registry machine gets a status card and ambiguous codes do n
   assert.match(embed, /s==='belum ada data'.*return 'unknown'/);
 });
 
-test('mobile status callouts stay readable without overlapping the factory view', () => {
-  assert.match(embed, /const mobileLimit=mobile\?3:Infinity/);
+test('mobile status callouts limit display count and avoid overlapping the factory view', () => {
+  assert.match(embed, /const mobileLimit=mobile\?2:8/);
   assert.match(embed, /const mobile=matchMedia\('\(max-width:767px\)'\)\.matches\|\|matchMedia\('\(pointer:coarse\)'\)\.matches/);
   assert.match(embed, /entries\.sort\(\(a,b\)=>a\.statusPriority-b\.statusPriority\|\|a\.distance-b\.distance/);
   assert.match(embed, /if\(!chosen\)continue;/);
@@ -97,8 +98,8 @@ test('compact labels remain distinct for repeated machine families', () => {
   assert.match(embed, /card\.title=String\(machine\.name\|\|shortName\(machine\)\)/);
 });
 
-test('mobile overview caps simultaneous status callouts at three and gives machine names priority', () => {
-  assert.match(embed, /const cardWidth=mobile\?104:122,cardHeight=mobile\?48:50/);
+test('mobile overview caps simultaneous status callouts at two and limits desktop callouts', () => {
+  assert.match(embed, /const cardWidth=mobile\?118:122,cardHeight=mobile\?48:50/);
   assert.match(embed, /font-size:9px!important;font-weight:850!important;line-height:1\.2!important;color:#203c4f!important/);
   assert.match(embed, /card\.querySelector\('\.machine-label'\)\.textContent=shortName\(machine\)/);
   assert.match(embed, /\.machine-state\{display:block!important;visibility:visible!important;opacity:1!important/);
@@ -121,11 +122,11 @@ test('compact status cards always carry a live leader connector to their machine
 });
 
 test('mobile status callouts use a compact name, status and date hierarchy', () => {
-  assert.ok(embed.includes('.omodos-machine-status-card{width:104px;min-height:48px;padding:4px 5px 5px'));
+  assert.ok(embed.includes('.omodos-machine-status-card{width:118px;min-height:48px;padding:4px 6px 5px'));
   assert.ok(embed.includes("card.querySelector('.machine-label').textContent=shortName(machine)"));
   assert.ok(embed.includes("card.querySelector('.machine-state').textContent=compactStatus(status)"));
   assert.ok(embed.includes("card.querySelector('.machine-date').textContent=row?.date?formatDate(row.date):''"));
-  assert.ok(embed.includes('const mobileLimit=mobile?3:Infinity'));
+  assert.ok(embed.includes('const mobileLimit=mobile?2:8'));
 });
 
 
@@ -138,4 +139,33 @@ test('status cards are visible, keyboard/touch activatable, and report the machi
   assert.match(embed, /if\(!chosen&&mobile\)/);
   assert.ok(embed.includes('const margin=5,gap=7,columns=Math.max(1,Math.floor((width-2*margin+gap)/(cardWidth+gap)));'));
   assert.match(embed, /card\.dataset\.machineLabel=machineLabel/);
+});
+
+
+test('OMODOS preview uses the low-power exterior profile and skips detailed machine hydration', () => {
+  assert.match(engine, /this\.omodosStatusEmbed=new URLSearchParams\(location\.search\)\.get\('embed'\)==='omodos-status'/);
+  assert.match(engine, /powerPreference:this\.omodosStatusEmbed\?'low-power':'high-performance'/);
+  assert.match(engine, /if\(this\.omodosStatusEmbed\)/);
+  assert.match(engine, /this\.actualFactory=buildActualFactory\(l,l\.fleet\)/);
+  assert.match(engine, /this\.actualFactory=this\.capabilities\?\.memory<=2\?buildLowDetailFactory/);
+  assert.match(engine, /if\(!this\.omodosStatusEmbed\)void this\.hydrateFactoryDetailedMachines\?\.\(l,l\.fleet\)/);
+  assert.match(engine, /if\(this\.omodosStatusEmbed\)requested='hemat'/);
+  assert.match(engine, /const frameInterval=this\.omodosStatusEmbed\?48/);
+  assert.equal(engine.includes('this.frame=this.omodosStatusEmbed?setTimeout(()=>this.render(performance.now()),48)'), true);
+  assert.equal(engine.includes('document.hidden?1000:frameInterval'), true);
+  assert.equal(engine.includes('if(this.omodosStatusEmbed)clearTimeout(this.frame);else cancelAnimationFrame(this.frame)'), true);
+});
+
+test('OMODOS preview disposes hidden building layers and builds static anchors only once per scene', () => {
+  assert.match(embed, /function compactPreviewScene_\(/);
+  assert.match(embed, /function disposePreviewSubtree_\(/);
+  assert.match(embed, /state\.previewPrunedRoot!==signature/);
+  assert.match(embed, /if\(!state\.lastAnchorAt\|\|rootChanged\)rebuildAnchors\(THREE,engine\)/);
+
+  assert.doesNotMatch(embed, /gate\.remove\(\);state\.lastAnchorAt=0;startViewerOnce\(\)/);
+  assert.match(embed, /const mobileLimit=mobile\?2:8/);
+  assert.equal(embed.includes('const projectionInterval=overlayMobile?160:120'), true);
+  assert.equal(embed.includes('setTimeout(projectLoop,document.hidden?1000:projectionInterval)'), true);
+  assert.equal(embed.includes('requestAnimationFrame(projectLoop)'), false);
+  assert.match(embed, /state\.summary=\{critical:/);
 });
