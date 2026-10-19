@@ -84,7 +84,7 @@ test('every displayed status card visibly labels the machine before showing its 
   assert.match(embed, /card\.innerHTML='<span class="machine-label"><\/span><span class="machine-state">/);
   assert.match(embed, /card\.querySelector\('\.machine-label'\)\.textContent=shortName\(machine\)/);
   assert.match(embed, /#omodos-status-overlay \.omodos-machine-status-card \.machine-label\{display:block!important/);
-  assert.match(embed, /if\(labelEl\)labelEl\.textContent=shortName\(entry\.machine\)/);
+  assert.ok(embed.includes("if(labelEl)labelEl.textContent=machineLabel;"));
   assert.match(embed, /\.omodos-machine-status-card \.machine-state\{display:block!important/);
 });
 
@@ -136,6 +136,6 @@ test('status cards are visible, keyboard/touch activatable, and report the machi
   assert.match(embed, /event\.key==='Enter'\|\|event\.key===' '/);
   assert.match(embed, /type:'OMODOS_FACTORY_STATUS_CARD_CLICK',version:1,code,name/);
   assert.match(embed, /if\(!chosen&&mobile\)/);
-  assert.match(embed, /const columns=Math\.max\(1,Math\.floor\(\(width-2\*margin\+gap\)\/\(cardWidth\+gap\)\)\)/);
+  assert.ok(embed.includes('const margin=5,gap=7,columns=Math.max(1,Math.floor((width-2*margin+gap)/(cardWidth+gap)));'));
   assert.match(embed, /card\.dataset\.machineLabel=machineLabel/);
 });
