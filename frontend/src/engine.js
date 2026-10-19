@@ -310,7 +310,11 @@ export class FactoryEngine {
     if(l.baselineId&&l.fleet){
       // Keep the proven lightweight building context only on severely memory-limited devices.
       // Machine wrappers are still progressively replaced by the same polished templates used by "Buka model 3D".
-      this.actualFactory=!this.omodosStatusEmbed&&this.capabilities?.memory<=2?buildLowDetailFactory(l,l.fleet):buildActualFactory(l,l.fleet);
+      if(this.omodosStatusEmbed){
+        this.actualFactory=buildActualFactory(l,l.fleet);
+      }else{
+        this.actualFactory=this.capabilities?.memory<=2?buildLowDetailFactory(l,l.fleet):buildActualFactory(l,l.fleet);
+      }
       this.factory.add(this.actualFactory.root);this.captureFactoryLabels?.();this.loadedFleet=l.fleet;this.layoutStats={total:l.source.entityCount,rendered:l.actual.walls.length,unimplemented:0};
       // OMODOS embeds only the baked exterior silhouettes from the fleet. The full
       // detailed machine templates and interior hydration remain in DigitalTwin proper.
