@@ -83,6 +83,7 @@ test('every displayed status card visibly labels the machine before showing its 
   assert.match(embed, /card\.innerHTML='<span class="machine-label"><\/span><span class="machine-state">/);
   assert.match(embed, /card\.querySelector\('\.machine-label'\)\.textContent=shortName\(machine\)/);
   assert.match(embed, /#omodos-status-overlay \.omodos-machine-status-card \.machine-label\{display:block!important/);
+  assert.match(embed, /if\(labelEl\)labelEl\.textContent=shortName\(entry\.machine\)/);
   assert.match(embed, /\.omodos-machine-status-card \.machine-state\{display:block!important/);
 });
 
