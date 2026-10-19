@@ -71,11 +71,11 @@ test('every visible registry machine gets a status card and ambiguous codes do n
 });
 
 test('mobile status callouts stay readable without overlapping the factory view', () => {
-  assert.match(embed, /const mobileLimit=mobile\?Math\.max\(5,Math\.min\(9,/);
+  assert.match(embed, /const mobileLimit=mobile\?Math\.max\(4,Math\.min\(5,/);
   assert.match(embed, /entries\.sort\(\(a,b\)=>a\.statusPriority-b\.statusPriority\|\|a\.distance-b\.distance/);
   assert.match(embed, /if\(!chosen\)continue;/);
   assert.doesNotMatch(embed, /bestOverlap|if\(overlap<bestOverlap\)/);
-  assert.match(embed, /shown\+' kartu tampil/);
+  assert.match(embed, /shown\+' kartu terlihat/);
   assert.match(embed, /data-status-summary/);
 });
 
