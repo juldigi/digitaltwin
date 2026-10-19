@@ -86,3 +86,10 @@ test('every displayed status card visibly labels the machine before showing its 
   assert.match(embed, /\.omodos-machine-status-card \.machine-state\{display:block!important/);
 });
 
+test('compact labels remain distinct for repeated machine families', () => {
+  assert.match(embed, /return brand\+'\s+'\+Number\(compressor\[2\]\)/);
+  assert.match(embed, /return 'CTP Heidelberg 1'/);
+  assert.match(embed, /return 'CTP Heidelberg 2'/);
+  assert.match(embed, /return 'Folder Gluer '\+Number\(folder\[1\]\)/);
+});
+
