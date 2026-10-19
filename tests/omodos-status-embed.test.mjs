@@ -37,7 +37,7 @@ test('embedded overview disables machine-detail selection and avoids repeated po
   assert.match(embed, /engine\.onFactorySelect=\(\)=>\{\}/);
   assert.match(embed, /if\(rootChanged\|\|!state\.policyApplied\)/);
   assert.doesNotMatch(embed, /if\(rootChanged\|\|now-state\.lastPolicyAt>900\)/);
-  assert.match(embed, /if\(firstAuthorization\)state\.policyApplied=false/);
+  assert.match(embed, /if\(firstAuthorization\)\{state\.policyApplied=false;state\.lastAnchorAt=0;\}/);
 });
 
 
@@ -161,7 +161,7 @@ test('OMODOS preview disposes hidden building layers and builds static anchors o
   assert.match(embed, /function disposePreviewSubtree_\(/);
   assert.match(embed, /state\.previewPrunedRoot!==signature/);
   assert.match(embed, /if\(!state\.lastAnchorAt\|\|rootChanged\)rebuildAnchors\(THREE,engine\)/);
-  assert.match(embed, /if\(firstAuthorization\)\{state\.policyApplied=false;state\.lastAnchorAt=0;\}/);
+
   assert.doesNotMatch(embed, /gate\.remove\(\);state\.lastAnchorAt=0;startViewerOnce\(\)/);
   assert.match(embed, /const mobileLimit=mobile\?2:8/);
   assert.equal(embed.includes('const projectionInterval=overlayMobile?160:120'), true);
