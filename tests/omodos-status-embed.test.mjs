@@ -71,7 +71,7 @@ test('every visible registry machine gets a status card and ambiguous codes do n
 });
 
 test('mobile status callouts stay readable without overlapping the factory view', () => {
-  assert.match(embed, /const mobileLimit=mobile\?Math\.max\(5,Math\.min\(9,/);
+  assert.match(embed, /const mobileLimit=mobile\?Math\.max\(4,Math\.min\(5,/);
   assert.match(embed, /entries\.sort\(\(a,b\)=>a\.statusPriority-b\.statusPriority\|\|a\.distance-b\.distance/);
   assert.match(embed, /if\(!chosen\)continue;/);
   assert.doesNotMatch(embed, /bestOverlap|if\(overlap<bestOverlap\)/);
@@ -95,3 +95,10 @@ test('compact labels remain distinct for repeated machine families', () => {
   assert.match(embed, /card\.title=String\(machine\.name\|\|shortName\(machine\)\)/);
 });
 
+test('mobile overview caps simultaneous status callouts at five and gives machine names priority', () => {
+  assert.match(embed, /const cardWidth=mobile\?112:122,cardHeight=mobile\?48:50/);
+  assert.match(embed, /font-size:10px!important;font-weight:850!important;line-height:1\.25!important;color:#203c4f!important/);
+  assert.match(embed, /card\.querySelector\('\.machine-label'\)\.textContent=shortName\(machine\)/);
+  assert.match(embed, /\.machine-state\{display:block!important;visibility:visible!important;opacity:1!important/);
+  assert.match(embed, /shown\+' kartu tampil/);
+});
