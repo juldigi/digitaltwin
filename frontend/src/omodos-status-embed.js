@@ -41,6 +41,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
   function shortName(machine){
     const raw=String(machine?.name||machine?.sapCode||'Mesin').trim();
     const offset=raw.match(/offset[^0-9]{0,24}(\d+)/i);if(offset)return 'Offset '+Number(offset[1]);
+    if(/polar\s*115/i.test(raw))return 'Polar 115';
     const numbered=raw.match(/\b(AHU|APM|FGM|CTP|CTF|OFS|OFU|GLM|PDS|RMS)\s*[-# ]?\s*(\d+)\b/i);
     if(numbered)return numbered[1].toUpperCase()+' '+Number(numbered[2]);
     const platen=raw.match(/\bAUTOPLATEN\s*[-# ]*(\d+)\b/i);if(platen)return 'Autoplaten '+Number(platen[1]);
@@ -49,11 +50,10 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     const inspection=raw.match(/\bOFFLINE\s+INSPECTION\s*(\d+)\s*[- ]*\s*(MK|FOCUSIGHT)?/i);
     if(inspection)return 'Inspection '+Number(inspection[1])+(inspection[2]?' · '+inspection[2].toUpperCase():'');
     const blanking=raw.match(/\bAUTOBLANKING(?:\s+MACHINE)?\s*[-# ]*(\d+)\b/i);if(blanking)return 'Autoblanking '+Number(blanking[1]);
-    if(/polar\s*115/i.test(raw))return 'Polar 115';
     if(/sheeting/i.test(raw))return 'Sheeting Lexus';
     const compressor=raw.match(/\bCOMPRESSOR\s+(ATLAS\s+COPCO|KAESER|SWAN)\s+NO\.?\s*(\d+)\b/i);
     if(compressor){
-      const brand=compressor[1].replace(/\s+/g,' ').replace(/\b[A-Z]/g,c=>c.toUpperCase());
+      const brand=compressor[1].replace(/\s+/g,' ').toLowerCase().replace(/\b[a-z]/g,c=>c.toUpperCase());
       return brand+' '+Number(compressor[2]);
     }
     if(/\bCOMPRESSOR\b/i.test(raw))return raw.length>20?raw.slice(0,20).trim():raw;
@@ -137,7 +137,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
   function updateCardContent(machine,card){
     const row=bestRecord(machine),status=row?.status||'Belum ada catatan';card.classList.remove('good','attention','critical','unknown');card.classList.add(row?toneFor(status):'unknown');
     card.querySelector('.machine-label').textContent=shortName(machine);card.querySelector('.machine-state').textContent=compactStatus(status);card.querySelector('.machine-date').textContent=row?.date?formatDate(row.date):'';
-    card.setAttribute('aria-label',shortName(machine)+': '+status+(row?.date?', '+formatDate(row.date):''));card.dataset.contentVersion=String(state.recordsVersion);
+    card.setAttribute('aria-label',shortName(machine)+': '+status+(row?.date?', '+formatDate(row.date):''));card.title=String(machine.name||shortName(machine))+' · '+status+(row?.date?', '+formatDate(row.date):'');card.dataset.contentVersion=String(state.recordsVersion);
   }
   function rebuildAnchors(THREE,engine){
     state.anchors.clear();for(const machine of state.registry){const obj=engine.actualFactory?.assets?.get(machine.machineId),anchor=readBox(THREE,obj);if(anchor)state.anchors.set(machine.machineId,{machine,obj,anchor});}
