@@ -180,6 +180,13 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
       ?[[0,-8],[0,-cardHeight-12],[-cardWidth*.58,-8],[cardWidth*.58,-8],[0,-cardHeight*2-14],[-cardWidth*.9,-cardHeight*.6],[cardWidth*.9,-cardHeight*.6],[0,10],[-cardWidth*.55,10],[cardWidth*.55,10],[-cardWidth,-8],[cardWidth,-8]]
       :[[0,-8],[0,-cardHeight-10],[0,cardHeight*.45],[-cardWidth*.62,-8],[cardWidth*.62,-8],[-cardWidth*.92,-cardHeight*.55],[cardWidth*.92,-cardHeight*.55],[0,-cardHeight*1.7],[-cardWidth*.6,-cardHeight-8],[cardWidth*.6,-cardHeight-8],[0,10],[-cardWidth,-8],[cardWidth,-8],[0,-cardHeight*2.6]];
     const used=[];
+    const badge=state.layer.querySelector('#omodos-status-badge');
+    if(badge){
+      const br=badge.getBoundingClientRect(),vr=viewport.getBoundingClientRect();
+      if(br.width>0&&br.height>0){
+        used.push({left:br.left-vr.left-4,top:br.top-vr.top-4,right:br.right-vr.left+4,bottom:br.bottom-vr.top+4});
+      }
+    }
     let shown=0;
     for(const entry of candidates){
       const card=entry.card;
