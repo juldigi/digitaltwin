@@ -404,7 +404,9 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
         }
       },1000);
       const overlayMobile=matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse)').matches;
-      const projectLoop=()=>{const now=performance.now(),interval=overlayMobile?125:90;if(state.authorized&&state.engine&&now-state.lastProjectionAt>=interval){state.lastProjectionAt=now;projectCards(THREE,state.engine);}requestAnimationFrame(projectLoop);};requestAnimationFrame(projectLoop);
+      const projectionInterval=overlayMobile?160:120;
+      const projectLoop=()=>{if(!document.hidden&&state.authorized&&state.engine)projectCards(THREE,state.engine);setTimeout(projectLoop,document.hidden?1000:projectionInterval);};
+      setTimeout(projectLoop,projectionInterval);
     }catch(error){console.error('[OMODOS status twin]',error);const card=gate.querySelector('.gate-card');if(card)card.innerHTML='<strong>Viewer 3D tidak tersedia</strong>Komponen tampilan tidak berhasil dimuat. Beranda OMODOS tetap dapat digunakan.';}
   }
   let viewerStarted=false;function startViewerOnce(){if(viewerStarted)return;viewerStarted=true;void startViewer();}
