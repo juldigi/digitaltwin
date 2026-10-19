@@ -99,7 +99,7 @@ test('compact labels remain distinct for repeated machine families', () => {
 });
 
 test('mobile overview caps simultaneous status callouts at two and limits desktop callouts', () => {
-  assert.match(embed, /const cardWidth=mobile\?104:122,cardHeight=mobile\?48:50/);
+  assert.match(embed, /const cardWidth=mobile\?118:122,cardHeight=mobile\?48:50/);
   assert.match(embed, /font-size:9px!important;font-weight:850!important;line-height:1\.2!important;color:#203c4f!important/);
   assert.match(embed, /card\.querySelector\('\.machine-label'\)\.textContent=shortName\(machine\)/);
   assert.match(embed, /\.machine-state\{display:block!important;visibility:visible!important;opacity:1!important/);
@@ -145,7 +145,7 @@ test('status cards are visible, keyboard/touch activatable, and report the machi
 test('OMODOS preview uses the low-power exterior profile and skips detailed machine hydration', () => {
   assert.match(engine, /this\.omodosStatusEmbed=new URLSearchParams\(location\.search\)\.get\('embed'\)==='omodos-status'/);
   assert.match(engine, /powerPreference:this\.omodosStatusEmbed\?'low-power':'high-performance'/);
-  assert.match(engine, /this\.actualFactory=!this\.omodosStatusEmbed&&this\.capabilities\?\.memory<=2\?buildLowDetailFactory/);
+  assert.match(engine, /if\(this\.omodosStatusEmbed\)\{\\s*this\.actualFactory=buildActualFactory\(l,l\.fleet\);\\s*\}else\{\\s*this\.actualFactory=this\.capabilities\?\.memory<=2\?buildLowDetailFactory\(l,l\.fleet\):buildActualFactory\(l,l\.fleet\);\\s*\}/);
   assert.match(engine, /if\(!this\.omodosStatusEmbed\)void this\.hydrateFactoryDetailedMachines\?\.\(l,l\.fleet\)/);
   assert.match(engine, /if\(this\.omodosStatusEmbed\)requested='hemat'/);
   assert.match(engine, /const frameInterval=this\.omodosStatusEmbed\?48/);
