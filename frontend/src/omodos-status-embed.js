@@ -23,14 +23,14 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     '#omodos-status-badge strong{display:block;font-size:12px;letter-spacing:.055em;text-transform:uppercase}',
     '#omodos-status-badge span{display:block;margin-top:2px;font-size:10px;color:#607585}',
     '.omodos-machine-status-card{position:absolute;left:0;top:0;width:122px;min-height:50px;transform:translate(-50%,-100%);padding:5px 7px 6px;border:1px solid rgba(190,204,214,.94);border-radius:8px;background:rgba(255,255,255,.97);box-shadow:0 2px 8px rgba(26,51,67,.14);color:#203c4f;text-align:left;overflow:hidden}',
-    '.omodos-machine-status-card .machine-label{display:block!important;position:relative;visibility:visible!important;opacity:1!important;min-height:11px;margin:0!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:850;line-height:1.25;letter-spacing:.005em;color:#203c4f}',
+    '.omodos-machine-status-card .machine-label{display:block!important;position:relative;visibility:visible!important;opacity:1!important;order:0;min-height:12px;margin:0!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:850;line-height:1.25;letter-spacing:.005em;color:#203c4f}',
     '.omodos-machine-status-card .machine-state{display:block!important;position:relative;margin-top:3px!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:750;line-height:1.25;color:#596e7d}',
     '.omodos-machine-status-card .machine-date{display:block!important;position:relative;margin-top:1px!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;line-height:1.2;color:#738592}',
     '.omodos-machine-status-card.good{border-color:#a8d9bd;background:rgba(247,255,250,.97)}.omodos-machine-status-card.good .machine-state{color:#187044}',
     '.omodos-machine-status-card.attention{border-color:#efc07b;background:rgba(255,251,242,.97)}.omodos-machine-status-card.attention .machine-state{color:#985400}',
     '.omodos-machine-status-card.critical{border-color:#e4a2a2;background:rgba(255,247,247,.97)}.omodos-machine-status-card.critical .machine-state{color:#ad2e35}',
     '.omodos-machine-status-card.unknown{border-color:#c9d4dc;background:rgba(249,251,252,.95)}.omodos-machine-status-card.unknown .machine-state{color:#71818c}',
-    '@media(max-width:700px){#omodos-status-badge{left:7px;top:7px;max-width:min(330px,calc(100vw - 14px));padding:6px 8px;border-radius:9px}#omodos-status-badge strong{font-size:10px}#omodos-status-badge span{font-size:9px;line-height:1.25}.omodos-machine-status-card{width:100px;min-height:46px;padding:4px 5px 5px;border-radius:7px;background:rgba(255,255,255,.98)}.omodos-machine-status-card .machine-label{font-size:9px;min-height:10px}.omodos-machine-status-card .machine-state{margin-top:2px!important;font-size:9px}.omodos-machine-status-card .machine-date{font-size:8px}}'
+    '@media(max-width:700px){#omodos-status-badge{left:7px;top:7px;max-width:min(330px,calc(100vw - 14px));padding:6px 8px;border-radius:9px}#omodos-status-badge strong{font-size:10px}#omodos-status-badge span{font-size:9px;line-height:1.25}.omodos-machine-status-card{width:112px;min-height:46px;padding:4px 6px 5px;border-radius:7px;background:rgba(255,255,255,.98)}.omodos-machine-status-card .machine-label{display:block!important;order:0;font-size:9.5px;min-height:11px;line-height:1.2}.omodos-machine-status-card .machine-state{display:block!important;order:1;margin-top:2px!important;font-size:9px;line-height:1.2}.omodos-machine-status-card .machine-date{display:block!important;order:2;font-size:8px;line-height:1.1}}'
   ].join('\n');
   const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
   const gate = document.createElement('div'); gate.id = 'omodos-status-gate';
@@ -152,7 +152,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     const mobile=matchMedia('(max-width:700px)').matches;
     // The mobile viewport cannot label every asset at once. Prioritize important
     // statuses near the current camera and let users rotate/zoom to other areas.
-    const cardWidth=mobile?100:122,cardHeight=mobile?46:50;
+    const cardWidth=mobile?112:122,cardHeight=mobile?46:50;
     const entries=[];
     for(const entry of state.anchors.values()){
       const card=ensureCard(entry.machine);
@@ -174,7 +174,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
       });
     }
     entries.sort((a,b)=>a.statusPriority-b.statusPriority||a.distance-b.distance||a.y-b.y);
-    const mobileLimit=mobile?Math.max(5,Math.min(9,Math.floor((width*height)/(cardWidth*cardHeight)*.22))):Infinity;
+    const mobileLimit=mobile?Math.max(4,Math.min(5,Math.floor((width*height)/(cardWidth*cardHeight)*.12))):Infinity;
     const candidates=entries.slice(0,mobileLimit);
     const offsets=mobile
       ?[[0,-8],[0,-cardHeight-12],[-cardWidth*.58,-8],[cardWidth*.58,-8],[0,-cardHeight*2-14],[-cardWidth*.9,-cardHeight*.6],[cardWidth*.9,-cardHeight*.6],[0,10],[-cardWidth*.55,10],[cardWidth*.55,10],[-cardWidth,-8],[cardWidth,-8]]
@@ -215,7 +215,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
       if(mobile){
         const critical=state.records.filter(row=>/^(kritikal|critical|breakdown)$/i.test(String(row.status||'').trim())).length;
         const attention=state.records.filter(row=>/perlu perhatian|attention|pending|proses/i.test(String(row.status||'').trim())).length;
-        summary.textContent=shown+' kartu tampil · Kritikal '+critical+' · Perhatian '+attention+' · putar/perbesar untuk mesin lain';
+        summary.textContent=shown+' kartu terlihat · '+state.anchors.size+' mesin di model · Kritikal '+critical+' · Perhatian '+attention+' · putar/perbesar untuk melihat mesin lain';
       }else{
         summary.textContent='Status terbaru dari Logbook/Patrol · bukan telemetry sensor langsung';
       }
