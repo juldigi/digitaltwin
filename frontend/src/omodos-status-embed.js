@@ -22,15 +22,15 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     '#omodos-status-badge{position:absolute;left:12px;top:12px;max-width:min(320px,calc(100vw - 24px));padding:9px 12px;border:1px solid rgba(197,211,220,.9);border-radius:12px;background:rgba(255,255,255,.94);box-shadow:0 3px 14px rgba(28,56,74,.1);color:#193548;backdrop-filter:blur(8px)}',
     '#omodos-status-badge strong{display:block;font-size:12px;letter-spacing:.055em;text-transform:uppercase}',
     '#omodos-status-badge span{display:block;margin-top:2px;font-size:10px;color:#607585}',
-    '.omodos-machine-status-card{position:absolute;left:0;top:0;width:104px;min-height:39px;transform:translate(-50%,-100%);padding:4px 6px 5px;border:1px solid rgba(190,204,214,.94);border-radius:7px;background:rgba(255,255,255,.95);box-shadow:0 2px 8px rgba(26,51,67,.14);color:#203c4f;text-align:left;overflow:hidden}',
-    '.omodos-machine-status-card .machine-label{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;font-weight:800;line-height:1.25;letter-spacing:.01em}',
-    '.omodos-machine-status-card .machine-state{display:block;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;font-weight:700;line-height:1.25;color:#596e7d}',
-    '.omodos-machine-status-card .machine-date{display:block;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:8px;line-height:1.2;color:#738592}',
+    '.omodos-machine-status-card{position:absolute;left:0;top:0;width:122px;min-height:50px;transform:translate(-50%,-100%);padding:5px 7px 6px;border:1px solid rgba(190,204,214,.94);border-radius:8px;background:rgba(255,255,255,.97);box-shadow:0 2px 8px rgba(26,51,67,.14);color:#203c4f;text-align:left;overflow:hidden}',
+    '.omodos-machine-status-card .machine-label{display:block!important;position:relative;visibility:visible!important;opacity:1!important;min-height:11px;margin:0!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:850;line-height:1.25;letter-spacing:.005em;color:#203c4f}',
+    '.omodos-machine-status-card .machine-state{display:block!important;position:relative;margin-top:3px!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:750;line-height:1.25;color:#596e7d}',
+    '.omodos-machine-status-card .machine-date{display:block!important;position:relative;margin-top:1px!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;line-height:1.2;color:#738592}',
     '.omodos-machine-status-card.good{border-color:#a8d9bd;background:rgba(247,255,250,.97)}.omodos-machine-status-card.good .machine-state{color:#187044}',
     '.omodos-machine-status-card.attention{border-color:#efc07b;background:rgba(255,251,242,.97)}.omodos-machine-status-card.attention .machine-state{color:#985400}',
     '.omodos-machine-status-card.critical{border-color:#e4a2a2;background:rgba(255,247,247,.97)}.omodos-machine-status-card.critical .machine-state{color:#ad2e35}',
     '.omodos-machine-status-card.unknown{border-color:#c9d4dc;background:rgba(249,251,252,.95)}.omodos-machine-status-card.unknown .machine-state{color:#71818c}',
-    '@media(max-width:700px){#omodos-status-badge{left:7px;top:7px;padding:6px 8px;border-radius:9px}#omodos-status-badge strong{font-size:10px}#omodos-status-badge span{font-size:9px}.omodos-machine-status-card{width:80px;min-height:33px;padding:3px 4px;border-radius:6px}.omodos-machine-status-card .machine-label{font-size:8px}.omodos-machine-status-card .machine-state{margin-top:1px;font-size:8px}.omodos-machine-status-card .machine-date{font-size:7px}}'
+    '@media(max-width:700px){#omodos-status-badge{left:7px;top:7px;max-width:min(330px,calc(100vw - 14px));padding:6px 8px;border-radius:9px}#omodos-status-badge strong{font-size:10px}#omodos-status-badge span{font-size:9px;line-height:1.25}.omodos-machine-status-card{width:100px;min-height:46px;padding:4px 5px 5px;border-radius:7px;background:rgba(255,255,255,.98)}.omodos-machine-status-card .machine-label{font-size:9px;min-height:10px}.omodos-machine-status-card .machine-state{margin-top:2px!important;font-size:9px}.omodos-machine-status-card .machine-date{font-size:8px}}'
   ].join('\n');
   const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
   const gate = document.createElement('div'); gate.id = 'omodos-status-gate';
@@ -39,9 +39,34 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
   function normalize(value){return String(value==null?'':value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ');}
   function machineNameKey(value){return normalize(value).replace(/(^|\s)0+(\d+)/g,(_,prefix,digits)=>prefix+String(Number(digits)));}
   function shortName(machine){
-    const raw=String(machine?.name||machine?.sapCode||'Mesin');const offset=raw.match(/offset[^0-9]{0,24}(\d+)/i);if(offset)return 'Offset '+offset[1];
-    const match=raw.match(/\b(APM|FGM|AHU|CTP|CTF|FZG|OFS|OFU|GLM|PDS|RMS)\s*[-# ]?\s*(\d+)\b/i);if(match)return match[1].toUpperCase()+' '+match[2];
-    if(/polar\s*115/i.test(raw))return 'Polar 115';if(/sheeting/i.test(raw))return 'Sheeting';if(/compressor/i.test(raw))return 'Compressor';if(/collator/i.test(raw))return 'Collator';if(/ipal/i.test(raw))return 'IPAL';
+    const raw=String(machine?.name||machine?.sapCode||'Mesin').trim();
+    const offset=raw.match(/offset[^0-9]{0,24}(\d+)/i);if(offset)return 'Offset '+Number(offset[1]);
+    if(/polar\s*115/i.test(raw))return 'Polar 115';
+    const numbered=raw.match(/\b(AHU|APM|FGM|CTP|CTF|OFS|OFU|GLM|PDS|RMS)\s*[-# ]?\s*(\d+)\b/i);
+    if(numbered)return numbered[1].toUpperCase()+' '+Number(numbered[2]);
+    const platen=raw.match(/\bAUTOPLATEN\s*[-# ]*(\d+)\b/i);if(platen)return 'Autoplaten '+Number(platen[1]);
+    const folder=raw.match(/\bFOLDER\s+GLUER\s*[-# ]*(\d+)\b/i);if(folder)return 'Folder Gluer '+Number(folder[1]);
+    const pile=raw.match(/\bPILE\s+TURNER\s*[-# ]*(\d+)\b/i);if(pile)return 'Pile Turner '+Number(pile[1]);
+    const inspection=raw.match(/\bOFFLINE\s+INSPECTION\s*(\d+)\s*[- ]*\s*(MK|FOCUSIGHT)?/i);
+    if(inspection)return 'Inspection '+Number(inspection[1])+(inspection[2]?' · '+inspection[2].toUpperCase():'');
+    const blanking=raw.match(/\bAUTOBLANKING(?:\s+MACHINE)?\s*[-# ]*(\d+)\b/i);if(blanking)return 'Autoblanking '+Number(blanking[1]);
+    if(/sheeting/i.test(raw))return 'Sheeting Lexus';
+    const compressor=raw.match(/\bCOMPRESSOR\s+(ATLAS\s+COPCO|KAESER|SWAN)\s+NO\.?\s*(\d+)\b/i);
+    if(compressor){
+      const brand=compressor[1].replace(/\s+/g,' ').toLowerCase().replace(/\b[a-z]/g,c=>c.toUpperCase());
+      return brand+' '+Number(compressor[2]);
+    }
+    if(/\bCOMPRESSOR\b/i.test(raw))return raw.length>20?raw.slice(0,20).trim():raw;
+    if(/\bCOLLATOR\b/i.test(raw))return 'Collator';
+    if(/\bDIGITAL\s+INKJET\b/i.test(raw))return 'Digital Inkjet';
+    if(/\bCTP\s+HEIDELBERG\b/i.test(raw)){
+      if(String(machine?.machineId||'').endsWith('0025'))return 'CTP Heidelberg 1';
+      if(String(machine?.machineId||'').endsWith('0026'))return 'CTP Heidelberg 2';
+      return 'CTP Heidelberg';
+    }
+    if(/\bCTF\s+IMAGESETTER\b/i.test(raw))return 'CTF Imagesetter';
+    if(/\bZUND\b/i.test(raw))return 'Zünd';
+    if(/\bIPAL\b/i.test(raw))return 'IPAL';
     return raw.length>22?raw.slice(0,21).trim()+'…':raw;
   }
   function aliasesFor(machine){
@@ -112,39 +137,101 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
   function updateCardContent(machine,card){
     const row=bestRecord(machine),status=row?.status||'Belum ada catatan';card.classList.remove('good','attention','critical','unknown');card.classList.add(row?toneFor(status):'unknown');
     card.querySelector('.machine-label').textContent=shortName(machine);card.querySelector('.machine-state').textContent=compactStatus(status);card.querySelector('.machine-date').textContent=row?.date?formatDate(row.date):'';
-    card.setAttribute('aria-label',shortName(machine)+': '+status+(row?.date?', '+formatDate(row.date):''));card.dataset.contentVersion=String(state.recordsVersion);
+    card.setAttribute('aria-label',shortName(machine)+': '+status+(row?.date?', '+formatDate(row.date):''));card.title=String(machine.name||shortName(machine))+' · '+status+(row?.date?', '+formatDate(row.date):'');card.dataset.contentVersion=String(state.recordsVersion);
   }
   function rebuildAnchors(THREE,engine){
     state.anchors.clear();for(const machine of state.registry){const obj=engine.actualFactory?.assets?.get(machine.machineId),anchor=readBox(THREE,obj);if(anchor)state.anchors.set(machine.machineId,{machine,obj,anchor});}
     state.lastAnchorAt=performance.now();
   }
   function projectCards(THREE,engine){
-    if(!state.authorized||!state.layer||!engine?.camera||!engine?.renderer?.domElement)return;const viewport=engine.renderer.domElement.parentElement||document.getElementById('viewport');if(!viewport)return;
-    const width=viewport.clientWidth,height=viewport.clientHeight;if(width<10||height<10)return;
-    const entries=[...state.anchors.values()].map(entry=>{const pos=new THREE.Vector3(entry.anchor.x,entry.anchor.y,entry.anchor.z).project(engine.camera);return {...entry,px:(pos.x+1)*.5*width,py:(1-pos.y)*.5*height,depth:pos.z,ndcX:pos.x,ndcY:pos.y};})
-      .filter(x=>x.depth>=-1.05&&x.depth<=1.05&&x.ndcX>-1.2&&x.ndcX<1.2&&x.ndcY>-1.2&&x.ndcY<1.2).sort((a,b)=>a.py-b.py);
-    const mobile=matchMedia('(max-width:700px)').matches,cardWidth=mobile?82:106,cardHeight=mobile?39:46;
-    const offsets=[[0,-5],[0,-cardHeight-5],[0,cardHeight/2],[-cardWidth/2-7,-5],[cardWidth/2+7,-5],[-cardWidth-6,-cardHeight/2],[cardWidth+6,-cardHeight/2],[0,-cardHeight*1.5],[-cardWidth/2-7,-cardHeight-5],[cardWidth/2+7,-cardHeight-5],[-cardWidth*1.2,0],[cardWidth*1.2,0]];
-    const used=[];
-    for(const entry of entries){
-      const card=ensureCard(entry.machine);if(card.dataset.contentVersion!==String(state.recordsVersion))updateCardContent(entry.machine,card);
-      const x=Math.max(cardWidth/2+3,Math.min(width-cardWidth/2-3,entry.px)),y=Math.max(cardHeight+4,Math.min(height-4,entry.py));let chosen=null,bestOverlap=Infinity;
-      for(const [dx,dy] of offsets){
-        const cx=Math.max(cardWidth/2+3,Math.min(width-cardWidth/2-3,x+dx)),cy=Math.max(cardHeight+3,Math.min(height-3,y+dy));
-        const rect={left:cx-cardWidth/2,right:cx+cardWidth/2,top:cy-cardHeight,bottom:cy};
-        const overlap=used.reduce((sum,u)=>sum+Math.max(0,Math.min(rect.right,u.right)-Math.max(rect.left,u.left))*Math.max(0,Math.min(rect.bottom,u.bottom)-Math.max(rect.top,u.top)),0);
-        if(overlap===0){chosen={cx,cy,rect};break;}if(overlap<bestOverlap){bestOverlap=overlap;chosen={cx,cy,rect};}
-      }
-      if(!chosen){card.hidden=true;continue;}card.hidden=false;card.style.left=chosen.cx+'px';card.style.top=chosen.cy+'px';used.push(chosen.rect);
+    if(!state.authorized||!state.layer||!engine?.camera||!engine?.renderer?.domElement)return;
+    const viewport=engine.renderer.domElement.parentElement||document.getElementById('viewport');
+    if(!viewport)return;
+    const width=viewport.clientWidth,height=viewport.clientHeight;
+    if(width<10||height<10)return;
+    const mobile=matchMedia('(max-width:700px)').matches;
+    // The mobile viewport cannot label every asset at once. Prioritize important
+    // statuses near the current camera and let users rotate/zoom to other areas.
+    const cardWidth=mobile?100:122,cardHeight=mobile?46:50;
+    const entries=[];
+    for(const entry of state.anchors.values()){
+      const card=ensureCard(entry.machine);
+      if(card.dataset.contentVersion!==String(state.recordsVersion))updateCardContent(entry.machine,card);
+      card.hidden=true;
+      const pos=new THREE.Vector3(entry.anchor.x,entry.anchor.y,entry.anchor.z).project(engine.camera);
+      if(pos.z < -1.05 || pos.z > 1.05 || pos.x < -1.08 || pos.x > 1.08 || pos.y < -1.08 || pos.y > 1.08)continue;
+      const statusPriority=card.classList.contains('critical')?0:
+        card.classList.contains('attention')?1:
+        card.classList.contains('good')?2:3;
+      entries.push({
+        machineId:entry.machine.machineId,
+        machine:entry.machine,
+        card,
+        statusPriority,
+        x:(pos.x*.5+.5)*width,
+        y:(-.5*pos.y+.5)*height,
+        distance:(pos.x*pos.x)+(pos.y*pos.y)
+      });
     }
-    for(const [id,card] of state.cards)if(!state.anchors.has(id))card.hidden=true;
+    entries.sort((a,b)=>a.statusPriority-b.statusPriority||a.distance-b.distance||a.y-b.y);
+    const mobileLimit=mobile?Math.max(5,Math.min(9,Math.floor((width*height)/(cardWidth*cardHeight)*.22))):Infinity;
+    const candidates=entries.slice(0,mobileLimit);
+    const offsets=mobile
+      ?[[0,-8],[0,-cardHeight-12],[-cardWidth*.58,-8],[cardWidth*.58,-8],[0,-cardHeight*2-14],[-cardWidth*.9,-cardHeight*.6],[cardWidth*.9,-cardHeight*.6],[0,10],[-cardWidth*.55,10],[cardWidth*.55,10],[-cardWidth,-8],[cardWidth,-8]]
+      :[[0,-8],[0,-cardHeight-10],[0,cardHeight*.45],[-cardWidth*.62,-8],[cardWidth*.62,-8],[-cardWidth*.92,-cardHeight*.55],[cardWidth*.92,-cardHeight*.55],[0,-cardHeight*1.7],[-cardWidth*.6,-cardHeight-8],[cardWidth*.6,-cardHeight-8],[0,10],[-cardWidth,-8],[cardWidth,-8],[0,-cardHeight*2.6]];
+    const used=[];
+    const badge=state.layer.querySelector('#omodos-status-badge');
+    if(badge){
+      const br=badge.getBoundingClientRect(),vr=viewport.getBoundingClientRect();
+      if(br.width>0&&br.height>0){
+        used.push({left:br.left-vr.left-4,top:br.top-vr.top-4,right:br.right-vr.left+4,bottom:br.bottom-vr.top+4});
+      }
+    }
+    let shown=0;
+    for(const entry of candidates){
+      const card=entry.card;
+      const x=Math.max(cardWidth/2+3,Math.min(width-cardWidth/2-3,entry.x));
+      const y=Math.max(cardHeight+4,Math.min(height-4,entry.y));
+      let chosen=null;
+      for(const [dx,dy] of offsets){
+        const cx=Math.max(cardWidth/2+3,Math.min(width-cardWidth/2-3,x+dx));
+        const cy=Math.max(cardHeight+3,Math.min(height-3,y+dy));
+        const rect={left:cx-cardWidth/2,right:cx+cardWidth/2,top:cy-cardHeight,bottom:cy};
+        const overlaps=used.some(u=>rect.left<u.right+4&&rect.right>u.left-4&&rect.top<u.bottom+4&&rect.bottom>u.top-4);
+        if(!overlaps){chosen={cx,cy,rect};break;}
+      }
+      // Never fall back to a partially overlapping placement.
+      if(!chosen)continue;
+      card.hidden=false;
+      card.style.width=cardWidth+'px';
+      card.style.minHeight=cardHeight+'px';
+      card.style.left=chosen.cx+'px';
+      card.style.top=chosen.cy+'px';
+      used.push(chosen.rect);
+      shown++;
+    }
+    const summary=state.layer.querySelector('[data-status-summary]');
+    if(summary){
+      if(mobile){
+        const critical=state.records.filter(row=>/^(kritikal|critical|breakdown)$/i.test(String(row.status||'').trim())).length;
+        const attention=state.records.filter(row=>/perlu perhatian|attention|pending|proses/i.test(String(row.status||'').trim())).length;
+        summary.textContent=shown+' kartu tampil · Kritikal '+critical+' · Perhatian '+attention+' · putar/perbesar untuk mesin lain';
+      }else{
+        summary.textContent='Status terbaru dari Logbook/Patrol · bukan telemetry sensor langsung';
+      }
+    }
+    // Do not let a card from an earlier frame remain visible after the current
+    // mobile priority set has changed.
+    for(const [id,card] of state.cards){
+      if(!entries.some(entry=>entry.machineId===id&&entry.card===card)||!candidates.some(entry=>entry.machineId===id))card.hidden=true;
+    }
   }
   function visibleMeshesUnder(layer){const found=[];if(!layer)return found;const visit=(node,parentVisible)=>{const visible=parentVisible&&node.visible!==false;if(!visible)return;if(node.isMesh)found.push(node);for(const child of node.children||[])visit(child,visible);};visit(layer,true);return found;}
   async function startViewer(){
     try{
       const [THREE,registryModule]=await Promise.all([import('three'),import('./data/machine-registry.js')]);state.registry=registryModule.MACHINE_REGISTRY||[];
       const viewport=document.getElementById('viewport');if(!viewport)throw new Error('Viewport pabrik tidak ditemukan.');
-      const layer=document.createElement('div');layer.id='omodos-status-overlay';layer.innerHTML='<div id="omodos-status-badge"><strong>BMJ · Factory Status</strong><span>Status terbaru Logbook/Patrol · bukan telemetry real-time</span></div>';viewport.appendChild(layer);state.layer=layer;
+      const layer=document.createElement('div');layer.id='omodos-status-overlay';layer.innerHTML='<div id="omodos-status-badge"><strong>BMJ · Factory Status</strong><span data-status-summary>Status terbaru dari Logbook/Patrol · bukan telemetry sensor langsung</span></div>';viewport.appendChild(layer);state.layer=layer;
       let rootSignature='';
       setInterval(()=>{
         const engine=window.__BMJ_FACTORY_ENGINE__;if(!engine?.actualFactory?.assets||!engine.factory)return;state.engine=engine;
