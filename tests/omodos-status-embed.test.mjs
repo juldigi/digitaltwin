@@ -149,6 +149,9 @@ test('OMODOS preview uses the low-power exterior profile and skips detailed mach
   assert.match(engine, /if\(!this\.omodosStatusEmbed\)void this\.hydrateFactoryDetailedMachines\?\.\(l,l\.fleet\)/);
   assert.match(engine, /if\(this\.omodosStatusEmbed\)requested='hemat'/);
   assert.match(engine, /const frameInterval=this\.omodosStatusEmbed\?48/);
+  assert.equal(engine.includes('this.frame=this.omodosStatusEmbed?setTimeout(()=>this.render(performance.now()),48)'), true);
+  assert.equal(engine.includes('document.hidden?1000:frameInterval'), true);
+  assert.equal(engine.includes('if(this.omodosStatusEmbed)clearTimeout(this.frame);else cancelAnimationFrame(this.frame)'), true);
 });
 
 test('OMODOS preview disposes hidden building layers and builds static anchors only once per scene', () => {
@@ -159,6 +162,8 @@ test('OMODOS preview disposes hidden building layers and builds static anchors o
   assert.match(embed, /if\(firstAuthorization\)\{state\.policyApplied=false;state\.lastAnchorAt=0;\}/);
   assert.doesNotMatch(embed, /gate\.remove\(\);state\.lastAnchorAt=0;startViewerOnce\(\)/);
   assert.match(embed, /const mobileLimit=mobile\?2:8/);
-  assert.match(embed, /overlayMobile\?125:90/);
+  assert.equal(embed.includes('const projectionInterval=overlayMobile?160:120'), true);
+  assert.equal(embed.includes('setTimeout(projectLoop,document.hidden?1000:projectionInterval)'), true);
+  assert.equal(embed.includes('requestAnimationFrame(projectLoop)'), false);
   assert.match(embed, /state\.summary=\{critical:/);
 });
