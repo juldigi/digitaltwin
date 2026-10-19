@@ -91,5 +91,7 @@ test('compact labels remain distinct for repeated machine families', () => {
   assert.match(embed, /return 'CTP Heidelberg 1'/);
   assert.match(embed, /return 'CTP Heidelberg 2'/);
   assert.match(embed, /return 'Folder Gluer '\+Number\(folder\[1\]\)/);
+  assert.match(embed, /if\(\/polar\\s\*115\/i\.test\(raw\)\)return 'Polar 115'/);
+  assert.match(embed, /card\.title=String\(machine\.name\|\|shortName\(machine\)\)/);
 });
 
