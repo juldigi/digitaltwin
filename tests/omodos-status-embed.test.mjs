@@ -69,3 +69,20 @@ test('every visible registry machine gets a status card and ambiguous codes do n
   assert.match(embed, /critical\|kritikal/);
   assert.match(embed, /s==='belum ada data'.*return 'unknown'/);
 });
+
+test('mobile status callouts stay readable without overlapping the factory view', () => {
+  assert.match(embed, /const mobileLimit=mobile\?Math\.max\(5,Math\.min\(9,/);
+  assert.match(embed, /entries\.sort\(\(a,b\)=>a\.statusPriority-b\.statusPriority\|\|a\.distance-b\.distance/);
+  assert.match(embed, /if\(!chosen\)continue;/);
+  assert.doesNotMatch(embed, /bestOverlap|if\(overlap<bestOverlap\)/);
+  assert.match(embed, /shown\+' kartu tampil/);
+  assert.match(embed, /data-status-summary/);
+});
+
+test('every displayed status card visibly labels the machine before showing its status', () => {
+  assert.match(embed, /card\.innerHTML='<span class="machine-label"><\/span><span class="machine-state">/);
+  assert.match(embed, /card\.querySelector\('\.machine-label'\)\.textContent=shortName\(machine\)/);
+  assert.match(embed, /\.omodos-machine-status-card \.machine-label\{display:block!important/);
+  assert.match(embed, /\.omodos-machine-status-card \.machine-state\{display:block!important/);
+});
+
