@@ -98,9 +98,32 @@ test('compact labels remain distinct for repeated machine families', () => {
 });
 
 test('mobile overview caps simultaneous status callouts at three and gives machine names priority', () => {
-  assert.match(embed, /const cardWidth=mobile\?116:122,cardHeight=mobile\?52:50/);
-  assert.match(embed, /font-size:10px!important;font-weight:850!important;line-height:1\.25!important;color:#203c4f!important/);
+  assert.match(embed, /const cardWidth=mobile\?100:122,cardHeight=mobile\?44:50/);
+  assert.match(embed, /font-size:9px!important;font-weight:850!important;line-height:1\.2!important;color:#203c4f!important/);
   assert.match(embed, /card\.querySelector\('\.machine-label'\)\.textContent=shortName\(machine\)/);
   assert.match(embed, /\.machine-state\{display:block!important;visibility:visible!important;opacity:1!important/);
   assert.match(embed, /shown\+' kartu tampil/);
+});
+
+
+
+test('compact status cards always carry a live leader connector to their machine anchor', () => {
+  assert.ok(embed.includes('#omodos-status-leaders{position:absolute;inset:0'));
+  assert.ok(embed.includes("const leaderSvg=document.createElementNS('http://www.w3.org/2000/svg','svg')"));
+  assert.ok(embed.includes('function ensureLeader(machineId)'));
+  assert.ok(embed.includes('function updateLeader_(entry,rect)'));
+  assert.ok(embed.includes("nodes.line.setAttribute('x1',entry.x.toFixed(1))"));
+  assert.ok(embed.includes("nodes.line.setAttribute('y1',entry.y.toFixed(1))"));
+  assert.ok(embed.includes("nodes.line.setAttribute('x2',end.x.toFixed(1))"));
+  assert.ok(embed.includes("nodes.line.setAttribute('y2',end.y.toFixed(1))"));
+  assert.ok(embed.includes('updateLeader_(entry,chosen.rect)'));
+  assert.ok(embed.includes('hideLeaders_();'));
+});
+
+test('mobile status callouts use a compact name, status and date hierarchy', () => {
+  assert.ok(embed.includes('.omodos-machine-status-card{width:100px;min-height:44px;padding:4px 5px 5px'));
+  assert.ok(embed.includes("card.querySelector('.machine-label').textContent=shortName(machine)"));
+  assert.ok(embed.includes("card.querySelector('.machine-state').textContent=compactStatus(status)"));
+  assert.ok(embed.includes("card.querySelector('.machine-date').textContent=row?.date?formatDate(row.date):''"));
+  assert.ok(embed.includes('const mobileLimit=mobile?3:Infinity'));
 });
