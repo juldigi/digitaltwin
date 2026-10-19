@@ -3,7 +3,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
   // No extra imports or UI for regular DigitalTwin sessions.
 } else {
   const ALLOWED_PARENT_ORIGINS = new Set(['https://omodos.juldigi.workers.dev']);
-  const state = {authorized:false,readySent:false,parentOrigin:null,records:[],recordsVersion:0,registry:[],engine:null,layer:null,cards:new Map(),anchors:new Map(),leaders:new Map(),leaderSvg:null,lastAnchorAt:0,lastPolicyAt:0,policyApplied:false};
+  const state = {authorized:false,readySent:false,parentOrigin:null,records:[],recordsVersion:0,registry:[],engine:null,layer:null,cards:new Map(),anchors:new Map(),leaders:new Map(),leaderSvg:null,lastAnchorAt:0,lastPolicyAt:0,policyApplied:false,overviewCameraDistance:0};
   document.documentElement.classList.add('omodos-status-embed');
   const css = [
     'html.omodos-status-embed,html.omodos-status-embed body{width:100%!important;height:100%!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#edf2f5!important}',
@@ -28,15 +28,15 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     '#omodos-status-badge{position:absolute;left:12px;top:12px;z-index:4;max-width:min(320px,calc(100vw - 24px));padding:9px 12px;border:1px solid rgba(197,211,220,.9);border-radius:12px;background:rgba(255,255,255,.94);box-shadow:0 3px 14px rgba(28,56,74,.1);color:#193548;backdrop-filter:blur(8px)}',
     '#omodos-status-badge strong{display:block;font-size:12px;letter-spacing:.055em;text-transform:uppercase}',
     '#omodos-status-badge span{display:block;margin-top:2px;font-size:10px;color:#607585}',
-    '.omodos-machine-status-card{position:absolute;left:0;top:0;z-index:2;width:122px;min-height:50px;transform:translate(-50%,-100%);padding:5px 7px 6px;border:1px solid rgba(190,204,214,.94);border-radius:8px;background:rgba(255,255,255,.97);box-shadow:0 2px 8px rgba(26,51,67,.14);color:#203c4f;text-align:left;overflow:hidden;pointer-events:auto;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-tap-highlight-color:transparent}',
-    '#omodos-status-overlay .omodos-machine-status-card .machine-label{display:block!important;position:static!important;visibility:visible!important;opacity:1!important;min-height:12px;margin:0!important;padding:0!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:850;line-height:1.25;letter-spacing:.005em;color:#203c4f!important}',
+    '.omodos-machine-status-card{position:absolute;left:0;top:0;z-index:2;width:122px;min-height:50px;transform:translate(-50%,-100%);padding:5px 7px 6px;border:1px solid rgba(190,204,214,.94);border-radius:8px;background:rgba(255,255,255,.985);box-shadow:0 2px 8px rgba(26,51,67,.14);color:#203c4f;text-align:left;overflow:hidden;pointer-events:none;cursor:default;touch-action:none;user-select:none;-webkit-tap-highlight-color:transparent}',
+    '#omodos-status-overlay .omodos-machine-status-card .machine-title{display:block!important;position:static!important;visibility:visible!important;opacity:1!important;min-height:12px;margin:0!important;padding:0!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:850;line-height:1.25;letter-spacing:.005em;color:#203c4f!important}',
     '.omodos-machine-status-card .machine-state{display:block!important;position:relative;margin-top:3px!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:750;line-height:1.25;color:#596e7d}',
     '.omodos-machine-status-card .machine-date{display:block!important;position:relative;margin-top:1px!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;line-height:1.2;color:#738592}',
     '.omodos-machine-status-card.good{border-color:#a8d9bd;background:rgba(247,255,250,.97)}.omodos-machine-status-card.good .machine-state{color:#187044}',
     '.omodos-machine-status-card.attention{border-color:#efc07b;background:rgba(255,251,242,.97)}.omodos-machine-status-card.attention .machine-state{color:#985400}',
     '.omodos-machine-status-card.critical{border-color:#e4a2a2;background:rgba(255,247,247,.97)}.omodos-machine-status-card.critical .machine-state{color:#ad2e35}',
     '.omodos-machine-status-card.unknown{border-color:#c9d4dc;background:rgba(249,251,252,.95)}.omodos-machine-status-card.unknown .machine-state{color:#71818c}',
-    '@media(max-width:700px){#omodos-status-badge{left:7px;top:7px;max-width:min(330px,calc(100vw - 14px));padding:6px 8px;border-radius:9px}#omodos-status-badge strong{font-size:10px}#omodos-status-badge span{font-size:9px;line-height:1.25}.omodos-machine-status-card{width:104px;min-height:48px;padding:4px 5px 5px;border-radius:7px;background:rgba(255,255,255,.985);pointer-events:auto;cursor:pointer;touch-action:manipulation}.omodos-machine-status-card .machine-label{display:block!important;visibility:visible!important;opacity:1!important;min-height:11px;margin:0!important;font-size:9px!important;font-weight:850!important;line-height:1.2!important;color:#203c4f!important}.omodos-machine-status-card .machine-state{display:block!important;visibility:visible!important;opacity:1!important;margin-top:2px!important;font-size:8.5px!important;font-weight:750!important;line-height:1.15!important;color:#394e5d!important}.omodos-machine-status-card .machine-date{display:block!important;visibility:visible!important;opacity:1!important;margin-top:1px!important;font-size:8px!important;line-height:1.2!important}}'
+    '@media(max-width:700px){#omodos-status-badge{left:7px;top:7px;max-width:min(330px,calc(100vw - 14px));padding:6px 8px;border-radius:9px}#omodos-status-badge strong{font-size:10px}#omodos-status-badge span{font-size:9px;line-height:1.25}.omodos-machine-status-card{width:104px;min-height:48px;padding:4px 5px 5px;border-radius:7px;background:rgba(255,255,255,.985);pointer-events:none;cursor:default;touch-action:none}.omodos-machine-status-card .machine-title{display:block!important;visibility:visible!important;opacity:1!important;min-height:11px;margin:0!important;font-size:10px!important;font-weight:900!important;line-height:1.2!important;color:#203c4f!important}.omodos-machine-status-card .machine-state{display:block!important;visibility:visible!important;opacity:1!important;margin-top:2px!important;font-size:8.5px!important;font-weight:750!important;line-height:1.15!important;color:#394e5d!important}.omodos-machine-status-card .machine-date{display:block!important;visibility:visible!important;opacity:1!important;margin-top:1px!important;font-size:8px!important;line-height:1.2!important}}'
   ].join('\n');
   const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
   const gate = document.createElement('div'); gate.id = 'omodos-status-gate';
@@ -137,23 +137,14 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
   function ensureCard(machine){
     let card=state.cards.get(machine.machineId);if(card)return card;
     card=document.createElement('div');card.className='omodos-machine-status-card unknown';card.dataset.machineId=machine.machineId;
-    card.setAttribute('role','button');card.tabIndex=0;card.style.pointerEvents='auto';
-    card.innerHTML='<span class="machine-label"></span><span class="machine-state">Belum ada catatan</span><span class="machine-date"></span>';
-    const activate=event=>{
-      if(event){event.preventDefault();event.stopPropagation();}
-      if(!state.authorized||!state.parentOrigin||!ALLOWED_PARENT_ORIGINS.has(state.parentOrigin))return;
-      const row=bestRecord(machine)||{};
-      const code=String(row.code||machine.sapCode||'').trim();
-      const name=String(row.name||machine.name||'').trim();
-      window.parent.postMessage({type:'OMODOS_FACTORY_STATUS_CARD_CLICK',version:1,code,name},state.parentOrigin);
-    };
-    card.addEventListener('click',activate);
-    card.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){activate(event);}});
+    card.setAttribute('role','img');
+    card.innerHTML='<span class="machine-title"></span><span class="machine-state">Belum ada catatan</span><span class="machine-date"></span>';
+    card.style.pointerEvents='none';
     state.layer.appendChild(card);state.cards.set(machine.machineId,card);return card;
   }
   function updateCardContent(machine,card){
     const row=bestRecord(machine),status=row?.status||'Belum ada catatan';card.classList.remove('good','attention','critical','unknown');card.classList.add(row?toneFor(status):'unknown');
-    card.querySelector('.machine-label').textContent=shortName(machine);card.querySelector('.machine-state').textContent=compactStatus(status);card.querySelector('.machine-date').textContent=row?.date?formatDate(row.date):'';
+    card.querySelector('.machine-title').textContent=shortName(machine);card.querySelector('.machine-state').textContent=compactStatus(status);card.querySelector('.machine-date').textContent=row?.date?formatDate(row.date):'';
     card.setAttribute('aria-label',shortName(machine)+': '+status+(row?.date?', '+formatDate(row.date):''));card.title=String(machine.name||shortName(machine))+' · '+status+(row?.date?', '+formatDate(row.date):'');card.dataset.contentVersion=String(state.recordsVersion);
   }
   function rebuildAnchors(THREE,engine){
@@ -191,6 +182,19 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     nodes.dot.setAttribute('fill',stateClass==='critical'?'#c84b53':stateClass==='attention'?'#bd7b23':stateClass==='good'?'#348461':'#8196a4');
     nodes.line.style.display='block';nodes.dot.style.display='block';
   }
+  function mobileCardLimit_(engine){
+    const target=engine?.controls?.target;
+    const currentDistance=target&&engine?.camera?.position?.distanceTo?engine.camera.position.distanceTo(target):NaN;
+    const overviewDistance=state.overviewCameraDistance;
+    if(!Number.isFinite(currentDistance)||currentDistance<=0||!Number.isFinite(overviewDistance)||overviewDistance<=0)return 3;
+    const zoomRatio=overviewDistance/currentDistance;
+    // Keep the full-factory view calm; reveal more labels only as the user zooms into a machine cluster.
+    if(zoomRatio<1.28)return 3;
+    if(zoomRatio<1.72)return 5;
+    if(zoomRatio<2.28)return 8;
+    if(zoomRatio<3.0)return 12;
+    return 16;
+  }
   function projectCards(THREE,engine){
     if(!state.authorized||!state.layer||!engine?.camera||!engine?.renderer?.domElement)return;
     hideLeaders_();
@@ -223,7 +227,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
       });
     }
     entries.sort((a,b)=>a.statusPriority-b.statusPriority||a.distance-b.distance||a.y-b.y);
-    const mobileLimit=mobile?3:Infinity;
+    const mobileLimit=mobile?mobileCardLimit_(engine):Infinity;
     const candidates=entries.slice(0,mobileLimit);
     const offsets=mobile
       ?[[0,-8],[0,-cardHeight-12],[-cardWidth*.58,-8],[cardWidth*.58,-8],[0,-cardHeight*2-14],[-cardWidth*.9,-cardHeight*.6],[cardWidth*.9,-cardHeight*.6],[0,10],[-cardWidth*.55,10],[cardWidth*.55,10],[-cardWidth,-8],[cardWidth,-8]]
@@ -239,7 +243,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     let shown=0;
     for(const entry of candidates){
       const card=entry.card;
-      const labelEl=card.querySelector('.machine-label');
+      const labelEl=card.querySelector('.machine-title');
       const machineLabel=shortName(entry.machine);
       if(labelEl)labelEl.textContent=machineLabel;
       card.dataset.machineLabel=machineLabel;
@@ -334,7 +338,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
           };
           hideIpalStructure(engine.actualFactory.layers.ipal);
           engine.onFactorySelect=()=>{};engine.onTaxonomySelect=()=>{};engine.renderer.domElement.style.touchAction='none';engine.renderer.domElement.setAttribute('aria-label','Tampilan 3D status mesin BMJ; objek tidak membuka detail.');
-          if(state.authorized&&engine.actualFactory.assets.size){const fitObjects=[...engine.actualFactory.assets.values(),...visibleMeshesUnder(engine.actualFactory.layers.ipal)];engine.fitObjects(fitObjects,'iso',false);}
+          if(state.authorized&&engine.actualFactory.assets.size){const fitObjects=[...engine.actualFactory.assets.values(),...visibleMeshesUnder(engine.actualFactory.layers.ipal)];engine.fitObjects(fitObjects,'iso',false);const target=engine.controls?.target;const distance=target&&engine.camera?.position?.distanceTo?engine.camera.position.distanceTo(target):NaN;if(Number.isFinite(distance)&&distance>0)state.overviewCameraDistance=distance;}
         }
         if(now-state.lastAnchorAt>1400||rootChanged)rebuildAnchors(THREE,engine);
         // Tell OMODOS the viewer is ready only after the engine, visible assets,
