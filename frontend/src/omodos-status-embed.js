@@ -3,7 +3,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
   // No extra imports or UI for regular DigitalTwin sessions.
 } else {
   const ALLOWED_PARENT_ORIGINS = new Set(['https://omodos.juldigi.workers.dev']);
-  const state = {authorized:false,readySent:false,parentOrigin:null,records:[],recordsVersion:0,registry:[],engine:null,layer:null,cards:new Map(),anchors:new Map(),leaders:new Map(),leaderSvg:null,lastAnchorAt:0,lastPolicyAt:0,policyApplied:false};
+  const state = {authorized:false,readySent:false,parentOrigin:null,records:[],recordsVersion:0,summary:{critical:0,attention:0},registry:[],engine:null,layer:null,cards:new Map(),anchors:new Map(),leaders:new Map(),leaderSvg:null,lastAnchorAt:0,lastProjectionAt:0,lastPolicyAt:0,policyApplied:false,previewPrunedRoot:''};
   document.documentElement.classList.add('omodos-status-embed');
   const css = [
     'html.omodos-status-embed,html.omodos-status-embed body{width:100%!important;height:100%!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#edf2f5!important}',
@@ -29,14 +29,14 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     '#omodos-status-badge strong{display:block;font-size:12px;letter-spacing:.055em;text-transform:uppercase}',
     '#omodos-status-badge span{display:block;margin-top:2px;font-size:10px;color:#607585}',
     '.omodos-machine-status-card{position:absolute;left:0;top:0;z-index:2;width:122px;min-height:50px;transform:translate(-50%,-100%);padding:5px 7px 6px;border:1px solid rgba(190,204,214,.94);border-radius:8px;background:rgba(255,255,255,.97);box-shadow:0 2px 8px rgba(26,51,67,.14);color:#203c4f;text-align:left;overflow:hidden;pointer-events:auto;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-tap-highlight-color:transparent}',
-    '#omodos-status-overlay .omodos-machine-status-card .machine-label{display:block!important;position:static!important;visibility:visible!important;opacity:1!important;min-height:12px;margin:0!important;padding:0!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:850;line-height:1.25;letter-spacing:.005em;color:#203c4f!important}',
+    '#omodos-status-overlay .omodos-machine-status-card .machine-label{display:block!important;position:static!important;visibility:visible!important;opacity:1!important;height:auto!important;min-height:12px;max-height:1.5em;margin:0!important;padding:0!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:850;line-height:1.25;letter-spacing:.005em;color:#203c4f!important}',
     '.omodos-machine-status-card .machine-state{display:block!important;position:relative;margin-top:3px!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:750;line-height:1.25;color:#596e7d}',
     '.omodos-machine-status-card .machine-date{display:block!important;position:relative;margin-top:1px!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;line-height:1.2;color:#738592}',
     '.omodos-machine-status-card.good{border-color:#a8d9bd;background:rgba(247,255,250,.97)}.omodos-machine-status-card.good .machine-state{color:#187044}',
     '.omodos-machine-status-card.attention{border-color:#efc07b;background:rgba(255,251,242,.97)}.omodos-machine-status-card.attention .machine-state{color:#985400}',
     '.omodos-machine-status-card.critical{border-color:#e4a2a2;background:rgba(255,247,247,.97)}.omodos-machine-status-card.critical .machine-state{color:#ad2e35}',
     '.omodos-machine-status-card.unknown{border-color:#c9d4dc;background:rgba(249,251,252,.95)}.omodos-machine-status-card.unknown .machine-state{color:#71818c}',
-    '@media(max-width:700px){#omodos-status-badge{left:7px;top:7px;max-width:min(330px,calc(100vw - 14px));padding:6px 8px;border-radius:9px}#omodos-status-badge strong{font-size:10px}#omodos-status-badge span{font-size:9px;line-height:1.25}.omodos-machine-status-card{width:104px;min-height:48px;padding:4px 5px 5px;border-radius:7px;background:rgba(255,255,255,.985);pointer-events:auto;cursor:pointer;touch-action:manipulation}.omodos-machine-status-card .machine-label{display:block!important;visibility:visible!important;opacity:1!important;min-height:11px;margin:0!important;font-size:9px!important;font-weight:850!important;line-height:1.2!important;color:#203c4f!important}.omodos-machine-status-card .machine-state{display:block!important;visibility:visible!important;opacity:1!important;margin-top:2px!important;font-size:8.5px!important;font-weight:750!important;line-height:1.15!important;color:#394e5d!important}.omodos-machine-status-card .machine-date{display:block!important;visibility:visible!important;opacity:1!important;margin-top:1px!important;font-size:8px!important;line-height:1.2!important}}'
+    '@media(max-width:700px){#omodos-status-badge{left:7px;top:7px;max-width:min(330px,calc(100vw - 14px));padding:6px 8px;border-radius:9px}#omodos-status-badge strong{font-size:10px}#omodos-status-badge span{font-size:9px;line-height:1.25}.omodos-machine-status-card{width:118px;min-height:48px;padding:4px 6px 5px;border-radius:7px;background:rgba(255,255,255,.985);pointer-events:auto;cursor:pointer;touch-action:manipulation}.omodos-machine-status-card .machine-label{display:block!important;visibility:visible!important;opacity:1!important;min-height:11px;margin:0!important;font-size:9px!important;font-weight:850!important;line-height:1.2!important;color:#203c4f!important}.omodos-machine-status-card .machine-state{display:block!important;visibility:visible!important;opacity:1!important;margin-top:2px!important;font-size:8.5px!important;font-weight:750!important;line-height:1.15!important;color:#394e5d!important}.omodos-machine-status-card .machine-date{display:block!important;visibility:visible!important;opacity:1!important;margin-top:1px!important;font-size:8px!important;line-height:1.2!important}}'
   ].join('\n');
   const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
   const gate = document.createElement('div'); gate.id = 'omodos-status-gate';
@@ -192,7 +192,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     nodes.line.style.display='block';nodes.dot.style.display='block';
   }
   function projectCards(THREE,engine){
-    if(!state.authorized||!state.layer||!engine?.camera||!engine?.renderer?.domElement)return;
+    if(!state.authorized||document.hidden||!state.layer||!engine?.camera||!engine?.renderer?.domElement)return;
     hideLeaders_();
     const viewport=engine.renderer.domElement.parentElement||document.getElementById('viewport');
     if(!viewport)return;
@@ -201,7 +201,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     const mobile=matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse)').matches;
     // The mobile viewport cannot label every asset at once. Prioritize important
     // statuses near the current camera and let users rotate/zoom to other areas.
-    const cardWidth=mobile?104:122,cardHeight=mobile?48:50;
+    const cardWidth=mobile?118:122,cardHeight=mobile?48:50;
     const entries=[];
     for(const entry of state.anchors.values()){
       const card=ensureCard(entry.machine);
@@ -223,7 +223,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
       });
     }
     entries.sort((a,b)=>a.statusPriority-b.statusPriority||a.distance-b.distance||a.y-b.y);
-    const mobileLimit=mobile?3:Infinity;
+    const mobileLimit=mobile?2:8;
     const candidates=entries.slice(0,mobileLimit);
     const offsets=mobile
       ?[[0,-8],[0,-cardHeight-12],[-cardWidth*.58,-8],[cardWidth*.58,-8],[0,-cardHeight*2-14],[-cardWidth*.9,-cardHeight*.6],[cardWidth*.9,-cardHeight*.6],[0,10],[-cardWidth*.55,10],[cardWidth*.55,10],[-cardWidth,-8],[cardWidth,-8]]
@@ -288,11 +288,9 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     const summary=state.layer.querySelector('[data-status-summary]');
     if(summary){
       if(mobile){
-        const critical=state.records.filter(row=>/^(kritikal|critical|breakdown)$/i.test(String(row.status||'').trim())).length;
-        const attention=state.records.filter(row=>/perlu perhatian|attention|pending|proses/i.test(String(row.status||'').trim())).length;
-        summary.textContent=shown+' kartu tampil · Kritikal '+critical+' · Perhatian '+attention+' · putar/perbesar untuk mesin lain';
+        summary.textContent=shown+' kartu tampil · Kritikal '+state.summary.critical+' · Perhatian '+state.summary.attention+' · putar/perbesar untuk mesin lain';
       }else{
-        summary.textContent='Status terbaru dari Logbook/Patrol · bukan telemetry sensor langsung';
+        summary.textContent=shown+' kartu tampil · status Logbook/Patrol, bukan telemetry sensor langsung';
       }
     }
     // Do not let a card from an earlier frame remain visible after the current
@@ -302,6 +300,66 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     }
   }
   function visibleMeshesUnder(layer){const found=[];if(!layer)return found;const visit=(node,parentVisible)=>{const visible=parentVisible&&node.visible!==false;if(!visible)return;if(node.isMesh)found.push(node);for(const child of node.children||[])visit(child,visible);};visit(layer,true);return found;}
+
+  function collectPreviewResources_(root,keep){
+    const visit=(node,parentVisible)=>{
+      const visible=parentVisible&&node.visible!==false;if(!visible)return;
+      if(node.geometry)keep.geometries.add(node.geometry);
+      const materials=Array.isArray(node.material)?node.material:(node.material?[node.material]:[]);
+      for(const material of materials){
+        keep.materials.add(material);
+        for(const value of Object.values(material||{}))if(value?.isTexture)keep.textures.add(value);
+      }
+      for(const child of node.children||[])visit(child,visible);
+    };
+    visit(root,true);
+  }
+  function disposePreviewSubtree_(node,keep,disposed){
+    for(const child of [...(node.children||[])])disposePreviewSubtree_(child,keep,disposed);
+    node.parent?.remove(node);
+    const geometry=node.geometry;
+    if(geometry&&!keep.geometries.has(geometry)&&!disposed.geometries.has(geometry)){
+      disposed.geometries.add(geometry);geometry.dispose?.();
+    }
+    const materials=Array.isArray(node.material)?node.material:(node.material?[node.material]:[]);
+    for(const material of materials){
+      if(!material||keep.materials.has(material)||disposed.materials.has(material))continue;
+      disposed.materials.add(material);
+      for(const value of Object.values(material)){
+        if(value?.isTexture&&!keep.textures.has(value)&&!disposed.textures.has(value)){
+          disposed.textures.add(value);value.dispose?.();
+        }
+      }
+      material.dispose?.();
+    }
+  }
+  function pruneInvisiblePreviewBranches_(parent,keep,disposed){
+    for(const child of [...(parent?.children||[])]){
+      if(child.visible===false){disposePreviewSubtree_(child,keep,disposed);continue;}
+      pruneInvisiblePreviewBranches_(child,keep,disposed);
+    }
+  }
+  function compactPreviewScene_(engine){
+    const actual=engine?.actualFactory,layers=actual?.layers,assets=actual?.assets;
+    if(!layers||!(assets instanceof Map))return false;
+    const assetRoots=new Set([...assets.values()]);
+    const keep={geometries:new Set(),materials:new Set(),textures:new Set()};
+    const disposed={geometries:new Set(),materials:new Set(),textures:new Set()};
+    const keepLayers=['floor','machines','unidentified','ipal'];
+    for(const name of keepLayers)if(layers[name])collectPreviewResources_(layers[name],keep);
+    for(const [name,layer] of Object.entries(layers)){
+      if(keepLayers.includes(name))continue;
+      layer.visible=false;
+      for(const child of [...(layer.children||[])])disposePreviewSubtree_(child,keep,disposed);
+    }
+    for(const child of [...(layers.unidentified?.children||[])]){
+      if(!assetRoots.has(child))disposePreviewSubtree_(child,keep,disposed);
+    }
+    if(layers.ipal)pruneInvisiblePreviewBranches_(layers.ipal,keep,disposed);
+    actual.root.userData={...(actual.root.userData||{}),omodosExteriorPreview:true,detailedHydration:false,prunedLayers:true};
+    return true;
+  }
+
   async function startViewer(){
     try{
       const [THREE,registryModule]=await Promise.all([import('three'),import('./data/machine-registry.js')]);state.registry=registryModule.MACHINE_REGISTRY||[];
@@ -333,25 +391,27 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
             for(const child of node.children||[])hideIpalStructure(child);
           };
           hideIpalStructure(engine.actualFactory.layers.ipal);
+          if(state.previewPrunedRoot!==signature){compactPreviewScene_(engine);state.previewPrunedRoot=signature;}
           engine.onFactorySelect=()=>{};engine.onTaxonomySelect=()=>{};engine.renderer.domElement.style.touchAction='none';engine.renderer.domElement.setAttribute('aria-label','Tampilan 3D status mesin BMJ; objek tidak membuka detail.');
           if(state.authorized&&engine.actualFactory.assets.size){const fitObjects=[...engine.actualFactory.assets.values(),...visibleMeshesUnder(engine.actualFactory.layers.ipal)];engine.fitObjects(fitObjects,'iso',false);}
         }
-        if(now-state.lastAnchorAt>1400||rootChanged)rebuildAnchors(THREE,engine);
+        if(!state.lastAnchorAt||rootChanged)rebuildAnchors(THREE,engine);
         // Tell OMODOS the viewer is ready only after the engine, visible assets,
         // and the status-card anchors exist. The parent then sends fresh records.
         if(state.authorized&&!state.readySent&&engine.actualFactory.assets.size>0&&state.anchors.size>0&&state.parentOrigin&&ALLOWED_PARENT_ORIGINS.has(state.parentOrigin)){
           state.readySent=true;
           window.parent.postMessage({type:'OMODOS_FACTORY_STATUS_READY',version:1},state.parentOrigin);
         }
-      },350);
-      const projectLoop=()=>{if(state.authorized&&state.engine)projectCards(THREE,state.engine);requestAnimationFrame(projectLoop);};requestAnimationFrame(projectLoop);
+      },1000);
+      const overlayMobile=matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse)').matches;
+      const projectLoop=()=>{const now=performance.now(),interval=overlayMobile?125:90;if(state.authorized&&state.engine&&now-state.lastProjectionAt>=interval){state.lastProjectionAt=now;projectCards(THREE,state.engine);}requestAnimationFrame(projectLoop);};requestAnimationFrame(projectLoop);
     }catch(error){console.error('[OMODOS status twin]',error);const card=gate.querySelector('.gate-card');if(card)card.innerHTML='<strong>Viewer 3D tidak tersedia</strong>Komponen tampilan tidak berhasil dimuat. Beranda OMODOS tetap dapat digunakan.';}
   }
   let viewerStarted=false;function startViewerOnce(){if(viewerStarted)return;viewerStarted=true;void startViewer();}
   window.addEventListener('message',event=>{
     if(window.parent===window||event.source!==window.parent||!ALLOWED_PARENT_ORIGINS.has(event.origin))return;
     const payload=event.data;if(!payload||payload.type!=='OMODOS_FACTORY_STATUS'||payload.version!==1||!Array.isArray(payload.records))return;
-    state.records=payload.records.slice(0,1200).map((row,index)=>({code:String(row?.code||'').trim(),name:String(row?.name||'').trim(),status:String(row?.status||'').trim(),date:String(row?.date||'').trim(),index:Number(row?.index)||index}));state.recordsVersion++;
+    state.records=payload.records.slice(0,1200).map((row,index)=>({code:String(row?.code||'').trim(),name:String(row?.name||'').trim(),status:String(row?.status||'').trim(),date:String(row?.date||'').trim(),index:Number(row?.index)||index}));state.recordsVersion++;state.summary={critical:state.records.filter(row=>/^(kritikal|critical|breakdown)$/i.test(String(row.status||'').trim())).length,attention:state.records.filter(row=>/perlu perhatian|attention|pending|proses/i.test(String(row.status||'').trim())).length};
     const firstAuthorization=!state.authorized;state.authorized=true;state.parentOrigin=event.origin;if(firstAuthorization)state.policyApplied=false;const activeEngine=window.__BMJ_FACTORY_ENGINE__;if(activeEngine){activeEngine.onFactorySelect=()=>{};activeEngine.onTaxonomySelect=()=>{};}document.documentElement.classList.add('omodos-status-authorized');gate.remove();state.lastAnchorAt=0;startViewerOnce();
   });
 }
