@@ -8,7 +8,6 @@ const building = readFileSync(new URL('../frontend/src/factory-building.js', imp
 
 test('OMODOS status viewer is opt-in and only accepts the authenticated OMODOS parent origin', () => {
   assert.ok(html.includes('omodos-status-embed.js?v=2'));
-  // assert.match(html, /src="\.\/src\/omodos-status-embed\.js\?v=2"/);
   assert.match(embed, /new URLSearchParams\(location\.search\)\.get\('embed'\) !== EMBED_KEY/);
   assert.match(embed, /ALLOWED_PARENT_ORIGINS = new Set\(\['https:\/\/omodos\.juldigi\.workers\.dev'\]\)/);
   assert.match(embed, /ALLOWED_PARENT_ORIGINS\.has\(event\.origin\)/);
@@ -98,9 +97,9 @@ test('compact labels remain distinct for repeated machine families', () => {
   assert.match(embed, /card\.title=String\(machine\.name\|\|shortName\(machine\)\)/);
 });
 
-test('mobile overview caps simultaneous status callouts at three and gives machine names priority', () => {
+test('mobile status callouts stay compact and give machine names priority', () => {
   assert.match(embed, /const cardWidth=mobile\?104:122,cardHeight=mobile\?48:50/);
-  assert.match(embed, /font-size:9px!important;font-weight:850!important;line-height:1\.2!important;color:#203c4f!important/);
+  assert.match(embed, /font-size:10px!important;font-weight:900!important;line-height:1\.2!important;color:#203c4f!important/);
   assert.match(embed, /card\.querySelector\('\.machine-title'\)\.textContent=shortName\(machine\)/);
   assert.match(embed, /\.machine-state\{display:block!important;visibility:visible!important;opacity:1!important/);
   assert.match(embed, /shown\+' kartu tampil/);
