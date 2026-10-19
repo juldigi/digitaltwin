@@ -3,7 +3,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
   // No extra imports or UI for regular DigitalTwin sessions.
 } else {
   const ALLOWED_PARENT_ORIGINS = new Set(['https://omodos.juldigi.workers.dev']);
-  const state = {authorized:false,readySent:false,parentOrigin:null,records:[],recordsVersion:0,registry:[],engine:null,layer:null,cards:new Map(),anchors:new Map(),lastAnchorAt:0,lastPolicyAt:0,policyApplied:false};
+  const state = {authorized:false,readySent:false,parentOrigin:null,records:[],recordsVersion:0,registry:[],engine:null,layer:null,cards:new Map(),anchors:new Map(),leaders:new Map(),leaderSvg:null,lastAnchorAt:0,lastPolicyAt:0,policyApplied:false};
   document.documentElement.classList.add('omodos-status-embed');
   const css = [
     'html.omodos-status-embed,html.omodos-status-embed body{width:100%!important;height:100%!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#edf2f5!important}',
@@ -19,10 +19,16 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     '#omodos-status-gate strong{display:block;margin-bottom:8px;font-size:18px}',
     'html.omodos-status-embed:not(.omodos-status-authorized) #viewport{visibility:hidden!important}',
     '#omodos-status-overlay{position:absolute;inset:0;z-index:30;pointer-events:none;overflow:hidden;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}',
-    '#omodos-status-badge{position:absolute;left:12px;top:12px;max-width:min(320px,calc(100vw - 24px));padding:9px 12px;border:1px solid rgba(197,211,220,.9);border-radius:12px;background:rgba(255,255,255,.94);box-shadow:0 3px 14px rgba(28,56,74,.1);color:#193548;backdrop-filter:blur(8px)}',
+    '#omodos-status-leaders{position:absolute;inset:0;display:block;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:1}',
+    '#omodos-status-leaders .machine-leader{fill:none;stroke:#8196a4;stroke-width:1.15;stroke-opacity:.9;stroke-linecap:round;vector-effect:non-scaling-stroke}',
+    '#omodos-status-leaders .machine-leader.critical{stroke:#c84b53;stroke-width:1.35}',
+    '#omodos-status-leaders .machine-leader.attention{stroke:#bd7b23;stroke-width:1.25}',
+    '#omodos-status-leaders .machine-leader.good{stroke:#348461}',
+    '#omodos-status-leaders .machine-leader-dot{stroke:#fff;stroke-width:1;vector-effect:non-scaling-stroke}',
+    '#omodos-status-badge{position:absolute;left:12px;top:12px;z-index:4;max-width:min(320px,calc(100vw - 24px));padding:9px 12px;border:1px solid rgba(197,211,220,.9);border-radius:12px;background:rgba(255,255,255,.94);box-shadow:0 3px 14px rgba(28,56,74,.1);color:#193548;backdrop-filter:blur(8px)}',
     '#omodos-status-badge strong{display:block;font-size:12px;letter-spacing:.055em;text-transform:uppercase}',
     '#omodos-status-badge span{display:block;margin-top:2px;font-size:10px;color:#607585}',
-    '.omodos-machine-status-card{position:absolute;left:0;top:0;width:122px;min-height:50px;transform:translate(-50%,-100%);padding:5px 7px 6px;border:1px solid rgba(190,204,214,.94);border-radius:8px;background:rgba(255,255,255,.97);box-shadow:0 2px 8px rgba(26,51,67,.14);color:#203c4f;text-align:left;overflow:hidden}',
+    '.omodos-machine-status-card{position:absolute;left:0;top:0;z-index:2;width:122px;min-height:50px;transform:translate(-50%,-100%);padding:5px 7px 6px;border:1px solid rgba(190,204,214,.94);border-radius:8px;background:rgba(255,255,255,.97);box-shadow:0 2px 8px rgba(26,51,67,.14);color:#203c4f;text-align:left;overflow:hidden}',
     '#omodos-status-overlay .omodos-machine-status-card .machine-label{display:block!important;position:static!important;visibility:visible!important;opacity:1!important;min-height:12px;margin:0!important;padding:0!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:850;line-height:1.25;letter-spacing:.005em;color:#203c4f!important}',
     '.omodos-machine-status-card .machine-state{display:block!important;position:relative;margin-top:3px!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:750;line-height:1.25;color:#596e7d}',
     '.omodos-machine-status-card .machine-date{display:block!important;position:relative;margin-top:1px!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;line-height:1.2;color:#738592}',
@@ -30,7 +36,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     '.omodos-machine-status-card.attention{border-color:#efc07b;background:rgba(255,251,242,.97)}.omodos-machine-status-card.attention .machine-state{color:#985400}',
     '.omodos-machine-status-card.critical{border-color:#e4a2a2;background:rgba(255,247,247,.97)}.omodos-machine-status-card.critical .machine-state{color:#ad2e35}',
     '.omodos-machine-status-card.unknown{border-color:#c9d4dc;background:rgba(249,251,252,.95)}.omodos-machine-status-card.unknown .machine-state{color:#71818c}',
-    '@media(max-width:700px){#omodos-status-badge{left:7px;top:7px;max-width:min(330px,calc(100vw - 14px));padding:6px 8px;border-radius:9px}#omodos-status-badge strong{font-size:10px}#omodos-status-badge span{font-size:9px;line-height:1.25}.omodos-machine-status-card{width:116px;min-height:52px;padding:5px 6px 6px;border-radius:7px;background:rgba(255,255,255,.985)}.omodos-machine-status-card .machine-label{display:block!important;visibility:visible!important;opacity:1!important;min-height:11px;margin:0!important;font-size:10px!important;font-weight:850!important;line-height:1.25!important;color:#203c4f!important}.omodos-machine-status-card .machine-state{display:block!important;visibility:visible!important;opacity:1!important;margin-top:3px!important;font-size:9px!important;font-weight:750!important;line-height:1.2!important;color:#394e5d!important}.omodos-machine-status-card .machine-date{display:block!important;visibility:visible!important;opacity:1!important;margin-top:1px!important;font-size:8px!important;line-height:1.2!important}}'
+    '@media(max-width:700px){#omodos-status-badge{left:7px;top:7px;max-width:min(330px,calc(100vw - 14px));padding:6px 8px;border-radius:9px}#omodos-status-badge strong{font-size:10px}#omodos-status-badge span{font-size:9px;line-height:1.25}.omodos-machine-status-card{width:100px;min-height:44px;padding:4px 5px 5px;border-radius:7px;background:rgba(255,255,255,.985)}.omodos-machine-status-card .machine-label{display:block!important;visibility:visible!important;opacity:1!important;min-height:11px;margin:0!important;font-size:9px!important;font-weight:850!important;line-height:1.2!important;color:#203c4f!important}.omodos-machine-status-card .machine-state{display:block!important;visibility:visible!important;opacity:1!important;margin-top:2px!important;font-size:8.5px!important;font-weight:750!important;line-height:1.15!important;color:#394e5d!important}.omodos-machine-status-card .machine-date{display:block!important;visibility:visible!important;opacity:1!important;margin-top:1px!important;font-size:8px!important;line-height:1.2!important}}'
   ].join('\n');
   const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
   const gate = document.createElement('div'); gate.id = 'omodos-status-gate';
@@ -143,8 +149,40 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     state.anchors.clear();for(const machine of state.registry){const obj=engine.actualFactory?.assets?.get(machine.machineId),anchor=readBox(THREE,obj);if(anchor)state.anchors.set(machine.machineId,{machine,obj,anchor});}
     state.lastAnchorAt=performance.now();
   }
+  function ensureLeader(machineId){
+    let nodes=state.leaders.get(machineId);if(nodes)return nodes;
+    if(!state.leaderSvg)return null;
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('class','machine-leader unknown');line.setAttribute('data-machine-id',machineId);
+    const dot=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    dot.setAttribute('class','machine-leader-dot unknown');dot.setAttribute('data-machine-id',machineId);dot.setAttribute('r','2.5');
+    state.leaderSvg.append(line,dot);nodes={line,dot};state.leaders.set(machineId,nodes);return nodes;
+  }
+  function hideLeaders_(){
+    for(const nodes of state.leaders.values()){nodes.line.style.display='none';nodes.dot.style.display='none';}
+  }
+  function updateLeader_(entry,rect){
+    const nodes=ensureLeader(entry.machineId);if(!nodes)return;
+    const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
+    const points=[
+      {x:clamp(entry.x,rect.left+8,rect.right-8),y:rect.top,edge:'top'},
+      {x:clamp(entry.x,rect.left+8,rect.right-8),y:rect.bottom,edge:'bottom'},
+      {x:rect.left,y:clamp(entry.y,rect.top+7,rect.bottom-7),edge:'left'},
+      {x:rect.right,y:clamp(entry.y,rect.top+7,rect.bottom-7),edge:'right'}
+    ];
+    points.sort((a,b)=>((a.x-entry.x)**2+(a.y-entry.y)**2)-((b.x-entry.x)**2+(b.y-entry.y)**2));
+    const end=points[0];
+    const stateClass=entry.card.classList.contains('critical')?'critical':entry.card.classList.contains('attention')?'attention':entry.card.classList.contains('good')?'good':'unknown';
+    nodes.line.setAttribute('class','machine-leader '+stateClass);
+    nodes.line.setAttribute('x1',entry.x.toFixed(1));nodes.line.setAttribute('y1',entry.y.toFixed(1));
+    nodes.line.setAttribute('x2',end.x.toFixed(1));nodes.line.setAttribute('y2',end.y.toFixed(1));
+    nodes.dot.setAttribute('cx',entry.x.toFixed(1));nodes.dot.setAttribute('cy',entry.y.toFixed(1));
+    nodes.dot.setAttribute('fill',stateClass==='critical'?'#c84b53':stateClass==='attention'?'#bd7b23':stateClass==='good'?'#348461':'#8196a4');
+    nodes.line.style.display='block';nodes.dot.style.display='block';
+  }
   function projectCards(THREE,engine){
     if(!state.authorized||!state.layer||!engine?.camera||!engine?.renderer?.domElement)return;
+    hideLeaders_();
     const viewport=engine.renderer.domElement.parentElement||document.getElementById('viewport');
     if(!viewport)return;
     const width=viewport.clientWidth,height=viewport.clientHeight;
@@ -152,7 +190,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     const mobile=matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse)').matches;
     // The mobile viewport cannot label every asset at once. Prioritize important
     // statuses near the current camera and let users rotate/zoom to other areas.
-    const cardWidth=mobile?116:122,cardHeight=mobile?52:50;
+    const cardWidth=mobile?100:122,cardHeight=mobile?44:50;
     const entries=[];
     for(const entry of state.anchors.values()){
       const card=ensureCard(entry.machine);
@@ -209,6 +247,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
       card.style.minHeight=cardHeight+'px';
       card.style.left=chosen.cx+'px';
       card.style.top=chosen.cy+'px';
+      updateLeader_(entry,chosen.rect);
       used.push(chosen.rect);
       shown++;
     }
@@ -233,7 +272,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     try{
       const [THREE,registryModule]=await Promise.all([import('three'),import('./data/machine-registry.js')]);state.registry=registryModule.MACHINE_REGISTRY||[];
       const viewport=document.getElementById('viewport');if(!viewport)throw new Error('Viewport pabrik tidak ditemukan.');
-      const layer=document.createElement('div');layer.id='omodos-status-overlay';layer.innerHTML='<div id="omodos-status-badge"><strong>BMJ · Factory Status</strong><span data-status-summary>Status terbaru dari Logbook/Patrol · bukan telemetry sensor langsung</span></div>';viewport.appendChild(layer);state.layer=layer;
+      const layer=document.createElement('div');layer.id='omodos-status-overlay';layer.innerHTML='<div id="omodos-status-badge"><strong>BMJ · Factory Status</strong><span data-status-summary>Status terbaru dari Logbook/Patrol · bukan telemetry sensor langsung</span></div>';const leaderSvg=document.createElementNS('http://www.w3.org/2000/svg','svg');leaderSvg.id='omodos-status-leaders';leaderSvg.setAttribute('aria-hidden','true');leaderSvg.setAttribute('preserveAspectRatio','none');layer.appendChild(leaderSvg);viewport.appendChild(layer);state.layer=layer;state.leaderSvg=leaderSvg;
       let rootSignature='';
       setInterval(()=>{
         const engine=window.__BMJ_FACTORY_ENGINE__;if(!engine?.actualFactory?.assets||!engine.factory)return;state.engine=engine;
