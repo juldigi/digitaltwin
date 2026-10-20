@@ -83,7 +83,7 @@ test('mobile status callouts stay readable without overlapping the factory view'
 
 test('every displayed status card visibly labels the machine before showing its status', () => {
   assert.match(embed, /card\.innerHTML='<span class="machine-label"><\/span><span class="machine-state">/);
-  assert.match(embed, /card\.querySelector\('\.machine-label'\)\.textContent=shortName\(machine\)/);
+  assert.match(embed, /if\(labelEl\)labelEl\.textContent=visibleLabel/);
   assert.match(embed, /#omodos-status-overlay \.omodos-machine-status-card \.machine-label\{display:block!important/);
   assert.ok(embed.includes("if(labelEl)labelEl.textContent=label;"));
   assert.match(embed, /\.omodos-machine-status-card \.machine-state\{display:block!important/);
@@ -99,9 +99,9 @@ test('compact labels remain distinct for repeated machine families', () => {
 });
 
 test('mobile overview keeps machine names visible and prioritizes focused/status-relevant machines', () => {
-  assert.match(embed, /const cardWidth=focused\?154:Math\.min\(118/);
+  assert.match(embed, /const cardWidth=focused\?154:Math\.min\(116/);
   assert.match(embed, /font-size:9px!important;font-weight:850!important;line-height:1\.2!important;color:#203c4f!important/);
-  assert.match(embed, /card\.querySelector\('\.machine-label'\)\.textContent=shortName\(machine\)/);
+  assert.match(embed, /if\(labelEl\)labelEl\.textContent=visibleLabel/);
   assert.match(embed, /\.machine-state\{display:block!important;visibility:visible!important;opacity:1!important/);
   assert.match(embed, /shown\+' mesin terlihat/);
 });
@@ -139,14 +139,14 @@ test('status cards are visible, keyboard/touch activatable, and report the machi
   assert.match(embed, /type:'OMODOS_FACTORY_STATUS_CARD_CLICK',version:1,code,name/);
   assert.match(embed, /if\(!chosen\)\{/);
   assert.ok(embed.includes('const cellW=120+gap,cellH=29+gap;'));
-  assert.match(embed, /card\.dataset\.machineLabel=label/);
+  assert.match(embed, /card\.dataset\.machineLabel=visibleLabel/);
 });
 
 
 test('status cards use border-box dimensions matching the non-overlap placement grid', () => {
   assert.match(embed, /box-sizing:border-box;display:flex;flex-direction:column/);
   assert.match(embed, /card\.style\.height=cardHeight\+'px'/);
-  assert.match(embed, /const cardWidth=focused\?154:Math\.min\(118/);
+  assert.match(embed, /const cardWidth=focused\?154:Math\.min\(116/);
 });
 
 test('mobile status labels wrap to two lines and preserve distinct machine identities', () => {
