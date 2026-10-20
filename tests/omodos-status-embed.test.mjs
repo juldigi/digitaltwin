@@ -85,7 +85,7 @@ test('every displayed status card visibly labels the machine before showing its 
   assert.match(embed, /card\.innerHTML='<span class="machine-label"><\/span><span class="machine-state">/);
   assert.match(embed, /card\.querySelector\('\.machine-label'\)\.textContent=shortName\(machine\)/);
   assert.match(embed, /#omodos-status-overlay \.omodos-machine-status-card \.machine-label\{display:block!important/);
-  assert.ok(embed.includes("if(labelEl)labelEl.textContent=machineLabel;"));
+  assert.ok(embed.includes("if(labelEl)labelEl.textContent=label;"));
   assert.match(embed, /\.omodos-machine-status-card \.machine-state\{display:block!important/);
 });
 
@@ -98,7 +98,7 @@ test('compact labels remain distinct for repeated machine families', () => {
   assert.match(embed, /card\.title=String\(machine\.name\|\|shortName\(machine\)\)/);
 });
 
-test('mobile overview caps simultaneous status callouts at three and gives machine names priority', () => {
+test('mobile overview keeps machine names visible and prioritizes focused/status-relevant machines', () => {
   assert.match(embed, /const cardWidth=focused\?154:Math\.min\(118/);
   assert.match(embed, /font-size:9px!important;font-weight:850!important;line-height:1\.2!important;color:#203c4f!important/);
   assert.match(embed, /card\.querySelector\('\.machine-label'\)\.textContent=shortName\(machine\)/);
