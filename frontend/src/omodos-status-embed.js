@@ -33,8 +33,8 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     '#omodos-status-badge .status-actions button{border:1px solid #bfd0db;border-radius:7px;padding:6px 8px;background:#193a51;color:#fff;font:700 10px/1.2 system-ui,-apple-system,sans-serif;cursor:pointer;touch-action:manipulation}',
     '#omodos-status-badge .status-actions button:focus-visible{outline:2px solid #1685c5;outline-offset:2px}',
     '#omodos-status-leaders .machine-leader{stroke-opacity:0!important}',
-    '.omodos-machine-status-card.compact{height:auto!important;min-height:0!important;justify-content:center;overflow:visible!important;padding:5px 7px!important;border-width:1px!important;box-shadow:0 2px 6px rgba(26,51,67,.12)!important}',
-    '#omodos-status-overlay .omodos-machine-status-card.compact .machine-label{display:block!important;position:static!important;visibility:visible!important;opacity:1!important;width:100%!important;max-width:none!important;height:auto!important;min-height:0!important;margin:0!important;padding:0!important;overflow:visible!important;text-overflow:clip!important;white-space:normal!important;font-size:10px!important;font-weight:850!important;line-height:1.2!important;color:#203c4f!important;-webkit-line-clamp:unset!important;-webkit-box-orient:initial!important}',
+    '.omodos-machine-status-card.compact{box-sizing:border-box;justify-content:center;overflow:hidden!important;padding:3px 6px!important;border-width:1px!important;box-shadow:0 2px 6px rgba(26,51,67,.12)!important}',
+    '#omodos-status-overlay .omodos-machine-status-card.compact .machine-label{display:block!important;position:static!important;visibility:visible!important;opacity:1!important;width:100%!important;max-width:100%!important;height:auto!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;font-size:10px!important;font-weight:850!important;line-height:1.2!important;color:#203c4f!important;-webkit-line-clamp:unset!important;-webkit-box-orient:initial!important}',
     '.omodos-machine-status-card{position:absolute;left:0;top:0;z-index:2;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-start;width:122px;height:60px;min-height:60px;transform:translate(-50%,-100%);padding:5px 7px 6px;border:1px solid rgba(190,204,214,.94);border-radius:8px;background:rgba(255,255,255,.97);box-shadow:0 2px 8px rgba(26,51,67,.14);color:#203c4f;text-align:left;overflow:hidden;pointer-events:auto;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-tap-highlight-color:transparent}',
     '#omodos-status-overlay .omodos-machine-status-card .machine-label{display:block!important;position:static!important;visibility:visible!important;opacity:1!important;min-height:12px;margin:0!important;padding:0!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:850;line-height:1.25;letter-spacing:.005em;color:#203c4f!important}',
     '.omodos-machine-status-card .machine-state{display:block!important;position:relative;margin-top:3px!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:750;line-height:1.25;color:#596e7d}',
@@ -247,11 +247,12 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     for(const entry of entries){
       const card=entry.card,focused=entry.focused,label=shortName(entry.machine);
       card.classList.toggle('compact',!focused);card.classList.toggle('focused',focused);
-      const cardWidth=focused?154:Math.min(118,Math.max(72,label.length*5.8+14));
-      const cardHeight=focused?76:Math.min(38,Math.max(28,label.length>18?36:28));
-      const labelEl=card.querySelector('.machine-label');if(labelEl)labelEl.textContent=label;
-      card.dataset.machineLabel=label;
-      card.setAttribute('aria-label',label+(focused?' — '+(card.querySelector('.machine-state')?.textContent||'status belum tersedia')+' — ketuk lagi untuk detail pekerjaan':' — ketuk untuk fokus'));
+      const visibleLabel=String(label||entry.machine?.name||entry.machine?.sapCode||'Mesin').trim()||'Mesin';
+      const cardWidth=focused?154:Math.min(116,Math.max(76,visibleLabel.length*5.5+14));
+      const cardHeight=focused?76:26;
+      const labelEl=card.querySelector('.machine-label');if(labelEl)labelEl.textContent=visibleLabel;
+      card.dataset.machineLabel=visibleLabel;
+      card.setAttribute('aria-label',visibleLabel+(focused?' — '+(card.querySelector('.machine-state')?.textContent||'status belum tersedia')+' — ketuk lagi untuk detail pekerjaan':' — ketuk untuk fokus'));
       const x=Math.max(cardWidth/2+margin,Math.min(width-cardWidth/2-margin,entry.x));
       const y=Math.max(cardHeight+margin,Math.min(height-margin,entry.y-7));
       const offsets=focused?[[0,-8],[0,-cardHeight-10],[0,cardHeight*.65]]:[[0,-8],[0,-cardHeight-7],[-cardWidth*.55,-8],[cardWidth*.55,-8],[0,cardHeight+4],[-cardWidth*.55,cardHeight+4],[cardWidth*.55,cardHeight+4]];
@@ -263,14 +264,14 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
         if(!used.some(u=>rect.left<u.right+gap&&rect.right>u.left-gap&&rect.top<u.bottom+gap&&rect.bottom>u.top-gap)){chosen={cx,cy,rect};break;}
       }
       if(!chosen){
-        const cellW=118+gap,cellH=38+gap;
+        const cellW=120+gap,cellH=29+gap;
         const columns=Math.max(1,Math.floor((width-2*margin+gap)/cellW));
         const rows=Math.max(1,Math.ceil((height-2*margin+gap)/cellH));
         let best=null,bestDistance=Infinity;
         for(let row=0;row<rows;row++)for(let col=0;col<columns;col++){
-          const cx=Math.max(59,Math.min(width-59,margin+59+col*cellW));
-          const cy=Math.max(38,Math.min(height-margin,margin+38+row*cellH));
-          const rect={left:cx-59,right:cx+59,top:cy-38,bottom:cy};
+          const cx=Math.max(60,Math.min(width-60,margin+60+col*cellW));
+          const cy=Math.max(29,Math.min(height-margin,margin+29+row*cellH));
+          const rect={left:cx-60,right:cx+60,top:cy-29,bottom:cy};
           if(used.some(u=>rect.left<u.right+1&&rect.right>u.left-1&&rect.top<u.bottom+1&&rect.bottom>u.top-1))continue;
           const d=(cx-entry.x)**2+(cy-16-entry.y)**2;
           if(d<bestDistance){bestDistance=d;best={cx,cy,rect};}
@@ -278,9 +279,9 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
         chosen=best;
       }
       if(!chosen){
-        const cols=Math.max(1,Math.floor(width/121)),col=shown%cols,row=Math.floor(shown/cols);
-        const cx=Math.max(59,Math.min(width-59,59+col*121)),cy=Math.min(height-margin,margin+32+row*35);
-        chosen={cx,cy,rect:{left:cx-59,right:cx+59,top:cy-32,bottom:cy}};
+        const cols=Math.max(1,Math.floor(width/123)),col=shown%cols,row=Math.floor(shown/cols);
+        const cx=Math.max(60,Math.min(width-60,60+col*123)),cy=Math.min(height-margin,margin+29+row*30);
+        chosen={cx,cy,rect:{left:cx-60,right:cx+60,top:cy-29,bottom:cy}};
       }
       card.hidden=false;card.style.width=cardWidth+'px';card.style.minHeight=cardHeight+'px';card.style.height=cardHeight+'px';
       card.style.left=chosen.cx+'px';card.style.top=chosen.cy+'px';
