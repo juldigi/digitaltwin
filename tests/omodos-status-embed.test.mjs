@@ -7,7 +7,7 @@ const embed = readFileSync(new URL('../frontend/src/omodos-status-embed.js', imp
 const building = readFileSync(new URL('../frontend/src/factory-building.js', import.meta.url), 'utf8');
 
 test('OMODOS status viewer is opt-in and only accepts the authenticated OMODOS parent origin', () => {
-  assert.match(html, /src="\.\/src\/omodos-status-embed\.js\?v=2"/);
+  assert.match(html, /src="\.\/src\/omodos-status-embed\.js\?v=3"/);
   assert.match(embed, /new URLSearchParams\(location\.search\)\.get\('embed'\) !== EMBED_KEY/);
   assert.match(embed, /ALLOWED_PARENT_ORIGINS = new Set\(\['https:\/\/omodos\.juldigi\.workers\.dev'\]\)/);
   assert.match(embed, /ALLOWED_PARENT_ORIGINS\.has\(event\.origin\)/);
@@ -73,7 +73,7 @@ test('every visible registry machine gets a status card and ambiguous codes do n
 test('mobile status callouts stay readable without overlapping the factory view', () => {
   assert.doesNotMatch(embed, /const mobileLimit=mobile\?3:Infinity/);
   assert.match(embed, /for\(const entry of state\.anchors\.values\(\)\)/);
-  assert.match(embed, /const mobile=matchMedia\('\(max-width:767px\)'\)\.matches\|\|matchMedia\('\(pointer:coarse\)'\)\.matches/);
+  assert.match(embed, /const gap=3,margin=4/);
   assert.match(embed, /entries\.sort\(\(a,b\)=>Number\(b\.focused\)-Number\(a\.focused\)\|\|a\.priority-b\.priority\|\|a\.y-b\.y/);
   assert.match(embed, /if\(!chosen\)\{/);
   assert.doesNotMatch(embed, /bestOverlap|if\(overlap<bestOverlap\)/);
