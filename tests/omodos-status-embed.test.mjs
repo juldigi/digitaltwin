@@ -100,7 +100,7 @@ test('compact labels remain distinct for repeated machine families', () => {
 
 test('mobile overview keeps machine names visible and prioritizes focused/status-relevant machines', () => {
   assert.match(embed, /const cardWidth=focused\?154:Math\.min\(116/);
-  assert.match(embed, /font-size:9px!important;font-weight:850!important;line-height:1\.2!important;color:#203c4f!important/);
+  assert.match(embed, /#omodos-status-overlay \.omodos-machine-status-card\.compact::before\{content:attr\(data-visible-name\);display:block!important/);
   assert.match(embed, /if\(labelEl\)labelEl\.textContent=visibleLabel/);
   assert.match(embed, /\.machine-state\{display:block!important;visibility:visible!important;opacity:1!important/);
   assert.match(embed, /shown\+' mesin terlihat/);
@@ -123,7 +123,7 @@ test('compact status cards always carry a live leader connector to their machine
 
 test('mobile status callouts use a compact name, status and date hierarchy', () => {
   assert.ok(embed.includes('.omodos-machine-status-card{box-sizing:border-box;width:124px;height:64px;min-height:64px;padding:4px 5px 5px'));
-  assert.ok(embed.includes("card.querySelector('.machine-label').textContent=shortName(machine)"));
+  assert.ok(embed.includes("if(labelEl)labelEl.textContent=visibleLabel"));
   assert.ok(embed.includes("card.querySelector('.machine-state').textContent=compactStatus(status)"));
   assert.ok(embed.includes("card.querySelector('.machine-date').textContent=row?.date?formatDate(row.date):''"));
   assert.ok(embed.includes('for(const entry of state.anchors.values())'));
