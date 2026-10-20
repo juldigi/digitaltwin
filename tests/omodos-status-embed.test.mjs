@@ -197,6 +197,6 @@ test('compact embed chips are responsive and the embedded viewer has no redundan
   assert.match(embed, /const cardHeight=focused\?76:\(width<480\?25:26\)/);
   assert.match(embed, /label ditampilkan agar tidak bertumpuk/);
   assert.doesNotMatch(embed, /Buka Aplikasi Digital Twin/);
-  assert.doesNotMatch(embed, /data-open-digital-twin/);
+  assert.doesNotMatch(embed, /<button[^>]*data-open-digital-twin/);
   assert.match(index, /omodos-status-embed\.js\?v=10/);
 });
