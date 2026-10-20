@@ -100,7 +100,6 @@ test('compact labels remain distinct for repeated machine families', () => {
 });
 
 test('mobile overview keeps machine names visible and prioritizes focused/status-relevant machines', () => {
-  assert.match(embed, /#omodos-status-overlay \.omodos-machine-status-card\.compact::before\{content:attr\(data-visible-name\);display:block!important/);
   assert.match(embed, /if\(labelEl\)labelEl\.textContent=visibleLabel/);
   assert.match(embed, /\.machine-state\{display:block!important;visibility:visible!important;opacity:1!important/);
   assert.match(embed, /shown\+' mesin terlihat/);
@@ -179,18 +178,17 @@ test('Compact status chips keep their JS-computed width and height for collision
   assert.match(embed, /card\.style\.width=cardWidth\+'px';card\.style\.minHeight=cardHeight\+'px';card\.style\.height=cardHeight\+'px'/);
 });
 
-assert.match(embed, /#omodos-status-overlay \.omodos-machine-status-card\.compact::before\{content:attr\(data-visible-name\)/);
 assert.match(embed, /stroke-opacity:0!important/);
 
 assert.doesNotMatch(embed, /\.omodos-machine-status-card\.compact\{height:auto!important/);
 assert.match(embed, /const visibleLabel=String\(label\|\|entry\.machine\?\.name\|\|entry\.machine\?\.sapCode\|\|'Mesin'\)/);
 
 assert.match(embed, /card\.dataset\.visibleName=visibleLabel/);
-assert.match(embed, /content:attr\(data-visible-name\)/);
+assert.ok(embed.includes("#omodos-status-overlay .omodos-machine-status-card.compact::before{content:none!important;display:none!important}"));
+assert.ok(embed.includes("white-space:nowrap!important;overflow-wrap:normal!important;word-break:normal!important"));
 assert.match(embed, /\.omodos-machine-status-card\.compact \.machine-label\{display:none!important\}/);
 
 assert.match(embed, /font-size:8px!important;line-height:1\.2!important\}\}',\s*'\.omodos-machine-status-card\.compact \.machine-label/);
-assert.match(embed, /content:attr\(data-visible-name\)/);
 
 
 test('compact embed chips are responsive and the embedded viewer has no redundant self-link', () => {
@@ -200,5 +198,5 @@ test('compact embed chips are responsive and the embedded viewer has no redundan
   assert.match(embed, /label ditampilkan agar tidak bertumpuk/);
   assert.doesNotMatch(embed, /Buka Aplikasi Digital Twin/);
   assert.doesNotMatch(embed, /data-open-digital-twin/);
-  assert.match(index, /omodos-status-embed\.js\?v=9/);
+  assert.match(index, /omodos-status-embed\.js\?v=10/);
 });
