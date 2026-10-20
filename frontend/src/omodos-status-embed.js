@@ -3,7 +3,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
   // No extra imports or UI for regular DigitalTwin sessions.
 } else {
   const ALLOWED_PARENT_ORIGINS = new Set(['https://omodos.juldigi.workers.dev']);
-  const state = {authorized:false,readySent:false,parentOrigin:null,records:[],recordsVersion:0,registry:[],engine:null,layer:null,cards:new Map(),anchors:new Map(),leaders:new Map(),leaderSvg:null,lastAnchorAt:0,lastPolicyAt:0,policyApplied:false};
+  const state = {authorized:false,readySent:false,parentOrigin:null,records:[],recordsVersion:0,registry:[],engine:null,layer:null,cards:new Map(),anchors:new Map(),leaders:new Map(),leaderSvg:null,lastAnchorAt:0,lastPolicyAt:0,policyApplied:false,focusedMachineId:null,boundControls:null};
   document.documentElement.classList.add('omodos-status-embed');
   const css = [
     'html.omodos-status-embed,html.omodos-status-embed body{width:100%!important;height:100%!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#edf2f5!important}',
@@ -32,6 +32,11 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     '#omodos-status-overlay .omodos-machine-status-card .machine-label{display:block!important;position:static!important;visibility:visible!important;opacity:1!important;min-height:12px;margin:0!important;padding:0!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:850;line-height:1.25;letter-spacing:.005em;color:#203c4f!important}',
     '.omodos-machine-status-card .machine-state{display:block!important;position:relative;margin-top:3px!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:750;line-height:1.25;color:#596e7d}',
     '.omodos-machine-status-card .machine-date{display:block!important;position:relative;margin-top:1px!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;line-height:1.2;color:#738592}',
+    '.omodos-machine-status-card.compact{width:auto!important;height:auto!important;min-height:0!important;max-width:118px;padding:3px 6px!important;border-radius:7px;white-space:normal}',
+    '.omodos-machine-status-card.compact .machine-label{display:-webkit-box!important;min-height:0!important;max-width:106px;font-size:9px!important;font-weight:850!important;line-height:1.15!important;white-space:normal!important;overflow:hidden;text-overflow:ellipsis;-webkit-line-clamp:2;-webkit-box-orient:vertical}',
+    '.omodos-machine-status-card.compact .machine-state,.omodos-machine-status-card.compact .machine-date{display:none!important}',
+    '.omodos-machine-status-card.focused{width:154px!important;height:76px!important;min-height:76px!important;padding:7px 9px!important;box-shadow:0 5px 18px rgba(26,51,67,.22)}',
+    '.omodos-machine-status-card.focused .machine-label{font-size:11px!important;line-height:1.2!important;white-space:normal!important;display:-webkit-box!important;-webkit-line-clamp:2;-webkit-box-orient:vertical}',
     '.omodos-machine-status-card.good{border-color:#a8d9bd;background:rgba(247,255,250,.97)}.omodos-machine-status-card.good .machine-state{color:#187044}',
     '.omodos-machine-status-card.attention{border-color:#efc07b;background:rgba(255,251,242,.97)}.omodos-machine-status-card.attention .machine-state{color:#985400}',
     '.omodos-machine-status-card.critical{border-color:#e4a2a2;background:rgba(255,247,247,.97)}.omodos-machine-status-card.critical .machine-state{color:#ad2e35}',
@@ -143,7 +148,14 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     card.innerHTML='<span class="machine-label"></span><span class="machine-state">Belum ada catatan</span><span class="machine-date"></span>';
     const activate=event=>{
       if(event){event.preventDefault();event.stopPropagation();}
-      if(!state.authorized||!state.parentOrigin||!ALLOWED_PARENT_ORIGINS.has(state.parentOrigin))return;
+      if(!state.authorized||!state.parentOrigin||!ALLOWED_PARENT_ORIGINS.has(state.parentOrigin)||!state.engine)return;
+      const anchor=state.anchors.get(machine.machineId);
+      if(!anchor?.obj)return;
+      if(state.focusedMachineId!==machine.machineId){
+        state.engine.fit(anchor.obj,'iso',true);
+        state.focusedMachineId=machine.machineId;
+        return;
+      }
       const row=bestRecord(machine)||{};
       const code=String(row.code||machine.sapCode||'').trim();
       const name=String(row.name||machine.name||'').trim();
@@ -200,10 +212,11 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     if(!viewport)return;
     const width=viewport.clientWidth,height=viewport.clientHeight;
     if(width<10||height<10)return;
-    const mobile=matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse)').matches;
-    // The mobile viewport cannot label every asset at once. Prioritize important
-    // statuses near the current camera and let users rotate/zoom to other areas.
-    const cardWidth=mobile?124:122,cardHeight=mobile?64:60;
+    if(state.boundControls!==engine.controls){
+      state.boundControls=engine.controls||null;
+      state.boundControls?.addEventListener('start',()=>{state.focusedMachineId=null;});
+    }
+    if(state.focusedMachineId&&!state.anchors.has(state.focusedMachineId))state.focusedMachineId=null;
     const entries=[];
     for(const entry of state.anchors.values()){
       const card=ensureCard(entry.machine);
@@ -211,98 +224,64 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
       card.hidden=true;
       const pos=new THREE.Vector3(entry.anchor.x,entry.anchor.y,entry.anchor.z).project(engine.camera);
       if(pos.z < -1.05 || pos.z > 1.05 || pos.x < -1.08 || pos.x > 1.08 || pos.y < -1.08 || pos.y > 1.08)continue;
-      const statusPriority=card.classList.contains('critical')?0:
-        card.classList.contains('attention')?1:
-        card.classList.contains('good')?2:3;
-      entries.push({
-        machineId:entry.machine.machineId,
-        machine:entry.machine,
-        card,
-        statusPriority,
-        x:(pos.x*.5+.5)*width,
-        y:(-.5*pos.y+.5)*height,
-        distance:(pos.x*pos.x)+(pos.y*pos.y)
-      });
+      const focused=entry.machine.machineId===state.focusedMachineId;
+      entries.push({machineId:entry.machine.machineId,machine:entry.machine,card,focused,
+        priority:card.classList.contains('critical')?0:card.classList.contains('attention')?1:card.classList.contains('good')?2:3,
+        x:(pos.x*.5+.5)*width,y:(-.5*pos.y+.5)*height});
     }
-    entries.sort((a,b)=>a.statusPriority-b.statusPriority||a.distance-b.distance||a.y-b.y);
-    const mobileLimit=mobile?3:Infinity;
-    const candidates=entries.slice(0,mobileLimit);
-    const offsets=mobile
-      ?[[0,-8],[0,-cardHeight-12],[-cardWidth*.58,-8],[cardWidth*.58,-8],[0,-cardHeight*2-14],[-cardWidth*.9,-cardHeight*.6],[cardWidth*.9,-cardHeight*.6],[0,10],[-cardWidth*.55,10],[cardWidth*.55,10],[-cardWidth,-8],[cardWidth,-8]]
-      :[[0,-8],[0,-cardHeight-10],[0,cardHeight*.45],[-cardWidth*.62,-8],[cardWidth*.62,-8],[-cardWidth*.92,-cardHeight*.55],[cardWidth*.92,-cardHeight*.55],[0,-cardHeight*1.7],[-cardWidth*.6,-cardHeight-8],[cardWidth*.6,-cardHeight-8],[0,10],[-cardWidth,-8],[cardWidth,-8],[0,-cardHeight*2.6]];
+    entries.sort((a,b)=>Number(b.focused)-Number(a.focused)||a.priority-b.priority||a.y-b.y);
     const used=[];
     const badge=state.layer.querySelector('#omodos-status-badge');
     if(badge){
       const br=badge.getBoundingClientRect(),vr=viewport.getBoundingClientRect();
-      if(br.width>0&&br.height>0){
-        used.push({left:br.left-vr.left-4,top:br.top-vr.top-4,right:br.right-vr.left+4,bottom:br.bottom-vr.top+4});
-      }
+      if(br.width>0&&br.height>0)used.push({left:br.left-vr.left-3,top:br.top-vr.top-3,right:br.right-vr.left+3,bottom:br.bottom-vr.top+3});
     }
-    let shown=0;
-    for(const entry of candidates){
-      const card=entry.card;
-      const labelEl=card.querySelector('.machine-label');
-      const machineLabel=shortName(entry.machine);
-      if(labelEl)labelEl.textContent=machineLabel;
-      card.dataset.machineLabel=machineLabel;
-      card.setAttribute('aria-label',machineLabel+' — '+(card.querySelector('.machine-state')?.textContent||'Belum ada catatan'));
-      const x=Math.max(cardWidth/2+3,Math.min(width-cardWidth/2-3,entry.x));
-      const y=Math.max(cardHeight+4,Math.min(height-4,entry.y));
+    const gap=3,margin=4;let shown=0;
+    for(const entry of entries){
+      const card=entry.card,focused=entry.focused,label=shortName(entry.machine);
+      card.classList.toggle('compact',!focused);card.classList.toggle('focused',focused);
+      const cardWidth=focused?154:Math.min(118,Math.max(72,label.length*5.8+14));
+      const cardHeight=focused?76:(label.length>18?32:25);
+      const labelEl=card.querySelector('.machine-label');if(labelEl)labelEl.textContent=label;
+      card.dataset.machineLabel=label;
+      card.setAttribute('aria-label',label+(focused?' — '+(card.querySelector('.machine-state')?.textContent||'status belum tersedia')+' — ketuk lagi untuk detail pekerjaan':' — ketuk untuk fokus'));
+      const x=Math.max(cardWidth/2+margin,Math.min(width-cardWidth/2-margin,entry.x));
+      const y=Math.max(cardHeight+margin,Math.min(height-margin,entry.y-7));
+      const offsets=focused?[[0,-8],[0,-cardHeight-10],[0,cardHeight*.65]]:[[0,-8],[0,-cardHeight-7],[-cardWidth*.55,-8],[cardWidth*.55,-8],[0,cardHeight+4],[-cardWidth*.55,cardHeight+4],[cardWidth*.55,cardHeight+4],[-cardWidth*.8,-cardHeight*.6],[cardWidth*.8,-cardHeight*.6]];
       let chosen=null;
       for(const [dx,dy] of offsets){
-        const cx=Math.max(cardWidth/2+3,Math.min(width-cardWidth/2-3,x+dx));
-        const cy=Math.max(cardHeight+3,Math.min(height-3,y+dy));
+        const cx=Math.max(cardWidth/2+margin,Math.min(width-cardWidth/2-margin,x+dx));
+        const cy=Math.max(cardHeight+margin,Math.min(height-margin,y+dy));
         const rect={left:cx-cardWidth/2,right:cx+cardWidth/2,top:cy-cardHeight,bottom:cy};
-        const overlaps=used.some(u=>rect.left<u.right+4&&rect.right>u.left-4&&rect.top<u.bottom+4&&rect.bottom>u.top-4);
-        if(!overlaps){chosen={cx,cy,rect};break;}
+        if(!used.some(u=>rect.left<u.right+gap&&rect.right>u.left-gap&&rect.top<u.bottom+gap&&rect.bottom>u.top-gap)){chosen={cx,cy,rect};break;}
       }
-      // Mobile fallback grid: keep callouts readable even when three
-      // nearby assets compete for the same tiny area. The leader still points
-      // to the true machine anchor; no status card is stacked on another.
-      if(!chosen&&mobile){
-        const margin=5,gap=7,columns=Math.max(1,Math.floor((width-2*margin+gap)/(cardWidth+gap)));
-        const rows=Math.max(1,Math.ceil(height/(cardHeight+gap)));
-        let fallback=null,bestDistance=Infinity;
-        for(let rowIndex=0;rowIndex<rows;rowIndex++){
-          const bottom=margin+cardHeight+rowIndex*(cardHeight+gap);
-          if(bottom>height-margin)continue;
-          for(let column=0;column<columns;column++){
-            const cx=margin+cardWidth/2+column*(cardWidth+gap);
-            const rect={left:cx-cardWidth/2,top:bottom-cardHeight,right:cx+cardWidth/2,bottom};
-            const overlaps=used.some(u=>rect.left<u.right+3&&rect.right>u.left-3&&rect.top<u.bottom+3&&rect.bottom>u.top-3);
-            if(overlaps)continue;
-            const distance=(cx-entry.x)**2+(bottom-cardHeight/2-entry.y)**2;
-            if(distance<bestDistance){bestDistance=distance;fallback={cx,cy:bottom,rect};}
-          }
+      if(!chosen){
+        const cellW=118+gap,cellH=32+gap;
+        const columns=Math.max(1,Math.floor((width-2*margin+gap)/cellW));
+        const rows=Math.max(1,Math.ceil((height-2*margin+gap)/cellH));
+        let best=null,bestDistance=Infinity;
+        for(let row=0;row<rows;row++)for(let col=0;col<columns;col++){
+          const cx=Math.max(59,Math.min(width-59,margin+59+col*cellW));
+          const cy=Math.max(32,Math.min(height-margin,margin+32+row*cellH));
+          const rect={left:cx-59,right:cx+59,top:cy-32,bottom:cy};
+          if(used.some(u=>rect.left<u.right+1&&rect.right>u.left-1&&rect.top<u.bottom+1&&rect.bottom>u.top-1))continue;
+          const d=(cx-entry.x)**2+(cy-16-entry.y)**2;
+          if(d<bestDistance){bestDistance=d;best={cx,cy,rect};}
         }
-        if(fallback)chosen=fallback;
+        chosen=best;
       }
-      if(!chosen)continue;
-      card.hidden=false;
-      card.style.width=cardWidth+'px';
-      card.style.minHeight=cardHeight+'px';
-      card.style.height=cardHeight+'px';
-      card.style.left=chosen.cx+'px';
-      card.style.top=chosen.cy+'px';
-      updateLeader_(entry,chosen.rect);
-      used.push(chosen.rect);
-      shown++;
+      if(!chosen){
+        const cols=Math.max(1,Math.floor(width/121)),col=shown%cols,row=Math.floor(shown/cols);
+        const cx=Math.max(59,Math.min(width-59,59+col*121)),cy=Math.min(height-margin,margin+32+row*35);
+        chosen={cx,cy,rect:{left:cx-59,right:cx+59,top:cy-32,bottom:cy}};
+      }
+      card.hidden=false;card.style.width=cardWidth+'px';card.style.minHeight=cardHeight+'px';card.style.height=cardHeight+'px';
+      card.style.left=chosen.cx+'px';card.style.top=chosen.cy+'px';
+      updateLeader_(entry,chosen.rect);used.push(chosen.rect);shown++;
     }
     const summary=state.layer.querySelector('[data-status-summary]');
-    if(summary){
-      if(mobile){
-        const critical=state.records.filter(row=>/^(kritikal|critical|breakdown)$/i.test(String(row.status||'').trim())).length;
-        const attention=state.records.filter(row=>/perlu perhatian|attention|pending|proses/i.test(String(row.status||'').trim())).length;
-        summary.textContent=shown+' kartu tampil · Kritikal '+critical+' · Perhatian '+attention+' · putar/perbesar untuk mesin lain';
-      }else{
-        summary.textContent='Status terbaru dari Logbook/Patrol · bukan telemetry sensor langsung';
-      }
-    }
-    // Do not let a card from an earlier frame remain visible after the current
-    // mobile priority set has changed.
-    for(const [id,card] of state.cards){
-      if(!entries.some(entry=>entry.machineId===id&&entry.card===card)||!candidates.some(entry=>entry.machineId===id))card.hidden=true;
-    }
+    if(summary)summary.textContent=state.focusedMachineId?'Mesin difokuskan · ketuk kartu yang sama lagi untuk detail pekerjaan':shown+' mesin terlihat · kartu hanya menampilkan nama dan warna status terbaru · ketuk untuk fokus';
+    for(const [id,card] of state.cards)if(!entries.some(entry=>entry.machineId===id&&entry.card===card))card.hidden=true;
   }
   function visibleMeshesUnder(layer){const found=[];if(!layer)return found;const visit=(node,parentVisible)=>{const visible=parentVisible&&node.visible!==false;if(!visible)return;if(node.isMesh)found.push(node);for(const child of node.children||[])visit(child,visible);};visit(layer,true);return found;}
   async function startViewer(){
