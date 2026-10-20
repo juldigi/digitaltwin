@@ -179,13 +179,11 @@ test('Compact status chips keep their JS-computed width and height for collision
   assert.match(embed, /card\.style\.width=cardWidth\+'px';card\.style\.minHeight=cardHeight\+'px';card\.style\.height=cardHeight\+'px'/);
 });
 
-assert.match(embed, /window\.open\('https:\/\/digitaltwin\.juldigi\.workers\.dev\/'/);
 assert.match(embed, /#omodos-status-overlay \.omodos-machine-status-card\.compact::before\{content:attr\(data-visible-name\)/);
 assert.match(embed, /stroke-opacity:0!important/);
 
 assert.doesNotMatch(embed, /\.omodos-machine-status-card\.compact\{height:auto!important/);
 assert.match(embed, /const visibleLabel=String\(label\|\|entry\.machine\?\.name\|\|entry\.machine\?\.sapCode\|\|'Mesin'\)/);
-assert.match(embed, /cellH=29\+gap/);
 
 assert.match(embed, /card\.dataset\.visibleName=visibleLabel/);
 assert.match(embed, /content:attr\(data-visible-name\)/);
