@@ -51,6 +51,12 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     '@media(max-width:700px){#omodos-status-badge{left:7px;top:7px;max-width:min(330px,calc(100vw - 14px));padding:6px 8px;border-radius:9px}#omodos-status-badge strong{font-size:10px}#omodos-status-badge span{font-size:9px;line-height:1.25}.omodos-machine-status-card{box-sizing:border-box;width:124px;height:64px;min-height:64px;padding:4px 5px 5px;border-radius:7px;background:rgba(255,255,255,.985);pointer-events:auto;cursor:pointer;touch-action:manipulation}.omodos-machine-status-card .machine-label{display:block!important;visibility:visible!important;opacity:1!important;min-height:11px;margin:0!important;font-size:9px!important;font-weight:850!important;line-height:1.2!important;color:#203c4f!important}#omodos-status-overlay .omodos-machine-status-card .machine-label{display:-webkit-box!important;white-space:normal!important;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.15!important;max-height:2.3em}.omodos-machine-status-card .machine-state{display:block!important;visibility:visible!important;opacity:1!important;margin-top:2px!important;font-size:8.5px!important;font-weight:750!important;line-height:1.15!important;color:#394e5d!important}.omodos-machine-status-card .machine-date{display:block!important;visibility:visible!important;opacity:1!important;margin-top:1px!important;font-size:8px!important;line-height:1.2!important}}',
     '.omodos-machine-status-card.compact .machine-label{display:none!important}',
     '#omodos-status-overlay .omodos-machine-status-card.compact::before{content:attr(data-visible-name);display:block!important;position:static!important;visibility:visible!important;opacity:1!important;width:100%!important;max-width:100%!important;min-height:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;color:#203c4f!important;font-size:10px!important;font-weight:850!important;line-height:1.2!important;letter-spacing:0!important}',
+    '#omodos-status-badge{left:8px;top:8px;max-width:min(242px,calc(100vw - 16px));padding:6px 8px;border-radius:8px;box-shadow:0 1px 6px rgba(28,56,74,.08)}',
+    '#omodos-status-badge strong{font-size:10px;letter-spacing:.025em}',
+    '#omodos-status-badge span{margin-top:1px;font-size:8px;line-height:1.15;color:#607585}',
+    '.omodos-machine-status-card.compact{padding:2px 3px!important;border-radius:6px!important;box-shadow:none!important}',
+    '#omodos-status-overlay .omodos-machine-status-card.compact::before{display:-webkit-box!important;width:100%!important;max-width:100%!important;height:auto!important;max-height:2.2em!important;min-height:0!important;overflow:hidden!important;text-overflow:clip!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:normal!important;text-align:center!important;font-size:8px!important;font-weight:800!important;line-height:1.08!important;letter-spacing:0!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important}',
+    '@media(max-width:700px){#omodos-status-badge{left:6px;top:6px;max-width:min(224px,calc(100vw - 12px));padding:5px 7px;border-radius:7px}#omodos-status-badge strong{font-size:9px}#omodos-status-badge span{font-size:8px;max-width:205px}.omodos-machine-status-card.compact{border-radius:5px!important}}',
   ].join('\n');
   const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
   const gate = document.createElement('div'); gate.id = 'omodos-status-gate';
@@ -250,8 +256,9 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
       const card=entry.card,focused=entry.focused,label=shortName(entry.machine);
       card.classList.toggle('compact',!focused);card.classList.toggle('focused',focused);
       const visibleLabel=String(label||entry.machine?.name||entry.machine?.sapCode||'Mesin').trim()||'Mesin';
-      const cardWidth=focused?154:Math.min(116,Math.max(76,visibleLabel.length*5.5+14));
-      const cardHeight=focused?76:26;
+      const compactWidth=width<480?86:width<800?94:Math.min(104,Math.max(92,visibleLabel.length*4.8+12));
+      const cardWidth=focused?154:compactWidth;
+      const cardHeight=focused?76:(width<480?25:26);
       const labelEl=card.querySelector('.machine-label');if(labelEl)labelEl.textContent=visibleLabel;
       card.dataset.machineLabel=visibleLabel;
       card.dataset.visibleName=visibleLabel;
@@ -267,31 +274,29 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
         if(!used.some(u=>rect.left<u.right+gap&&rect.right>u.left-gap&&rect.top<u.bottom+gap&&rect.bottom>u.top-gap)){chosen={cx,cy,rect};break;}
       }
       if(!chosen){
-        const cellW=120+gap,cellH=29+gap;
+        const gridCardWidth=width<480?86:width<800?94:104;
+        const gridCardHeight=width<480?25:26;
+        const cellW=gridCardWidth+gap,cellH=gridCardHeight+gap;
         const columns=Math.max(1,Math.floor((width-2*margin+gap)/cellW));
-        const rows=Math.max(1,Math.ceil((height-2*margin+gap)/cellH));
+        const rows=Math.max(1,Math.floor((height-2*margin+gap)/cellH));
         let best=null,bestDistance=Infinity;
         for(let row=0;row<rows;row++)for(let col=0;col<columns;col++){
-          const cx=Math.max(60,Math.min(width-60,margin+60+col*cellW));
-          const cy=Math.max(29,Math.min(height-margin,margin+29+row*cellH));
-          const rect={left:cx-60,right:cx+60,top:cy-29,bottom:cy};
+          const cx=Math.max(margin+gridCardWidth/2,Math.min(width-margin-gridCardWidth/2,margin+gridCardWidth/2+col*cellW));
+          const cy=Math.max(gridCardHeight+margin,Math.min(height-margin,margin+gridCardHeight+row*cellH));
+          const rect={left:cx-gridCardWidth/2,right:cx+gridCardWidth/2,top:cy-gridCardHeight,bottom:cy};
           if(used.some(u=>rect.left<u.right+1&&rect.right>u.left-1&&rect.top<u.bottom+1&&rect.bottom>u.top-1))continue;
           const d=(cx-entry.x)**2+(cy-16-entry.y)**2;
           if(d<bestDistance){bestDistance=d;best={cx,cy,rect};}
         }
         chosen=best;
       }
-      if(!chosen){
-        const cols=Math.max(1,Math.floor(width/123)),col=shown%cols,row=Math.floor(shown/cols);
-        const cx=Math.max(60,Math.min(width-60,60+col*123)),cy=Math.min(height-margin,margin+29+row*30);
-        chosen={cx,cy,rect:{left:cx-60,right:cx+60,top:cy-29,bottom:cy}};
-      }
+      if(!chosen){card.hidden=true;continue;}
       card.hidden=false;card.style.width=cardWidth+'px';card.style.minHeight=cardHeight+'px';card.style.height=cardHeight+'px';
       card.style.left=chosen.cx+'px';card.style.top=chosen.cy+'px';
       updateLeader_(entry,chosen.rect);used.push(chosen.rect);shown++;
     }
     const summary=state.layer.querySelector('[data-status-summary]');
-    if(summary)summary.textContent=state.focusedMachineId?'Mesin difokuskan · ketuk kartu yang sama lagi untuk detail pekerjaan':shown+' mesin terlihat · kartu hanya menampilkan nama dan warna status terbaru · ketuk untuk fokus';
+    if(summary)summary.textContent=state.focusedMachineId?'Mesin difokuskan · ketuk kartu yang sama lagi untuk detail pekerjaan':shown<entries.length?shown+' dari '+entries.length+' label ditampilkan agar tidak bertumpuk':shown+' mesin terlihat · nama dan warna status terbaru · ketuk untuk fokus';
     for(const [id,card] of state.cards)if(!entries.some(entry=>entry.machineId===id&&entry.card===card))card.hidden=true;
   }
   function visibleMeshesUnder(layer){const found=[];if(!layer)return found;const visit=(node,parentVisible)=>{const visible=parentVisible&&node.visible!==false;if(!visible)return;if(node.isMesh)found.push(node);for(const child of node.children||[])visit(child,visible);};visit(layer,true);return found;}
@@ -299,7 +304,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     try{
       const [THREE,registryModule]=await Promise.all([import('three'),import('./data/machine-registry.js')]);state.registry=registryModule.MACHINE_REGISTRY||[];
       const viewport=document.getElementById('viewport');if(!viewport)throw new Error('Viewport pabrik tidak ditemukan.');
-      const layer=document.createElement('div');layer.id='omodos-status-overlay';layer.innerHTML='<div id="omodos-status-badge"><strong>BMJ · Factory Status</strong><span data-status-summary>Status terbaru dari Logbook/Patrol · bukan telemetry sensor langsung</span><div class="status-actions"><button type="button" data-open-digital-twin>Buka Aplikasi Digital Twin</button></div></div>';layer.querySelector('[data-open-digital-twin]')?.addEventListener('click',()=>{window.open('https://digitaltwin.juldigi.workers.dev/','_blank','noopener,noreferrer');});
+      const layer=document.createElement('div');layer.id='omodos-status-overlay';layer.innerHTML='<div id="omodos-status-badge"><strong>BMJ · Status Mesin</strong><span data-status-summary>Warna dari Logbook/Patrol terbaru</span></div>';
       const leaderSvg=document.createElementNS('http://www.w3.org/2000/svg','svg');leaderSvg.id='omodos-status-leaders';leaderSvg.setAttribute('aria-hidden','true');leaderSvg.setAttribute('preserveAspectRatio','none');layer.appendChild(leaderSvg);viewport.appendChild(layer);state.layer=layer;state.leaderSvg=leaderSvg;
       let rootSignature='';
       setInterval(()=>{

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const html = readFileSync(new URL('../frontend/index.html', import.meta.url), 'utf8');
+const index = html;
 const embed = readFileSync(new URL('../frontend/src/omodos-status-embed.js', import.meta.url), 'utf8');
 const building = readFileSync(new URL('../frontend/src/factory-building.js', import.meta.url), 'utf8');
 
@@ -99,7 +100,6 @@ test('compact labels remain distinct for repeated machine families', () => {
 });
 
 test('mobile overview keeps machine names visible and prioritizes focused/status-relevant machines', () => {
-  assert.match(embed, /const cardWidth=focused\?154:Math\.min\(116/);
   assert.match(embed, /#omodos-status-overlay \.omodos-machine-status-card\.compact::before\{content:attr\(data-visible-name\);display:block!important/);
   assert.match(embed, /if\(labelEl\)labelEl\.textContent=visibleLabel/);
   assert.match(embed, /\.machine-state\{display:block!important;visibility:visible!important;opacity:1!important/);
@@ -138,7 +138,6 @@ test('status cards are visible, keyboard/touch activatable, and report the machi
   assert.match(embed, /event\.key==='Enter'\|\|event\.key===' '/);
   assert.match(embed, /type:'OMODOS_FACTORY_STATUS_CARD_CLICK',version:1,code,name/);
   assert.match(embed, /if\(!chosen\)\{/);
-  assert.ok(embed.includes('const cellW=120+gap,cellH=29+gap;'));
   assert.match(embed, /card\.dataset\.machineLabel=visibleLabel/);
 });
 
@@ -146,7 +145,6 @@ test('status cards are visible, keyboard/touch activatable, and report the machi
 test('status cards use border-box dimensions matching the non-overlap placement grid', () => {
   assert.match(embed, /box-sizing:border-box;display:flex;flex-direction:column/);
   assert.match(embed, /card\.style\.height=cardHeight\+'px'/);
-  assert.match(embed, /const cardWidth=focused\?154:Math\.min\(116/);
 });
 
 test('mobile status labels wrap to two lines and preserve distinct machine identities', () => {
@@ -181,14 +179,11 @@ test('Compact status chips keep their JS-computed width and height for collision
   assert.match(embed, /card\.style\.width=cardWidth\+'px';card\.style\.minHeight=cardHeight\+'px';card\.style\.height=cardHeight\+'px'/);
 });
 
-assert.match(embed, /Buka Aplikasi Digital Twin/);
-assert.match(embed, /data-open-digital-twin/);
 assert.match(embed, /window\.open\('https:\/\/digitaltwin\.juldigi\.workers\.dev\/'/);
 assert.match(embed, /#omodos-status-overlay \.omodos-machine-status-card\.compact::before\{content:attr\(data-visible-name\)/);
 assert.match(embed, /stroke-opacity:0!important/);
 
 assert.doesNotMatch(embed, /\.omodos-machine-status-card\.compact\{height:auto!important/);
-assert.match(embed, /const cardHeight=focused\?76:26/);
 assert.match(embed, /const visibleLabel=String\(label\|\|entry\.machine\?\.name\|\|entry\.machine\?\.sapCode\|\|'Mesin'\)/);
 assert.match(embed, /cellH=29\+gap/);
 
@@ -198,3 +193,14 @@ assert.match(embed, /\.omodos-machine-status-card\.compact \.machine-label\{disp
 
 assert.match(embed, /font-size:8px!important;line-height:1\.2!important\}\}',\s*'\.omodos-machine-status-card\.compact \.machine-label/);
 assert.match(embed, /content:attr\(data-visible-name\)/);
+
+
+test('compact embed chips are responsive and the embedded viewer has no redundant self-link', () => {
+  assert.match(embed, /const compactWidth=width<480\?86:width<800\?94/);
+  assert.match(embed, /const gridCardWidth=width<480\?86:width<800\?94:104/);
+  assert.match(embed, /const cardHeight=focused\?76:\(width<480\?25:26\)/);
+  assert.match(embed, /label ditampilkan agar tidak bertumpuk/);
+  assert.doesNotMatch(embed, /Buka Aplikasi Digital Twin/);
+  assert.doesNotMatch(embed, /data-open-digital-twin/);
+  assert.match(index, /omodos-status-embed\.js\?v=9/);
+});
