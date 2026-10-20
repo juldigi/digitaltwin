@@ -138,7 +138,7 @@ test('status cards are visible, keyboard/touch activatable, and report the machi
   assert.match(embed, /event\.key==='Enter'\|\|event\.key===' '/);
   assert.match(embed, /type:'OMODOS_FACTORY_STATUS_CARD_CLICK',version:1,code,name/);
   assert.match(embed, /if\(!chosen\)\{/);
-  assert.ok(embed.includes('const cellW=118+gap,cellH=32+gap;'));
+  assert.ok(embed.includes('const cellW=120+gap,cellH=29+gap;'));
   assert.match(embed, /card\.dataset\.machineLabel=label/);
 });
 
