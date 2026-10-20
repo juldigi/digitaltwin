@@ -85,7 +85,7 @@ test('every displayed status card visibly labels the machine before showing its 
   assert.match(embed, /card\.innerHTML='<span class="machine-label"><\/span><span class="machine-state">/);
   assert.match(embed, /if\(labelEl\)labelEl\.textContent=visibleLabel/);
   assert.match(embed, /#omodos-status-overlay \.omodos-machine-status-card \.machine-label\{display:block!important/);
-  assert.ok(embed.includes("if(labelEl)labelEl.textContent=label;"));
+  assert.ok(embed.includes("if(labelEl)labelEl.textContent=visibleLabel"));
   assert.match(embed, /\.omodos-machine-status-card \.machine-state\{display:block!important/);
 });
 
