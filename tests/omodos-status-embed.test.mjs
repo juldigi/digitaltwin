@@ -184,7 +184,7 @@ test('Compact status chips keep their JS-computed width and height for collision
 assert.match(embed, /Buka Aplikasi Digital Twin/);
 assert.match(embed, /data-open-digital-twin/);
 assert.match(embed, /window\.open\('https:\/\/digitaltwin\.juldigi\.workers\.dev\/'/);
-assert.match(embed, /#omodos-status-overlay \.omodos-machine-status-card\.compact \.machine-label\{display:block!important/);
+assert.match(embed, /#omodos-status-overlay \.omodos-machine-status-card\.compact::before\{content:attr\(data-visible-name\)/);
 assert.match(embed, /stroke-opacity:0!important/);
 
 assert.doesNotMatch(embed, /\.omodos-machine-status-card\.compact\{height:auto!important/);
