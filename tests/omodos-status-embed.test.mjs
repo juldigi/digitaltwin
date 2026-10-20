@@ -71,12 +71,13 @@ test('every visible registry machine gets a status card and ambiguous codes do n
 });
 
 test('mobile status callouts stay readable without overlapping the factory view', () => {
-  assert.match(embed, /const mobileLimit=mobile\?3:Infinity/);
+  assert.doesNotMatch(embed, /const mobileLimit=mobile\?3:Infinity/);
+  assert.match(embed, /for\(const entry of state\.anchors\.values\(\)\)/);
   assert.match(embed, /const mobile=matchMedia\('\(max-width:767px\)'\)\.matches\|\|matchMedia\('\(pointer:coarse\)'\)\.matches/);
-  assert.match(embed, /entries\.sort\(\(a,b\)=>a\.statusPriority-b\.statusPriority\|\|a\.distance-b\.distance/);
-  assert.match(embed, /if\(!chosen\)continue;/);
+  assert.match(embed, /entries\.sort\(\(a,b\)=>Number\(b\.focused\)-Number\(a\.focused\)\|\|a\.priority-b\.priority\|\|a\.y-b\.y/);
+  assert.match(embed, /if\(!chosen\)\{/);
   assert.doesNotMatch(embed, /bestOverlap|if\(overlap<bestOverlap\)/);
-  assert.match(embed, /shown\+' kartu tampil/);
+  assert.match(embed, /shown\+' mesin terlihat/);
   assert.match(embed, /data-status-summary/);
 });
 
@@ -98,11 +99,11 @@ test('compact labels remain distinct for repeated machine families', () => {
 });
 
 test('mobile overview caps simultaneous status callouts at three and gives machine names priority', () => {
-  assert.match(embed, /const cardWidth=mobile\?124:122,cardHeight=mobile\?64:60/);
+  assert.match(embed, /const cardWidth=focused\?154:Math\.min\(118/);
   assert.match(embed, /font-size:9px!important;font-weight:850!important;line-height:1\.2!important;color:#203c4f!important/);
   assert.match(embed, /card\.querySelector\('\.machine-label'\)\.textContent=shortName\(machine\)/);
   assert.match(embed, /\.machine-state\{display:block!important;visibility:visible!important;opacity:1!important/);
-  assert.match(embed, /shown\+' kartu tampil/);
+  assert.match(embed, /shown\+' mesin terlihat/);
 });
 
 
@@ -136,16 +137,16 @@ test('status cards are visible, keyboard/touch activatable, and report the machi
   assert.match(embed, /card\.addEventListener\('click',activate\)/);
   assert.match(embed, /event\.key==='Enter'\|\|event\.key===' '/);
   assert.match(embed, /type:'OMODOS_FACTORY_STATUS_CARD_CLICK',version:1,code,name/);
-  assert.match(embed, /if\(!chosen&&mobile\)/);
-  assert.ok(embed.includes('const margin=5,gap=7,columns=Math.max(1,Math.floor((width-2*margin+gap)/(cardWidth+gap)));'));
-  assert.match(embed, /card\.dataset\.machineLabel=machineLabel/);
+  assert.match(embed, /if\(!chosen\)\{/);
+  assert.ok(embed.includes('const cellW=118+gap,cellH=32+gap;'));
+  assert.match(embed, /card\.dataset\.machineLabel=label/);
 });
 
 
 test('status cards use border-box dimensions matching the non-overlap placement grid', () => {
   assert.match(embed, /box-sizing:border-box;display:flex;flex-direction:column/);
   assert.match(embed, /card\.style\.height=cardHeight\+'px'/);
-  assert.match(embed, /const cardWidth=mobile\?124:122,cardHeight=mobile\?64:60/);
+  assert.match(embed, /const cardWidth=focused\?154:Math\.min\(118/);
 });
 
 test('mobile status labels wrap to two lines and preserve distinct machine identities', () => {
