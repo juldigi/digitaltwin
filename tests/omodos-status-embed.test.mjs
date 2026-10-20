@@ -7,7 +7,7 @@ const embed = readFileSync(new URL('../frontend/src/omodos-status-embed.js', imp
 const building = readFileSync(new URL('../frontend/src/factory-building.js', import.meta.url), 'utf8');
 
 test('OMODOS status viewer is opt-in and only accepts the authenticated OMODOS parent origin', () => {
-  assert.match(html, /src="\.\/src\/omodos-status-embed\.js\?v=7"/);
+  assert.match(html, /src="\.\/src\/omodos-status-embed\.js\?v=8"/);
   assert.match(embed, /new URLSearchParams\(location\.search\)\.get\('embed'\) !== EMBED_KEY/);
   assert.match(embed, /ALLOWED_PARENT_ORIGINS = new Set\(\['https:\/\/omodos\.juldigi\.workers\.dev'\]\)/);
   assert.match(embed, /ALLOWED_PARENT_ORIGINS\.has\(event\.origin\)/);
@@ -195,3 +195,6 @@ assert.match(embed, /cellH=29\+gap/);
 assert.match(embed, /card\.dataset\.visibleName=visibleLabel/);
 assert.match(embed, /content:attr\(data-visible-name\)/);
 assert.match(embed, /\.omodos-machine-status-card\.compact \.machine-label\{display:none!important\}/);
+
+assert.match(embed, /font-size:8px!important;line-height:1\.2!important\}\}',\s*'\.omodos-machine-status-card\.compact \.machine-label/);
+assert.match(embed, /content:attr\(data-visible-name\)/);
