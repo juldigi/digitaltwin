@@ -125,7 +125,8 @@ test('mobile status callouts use a compact name, status and date hierarchy', () 
   assert.ok(embed.includes("card.querySelector('.machine-label').textContent=shortName(machine)"));
   assert.ok(embed.includes("card.querySelector('.machine-state').textContent=compactStatus(status)"));
   assert.ok(embed.includes("card.querySelector('.machine-date').textContent=row?.date?formatDate(row.date):''"));
-  assert.ok(embed.includes('const mobileLimit=mobile?3:Infinity'));
+  assert.ok(embed.includes('for(const entry of state.anchors.values())'));
+  assert.doesNotMatch(embed,/const mobileLimit=mobile\?3:Infinity/);
 });
 
 
@@ -156,4 +157,18 @@ test('mobile status labels wrap to two lines and preserve distinct machine ident
 test('mobile factory framing gets a modest portrait-only zoom after fitting the full factory', () => {
   assert.match(embed, /engine\.fitObjects\(fitObjects,'iso',false\);if\(viewport\.clientWidth<=767/);
   assert.match(embed, /multiplyScalar\(\.9\)/);
+});
+
+
+test('Factory overview renders compact name-only status chips for all visible machines', () => {
+  assert.match(embed, /card\.classList\.toggle\('compact',!focused\)/);
+  assert.match(embed, /for\(const entry of state\.anchors\.values\(\)\)/);
+  assert.doesNotMatch(embed, /const mobileLimit=mobile\?3:Infinity/);
+  assert.match(embed, /card\.classList\.add\(row\?toneFor\(status\):'unknown'\)/);
+});
+
+test('Factory machine cards focus on first tap and open existing OMODOS detail on second tap', () => {
+  assert.match(embed, /state\.focusedMachineId!==machine\.machineId/);
+  assert.match(embed, /state\.engine\.fit\(anchor\.obj,'iso',true\)/);
+  assert.match(embed, /OMODOS_FACTORY_STATUS_CARD_CLICK/);
 });
