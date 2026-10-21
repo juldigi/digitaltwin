@@ -236,7 +236,6 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     const width=viewport.clientWidth,height=viewport.clientHeight;
     if(width<10||height<10)return;
     const mobile=matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse)').matches;
-    const mobile=matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse)').matches;
     if(state.boundControls!==engine.controls){
       state.boundControls=engine.controls||null;
       state.boundControls?.addEventListener('start',()=>{state.focusedMachineId=null;});
@@ -344,14 +343,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
           };
           hideIpalStructure(engine.actualFactory.layers.ipal);
           engine.onFactorySelect=()=>{};engine.onTaxonomySelect=()=>{};engine.renderer.domElement.style.touchAction='none';engine.renderer.domElement.setAttribute('aria-label','Tampilan 3D status mesin BMJ; objek tidak membuka detail.');
-          if(state.authorized&&engine.actualFactory.assets.size){
-            const fitObjects=[...engine.actualFactory.assets.values(),...visibleMeshesUnder(engine.actualFactory.layers.ipal)];
-            engine.fitObjects(fitObjects,'iso',false);
-            if(viewport.clientWidth<=767&&matchMedia('(pointer:coarse)').matches&&engine.controls?.target&&engine.camera){
-              engine.camera.position.sub(engine.controls.target).multiplyScalar(.9).add(engine.controls.target);
-              engine.controls.update();
-            }
-          }
+          if(state.authorized&&engine.actualFactory.assets.size){const fitObjects=[...engine.actualFactory.assets.values(),...visibleMeshesUnder(engine.actualFactory.layers.ipal)];engine.fitObjects(fitObjects,'iso',false);if(viewport.clientWidth<=767&&matchMedia('(pointer:coarse)').matches&&engine.controls?.target&&engine.camera){engine.camera.position.sub(engine.controls.target).multiplyScalar(.9).add(engine.controls.target);engine.controls.update();}}
         }
         if(now-state.lastAnchorAt>1400||rootChanged)rebuildAnchors(THREE,engine);
         // Tell OMODOS the viewer is ready only after the engine, visible assets,
