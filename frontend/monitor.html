@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111b22">
+  <title>OMODOS · Factory Status Twin</title>
+  <link rel="stylesheet" href="./monitor.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/addons/"}}</script>
+</head>
+<body>
+  <section id="monitor-gate" class="gate" aria-live="polite">
+    <div class="gate-mark">BMJ</div>
+    <h1>Factory Status Twin</h1>
+    <p>Tampilan ini hanya dapat dibuka dari beranda OMODOS oleh Superadmin.</p>
+    <span class="gate-hint">Menunggu otorisasi OMODOS…</span>
+  </section>
+
+  <div id="monitor-app" class="monitor-app" hidden>
+    <header class="monitor-header">
+      <div class="brand-lockup">
+        <div class="brand-mark" aria-hidden="true">BMJ</div>
+        <div class="brand-copy">
+          <div class="eyebrow">OMODOS · SUPERADMIN</div>
+          <h1>Factory Status Twin</h1>
+          <p>Visualisasi statis seluruh mesin · status terakhir dari Logbook/Patrol</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="camera-iso" type="button" class="view-button active" aria-pressed="true">Isometrik</button>
+        <button id="camera-top" type="button" class="view-button" aria-pressed="false">Tampak atas</button>
+        <button id="camera-fit" type="button" class="fit-button" title="Sesuaikan seluruh pabrik">⌖</button>
+      </div>
+    </header>
+
+    <section class="summary-strip" aria-label="Ringkasan status mesin">
+      <div class="summary-total"><strong id="summary-total">—</strong><span>Mesin pada layout</span></div>
+      <div class="summary-item critical"><i></i><strong id="summary-critical">—</strong><span>Kritis</span></div>
+      <div class="summary-item attention"><i></i><strong id="summary-attention">—</strong><span>Perhatian</span></div>
+      <div class="summary-item normal"><i></i><strong id="summary-normal">—</strong><span>Normal</span></div>
+      <div class="summary-item unknown"><i></i><strong id="summary-unknown">—</strong><span>Belum ada data</span></div>
+      <div class="updated-at" id="updated-at">Menunggu data status…</div>
+    </section>
+
+    <main id="factory-viewport" class="factory-viewport" aria-label="Visualisasi 3D seluruh area pabrik">
+      <div class="loading-state" id="loading-state">
+        <span class="loading-spinner" aria-hidden="true"></span>
+        <strong>Menyiapkan model pabrik</strong>
+        <span>Memuat layout dan mesin dari DigitalTwin.</span>
+      </div>
+      <div class="machine-label-layer" id="machine-label-layer" aria-hidden="true"></div>
+      <div class="viewer-error" id="viewer-error" hidden></div>
+      <div class="viewport-hint">Geser untuk memutar · cubit atau scroll untuk memperbesar</div>
+    </main>
+
+    <footer class="monitor-footer">
+      <span><i class="legend-dot critical"></i> Kritis</span>
+      <span><i class="legend-dot attention"></i> Perhatian</span>
+      <span><i class="legend-dot normal"></i> Normal</span>
+      <span><i class="legend-dot unknown"></i> Belum ada data</span>
+      <p>Warna menunjukkan catatan terbaru yang tersedia, bukan telemetri sensor real-time.</p>
+    </footer>
+  </div>
+  <script type="module" src="./src/monitor.js"></script>
+</body>
+</html>
