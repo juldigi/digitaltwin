@@ -3,7 +3,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
   // No extra imports or UI for regular DigitalTwin sessions.
 } else {
   const ALLOWED_PARENT_ORIGINS = new Set(['https://omodos.juldigi.workers.dev']);
-  const state = {authorized:false,readySent:false,parentOrigin:null,records:[],recordsVersion:0,registry:[],engine:null,layer:null,cards:new Map(),anchors:new Map(),leaders:new Map(),leaderSvg:null,lastAnchorAt:0,lastPolicyAt:0,policyApplied:false,focusedMachineId:null,boundControls:null,overviewCameraDistance:null};
+  const state = {authorized:false,readySent:false,parentOrigin:null,records:[],recordsVersion:0,registry:[],engine:null,layer:null,cards:new Map(),anchors:new Map(),leaders:new Map(),leaderSvg:null,lastAnchorAt:0,lastPolicyAt:0,policyApplied:false,focusedMachineId:null,boundControls:null};
   document.documentElement.classList.add('omodos-status-embed');
   const css = [
     'html.omodos-status-embed,html.omodos-status-embed body{width:100%!important;height:100%!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#edf2f5!important}',
@@ -228,19 +228,6 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     nodes.dot.setAttribute('fill',stateClass==='critical'?'#c84b53':stateClass==='attention'?'#bd7b23':stateClass==='good'?'#348461':'#8196a4');
     nodes.line.style.display='block';nodes.dot.style.display='block';
   }
-  function mobileCardLimit_(engine){
-    const target=engine?.controls?.target;
-    const currentDistance=target&&engine?.camera?.position?.distanceTo?engine.camera.position.distanceTo(target):NaN;
-    const overviewDistance=state.overviewCameraDistance;
-    if(!Number.isFinite(currentDistance)||currentDistance<=0||!Number.isFinite(overviewDistance)||overviewDistance<=0)return 3;
-    const zoomRatio=overviewDistance/currentDistance;
-    // Keep the full-factory mobile view calm; reveal more labels as the user zooms into a machine cluster.
-    if(zoomRatio<1.28)return 3;
-    if(zoomRatio<1.72)return 5;
-    if(zoomRatio<2.28)return 8;
-    if(zoomRatio<3.0)return 12;
-    return 16;
-  }
   function projectCards(THREE,engine){
     if(!state.authorized||!state.layer||!engine?.camera||!engine?.renderer?.domElement)return;
     hideLeaders_();
@@ -248,6 +235,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     if(!viewport)return;
     const width=viewport.clientWidth,height=viewport.clientHeight;
     if(width<10||height<10)return;
+    const mobile=matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse)').matches;
     const mobile=matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse)').matches;
     if(state.boundControls!==engine.controls){
       state.boundControls=engine.controls||null;
@@ -267,7 +255,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
         x:(pos.x*.5+.5)*width,y:(-.5*pos.y+.5)*height});
     }
     entries.sort((a,b)=>Number(b.focused)-Number(a.focused)||a.priority-b.priority||a.y-b.y);
-    const candidates=mobile?entries.slice(0,mobileCardLimit_(engine)):entries;
+    const denseMobile=mobile&&entries.length>28;
     const used=[];
     const badge=state.layer.querySelector('#omodos-status-badge');
     if(badge){
@@ -275,13 +263,13 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
       if(br.width>0&&br.height>0)used.push({left:br.left-vr.left-3,top:br.top-vr.top-3,right:br.right-vr.left+3,bottom:br.bottom-vr.top+3});
     }
     const gap=3,margin=4;let shown=0;
-    for(const entry of candidates){
+    for(const entry of entries){
       const card=entry.card,focused=entry.focused,label=shortName(entry.machine);
       card.classList.toggle('compact',!focused);card.classList.toggle('focused',focused);
       const visibleLabel=String(label||entry.machine?.name||entry.machine?.sapCode||'Mesin').trim()||'Mesin';
-      const compactWidth=width<480?86:width<800?94:Math.min(104,Math.max(92,visibleLabel.length*4.8+12));
+      const compactWidth=width<480?(denseMobile?76:86):width<800?94:Math.min(104,Math.max(92,visibleLabel.length*4.8+12));
       const cardWidth=focused?154:compactWidth;
-      const cardHeight=focused?76:(width<480?25:26);
+      const cardHeight=focused?76:(width<480?(denseMobile?23:25):26);
       const labelEl=card.querySelector('.machine-label');if(labelEl)labelEl.textContent=visibleLabel;
       card.dataset.machineLabel=visibleLabel;
       card.dataset.visibleName=visibleLabel;
@@ -297,7 +285,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
         if(!used.some(u=>rect.left<u.right+gap&&rect.right>u.left-gap&&rect.top<u.bottom+gap&&rect.bottom>u.top-gap)){chosen={cx,cy,rect};break;}
       }
       if(!chosen){
-        const gridCardWidth=width<480?86:width<800?94:104;
+        const gridCardWidth=width<480?(denseMobile?76:86):width<800?94:104;
         const gridCardHeight=width<480?25:26;
         const cellW=gridCardWidth+gap,cellH=gridCardHeight+gap;
         const columns=Math.max(1,Math.floor((width-2*margin+gap)/cellW));
@@ -363,9 +351,6 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
               engine.camera.position.sub(engine.controls.target).multiplyScalar(.9).add(engine.controls.target);
               engine.controls.update();
             }
-            const overviewTarget=engine.controls?.target;
-            const overviewDistance=overviewTarget&&engine.camera?.position?.distanceTo?engine.camera.position.distanceTo(overviewTarget):NaN;
-            state.overviewCameraDistance=Number.isFinite(overviewDistance)&&overviewDistance>0?overviewDistance:null;
           }
         }
         if(now-state.lastAnchorAt>1400||rootChanged)rebuildAnchors(THREE,engine);
