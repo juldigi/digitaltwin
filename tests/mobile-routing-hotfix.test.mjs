@@ -18,7 +18,7 @@ test('user toast never exposes raw JavaScript exception text',()=>{
 });
 
 test('HTML requests the cache-busted fixed controller',()=>{
- assert.match(html,/src\/app\.js\?v=222/);
+ assert.match(html,/src\/app\.js\?v=223/);
 });
 
 
@@ -32,7 +32,9 @@ test('mobile renderer preserves the detailed factory except on severely memory-l
  assert.match(engine,/function buildLowDetailFactory\(layout,fleet\)/);
  assert.match(engine,/this\.actualFactory=this\.capabilities\?\.memory<=2\?buildLowDetailFactory\(l,l\.fleet\):buildActualFactory\(l,l\.fleet\)/);
  assert.match(engine,/matchMedia\('\(max-width:767px\)'\)\.matches/);
- assert.match(engine,/antialias:true/);
+ assert.match(engine,/antialias:!this\.omodosStatusEmbed/);
+ assert.match(engine,/this\.omodosStatusEmbed=new URLSearchParams\(location\.search\)\.get\('embed'\)==='omodos-status'/);
+ assert.match(engine,/powerPreference:this\.omodosStatusEmbed\?'low-power':'high-performance'/);
  assert.match(engine,/this\.renderFaulted=true/);
  assert.match(css,/\.part-label-layer\{display:none!important;pointer-events:none!important\}/);
 });
