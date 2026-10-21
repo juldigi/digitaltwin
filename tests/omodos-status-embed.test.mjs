@@ -203,14 +203,16 @@ test('compact embed chips are responsive and the embedded viewer has no redundan
 });
 
 
-test('OMODOS embed uses a low-power renderer and adaptive mobile card density', () => {
+test('OMODOS embed uses a low-power renderer and keeps all visible machine cards selectable on mobile', () => {
   assert.ok(engine.includes("this.omodosStatusEmbed=new URLSearchParams(location.search).get('embed')==='omodos-status'"));
   assert.ok(engine.includes("powerPreference:this.omodosStatusEmbed?'low-power':'high-performance'"));
   assert.ok(engine.includes("const frameInterval=this.omodosStatusEmbed?48"));
   assert.ok(engine.includes("if(!this.omodosStatusEmbed)void this.hydrateFactoryDetailedMachines"));
-  assert.ok(embed.includes("function mobileCardLimit_(engine)"));
-  assert.ok(embed.includes("const candidates=mobile?entries.slice(0,mobileCardLimit_(engine)):entries"));
-  assert.ok(embed.includes("state.overviewCameraDistance=Number.isFinite(overviewDistance)"));
+  assert.ok(embed.includes("const denseMobile=mobile&&entries.length>28"));
+  assert.ok(embed.includes("const compactWidth=width<480?(denseMobile?76:86)"));
+  assert.ok(embed.includes("const gridCardWidth=width<480?(denseMobile?76:86)"));
+  assert.ok(embed.includes("const cardHeight=focused?76:(width<480?(denseMobile?23:25):26)"));
+  assert.doesNotMatch(embed,/mobileCardLimit_|entries\.slice\(0,/);
   assert.ok(embed.includes("setTimeout(projectLoop,document.hidden?1000:projectionInterval)"));
   assert.ok(index.includes("omodos-status-embed.js?v=11"));
 });
