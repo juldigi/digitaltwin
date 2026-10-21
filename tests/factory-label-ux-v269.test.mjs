@@ -28,7 +28,7 @@ test('V269 keeps label size stable while zooming and culls overlapping labels',(
  assert.match(engine,/THREE\.MathUtils\.clamp\(distance\/45,\.12,1\.25\)/);
  assert.match(engine,/if\(selectedId&&this\.transition\)\{for\(const sprite of sprites\)sprite\.visible=false;return;\}/);
  assert.match(engine,/const overlaps=!selected&&placed\.some/);
- assert.match(engine,/if\(this\.view==='factory'\)this\.updateFactoryLabels\(\)/);
+ assert.match(engine,/if\(this\.view==='factory'&&!this\.omodosStatusEmbed\)this\.updateFactoryLabels\(\)/);
 });
 
 test('V269 component labels also stay out of the way while camera focus is moving',()=>{
