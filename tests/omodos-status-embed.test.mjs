@@ -5,10 +5,11 @@ import { readFileSync } from 'node:fs';
 const html = readFileSync(new URL('../frontend/index.html', import.meta.url), 'utf8');
 const index = html;
 const embed = readFileSync(new URL('../frontend/src/omodos-status-embed.js', import.meta.url), 'utf8');
+const engine = readFileSync(new URL('../frontend/src/engine.js', import.meta.url), 'utf8');
 const building = readFileSync(new URL('../frontend/src/factory-building.js', import.meta.url), 'utf8');
 
 test('OMODOS status viewer is opt-in and only accepts the authenticated OMODOS parent origin', () => {
-  assert.match(html, /src="\.\/src\/omodos-status-embed\.js\?v=10"/);
+  assert.match(html, /src="\.\/src\/omodos-status-embed\.js\?v=11"/);
   assert.match(embed, /new URLSearchParams\(location\.search\)\.get\('embed'\) !== EMBED_KEY/);
   assert.match(embed, /ALLOWED_PARENT_ORIGINS = new Set\(\['https:\/\/omodos\.juldigi\.workers\.dev'\]\)/);
   assert.match(embed, /ALLOWED_PARENT_ORIGINS\.has\(event\.origin\)/);
@@ -192,11 +193,26 @@ assert.match(embed, /font-size:8px!important;line-height:1\.2!important\}\}',\s*
 
 
 test('compact embed chips are responsive and the embedded viewer has no redundant self-link', () => {
-  assert.match(embed, /const compactWidth=width<480\?86:width<800\?94/);
-  assert.match(embed, /const gridCardWidth=width<480\?86:width<800\?94:104/);
-  assert.match(embed, /const cardHeight=focused\?76:\(width<480\?25:26\)/);
+  assert.match(embed, /const compactWidth=width<480\?\(denseMobile\?76:86\):width<800\?94/);
+  assert.match(embed, /const gridCardWidth=width<480\?\(denseMobile\?76:86\):width<800\?94:104/);
+  assert.match(embed, /const cardHeight=focused\?76:\(width<480\?\(denseMobile\?23:25\):26\)/);
   assert.match(embed, /label ditampilkan agar tidak bertumpuk/);
   assert.doesNotMatch(embed, /Buka Aplikasi Digital Twin/);
   assert.doesNotMatch(embed, /<button[^>]*data-open-digital-twin/);
-  assert.match(index, /omodos-status-embed\.js\?v=10/);
+  assert.match(index, /omodos-status-embed\.js\?v=11/);
+});
+
+
+test('OMODOS embed uses a low-power renderer and keeps all visible machine cards selectable on mobile', () => {
+  assert.ok(engine.includes("this.omodosStatusEmbed=new URLSearchParams(location.search).get('embed')==='omodos-status'"));
+  assert.ok(engine.includes("powerPreference:this.omodosStatusEmbed?'low-power':'high-performance'"));
+  assert.ok(engine.includes("const frameInterval=this.omodosStatusEmbed?48"));
+  assert.ok(engine.includes("if(!this.omodosStatusEmbed)void this.hydrateFactoryDetailedMachines"));
+  assert.ok(embed.includes("const denseMobile=mobile&&entries.length>28"));
+  assert.ok(embed.includes("const compactWidth=width<480?(denseMobile?76:86)"));
+  assert.ok(embed.includes("const gridCardWidth=width<480?(denseMobile?76:86)"));
+  assert.ok(embed.includes("const cardHeight=focused?76:(width<480?(denseMobile?23:25):26)"));
+  assert.doesNotMatch(embed,/mobileCardLimit_|entries\.slice\(0,/);
+  assert.ok(embed.includes("setTimeout(projectLoop,document.hidden?1000:projectionInterval)"));
+  assert.ok(index.includes("omodos-status-embed.js?v=11"));
 });

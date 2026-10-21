@@ -235,6 +235,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     if(!viewport)return;
     const width=viewport.clientWidth,height=viewport.clientHeight;
     if(width<10||height<10)return;
+    const mobile=matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse)').matches;
     if(state.boundControls!==engine.controls){
       state.boundControls=engine.controls||null;
       state.boundControls?.addEventListener('start',()=>{state.focusedMachineId=null;});
@@ -253,6 +254,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
         x:(pos.x*.5+.5)*width,y:(-.5*pos.y+.5)*height});
     }
     entries.sort((a,b)=>Number(b.focused)-Number(a.focused)||a.priority-b.priority||a.y-b.y);
+    const denseMobile=mobile&&entries.length>28;
     const used=[];
     const badge=state.layer.querySelector('#omodos-status-badge');
     if(badge){
@@ -264,9 +266,9 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
       const card=entry.card,focused=entry.focused,label=shortName(entry.machine);
       card.classList.toggle('compact',!focused);card.classList.toggle('focused',focused);
       const visibleLabel=String(label||entry.machine?.name||entry.machine?.sapCode||'Mesin').trim()||'Mesin';
-      const compactWidth=width<480?86:width<800?94:Math.min(104,Math.max(92,visibleLabel.length*4.8+12));
+      const compactWidth=width<480?(denseMobile?76:86):width<800?94:Math.min(104,Math.max(92,visibleLabel.length*4.8+12));
       const cardWidth=focused?154:compactWidth;
-      const cardHeight=focused?76:(width<480?25:26);
+      const cardHeight=focused?76:(width<480?(denseMobile?23:25):26);
       const labelEl=card.querySelector('.machine-label');if(labelEl)labelEl.textContent=visibleLabel;
       card.dataset.machineLabel=visibleLabel;
       card.dataset.visibleName=visibleLabel;
@@ -282,7 +284,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
         if(!used.some(u=>rect.left<u.right+gap&&rect.right>u.left-gap&&rect.top<u.bottom+gap&&rect.bottom>u.top-gap)){chosen={cx,cy,rect};break;}
       }
       if(!chosen){
-        const gridCardWidth=width<480?86:width<800?94:104;
+        const gridCardWidth=width<480?(denseMobile?76:86):width<800?94:104;
         const gridCardHeight=width<480?25:26;
         const cellW=gridCardWidth+gap,cellH=gridCardHeight+gap;
         const columns=Math.max(1,Math.floor((width-2*margin+gap)/cellW));
@@ -351,7 +353,8 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
           window.parent.postMessage({type:'OMODOS_FACTORY_STATUS_READY',version:1},state.parentOrigin);
         }
       },350);
-      const projectLoop=()=>{if(state.authorized&&state.engine)projectCards(THREE,state.engine);requestAnimationFrame(projectLoop);};requestAnimationFrame(projectLoop);
+      const projectionInterval=(matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse)').matches)?80:64;
+      const projectLoop=()=>{if(!document.hidden&&state.authorized&&state.engine)projectCards(THREE,state.engine);setTimeout(projectLoop,document.hidden?1000:projectionInterval);};setTimeout(projectLoop,projectionInterval);
     }catch(error){console.error('[OMODOS status twin]',error);const card=gate.querySelector('.gate-card');if(card)card.innerHTML='<strong>Viewer 3D tidak tersedia</strong>Komponen tampilan tidak berhasil dimuat. Beranda OMODOS tetap dapat digunakan.';}
   }
   let viewerStarted=false;function startViewerOnce(){if(viewerStarted)return;viewerStarted=true;void startViewer();}
