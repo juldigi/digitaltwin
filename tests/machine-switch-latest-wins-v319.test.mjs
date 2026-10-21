@@ -34,7 +34,7 @@ test('V319 engine rejects a stale dynamic import before constructing or swapping
 
 test('V319 clearing or disposing the engine also cancels any pending machine import',()=>{
  assert.match(engine,/clearMachineContext\(\)\{\n    this\.cancelMachineSwitch\(\)/);
- assert.match(engine,/dispose\(\)\{this\.cancelMachineSwitch\(\);cancelAnimationFrame/);
+ assert.match(engine,/dispose\(\)\{this\.cancelMachineSwitch\(\);if\(this\.omodosStatusEmbed\)clearTimeout\(this\.frame\);else cancelAnimationFrame/);
 });
 
 test('V319 failed rollback stays transaction-owned after its own async machine restore',()=>{
