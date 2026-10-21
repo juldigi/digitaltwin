@@ -194,7 +194,7 @@ assert.match(embed, /font-size:8px!important;line-height:1\.2!important\}\}',\s*
 
 test('compact embed chips are responsive and the embedded viewer has no redundant self-link', () => {
   assert.match(embed, /const compactWidth=width<480\?\(denseMobile\?76:86\):width<800\?94/);
-  assert.match(embed, /const gridCardWidth=width<480\?86:width<800\?94:104/);
+  assert.match(embed, /const gridCardWidth=width<480\?\(denseMobile\?76:86\):width<800\?94:104/);
   assert.match(embed, /const cardHeight=focused\?76:\(width<480\?25:26\)/);
   assert.match(embed, /label ditampilkan agar tidak bertumpuk/);
   assert.doesNotMatch(embed, /Buka Aplikasi Digital Twin/);
