@@ -209,6 +209,11 @@ test('OMODOS embed uses a low-power renderer and keeps all visible machine cards
   assert.ok(engine.includes("const frameInterval=this.omodosStatusEmbed?48"));
   assert.ok(engine.includes("if(!this.omodosStatusEmbed)void this.hydrateFactoryDetailedMachines"));
   assert.ok(embed.includes("const denseMobile=mobile&&entries.length>28"));
+  assert.ok(embed.includes("function compactPreviewScene_(engine)"));
+  assert.ok(embed.includes("function disposePreviewSubtree_(node,keep,disposed)"));
+  assert.ok(embed.includes("state.previewPrunedRoot!==signature"));
+  assert.ok(embed.includes("if(!state.lastAnchorAt||rootChanged)rebuildAnchors(THREE,engine)"));
+  assert.ok(embed.includes("const keepLayers=['floor','machines','unidentified','ipal']"));
   assert.ok(embed.includes("const compactWidth=width<480?(denseMobile?76:86)"));
   assert.ok(embed.includes("const gridCardWidth=width<480?(denseMobile?76:86)"));
   assert.ok(embed.includes("const cardHeight=focused?76:(width<480?(denseMobile?23:25):26)"));

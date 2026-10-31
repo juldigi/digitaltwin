@@ -3,7 +3,7 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
   // No extra imports or UI for regular DigitalTwin sessions.
 } else {
   const ALLOWED_PARENT_ORIGINS = new Set(['https://omodos.juldigi.workers.dev']);
-  const state = {authorized:false,readySent:false,parentOrigin:null,records:[],recordsVersion:0,registry:[],engine:null,layer:null,cards:new Map(),anchors:new Map(),leaders:new Map(),leaderSvg:null,lastAnchorAt:0,lastPolicyAt:0,policyApplied:false,focusedMachineId:null,boundControls:null};
+  const state = {authorized:false,readySent:false,parentOrigin:null,records:[],recordsVersion:0,registry:[],engine:null,layer:null,cards:new Map(),anchors:new Map(),leaders:new Map(),leaderSvg:null,lastAnchorAt:0,lastPolicyAt:0,policyApplied:false,previewPrunedRoot:'',focusedMachineId:null,boundControls:null};
   document.documentElement.classList.add('omodos-status-embed');
   const css = [
     'html.omodos-status-embed,html.omodos-status-embed body{width:100%!important;height:100%!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#edf2f5!important}',
@@ -309,6 +309,65 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
     if(summary)summary.textContent=state.focusedMachineId?'Mesin difokuskan · ketuk kartu yang sama lagi untuk detail pekerjaan':shown<entries.length?shown+' dari '+entries.length+' label ditampilkan agar tidak bertumpuk':shown+' mesin terlihat · nama dan warna status terbaru · ketuk untuk fokus';
     for(const [id,card] of state.cards)if(!entries.some(entry=>entry.machineId===id&&entry.card===card))card.hidden=true;
   }
+  function collectPreviewResources_(root,keep){
+    const visit=(node,parentVisible)=>{
+      const visible=parentVisible&&node.visible!==false;if(!visible)return;
+      if(node.geometry)keep.geometries.add(node.geometry);
+      const materials=Array.isArray(node.material)?node.material:(node.material?[node.material]:[]);
+      for(const material of materials){
+        keep.materials.add(material);
+        for(const value of Object.values(material||{}))if(value?.isTexture)keep.textures.add(value);
+      }
+      for(const child of node.children||[])visit(child,visible);
+    };
+    visit(root,true);
+  }
+  function disposePreviewSubtree_(node,keep,disposed){
+    for(const child of [...(node.children||[])])disposePreviewSubtree_(child,keep,disposed);
+    node.parent?.remove(node);
+    const geometry=node.geometry;
+    if(geometry&&!keep.geometries.has(geometry)&&!disposed.geometries.has(geometry)){
+      disposed.geometries.add(geometry);geometry.dispose?.();
+    }
+    const materials=Array.isArray(node.material)?node.material:(node.material?[node.material]:[]);
+    for(const material of materials){
+      if(!material||keep.materials.has(material)||disposed.materials.has(material))continue;
+      disposed.materials.add(material);
+      for(const value of Object.values(material)){
+        if(value?.isTexture&&!keep.textures.has(value)&&!disposed.textures.has(value)){
+          disposed.textures.add(value);value.dispose?.();
+        }
+      }
+      material.dispose?.();
+    }
+  }
+  function pruneInvisiblePreviewBranches_(parent,keep,disposed){
+    for(const child of [...(parent?.children||[])]){
+      if(child.visible===false){disposePreviewSubtree_(child,keep,disposed);continue;}
+      pruneInvisiblePreviewBranches_(child,keep,disposed);
+    }
+  }
+  function compactPreviewScene_(engine){
+    const actual=engine?.actualFactory,layers=actual?.layers,assets=actual?.assets;
+    if(!layers||!(assets instanceof Map))return false;
+    const assetRoots=new Set([...assets.values()]);
+    const keep={geometries:new Set(),materials:new Set(),textures:new Set()};
+    const disposed={geometries:new Set(),materials:new Set(),textures:new Set()};
+    const keepLayers=['floor','machines','unidentified','ipal'];
+    for(const name of keepLayers)if(layers[name])collectPreviewResources_(layers[name],keep);
+    for(const [name,layer] of Object.entries(layers)){
+      if(keepLayers.includes(name))continue;
+      layer.visible=false;
+      for(const child of [...(layer.children||[])])disposePreviewSubtree_(child,keep,disposed);
+    }
+    for(const child of [...(layers.unidentified?.children||[])]){
+      if(!assetRoots.has(child))disposePreviewSubtree_(child,keep,disposed);
+    }
+    if(layers.ipal)pruneInvisiblePreviewBranches_(layers.ipal,keep,disposed);
+    actual.root.userData={...(actual.root.userData||{}),omodosExteriorPreview:true,detailedHydration:false,prunedLayers:true};
+    return true;
+  }
+
   function visibleMeshesUnder(layer){const found=[];if(!layer)return found;const visit=(node,parentVisible)=>{const visible=parentVisible&&node.visible!==false;if(!visible)return;if(node.isMesh)found.push(node);for(const child of node.children||[])visit(child,visible);};visit(layer,true);return found;}
   async function startViewer(){
     try{
@@ -342,10 +401,11 @@ if (new URLSearchParams(location.search).get('embed') !== EMBED_KEY) {
             for(const child of node.children||[])hideIpalStructure(child);
           };
           hideIpalStructure(engine.actualFactory.layers.ipal);
+          if(state.previewPrunedRoot!==signature){compactPreviewScene_(engine);state.previewPrunedRoot=signature;}
           engine.onFactorySelect=()=>{};engine.onTaxonomySelect=()=>{};engine.renderer.domElement.style.touchAction='none';engine.renderer.domElement.setAttribute('aria-label','Tampilan 3D status mesin BMJ; objek tidak membuka detail.');
           if(state.authorized&&engine.actualFactory.assets.size){const fitObjects=[...engine.actualFactory.assets.values(),...visibleMeshesUnder(engine.actualFactory.layers.ipal)];engine.fitObjects(fitObjects,'iso',false);if(viewport.clientWidth<=767&&matchMedia('(pointer:coarse)').matches&&engine.controls?.target&&engine.camera){engine.camera.position.sub(engine.controls.target).multiplyScalar(.9).add(engine.controls.target);engine.controls.update();}}
         }
-        if(now-state.lastAnchorAt>1400||rootChanged)rebuildAnchors(THREE,engine);
+        if(!state.lastAnchorAt||rootChanged)rebuildAnchors(THREE,engine);
         // Tell OMODOS the viewer is ready only after the engine, visible assets,
         // and the status-card anchors exist. The parent then sends fresh records.
         if(state.authorized&&!state.readySent&&engine.actualFactory.assets.size>0&&state.anchors.size>0&&state.parentOrigin&&ALLOWED_PARENT_ORIGINS.has(state.parentOrigin)){
